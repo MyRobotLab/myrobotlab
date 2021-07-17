@@ -1769,9 +1769,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    *          - max time to wait in ms
    * @param sendMsg
    *          - optional message to send to the remote topic
-   * @return
-   * @throws InterruptedException
-   * @throws TimeoutException
+   * @return the returned object
+   * @throws InterruptedException boom
+   * @throws TimeoutException boom
    */
   protected Object waitOn(String fullName, String method, Integer timeout, Message sendMsg) throws InterruptedException, TimeoutException {
 

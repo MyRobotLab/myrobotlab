@@ -297,8 +297,7 @@ public class Platform implements Serializable {
   }
 
   /**
-   * The message of the day.
-   * "resistance is futile, we have cookies and robots ..."
+   * @return The message of the day. "resistance is futile, we have cookies and robots ..."
    */
   public String getMotd() {
     return motd;

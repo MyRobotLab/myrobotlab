@@ -563,6 +563,12 @@ public class CodecUtils {
    * will send it to a another process or it will go to the MethodCache of some
    * service. The MethodCache will decode a 2nd time based on a method signature
    * key match (key based on parameter types).
+ * @param sender the sender of the message
+ * @param sendingMethod the method sending it
+ * @param name dest service
+ * @param method dest method
+ * @param params params to pass
+ * @return the string representation of the json message
    * 
    */
   final public static String createJsonMsg(String sender, String sendingMethod, String name, String method, Object... params) {

@@ -18,6 +18,7 @@ public interface StateSaver {
   
   /**
    * save to a specific location
+   * @param filename the file to save as
    * @return true if successful
    */
   public boolean save(String filename);
