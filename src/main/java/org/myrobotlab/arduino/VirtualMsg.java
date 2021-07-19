@@ -239,24 +239,38 @@ public class VirtualMsg {
 
 /**
  * These methods will be invoked from the Msg class as callbacks from MrlComm.
+   * @param arduino - the virtual mrlcomm device
+   * @param serial - the virtual serial port to use
+   * 
  */
   
   // public void getBoardInfo(){}
-  // public void enablePin(Integer address/*byte*/, Integer type/*byte*/, Integer rate/*b16*/){}
+  // public void enablePin(Integer address/*byte*/, Integer type/*byte*/,
+  // Integer rate/*b16*/){}
   // public void setDebug(Boolean enabled/*bool*/){}
   // public void setSerialRate(Integer rate/*b32*/){}
   // public void softReset(){}
   // public void enableAck(Boolean enabled/*bool*/){}
-  // public void echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/){}
+  // public void echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float
+  // secondFloat/*f32*/){}
   // public void customMsg(int[] msg/*[]*/){}
   // public void deviceDetach(Integer deviceId/*byte*/){}
-  // public void i2cBusAttach(Integer deviceId/*byte*/, Integer i2cBus/*byte*/){}
-  // public void i2cRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer size/*byte*/){}
-  // public void i2cWrite(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, int[] data/*[]*/){}
-  // public void i2cWriteRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer readSize/*byte*/, Integer writeValue/*byte*/){}
-  // public void neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/, Integer depth/*byte*/){}
-  // public void neoPixelSetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer speed/*b16*/){}
-  // public void neoPixelWriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/){}
+  // public void i2cBusAttach(Integer deviceId/*byte*/, Integer
+  // i2cBus/*byte*/){}
+  // public void i2cRead(Integer deviceId/*byte*/, Integer
+  // deviceAddress/*byte*/, Integer size/*byte*/){}
+  // public void i2cWrite(Integer deviceId/*byte*/, Integer
+  // deviceAddress/*byte*/, int[] data/*[]*/){}
+  // public void i2cWriteRead(Integer deviceId/*byte*/, Integer
+  // deviceAddress/*byte*/, Integer readSize/*byte*/, Integer
+  // writeValue/*byte*/){}
+  // public void neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/,
+  // Integer numPixels/*b32*/, Integer depth/*byte*/){}
+  // public void neoPixelSetAnimation(Integer deviceId/*byte*/, Integer
+  // animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer
+  // blue/*byte*/, Integer speed/*b16*/){}
+  // public void neoPixelWriteMatrix(Integer deviceId/*byte*/, int[]
+  // buffer/*[]*/){}
   // public void analogWrite(Integer pin/*byte*/, Integer value/*byte*/){}
   // public void digitalWrite(Integer pin/*byte*/, Integer value/*byte*/){}
   // public void disablePin(Integer pin/*byte*/){}
@@ -264,24 +278,33 @@ public class VirtualMsg {
   // public void pinMode(Integer pin/*byte*/, Integer mode/*byte*/){}
   // public void setTrigger(Integer pin/*byte*/, Integer triggerValue/*byte*/){}
   // public void setDebounce(Integer pin/*byte*/, Integer delay/*byte*/){}
-  // public void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/){}
+  // public void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/,
+  // Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/){}
   // public void servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/){}
   // public void servoDetachPin(Integer deviceId/*byte*/){}
-  // public void servoSetVelocity(Integer deviceId/*byte*/, Integer velocity/*b16*/){}
-  // public void servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/, Integer max/*byte*/, Integer step/*byte*/){}
+  // public void servoSetVelocity(Integer deviceId/*byte*/, Integer
+  // velocity/*b16*/){}
+  // public void servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/,
+  // Integer max/*byte*/, Integer step/*byte*/){}
   // public void servoSweepStop(Integer deviceId/*byte*/){}
-  // public void servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer target/*b16*/){}
-  // public void servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/){}
-  // public void serialAttach(Integer deviceId/*byte*/, Integer relayPin/*byte*/){}
+  // public void servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer
+  // target/*b16*/){}
+  // public void servoSetAcceleration(Integer deviceId/*byte*/, Integer
+  // acceleration/*b16*/){}
+  // public void serialAttach(Integer deviceId/*byte*/, Integer
+  // relayPin/*byte*/){}
   // public void serialRelay(Integer deviceId/*byte*/, int[] data/*[]*/){}
-  // public void ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer triggerPin/*byte*/, Integer echoPin/*byte*/){}
+  // public void ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer
+  // triggerPin/*byte*/, Integer echoPin/*byte*/){}
   // public void ultrasonicSensorStartRanging(Integer deviceId/*byte*/){}
   // public void ultrasonicSensorStopRanging(Integer deviceId/*byte*/){}
   // public void setAref(Integer type/*b16*/){}
-  // public void motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/, int[] pins/*[]*/){}
+  // public void motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/,
+  // int[] pins/*[]*/){}
   // public void motorMove(Integer deviceId/*byte*/, Integer pwr/*byte*/){}
   // public void motorMoveTo(Integer deviceId/*byte*/, Integer pos/*byte*/){}
-  // public void encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/, Integer pin/*byte*/){}
+  // public void encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/,
+  // Integer pin/*byte*/){}
   // public void setZeroPoint(Integer deviceId/*byte*/){}
   // public void servoStop(Integer deviceId/*byte*/){}
   // public void neoPixel2Attach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b16*/, Integer depth/*byte*/){}

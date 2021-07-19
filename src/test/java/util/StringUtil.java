@@ -47,7 +47,7 @@ public class StringUtil {
      * 
      * @param str String to get character from
      * @param random generator for random index within String
-     * @return
+     * @return random char
      */
     public static char randomCharacter(final String str, final Random random) {
         // ensures that index is in bounds of the string
@@ -63,7 +63,7 @@ public class StringUtil {
      * These Strings have only a limited set of characters but these are from various parts of the Unicode space.
      * 
      * @param random generator used for character retrieval
-     * @return
+     * @return random char
      */
     public static char randomCharacter(final Random random) {
         final int i = random.nextInt(3);
@@ -103,7 +103,7 @@ public class StringUtil {
      * When creating an byte array out of the String it will have a size of {@code length}. 
      * 
      * @param length maximum size of resulting byte array
-     * @return
+     * @return random string
      */
     public static String maxSizeRandomString(final int length) {
         String str = randomString(length);
@@ -132,7 +132,7 @@ public class StringUtil {
      * The resulting byte array will have a size of {@code length} +1 since byte[0] contains the length. 
      * 
      * @param length maximum size of resulting byte array
-     * @return
+     * @return random byte array
      */
     public static byte[] randomStringBytes(final int length) {
         final String str = maxSizeRandomString(length);

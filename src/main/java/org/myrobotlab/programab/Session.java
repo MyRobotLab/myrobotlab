@@ -42,10 +42,10 @@ public class Session {
 
   /**
    * Session for a user and bot
+   * @param programab program ab for this session
+   * @param userName username
+   * @param botInfo the bot for the session
    * 
-   * @param programab
-   * @param userName
-   * @param botInfo
    */
   public Session(ProgramAB programab, String userName, BotInfo botInfo) {
     this.programab = programab;

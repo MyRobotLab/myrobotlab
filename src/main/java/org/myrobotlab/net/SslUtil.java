@@ -36,8 +36,8 @@ public class SslUtil {
    * @param crtFile - certificate file (pem)
    * @param keyFile - private key
    * @param inpassword - password if key/cert are protected by a password
-   * @return
-   * @throws Exception
+   * @return the ssl socket factory 
+   * @throws Exception boom
    */
   public static SSLSocketFactory getSocketFactory(final String caCrtFile, final String crtFile, final String keyFile, final String inpassword) throws Exception {
     Security.addProvider(new BouncyCastleProvider());

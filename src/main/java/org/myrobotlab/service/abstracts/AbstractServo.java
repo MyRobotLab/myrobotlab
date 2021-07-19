@@ -202,6 +202,8 @@ private Double maxSpeed;
    * 
    * * Arduino/MrlComm * Adafruit16CServoController * JMonkeyEngine /
    * Interpolator
+ * @param n the name
+ * @param id the instance id
    * 
    */
 
@@ -261,9 +263,9 @@ private Double maxSpeed;
 
   /**
    * max complexity - minimal parameter EncoderControl attach
+ * @param enc the encoder
+ * @throws Exception boom
    * 
-   * @param enc
-   * @throws Exception
    */
   public void attach(EncoderControl enc) throws Exception {
     if (enc == null) {
@@ -560,9 +562,9 @@ private Double maxSpeed;
 
   /**
    * formula for calculating the position from microseconds to degrees
+ * @param microseconds ms to convert
+ * @return the degrees converted
    * 
-   * @param microseconds
-   * @return
    */
   public static double microsecondsToDegree(double microseconds) {
     if (microseconds <= 180)

@@ -157,6 +157,7 @@ public class Launcher {
 
   /**
    * prints help to the console
+   * @return the help 
    */
   static public String mainHelp() {
     String help = new CommandLine(new CmdOptions()).getUsageMessage();
@@ -207,8 +208,7 @@ public class Launcher {
    * Start class for myrobotlab.jar. Its primary concern is to build and launch
    * a myrobotlab instance, depending on flags it might also start a client as
    * an interface to the spawned instance
-   * 
-   * @param args
+   * @param args args
    */
   public static void main(String[] args) {
     try {

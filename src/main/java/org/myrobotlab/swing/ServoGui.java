@@ -495,8 +495,8 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
 
   /**
    * publish of the "moveTo" from servo
+   * @param servo the servo that moved
    * 
-   * @param servo
    */
   public void onMoveTo(final Servo servo) {
     SwingUtilities.invokeLater(new Runnable() {
@@ -777,8 +777,8 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
   /**
    * call back to hand new services registered we want to update our list of
    * possible controllers and encoders
+   * @param s registration
    * 
-   * @param s
    */
   public void onRegistered(Registration s) {
     refreshControllers();

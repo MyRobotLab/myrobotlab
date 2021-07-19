@@ -37,8 +37,7 @@ public class Locale {
 
   /**
    * correct conversion form java.util.Locale to mrl Locale
-   * 
-   * @param locale
+   * @param locale the java locale
    */
   public Locale(java.util.Locale locale) {
     this(locale.toString());

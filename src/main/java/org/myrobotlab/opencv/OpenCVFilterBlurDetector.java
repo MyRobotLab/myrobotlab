@@ -33,6 +33,7 @@ public class OpenCVFilterBlurDetector extends OpenCVFilter {
    * 
    * NOTE: Lower blurriness scores mean the image is more blurry! Scores below
    * 100 tend to be very blurry and scores above 100 tend to be sharper.
+   * @param name the name of the filter
    * 
    */
   public OpenCVFilterBlurDetector(String name) {

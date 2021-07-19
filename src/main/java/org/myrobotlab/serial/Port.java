@@ -43,8 +43,7 @@ public abstract class Port implements Runnable, SerialControl {
   /**
    * Default constructor for a port at a minimum requires a port name. Typically
    * something like COM4 or /dev/ttyACM0 or even a virtual port name.
-   * 
-   * @param portName
+   * @param portName name of port
    */
   public Port(String portName) {
     this.stats.name = portName;
@@ -191,8 +190,8 @@ public abstract class Port implements Runnable, SerialControl {
    * "real" serial function stubbed out in the abstract class in case the serial
    * implementation does not actually implement this method e.g. (bluetooth,
    * iostream, tcp/ip)
+   * @param state dtr state true/false
    * 
-   * @param state
    * 
    */
   public void setDTR(boolean state) {

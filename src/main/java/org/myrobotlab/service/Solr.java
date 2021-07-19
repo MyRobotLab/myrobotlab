@@ -102,9 +102,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   /**
    * USE WITH CAUTION!!! This will DELETE ALL OF YOUR ROBOTS MEMORIES. THERE IS
    * NO RECOVERY FROM THIS.
+   * @throws SolrServerException boom
+   * @throws IOException boom
    * 
-   * @throws SolrServerException
-   * @throws IOException
    */
   public void deleteEmbeddedIndex() throws SolrServerException, IOException {
     if (embeddedSolrServer != null) {
@@ -121,10 +121,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * Start the embedded Solr instance with the solr home directory provided.
    * This expects that you ahve a valid solr.xml and configset in that directory
    * named "core1"
-   * 
-   * @param path
-   * @throws SolrServerException
-   * @throws IOException
+   * @param path path to start for solr
+   * @throws SolrServerException boom
+   * @throws IOException boom
    */
   public void startEmbedded(String path) throws SolrServerException, IOException {
     // let's extract our default configs into the directory/
@@ -155,8 +154,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   /**
    * Add a single document at a time to the solr server.
+   * @param doc the input doc to send to solr
    * 
-   * @param doc
    */
   public void addDocument(SolrInputDocument doc) {
     try {
@@ -216,8 +215,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   /**
    * Delete a single document from the index provided a specific doc id.
+   * @param docId id of the solr document to delete
    * 
-   * @param docId
    */
   public void deleteDocument(String docId) {
     try {
@@ -315,9 +314,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * Helper method that will run a search, and return the bytes field from the
    * first result decoded into an IplImage
    * 
-   * @param queryString
-   * @return
-   * @throws IOException
+   * @param queryString query to find the image
+   * @return an ipl image from the index
+   * @throws IOException if in error
    */
   public IplImage fetchImage(String queryString) throws IOException {
     String fieldName = "bytes";
@@ -343,10 +342,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * and testing of a dl4j model. This will return a query that when executed
    * will return the number of records found for the query, as well as a facet
    * on the label field.
+   * @param queryString the query string 
+   * @param labelField the field containing the labels
+   * @return a query request
    * 
-   * @param queryString
-   * @param labelField
-   * @return
    */
   public SolrQuery makeDatasetQuery(String queryString, String labelField) {
     SolrQuery solrQuery = new SolrQuery(queryString);
@@ -397,10 +396,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   /**
    * Helper method to serialize an IplImage into a byte array. returns a png
    * version of the original image
+   * @param image input iage
+   * @return byte array of image
+   * @throws IOException boom
    * 
-   * @param image
-   * @return
-   * @throws IOException
    */
   public byte[] imageToBytes(IplImage image) throws IOException {
 
@@ -419,10 +418,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   /**
    * deserialize from a png byte array to an IplImage
+   * @param bytes input bytes
+   * @return an iplimage
+   * @throws IOException boom 
    * 
-   * @param bytes
-   * @return
-   * @throws IOException
    */
   public IplImage bytesToImage(byte[] bytes) throws IOException {
     //
@@ -440,10 +439,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   /**
    * Helper search function that runs a search and returns a specified field
    * from the first result
+   * @param queryString query string 
+   * @param fieldName field name 
+   * @return the value from the field
    * 
-   * @param queryString
-   * @param fieldName
-   * @return
    */
   public String fetchFirstResultField(String queryString, String fieldName) {
     QueryResponse qr = search(queryString, 1, 0, false);
@@ -476,6 +475,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   /**
    * Default query to fetch the top 10 documents that match the query request.
+   * @param queryString the query string
+   * @return a query response
    */
   public QueryResponse search(String queryString) {
     // default to 10 hits returned.
@@ -484,6 +485,11 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   /**
    * Default query to fetch the top 10 documents that match the query request.
+   * @param queryString query string
+   * @param rows number of rows to return
+   * @param start offset into the restult
+   * @param mostRecent specify index_date sort
+   * @return the response
    */
   public QueryResponse search(String queryString, int rows, int start, boolean mostRecent) {
     log.info("Searching for : {}", queryString);
@@ -515,6 +521,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   /**
    * Set the url for the solr instance to communicate with. This is not used
    * with the embedded solr server
+   * @param solrUrl the solr url to connect to. (HttpSolrClient)
    */
   public void setSolrUrl(String solrUrl) {
     this.solrUrl = solrUrl;
@@ -990,9 +997,12 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   /**
    * This method will issue an atomic update to the solr index for a given
    * document id the value will be set on the document
+   * @param docId doc id (required)
+   * @param fieldName field name to update
+   * @param value  new value for field
+   * @throws SolrServerException boom
+   * @throws IOException boom
    * 
-   * @throws IOException
-   * @throws SolrServerException
    */
   public void updateDocument(String docId, String fieldName, String value) throws SolrServerException, IOException {
     SolrInputDocument sdoc = new SolrInputDocument();

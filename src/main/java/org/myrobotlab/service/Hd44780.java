@@ -107,8 +107,8 @@ public class Hd44780 extends Service {
 
   /**
    * Send byte to PCF controller
+   * @param cmd c
    * 
-   * @param cmd
    */
   public void writeRegister(byte cmd) {
     if (isReady()) {
@@ -120,8 +120,8 @@ public class Hd44780 extends Service {
 
   /**
    * Turn ON/OFF LCD backlight
+   * @param status s
    * 
-   * @param status
    */
   public void setBackLight(boolean status) {
     if (status == true) {
@@ -140,9 +140,9 @@ public class Hd44780 extends Service {
 
   /**
    * Display string on LCD, by line
+   * @param string s
+   * @param line l
    * 
-   * @param string
-   * @param line
    */
   public void display(String string, int line) {
     screenContent.put(line, string);

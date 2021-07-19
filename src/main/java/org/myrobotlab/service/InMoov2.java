@@ -63,9 +63,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   static String speechRecognizer = "WebkitSpeechRecognition";
 
   /**
-   * execute a resource script
-   * 
-   * @param someScriptName
+   * @param someScriptName execute a resource script
+   * @return success or failure
    */
   public boolean execScript(String someScriptName) {
     try {
@@ -107,6 +106,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * This method will load a python file into the python interpreter.
+ * @param file file to load
+ * @return success/failure
    */
   @Deprecated /* use execScript - this doesn't handle resources correctly */
   public static boolean loadFile(String file) {
@@ -361,6 +362,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   
   /**
    * comes in from runtime which owns the config list
+   * @param configList list of configs
    */
   public void onConfigList(List<String> configList){
     this.configList = configList;
@@ -370,7 +372,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   /**
    * "re"-publishing runtime config list, because
    * I don't want to fix the js subscribeTo :P
-   * @return
+   * @return list of config names
    */
   public List<String> publishConfigList(){
     return configList;
@@ -495,6 +497,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * This method will try to launch a python command with error handling
+   * @param gesture the gesture
+   * @return gesture result
    */
   public String execGesture(String gesture) {
 
@@ -749,6 +753,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
    * 
    * @param directory
    *          - the directory that contains the gesture python files.
+   * @return true/false
    */
   public boolean loadGestures(String directory) {
     speakBlocking(get("STARTINGGESTURES"));
@@ -1230,8 +1235,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * start servos - no controllers
-   * 
-   * @throws Exception
+ * @throws Exception boom
    */
   public void startServos() throws Exception {
     startServos(null, null);
@@ -1856,9 +1860,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * called with only port - will default with defaulted pins
-   * 
-   * @param port
-   * @return
+   * @param port port for the sensor
+   * @return the ultrasonic sensor service
    */
   public UltrasonicSensor startUltraSonicRight(String port) {
     return startUltraSonicRight(port, 64, 63);
@@ -1866,11 +1869,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * called explicitly with pin values
+   * @param port p
+   * @param trigPin trigger pin 
+   * @param echoPin echo pin
+   * @return the ultrasonic sensor
    * 
-   * @param port
-   * @param trigPin
-   * @param echoPin
-   * @return
    */
   public UltrasonicSensor startUltraSonicRight(String port, int trigPin, int echoPin) {
 

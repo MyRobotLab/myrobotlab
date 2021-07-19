@@ -13,15 +13,11 @@ public class Bno055Meta extends MetaData {
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
    * definitions.
-   * 
-   * 
-   * 
+   * @param name n
    */
   public Bno055Meta(String name) {
 
     super(name);
-    Platform platform = Platform.getLocalInstance();
-
     addDescription("General BNO055 acclerometer and gyro");
     addCategory("microcontroller", "sensors");
     setSponsor("calamity");

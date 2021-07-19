@@ -76,10 +76,10 @@ public class OpenCVFilterCopy extends OpenCVFilter {
 
   /**
    * default copy - location starts in 0,0 - overlap gets cropped
+ * @param src the source image
+ * @param dst dest image to copy it to
+ * @return the compied image with the roi
    * 
-   * @param src
-   * @param dst
-   * @return
    */
   public IplImage copy(IplImage src, IplImage dst) {
     CvRect rect = getMinRoi(src, dst);

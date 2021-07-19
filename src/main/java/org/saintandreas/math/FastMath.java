@@ -400,8 +400,8 @@ final public class FastMath {
 
     /**
      * A direct call to Math.atan2.
-     * @param fY
-     * @param fX
+     * @param fY y
+     * @param fX x
      * @return Math.atan2(fY,fX)
      * @see java.lang.Math#atan2(double, double)
      */
@@ -427,6 +427,8 @@ final public class FastMath {
      * very very close. 
      * 
      * note: code from wiki posting on java.net by jeffpk
+     * @param radians input
+     * @return reduce sin in radians
      */
     public static float reduceSinAngle(float radians) {
         radians %= TWO_PI; // put us in -2PI to +2PI space
@@ -704,6 +706,23 @@ final public class FastMath {
 
     /**
      * Returns the determinant of a 4x4 matrix.
+     * @param m00 a
+     * @param m01 a
+     * @param m02 a
+     * @param m03 a
+     * @param m10 a
+     * @param m11 a
+     * @param m12 a
+     * @param m13 a
+     * @param m20 a
+     * @param m21 a
+     * @param m22 a
+     * @param m23 a
+     * @param m30 a
+     * @param m31 a
+     * @param m32 a
+     * @param m33 a
+     * @return determinat of matrix
      */
     public static float determinant(double m00, double m01, double m02,
             double m03, double m10, double m11, double m12, double m13,
@@ -734,6 +753,8 @@ final public class FastMath {
 
     /**
      * Returns a random integer between min and max.
+     * @param min min value
+     * @param max max value
      * 
      * @return A random int between min (inclusive) to
      *         max (inclusive).
@@ -749,6 +770,8 @@ final public class FastMath {
     /**
      * Converts a point from Spherical coordinates to Cartesian (using positive
      * Y as up) and stores the results in the store var.
+     * @param sphereCoords input 
+     * @return cartesian output
      */
     public static Vector3f sphericalToCartesian(Vector3f sphereCoords) {
       float a, x, y, z;
@@ -763,6 +786,8 @@ final public class FastMath {
      * Converts a point from Cartesian coordinates (using positive Y as up) to
      * Spherical and stores the results in the store var. (Radius, Azimuth,
      * Polar)
+     * @param cartCoords carteasian coordinates
+     * @return converted to spherical 
      */
     public static Vector3f cartesianToSpherical(Vector3f cartCoords) {
         float x = cartCoords.x;
@@ -785,6 +810,8 @@ final public class FastMath {
     /**
      * Converts a point from Spherical coordinates to Cartesian (using positive
      * Z as up) and stores the results in the store var.
+     * @param sphereCoords input
+     * @return output cartesian Z
      */
     public static Vector3f sphericalToCartesianZ(Vector3f sphereCoords) {
       float a, x, y, z;
@@ -799,6 +826,8 @@ final public class FastMath {
      * Converts a point from Cartesian coordinates (using positive Z as up) to
      * Spherical and stores the results in the store var. (Radius, Azimuth,
      * Polar)
+     * @param cartCoords cartisean corrdinates
+     * @return coords in spehrical
      */
     public static Vector3f cartesianZToSpherical(Vector3f cartCoords) {
         float x = cartCoords.x;
@@ -822,6 +851,8 @@ final public class FastMath {
      * 
      * @param val -
      *            the angle to normalize (in radians)
+     * @param min m
+     * @param max m
      * @return the normalized angle (also in radians)
      */
     public static float normalize(float val, float min, float max) {
@@ -857,10 +888,9 @@ final public class FastMath {
 
     /**
      * Take a float input and clamp it between min and max.
-     * 
-     * @param input
-     * @param min
-     * @param max
+     * @param input in
+     * @param min m
+     * @param max m
      * @return clamped input
      */
     public static float clamp(float input, float min, float max) {
@@ -869,8 +899,7 @@ final public class FastMath {
 
     /**
      * Clamps the given float to be between 0 and 1.
-     *
-     * @param input
+     * @param input in
      * @return input clamped between 0 and 1.
      */
     public static float saturate(float input) {

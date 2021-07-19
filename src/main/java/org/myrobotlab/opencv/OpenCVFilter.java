@@ -331,6 +331,7 @@ public abstract class OpenCVFilter implements Serializable {
   /**
    * method which determines if this filter to process its display TODO - have
    * it also decide if its cumulative display or not
+ * @return the buffered image to display
    */
   public BufferedImage processDisplay() {
 
@@ -386,6 +387,8 @@ public abstract class OpenCVFilter implements Serializable {
     }
   }
    * </pre>
+ * @param keyPart the key
+ * @param object the object
    */
 
   public void put(String keyPart, Object object) {
@@ -452,6 +455,8 @@ public abstract class OpenCVFilter implements Serializable {
 
   /**
    * converting IplImages to BufferedImages
+ * @param image the iplimage to convert
+ * @return the buffered image
    */
   public BufferedImage toBufferedImage(IplImage image) {
     return jconverter.convert(converterToImage.convert(image));
@@ -471,6 +476,8 @@ public abstract class OpenCVFilter implements Serializable {
 
   /**
    * convert BufferedImages to IplImages
+ * @param src the buffered image to convert
+ * @return the ipl image resulting
    */
   public IplImage toImage(BufferedImage src) {
     return converterToImage.convert(jconverter.convert(src));

@@ -69,6 +69,7 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
   /**
    * If setContinuous is False, this speedup recognition processing If
    * setContinuous is True, you have some time to speak again, in case of error
+   * @param continuous true if continious mode
    */
   @Deprecated /* artifact of webkit */
   public void setContinuous(boolean continuous) {

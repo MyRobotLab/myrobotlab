@@ -22,9 +22,9 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
 
   /**
    * set the speaker voice
+   * @param voice name of voice to set.
+   * @return success or failure
    * 
-   * @param voice
-   * @return
    */
   public boolean setVoice(String voice);
 
@@ -104,8 +104,8 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
 
   /**
    * mute or unmute
+   * @param mute true to mute
    * 
-   * @param mute
    */
   public void setMute(boolean mute);
 
@@ -118,17 +118,17 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
   public void onRequestConfirmation(String text);
 
   /**
-   * get a list of voices this speech synthesis supports
+   * @return get a list of voices this speech synthesis supports
    * 
-   * @return
+   * 
    */
   public List<Voice> getVoices();
 
   /**
    * puts all speaking into blocking mode - default is false
+   * @param b true to block 
+   * @return blocking value
    * 
-   * @param b
-   * @return
    */
   public Boolean setBlocking(Boolean b);
 
@@ -136,30 +136,28 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
    * This attach subscribes the the SpeechRecognizer to the SpeechSynthesizer so
    * the bot won't incorrectly recognize itself when its speaking ... otherwise
    * silly things can happen when talking to self...
-   * 
-   * @param ear
+   * @param ear to attach
    */
   public void attachSpeechRecognizer(SpeechRecognizer ear);
 
   /**
    * Speech control controls volume, setting the voice, and of course "speak"
+   * @param control the speech synth to attach
    * 
-   * @param control
    */
   public void attachSpeechControl(SpeechSynthesisControl control);
 
   /**
    * replace one word with another - instead of "biscuit" say "cookie"
+   * @param key lookup word
+   * @param replacement replacement word.
    * 
-   * @param key
-   * @param replacement
    */
   public void replaceWord(String key, String replacement);
 
   /**
    * replace one word with another - instead of "biscuit" say "cookie"
-   * 
-   * @param filter
+   * @param filter word filter to use
    */
   public void replaceWord(WordFilter filter);
 }

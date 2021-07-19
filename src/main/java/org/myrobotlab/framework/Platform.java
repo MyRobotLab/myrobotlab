@@ -289,25 +289,22 @@ public class Platform implements Serializable {
   }
 
   /**
-   * The process id of the currently running Java process
-   * @return
+   * @return The process id of the currently running Java process
+   * 
    */
   public String getPid() {
     return pid;
   }
 
   /**
-   * The message of the day.
-   * "resistance is futile, we have cookies and robots ..."
-   * @return
+   * @return The message of the day. "resistance is futile, we have cookies and robots ..."
    */
   public String getMotd() {
     return motd;
   }
 
   /**
-   * The branch this software was built from.
-   * @return
+   * @return The branch this software was built from.
    */
   public String getBranch() {
     return branch;
@@ -319,69 +316,65 @@ public class Platform implements Serializable {
   }
 
   /**
-   * This is the full commit of the source.
-   * @return
+   * @return This is the full commit of the source.
    */
   public String getCommit() {
     return commit;
   }
 
   /**
-   * CPU Architecture
-   * x86, armv6, armv7, armv8
-   * @return
+   * @return CPU Architecture x86, armv6, armv7, armv8
    */
+  
   public String getArch() {
     return arch;
   }
 
   /**
-   * Os bitness - should be
-   * 64 or 32
-   * @return
+   * @return Os bitness - should be 64 or 32
    */
   public int getOsBitness() {
     return osBitness;
   }
 
   /**
-   * Java virtual machine bitness
+   * @return Java virtual machine bitness
    * either 64 or 32 bit
-   * @return
+   * 
    */
   public int getJvmBitness() {
     return jvmBitness;
   }
 
   /**
-   * Operating system type
+   * @return Operating system type
    * linux, windows, mac
-   * @return
+   * 
    */
   public String getOS() {
     return os;
   }
 
   /**
-   * arc bitness and os together
+   * @return arc bitness and os together
    * x86.64.linux, armv7.32.linux, x86.32.windows etc..
-   * @return
+   * 
    */
   public String getPlatformId() {
     return String.format("%s.%s.%s", getArch(), getJvmBitness(), getOS());
   }
 
   /**
-   * version or myrobotlab
-   * @return
+   * @return version or myrobotlab
+   * 
    */
   public String getVersion() {
     return mrlVersion;
   }
 
   /**
-   * Name of the Jvm Hotspot or OpenJDK typically
-   * @return
+   * @return Name of the Jvm Hotspot or OpenJDK typically
+   *
    */
   public String getVMName() {
     return vmName;
@@ -467,9 +460,9 @@ public class Platform implements Serializable {
   }
 
   /**
-   * The instance identifier of the current running myrobotlab.
+   * @return The instance identifier of the current running myrobotlab.
    * Used for connecting multiple myrobotlabs together
-   * @return
+   * 
    */
   public String getId() {
     // null ids are not allowed
@@ -480,32 +473,31 @@ public class Platform implements Serializable {
   }
 
   /**
-   * The Computer's hostname
-   * @return
+   * @return The Computer's hostname
    */
   public String getHostname() {
     return hostname;
   }
 
   /**
-   * Set your own instance identifier 
-   * @param newId
+   * @param newId Set your own instance identifier 
+   * 
    */
   public void setId(String newId) {
     id = newId;
   }
 
   /**
-   * Return the time when this instance was started
-   * @return
+   * @return the time when this instance was started
+   * 
    */
   public Date getStartTime() {
     return startTime;
   }
 
   /**
-   * Returns true if running in virtual mode
-   * @return
+   * @return true if running in virtual mode
+   * 
    */
   public static boolean isVirtual() {
     Platform p = getLocalInstance();

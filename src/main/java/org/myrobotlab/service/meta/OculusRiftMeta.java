@@ -12,6 +12,7 @@ public class OculusRiftMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
+   * @param name n
    * 
    */
   public OculusRiftMeta(String name) {

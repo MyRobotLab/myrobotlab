@@ -156,6 +156,7 @@ public final class Vector2f extends Vector<Vector2f> implements java.io.Serializ
    * @param changeAmnt
    *          An amount between 0.0 - 1.0 representing a precentage change from
    *          beginVec towards finalVec
+ * @return vector
    */
   public static Vector2f interpolate(@Nonnull Vector2f beginVec,
       @Nonnull Vector2f finalVec, float changeAmnt) {

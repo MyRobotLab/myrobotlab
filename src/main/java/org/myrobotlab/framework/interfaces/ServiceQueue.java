@@ -8,9 +8,9 @@ import org.myrobotlab.framework.Message;
 public interface ServiceQueue {
 
   /**
-   * put message in inbox, so it will be processed by this service
    * 
-   * @param msg
+ * @param msg put message in inbox, so it will be processed by this service
+   * 
    * 
    */
 

@@ -244,13 +244,13 @@ public class InMoov2Head extends Service {
 
   /**
    * Move servos of the head - null is a none move
+   * @param neckPos p
+   * @param rotheadPos p  
+   * @param eyeXPos p 
+   * @param eyeYPos p
+   * @param jawPos p
+   * @param rollNeckPos p
    * 
-   * @param neckPos
-   * @param rotheadPos
-   * @param eyeXPos
-   * @param eyeYPos
-   * @param jawPos
-   * @param rollNeckPos
    */
   public void moveTo(Double neckPos, Double rotheadPos, Double eyeXPos, Double eyeYPos, Double jawPos, Double rollNeckPos) {
     if (log.isDebugEnabled()) {
@@ -389,19 +389,19 @@ public class InMoov2Head extends Service {
   /**
    * Set the put min and max values for all servoes in the head. input limits
    * are not modified.
+   * @param headXMin a
+   * @param headXMax a
+   * @param headYMin a
+   * @param headYMax a
+   * @param eyeXMin a
+   * @param eyeXMax a
+   * @param eyeYMin a
+   * @param eyeYMax a
+   * @param jawMin a
+   * @param jawMax a
+   * @param rollNeckMin a
+   * @param rollNeckMax a
    * 
-   * @param headXMin
-   * @param headXMax
-   * @param headYMin
-   * @param headYMax
-   * @param eyeXMin
-   * @param eyeXMax
-   * @param eyeYMin
-   * @param eyeYMax
-   * @param jawMin
-   * @param jawMax
-   * @param rollNeckMin
-   * @param rollNeckMax
    */
   public void setLimits(double headXMin, double headXMax, double headYMin, double headYMax, double eyeXMin, double eyeXMax, double eyeYMin, double eyeYMax, double jawMin,
       double jawMax, double rollNeckMin, double rollNeckMax) {

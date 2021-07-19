@@ -115,7 +115,8 @@ public class Msg {
   public final static int PUBLISH_MRLCOMM_ERROR = 1;
   // > getBoardInfo
   public final static int GET_BOARD_INFO = 2;
-  // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/activePins/[] deviceSummary
+  // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16
+  // sram/activePins/[] deviceSummary
   public final static int PUBLISH_BOARD_INFO = 3;
   // > enablePin/address/type/b16 rate
   public final static int ENABLE_PIN = 4;
@@ -239,6 +240,8 @@ public class Msg {
 
 /**
  * These methods will be invoked from the Msg class as callbacks from MrlComm.
+   * @param arduino  - the mrlcomm publisher 
+   * @param serial - the serial device that is being used for communication
  */
   
   // public void publishMRLCommError(String errorMsg/*str*/){}

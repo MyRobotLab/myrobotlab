@@ -199,8 +199,9 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   /**
    * Compute the inverse kinematics to move the robot hand to the destination
    * first scale the input point, then apply
+   * @param name n
+   * @param p p
    * 
-   * @param p
    */
   public void moveTo(String name, Point p) {
 

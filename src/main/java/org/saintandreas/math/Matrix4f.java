@@ -76,23 +76,23 @@ public final class Matrix4f implements java.io.Serializable {
 
   /**
    * constructs a matrix with the given values.
+ * @param m00 a
+ * @param m01 a
+ * @param m02 a
+ * @param m03 a
+ * @param m10 a
+ * @param m11 a
+ * @param m12 a
+ * @param m13 a
+ * @param m20 a
+ * @param m21 a
+ * @param m22 a
+ * @param m23 a
+ * @param m30 a
+ * @param m31 a
+ * @param m32 a
+ * @param m33 a
    * 
-   * @param m00
-   * @param m01
-   * @param m02
-   * @param m03
-   * @param m10
-   * @param m11
-   * @param m12
-   * @param m13
-   * @param m20
-   * @param m21
-   * @param m22
-   * @param m23
-   * @param m30
-   * @param m31
-   * @param m32
-   * @param m33
    */
   public Matrix4f( //
       float m00, float m01, float m02, float m03, //
@@ -639,6 +639,7 @@ public final class Matrix4f implements java.io.Serializable {
    *          the angle to rotate (in radians).
    * @param axis
    *          the axis of rotation.
+   * @return m
    */
   public static Matrix4f fromAngleAxis(float angle, Vector3f axis) {
     Vector3f normAxis = axis.normalize();
@@ -653,6 +654,7 @@ public final class Matrix4f implements java.io.Serializable {
    *          the angle to rotate (in radians).
    * @param axis
    *          the axis of rotation (already normalized).
+   * @return m
    */
   public static Matrix4f fromAngleNormalAxis(float angle, Vector3f axis) {
     Matrix4fTemp m = new Matrix4fTemp();
@@ -794,7 +796,7 @@ public final class Matrix4f implements java.io.Serializable {
    * 
    * @param vec
    *          vec to multiply against.
-   * @return
+   * @return v
    */
   public Vector3f multNormal(Vector3f vec) {
     float vx = vec.x, vy = vec.y, vz = vec.z;

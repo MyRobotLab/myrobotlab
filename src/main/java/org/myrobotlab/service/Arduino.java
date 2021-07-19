@@ -293,6 +293,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * String interface - this allows you to easily use url api requests like
    * /attach/nameOfListener/3
+ * @param listener the listener
+ * @param address the address
    */
   public void attach(String listener, int address) {
     attach((PinListener) Runtime.getService(listener), address);
@@ -332,7 +334,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * 
    * @param encoder
    *          - the encoder control to attach
-   * @throws Exception
+   * @throws Exception if an error occurred trying to attach the encoder
    */
   @Override
   public void attach(EncoderControl encoder) throws Exception {
@@ -461,7 +463,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   /**
    * 
-   * @param dm
+   * @param dm the arduino device mapping
    */
   public void reattach(DeviceMapping dm) {
 
@@ -671,6 +673,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * silly Arduino implementation - but keeping it since its familiar
    * digitalWrite/pin/value
+ * @param address the address
+ * @param value the value to write
    */
   public void digitalWrite(int address, int value) {
     log.info("digitalWrite {} {}", address, value);
@@ -951,6 +955,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   /**
    * int type to describe the pin defintion to Pin.h 0 digital 1 analog
+ * @param pin the pin definition
+ * @return the type of pin
    * 
    */
   public Integer getMrlPinType(PinDefinition pin) {
@@ -1598,9 +1604,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * publishEcho/b32 sInt/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[]
    * 
-   * @param myFloat
-   * @param myByte
-   * @param secondFloat
    */
   public void publishEcho(float myFloat, int myByte, float secondFloat) {
     log.info("myFloat {} {} {} ", myFloat, myByte, secondFloat);
@@ -1660,8 +1663,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * error from mrlcom in string form
    * 
-   * @param errorMsg
-   * @return
+   * @param errorMsg a string representing the error message
+   * @return the published error message
    */
   // < publishMRLCommError/str errorMsg
   public String publishMRLCommError(String errorMsg/* str */) {
@@ -1745,9 +1748,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * FIXME - I bet this doesnt work - test it
    * 
-   * @param deviceId
-   * @param data
-   * @return
    */
   public SerialRelayData publishSerialData(Integer deviceId, int[] data) {
     SerialRelayData serialData = new SerialRelayData(deviceId, data);
@@ -2311,8 +2311,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * 
    * -Djava.library.path=libraries/native -Djna.library.path=libraries/native
    * -Dfile.encoding=UTF-8
+   * @param args command line args
    * 
-   * @param args
    */
   public static void main(String[] args) {
     try {
