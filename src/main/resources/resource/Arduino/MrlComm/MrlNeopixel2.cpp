@@ -29,7 +29,6 @@ bool MrlNeopixel2::attach(byte pin, int count, byte depth)
 	//   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
 
 	// initialization
-	pixelIndex = 0;
 	previousWaitMs = millis();
 	numPixels = count;
 	strip = new Adafruit_NeoPixel(count, pin, NEO_GRB + NEO_KHZ800);
@@ -70,48 +69,6 @@ void MrlNeopixel2::colorWipe()
 	previousWaitMs = millis();
 }
 
-void MrlNeopixel2::ironman()
-{
-
-	if (!doneWaiting())
-	{
-		// not done waiting
-		// wait_ms - come back when
-		// we have..
-		return;
-	}
-
-	if(y == strip->numPixels()-1){
-		z = 0;
-	} 
-
-	if(y == 0){
-		z = 1;
-	} 
-
-	if (z)
-	{
-		y++;
-	}
-	else
-	{
-		y--;
-	}
-
-	strip->clear(); //   Set all pixels in RAM to 0 (off)
-
-	// 'c' counts up from 'b' to end of strip in steps of 3...
-	// for (int c = y; c < strip->numPixels(); c += 3)
-	// {
-		strip->setPixelColor(y, color); // Set pixel 'c' to value 'color'
-	//}
-
-
-	strip->show();
-	x++;
-	previousWaitMs = millis();
-}
-
 void MrlNeopixel2::scanner()
 {
 
@@ -123,13 +80,15 @@ void MrlNeopixel2::scanner()
 		return;
 	}
 
-	if(y == strip->numPixels()-1){
+	if (y == strip->numPixels() - 1)
+	{
 		z = 0;
-	} 
+	}
 
-	if(y == 0){
+	if (y == 0)
+	{
 		z = 1;
-	} 
+	}
 
 	if (z)
 	{
@@ -145,9 +104,8 @@ void MrlNeopixel2::scanner()
 	// 'c' counts up from 'b' to end of strip in steps of 3...
 	// for (int c = y; c < strip->numPixels(); c += 3)
 	// {
-		strip->setPixelColor(y, color); // Set pixel 'c' to value 'color'
+	strip->setPixelColor(y, color); // Set pixel 'c' to value 'color'
 	//}
-
 
 	strip->show();
 	x++;
@@ -181,7 +139,6 @@ void MrlNeopixel2::theaterChase()
 	previousWaitMs = millis();
 }
 
-// Rainbow cycle along whole strip. Pass delay time (in ms) between frames.
 void MrlNeopixel2::rainbow()
 {
 
@@ -198,6 +155,43 @@ void MrlNeopixel2::rainbow()
 		int pixelHue = (x * 256) + (i * 65536L / strip->numPixels());
 		strip->setPixelColor(i, strip->gamma32(strip->ColorHSV(pixelHue)));
 	}
+	// FIXME - fix show
+	strip->show(); //  Update strip to match
+	x++;
+	previousWaitMs = millis();
+}
+
+void MrlNeopixel2::ironman()
+{
+
+	if (!doneWaiting())
+	{
+		// not done waiting
+		// wait_ms - come back when
+		// we have..
+		return;
+	}
+
+//	if (brightness > 255 || brightness < 0){
+		brightness = random(20, 204);
+//	}
+
+    int dir = random(3);
+/*
+	if (dir == 0){
+		brightness-=10;
+	} else if (dir == 1){
+		brightness+=10;
+	} // else don't vary brightnesee 
+*/
+	/*
+	for (int i = 0; i < strip->numPixels(); i++)
+	{				
+		strip->setPixelColor(i, color);
+	}*/
+
+	strip->setBrightness(brightness);
+
 	// FIXME - fix show
 	strip->show(); //  Update strip to match
 	x++;
@@ -249,7 +243,6 @@ void MrlNeopixel2::setAnimation(byte animation, byte red, byte green, byte blue,
 {
 	animationIndex = animation;
 	x = 0;
-	pixelIndex = 0;
 	color = Adafruit_NeoPixel::Color(red, green, blue, white);
 	wait = wait_ms;
 	if (animation == 0)
@@ -264,13 +257,42 @@ void MrlNeopixel2::setAnimation(byte animation, byte red, byte green, byte blue,
 	// colorWipe();
 }
 
+void MrlNeopixel2::fill(int firstAddress, int count, byte red, byte green, byte blue, byte white)
+{
+	if (strip)
+	{
+		// TRIPLE EXCLAMATION POINTS ARE DEADLY msg->publishError(F("fill!!!!"));
+		uint32_t color = ((uint32_t)white << 24) | ((uint32_t)red << 16) | ((uint32_t)green << 8) | (uint32_t)blue;
+		strip->fill(color, firstAddress, count);
+		strip->show();
+	}
+}
+
+void MrlNeopixel2::setBrightness(byte brightness)
+{
+	if (strip)
+	{
+		strip->setBrightness(brightness);
+		strip->show();
+	}
+}
+
+void MrlNeopixel2::clear()
+{
+	if (strip)
+	{
+		strip->clear();
+		strip->show();
+	}
+}
+
 void MrlNeopixel2::update()
 {
 	if (runAnimation)
 	{
 
 		switch (animationIndex)
-		{
+		{ 
 		case NEOPIXEL_ANIMATION_COLOR_WIPE:
 			colorWipe();
 			break;
@@ -286,9 +308,12 @@ void MrlNeopixel2::update()
 		case NEOPIXEL_ANIMATION_LARSON_SCANNER:
 			scanner();
 			break;
-			
+		case NEOPIXEL_ANIMATION_IRONMAN:
+			ironman();
+			break;
+
 		default:
-			msg->publishError(F("Neopixel animation do not exist"));
+			msg->publishError(F("neopixel animation do not exist"));
 			break;
 		}
 	}

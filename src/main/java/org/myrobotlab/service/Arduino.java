@@ -27,6 +27,7 @@ import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.i2c.I2CBus;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.Zip;
@@ -2253,7 +2254,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     log.debug("CONTROLLER SERVO_STOPPED {}", name);
     return name;
   }
-  
+
   @Override
   public void neoPixel2Attach(String name, int pin, int numberOfPixels, int depth) {
     ServiceInterface neopixel = Runtime.getService(name);
@@ -2272,7 +2273,21 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     msg.neoPixel2SetAnimation(getDeviceId(neopixel), animation, red, green, blue, white, speed);
   }
 
+  @Override
+  public void neoPixel2Fill(String neopixel, int beginAddress, int count, int red, int green, int blue, int white) {
+    msg.neoPixel2Fill(getDeviceId(neopixel), beginAddress, count, red, green, blue, white);
+  }
 
+  @Override
+  public void neoPixel2SetBrightness(String neopixel, int brightness) {
+    msg.neoPixel2SetBrightness(getDeviceId(neopixel), brightness);
+  }
+
+  @Override
+  public void neoPixel2Clear(String neopixel) {
+    msg.neoPixel2Clear(getDeviceId(neopixel));
+  }
+ 
   @Override
   public ServiceConfig getConfig() {
     ArduinoConfig config = (ArduinoConfig) initConfig(new ArduinoConfig());
@@ -2424,6 +2439,5 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       log.error("main threw", e);
     }
   }
-
-  
+ 
 }

@@ -29,6 +29,8 @@ private:
   // general pause in ms
   int wait = 100;
 
+  int brightness = 255;
+
 public:
   MrlNeopixel2(int deviceId);
   ~MrlNeopixel2();
@@ -39,8 +41,9 @@ public:
   int y;
   int z;
   int numPixels;
-  int pixelIndex;
   long previousWaitMs;
+
+  // utility
   bool doneWaiting();
 
   // animations
@@ -49,29 +52,17 @@ public:
   void rainbow(); 
   void scanner(); 
   void theaterChaseRainbow();
+  void ironman();
 
+  // basic methods
   void writeMatrix(byte bufferSize, const byte *buffer);
   void setAnimation(byte animation, byte red, byte green, byte blue, byte white, long wait_ms);
-
+  void fill(int address,  int count,  byte red,  byte green,  byte blue,  byte white);
+  void setBrightness(byte brightness);
+  void clear();
+  
+  // the general update
   void update();
-
-  /*
-  AdaFruit Library methods 
-
-  void begin(void);
-  void show(void);
-  void setPin(uint16_t p);
-  void setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b);
-  void setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b,
-                     uint8_t w);
-
-  void setPixelColor(uint16_t n, uint32_t c);
-  void fill(uint32_t c = 0, uint16_t first = 0, uint16_t count = 0);
-  void setBrightness(uint8_t);
-  void clear(void);
-  void updateLength(uint16_t n);
-  void updateType(neoPixelType t);
-  */
 };
 
 #endif

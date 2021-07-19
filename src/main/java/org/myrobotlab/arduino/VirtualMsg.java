@@ -229,6 +229,12 @@ public class VirtualMsg {
   public final static int NEO_PIXEL2_SET_ANIMATION = 58;
   // > neoPixel2WriteMatrix/deviceId/[] buffer
   public final static int NEO_PIXEL2_WRITE_MATRIX = 59;
+  // > neoPixel2Fill/deviceId/b16 address/b16 count/red/green/blue/white
+  public final static int NEO_PIXEL2_FILL = 60;
+  // > neoPixel2SetBrightness/deviceId/brightness
+  public final static int NEO_PIXEL2_SET_BRIGHTNESS = 61;
+  // > neoPixel2Clear/deviceId
+  public final static int NEO_PIXEL2_CLEAR = 62;
 
 
 /**
@@ -281,6 +287,9 @@ public class VirtualMsg {
   // public void neoPixel2Attach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b16*/, Integer depth/*byte*/){}
   // public void neoPixel2SetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer white/*byte*/, Integer wait_ms/*b32*/){}
   // public void neoPixel2WriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/){}
+  // public void neoPixel2Fill(Integer deviceId/*byte*/, Integer address/*b16*/, Integer count/*b16*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer white/*byte*/){}
+  // public void neoPixel2SetBrightness(Integer deviceId/*byte*/, Integer brightness/*byte*/){}
+  // public void neoPixel2Clear(Integer deviceId/*byte*/){}
   
   
 
@@ -892,6 +901,50 @@ public class VirtualMsg {
         arduino.invoke("neoPixel2WriteMatrix",  deviceId,  buffer);
       } else { 
          arduino.neoPixel2WriteMatrix( deviceId,  buffer);
+      }
+      break;
+    }
+    case NEO_PIXEL2_FILL: {
+      Integer deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      Integer address = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
+      Integer count = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
+      Integer red = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      Integer green = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      Integer blue = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      Integer white = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      if(invoke){
+        arduino.invoke("neoPixel2Fill",  deviceId,  address,  count,  red,  green,  blue,  white);
+      } else { 
+         arduino.neoPixel2Fill( deviceId,  address,  count,  red,  green,  blue,  white);
+      }
+      break;
+    }
+    case NEO_PIXEL2_SET_BRIGHTNESS: {
+      Integer deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      Integer brightness = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      if(invoke){
+        arduino.invoke("neoPixel2SetBrightness",  deviceId,  brightness);
+      } else { 
+         arduino.neoPixel2SetBrightness( deviceId,  brightness);
+      }
+      break;
+    }
+    case NEO_PIXEL2_CLEAR: {
+      Integer deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      if(invoke){
+        arduino.invoke("neoPixel2Clear",  deviceId);
+      } else { 
+         arduino.neoPixel2Clear( deviceId);
       }
       break;
     }
@@ -1526,6 +1579,15 @@ public class VirtualMsg {
     }
     case NEO_PIXEL2_WRITE_MATRIX:{
       return "neoPixel2WriteMatrix";
+    }
+    case NEO_PIXEL2_FILL:{
+      return "neoPixel2Fill";
+    }
+    case NEO_PIXEL2_SET_BRIGHTNESS:{
+      return "neoPixel2SetBrightness";
+    }
+    case NEO_PIXEL2_CLEAR:{
+      return "neoPixel2Clear";
     }
 
     default: {

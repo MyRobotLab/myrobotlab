@@ -378,6 +378,25 @@ void MrlComm::neoPixel2WriteMatrix( byte deviceId,  byte bufferSize, const byte*
 	((MrlNeopixel2 *)getDevice(deviceId))->writeMatrix(bufferSize, buffer);
 }
 
+// > neoPixel2Fill/deviceId/b16 address/b16 count/red/green/blue/white
+void MrlComm::neoPixel2Fill( byte deviceId,  int address,  int count,  byte red,  byte green,  byte blue,  byte white)
+{
+	((MrlNeopixel2 *)getDevice(deviceId))->fill(address, count, red, green, blue, white);
+}
+
+// > neoPixel2SetBrightness/deviceId/brightness
+void MrlComm::neoPixel2SetBrightness( byte deviceId,  byte brightness)
+{
+	((MrlNeopixel2 *)getDevice(deviceId))->setBrightness(brightness);
+}
+
+// > neoPixel2Clear/deviceId
+void MrlComm::neoPixel2Clear( byte deviceId)
+{
+	((MrlNeopixel2 *)getDevice(deviceId))->clear();
+}
+
+
 /////////////////////////////////// NeoPixel2 End ///////////////////////////////////////////
 
 // > servoAttach/deviceId/pin/targetOutput/b16 velocity

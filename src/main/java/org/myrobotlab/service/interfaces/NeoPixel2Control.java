@@ -30,21 +30,16 @@ import org.myrobotlab.framework.interfaces.NameProvider;
 public interface NeoPixel2Control extends NameProvider {
 
   /**
-   * high level "attach" which internally will call attachDevice(Device device,
-   * int[] config)
-   * 
-   * @param control
-   * @param pin
-   * @param numPixel
-   * @param depth
-   * @throws Exception
+   * explicit attach no additional parameters
+   * @param controller
    */
-  public void attach(String control, int pin, int numPixel, int depth) throws Exception;
+  public void attachNeoPixel2Controller(NeoPixel2Controller controller);
 
-  /*
-   * high level "detach" with internally will call detachDevice(Device device)
+  /**
+   * explicit detach
+   * @param controller
    */
-  public void detach(String controller);
+  public void detachNeoPixel2Controller(NeoPixel2Controller controller);
 
   /**
    * SetPixel: defining the pixels of the pixel matrix. Setting pixels are not
@@ -62,23 +57,15 @@ public interface NeoPixel2Control extends NameProvider {
    * Send a matrix of pixels to the neopixel hardware
    */
   public void writeMatrix();
+  
+  public void setPin(int pin);
 
   public Integer getPin();
 
   public int getNumPixel();
-
-  public void turnOff();
-
-  public void turnOn();
-
-  /*
-   * <pre> setAnimation &#64;param animation - preprogramed animation &#64;param
-   * red - value 0-255 - set base color for the animation &#64;param green -
-   * value 0-255 - set base color for the animation &#64;param blue - value
-   * 0-255 - set base color for the animation &#64;param speed - set speed of
-   * the animation 1 = fastest (update every ~30ms), 100 = 100 times slower than
-   * 1 value </pre>
-   */
+  
+  public void clear();
+  
   public void setAnimation(int animation, int red, int green, int blue, int wait_ms);
 
   public void setAnimation(String animation, int red, int green, int blue, int wait_ms);

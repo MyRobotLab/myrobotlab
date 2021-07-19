@@ -913,4 +913,19 @@ public class MrlComm implements SerialDataListener {
     
   }
 
+  public void neoPixel2Clear(Integer deviceId) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  public void neoPixel2Fill(Integer deviceId, Integer address, Integer count, Integer red, Integer green, Integer blue, Integer white) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  public void neoPixel2SetBrightness(Integer deviceId, Integer brightness) {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

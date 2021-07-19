@@ -144,6 +144,12 @@
 #define NEO_PIXEL2_SET_ANIMATION 58
 // > neoPixel2WriteMatrix/deviceId/[] buffer
 #define NEO_PIXEL2_WRITE_MATRIX 59
+// > neoPixel2Fill/deviceId/b16 address/b16 count/red/green/blue/white
+#define NEO_PIXEL2_FILL 60
+// > neoPixel2SetBrightness/deviceId/brightness
+#define NEO_PIXEL2_SET_BRIGHTNESS 61
+// > neoPixel2Clear/deviceId
+#define NEO_PIXEL2_CLEAR 62
 
 
 

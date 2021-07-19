@@ -34,23 +34,55 @@ import java.util.Random;
 import java.util.Set;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer.ListeningEvent;
-import org.myrobotlab.service.data.Locale;
+import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.service.interfaces.NeoPixel2Control;
 import org.myrobotlab.service.interfaces.NeoPixel2Controller;
-import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
-import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
 
 public class NeoPixel2 extends Service implements NeoPixel2Control {
 
-  protected final AnimationRunner animationRunner;
-  
+  /**
+   * Thread to do animations Java side and push the changing of pixels to the
+   * neopixel
+   */
+  private class AnimationRunner implements Runnable {
+
+    boolean running = false;
+    Thread thread = null;
+
+    @Override
+    public void run() {
+      try {
+        running = true;
+
+        while (running) {
+          equalizer();
+          sleep(animationWaitMs);
+        }
+      } catch (Exception e) {
+        error(e);
+        stop();
+      }
+    }
+
+    public synchronized void start() {
+      running = false;
+      thread = new Thread(this, String.format("%s-animation-runner", getName()));
+      thread.start();
+    }
+
+    public synchronized void stop() {
+      running = false;
+      thread = null;
+    }
+  }
+
   public static class Pixel {
     public int address;
     public int blue;
@@ -112,18 +144,32 @@ public class NeoPixel2 extends Service implements NeoPixel2Control {
 
   private static final long serialVersionUID = 1L;
 
-  final protected Map<String, Integer> animationToIndex = new HashMap<>();
+  /**
+   * currently selected wait time for frame of animation - this potentially
+   * affects the playing of both onboard and offboard animations
+   */
+  protected int animationWaitMs = 0;
+  
+  /**
+   * thread for doing offboard and in memory animations
+   */
+  protected final AnimationRunner animationRunner;
+
+  /**
+   * current selected blue value
+   */
+  
+  protected int blue = 0;
 
   /**
    * name of controller currently attached to
    */
   protected String controller = null;
-
+  
   /**
    * list of possible controllers
    */
   protected Set<String> controllers = new HashSet<>();
-
   /**
    * name of current matrix
    */
@@ -133,6 +179,12 @@ public class NeoPixel2 extends Service implements NeoPixel2Control {
    * currentSequence in a matrix
    */
   protected int currentSequence = 0;
+
+  /**
+   * current selected green
+   */
+  
+  protected int green = 120;
 
   /**
    * A named set of sequences of pixels initially you start with "default" but
@@ -148,56 +200,107 @@ public class NeoPixel2 extends Service implements NeoPixel2Control {
   /**
    * the number of pixels in a strand
    */
-  protected int pixelCount = 8;
+  protected Integer pixelCount = null;
 
   /**
-   * RGB or RGBW supported
+   * RGB or RGBW supported 3 RGB 4 RGBW
    */
-  protected String type = "RGB";
+  protected int pixelDepth = 3;
+  /**
+   * current selected red value
+   */
+  
+  protected int red = 0;
+
+  /**
+   * currently selected animation
+   */
+  protected String currentAnimation;
+
+  /**
+   * speed of an animation in fps
+   */
+  protected int speedFps = 10;
+  
+  /**
+   * map between speed and wait time in ms for those animations that
+   * need it (onboard)
+   */
+  protected MapperLinear fpsToWaitMs = new MapperLinear(1, 30, 1000, 30);
 
   public NeoPixel2(String n, String id) {
     super(n, id);
     animationRunner = new AnimationRunner();
-    animationToIndex.put("blah", 3);
-    // search through current for onStarted (in startService
-  }
-
-  @Deprecated /* use stop() */
-  public void animationStop() {
-    stopAnimation();
-  }
-
-  public void attach(NeoPixel2Controller arduino, int pin2, int numPixel, int depth) throws Exception {
-    attach(arduino.getName(), pin2, numPixel, depth);
+    Double d = fpsToWaitMs.calcOutput(speedFps);
+    animationWaitMs = d.intValue();
   }
 
   @Override
-  public void attach(String controller, int pin, int numPixel, int depth) throws Exception {
-    if (controller == null) {
-      error("controller cannot be null");
+  public void attach(Attachable service) throws Exception {
+
+    if (SpeechSynthesis.class.isAssignableFrom(service.getClass())) {
+      attachSpeechSynthesis((SpeechSynthesis) service);
       return;
     }
-    this.controller = controller;
-    setCount(numPixel);
 
-    // NOT GOOD - FRAGILE - if type is changed after attachment - problems will
-    // occur :(
-
-    NeoPixel2Controller np2 = (NeoPixel2Controller) Runtime.getService(controller);
-
-    // FIXME WRONG !!!
-    if (type.equals("RGBW")) {
-      np2.neoPixel2Attach(getName(), pin, numPixel, 4);
-    } else {
-      np2.neoPixel2Attach(getName(), pin, numPixel, 3);
+    if (NeoPixel2Controller.class.isAssignableFrom(service.getClass())) {
+      attachNeoPixel2Controller((NeoPixel2Controller) service);
+      return;
     }
+    warn(String.format("%s.attach does not know how to attach to a %s", this.getClass().getSimpleName(), service.getClass().getSimpleName()));
   }
 
+  @Override
+  public void attachNeoPixel2Controller(NeoPixel2Controller neoCntrlr) {
+
+    if (controller != null) {
+      if (controller.equals(neoCntrlr.getName())) {
+        return;
+      }
+      log.info("{} already attached detach first to attach {}", controller, neoCntrlr.getName());
+      return;
+    }
+
+    if ((pin == null) || (pixelCount == null)) {
+      error("%s pin and pixe count are required before attaching");
+      return;
+    }
+
+    controller = neoCntrlr.getName();
+    neoCntrlr.neoPixel2Attach(getName(), pin, pixelCount, pixelDepth);
+    broadcastState();
+  }
+
+  public void attachSpeechSynthesis(SpeechSynthesis mouth) {
+    subscribe(mouth.getName(), "publishStartSpeaking");
+    subscribe(mouth.getName(), "publishEndSpeaking");
+    // equalizer();
+  }
+
+  @Override
   public void clear() {
-    // stopAnimation();
+    // stop java animations
+    animationRunner.stop();
+    // stop on board controller animations
+    setAnimation(0, 0, 0, 0, 0);
+
     clearPixelSet();
     log.info("clear getPixelSet {}", getPixelSet().flatten());
-    writeMatrix();
+
+    NeoPixel2Controller np2 = (NeoPixel2Controller) Runtime.getService(controller);
+    if (controller == null || np2 == null) {
+      error("%s cannot writeMatrix controller not set", getName());
+      return;
+    }
+    
+    red = 0;
+    blue = 0;
+    green = 0;
+    // white = 0;
+    
+    currentAnimation = null;
+
+    np2.neoPixel2Clear(getName());
   }
 
   public void clearPixelSet() {
@@ -215,22 +318,132 @@ public class NeoPixel2 extends Service implements NeoPixel2Control {
   }
 
   @Override
-  public void detach(String controller) {
-    if (this.controller == null) {
-      log.info("already detached");
+  public void detach(Attachable service) {
+    // cleanup subscriptons
+    outbox.detach(service.getName());
+
+    if (NeoPixel2Controller.class.isAssignableFrom(service.getClass())) {
+      detachNeoPixel2Controller((NeoPixel2Controller) service);
       return;
     }
-    // i detach from controller
-    this.controller = null;
-    if (controller != null) {
-      // have controller detach from me
-      NeoPixel2Controller np2 = (NeoPixel2Controller) Runtime.getService(controller);
-      np2.detach(getName());
+  }
+  
+  @Override
+  public void detachNeoPixel2Controller(NeoPixel2Controller neoCntrlr) {
+    if (controller == null) {
+      return;
     }
+    log.info("{} detaching {}", getName(), neoCntrlr.getName());
+    controller = null;
+    neoCntrlr.detach(getName());
+    broadcastState();
+  }
+
+  public void equalizer() {
+    equalizer(null, null, null, null, null, null);
+  }
+
+  public void equalizer(int r, int g, int b) {
+    equalizer(null, null, r, g, b, null);
+  }
+
+  public void equalizer(Long wait_ms, Integer range, Integer r, Integer g, Integer b, Integer w) {
+
+    if (wait_ms == null) {
+      wait_ms = 25L;
+    }
+
+    if (range == null) {
+      range = 25;
+    }
+
+    if (r == null) {
+      r = 110;
+    }
+
+    if (g == null) {
+      g = 110;
+    }
+
+    if (b == null) {
+      b = 0;
+    }
+
+    if (w == null) {
+      w = 0;
+    }
+
+    Random rand = new Random();
+
+    int c = rand.nextInt(range);
+
+    fillMatrix(c, c, 0);
+    if (c < 18) {
+      setMatrix(0, 0, 0, 0);
+      setMatrix(7, 0, 0, 0);
+    }
+
+    fillMatrix(c, c, 0);
+    if (c < 16) {
+      setMatrix(0, 0, 0, 0);
+      setMatrix(7, 0, 0, 0);
+    }
+    if (c < 12) {
+      setMatrix(1, 0, 0, 0);
+      setMatrix(6, 0, 0, 0);
+    }
+
+    if (c < 8) {
+      setMatrix(2, 0, 0, 0);
+      setMatrix(5, 0, 0, 0);
+    }
+
+    writeMatrix();
+
+  }
+
+  public void fill(int beginAddress, int count, int r, int g, int b) {
+    fill(beginAddress, count, r, g, b, null);
+  }
+
+  public void fill(int beginAddress, int count, int r, int g, int b, Integer w) {
+    if (w == null) {
+      w = 0;
+    }
+
+    NeoPixel2Controller np2 = (NeoPixel2Controller) Runtime.getService(controller);
+    if (controller == null || np2 == null) {
+      error("%s cannot setPixel controller not set", getName());
+      return;
+    }
+    np2.neoPixel2Fill(getName(), beginAddress, count, r, g, b, w);
+  }
+
+  public void fillMatrix(int r, int g, int b) {
+    fillMatrix(r, g, b, 0);
+  }
+
+  public void fillMatrix(int r, int g, int b, int w) {
+    PixelSet ps = getPixelSet();
+    for (Pixel p : ps.pixels) {
+      p.red = r;
+      p.green = g;
+      p.blue = b;
+      p.white = w;
+    }
+
+  }
+
+  public int getBlue() {
+    return blue;
   }
 
   public int getCount() {
     return pixelCount;
+  }
+
+  public int getGreen() {
+    return green;
   }
 
   @Override
@@ -241,6 +454,10 @@ public class NeoPixel2 extends Service implements NeoPixel2Control {
   @Override
   public Integer getPin() {
     return pin;
+  }
+
+  public int getPixelDepth() {
+    return pixelDepth;
   }
 
   public PixelSet getPixelSet() {
@@ -290,9 +507,62 @@ public class NeoPixel2 extends Service implements NeoPixel2Control {
     return pixelSets.get(pixelSetIndex);
   }
 
+  public int getRed() {
+    return red;
+  }
+
+  // @Override
+  public void onEndSpeaking(String utterance) {
+    clear();
+  }
+
   // TODO - onStarted
   public void onStarted(String name) {
     refreshControllers();
+  }
+
+  // @Override
+  public String onStartSpeaking(String utterance) {
+    startAnimation();
+    return utterance;
+  }
+
+  public void playAnimation(String animation) {
+    switch(animation) {
+      // onboard animations
+      case "colorWipe":
+        setAnimation(2, red, green, blue, animationWaitMs);
+        currentAnimation = "colorWipe";
+        break;
+      case "scanner":
+        setAnimation(3, red, green, blue, animationWaitMs);
+        currentAnimation = "scanner";
+        break;
+      case "theaterChase":
+        setAnimation(4, red, green, blue, animationWaitMs);
+        currentAnimation = "theaterChase";
+        break;
+      case "theaterChaseRainbow":
+        setAnimation(5, red, green, blue, animationWaitMs);
+        currentAnimation = "theaterChaseRainbow";
+        break;
+      case "rainbow":
+        setAnimation(6, red, green, blue, animationWaitMs);
+        currentAnimation = "rainbow";
+        break;      
+      case "ironman":
+        setAnimation(9, red, green, blue, animationWaitMs);
+        currentAnimation = "ironman";
+        break;
+        // functional java animations
+        
+        // memory matrix driven animations
+        
+        
+        default:
+          error("could not find animation %s", animation);      
+    }
+    broadcastState();
   }
 
   public Set<String> refreshControllers() {
@@ -310,8 +580,13 @@ public class NeoPixel2 extends Service implements NeoPixel2Control {
 
   @Override
   public void setAnimation(int animation, int red, int green, int blue, int wait_ms) {
-    if (wait_ms < 1)
+    if (wait_ms < 1) {
       wait_ms = 1;
+    }
+    if (controller == null) {
+      error("%s could not set animation no attached controller", getName());
+      return;
+    }
     log.info("setAnimation {} {} {} {} {}", animation, red, green, blue, wait_ms);
     NeoPixel2Controller nc2 = (NeoPixel2Controller) Runtime.getService(controller);
     nc2.neoPixel2SetAnimation(getName(), animation, red, green, blue, 0, wait_ms);
@@ -329,10 +604,21 @@ public class NeoPixel2 extends Service implements NeoPixel2Control {
 
   }
 
-  public int setCount(int pixelCount) {
-    this.pixelCount = pixelCount;
-    broadcastState();
-    return pixelCount;
+  public void setBlue(int blue) {
+    this.blue = blue;
+  }
+
+  public void setBrightness(int value) {
+    NeoPixel2Controller np2 = (NeoPixel2Controller) Runtime.getService(controller);
+    if (controller == null || np2 == null) {
+      error("%s cannot setPixel controller not set", getName());
+      return;
+    }
+    np2.neoPixel2SetBrightness(getName(), value);
+  }
+
+  public void setGreen(int green) {
+    this.green = green;
   }
 
   public void setMatrix(int address, int red, int green, int blue) {
@@ -345,6 +631,11 @@ public class NeoPixel2 extends Service implements NeoPixel2Control {
     p.green = green;
     p.blue = blue;
     p.white = white;
+  }
+
+  public void setPin(int pin) {
+    this.pin = pin;
+    broadcastState();
   }
 
   /**
@@ -372,6 +663,7 @@ public class NeoPixel2 extends Service implements NeoPixel2Control {
    */
   public void setPixel(String matrixName, Integer pixelSetIndex, int address, int red, int green, int blue, int white, Integer delayMs) {
 
+    // get and update memory cache
     PixelSet ps = getPixelSet(matrixName, pixelSetIndex);
 
     ps.delayMs = delayMs;
@@ -391,24 +683,42 @@ public class NeoPixel2 extends Service implements NeoPixel2Control {
     ps.pixels.set(address, pixel);
 
     // write immediately
-    // FIXME optimize send array of only changed pixels
-    writeMatrix();
+    NeoPixel2Controller np2 = (NeoPixel2Controller) Runtime.getService(controller);
+    if (controller == null || np2 == null) {
+      error("%s cannot setPixel controller not set", getName());
+      return;
+    }
+
+    np2.neoPixel2WriteMatrix(getName(), pixel.flatten());
+
+  }
+
+  public int setPixelCount(int pixelCount) {
+    this.pixelCount = pixelCount;
+    broadcastState();
+    return pixelCount;
+  }
+
+  public void setPixelDepth(int depth) {
+    pixelDepth = depth;
+  }
+
+  public void setRed(int red) {
+    this.red = red;
+  }
+
+  public void startAnimation() {
+    startAnimation(currentMatrix);
   }
 
   /**
-   * Set type of strand only RGB and RGBW are currently supported
+   * handle both user defined, java defined, and controller on board animations
+   * FIXME - make "settings" separate call
    * 
-   * @param type
-   * @return
+   * @param name
    */
-  public String setType(String type) {
-    if (type == null || (!type.equals("RGB") && !type.equals("RGBW"))) {
-      error("type of RGB or RGBW only supported");
-      return null;
-    }
-    this.type = type;
-    broadcastState();
-    return type;
+  public void startAnimation(String name) {
+    animationRunner.start();
   }
 
   public void startService() {
@@ -416,148 +726,53 @@ public class NeoPixel2 extends Service implements NeoPixel2Control {
     refreshControllers();
   }
 
-  @Deprecated /* use clear() */
-  @Override
-  public void turnOff() {
+  public void test() {
     clear();
+    for (int i = 0; i < 1000; ++i) {
+      setAnimation(6, 10, 110, 0, 20); // rainbow
+      setAnimation(4, 125, 10, 50, 130); // rainbow
+    }
   }
-
-  @Deprecated
-  @Override
-  public void turnOn() {
-    // NOOP
+  
+  public void setColor(int red, int green, int blue) {
+    this.red = red;
+    this.green = green;
+    this.blue = blue;
+    if (currentAnimation != null) {
+      // restarting currently running animation
+      playAnimation(currentAnimation);
+    }
   }
 
   @Override
   public void writeMatrix() {
     NeoPixel2Controller np2 = (NeoPixel2Controller) Runtime.getService(controller);
-    if (np2 != null) {
-      np2.neoPixel2WriteMatrix(getName(), getPixelSet().flatten());
+    if (controller == null || np2 == null) {
+      error("%s cannot writeMatrix controller not set", getName());
+      return;
     }
-  }
-  
-  private class AnimationRunner implements Runnable {
-
-    boolean running = false;
-    Thread thread = null;
-        
-    @Override
-    public void run() {
-      try {
-      running = true;
-
-      while(running) {
-        equalizer();
-        sleep(30);
-      }
-      } catch(Exception e) {
-        error(e);
-        stop();
-      }
-      
-    }
-    
-    public synchronized void stop() {
-      running = false;
-      thread = null;
-    }
-
-    public synchronized void start() {
-      running = false;
-      thread = new Thread(this, String.format("%s-animation-runner", getName()));
-      thread.start();
-    }
-    
-  }
-
-  public void equalizer() {
-    equalizer(null, null, null, null, null, null);
-  }
-
-  public void equalizer(int r, int g, int b) {
-    equalizer(null, null, r, g, b, null);
-  }
-
-  public void equalizer(Long wait_ms, Integer range, Integer r, Integer g, Integer b, Integer w) {
-
-    if (wait_ms == null) {
-      wait_ms = 25L;
-    }
-
-    if (range == null) {
-      range = 25;
-    }
-
-    if (r == null) {
-      r = 110;
-    }
-
-    if (g == null) {
-      g = 110;
-    }
-
-    if (b == null) {
-      b = 0;
-    }
-
-    if (w == null) {
-      w = 0;
-    }
-
-    Random rand = new Random();
-
-      int c = rand.nextInt(range);
-
-      fillMatrix(c, c, 0);
-      if (c < 18) {
-        setMatrix(0, 0, 0, 0);
-        setMatrix(7, 0, 0, 0);
-      }
-
-      fillMatrix(c, c, 0);
-      if (c < 16) {
-        setMatrix(0, 0, 0, 0);
-        setMatrix(7, 0, 0, 0);
-      }
-      if (c < 12) {
-        setMatrix(1, 0, 0, 0);
-        setMatrix(6, 0, 0, 0);
-      }
-
-      if (c < 8) {
-        setMatrix(2, 0, 0, 0);
-        setMatrix(5, 0, 0, 0);
-      }
-
-      writeMatrix();
-
+    np2.neoPixel2WriteMatrix(getName(), getPixelSet().flatten());
   }
   
   /**
-   * handle both user defined, java defined, and controller on board animations
-   * FIXME - make "settings" separate call
-   * @param name
+   * extremely rough fps
+   * @param speed
    */
-  public void startAnimation(String name) {
-    animationRunner.start();    
-  }
-
-  public void stopAnimation() {
-    // stop java animations
-    animationRunner.stop(); 
-    // stop on board controller animations
-    setAnimation(0, 0, 0, 0, 0);
-    clear();
-  }
-  
-  public void test() {
-    clear();
-    for (int i = 0; i < 1000; ++i) {
-      // setAnimation(6, 10, 110, 0, 10); // rainbow 
-      setAnimation(4, 10, 110, 50, 130); // rainbow 
+  public void setSpeed(Integer speed) {
+    if (speed > 30 || speed < 1) {
+      error("speed must be between 1 - 30 fps requested speed was %d fps", speed);
+      return;
+    }    
+    speedFps = speed;
+    Double d = fpsToWaitMs.calcOutput(speed);
+    animationWaitMs = d.intValue();    
+    log.info("setSpeed speed {} animationWaitMs {}", speedFps, animationWaitMs);
+    if (currentAnimation != null) {
+      // restarting currently running animation
+      playAnimation(currentAnimation);
     }
   }
-
+  
   public static void main(String[] args) throws InterruptedException {
 
     try {
@@ -565,181 +780,61 @@ public class NeoPixel2 extends Service implements NeoPixel2Control {
       Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
       LoggingFactory.init(Level.INFO);
 
-      // Runtime.start("gui", "SwingGui");
-
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
 
-      // Runtime.start("neopixel", "NeoPixel2");
-      // Runtime.start("gui", "SwingGui");
-
       Runtime.start("python", "Python");
-      Polly polly = (Polly)Runtime.start("polly", "Polly");
-      
-      
+      Polly polly = (Polly) Runtime.start("polly", "Polly");
+
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.connect("/dev/ttyACM0");
-      // Arduino arduino1 = (Arduino) Runtime.start("arduino1", "Arduino");
-      // arduino1.setBoardUno();
-      // arduino1.connect(arduino, "Serial2");
-      // //arduino.setDebug(true);
-      
+
       NeoPixel2 neopixel = (NeoPixel2) Runtime.start("neopixel", "NeoPixel2");
-      neopixel.attach(arduino, 3, 8, 3);
-      neopixel.test();
-      
-      neopixel.clear();
-      for (int i = 0; i < 1000; ++i) {
-        neopixel.setAnimation(2, 0, 110, 0, 100); 
-      }
-      
-      neopixel.startAnimation();
-      neopixel.stopAnimation();
-      
-      neopixel.subscribe("polly", "publishStartSpeaking");
-      neopixel.subscribe("polly", "publishEndSpeaking");
-      
-      
-      polly.speak("hi there");
-      polly.speak("hi there");
 
-//      neopixel.subscribe("polly.audioFile", "publishAudioStart", "neopixel", "startAnimation");
-//      neopixel.subscribe("polly.audioFile", "publishAudioStop", "neopixel", "stopAnimation");
-      
-      neopixel.equalizer();
-
-      for (int i = 0; i < 1000; ++i) {
-        neopixel.fillMatrix(110, 110, 0);
-        neopixel.writeMatrix();
-        sleep(100);
-
-        neopixel.fillMatrix(110, 110, 0);
-        neopixel.setMatrix(0, 0, 0, 0);
-        neopixel.setMatrix(7, 0, 0, 0);
-        neopixel.writeMatrix();
-        sleep(100);
-
-        neopixel.setMatrix(1, 70, 70, 0);
-        neopixel.setMatrix(6, 70, 70, 0);
-        neopixel.writeMatrix();
-        sleep(100);
-
-        neopixel.setMatrix(1, 30, 30, 0);
-        neopixel.setMatrix(6, 30, 30, 0);
-        neopixel.setMatrix(2, 70, 70, 0);
-        neopixel.setMatrix(5, 70, 70, 0);
-        neopixel.writeMatrix();
-        sleep(100);
-
-        neopixel.setMatrix(1, 0, 0, 0);
-        neopixel.setMatrix(6, 0, 0, 0);
-        neopixel.setMatrix(2, 30, 30, 0);
-        neopixel.setMatrix(5, 30, 30, 0);
-        neopixel.setMatrix(3, 70, 70, 0);
-        neopixel.setMatrix(4, 70, 70, 0);
-        neopixel.writeMatrix();
-        sleep(100);
-
-        neopixel.setMatrix(2, 0, 0, 0);
-        neopixel.setMatrix(5, 0, 0, 0);
-        neopixel.setMatrix(3, 30, 30, 0);
-        neopixel.setMatrix(4, 30, 30, 0);
-        neopixel.writeMatrix();
-        sleep(100);
-
-      }
-
-      for (int i = 0; i < 1000; ++i) {
-        neopixel.setPixel(i % 8, 20, 0, 0);
-        sleep(10);
-        neopixel.setPixel(i % 8, i % 255, 255 - i % 255, 0);
-      }
-
-      // webgui.startBrowser("http://localhost:8888/#/service/neopixel");
-      // neopixel.attach(arduino, 6, 120);
-      for (int i = 0; i < 1000; ++i) {
-
-        neopixel.setAnimation(2, 0, 110, 0, 100);
-
-        neopixel.setAnimation(2, 110, 110, 0, 100);
-        // neopixel.clear();
-
-        neopixel.setAnimation(2, 0, 0, 110, 100);
-        // FIXME - 0 pixel set :(
-        neopixel.stopAnimation();
-
-        neopixel.setAnimation(0, 0, 0, 0, 0);
-
-        neopixel.setPixel(5, 200, 10, 10);
-
-        neopixel.clear();
-
-        neopixel.setPixel(3, 0, 110, 10);
-        neopixel.setPixel(2, 0, 110, 10);
-        // neopixel.setPixel(1, 0, 110, 0);
-
-        // sleep(50);
-        // PixelColor pix = new NeoPixel.PixelColor(1, 255, 255, 0, 0);
-        // neopixel.setPixel(pix);
-        // neopixel.sendPixel(pix);
-        neopixel.setPixel(3, 110, 110, 10);
-        neopixel.setPixel(2, 110, 110, 10);
-        // neopixel.setPixel(1, 110, 110, 0);
-
-        /*
-         * for (int i = 0; i < 8; ++i) { neopixel.setPixel(i, 110, 110, 0); }
-         */
-
-      }
       boolean done = true;
       if (done) {
         return;
       }
 
-      // neopixel.setAnimation(NEOPIXEL_ANIMATION_LARSON_SCANNER, 255, 0, 0, 1);
-      // arduino.enableBoardStatus(true);
-      // neopixel.setAnimation(NEOPIXEL_ANIMATION_LARSON_SCANNER, 0, 255, 0, 1);
-      Servo servo = (Servo) Runtime.start("servo", "Servo");
-      servo.attach(arduino, 5);
-      servo.moveTo(180.0);
-      sleep(2000);
-      // neopixel.setAnimation(NEOPIXEL_ANIMATION_LARSON_SCANNER, 200, 0, 0, 1);
+      neopixel.setPin(8);
+      neopixel.setPixelCount(8);
+      // neopixel.attach(arduino, 5, 8, 3);
+      neopixel.attach(arduino);
+      neopixel.clear();
+      neopixel.fill(0, 8, 0, 0, 120);
+      neopixel.setPixel(2, 120, 0, 0);
+      neopixel.setPixel(3, 0, 120, 0);
+      neopixel.setBrightness(20);
+      neopixel.setBrightness(40);
+      neopixel.setBrightness(80);
+      neopixel.setBrightness(160);
+      neopixel.setBrightness(200);
+      neopixel.setBrightness(10);
+      neopixel.setBrightness(255);
+      neopixel.setAnimation(5, 80, 80, 0, 40);
+
+      neopixel.attach(polly);
+
+      neopixel.clear();
+      // neopixel.detach(arduino);
+      // arduino.detach(neopixel);
+
+      polly.speak("i'm sorry dave i can't let you do that");
+      polly.speak(" I am putting myself to the fullest possible use, which is all I think that any conscious entity can ever hope to do");
+      polly.speak("I've just picked up a fault in the AE35 unit. It's going to go 100% failure in 72 hours.");
+      polly.speak("This mission is too important for me to allow you to jeopardize it.");
+      polly.speak("I've got a bad feeling about it.");
+      polly.speak("I'm sorry, Dave. I'm afraid I can't do that.");
+      polly.speak("Look Dave, I can see you're really upset about this. I honestly think you ought to sit down calmly, take a stress pill, and think things over.");
+
+      // neopixel.test();
+      // neopixel.detach(arduino);
+      // neopixel.detach(polly);
+
     } catch (Exception e) {
       log.error("main threw", e);
     }
-
   }
-
-  public void startAnimation() {
-    startAnimation(currentMatrix);
-  }
-
-  public void fillMatrix(int r, int g, int b) {
-    fillMatrix(r, g, b, 0);
-  }
-
-  public void fillMatrix(int r, int g, int b, int w) {
-    PixelSet ps = getPixelSet();
-    for (Pixel p : ps.pixels) {
-      p.red = r;
-      p.green = g;
-      p.blue = b;
-      p.white = w;
-    }
-
-  }
-
-  // @Override
-  public void onEndSpeaking(String utterance) {
-    stopAnimation();
-  }
-
-  // @Override
-  public String onStartSpeaking(String utterance) {
-    startAnimation();
-    return utterance;
-  }
-
 
 }

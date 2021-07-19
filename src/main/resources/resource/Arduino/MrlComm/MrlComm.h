@@ -168,6 +168,12 @@ public:
   void neoPixel2SetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  byte white,  long wait_ms);
   // > neoPixel2WriteMatrix/deviceId/[] buffer
   void neoPixel2WriteMatrix( byte deviceId,  byte bufferSize, const byte*buffer);
+  // > neoPixel2Fill/deviceId/b16 address/b16 count/red/green/blue/white
+  void neoPixel2Fill( byte deviceId,  int address,  int count,  byte red,  byte green,  byte blue,  byte white);
+  // > neoPixel2SetBrightness/deviceId/brightness
+  void neoPixel2SetBrightness( byte deviceId,  byte brightness);
+  // > neoPixel2Clear/deviceId
+  void neoPixel2Clear( byte deviceId);
     // </generatedCallBacks>
   // end
 

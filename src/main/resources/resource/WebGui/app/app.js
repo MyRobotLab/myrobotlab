@@ -16,6 +16,7 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'sticky', //sticky elements
 'checklist-model', // checklists
 'peer',
+'color.picker',
 'angular-intro', // intro
 'angularScreenfull', // screenfull
 'angular-clipboard', 'rzModule', 'ngFlash', //'charts',

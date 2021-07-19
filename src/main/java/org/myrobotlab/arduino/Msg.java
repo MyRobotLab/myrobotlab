@@ -229,6 +229,12 @@ public class Msg {
   public final static int NEO_PIXEL2_SET_ANIMATION = 58;
   // > neoPixel2WriteMatrix/deviceId/[] buffer
   public final static int NEO_PIXEL2_WRITE_MATRIX = 59;
+  // > neoPixel2Fill/deviceId/b16 address/b16 count/red/green/blue/white
+  public final static int NEO_PIXEL2_FILL = 60;
+  // > neoPixel2SetBrightness/deviceId/brightness
+  public final static int NEO_PIXEL2_SET_BRIGHTNESS = 61;
+  // > neoPixel2Clear/deviceId
+  public final static int NEO_PIXEL2_CLEAR = 62;
 
 
 /**
@@ -2244,6 +2250,120 @@ public class Msg {
     }
   }
 
+  public synchronized byte[] neoPixel2Fill(Integer deviceId/*byte*/, Integer address/*b16*/, Integer count/*b16*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer white/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: neoPixel2Fill to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 2 + 2 + 1 + 1 + 1 + 1); // size
+      appendMessage(baos, NEO_PIXEL2_FILL); // msgType = 60
+      appendMessage(baos, deviceId);
+      appendMessageb16(baos, address);
+      appendMessageb16(baos, count);
+      appendMessage(baos, red);
+      appendMessage(baos, green);
+      appendMessage(baos, blue);
+      appendMessage(baos, white);
+ 
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
+      if(record != null){
+        txBuffer.append("> neoPixel2Fill");
+        txBuffer.append("/");
+        txBuffer.append(deviceId);
+        txBuffer.append("/");
+        txBuffer.append(address);
+        txBuffer.append("/");
+        txBuffer.append(count);
+        txBuffer.append("/");
+        txBuffer.append(red);
+        txBuffer.append("/");
+        txBuffer.append(green);
+        txBuffer.append("/");
+        txBuffer.append(blue);
+        txBuffer.append("/");
+        txBuffer.append(white);
+        txBuffer.append("\n");
+        record.write(txBuffer.toString().getBytes());
+        txBuffer.setLength(0);
+      }
+
+      return message;
+	} catch (Exception e) {
+      log.error("neoPixel2Fill threw",e);
+      return null;
+    }
+  }
+
+  public synchronized byte[] neoPixel2SetBrightness(Integer deviceId/*byte*/, Integer brightness/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: neoPixel2SetBrightness to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, NEO_PIXEL2_SET_BRIGHTNESS); // msgType = 61
+      appendMessage(baos, deviceId);
+      appendMessage(baos, brightness);
+ 
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
+      if(record != null){
+        txBuffer.append("> neoPixel2SetBrightness");
+        txBuffer.append("/");
+        txBuffer.append(deviceId);
+        txBuffer.append("/");
+        txBuffer.append(brightness);
+        txBuffer.append("\n");
+        record.write(txBuffer.toString().getBytes());
+        txBuffer.setLength(0);
+      }
+
+      return message;
+	} catch (Exception e) {
+      log.error("neoPixel2SetBrightness threw",e);
+      return null;
+    }
+  }
+
+  public synchronized byte[] neoPixel2Clear(Integer deviceId/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: neoPixel2Clear to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, NEO_PIXEL2_CLEAR); // msgType = 62
+      appendMessage(baos, deviceId);
+ 
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
+      if(record != null){
+        txBuffer.append("> neoPixel2Clear");
+        txBuffer.append("/");
+        txBuffer.append(deviceId);
+        txBuffer.append("\n");
+        record.write(txBuffer.toString().getBytes());
+        txBuffer.setLength(0);
+      }
+
+      return message;
+	} catch (Exception e) {
+      log.error("neoPixel2Clear threw",e);
+      return null;
+    }
+  }
+
 
   public static String methodToString(int method) {
     switch (method) {
@@ -2423,6 +2543,15 @@ public class Msg {
     }
     case NEO_PIXEL2_WRITE_MATRIX:{
       return "neoPixel2WriteMatrix";
+    }
+    case NEO_PIXEL2_FILL:{
+      return "neoPixel2Fill";
+    }
+    case NEO_PIXEL2_SET_BRIGHTNESS:{
+      return "neoPixel2SetBrightness";
+    }
+    case NEO_PIXEL2_CLEAR:{
+      return "neoPixel2Clear";
     }
 
     default: {

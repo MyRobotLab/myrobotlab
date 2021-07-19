@@ -144,6 +144,12 @@ Msg* Msg::getInstance() {
   void neoPixel2SetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  byte white,  long wait_ms);
   // > neoPixel2WriteMatrix/deviceId/[] buffer
   void neoPixel2WriteMatrix( byte deviceId,  byte bufferSize, const byte*buffer);
+  // > neoPixel2Fill/deviceId/b16 address/b16 count/red/green/blue/white
+  void neoPixel2Fill( byte deviceId,  int address,  int count,  byte red,  byte green,  byte blue,  byte white);
+  // > neoPixel2SetBrightness/deviceId/brightness
+  void neoPixel2SetBrightness( byte deviceId,  byte brightness);
+  // > neoPixel2Clear/deviceId
+  void neoPixel2Clear( byte deviceId);
 
  */
 
@@ -675,6 +681,38 @@ void Msg::processCommand() {
       byte bufferSize = ioCmd[startPos+1];
       startPos += 1 + ioCmd[startPos+1];
       mrlComm->neoPixel2WriteMatrix( deviceId,  bufferSize, buffer);
+      break;
+	}
+  case NEO_PIXEL2_FILL: { // neoPixel2Fill
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      int address = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
+      int count = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
+      byte red = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte green = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte blue = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte white = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->neoPixel2Fill( deviceId,  address,  count,  red,  green,  blue,  white);
+      break;
+	}
+  case NEO_PIXEL2_SET_BRIGHTNESS: { // neoPixel2SetBrightness
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte brightness = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->neoPixel2SetBrightness( deviceId,  brightness);
+      break;
+	}
+  case NEO_PIXEL2_CLEAR: { // neoPixel2Clear
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->neoPixel2Clear( deviceId);
       break;
 	}
 
