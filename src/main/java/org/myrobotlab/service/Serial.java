@@ -1268,6 +1268,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
   @Override
   public ServiceConfig load(ServiceConfig c) {
+    super.load(c);
     SerialConfig config = (SerialConfig) c;
 
     if (config.port != null) {

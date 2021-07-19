@@ -7,6 +7,7 @@ public class ServiceConfig {
   public String name;
   public String type;   
   public String locale;
+  public boolean isVirtual = false;
   // FIXME - is HashMap instead of Map because outbox.notifyList is HashMap too - 
   // didn't want to correct it at this time - possibly a serialization problem
   // public HashMap<String, List<MRLListener>> listeners;

@@ -250,6 +250,8 @@ public class Servo extends AbstractServo implements ServoControl {
   }
 
   public ServiceConfig load(ServiceConfig c) {
+    super.load(c);
+    
     ServoConfig config = (ServoConfig)c;
     
     autoDisable = config.autoDisable;

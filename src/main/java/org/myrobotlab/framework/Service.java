@@ -201,7 +201,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   protected long statusBroadcastLimitMs = 1000;
 
   /**
-   * variable for services to virtualize some of their dependencies
+   * variable for services to virtualize some of their dependencies - defaults
+   * to be the same as Runtime's unless explicitly set
    */
   protected boolean isVirtual = false;
 
@@ -211,6 +212,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   protected boolean ready = true;
 
+  /**
+   * Locale for the service - defaults to be the same as Runtime's unless
+   * explicitly set
+   */
   protected Locale locale;
 
   /**
@@ -406,7 +411,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * Non-static getResourceDir() will return /resource/{service type name} e.g.
    * /resource/Arduino
- * @return  the resource directory
+   * 
+   * @return the resource directory
    * 
    */
   public String getResourceDir() {
@@ -417,8 +423,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * Static getResourceDir(Class clazz) will return the appropriate resource
    * directory, typically it will be /resource/{MetaData} but depending if run
    * in the presence of other developing directories.
- * @param clazz the class name
- * @return the resource dir
+   * 
+   * @param clazz
+   *          the class name
+   * @return the resource dir
    * 
    */
   static public String getResourceDir(Class<?> clazz) {
@@ -440,9 +448,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    *     2. src/resource/{MetaData} or
    *     3. ../{MetaData}/resource/{MetaData}
    * </pre>
- * @param serviceType the type of service
- * @param additionalPath to glue together
- * @return the full resolved path
+   * 
+   * @param serviceType
+   *          the type of service
+   * @param additionalPath
+   *          to glue together
+   * @return the full resolved path
    * 
    */
   static public String getResourceDir(String serviceType, String additionalPath) {
@@ -474,9 +485,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * non static get resource path return the path to a resource - since the root
    * can change depending if in debug or runtime - it gets the appropriate root
-   * and adds the additionalPath.. 
- * @param additionalPath additional paths to add to the resource path
- * @return the combined file path
+   * and adds the additionalPath..
+   * 
+   * @param additionalPath
+   *          additional paths to add to the resource path
+   * @return the combined file path
    * 
    */
   public String getResourcePath(String additionalPath) {
@@ -487,7 +500,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * All resource access should be using this method. Util.getResource... should
    * be deprecated. This should be the one source which determines the location
    * and resolves the priority of setting this configuration
- * @return the root folder for the resource dir
+   * 
+   * @return the root folder for the resource dir
    * 
    */
 
@@ -504,7 +518,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   /**
    * 
- * @return list of resources for this service top level
+   * @return list of resources for this service top level
    * 
    */
   public File[] getResourceDirList() {
@@ -518,7 +532,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    *          - the type of service
    * @param resourceName
    *          - the path of the resource
- * @return the bytes of the resource
+   * @return the bytes of the resource
    */
   static public byte[] getResource(String serviceType, String resourceName) {
     String filename = getResourceDir(serviceType, resourceName);
@@ -543,9 +557,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * static getResource(Class, resourceName) to access a different services
    * resources
- * @param clazz the class
- * @param resourceName the resource name
- * @return bytes of the resource
+   * 
+   * @param clazz
+   *          the class
+   * @param resourceName
+   *          the resource name
+   * @return bytes of the resource
    * 
    */
   static public byte[] getResource(Class<?> clazz, String resourceName) {
@@ -555,8 +572,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * Get a resource as a string. This will follow the conventions of finding the
    * appropriate resource dir
- * @param resourceName the name of the resource
- * @return the string of the bytes , assuming utf-8
+   * 
+   * @param resourceName
+   *          the name of the resource
+   * @return the string of the bytes , assuming utf-8
    * 
    */
   public String getResourceAsString(String resourceName) {
@@ -590,8 +609,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * Constructor of service, reservedkey typically is a services name and inId
    * will be its process id
- * @param reservedKey the service name
- * @param inId process id
+   * 
+   * @param reservedKey
+   *          the service name
+   * @param inId
+   *          process id
    * 
    */
   public Service(String reservedKey, String inId) {
@@ -662,8 +684,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   /**
    * 
- * @param additionalPath get a list of resource files in a resource path
- * @return list of files
+   * @param additionalPath
+   *          get a list of resource files in a resource path
+   * @return list of files
    * 
    */
   public File[] getResourceDirList(String additionalPath) {
@@ -1180,10 +1203,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   /**
    * thread blocking invoke call on different service in the same process
- * @param serviceName the service to invoke on
- * @param methodName the method to invoke
- * @param params var args of the params to pass
- * @return the returned value from invoking
+   * 
+   * @param serviceName
+   *          the service to invoke on
+   * @param methodName
+   *          the method to invoke
+   * @param params
+   *          var args of the params to pass
+   * @return the returned value from invoking
    * 
    */
   final public Object invokeOn(String serviceName, String methodName, Object... params) {
@@ -1233,15 +1260,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
                 log.info("{} cannot callback to listener {} does not exist for {} ", getName(), listener.callbackName, listener.callbackMethod);
               } else {
                 Method m = cache.getMethod(si.getClass(), listener.callbackMethod, retobj);
-                if (m == null) {;
+                if (m == null) {
+                  ;
                   log.warn("Null Method as a result of cache lookup. {} {} {}", si.getClass(), listener.callbackMethod, retobj);
                 }
                 try {
                   m.invoke(si, retobj);
                 } catch (Throwable e) {
-                  // we attempted to invoke this , it blew up.  Catch it here, continue  
+                  // we attempted to invoke this , it blew up. Catch it here,
+                  // continue
                   // through the rest of the listeners instead of bombing out.
-                  log.error("Invoke blew up! on: {} calling method {} ",si.getName(), m.toString(), e);
+                  log.error("Invoke blew up! on: {} calling method {} ", si.getName(), m.toString(), e);
                 }
               }
             } else {
@@ -1287,12 +1316,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
-   * Default load config method, subclasses should override this to support 
+   * Default load config method, subclasses should override this to support
    * service specific configuration in the service yaml files.
    * 
    */
   public ServiceConfig load(ServiceConfig config) {
     log.info("Default service config loading for service: {} type: {}", getName(), getType());
+    setVirtual(config.isVirtual);
+    setLocale(config.locale);
     return config;
   }
 
@@ -1309,6 +1340,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   protected ServiceConfig initConfig(ServiceConfig config) {
     config.name = getName();
     config.type = getSimpleName();
+    config.isVirtual = isVirtual;
     if (Runtime.isRuntime(this)) {
       config.locale = getLocaleTag();
     } else if (locale != null && !locale.equals(Runtime.getInstance().getLocale())) {
@@ -1339,9 +1371,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * loads a yaml configuration file from the file system default location will
    * be data/config/{name}.yml
- * @param filename the file to load
- * @return service config loaded from file.
- * @throws IOException if an error occurs reading the file
+   * 
+   * @param filename
+   *          the file to load
+   * @return service config loaded from file.
+   * @throws IOException
+   *           if an error occurs reading the file
    * 
    */
   public ServiceConfig load(String filename) throws IOException {
@@ -1366,9 +1401,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       log.info("{}Config does not exist - using default ServiceConfig", getSimpleName());
     }
 
-    Class<?> clazz = (o == null)?ServiceConfig.class:o.getClass();    
+    Class<?> clazz = (o == null) ? ServiceConfig.class : o.getClass();
     ServiceConfig config = null;
-    
+
     String data = FileIO.toString(filename);
     if ("json".equalsIgnoreCase(format)) {
       config = (ServiceConfig) CodecUtils.fromJson(data, clazz);
@@ -1378,7 +1413,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     // be aware - the service may or may not be started
     load(config);
-    
+
     // previously used to attempt to process attaches here
     // attaches do not work well before starting - attaching
     // has now been moved out to runtime
@@ -1770,8 +1805,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @param sendMsg
    *          - optional message to send to the remote topic
    * @return the returned object
-   * @throws InterruptedException boom
-   * @throws TimeoutException boom
+   * @throws InterruptedException
+   *           boom
+   * @throws TimeoutException
+   *           boom
    */
   protected Object waitOn(String fullName, String method, Integer timeout, Message sendMsg) throws InterruptedException, TimeoutException {
 
@@ -2460,7 +2497,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   /**
    * non parameter version for use within a Service
- * @return bytes of png image
+   * 
+   * @return bytes of png image
    * 
    */
   public byte[] getServiceIcon() {
@@ -2469,8 +2507,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   /**
    * static class version for use when class is available "preferred"
- * @param serviceType the type of service
- * @return the bytes representing it's icon (png)
+   * 
+   * @param serviceType
+   *          the type of service
+   * @return the bytes representing it's icon (png)
    * 
    */
   public static byte[] getServiceIcon(Class<?> serviceType) {
@@ -2480,8 +2520,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * One place to get the ServiceIcons so that we can avoid a lot of strings
    * with "resource/Servo.png"
- * @param serviceType name of the service type
- * @return byte array of the icon image (png)
+   * 
+   * @param serviceType
+   *          name of the service type
+   * @return byte array of the icon image (png)
    * 
    */
   public static byte[] getServiceIcon(String serviceType) {
@@ -2517,7 +2559,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * Determine if the service is operating in dev mode. isJar() is no longer
    * appropriate - as some services are modular and can be operating outside in
    * develop mode in a different repo with a "runtime" myrobotlab.jar.
- * @return true if running inside an IDE
+   * 
+   * @return true if running inside an IDE
    * 
    */
   public boolean isDev() {
@@ -2540,8 +2583,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * localize a key - details are
    * http://myrobotlab.org/content/localization-myrobotlab-and-inmoov-languagepacks
- * @param key key to lookup in localize
- * @return localized string for key
+   * 
+   * @param key
+   *          key to lookup in localize
+   * @return localized string for key
    * 
    */
   public String localize(String key) {
@@ -2550,9 +2595,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   /**
    * String format template processing localization
- * @param key lookup key
- * @param args var args
- * @return localized string for key
+   * 
+   * @param key
+   *          lookup key
+   * @param args
+   *          var args
+   * @return localized string for key
    * 
    */
   public String localize(String key, Object... args) {
@@ -2628,7 +2676,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * to use This function is used to simplify all of that - since we are
    * primarily interested in language and do not usually need the distinction
    * between regions in this context
- * @return the language from the locale
+   * 
+   * @return the language from the locale
    * 
    */
   public String getLanguage() {
@@ -2636,7 +2685,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
- * @return the current locale
+   * @return the current locale
    */
   public Locale getLocale() {
     return locale;
@@ -2650,7 +2699,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
-   * @return get current locale tag - this is of the form en-BR en-US including region
+   * @return get current locale tag - this is of the form en-BR en-US including
+   *         region
    */
   public String getLocaleTag() {
     return locale.getTag();

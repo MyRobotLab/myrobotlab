@@ -560,24 +560,27 @@ public class Tracking extends Service {
   public static void main(String[] args) {
 
     try {
-      LoggingFactory.init(Level.INFO);
+      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
+      LoggingFactory.init("WARN");
+      
+      Runtime.start("webgui", "WebGui");
 
-      Runtime.start("gui", "SwingGui");
-      // Runtime.start("webgui", "WebGui");
-
-      VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-      virtual.connect("COM3");
-      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-      arduino.connect("COM3");
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      mega.connect("/dev/ttyACM0");
 
       Tracking t01 = (Tracking) Runtime.start("t01", "Tracking");
-      Servo rothead = (Servo) Runtime.start("rothead", "Servo");
-      Servo neck = (Servo) Runtime.start("neck", "Servo");
-      rothead.attach(arduino, 0);
-      neck.attach(arduino, 1);
-      OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
-      t01.connect(opencv, rothead, neck);
-      opencv.capture();
+      Servo pan = (Servo) Runtime.start("pan", "Servo");
+      Servo tilt = (Servo) Runtime.start("tilt", "Servo");
+      pan.setPin(4);
+      tilt.setPin(5);
+      mega.attach(tilt);
+      mega.attach(pan);
+      
+      OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+      t01.connect(cv, pan, tilt);
+      cv.setCameraIndex(4);
+      cv.capture();
+      cv.addFilter("Flip");
       // t01.trackPoint();
       t01.faceDetect();
       // tracker.getGoodFeatures();

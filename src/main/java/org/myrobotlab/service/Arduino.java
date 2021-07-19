@@ -2298,6 +2298,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   @Override
   public ServiceConfig load(ServiceConfig c) {
+    super.load(c);
+
     ArduinoConfig config = (ArduinoConfig) c;
 
     if (config.port != null) {

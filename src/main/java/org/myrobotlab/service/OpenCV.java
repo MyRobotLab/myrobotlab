@@ -2079,6 +2079,7 @@ public class OpenCV extends AbstractComputerVision {
   }
 
   public ServiceConfig load(ServiceConfig c) {
+    super.load(c);
     OpenCVConfig config = (OpenCVConfig) c;
     setCameraIndex(config.cameraIndex);
     setGrabberType(config.grabberType);

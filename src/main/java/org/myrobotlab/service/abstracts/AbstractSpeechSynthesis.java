@@ -1095,6 +1095,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   public ServiceConfig load(ServiceConfig c) {
     AbstractSpeechSynthesisConfig config = (AbstractSpeechSynthesisConfig) c;
+    super.load(c);
 
     setMute(config.mute);
 

@@ -36,8 +36,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.CodecUtils.ApiDescription;
@@ -3388,6 +3386,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     RuntimeConfig config = (RuntimeConfig) initConfig(new RuntimeConfig());
     // config.id = getId(); Not ready yet
+    config.virtual = Platform.isVirtual();
 
     Map<String, ServiceInterface> services = getLocalServices();
     List<ServiceInterface> s = new ArrayList<>();
@@ -3420,8 +3419,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   public ServiceConfig load(ServiceConfig c) {
+    super.load(c);
     RuntimeConfig config = (RuntimeConfig) c;
     setLocale(c.locale);
+    setAllVirtual(config.virtual);
     // setId(config.id); Very Fragile ! Cannot do this yet
     if (config.registry != null) {
       ServiceConfig sc = null;
