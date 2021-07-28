@@ -775,6 +775,8 @@ public class Python extends Service {
     for (ServiceInterface s : services.values()) {
       onStarted(s.getName());
     }
+    // register runtime life cycle events for other services 
+    Runtime.getInstance().subscribeToLifeCycleEvents(getName());
   }
 
   @Override

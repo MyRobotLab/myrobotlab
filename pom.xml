@@ -117,12 +117,12 @@
           <name>oss-snapshots-repo</name>
           <url>https://oss.sonatype.org/content/groups/public</url>
         </repository>
-        <!-- swinggui mxgraph  -->
+        <!-- swinggui mxgraph -->  
         <repository>
-          <id>alfresco</id>
-          <name>alfresco</name>
-          <url>https://artifacts.alfresco.com/nexus/content/repositories/public</url>
-        </repository>
+          <id>talend</id>
+          <name>talend</name>
+          <url>https://nexus.talanlabs.com/content/repositories/releases/</url>
+        </repository> 
         <!-- some marytts voices  -->
         <repository>
           <id>marytts</id>
@@ -1328,10 +1328,11 @@
     <artifactId>jide-oss</artifactId>
     <version>3.6.18</version>
   </dependency>
+  <!-- https://mvnrepository.com/artifact/com.mxgraph/jgraphx -->
   <dependency>
     <groupId>com.mxgraph</groupId>
     <artifactId>jgraphx</artifactId>
-    <version>1.10.4.2</version>
+    <version>1.12.0.2</version>
   </dependency>
 <!-- SwingGui end -->
 
