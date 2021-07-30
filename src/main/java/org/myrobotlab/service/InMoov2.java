@@ -1390,9 +1390,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
         arduino.attach(head.eyeX);
         arduino.attach(head.eyeY);
         arduino.attach(head.jaw);
-      } catch (Exception e) {
-        error(e);
-      }        
+      }
       else {
         speakBlocking(port);
         Arduino arduino = (Arduino) startPeer("right");
