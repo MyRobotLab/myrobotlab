@@ -15,6 +15,7 @@
 #define NEOPIXEL_ANIMATION_FLASH_RANDOM 8
 #define NEOPIXEL_ANIMATION_IRONMAN 9
 
+
 class Msg;
 
 class MrlNeopixel2 : public Device
@@ -52,6 +53,7 @@ public:
   void rainbow(); 
   void scanner(); 
   void theaterChaseRainbow();
+  void animationFlashRandom();
   void ironman();
 
   // basic methods

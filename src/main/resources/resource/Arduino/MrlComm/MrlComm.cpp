@@ -2,7 +2,7 @@
 #include "Msg.h"
 #include "Device.h"
 #include "Pin.h"
-#include "MrlNeopixel.h"
+// #include "MrlNeopixel.h"
 #include "MrlNeopixel2.h"
 #include <Servo.h>
 #include "MrlServo.h"
@@ -336,23 +336,26 @@ void MrlComm::i2cWriteRead(byte deviceId, byte deviceAddress, byte readSize, byt
 void MrlComm::neoPixelAttach(byte deviceId, byte pin, long numPixels, byte depth)
 {
 	//msg->publishDebug("MrlNeopixel.deviceAttach!");
-
+/*
 	MrlNeopixel *neo = (MrlNeopixel *)addDevice(new MrlNeopixel(deviceId));
 	msg->publishDebug("id" + String(deviceId));
 	neo->attach(pin, numPixels, depth);
+	*/
 }
 
 // > neoPixelAttach/pin/b16 numPixels
 void MrlComm::neoPixelSetAnimation(byte deviceId, byte animation, byte red, byte green, byte blue, int speed)
 {
+	/*
 	msg->publishDebug("MrlNeopixel.setAnimation!");
 	((MrlNeopixel *)getDevice(deviceId))->setAnimation(animation, red, green, blue, speed);
+	*/
 }
 
 // > neoPixelWriteMatrix/deviceId/[] buffer
 void MrlComm::neoPixelWriteMatrix(byte deviceId, byte bufferSize, const byte *buffer)
 {
-	((MrlNeopixel *)getDevice(deviceId))->neopixelWriteMatrix(bufferSize, buffer);
+	// ((MrlNeopixel *)getDevice(deviceId))->neopixelWriteMatrix(bufferSize, buffer);
 }
 
 /////////////////////////////////// NeoPixel2 Begin ///////////////////////////////////////////

@@ -550,6 +550,10 @@ public class NeoPixel2 extends Service implements NeoPixel2Control {
         setAnimation(6, red, green, blue, animationWaitMs);
         currentAnimation = "rainbow";
         break;      
+      case "randomFlash":
+        setAnimation(8, red, green, blue, animationWaitMs);
+        currentAnimation = "randomFlash";
+        break;      
       case "ironman":
         setAnimation(9, red, green, blue, animationWaitMs);
         currentAnimation = "ironman";

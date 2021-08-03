@@ -163,7 +163,6 @@ void MrlNeopixel2::rainbow()
 
 void MrlNeopixel2::ironman()
 {
-
 	if (!doneWaiting())
 	{
 		// not done waiting
@@ -172,24 +171,7 @@ void MrlNeopixel2::ironman()
 		return;
 	}
 
-//	if (brightness > 255 || brightness < 0){
-		brightness = random(20, 204);
-//	}
-
-    int dir = random(3);
-/*
-	if (dir == 0){
-		brightness-=10;
-	} else if (dir == 1){
-		brightness+=10;
-	} // else don't vary brightnesee 
-*/
-	/*
-	for (int i = 0; i < strip->numPixels(); i++)
-	{				
-		strip->setPixelColor(i, color);
-	}*/
-
+	brightness = random(20, 204);
 	strip->setBrightness(brightness);
 
 	// FIXME - fix show
@@ -286,6 +268,26 @@ void MrlNeopixel2::clear()
 	}
 }
 
+void MrlNeopixel2::animationFlashRandom() {
+	if (!doneWaiting())
+	{
+		// not done waiting
+		// wait_ms - come back when
+		// we have..
+		return;
+	}
+
+	for (int i = 0; i < strip->numPixels(); i++)
+	{
+		strip->setPixelColor(i, random(0,255), random(0,255), random(0,255));
+	}
+
+	// FIXME - fix show
+	strip->show(); //  Update strip to match
+	x++;
+	previousWaitMs = millis();
+}
+
 void MrlNeopixel2::update()
 {
 	if (runAnimation)
@@ -296,8 +298,8 @@ void MrlNeopixel2::update()
 		case NEOPIXEL_ANIMATION_COLOR_WIPE:
 			colorWipe();
 			break;
-		case NEOPIXEL_ANIMATION_RAINBOW:
-			rainbow();
+		case NEOPIXEL_ANIMATION_LARSON_SCANNER:
+			scanner();
 			break;
 		case NEOPIXEL_ANIMATION_THEATER_CHASE:
 			theaterChase();
@@ -305,8 +307,11 @@ void MrlNeopixel2::update()
 		case NEOPIXEL_ANIMATION_THEATER_CHASE_RAINBOW:
 			theaterChaseRainbow();
 			break;
-		case NEOPIXEL_ANIMATION_LARSON_SCANNER:
-			scanner();
+		case NEOPIXEL_ANIMATION_RAINBOW:
+			rainbow();
+			break;
+		case NEOPIXEL_ANIMATION_FLASH_RANDOM:
+			 animationFlashRandom();
 			break;
 		case NEOPIXEL_ANIMATION_IRONMAN:
 			ironman();
