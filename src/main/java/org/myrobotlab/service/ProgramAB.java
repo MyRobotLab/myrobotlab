@@ -107,6 +107,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   public ProgramAB(String n, String id) {
     super(n, id);
     
+    // TODO - allow lazy selection of bot - even if it currently doesn't exist
+    // in the bot map - move scanning to start
+    
     // 1. scan resources .. either "resource/ProgramAB" or
     // ../ProgramAB/resource/ProgramAB (for dev) for valid bot directories
 
