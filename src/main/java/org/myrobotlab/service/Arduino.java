@@ -53,7 +53,7 @@ import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.MrlCommPublisher;
-import org.myrobotlab.service.interfaces.NeoPixel2Controller;
+import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinArrayPublisher;
@@ -71,7 +71,7 @@ import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 import org.slf4j.Logger;
 
-public class Arduino extends AbstractMicrocontroller implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixel2Controller, NeoPixelController,
+public class Arduino extends AbstractMicrocontroller implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController,
     UltrasonicSensorController, PortConnector, RecordControl, PortListener, PortPublisher, EncoderController, PinArrayPublisher, MrlCommPublisher, ServoStatusPublisher {
 
   transient public final static Logger log = LoggerFactory.getLogger(Arduino.class);
@@ -1373,33 +1373,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       msg.analogWrite(getAddress(config.getLeftPwmPin()), 0);
       msg.analogWrite(getAddress(config.getRightPwmPin()), 0);
     }
-  }
-
-  @Override
-  // > neoPixelAttach/deviceId/pin/b32 numPixels/depth
-  public void neoPixelAttach(NeoPixel neopixel, int pin, int numPixels) {
-    DeviceMapping dm = attachDevice(neopixel, new Object[] { pin, numPixels });
-    Integer deviceId = dm.getId();
-    msg.neoPixelAttach(getDeviceId(neopixel)/* byte */, pin/* byte */,
-        numPixels/* b32 */, neopixel.depth);
-  }
-
-  @Override
-  // > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
-  public void neoPixelSetAnimation(NeoPixel neopixel, int animation, int red, int green, int blue, int speed) {
-    msg.neoPixelSetAnimation(getDeviceId(neopixel), animation, red, green, blue, speed);
-  }
-
-  /**
-   * neoPixelWriteMatrix/deviceId/[] buffer
-   */
-  @Override
-  public void neoPixelWriteMatrix(NeoPixel neopixel, List<Integer> data) {
-    int[] buffer = new int[data.size()];
-    for (int i = 0; i < data.size(); ++i) {
-      buffer[i] = data.get(i);
-    }
-    msg.neoPixelWriteMatrix(getDeviceId(neopixel), buffer);
   }
 
   /**
