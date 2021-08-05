@@ -1019,7 +1019,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
     stopVinMoov();
     if (neopixel != null && neopixelArduino != null) {
-      neopixel.animationStop();
+      neopixel.clear();
       sleep(500);
       neopixel.detach(neopixelArduino);
       sleep(100);
@@ -2339,7 +2339,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
   public void stopNeopixelAnimation() {
     if (neopixel != null && neopixelArduino != null) {
-      neopixel.animationStop();
+      neopixel.clear();
     } else {
       warn("No Neopixel attached");
     }

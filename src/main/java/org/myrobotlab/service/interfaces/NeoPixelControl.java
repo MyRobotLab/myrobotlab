@@ -30,26 +30,16 @@ import org.myrobotlab.framework.interfaces.NameProvider;
 public interface NeoPixelControl extends NameProvider {
 
   /**
-   * high level "attach" which internally will call attachDevice(Device device,
-   * int[] config)
-   * 
+   * explicit attach no additional parameters
    * @param controller
-   *          c
-   * 
-   * @param numPixel
-   *          - All of the config needed for the device -numPixel=number of
-   *          pixel of the neopixel hardware
-   * @param pin
-   *          p -
-   * @throws Exception
-   *           e
    */
-  public void attach(NeoPixelController controller, int pin, int numPixel) throws Exception;
+  public void attachNeoPixel2Controller(NeoPixelController controller);
 
-  /*
-   * high level "detach" with internally will call detachDevice(Device device)
+  /**
+   * explicit detach
+   * @param controller
    */
-  public void detach(NeoPixelController controller);
+  public void detachNeoPixel2Controller(NeoPixelController controller);
 
   /**
    * SetPixel: defining the pixels of the pixel matrix. Setting pixels are not
@@ -57,42 +47,28 @@ public interface NeoPixelControl extends NameProvider {
    * method
    * 
    * @param address
-   *          - value 1 to numPixel
    * @param red
-   *          - value 0-255
    * @param green
-   *          - value 0-255
    * @param blue
-   *          - value 0-255
    */
   public void setPixel(int address, int red, int green, int blue);
 
   /**
-   * Send a matrix of pixel to the neopixel hardware
+   * Send a matrix of pixels to the neopixel hardware
    */
   public void writeMatrix();
+  
+  public void setPin(int pin);
 
   public Integer getPin();
 
   public int getNumPixel();
+  
+  public void clear();
+  
+  public void setAnimation(int animation, int red, int green, int blue, int wait_ms);
 
-  public void turnOff();
-
-  public void turnOn();
-
-  /*
-   * <pre> setAnimation &#64;param animation - preprogramed animation &#64;param
-   * red - value 0-255 - set base color for the animation &#64;param green -
-   * value 0-255 - set base color for the animation &#64;param blue - value
-   * 0-255 - set base color for the animation &#64;param speed - set speed of
-   * the animation 1 = fastest (update every ~30ms), 100 = 100 times slower than
-   * 1 value </pre>
-   */
-  public void setAnimation(int animation, int red, int green, int blue, int speed);
-
-  public void setAnimation(String animation, int red, int green, int blue, int speed);
-
-  public void setAnimation(String animation, String red, String green, String blue, String speed);
+  public void setAnimation(String animation, int red, int green, int blue, int wait_ms);
 
   public void setAnimationSetting(String animation);
 
