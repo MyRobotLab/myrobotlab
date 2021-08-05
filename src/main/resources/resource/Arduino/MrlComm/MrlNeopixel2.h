@@ -4,6 +4,8 @@
 #include "Adafruit_NeoPixel.h"
 #include <Arduino.h>
 
+// TODO: Why two enums to tell the animation to stop?  maybe best to just
+// have a stop animation call?
 #define NEOPIXEL_ANIMATION_NO_ANIMATION 0
 #define NEOPIXEL_ANIMATION_STOP 1
 #define NEOPIXEL_ANIMATION_COLOR_WIPE 2
@@ -14,7 +16,6 @@
 #define NEOPIXEL_ANIMATION_RAINBOW_CYCLE 7
 #define NEOPIXEL_ANIMATION_FLASH_RANDOM 8
 #define NEOPIXEL_ANIMATION_IRONMAN 9
-
 
 class Msg;
 
@@ -50,7 +51,8 @@ public:
   // animations
   void colorWipe();
   void theaterChase();
-  void rainbow(); 
+  void rainbow();
+  void rainbowCycle();
   void scanner(); 
   void theaterChaseRainbow();
   void animationFlashRandom();
