@@ -84,12 +84,18 @@ Msg* Msg::getInstance() {
   void i2cWrite( byte deviceId,  byte deviceAddress,  byte dataSize, const byte*data);
   // > i2cWriteRead/deviceId/deviceAddress/readSize/writeValue
   void i2cWriteRead( byte deviceId,  byte deviceAddress,  byte readSize,  byte writeValue);
-  // > neoPixelAttach/deviceId/pin/b32 numPixels/depth
-  void neoPixelAttach( byte deviceId,  byte pin,  long numPixels,  byte depth);
-  // > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
-  void neoPixelSetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  int speed);
+  // > neoPixelAttach/deviceId/pin/b16 numPixels/depth
+  void neoPixelAttach( byte deviceId,  byte pin,  int numPixels,  byte depth);
+  // > neoPixelSetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
+  void neoPixelSetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  byte white,  long wait_ms);
   // > neoPixelWriteMatrix/deviceId/[] buffer
   void neoPixelWriteMatrix( byte deviceId,  byte bufferSize, const byte*buffer);
+  // > neoPixelFill/deviceId/b16 address/b16 count/red/green/blue/white
+  void neoPixelFill( byte deviceId,  int address,  int count,  byte red,  byte green,  byte blue,  byte white);
+  // > neoPixelSetBrightness/deviceId/brightness
+  void neoPixelSetBrightness( byte deviceId,  byte brightness);
+  // > neoPixelClear/deviceId
+  void neoPixelClear( byte deviceId);
   // > disablePin/pin
   void disablePin( byte pin);
   // > disablePins
@@ -138,18 +144,6 @@ Msg* Msg::getInstance() {
   void setZeroPoint( byte deviceId);
   // > servoStop/deviceId
   void servoStop( byte deviceId);
-  // > neoPixel2Attach/deviceId/pin/b16 numPixels/depth
-  void neoPixel2Attach( byte deviceId,  byte pin,  int numPixels,  byte depth);
-  // > neoPixel2SetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
-  void neoPixel2SetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  byte white,  long wait_ms);
-  // > neoPixel2WriteMatrix/deviceId/[] buffer
-  void neoPixel2WriteMatrix( byte deviceId,  byte bufferSize, const byte*buffer);
-  // > neoPixel2Fill/deviceId/b16 address/b16 count/red/green/blue/white
-  void neoPixel2Fill( byte deviceId,  int address,  int count,  byte red,  byte green,  byte blue,  byte white);
-  // > neoPixel2SetBrightness/deviceId/brightness
-  void neoPixel2SetBrightness( byte deviceId,  byte brightness);
-  // > neoPixel2Clear/deviceId
-  void neoPixel2Clear( byte deviceId);
 
  */
 
@@ -219,7 +213,7 @@ void Msg::publishI2cData( byte deviceId, const byte* data,  byte dataSize) {
 void Msg::publishDebug(const char* debugMsg,  byte debugMsgSize) {
   write(MAGIC_NUMBER);
   write(1 + (1 + debugMsgSize)); // size
-  write(PUBLISH_DEBUG); // msgType = 28
+  write(PUBLISH_DEBUG); // msgType = 31
   write((byte*)debugMsg, debugMsgSize);
   flush();
   reset();
@@ -228,7 +222,7 @@ void Msg::publishDebug(const char* debugMsg,  byte debugMsgSize) {
 void Msg::publishPinArray(const byte* data,  byte dataSize) {
   write(MAGIC_NUMBER);
   write(1 + (1 + dataSize)); // size
-  write(PUBLISH_PIN_ARRAY); // msgType = 29
+  write(PUBLISH_PIN_ARRAY); // msgType = 32
   write((byte*)data, dataSize);
   flush();
   reset();
@@ -237,7 +231,7 @@ void Msg::publishPinArray(const byte* data,  byte dataSize) {
 void Msg::publishServoEvent( byte deviceId,  byte eventType,  int currentPos,  int targetPos) {
   write(MAGIC_NUMBER);
   write(1 + 1 + 1 + 2 + 2); // size
-  write(PUBLISH_SERVO_EVENT); // msgType = 40
+  write(PUBLISH_SERVO_EVENT); // msgType = 43
   write(deviceId);
   write(eventType);
   writeb16(currentPos);
@@ -249,7 +243,7 @@ void Msg::publishServoEvent( byte deviceId,  byte eventType,  int currentPos,  i
 void Msg::publishSerialData( byte deviceId, const byte* data,  byte dataSize) {
   write(MAGIC_NUMBER);
   write(1 + 1 + (1 + dataSize)); // size
-  write(PUBLISH_SERIAL_DATA); // msgType = 43
+  write(PUBLISH_SERIAL_DATA); // msgType = 46
   write(deviceId);
   write((byte*)data, dataSize);
   flush();
@@ -259,7 +253,7 @@ void Msg::publishSerialData( byte deviceId, const byte* data,  byte dataSize) {
 void Msg::publishUltrasonicSensorData( byte deviceId,  int echoTime) {
   write(MAGIC_NUMBER);
   write(1 + 1 + 2); // size
-  write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 47
+  write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 50
   write(deviceId);
   writeb16(echoTime);
   flush();
@@ -269,7 +263,7 @@ void Msg::publishUltrasonicSensorData( byte deviceId,  int echoTime) {
 void Msg::publishEncoderData( byte deviceId,  int position) {
   write(MAGIC_NUMBER);
   write(1 + 1 + 2); // size
-  write(PUBLISH_ENCODER_DATA); // msgType = 54
+  write(PUBLISH_ENCODER_DATA); // msgType = 57
   write(deviceId);
   writeb16(position);
   flush();
@@ -279,7 +273,7 @@ void Msg::publishEncoderData( byte deviceId,  int position) {
 void Msg::publishMrlCommBegin( byte version) {
   write(MAGIC_NUMBER);
   write(1 + 1); // size
-  write(PUBLISH_MRL_COMM_BEGIN); // msgType = 55
+  write(PUBLISH_MRL_COMM_BEGIN); // msgType = 58
   write(version);
   flush();
   reset();
@@ -397,8 +391,8 @@ void Msg::processCommand() {
       startPos += 1;
       byte pin = ioCmd[startPos+1]; // bu8
       startPos += 1;
-      long numPixels = b32(ioCmd, startPos+1);
-      startPos += 4; //b32
+      int numPixels = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
       byte depth = ioCmd[startPos+1]; // bu8
       startPos += 1;
       mrlComm->neoPixelAttach( deviceId,  pin,  numPixels,  depth);
@@ -415,9 +409,11 @@ void Msg::processCommand() {
       startPos += 1;
       byte blue = ioCmd[startPos+1]; // bu8
       startPos += 1;
-      int speed = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      mrlComm->neoPixelSetAnimation( deviceId,  animation,  red,  green,  blue,  speed);
+      byte white = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      long wait_ms = b32(ioCmd, startPos+1);
+      startPos += 4; //b32
+      mrlComm->neoPixelSetAnimation( deviceId,  animation,  red,  green,  blue,  white,  wait_ms);
       break;
 	}
   case NEO_PIXEL_WRITE_MATRIX: { // neoPixelWriteMatrix
@@ -427,6 +423,38 @@ void Msg::processCommand() {
       byte bufferSize = ioCmd[startPos+1];
       startPos += 1 + ioCmd[startPos+1];
       mrlComm->neoPixelWriteMatrix( deviceId,  bufferSize, buffer);
+      break;
+	}
+  case NEO_PIXEL_FILL: { // neoPixelFill
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      int address = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
+      int count = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
+      byte red = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte green = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte blue = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte white = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->neoPixelFill( deviceId,  address,  count,  red,  green,  blue,  white);
+      break;
+	}
+  case NEO_PIXEL_SET_BRIGHTNESS: { // neoPixelSetBrightness
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte brightness = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->neoPixelSetBrightness( deviceId,  brightness);
+      break;
+	}
+  case NEO_PIXEL_CLEAR: { // neoPixelClear
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->neoPixelClear( deviceId);
       break;
 	}
   case ANALOG_WRITE: { // analogWrite
@@ -642,77 +670,6 @@ void Msg::processCommand() {
       byte deviceId = ioCmd[startPos+1]; // bu8
       startPos += 1;
       mrlComm->servoStop( deviceId);
-      break;
-	}
-  case NEO_PIXEL2_ATTACH: { // neoPixel2Attach
-      byte deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      byte pin = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      int numPixels = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      byte depth = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      mrlComm->neoPixel2Attach( deviceId,  pin,  numPixels,  depth);
-      break;
-	}
-  case NEO_PIXEL2_SET_ANIMATION: { // neoPixel2SetAnimation
-      byte deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      byte animation = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      byte red = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      byte green = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      byte blue = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      byte white = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      long wait_ms = b32(ioCmd, startPos+1);
-      startPos += 4; //b32
-      mrlComm->neoPixel2SetAnimation( deviceId,  animation,  red,  green,  blue,  white,  wait_ms);
-      break;
-	}
-  case NEO_PIXEL2_WRITE_MATRIX: { // neoPixel2WriteMatrix
-      byte deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      const byte* buffer = ioCmd+startPos+2;
-      byte bufferSize = ioCmd[startPos+1];
-      startPos += 1 + ioCmd[startPos+1];
-      mrlComm->neoPixel2WriteMatrix( deviceId,  bufferSize, buffer);
-      break;
-	}
-  case NEO_PIXEL2_FILL: { // neoPixel2Fill
-      byte deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      int address = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      int count = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      byte red = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      byte green = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      byte blue = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      byte white = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      mrlComm->neoPixel2Fill( deviceId,  address,  count,  red,  green,  blue,  white);
-      break;
-	}
-  case NEO_PIXEL2_SET_BRIGHTNESS: { // neoPixel2SetBrightness
-      byte deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      byte brightness = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      mrlComm->neoPixel2SetBrightness( deviceId,  brightness);
-      break;
-	}
-  case NEO_PIXEL2_CLEAR: { // neoPixel2Clear
-      byte deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      mrlComm->neoPixel2Clear( deviceId);
       break;
 	}
 

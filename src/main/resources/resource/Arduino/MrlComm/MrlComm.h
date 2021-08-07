@@ -108,12 +108,18 @@ public:
   void i2cWrite( byte deviceId,  byte deviceAddress,  byte dataSize, const byte*data);
   // > i2cWriteRead/deviceId/deviceAddress/readSize/writeValue
   void i2cWriteRead( byte deviceId,  byte deviceAddress,  byte readSize,  byte writeValue);
-  // > neoPixelAttach/deviceId/pin/b32 numPixels/depth
-  void neoPixelAttach( byte deviceId,  byte pin,  long numPixels,  byte depth);
-  // > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
-  void neoPixelSetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  int speed);
+  // > neoPixelAttach/deviceId/pin/b16 numPixels/depth
+  void neoPixelAttach( byte deviceId,  byte pin,  int numPixels,  byte depth);
+  // > neoPixelSetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
+  void neoPixelSetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  byte white,  long wait_ms);
   // > neoPixelWriteMatrix/deviceId/[] buffer
   void neoPixelWriteMatrix( byte deviceId,  byte bufferSize, const byte*buffer);
+  // > neoPixelFill/deviceId/b16 address/b16 count/red/green/blue/white
+  void neoPixelFill( byte deviceId,  int address,  int count,  byte red,  byte green,  byte blue,  byte white);
+  // > neoPixelSetBrightness/deviceId/brightness
+  void neoPixelSetBrightness( byte deviceId,  byte brightness);
+  // > neoPixelClear/deviceId
+  void neoPixelClear( byte deviceId);
   // > disablePin/pin
   void disablePin( byte pin);
   // > disablePins
@@ -162,18 +168,6 @@ public:
   void setZeroPoint( byte deviceId);
   // > servoStop/deviceId
   void servoStop( byte deviceId);
-  // > neoPixel2Attach/deviceId/pin/b16 numPixels/depth
-  void neoPixel2Attach( byte deviceId,  byte pin,  int numPixels,  byte depth);
-  // > neoPixel2SetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
-  void neoPixel2SetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  byte white,  long wait_ms);
-  // > neoPixel2WriteMatrix/deviceId/[] buffer
-  void neoPixel2WriteMatrix( byte deviceId,  byte bufferSize, const byte*buffer);
-  // > neoPixel2Fill/deviceId/b16 address/b16 count/red/green/blue/white
-  void neoPixel2Fill( byte deviceId,  int address,  int count,  byte red,  byte green,  byte blue,  byte white);
-  // > neoPixel2SetBrightness/deviceId/brightness
-  void neoPixel2SetBrightness( byte deviceId,  byte brightness);
-  // > neoPixel2Clear/deviceId
-  void neoPixel2Clear( byte deviceId);
     // </generatedCallBacks>
   // end
 

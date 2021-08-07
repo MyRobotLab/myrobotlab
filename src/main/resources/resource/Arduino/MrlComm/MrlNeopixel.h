@@ -1,5 +1,5 @@
-#ifndef MrlNeopixel2_h
-#define MrlNeopixel2_h
+#ifndef MrlNeopixel_h
+#define MrlNeopixel_h
 
 #include "Adafruit_NeoPixel.h"
 #include <Arduino.h>
@@ -19,7 +19,7 @@
 
 class Msg;
 
-class MrlNeopixel2 : public Device
+class MrlNeopixel : public Device
 {
 private:
   Adafruit_NeoPixel *strip = NULL;
@@ -34,8 +34,8 @@ private:
   int brightness = 255;
 
 public:
-  MrlNeopixel2(int deviceId);
-  ~MrlNeopixel2();
+  MrlNeopixel(int deviceId);
+  ~MrlNeopixel();
 
   bool attach(byte pin, int numPixels, byte depth);
 

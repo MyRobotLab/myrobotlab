@@ -898,32 +898,32 @@ public class MrlComm implements SerialDataListener {
     log.warn("Ack timeout seen, this shouldn't happen in virtual device land.");
   }
 
-  public void neoPixel2Attach(Integer deviceId, Integer pin, Integer numPixels, Integer depth) {
+  public void neoPixelAttach(Integer deviceId, Integer pin, Integer numPixels, Integer depth) {
     // TODO Auto-generated method stub
     
   }
 
-  public void neoPixel2WriteMatrix(Integer deviceId, int[] buffer) {
+  public void neoPixelWriteMatrix(Integer deviceId, int[] buffer) {
     // TODO Auto-generated method stub
     
   }
 
-  public void neoPixel2SetAnimation(Integer deviceId, Integer animation, Integer red, Integer green, Integer blue, Integer white, Integer speed) {
+  public void neoPixelSetAnimation(Integer deviceId, Integer animation, Integer red, Integer green, Integer blue, Integer white, Integer speed) {
     // TODO Auto-generated method stub
     
   }
 
-  public void neoPixel2Clear(Integer deviceId) {
+  public void neoPixelClear(Integer deviceId) {
     // TODO Auto-generated method stub
     
   }
 
-  public void neoPixel2Fill(Integer deviceId, Integer address, Integer count, Integer red, Integer green, Integer blue, Integer white) {
+  public void neoPixelFill(Integer deviceId, Integer address, Integer count, Integer red, Integer green, Integer blue, Integer white) {
     // TODO Auto-generated method stub
     
   }
 
-  public void neoPixel2SetBrightness(Integer deviceId, Integer brightness) {
+  public void neoPixelSetBrightness(Integer deviceId, Integer brightness) {
     // TODO Auto-generated method stub
     
   }

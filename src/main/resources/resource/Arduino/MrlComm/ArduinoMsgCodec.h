@@ -23,7 +23,6 @@
 #define DEVICE_TYPE_I2C    7
 #define DEVICE_TYPE_NEOPIXEL    8
 #define DEVICE_TYPE_ENCODER    9
-#define DEVICE_TYPE_NEOPIXEL2    10
 
 
 // < publishMRLCommError/str errorMsg
@@ -64,92 +63,86 @@
 #define I2C_WRITE_READ 18
 // < publishI2cData/deviceId/[] data
 #define PUBLISH_I2C_DATA 19
-// > neoPixelAttach/deviceId/pin/b32 numPixels/depth
+// > neoPixelAttach/deviceId/pin/b16 numPixels/depth
 #define NEO_PIXEL_ATTACH 20
-// > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
+// > neoPixelSetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
 #define NEO_PIXEL_SET_ANIMATION 21
 // > neoPixelWriteMatrix/deviceId/[] buffer
 #define NEO_PIXEL_WRITE_MATRIX 22
+// > neoPixelFill/deviceId/b16 address/b16 count/red/green/blue/white
+#define NEO_PIXEL_FILL 23
+// > neoPixelSetBrightness/deviceId/brightness
+#define NEO_PIXEL_SET_BRIGHTNESS 24
+// > neoPixelClear/deviceId
+#define NEO_PIXEL_CLEAR 25
 // > analogWrite/pin/value
-#define ANALOG_WRITE 23
+#define ANALOG_WRITE 26
 // > digitalWrite/pin/value
-#define DIGITAL_WRITE 24
+#define DIGITAL_WRITE 27
 // > disablePin/pin
-#define DISABLE_PIN 25
+#define DISABLE_PIN 28
 // > disablePins
-#define DISABLE_PINS 26
+#define DISABLE_PINS 29
 // > pinMode/pin/mode
-#define PIN_MODE 27
+#define PIN_MODE 30
 // < publishDebug/str debugMsg
-#define PUBLISH_DEBUG 28
+#define PUBLISH_DEBUG 31
 // < publishPinArray/[] data
-#define PUBLISH_PIN_ARRAY 29
+#define PUBLISH_PIN_ARRAY 32
 // > setTrigger/pin/triggerValue
-#define SET_TRIGGER 30
+#define SET_TRIGGER 33
 // > setDebounce/pin/delay
-#define SET_DEBOUNCE 31
+#define SET_DEBOUNCE 34
 // > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity/str name
-#define SERVO_ATTACH 32
+#define SERVO_ATTACH 35
 // > servoAttachPin/deviceId/pin
-#define SERVO_ATTACH_PIN 33
+#define SERVO_ATTACH_PIN 36
 // > servoDetachPin/deviceId
-#define SERVO_DETACH_PIN 34
+#define SERVO_DETACH_PIN 37
 // > servoSetVelocity/deviceId/b16 velocity
-#define SERVO_SET_VELOCITY 35
+#define SERVO_SET_VELOCITY 38
 // > servoSweepStart/deviceId/min/max/step
-#define SERVO_SWEEP_START 36
+#define SERVO_SWEEP_START 39
 // > servoSweepStop/deviceId
-#define SERVO_SWEEP_STOP 37
+#define SERVO_SWEEP_STOP 40
 // > servoMoveToMicroseconds/deviceId/b16 target
-#define SERVO_MOVE_TO_MICROSECONDS 38
+#define SERVO_MOVE_TO_MICROSECONDS 41
 // > servoSetAcceleration/deviceId/b16 acceleration
-#define SERVO_SET_ACCELERATION 39
+#define SERVO_SET_ACCELERATION 42
 // < publishServoEvent/deviceId/eventType/b16 currentPos/b16 targetPos
-#define PUBLISH_SERVO_EVENT 40
+#define PUBLISH_SERVO_EVENT 43
 // > serialAttach/deviceId/relayPin
-#define SERIAL_ATTACH 41
+#define SERIAL_ATTACH 44
 // > serialRelay/deviceId/[] data
-#define SERIAL_RELAY 42
+#define SERIAL_RELAY 45
 // < publishSerialData/deviceId/[] data
-#define PUBLISH_SERIAL_DATA 43
+#define PUBLISH_SERIAL_DATA 46
 // > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
-#define ULTRASONIC_SENSOR_ATTACH 44
+#define ULTRASONIC_SENSOR_ATTACH 47
 // > ultrasonicSensorStartRanging/deviceId
-#define ULTRASONIC_SENSOR_START_RANGING 45
+#define ULTRASONIC_SENSOR_START_RANGING 48
 // > ultrasonicSensorStopRanging/deviceId
-#define ULTRASONIC_SENSOR_STOP_RANGING 46
+#define ULTRASONIC_SENSOR_STOP_RANGING 49
 // < publishUltrasonicSensorData/deviceId/b16 echoTime
-#define PUBLISH_ULTRASONIC_SENSOR_DATA 47
+#define PUBLISH_ULTRASONIC_SENSOR_DATA 50
 // > setAref/b16 type
-#define SET_AREF 48
+#define SET_AREF 51
 // > motorAttach/deviceId/type/[] pins
-#define MOTOR_ATTACH 49
+#define MOTOR_ATTACH 52
 // > motorMove/deviceId/pwr
-#define MOTOR_MOVE 50
+#define MOTOR_MOVE 53
 // > motorMoveTo/deviceId/pos
-#define MOTOR_MOVE_TO 51
+#define MOTOR_MOVE_TO 54
 // > encoderAttach/deviceId/type/pin
-#define ENCODER_ATTACH 52
+#define ENCODER_ATTACH 55
 // > setZeroPoint/deviceId
-#define SET_ZERO_POINT 53
+#define SET_ZERO_POINT 56
 // < publishEncoderData/deviceId/b16 position
-#define PUBLISH_ENCODER_DATA 54
+#define PUBLISH_ENCODER_DATA 57
 // < publishMrlCommBegin/version
-#define PUBLISH_MRL_COMM_BEGIN 55
+#define PUBLISH_MRL_COMM_BEGIN 58
 // > servoStop/deviceId
-#define SERVO_STOP 56
-// > neoPixel2Attach/deviceId/pin/b16 numPixels/depth
-#define NEO_PIXEL2_ATTACH 57
-// > neoPixel2SetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
-#define NEO_PIXEL2_SET_ANIMATION 58
-// > neoPixel2WriteMatrix/deviceId/[] buffer
-#define NEO_PIXEL2_WRITE_MATRIX 59
-// > neoPixel2Fill/deviceId/b16 address/b16 count/red/green/blue/white
-#define NEO_PIXEL2_FILL 60
-// > neoPixel2SetBrightness/deviceId/brightness
-#define NEO_PIXEL2_SET_BRIGHTNESS 61
-// > neoPixel2Clear/deviceId
-#define NEO_PIXEL2_CLEAR 62
+#define SERVO_STOP 59
 
 
 

@@ -2229,36 +2229,36 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   @Override
-  public void neoPixel2Attach(String name, int pin, int numberOfPixels, int depth) {
+  public void neoPixelAttach(String name, int pin, int numberOfPixels, int depth) {
     ServiceInterface neopixel = Runtime.getService(name);
     DeviceMapping dm = attachDevice(neopixel, new Object[] { pin, numberOfPixels, depth });
-    msg.neoPixel2Attach(dm.getId(), pin, numberOfPixels, depth);
+    msg.neoPixelAttach(dm.getId(), pin, numberOfPixels, depth);
   }
 
   @Override
-  public void neoPixel2WriteMatrix(String neopixel, int[] buffer) {
+  public void neoPixelWriteMatrix(String neopixel, int[] buffer) {
     log.info("writing {} pixels : {}", buffer.length/5, buffer);
-    msg.neoPixel2WriteMatrix(getDeviceId(neopixel), buffer);
+    msg.neoPixelWriteMatrix(getDeviceId(neopixel), buffer);
   }
 
   @Override
-  public void neoPixel2SetAnimation(String neopixel, int animation, int red, int green, int blue, int white, int speed) {
-    msg.neoPixel2SetAnimation(getDeviceId(neopixel), animation, red, green, blue, white, speed);
+  public void neoPixelSetAnimation(String neopixel, int animation, int red, int green, int blue, int white, int speed) {
+    msg.neoPixelSetAnimation(getDeviceId(neopixel), animation, red, green, blue, white, speed);
   }
 
   @Override
-  public void neoPixel2Fill(String neopixel, int beginAddress, int count, int red, int green, int blue, int white) {
-    msg.neoPixel2Fill(getDeviceId(neopixel), beginAddress, count, red, green, blue, white);
+  public void neoPixelFill(String neopixel, int beginAddress, int count, int red, int green, int blue, int white) {
+    msg.neoPixelFill(getDeviceId(neopixel), beginAddress, count, red, green, blue, white);
   }
 
   @Override
-  public void neoPixel2SetBrightness(String neopixel, int brightness) {
-    msg.neoPixel2SetBrightness(getDeviceId(neopixel), brightness);
+  public void neoPixelSetBrightness(String neopixel, int brightness) {
+    msg.neoPixelSetBrightness(getDeviceId(neopixel), brightness);
   }
 
   @Override
-  public void neoPixel2Clear(String neopixel) {
-    msg.neoPixel2Clear(getDeviceId(neopixel));
+  public void neoPixelClear(String neopixel) {
+    msg.neoPixelClear(getDeviceId(neopixel));
   }
  
   @Override

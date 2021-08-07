@@ -244,14 +244,14 @@ public class NeoPixel extends Service implements NeoPixelControl {
     }
 
     if (NeoPixelController.class.isAssignableFrom(service.getClass())) {
-      attachNeoPixel2Controller((NeoPixelController) service);
+      attachNeoPixelController((NeoPixelController) service);
       return;
     }
     warn(String.format("%s.attach does not know how to attach to a %s", this.getClass().getSimpleName(), service.getClass().getSimpleName()));
   }
 
   @Override
-  public void attachNeoPixel2Controller(NeoPixelController neoCntrlr) {
+  public void attachNeoPixelController(NeoPixelController neoCntrlr) {
 
     if (controller != null) {
       if (controller.equals(neoCntrlr.getName())) {
@@ -267,7 +267,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     }
 
     controller = neoCntrlr.getName();
-    neoCntrlr.neoPixel2Attach(getName(), pin, pixelCount, pixelDepth);
+    neoCntrlr.neoPixelAttach(getName(), pin, pixelCount, pixelDepth);
     broadcastState();
   }
   
@@ -310,7 +310,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     
     currentAnimation = null;
 
-    np2.neoPixel2Clear(getName());
+    np2.neoPixelClear(getName());
   }
 
   public void clearPixelSet() {
@@ -333,13 +333,13 @@ public class NeoPixel extends Service implements NeoPixelControl {
     outbox.detach(service.getName());
 
     if (NeoPixelController.class.isAssignableFrom(service.getClass())) {
-      detachNeoPixel2Controller((NeoPixelController) service);
+      detachNeoPixelController((NeoPixelController) service);
       return;
     }
   }
   
   @Override
-  public void detachNeoPixel2Controller(NeoPixelController neoCntrlr) {
+  public void detachNeoPixelController(NeoPixelController neoCntrlr) {
     if (controller == null) {
       return;
     }
@@ -426,7 +426,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       error("%s cannot setPixel controller not set", getName());
       return;
     }
-    np2.neoPixel2Fill(getName(), beginAddress, count, r, g, b, w);
+    np2.neoPixelFill(getName(), beginAddress, count, r, g, b, w);
   }
 
   public void fillMatrix(int r, int g, int b) {
@@ -603,7 +603,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     }
     log.info("setAnimation {} {} {} {} {}", animation, red, green, blue, wait_ms);
     NeoPixelController nc2 = (NeoPixelController) Runtime.getService(controller);
-    nc2.neoPixel2SetAnimation(getName(), animation, red, green, blue, 0, wait_ms);
+    nc2.neoPixelSetAnimation(getName(), animation, red, green, blue, 0, wait_ms);
   }
 
   @Override
@@ -628,7 +628,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       error("%s cannot setPixel controller not set", getName());
       return;
     }
-    np2.neoPixel2SetBrightness(getName(), value);
+    np2.neoPixelSetBrightness(getName(), value);
   }
 
   public void setGreen(int green) {
@@ -682,7 +682,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
     ps.delayMs = delayMs;
 
-    // NeoPixel2Controller c = (NeoPixel2Controller)
+    // NeoPixelController c = (NeoPixelController)
     // Runtime.getService(controller);
     ServiceInterface sc = Runtime.getService(controller);
     if (sc == null) {
@@ -703,7 +703,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       return;
     }
 
-    np2.neoPixel2WriteMatrix(getName(), pixel.flatten());
+    np2.neoPixelWriteMatrix(getName(), pixel.flatten());
 
   }
 
@@ -765,7 +765,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       error("%s cannot writeMatrix controller not set", getName());
       return;
     }
-    np2.neoPixel2WriteMatrix(getName(), getPixelSet().flatten());
+    np2.neoPixelWriteMatrix(getName(), getPixelSet().flatten());
   }
   
   /**
@@ -804,7 +804,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.connect("/dev/ttyACM0");
 
-      NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel2");
+      NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
 
       boolean done = true;
       if (done) {

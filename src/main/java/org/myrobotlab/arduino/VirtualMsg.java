@@ -109,7 +109,6 @@ public class VirtualMsg {
   public static final int DEVICE_TYPE_I2C   =     7;
   public static final int DEVICE_TYPE_NEOPIXEL   =     8;
   public static final int DEVICE_TYPE_ENCODER   =     9;
-  public static final int DEVICE_TYPE_NEOPIXEL2   =     10;
     
   // < publishMRLCommError/str errorMsg
   public final static int PUBLISH_MRLCOMM_ERROR = 1;
@@ -149,128 +148,111 @@ public class VirtualMsg {
   public final static int I2C_WRITE_READ = 18;
   // < publishI2cData/deviceId/[] data
   public final static int PUBLISH_I2C_DATA = 19;
-  // > neoPixelAttach/deviceId/pin/b32 numPixels/depth
+  // > neoPixelAttach/deviceId/pin/b16 numPixels/depth
   public final static int NEO_PIXEL_ATTACH = 20;
-  // > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
+  // > neoPixelSetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
   public final static int NEO_PIXEL_SET_ANIMATION = 21;
   // > neoPixelWriteMatrix/deviceId/[] buffer
   public final static int NEO_PIXEL_WRITE_MATRIX = 22;
+  // > neoPixelFill/deviceId/b16 address/b16 count/red/green/blue/white
+  public final static int NEO_PIXEL_FILL = 23;
+  // > neoPixelSetBrightness/deviceId/brightness
+  public final static int NEO_PIXEL_SET_BRIGHTNESS = 24;
+  // > neoPixelClear/deviceId
+  public final static int NEO_PIXEL_CLEAR = 25;
   // > analogWrite/pin/value
-  public final static int ANALOG_WRITE = 23;
+  public final static int ANALOG_WRITE = 26;
   // > digitalWrite/pin/value
-  public final static int DIGITAL_WRITE = 24;
+  public final static int DIGITAL_WRITE = 27;
   // > disablePin/pin
-  public final static int DISABLE_PIN = 25;
+  public final static int DISABLE_PIN = 28;
   // > disablePins
-  public final static int DISABLE_PINS = 26;
+  public final static int DISABLE_PINS = 29;
   // > pinMode/pin/mode
-  public final static int PIN_MODE = 27;
+  public final static int PIN_MODE = 30;
   // < publishDebug/str debugMsg
-  public final static int PUBLISH_DEBUG = 28;
+  public final static int PUBLISH_DEBUG = 31;
   // < publishPinArray/[] data
-  public final static int PUBLISH_PIN_ARRAY = 29;
+  public final static int PUBLISH_PIN_ARRAY = 32;
   // > setTrigger/pin/triggerValue
-  public final static int SET_TRIGGER = 30;
+  public final static int SET_TRIGGER = 33;
   // > setDebounce/pin/delay
-  public final static int SET_DEBOUNCE = 31;
+  public final static int SET_DEBOUNCE = 34;
   // > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity/str name
-  public final static int SERVO_ATTACH = 32;
+  public final static int SERVO_ATTACH = 35;
   // > servoAttachPin/deviceId/pin
-  public final static int SERVO_ATTACH_PIN = 33;
+  public final static int SERVO_ATTACH_PIN = 36;
   // > servoDetachPin/deviceId
-  public final static int SERVO_DETACH_PIN = 34;
+  public final static int SERVO_DETACH_PIN = 37;
   // > servoSetVelocity/deviceId/b16 velocity
-  public final static int SERVO_SET_VELOCITY = 35;
+  public final static int SERVO_SET_VELOCITY = 38;
   // > servoSweepStart/deviceId/min/max/step
-  public final static int SERVO_SWEEP_START = 36;
+  public final static int SERVO_SWEEP_START = 39;
   // > servoSweepStop/deviceId
-  public final static int SERVO_SWEEP_STOP = 37;
+  public final static int SERVO_SWEEP_STOP = 40;
   // > servoMoveToMicroseconds/deviceId/b16 target
-  public final static int SERVO_MOVE_TO_MICROSECONDS = 38;
+  public final static int SERVO_MOVE_TO_MICROSECONDS = 41;
   // > servoSetAcceleration/deviceId/b16 acceleration
-  public final static int SERVO_SET_ACCELERATION = 39;
+  public final static int SERVO_SET_ACCELERATION = 42;
   // < publishServoEvent/deviceId/eventType/b16 currentPos/b16 targetPos
-  public final static int PUBLISH_SERVO_EVENT = 40;
+  public final static int PUBLISH_SERVO_EVENT = 43;
   // > serialAttach/deviceId/relayPin
-  public final static int SERIAL_ATTACH = 41;
+  public final static int SERIAL_ATTACH = 44;
   // > serialRelay/deviceId/[] data
-  public final static int SERIAL_RELAY = 42;
+  public final static int SERIAL_RELAY = 45;
   // < publishSerialData/deviceId/[] data
-  public final static int PUBLISH_SERIAL_DATA = 43;
+  public final static int PUBLISH_SERIAL_DATA = 46;
   // > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
-  public final static int ULTRASONIC_SENSOR_ATTACH = 44;
+  public final static int ULTRASONIC_SENSOR_ATTACH = 47;
   // > ultrasonicSensorStartRanging/deviceId
-  public final static int ULTRASONIC_SENSOR_START_RANGING = 45;
+  public final static int ULTRASONIC_SENSOR_START_RANGING = 48;
   // > ultrasonicSensorStopRanging/deviceId
-  public final static int ULTRASONIC_SENSOR_STOP_RANGING = 46;
+  public final static int ULTRASONIC_SENSOR_STOP_RANGING = 49;
   // < publishUltrasonicSensorData/deviceId/b16 echoTime
-  public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 47;
+  public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 50;
   // > setAref/b16 type
-  public final static int SET_AREF = 48;
+  public final static int SET_AREF = 51;
   // > motorAttach/deviceId/type/[] pins
-  public final static int MOTOR_ATTACH = 49;
+  public final static int MOTOR_ATTACH = 52;
   // > motorMove/deviceId/pwr
-  public final static int MOTOR_MOVE = 50;
+  public final static int MOTOR_MOVE = 53;
   // > motorMoveTo/deviceId/pos
-  public final static int MOTOR_MOVE_TO = 51;
+  public final static int MOTOR_MOVE_TO = 54;
   // > encoderAttach/deviceId/type/pin
-  public final static int ENCODER_ATTACH = 52;
+  public final static int ENCODER_ATTACH = 55;
   // > setZeroPoint/deviceId
-  public final static int SET_ZERO_POINT = 53;
+  public final static int SET_ZERO_POINT = 56;
   // < publishEncoderData/deviceId/b16 position
-  public final static int PUBLISH_ENCODER_DATA = 54;
+  public final static int PUBLISH_ENCODER_DATA = 57;
   // < publishMrlCommBegin/version
-  public final static int PUBLISH_MRL_COMM_BEGIN = 55;
+  public final static int PUBLISH_MRL_COMM_BEGIN = 58;
   // > servoStop/deviceId
-  public final static int SERVO_STOP = 56;
-  // > neoPixel2Attach/deviceId/pin/b16 numPixels/depth
-  public final static int NEO_PIXEL2_ATTACH = 57;
-  // > neoPixel2SetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
-  public final static int NEO_PIXEL2_SET_ANIMATION = 58;
-  // > neoPixel2WriteMatrix/deviceId/[] buffer
-  public final static int NEO_PIXEL2_WRITE_MATRIX = 59;
-  // > neoPixel2Fill/deviceId/b16 address/b16 count/red/green/blue/white
-  public final static int NEO_PIXEL2_FILL = 60;
-  // > neoPixel2SetBrightness/deviceId/brightness
-  public final static int NEO_PIXEL2_SET_BRIGHTNESS = 61;
-  // > neoPixel2Clear/deviceId
-  public final static int NEO_PIXEL2_CLEAR = 62;
+  public final static int SERVO_STOP = 59;
 
 
 /**
  * These methods will be invoked from the Msg class as callbacks from MrlComm.
-   * @param arduino - the virtual mrlcomm device
-   * @param serial - the virtual serial port to use
-   * 
  */
   
   // public void getBoardInfo(){}
-  // public void enablePin(Integer address/*byte*/, Integer type/*byte*/,
-  // Integer rate/*b16*/){}
+  // public void enablePin(Integer address/*byte*/, Integer type/*byte*/, Integer rate/*b16*/){}
   // public void setDebug(Boolean enabled/*bool*/){}
   // public void setSerialRate(Integer rate/*b32*/){}
   // public void softReset(){}
   // public void enableAck(Boolean enabled/*bool*/){}
-  // public void echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float
-  // secondFloat/*f32*/){}
+  // public void echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/){}
   // public void customMsg(int[] msg/*[]*/){}
   // public void deviceDetach(Integer deviceId/*byte*/){}
-  // public void i2cBusAttach(Integer deviceId/*byte*/, Integer
-  // i2cBus/*byte*/){}
-  // public void i2cRead(Integer deviceId/*byte*/, Integer
-  // deviceAddress/*byte*/, Integer size/*byte*/){}
-  // public void i2cWrite(Integer deviceId/*byte*/, Integer
-  // deviceAddress/*byte*/, int[] data/*[]*/){}
-  // public void i2cWriteRead(Integer deviceId/*byte*/, Integer
-  // deviceAddress/*byte*/, Integer readSize/*byte*/, Integer
-  // writeValue/*byte*/){}
-  // public void neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/,
-  // Integer numPixels/*b32*/, Integer depth/*byte*/){}
-  // public void neoPixelSetAnimation(Integer deviceId/*byte*/, Integer
-  // animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer
-  // blue/*byte*/, Integer speed/*b16*/){}
-  // public void neoPixelWriteMatrix(Integer deviceId/*byte*/, int[]
-  // buffer/*[]*/){}
+  // public void i2cBusAttach(Integer deviceId/*byte*/, Integer i2cBus/*byte*/){}
+  // public void i2cRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer size/*byte*/){}
+  // public void i2cWrite(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, int[] data/*[]*/){}
+  // public void i2cWriteRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer readSize/*byte*/, Integer writeValue/*byte*/){}
+  // public void neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b16*/, Integer depth/*byte*/){}
+  // public void neoPixelSetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer white/*byte*/, Integer wait_ms/*b32*/){}
+  // public void neoPixelWriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/){}
+  // public void neoPixelFill(Integer deviceId/*byte*/, Integer address/*b16*/, Integer count/*b16*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer white/*byte*/){}
+  // public void neoPixelSetBrightness(Integer deviceId/*byte*/, Integer brightness/*byte*/){}
+  // public void neoPixelClear(Integer deviceId/*byte*/){}
   // public void analogWrite(Integer pin/*byte*/, Integer value/*byte*/){}
   // public void digitalWrite(Integer pin/*byte*/, Integer value/*byte*/){}
   // public void disablePin(Integer pin/*byte*/){}
@@ -278,41 +260,26 @@ public class VirtualMsg {
   // public void pinMode(Integer pin/*byte*/, Integer mode/*byte*/){}
   // public void setTrigger(Integer pin/*byte*/, Integer triggerValue/*byte*/){}
   // public void setDebounce(Integer pin/*byte*/, Integer delay/*byte*/){}
-  // public void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/,
-  // Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/){}
+  // public void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/){}
   // public void servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/){}
   // public void servoDetachPin(Integer deviceId/*byte*/){}
-  // public void servoSetVelocity(Integer deviceId/*byte*/, Integer
-  // velocity/*b16*/){}
-  // public void servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/,
-  // Integer max/*byte*/, Integer step/*byte*/){}
+  // public void servoSetVelocity(Integer deviceId/*byte*/, Integer velocity/*b16*/){}
+  // public void servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/, Integer max/*byte*/, Integer step/*byte*/){}
   // public void servoSweepStop(Integer deviceId/*byte*/){}
-  // public void servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer
-  // target/*b16*/){}
-  // public void servoSetAcceleration(Integer deviceId/*byte*/, Integer
-  // acceleration/*b16*/){}
-  // public void serialAttach(Integer deviceId/*byte*/, Integer
-  // relayPin/*byte*/){}
+  // public void servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer target/*b16*/){}
+  // public void servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/){}
+  // public void serialAttach(Integer deviceId/*byte*/, Integer relayPin/*byte*/){}
   // public void serialRelay(Integer deviceId/*byte*/, int[] data/*[]*/){}
-  // public void ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer
-  // triggerPin/*byte*/, Integer echoPin/*byte*/){}
+  // public void ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer triggerPin/*byte*/, Integer echoPin/*byte*/){}
   // public void ultrasonicSensorStartRanging(Integer deviceId/*byte*/){}
   // public void ultrasonicSensorStopRanging(Integer deviceId/*byte*/){}
   // public void setAref(Integer type/*b16*/){}
-  // public void motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/,
-  // int[] pins/*[]*/){}
+  // public void motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/, int[] pins/*[]*/){}
   // public void motorMove(Integer deviceId/*byte*/, Integer pwr/*byte*/){}
   // public void motorMoveTo(Integer deviceId/*byte*/, Integer pos/*byte*/){}
-  // public void encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/,
-  // Integer pin/*byte*/){}
+  // public void encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/, Integer pin/*byte*/){}
   // public void setZeroPoint(Integer deviceId/*byte*/){}
   // public void servoStop(Integer deviceId/*byte*/){}
-  // public void neoPixel2Attach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b16*/, Integer depth/*byte*/){}
-  // public void neoPixel2SetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer white/*byte*/, Integer wait_ms/*b32*/){}
-  // public void neoPixel2WriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/){}
-  // public void neoPixel2Fill(Integer deviceId/*byte*/, Integer address/*b16*/, Integer count/*b16*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer white/*byte*/){}
-  // public void neoPixel2SetBrightness(Integer deviceId/*byte*/, Integer brightness/*byte*/){}
-  // public void neoPixel2Clear(Integer deviceId/*byte*/){}
   
   
 
@@ -514,8 +481,8 @@ public class VirtualMsg {
       startPos += 1;
       Integer pin = ioCmd[startPos+1]; // bu8
       startPos += 1;
-      Integer numPixels = b32(ioCmd, startPos+1);
-      startPos += 4; //b32
+      Integer numPixels = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
       Integer depth = ioCmd[startPos+1]; // bu8
       startPos += 1;
       if(invoke){
@@ -536,12 +503,14 @@ public class VirtualMsg {
       startPos += 1;
       Integer blue = ioCmd[startPos+1]; // bu8
       startPos += 1;
-      Integer speed = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
+      Integer white = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      Integer wait_ms = b32(ioCmd, startPos+1);
+      startPos += 4; //b32
       if(invoke){
-        arduino.invoke("neoPixelSetAnimation",  deviceId,  animation,  red,  green,  blue,  speed);
+        arduino.invoke("neoPixelSetAnimation",  deviceId,  animation,  red,  green,  blue,  white,  wait_ms);
       } else { 
-         arduino.neoPixelSetAnimation( deviceId,  animation,  red,  green,  blue,  speed);
+         arduino.neoPixelSetAnimation( deviceId,  animation,  red,  green,  blue,  white,  wait_ms);
       }
       break;
     }
@@ -554,6 +523,50 @@ public class VirtualMsg {
         arduino.invoke("neoPixelWriteMatrix",  deviceId,  buffer);
       } else { 
          arduino.neoPixelWriteMatrix( deviceId,  buffer);
+      }
+      break;
+    }
+    case NEO_PIXEL_FILL: {
+      Integer deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      Integer address = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
+      Integer count = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
+      Integer red = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      Integer green = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      Integer blue = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      Integer white = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      if(invoke){
+        arduino.invoke("neoPixelFill",  deviceId,  address,  count,  red,  green,  blue,  white);
+      } else { 
+         arduino.neoPixelFill( deviceId,  address,  count,  red,  green,  blue,  white);
+      }
+      break;
+    }
+    case NEO_PIXEL_SET_BRIGHTNESS: {
+      Integer deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      Integer brightness = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      if(invoke){
+        arduino.invoke("neoPixelSetBrightness",  deviceId,  brightness);
+      } else { 
+         arduino.neoPixelSetBrightness( deviceId,  brightness);
+      }
+      break;
+    }
+    case NEO_PIXEL_CLEAR: {
+      Integer deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      if(invoke){
+        arduino.invoke("neoPixelClear",  deviceId);
+      } else { 
+         arduino.neoPixelClear( deviceId);
       }
       break;
     }
@@ -877,100 +890,6 @@ public class VirtualMsg {
       }
       break;
     }
-    case NEO_PIXEL2_ATTACH: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer pin = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer numPixels = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      Integer depth = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("neoPixel2Attach",  deviceId,  pin,  numPixels,  depth);
-      } else { 
-         arduino.neoPixel2Attach( deviceId,  pin,  numPixels,  depth);
-      }
-      break;
-    }
-    case NEO_PIXEL2_SET_ANIMATION: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer animation = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer red = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer green = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer blue = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer white = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer wait_ms = b32(ioCmd, startPos+1);
-      startPos += 4; //b32
-      if(invoke){
-        arduino.invoke("neoPixel2SetAnimation",  deviceId,  animation,  red,  green,  blue,  white,  wait_ms);
-      } else { 
-         arduino.neoPixel2SetAnimation( deviceId,  animation,  red,  green,  blue,  white,  wait_ms);
-      }
-      break;
-    }
-    case NEO_PIXEL2_WRITE_MATRIX: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      int[] buffer = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
-      startPos += 1 + ioCmd[startPos+1];
-      if(invoke){
-        arduino.invoke("neoPixel2WriteMatrix",  deviceId,  buffer);
-      } else { 
-         arduino.neoPixel2WriteMatrix( deviceId,  buffer);
-      }
-      break;
-    }
-    case NEO_PIXEL2_FILL: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer address = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      Integer count = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      Integer red = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer green = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer blue = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer white = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("neoPixel2Fill",  deviceId,  address,  count,  red,  green,  blue,  white);
-      } else { 
-         arduino.neoPixel2Fill( deviceId,  address,  count,  red,  green,  blue,  white);
-      }
-      break;
-    }
-    case NEO_PIXEL2_SET_BRIGHTNESS: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer brightness = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("neoPixel2SetBrightness",  deviceId,  brightness);
-      } else { 
-         arduino.neoPixel2SetBrightness( deviceId,  brightness);
-      }
-      break;
-    }
-    case NEO_PIXEL2_CLEAR: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("neoPixel2Clear",  deviceId);
-      } else { 
-         arduino.neoPixel2Clear( deviceId);
-      }
-      break;
-    }
     
     }
   }
@@ -1196,7 +1115,7 @@ public class VirtualMsg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + (1 + debugMsg.length())); // size
-      appendMessage(baos, PUBLISH_DEBUG); // msgType = 28
+      appendMessage(baos, PUBLISH_DEBUG); // msgType = 31
       appendMessage(baos, debugMsg);
  
       byte[] message = sendMessage(baos);
@@ -1227,7 +1146,7 @@ public class VirtualMsg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + (1 + data.length)); // size
-      appendMessage(baos, PUBLISH_PIN_ARRAY); // msgType = 29
+      appendMessage(baos, PUBLISH_PIN_ARRAY); // msgType = 32
       appendMessage(baos, data);
  
       byte[] message = sendMessage(baos);
@@ -1258,7 +1177,7 @@ public class VirtualMsg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 1 + 2 + 2); // size
-      appendMessage(baos, PUBLISH_SERVO_EVENT); // msgType = 40
+      appendMessage(baos, PUBLISH_SERVO_EVENT); // msgType = 43
       appendMessage(baos, deviceId);
       appendMessage(baos, eventType);
       appendMessageb16(baos, currentPos);
@@ -1298,7 +1217,7 @@ public class VirtualMsg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + (1 + data.length)); // size
-      appendMessage(baos, PUBLISH_SERIAL_DATA); // msgType = 43
+      appendMessage(baos, PUBLISH_SERIAL_DATA); // msgType = 46
       appendMessage(baos, deviceId);
       appendMessage(baos, data);
  
@@ -1332,7 +1251,7 @@ public class VirtualMsg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 2); // size
-      appendMessage(baos, PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 47
+      appendMessage(baos, PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 50
       appendMessage(baos, deviceId);
       appendMessageb16(baos, echoTime);
  
@@ -1366,7 +1285,7 @@ public class VirtualMsg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 2); // size
-      appendMessage(baos, PUBLISH_ENCODER_DATA); // msgType = 54
+      appendMessage(baos, PUBLISH_ENCODER_DATA); // msgType = 57
       appendMessage(baos, deviceId);
       appendMessageb16(baos, position);
  
@@ -1400,7 +1319,7 @@ public class VirtualMsg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1); // size
-      appendMessage(baos, PUBLISH_MRL_COMM_BEGIN); // msgType = 55
+      appendMessage(baos, PUBLISH_MRL_COMM_BEGIN); // msgType = 58
       appendMessage(baos, version);
  
       byte[] message = sendMessage(baos);
@@ -1491,6 +1410,15 @@ public class VirtualMsg {
     }
     case NEO_PIXEL_WRITE_MATRIX:{
       return "neoPixelWriteMatrix";
+    }
+    case NEO_PIXEL_FILL:{
+      return "neoPixelFill";
+    }
+    case NEO_PIXEL_SET_BRIGHTNESS:{
+      return "neoPixelSetBrightness";
+    }
+    case NEO_PIXEL_CLEAR:{
+      return "neoPixelClear";
     }
     case ANALOG_WRITE:{
       return "analogWrite";
@@ -1593,24 +1521,6 @@ public class VirtualMsg {
     }
     case SERVO_STOP:{
       return "servoStop";
-    }
-    case NEO_PIXEL2_ATTACH:{
-      return "neoPixel2Attach";
-    }
-    case NEO_PIXEL2_SET_ANIMATION:{
-      return "neoPixel2SetAnimation";
-    }
-    case NEO_PIXEL2_WRITE_MATRIX:{
-      return "neoPixel2WriteMatrix";
-    }
-    case NEO_PIXEL2_FILL:{
-      return "neoPixel2Fill";
-    }
-    case NEO_PIXEL2_SET_BRIGHTNESS:{
-      return "neoPixel2SetBrightness";
-    }
-    case NEO_PIXEL2_CLEAR:{
-      return "neoPixel2Clear";
     }
 
     default: {
@@ -1945,10 +1855,6 @@ public class VirtualMsg {
     }
     case 9 :  {
       return "Encoder";
-
-    }
-    case 10 :  {
-      return "NeoPixel2";
 
     }
     

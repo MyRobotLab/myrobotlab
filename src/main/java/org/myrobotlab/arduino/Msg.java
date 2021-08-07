@@ -109,14 +109,12 @@ public class Msg {
   public static final int DEVICE_TYPE_I2C   =     7;
   public static final int DEVICE_TYPE_NEOPIXEL   =     8;
   public static final int DEVICE_TYPE_ENCODER   =     9;
-  public static final int DEVICE_TYPE_NEOPIXEL2   =     10;
     
   // < publishMRLCommError/str errorMsg
   public final static int PUBLISH_MRLCOMM_ERROR = 1;
   // > getBoardInfo
   public final static int GET_BOARD_INFO = 2;
-  // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16
-  // sram/activePins/[] deviceSummary
+  // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/activePins/[] deviceSummary
   public final static int PUBLISH_BOARD_INFO = 3;
   // > enablePin/address/type/b16 rate
   public final static int ENABLE_PIN = 4;
@@ -150,98 +148,90 @@ public class Msg {
   public final static int I2C_WRITE_READ = 18;
   // < publishI2cData/deviceId/[] data
   public final static int PUBLISH_I2C_DATA = 19;
-  // > neoPixelAttach/deviceId/pin/b32 numPixels/depth
+  // > neoPixelAttach/deviceId/pin/b16 numPixels/depth
   public final static int NEO_PIXEL_ATTACH = 20;
-  // > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
+  // > neoPixelSetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
   public final static int NEO_PIXEL_SET_ANIMATION = 21;
   // > neoPixelWriteMatrix/deviceId/[] buffer
   public final static int NEO_PIXEL_WRITE_MATRIX = 22;
+  // > neoPixelFill/deviceId/b16 address/b16 count/red/green/blue/white
+  public final static int NEO_PIXEL_FILL = 23;
+  // > neoPixelSetBrightness/deviceId/brightness
+  public final static int NEO_PIXEL_SET_BRIGHTNESS = 24;
+  // > neoPixelClear/deviceId
+  public final static int NEO_PIXEL_CLEAR = 25;
   // > analogWrite/pin/value
-  public final static int ANALOG_WRITE = 23;
+  public final static int ANALOG_WRITE = 26;
   // > digitalWrite/pin/value
-  public final static int DIGITAL_WRITE = 24;
+  public final static int DIGITAL_WRITE = 27;
   // > disablePin/pin
-  public final static int DISABLE_PIN = 25;
+  public final static int DISABLE_PIN = 28;
   // > disablePins
-  public final static int DISABLE_PINS = 26;
+  public final static int DISABLE_PINS = 29;
   // > pinMode/pin/mode
-  public final static int PIN_MODE = 27;
+  public final static int PIN_MODE = 30;
   // < publishDebug/str debugMsg
-  public final static int PUBLISH_DEBUG = 28;
+  public final static int PUBLISH_DEBUG = 31;
   // < publishPinArray/[] data
-  public final static int PUBLISH_PIN_ARRAY = 29;
+  public final static int PUBLISH_PIN_ARRAY = 32;
   // > setTrigger/pin/triggerValue
-  public final static int SET_TRIGGER = 30;
+  public final static int SET_TRIGGER = 33;
   // > setDebounce/pin/delay
-  public final static int SET_DEBOUNCE = 31;
+  public final static int SET_DEBOUNCE = 34;
   // > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity/str name
-  public final static int SERVO_ATTACH = 32;
+  public final static int SERVO_ATTACH = 35;
   // > servoAttachPin/deviceId/pin
-  public final static int SERVO_ATTACH_PIN = 33;
+  public final static int SERVO_ATTACH_PIN = 36;
   // > servoDetachPin/deviceId
-  public final static int SERVO_DETACH_PIN = 34;
+  public final static int SERVO_DETACH_PIN = 37;
   // > servoSetVelocity/deviceId/b16 velocity
-  public final static int SERVO_SET_VELOCITY = 35;
+  public final static int SERVO_SET_VELOCITY = 38;
   // > servoSweepStart/deviceId/min/max/step
-  public final static int SERVO_SWEEP_START = 36;
+  public final static int SERVO_SWEEP_START = 39;
   // > servoSweepStop/deviceId
-  public final static int SERVO_SWEEP_STOP = 37;
+  public final static int SERVO_SWEEP_STOP = 40;
   // > servoMoveToMicroseconds/deviceId/b16 target
-  public final static int SERVO_MOVE_TO_MICROSECONDS = 38;
+  public final static int SERVO_MOVE_TO_MICROSECONDS = 41;
   // > servoSetAcceleration/deviceId/b16 acceleration
-  public final static int SERVO_SET_ACCELERATION = 39;
+  public final static int SERVO_SET_ACCELERATION = 42;
   // < publishServoEvent/deviceId/eventType/b16 currentPos/b16 targetPos
-  public final static int PUBLISH_SERVO_EVENT = 40;
+  public final static int PUBLISH_SERVO_EVENT = 43;
   // > serialAttach/deviceId/relayPin
-  public final static int SERIAL_ATTACH = 41;
+  public final static int SERIAL_ATTACH = 44;
   // > serialRelay/deviceId/[] data
-  public final static int SERIAL_RELAY = 42;
+  public final static int SERIAL_RELAY = 45;
   // < publishSerialData/deviceId/[] data
-  public final static int PUBLISH_SERIAL_DATA = 43;
+  public final static int PUBLISH_SERIAL_DATA = 46;
   // > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
-  public final static int ULTRASONIC_SENSOR_ATTACH = 44;
+  public final static int ULTRASONIC_SENSOR_ATTACH = 47;
   // > ultrasonicSensorStartRanging/deviceId
-  public final static int ULTRASONIC_SENSOR_START_RANGING = 45;
+  public final static int ULTRASONIC_SENSOR_START_RANGING = 48;
   // > ultrasonicSensorStopRanging/deviceId
-  public final static int ULTRASONIC_SENSOR_STOP_RANGING = 46;
+  public final static int ULTRASONIC_SENSOR_STOP_RANGING = 49;
   // < publishUltrasonicSensorData/deviceId/b16 echoTime
-  public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 47;
+  public final static int PUBLISH_ULTRASONIC_SENSOR_DATA = 50;
   // > setAref/b16 type
-  public final static int SET_AREF = 48;
+  public final static int SET_AREF = 51;
   // > motorAttach/deviceId/type/[] pins
-  public final static int MOTOR_ATTACH = 49;
+  public final static int MOTOR_ATTACH = 52;
   // > motorMove/deviceId/pwr
-  public final static int MOTOR_MOVE = 50;
+  public final static int MOTOR_MOVE = 53;
   // > motorMoveTo/deviceId/pos
-  public final static int MOTOR_MOVE_TO = 51;
+  public final static int MOTOR_MOVE_TO = 54;
   // > encoderAttach/deviceId/type/pin
-  public final static int ENCODER_ATTACH = 52;
+  public final static int ENCODER_ATTACH = 55;
   // > setZeroPoint/deviceId
-  public final static int SET_ZERO_POINT = 53;
+  public final static int SET_ZERO_POINT = 56;
   // < publishEncoderData/deviceId/b16 position
-  public final static int PUBLISH_ENCODER_DATA = 54;
+  public final static int PUBLISH_ENCODER_DATA = 57;
   // < publishMrlCommBegin/version
-  public final static int PUBLISH_MRL_COMM_BEGIN = 55;
+  public final static int PUBLISH_MRL_COMM_BEGIN = 58;
   // > servoStop/deviceId
-  public final static int SERVO_STOP = 56;
-  // > neoPixel2Attach/deviceId/pin/b16 numPixels/depth
-  public final static int NEO_PIXEL2_ATTACH = 57;
-  // > neoPixel2SetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
-  public final static int NEO_PIXEL2_SET_ANIMATION = 58;
-  // > neoPixel2WriteMatrix/deviceId/[] buffer
-  public final static int NEO_PIXEL2_WRITE_MATRIX = 59;
-  // > neoPixel2Fill/deviceId/b16 address/b16 count/red/green/blue/white
-  public final static int NEO_PIXEL2_FILL = 60;
-  // > neoPixel2SetBrightness/deviceId/brightness
-  public final static int NEO_PIXEL2_SET_BRIGHTNESS = 61;
-  // > neoPixel2Clear/deviceId
-  public final static int NEO_PIXEL2_CLEAR = 62;
+  public final static int SERVO_STOP = 59;
 
 
 /**
  * These methods will be invoked from the Msg class as callbacks from MrlComm.
-   * @param arduino  - the mrlcomm publisher 
-   * @param serial - the serial device that is being used for communication
  */
   
   // public void publishMRLCommError(String errorMsg/*str*/){}
@@ -1098,18 +1088,18 @@ public class Msg {
     }
   }
 
-  public synchronized byte[] neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/, Integer depth/*byte*/) {
+  public synchronized byte[] neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b16*/, Integer depth/*byte*/) {
     if (debug) {
       log.info("Sending Message: neoPixelAttach to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
       appendMessage(baos, MAGIC_NUMBER);
-      appendMessage(baos, 1 + 1 + 1 + 4 + 1); // size
+      appendMessage(baos, 1 + 1 + 1 + 2 + 1); // size
       appendMessage(baos, NEO_PIXEL_ATTACH); // msgType = 20
       appendMessage(baos, deviceId);
       appendMessage(baos, pin);
-      appendMessageb32(baos, numPixels);
+      appendMessageb16(baos, numPixels);
       appendMessage(baos, depth);
  
       byte[] message = sendMessage(baos);
@@ -1138,21 +1128,22 @@ public class Msg {
     }
   }
 
-  public synchronized byte[] neoPixelSetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer speed/*b16*/) {
+  public synchronized byte[] neoPixelSetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer white/*byte*/, Integer wait_ms/*b32*/) {
     if (debug) {
       log.info("Sending Message: neoPixelSetAnimation to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
       appendMessage(baos, MAGIC_NUMBER);
-      appendMessage(baos, 1 + 1 + 1 + 1 + 1 + 1 + 2); // size
+      appendMessage(baos, 1 + 1 + 1 + 1 + 1 + 1 + 1 + 4); // size
       appendMessage(baos, NEO_PIXEL_SET_ANIMATION); // msgType = 21
       appendMessage(baos, deviceId);
       appendMessage(baos, animation);
       appendMessage(baos, red);
       appendMessage(baos, green);
       appendMessage(baos, blue);
-      appendMessageb16(baos, speed);
+      appendMessage(baos, white);
+      appendMessageb32(baos, wait_ms);
  
       byte[] message = sendMessage(baos);
       if (ackEnabled){
@@ -1171,7 +1162,9 @@ public class Msg {
         txBuffer.append("/");
         txBuffer.append(blue);
         txBuffer.append("/");
-        txBuffer.append(speed);
+        txBuffer.append(white);
+        txBuffer.append("/");
+        txBuffer.append(wait_ms);
         txBuffer.append("\n");
         record.write(txBuffer.toString().getBytes());
         txBuffer.setLength(0);
@@ -1218,6 +1211,120 @@ public class Msg {
     }
   }
 
+  public synchronized byte[] neoPixelFill(Integer deviceId/*byte*/, Integer address/*b16*/, Integer count/*b16*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer white/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: neoPixelFill to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 2 + 2 + 1 + 1 + 1 + 1); // size
+      appendMessage(baos, NEO_PIXEL_FILL); // msgType = 23
+      appendMessage(baos, deviceId);
+      appendMessageb16(baos, address);
+      appendMessageb16(baos, count);
+      appendMessage(baos, red);
+      appendMessage(baos, green);
+      appendMessage(baos, blue);
+      appendMessage(baos, white);
+ 
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
+      if(record != null){
+        txBuffer.append("> neoPixelFill");
+        txBuffer.append("/");
+        txBuffer.append(deviceId);
+        txBuffer.append("/");
+        txBuffer.append(address);
+        txBuffer.append("/");
+        txBuffer.append(count);
+        txBuffer.append("/");
+        txBuffer.append(red);
+        txBuffer.append("/");
+        txBuffer.append(green);
+        txBuffer.append("/");
+        txBuffer.append(blue);
+        txBuffer.append("/");
+        txBuffer.append(white);
+        txBuffer.append("\n");
+        record.write(txBuffer.toString().getBytes());
+        txBuffer.setLength(0);
+      }
+
+      return message;
+	} catch (Exception e) {
+      log.error("neoPixelFill threw",e);
+      return null;
+    }
+  }
+
+  public synchronized byte[] neoPixelSetBrightness(Integer deviceId/*byte*/, Integer brightness/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: neoPixelSetBrightness to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, NEO_PIXEL_SET_BRIGHTNESS); // msgType = 24
+      appendMessage(baos, deviceId);
+      appendMessage(baos, brightness);
+ 
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
+      if(record != null){
+        txBuffer.append("> neoPixelSetBrightness");
+        txBuffer.append("/");
+        txBuffer.append(deviceId);
+        txBuffer.append("/");
+        txBuffer.append(brightness);
+        txBuffer.append("\n");
+        record.write(txBuffer.toString().getBytes());
+        txBuffer.setLength(0);
+      }
+
+      return message;
+	} catch (Exception e) {
+      log.error("neoPixelSetBrightness threw",e);
+      return null;
+    }
+  }
+
+  public synchronized byte[] neoPixelClear(Integer deviceId/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: neoPixelClear to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, NEO_PIXEL_CLEAR); // msgType = 25
+      appendMessage(baos, deviceId);
+ 
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
+      if(record != null){
+        txBuffer.append("> neoPixelClear");
+        txBuffer.append("/");
+        txBuffer.append(deviceId);
+        txBuffer.append("\n");
+        record.write(txBuffer.toString().getBytes());
+        txBuffer.setLength(0);
+      }
+
+      return message;
+	} catch (Exception e) {
+      log.error("neoPixelClear threw",e);
+      return null;
+    }
+  }
+
   public synchronized byte[] analogWrite(Integer pin/*byte*/, Integer value/*byte*/) {
     if (debug) {
       log.info("Sending Message: analogWrite to {}", serial.getName());
@@ -1226,7 +1333,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 1); // size
-      appendMessage(baos, ANALOG_WRITE); // msgType = 23
+      appendMessage(baos, ANALOG_WRITE); // msgType = 26
       appendMessage(baos, pin);
       appendMessage(baos, value);
  
@@ -1260,7 +1367,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 1); // size
-      appendMessage(baos, DIGITAL_WRITE); // msgType = 24
+      appendMessage(baos, DIGITAL_WRITE); // msgType = 27
       appendMessage(baos, pin);
       appendMessage(baos, value);
  
@@ -1294,7 +1401,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1); // size
-      appendMessage(baos, DISABLE_PIN); // msgType = 25
+      appendMessage(baos, DISABLE_PIN); // msgType = 28
       appendMessage(baos, pin);
  
       byte[] message = sendMessage(baos);
@@ -1325,7 +1432,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1); // size
-      appendMessage(baos, DISABLE_PINS); // msgType = 26
+      appendMessage(baos, DISABLE_PINS); // msgType = 29
  
       byte[] message = sendMessage(baos);
       if (ackEnabled){
@@ -1353,7 +1460,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 1); // size
-      appendMessage(baos, PIN_MODE); // msgType = 27
+      appendMessage(baos, PIN_MODE); // msgType = 30
       appendMessage(baos, pin);
       appendMessage(baos, mode);
  
@@ -1387,7 +1494,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 1); // size
-      appendMessage(baos, SET_TRIGGER); // msgType = 30
+      appendMessage(baos, SET_TRIGGER); // msgType = 33
       appendMessage(baos, pin);
       appendMessage(baos, triggerValue);
  
@@ -1421,7 +1528,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 1); // size
-      appendMessage(baos, SET_DEBOUNCE); // msgType = 31
+      appendMessage(baos, SET_DEBOUNCE); // msgType = 34
       appendMessage(baos, pin);
       appendMessage(baos, delay);
  
@@ -1455,7 +1562,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 1 + 2 + 2 + (1 + name.length())); // size
-      appendMessage(baos, SERVO_ATTACH); // msgType = 32
+      appendMessage(baos, SERVO_ATTACH); // msgType = 35
       appendMessage(baos, deviceId);
       appendMessage(baos, pin);
       appendMessageb16(baos, initPos);
@@ -1498,7 +1605,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 1); // size
-      appendMessage(baos, SERVO_ATTACH_PIN); // msgType = 33
+      appendMessage(baos, SERVO_ATTACH_PIN); // msgType = 36
       appendMessage(baos, deviceId);
       appendMessage(baos, pin);
  
@@ -1532,7 +1639,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1); // size
-      appendMessage(baos, SERVO_DETACH_PIN); // msgType = 34
+      appendMessage(baos, SERVO_DETACH_PIN); // msgType = 37
       appendMessage(baos, deviceId);
  
       byte[] message = sendMessage(baos);
@@ -1563,7 +1670,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 2); // size
-      appendMessage(baos, SERVO_SET_VELOCITY); // msgType = 35
+      appendMessage(baos, SERVO_SET_VELOCITY); // msgType = 38
       appendMessage(baos, deviceId);
       appendMessageb16(baos, velocity);
  
@@ -1597,7 +1704,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 1 + 1 + 1); // size
-      appendMessage(baos, SERVO_SWEEP_START); // msgType = 36
+      appendMessage(baos, SERVO_SWEEP_START); // msgType = 39
       appendMessage(baos, deviceId);
       appendMessage(baos, min);
       appendMessage(baos, max);
@@ -1637,7 +1744,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1); // size
-      appendMessage(baos, SERVO_SWEEP_STOP); // msgType = 37
+      appendMessage(baos, SERVO_SWEEP_STOP); // msgType = 40
       appendMessage(baos, deviceId);
  
       byte[] message = sendMessage(baos);
@@ -1668,7 +1775,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 2); // size
-      appendMessage(baos, SERVO_MOVE_TO_MICROSECONDS); // msgType = 38
+      appendMessage(baos, SERVO_MOVE_TO_MICROSECONDS); // msgType = 41
       appendMessage(baos, deviceId);
       appendMessageb16(baos, target);
  
@@ -1702,7 +1809,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 2); // size
-      appendMessage(baos, SERVO_SET_ACCELERATION); // msgType = 39
+      appendMessage(baos, SERVO_SET_ACCELERATION); // msgType = 42
       appendMessage(baos, deviceId);
       appendMessageb16(baos, acceleration);
  
@@ -1736,7 +1843,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 1); // size
-      appendMessage(baos, SERIAL_ATTACH); // msgType = 41
+      appendMessage(baos, SERIAL_ATTACH); // msgType = 44
       appendMessage(baos, deviceId);
       appendMessage(baos, relayPin);
  
@@ -1770,7 +1877,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + (1 + data.length)); // size
-      appendMessage(baos, SERIAL_RELAY); // msgType = 42
+      appendMessage(baos, SERIAL_RELAY); // msgType = 45
       appendMessage(baos, deviceId);
       appendMessage(baos, data);
  
@@ -1804,7 +1911,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 1 + 1); // size
-      appendMessage(baos, ULTRASONIC_SENSOR_ATTACH); // msgType = 44
+      appendMessage(baos, ULTRASONIC_SENSOR_ATTACH); // msgType = 47
       appendMessage(baos, deviceId);
       appendMessage(baos, triggerPin);
       appendMessage(baos, echoPin);
@@ -1841,7 +1948,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1); // size
-      appendMessage(baos, ULTRASONIC_SENSOR_START_RANGING); // msgType = 45
+      appendMessage(baos, ULTRASONIC_SENSOR_START_RANGING); // msgType = 48
       appendMessage(baos, deviceId);
  
       byte[] message = sendMessage(baos);
@@ -1872,7 +1979,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1); // size
-      appendMessage(baos, ULTRASONIC_SENSOR_STOP_RANGING); // msgType = 46
+      appendMessage(baos, ULTRASONIC_SENSOR_STOP_RANGING); // msgType = 49
       appendMessage(baos, deviceId);
  
       byte[] message = sendMessage(baos);
@@ -1903,7 +2010,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 2); // size
-      appendMessage(baos, SET_AREF); // msgType = 48
+      appendMessage(baos, SET_AREF); // msgType = 51
       appendMessageb16(baos, type);
  
       byte[] message = sendMessage(baos);
@@ -1934,7 +2041,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 1 + (1 + pins.length)); // size
-      appendMessage(baos, MOTOR_ATTACH); // msgType = 49
+      appendMessage(baos, MOTOR_ATTACH); // msgType = 52
       appendMessage(baos, deviceId);
       appendMessage(baos, type);
       appendMessage(baos, pins);
@@ -1971,7 +2078,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 1); // size
-      appendMessage(baos, MOTOR_MOVE); // msgType = 50
+      appendMessage(baos, MOTOR_MOVE); // msgType = 53
       appendMessage(baos, deviceId);
       appendMessage(baos, pwr);
  
@@ -2005,7 +2112,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 1); // size
-      appendMessage(baos, MOTOR_MOVE_TO); // msgType = 51
+      appendMessage(baos, MOTOR_MOVE_TO); // msgType = 54
       appendMessage(baos, deviceId);
       appendMessage(baos, pos);
  
@@ -2039,7 +2146,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1 + 1 + 1); // size
-      appendMessage(baos, ENCODER_ATTACH); // msgType = 52
+      appendMessage(baos, ENCODER_ATTACH); // msgType = 55
       appendMessage(baos, deviceId);
       appendMessage(baos, type);
       appendMessage(baos, pin);
@@ -2076,7 +2183,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1); // size
-      appendMessage(baos, SET_ZERO_POINT); // msgType = 53
+      appendMessage(baos, SET_ZERO_POINT); // msgType = 56
       appendMessage(baos, deviceId);
  
       byte[] message = sendMessage(baos);
@@ -2107,7 +2214,7 @@ public class Msg {
     try {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1 + 1); // size
-      appendMessage(baos, SERVO_STOP); // msgType = 56
+      appendMessage(baos, SERVO_STOP); // msgType = 59
       appendMessage(baos, deviceId);
  
       byte[] message = sendMessage(baos);
@@ -2126,243 +2233,6 @@ public class Msg {
       return message;
 	} catch (Exception e) {
       log.error("servoStop threw",e);
-      return null;
-    }
-  }
-
-  public synchronized byte[] neoPixel2Attach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b16*/, Integer depth/*byte*/) {
-    if (debug) {
-      log.info("Sending Message: neoPixel2Attach to {}", serial.getName());
-    }
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try {
-      appendMessage(baos, MAGIC_NUMBER);
-      appendMessage(baos, 1 + 1 + 1 + 2 + 1); // size
-      appendMessage(baos, NEO_PIXEL2_ATTACH); // msgType = 57
-      appendMessage(baos, deviceId);
-      appendMessage(baos, pin);
-      appendMessageb16(baos, numPixels);
-      appendMessage(baos, depth);
- 
-      byte[] message = sendMessage(baos);
-      if (ackEnabled){
-        waitForAck();
-      }
-      if(record != null){
-        txBuffer.append("> neoPixel2Attach");
-        txBuffer.append("/");
-        txBuffer.append(deviceId);
-        txBuffer.append("/");
-        txBuffer.append(pin);
-        txBuffer.append("/");
-        txBuffer.append(numPixels);
-        txBuffer.append("/");
-        txBuffer.append(depth);
-        txBuffer.append("\n");
-        record.write(txBuffer.toString().getBytes());
-        txBuffer.setLength(0);
-      }
-
-      return message;
-	} catch (Exception e) {
-      log.error("neoPixel2Attach threw",e);
-      return null;
-    }
-  }
-
-  public synchronized byte[] neoPixel2SetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer white/*byte*/, Integer wait_ms/*b32*/) {
-    if (debug) {
-      log.info("Sending Message: neoPixel2SetAnimation to {}", serial.getName());
-    }
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try {
-      appendMessage(baos, MAGIC_NUMBER);
-      appendMessage(baos, 1 + 1 + 1 + 1 + 1 + 1 + 1 + 4); // size
-      appendMessage(baos, NEO_PIXEL2_SET_ANIMATION); // msgType = 58
-      appendMessage(baos, deviceId);
-      appendMessage(baos, animation);
-      appendMessage(baos, red);
-      appendMessage(baos, green);
-      appendMessage(baos, blue);
-      appendMessage(baos, white);
-      appendMessageb32(baos, wait_ms);
- 
-      byte[] message = sendMessage(baos);
-      if (ackEnabled){
-        waitForAck();
-      }
-      if(record != null){
-        txBuffer.append("> neoPixel2SetAnimation");
-        txBuffer.append("/");
-        txBuffer.append(deviceId);
-        txBuffer.append("/");
-        txBuffer.append(animation);
-        txBuffer.append("/");
-        txBuffer.append(red);
-        txBuffer.append("/");
-        txBuffer.append(green);
-        txBuffer.append("/");
-        txBuffer.append(blue);
-        txBuffer.append("/");
-        txBuffer.append(white);
-        txBuffer.append("/");
-        txBuffer.append(wait_ms);
-        txBuffer.append("\n");
-        record.write(txBuffer.toString().getBytes());
-        txBuffer.setLength(0);
-      }
-
-      return message;
-	} catch (Exception e) {
-      log.error("neoPixel2SetAnimation threw",e);
-      return null;
-    }
-  }
-
-  public synchronized byte[] neoPixel2WriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/) {
-    if (debug) {
-      log.info("Sending Message: neoPixel2WriteMatrix to {}", serial.getName());
-    }
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try {
-      appendMessage(baos, MAGIC_NUMBER);
-      appendMessage(baos, 1 + 1 + (1 + buffer.length)); // size
-      appendMessage(baos, NEO_PIXEL2_WRITE_MATRIX); // msgType = 59
-      appendMessage(baos, deviceId);
-      appendMessage(baos, buffer);
- 
-      byte[] message = sendMessage(baos);
-      if (ackEnabled){
-        waitForAck();
-      }
-      if(record != null){
-        txBuffer.append("> neoPixel2WriteMatrix");
-        txBuffer.append("/");
-        txBuffer.append(deviceId);
-        txBuffer.append("/");
-        txBuffer.append(Arrays.toString(buffer));
-        txBuffer.append("\n");
-        record.write(txBuffer.toString().getBytes());
-        txBuffer.setLength(0);
-      }
-
-      return message;
-	} catch (Exception e) {
-      log.error("neoPixel2WriteMatrix threw",e);
-      return null;
-    }
-  }
-
-  public synchronized byte[] neoPixel2Fill(Integer deviceId/*byte*/, Integer address/*b16*/, Integer count/*b16*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer white/*byte*/) {
-    if (debug) {
-      log.info("Sending Message: neoPixel2Fill to {}", serial.getName());
-    }
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try {
-      appendMessage(baos, MAGIC_NUMBER);
-      appendMessage(baos, 1 + 1 + 2 + 2 + 1 + 1 + 1 + 1); // size
-      appendMessage(baos, NEO_PIXEL2_FILL); // msgType = 60
-      appendMessage(baos, deviceId);
-      appendMessageb16(baos, address);
-      appendMessageb16(baos, count);
-      appendMessage(baos, red);
-      appendMessage(baos, green);
-      appendMessage(baos, blue);
-      appendMessage(baos, white);
- 
-      byte[] message = sendMessage(baos);
-      if (ackEnabled){
-        waitForAck();
-      }
-      if(record != null){
-        txBuffer.append("> neoPixel2Fill");
-        txBuffer.append("/");
-        txBuffer.append(deviceId);
-        txBuffer.append("/");
-        txBuffer.append(address);
-        txBuffer.append("/");
-        txBuffer.append(count);
-        txBuffer.append("/");
-        txBuffer.append(red);
-        txBuffer.append("/");
-        txBuffer.append(green);
-        txBuffer.append("/");
-        txBuffer.append(blue);
-        txBuffer.append("/");
-        txBuffer.append(white);
-        txBuffer.append("\n");
-        record.write(txBuffer.toString().getBytes());
-        txBuffer.setLength(0);
-      }
-
-      return message;
-	} catch (Exception e) {
-      log.error("neoPixel2Fill threw",e);
-      return null;
-    }
-  }
-
-  public synchronized byte[] neoPixel2SetBrightness(Integer deviceId/*byte*/, Integer brightness/*byte*/) {
-    if (debug) {
-      log.info("Sending Message: neoPixel2SetBrightness to {}", serial.getName());
-    }
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try {
-      appendMessage(baos, MAGIC_NUMBER);
-      appendMessage(baos, 1 + 1 + 1); // size
-      appendMessage(baos, NEO_PIXEL2_SET_BRIGHTNESS); // msgType = 61
-      appendMessage(baos, deviceId);
-      appendMessage(baos, brightness);
- 
-      byte[] message = sendMessage(baos);
-      if (ackEnabled){
-        waitForAck();
-      }
-      if(record != null){
-        txBuffer.append("> neoPixel2SetBrightness");
-        txBuffer.append("/");
-        txBuffer.append(deviceId);
-        txBuffer.append("/");
-        txBuffer.append(brightness);
-        txBuffer.append("\n");
-        record.write(txBuffer.toString().getBytes());
-        txBuffer.setLength(0);
-      }
-
-      return message;
-	} catch (Exception e) {
-      log.error("neoPixel2SetBrightness threw",e);
-      return null;
-    }
-  }
-
-  public synchronized byte[] neoPixel2Clear(Integer deviceId/*byte*/) {
-    if (debug) {
-      log.info("Sending Message: neoPixel2Clear to {}", serial.getName());
-    }
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try {
-      appendMessage(baos, MAGIC_NUMBER);
-      appendMessage(baos, 1 + 1); // size
-      appendMessage(baos, NEO_PIXEL2_CLEAR); // msgType = 62
-      appendMessage(baos, deviceId);
- 
-      byte[] message = sendMessage(baos);
-      if (ackEnabled){
-        waitForAck();
-      }
-      if(record != null){
-        txBuffer.append("> neoPixel2Clear");
-        txBuffer.append("/");
-        txBuffer.append(deviceId);
-        txBuffer.append("\n");
-        record.write(txBuffer.toString().getBytes());
-        txBuffer.setLength(0);
-      }
-
-      return message;
-	} catch (Exception e) {
-      log.error("neoPixel2Clear threw",e);
       return null;
     }
   }
@@ -2435,6 +2305,15 @@ public class Msg {
     }
     case NEO_PIXEL_WRITE_MATRIX:{
       return "neoPixelWriteMatrix";
+    }
+    case NEO_PIXEL_FILL:{
+      return "neoPixelFill";
+    }
+    case NEO_PIXEL_SET_BRIGHTNESS:{
+      return "neoPixelSetBrightness";
+    }
+    case NEO_PIXEL_CLEAR:{
+      return "neoPixelClear";
     }
     case ANALOG_WRITE:{
       return "analogWrite";
@@ -2537,24 +2416,6 @@ public class Msg {
     }
     case SERVO_STOP:{
       return "servoStop";
-    }
-    case NEO_PIXEL2_ATTACH:{
-      return "neoPixel2Attach";
-    }
-    case NEO_PIXEL2_SET_ANIMATION:{
-      return "neoPixel2SetAnimation";
-    }
-    case NEO_PIXEL2_WRITE_MATRIX:{
-      return "neoPixel2WriteMatrix";
-    }
-    case NEO_PIXEL2_FILL:{
-      return "neoPixel2Fill";
-    }
-    case NEO_PIXEL2_SET_BRIGHTNESS:{
-      return "neoPixel2SetBrightness";
-    }
-    case NEO_PIXEL2_CLEAR:{
-      return "neoPixel2Clear";
     }
 
     default: {
@@ -2889,10 +2750,6 @@ public class Msg {
     }
     case 9 :  {
       return "Encoder";
-
-    }
-    case 10 :  {
-      return "NeoPixel2";
 
     }
     

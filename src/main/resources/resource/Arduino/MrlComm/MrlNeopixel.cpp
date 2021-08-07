@@ -1,13 +1,13 @@
 #include <Arduino.h>
 #include "Msg.h"
 #include "Device.h"
-#include "MrlNeopixel2.h"
+#include "MrlNeopixel.h"
 
-MrlNeopixel2::MrlNeopixel2(int deviceId) : Device(deviceId, DEVICE_TYPE_NEOPIXEL2)
+MrlNeopixel::MrlNeopixel(int deviceId) : Device(deviceId, DEVICE_TYPE_NEOPIXEL)
 {
 }
 
-MrlNeopixel2::~MrlNeopixel2()
+MrlNeopixel::~MrlNeopixel()
 {
   runAnimation = false;
   if (strip)
@@ -17,7 +17,7 @@ MrlNeopixel2::~MrlNeopixel2()
   }
 }
 
-bool MrlNeopixel2::attach(byte pin, int count, byte depth)
+bool MrlNeopixel::attach(byte pin, int count, byte depth)
 {
   // FIXME - support "types/depth"
   //  Pixel type flags, add together as needed:
@@ -36,7 +36,7 @@ bool MrlNeopixel2::attach(byte pin, int count, byte depth)
   return true;
 }
 
-bool MrlNeopixel2::doneWaiting()
+bool MrlNeopixel::doneWaiting()
 {
   // current time - previous wait timestamp > wait interval
   return millis() - previousWaitMs > wait;
@@ -48,12 +48,12 @@ bool MrlNeopixel2::doneWaiting()
 // (as a single 'packed' 32-bit value, which you can get by calling
 // strip->Color(red, green, blue) as shown in the loop() function above),
 // and a delay time (in milliseconds) between pixels.
-void MrlNeopixel2::colorWipe()
+void MrlNeopixel::colorWipe()
 {
   strip->setPixelColor(x % numPixels, color);
 }
 
-void MrlNeopixel2::scanner()
+void MrlNeopixel::scanner()
 {
   if (y == strip->numPixels() - 1)
   {
@@ -80,7 +80,7 @@ void MrlNeopixel2::scanner()
 // Theater-marquee-style chasing lights. Pass in a color (32-bit value,
 // a la strip->Color(r,g,b) as mentioned above), and a delay time (in ms)
 // between frames.
-void MrlNeopixel2::theaterChase()
+void MrlNeopixel::theaterChase()
 {
   y = x % 3;
   strip->clear(); //   Set all pixels in RAM to 0 (off)
@@ -92,7 +92,7 @@ void MrlNeopixel2::theaterChase()
 }
 
 // Displays a rainbow..  no animation i guess?
-void MrlNeopixel2::rainbow()
+void MrlNeopixel::rainbow()
 {
   for (int i = 0; i < strip->numPixels(); i++)
   {
@@ -102,7 +102,7 @@ void MrlNeopixel2::rainbow()
 }
 
 // Displays a rotating rainbow
-void MrlNeopixel2::rainbowCycle()
+void MrlNeopixel::rainbowCycle()
 {
   for (int i = 0; i < strip->numPixels(); i++)
   {
@@ -112,14 +112,16 @@ void MrlNeopixel2::rainbowCycle()
 }
 
 // He was turned to steel in a great magnetic field.
-void MrlNeopixel2::ironman()
+void MrlNeopixel::ironman()
 {
   if (x == 0) {
     // initial brightness
     brightness = 127;
-    // initialize the color
-    strip->fill(color, 0, numPixels);
+
+
   }
+  // initialize the color
+  strip->fill(color, 0, numPixels);
   int change = random(-16,16);
   // add the incremental random change in the brightness
   brightness = brightness + change;
@@ -130,10 +132,14 @@ void MrlNeopixel2::ironman()
     brightness = 224;
   }
   strip->setBrightness(brightness);
+
+  // pluck a random pixel
+  int pixelToFlicker = random(0,numPixels);
+  strip->setPixelColor(pixelToFlicker, random(0,255), random(0,255), random(0,255));
 }
 
 // Rainbow-enhanced theater marquee. Pass delay time (in ms) between frames.
-void MrlNeopixel2::theaterChaseRainbow()
+void MrlNeopixel::theaterChaseRainbow()
 {
   y = x % 3;
   strip->clear(); //   Set all pixels in RAM to 0 (off)
@@ -145,7 +151,7 @@ void MrlNeopixel2::theaterChaseRainbow()
   }
 }
 
-void MrlNeopixel2::writeMatrix(byte bufferSize, const byte *buffer)
+void MrlNeopixel::writeMatrix(byte bufferSize, const byte *buffer)
 {
   if (!strip)
   {
@@ -161,7 +167,7 @@ void MrlNeopixel2::writeMatrix(byte bufferSize, const byte *buffer)
   strip->show();
 }
 
-void MrlNeopixel2::setAnimation(byte animation, byte red, byte green, byte blue, byte white, long wait_ms)
+void MrlNeopixel::setAnimation(byte animation, byte red, byte green, byte blue, byte white, long wait_ms)
 {
   animationIndex = animation;
   x = 0;
@@ -177,7 +183,7 @@ void MrlNeopixel2::setAnimation(byte animation, byte red, byte green, byte blue,
   }
 }
 
-void MrlNeopixel2::fill(int firstAddress, int count, byte red, byte green, byte blue, byte white)
+void MrlNeopixel::fill(int firstAddress, int count, byte red, byte green, byte blue, byte white)
 {
   if (strip)
   {
@@ -188,7 +194,7 @@ void MrlNeopixel2::fill(int firstAddress, int count, byte red, byte green, byte 
   }
 }
 
-void MrlNeopixel2::setBrightness(byte brightness)
+void MrlNeopixel::setBrightness(byte brightness)
 {
   if (strip)
   {
@@ -197,7 +203,7 @@ void MrlNeopixel2::setBrightness(byte brightness)
   }
 }
 
-void MrlNeopixel2::clear()
+void MrlNeopixel::clear()
 {
   if (strip)
   {
@@ -206,14 +212,14 @@ void MrlNeopixel2::clear()
   }
 }
 
-void MrlNeopixel2::animationFlashRandom() {
+void MrlNeopixel::animationFlashRandom() {
   for (int i = 0; i < strip->numPixels(); i++)
   {
     strip->setPixelColor(i, random(0,255), random(0,255), random(0,255));
   }
 }
 
-void MrlNeopixel2::update()
+void MrlNeopixel::update()
 {
   if (doneWaiting() || x == 0)
   {

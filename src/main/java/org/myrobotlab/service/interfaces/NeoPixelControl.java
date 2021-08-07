@@ -33,13 +33,13 @@ public interface NeoPixelControl extends NameProvider {
    * explicit attach no additional parameters
    * @param controller
    */
-  public void attachNeoPixel2Controller(NeoPixelController controller);
+  public void attachNeoPixelController(NeoPixelController controller);
 
   /**
    * explicit detach
    * @param controller
    */
-  public void detachNeoPixel2Controller(NeoPixelController controller);
+  public void detachNeoPixelController(NeoPixelController controller);
 
   /**
    * SetPixel: defining the pixels of the pixel matrix. Setting pixels are not
