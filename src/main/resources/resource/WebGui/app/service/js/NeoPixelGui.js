@@ -1,95 +1,121 @@
-angular.module('mrlapp.service.NeoPixelGui', [])
-.controller('NeoPixelGuiCtrl', ['$log', '$scope', 'mrl', function($log, $scope, mrl) {
-    $log.info('NeoPixelGuiCtrl')
-    var _self = this
-    var msg = this.msg
-    
-    // init
-    //$scope.controller = ''
-    $scope.controllerName = ''
-    $scope.controllers = []
+angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', ['$scope', 'mrl', function($scope, mrl) {
+    console.info('NeoPixelGuiCtrl')
+    let _self = this
+    let msg = this.msg
+
+    $scope.color = '000000'
+    $scope.address = 0
+    $scope.leds = []
     $scope.pins = []
-    $scope.numPixels = []
-    $scope.animations = []
-    $scope.animationData = {
-      "animation": '',
-      "red": 0,
-      "green": 0,
-      "blue": 0,
-      "speed": 1
+    $scope.speeds = []
+    $scope.commonPixelCounts = [8, 12, 16, 24, 32, 64, 128, 256]
+    $scope.animations = ['colorWipe', 'theaterChase', 'rainbow', 'scanner', 'randomFlash', 'theaterChaseRainbow', 'ironman']
+
+    _self.uiPixelCount = 0
+
+    for (i = 0; i < 30; i++) {
+        $scope.pins.push(i)
+        $scope.speeds.push(i + 1)
     }
-      
-    for (let i = 0; i < 70; ++i) {
-        $scope.pins.push(i);
+
+    $scope.drawPixels = function() {
+        if ($scope.service.pixelCount) {
+            $scope.leds = []
+            for (i = 0; i < $scope.service.pixelCount; ++i) {
+                $scope.leds.push({
+                    "address": i,
+                    "style": {
+                        "color": "white",
+                        "background-color": "coral"
+                    }
+                })
+            }
+        }
+        // if service.pixelCount
     }
-    for (let i = 1; i <24 ; i++){
-    	$scope.numPixels.push(i);
+
+    $scope.colorPickerOptions = {
+        // format: 'hex',
+        format: 'rgb',
+        alpha: false,
+        swatchOnly: true,
+        horizontal: true,
+        preserveInputFormat: true
+    }
+
+    // api event handlers
+    $scope.eventApi = {
+        onChange: function(api, color, $event) {
+            $scope.color = color
+            let rgb = color.substring(4, color.length - 1).replace(/ /g, '').split(',')
+            $scope.address = api.getElement().attr('id')
+            if ($scope.address == 'select') {
+                msg.send('setColor', parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]))
+            } else if ($scope.address == 'fill') {
+                msg.send('fill', 0, $scope.service.pixelCount, parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]))
+            } else {
+                msg.send('setPixel', $scope.address, parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]))
+            }
+        },
+        onBlur: function(api, color, $event) {},
+        onOpen: function(api, color, $event) {},
+        onClose: function(api, color, $event) {},
+        onClear: function(api, color, $event) {},
+        onReset: function(api, color, $event) {},
+        onDestroy: function(api, color) {},
     }
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
-        $scope.controllerName = service.controllerName
-        $scope.isAttached = service.isAttached
-        $scope.pin = service.pin
-        $scope.numPixel = service.numPixel
-        $scope.controllers = service.controllers
-        $scope.pixels = service.savedPixelMatrix
-        $scope.off = service.off
-        $scope.animations = service.animations
-        $scope.animation = service.animation
-	    $scope.animationSettingColor = service.animationSettingColor
-	    $scope.animationSettingSpeed = service.animationSettingSpeed
-     }
-    
+        if ($scope.service.pixelCount != _self.uiPixelCount) {
+            $scope.drawPixels()
+        }
+    }
+
     this.onMsg = function(inMsg) {
-        var data = inMsg.data[0]
+        let data = inMsg.data[0]
         switch (inMsg.method) {
         case 'onState':
             _self.updateState(data)
             $scope.$apply()
             break
-        // servo event in the past 
-        // meant feedback from MRLComm.c
-        // but perhaps its come to mean
-        // feedback from the service.moveTo
-        case 'onStatus':
-            $scope.status = data
+        case 'onSetCount':
+            $scope.service.pixelCount = data
+            $scope.drawPixels()
             $scope.$apply()
             break
-        case 'onServiceNamesFromInterface':
-            $scope.controllers = data
-            $scope.$apply()
+        case 'onStatus':
             break
         default:
-            $log.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method)
+            console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
         }
     }
-    
-    
-    $scope.setControllerName = function(name) {
-        $scope.controllerName = name
-    }
-    
-    $scope.setPin = function(inPin) {
-        $scope.pin = inPin
+
+    $scope.clear = function() {
+        msg.send('clear')
+        $scope.pickedColor = 'rgb(0, 0, 0)'
+        $scope.color = $scope.pickedColor
+        msg.send('broadcastState')
     }
 
-    $scope.setPixel = function(inPixel) {
-        $scope.numPixel = inPixel
-    }
-    
-    $scope.setAnimationSetting = function(animation) {
-    	$scope.animationData.animation = animation
-    	msg.send('setAnimationSetting',animation)
+    $scope.fill = function() {
+        msg.send('fill')
     }
 
+    $scope.attach = function(controller) {
+        msg.send('attach', controller)
+    }
+
+    $scope.detach = function() {
+        if ($scope.service.controller) {
+            msg.send('detach', $scope.service.controller)
+        }
+    }
+
+    $scope.drawPixels()
+    msg.subscribe('setCount')
     msg.subscribe(this)
-    
-    var runtimeName = mrl.getRuntime().name
-    mrl.subscribe(runtimeName, 'getServiceNamesFromInterface')
-    mrl.subscribeToServiceMethod(this.onMsg, runtimeName, 'getServiceNamesFromInterface')
-    mrl.sendTo(runtimeName, 'getServiceNamesFromInterface', 'org.myrobotlab.service.interfaces.NeoPixelController')
 }
 ])
