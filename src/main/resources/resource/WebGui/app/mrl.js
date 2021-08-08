@@ -823,6 +823,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             angular.forEach(updateSubscribtions, function(value, key) {
                 value(panellist)
             })
+            _self.changeTab('runtime')
         }
 
         //END_update-notification
