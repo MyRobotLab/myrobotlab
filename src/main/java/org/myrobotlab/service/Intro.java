@@ -135,7 +135,7 @@ public class Intro extends Service {
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true); 
-      webgui.autoStartBrowser(true);
+      webgui.autoStartBrowser(false);
       webgui.startService();
 
     } catch (Exception e) {
