@@ -562,6 +562,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
         setAnimation(6, red, green, blue, speedFps);
         currentAnimation = "rainbow";
         break;
+      case "rainbowCycle":
+        setAnimation(7, red, green, blue, speedFps);
+        currentAnimation = "rainbow";
+        break;
       case "randomFlash":
         setAnimation(8, red, green, blue, speedFps);
         currentAnimation = "randomFlash";

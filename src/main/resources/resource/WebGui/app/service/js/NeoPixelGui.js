@@ -9,7 +9,7 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
     $scope.pins = []
     $scope.speeds = []
     $scope.commonPixelCounts = [8, 12, 16, 24, 32, 64, 128, 256]
-    $scope.animations = ['colorWipe', 'theaterChase', 'rainbow', 'scanner', 'randomFlash', 'theaterChaseRainbow', 'ironman', 'equalizer']
+    $scope.animations = ['colorWipe', 'theaterChase', 'rainbow', 'rainbowCycle', 'scanner', 'randomFlash', 'theaterChaseRainbow', 'ironman', 'equalizer']
 
     _self.uiPixelCount = 0
 
