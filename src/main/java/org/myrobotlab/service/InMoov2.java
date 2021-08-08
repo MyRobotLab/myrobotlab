@@ -1244,6 +1244,25 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public ProgramAB startChatBot() {
 
     try {
+      
+      // copy (if they don't already exist) the chatbots which came with InMoov2      
+      String resourceBotDir = FileIO.gluePaths(getResourceDir(), "chatbot/bots");
+      
+      List<File> files = FileIO.getFileList(resourceBotDir);
+      for (File f: files) {
+        // copyResource(f.getAbsolutePath(), FileIO.gluePaths(getResourceDir(), f.getName()));
+        String botDir = "data/ProgramAB/" + f.getName();
+        if (new File(botDir).exists()) {
+          log.info("found data/ProgramAB/{} not copying", botDir);
+        } else {
+          log.info("will copy new data/ProgramAB/{}", botDir);
+          try {
+            FileIO.copy(f.getAbsolutePath(), botDir);
+          } catch (Exception e) {
+            error(e);
+          }
+        }
+      }
 
       chatBot = (ProgramAB) startPeer("chatBot");
       isChatBotActivated = true;
