@@ -60,7 +60,7 @@ public interface NeoPixelController extends Attachable {
    * @param green
    * @param blue
    * @param white
-   * @param wait_ms
+   * @param wait_ms - number of ms to wait in "show" pixels
    */
   public void neoPixelSetAnimation(String neopixel, int animation, int red, int green, int blue, int white, int wait_ms);
   

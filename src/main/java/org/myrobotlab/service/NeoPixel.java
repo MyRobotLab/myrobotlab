@@ -63,7 +63,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
         while (running) {
           equalizer();
-          sleep(animationWaitMs);
+          Double wait_ms_per_frame = fpsToWaitMs.calcOutput(speedFps);
+          sleep(wait_ms_per_frame.intValue());
         }
       } catch (Exception e) {
         error(e);
@@ -148,7 +149,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
    * currently selected wait time for frame of animation - this potentially
    * affects the playing of both onboard and offboard animations
    */
-  protected int animationWaitMs = 0;
+  // protected int animationWaitMs = 0;
 
   /**
    * thread for doing offboard and in memory animations
@@ -230,9 +231,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   public NeoPixel(String n, String id) {
     super(n, id);
-    animationRunner = new AnimationRunner();
-    Double d = fpsToWaitMs.calcOutput(speedFps);
-    animationWaitMs = d.intValue();
+    animationRunner = new AnimationRunner();        
   }
 
   @Override
@@ -292,7 +291,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     // stop java animations
     animationRunner.stop();
     // stop on board controller animations
-    setAnimation(0, 0, 0, 0, 0);
+    setAnimation(0, 0, 0, 0, speedFps);
 
     clearPixelSet();
     log.info("clear getPixelSet {}", getPixelSet().flatten());
@@ -357,10 +356,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
     equalizer(null, null, r, g, b, null);
   }
 
-  public void equalizer(Long wait_ms, Integer range, Integer r, Integer g, Integer b, Integer w) {
+  public void equalizer(Long wait_ms_per_frame, Integer range, Integer r, Integer g, Integer b, Integer w) {
 
-    if (wait_ms == null) {
-      wait_ms = 25L;
+    if (wait_ms_per_frame == null) {
+      wait_ms_per_frame = 25L;
     }
 
     if (range == null) {
@@ -541,40 +540,40 @@ public class NeoPixel extends Service implements NeoPixelControl {
     switch (animation) {
       // onboard animations
       case "stopAnimation":
-        setAnimation(1, red, green, blue, animationWaitMs);
+        setAnimation(1, red, green, blue, speedFps);
         break;
       case "colorWipe":
-        setAnimation(2, red, green, blue, animationWaitMs);
+        setAnimation(2, red, green, blue, speedFps);
         currentAnimation = "colorWipe";
         break;
       case "scanner":
-        setAnimation(3, red, green, blue, animationWaitMs);
+        setAnimation(3, red, green, blue, speedFps);
         currentAnimation = "scanner";
         break;
       case "theaterChase":
-        setAnimation(4, red, green, blue, animationWaitMs);
+        setAnimation(4, red, green, blue, speedFps);
         currentAnimation = "theaterChase";
         break;
       case "theaterChaseRainbow":
-        setAnimation(5, red, green, blue, animationWaitMs);
+        setAnimation(5, red, green, blue, speedFps);
         currentAnimation = "theaterChaseRainbow";
         break;
       case "rainbow":
-        setAnimation(6, red, green, blue, animationWaitMs);
+        setAnimation(6, red, green, blue, speedFps);
         currentAnimation = "rainbow";
         break;
       case "randomFlash":
-        setAnimation(8, red, green, blue, animationWaitMs);
+        setAnimation(8, red, green, blue, speedFps);
         currentAnimation = "randomFlash";
         break;
       case "ironman":
-        setAnimation(9, red, green, blue, animationWaitMs);
+        setAnimation(9, red, green, blue, speedFps);
         currentAnimation = "ironman";
         break;
 
       // TODO functional java animations
       case "equalizer":
-        // setAnimation(9, red, green, blue, animationWaitMs);
+        // setAnimation(9, red, green, blue, speedFps);
         currentAnimation = "equalizer";
         equalizer();
         animationRunner.start();
@@ -602,21 +601,25 @@ public class NeoPixel extends Service implements NeoPixelControl {
   }
 
   public void stopAnimation() {
-    setAnimation(1, red, green, blue, animationWaitMs);
+    setAnimation(1, red, green, blue, speedFps);
   }
 
   @Override
-  public void setAnimation(int animation, int red, int green, int blue, int wait_ms) {
-    if (wait_ms < 1) {
-      wait_ms = 1;
+  public void setAnimation(int animation, int red, int green, int blue, int speedFps) {
+    if (speedFps > 30) {
+      speedFps = 30;
     }
+    
+    this.speedFps = speedFps;
+    
     if (controller == null) {
       error("%s could not set animation no attached controller", getName());
       return;
     }
-    log.info("setAnimation {} {} {} {} {}", animation, red, green, blue, wait_ms);
+    log.info("setAnimation {} {} {} {} {}", animation, red, green, blue, speedFps);
     NeoPixelController nc2 = (NeoPixelController) Runtime.getService(controller);
-    nc2.neoPixelSetAnimation(getName(), animation, red, green, blue, 0, wait_ms);
+    Double wait_ms_per_frame = fpsToWaitMs.calcOutput(speedFps);
+    nc2.neoPixelSetAnimation(getName(), animation, red, green, blue, 0, wait_ms_per_frame.intValue());
     if (animation == 1) {
       currentAnimation = null;
       animationRunner.stop();
@@ -629,7 +632,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     this.red = red;
     this.green = green;
     this.blue = blue;
-    this.animationWaitMs = wait_ms;
+    this.speedFps = wait_ms;
     playAnimation(animation);
   }
 
@@ -790,10 +793,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
       error("speed must be between 1 - 30 fps requested speed was %d fps", speed);
       return;
     }
-    speedFps = speed;
-    Double d = fpsToWaitMs.calcOutput(speed);
-    animationWaitMs = d.intValue();
-    log.info("setSpeed speed {} animationWaitMs {}", speedFps, animationWaitMs);
+    speedFps = speed;    
+    log.info("setSpeed speed {}", speedFps);
     if (currentAnimation != null) {
       // restarting currently running animation
       playAnimation(currentAnimation);
