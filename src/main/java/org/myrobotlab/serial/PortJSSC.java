@@ -87,6 +87,8 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
       port.setParams(rate, dataBits, stopBits, parity);
       // add self as a event listener, and listen to MASK_RXCHAR
       port.addEventListener(this, SerialPort.MASK_RXCHAR);
+      // jssc uses own listening thread to push events
+      listening = true;
     } catch (Exception e) {
       throw new IOException(String.format("could not open port %s  rate %d dataBits %d stopBits %d parity %d", portName, rate, dataBits, stopBits, parity), e);
     }
