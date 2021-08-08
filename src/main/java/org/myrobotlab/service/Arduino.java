@@ -2236,7 +2236,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   @Override
   public void neoPixelWriteMatrix(String neopixel, int[] buffer) {
-    log.info("writing {} pixels : {}", buffer.length/5, buffer);
+    // log.debug("writing {} pixels : {}", buffer.length/5, buffer);
     msg.neoPixelWriteMatrix(getDeviceId(neopixel), buffer);
   }
 

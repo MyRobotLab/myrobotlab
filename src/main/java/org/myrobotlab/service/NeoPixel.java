@@ -149,7 +149,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
    * affects the playing of both onboard and offboard animations
    */
   protected int animationWaitMs = 0;
-  
+
   /**
    * thread for doing offboard and in memory animations
    */
@@ -158,14 +158,14 @@ public class NeoPixel extends Service implements NeoPixelControl {
   /**
    * current selected blue value
    */
-  
+
   protected int blue = 0;
 
   /**
    * name of controller currently attached to
    */
   protected String controller = null;
-  
+
   /**
    * list of possible controllers
    */
@@ -183,7 +183,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   /**
    * current selected green
    */
-  
+
   protected int green = 120;
 
   /**
@@ -209,7 +209,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   /**
    * current selected red value
    */
-  
+
   protected int red = 0;
 
   /**
@@ -221,10 +221,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
    * speed of an animation in fps
    */
   protected int speedFps = 10;
-  
+
   /**
-   * map between speed and wait time in ms for those animations that
-   * need it (onboard)
+   * map between speed and wait time in ms for those animations that need it
+   * (onboard)
    */
   protected MapperLinear fpsToWaitMs = new MapperLinear(1, 30, 1000, 30);
 
@@ -270,12 +270,12 @@ public class NeoPixel extends Service implements NeoPixelControl {
     neoCntrlr.neoPixelAttach(getName(), pin, pixelCount, pixelDepth);
     broadcastState();
   }
-  
+
   @Deprecated /* use clear() */
   public void animationStop() {
     clear();
   }
-  
+
   @Override
   public boolean isAttached(Attachable instance) {
     return instance.getName().equals(controller);
@@ -302,12 +302,12 @@ public class NeoPixel extends Service implements NeoPixelControl {
       error("%s cannot writeMatrix controller not set", getName());
       return;
     }
-    
+
     red = 0;
     blue = 0;
     green = 0;
     // white = 0;
-    
+
     currentAnimation = null;
 
     np2.neoPixelClear(getName());
@@ -337,7 +337,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       return;
     }
   }
-  
+
   @Override
   public void detachNeoPixelController(NeoPixelController neoCntrlr) {
     if (controller == null) {
@@ -538,8 +538,11 @@ public class NeoPixel extends Service implements NeoPixelControl {
   }
 
   public void playAnimation(String animation) {
-    switch(animation) {
+    switch (animation) {
       // onboard animations
+      case "stopAnimation":
+        setAnimation(1, red, green, blue, animationWaitMs);
+        break;
       case "colorWipe":
         setAnimation(2, red, green, blue, animationWaitMs);
         currentAnimation = "colorWipe";
@@ -559,22 +562,28 @@ public class NeoPixel extends Service implements NeoPixelControl {
       case "rainbow":
         setAnimation(6, red, green, blue, animationWaitMs);
         currentAnimation = "rainbow";
-        break;      
+        break;
       case "randomFlash":
         setAnimation(8, red, green, blue, animationWaitMs);
         currentAnimation = "randomFlash";
-        break;      
+        break;
       case "ironman":
         setAnimation(9, red, green, blue, animationWaitMs);
         currentAnimation = "ironman";
         break;
-        // functional java animations
-        
-        // memory matrix driven animations
-        
-        
-        default:
-          error("could not find animation %s", animation);      
+
+      // TODO functional java animations
+      case "equalizer":
+        // setAnimation(9, red, green, blue, animationWaitMs);
+        currentAnimation = "equalizer";
+        equalizer();
+        animationRunner.start();
+        break;
+
+      // TODO memory matrix driven animations
+
+      default:
+        error("could not find animation %s", animation);
     }
     broadcastState();
   }
@@ -592,6 +601,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
     return controllers;
   }
 
+  public void stopAnimation() {
+    setAnimation(1, red, green, blue, animationWaitMs);
+  }
+
   @Override
   public void setAnimation(int animation, int red, int green, int blue, int wait_ms) {
     if (wait_ms < 1) {
@@ -604,18 +617,25 @@ public class NeoPixel extends Service implements NeoPixelControl {
     log.info("setAnimation {} {} {} {} {}", animation, red, green, blue, wait_ms);
     NeoPixelController nc2 = (NeoPixelController) Runtime.getService(controller);
     nc2.neoPixelSetAnimation(getName(), animation, red, green, blue, 0, wait_ms);
+    if (animation == 1) {
+      currentAnimation = null;
+      animationRunner.stop();
+    }
+    broadcastState();
   }
 
   @Override
   public void setAnimation(String animation, int red, int green, int blue, int wait_ms) {
-    // TODO convert to int
-
+    this.red = red;
+    this.green = green;
+    this.blue = blue;
+    this.animationWaitMs = wait_ms;
+    playAnimation(animation);
   }
 
   @Override
   public void setAnimationSetting(String animation) {
-    // TODO Auto-generated method stub
-
+    playAnimation(animation);
   }
 
   public void setBlue(int blue) {
@@ -740,14 +760,6 @@ public class NeoPixel extends Service implements NeoPixelControl {
     refreshControllers();
   }
 
-  public void test() {
-    clear();
-    for (int i = 0; i < 1000; ++i) {
-      setAnimation(6, 10, 110, 0, 20); // rainbow
-      setAnimation(4, 125, 10, 50, 130); // rainbow
-    }
-  }
-  
   public void setColor(int red, int green, int blue) {
     this.red = red;
     this.green = green;
@@ -767,26 +779,27 @@ public class NeoPixel extends Service implements NeoPixelControl {
     }
     np2.neoPixelWriteMatrix(getName(), getPixelSet().flatten());
   }
-  
+
   /**
    * extremely rough fps
+   * 
    * @param speed
    */
   public void setSpeed(Integer speed) {
     if (speed > 30 || speed < 1) {
       error("speed must be between 1 - 30 fps requested speed was %d fps", speed);
       return;
-    }    
+    }
     speedFps = speed;
     Double d = fpsToWaitMs.calcOutput(speed);
-    animationWaitMs = d.intValue();    
+    animationWaitMs = d.intValue();
     log.info("setSpeed speed {} animationWaitMs {}", speedFps, animationWaitMs);
     if (currentAnimation != null) {
       // restarting currently running animation
       playAnimation(currentAnimation);
     }
   }
-  
+
   public static void main(String[] args) throws InterruptedException {
 
     try {
