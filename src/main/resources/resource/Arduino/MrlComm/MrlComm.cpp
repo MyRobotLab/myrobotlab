@@ -2,7 +2,6 @@
 #include "Msg.h"
 #include "Device.h"
 #include "Pin.h"
-// #include "MrlNeopixel.h"
 #include "MrlNeopixel.h"
 #include <Servo.h>
 #include "MrlServo.h"

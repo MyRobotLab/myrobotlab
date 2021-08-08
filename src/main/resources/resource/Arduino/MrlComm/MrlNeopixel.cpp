@@ -205,6 +205,7 @@ void MrlNeopixel::setBrightness(byte brightness)
 
 void MrlNeopixel::clear()
 {
+  runAnimation = false;
   if (strip)
   {
     strip->clear();

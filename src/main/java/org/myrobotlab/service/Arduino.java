@@ -54,7 +54,6 @@ import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.myrobotlab.service.interfaces.NeoPixelController;
-import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinArrayPublisher;
 import org.myrobotlab.service.interfaces.PinDefinition;
