@@ -359,12 +359,6 @@
 <!-- Git end -->
 
 <!-- GoogleCloud begin -->
-  <dependency>
-    <groupId>com.google.cloud</groupId>
-    <artifactId>google-cloud-vision</artifactId>
-    <version>1.14.0</version>
-    <scope>provided</scope>
-  </dependency>
 <!-- GoogleCloud end -->
 
 <!-- GoogleSearch begin -->
@@ -1225,6 +1219,12 @@
     <groupId>org.atmosphere</groupId>
     <artifactId>wasync</artifactId>
     <version>2.1.5</version>
+    <exclusions>
+    	<exclusion>
+    		<groupId>io.netty</groupId>
+    		<artifactId>netty</artifactId>
+    	</exclusion>
+    </exclusions>
   </dependency>
   <dependency>
     <groupId>info.picocli</groupId>
@@ -1258,42 +1258,7 @@
 <!-- Serial end -->
 
 <!-- Solr begin -->
-  <dependency>
-    <groupId>org.apache.lucene</groupId>
-    <artifactId>lucene-core</artifactId>
-    <version>8.8.2</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.apache.solr</groupId>
-    <artifactId>solr-core</artifactId>
-    <version>8.8.2</version>
-    <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-slf4j-impl</artifactId>
-        </exclusion>
-      </exclusions>
-  </dependency>
-  <dependency>
-    <groupId>org.apache.solr</groupId>
-    <artifactId>solr-test-framework</artifactId>
-    <version>8.8.2</version>
-    <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-slf4j-impl</artifactId>
-        </exclusion>
-      </exclusions>
-  </dependency>
-  <dependency>
-    <groupId>org.apache.solr</groupId>
-    <artifactId>solr-solrj</artifactId>
-    <version>8.8.2</version>
-    <scope>provided</scope>
-  </dependency>
+
 <!-- Duplicate entry for commons-io-commons-io-2.7 skipping -->
 <!-- Solr end -->
 
@@ -1413,7 +1378,7 @@
   <dependency>
     <groupId>org.atmosphere</groupId>
     <artifactId>nettosphere</artifactId>
-    <version>3.2.1</version>
+    <version>3.2.3</version>
   </dependency>
   <dependency>
     <groupId>javax.annotation</groupId>
