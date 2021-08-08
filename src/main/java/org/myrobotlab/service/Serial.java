@@ -32,7 +32,6 @@ import org.myrobotlab.serial.Port;
 import org.myrobotlab.serial.PortQueue;
 import org.myrobotlab.serial.PortStream;
 import org.myrobotlab.serial.SerialControl;
-import org.myrobotlab.service.config.ArduinoConfig;
 import org.myrobotlab.service.config.SerialConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.PortConnector;
@@ -382,7 +381,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     this.stopBits = stopBits;
     this.parity = parity;
 
-    lastPortName = portName;
 
     // two possible logics to see if we are connected - look at the
     // state of the port
@@ -405,7 +403,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     if (ports.containsKey(inPortName)) {
       info("#2 connect to a pre-existing port");
       connectPort(ports.get(inPortName), null);
-      lastPortName = portName;
       return;
     }
 
@@ -481,6 +478,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
     // we have a portName and we are connected
     portName = port.getName();
+    lastPortName = portName;
+
 
     // save(); why?
     broadcastState();
@@ -1271,7 +1270,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     SerialConfig config = (SerialConfig) c;
 
     if (config.port != null) {
-      portName = config.port;
       try {
         if (isConnected()) {
           connect(config.port);
