@@ -1315,7 +1315,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       // FIXME - deal with language
       // speakBlocking(get("CHATBOTACTIVATED"));
       chatBot.repetitionCount(10);
-      chatBot.setPath(getResourceDir() + fs + "chatbot");
+      // chatBot.setPath(getResourceDir() + fs + "chatbot");
+      chatBot.setPath(getDataDir() + fs + "chatbot");
       chatBot.startSession("default", locale.getTag());
       // reset some parameters to default...
       chatBot.setPredicate("topic", "default");
