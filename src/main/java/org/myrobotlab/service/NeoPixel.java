@@ -54,7 +54,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   private class AnimationRunner implements Runnable {
 
     boolean running = false;
-    Thread thread = null;
+    private transient Thread thread = null;
 
     @Override
     public void run() {
