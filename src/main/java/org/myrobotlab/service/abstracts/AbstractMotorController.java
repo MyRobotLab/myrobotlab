@@ -1,7 +1,6 @@
 package org.myrobotlab.service.abstracts;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.myrobotlab.framework.Service;
@@ -14,11 +13,14 @@ import org.myrobotlab.service.interfaces.MotorController;
 
 public abstract class AbstractMotorController extends Service implements MotorController {
 
-  protected transient Map<String, AbstractMotor> motors = new HashMap<String, AbstractMotor>();
+  /**
+   * currently attached motors to this controller
+   */
+  protected Set<String> motors = new HashSet<>();
 
   private static final long serialVersionUID = 1L;
 
-  MapperLinear defaultMapper;
+  protected MapperLinear defaultMapper = new MapperLinear();
 
   public AbstractMotorController(String reservedKey, String id) {
     super(reservedKey, id);
@@ -26,9 +28,6 @@ public abstract class AbstractMotorController extends Service implements MotorCo
 
   // setting default map values
   public void map(double minX, double maxX, double minY, double maxY) {
-    if (defaultMapper == null) {
-      defaultMapper = new MapperLinear();
-    }
     defaultMapper.map(minX, maxX, minY, maxY);
     // we want to setMap because we merge with motorControl values
     // which initially hold limits - and we don't want to int
@@ -40,13 +39,13 @@ public abstract class AbstractMotorController extends Service implements MotorCo
   // TODO - switch to MotorControl interface instead of AbstractMotor
   public double motorCalcOutput(MotorControl mc) {
     double calculatedMotorControllerOutput = mc.calcControllerOutput();
-    info("%s.move(%f) -> %s.motorMove %.2f -> hardware", mc.getName(), mc.getPowerLevel(), getName(), calculatedMotorControllerOutput);
+    log.debug("{}.move({}) -> {}.motorMove {} -> hardware", mc.getName(), mc.getPowerLevel(), getName(), calculatedMotorControllerOutput);
     return calculatedMotorControllerOutput;
   }
 
   // FIXME - if kept they should be put in interface
   public boolean motorDetach(String name) {
-    if (motors.containsKey(name)) {
+    if (motors.contains(name)) {
       motors.remove(name);
       return true;
     }
@@ -82,7 +81,7 @@ public abstract class AbstractMotorController extends Service implements MotorCo
 
   @Override
   public void detach() {
-    for (String name : motors.keySet()) {
+    for (String name : motors) {
       MotorControl m = (MotorControl) Runtime.getService(name);
       if (m != null) {
         m.detach(this);
@@ -94,12 +93,12 @@ public abstract class AbstractMotorController extends Service implements MotorCo
   // their own isAttached
   @Override
   public boolean isAttached(Attachable service) {
-    return motors.containsKey(service.getName());
+    return motors.contains(service.getName());
   }
 
   @Override
   public Set<String> getAttached() {
-    return motors.keySet();
+    return motors;
   }
 
   public void detach(MotorControl device) {
@@ -141,7 +140,7 @@ public abstract class AbstractMotorController extends Service implements MotorCo
     if (MotorControl.class.isAssignableFrom(service.getClass())) {
       MotorControl motor = (MotorControl) service;
       // add motor to set of current motors this controller is attached to
-      motors.put(motor.getName(), (AbstractMotor) motor);
+      motors.add(motor.getName());
 
       // give opportunity for motor to attach
       motor.attach(this);

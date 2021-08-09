@@ -114,5 +114,25 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
    */
   void unlock();
 
+  /**
+   * publishes a power change in the motor
+   * 
+   * @param powerInput
+   * @return
+   */
+  public double publishPowerChange(double powerInput);
+
+  /**
+   * calculates the appropriate value from the requested input to the effective
+   * range needed for the motor controller
+   * 
+   * @return
+   */
   double calcControllerOutput();
+
+  /**
+   * sets a min and max on the range of power input for a motor
+   */
+  public void setMinMax(double min, double max);
+
 }
