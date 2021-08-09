@@ -327,13 +327,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void setSpeed(Double degreesPerSecond);
 
   /**
-   * sets the maximum speed for which setSpeed cannot go over
-   * @param degreesPerSecond
-   */
-  void setMaxSpeed(Double degreesPerSecond);
-
-
-  /**
    * stops the servo if currently in motion servo must be moving at incremental
    * speed for a stop to work (setSpeed &lt; 1.0)
    */
