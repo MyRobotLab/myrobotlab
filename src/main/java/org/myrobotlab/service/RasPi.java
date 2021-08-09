@@ -568,6 +568,8 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
 
       I2CBus bus = I2CFactory.getInstance(busNumber);
 
+      validAddresses = new HashMap<>();
+      
       if (!validAddresses.containsKey(busNumber)) {
         validAddresses.put(busNumber, new HashSet<>());
       }
@@ -577,7 +579,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       for (int i = 1; i < 128; i++) {
         try {
           I2CDevice device = bus.getDevice(i);
-          device.write((byte) 0);
+          device.write((byte) 0); 
           addresses.add(Integer.toHexString(i));
         } catch (Exception ignore) {
         }
