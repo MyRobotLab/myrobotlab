@@ -122,6 +122,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     } catch (Exception e) {
       error(e);
     }
+    
+    runtime.invoke("publishConfigList");
   }
 
   public void onCreated(String fullname) {
