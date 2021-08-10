@@ -201,7 +201,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   protected long statusBroadcastLimitMs = 1000;
 
   /**
-   * variable for services to virtualize some of their dependencies
+   * variable for services to virtualize some of their dependencies - defaults
+   * to be the same as Runtime's unless explicitly set
    */
   protected boolean isVirtual = false;
 
@@ -2674,6 +2675,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * to use This function is used to simplify all of that - since we are
    * primarily interested in language and do not usually need the distinction
    * between regions in this context
+   * 
    * @return the language from the locale
    * 
    */
@@ -2696,7 +2698,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
-   * @return get current locale tag - this is of the form en-BR en-US including region
+   * @return get current locale tag - this is of the form en-BR en-US including
+   *         region
    */
   public String getLocaleTag() {
     return locale.getTag();

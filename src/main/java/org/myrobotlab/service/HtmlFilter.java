@@ -122,7 +122,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
   @Override
   public void attachTextListener(TextListener service) {
     if (service == null) {
-      log.warn("{}.attachTextListener(null)");
+      log.warn("{}.attachTextListener(null)", getName());
       return;
     }
     
