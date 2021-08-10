@@ -24,15 +24,6 @@ public class WolframAlphaMeta extends MetaData {
 
     addDescription("Run queries against wolfram alpha!");
     addDependency("WolframAlpha", "WolframAlpha", "1.1");
-
-    // FIXME - add Mrl Service HttpClient Peer - don't include dependency
-    // directly
-    /*
-     * - currently Runtime provides these dependencies
-     * addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
-     * addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
-     */
-
     setCloudService(true);
 
   }
