@@ -33,6 +33,7 @@ public class MarySpeechMeta extends AbstractSpeechSynthesisMeta {
 
     for (String voice : voices) {
       addDependency("de.dfki.mary", voice, "5.2");
+      // force using Runtimes httpclient version - exclude here
       exclude("org.apache.httpcomponents", "httpcore");
       exclude("org.apache.httpcomponents", "httpclient");
 
