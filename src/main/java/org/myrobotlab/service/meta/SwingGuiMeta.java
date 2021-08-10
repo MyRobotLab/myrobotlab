@@ -26,7 +26,7 @@ public class SwingGuiMeta extends MetaData {
     addDependency("com.fifesoft", "rsyntaxtextarea", "2.0.5.1");
     addDependency("com.fifesoft", "autocomplete", "2.0.5.1");
     addDependency("com.jidesoft", "jide-oss", "3.6.18");
-    addDependency("com.mxgraph", "jgraphx", "1.10.4.2");
+    addDependency("com.mxgraph", "jgraphx", "1.12.0.2");
 
   }
 

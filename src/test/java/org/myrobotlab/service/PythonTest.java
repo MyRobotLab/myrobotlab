@@ -70,12 +70,18 @@ public class PythonTest extends AbstractServiceTest {
     
     // verifying callbacks from subscriptions can call python methods
     python.exec("count = 0\ndef onPulse(clock_date):\n\tprint('successs !', clock_date)\n\tglobal count\n\tcount = count + 1");
-    Clock clock = (Clock)Runtime.start("clock01", "Clock");
-    python.subscribe("clock01", "pulse");
-    clock.startClock();
+    Clock clockp01 = (Clock)Runtime.start("clockp01", "Clock");
+    python.subscribe("clockp01", "pulse");
+    clockp01.startClock();
     sleep(2000);
     Integer count = (Integer)python.get("count");
     assertTrue(count > 0);
+    
+    
+    python.exec("clockp01.stopClock()");
+    sleep(500);
+    
+    assert(!clockp01.isClockRunning());
     
   }
 

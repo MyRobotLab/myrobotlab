@@ -816,6 +816,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             angular.forEach(panelReleasedSubscribers, function(value, key) {
                 value(panelName)
             })
+            _self.changeTab('runtime')
         }
 
         var notifyAllOfUpdate = function() {

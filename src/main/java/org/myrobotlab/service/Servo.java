@@ -214,12 +214,6 @@ public class Servo extends AbstractServo implements ServoControl {
     setAutoDisable(value);
   }
 
-  @Deprecated
-  public void setMaxVelocity(Double speed) {
-    log.warn("setMaxVelocity is deprecated - use setMaxSpeed");
-    setMaxSpeed(speed);
-  }
- 
   @Override
   public ServiceConfig getConfig() {
     

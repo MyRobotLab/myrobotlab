@@ -36,8 +36,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.CodecUtils.ApiDescription;
@@ -354,7 +352,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   static public boolean setAllVirtual(boolean b) {
-    Platform.setVirtual(true);
+    Platform.setVirtual(b);
     for (ServiceInterface si : getServices()) {
       if (!si.isRuntime()) {
         si.setVirtual(b);
@@ -739,7 +737,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * FIXME - return 
+   * FIXME - return
    * 
    * @return filtering/query requests
    */
@@ -852,7 +850,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
  * @param interfaze the interface
- * @return a list of service names that have the interface
+   * @return a list of service names that have the interface
  * @throws ClassNotFoundException boom
    * 
    */
@@ -1983,7 +1981,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    *
    * The serviceData.xml lists all service types, dependencies, categories and
    * other relevant information regarding service creation
-   * @return list of all service type names 
+   * @return list of all service type names
    */
   public String[] getServiceTypeNames() {
     return getServiceTypeNames("all");
@@ -3388,6 +3386,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     RuntimeConfig config = (RuntimeConfig) initConfig(new RuntimeConfig());
     // config.id = getId(); Not ready yet
+    config.virtual = Platform.isVirtual();
 
     Map<String, ServiceInterface> services = getLocalServices();
     List<ServiceInterface> s = new ArrayList<>();
@@ -3411,17 +3410,24 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // When runtime calls load, we expect the full path to the runtime.yml file.
     // based on the directory structure, we need to set the current config name
     // so we can find the other services to load.
-    if (filename == null) {
-      filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + getName() + ".yml";
+    try {
+      if (filename == null) {
+        filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + getName() + ".yml";
+      }
+      File f = new File(filename);
+      setConfigName(f.getParentFile().getName());
+      return super.load(filename);
+    } catch (Exception e) {
+      error("could not load %s", filename);
     }
-    File f = new File(filename);
-    setConfigName(f.getParentFile().getName());
-    return super.load(filename);
+    return null;
   }
 
   public ServiceConfig load(ServiceConfig c) {
+    super.load(c);
     RuntimeConfig config = (RuntimeConfig) c;
     setLocale(c.locale);
+    setAllVirtual(config.virtual);
     // setId(config.id); Very Fragile ! Cannot do this yet
     if (config.registry != null) {
       ServiceConfig sc = null;
@@ -3513,8 +3519,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           for (String n : sc.attach) {
             try {
               // log.warn("attaching {} to {}", si.getName(), n);
-              // TODO: if the services you are attaching have conflicting interfaces, this call is potentially ambigious as to it's meaning.
-              // Example: htmlfilter attaching to programab... both are text listeners, both are text publishers.  which direction do we define
+              // TODO: if the services you are attaching have conflicting
+              // interfaces, this call is potentially ambigious as to it's
+              // meaning.
+              // Example: htmlfilter attaching to programab... both are text
+              // listeners, both are text publishers. which direction do we
+              // define
               // the attach in..
               si.attach(n);
               si.broadcastState();
@@ -3555,7 +3565,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       error("could not release %s", filename);
     }
   }
-  
+
   public boolean save() {
     return save(null);
   }

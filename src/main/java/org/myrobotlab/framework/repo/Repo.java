@@ -153,8 +153,9 @@ public abstract class Repo {
       // remotes.add(new RemoteRepo("jmonkey", "https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine", "jmonkey simulator"));
 
       remotes.add(new RemoteRepo("oss-snapshots-repo", "https://oss.sonatype.org/content/groups/public", "sphinx"));
-      remotes.add(new RemoteRepo("alfresco", "https://artifacts.alfresco.com/nexus/content/repositories/public", "swinggui mxgraph"));
-
+      // remotes.add(new RemoteRepo("alfresco", "https://artifacts.alfresco.com/nexus/content/repositories/public", "swinggui mxgraph"));
+      remotes.add(new RemoteRepo("talend", "https://nexus.talanlabs.com/content/repositories/releases/", "swinggui mxgraph"));
+      
       remotes.add(new RemoteRepo("marytts", "http://mary.dfki.de/repo", "some marytts voices"));
       
       // This one is needed because of a transient dependency of solr org.restlet.jee .. not sure where 

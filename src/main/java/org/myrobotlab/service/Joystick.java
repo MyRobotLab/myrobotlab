@@ -44,6 +44,8 @@ import org.myrobotlab.joystick.Controller;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.service.config.JoystickConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.JoystickData;
 import org.slf4j.Logger;
 
@@ -66,51 +68,52 @@ public class Joystick extends Service {
   public final static Logger log = LoggerFactory.getLogger(Joystick.class);
   private static final long serialVersionUID = 1L;
 
-  List<Controller> controllers;
+  protected List<Controller> controllers;
 
   /**
    * current selected controller
    */
-  Controller hardwareController = null;
+  protected Controller hardwareController = null;
 
-  Map<String, Set<MRLListener>> idAndServiceSubscription = new HashMap<String, Set<MRLListener>>();
+  protected Map<String, Set<MRLListener>> idAndServiceSubscription = new HashMap<String, Set<MRLListener>>();
 
   protected List<Component> hardwareComponents;
 
   /**
    * non serializable hardware rumblers
    */
-  transient Rumbler[] hardwareRumblers;
+  protected transient Rumbler[] hardwareRumblers;
 
   final protected Poller poller = new Poller();
 
   /**
    * polling state
    */
-  boolean isPolling = false;
+  protected boolean isPolling = false;
 
   /**
    * name to index map of controllers
    */
-  TreeMap<String, Integer> controllerNames = new TreeMap<String, Integer>();
+  protected TreeMap<String, Integer> controllerNames = new TreeMap<String, Integer>();
 
   /**
    * index for the rumbler being used
    */
-  int rumblerIdx;
+  protected int rumblerIdx;
   
   /**
    * is rumbler on or off
    */
-  boolean rumblerOn = false;
+  protected boolean rumblerOn = false;
 
   /**
    * non-transient serializable definition
    */
-  Map<String, MapperLinear> mappers = new HashMap<String, MapperLinear>();
-  Map<String, Component> components = null;
+  protected Map<String, MapperLinear> mappers = new HashMap<String, MapperLinear>();
+  
+  protected Map<String, Component> components = null;
 
-  String controller;
+  protected String controller;
 
   public class Poller implements Runnable {
     
@@ -581,5 +584,22 @@ public class Joystick extends Service {
     Component component = components.get(axisName);
     component.setVirtualValue(value);
   }
+  
+  @Override
+  public ServiceConfig getConfig() {    
+    JoystickConfig config = (JoystickConfig) initConfig(new JoystickConfig());
+    config.controller = controller;
+    return config;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    super.load(c);    
+    JoystickConfig config = (JoystickConfig)c;
+    if (config.controller != null) {
+      setController(config.controller);
+    }
+    return c;
+  }
+
 
 }
