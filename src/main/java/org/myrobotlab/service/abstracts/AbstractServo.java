@@ -187,8 +187,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   protected double actualAngleDeltaError = 0.1;
 
-private Double maxSpeed;
-
   /**
    * if true - a single moveTo command will be published for servo controllers
    * or other services which implement their own speed contrl
@@ -816,12 +814,9 @@ private Double maxSpeed;
     // speed = maxSpeed;
     // log.info("Trying to set speed to a value greater than max speed");
     // }
-    if (maxSpeed != null && (degreesPerSecond == null || degreesPerSecond > maxSpeed)) {
-    	speed = maxSpeed;
-    	return;
-    } else {
-    	speed = degreesPerSecond;
-    }
+
+    speed = degreesPerSecond;
+
     
     if (degreesPerSecond == null) {
       log.info("disabling speed control");
@@ -830,16 +825,6 @@ private Double maxSpeed;
     broadcastState();
   }
   
-  @Override
-  public void setMaxSpeed(Double degreesPerSecond) {
-	 if (degreesPerSecond != null && (speed == null || speed > degreesPerSecond)){
-		 speed = degreesPerSecond;
-	 }
-	 this.maxSpeed = degreesPerSecond;
-	 broadcastState();
-  }
-
-
   @Deprecated /* this is really speed not velocity, velocity is a vector */
   public void setVelocity(Double degreesPerSecond) {
     setSpeed(degreesPerSecond);
