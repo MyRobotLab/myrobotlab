@@ -1,31 +1,38 @@
-angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', '$state', '$uibModal', 'mrl', 'statusSvc', 'noWorkySvc', 'Flash', function($scope, $log, $filter, $timeout, $location, $anchorScroll, $state, $uibModal, mrl, statusSvc, noWorkySvc, Flash) {
-    //connection state LED
-    $scope.connected = mrl.isConnected()
-
+angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$filter', '$timeout', '$location', '$anchorScroll', '$state', '$uibModal', 'mrl', 'statusSvc', 'noWorkySvc', 'Flash', function($scope, $filter, $timeout, $location, $anchorScroll, $state, $uibModal, mrl, statusSvc, noWorkySvc, Flash) {
+    
     $scope.errorStatus = null
     $scope.warningStatus = null
     $scope.infoStatus = null
     $scope.mrl = mrl
 
-
     $scope.errorCount = 0
     $scope.warningCount = 0
     $scope.infoCount = 0
-    // platform of webgui
-    $scope.remotePlatform = null
-    //$scope.viewType = mrl.getViewType()
 
+    $scope.remotePlatform = null
     $scope.displayImages = mrl.getDisplayImages()
 
-  
+    // initial query for connection state LED
+    // need the depth of state - because of angular's watch process
+    $scope.state = {
+      'connected' : mrl.isConnected()
+    }
 
+    // callback setup from the connected state of the websocket
     mrl.subscribeConnected(function(connected) {
-        $log.info('nav:connection update', connected)
-        $timeout(function() {
-            $scope.connected = connected
+        console.info('nav:connection update', connected)
+            $scope.state.connected = connected
+            $scope.$apply()
+    })
 
+
+    // callback from the describe call - to process info relating to the instance we
+    // are currently connected to
+    $scope.onDescribe = function(onDescribeMsg){
+            let data = onDescribeMsg.data[0]
+            // $scope.connected = connected
             $scope.platform = mrl.getPlatform()
-            $scope.remotePlatform = mrl.getRemotePlatform()
+            $scope.remotePlatform = data.platform
             $scope.id = mrl.getId()
             $scope.platform.vmVersion
             if ($scope.remotePlatform && $scope.remotePlatform.vmVersion != '1.8') {
@@ -34,10 +41,12 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
                     key: "BadJVM",
                     detail: "unsupported Java " + $scope.platform.vmVersion + "- please uninstall and install Java 1.8"
                 }
-            }
-        })
-    })
-
+            }  
+    }
+  
+    // we subscribe to the onDescribe method - to get info regarding the java instance
+    // we are currently connected to
+    mrl.subscribeTo('runtime','describe', $scope.onDescribe)
 
 
     // load type ahead service types
