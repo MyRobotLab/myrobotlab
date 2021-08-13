@@ -142,6 +142,45 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     protected double gyroDegreeX = 0;
     protected double gyroDegreeY = 0;
     protected double gyroDegreeZ = 0;
+    
+    public String toString() {
+      StringBuilder sb = new StringBuilder();
+      sb.append(orientation.toString());
+      sb.append(" ");
+      sb.append(" accelX ");
+      sb.append(accelX);
+      sb.append(" accelY ");
+      sb.append(accelY);
+      sb.append(" accelZ ");
+      sb.append(accelZ);
+
+      sb.append(" temperature ");
+      sb.append(temperature);
+      sb.append(" gyroX ");
+      sb.append(gyroX);
+      sb.append(" gyroY ");
+      sb.append(gyroY);
+      sb.append(" gyroZ ");
+      sb.append(gyroZ);
+
+      sb.append(" accelGX ");
+      sb.append(accelGX);
+      sb.append(" accelGY ");
+      sb.append(accelGY);
+      sb.append(" accelGZ ");
+      sb.append(accelGZ);
+      sb.append(" temperatureC ");
+      sb.append(temperatureC);
+
+      sb.append(" gyroDegreeX ");
+      sb.append(gyroDegreeX);
+      sb.append(" gyroDegreeY ");
+      sb.append(gyroDegreeY);
+      sb.append(" gyroDegreeZ ");
+      sb.append(gyroDegreeZ);
+
+      return sb.toString();
+    }
 
   }
 

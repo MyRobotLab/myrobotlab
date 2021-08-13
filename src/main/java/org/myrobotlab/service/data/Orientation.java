@@ -49,7 +49,7 @@ public class Orientation {
 
   @Override
   public String toString() {
-    return "OculusData [roll=" + roll + ", pitch=" + pitch + ", yaw=" + yaw + "]";
+    return "Orientation [roll=" + roll + ", pitch=" + pitch + ", yaw=" + yaw + "]";
   }
 
 }
