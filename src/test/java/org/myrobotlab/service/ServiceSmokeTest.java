@@ -48,15 +48,19 @@ public class ServiceSmokeTest extends AbstractTest {
     blacklist.add("org.myrobotlab.service.JMonkeyEngine");
     blacklist.add("org.myrobotlab.service.Lloyd");
     blacklist.add("org.myrobotlab.service._TemplateService");
-    
+
+
+    // FIXME - really ? lame 
+    blacklist.add("org.myrobotlab.service.Joystick");
+
   
     // the service data!
     ServiceData serviceData = ServiceData.getLocalInstance();
 
     // we need to load a service for each service type we have.
-    String[] serviceTypes = serviceData.getServiceTypeNames();
+    // String[] serviceTypes = serviceData.getServiceTypeNames();
     
-    // String[] serviceTypes = new String[] {"org.myrobotlab.service.InMoov"};
+    String[] serviceTypes = new String[] {"org.myrobotlab.service.Joystick"};
 
     for (String serviceType : serviceTypes) {
       log.info("Service Type: {}", serviceType);

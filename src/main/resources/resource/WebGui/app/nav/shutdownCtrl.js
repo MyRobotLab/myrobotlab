@@ -1,5 +1,10 @@
 angular.module('mrlapp.nav').controller('shutdownCtrl', ['$scope', '$uibModalInstance', 'type', 'mrl', function($scope, $uibModalInstance, type, mrl) {
     $scope.type = type
+    
+    $scope.close = function() {
+        $uibModalInstance.close()
+    }
+    
     $scope.shutdown = function() {
         switch (type) {
         case 'shutdown':

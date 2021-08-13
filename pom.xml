@@ -40,6 +40,8 @@
     mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=org.myrobotlab:worke:0.0.2:jar:sources -Ddest=.
     mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=org.myrobotlab:worke:0.0.2:zip -Ddest=.
 
+    # doclets
+    javadoc -classpath target/myrobotlab.jar:libraries/jar/* -docletpath target/myrobotlab.jar -doclet org.myrobotlab.doclet.ScannerDoclet  src/main/java/org/myrobotlab/service/Clock.java minus-show-comments/show-elements
     # specific test
     mvn -Dtest=org.myrobotlab.opencv.OpenCVFilterFaceDetectTest test
 
@@ -117,12 +119,12 @@
           <name>oss-snapshots-repo</name>
           <url>https://oss.sonatype.org/content/groups/public</url>
         </repository>
-        <!-- swinggui mxgraph -->  
+        <!-- swinggui mxgraph  -->
         <repository>
           <id>talend</id>
           <name>talend</name>
           <url>https://nexus.talanlabs.com/content/repositories/releases/</url>
-        </repository> 
+        </repository>
         <!-- some marytts voices  -->
         <repository>
           <id>marytts</id>
@@ -562,13 +564,6 @@
 
 <!-- LocalSpeech begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-  <dependency>
-    <groupId>com.microsoft</groupId>
-    <artifactId>tts</artifactId>
-    <version>1.1</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
 <!-- LocalSpeech end -->
 
 <!-- MarySpeech begin -->
@@ -889,17 +884,6 @@
       </exclusions>
   </dependency>
 <!-- MarySpeech end -->
-
-<!-- MimicSpeech begin -->
-<!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-  <dependency>
-    <groupId>mycroftai.mimic</groupId>
-    <artifactId>mimic_win64</artifactId>
-    <version>1.0</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
-<!-- MimicSpeech end -->
 
 <!-- Mqtt begin -->
   <dependency>
@@ -1246,7 +1230,7 @@
     <artifactId>snakeyaml</artifactId>
     <version>1.29</version>
   </dependency>
-  <!-- Runtime end -->
+<!-- Runtime end -->
 
 <!-- Serial begin -->
   <dependency>
@@ -1328,7 +1312,6 @@
     <artifactId>jide-oss</artifactId>
     <version>3.6.18</version>
   </dependency>
-  <!-- https://mvnrepository.com/artifact/com.mxgraph/jgraphx -->
   <dependency>
     <groupId>com.mxgraph</groupId>
     <artifactId>jgraphx</artifactId>

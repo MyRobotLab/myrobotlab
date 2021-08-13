@@ -22,15 +22,6 @@ public class Esp8266_01Meta extends MetaData {
     addDescription("ESP8266-01 service to communicate using WiFi and i2c");
     addCategory("i2c", "control");
     setSponsor("Mats");
-    // FIXME - add HttpClient as a peer .. and use its interface .. :)
-    // then remove direct dependencies to httpcomponents ...
-    // One HttpClient to Rule them all !!
-    /*
-     * Runtime currently includes these dependencies
-     * addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
-     * addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
-     */
-
   }
 
 }
