@@ -4540,6 +4540,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     Mpu6050Config config = (Mpu6050Config) initConfig(new Mpu6050Config());
     config.start = publisher.isRunning;
     config.sampleRate = sampleRateHz;
+    config.bus = deviceBus;
+    config.address = deviceAddress;
     return config;
   }
 
@@ -4552,6 +4554,12 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     }
     if (config.sampleRate != null) {
       setSampleRate(config.sampleRate);
+    }
+    if (config.bus != null) {
+      setDeviceBus(config.bus);
+    }
+    if (config.address != null) {
+      setDeviceAddress(config.address);
     }
     return c;
   }
