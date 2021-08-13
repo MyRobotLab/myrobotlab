@@ -307,4 +307,24 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
     ;
     return false;
   }
+
+  @Override
+  public void setBus(String bus) {
+    setDeviceBus(bus);
+  }
+
+  @Override
+  public void setAddress(String address) {
+    setDeviceAddress(address);
+  }
+
+  @Override
+  public String getBus() {
+    return deviceBus;
+  }
+
+  @Override
+  public String getAddress() {
+    return deviceAddress;
+  }
 }

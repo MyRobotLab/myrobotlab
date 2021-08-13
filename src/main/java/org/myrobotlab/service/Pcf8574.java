@@ -624,4 +624,24 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
     }
   }
 
+  @Override
+  public void setBus(String bus) {
+    setDeviceBus(bus);
+  }
+
+  @Override
+  public void setAddress(String address) {
+    setDeviceAddress(address);
+  }
+
+  @Override
+  public String getBus() {
+    return deviceBus;
+  }
+
+  @Override
+  public String getAddress() {
+    return deviceAddress;
+  }
+
 }

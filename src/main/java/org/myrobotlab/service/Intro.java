@@ -130,6 +130,7 @@ public class Intro extends Service {
 
       Runtime.main(new String[] { "--from-launcher"});
       Runtime.start("intro", "Intro");
+      Runtime.start("python", "Python");
 
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
 

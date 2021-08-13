@@ -1007,5 +1007,25 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     }
     return c;
   }
+
+  @Override
+  public void setBus(String bus) {
+    setDeviceBus(bus);
+  }
+
+  @Override
+  public void setAddress(String address) {
+    setDeviceAddress(address);
+  }
+
+  @Override
+  public String getBus() {
+    return deviceBus;
+  }
+
+  @Override
+  public String getAddress() {
+    return deviceAddress;
+  }
   
 }
