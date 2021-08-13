@@ -512,10 +512,10 @@ public class CodecUtils {
         for (int i = 3; i < parts.length; ++i) {
           if (isInteger(parts[i])) {
             payload[i - 3] = makeInteger(parts[i]);
-          } else if (isBoolean(parts[i])) {
-            payload[i - 3] = makeBoolean(parts[i]);
           } else if (isDouble(parts[i])) {
             payload[i - 3] = makeDouble(parts[i]);
+          } else if (parts[i].equals("true") || parts[i].equals("false")) {
+            payload[i - 3] = makeBoolean(parts[i]);
           } else { // String 
             // sloppy as the cli does not require quotes \" but json does
             // humans won't add quotes - but we will
