@@ -885,4 +885,25 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     // TODO Auto-generated method stub
     return null;
   }
+  
+  @Override
+  public void setBus(String bus) {
+    setDeviceBus(bus);
+  }
+
+  @Override
+  public void setAddress(String address) {
+    setDeviceAddress(address);
+  }
+
+  @Override
+  public String getBus() {
+    return deviceBus;
+  }
+
+  @Override
+  public String getAddress() {
+    return deviceAddress;
+  }
+
 }

@@ -201,17 +201,38 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   @Override
-  public void setDeviceBus(String deviceBus) {
-    this.deviceBus = deviceBus;
+  public void setBus(String bus) {
+    this.deviceBus = bus;
     broadcastState();
   }
 
   @Override
+  public String getBus() {
+    return this.deviceBus;
+  }
+
+  @Override
+  public String getAddress() {
+    return this.deviceAddress;
+  }
+
+  @Override
+  public void setDeviceBus(String deviceBus) {
+    setBus(deviceBus);
+  }
+
+  @Override
   public void setDeviceAddress(String deviceAddress) {
-    this.deviceAddress = deviceAddress;
+    setAddress(deviceAddress);
+  }
+
+  @Override
+  public void setAddress(String address) {
+    this.deviceAddress = address;
     broadcastState();
   }
 
+  
   /**
    * This method reads all the 7 raw values in one go accelX accelY accelZ
    * temperature ( In degrees Celcius ) gyroX gyroY gyroZ
@@ -4556,12 +4577,12 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     return ret;
   }
 
-  @Override
+  @Deprecated
   public String getDeviceBus() {
     return this.deviceBus;
   }
 
-  @Override
+  @Deprecated
   public String getDeviceAddress() {
     return this.deviceAddress;
   }
