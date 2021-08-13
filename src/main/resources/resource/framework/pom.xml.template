@@ -54,7 +54,8 @@
     sshfs xxxxx@yyyyy.myrobotlab.org:/home/xxxxx /home/xxxxx/sshfs/blade2
     java -classpath target/classes:libraries/jar/* org.myrobotlab.service.Runtime &#45;&#45;from-launcher -s webgui WebGui python Python
 
-
+    # jpackage
+    jpackage --verbose --name myrobotlab --input target --main-jar myrobotlab.jar --main-class org.myrobotlab.service.Runtime --java-options '-Xmx512m -Xms512m -Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8' --arguments "--from-launcher --id historical-gates --log-level info -s webgui WebGui intro Intro python Python" --type app-image
   
    -->  
   <modelVersion>4.0.0</modelVersion>
