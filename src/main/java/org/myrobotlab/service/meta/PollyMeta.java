@@ -28,7 +28,7 @@ public class PollyMeta extends AbstractSpeechSynthesisMeta {
     addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.10.1");
     addDependency("com.amazonaws", "aws-java-sdk-polly", "1.11.512");
     addDependency("org.apache.commons", "commons-lang3", "3.3.2");
-    // force using httpClient service httpcomponents version
+    // force using Runtimes httpclient version exclude here
     exclude("org.apache.httpcomponents", "httpcore");
     exclude("org.apache.httpcomponents", "httpclient");
 

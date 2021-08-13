@@ -27,6 +27,7 @@ import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.i2c.I2CBus;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.Zip;
@@ -1373,33 +1374,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     }
   }
 
-  @Override
-  // > neoPixelAttach/deviceId/pin/b32 numPixels/depth
-  public void neoPixelAttach(NeoPixel neopixel, int pin, int numPixels) {
-    DeviceMapping dm = attachDevice(neopixel, new Object[] { pin, numPixels });
-    Integer deviceId = dm.getId();
-    msg.neoPixelAttach(getDeviceId(neopixel)/* byte */, pin/* byte */,
-        numPixels/* b32 */, neopixel.depth);
-  }
-
-  @Override
-  // > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
-  public void neoPixelSetAnimation(NeoPixel neopixel, int animation, int red, int green, int blue, int speed) {
-    msg.neoPixelSetAnimation(getDeviceId(neopixel), animation, red, green, blue, speed);
-  }
-
-  /**
-   * neoPixelWriteMatrix/deviceId/[] buffer
-   */
-  @Override
-  public void neoPixelWriteMatrix(NeoPixel neopixel, List<Integer> data) {
-    int[] buffer = new int[data.size()];
-    for (int i = 0; i < data.size(); ++i) {
-      buffer[i] = data.get(i);
-    }
-    msg.neoPixelWriteMatrix(getDeviceId(neopixel), buffer);
-  }
-
   /**
    * Callback for Serial service - local (not remote) although a
    * publish/subscribe could be created - this method is called by a thread
@@ -2254,6 +2228,39 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   @Override
+  public void neoPixelAttach(String name, int pin, int numberOfPixels, int depth) {
+    ServiceInterface neopixel = Runtime.getService(name);
+    DeviceMapping dm = attachDevice(neopixel, new Object[] { pin, numberOfPixels, depth });
+    msg.neoPixelAttach(dm.getId(), pin, numberOfPixels, depth);
+  }
+
+  @Override
+  public void neoPixelWriteMatrix(String neopixel, int[] buffer) {
+    // log.debug("writing {} pixels : {}", buffer.length/5, buffer);
+    msg.neoPixelWriteMatrix(getDeviceId(neopixel), buffer);
+  }
+
+  @Override
+  public void neoPixelSetAnimation(String neopixel, int animation, int red, int green, int blue, int white, int speed) {
+    msg.neoPixelSetAnimation(getDeviceId(neopixel), animation, red, green, blue, white, speed);
+  }
+
+  @Override
+  public void neoPixelFill(String neopixel, int beginAddress, int count, int red, int green, int blue, int white) {
+    msg.neoPixelFill(getDeviceId(neopixel), beginAddress, count, red, green, blue, white);
+  }
+
+  @Override
+  public void neoPixelSetBrightness(String neopixel, int brightness) {
+    msg.neoPixelSetBrightness(getDeviceId(neopixel), brightness);
+  }
+
+  @Override
+  public void neoPixelClear(String neopixel) {
+    msg.neoPixelClear(getDeviceId(neopixel));
+  }
+ 
+  @Override
   public ServiceConfig getConfig() {
     ArduinoConfig config = (ArduinoConfig) initConfig(new ArduinoConfig());
     config.port = port;    
@@ -2404,5 +2411,5 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       log.error("main threw", e);
     }
   }
-
+ 
 }

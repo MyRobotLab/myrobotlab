@@ -2076,7 +2076,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public void stopNeopixelAnimation() {
     if (neopixel != null) {
-      neopixel.animationStop();
+      neopixel.clear();
     } else {
       warn("No Neopixel attached");
     }

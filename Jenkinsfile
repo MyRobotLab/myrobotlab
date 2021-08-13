@@ -76,10 +76,10 @@ pipeline {
             script {
                if (isUnix()) {
                   sh '''
-                     mvn -DBUILD_NUMBER=${BUILD_NUMBER} -q clean compile
+                     mvn -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -q clean compile
                   '''
                } else {
-                  bat(/"${MAVEN_HOME}\bin\mvn" -DBUILD_NUMBER=${BUILD_NUMBER} -q clean compile  /)
+                  bat(/"${MAVEN_HOME}\bin\mvn" -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -q clean compile  /)
                }
             }
          }
@@ -104,6 +104,20 @@ pipeline {
             }
          }
       } // stage verify
+
+      stage('package') {
+         steps {
+            script {
+               if (isUnix()) {
+                  sh '''
+                     mvn -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -q package
+                  '''
+               } else {
+                  bat(/"${MAVEN_HOME}\bin\mvn" -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -q package  /)
+               }
+            }
+         }
+      } // stage compile
       
       stage('javadoc') {
          when {

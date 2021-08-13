@@ -39,7 +39,7 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
     assertFalse(msg.isClearToSend());
     // now we want to just see how it responds when i send it various byte sequences.
     //byte[] testBytes = new byte[] {-86,14,1};
-    byte[] testBytes = createTestBytes("170,2,55,63");
+    byte[] testBytes = createTestBytes("170,2," + Msg.PUBLISH_MRL_COMM_BEGIN + ",63");
     msg.onBytes(testBytes);
     // msg.waitForBegin();
     // now what? 
@@ -71,7 +71,7 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
   @Test
   public void testRealWorldError2() {
     String testMsg1 = "170,14,1,12,101,255";
-    String testMsg2 = "170,2,55,63";
+    String testMsg2 = "170,2,"+ Msg.PUBLISH_MRL_COMM_BEGIN +",63";
     msg = new Msg(this, null);
     msg.setInvoke(false);
     assertFalse(msg.isClearToSend());
