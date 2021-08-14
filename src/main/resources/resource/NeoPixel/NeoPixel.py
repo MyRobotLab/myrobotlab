@@ -2,65 +2,84 @@
 # NeoPixel.py
 # more info @: http://myrobotlab.org/service/NeoPixel
 #########################################
+# new neopixel has some capability to have animations which can
+# be custom created and run
+# There are now 'service animations' and 'onboard animations'
+#
+# Service animations have some ability to be customized and saved,
+#   each frame is sent over the serial line to the neopixel
+#
+# Onboard ones do not but are less chatty over the serial line
+# 
+# Animations
+# stopAnimation       = 1
+# colorWipe           = 2
+# scanner             = 3
+# theaterChase        = 4
+# theaterChaseRainbow = 5
+# rainbow             = 6
+# rainbowCycle        = 7
+# randomFlash         = 8
+# ironman             = 9
+# Runtime.setVirtual(True) # if you want no hardware
+# port = "COM3"
+port = "/dev/ttyACM0"
+pin = 5
 
-# virtual = True
-port = "COM3"
-# optional but recommended neopixel connected on a dedicated arduino
-rxtxPort = "Serial2"
-
-# start optional virtual arduino service, used for internal test
-if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
-    virtualArduino.connect(port)
-# end used for internal test
-
-#Starting Arduino Service
+# starting arduino
 arduino = Runtime.start("arduino","Arduino")
-arduino.setBoardMega() #or arduino.setBoardUno()
 arduino.connect(port)
 
-#Starting NeoPixel Service
+# starting neopixle
 neopixel = Runtime.start("neopixel","NeoPixel")
+neopixel.setPin(pin)
+neopixel.setPixelCount(8)
 
-#neopixel.attach(arduino, pin, number of pixel)
-if ('virtual' in globals() and virtual):
-  #Attach Neopixel to main arduino
-  neopixel.attach(arduino, 2, 16)
-else:
-  #Starting optional RX/TX connected slave arduino and Attach Neopixel to slave arduino
-  arduinoNano = Runtime.start("arduinoNano","Arduino")
-  arduinoNano.setBoardNano() #or arduino.setBoardUno()
-  arduinoNano.connect(arduino,rxtxPort)
-  neopixel.attach(arduinoNano, 2, 16)
+# attach the two services
+neopixel.attach(arduino)
 
+# fuschia 
+neopixel.setColor(120, 10, 30)
+# 1 to 50 Hz default is 10
+neopixel.setSpeed(30) 
 
-#Animations;
-#"Color Wipe"
-#"Larson Scanner"
-#"Theater Chase"
-#"Theater Chase Rainbow"
-#"Rainbow"
-#"Rainbow Cycle"
-#"Flash Random"
-#"Ironman"
+# start an animation
+neopixel.playAnimation("Larson Scanner")
+sleep(2)
 
-#speed: 1-65535   1=full speed, 2=2x slower than 1, 10=10x slower than 1
-#starting a animation
-#neopixel.setAnimation("Animation Name", red, green, blue, speed)
-neopixel.setAnimation("Theater Chase", 255, 0, 0, 1) #running Theater Chase with color red at full speed
+# turquoise
+neopixel.setColor(10, 120, 60)
+sleep(2)
 
-sleep(10)
-neopixel.animationStop()
+# start an animation
+neopixel.playAnimation("Rainbow Cycle")
+sleep(5)
 
-#run an animation with python script
-#turn off all the pixels
-for pixel in range (1,neopixel.numPixel + 1):
-  neopixel.setPixel(pixel, 0, 0, 0)  #setPixel(pixel, red, green, blue)
-neopixel.writeMatrix() #send the pixel data to the Neopixel hardware 
-for loop in range(0,10): #do 10 loop
-  for pixel in range(1, neopixel.numPixel +1):
-    neopixel.setPixel(pixel, 255, 0, 0) #set the pixel to red
-    neopixel.writeMatrix()
-    sleep(0.03) #give a bit of delay before next step
-    neopixel.setPixel(pixel, 0, 0, 0) #turn off the pixel
-neopixel.writeMatrix()
+neopixel.setColor(40, 20, 160)
+neopixel.playAnimation("Color Wipe")
+sleep(1)
+
+neopixel.setColor(140, 20, 60)
+sleep(1)
+
+neopixel.clear()
+
+# set individual pixels
+neopixel.setPixel(0, 40, 40, 0)
+sleep(1)
+neopixel.setPixel(1, 140, 40, 0)
+sleep(1)
+neopixel.setPixel(2, 40, 140, 0)
+sleep(1)
+neopixel.setPixel(2, 40, 0, 140)
+sleep(1)
+
+neopixel.clear()
+neopixel.setColor(0, 40, 220)
+neopixel.playAnimation("Ironman")
+sleep(3)
+
+# preset color and frequency values
+neopixel.playIronman()
+sleep(5)
+neopixel.clear()

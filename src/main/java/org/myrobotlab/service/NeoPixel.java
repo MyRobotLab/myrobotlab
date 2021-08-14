@@ -302,9 +302,9 @@ public class NeoPixel extends Service implements NeoPixelControl {
       return;
     }
 
-    red = 0;
-    blue = 0;
-    green = 0;
+    // red = 0;
+    // blue = 0;
+    // green = 0;
     // white = 0;
 
     currentAnimation = null;
@@ -525,7 +525,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     clear();
   }
 
-  // TODO - onStarted
+  @Override
   public void onStarted(String name) {
     refreshControllers();
   }
@@ -535,44 +535,47 @@ public class NeoPixel extends Service implements NeoPixelControl {
     startAnimation();
     return utterance;
   }
-
+  
   public void playAnimation(String animation) {
     switch (animation) {
       // onboard animations
-      case "stopAnimation":
+      case "No animation":
+        clear();
+        break;
+      case "Stop":
         setAnimation(1, red, green, blue, speedFps);
         break;
-      case "colorWipe":
+      case "Color Wipe":
         setAnimation(2, red, green, blue, speedFps);
-        currentAnimation = "colorWipe";
+        currentAnimation = "Color Wipe";
         break;
-      case "scanner":
+      case "Larson Scanner":
         setAnimation(3, red, green, blue, speedFps);
-        currentAnimation = "scanner";
+        currentAnimation = "Larson Scanner";
         break;
-      case "theaterChase":
+      case "Theater Chase":
         setAnimation(4, red, green, blue, speedFps);
-        currentAnimation = "theaterChase";
+        currentAnimation = "Theater Chase";
         break;
-      case "theaterChaseRainbow":
+      case "Theater Chase Rainbow":
         setAnimation(5, red, green, blue, speedFps);
-        currentAnimation = "theaterChaseRainbow";
+        currentAnimation = "Theater Chase Rainbow";
         break;
-      case "rainbow":
+      case "Rainbow":
         setAnimation(6, red, green, blue, speedFps);
-        currentAnimation = "rainbow";
+        currentAnimation = "Rainbow";
         break;
-      case "rainbowCycle":
+      case "Rainbow Cycle":
         setAnimation(7, red, green, blue, speedFps);
-        currentAnimation = "rainbow";
+        currentAnimation = "Rainbow Cycle";
         break;
-      case "randomFlash":
+      case "Flash Random":
         setAnimation(8, red, green, blue, speedFps);
-        currentAnimation = "randomFlash";
+        currentAnimation = "Flash Random";
         break;
-      case "ironman":
+      case "Ironman":
         setAnimation(9, red, green, blue, speedFps);
-        currentAnimation = "ironman";
+        currentAnimation = "Ironman";
         break;
 
       // TODO functional java animations
@@ -793,8 +796,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
    * @param speed
    */
   public void setSpeed(Integer speed) {
-    if (speed > 30 || speed < 1) {
-      error("speed must be between 1 - 30 fps requested speed was %d fps", speed);
+    if (speed > 50 || speed < 1) {
+      error("speed must be between 1 - 50 fps requested speed was %d fps", speed);
       return;
     }
     speedFps = speed;    
@@ -803,6 +806,12 @@ public class NeoPixel extends Service implements NeoPixelControl {
       // restarting currently running animation
       playAnimation(currentAnimation);
     }
+  }
+  
+  public void playIronman() {
+    setColor(76, 255, 252);
+    setSpeed(50);
+    playAnimation(currentAnimation);
   }
 
   public static void main(String[] args) throws InterruptedException {

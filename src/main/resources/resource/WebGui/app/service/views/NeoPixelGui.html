@@ -1,23 +1,25 @@
 <div class="row">
-    <div class="col-md-1"></div>
     <div class="col-md-11">
         <h1>{{address}} {{color}}</h1>
         matrix {{service.currentMatrix}}
         <br/>
-        <div class="btn-group" uib-dropdown  >
-            <button type="button"  class="btn btn-default">controller {{service.controller}}</button>
-            <button id="single-button" ng-disabled="service.pin == null || service.pixelCount == null" type="button" class="btn btn-default" uib-dropdown-toggle><span class="caret"></span>
+        <div class="btn-group" uib-dropdown>
+            <button type="button" class="btn btn-default">controller {{state.controller}}</button>
+            <button id="single-button" ng-disabled="service.pin == null || service.pixelCount == null" type="button" class="btn btn-default" uib-dropdown-toggle>
+                <span class="caret"></span>
             </button>
             <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
                 <li ng-repeat="c in service.controllers">
-                    <a href="" ng-click="attach(c)">{{c}}</a>
+                    <a href="" ng-click="setController(c)">{{c}}</a>
                 </li>
             </ul>
         </div>
-        <button type="button" class="btn btn-default" ng-click='detach()' ng-show='service.controller != null'>detach</button>
+        <button type="button" class="btn btn-default" ng-click='attach()' ng-show='!service.controller'>attach</button>
+        <button type="button" class="btn btn-default" ng-click='detach()' ng-show='service.controller'>detach</button>
         <div class="btn-group" uib-dropdown>
             <button type="button" class="btn btn-default">pin {{service.pin}}</button>
-            <button id="single-button" ng-disabled="service.controller != null" type="button" class="btn btn-default" uib-dropdown-toggle><span class="caret"></span>
+            <button id="single-button" ng-disabled="service.controller != null" type="button" class="btn btn-default" uib-dropdown-toggle>
+                <span class="caret"></span>
             </button>
             <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
                 <li ng-repeat="c in pins">
@@ -43,29 +45,32 @@
         -->
         <div class="btn-group" uib-dropdown>
             <button type="button" class="btn btn-default">pixel count {{service.pixelCount}}</button>
-            <button type="button" ng-disabled="service.controller != null" class="btn btn-default" uib-dropdown-toggle><span class="caret"></span></button>
+            <button type="button" ng-disabled="service.controller != null" class="btn btn-default" uib-dropdown-toggle>
+                <span class="caret"></span>
+            </button>
             <ul uib-dropdown-menu>
                 <li ng-repeat="pixelCount in commonPixelCounts">
                     <a href="" ng-click="msg.setPixelCount(pixelCount)">{{pixelCount}}</a>
                 </li>
             </ul>
         </div>
-        
         <div class="btn-group" uib-dropdown ng-hide="service.controller == null">
             <button type="button" class="btn btn-default">play animation {{service.currentAnimation}}</button>
-            <button type="button"  class="btn btn-default" uib-dropdown-toggle><span class="caret"></span></button>
+            <button type="button" class="btn btn-default" uib-dropdown-toggle>
+                <span class="caret"></span>
+            </button>
             <ul uib-dropdown-menu>
                 <li ng-repeat="animation in animations">
                     <a href="" ng-click="msg.playAnimation(animation)">{{animation}}</a>
                 </li>
             </ul>
         </div>
-
         <button type="button" class="btn btn-default" ng-click='msg.stopAnimation()' ng-show='service.controller != null'>stop</button>
-
         <div class="btn-group" uib-dropdown ng-hide="service.controller == null">
             <button type="button" class="btn btn-default">speed {{service.speedFps}} fps</button>
-            <button type="button"  class="btn btn-default" uib-dropdown-toggle><span class="caret"></span></button>
+            <button type="button" class="btn btn-default" uib-dropdown-toggle>
+                <span class="caret"></span>
+            </button>
             <ul uib-dropdown-menu>
                 <li ng-repeat="speed in speeds">
                     <a href="" ng-click="msg.setSpeed(speed);msg.broadcastState()">{{speed}}</a>
@@ -73,17 +78,32 @@
             </ul>
         </div>
     </div>
+    <div class="col-md-1"></div>
 </div>
 <div class="row">
-    <div class="col-md-1">&nbsp;<span>select<color-picker id="select" ng-model="pickedColor" options="colorPickerOptions" event-api="eventApi"></color-picker></span>
+    <div class="col-md-3">
+        <table width="100%">
+            <tr>
+                <td>
+                    animation color<color-picker id="select" ng-model="pickedColor" options="colorPickerOptions" event-api="eventApi"></color-picker>
+                </td>
+                <td>
+                    fill color<color-picker id="fill" ng-model="pickedColor" options="colorPickerOptions" event-api="eventApi"></color-picker>                    
+                </td>
+                <td>
+                    <button type="button" ng-style="led.style" class="btn btn-default" ng-click='clear();' tooltip="clear pixels">clear</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="col-md-9">&nbsp;</div>
 </div>
+<div class="row">
     <div class="col-md-11">
-        <button type="button" ng-style="led.style" class="btn btn-default btn-xs" ng-click='clear();' tooltip="send log file" tooltip-placement="bottom">clear</button>
-        <br/>
-        <span style="float:left">fill<color-picker id="fill" ng-model="pickedColor" options="colorPickerOptions" event-api="eventApi"></color-picker></span>
         <span ng-repeat="led in leds" style="float:left">
             {{led.address}}
                 <color-picker id="{{led.address}}" ng-model="pickedColor" options="colorPickerOptions" event-api="eventApi"></color-picker>
         </span>
     </div>
+    <div class="col-md-1">&nbsp;</div>
 </div>
