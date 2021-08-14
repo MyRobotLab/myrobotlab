@@ -42,28 +42,29 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   // FIXME - why
   @Deprecated
   public static boolean RobotCanMoveBodyRandom = true;
-  
+
   @Deprecated
   public static boolean RobotCanMoveHeadRandom = true;
-  
+
   @Deprecated
   public static boolean RobotCanMoveEyesRandom = true;
-  
+
   @Deprecated
   public static boolean RobotCanMoveRandom = true;
-  
+
   @Deprecated
   public static boolean RobotIsSleeping = false;
-  
+
   @Deprecated
-  public static boolean RobotIsStarted = false;  
-  
+  public static boolean RobotIsStarted = false;
+
   private static final long serialVersionUID = 1L;
 
   static String speechRecognizer = "WebkitSpeechRecognition";
 
   /**
-   * @param someScriptName execute a resource script
+   * @param someScriptName
+   *          execute a resource script
    * @return success or failure
    */
   public boolean execScript(String someScriptName) {
@@ -93,11 +94,36 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       log.error("onStarted threw", e);
     }
   }
-  
+
   public void startService() {
     super.startService();
     Runtime runtime = Runtime.getInstance();
     runtime.subscribeToLifeCycleEvents(getName());
+
+    try {
+      // copy config if it doesn't already exist
+      String resourceBotDir = FileIO.gluePaths(getResourceDir(), "config");
+
+      List<File> files = FileIO.getFileList(resourceBotDir);
+      for (File f : files) {
+        String botDir = "data/config/" + f.getName();
+        File bDir = new File(botDir);
+        if (bDir.exists() || !f.isDirectory()) {
+          log.info("skipping data/config/{}", botDir);
+        } else {
+          log.info("will copy new data/config/{}", botDir);
+          try {
+            FileIO.copy(f.getAbsolutePath(), botDir);
+          } catch (Exception e) {
+            error(e);
+          }
+        }
+      }
+    } catch (Exception e) {
+      error(e);
+    }
+    
+    runtime.invoke("publishConfigList");
   }
 
   public void onCreated(String fullname) {
@@ -106,8 +132,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * This method will load a python file into the python interpreter.
- * @param file file to load
- * @return success/failure
+   * 
+   * @param file
+   *          file to load
+   * @return success/failure
    */
   @Deprecated /* use execScript - this doesn't handle resources correctly */
   public static boolean loadFile(String file) {
@@ -149,17 +177,15 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       Runtime.main(new String[] { "--from-launcher", "--id", "inmoov" });
       // Runtime.start("s01", "Servo");
       Runtime.start("intro", "Intro");
-      
+
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
 
-      
       InMoov2 i01 = (InMoov2) Runtime.create("i01", "InMoov2");
       i01.setVirtual(false);
       i01.startService();
       // Runtime.start("s02", "Servo");
-
 
       boolean done = true;
       if (done) {
@@ -342,7 +368,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     subscribe(r.getName(), "shutdown");
     subscribe(r.getName(), "publishConfigList");
 
-    
     // FIXME - Framework should auto-magically auto-start peers AFTER
     // construction - unless explicitly told not to
     // peers to start on construction
@@ -359,22 +384,25 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public void attachTextListener(TextListener service) {
     attachTextListener(service.getName());
   }
-  
+
   /**
    * comes in from runtime which owns the config list
-   * @param configList list of configs
+   * 
+   * @param configList
+   *          list of configs
    */
-  public void onConfigList(List<String> configList){
+  public void onConfigList(List<String> configList) {
     this.configList = configList;
     invoke("publishConfigList");
   }
-  
+
   /**
-   * "re"-publishing runtime config list, because
-   * I don't want to fix the js subscribeTo :P
+   * "re"-publishing runtime config list, because I don't want to fix the js
+   * subscribeTo :P
+   * 
    * @return list of config names
    */
-  public List<String> publishConfigList(){
+  public List<String> publishConfigList() {
     return configList;
   }
 
@@ -497,7 +525,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * This method will try to launch a python command with error handling
-   * @param gesture the gesture
+   * 
+   * @param gesture
+   *          the gesture
    * @return gesture result
    */
   public String execGesture(String gesture) {
@@ -791,7 +821,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
     return true;
   }
-  
+
   public void cameraOff() {
     if (opencv != null) {
       opencv.stopCapture();
@@ -1235,7 +1265,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * start servos - no controllers
- * @throws Exception boom
+   * 
+   * @throws Exception
+   *           boom
    */
   public void startServos() throws Exception {
     startServos(null, null);
@@ -1244,6 +1276,26 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public ProgramAB startChatBot() {
 
     try {
+
+      // copy (if they don't already exist) the chatbots which came with InMoov2
+      String resourceBotDir = FileIO.gluePaths(getResourceDir(), "chatbot/bots");
+
+      List<File> files = FileIO.getFileList(resourceBotDir);
+      for (File f : files) {
+        // copyResource(f.getAbsolutePath(), FileIO.gluePaths(getResourceDir(),
+        // f.getName()));
+        String botDir = "data/ProgramAB/" + f.getName();
+        if (new File(botDir).exists()) {
+          log.info("found data/ProgramAB/{} not copying", botDir);
+        } else {
+          log.info("will copy new data/ProgramAB/{}", botDir);
+          try {
+            FileIO.copy(f.getAbsolutePath(), botDir);
+          } catch (Exception e) {
+            error(e);
+          }
+        }
+      }
 
       chatBot = (ProgramAB) startPeer("chatBot");
       isChatBotActivated = true;
@@ -1265,7 +1317,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       // FIXME - deal with language
       // speakBlocking(get("CHATBOTACTIVATED"));
       chatBot.repetitionCount(10);
-      chatBot.setPath(getResourceDir() + fs + "chatbot");
+      // chatBot.setPath(getResourceDir() + fs + "chatbot");
+      chatBot.setPath(getDataDir() + fs + "chatbot");
       chatBot.startSession("default", locale.getTag());
       // reset some parameters to default...
       chatBot.setPredicate("topic", "default");
@@ -1692,7 +1745,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     simulator.setMapper(getName() + ".head.neck", 0, 180, 20, -20);
     simulator.setMapper(getName() + ".head.rollNeck", 0, 180, 30, -30);
     simulator.setMapper(getName() + ".head.eyeY", 0, 180, 40, 140);
-    simulator.setMapper(getName() + ".head.eyeX", 0, 180, -10, 70); // HERE there need
+    simulator.setMapper(getName() + ".head.eyeX", 0, 180, -10, 70); // HERE
+                                                                    // there
+                                                                    // need
     // to be
     // two eyeX (left and
     // right?)
@@ -1860,7 +1915,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * called with only port - will default with defaulted pins
-   * @param port port for the sensor
+   * 
+   * @param port
+   *          port for the sensor
    * @return the ultrasonic sensor service
    */
   public UltrasonicSensor startUltraSonicRight(String port) {
@@ -1869,9 +1926,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * called explicitly with pin values
-   * @param port p
-   * @param trigPin trigger pin 
-   * @param echoPin echo pin
+   * 
+   * @param port
+   *          p
+   * @param trigPin
+   *          trigger pin
+   * @param echoPin
+   *          echo pin
    * @return the ultrasonic sensor
    * 
    */
@@ -2132,7 +2193,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
     return neopixel;
   }
-  
+
   @Override
   public void attachTextListener(String name) {
     addListener("publishText", name);
