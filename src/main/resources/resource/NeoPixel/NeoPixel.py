@@ -25,6 +25,7 @@
 # port = "COM3"
 port = "/dev/ttyACM0"
 pin = 5
+pixelCount = 8
 
 # starting arduino
 arduino = Runtime.start("arduino","Arduino")
@@ -33,7 +34,7 @@ arduino.connect(port)
 # starting neopixle
 neopixel = Runtime.start("neopixel","NeoPixel")
 neopixel.setPin(pin)
-neopixel.setPixelCount(8)
+neopixel.setPixelCount(pixelCount)
 
 # attach the two services
 neopixel.attach(arduino)
