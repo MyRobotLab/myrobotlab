@@ -5,7 +5,7 @@
         <br/>
         <div class="btn-group" uib-dropdown>
             <button type="button" class="btn btn-default">controller {{state.controller}}</button>
-            <button id="single-button" ng-disabled="service.pin == null || service.pixelCount == null" type="button" class="btn btn-default" uib-dropdown-toggle>
+            <button id="single-button" ng-disabled="service.pin == null || service.pixelCount == null || service.controller != null" type="button" class="btn btn-default" uib-dropdown-toggle>
                 <span class="caret"></span>
             </button>
             <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">

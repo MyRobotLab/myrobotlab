@@ -39,7 +39,7 @@ neopixel.setPixelCount(pixelCount)
 # attach the two services
 neopixel.attach(arduino)
 
-# fuschia 
+# fuschia - setColor(R, G, B)
 neopixel.setColor(120, 10, 30)
 # 1 to 50 Hz default is 10
 neopixel.setSpeed(30) 
@@ -66,6 +66,7 @@ sleep(1)
 neopixel.clear()
 
 # set individual pixels
+# setPixel(address, R, G, B)
 neopixel.setPixel(0, 40, 40, 0)
 sleep(1)
 neopixel.setPixel(1, 140, 40, 0)

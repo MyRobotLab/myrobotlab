@@ -171,6 +171,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
    * list of possible controllers
    */
   protected Set<String> controllers = new HashSet<>();
+  
   /**
    * name of current matrix
    */
@@ -530,6 +531,11 @@ public class NeoPixel extends Service implements NeoPixelControl {
     refreshControllers();
   }
 
+  @Override
+  public void onReleased(String name) {
+    refreshControllers();
+  }
+  
   // @Override
   public String onStartSpeaking(String utterance) {
     startAnimation();
@@ -768,8 +774,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
   public void startService() {
     super.startService();
     refreshControllers();
+    Runtime runtime = Runtime.getInstance();
+    runtime.subscribeToLifeCycleEvents(getName());
   }
-
+  
   public void setColor(int red, int green, int blue) {
     this.red = red;
     this.green = green;
