@@ -613,8 +613,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   @Override
   public void setAnimation(int animation, int red, int green, int blue, int speedFps) {
-    if (speedFps > 30) {
-      speedFps = 30;
+    if (speedFps > 50) {
+      speedFps = 50;
     }
     
     this.speedFps = speedFps;
