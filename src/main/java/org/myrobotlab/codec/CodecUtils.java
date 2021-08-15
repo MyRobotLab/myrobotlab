@@ -16,7 +16,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.myrobotlab.framework.MRLListener;
@@ -28,14 +30,12 @@ import org.slf4j.Logger;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
-import org.yaml.snakeyaml.introspector.BeanAccess;
-import org.yaml.snakeyaml.introspector.Property;
-import org.yaml.snakeyaml.nodes.NodeTuple;
-import org.yaml.snakeyaml.nodes.Tag;
-import org.yaml.snakeyaml.representer.Representer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.internal.LinkedTreeMap;
 
 /**
@@ -440,7 +440,7 @@ public class CodecUtils {
    */
   static public Message cliToMsg(String contextPath, String from, String to, String cmd) {
     Message msg = Message.createMessage(from, to, "ls", null);
-
+    
     /**
      * <pre>
      
@@ -496,15 +496,33 @@ public class CodecUtils {
 
       // fix me diff from 2 & 3 "/"
       if (parts.length >= 3) {
+        // prepare to parse the arguments 
+        
         msg.name = parts[1];
         // prepare the method
         msg.method = parts[2].trim();
-
+        
+        
         // FIXME - to encode or not to encode that is the question ...
+        // This source comes from the cli - which is "all" strings
+        // in theory it needs to be decoded from an all strings interface 
+        // json is an all string interface so we will decode from cli strings (not json)
+        // using a json decoder - cuz it will work :P - and string will decode to a string
         Object[] payload = new Object[parts.length - 3];
         for (int i = 3; i < parts.length; ++i) {
-          payload[i - 3] = parts[i];
+          if (isInteger(parts[i])) {
+            payload[i - 3] = makeInteger(parts[i]);
+          } else if (isDouble(parts[i])) {
+            payload[i - 3] = makeDouble(parts[i]);
+          } else if (parts[i].equals("true") || parts[i].equals("false")) {
+            payload[i - 3] = makeBoolean(parts[i]);
+          } else { // String 
+            // sloppy as the cli does not require quotes \" but json does
+            // humans won't add quotes - but we will
+            payload[i - 3] =  parts[i];
+          }
         }
+        
         msg.data = payload;
       }
       return msg;
@@ -530,6 +548,52 @@ public class CodecUtils {
 
       return msg;
     }
+  }
+  
+  static public Integer makeInteger(String data) {
+    try {
+      return Integer.parseInt(data);      
+    } catch(Exception e) {
+    }
+    return null;
+  }
+  
+  static public boolean isInteger(String data) {
+    try {
+      Integer.parseInt(data);
+      return true;
+    } catch(Exception e) {
+    }
+    return false;
+  }
+  
+  static public boolean isDouble(String data) {
+    try {
+      Double.parseDouble(data);
+      return true;
+    } catch(Exception e) {
+    }
+    return false;
+  }
+  
+  static public Double makeDouble(String data) {
+    try {
+      return Double.parseDouble(data);      
+    } catch(Exception e) {
+    }
+    return null;
+  }
+
+  static public Boolean isBoolean(String data) {
+      return Boolean.parseBoolean(data);
+  }
+  
+  static public Boolean makeBoolean(String data) {
+    try {
+      return Boolean.parseBoolean(data);      
+    } catch(Exception e) {
+    }
+    return null;
   }
 
   static public List<ApiDescription> getApis() {

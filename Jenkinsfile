@@ -75,12 +75,11 @@ pipeline {
          steps {
             script {
                if (isUnix()) {
-                     // mvn -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean package
                   sh '''
-                     mvn -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile
+                     mvn -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -q clean compile
                   '''
                } else {
-                  bat(/"${MAVEN_HOME}\bin\mvn" -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile  /)
+                  bat(/"${MAVEN_HOME}\bin\mvn" -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -q clean compile  /)
                }
             }
          }
@@ -95,16 +94,30 @@ pipeline {
                // TODO - integration tests !
                if (isUnix()) {
                   sh '''
-                     mvn -Dfile.encoding=UTF-8 verify
+                     mvn -Dfile.encoding=UTF-8 verify --fail-fast
                   '''
                } else {
                   bat '''
-                     mvn -Dfile.encoding=UTF-8 verify
+                     mvn -Dfile.encoding=UTF-8 verify --fail-fast
                   '''
                }
             }
          }
       } // stage verify
+
+      stage('package') {
+         steps {
+            script {
+               if (isUnix()) {
+                  sh '''
+                     mvn -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -q package
+                  '''
+               } else {
+                  bat(/"${MAVEN_HOME}\bin\mvn" -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -q package  /)
+               }
+            }
+         }
+      } // stage compile
       
       stage('javadoc') {
          when {

@@ -1,28 +1,6 @@
 package org.myrobotlab.service;
 
-import static org.myrobotlab.service.data.Mpu6050Data.dmpAddress1;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpAddress2;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpAddress3;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpAddress4;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpAddress5;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpAddress6;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpAddress7;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpBank1;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpBank2;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpBank3;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpBank4;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpBank5;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpBank6;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpBank7;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpConfig;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpMemory;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpUpdates1;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpUpdates2;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpUpdates3;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpUpdates4;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpUpdates5;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpUpdates6;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpUpdates7;
+import static org.myrobotlab.service.data.Mpu6050Data.*;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -32,9 +10,12 @@ import java.util.Set;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.Mpu6050Config;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Orientation;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -44,32 +25,18 @@ import org.slf4j.Logger;
 
 /**
  * 
- * MPU6050 - MPU-6050 sensor contains a MEMS accelerometer and a MEMS gyro in a single chip. 
- * It is very accurate, as it contains 16-bits analog to digital conversion hardware for each channel. 
- * Therefore it captures the x, y, and z channel at the same time.
- * http://playground.arduino.cc/Main/MPU-6050
+ * MPU6050 - MPU-6050 sensor contains a MEMS accelerometer and a MEMS gyro in a
+ * single chip. It is very accurate, as it contains 16-bits analog to digital
+ * conversion hardware for each channel. Therefore it captures the x, y, and z
+ * channel at the same time. http://playground.arduino.cc/Main/MPU-6050
  *
- * This is a port of the https://github.com/jrowberg/i2cdevlib/blob/master/Arduino/MPU6050/MPU6050.cpp
- * from Arduino C/C++ to Java. 
+ * This is a port of the
+ * https://github.com/jrowberg/i2cdevlib/blob/master/Arduino/MPU6050/MPU6050.cpp
+ * from Arduino C/C++ to Java.
  * 
- * ============================================ 
- * I2Cdev device library code is
- * placed under the MIT license Copyright (c) 2012 Jeff Rowberg Permission is
- * hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the
- * Software without restriction, including without limitation the rights to use,
- * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do
- * so, subject to the following conditions: The above copyright notice and this
- * permission notice shall be included in all copies or substantial portions of
- * the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
- * EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
- * OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE. 
- * ===============================================
+ * I2Cdev device library code is placed under the MIT license Copyright (c) 2012
+ * Jeff Rowberg
+ * 
  */
 
 public class Mpu6050 extends Service implements I2CControl, OrientationPublisher {
@@ -78,467 +45,143 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 
   public final static Logger log = LoggerFactory.getLogger(Mpu6050.class);
 
-  StringBuilder debugRX = new StringBuilder();
+  protected StringBuilder debugRX = new StringBuilder();
 
-  transient HashSet<OrientationListener> listeners = new HashSet<OrientationListener>();
+  protected transient HashSet<OrientationListener> listeners = new HashSet<OrientationListener>();
 
-  transient OrientationPublisher publisher;
+  final protected OrientationPublisher publisher = new OrientationPublisher();
 
-  public transient I2CController controller;
+  protected transient I2CController controller;
 
-  public List<String> deviceAddressList = Arrays.asList("0x68", "0x69");
+  protected List<String> deviceAddressList = Arrays.asList("0x68", "0x69");
+
+  protected String deviceAddress = "0x68";
+
+  protected List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8");
+
+  protected String deviceBus = "1";
+
+  final protected Mpu6050Data data = new Mpu6050Data();
+
+  protected List<String> controllers;
+
+  protected String controllerName;
   
-  public String deviceAddress = "0x68";
+  /**
+   * frequency
+   */
+  protected Double sampleRateHz = 3.0;
 
-  public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8");
-  
-  public String deviceBus = "1";
-
-  public static final int MPU6050_ADDRESS_AD0_LOW = 0x68; // address pin low
-  // (GND), default
-  // for
-  // InvenSense
-  // evaluation board
-  public static final int MPU6050_ADDRESS_AD0_HIGH = 0x69; // address pin high
-  // (VCC)
-  public static final int MPU6050_DEFAULT_ADDRESS = MPU6050_ADDRESS_AD0_LOW;
-
-  public static final int MPU6050_RA_XG_OFFS_TC = 0x00; // [7] PWR_MODE, [6:1]
-  // XG_OFFS_TC, [0]
-  // OTP_BNK_VLD
-  public static final int MPU6050_RA_YG_OFFS_TC = 0x01; // [7] PWR_MODE, [6:1]
-  // YG_OFFS_TC, [0]
-  // OTP_BNK_VLD
-  public static final int MPU6050_RA_ZG_OFFS_TC = 0x02; // [7] PWR_MODE, [6:1]
-  // ZG_OFFS_TC, [0]
-  // OTP_BNK_VLD
-  public static final int MPU6050_RA_X_FINE_GAIN = 0x03; // [7:0] X_FINE_GAIN
-  public static final int MPU6050_RA_Y_FINE_GAIN = 0x04; // [7:0] Y_FINE_GAIN
-  public static final int MPU6050_RA_Z_FINE_GAIN = 0x05; // [7:0] Z_FINE_GAIN
-  public static final int MPU6050_RA_XA_OFFS_H = 0x06; // [15:0] XA_OFFS
-  public static final int MPU6050_RA_XA_OFFS_L_TC = 0x07;
-  public static final int MPU6050_RA_YA_OFFS_H = 0x08; // [15:0] YA_OFFS
-  public static final int MPU6050_RA_YA_OFFS_L_TC = 0x09;
-  public static final int MPU6050_RA_ZA_OFFS_H = 0x0A; // [15:0] ZA_OFFS
-  public static final int MPU6050_RA_ZA_OFFS_L_TC = 0x0B;
-  public static final int MPU6050_RA_SELF_TEST_X = 0x0D; // [7:5]
-  // XA_TEST[4-2],
-  // [4:0]
-  // XG_TEST[4-0]
-  public static final int MPU6050_RA_SELF_TEST_Y = 0x0E; // [7:5]
-  // YA_TEST[4-2],
-  // [4:0]
-  // YG_TEST[4-0]
-  public static final int MPU6050_RA_SELF_TEST_Z = 0x0F; // [7:5]
-  // ZA_TEST[4-2],
-  // [4:0]
-  // ZG_TEST[4-0]
-  public static final int MPU6050_RA_SELF_TEST_A = 0x10; // [5:4]
-  // XA_TEST[1-0],
-  // [3:2]
-  // YA_TEST[1-0],
-  // [1:0]
-  // ZA_TEST[1-0]
-  public static final int MPU6050_RA_XG_OFFS_USRH = 0x13; // [15:0]
-  // XG_OFFS_USR
-  public static final int MPU6050_RA_XG_OFFS_USRL = 0x14;
-  public static final int MPU6050_RA_YG_OFFS_USRH = 0x15; // [15:0]
-  // YG_OFFS_USR
-  public static final int MPU6050_RA_YG_OFFS_USRL = 0x16;
-  public static final int MPU6050_RA_ZG_OFFS_USRH = 0x17; // [15:0]
-  // ZG_OFFS_USR
-  public static final int MPU6050_RA_ZG_OFFS_USRL = 0x18;
-  public static final int MPU6050_RA_SMPLRT_DIV = 0x19;
-  public static final int MPU6050_RA_CONFIG = 0x1A;
-  public static final int MPU6050_RA_GYRO_CONFIG = 0x1B;
-  public static final int MPU6050_RA_ACCEL_CONFIG = 0x1C;
-  public static final int MPU6050_RA_FF_THR = 0x1D;
-  public static final int MPU6050_RA_FF_DUR = 0x1E;
-  public static final int MPU6050_RA_MOT_THR = 0x1F;
-  public static final int MPU6050_RA_MOT_DUR = 0x20;
-  public static final int MPU6050_RA_ZRMOT_THR = 0x21;
-  public static final int MPU6050_RA_ZRMOT_DUR = 0x22;
-  public static final int MPU6050_RA_FIFO_EN = 0x23;
-  public static final int MPU6050_RA_I2C_MST_CTRL = 0x24;
-  public static final int MPU6050_RA_I2C_SLV0_ADDR = 0x25;
-  public static final int MPU6050_RA_I2C_SLV0_REG = 0x26;
-  public static final int MPU6050_RA_I2C_SLV0_CTRL = 0x27;
-  public static final int MPU6050_RA_I2C_SLV1_ADDR = 0x28;
-  public static final int MPU6050_RA_I2C_SLV1_REG = 0x29;
-  public static final int MPU6050_RA_I2C_SLV1_CTRL = 0x2A;
-  public static final int MPU6050_RA_I2C_SLV2_ADDR = 0x2B;
-  public static final int MPU6050_RA_I2C_SLV2_REG = 0x2C;
-  public static final int MPU6050_RA_I2C_SLV2_CTRL = 0x2D;
-  public static final int MPU6050_RA_I2C_SLV3_ADDR = 0x2E;
-  public static final int MPU6050_RA_I2C_SLV3_REG = 0x2F;
-  public static final int MPU6050_RA_I2C_SLV3_CTRL = 0x30;
-  public static final int MPU6050_RA_I2C_SLV4_ADDR = 0x31;
-  public static final int MPU6050_RA_I2C_SLV4_REG = 0x32;
-  public static final int MPU6050_RA_I2C_SLV4_DO = 0x33;
-  public static final int MPU6050_RA_I2C_SLV4_CTRL = 0x34;
-  public static final int MPU6050_RA_I2C_SLV4_DI = 0x35;
-  public static final int MPU6050_RA_I2C_MST_STATUS = 0x36;
-  public static final int MPU6050_RA_INT_PIN_CFG = 0x37;
-  public static final int MPU6050_RA_INT_ENABLE = 0x38;
-  public static final int MPU6050_RA_DMP_INT_STATUS = 0x39;
-  public static final int MPU6050_RA_INT_STATUS = 0x3A;
-  public static final int MPU6050_RA_ACCEL_XOUT_H = 0x3B;
-  public static final int MPU6050_RA_ACCEL_XOUT_L = 0x3C;
-  public static final int MPU6050_RA_ACCEL_YOUT_H = 0x3D;
-  public static final int MPU6050_RA_ACCEL_YOUT_L = 0x3E;
-  public static final int MPU6050_RA_ACCEL_ZOUT_H = 0x3F;
-  public static final int MPU6050_RA_ACCEL_ZOUT_L = 0x40;
-  public static final int MPU6050_RA_TEMP_OUT_H = 0x41;
-  public static final int MPU6050_RA_TEMP_OUT_L = 0x42;
-  public static final int MPU6050_RA_GYRO_XOUT_H = 0x43;
-  public static final int MPU6050_RA_GYRO_XOUT_L = 0x44;
-  public static final int MPU6050_RA_GYRO_YOUT_H = 0x45;
-  public static final int MPU6050_RA_GYRO_YOUT_L = 0x46;
-  public static final int MPU6050_RA_GYRO_ZOUT_H = 0x47;
-  public static final int MPU6050_RA_GYRO_ZOUT_L = 0x48;
-  public static final int MPU6050_RA_EXT_SENS_DATA_00 = 0x49;
-  public static final int MPU6050_RA_EXT_SENS_DATA_01 = 0x4A;
-  public static final int MPU6050_RA_EXT_SENS_DATA_02 = 0x4B;
-  public static final int MPU6050_RA_EXT_SENS_DATA_03 = 0x4C;
-  public static final int MPU6050_RA_EXT_SENS_DATA_04 = 0x4D;
-  public static final int MPU6050_RA_EXT_SENS_DATA_05 = 0x4E;
-  public static final int MPU6050_RA_EXT_SENS_DATA_06 = 0x4F;
-  public static final int MPU6050_RA_EXT_SENS_DATA_07 = 0x50;
-  public static final int MPU6050_RA_EXT_SENS_DATA_08 = 0x51;
-  public static final int MPU6050_RA_EXT_SENS_DATA_09 = 0x52;
-  public static final int MPU6050_RA_EXT_SENS_DATA_10 = 0x53;
-  public static final int MPU6050_RA_EXT_SENS_DATA_11 = 0x54;
-  public static final int MPU6050_RA_EXT_SENS_DATA_12 = 0x55;
-  public static final int MPU6050_RA_EXT_SENS_DATA_13 = 0x56;
-  public static final int MPU6050_RA_EXT_SENS_DATA_14 = 0x57;
-  public static final int MPU6050_RA_EXT_SENS_DATA_15 = 0x58;
-  public static final int MPU6050_RA_EXT_SENS_DATA_16 = 0x59;
-  public static final int MPU6050_RA_EXT_SENS_DATA_17 = 0x5A;
-  public static final int MPU6050_RA_EXT_SENS_DATA_18 = 0x5B;
-  public static final int MPU6050_RA_EXT_SENS_DATA_19 = 0x5C;
-  public static final int MPU6050_RA_EXT_SENS_DATA_20 = 0x5D;
-  public static final int MPU6050_RA_EXT_SENS_DATA_21 = 0x5E;
-  public static final int MPU6050_RA_EXT_SENS_DATA_22 = 0x5F;
-  public static final int MPU6050_RA_EXT_SENS_DATA_23 = 0x60;
-  public static final int MPU6050_RA_MOT_DETECT_STATUS = 0x61;
-  public static final int MPU6050_RA_I2C_SLV0_DO = 0x63;
-  public static final int MPU6050_RA_I2C_SLV1_DO = 0x64;
-  public static final int MPU6050_RA_I2C_SLV2_DO = 0x65;
-  public static final int MPU6050_RA_I2C_SLV3_DO = 0x66;
-  public static final int MPU6050_RA_I2C_MST_DELAY_CTRL = 0x67;
-  public static final int MPU6050_RA_SIGNAL_PATH_RESET = 0x68;
-  public static final int MPU6050_RA_MOT_DETECT_CTRL = 0x69;
-  public static final int MPU6050_RA_USER_CTRL = 0x6A;
-  public static final int MPU6050_RA_PWR_MGMT_1 = 0x6B;
-  public static final int MPU6050_RA_PWR_MGMT_2 = 0x6C;
-  public static final int MPU6050_RA_BANK_SEL = 0x6D;
-  public static final int MPU6050_RA_MEM_START_ADDR = 0x6E;
-  public static final int MPU6050_RA_MEM_R_W = 0x6F;
-  public static final int MPU6050_RA_DMP_CFG_1 = 0x70;
-  public static final int MPU6050_RA_DMP_CFG_2 = 0x71;
-  public static final int MPU6050_RA_FIFO_COUNTH = 0x72;
-  public static final int MPU6050_RA_FIFO_COUNTL = 0x73;
-  public static final int MPU6050_RA_FIFO_R_W = 0x74;
-  public static final int MPU6050_RA_WHO_AM_I = 0x75;
-
-  public static final int MPU6050_SELF_TEST_XA_1_BIT = 0x07;
-  public static final int MPU6050_SELF_TEST_XA_1_LENGTH = 0x03;
-  public static final int MPU6050_SELF_TEST_XA_2_BIT = 0x05;
-  public static final int MPU6050_SELF_TEST_XA_2_LENGTH = 0x02;
-  public static final int MPU6050_SELF_TEST_YA_1_BIT = 0x07;
-  public static final int MPU6050_SELF_TEST_YA_1_LENGTH = 0x03;
-  public static final int MPU6050_SELF_TEST_YA_2_BIT = 0x03;
-  public static final int MPU6050_SELF_TEST_YA_2_LENGTH = 0x02;
-  public static final int MPU6050_SELF_TEST_ZA_1_BIT = 0x07;
-  public static final int MPU6050_SELF_TEST_ZA_1_LENGTH = 0x03;
-  public static final int MPU6050_SELF_TEST_ZA_2_BIT = 0x01;
-  public static final int MPU6050_SELF_TEST_ZA_2_LENGTH = 0x02;
-
-  public static final int MPU6050_SELF_TEST_XG_1_BIT = 0x04;
-  public static final int MPU6050_SELF_TEST_XG_1_LENGTH = 0x05;
-  public static final int MPU6050_SELF_TEST_YG_1_BIT = 0x04;
-  public static final int MPU6050_SELF_TEST_YG_1_LENGTH = 0x05;
-  public static final int MPU6050_SELF_TEST_ZG_1_BIT = 0x04;
-  public static final int MPU6050_SELF_TEST_ZG_1_LENGTH = 0x05;
-
-  public static final int MPU6050_TC_PWR_MODE_BIT = 7;
-  public static final int MPU6050_TC_OFFSET_BIT = 6;
-  public static final int MPU6050_TC_OFFSET_LENGTH = 6;
-  public static final int MPU6050_TC_OTP_BNK_VLD_BIT = 0;
-
-  public static final int MPU6050_VDDIO_LEVEL_VLOGIC = 0;
-  public static final int MPU6050_VDDIO_LEVEL_VDD = 1;
-
-  public static final int MPU6050_CFG_EXT_SYNC_SET_BIT = 5;
-  public static final int MPU6050_CFG_EXT_SYNC_SET_LENGTH = 3;
-  public static final int MPU6050_CFG_DLPF_CFG_BIT = 2;
-  public static final int MPU6050_CFG_DLPF_CFG_LENGTH = 3;
-
-  public static final int MPU6050_EXT_SYNC_DISABLED = 0x0;
-  public static final int MPU6050_EXT_SYNC_TEMP_OUT_L = 0x1;
-  public static final int MPU6050_EXT_SYNC_GYRO_XOUT_L = 0x2;
-  public static final int MPU6050_EXT_SYNC_GYRO_YOUT_L = 0x3;
-  public static final int MPU6050_EXT_SYNC_GYRO_ZOUT_L = 0x4;
-  public static final int MPU6050_EXT_SYNC_ACCEL_XOUT_L = 0x5;
-  public static final int MPU6050_EXT_SYNC_ACCEL_YOUT_L = 0x6;
-  public static final int MPU6050_EXT_SYNC_ACCEL_ZOUT_L = 0x7;
-
-  public static final int MPU6050_DLPF_BW_256 = 0x00;
-  public static final int MPU6050_DLPF_BW_188 = 0x01;
-  public static final int MPU6050_DLPF_BW_98 = 0x02;
-  public static final int MPU6050_DLPF_BW_42 = 0x03;
-  public static final int MPU6050_DLPF_BW_20 = 0x04;
-  public static final int MPU6050_DLPF_BW_10 = 0x05;
-  public static final int MPU6050_DLPF_BW_5 = 0x06;
-
-  public static final int MPU6050_GCONFIG_FS_SEL_BIT = 4;
-  public static final int MPU6050_GCONFIG_FS_SEL_LENGTH = 2;
-
-  public static final int MPU6050_GYRO_FS_250 = 0x00;
-  public static final int MPU6050_GYRO_FS_500 = 0x01;
-  public static final int MPU6050_GYRO_FS_1000 = 0x02;
-  public static final int MPU6050_GYRO_FS_2000 = 0x03;
-
-  public static final int MPU6050_ACONFIG_XA_ST_BIT = 7;
-  public static final int MPU6050_ACONFIG_YA_ST_BIT = 6;
-  public static final int MPU6050_ACONFIG_ZA_ST_BIT = 5;
-  public static final int MPU6050_ACONFIG_AFS_SEL_BIT = 4;
-  public static final int MPU6050_ACONFIG_AFS_SEL_LENGTH = 2;
-  public static final int MPU6050_ACONFIG_ACCEL_HPF_BIT = 2;
-  public static final int MPU6050_ACONFIG_ACCEL_HPF_LENGTH = 3;
-
-  public static final int MPU6050_ACCEL_FS_2 = 0x00;
-  public static final int MPU6050_ACCEL_FS_4 = 0x01;
-  public static final int MPU6050_ACCEL_FS_8 = 0x02;
-  public static final int MPU6050_ACCEL_FS_16 = 0x03;
-
-  public static final int MPU6050_DHPF_RESET = 0x00;
-  public static final int MPU6050_DHPF_5 = 0x01;
-  public static final int MPU6050_DHPF_2P5 = 0x02;
-  public static final int MPU6050_DHPF_1P25 = 0x03;
-  public static final int MPU6050_DHPF_0P63 = 0x04;
-  public static final int MPU6050_DHPF_HOLD = 0x07;
-
-  public static final int MPU6050_TEMP_FIFO_EN_BIT = 7;
-  public static final int MPU6050_XG_FIFO_EN_BIT = 6;
-  public static final int MPU6050_YG_FIFO_EN_BIT = 5;
-  public static final int MPU6050_ZG_FIFO_EN_BIT = 4;
-  public static final int MPU6050_ACCEL_FIFO_EN_BIT = 3;
-  public static final int MPU6050_SLV2_FIFO_EN_BIT = 2;
-  public static final int MPU6050_SLV1_FIFO_EN_BIT = 1;
-  public static final int MPU6050_SLV0_FIFO_EN_BIT = 0;
-
-  public static final int MPU6050_MULT_MST_EN_BIT = 7;
-  public static final int MPU6050_WAIT_FOR_ES_BIT = 6;
-  public static final int MPU6050_SLV_3_FIFO_EN_BIT = 5;
-  public static final int MPU6050_I2C_MST_P_NSR_BIT = 4;
-  public static final int MPU6050_I2C_MST_CLK_BIT = 3;
-  public static final int MPU6050_I2C_MST_CLK_LENGTH = 4;
-
-  public static final int MPU6050_CLOCK_DIV_348 = 0x0;
-  public static final int MPU6050_CLOCK_DIV_333 = 0x1;
-  public static final int MPU6050_CLOCK_DIV_320 = 0x2;
-  public static final int MPU6050_CLOCK_DIV_308 = 0x3;
-  public static final int MPU6050_CLOCK_DIV_296 = 0x4;
-  public static final int MPU6050_CLOCK_DIV_286 = 0x5;
-  public static final int MPU6050_CLOCK_DIV_276 = 0x6;
-  public static final int MPU6050_CLOCK_DIV_267 = 0x7;
-  public static final int MPU6050_CLOCK_DIV_258 = 0x8;
-  public static final int MPU6050_CLOCK_DIV_500 = 0x9;
-  public static final int MPU6050_CLOCK_DIV_471 = 0xA;
-  public static final int MPU6050_CLOCK_DIV_444 = 0xB;
-  public static final int MPU6050_CLOCK_DIV_421 = 0xC;
-  public static final int MPU6050_CLOCK_DIV_400 = 0xD;
-  public static final int MPU6050_CLOCK_DIV_381 = 0xE;
-  public static final int MPU6050_CLOCK_DIV_364 = 0xF;
-
-  public static final int MPU6050_I2C_SLV_RW_BIT = 7;
-  public static final int MPU6050_I2C_SLV_ADDR_BIT = 6;
-  public static final int MPU6050_I2C_SLV_ADDR_LENGTH = 7;
-  public static final int MPU6050_I2C_SLV_EN_BIT = 7;
-  public static final int MPU6050_I2C_SLV_BYTE_SW_BIT = 6;
-  public static final int MPU6050_I2C_SLV_REG_DIS_BIT = 5;
-  public static final int MPU6050_I2C_SLV_GRP_BIT = 4;
-  public static final int MPU6050_I2C_SLV_LEN_BIT = 3;
-  public static final int MPU6050_I2C_SLV_LEN_LENGTH = 4;
-
-  public static final int MPU6050_I2C_SLV4_RW_BIT = 7;
-  public static final int MPU6050_I2C_SLV4_ADDR_BIT = 6;
-  public static final int MPU6050_I2C_SLV4_ADDR_LENGTH = 7;
-  public static final int MPU6050_I2C_SLV4_EN_BIT = 7;
-  public static final int MPU6050_I2C_SLV4_INT_EN_BIT = 6;
-  public static final int MPU6050_I2C_SLV4_REG_DIS_BIT = 5;
-  public static final int MPU6050_I2C_SLV4_MST_DLY_BIT = 4;
-  public static final int MPU6050_I2C_SLV4_MST_DLY_LENGTH = 5;
-
-  public static final int MPU6050_MST_PASS_THROUGH_BIT = 7;
-  public static final int MPU6050_MST_I2C_SLV4_DONE_BIT = 6;
-  public static final int MPU6050_MST_I2C_LOST_ARB_BIT = 5;
-  public static final int MPU6050_MST_I2C_SLV4_NACK_BIT = 4;
-  public static final int MPU6050_MST_I2C_SLV3_NACK_BIT = 3;
-  public static final int MPU6050_MST_I2C_SLV2_NACK_BIT = 2;
-  public static final int MPU6050_MST_I2C_SLV1_NACK_BIT = 1;
-  public static final int MPU6050_MST_I2C_SLV0_NACK_BIT = 0;
-
-  public static final int MPU6050_INTCFG_INT_LEVEL_BIT = 7;
-  public static final int MPU6050_INTCFG_INT_OPEN_BIT = 6;
-  public static final int MPU6050_INTCFG_LATCH_INT_EN_BIT = 5;
-  public static final int MPU6050_INTCFG_INT_RD_CLEAR_BIT = 4;
-  public static final int MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT = 3;
-  public static final int MPU6050_INTCFG_FSYNC_INT_EN_BIT = 2;
-  public static final int MPU6050_INTCFG_I2C_BYPASS_EN_BIT = 1;
-  public static final int MPU6050_INTCFG_CLKOUT_EN_BIT = 0;
-
-  public static final int MPU6050_INTMODE_ACTIVEHIGH = 0x00;
-  public static final int MPU6050_INTMODE_ACTIVELOW = 0x01;
-
-  public static final int MPU6050_INTDRV_PUSHPULL = 0x00;
-  public static final int MPU6050_INTDRV_OPENDRAIN = 0x01;
-
-  public static final int MPU6050_INTLATCH_50USPULSE = 0x00;
-  public static final int MPU6050_INTLATCH_WAITCLEAR = 0x01;
-
-  public static final int MPU6050_INTCLEAR_STATUSREAD = 0x00;
-  public static final int MPU6050_INTCLEAR_ANYREAD = 0x01;
-
-  public static final int MPU6050_INTERRUPT_FF_BIT = 7;
-  public static final int MPU6050_INTERRUPT_MOT_BIT = 6;
-  public static final int MPU6050_INTERRUPT_ZMOT_BIT = 5;
-  public static final int MPU6050_INTERRUPT_FIFO_OFLOW_BIT = 4;
-  public static final int MPU6050_INTERRUPT_I2C_MST_INT_BIT = 3;
-  public static final int MPU6050_INTERRUPT_PLL_RDY_INT_BIT = 2;
-  public static final int MPU6050_INTERRUPT_DMP_INT_BIT = 1;
-  public static final int MPU6050_INTERRUPT_DATA_RDY_BIT = 0;
-
-  // TODO: figure out what these actually do
-  // UMPL source code is not very obivous
-  public static final int MPU6050_DMPINT_5_BIT = 5;
-  public static final int MPU6050_DMPINT_4_BIT = 4;
-  public static final int MPU6050_DMPINT_3_BIT = 3;
-  public static final int MPU6050_DMPINT_2_BIT = 2;
-  public static final int MPU6050_DMPINT_1_BIT = 1;
-  public static final int MPU6050_DMPINT_0_BIT = 0;
-
-  public static final int MPU6050_MOTION_MOT_XNEG_BIT = 7;
-  public static final int MPU6050_MOTION_MOT_XPOS_BIT = 6;
-  public static final int MPU6050_MOTION_MOT_YNEG_BIT = 5;
-  public static final int MPU6050_MOTION_MOT_YPOS_BIT = 4;
-  public static final int MPU6050_MOTION_MOT_ZNEG_BIT = 3;
-  public static final int MPU6050_MOTION_MOT_ZPOS_BIT = 2;
-  public static final int MPU6050_MOTION_MOT_ZRMOT_BIT = 0;
-
-  public static final int MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT = 7;
-  public static final int MPU6050_DELAYCTRL_I2C_SLV4_DLY_EN_BIT = 4;
-  public static final int MPU6050_DELAYCTRL_I2C_SLV3_DLY_EN_BIT = 3;
-  public static final int MPU6050_DELAYCTRL_I2C_SLV2_DLY_EN_BIT = 2;
-  public static final int MPU6050_DELAYCTRL_I2C_SLV1_DLY_EN_BIT = 1;
-  public static final int MPU6050_DELAYCTRL_I2C_SLV0_DLY_EN_BIT = 0;
-
-  public static final int MPU6050_PATHRESET_GYRO_RESET_BIT = 2;
-  public static final int MPU6050_PATHRESET_ACCEL_RESET_BIT = 1;
-  public static final int MPU6050_PATHRESET_TEMP_RESET_BIT = 0;
-
-  public static final int MPU6050_DETECT_ACCEL_ON_DELAY_BIT = 5;
-  public static final int MPU6050_DETECT_ACCEL_ON_DELAY_LENGTH = 2;
-  public static final int MPU6050_DETECT_FF_COUNT_BIT = 3;
-  public static final int MPU6050_DETECT_FF_COUNT_LENGTH = 2;
-  public static final int MPU6050_DETECT_MOT_COUNT_BIT = 1;
-  public static final int MPU6050_DETECT_MOT_COUNT_LENGTH = 2;
-
-  public static final int MPU6050_DETECT_DECREMENT_RESET = 0x0;
-  public static final int MPU6050_DETECT_DECREMENT_1 = 0x1;
-  public static final int MPU6050_DETECT_DECREMENT_2 = 0x2;
-  public static final int MPU6050_DETECT_DECREMENT_4 = 0x3;
-
-  public static final int MPU6050_USERCTRL_DMP_EN_BIT = 7;
-  public static final int MPU6050_USERCTRL_FIFO_EN_BIT = 6;
-  public static final int MPU6050_USERCTRL_I2C_MST_EN_BIT = 5;
-  public static final int MPU6050_USERCTRL_I2C_IF_DIS_BIT = 4;
-  public static final int MPU6050_USERCTRL_DMP_RESET_BIT = 3;
-  public static final int MPU6050_USERCTRL_FIFO_RESET_BIT = 2;
-  public static final int MPU6050_USERCTRL_I2C_MST_RESET_BIT = 1;
-  public static final int MPU6050_USERCTRL_SIG_COND_RESET_BIT = 0;
-
-  public static final int MPU6050_PWR1_DEVICE_RESET_BIT = 7;
-  public static final int MPU6050_PWR1_SLEEP_BIT = 6;
-  public static final int MPU6050_PWR1_CYCLE_BIT = 5;
-  public static final int MPU6050_PWR1_TEMP_DIS_BIT = 3;
-  public static final int MPU6050_PWR1_CLKSEL_BIT = 2;
-  public static final int MPU6050_PWR1_CLKSEL_LENGTH = 3;
-
-  public static final int MPU6050_CLOCK_INTERNAL = 0x00;
-  public static final int MPU6050_CLOCK_PLL_XGYRO = 0x01;
-  public static final int MPU6050_CLOCK_PLL_YGYRO = 0x02;
-  public static final int MPU6050_CLOCK_PLL_ZGYRO = 0x03;
-  public static final int MPU6050_CLOCK_PLL_EXT32K = 0x04;
-  public static final int MPU6050_CLOCK_PLL_EXT19M = 0x05;
-  public static final int MPU6050_CLOCK_KEEP_RESET = 0x07;
-
-  public static final int MPU6050_PWR2_LP_WAKE_CTRL_BIT = 7;
-  public static final int MPU6050_PWR2_LP_WAKE_CTRL_LENGTH = 2;
-  public static final int MPU6050_PWR2_STBY_XA_BIT = 5;
-  public static final int MPU6050_PWR2_STBY_YA_BIT = 4;
-  public static final int MPU6050_PWR2_STBY_ZA_BIT = 3;
-  public static final int MPU6050_PWR2_STBY_XG_BIT = 2;
-  public static final int MPU6050_PWR2_STBY_YG_BIT = 1;
-  public static final int MPU6050_PWR2_STBY_ZG_BIT = 0;
-
-  public static final int MPU6050_WAKE_FREQ_1P25 = 0x0;
-  public static final int MPU6050_WAKE_FREQ_2P5 = 0x1;
-  public static final int MPU6050_WAKE_FREQ_5 = 0x2;
-  public static final int MPU6050_WAKE_FREQ_10 = 0x3;
-
-  public static final int MPU6050_BANKSEL_PRFTCH_EN_BIT = 6;
-  public static final int MPU6050_BANKSEL_CFG_USER_BANK_BIT = 5;
-  public static final int MPU6050_BANKSEL_MEM_SEL_BIT = 4;
-  public static final int MPU6050_BANKSEL_MEM_SEL_LENGTH = 5;
-
-  public static final int MPU6050_WHO_AM_I_BIT = 6;
-  public static final int MPU6050_WHO_AM_I_LENGTH = 6;
-
-  public static final int MPU6050_DMP_MEMORY_BANKS = 8;
-  public static final int MPU6050_DMP_MEMORY_BANK_SIZE = 256;
-  public static final int MPU6050_DMP_MEMORY_CHUNK_SIZE = 16;
-
-  // public static final byte ACCEL_XOUT_H = 0x3B;
-
-  // Raw data values read by getRaw
-  public int accelX;
-  public int accelY;
-  public int accelZ;
-  public int temperature;
-  public int gyroX;
-  public int gyroY;
-  public int gyroZ;
-  // Accel values converted to G
-  // Temperature converted to Celcius
-  // Gyro values converted degrees/s
-  public double accelGX = 0;
-  public double accelGY = 0;
-  public double accelGZ = 0;
-  public double temperatureC = 0;
-  public double gyroDegreeX = 0;
-  public double gyroDegreeY = 0;
-  public double gyroDegreeZ = 0;
-
-  public List<String> controllers;
-  public String controllerName;
-
-  // complementaryFiltered angles
-  public double filtered_x_angle;
-  public double filtered_y_angle;
-  public double filtered_z_angle;
-
-  public class OrientationPublisher extends Thread {
-    public boolean isRunning = false;
+  protected class OrientationPublisher implements Runnable {
+    protected boolean isRunning = false;
+    private transient Thread thread = null;
 
     public void run() {
-      isRunning = true;
-      while (isRunning) {
-        refresh();
-        invoke("publishOrientation", new Orientation(filtered_x_angle, filtered_y_angle, filtered_z_angle));
+      try {
+        isRunning = true;
+        dmpInitialize(); // TODO check initialize() switch use dmp?
+        while (isRunning) {
+          refresh();
+          invoke("publishOrientation", data.orientation);
+          invoke("publishMpu6050Data", data);
+          
+          sleep((int)(1000/sampleRateHz));
+        }
+      } catch (Exception e) {
+        log.error("publisher threw", e);
+        error("publisher error %s", e.getMessage());
       }
+      isRunning = false;
     }
+
+    public synchronized void start() {
+      if (isRunning) {
+        return;
+      }
+      thread = new Thread(this, String.format("%s-publisher", getName()));
+      thread.start();
+      broadcastState();
+    }
+
+    public synchronized void stop() {
+      isRunning = false;
+      broadcastState();
+    }
+  }
+
+  static class Mpu6050Data {
+    
+    Orientation orientation = new Orientation(0.0, 0.0, 0.0);
+
+    /**
+     * raw values
+     */
+    protected int accelX;
+    protected int accelY;
+    protected int accelZ;
+    protected int temperature;
+    protected int gyroX;
+    protected int gyroY;
+    protected int gyroZ;
+
+    /**
+     * accelerometer converted to G
+     */
+    protected double accelGX = 0;
+    protected double accelGY = 0;
+    protected double accelGZ = 0;
+
+    /**
+     * temperature converted to Celsius
+     */
+    protected double temperatureC = 0;
+
+    /**
+     * converted to degrees/second
+     */
+    protected double gyroDegreeX = 0;
+    protected double gyroDegreeY = 0;
+    protected double gyroDegreeZ = 0;
+    
+    public String toString() {
+      StringBuilder sb = new StringBuilder();
+      sb.append(orientation.toString());
+      sb.append(" ");
+      sb.append(" accelX ");
+      sb.append(accelX);
+      sb.append(" accelY ");
+      sb.append(accelY);
+      sb.append(" accelZ ");
+      sb.append(accelZ);
+
+      sb.append(" temperature ");
+      sb.append(temperature);
+      sb.append(" gyroX ");
+      sb.append(gyroX);
+      sb.append(" gyroY ");
+      sb.append(gyroY);
+      sb.append(" gyroZ ");
+      sb.append(gyroZ);
+
+      sb.append(" accelGX ");
+      sb.append(accelGX);
+      sb.append(" accelGY ");
+      sb.append(accelGY);
+      sb.append(" accelGZ ");
+      sb.append(accelGZ);
+      sb.append(" temperatureC ");
+      sb.append(temperatureC);
+
+      sb.append(" gyroDegreeX ");
+      sb.append(gyroDegreeX);
+      sb.append(" gyroDegreeY ");
+      sb.append(gyroDegreeY);
+      sb.append(" gyroDegreeZ ");
+      sb.append(gyroDegreeZ);
+
+      return sb.toString();
+    }
+
   }
 
   public Mpu6050(String n, String id) {
@@ -550,7 +193,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   public void onRegistered(Registration s) {
     refreshControllers();
     broadcastState();
-
   }
 
   public List<String> refreshControllers() {
@@ -559,17 +201,38 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   @Override
-  public void setDeviceBus(String deviceBus) {
-    this.deviceBus = deviceBus;
+  public void setBus(String bus) {
+    this.deviceBus = bus;
     broadcastState();
   }
 
   @Override
+  public String getBus() {
+    return this.deviceBus;
+  }
+
+  @Override
+  public String getAddress() {
+    return this.deviceAddress;
+  }
+
+  @Override
+  public void setDeviceBus(String deviceBus) {
+    setBus(deviceBus);
+  }
+
+  @Override
   public void setDeviceAddress(String deviceAddress) {
-    this.deviceAddress = deviceAddress;
+    setAddress(deviceAddress);
+  }
+
+  @Override
+  public void setAddress(String address) {
+    this.deviceAddress = address;
     broadcastState();
   }
 
+  
   /**
    * This method reads all the 7 raw values in one go accelX accelY accelZ
    * temperature ( In degrees Celcius ) gyroX gyroY gyroZ
@@ -581,8 +244,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    */
   public void refresh() {
     getRaw();
-    complementaryFilter(gyroX, gyroY, gyroZ, accelX, accelY, accelZ);
-    broadcastState();
+    complementaryFilter(data.gyroX, data.gyroY, data.gyroZ, data.accelX, data.accelY, data.accelZ);
+    // log.debug("{} {} {} {} {} {}", data.gyroX, data.gyroY, data.gyroZ, data.accelX, data.accelY, data.accelZ);
   }
 
   public void getRaw() {
@@ -595,24 +258,24 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     byte[] readbuffer = new byte[14];
     controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
     // Fill the variables with the result from the read operation
-    accelX = (byte) readbuffer[0] << 8 | readbuffer[1] & 0xFF;
-    accelY = (byte) readbuffer[2] << 8 | readbuffer[3] & 0xFF;
-    accelZ = (byte) readbuffer[4] << 8 | readbuffer[5] & 0xFF;
-    temperature = (byte) readbuffer[6] << 8 | readbuffer[7] & 0xFF;
-    gyroX = (byte) readbuffer[8] << 8 | readbuffer[9] & 0xFF;
-    gyroY = (byte) readbuffer[10] << 8 | readbuffer[11] & 0xFF;
-    gyroZ = (byte) readbuffer[12] << 8 | readbuffer[13] & 0xFF;
+    data.accelX = (byte) readbuffer[0] << 8 | readbuffer[1] & 0xFF;
+    data.accelY = (byte) readbuffer[2] << 8 | readbuffer[3] & 0xFF;
+    data.accelZ = (byte) readbuffer[4] << 8 | readbuffer[5] & 0xFF;
+    data.temperature = (byte) readbuffer[6] << 8 | readbuffer[7] & 0xFF;
+    data.gyroX = (byte) readbuffer[8] << 8 | readbuffer[9] & 0xFF;
+    data.gyroY = (byte) readbuffer[10] << 8 | readbuffer[11] & 0xFF;
+    data.gyroZ = (byte) readbuffer[12] << 8 | readbuffer[13] & 0xFF;
     // Convert acceleration to G assuming min-max 2G as set in initialize()
-    accelGX = accelX / 16384.0;
-    accelGY = accelY / 16384.0;
-    accelGZ = accelZ / 16384.0;
+    data.accelGX = data.accelX / 16384.0;
+    data.accelGY = data.accelY / 16384.0;
+    data.accelGZ = data.accelZ / 16384.0;
     // Convert temp to degrees Celcius
-    temperatureC = (temperature / 340.0) + 36.53;
+    data.temperatureC = (data.temperature / 340.0) + 36.53;
     // Convert gyro to degrees/s ( assuming max +-250 degrees/s ) as set in
     // initialize()
-    gyroDegreeX = gyroX / 131;
-    gyroDegreeY = gyroY / 131;
-    gyroDegreeZ = gyroZ / 131;
+    data.gyroDegreeX = data.gyroX / 131;
+    data.gyroDegreeY = data.gyroY / 131;
+    data.gyroDegreeZ = data.gyroZ / 131;
     // broadcastState();
   }
 
@@ -642,21 +305,27 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     double acc_z_angle = Math.atan(Math.sqrt((acc_x * acc_x) + (acc_y * acc_y)) / acc_z);
 
     // Calculate the change in direction from the Gyro
-    double gyro_x_angle = filtered_x_angle + (dt * gyro_x / 131) * (Math.PI / 180);
-    double gyro_y_angle = filtered_y_angle + (dt * gyro_y / 131) * (Math.PI / 180);
-    double gyro_z_angle = filtered_z_angle + (dt * gyro_z / 131) * (Math.PI / 180);
+    double gyro_x_angle = data.orientation.roll + (dt * gyro_x / 131) * (Math.PI / 180);
+    double gyro_y_angle = data.orientation.pitch + (dt * gyro_y / 131) * (Math.PI / 180);
+    double gyro_z_angle = data.orientation.yaw + (dt * gyro_z / 131) * (Math.PI / 180);
 
-    filtered_x_angle = gyroPortion * gyro_x_angle + accPortion * acc_x_angle;
-    filtered_y_angle = gyroPortion * gyro_y_angle + accPortion * acc_y_angle;
-    filtered_z_angle = gyroPortion * gyro_z_angle + accPortion * acc_z_angle;
+    data.orientation.roll = gyroPortion * gyro_x_angle + accPortion * acc_x_angle;
+    data.orientation.pitch = gyroPortion * gyro_y_angle + accPortion * acc_y_angle;
+    data.orientation.yaw = gyroPortion * gyro_z_angle + accPortion * acc_z_angle;
 
   }
 
+  /**
+   * This initializes the MPU from sleep mode "in addition" to initializing the
+   * DMP (digital motion processor)
+   * 
+   * @return
+   */
   public int dmpInitialize() {
     // reset device
     log.info("Resetting MPU6050...");
     reset();
-    delay(30); // wait after reset
+    sleep(30); // wait after reset
 
     // disable sleep mode
     log.info("Disabling sleep mode...");
@@ -694,7 +363,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     setSlaveAddress(0, 0x68);
     log.info("Resetting I2C Master control...");
     resetI2CMaster();
-    delay(20);
+    sleep(20);
 
     // load DMP code into memory banks
     log.info("Writing DMP code to MPU memory banks ({}) bytes", dmpMemory.length);
@@ -858,15 +527,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
       return 1; // main binary block loading failed
     }
     return 0;
-  }
-
-  public void delay(int ms) {
-    try {
-      Thread.sleep(ms);
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      Logging.logError(e);
-    } // wait after reset
   }
 
   public void initialize() {
@@ -3418,8 +3078,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_SIGNAL_PATH_RESET, MPU6050_PATHRESET_TEMP_RESET_BIT, true);
   }
 
-  // MOT_DETECT_CTRL register
-
   /**
    * Get accelerometer power-on delay. The accelerometer data path provides
    * samples to the sensor registers, Motion detection, Zero Motion detection,
@@ -3791,8 +3449,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CLKSEL_BIT, MPU6050_PWR1_CLKSEL_LENGTH, source);
   }
 
-  // PWR_MGMT_2 register
-
   /**
    * Get wake frequency in Accel-Only Low Power Mode. The MPU-60X0 can be put
    * into Accerlerometer Only Low Power Mode by setting PWRSEL to 1 in the Power
@@ -3975,8 +3631,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_ZG_BIT, enabled);
   }
 
-  // FIFO_COUNT* registers
-
   /**
    * Get current FIFO buffer size. This value indicates the number of bytes
    * stored in the FIFO buffer. This number is in turn the number of bytes that
@@ -3991,8 +3645,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_FIFO_COUNTH, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
-
-  // FIFO_R_W register
 
   /**
    * Get byte from FIFO buffer. This register is used to read and write data
@@ -4073,9 +3725,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   // ======== UNDOCUMENTED/DMP REGISTERS/METHODS ========
-
-  // XG_OFFS_TC register
-
   boolean getOTPBankValid() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_XG_OFFS_TC, MPU6050_TC_OTP_BNK_VLD_BIT);
   }
@@ -4092,8 +3741,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_XG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH, offset);
   }
 
-  // YG_OFFS_TC register
-
   int getYGyroOffsetTC() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_YG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH);
   }
@@ -4101,8 +3748,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   void setYGyroOffsetTC(int offset) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_YG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH, offset);
   }
-
-  // ZG_OFFS_TC register
 
   int getZGyroOffsetTC() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_ZG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH);
@@ -4112,8 +3757,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_ZG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH, offset);
   }
 
-  // X_FINE_GAIN register
-
   int getXFineGain() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_X_FINE_GAIN);
   }
@@ -4121,8 +3764,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   void setXFineGain(int gain) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_X_FINE_GAIN, gain);
   }
-
-  // Y_FINE_GAIN register
 
   int getYFineGain() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_Y_FINE_GAIN);
@@ -4132,8 +3773,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_Y_FINE_GAIN, gain);
   }
 
-  // Z_FINE_GAIN register
-
   int getZFineGain() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_Z_FINE_GAIN);
   }
@@ -4141,8 +3780,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   void setZFineGain(int gain) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_Z_FINE_GAIN, gain);
   }
-
-  // XA_OFFS_* registers
 
   int getXAccelOffset() {
     int readBuffer[] = new int[2];
@@ -4154,8 +3791,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_XA_OFFS_H, offset);
   }
 
-  // YA_OFFS_* register
-
   int getYAccelOffset() {
     int readBuffer[] = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_YA_OFFS_H, 2, readBuffer);
@@ -4165,8 +3800,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   void setYAccelOffset(int offset) {
     I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_YA_OFFS_H, offset);
   }
-
-  // ZA_OFFS_* register
 
   int getZAccelOffset() {
     int readBuffer[] = new int[2];
@@ -4178,8 +3811,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_ZA_OFFS_H, offset);
   }
 
-  // XG_OFFS_USR* registers
-
   int getXGyroOffset() {
     int readBuffer[] = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_XG_OFFS_USRH, 2, readBuffer);
@@ -4189,8 +3820,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   void setXGyroOffset(int offset) {
     I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_XG_OFFS_USRH, offset);
   }
-
-  // YG_OFFS_USR* register
 
   int getYGyroOffset() {
     int readBuffer[] = new int[2];
@@ -4202,8 +3831,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_YG_OFFS_USRH, offset);
   }
 
-  // ZG_OFFS_USR* register
-
   int getZGyroOffset() {
     int readBuffer[] = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_ZG_OFFS_USRH, 2, readBuffer);
@@ -4213,8 +3840,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   void setZGyroOffset(int offset) {
     I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_ZG_OFFS_USRH, offset);
   }
-
-  // INT_ENABLE register (DMP functions)
 
   boolean getIntPLLReadyEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_PLL_RDY_INT_BIT);
@@ -4231,8 +3856,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   void setIntDMPEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DMP_INT_BIT, enabled);
   }
-
-  // DMP_INT_STATUS
 
   boolean getDMPInt5Status() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_5_BIT);
@@ -4258,8 +3881,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_0_BIT);
   }
 
-  // INT_STATUS register (DMP functions)
-
   boolean getIntPLLReadyStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_PLL_RDY_INT_BIT);
   }
@@ -4267,8 +3888,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   boolean getIntDMPStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_DMP_INT_BIT);
   }
-
-  // USER_CTRL register (DMP functions)
 
   boolean getDMPEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_DMP_EN_BIT);
@@ -4281,8 +3900,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   void resetDMP() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_DMP_RESET_BIT, true);
   }
-
-  // BANK_SEL register
 
   void setMemoryBank(int bank, boolean prefetchEnabled, boolean userBank) {
     bank = bank & 0x1F;
@@ -4297,13 +3914,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     setMemoryBank(bank, false, false);
   }
 
-  // MEM_START_ADDR register
-
   void setMemoryStartAddress(int address) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_MEM_START_ADDR, address);
   }
-
-  // MEM_R_W register
 
   int readMemoryByte() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_MEM_R_W);
@@ -4514,8 +4127,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     return writeDMPConfigurationSet(data, dataSize);
   }
 
-  // DMP_CFG_1 register
-
   int getDMPConfig1() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_DMP_CFG_1);
   }
@@ -4534,8 +4145,13 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_DMP_CFG_2, config);
   }
 
-  // * Compare the content of two buffers
-  // Returns 0 if the two buffers have the same content otherwise 1
+  /**
+   * Compare the content of two buffers Returns 0 if the two buffers have the same content otherwise 1
+   * @param buffer1
+   * @param buffer2
+   * @param length
+   * @return
+   */
   int memcmp(int[] buffer1, int[] buffer2, int length) {
     int result = 0;
     for (int i = 0; i < length; i++) {
@@ -4549,11 +4165,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   int pgm_read_byte(int a) {
     return 0;
   }
-
-  /*
-   * Start of I2CDEV section. Most of this code could be moved to and
-   * implemented in the I2CControl interface.
-   */
 
   /**
    * Read a single bit from an 8-bit device register.
@@ -4830,30 +4441,40 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     return true;
   }
 
-  /*
-   * End of I2CDEV section.
-   */
-
   @Override
   public Orientation publishOrientation(Orientation data) {
+    // log.debug("pitch {} roll {} yaw {}", data.pitch, data.roll, data.yaw);
     return data;
+  }
+
+  public Mpu6050Data publishMpu6050Data(Mpu6050Data data) {
+    return data;
+  }
+
+  /**
+   * This sensor has one purpose - read orientation data - it should have a
+   * simple method - starts the reading/publishing
+   */
+  public synchronized void start() {
+    publisher.start();
   }
 
   @Override
   public void startOrientationTracking() {
+    start();
+  }
 
-    if (publisher == null) {
-      publisher = new OrientationPublisher();
-      publisher.start();
-    }
+  /**
+   * This sensor has one purpose - read orientation data - it should have a
+   * simple method - stops the reading/publishing
+   */
+  public synchronized void stop() {
+    publisher.stop();
   }
 
   @Override
   public void stopOrientationTracking() {
-    if (publisher != null) {
-      publisher.isRunning = false;
-      publisher = null;
-    }
+    stop();
   }
 
   @Override
@@ -4866,6 +4487,17 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     listeners.remove(listener);
   }
 
+  /**
+   * the simple router attach
+   */
+  public void attach(Attachable service) throws Exception {
+    if (I2CController.class.isAssignableFrom(service.getClass())) {
+      attachI2CController((I2CController) service);
+      return;
+    }
+    warn(String.format("Service.attach does not know how to attach %s to a %s", service.getClass().getSimpleName(), this.getClass().getSimpleName()));
+  }
+
   public void attach(I2CController controller) {
     attachI2CController(controller, deviceBus, deviceAddress);
   }
@@ -4875,29 +4507,34 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   public void attachI2CController(I2CController controller, String deviceBus, String deviceAddress) {
+    setDeviceBus(deviceBus);
+    setDeviceAddress(deviceAddress);
+    attachI2CController(controller);
+  }
+
+  @Override
+  public void attachI2CController(I2CController controller) {
 
     if (controller.equals(this.controller)) {
       // already attached
       return;
     }
-    
-    if (deviceBus != null) {
-      this.deviceBus = deviceBus;
-    }
-    
-    if (deviceAddress != null) {
-      this.deviceAddress = deviceAddress;
-    }    
-    
+
     this.controllerName = controller.getName();
     this.controller = controller;
-    
     controller.attachI2CControl(this);
-    
     log.info("Attached {} device on bus: {} address {}", controllerName, deviceBus, deviceAddress);
-    
+    broadcastState();
   }
-  
+
+  public void detach() {
+    log.info("detaching");
+    super.detach();
+    if (controller != null) {
+      detachI2CController(controller);
+    }
+  }
+
   // This section contains all the new detach logic
   // TODO: This default code could be in Attachable
   @Override
@@ -4907,42 +4544,45 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 
   @Override
   public void detach(Attachable service) {
-
+    log.info("detach(Attachable");
+    // FIXME Orientation listener
     if (I2CController.class.isAssignableFrom(service.getClass())) {
       detachI2CController((I2CController) service);
       return;
     }
-  }  
+  }
 
   @Override
-  public void detachI2CController(I2CController controller) {
-
-    if (!isAttached(controller))
+  public void detachI2CController(I2CController inController) {
+    log.info("detachI2CController");
+    if (!isAttached(inController))
       return;
     controller.detachI2CControl(this);
+    publisher.stop();
+    controller = null;
+    controllerName = null;    
+    log.info("detachI2CController broadcast");
     broadcastState();
   }
 
-  // This section contains all the methods used to query / show all attached
-  // methods
   /**
    * Returns all the currently attached services
    */
   @Override
-  public Set<String> getAttached() {
-    HashSet<String> ret = new HashSet<String>();
+  public Set<String> getAttached() {    
+    Set<String> ret = super.getAttached();
     if (controller != null) {
       ret.add(controller.getName());
     }
     return ret;
   }
 
-  @Override
+  @Deprecated
   public String getDeviceBus() {
     return this.deviceBus;
   }
 
-  @Override
+  @Deprecated
   public String getDeviceAddress() {
     return this.deviceAddress;
   }
@@ -4954,11 +4594,58 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     }
     return false;
   }
+  
+  @Override
+  public ServiceConfig getConfig() {    
+    Mpu6050Config config = (Mpu6050Config) initConfig(new Mpu6050Config());
+    config.start = publisher.isRunning;
+    config.sampleRate = sampleRateHz;
+    config.bus = deviceBus;
+    config.address = deviceAddress;
+    return config;
+  }
+
+  @Override
+  public ServiceConfig load(ServiceConfig c) {
+    super.load(c);    
+    Mpu6050Config config = (Mpu6050Config)c;
+    if (config.start) {
+      publisher.start();
+    }
+    if (config.sampleRate != null) {
+      setSampleRate(config.sampleRate);
+    }
+    if (config.bus != null) {
+      setDeviceBus(config.bus);
+    }
+    if (config.address != null) {
+      setDeviceAddress(config.address);
+    }
+    return c;
+  }
+  
+  public void setSampleRate(double rateHz) {
+    if (rateHz < 0.001 && rateHz > 100) {
+      error("rate must be 0.001 < rateHz < 100");
+      return;
+    }
+    sampleRateHz = rateHz;
+    broadcastState();
+  }
 
   public static void main(String[] args) {
-    LoggingFactory.init("info");
-
     try {
+
+      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
+      LoggingFactory.init(Level.INFO);
+
+      // Runtime.setAllVirtual(true);
+      Arduino arduino = (Arduino) Runtime.start("mega", "Arduino");
+      arduino.connect("/dev/ttyACM0");
+      Runtime.start("mpu6050", "Mpu6050");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
 
       /*
        * Mpu6050 mpu6050 = (Mpu6050) Runtime.start("mpu6050", "Mpu6050");
@@ -4981,12 +4668,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     } catch (Exception e) {
       Logging.logError(e);
     }
-  }
-
-  @Override
-  public void attachI2CController(I2CController controller) {
-    // TODO Auto-generated method stub
-    
   }
 
 }

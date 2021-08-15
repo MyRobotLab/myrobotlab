@@ -547,6 +547,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
 
   @Override
   public void stopService() {
+    super.stopService();
     stopListening();
   }
 

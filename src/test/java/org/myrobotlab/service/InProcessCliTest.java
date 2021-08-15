@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -10,15 +12,14 @@ import java.io.PipedOutputStream;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.process.InProcessCli;
 import org.myrobotlab.test.AbstractTest;
 
 public class InProcessCliTest extends AbstractTest {
-  
+
   static PipedOutputStream pipe = null;
   static PipedInputStream in = null;
   static ByteArrayOutputStream bos = null;
-  
+
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     pipe = new PipedOutputStream();
@@ -32,50 +33,58 @@ public class InProcessCliTest extends AbstractTest {
     // must read it off and process the data
     sleep(50);
   }
-  
+
   public void clear() {
     bos.reset();
   }
-  
+
   public String getResponse() {
-    String ret =  new String(bos.toByteArray());
+    String ret = new String(bos.toByteArray());
     log.info("cd => {}", ret);
     // clear();
     return ret;
   }
-  
+
   public String toJson(Object o) {
     return CodecUtils.toPrettyJson(o);
   }
 
   @Test
   public void testProcess() throws IOException, InterruptedException {
-    
+
     Runtime runtime = Runtime.getInstance();
     runtime.startInteractiveMode(in, bos);
-    
+
     // wait for pipe to clear
     Thread.sleep(300);
     clear();
     write("pwd");
-    String ret = getResponse();    
+    String ret = getResponse();
     assertTrue(ret.startsWith("\"/\""));
-    
+
     clear();
     write("ls");
     assertTrue(getResponse().contains(toJson(Runtime.getServiceNames())));
-    
-    
-    /*
+
+    boolean virtual = runtime.isVirtual();
+
+    // boolean conversion
     clear();
-    write("route");
-    assertTrue(getResponse().contains(toJson(Runtime.getInstance().route())));
-    */
+    write("/runtime/setVirtual/false");
+    ret = getResponse();
+    assertFalse(runtime.isVirtual());
+    write("/runtime/setVirtual/true");
+    assertTrue(runtime.isVirtual());
+    // replace with original value
+    runtime.setVirtual(virtual);
     
-    // cd to different directory with and without /
+    // integer conversion
+    Clock clockCli = (Clock)Runtime.start("clockCli", "Clock");
+    write("/clockCli/setInterval/1234");
+    Integer check = 1234;
+    assertEquals(check, clockCli.getInterval());
     
-    // try a bunch of service commands
-    
+
   }
 
 }

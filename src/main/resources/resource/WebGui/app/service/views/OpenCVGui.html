@@ -6,10 +6,12 @@
                 <span class="glyphicon glyphicon-play text-primary"></span>
                 &nbsp;Start Capture
             
+            
             </button>
             <button class="btn btn-default" ng-hide="!service.capturing" class="btn btn-default" ng-click="msg.stopCapture()">
                 <span class="glyphicon glyphicon-stop"></span>
                 &nbsp;Stop Capture
+            
             
             </button>
             <label>Web Viewer</label>
@@ -70,16 +72,18 @@
             </div> -->
         </div>
         <div ng-click="onSamplePoint($event)">
-        <img data-ng-src="{{getDisplayImage()}}"/>
+            <img data-ng-src="{{getDisplayImage()}}"/>
         </div>
         <!-- /videoContainer -->
         <div class="videoInfo">
             <span class="glyphicon glyphicon-info-sign gray1"></span>
             {{service.displayFilter}} mouse x y {{samplePoint.x}}x{{samplePoint.y}} {{stats.fps}} fps  latency {{stats.latency}} ms
+        
         </div>
         <br/>
         <label>Output</label>
         <table class="col-md-12 buttonsTable">
+            <!--
             <tr>
                 <td colspan="2">
                     <input type="text" name="outputFolder" placeholder="data/OpenCV/output" value="data/OpenCV/output" class="form-control"/>
@@ -90,28 +94,27 @@
             </tr>
             <tr>
                 <td>
-                    <select name="output" class="form-control" ng-model="output.type" ng-dropdown required>
+                    <select name="output" class="form-control" ng-model="service.recordingFrames" ng-dropdown required>
                         <option ng-option value="video" selected>Video</option>
                         <option ng-option value="frames">Frames sequence</option>
                     </select>
                 </td>
+                -->
                 <td style="width:104px">
-                    <!--
-                        <button class="btn btn-default" style="width:100px">
-                            <span class="glyphicon glyphicon-record"></span> REC
-                        </button>
-                        -->
-                    <button class="btn btn-default" style="width:100px">
+                    <button ng-click="msg.record()" class="btn btn-default" style="width:100px" ng-show="!service.recording">
+                        <span class="glyphicon glyphicon-record"></span>
+                        REC
+                    </button>
+                    <button ng-click="msg.stopRecording()" class="btn btn-default" style="width:100px" ng-show="service.recording">
                         <span class="glyphicon glyphicon-stop"></span>
                         STOP
                     </button>
                 </td>
                 <td style="width:132px">
-                    <button class="btn btn-default" style="width:126px">
+                    <button class="btn btn-default" style="width:126px" ng-click="msg.recordFrame()">
                         <span class="glyphicon glyphicon-camera"></span>
                         Snapshot
-                    
-                    </button>
+                        </button>
                 </td>
             </tr>
             <td colspan="3" ng-show="service.recording">
@@ -119,6 +122,7 @@
                 <div class="progress-bar progress-bar-danger  progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                     <span></span>
                     RECORDING
+                
                 </div>
             </td>
         </table>
@@ -166,7 +170,7 @@
             Block Size {{getFilter().blockSize}}  <rzslider class="custom-slider3" rz-slider-model="getFilter().blockSize" rz-slider-options="getFilterType().blockSize.options"/>
             <br/>
             Subtracted {{getFilter().param1}}  <rzslider class="custom-slider3" rz-slider-model="getFilter().param1" rz-slider-options="getFilterType().param1.options"/>
-            <select class="form-control"  ng-change="setFilterState()" ng-model="getFilter().algorithm">
+            <select class="form-control" ng-change="setFilterState()" ng-model="getFilter().algorithm">
                 <option>mean</option>
                 <option>gaussian</option>
             </select>
@@ -194,7 +198,8 @@
             High Threshold {{getFilter().highThreshold}} <rzslider class="custom-slider3" rz-slider-model="getFilter().highThreshold" rz-slider-options="getFilterType().highThreshold.options"/>
         </div>
         <div ng-show="isFilterType('LKOpticalTrack')" class="col-md-12">
-            <a href="https://docs.opencv.org/3.4.1/d7/d8b/tutorial_py_lucas_kanade.html">Optical flow</a> is the pattern of apparent motion of image objects between two consecutive frames caused by the movemement of object or camera. 
+            <a href="https://docs.opencv.org/3.4.1/d7/d8b/tutorial_py_lucas_kanade.html">Optical flow</a>
+            is the pattern of apparent motion of image objects between two consecutive frames caused by the movemement of object or camera. 
             It is 2D vector field where each vector is a displacement vector showing the movement of points from first frame to second..             
             <br/>
             <hr>
@@ -205,13 +210,14 @@
             Block Size {{getFilter().blockSize}} <rzslider class="custom-slider3" rz-slider-model="getFilter().blockSize" rz-slider-options="getFilterType().blockSize.options"/>
             <br/>
             Quality {{getFilter().quality/100}} <rzslider class="custom-slider3" rz-slider-model="getFilter().quality" rz-slider-options="getFilterType().quality.options"/>
-            <button class="btn btn-default" ng-click="getFilter().needTrackingPoints=true;getFilter().clearPoints=false;setFilterState()">Get Features</button><button class="btn btn-default" ng-click="getFilter().clearPoints=true;setFilterState()">Clear Point</button>
+            <button class="btn btn-default" ng-click="getFilter().needTrackingPoints=true;getFilter().clearPoints=false;setFilterState()">Get Features</button>
+            <button class="btn btn-default" ng-click="getFilter().clearPoints=true;setFilterState()">Clear Point</button>
         </div>
         <!-- =================================== FILTER DIALOGS STOP =================================== -->
     </div>
 </div>
-
 <script type="text/ng-template" id="addFilterDialog.html">
+    
     <div class="modal-header">
         <button type="button" class="close" ng-click="cancel()" aria-hidden="true">&times;</button>
         Add new filter:
@@ -227,4 +233,5 @@
             <span class="input-group-btn"><button class="btn btn-default" ng-click="addNamedFilter(newUserName)">add</button></span>        
             <!-- <button ng-click="cancel()" class="btn btn-primary">Close</button> -->
         </div>
+
 </script>

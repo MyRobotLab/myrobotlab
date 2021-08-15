@@ -130,12 +130,13 @@ public class Intro extends Service {
 
       Runtime.main(new String[] { "--from-launcher"});
       Runtime.start("intro", "Intro");
+      Runtime.start("python", "Python");
 
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true); 
-      webgui.autoStartBrowser(true);
+      webgui.autoStartBrowser(false);
       webgui.startService();
 
     } catch (Exception e) {

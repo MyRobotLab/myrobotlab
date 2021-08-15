@@ -122,9 +122,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // connectivity related end
     var msgCount = 0
 
-    // FIXME - clean up maps and target vs source runtime
-    // msg map of js runtime 
-    var jsRuntimeMethodMap = {}
     // map of 'full' service names to callbacks
     var nameCallbackMap = {}
 
@@ -159,20 +156,18 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         nameMethodCallbackMap[key].push(callback)
     }
 
+    // subscribe to connected java service - addListener of js runtime with callback
     this.subscribeTo = function(toServiceName, method, callbackFunctionRef) {
-        // if not fullname make it so...
-        // local subscription
-        let fullname = _self.getFullName(toServiceName)
-        var key = fullname + "." + getCallBackName(method)
-        if (!(key in nameMethodCallbackMap)) {
-            nameMethodCallbackMap[key] = []
+        var key = 'runtime@' + _self.id + "." + getCallBackName(method)
+        if (!(key in jsRuntimeMethodCallbackMap)) {
+            jsRuntimeMethodCallbackMap[key] = []
         }
-        nameMethodCallbackMap[key].push(callbackFunctionRef)
+        jsRuntimeMethodCallbackMap[key].push(callbackFunctionRef)
 
         // remote subscription - runtime@id handles all callback for this js client
-        _self.sendTo(fullname, "addListener", method, 'runtime@' + _self.id)
-
+        _self.sendTo(toServiceName, "addListener", method, 'runtime@' + _self.id)
     }
+    
 
     this.subscribeToMethod = function(callback, methodName) {
         if (!(methodName in methodCallbackMap)) {
@@ -418,7 +413,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 key = msg.name + '.' + msg.method
                 if (jsRuntimeMethodCallbackMap.hasOwnProperty(key)) {
                     let cbs = jsRuntimeMethodCallbackMap[key]
-                    cbs(msg)
+                    for (var i = 0; i < cbs.length; i++) {
+                        cbs[i](msg)
+                    }
                 }
 
                 // THE CENTER OF ALL CALLBACKS
@@ -689,20 +686,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         console.debug('sending describe to host runtime with hello ' + JSON.stringify(hello))
 
+        _self.subscribeTo('runtime', 'describe', _self.onDescribe)
+        _self.subscribeTo('runtime', 'registered', _self.onRegistered)
+        _self.subscribeTo('runtime', 'released', _self.onReleased)
+
         // js runtime callbacks
         let fullname = 'runtime@' + _self.id
-        jsRuntimeMethodCallbackMap[fullname + '.onDescribe'] = _self.onDescribe
-        jsRuntimeMethodCallbackMap[fullname + '.onRegistered'] = _self.onRegistered
-        jsRuntimeMethodCallbackMap[fullname + '.onReleased'] = _self.onReleased
-
-        // sloppy - short name runtime "will" work since the pipe is connected directly
-        // to the instance of interest - it won't work beyond that :(
-        // for mutli instances multiple hops away - you would need complete name,
-        // but of course, multiple hops away would never be in the onOpen method
-        _self.subscribe('runtime', 'describe')
-        _self.subscribe('runtime', 'registered')
-        _self.subscribe('runtime', 'released')
-
         // send us a description
         _self.sendTo('runtime', "describe")
     }
@@ -816,6 +805,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             angular.forEach(panelReleasedSubscribers, function(value, key) {
                 value(panelName)
             })
+            _self.changeTab('runtime')
         }
 
         var notifyAllOfUpdate = function() {
@@ -823,7 +813,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             angular.forEach(updateSubscribtions, function(value, key) {
                 value(panellist)
             })
-            _self.changeTab('runtime')
         }
 
         //END_update-notification
@@ -1154,6 +1143,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
             connecting = true
             socket = atmosphere.subscribe(this.request)
+
+            // critical subscriptions from the java runtime we are connected to
+            // to the js runtime - these send addListeners to java runtime
 
         }
 
@@ -1550,10 +1542,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     this.request.onMessage = this.onMessage
     this.request.onOpen = this.onOpen
     this.request.onError = this.onError
-
-    // correct way to put in callbacks for js runtime instance
-    jsRuntimeMethodMap["runtime@" + this.id + ".onRegistered"] = _self.onRegistered
-    // jsRuntimeMethodMap["runtime@" + this.id + ".setServiceTypes"] = _self.setServiceTypes
 
     // FIXME - not sure if this callback map/notify entry will have multiple recievers - but
     // it was standardized with the others to do so

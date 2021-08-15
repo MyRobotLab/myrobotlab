@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalMultipurpose;
-import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.PinMode;
 import com.pi4j.io.gpio.PinPullResistance;
@@ -43,14 +42,11 @@ import com.pi4j.wiringpi.SoftPwm;
 /**
  * 
  * RasPi - This is the MyRobotLab Service for the Raspberry Pi. It should allow
- * all control offered by the great Pi4J project.
+ * all control offered by the Pi4J project.
  * 
  * More Info : http://pi4j.com/
  * 
  */
-// TODO Ensure that only one instance of RasPi can execute on each RaspBerry PI
-// TODO pi4j implementation NOWORKY : I/O errors, dont know why, not know this
-// enough :)
 public class RasPi extends AbstractMicrocontroller implements I2CController, GpioPinListenerDigital {
 
   @Override
@@ -80,10 +76,6 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   private static final long serialVersionUID = 1L;
 
   transient GpioController gpio;
-
-  transient GpioPinDigitalOutput gpio01;
-
-  transient GpioPinDigitalOutput gpio03;
   
   protected Map<Integer, Set<String>> validAddresses = new HashMap<>();
 
@@ -98,11 +90,12 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
    */
   protected Set<String> attachedServices = new HashSet<>();
 
-  protected SystemInfo systemInfo = null;
+  // FIXME - all wiringPi type of i2c access should be removed
+  // Pi4j nicely abstracts it away - this interface should be used
+  @Deprecated
+  private boolean wiringPi = false; // Defined to be able to switch between
 
-  private boolean wiringPi = true; // Defined to be able to switch between
-
-  protected com.pi4j.system.SystemInfo.BoardType boardType = null;
+  protected String boardType = null;
 
   public RasPi(String n, String id) {
     super(n, id);
@@ -112,12 +105,12 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     log.info("architecture is {}", platform.getArch());
 
     try {
-      boardType = SystemInfo.getBoardType();
+      boardType = SystemInfo.getBoardType().toString();
       gpio = GpioFactory.getInstance();
       log.info("Executing on Raspberry PI");
       getPinList();
     } catch (Exception e) {
-      error("%s architecture is not arm - %s", getName(), e.getMessage());
+      error("raspi service requires arm %s is not arm - %s", getName(), e.getMessage());
     }
   }
 
@@ -284,11 +277,12 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
    * @return true if library used
    * 
    */
+  @Deprecated
   public boolean getWiringPi() {
     return wiringPi;
   }
 
-  @Override
+  @Override // FIXME - I2CControl has bus why is it supplied here as a parameter or why 
   public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
     int bytesRead = 0;
     String key = String.format("%d.%d", busAddress, deviceAddress);
@@ -301,13 +295,14 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     if (wiringPi) {
       for (int i = 0; i < size; i++) {
         buffer[i] = (byte) (I2C.wiringPiI2CRead(devicedata.deviceHandle) & 0xFF);
-        log.debug("Read value {}", buffer[i]);
+        ++bytesRead;
       }
     } else {
       try {
         bytesRead = devicedata.device.read(buffer, 0, buffer.length);
       } catch (IOException e) {
-        Logging.logError(e);
+        error("i2c could not read");
+        log.error("i2cRead threw", e);
       }
     }
     return bytesRead;
@@ -444,6 +439,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
    * @param status wiring status for the pi
    * 
    */
+  @Deprecated
   public void setWiringPi(boolean status) {
     this.wiringPi = status;
   }
@@ -572,6 +568,8 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
 
       I2CBus bus = I2CFactory.getInstance(busNumber);
 
+      validAddresses = new HashMap<>();
+      
       if (!validAddresses.containsKey(busNumber)) {
         validAddresses.put(busNumber, new HashSet<>());
       }
@@ -581,7 +579,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       for (int i = 1; i < 128; i++) {
         try {
           I2CDevice device = bus.getDevice(i);
-          device.write((byte) 0);
+          device.write((byte) 0); 
           addresses.add(Integer.toHexString(i));
         } catch (Exception ignore) {
         }

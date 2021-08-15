@@ -28,14 +28,14 @@ public class RuntimeMeta extends MetaData {
     // apache 2.0 license
     addDependency("org.apache.ivy", "ivy", "2.4.0-5");
     // apache 2.0 license
-    addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
+    addDependency("org.apache.httpcomponents", "httpclient", "4.5.13");
     // apache 2.0 license
     addDependency("org.atmosphere", "wasync", "2.1.5");
     // apache 2.0 license
     addDependency("info.picocli", "picocli", "4.4.0");
     // all your logging needs
     addDependency("org.slf4j", "slf4j-api", "1.7.21");
-    addDependency("ch.qos.logback", "logback-classic", "1.0.13");
+    addDependency("ch.qos.logback", "logback-classic", "1.2.0");
     // for config file support.
     addDependency("org.yaml", "snakeyaml", "1.29");
 
