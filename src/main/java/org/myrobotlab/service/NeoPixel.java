@@ -39,7 +39,6 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
@@ -63,7 +62,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
         while (running) {
           equalizer();
-          Double wait_ms_per_frame = fpsToWaitMs.calcOutput(speedFps);
+          Double wait_ms_per_frame = fpsToWaitMs(speedFps);          
           sleep(wait_ms_per_frame.intValue());
         }
       } catch (Exception e) {
@@ -214,12 +213,6 @@ public class NeoPixel extends Service implements NeoPixelControl {
   protected int speedFps = 10;
 
   private int maxFps = 50;
-  
-  /**
-   * map between speed and wait time in ms for those animations that need it
-   * (onboard) (This mapper clips the output to maxFps (50).)
-   */
-  protected MapperLinear fpsToWaitMs = new MapperLinear(1, maxFps, 1000, maxFps);
 
   public NeoPixel(String n, String id) {
     super(n, id);
@@ -617,7 +610,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     }
     log.info("setAnimation {} {} {} {} {}", animation, red, green, blue, speedFps);
     NeoPixelController nc2 = (NeoPixelController) Runtime.getService(controller);
-    Double wait_ms_per_frame = fpsToWaitMs.calcOutput(speedFps);
+    Double wait_ms_per_frame = fpsToWaitMs(speedFps);
     nc2.neoPixelSetAnimation(getName(), animation, red, green, blue, 0, wait_ms_per_frame.intValue());
     if (animation == 1) {
       currentAnimation = null;
@@ -626,6 +619,17 @@ public class NeoPixel extends Service implements NeoPixelControl {
     broadcastState();
   }
 
+  // utility to convert frames per second to milliseconds per frame.
+  private double fpsToWaitMs(int fps) {
+    if (fps == 0) {
+      // fps can't be zero.
+      error("fps can't be zero for neopixel animation defaulting to 1 fps");
+      return 1000.0;
+    }
+    double result = 1000.0/fps;
+    return result;    
+  }
+  
   @Override
   public void setAnimation(String animation, int red, int green, int blue, int wait_ms) {
     this.red = red;
@@ -803,9 +807,9 @@ public class NeoPixel extends Service implements NeoPixelControl {
   }
   
   public void playIronman() {
-    setColor(76, 255, 252);
+    setColor(170, 170, 255);
     setSpeed(50);
-    playAnimation(currentAnimation);
+    playAnimation("Ironman");
   }
 
   public static void main(String[] args) throws InterruptedException {
