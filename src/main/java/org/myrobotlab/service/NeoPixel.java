@@ -39,7 +39,6 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
@@ -63,7 +62,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
         while (running) {
           equalizer();
-          Double wait_ms_per_frame = fpsToWaitMs.calcOutput(speedFps);
+          Double wait_ms_per_frame = fpsToWaitMs(speedFps);          
           sleep(wait_ms_per_frame.intValue());
         }
       } catch (Exception e) {
@@ -120,12 +119,9 @@ public class NeoPixel extends Service implements NeoPixelControl {
     public List<Pixel> pixels = new ArrayList<>();
 
     public int[] flatten() {
-      // List<Integer> ret = new ArrayList<>();
-
       // initial imp of RGB and RGBW
       // was done with RGBW buckets ...
       int[] ret = new int[pixels.size() * 5];
-
       for (int i = 0; i < pixels.size(); i++) {
         Pixel p = pixels.get(i);
         int j = i * 5;
@@ -146,21 +142,24 @@ public class NeoPixel extends Service implements NeoPixelControl {
   private static final long serialVersionUID = 1L;
 
   /**
-   * currently selected wait time for frame of animation - this potentially
-   * affects the playing of both onboard and offboard animations
-   */
-  // protected int animationWaitMs = 0;
-
-  /**
    * thread for doing offboard and in memory animations
    */
   protected final AnimationRunner animationRunner;
 
   /**
+   * current selected red value
+   */
+  protected int red = 0;
+
+  /**
    * current selected blue value
    */
-
   protected int blue = 0;
+
+  /**
+   * current selected green value
+   */
+  protected int green = 120;
 
   /**
    * name of controller currently attached to
@@ -171,6 +170,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
    * list of possible controllers
    */
   protected Set<String> controllers = new HashSet<>();
+  
   /**
    * name of current matrix
    */
@@ -180,12 +180,6 @@ public class NeoPixel extends Service implements NeoPixelControl {
    * currentSequence in a matrix
    */
   protected int currentSequence = 0;
-
-  /**
-   * current selected green
-   */
-
-  protected int green = 120;
 
   /**
    * A named set of sequences of pixels initially you start with "default" but
@@ -207,11 +201,6 @@ public class NeoPixel extends Service implements NeoPixelControl {
    * RGB or RGBW supported 3 RGB 4 RGBW
    */
   protected int pixelDepth = 3;
-  /**
-   * current selected red value
-   */
-
-  protected int red = 0;
 
   /**
    * currently selected animation
@@ -223,11 +212,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
    */
   protected int speedFps = 10;
 
-  /**
-   * map between speed and wait time in ms for those animations that need it
-   * (onboard)
-   */
-  protected MapperLinear fpsToWaitMs = new MapperLinear(1, 30, 1000, 30);
+  private int maxFps = 50;
 
   public NeoPixel(String n, String id) {
     super(n, id);
@@ -301,11 +286,6 @@ public class NeoPixel extends Service implements NeoPixelControl {
       error("%s cannot writeMatrix controller not set", getName());
       return;
     }
-
-    red = 0;
-    blue = 0;
-    green = 0;
-    // white = 0;
 
     currentAnimation = null;
 
@@ -525,54 +505,62 @@ public class NeoPixel extends Service implements NeoPixelControl {
     clear();
   }
 
-  // TODO - onStarted
+  @Override
   public void onStarted(String name) {
     refreshControllers();
   }
 
+  @Override
+  public void onReleased(String name) {
+    refreshControllers();
+  }
+  
   // @Override
   public String onStartSpeaking(String utterance) {
     startAnimation();
     return utterance;
   }
-
+  
   public void playAnimation(String animation) {
     switch (animation) {
       // onboard animations
-      case "stopAnimation":
+      case "No animation":
+        clear();
+        break;
+      case "Stop":
         setAnimation(1, red, green, blue, speedFps);
         break;
-      case "colorWipe":
+      case "Color Wipe":
         setAnimation(2, red, green, blue, speedFps);
-        currentAnimation = "colorWipe";
+        currentAnimation = "Color Wipe";
         break;
-      case "scanner":
+      case "Larson Scanner":
         setAnimation(3, red, green, blue, speedFps);
-        currentAnimation = "scanner";
+        currentAnimation = "Larson Scanner";
         break;
-      case "theaterChase":
+      case "Theater Chase":
         setAnimation(4, red, green, blue, speedFps);
-        currentAnimation = "theaterChase";
+        currentAnimation = "Theater Chase";
         break;
-      case "theaterChaseRainbow":
+      case "Theater Chase Rainbow":
         setAnimation(5, red, green, blue, speedFps);
-        currentAnimation = "theaterChaseRainbow";
+        currentAnimation = "Theater Chase Rainbow";
         break;
-      case "rainbow":
+      case "Rainbow":
         setAnimation(6, red, green, blue, speedFps);
-        currentAnimation = "rainbow";
+        currentAnimation = "Rainbow";
         break;
-      case "rainbowCycle":
+      case "Rainbow Cycle":
         setAnimation(7, red, green, blue, speedFps);
-        currentAnimation = "rainbow";
+        currentAnimation = "Rainbow Cycle";
         break;
-      case "randomFlash":
+      case "Flash Random":
         setAnimation(8, red, green, blue, speedFps);
-        currentAnimation = "randomFlash";
+        currentAnimation = "Flash Random";
         break;
-      case "ironman":
+      case "Ironman":
         setAnimation(9, red, green, blue, speedFps);
-        currentAnimation = "ironman";
+        currentAnimation = "Ironman";
         break;
 
       // TODO functional java animations
@@ -610,8 +598,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   @Override
   public void setAnimation(int animation, int red, int green, int blue, int speedFps) {
-    if (speedFps > 30) {
-      speedFps = 30;
+    if (speedFps > maxFps) {
+      speedFps = maxFps;
     }
     
     this.speedFps = speedFps;
@@ -622,7 +610,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     }
     log.info("setAnimation {} {} {} {} {}", animation, red, green, blue, speedFps);
     NeoPixelController nc2 = (NeoPixelController) Runtime.getService(controller);
-    Double wait_ms_per_frame = fpsToWaitMs.calcOutput(speedFps);
+    Double wait_ms_per_frame = fpsToWaitMs(speedFps);
     nc2.neoPixelSetAnimation(getName(), animation, red, green, blue, 0, wait_ms_per_frame.intValue());
     if (animation == 1) {
       currentAnimation = null;
@@ -631,6 +619,17 @@ public class NeoPixel extends Service implements NeoPixelControl {
     broadcastState();
   }
 
+  // utility to convert frames per second to milliseconds per frame.
+  private double fpsToWaitMs(int fps) {
+    if (fps == 0) {
+      // fps can't be zero.
+      error("fps can't be zero for neopixel animation defaulting to 1 fps");
+      return 1000.0;
+    }
+    double result = 1000.0/fps;
+    return result;    
+  }
+  
   @Override
   public void setAnimation(String animation, int red, int green, int blue, int wait_ms) {
     this.red = red;
@@ -765,8 +764,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
   public void startService() {
     super.startService();
     refreshControllers();
+    Runtime runtime = Runtime.getInstance();
+    runtime.subscribeToLifeCycleEvents(getName());
   }
-
+  
   public void setColor(int red, int green, int blue) {
     this.red = red;
     this.green = green;
@@ -793,8 +794,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
    * @param speed
    */
   public void setSpeed(Integer speed) {
-    if (speed > 30 || speed < 1) {
-      error("speed must be between 1 - 30 fps requested speed was %d fps", speed);
+    if (speed > maxFps || speed < 1) {
+      error("speed must be between 1 - %d fps requested speed was %d fps", maxFps, speed);
       return;
     }
     speedFps = speed;    
@@ -803,6 +804,12 @@ public class NeoPixel extends Service implements NeoPixelControl {
       // restarting currently running animation
       playAnimation(currentAnimation);
     }
+  }
+  
+  public void playIronman() {
+    setColor(170, 170, 255);
+    setSpeed(50);
+    playAnimation("Ironman");
   }
 
   public static void main(String[] args) throws InterruptedException {
