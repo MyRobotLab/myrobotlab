@@ -593,7 +593,11 @@ public class Joystick extends Service {
   }
 
   public ServiceConfig load(ServiceConfig c) {
-    super.load(c);    
+    super.load(c);   
+    // scan for hardware controllers
+    getControllers();
+    
+    // get controller request from config
     JoystickConfig config = (JoystickConfig)c;
     if (config.controller != null) {
       setController(config.controller);
