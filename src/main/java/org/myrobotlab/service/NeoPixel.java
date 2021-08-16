@@ -120,12 +120,9 @@ public class NeoPixel extends Service implements NeoPixelControl {
     public List<Pixel> pixels = new ArrayList<>();
 
     public int[] flatten() {
-      // List<Integer> ret = new ArrayList<>();
-
       // initial imp of RGB and RGBW
       // was done with RGBW buckets ...
       int[] ret = new int[pixels.size() * 5];
-
       for (int i = 0; i < pixels.size(); i++) {
         Pixel p = pixels.get(i);
         int j = i * 5;
@@ -146,21 +143,24 @@ public class NeoPixel extends Service implements NeoPixelControl {
   private static final long serialVersionUID = 1L;
 
   /**
-   * currently selected wait time for frame of animation - this potentially
-   * affects the playing of both onboard and offboard animations
-   */
-  // protected int animationWaitMs = 0;
-
-  /**
    * thread for doing offboard and in memory animations
    */
   protected final AnimationRunner animationRunner;
 
   /**
+   * current selected red value
+   */
+  protected int red = 0;
+
+  /**
    * current selected blue value
    */
-
   protected int blue = 0;
+
+  /**
+   * current selected green value
+   */
+  protected int green = 120;
 
   /**
    * name of controller currently attached to
@@ -183,12 +183,6 @@ public class NeoPixel extends Service implements NeoPixelControl {
   protected int currentSequence = 0;
 
   /**
-   * current selected green
-   */
-
-  protected int green = 120;
-
-  /**
    * A named set of sequences of pixels initially you start with "default" but
    * if you can choose to name and save sequences
    */
@@ -208,11 +202,6 @@ public class NeoPixel extends Service implements NeoPixelControl {
    * RGB or RGBW supported 3 RGB 4 RGBW
    */
   protected int pixelDepth = 3;
-  /**
-   * current selected red value
-   */
-
-  protected int red = 0;
 
   /**
    * currently selected animation
@@ -224,11 +213,13 @@ public class NeoPixel extends Service implements NeoPixelControl {
    */
   protected int speedFps = 10;
 
+  private int maxFps = 50;
+  
   /**
    * map between speed and wait time in ms for those animations that need it
-   * (onboard)
+   * (onboard) (This mapper clips the output to maxFps (50).)
    */
-  protected MapperLinear fpsToWaitMs = new MapperLinear(1, 30, 1000, 30);
+  protected MapperLinear fpsToWaitMs = new MapperLinear(1, maxFps, 1000, maxFps);
 
   public NeoPixel(String n, String id) {
     super(n, id);
@@ -302,11 +293,6 @@ public class NeoPixel extends Service implements NeoPixelControl {
       error("%s cannot writeMatrix controller not set", getName());
       return;
     }
-
-    // red = 0;
-    // blue = 0;
-    // green = 0;
-    // white = 0;
 
     currentAnimation = null;
 
@@ -619,8 +605,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   @Override
   public void setAnimation(int animation, int red, int green, int blue, int speedFps) {
-    if (speedFps > 50) {
-      speedFps = 50;
+    if (speedFps > maxFps) {
+      speedFps = maxFps;
     }
     
     this.speedFps = speedFps;
@@ -804,8 +790,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
    * @param speed
    */
   public void setSpeed(Integer speed) {
-    if (speed > 50 || speed < 1) {
-      error("speed must be between 1 - 50 fps requested speed was %d fps", speed);
+    if (speed > maxFps || speed < 1) {
+      error("speed must be between 1 - %d fps requested speed was %d fps", maxFps, speed);
       return;
     }
     speedFps = speed;    
