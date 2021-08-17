@@ -34,7 +34,6 @@ import java.util.Set;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.joystick.Component;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.interfaces.Mapper;
@@ -44,9 +43,7 @@ import org.myrobotlab.sensor.EncoderPublisher;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.AbstractMotorConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.data.AxisData;
-import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.ButtonDefinition;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -113,13 +110,12 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   protected double min = -1.0;
 
   /**
-   * max - defaults to 1.0 equivalent of 100% power cw rotation 
+   * max - defaults to 1.0 equivalent of 100% power cw rotation
    */
   protected double max = 1.0;
 
   private String axisName;
 
-  
   public AbstractMotor(String n, String id) {
     super(n, id);
     subscribeToRuntime("registered");
@@ -172,17 +168,17 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
       info("%s is locked - will not move");
       return;
     }
-    
+
     if (powerInput < min) {
       warn("requested power %.2f is under minimum %.2f", powerInput, min);
       return;
     }
-    
-    if (powerInput > max) { 
+
+    if (powerInput > max) {
       warn("requested power %.2f is over maximum %.2f", powerInput, max);
       return;
     }
-    
+
     log.info("{}.move({})", getName(), powerInput);
     this.powerInput = powerInput;
     if (controller != null) {
@@ -191,7 +187,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     }
     broadcastState();
   }
-  
+
   @Override
   public double publishPowerChange(double powerInput) {
     return powerInput;
@@ -211,7 +207,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     info("updated min %.2f max %.2f", min, max);
     broadcastState();
   }
-  
+
   public void map(double minX, double maxX, double minY, double maxY) {
     mapper.map(minX, maxX, minY, maxY);
     broadcastState();
@@ -312,16 +308,6 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     move(pwr);
   }
 
-  // hmm
-  public void onJoystickData(JoystickData data) {
-    // info("AbstractMotor onJoystickData - %f", data.value);
-    Double pwr = null;
-    pwr = data.value.doubleValue();
-    move(pwr);
-  }
-
-  //////////////// begin new stuff ///////////////////////
-
   public void attach(PinDefinition pindef) {
     // SINGLE PIN MAN !! not ALL PINS !
     // must be local now :P
@@ -331,15 +317,6 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     PinArrayControl pac = (PinArrayControl) Runtime.getService(pindef.getName());
     pac.attach(this, pindef.getAddress());
     // subscribe(pindef.getName(), "publishPin", getName(), "move");
-  }
-
-  // FIXME MOTORS SHOULD NOT KNOW ABOUT JOYSTICKS - need simple AxisPublisher 
-  public void attach(Component joystickComponent) {
-    if (joystickComponent == null) {
-      error("cannot attach a null joystick component", getName());
-      return;
-    }
-    send(joystickComponent.getName(), "attach", getName(), joystickComponent.id);
   }
 
   public void attach(ButtonDefinition buttondef) {
@@ -364,7 +341,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     motorPorts = controller.getPorts();
     // TODO: KW: set a reasonable mapper. for pwm motor it's probable -1 to 1 to
     // 0 to 255 ? not sure.
-    
+
     /**
      * <pre>
      * Cannot directly assign - we just want the output values of the controller's mapper
@@ -391,7 +368,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   public boolean isAttached() {
     return controller != null;
   }
-  
+
   public void detach() {
     super.detach();
     if (controller != null) {
@@ -406,7 +383,8 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     if (controller == null || !name.equals(controller.getName())) {
       return;
     }
-    controller.detach(this); // FIXME - call detachMotorController(MotorController
+    controller.detach(this); // FIXME - call
+                             // detachMotorController(MotorController
     controllerName = null;
     controller = null;
     broadcastState();
@@ -440,7 +418,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   public double calcControllerOutput() {
     return mapper.calcOutput(getPowerLevel());
   }
-  
+
   @Override
   public void setAxisName(String name) {
     axisName = name;
@@ -455,11 +433,11 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   public void onAxis(AxisData data) {
     move(data.value);
   }
- 
+
   protected ServiceConfig initConfig(ServiceConfig c) {
     super.initConfig(c);
-    AbstractMotorConfig config = (AbstractMotorConfig)c;
-    
+    AbstractMotorConfig config = (AbstractMotorConfig) c;
+
     config.locked = locked;
 
     if (mapper != null) {
@@ -475,11 +453,11 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   public ServiceConfig load(ServiceConfig c) {
-    AbstractMotorConfig config = (AbstractMotorConfig)c;
+    AbstractMotorConfig config = (AbstractMotorConfig) c;
 
     mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
     mapper.setInverted(config.inverted);
-    mapper.setClip(config.clip);    
+    mapper.setClip(config.clip);
 
     if (locked) {
       lock();
@@ -487,5 +465,5 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
     return c;
   }
-    
+
 }
