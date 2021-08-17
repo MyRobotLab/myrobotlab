@@ -617,11 +617,12 @@ public class Joystick extends Service implements AxisPublisher {
       for (String key : idAndServiceSubscription.keySet()) {
         Set<MRLListener> listeners = idAndServiceSubscription.get(key);
         // HashSet<String> s = new HashSet<>();
-        String[] s = new String[listeners.size()];
+        // String[] s = new String[listeners.size()];
+        ArrayList<String> s = new ArrayList<>();
         config.componentListeners.put(key, s);
         int i = 0;
         for (MRLListener l : listeners) {
-          s[i] = l.callbackName;
+          s.add(l.callbackName);
           ++i;
         }
       }
@@ -648,7 +649,8 @@ public class Joystick extends Service implements AxisPublisher {
     
     if (config.componentListeners != null) {
       for (String k : config.componentListeners.keySet()) {
-        for (String n: config.componentListeners.get(k)) {
+        ArrayList<String> list = config.componentListeners.get(k);
+        for (String n: list) {
           attach(n, k);
         }
       }
