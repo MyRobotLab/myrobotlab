@@ -42,6 +42,10 @@ import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.sensor.EncoderPublisher;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.config.AbstractMotorConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
+import org.myrobotlab.service.data.AxisData;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.ButtonDefinition;
@@ -113,6 +117,8 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
    */
   protected double max = 1.0;
 
+  private String axisName;
+
   
   public AbstractMotor(String n, String id) {
     super(n, id);
@@ -172,7 +178,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
       return;
     }
     
-    if (powerInput > max) {
+    if (powerInput > max) { 
       warn("requested power %.2f is over maximum %.2f", powerInput, max);
       return;
     }
@@ -327,12 +333,13 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     // subscribe(pindef.getName(), "publishPin", getName(), "move");
   }
 
+  // FIXME MOTORS SHOULD NOT KNOW ABOUT JOYSTICKS - need simple AxisPublisher 
   public void attach(Component joystickComponent) {
     if (joystickComponent == null) {
       error("cannot attach a null joystick component", getName());
       return;
     }
-    send(joystickComponent.getName(), "addListener", getName(), joystickComponent.id);
+    send(joystickComponent.getName(), "attach", getName(), joystickComponent.id);
   }
 
   public void attach(ButtonDefinition buttondef) {
@@ -433,4 +440,52 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   public double calcControllerOutput() {
     return mapper.calcOutput(getPowerLevel());
   }
+  
+  @Override
+  public void setAxisName(String name) {
+    axisName = name;
+  }
+
+  @Override
+  public String getAxisName() {
+    return axisName;
+  }
+
+  @Override
+  public void onAxis(AxisData data) {
+    move(data.value);
+  }
+ 
+  protected ServiceConfig initConfig(ServiceConfig c) {
+    super.initConfig(c);
+    AbstractMotorConfig config = (AbstractMotorConfig)c;
+    
+    config.locked = locked;
+
+    if (mapper != null) {
+      config.clip = mapper.isClip();
+      config.maxIn = mapper.getMaxX();
+      config.maxOut = mapper.getMaxY();
+      config.minIn = mapper.getMinX();
+      config.minOut = mapper.getMinY();
+      config.inverted = mapper.isInverted();
+    }
+
+    return config;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    AbstractMotorConfig config = (AbstractMotorConfig)c;
+
+    mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
+    mapper.setInverted(config.inverted);
+    mapper.setClip(config.clip);    
+
+    if (locked) {
+      lock();
+    }
+
+    return c;
+  }
+    
 }

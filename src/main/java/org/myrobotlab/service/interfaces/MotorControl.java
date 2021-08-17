@@ -29,7 +29,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.sensor.EncoderPublisher;
 
-public interface MotorControl extends NameProvider, RelativePositionControl, Attachable {
+public interface MotorControl extends NameProvider, RelativePositionControl, AxisListener, Attachable {
 
   void attachMotorController(MotorController controller) throws Exception;
 
