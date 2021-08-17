@@ -38,6 +38,7 @@ import java.util.TreeMap;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.joystick.Component;
 import org.myrobotlab.joystick.Controller;
@@ -46,7 +47,10 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.service.config.JoystickConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.data.AxisData;
 import org.myrobotlab.service.data.JoystickData;
+import org.myrobotlab.service.interfaces.AxisListener;
+import org.myrobotlab.service.interfaces.AxisPublisher;
 import org.slf4j.Logger;
 
 import net.java.games.input.ControllerEnvironment;
@@ -63,7 +67,7 @@ import net.java.games.input.Rumbler;
  * To Test java -Djava.library.path="./" -cp "./*"
  * net.java.games.input.test.ControllerReadTest
  */
-public class Joystick extends Service {
+public class Joystick extends Service implements AxisPublisher {
 
   public final static Logger log = LoggerFactory.getLogger(Joystick.class);
   private static final long serialVersionUID = 1L;
@@ -100,7 +104,7 @@ public class Joystick extends Service {
    * index for the rumbler being used
    */
   protected int rumblerIdx;
-  
+
   /**
    * is rumbler on or off
    */
@@ -110,16 +114,16 @@ public class Joystick extends Service {
    * non-transient serializable definition
    */
   protected Map<String, MapperLinear> mappers = new HashMap<String, MapperLinear>();
-  
+
   protected Map<String, Component> components = null;
 
   protected String controller;
 
   public class Poller implements Runnable {
-    
+
     transient Thread myThread = null;
-    
-    public void run() {      
+
+    public void run() {
       poll();
     }
 
@@ -292,9 +296,25 @@ public class Joystick extends Service {
     service.subscribe(this.getName(), "publishJoystickInput");
   }
 
+  @Override
+  public void attach(Attachable service) {
+    if (AxisListener.class.isAssignableFrom(service.getClass())) {
+      attachAxisListener((AxisListener) service);
+    } else {
+      error(String.format("%s.attach does not know how to attach to a %s", this.getClass().getSimpleName(), service.getClass().getSimpleName()));
+    }
+  }
+
+  public void attachAxisListener(AxisListener service) {
+    String id = service.getAxisName();
+    // TODO verify "id" is one of the axis
+    attach(service.getName(), id);
+  }
+
+  @Deprecated /* name should be attachComponentListener */
   public void attach(String serviceName, String id) {
     if (!components.containsKey(id)) {
-      error("%s requests subscription to component %s - but %d does not exist", serviceName, id, id);
+      error("%s requests subscription to component %s - but %s does not exist", serviceName, id, id);
       return;
     }
     Set<MRLListener> listeners = null;
@@ -376,6 +396,11 @@ public class Joystick extends Service {
 
   public void startService() {
     super.startService();
+    initNativeLibs();
+    invoke("getControllers");
+  }
+
+  private void initNativeLibs() {
     // we will force a system property here to specify the native location for
     // the
     // jinput libraries
@@ -386,14 +411,12 @@ public class Joystick extends Service {
     System.getProperties().setProperty("net.java.games.input.librarypath", jinputNativePath);
     String[] controllers = getControllerNames();
     info("found %d controllers %s", controllers.length, Arrays.toString(controllers));
-    
-    invoke("getControllers");
   }
 
   public String getController() {
     return controller;
   }
-  
+
   public void stopService() {
     super.stopService();
     stopPolling();
@@ -468,8 +491,8 @@ public class Joystick extends Service {
 
     Controller controller = controllers.get(index);
     String filename = String.format("%s-virtual-%s-%s.json", getName(), controller.getName(), ++index);
-    
-    String json = CodecUtils.toJson(controller);    
+
+    String json = CodecUtils.toJson(controller);
     FileIO.toFile(filename, json);
 
     // FIXME - non-symmetric save and load :(
@@ -499,7 +522,7 @@ public class Joystick extends Service {
   public static void main(String args[]) {
     try {
 
-      Runtime.main(new String[] {"--id", "admin", "--from-launcher" });
+      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
       LoggingFactory.init("INFO");
 
       Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
@@ -584,22 +607,59 @@ public class Joystick extends Service {
     Component component = components.get(axisName);
     component.setVirtualValue(value);
   }
-  
+
   @Override
-  public ServiceConfig getConfig() {    
+  public ServiceConfig getConfig() {
     JoystickConfig config = (JoystickConfig) initConfig(new JoystickConfig());
     config.controller = controller;
+    if (idAndServiceSubscription.size() > 0) {
+      config.componentListeners = new HashMap<>();
+      for (String key : idAndServiceSubscription.keySet()) {
+        Set<MRLListener> listeners = idAndServiceSubscription.get(key);
+        // HashSet<String> s = new HashSet<>();
+        String[] s = new String[listeners.size()];
+        config.componentListeners.put(key, s);
+        int i = 0;
+        for (MRLListener l : listeners) {
+          s[i] = l.callbackName;
+          ++i;
+        }
+      }
+    }
     return config;
   }
 
   public ServiceConfig load(ServiceConfig c) {
-    super.load(c);    
-    JoystickConfig config = (JoystickConfig)c;
+    super.load(c);
+
+    // "special" needs native libs
+    initNativeLibs();
+
+    // scan for hardware controllers
+    // required because you can't "set" a controller
+    // unless its in the list of controllers
+    getControllers();
+
+    // get controller request from config
+    JoystickConfig config = (JoystickConfig) c;
     if (config.controller != null) {
       setController(config.controller);
     }
+    
+    if (config.componentListeners != null) {
+      for (String k : config.componentListeners.keySet()) {
+        for (String n: config.componentListeners.get(k)) {
+          attach(n, k);
+        }
+      }
+    }
+    
     return c;
   }
 
+  @Override
+  public AxisData publishAxis(AxisData data) {
+    return data;
+  }
 
 }

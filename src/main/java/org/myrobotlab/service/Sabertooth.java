@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotorController;
 import org.myrobotlab.service.config.SabertoothConfig;
 import org.myrobotlab.service.config.ServiceConfig;
@@ -321,7 +321,16 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init("INFO");
+      Runtime.main(new String[] { "--from-launcher"});
+      Runtime.start("intro", "Intro");
+      Runtime.start("python", "Python");
+      Platform.setVirtual(true);
+      
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      // webgui.setSsl(true); 
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+      
 
       boolean virtual = true;
       //////////////////////////////////////////////////////////////////////////////////
@@ -334,7 +343,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
       String port = "COM14";
       // String port = "/dev/ttyUSB0";
-
+/*
       // start optional virtual serial service, used for test
       if (virtual) {
         // use static method Serial.connectVirtualUart to create
@@ -343,8 +352,8 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
         Serial uart = Serial.connectVirtualUart(port);
         uart.logRecv(true); // dump bytes sent from sabertooth
       }
+*/      
       // start the services
-      Runtime.start("gui", "SwingGui");
       Sabertooth sabertooth = (Sabertooth) Runtime.start("sabertooth", "Sabertooth");
       MotorPort m1 = (MotorPort) Runtime.start("m1", "MotorPort");
       MotorPort m2 = (MotorPort) Runtime.start("m2", "MotorPort");
@@ -355,13 +364,20 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       m1.setPort("m1");
       m2.setPort("m2");
 
-      joy.setController(5); // 0 on Linux
+      joy.setController(0); // 0 on Linux
 
       // attach services
       sabertooth.attach(m1);
       sabertooth.attach(m2);
-      m1.attach(joy.getAxis("y"));
-      m2.attach(joy.getAxis("rz"));
+      
+      m1.setAxisName("y");
+      m2.setAxisName("rz");
+      
+      // m1.attach(joy.getAxis("y"));
+      // m2.attach(joy.getAxis("rz"));
+      
+      joy.attach(m1);
+      joy.attach(m2);
 
       m1.setInverted(true);
       m2.setInverted(true);
