@@ -465,9 +465,10 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     move(data.value);
   }
 
+  @Override
   protected ServiceConfig initConfig(ServiceConfig c) {
     super.initConfig(c);
-    AbstractMotorConfig config = (AbstractMotorConfig) c;
+    AbstractMotorConfig config = new AbstractMotorConfig(c);
 
     config.locked = locked;
 
