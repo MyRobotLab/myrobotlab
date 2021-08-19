@@ -1,6 +1,6 @@
 angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$log', '$scope', 'mrl', '$uibModal', '$timeout', function($log, $scope, mrl, $uibModal, $timeout) {
     $log.info('PythonGuiCtrl')
-    _self = this
+    var _self = this
     var msg = this.msg
     var name = $scope.name
     // init scope values
@@ -20,7 +20,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     $scope.loadFile = false
     $scope.newFile = false
 
-    this.updateState = function(service) {
+    _self.updateState = function(service) {
         $scope.service = service
         $scope.scriptCount = 0
 
@@ -108,13 +108,14 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     $scope.closeScript = function(scriptName) {
         // FIXME - save first ?
         msg.send('closeScript', scriptName)
-        delete $scope.scripts[scriptName]
         $scope.scriptCount--
+        delete $scope.scripts[scriptName]
         console.log("removed " + scriptName)
     }
 
     $scope.exec = function() {
-        msg.send('exec', $scope.activeScript.code)
+        // non-blocking exec
+        msg.send('exec', $scope.activeScript.code, false)
     }
     $scope.tabSelected = function(script) {
         $log.info('here')

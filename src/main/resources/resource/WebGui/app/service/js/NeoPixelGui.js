@@ -9,11 +9,15 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
     $scope.pins = []
     $scope.speeds = []
     $scope.commonPixelCounts = [8, 12, 16, 24, 32, 64, 128, 256]
-    $scope.animations = ['colorWipe', 'theaterChase', 'rainbow', 'rainbowCycle', 'scanner', 'randomFlash', 'theaterChaseRainbow', 'ironman', 'equalizer']
+    $scope.animations = ['No animation', 'Stop', 'Color Wipe', 'Larson Scanner', 'Theater Chase', 'Theater Chase Rainbow', 'Rainbow', 'Rainbow Cycle', 'Flash Random', 'Ironman', 'equalizer']
+
+    $scope.state = {
+        controller: null
+    }
 
     _self.uiPixelCount = 0
 
-    for (i = 0; i < 30; i++) {
+    for (i = 0; i < 50; i++) {
         $scope.pins.push(i)
         $scope.speeds.push(i + 1)
     }
@@ -60,7 +64,9 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
         onBlur: function(api, color, $event) {},
         onOpen: function(api, color, $event) {},
         onClose: function(api, color, $event) {},
-        onClear: function(api, color, $event) {},
+        onClear: function(api, color, $event) {
+            console.info('here')
+        },
         onReset: function(api, color, $event) {},
         onDestroy: function(api, color) {},
     }
@@ -70,6 +76,10 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
         $scope.service = service
         if ($scope.service.pixelCount != _self.uiPixelCount) {
             $scope.drawPixels()
+        }
+
+        if (!$scope.state.controller){
+            $scope.state.controller = $scope.service.controller 
         }
     }
 
@@ -104,14 +114,20 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
         msg.send('fill')
     }
 
-    $scope.attach = function(controller) {
-        msg.send('attach', controller)
+    $scope.attach = function() {
+        msg.send('setPin', $scope.service.pin)
+        msg.send('setPixelCount', $scope.service.pixelCount)
+        msg.send('attach', $scope.state.controller)
     }
 
     $scope.detach = function() {
         if ($scope.service.controller) {
             msg.send('detach', $scope.service.controller)
         }
+    }
+
+    $scope.setController = function(controller){
+        $scope.state.controller = controller
     }
 
     $scope.drawPixels()
