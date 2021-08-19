@@ -666,18 +666,17 @@ public class Joystick extends Service implements AnalogPublisher {
   public ServiceConfig getConfig() {
     JoystickConfig config = (JoystickConfig) initConfig(new JoystickConfig());
     config.controller = controller;
-    if (idAndServiceSubscription.size() > 0) {
-      config.componentListeners = new HashMap<>();
-      for (String key : idAndServiceSubscription.keySet()) {
-        Set<MRLListener> listeners = idAndServiceSubscription.get(key);
+
+    if (analogListeners.size() > 0) {
+      config.analogListeners = new HashMap<>();
+      for (String key : analogListeners.keySet()) {
+        Set<String> listeners = analogListeners.get(key);
         // HashSet<String> s = new HashSet<>();
         // String[] s = new String[listeners.size()];
         ArrayList<String> s = new ArrayList<>();
-        config.componentListeners.put(key, s);
-        int i = 0;
-        for (MRLListener l : listeners) {
-          s.add(l.callbackName);
-          ++i;
+        config.analogListeners.put(key, s);
+        for (String l : listeners) {
+          s.add(l);
         }
       }
     }
@@ -701,15 +700,19 @@ public class Joystick extends Service implements AnalogPublisher {
       setController(config.controller);
     }
     
-    if (config.componentListeners != null) {
-      for (String k : config.componentListeners.keySet()) {
-        ArrayList<String> list = config.componentListeners.get(k);
-        for (String n: list) {
-          attach(n, k);
+    // stupid transform from array to set - yaml wants array, set prevents
+    // duplicates :(
+    if (config.analogListeners != null) {
+      for (String id : config.analogListeners.keySet()) {
+        ArrayList<String> list = config.analogListeners.get(id);
+        Set<String> s = analogListeners.get(id);
+        if (s == null) {
+          s = new HashSet<>();
+          analogListeners.put(id, s);
         }
+        s.addAll(list);
       }
     }
-    
     return c;
   }
 
