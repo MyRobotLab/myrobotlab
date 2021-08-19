@@ -43,8 +43,9 @@ import org.myrobotlab.sensor.EncoderPublisher;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.AbstractMotorConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.data.AxisData;
+import org.myrobotlab.service.data.AnalogData;
 import org.myrobotlab.service.data.PinData;
+import org.myrobotlab.service.interfaces.AnalogPublisher;
 import org.myrobotlab.service.interfaces.ButtonDefinition;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
@@ -84,6 +85,12 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
    * if motor is locked - no position or power commands will work
    */
   protected boolean locked = false;
+  
+  /**
+   * attached analog publishers to this service - functionally its
+   * a simple "lock" to avoid cyclic attach/detaches - works well
+   */
+  final protected Set<String> analogPublishers = new HashSet<>();
 
   /**
    * the power level requested - varies between -1.0 &lt;--&gt; 1.0
@@ -296,12 +303,36 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     if (MotorController.class.isAssignableFrom(service.getClass())) {
       attachMotorController((MotorController) service);
       return;
+    } else if (AnalogPublisher.class.isAssignableFrom(service.getClass())) {
+      attachAnalogPublisher((AnalogPublisher) service);
+      return;
     }
 
     error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
   }
+    
+  @Override
+  public void attachAnalogPublisher(AnalogPublisher publisher) {
+    if (analogPublishers.contains(publisher.getName())) {
+      log.info("already attached to {}", publisher.getName());
+      return;
+    }
+    analogPublishers.add(publisher.getName());
+    publisher.attachAnalogListener(this);
+  }
+  
+  @Override
+  public void detachAnalogPublisher(AnalogPublisher publisher) {
+    if (!analogPublishers.contains(publisher.getName())) {
+      log.info("already detached from {}", publisher.getName());
+      return;
+    }
+    analogPublishers.remove(publisher.getName());
+    publisher.detachAnalogListener(this);    
+  }
 
-  // hmm
+
+  @Deprecated /* I think this was an attempt to control via an analog pin - should be updated to use attachAnalogPublisher */
   public void onPin(PinData data) {
     Double pwr = null;
     pwr = data.value.doubleValue();
@@ -420,17 +451,17 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   @Override
-  public void setAxisName(String name) {
+  public void setAnalogId(String name) {
     axisName = name;
   }
 
   @Override
-  public String getAxisName() {
+  public String getAnalogId() {
     return axisName;
   }
 
   @Override
-  public void onAxis(AxisData data) {
+  public void onAnalog(AnalogData data) {
     move(data.value);
   }
 

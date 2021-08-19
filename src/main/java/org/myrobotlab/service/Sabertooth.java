@@ -370,8 +370,8 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       sabertooth.attach(m1);
       sabertooth.attach(m2);
       
-      m1.setAxisName("y");
-      m2.setAxisName("rz");
+      m1.setAnalogId("y");
+      m2.setAnalogId("rz");
       
       // m1.attach(joy.getAxis("y"));
       // m2.attach(joy.getAxis("rz"));

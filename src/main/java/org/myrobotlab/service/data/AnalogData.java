@@ -1,6 +1,6 @@
 package org.myrobotlab.service.data;
 
-public class AxisData {
+public class AnalogData {
   
   /**
    * name of the axis
@@ -11,5 +11,10 @@ public class AxisData {
    * value of the axis
    */
   public Double value;
+
+  /**
+   * id of the Analog signal
+   */
+  public String id;
 
 }

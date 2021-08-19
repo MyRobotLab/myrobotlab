@@ -47,10 +47,10 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.service.config.JoystickConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.data.AxisData;
+import org.myrobotlab.service.data.AnalogData;
 import org.myrobotlab.service.data.JoystickData;
-import org.myrobotlab.service.interfaces.AxisListener;
-import org.myrobotlab.service.interfaces.AxisPublisher;
+import org.myrobotlab.service.interfaces.AnalogListener;
+import org.myrobotlab.service.interfaces.AnalogPublisher;
 import org.slf4j.Logger;
 
 import net.java.games.input.ControllerEnvironment;
@@ -67,7 +67,7 @@ import net.java.games.input.Rumbler;
  * To Test java -Djava.library.path="./" -cp "./*"
  * net.java.games.input.test.ControllerReadTest
  */
-public class Joystick extends Service implements AxisPublisher {
+public class Joystick extends Service implements AnalogPublisher {
 
   public final static Logger log = LoggerFactory.getLogger(Joystick.class);
   private static final long serialVersionUID = 1L;
@@ -79,7 +79,21 @@ public class Joystick extends Service implements AxisPublisher {
    */
   protected Controller hardwareController = null;
 
-  protected Map<String, Set<MRLListener>> idAndServiceSubscription = new HashMap<String, Set<MRLListener>>();
+  /**
+   * component listeners 
+   */
+  protected Map<String, Set<MRLListener>> idAndServiceSubscription = new HashMap<>();
+  
+  /**
+   * all analog listeners
+   */
+  protected Map<String, Set<String>> analogListeners = new HashMap<>();
+  
+  /**
+   * all digital listeners
+   */
+  protected Map<String, Set<String>> digitalListeners = new HashMap<>();
+  
 
   protected List<Component> hardwareComponents;
 
@@ -197,6 +211,18 @@ public class Joystick extends Service implements AxisPublisher {
 
             JoystickData data = new JoystickData(id, input);
             invoke("publishJoystickInput", data);
+            
+            // filtered by analog and id
+            if (analogListeners.containsKey(id)) {
+              Set<String> listeners = analogListeners.get(id);
+              AnalogData d = new AnalogData();
+              d.id = id;
+              d.name = getName();
+              d.value = data.value.doubleValue();
+              for (String listener : listeners) {
+                send(listener, "onAnalog", d);
+              }
+            }
 
             // filtered by subscribed components
             if (idAndServiceSubscription.containsKey(id)) {
@@ -298,17 +324,45 @@ public class Joystick extends Service implements AxisPublisher {
 
   @Override
   public void attach(Attachable service) {
-    if (AxisListener.class.isAssignableFrom(service.getClass())) {
-      attachAxisListener((AxisListener) service);
+    if (AnalogListener.class.isAssignableFrom(service.getClass())) {
+      attachAnalogListener((AnalogListener) service);
     } else {
       error(String.format("%s.attach does not know how to attach to a %s", this.getClass().getSimpleName(), service.getClass().getSimpleName()));
     }
   }
 
-  public void attachAxisListener(AxisListener service) {
-    String id = service.getAxisName();
-    // TODO verify "id" is one of the axis
-    attach(service.getName(), id);
+  public void attachAnalogListener(AnalogListener service) {
+    String id = service.getAnalogId();
+    String serviceName = service.getName();
+    getComponents();
+    if (components != null && !components.containsKey(id)) {
+      error("%s requests subscription to component %s - but %s does not exist", serviceName, id, id);
+    }
+    
+    Component c = components.get(id);
+    if (!c.isAnalog) {
+      error("attachAnalogListener getAnalogId (%s) is a not an analog component", id);
+    }
+    
+    Set<String> listeners = null;
+    if (analogListeners.containsKey(id)) {
+      listeners = analogListeners.get(id);
+    } else {
+      listeners = new HashSet<String>();
+    }
+    analogListeners.put(id, listeners);
+    listeners.add(serviceName);
+    
+  }
+  
+  @Override
+  public void detachAnalogListener(AnalogListener listener) {
+    String id = listener.getAnalogId();
+    String serviceName = listener.getName();
+    Set<String> listeners = analogListeners.get(id);
+    if (listeners != null) {
+      listeners.remove(serviceName);
+    }
   }
 
   @Deprecated /* name should be attachComponentListener */
@@ -660,7 +714,7 @@ public class Joystick extends Service implements AxisPublisher {
   }
 
   @Override
-  public AxisData publishAxis(AxisData data) {
+  public AnalogData publishAnalog(AnalogData data) {
     return data;
   }
 

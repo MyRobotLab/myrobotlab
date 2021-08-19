@@ -7,6 +7,7 @@ import java.util.List;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
+import org.myrobotlab.service.interfaces.AnalogPublisher;
 
 public class MotorDualPwm extends AbstractMotor {
   private static final long serialVersionUID = 1L;
