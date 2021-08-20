@@ -30,6 +30,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -267,11 +268,11 @@ public class MotorPortGui extends ServiceGui implements ActionListener, ChangeLi
 
   public void refreshControllers() {
     if (myMotor != null) {
-      List<String> v = myMotor.refreshControllers();
+      Set<String> v = myMotor.refreshControllers();
       controllerList.removeAllItems();
       controllerList.addItem("");
-      for (int i = 0; i < v.size(); ++i) {
-        controllerList.addItem(v.get(i));
+      for (String s : v) {
+        controllerList.addItem(s);
       }
       if (myMotor.getController() != null) {
         controllerList.setSelectedItem(myMotor.getController().getName());

@@ -1,0 +1,86 @@
+<div class="row">
+    <div class="col-md-11">
+    <!-- desired vs reported -->
+        <b>power</b>
+        <h1>{{service.powerInput}}</h1>
+        <br/>
+        <div class="btn-group" uib-dropdown>
+            <button type="button" class="btn btn-default">controller {{service.controllerName}}</button>
+            <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
+                <span class="caret"></span>
+            </button>
+            <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                <li ng-repeat="c in service.controllers">
+                    <a href="" ng-click="setController(c)">{{c}}</a>
+                </li>
+            </ul>
+        </div>
+        <button type="button" class="btn btn-default" ng-click='attach()' ng-show='!service.controllerName'>attach</button>
+        <button type="button" class="btn btn-default" ng-click='detach()' ng-show='service.controllerName'>detach</button>
+        <div class="btn-group" uib-dropdown>
+            <button type="button" class="btn btn-default">port {{service.port}}</button>
+            <button id="single-button" ng-disabled="service.controller != null" type="button" class="btn btn-default" uib-dropdown-toggle>
+                <span class="caret"></span>
+            </button>
+            <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                <li ng-repeat="c in service.motorPorts">
+                    <a href="" ng-click="msg.setPort(c)">{{c}}</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!--
+
+    <div class="col-lg-6">
+    <table>
+        <tr>
+            <td>controller</td>
+            <td><select ng-model="newController" ng-disabled="isAttached" ng-options="controller for controller in controllers" class="btn btn-default pull-right"></select></td>
+        </tr>
+        <tr>
+            <td>type</td>
+            <td><select ng-model="newType" ng-disabled="isAttached" ng-options="possibleType for possibleType in service.types" class="btn btn-default pull-right"></select></td>           
+        </tr>
+        <tr ng-show="{{newType == 'MotorConfigSimpleH'}}">
+            <td>pwm pin <select ng-model="newPin0" ng-disabled="isAttached" ng-options="pin for pin in pins" class="btn btn-default pull-right"></select></td>      
+            <td align="right">dir pin <select ng-model="newPin1" ng-disabled="isAttached" ng-options="pin for pin in pins" class="btn btn-default pull-right"></select></td>
+        </tr>
+        <tr ng-show="{{newType == 'MotorConfigDualPwm'}}">
+            <td>left <select ng-model="newPin0" ng-disabled="isAttached" ng-options="pin for pin in pins" class="btn btn-default pull-right"></select></td>      
+            <td align="right">right <select ng-model="newPin1" ng-disabled="isAttached" ng-options="pin for pin in pins" class="btn btn-default pull-right"></select></td>
+        </tr>
+    </table>
+    </div>
+  
+    <div class="col-lg-6">
+    <table>
+        <tr>
+            <td>position</td>
+            <td><h2>{{position}}</h2></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <div class="btn-group">
+                <button class="btn btn-default" ng-disabled="!isAttached" ng-click="moveLeft()"><span class="glyphicon glyphicon-chevron-left"></button>
+                <button class="btn btn-default" ng-disabled="!isAttached" ng-click="msg.stop()"><span class="glyphicon glyphicon-stop"></button>
+                <button class="btn btn-default" ng-disabled="!isAttached" ng-click="moveRight()"><span class="glyphicon glyphicon-chevron-right"></button>
+                </div>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><button class="btn btn-default btn-block" ng-click="msg.setPowerLevel(service.powerLevel);">power level</button></td>
+            <td><input type="text" ng-model="service.powerLevel" class="form-control"></td>
+        </tr>
+        <tr>
+            <td>     
+                <button class="btn btn-default btn-block" ng-if="!isAttached" ng-click="attach();">attach</button>
+                <button class="btn btn-default btn-block" ng-if="isAttached" ng-click="detach()">detach</button>
+            </td>
+            <td></td>
+        </tr>
+     </table>
+    </div>       
+-->

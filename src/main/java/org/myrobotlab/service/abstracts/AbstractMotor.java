@@ -74,7 +74,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   /**
    * list of names of possible controllers
    */
-  protected List<String> controllers;
+  final protected Set<String> controllers = new HashSet<>();
 
   /**
    * list of possible ports
@@ -125,21 +125,36 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   public AbstractMotor(String n, String id) {
     super(n, id);
-    subscribeToRuntime("registered");
+    // subscribeToRuntime("registered");
     // "top" half of the mapper is set by the control
     // so that we "try" to maintain a standard default of -1.0 <=> 1.0 with same
     // input limits
     // "bottom" half of the mapper will be set by the controller
     mapper.map(min, max, -1.0, 1.0);
-  }
-
-  public void onRegistered(Registration s) {
+    Runtime.getInstance().subscribeToLifeCycleEvents(getName());
     refreshControllers();
-    broadcastState();
   }
 
-  public List<String> refreshControllers() {
-    controllers = Runtime.getServiceNamesFromInterface(MotorController.class);
+  @Override
+  public void onRegistered(Registration s) {
+    if (s.hasInterface(MotorController.class)) {
+      controllers.add(s.getName());
+      broadcastState();  
+    }    
+  }
+
+  @Override
+  public void onReleased(String s) {
+    if (controllers.contains(s)) {
+      controllers.remove(s);
+      broadcastState();
+    }
+  }
+  
+  public Set <String> refreshControllers() {
+    controllers.clear();
+    controllers.addAll(Runtime.getServiceNamesFromInterface(MotorController.class));
+    broadcastState();
     return controllers;
   }
 
@@ -368,7 +383,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     log.info("attachMotorController {}", controller.getName());
 
     this.controller = controller;
-    this.controllerName = controller.getName();
+    controllerName = controller.getName();
     motorPorts = controller.getPorts();
     // TODO: KW: set a reasonable mapper. for pwm motor it's probable -1 to 1 to
     // 0 to 255 ? not sure.

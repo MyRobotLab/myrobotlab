@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.logging.LoggingFactory;
@@ -26,18 +27,17 @@ public class MotorHat4Pi extends AbstractMotor {
     subscribeToRuntime("registered");
   }
 
+  @Override
   public void onRegistered(Registration s) {
-    refreshControllers();
-    broadcastState();
+    if (s.hasInterface(AdafruitMotorHat4Pi.class)) {
+      controllers.add(s.getName());
+      broadcastState();
+    }
   }
 
-  public List<String> refreshControllers() {
-    controllers = new ArrayList<String>();
-    for (String serviceName : Runtime.getServiceNamesFromInterface(MotorController.class)) {
-      if (Runtime.getService(serviceName).getClass() == AdafruitMotorHat4Pi.class) {
-        controllers.add(serviceName);
-      }
-    }
+  public Set<String> refreshControllers() {
+    controllers.clear();
+    controllers.addAll(Runtime.getServiceNamesFromInterface(AdafruitMotorHat4Pi.class));
     return controllers;
   }
 

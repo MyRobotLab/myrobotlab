@@ -340,7 +340,10 @@ public class Joystick extends Service implements AnalogPublisher {
     }
     
     Component c = components.get(id);
-    if (!c.isAnalog) {
+    if (c == null) {
+      error("could not find requested joystick component %s", id);
+    }
+    if (c != null && !c.isAnalog) {
       error("attachAnalogListener getAnalogId (%s) is a not an analog component", id);
     }
     
