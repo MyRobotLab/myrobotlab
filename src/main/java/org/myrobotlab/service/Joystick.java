@@ -261,6 +261,12 @@ public class Joystick extends Service implements AnalogPublisher {
     components = hardwareController.getComponentMap();
     return components;
   }
+  
+  public void refresh() {
+    getControllers();
+    getComponents();
+    broadcastState();
+  }
 
   public Map<String, Integer> getControllers() {
 
@@ -350,12 +356,16 @@ public class Joystick extends Service implements AnalogPublisher {
     Set<String> listeners = null;
     if (analogListeners.containsKey(id)) {
       listeners = analogListeners.get(id);
+      if (listeners.contains(serviceName)) {
+        log.info("already attached to %s", serviceName);
+        return;
+      }
     } else {
       listeners = new HashSet<String>();
     }
     analogListeners.put(id, listeners);
     listeners.add(serviceName);
-    
+    // service.attachAnalogPublisher(this);
   }
   
   @Override
@@ -712,6 +722,7 @@ public class Joystick extends Service implements AnalogPublisher {
         if (s == null) {
           s = new HashSet<>();
           analogListeners.put(id, s);
+          // attachAnalogListener(null);
         }
         s.addAll(list);
       }

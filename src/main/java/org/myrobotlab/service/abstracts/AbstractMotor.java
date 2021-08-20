@@ -90,7 +90,11 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
    * attached analog publishers to this service - functionally its
    * a simple "lock" to avoid cyclic attach/detaches - works well
    */
-  final protected Set<String> analogPublishers = new HashSet<>();
+  // final protected Set<String> analogPublishers = new HashSet<>();
+  // bad idea publishers internally will need to know about subscribers
+  // but not the other way around ... could this be a general pattern for
+  // how to manage attach? ie publishers attach "always" needs to be called
+  // subscribers can just call publishers attach with their attach
 
   /**
    * the power level requested - varies between -1.0 &lt;--&gt; 1.0
@@ -328,21 +332,11 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     
   @Override
   public void attachAnalogPublisher(AnalogPublisher publisher) {
-    if (analogPublishers.contains(publisher.getName())) {
-      log.info("already attached to {}", publisher.getName());
-      return;
-    }
-    analogPublishers.add(publisher.getName());
     publisher.attachAnalogListener(this);
   }
   
   @Override
   public void detachAnalogPublisher(AnalogPublisher publisher) {
-    if (!analogPublishers.contains(publisher.getName())) {
-      log.info("already detached from {}", publisher.getName());
-      return;
-    }
-    analogPublishers.remove(publisher.getName());
     publisher.detachAnalogListener(this);    
   }
 
@@ -480,10 +474,10 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     move(data.value);
   }
 
-  @Override
+  @Override /* incoming config is from derived motor type */
   protected ServiceConfig initConfig(ServiceConfig c) {
     super.initConfig(c);
-    AbstractMotorConfig config = new AbstractMotorConfig(c);
+    AbstractMotorConfig config = (AbstractMotorConfig)c;
 
     config.locked = locked;
 

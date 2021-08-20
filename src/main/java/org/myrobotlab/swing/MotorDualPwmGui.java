@@ -204,8 +204,8 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
 
     setEnabled(motor.isAttached());
 
-    leftPwmPinList.setSelectedItem(motor.leftPwmPin);
-    rightPwmPinList.setSelectedItem(motor.rightPwmPin);
+    leftPwmPinList.setSelectedItem(motor.getLeftPwmPin());
+    rightPwmPinList.setSelectedItem(motor.getRightPwmPin());
 
     if (motor.isAttached()) {
       MotorController mc = (MotorController) motor.getController();

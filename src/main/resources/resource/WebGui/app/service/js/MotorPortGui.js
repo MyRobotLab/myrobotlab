@@ -2,6 +2,46 @@ angular.module('mrlapp.service.MotorPortGui', []).controller('MotorPortGuiCtrl',
     $log.info('MotorPortGuiCtrl');
     var _self = this;
     var msg = this.msg;
+
+
+
+
+
+
+    $scope.requestedPower = 0
+
+    $scope.powerSlider = {
+        value: 501,
+        options: {
+            floor: -100,
+            ceil: 100,
+            minLimit: -100,
+            maxLimit: 100,
+            // hideLimitLabels: true,
+            onStart: function() {},
+            onChange: function() {
+                if ($scope.sliderEnabled) {
+                    if ($scope.speedSlider.value == 501) {
+                        msg.send('fullSpeed')
+                    } else {
+                        msg.send('setSpeed', $scope.speedSlider.value)
+                    }
+                }
+            },
+            onEnd: function() {}
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+    
     // init scope variables
     $scope.isAttached = false;
     $scope.newEncoderType = null ;
