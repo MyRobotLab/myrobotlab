@@ -3,6 +3,8 @@ angular.module('mrlapp.service.JoystickGui', []).controller('JoystickGuiCtrl', [
     var _self = this
     var msg = this.msg
 
+    var colorCategory = d3.scale.category20b()
+
     $scope.controller = 'controllers'
     $scope.input = {
         "id": "",
@@ -15,6 +17,8 @@ angular.module('mrlapp.service.JoystickGui', []).controller('JoystickGuiCtrl', [
         "key": "Series 1",
         "values": $scope.axisValues //[['pov', 0], ['pov', -0.75], ['x', 0], ['x', 0.93]]
     }
+
+    $scope.selectedListenerComponent = null
 
     $scope.axis = [$scope.axisObject]
 
@@ -94,12 +98,15 @@ angular.module('mrlapp.service.JoystickGui', []).controller('JoystickGuiCtrl', [
         }
     }
 
+    $scope.setListenerComponent = function(cn) {
+        console.info('setListenerComponent', cn)
+        $scope.selectedListenerComponent = cn
+    }
+
+
     $scope.setController = function(index) {
         msg.send("setController", index)
     }
-
-    msg.subscribe('publishJoystickInput')
-    msg.subscribe(this)
 
     $scope.xAxisTickFormatFunction = function() {
         return function(d) {
@@ -108,14 +115,15 @@ angular.module('mrlapp.service.JoystickGui', []).controller('JoystickGuiCtrl', [
         }
     }
 
-    var colorCategory = d3.scale.category20b()
-
     $scope.colorFunction = function() {
         return function(d, i) {
             // return colorCategory(i)
             return '#CCC'
         }
-
     }
+
+    msg.subscribe('publishJoystickInput')
+    msg.subscribe(this)
+
 }
 ])

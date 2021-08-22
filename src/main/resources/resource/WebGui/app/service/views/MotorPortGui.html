@@ -1,26 +1,76 @@
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-3">
         <!-- desired vs reported -->
-        <h1>{{service.powerInput}}</h1>
         <table width="100%">
+        <tr>
+        <td colspan="3"><b>power</b></td>
+        </tr>
             <tr>
-                <td colspan="4">
-                    <b>mapping</b>
+                <td>
+                    requested<h1>{{(requestedPower/100).toFixed(2)}}</h1>
+                </td>
+                <td>
+                    reported
+                    <h1>
+                        <font color="grey">{{service.powerInput.toFixed(2)}}</font>
+                    </h1>
+                </td>
+                <td>
+                    output
+                    <h1>
+                        <font color="grey">{{powerOutput.toFixed(2)}}</font>
+                    </h1>
                 </td>
             </tr>
-            <tr>
-                <td colspan="2">input</td>
-                <td colspan="2">output</td>
-            </tr>
-            <tr>
-                <td><input class="form-control" type="text" width="4" ng-model="service.mapper.minX" title="minimum input"/></td>
-                <td><input class="form-control" type="text" width="4" ng-model="service.mapper.maxX" title="maximum input"/></td>
-                <td><input class="form-control" type="text" width="4" ng-model="service.mapper.minY" title="minimum output"/></td>
-                <td><input class="form-control" type="text" width="4" ng-model="service.mapper.maxY" title="maximum output"/></td>
-            </tr>
-        </table>
+            <br/>
+            <table width="100%">
+                <tr>
+                    <td colspan="5">
+                        <b>mapping</b>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">input</td>
+                    <td colspan="2">output</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>
+                        <input class="form-control" type="text" width="4" ng-model="service.mapper.minX" title="minimum input"/>
+                    </td>
+                    <td>
+                        <input class="form-control" type="text" width="4" ng-model="service.mapper.maxX" title="maximum input"/>
+                    </td>
+                    <td>
+                        <input class="form-control" type="text" width="4" ng-model="service.mapper.minY" title="minimum output"/>
+                    </td>
+                    <td>
+                        <input class="form-control" type="text" width="4" ng-model="service.mapper.maxY" title="maximum output"/>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-default" ng-click='update()'>update</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="5">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>invert</b>
+                        &nbsp;<toggle ng-model="service.mapper.inverted" class="miniBTN" title="This will invert motor direction" ng-change="msg.setInverted(service.mapper.inverted)" on="" off="" size="btn-lg"/>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+    </div>
+    <div class="col-md-9">&nbsp;</div>
+</div>
+<div class="row">
+    <div class="col-md-6">
         <div class="btn-group" uib-dropdown>
-            <button type="button" class="btn btn-default">controller {{service.controllerName}}</button>
+            <button type="button" class="btn btn-default">controller {{requestedController}}</button>
             <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
                 <span class="caret"></span>
             </button>
@@ -43,67 +93,24 @@
                 </li>
             </ul>
         </div>
+        <button type="button" class="btn btn-default" ng-click='stop()' ng-show='service.controllerName'>
+            <img src="stop-large.png" width="40"/>
+        </button>
     </div>
     <div class="col-md-6">&nbsp;</div>
 </div>
 <div class="row">
     <div class="col-md-6">
-        <b>power</b>
-        <rzslider class="custom-slider3" rz-slider-model="requestedPower" rz-slider-options="powerSlider.options"/>
+        <table width="100%">
+            <tr>
+                <td>
+                    <b>power</b>
+                    <rzslider class="custom-slider3" rz-slider-model="requestedPower" rz-slider-options="powerSlider.options"/>
+                </td>
+                <td>&nbsp;</td>
+                <td></td>
+            </tr>
+        </table>
     </div>
     <div class="col-md-6">&nbsp;</div>
 </div>
-<!--
-
-    <div class="col-lg-6">
-    <table>
-        <tr>
-            <td>controller</td>
-            <td><select ng-model="newController" ng-disabled="isAttached" ng-options="controller for controller in controllers" class="btn btn-default pull-right"></select></td>
-        </tr>
-        <tr>
-            <td>type</td>
-            <td><select ng-model="newType" ng-disabled="isAttached" ng-options="possibleType for possibleType in service.types" class="btn btn-default pull-right"></select></td>           
-        </tr>
-        <tr ng-show="{{newType == 'MotorConfigSimpleH'}}">
-            <td>pwm pin <select ng-model="newPin0" ng-disabled="isAttached" ng-options="pin for pin in pins" class="btn btn-default pull-right"></select></td>      
-            <td align="right">dir pin <select ng-model="newPin1" ng-disabled="isAttached" ng-options="pin for pin in pins" class="btn btn-default pull-right"></select></td>
-        </tr>
-        <tr ng-show="{{newType == 'MotorConfigDualPwm'}}">
-            <td>left <select ng-model="newPin0" ng-disabled="isAttached" ng-options="pin for pin in pins" class="btn btn-default pull-right"></select></td>      
-            <td align="right">right <select ng-model="newPin1" ng-disabled="isAttached" ng-options="pin for pin in pins" class="btn btn-default pull-right"></select></td>
-        </tr>
-    </table>
-    </div>
-  
-    <div class="col-lg-6">
-    <table>
-        <tr>
-            <td>position</td>
-            <td><h2>{{position}}</h2></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>
-                <div class="btn-group">
-                <button class="btn btn-default" ng-disabled="!isAttached" ng-click="moveLeft()"><span class="glyphicon glyphicon-chevron-left"></button>
-                <button class="btn btn-default" ng-disabled="!isAttached" ng-click="msg.stop()"><span class="glyphicon glyphicon-stop"></button>
-                <button class="btn btn-default" ng-disabled="!isAttached" ng-click="moveRight()"><span class="glyphicon glyphicon-chevron-right"></button>
-                </div>
-            </td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><button class="btn btn-default btn-block" ng-click="msg.setPowerLevel(service.powerLevel);">power level</button></td>
-            <td><input type="text" ng-model="service.powerLevel" class="form-control"></td>
-        </tr>
-        <tr>
-            <td>     
-                <button class="btn btn-default btn-block" ng-if="!isAttached" ng-click="attach();">attach</button>
-                <button class="btn btn-default btn-block" ng-if="isAttached" ng-click="detach()">detach</button>
-            </td>
-            <td></td>
-        </tr>
-     </table>
-    </div>       
--->

@@ -302,6 +302,10 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         console.info('ret ' + ret);
     }
 
+    $scope.connect = function(url){
+        msg.send('connect', url)
+    }
+
     // $scope.possibleServices = Object.values(mrl.getPossibleServices())
     msg.subscribe("getServiceTypes")
     msg.subscribe("getLocalServices")

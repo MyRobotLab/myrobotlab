@@ -1,10 +1,8 @@
 package org.myrobotlab.service;
 
-import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.config.MotorPortConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServoConfig;
 
 /**
  * Motor - MotorController which uses a "Port". Examples are Adafruit Motor
@@ -27,6 +25,7 @@ public class MotorPort extends AbstractMotor {
 
   public void setPort(String port) {
     this.port = port;
+    broadcastState();
   }
 
   public String getPort() {

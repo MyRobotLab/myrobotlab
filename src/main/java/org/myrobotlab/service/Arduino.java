@@ -279,7 +279,12 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       // need to determine the encoder type!
       attach((EncoderControl) service);
       return;
+    } else if (NeoPixel.class.isAssignableFrom(service.getClass())) {
+      NeoPixel np = (NeoPixel)service;
+      neoPixelAttach(np.getName(), np.getPin(), np.getNumPixel(), np.getPixelDepth());
+      return;
     }
+    
     error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
   }
 
@@ -2229,6 +2234,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   @Override
   public void neoPixelAttach(String name, int pin, int numberOfPixels, int depth) {
+    if (deviceList.containsKey(name)) {
+      log.info("neopixel %s already attached to mrl device", name);
+      return;
+    }
     ServiceInterface neopixel = Runtime.getService(name);
     DeviceMapping dm = attachDevice(neopixel, new Object[] { pin, numberOfPixels, depth });
     msg.neoPixelAttach(dm.getId(), pin, numberOfPixels, depth);
