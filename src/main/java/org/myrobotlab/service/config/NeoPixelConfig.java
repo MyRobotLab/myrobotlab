@@ -11,5 +11,6 @@ public class NeoPixelConfig extends ServiceConfig {
   public int blue;
   public String controller;
   public String currentAnimation;
+  public Integer brightness;
 
 }

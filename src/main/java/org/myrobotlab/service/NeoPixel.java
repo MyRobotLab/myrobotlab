@@ -218,6 +218,11 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   protected String type = "RGB";
 
+  /**
+   * 0 = off / 255 brightest
+   */
+  protected int brightness = 255;
+
   public NeoPixel(String n, String id) {
     super(n, id);
     animationRunner = new AnimationRunner();
@@ -658,6 +663,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       error("%s cannot setPixel controller not set", getName());
       return;
     }
+    brightness = value;
     np2.neoPixelSetBrightness(getName(), value);
   }
 
@@ -849,6 +855,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     config.blue = blue;
     config.controller = controller;
     config.currentAnimation = currentAnimation;
+    config.brightness = brightness;
 
     return config;
   }

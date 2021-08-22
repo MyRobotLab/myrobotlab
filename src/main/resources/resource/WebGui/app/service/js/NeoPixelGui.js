@@ -12,6 +12,7 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
     $scope.animations = ['No animation', 'Stop', 'Color Wipe', 'Larson Scanner', 'Theater Chase', 'Theater Chase Rainbow', 'Rainbow', 'Rainbow Cycle', 'Flash Random', 'Ironman', 'equalizer']
     $scope.pixelCount = null
     var firstTime = true
+    $scope.brightnesses = [1, 2, 3, 4, 5, 6, 7, 8, 10, 15, 20, 25, 50, 75, 100, 125, 150, 175, 200, 225, 255]
 
     $scope.state = {
         controller: null

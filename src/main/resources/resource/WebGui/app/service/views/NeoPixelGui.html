@@ -73,6 +73,19 @@
                 </li>
             </ul>
         </div>
+
+        <div class="btn-group" uib-dropdown ng-hide="service.controller == null">
+            <button type="button" class="btn btn-default">brightness {{service.brightness}}</button>
+            <button type="button" class="btn btn-default" uib-dropdown-toggle>
+                <span class="caret"></span>
+            </button>
+            <ul uib-dropdown-menu>
+                <li ng-repeat="b in brightnesses">
+                    <a href="" ng-click="msg.setBrightness(b);msg.broadcastState()">{{b}}</a>
+                </li>
+            </ul>
+        </div>
+
     </div>
     <div class="col-md-1"></div>
 </div>
