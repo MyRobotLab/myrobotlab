@@ -880,6 +880,11 @@ public class NeoPixel extends Service implements NeoPixelControl {
     if (config.currentAnimation != null) {
       playAnimation(config.currentAnimation);
     }
+    
+    if (config.brightness != null) {
+      setBrightness(config.brightness);
+    }
+    
     return c;
   }
 
