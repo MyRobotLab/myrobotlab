@@ -713,6 +713,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     addCategory(pattern, template, "*");
   }
 
+  /*
   public void writeAIML() {
     // TODO: revisit this method to make sure
     for (BotInfo bot : bots.values()) {
@@ -721,6 +722,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       }
     }
   }
+  */
 
   /**
    * writeAndQuit will write brain to disk For learn.aiml is concerned
@@ -732,7 +734,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
         try {
           savePredicates();
           // important to save learnf.aiml
-          writeAIML();
+          // writeAIML();
           bot.writeQuit();
         } catch (IOException e1) {
           log.error("saving predicates threw", e1);
