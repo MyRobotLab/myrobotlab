@@ -330,7 +330,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @param serviceName
    * @param interfaceName
    */
-  public void onAddInterface(String serviceName, String interfaceName) {
+  public void onInterfaceRegistered(String serviceName, String interfaceName) {
   }
   
   /**
@@ -343,7 +343,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @param serviceName
    * @param interfaceName
    */
-  public void onRemoveInterface(String serviceName, String interfaceName) {
+  public void onInterfaceReleased(String serviceName, String interfaceName) {
   }
   
 

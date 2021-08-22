@@ -256,7 +256,7 @@ public class Joystick extends Service implements AnalogPublisher {
   }
 
   @Override
-  public void onAddInterface(String serviceName, String interfaceName) {
+  public void onInterfaceRegistered(String serviceName, String interfaceName) {
     if (AnalogListener.class.toString().equals(interfaceName)) {
       analogListenerServices.add(serviceName);
       broadcastState();
@@ -264,7 +264,7 @@ public class Joystick extends Service implements AnalogPublisher {
   }
 
   @Override
-  public void onRemoveInterface(String serviceName, String interfaceName) {
+  public void onInterfaceReleased(String serviceName, String interfaceName) {
     if (AnalogListener.class.toString().equals(interfaceName)) {
       analogListenerServices.remove(serviceName);
       broadcastState();

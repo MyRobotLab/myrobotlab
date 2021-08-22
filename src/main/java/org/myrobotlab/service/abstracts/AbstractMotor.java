@@ -142,7 +142,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
   
   @Override
-  public void onAddInterface(String serviceName, String interfaceName) {
+  public void onInterfaceRegistered(String serviceName, String interfaceName) {
     if (MotorController.class.toString().equals(interfaceName)) {
       controllers.add(serviceName);
       broadcastState();
@@ -150,7 +150,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   @Override
-  public void onRemoveInterface(String serviceName, String interfaceName) {
+  public void onInterfaceReleased(String serviceName, String interfaceName) {
     if (MotorController.class.toString().equals(interfaceName)) {
       controllers.remove(serviceName);
       broadcastState();

@@ -1236,7 +1236,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
             // look for callbacks - send messages
             for (String serviceName : listeners) {
-              runtime.send(serviceName, "onAddInterface", registration.getFullName(), inter);
+              runtime.send(serviceName, "onInterfaceRegistered", registration.getFullName(), inter);
             }
           }
         }
@@ -1322,7 +1322,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
           // look for callbacks - send messages
           for (String serviceName : listeners) {
-            runtime.send(serviceName, "onRemoveInterface", name, inter);
+            runtime.send(serviceName, "onInterfaceReleased", name, inter);
           }
         }
       }
@@ -3685,7 +3685,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       Set<String> ifs = ClassUtil.getInterfaces(s.getClass());
       if (ifs.contains(interfaceName)) {
         // we found interface we're looking for
-        si.onAddInterface(s.getFullName(), interfaceName);
+        si.onInterfaceRegistered(s.getFullName(), interfaceName);
       }
     }
     
