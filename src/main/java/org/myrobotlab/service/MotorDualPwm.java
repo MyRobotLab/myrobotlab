@@ -7,13 +7,17 @@ import java.util.List;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
+import org.myrobotlab.service.config.MotorDualPwmConfig;
+import org.myrobotlab.service.config.MotorHat4PiConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.interfaces.AnalogPublisher;
 
 public class MotorDualPwm extends AbstractMotor {
   private static final long serialVersionUID = 1L;
 
-  public String leftPwmPin;
-  public String rightPwmPin;
-  Integer pwmFreq;
+  protected String leftPwmPin;
+  protected String rightPwmPin;
+  protected Integer pwmFreq;
 
   public List<String> pwmPinList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15");
 
@@ -66,6 +70,31 @@ public class MotorDualPwm extends AbstractMotor {
     this.pwmFreq = pwmfreq;
   }
 
+  @Override
+  public ServiceConfig getConfig() {    
+    MotorDualPwmConfig config = (MotorDualPwmConfig) initConfig(new MotorDualPwmConfig());
+    config.leftPwmPin = leftPwmPin;
+    config.rightPwmPin = rightPwmPin;
+    config.pwmFreq = pwmFreq;
+    return config;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    super.load(c);
+    MotorDualPwmConfig config = (MotorDualPwmConfig)c;
+    if (config.leftPwmPin != null) {
+      setLeftPwmPin(config.leftPwmPin);
+    }
+    if (config.rightPwmPin != null) {
+      setRightPwmPin(config.rightPwmPin);
+    }
+    if (config.pwmFreq != null) {
+      setPwmFreq(config.pwmFreq);
+    }
+    return c;
+  }
+
+  
   public static void main(String[] args) throws InterruptedException {
 
     LoggingFactory.init(Level.INFO);

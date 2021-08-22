@@ -119,11 +119,8 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   }
 
   public boolean motorDetach(String name) {
-    if (motors.containsKey(name)) {
-      motors.remove(name);
-      return true;
-    }
-    return false;
+     motors.remove(name);
+    return true;
   }
 
   public void motorMove(String name) {
@@ -246,12 +243,12 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   @Override
   public void motorMove(MotorControl mc) {
 
-    if (!motors.containsKey(mc.getName())) {
+    if (!motors.contains(mc.getName())) {
       error("%s not attached to %s", mc.getName(), getName());
       return;
     }
 
-    MotorPort motor = (MotorPort) motors.get(mc.getName());
+    MotorPort motor = (MotorPort) Runtime.getService(mc.getName());
     String port = motor.getPort();
 
     /// double pwr = motor.getPowerLevel();
@@ -404,7 +401,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
   @Override
   public Set<String> getAttached() {
-    return motors.keySet();
+    return motors;
   }
 
   /**
@@ -427,7 +424,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
         throw new IOException("port number in motor must be set to m1 or m2");
       }
 
-      motors.put(motor.getName(), motor);
+      motors.add(motor.getName());
 
       // give opportunity for motor to attach
       motor.attach(this);
@@ -472,7 +469,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
   @Override
   public boolean isAttached(Attachable service) {
-    return motors.containsKey(service.getName()) || (serial != null && serial.getName().equals(service.getName()));
+    return motors.contains(service.getName()) || (serial != null && serial.getName().equals(service.getName()));
   }
 
   @Override
@@ -482,7 +479,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
   @Override
   public void detach() {
-    for (String name : motors.keySet()) {
+    for (String name : motors) {
       Motor m = (Motor) Runtime.getService(name);
       if (m != null) {
         m.detach(this);

@@ -3,10 +3,14 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
+import org.myrobotlab.service.config.MotorHat4PiConfig;
+import org.myrobotlab.service.config.MotorPortConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.MotorController;
 
 public class MotorHat4Pi extends AbstractMotor {
@@ -26,18 +30,17 @@ public class MotorHat4Pi extends AbstractMotor {
     subscribeToRuntime("registered");
   }
 
+  @Override
   public void onRegistered(Registration s) {
-    refreshControllers();
-    broadcastState();
+    if (s.hasInterface(AdafruitMotorHat4Pi.class)) {
+      controllers.add(s.getName());
+      broadcastState();
+    }
   }
 
-  public List<String> refreshControllers() {
-    controllers = new ArrayList<String>();
-    for (String serviceName : Runtime.getServiceNamesFromInterface(MotorController.class)) {
-      if (Runtime.getService(serviceName).getClass() == AdafruitMotorHat4Pi.class) {
-        controllers.add(serviceName);
-      }
-    }
+  public Set<String> refreshControllers() {
+    controllers.clear();
+    controllers.addAll(Runtime.getServiceNamesFromInterface(AdafruitMotorHat4Pi.class));
     return controllers;
   }
 
@@ -88,6 +91,20 @@ public class MotorHat4Pi extends AbstractMotor {
 
   public String getMotorId() {
     return motorId;
+  }
+  
+  @Override
+  public ServiceConfig getConfig() {    
+    MotorHat4PiConfig config = (MotorHat4PiConfig) initConfig(new MotorHat4PiConfig());
+    config.motorId = motorId;
+    return config;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    super.load(c);
+    MotorHat4PiConfig config = (MotorHat4PiConfig)c;    
+    setMotor(config.motorId);
+    return c;
   }
 
   public static void main(String[] args) {

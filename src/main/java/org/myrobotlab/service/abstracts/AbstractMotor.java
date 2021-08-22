@@ -26,6 +26,7 @@
 
 package org.myrobotlab.service.abstracts;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,7 +34,6 @@ import java.util.Set;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.joystick.Component;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.interfaces.Mapper;
@@ -41,12 +41,14 @@ import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.sensor.EncoderPublisher;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.data.JoystickData;
+import org.myrobotlab.service.config.AbstractMotorConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.data.AnalogData;
 import org.myrobotlab.service.data.PinData;
+import org.myrobotlab.service.interfaces.AnalogPublisher;
 import org.myrobotlab.service.interfaces.ButtonDefinition;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
-import org.myrobotlab.service.interfaces.MotorEncoder;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PinListener;
@@ -67,65 +69,96 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   public final static Logger log = LoggerFactory.getLogger(AbstractMotor.class);
 
-  // my motor controller - TODO support multiple controllers ??? would virtual
-  // benefit ?
   protected transient MotorController controller = null;
+
   /**
    * list of names of possible controllers
    */
-  public List<String> controllers;
+  final protected Set<String> controllers = new HashSet<>();
 
-  boolean locked = false;
+  /**
+   * list of possible ports
+   */
+  protected List<String> motorPorts = new ArrayList<>();
+
+  /**
+   * if motor is locked - no position or power commands will work
+   */
+  protected boolean locked = false;
+  
+  /**
+   * attached analog publishers to this service - functionally its
+   * a simple "lock" to avoid cyclic attach/detaches - works well
+   */
+  // final protected Set<String> analogPublishers = new HashSet<>();
+  // bad idea publishers internally will need to know about subscribers
+  // but not the other way around ... could this be a general pattern for
+  // how to manage attach? ie publishers attach "always" needs to be called
+  // subscribers can just call publishers attach with their attach
 
   /**
    * the power level requested - varies between -1.0 &lt;--&gt; 1.0
    */
+  protected Double powerInput = 0.0;
 
-  // FIXME - check to see if these are necessary PROBABLY NOT SINCE THE MAPPER
-  // PARTS ARE NOW PART OF CONTROLLER
+  protected Double positionInput; // aka targetPos
 
-  // inputs
-  Double powerInput = 0.0;
-  Double positionInput; // aka targetPos
-
-  // feedback
-  Double positionCurrent; // aka currentPos
+  protected Double positionCurrent; // aka currentPos
 
   /**
    * a new "un-set" mapper for merging with default motorcontroller
    */
-  transient Mapper mapper = new MapperLinear();
+  protected MapperLinear mapper = new MapperLinear();
 
-  transient MotorEncoder encoder = null;
+  /**
+   * name of the currently attached motor controller
+   */
+  protected String controllerName;
 
-  // FIXME - implements an Encoder interface
-  // get a named instance - stopping and tarting should not be creating &
-  // destroying
-  transient Object lock = new Object();
+  /**
+   * min - defaults to -1.0 equivalent of 100% power rotation ccw
+   */
+  protected double min = -1.0;
 
-  String controllerName;
+  /**
+   * max - defaults to 1.0 equivalent of 100% power cw rotation
+   */
+  protected double max = 1.0;
 
-  Double min = null;
-
-  Double max = null;
+  private String axisName;
 
   public AbstractMotor(String n, String id) {
     super(n, id);
-    subscribeToRuntime("registered");
+    // subscribeToRuntime("registered");
     // "top" half of the mapper is set by the control
     // so that we "try" to maintain a standard default of -1.0 <=> 1.0 with same
     // input limits
     // "bottom" half of the mapper will be set by the controller
-    mapper.map(-1.0, 1.0, -1.0, 1.0);
-  }
-
-  public void onRegistered(Registration s) {
+    mapper.map(min, max, -1.0, 1.0);
+    Runtime.getInstance().subscribeToLifeCycleEvents(getName());
     refreshControllers();
-    broadcastState();
   }
 
-  public List<String> refreshControllers() {
-    controllers = Runtime.getServiceNamesFromInterface(MotorController.class);
+  @Override
+  public void onRegistered(Registration s) {
+    if (s.hasInterface(MotorController.class)) {
+      controllers.add(s.getName());
+      broadcastState();  
+    }    
+  }
+
+  @Override
+  public void onReleased(String s) {
+    if (controllers.contains(s)) {
+      controllers.remove(s);
+      broadcastState();
+    }
+  }
+  
+  public Set <String> refreshControllers() {
+    controllers.clear();
+    controllers.addAll(Runtime.getServiceNamesFromInterface(MotorController.class));
+    broadcastState();
     return controllers;
   }
 
@@ -151,30 +184,53 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public void lock() {
-    info("%s.lock", getName());
     locked = true;
     broadcastState();
   }
 
   @Override
   public void move(double powerInput) {
-    info("%s.move(%.2f)", getName(), powerInput);
+    if (locked) {
+      info("%s is locked - will not move");
+      return;
+    }
+
+    if (powerInput < min) {
+      warn("requested power %.2f is under minimum %.2f", powerInput, min);
+      return;
+    }
+
+    if (powerInput > max) {
+      warn("requested power %.2f is over maximum %.2f", powerInput, max);
+      return;
+    }
+
+    log.info("{}.move({})", getName(), powerInput);
     this.powerInput = powerInput;
-    if (controller != null)
+    if (controller != null) {
+      invoke("publishPowerChange", powerInput);
       controller.motorMove(this);
+    }
     broadcastState();
   }
 
   @Override
+  public double publishPowerChange(double powerInput) {
+    return powerInput;
+  }
+
+  @Override
   public void setInverted(boolean invert) {
+    log.warn("setting {} inverted = {}", getName(), invert);
     mapper.setInverted(invert);
     broadcastState();
   }
 
-  // ---- Servo begin ---------
+  @Override
   public void setMinMax(double min, double max) {
     this.min = min;
     this.max = max;
+    info("updated min %.2f max %.2f", min, max);
     broadcastState();
   }
 
@@ -257,34 +313,40 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     broadcastState();
   }
 
+  /**
+   * routing attach
+   */
   @Override
   public void attach(Attachable service) throws Exception {
+    log.info("routing attach in Abstractmotor");
     if (MotorController.class.isAssignableFrom(service.getClass())) {
       attachMotorController((MotorController) service);
+      return;
+    } else if (AnalogPublisher.class.isAssignableFrom(service.getClass())) {
+      attachAnalogPublisher((AnalogPublisher) service);
       return;
     }
 
     error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
   }
+    
+  @Override
+  public void attachAnalogPublisher(AnalogPublisher publisher) {
+    publisher.attachAnalogListener(this);
+  }
+  
+  @Override
+  public void detachAnalogPublisher(AnalogPublisher publisher) {
+    publisher.detachAnalogListener(this);    
+  }
 
-  // hmm
+
+  @Deprecated /* I think this was an attempt to control via an analog pin - should be updated to use attachAnalogPublisher */
   public void onPin(PinData data) {
     Double pwr = null;
-
-    pwr = data.value.doubleValue();
-
-    move(pwr);
-  }
-
-  // hmm
-  public void onJoystickData(JoystickData data) {
-    // info("AbstractMotor onJoystickData - %f", data.value);
-    Double pwr = null;
     pwr = data.value.doubleValue();
     move(pwr);
   }
-
-  //////////////// begin new stuff ///////////////////////
 
   public void attach(PinDefinition pindef) {
     // SINGLE PIN MAN !! not ALL PINS !
@@ -297,19 +359,9 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     // subscribe(pindef.getName(), "publishPin", getName(), "move");
   }
 
-  public void attach(Component joystickComponent) {
-    if (joystickComponent == null) {
-      error("cannot attach a null joystick component", getName());
-      return;
-    }
-    send(joystickComponent.getName(), "addListener", getName(), joystickComponent.id);
-  }
-
   public void attach(ButtonDefinition buttondef) {
     subscribe(buttondef.getName(), "publishButton", getName(), "move");
   }
-
-  //////////////// end new stuff ///////////////////////
 
   @Override
   public void attachMotorController(MotorController controller) throws Exception {
@@ -322,31 +374,60 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
       return;
     }
 
+    log.info("attachMotorController {}", controller.getName());
+
     this.controller = controller;
-    this.controllerName = controller.getName();
+    controllerName = controller.getName();
+    motorPorts = controller.getPorts();
     // TODO: KW: set a reasonable mapper. for pwm motor it's probable -1 to 1 to
     // 0 to 255 ? not sure.
-    this.mapper = controller.getDefaultMapper();
+
+    /**
+     * <pre>
+     * Cannot directly assign - we just want the output values of the controller's mapper
+     * The process is as follows:
+     *    1. user creates a motor
+     *    2. user creates a motor controller
+     *    3. the motor controllers map value inputs minX & minY are -1.0 to 1.0 
+     *       but it has no idea what the controller needs to map that range
+     *    4. hopefully the motor controller's developer created a map for the motor controller which
+     *       sanely maps -1.0, 1.0 to values needed by the controller .. e.g. Saber-tooth is -128, 127
+     *    5  the end user attaches the motor and motor controller - we then copy in the controllers output 
+     *       values to the motor control's output of its map.
+     *       So, the controller gave sane defaults, but the motor control has all the necessary configuration
+     * </pre>
+     */
+    Mapper defaultControllerMapper = controller.getDefaultMapper();
+    mapper.map(mapper.getMinX(), mapper.getMaxX(), defaultControllerMapper.getMinY(), defaultControllerMapper.getMaxY());
 
     broadcastState();
     controller.attach(this);
   }
-
-  /////// config start ////////////////////////
 
   @Override
   public boolean isAttached() {
     return controller != null;
   }
 
+  public void detach() {
+    super.detach();
+    if (controller != null) {
+      detach(controller.getName());
+    }
+  }
+
+  // FIXME - clean up the attach/detach
   // TODO - this could be Java 8 default interface implementation
   @Override
-  public void detach(String controllerName) {
-    if (controller == null || !controllerName.equals(controller.getName())) {
+  public void detach(String name) {
+    if (controller == null || !name.equals(controller.getName())) {
       return;
     }
-    controller.detach(this);
+    controller.detach(this); // FIXME - call
+                             // detachMotorController(MotorController
+    controllerName = null;
     controller = null;
+    broadcastState();
   }
 
   @Override
@@ -369,12 +450,61 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   // FIXME promote to interface
-  public void setMapper(Mapper mapper) {
+  public void setMapper(MapperLinear mapper) {
     this.mapper = mapper;
   }
 
-  // FIXME promot to interface
+  // FIXME promote to interface
   public double calcControllerOutput() {
     return mapper.calcOutput(getPowerLevel());
   }
+
+  @Override
+  public void setAnalogId(String name) {
+    axisName = name;
+  }
+
+  @Override
+  public String getAnalogId() {
+    return axisName;
+  }
+
+  @Override
+  public void onAnalog(AnalogData data) {
+    move(data.value);
+  }
+
+  @Override /* incoming config is from derived motor type */
+  protected ServiceConfig initConfig(ServiceConfig c) {
+    super.initConfig(c);
+    AbstractMotorConfig config = (AbstractMotorConfig)c;
+
+    config.locked = locked;
+
+    if (mapper != null) {
+      config.clip = mapper.isClip();
+      config.maxIn = mapper.getMaxX();
+      config.maxOut = mapper.getMaxY();
+      config.minIn = mapper.getMinX();
+      config.minOut = mapper.getMinY();
+      config.inverted = mapper.isInverted();
+    }
+
+    return config;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    AbstractMotorConfig config = (AbstractMotorConfig) c;
+
+    mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
+    mapper.setInverted(config.inverted);
+    mapper.setClip(config.clip);
+
+    if (locked) {
+      lock();
+    }
+
+    return c;
+  }
+
 }

@@ -421,7 +421,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
     // #2.5 - Platform is in virtual mode - create a virtual uart
 
-    if (Platform.isVirtual()) {
+    if (isVirtual()) {
       connectVirtualUart(inPortName);
       connect(inPortName);
       return;
