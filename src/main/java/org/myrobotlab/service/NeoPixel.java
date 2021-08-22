@@ -39,6 +39,8 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.NeoPixelConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
@@ -62,7 +64,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
         while (running) {
           equalizer();
-          Double wait_ms_per_frame = fpsToWaitMs(speedFps);          
+          Double wait_ms_per_frame = fpsToWaitMs(speedFps);
           sleep(wait_ms_per_frame.intValue());
         }
       } catch (Exception e) {
@@ -170,7 +172,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
    * list of possible controllers
    */
   protected Set<String> controllers = new HashSet<>();
-  
+
   /**
    * name of current matrix
    */
@@ -214,9 +216,11 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   private int maxFps = 50;
 
+  protected String type = "RGB";
+
   public NeoPixel(String n, String id) {
     super(n, id);
-    animationRunner = new AnimationRunner();        
+    animationRunner = new AnimationRunner();
   }
 
   @Override
@@ -514,13 +518,13 @@ public class NeoPixel extends Service implements NeoPixelControl {
   public void onReleased(String name) {
     refreshControllers();
   }
-  
+
   // @Override
   public String onStartSpeaking(String utterance) {
     startAnimation();
     return utterance;
   }
-  
+
   public void playAnimation(String animation) {
     switch (animation) {
       // onboard animations
@@ -601,9 +605,9 @@ public class NeoPixel extends Service implements NeoPixelControl {
     if (speedFps > maxFps) {
       speedFps = maxFps;
     }
-    
+
     this.speedFps = speedFps;
-    
+
     if (controller == null) {
       error("%s could not set animation no attached controller", getName());
       return;
@@ -626,10 +630,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
       error("fps can't be zero for neopixel animation defaulting to 1 fps");
       return 1000.0;
     }
-    double result = 1000.0/fps;
-    return result;    
+    double result = 1000.0 / fps;
+    return result;
   }
-  
+
   @Override
   public void setAnimation(String animation, int red, int green, int blue, int wait_ms) {
     this.red = red;
@@ -741,6 +745,26 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   public void setPixelDepth(int depth) {
     pixelDepth = depth;
+    if (pixelDepth == 3) {
+      type = "RGB";
+    } else if (pixelDepth == 4) {
+      type = "RGBW";
+    }
+    broadcastState();
+  }
+
+  public void setType(String type) {
+    if ("RGB".equals(type) || "RGBW".equals(type)) {
+      this.type = type;
+      if (type.equals("RGB")) {
+        pixelDepth = 3;
+      } else {
+        pixelDepth = 4;
+      }
+      broadcastState();
+    } else {
+      error("type %s invalid only RGB or RGBW", type);
+    }
   }
 
   public void setRed(int red) {
@@ -767,7 +791,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     Runtime runtime = Runtime.getInstance();
     runtime.subscribeToLifeCycleEvents(getName());
   }
-  
+
   public void setColor(int red, int green, int blue) {
     this.red = red;
     this.green = green;
@@ -798,18 +822,58 @@ public class NeoPixel extends Service implements NeoPixelControl {
       error("speed must be between 1 - %d fps requested speed was %d fps", maxFps, speed);
       return;
     }
-    speedFps = speed;    
+    speedFps = speed;
     log.info("setSpeed speed {}", speedFps);
     if (currentAnimation != null) {
       // restarting currently running animation
       playAnimation(currentAnimation);
     }
   }
-  
+
   public void playIronman() {
     setColor(170, 170, 255);
     setSpeed(50);
     playAnimation("Ironman");
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+
+    NeoPixelConfig config = (NeoPixelConfig) initConfig(new NeoPixelConfig());
+    config.pin = pin;
+    config.pixelCount = pixelCount;
+    config.pixelDepth = pixelDepth;
+    config.speed = speedFps;
+    config.red = red;
+    config.green = green;
+    config.blue = blue;
+    config.controller = controller;
+    config.currentAnimation = currentAnimation;
+
+    return config;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    NeoPixelConfig config = (NeoPixelConfig) c;
+    setPixelDepth(config.pixelDepth);
+    setPixelCount(config.pixelCount);
+    setSpeed(config.speed);
+    setPin(config.pin);
+    red = config.red;
+    green = config.green;
+    blue = config.blue;
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch(Exception e) {
+        error(e);
+      }
+    }
+    
+    if (config.currentAnimation != null) {
+      playAnimation(config.currentAnimation);
+    }
+    return c;
   }
 
   public static void main(String[] args) throws InterruptedException {

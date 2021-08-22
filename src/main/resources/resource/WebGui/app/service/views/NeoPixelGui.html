@@ -1,11 +1,11 @@
 <div class="row">
-    <div class="col-md-11">
+    <div class="col-md-6">
         <h1>{{address}} {{color}}</h1>
         matrix {{service.currentMatrix}}
         <br/>
         <div class="btn-group" uib-dropdown>
             <button type="button" class="btn btn-default">controller {{state.controller}}</button>
-            <button id="single-button" ng-disabled="service.pin == null || service.pixelCount == null || service.controller != null" type="button" class="btn btn-default" uib-dropdown-toggle>
+            <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
                 <span class="caret"></span>
             </button>
             <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
@@ -14,8 +14,15 @@
                 </li>
             </ul>
         </div>
-        <button type="button" class="btn btn-default" ng-click='attach()' ng-show='!service.controller'>attach</button>
-        <button type="button" class="btn btn-default" ng-click='detach()' ng-show='service.controller'>detach</button>
+        <table>
+            <tr>
+                <td>pixel count </td>
+                <td>&nbsp;</td>
+                <td>
+                    <input type="text" class="form-control" ng-readonly="service.controller" id="pixelCount" ng-model="pixelCount"/>
+                </td>
+            </tr>
+        </table>
         <div class="btn-group" uib-dropdown>
             <button type="button" class="btn btn-default">pin {{service.pin}}</button>
             <button id="single-button" ng-disabled="service.controller != null" type="button" class="btn btn-default" uib-dropdown-toggle>
@@ -27,33 +34,22 @@
                 </li>
             </ul>
         </div>
-        <!-- do not want to worry about type/depth at the moment
-        <div class="btn-group" uib-dropdown>
-            <button type="button" class="btn btn-default">{{service.pixelDepth}}</button>
+
+        <div class="btn-group" uib-dropdown ng-disabled="service.controller">
+            <button type="button" class="btn btn-default">type {{service.type}}</button>
             <button type="button" class="btn btn-default" uib-dropdown-toggle>
                 <span class="caret"></span>
             </button>
             <ul uib-dropdown-menu>
-                <li>
-                    <a href="" ng-click="msg.setType('RGB')">RGB</a>
-                </li>
-                <li>
-                    <a href="" ng-click="msg.setType('RGBW')">RGBW</a>
+                <li ng-repeat="t in types">
+                    <a href="" ng-click="msg.setType(t)">{{t}}</a>
                 </li>
             </ul>
         </div>
-        -->
-        <div class="btn-group" uib-dropdown>
-            <button type="button" class="btn btn-default">pixel count {{service.pixelCount}}</button>
-            <button type="button" ng-disabled="service.controller != null" class="btn btn-default" uib-dropdown-toggle>
-                <span class="caret"></span>
-            </button>
-            <ul uib-dropdown-menu>
-                <li ng-repeat="pixelCount in commonPixelCounts">
-                    <a href="" ng-click="msg.setPixelCount(pixelCount)">{{pixelCount}}</a>
-                </li>
-            </ul>
-        </div>
+
+        <button type="button" class="btn btn-default" ng-click='attach()' ng-disabled='service.pin == null  || !state.controller' ng-show='!service.controller'>attach</button>
+        <button type="button" class="btn btn-default" ng-click='detach()' ng-show='service.controller'>detach</button>
+
         <div class="btn-group" uib-dropdown ng-hide="service.controller == null">
             <button type="button" class="btn btn-default">play animation {{service.currentAnimation}}</button>
             <button type="button" class="btn btn-default" uib-dropdown-toggle>
@@ -88,7 +84,7 @@
                     animation color<color-picker id="select" ng-model="pickedColor" options="colorPickerOptions" event-api="eventApi"></color-picker>
                 </td>
                 <td>
-                    fill color<color-picker id="fill" ng-model="pickedColor" options="colorPickerOptions" event-api="eventApi"></color-picker>                    
+                    fill color<color-picker id="fill" ng-model="pickedColor" options="colorPickerOptions" event-api="eventApi"></color-picker>
                 </td>
                 <td>
                     <button type="button" ng-style="led.style" class="btn btn-default" ng-click='clear();' tooltip="clear pixels">clear</button>
