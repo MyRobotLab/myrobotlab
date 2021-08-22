@@ -68,6 +68,7 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
+import org.myrobotlab.service.interfaces.InterfaceChangeListener;
 import org.myrobotlab.service.interfaces.QueueReporter;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -318,6 +319,33 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     } // for each in ancestry
     return target;
   }
+
+  /**
+   * Callback from runtime - for new available interfaces from newly registered
+   * services Services can register for interfaces they wish to watch with
+   * Runtime.registerForInterfaceChange(name, interfaceName)
+   * 
+   * Overload this method to handle the callback
+   * 
+   * @param serviceName
+   * @param interfaceName
+   */
+  public void onAddInterface(String serviceName, String interfaceName) {
+  }
+  
+  /**
+   * Callback from runtime - for removed interfaces from newly released
+   * services Services can register for interfaces they wish to watch with
+   * Runtime.registerForInterfaceChange(name, interfaceName)
+   * 
+   * Overload this method to handle the callback
+   * 
+   * @param serviceName
+   * @param interfaceName
+   */
+  public void onRemoveInterface(String serviceName, String interfaceName) {
+  }
+  
 
   public static String getHostName(final String inHost) {
     if (inHost != null)
@@ -2394,7 +2422,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public void attach(Attachable service) throws Exception {
-    warn(String.format("Service.attach does not know how to attach %s to a %s", service.getClass().getSimpleName(), this.getClass().getSimpleName()));
+    if (service == null) {
+      error("cannot attach to null service");
+      return;
+    }
+    error(String.format("Service.attach does not know how to attach %s to a %s", service.getClass().getSimpleName(), this.getClass().getSimpleName()));
   }
 
   public boolean setVirtual(boolean b) {
@@ -2796,4 +2828,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return creationOrder;
   }
 
+  protected void registerForInterfaceChange(Class<?> clazz) {
+    Runtime.getInstance().registerForInterfaceChange(getName(), clazz);
+  }
+
+  
 }

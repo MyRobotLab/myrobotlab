@@ -1,11 +1,12 @@
 package org.myrobotlab.framework;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Clock;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TestCatcher;
 import org.myrobotlab.service.TestThrower;
@@ -57,6 +58,21 @@ public class AttachTest extends AbstractTest {
 
     assertFalse(thrower.isAttached(catcher01));
     assertFalse(thrower.isAttached(catcher02));
+    
+    Clock c01 = (Clock)Runtime.start("c01", "Clock");
+    c01.attach("blah");
+    
+    // testing of a service that does currently exist
+    // in the registry - this "should" be possible - it
+    // represents the loose coupling between message sending
+    // without npe with tightly coupled references
+    c01.addListener("publishTime", "bogusService");
+    assertTrue(c01.isAttached("bogusService"));    
+    c01.startClock();
+    
+    // so current behavior is a warning that goes out 
+    // every time a message is sent to say it couldn't find service bogusService - tearing down route
+    // but it does not actually tear down the route...
     
   }
 

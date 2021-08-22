@@ -10,10 +10,11 @@ import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.interfaces.InterfaceChangeListener;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 
 public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker,
-    StatePublisher, StatusPublisher, ServiceStatus, Attachable, Comparable<ServiceInterface> {
+    StatePublisher, StatusPublisher, ServiceStatus, Attachable, InterfaceChangeListener, Comparable<ServiceInterface> {
 
   /**
    * this is a local method which adds a request from some foreign service with

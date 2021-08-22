@@ -80,20 +80,24 @@ public class Joystick extends Service implements AnalogPublisher {
   protected Controller hardwareController = null;
 
   /**
-   * component listeners 
+   * component listeners
    */
   protected Map<String, Set<MRLListener>> idAndServiceSubscription = new HashMap<>();
-  
+
   /**
-   * all analog listeners
+   * services which implement the AnalogListener interface
    */
-  protected Map<String, Set<String>> analogListeners = new HashMap<>();
-  
+  final protected Set<String> analogListenerServices = new HashSet<>();
+
   /**
-   * all digital listeners
+   * all analog listeners which have subscriptions to components
    */
-  protected Map<String, Set<String>> digitalListeners = new HashMap<>();
-  
+  final protected Map<String, Set<String>> analogListeners = new HashMap<>();
+
+  /**
+   * all digital listeners which have subscriptions to components
+   */
+  final protected Map<String, Set<String>> digitalListeners = new HashMap<>();
 
   protected List<Component> hardwareComponents;
 
@@ -211,7 +215,7 @@ public class Joystick extends Service implements AnalogPublisher {
 
             JoystickData data = new JoystickData(id, input);
             invoke("publishJoystickInput", data);
-            
+
             // filtered by analog and id
             if (analogListeners.containsKey(id)) {
               Set<String> listeners = analogListeners.get(id);
@@ -248,8 +252,54 @@ public class Joystick extends Service implements AnalogPublisher {
   }
 
   public Joystick(String n, String id) {
-    super(n, id);
+    super(n, id);    
   }
+
+  @Override
+  public void onAddInterface(String serviceName, String interfaceName) {
+    if (AnalogListener.class.toString().equals(interfaceName)) {
+      analogListenerServices.add(serviceName);
+      broadcastState();
+    }
+  }
+
+  @Override
+  public void onRemoveInterface(String serviceName, String interfaceName) {
+    if (AnalogListener.class.toString().equals(interfaceName)) {
+      analogListenerServices.remove(serviceName);
+      broadcastState();
+    }
+  }
+  
+  /*
+  @Override
+  public void onRegistered(Registration registration) {
+    
+    if (registration.getName().startsWith("m")) {
+      log.info("here");
+    }
+    
+    if (analogListenerServices.isEmpty()) {
+      // first time - get all pre-existing services
+      analogListenerServices.addAll(Runtime.getServiceNamesFromInterface(AnalogListener.class));
+      broadcastState();
+    } else {
+      // evaluate only the one that was registered
+      ServiceInterface si = Runtime.getService(registration.getFullName());
+      if (si.getClass().isAssignableFrom(AnalogListener.class)) {
+        analogListenerServices.add(registration.getFullName());
+        broadcastState();
+      }
+    }
+  }
+  
+  @Override
+  public void onReleased(String name) {
+    if (analogListenerServices.remove(name)) {
+      broadcastState();
+    }
+  }
+  */
 
   // FIXME - simply set components e.g. getComponents
   public Map<String, Component> getComponents() {
@@ -261,7 +311,7 @@ public class Joystick extends Service implements AnalogPublisher {
     components = hardwareController.getComponentMap();
     return components;
   }
-  
+
   public void refresh() {
     getControllers();
     getComponents();
@@ -344,7 +394,7 @@ public class Joystick extends Service implements AnalogPublisher {
     if (components != null && !components.containsKey(id)) {
       error("%s requests subscription to component %s - but %s does not exist", serviceName, id, id);
     }
-    
+
     Component c = components.get(id);
     if (c == null) {
       error("could not find requested joystick component %s", id);
@@ -352,7 +402,7 @@ public class Joystick extends Service implements AnalogPublisher {
     if (c != null && !c.isAnalog) {
       error("attachAnalogListener getAnalogId (%s) is a not an analog component", id);
     }
-    
+
     Set<String> listeners = null;
     if (analogListeners.containsKey(id)) {
       listeners = analogListeners.get(id);
@@ -367,7 +417,7 @@ public class Joystick extends Service implements AnalogPublisher {
     listeners.add(serviceName);
     // service.attachAnalogPublisher(this);
   }
-  
+
   @Override
   public void detachAnalogListener(AnalogListener listener) {
     String id = listener.getAnalogId();
@@ -465,6 +515,8 @@ public class Joystick extends Service implements AnalogPublisher {
     super.startService();
     initNativeLibs();
     invoke("getControllers");
+    // may not be safe for the constructor
+    registerForInterfaceChange(AnalogListener.class);
   }
 
   private void initNativeLibs() {
@@ -594,6 +646,8 @@ public class Joystick extends Service implements AnalogPublisher {
 
       Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
       Runtime.start("webgui", "WebGui");
+      
+      Runtime.start("m1", "MotorPort");
 
       boolean done = true;
       if (done) {
@@ -712,7 +766,7 @@ public class Joystick extends Service implements AnalogPublisher {
     if (config.controller != null) {
       setController(config.controller);
     }
-    
+
     // stupid transform from array to set - yaml wants array, set prevents
     // duplicates :(
     if (config.analogListeners != null) {

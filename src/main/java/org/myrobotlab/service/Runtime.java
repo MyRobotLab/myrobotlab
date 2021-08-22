@@ -37,6 +37,7 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.myrobotlab.codec.ClassUtil;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.CodecUtils.ApiDescription;
 import org.myrobotlab.framework.CmdOptions;
@@ -113,6 +114,7 @@ import picocli.CommandLine;
  *
  */
 public class Runtime extends Service implements MessageListener, ServiceLifeCycle, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider {
+  
   final static private long serialVersionUID = 1L;
 
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
@@ -127,6 +129,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * thread for non-blocking install of services
    */
   static private transient Thread installerThread = null;
+  
+
+  /**
+   * services which want to know if another service with an interface they are interested
+   * in registers or is released
+   */
+  final static Map<String, Set<String>> interfaceChangeListeners = new HashMap<>();
+
 
   private String configName = "default";
 
@@ -1213,7 +1223,27 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       if (runtime != null) {
         // TODO - determine rules on re-broadcasting based on configuration
         runtime.broadcast("registered", registration);
+      
+        // send call backs for services which have registered for interface
+        // changes
+        // inspect/crawl all interfaces for this service 
+        // this processes changes made by the registered service to all services
+        // previously registered
+        Set<String> interfaces = ClassUtil.getInterfaces(registration.service.getClass());
+        for (String inter : interfaces) {
+          if (interfaceChangeListeners.containsKey(inter)) {
+            Set<String> listeners = interfaceChangeListeners.get(inter);
+
+            // look for callbacks - send messages
+            for (String serviceName : listeners) {
+              runtime.send(serviceName, "onAddInterface", registration.getFullName(), inter);
+            }
+          }
+        }
       }
+      
+      // this handles all changes to the newly registered service - from all other services
+      // get all services besides self
 
       // TODO - remove ? already get state from registration
       if (!registration.isLocal(Platform.getLocalInstance().getId())) {
@@ -1285,6 +1315,18 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     if (runtime != null) {
       runtime.broadcast("released", name); // <- DO NOT CHANGE THIS IS CORRECT
                                            // !!
+      Set<String> interfaces = ClassUtil.getInterfaces(sw.getClass());
+      for (String inter : interfaces) {
+        if (interfaceChangeListeners.containsKey(inter)) {
+          Set<String> listeners = interfaceChangeListeners.get(inter);
+
+          // look for callbacks - send messages
+          for (String serviceName : listeners) {
+            runtime.send(serviceName, "onRemoveInterface", name, inter);
+          }
+        }
+      }
+    
       // it should be FULLNAME !
       // runtime.broadcast("released", inName);
     }
@@ -3623,6 +3665,37 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     addListener("started", name);
     addListener("stopped", name);
     addListener("released", name);
+  }
+  
+  public void registerForInterfaceChange(String serviceName, Class<?> interfaze) {
+    registerForInterfaceChange(serviceName, interfaze.toString());
+  }
+  
+  public void registerForInterfaceChange(String serviceName, String interfaceName) {
+    ServiceInterface si = getService(serviceName);
+    if (si == null) {
+      error("%s registering for interface %s is not in registry", serviceName, interfaceName);
+      return;
+    }
+    
+    // if your registering for future interface changes - you probably want existing ones too
+    // so crawl(TODO cache?) all existing interfaces we are interested in
+    // TODO unit test for constructor or start?
+    for (ServiceInterface s : getServices()) {
+      Set<String> ifs = ClassUtil.getInterfaces(s.getClass());
+      if (ifs.contains(interfaceName)) {
+        // we found interface we're looking for
+        si.onAddInterface(s.getFullName(), interfaceName);
+      }
+    }
+    
+    // setting up callbacks for future service changes
+    Set<String> callbackServices = interfaceChangeListeners.get(interfaceName);
+    if (callbackServices == null) {
+      callbackServices = new HashSet<>();
+      interfaceChangeListeners.put(interfaceName, callbackServices);
+    }
+    callbackServices.add(serviceName);    
   }
 
 }

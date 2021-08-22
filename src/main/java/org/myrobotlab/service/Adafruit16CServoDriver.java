@@ -26,6 +26,7 @@ import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.config.Adafruit16CServoDriverConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.ServoConfig;
+import org.myrobotlab.service.interfaces.AnalogListener;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -1027,5 +1028,28 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   public String getAddress() {
     return deviceAddress;
   }
+  
+  @Override
+  public void startService() {
+    super.startService();
+    registerForInterfaceChange(I2CController.class);
+  }
+  
+  @Override
+  public void onAddInterface(String serviceName, String interfaceName) {
+    if (I2CController.class.toString().equals(interfaceName)) {
+      controllers.add(serviceName);
+      broadcastState();
+    }
+  }
+
+  @Override
+  public void onRemoveInterface(String serviceName, String interfaceName) {
+    if (I2CController.class.toString().equals(interfaceName)) {
+      controllers.remove(serviceName);
+      broadcastState();
+    }
+  }
+
   
 }
