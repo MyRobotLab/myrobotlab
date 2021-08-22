@@ -8,8 +8,11 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
     $scope.leds = []
     $scope.pins = []
     $scope.speeds = []
-    $scope.commonPixelCounts = [8, 12, 16, 24, 32, 64, 128, 256]
+    $scope.types = ['RGB', 'RGBW']
     $scope.animations = ['No animation', 'Stop', 'Color Wipe', 'Larson Scanner', 'Theater Chase', 'Theater Chase Rainbow', 'Rainbow', 'Rainbow Cycle', 'Flash Random', 'Ironman', 'equalizer']
+    $scope.pixelCount = null
+    var firstTime = true
+    $scope.brightnesses = [1, 2, 3, 4, 5, 6, 7, 8, 10, 15, 20, 25, 50, 75, 100, 125, 150, 175, 200, 225, 255]
 
     $scope.state = {
         controller: null
@@ -78,6 +81,11 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
             $scope.drawPixels()
         }
 
+        if (firstTime){
+            $scope.pixelCount = service.pixelCount
+            firstTime = false
+        }
+
         if (!$scope.state.controller){
             $scope.state.controller = $scope.service.controller 
         }
@@ -116,7 +124,7 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
 
     $scope.attach = function() {
         msg.send('setPin', $scope.service.pin)
-        msg.send('setPixelCount', $scope.service.pixelCount)
+        msg.send('setPixelCount', $scope.pixelCount)
         msg.send('attach', $scope.state.controller)
     }
 
