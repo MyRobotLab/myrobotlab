@@ -862,33 +862,35 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   public ServiceConfig load(ServiceConfig c) {
     NeoPixelConfig config = (NeoPixelConfig) c;
-    if (config.pixelDepth){
-      setPixelDepth(config.pixelDepth);
-    }
-    if (config.pixelCount){
+    setPixelDepth(config.pixelDepth);
+
+    if (config.pixelCount != null) {
       setPixelCount(config.pixelCount);
     }
+    
     setSpeed(config.speed);
-    setPin(config.pin);
+    if (config.pin != null) {
+      setPin(config.pin);
+    }
     red = config.red;
     green = config.green;
     blue = config.blue;
     if (config.controller != null) {
       try {
         attach(config.controller);
-      } catch(Exception e) {
+      } catch (Exception e) {
         error(e);
       }
     }
-    
+
     if (config.currentAnimation != null) {
       playAnimation(config.currentAnimation);
     }
-    
+
     if (config.brightness != null) {
       setBrightness(config.brightness);
     }
-    
+
     return c;
   }
 
