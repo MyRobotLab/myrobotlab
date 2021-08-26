@@ -1,7 +1,9 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -106,10 +108,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    */
   public ProgramAB(String n, String id) {
     super(n, id);
-    
+
     // TODO - allow lazy selection of bot - even if it currently doesn't exist
     // in the bot map - move scanning to start
-    
+
     // 1. scan resources .. either "resource/ProgramAB" or
     // ../ProgramAB/resource/ProgramAB (for dev) for valid bot directories
 
@@ -145,7 +147,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
         addBotPath(file.getAbsolutePath());
       }
     }
-    
+
   }
 
   public String getBotName(File file) {
@@ -156,7 +158,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * function to scan the parent directory for bot directories, and return a
    * list of valid bots to be added with addBot(path)
    * 
-   * @param path  path to search
+   * @param path
+   *          path to search
    * @return list of bot dirs
    */
   public List<File> scanForBots(String path) {
@@ -183,7 +186,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   }
 
   /**
-   * @param botDir checks to see if valid bot dir
+   * @param botDir
+   *          checks to see if valid bot dir
    * @return true/false
    */
   public boolean checkIfValid(File botDir) {
@@ -224,7 +228,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   /**
    * This is the main method that will ask for the current bot's chat session to
    * respond to It returns a Response object.
-   * @param text the input utterance
+   * 
+   * @param text
+   *          the input utterance
    * @return the programab response
    * 
    */
@@ -249,9 +255,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   /**
    * Full get response method . Using this method will update the current
    * user/bot name if different from the current session.
-   * @param userName username
-   * @param botName bot name
-   * @param text utterace
+   * 
+   * @param userName
+   *          username
+   * @param botName
+   *          bot name
+   * @param text
+   *          utterace
    * @return programab response to utterance
    * 
    */
@@ -262,9 +272,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   /**
    * Gets a response and optionally update if this is the current bot session
    * that's active globally.
- * @param userName username
- * @param botName botname
- * @param text utterance
+   * 
+   * @param userName
+   *          username
+   * @param botName
+   *          botname
+   * @param text
+   *          utterance
    * 
    * @param updateCurrentSession
    *          (specify if the currentbot/currentuser name should be updated in
@@ -324,7 +338,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   /**
    * This method specifics how many times the robot will respond with the same
    * thing before forcing a different (default?) response instead.
-   * @param val foo
+   * 
+   * @param val
+   *          foo
    */
   public void repetitionCount(int val) {
     org.alicebot.ab.MagicNumbers.repetition_count = val;
@@ -354,8 +370,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   /**
    * Add a value to a set for the current session
-   * @param setName name of the set
-   * @param setValue value to add to the set
+   * 
+   * @param setName
+   *          name of the set
+   * @param setValue
+   *          value to add to the set
    */
   public void addToSet(String setName, String setValue) {
     // add to the set for the bot.
@@ -443,7 +462,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * @param delay
    *          - min amount of time that must have transpired since the last
    * @return the response
-   * @throws IOException boom
+   * @throws IOException
+   *           boom
    */
   public Response troll(String userName, String text, Long delay) throws IOException {
     Session session = getSession(userName, getCurrentBotName());
@@ -498,7 +518,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   }
 
   /**
-   * @param response publish a response generated from a session in the programAB service.
+   * @param response
+   *          publish a response generated from a session in the programAB
+   *          service.
    * @return the response
    * 
    */
@@ -523,7 +545,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   /**
    * publish the contents of the mrl tag from an oob message in the aiml. The
    * result of this is displayed in the chatbot debug console.
-   * @param oobText the out of band text to publish
+   * 
+   * @param oobText
+   *          the out of band text to publish
    * @return oobtext
    * 
    */
@@ -534,9 +558,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   /**
    * This method will close the current bot, and reload it from AIML It then
    * will then re-establish only the session associated with userName.
-   * @param userName username for the session
-   * @param botName the bot name being chatted with
-   * @throws IOException boom
+   * 
+   * @param userName
+   *          username for the session
+   * @param botName
+   *          the bot name being chatted with
+   * @throws IOException
+   *           boom
    * 
    */
   public void reloadSession(String userName, String botName) throws IOException {
@@ -547,7 +575,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   /**
    * Save all the predicates for all known sessions.
-   * @throws IOException boom
+   * 
+   * @throws IOException
+   *           boom
    */
   public void savePredicates() throws IOException {
     for (Session session : sessions.values()) {
@@ -569,8 +599,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   /**
    * set a bot property - the result will be serialized to config/properties.txt
- * @param name property name to set for current bot/session
- * @param value value to set for current bot/session
+   * 
+   * @param name
+   *          property name to set for current bot/session
+   * @param value
+   *          value to set for current bot/session
    */
   public void setBotProperty(String name, String value) {
     setBotProperty(getCurrentBotName(), name, value);
@@ -578,9 +611,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   /**
    * set a bot property - the result will be serialized to config/properties.txt
-   * @param botName bot name
-   * @param name bot property name
-   * @param value value to set the property too
+   * 
+   * @param botName
+   *          bot name
+   * @param name
+   *          bot property name
+   * @param value
+   *          value to set the property too
    */
   public void setBotProperty(String botName, String name, String value) {
     info("setting %s property %s:%s", getCurrentBotName(), name, value);
@@ -623,7 +660,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * after the service is created.
    * 
    * @param path
-   *          - the path to the ProgramAB directory where the bots aiml and config reside
+   *          - the path to the ProgramAB directory where the bots aiml and
+   *          config reside
    * @param userName
    *          - The new user name
    * @param botName
@@ -644,7 +682,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    *          3. Locale is completely invalid - it is now part of the bot
    *          description in mrl.properties and shouldn't be defined externally,
    *          unles its pulled from Runtime
-   * @return the session that is started 
+   * @return the session that is started
    */
 
   public Session startSession(String path, String userName, String botName, java.util.Locale locale) {
@@ -680,8 +718,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   /**
    * setting the current session is equivalent to setting current user name and
    * current bot name
-   * @param userName username
-   * @param botName botname
+   * 
+   * @param userName
+   *          username
+   * @param botName
+   *          botname
    * 
    */
   public void setCurrentSession(String userName, String botName) {
@@ -690,8 +731,28 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   }
 
   public void addCategory(Category c) {
-    Bot bot = getBot(getCurrentBotName());
-    bot.brain.addCategory(c);
+    try {
+      Bot bot = getBot(getCurrentBotName());
+      bot.brain.addCategory(c);
+
+      String newCategory = Category.categoryToAIML(c) + "\n";
+
+      File newCatFile = new File(bot.aiml_path + fs + String.format("new_%s_categories.aiml", getName()));
+      FileOutputStream fos = null;
+      if (newCatFile.exists()) {
+        fos = new FileOutputStream(newCatFile, true);
+      } else {
+        fos = new FileOutputStream(newCatFile);
+        String header = new String("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".getBytes(), StandardCharsets.UTF_8);
+        fos.write(header.getBytes());
+      }
+
+      fos.write(newCategory.getBytes());
+
+      fos.close();
+    } catch (Exception e) {
+      error(e);
+    }
   }
 
   public void addCategory(String pattern, String template, String that) {
@@ -713,15 +774,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     addCategory(pattern, template, "*");
   }
 
-  public void writeAIML() {
-    // TODO: revisit this method to make sure
-    for (BotInfo bot : bots.values()) {
-      if (bot.isActive()) {
-        bot.writeAIMLFiles();
-      }
-    }
-  }
-
   /**
    * writeAndQuit will write brain to disk For learn.aiml is concerned
    */
@@ -731,9 +783,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       if (bot.isActive()) {
         try {
           savePredicates();
-          // important to save learnf.aiml
-          writeAIML();
-          bot.writeQuit();
         } catch (IOException e1) {
           log.error("saving predicates threw", e1);
         }
@@ -743,7 +792,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   /**
    * Verifies and adds a new path to the search directories for bots
-   * @param path the path to add a bot from
+   * 
+   * @param path
+   *          the path to add a bot from
    * @return the path if successful. o/w null
    * 
    */
@@ -769,30 +820,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     return path;
   }
 
-  @Deprecated /* for legacy - use addBotPath */
+  @Deprecated /* for legacy - use addBotsDir */
   public String setPath(String path) {
+    // This method is not good, because it doesn't take the full path
+    // from input and there is a buried "hardcoded" value which no one knows
+    // about
+    addBotsDir(path + File.separator + "bots");
 
-    if (path == null) {
-      error("set path can not be null");
-      return null;
-    }
-
-    File check = new File(path);
-    if (!check.exists() || !check.isDirectory()) {
-      error("invalid directory %s", path);
-      return null;
-    }
-
-    check = new File(FileIO.gluePaths(path, "bots"));
-
-    if (check.exists() && check.isDirectory()) {
-      for (File f : check.listFiles()) {
-        addBotPath(f.getAbsolutePath());
-      }
-      return path;
-    }
-
-    return addBotPath(path);
+    return path;
   }
 
   public void setCurrentBotName(String botName) {
@@ -848,6 +883,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    *  /data/ProgramAB is higher priority
    *  /../ProgramAB/
    * </pre>
+   * 
    * @return bot paths
    */
   public Set<String> initBotPaths() {
@@ -902,6 +938,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   /**
    * This method can be used to get a listing of all bots available in the bots
    * directory.
+   * 
    * @return list of botnames
    * 
    */
@@ -942,6 +979,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       startPeer("search");
     }
 
+    // FIXME - remove this time - use callback
     addTask("savePredicates", savePredicatesInterval, 0, "savePredicates");
     logPublisher = new SimpleLogPublisher(this);
     logPublisher.filterClasses(new String[] { "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans", "class org.myrobotlab.programab.MrlSraixHandler" });
@@ -982,7 +1020,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     Map<String, Locale> ret = new TreeMap<>();
     for (BotInfo botInfo : bots.values()) {
       if (botInfo.properties.containsKey("locale")) {
-        locale = new Locale(botInfo.properties.get("locale"));
+        locale = new Locale((String) botInfo.properties.get("locale"));
         ret.put(locale.getTag(), locale);
       }
     }
@@ -1002,7 +1040,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   /**
    * reload current session
-   * @throws IOException boom
+   * 
+   * @throws IOException
+   *           boom
    * 
    */
   public void reload() throws IOException {
@@ -1113,9 +1153,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
        */
 
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
-      Polly polly = (Polly) Runtime.start("polly", "Polly");
+      // Polly polly = (Polly) Runtime.start("polly", "Polly");
 
-      brain.attach("polly");
+      // brain.attach("polly");
 
       // brain.localize(key);
 
@@ -1134,6 +1174,29 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       webgui.startService();
     } catch (Exception e) {
       log.error("main threw", e);
+    }
+  }
+
+  public void addBotsDir(String path) {
+
+    if (path == null) {
+      error("set path can not be null");
+      return;
+    }
+
+    File check = new File(path);
+    if (!check.exists() || !check.isDirectory()) {
+      error("invalid directory %s", path);
+      return;
+    }
+
+    // check = new File(FileIO.gluePaths(path, "bots"));
+
+    if (check.exists() && check.isDirectory()) {
+      log.info("found %d possible bot directories", check.listFiles().length);
+      for (File f : check.listFiles()) {
+        addBotPath(f.getAbsolutePath());
+      }
     }
   }
 

@@ -1,11 +1,13 @@
 package org.myrobotlab.programab;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
 
 import org.alicebot.ab.Bot;
-import org.alicebot.ab.Properties;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.ProgramAB;
@@ -23,6 +25,9 @@ public class BotInfo {
   public boolean activated = false;
   private transient Bot bot;
   public Properties properties = new Properties();
+
+  protected org.alicebot.ab.Properties botProperties;
+  
   private transient ProgramAB programab;
 
   /**
@@ -35,7 +40,13 @@ public class BotInfo {
     this.path = path;
     this.programab = programab;
     programab.info("found bot %s", name);
-    properties.getProperties(FileIO.gluePaths(path.getAbsolutePath(), "config/properties.txt"));
+    try {
+      properties.load(new FileInputStream(FileIO.gluePaths(path.getAbsolutePath(), "manifest.txt")));
+    } catch(FileNotFoundException e) {
+      programab.warn("bot %s does not have a manifest.txt", name);
+    } catch(Exception e){
+      log.error("BotInfo threw", e);
+    }
     log.info("loaded properties");
   }
 
@@ -49,7 +60,7 @@ public class BotInfo {
     if (bot == null) {
       // lazy loading of bot - created on the first use
       if (properties.containsKey("locale")) {
-        bot = new Bot(name, path.getAbsolutePath(), java.util.Locale.forLanguageTag(properties.get("locale")));
+        bot = new Bot(name, path.getAbsolutePath(), java.util.Locale.forLanguageTag((String)properties.get("locale")));
       } else {
         bot = new Bot(name, path.getAbsolutePath());
       }
@@ -58,12 +69,12 @@ public class BotInfo {
       // user can fill the BotInfo with new properties before a Bot is created
       // this now is lazy Bot creation time - so we merge what the user has
       // then set our reference to the same set of properties
-      bot.properties.putAll(properties);
+      // bot.properties.putAll(properties);
       // bot.toJson(String.format("%s.json",name)); - pretty cool to see
       // Mr.Turings brain in json
 
       // setting reference of BotInfo properties to bot properties
-      properties = bot.properties;
+      botProperties = bot.properties;
 
       bot.setSraixHandler(new MrlSraixHandler(programab));
     }
@@ -92,9 +103,10 @@ public class BotInfo {
     saveProperties();
   }
 
+  // FIXME - botProperties should be sent to bot (and verified agains aiml tags ?)
   public void saveProperties() {
     Map<String, String> sorted = new TreeMap<>();
-    sorted.putAll(properties);
+    sorted.putAll(botProperties);
     StringBuilder sb = new StringBuilder();
     for (String key : sorted.keySet()) {
       sb.append(String.format("%s:%s\n", key, sorted.get(key)));
@@ -104,7 +116,7 @@ public class BotInfo {
     } catch (Exception e) {
       programab.error(e);
     }
-
+    
   }
 
   public void removeProperty(String name2) {
@@ -112,4 +124,8 @@ public class BotInfo {
     saveProperties();
   }
 
+  public String toString() {
+    return String.format("%s - %s", name, path);
+  }
+  
 }

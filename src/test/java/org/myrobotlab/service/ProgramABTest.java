@@ -314,7 +314,8 @@ public class ProgramABTest extends AbstractServiceTest {
   public void testLocales() {
     // have locales
     ProgramAB lloyd = (ProgramAB)Runtime.start("pikachu", "ProgramAB");
-    lloyd.setPath(path);
+    // lloyd.setPath(path);
+    lloyd.addBotsDir(path + File.separator + "bots");
     lloyd.setCurrentBotName("pikachu");
     Map<String,Locale> locales = lloyd.getLocales();
     assertTrue(locales.size() > 0);
