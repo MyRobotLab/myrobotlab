@@ -16,6 +16,7 @@ import org.alicebot.ab.AIMLSet;
 import org.alicebot.ab.Bot;
 import org.alicebot.ab.Category;
 import org.alicebot.ab.MagicBooleans;
+import org.alicebot.ab.ProgramABListener;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.image.Util;
@@ -50,7 +51,7 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class ProgramAB extends Service implements TextListener, TextPublisher, LocaleProvider, LogPublisher {
+public class ProgramAB extends Service implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -730,29 +731,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     setCurrentBotName(botName);
   }
 
+  /**
+   * A category sent "to" program-ab - there is a callback onAddCategory which should
+   * hook to the event when program-ab adds a category
+   * @param c
+   */
   public void addCategory(Category c) {
-    try {
       Bot bot = getBot(getCurrentBotName());
       bot.brain.addCategory(c);
-
-      String newCategory = Category.categoryToAIML(c) + "\n";
-
-      File newCatFile = new File(bot.aiml_path + fs + String.format("new_%s_categories.aiml", getName()));
-      FileOutputStream fos = null;
-      if (newCatFile.exists()) {
-        fos = new FileOutputStream(newCatFile, true);
-      } else {
-        fos = new FileOutputStream(newCatFile);
-        String header = new String("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".getBytes(), StandardCharsets.UTF_8);
-        fos.write(header.getBytes());
-      }
-
-      fos.write(newCategory.getBytes());
-
-      fos.close();
-    } catch (Exception e) {
-      error(e);
-    }
   }
 
   public void addCategory(String pattern, String template, String that) {
@@ -774,6 +760,16 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     addCategory(pattern, template, "*");
   }
 
+  public void writeAIML() {
+    // TODO: revisit this method to make sure
+    for (BotInfo bot : bots.values()) {
+      if (bot.isActive()) {
+        // bot.writeAIMLFiles(); NO !!!
+        bot.getBot().writeLearnfIFCategories();
+      }
+    }
+  }
+
   /**
    * writeAndQuit will write brain to disk For learn.aiml is concerned
    */
@@ -783,6 +779,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       if (bot.isActive()) {
         try {
           savePredicates();
+          // important to save learnf.aiml
+          writeAIML();
+          // bot.writeQuit();
         } catch (IOException e1) {
           log.error("saving predicates threw", e1);
         }
@@ -1198,6 +1197,46 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
         addBotPath(f.getAbsolutePath());
       }
     }
+  }
+
+  /**
+   * From program-ab - this get called whenever a new category is added to any Graphmaster
+   * You'll need to distinguish between learn, learnf and other categories by their Category.filename
+   * @param category
+   */
+  @Override
+  public void onAddCategory(Category c) {
+    /**<pre>
+    // not quite ready ...
+    
+    try {
+    // log.info("adding category {}", category);
+    
+    String newCategory = Category.categoryToAIML(c) + "\n";
+
+    File newCatFile = new File(bot.aiml_path + fs + String.format("new_%s_categories.aiml", getName()));
+    FileOutputStream fos = null;
+    if (newCatFile.exists()) {
+      fos = new FileOutputStream(newCatFile, true);
+    } else {
+      fos = new FileOutputStream(newCatFile);
+      String header = new String("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".getBytes(), StandardCharsets.UTF_8);
+      fos.write(header.getBytes());
+    }
+
+    fos.write(newCategory.getBytes());
+
+    fos.close();
+  } catch (Exception e) {
+    error(e);
+  }
+    </pre>*/
+    
+  }
+
+  @Override
+  public void onChangePredicate(String predicateName, String result) {
+    log.info("on predicate change {}={}", predicateName, result);
   }
 
 }

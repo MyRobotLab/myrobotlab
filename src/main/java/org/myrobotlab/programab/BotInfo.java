@@ -60,9 +60,9 @@ public class BotInfo {
     if (bot == null) {
       // lazy loading of bot - created on the first use
       if (properties.containsKey("locale")) {
-        bot = new Bot(name, path.getAbsolutePath(), java.util.Locale.forLanguageTag((String)properties.get("locale")));
+        bot = new Bot(name, path.getAbsolutePath(), java.util.Locale.forLanguageTag((String)properties.get("locale")), programab);
       } else {
-        bot = new Bot(name, path.getAbsolutePath());
+        bot = new Bot(name, path.getAbsolutePath(), programab);
       }
 
       // merge properties - potentially there are 2 sets
@@ -94,9 +94,11 @@ public class BotInfo {
     bot.writeAIMLFiles();
   }
 
+  /*
   public void writeQuit() {
     bot.writeQuit();
   }
+  */
 
   public void setProperty(String name2, String value) {
     properties.put(name2, value);
