@@ -1135,7 +1135,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
       Logging.logError(e);
     }
   }
-  
+
   @Override
   public void setBus(String bus) {
     setDeviceBus(bus);

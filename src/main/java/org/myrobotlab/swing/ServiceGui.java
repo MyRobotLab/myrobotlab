@@ -457,7 +457,9 @@ public abstract class ServiceGui implements WindowListener {
    * onRegistered is called on all service guis when a ne service is registered.
    * To be overriden if the ServiceGui designer wants to be notified of new
    * services.
-   * @param sw service interface registered
+   * 
+   * @param sw
+   *          service interface registered
    * 
    */
   public void onRegistered(final ServiceInterface sw) {
@@ -467,8 +469,11 @@ public abstract class ServiceGui implements WindowListener {
   /**
    * method to enable or disable all the children of a container - useful when a
    * single checkbox or button controls many other sub-configuration elements
-   * @param container c
-   * @param enabled e
+   * 
+   * @param container
+   *          c
+   * @param enabled
+   *          e
    * 
    */
   static public void setEnabled(Container container, boolean enabled) {

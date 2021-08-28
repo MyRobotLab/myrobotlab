@@ -3,11 +3,11 @@ package org.myrobotlab.opencv;
 import static org.junit.Assert.assertNotNull;
 
 import org.bytedeco.javacpp.Loader;
-import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_java;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Before;
 
-public class OpenCVFilterLKOpticalTrackTest  extends AbstractOpenCVFilterTest {
+public class OpenCVFilterLKOpticalTrackTest extends AbstractOpenCVFilterTest {
 
   @Before
   public void setup() {

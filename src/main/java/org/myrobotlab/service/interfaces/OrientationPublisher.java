@@ -21,10 +21,10 @@ public interface OrientationPublisher {
    * stop publishing orientation
    */
   public void stop();
-  
-  @Deprecated /*use start*/
+
+  @Deprecated /* use start */
   public void startOrientationTracking();
 
-  @Deprecated /*use stop*/
+  @Deprecated /* use stop */
   public void stopOrientationTracking();
 }

@@ -81,7 +81,9 @@ public class ServoMixer extends Service {
 
   /**
    * typed attach
-   * @param servo the servo to attach
+   * 
+   * @param servo
+   *          the servo to attach
    * 
    */
   public void attachServo(Servo servo) {
@@ -119,8 +121,11 @@ public class ServoMixer extends Service {
 
   /**
    * Save a {name}.pose file to the current poses directory.
-   * @param name name to save pose as
-   * @throws IOException boom
+   * 
+   * @param name
+   *          name to save pose as
+   * @throws IOException
+   *           boom
    * 
    */
   public void savePose(String name) throws IOException {
@@ -161,7 +166,9 @@ public class ServoMixer extends Service {
   /**
    * Get a pose by name - name corresponds to the filename of the file in the
    * servoMixerDirectory
-   * @param name name of the post to load.
+   * 
+   * @param name
+   *          name of the post to load.
    * 
    * @return the loaded pose object
    */
@@ -235,7 +242,9 @@ public class ServoMixer extends Service {
 
   /**
    * Export Python representation of a sequence
-   * @param name does nothing..
+   * 
+   * @param name
+   *          does nothing..
    * @return null
    * 
    */
@@ -404,8 +413,11 @@ public class ServoMixer extends Service {
   /**
    * Takes name of a file and a json encoded string of a sequence, saves it to
    * file and sets the "current" sequence to the data
-   * @param filename the filename to save the sequence as
-   * @param json the json to save
+   * 
+   * @param filename
+   *          the filename to save the sequence as
+   * @param json
+   *          the json to save
    * 
    */
   public void saveSequence(String filename, String json) {

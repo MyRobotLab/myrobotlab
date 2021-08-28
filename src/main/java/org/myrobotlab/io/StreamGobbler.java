@@ -25,7 +25,7 @@ public class StreamGobbler extends Thread {
       String line = null;
       while ((line = br.readLine()) != null)
         if (line != null) {
-          processIn.write(String.format("%s\n",line).getBytes());
+          processIn.write(String.format("%s\n", line).getBytes());
           processIn.flush();
         }
     } catch (IOException ioe) {

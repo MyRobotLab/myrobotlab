@@ -34,9 +34,13 @@ public class ServiceReservation implements Serializable {
 
   /**
    * key type and comment are all that is needed to define a peer
- * @param key key 
- * @param typeName type  
- * @param comment a comment about it...
+   * 
+   * @param key
+   *          key
+   * @param typeName
+   *          type
+   * @param comment
+   *          a comment about it...
    * 
    */
   public ServiceReservation(String key, String typeName, String comment) {
@@ -46,10 +50,15 @@ public class ServiceReservation implements Serializable {
   /**
    * when actual name is specified whatever key is then mapped to the actual
    * name
- * @param key the key
- * @param actualName the actual name
- * @param typeName the type
- * @param comment  a comment
+   * 
+   * @param key
+   *          the key
+   * @param actualName
+   *          the actual name
+   * @param typeName
+   *          the type
+   * @param comment
+   *          a comment
    * 
    */
   public ServiceReservation(String key, String actualName, String typeName, String comment) {

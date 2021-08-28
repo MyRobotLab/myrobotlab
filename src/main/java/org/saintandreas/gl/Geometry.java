@@ -1,7 +1,10 @@
 package org.saintandreas.gl;
 
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL11.GL_FLOAT;
+import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
+import static org.lwjgl.opengl.GL11.glDrawArrays;
+import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
+import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
 import java.util.LinkedHashMap;
 
@@ -59,8 +62,7 @@ public class Geometry {
       for (Integer location : attributes.keySet()) {
         int size = attributes.get(location);
         glEnableVertexAttribArray(location);
-        glVertexAttribPointer(location, size >> 2, GL_FLOAT, false, stride,
-            offset);
+        glVertexAttribPointer(location, size >> 2, GL_FLOAT, false, stride, offset);
         offset += size;
       }
       VertexArray.unbind();

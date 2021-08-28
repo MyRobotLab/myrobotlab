@@ -28,14 +28,13 @@ public class UserData implements Savable {
   public transient Geometry bb;
 
   /**
-   * this could be jsut a Mapper interface, however, it cuts down on the 
-   * saved yml if its a concrete class
+   * this could be jsut a Mapper interface, however, it cuts down on the saved
+   * yml if its a concrete class
    */
   public MapperLinear mapper;
 
   /**
-   * Rotation axis mask to be applied to a node
-   * Can be x, y, z - 
+   * Rotation axis mask to be applied to a node Can be x, y, z -
    */
   // public Vector3f rotationMaskx;
   public String rotationMask;
@@ -71,7 +70,7 @@ public class UserData implements Savable {
   public Mapper getMapper() {
     return mapper;
   }
-  
+
   @Override
   public void write(JmeExporter ex) throws IOException {
     // TODO Auto-generated method stub
@@ -93,7 +92,7 @@ public class UserData implements Savable {
    * spatial.scale(scale); spatial.updateGeometricState();
    * spatial.updateModelBound(); }
    */
-  
+
   public UserData() {
   }
 

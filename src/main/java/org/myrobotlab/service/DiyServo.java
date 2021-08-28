@@ -296,7 +296,8 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    * 
    * @param n
    *          name of the service
- * @param id the instance id
+   * @param id
+   *          the instance id
    */
   public DiyServo(String n, String id) {
     super(n, id);

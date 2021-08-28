@@ -16,9 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.myrobotlab.framework.MRLListener;
@@ -33,9 +31,6 @@ import org.yaml.snakeyaml.constructor.Constructor;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 import com.google.gson.internal.LinkedTreeMap;
 
 /**
@@ -168,8 +163,10 @@ public class CodecUtils {
 
   /**
    * Gets the instance id from a service name
- * @param name the name of the instance
- * @return the name of the instance
+   * 
+   * @param name
+   *          the name of the instance
+   * @return the name of the instance
    * 
    */
   static public final String getId(String name) {
@@ -440,7 +437,7 @@ public class CodecUtils {
    */
   static public Message cliToMsg(String contextPath, String from, String to, String cmd) {
     Message msg = Message.createMessage(from, to, "ls", null);
-    
+
     /**
      * <pre>
      
@@ -496,18 +493,19 @@ public class CodecUtils {
 
       // fix me diff from 2 & 3 "/"
       if (parts.length >= 3) {
-        // prepare to parse the arguments 
-        
+        // prepare to parse the arguments
+
         msg.name = parts[1];
         // prepare the method
         msg.method = parts[2].trim();
-        
-        
+
         // FIXME - to encode or not to encode that is the question ...
         // This source comes from the cli - which is "all" strings
-        // in theory it needs to be decoded from an all strings interface 
-        // json is an all string interface so we will decode from cli strings (not json)
-        // using a json decoder - cuz it will work :P - and string will decode to a string
+        // in theory it needs to be decoded from an all strings interface
+        // json is an all string interface so we will decode from cli strings
+        // (not json)
+        // using a json decoder - cuz it will work :P - and string will decode
+        // to a string
         Object[] payload = new Object[parts.length - 3];
         for (int i = 3; i < parts.length; ++i) {
           if (isInteger(parts[i])) {
@@ -516,13 +514,13 @@ public class CodecUtils {
             payload[i - 3] = makeDouble(parts[i]);
           } else if (parts[i].equals("true") || parts[i].equals("false")) {
             payload[i - 3] = makeBoolean(parts[i]);
-          } else { // String 
+          } else { // String
             // sloppy as the cli does not require quotes \" but json does
             // humans won't add quotes - but we will
-            payload[i - 3] =  parts[i];
+            payload[i - 3] = parts[i];
           }
         }
-        
+
         msg.data = payload;
       }
       return msg;
@@ -549,49 +547,49 @@ public class CodecUtils {
       return msg;
     }
   }
-  
+
   static public Integer makeInteger(String data) {
     try {
-      return Integer.parseInt(data);      
-    } catch(Exception e) {
+      return Integer.parseInt(data);
+    } catch (Exception e) {
     }
     return null;
   }
-  
+
   static public boolean isInteger(String data) {
     try {
       Integer.parseInt(data);
       return true;
-    } catch(Exception e) {
+    } catch (Exception e) {
     }
     return false;
   }
-  
+
   static public boolean isDouble(String data) {
     try {
       Double.parseDouble(data);
       return true;
-    } catch(Exception e) {
+    } catch (Exception e) {
     }
     return false;
   }
-  
+
   static public Double makeDouble(String data) {
     try {
-      return Double.parseDouble(data);      
-    } catch(Exception e) {
+      return Double.parseDouble(data);
+    } catch (Exception e) {
     }
     return null;
   }
 
   static public Boolean isBoolean(String data) {
-      return Boolean.parseBoolean(data);
+    return Boolean.parseBoolean(data);
   }
-  
+
   static public Boolean makeBoolean(String data) {
     try {
-      return Boolean.parseBoolean(data);      
-    } catch(Exception e) {
+      return Boolean.parseBoolean(data);
+    } catch (Exception e) {
     }
     return null;
   }
@@ -629,12 +627,18 @@ public class CodecUtils {
    * will send it to a another process or it will go to the MethodCache of some
    * service. The MethodCache will decode a 2nd time based on a method signature
    * key match (key based on parameter types).
- * @param sender the sender of the message
- * @param sendingMethod the method sending it
- * @param name dest service
- * @param method dest method
- * @param params params to pass
- * @return the string representation of the json message
+   * 
+   * @param sender
+   *          the sender of the message
+   * @param sendingMethod
+   *          the method sending it
+   * @param name
+   *          dest service
+   * @param method
+   *          dest method
+   * @param params
+   *          params to pass
+   * @return the string representation of the json message
    * 
    */
   final public static String createJsonMsg(String sender, String sendingMethod, String name, String method, Object... params) {
@@ -691,20 +695,22 @@ public class CodecUtils {
     options.setPrettyFlow(true);
     // options.setBeanAccess(BeanAccess.FIELD);
     options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-    /**<pre> How to suppress null fields if desired
-    Representer representer = new Representer() {
-      @Override
-      protected NodeTuple representJavaBeanProperty(Object javaBean, Property property, Object propertyValue, Tag customTag) {
-        // if value of property is null, ignore it.
-        if (propertyValue == null) {
-          return null;
-        } else {
-          return super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);
-        }
-      }
-    };
-    </pre>
-    */
+    /**
+     * <pre>
+     *  How to suppress null fields if desired
+     Representer representer = new Representer() {
+       &#64;Override
+       protected NodeTuple representJavaBeanProperty(Object javaBean, Property property, Object propertyValue, Tag customTag) {
+         // if value of property is null, ignore it.
+         if (propertyValue == null) {
+           return null;
+         } else {
+           return super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);
+         }
+       }
+     };
+     * </pre>
+     */
 
     Yaml yaml = new Yaml(options);
     // yaml.setBeanAccess(BeanAccess.FIELD);

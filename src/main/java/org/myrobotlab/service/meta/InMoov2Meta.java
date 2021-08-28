@@ -12,7 +12,9 @@ public class InMoov2Meta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * @param name n
+   * 
+   * @param name
+   *          n
    * 
    */
   public InMoov2Meta(String name) {
@@ -60,7 +62,7 @@ public class InMoov2Meta extends MetaData {
     // Arduino"); NO !!!!
     addPeer("headTracking.x", "head.rothead", "Servo", "shared servo");
     addPeer("headTracking.y", "head.neck", "Servo", "shared servo");
-    
+
     addPeer("neopixel", "NeoPixel", "neopixel animation");
 
     // Global - undecorated by self name

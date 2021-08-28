@@ -259,8 +259,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * ready .. ? Several speech synthesis services require cloud api keys or in
    * some cases, only certain operating systems are supported. We are going to
    * be pessimistic - MarySpeech is "always" ready :)
- * @param n the name of the service
- * @param id the id of the instance
+   * 
+   * @param n
+   *          the name of the service
+   * @param id
+   *          the id of the instance
    */
 
   public AbstractSpeechSynthesis(String n, String id) {
@@ -332,7 +335,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * Because all AbstractSpeechSynthesis derived classes use audioFile it is
    * also an AudioData publisher.
    * 
-   * @param data data to be published.
+   * @param data
+   *          data to be published.
    * @return AudioData object
    */
   public AudioData publishAudioStart(AudioData data) {
@@ -343,7 +347,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * Because all AbstractSpeechSynthesis derived classes use audioFile it is
    * also an AudioData publisher.
    * 
-   * @param data data to be published
+   * @param data
+   *          data to be published
    * @return the data for the end audio event.
    */
   public AudioData publishAudioEnd(AudioData data) {
@@ -536,7 +541,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * publishStartSpeaking text because the pre-processor/parser may need to
    * break it up into pieces to handle effects and other details
    * 
-   * @param toSpeak the string to be spoken.
+   * @param toSpeak
+   *          the string to be spoken.
    * @return the same string.
    */
   public String publishSpeechRequested(String toSpeak) {
@@ -642,7 +648,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    *          - the audoData for parameters
    * @param speak
    *          - the text to speak
-   * @param block true/false
+   * @param block
+   *          true/false
    * @return block - to block or not
    */
   public AudioData process(AudioData audioData, String speak, boolean block) {
@@ -733,7 +740,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    *          text
    * 
    * @return AudioData with raw data.
-   * @throws Exception boom
+   * @throws Exception
+   *           boom
    */
   abstract public AudioData generateAudioData(AudioData audioData, String toSpeak) throws Exception;
 
@@ -867,7 +875,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * @return default cache file type 
+   * @return default cache file type
    */
   public String getAudioCacheExtension() {
     return ".mp3";
@@ -895,7 +903,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * attempt to set language with tag, display and/or runtime Locale ??? - ie no
    * param
    * 
-   * @param lang the language to set
+   * @param lang
+   *          the language to set
    * @return true if the language was successfully set.
    */
   public boolean setLanguage(String lang) {

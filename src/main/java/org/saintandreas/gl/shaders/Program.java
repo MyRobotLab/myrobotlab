@@ -1,7 +1,26 @@
 package org.saintandreas.gl.shaders;
 
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL11.GL_TRUE;
+import static org.lwjgl.opengl.GL20.GL_ACTIVE_ATTRIBUTES;
+import static org.lwjgl.opengl.GL20.GL_ACTIVE_UNIFORMS;
+import static org.lwjgl.opengl.GL20.GL_FRAGMENT_SHADER;
+import static org.lwjgl.opengl.GL20.GL_LINK_STATUS;
+import static org.lwjgl.opengl.GL20.GL_VERTEX_SHADER;
+import static org.lwjgl.opengl.GL20.glCreateProgram;
+import static org.lwjgl.opengl.GL20.glDeleteProgram;
+import static org.lwjgl.opengl.GL20.glGetActiveAttrib;
+import static org.lwjgl.opengl.GL20.glGetActiveUniform;
+import static org.lwjgl.opengl.GL20.glGetAttribLocation;
+import static org.lwjgl.opengl.GL20.glGetProgramInfoLog;
+import static org.lwjgl.opengl.GL20.glGetProgrami;
+import static org.lwjgl.opengl.GL20.glGetUniformLocation;
+import static org.lwjgl.opengl.GL20.glLinkProgram;
+import static org.lwjgl.opengl.GL20.glUniform1f;
+import static org.lwjgl.opengl.GL20.glUniform1i;
+import static org.lwjgl.opengl.GL20.glUniform3f;
+import static org.lwjgl.opengl.GL20.glUniform4f;
+import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
+import static org.lwjgl.opengl.GL20.glUseProgram;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -38,13 +57,11 @@ public class Program {
   public int program = -1;
 
   public Program(Resource vs, Resource fs) {
-    this(ResourceManager.getProvider().getAsString(vs),
-        ResourceManager.getProvider().getAsString(fs));
+    this(ResourceManager.getProvider().getAsString(vs), ResourceManager.getProvider().getAsString(fs));
   }
 
   public Program(String vssf, String fssf) {
-    this(new Shader(GL_VERTEX_SHADER, vssf), null, new Shader(
-        GL_FRAGMENT_SHADER, fssf));
+    this(new Shader(GL_VERTEX_SHADER, vssf), null, new Shader(GL_FRAGMENT_SHADER, fssf));
   }
 
   public Program(Shader vs, Shader fs) {
@@ -78,14 +95,14 @@ public class Program {
     this.uniforms.clear();
     this.attributes.clear();
     program = newProgram;
-    if (program == -1) { 
+    if (program == -1) {
       throw new IllegalStateException("Link failure");
     }
     int count = glGetProgrami(program, GL_ACTIVE_UNIFORMS);
     for (int i = 0; i < count; ++i) {
       IntBuffer size = BufferUtils.getIntBuffer(2);
       IntBuffer type = BufferUtils.getIntBuffer(2);
-      String name = glGetActiveUniform(program, i, 256,size,type);
+      String name = glGetActiveUniform(program, i, 256, size, type);
       int location = glGetUniformLocation(program, name);
       this.uniforms.put(name, location);
     }
@@ -127,8 +144,7 @@ public class Program {
 
   private void checkCurrent() {
     if (this != CURRENT_PROGRAM) {
-      throw new IllegalStateException(
-          "Attempting to set uniform on unbound program");
+      throw new IllegalStateException("Attempting to set uniform on unbound program");
     }
   }
 
@@ -163,8 +179,7 @@ public class Program {
   }
 
   public void setUniformMatrix4(final String name, float[] v) {
-    FloatBuffer fb = ByteBuffer.allocateDirect(v.length * 4)
-        .order(ByteOrder.nativeOrder()).asFloatBuffer();
+    FloatBuffer fb = ByteBuffer.allocateDirect(v.length * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
     fb.put(v);
     fb.position(0);
     setUniformMatrix4(name, fb);

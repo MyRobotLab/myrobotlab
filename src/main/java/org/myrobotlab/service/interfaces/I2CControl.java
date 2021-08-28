@@ -43,7 +43,7 @@ public interface I2CControl extends NameProvider, Attachable {
   public String getBus();
 
   public String getAddress();
-  
+
   @Deprecated /* use getBus */
   public String getDeviceBus();
 

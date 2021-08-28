@@ -2,18 +2,19 @@ package org.myrobotlab.opencv;
 
 import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 import static org.junit.Assert.assertNotNull;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+
 import org.bytedeco.opencv.opencv_core.IplImage;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.rules.TemporaryFolder;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
-import org.junit.Assert;
 
 public class OpenCVFilterFaceRecognizerTest extends AbstractOpenCVFilterTest {
   transient public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceRecognizerTest.class);
@@ -21,9 +22,9 @@ public class OpenCVFilterFaceRecognizerTest extends AbstractOpenCVFilterTest {
   // a temporary folder for service tests to use
   @ClassRule
   public static TemporaryFolder testFolder = new TemporaryFolder();
-  
+
   String baseDirectory = "src/test/resources/OpenCV/FaceRecognizer/";
-  String[] names = new String[] {"Tony Stark", "Natasha Romanoff", "Steve Rogers"};
+  String[] names = new String[] { "Tony Stark", "Natasha Romanoff", "Steve Rogers" };
 
   @Before
   public void before() {
@@ -37,9 +38,9 @@ public class OpenCVFilterFaceRecognizerTest extends AbstractOpenCVFilterTest {
     log.info("Create filter.");
     OpenCVFilterFaceRecognizer filter = new OpenCVFilterFaceRecognizer("facerec");
     // set the training directory:
-    filter.setTrainingDir(testFolder.getRoot().getAbsolutePath()+File.separator+"OpenCVFaceRecognizer");
-    // Here we want to train the model.. 
-    filter.setMode(OpenCVFilterFaceRecognizer.Mode.TRAIN);   
+    filter.setTrainingDir(testFolder.getRoot().getAbsolutePath() + File.separator + "OpenCVFaceRecognizer");
+    // Here we want to train the model..
+    filter.setMode(OpenCVFilterFaceRecognizer.Mode.TRAIN);
     // now we need to pass some images in for tony.
     for (String name : names) {
       filter.setTrainName(name);
@@ -67,10 +68,10 @@ public class OpenCVFilterFaceRecognizerTest extends AbstractOpenCVFilterTest {
   }
 
   private void processDirectory(OpenCVFilterFaceRecognizer filter, String directory) throws InterruptedException {
-    // 
+    //
     filter.enabled = true;
     filter.displayEnabled = true;
-    
+
     File dir = new File(directory);
     log.info("Directory : " + dir.getAbsolutePath());
     for (File f : dir.listFiles()) {
@@ -81,14 +82,14 @@ public class OpenCVFilterFaceRecognizerTest extends AbstractOpenCVFilterTest {
         System.out.print("Image unable to be loaded..." + f.getAbsolutePath());
         continue;
       }
-      
+
       if (debug) {
         filter.show(image, "Input Image");
       }
 
-      
-      //filter.setData(new OpenCVData("testimg", 0 ,0 , OpenCV.toFrame(image)));
-      filter.setData(new OpenCVData("testimg", 0 ,0 , OpenCV.toFrame(image)));
+      // filter.setData(new OpenCVData("testimg", 0 ,0 ,
+      // OpenCV.toFrame(image)));
+      filter.setData(new OpenCVData("testimg", 0, 0, OpenCV.toFrame(image)));
       filter.process(image);
       filter.enabled = true;
       filter.displayEnabled = true;
@@ -100,7 +101,7 @@ public class OpenCVFilterFaceRecognizerTest extends AbstractOpenCVFilterTest {
         filter.show(displayVal, "Output Image");
       }
 
-     // waitOnAnyKey();
+      // waitOnAnyKey();
     }
   }
 
@@ -115,10 +116,10 @@ public class OpenCVFilterFaceRecognizerTest extends AbstractOpenCVFilterTest {
   @Override
   public void verify(OpenCVFilter filter, IplImage input, IplImage output) {
     // it should have found 1 face
-    OpenCVFilterFaceRecognizer f = (OpenCVFilterFaceRecognizer)filter;
+    OpenCVFilterFaceRecognizer f = (OpenCVFilterFaceRecognizer) filter;
     // expected vs actual
     Assert.assertEquals("Natasha Romanoff", f.getLastRecognizedName());
-    
+
     // waitOnAnyKey();
   }
 

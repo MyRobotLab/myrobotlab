@@ -302,7 +302,7 @@ public class Lm75a extends Service implements I2CControl {
     }
     return false;
   }
-  
+
   @Override
   public void setBus(String bus) {
     setDeviceBus(bus);

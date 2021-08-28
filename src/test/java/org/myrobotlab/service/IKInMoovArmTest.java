@@ -14,7 +14,7 @@ public class IKInMoovArmTest extends AbstractTest {
 
   @Before
   public void setUp() throws Exception {
-    testArm = (InMoovArm)Runtime.start("left", "InMoovArm");
+    testArm = (InMoovArm) Runtime.start("left", "InMoovArm");
 
   }
 

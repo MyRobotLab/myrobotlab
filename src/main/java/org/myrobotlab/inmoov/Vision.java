@@ -46,7 +46,9 @@ public class Vision {
 
   /**
    * pre filters are "always on" filters, set by user, like Flip or PyramidDown
-   * @param filter the filter to be added as a pre filter.
+   * 
+   * @param filter
+   *          the filter to be added as a pre filter.
    */
   public void addPreFilter(String filter) {
     if (!Arrays.asList(OpenCV.getPossibleFilters()).contains(filter)) {
@@ -74,8 +76,10 @@ public class Vision {
 
   /**
    * setActiveFilter will add filter if no exist, enable and setactive
- * @param filterName the filter to set active
- * @return the filter that is active. null otherwise
+   * 
+   * @param filterName
+   *          the filter to set active
+   * @return the filter that is active. null otherwise
    */
   public OpenCVFilter setActiveFilter(String filterName) {
     if (!Arrays.asList(OpenCV.getPossibleFilters()).contains(filterName)) {
@@ -123,7 +127,8 @@ public class Vision {
 
   /**
    * used by gestures, to not block if using openCV...
- * @return returns if the service is ready
+   * 
+   * @return returns if the service is ready
    */
   public boolean isReady() {
     return ready;
@@ -133,7 +138,9 @@ public class Vision {
    * Method to a analyze a yolo filter classifier ( maybe dl4j also ? ) This
    * will count objects on the frame and get labels + positions //TODO
    * individual position for multiple same labels..
-   * @param classifications the list of classifications
+   * 
+   * @param classifications
+   *          the list of classifications
    */
   public void yoloInventory(TreeMap<String, List<Classification>> classifications) {
 

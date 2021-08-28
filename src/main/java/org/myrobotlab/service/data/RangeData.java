@@ -1,7 +1,8 @@
 package org.myrobotlab.service.data;
 
 /**
- * Range with source - 
+ * Range with source -
+ * 
  * @author grog
  *
  */
@@ -13,5 +14,5 @@ public class RangeData extends AbstractData {
   }
 
   public Double range;
-  
+
 }

@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.arduino.VirtualMsg;
@@ -21,41 +22,45 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
 
   private Msg msg = new Msg(this, null);
   String testPort = "testPort";
-  Serial serial = (Serial)Runtime.start("dteSerial", "Serial");
+  Serial serial = (Serial) Runtime.start("dteSerial", "Serial");
 
   @Override
   public Service createService() {
     // Runtime.setLogLevel("info");
-    VirtualArduino service = (VirtualArduino)Runtime.start("virtualArduino", "VirtualArduino");
+    VirtualArduino service = (VirtualArduino) Runtime.start("virtualArduino", "VirtualArduino");
     return service;
   }
 
   @Override
   public void testService() throws Exception {
-    
+
     // our local msg handle that parses the stream from the virtual arduino
-    // skip invoking in unit tests, instead directly call the callbacks to make unit tests easier.
+    // skip invoking in unit tests, instead directly call the callbacks to make
+    // unit tests easier.
     msg.setInvoke(false);
     // our service to test
-    VirtualArduino va = (VirtualArduino)service;
+    VirtualArduino va = (VirtualArduino) service;
     // connect to the test uart/DCE port
     va.connect(testPort);
-    // virtual arduino listens on virtual port + .UART as the DCE side of the interface.
+    // virtual arduino listens on virtual port + .UART as the DCE side of the
+    // interface.
     assertEquals(testPort + ".UART", va.getPortName());
     // some basic validation stuff on the va..
-    assertNotNull(va.getPinList()); 
+    assertNotNull(va.getPinList());
     assertNotNull(va.board);
-    
-    Serial serial = (Serial)Runtime.start("serial", "Serial");
+
+    Serial serial = (Serial) Runtime.start("serial", "Serial");
     // attach our test as a byte listener for the onBytes call.
     serial.addByteListener(this);
     // connect to the actual DTE side of the virtual serial port.
     serial.connect(testPort);
     Thread.sleep(100);
-    // TODO: We should probably wait for the begin message to be seen from the virtual arduino here before proceeding.
+    // TODO: We should probably wait for the begin message to be seen from the
+    // virtual arduino here before proceeding.
     // servo attach method being written to the DTE side of the virtual port
     serial.write(msg.servoAttach(0, 7, 180, -1, "s1"));
-    // TODO: there's a race condition here.. we seem to fail without a small sleep here!!!!
+    // TODO: there's a race condition here.. we seem to fail without a small
+    // sleep here!!!!
     // we need to let the virtual arduinos catch up and actually add the device.
     Thread.sleep(50);
     // get a handle to the virtual device that we just attached.
@@ -65,34 +70,37 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     // make sure the device is actually a servo
     assertEquals(Msg.DEVICE_TYPE_SERVO, d.type);
     serial.write(msg.servoMoveToMicroseconds(0, 1500));
-    MrlServo s = (MrlServo)d;
-    // TODO: there's a race condition here.  it takes a moment for the virtual device to respond.
+    MrlServo s = (MrlServo) d;
+    // TODO: there's a race condition here. it takes a moment for the virtual
+    // device to respond.
     Thread.sleep(50);
     assertEquals(s.targetPosUs, 1500);
     serial.write(msg.servoSetVelocity(0, 22));
     Thread.sleep(50);
     assertEquals(s.velocity, 22);
-    
+
     // other Servo methods to test.
     serial.write(msg.servoAttachPin(0, 11));
     Thread.sleep(50);
     assertEquals(11, s.pin);
-    
+
     serial.write(msg.servoDetachPin(0));
     Thread.sleep(50);
     assertFalse(s.enabled);
-    
+
     va.disconnect();
     Thread.sleep(50);
     assertFalse(va.isConnected());
-    
-    // TODO: we could test other virtual devices.    
+
+    // TODO: we could test other virtual devices.
     // what else can we do?
-    
+
   }
 
-  // These are all of the messages that the MrlComm/MrlCommIno can publish back to the arduino service.
-  // none of these will get called unlesss this test gets the onBytes called that passes the returned stream down to the Msg.java onBytes.
+  // These are all of the messages that the MrlComm/MrlCommIno can publish back
+  // to the arduino service.
+  // none of these will get called unlesss this test gets the onBytes called
+  // that passes the returned stream down to the Msg.java onBytes.
 
   @Override
   public BoardInfo publishBoardInfo(Integer version, Integer boardTypeId, Integer microsPerLoop, Integer sram, Integer activePins, int[] deviceSummary) {
@@ -125,7 +133,7 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
   public EncoderData publishEncoderData(Integer deviceId, Integer position) {
     // mocked out encoder data to publish.
     log.info("Device ID:{} Position:{}", deviceId, position);
-    EncoderData data = new EncoderData("Test-" + deviceId, null, new Double(position),  new Double(position));
+    EncoderData data = new EncoderData("Test-" + deviceId, null, new Double(position), new Double(position));
     return data;
   }
 
@@ -161,7 +169,7 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
   @Override
   public PinData[] publishPinArray(int[] data) {
     log.info("Publish Pin Array: {}", data);
-    // TODO: this has some complex logic in Arduino to replicate/test here. 
+    // TODO: this has some complex logic in Arduino to replicate/test here.
     return null;
   }
 
@@ -173,7 +181,8 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
 
   @Override
   public void onBytes(byte[] data) {
-    // It's the responsibility of the MrlCommPublisher to relay serial bytes  / events to the msg.java class
+    // It's the responsibility of the MrlCommPublisher to relay serial bytes /
+    // events to the msg.java class
     msg.onBytes(data);
   }
 
@@ -185,18 +194,20 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
 
   @Override
   public void updateStats(QueueStats stats) {
-    // TODO: NoOp in the unit test for now.    
+    // TODO: NoOp in the unit test for now.
   }
 
   @Override
   public void onConnect(String portName) {
-    // TODO: should we test this?  it's the responsibility of the MrlCommPublisher to pass serial events to the msg class.
+    // TODO: should we test this? it's the responsibility of the
+    // MrlCommPublisher to pass serial events to the msg class.
     msg.onConnect(portName);
   }
 
   @Override
   public void onDisconnect(String portName) {
-    // TODO: should we test this? it's the responsibility of the MrlCommPublisher to pass serial events to the msg class.
+    // TODO: should we test this? it's the responsibility of the
+    // MrlCommPublisher to pass serial events to the msg class.
     msg.onDisconnect(portName);
   }
 

@@ -12,7 +12,9 @@ public class JMonkeyEngineMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * @param name n
+   * 
+   * @param name
+   *          n
    * 
    */
   public JMonkeyEngineMeta(String name) {
@@ -28,7 +30,7 @@ public class JMonkeyEngineMeta extends MetaData {
     // nev version of lwjgl3 which works with java 11
     addDependency("org.jmonkeyengine", "jme3-lwjgl3", jmeVersion);
     addDependency("org.jmonkeyengine", "jme3-jogg", jmeVersion);
-    
+
     // addDependency("org.jmonkeyengine", "jme3-test-data", jmeVersion);
     addDependency("com.simsilica", "lemur", "1.11.0");
     addDependency("com.simsilica", "lemur-proto", "1.10.0");

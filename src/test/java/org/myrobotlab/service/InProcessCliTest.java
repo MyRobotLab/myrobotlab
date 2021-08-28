@@ -77,13 +77,12 @@ public class InProcessCliTest extends AbstractTest {
     assertTrue(runtime.isVirtual());
     // replace with original value
     runtime.setVirtual(virtual);
-    
+
     // integer conversion
-    Clock clockCli = (Clock)Runtime.start("clockCli", "Clock");
+    Clock clockCli = (Clock) Runtime.start("clockCli", "Clock");
     write("/clockCli/setInterval/1234");
     Integer check = 1234;
     assertEquals(check, clockCli.getInterval());
-    
 
   }
 

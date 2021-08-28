@@ -32,15 +32,17 @@ import org.slf4j.Logger;
  * 
  * @author GroG
  * 
- * FIXME - test all types of Arduino's and thier pin definitions uno, mega, nano, pico, decillia
- * FIXME - make sure the primitives defined in the PinArrayControl are accessable through invoking ... (as per all primitive signature interfaces)
- * FIXME - test the othe PinArrayControllers .. Pcf8574, Mpr121, RasPi
- * FIXME - test webgui oscope
+ *         FIXME - test all types of Arduino's and thier pin definitions uno,
+ *         mega, nano, pico, decillia FIXME - make sure the primitives defined
+ *         in the PinArrayControl are accessable through invoking ... (as per
+ *         all primitive signature interfaces) FIXME - test the othe
+ *         PinArrayControllers .. Pcf8574, Mpr121, RasPi FIXME - test webgui
+ *         oscope
  *
  */
 
 public class ArduinoTest extends AbstractTest implements PinArrayListener, PinListener {
-  
+
   public final static Logger log = LoggerFactory.getLogger(ArduinoTest.class);
 
   static Arduino arduino01 = null;
@@ -51,13 +53,13 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
   String digitalPin = "D0";
 
   Map<String, PinData> pinData = new HashMap<String, PinData>();
-  
+
   PinData[] pinArray = null;
 
   String servoPin01 = "7";
 
   String[] activePins = null;
-  
+
   private void assertVirtualPinValue(VirtualArduino virtual, int address, int value) {
     if (virtual != null) {
       assertTrue(virtual.readBlocking(address, 50) == value);
@@ -90,13 +92,13 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
   public void setUp() throws Exception {
     // Runtime.setLogLevel("debug");
     arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
-    
-//    Runtime.start("gui", "SwingGui");
-    
+
+    // Runtime.start("gui", "SwingGui");
+
     // arduino01.setVirtual(false); // <-- useful for debugging "real" Arduino
-    
-    // log.info("servo ports {}", arduino01.getPortNames());    
-    // log.info("arduino virtual mode is {}", arduino01.isVirtual());   
+
+    // log.info("servo ports {}", arduino01.getPortNames());
+    // log.info("arduino virtual mode is {}", arduino01.isVirtual());
     arduino01.connect(port01);
     assertTrue(String.format("arduino could not connect to port %s", port01), arduino01.isConnected());
   }
@@ -147,7 +149,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
       uart.clear();
       uart.setTimeout(100);
     }
-    
+
     pinData.clear();
   }
 
@@ -191,7 +193,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     if (arduino01.isVirtual()) {
       arduino01.getVirtual().getSerial().clear();
     }
-    
+
     // test disconnected
     assertTrue(!arduino01.isConnected());
     // test no data - no exception ?
@@ -226,7 +228,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     assertTrue(pinData.containsKey(arduino01.getPin(analogPin).getPinName()));
     arduino01.disablePin(analogPin);
   }
-  
+
   @Test
   public void testEnablePinString() {
     if (printMethods)
@@ -262,29 +264,29 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     arduino01.setSketch(sketch);
     assertEquals(sketch, arduino01.getSketch());
   }
-  
+
   @Test
   public final void pinArrayTest() {
-    
+
     arduino01.connect(port01);
     pinData.clear();
     pinArray = null;
-    
-    activePins = new String[]{"D10","D12","D13"};
+
+    activePins = new String[] { "D10", "D12", "D13" };
     arduino01.attach((PinArrayListener) this);
     arduino01.enablePin(10);
     arduino01.enablePin(12);
     arduino01.enablePin(13);
     sleep(100);
     arduino01.reset();
-    
+
     assertNotNull("pin array is null", pinArray);
     assertTrue("pin array mismatch in pin count", pinArray.length == 3);
-    
+
     pinData.containsKey(arduino01.getPin(10).getPinName());
     pinData.containsKey(arduino01.getPin(12).getPinName());
     pinData.containsKey(arduino01.getPin(13).getPinName());
-    
+
   }
 
   @Test
@@ -329,7 +331,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
 
     Servo servo = (Servo) Runtime.start("servo01", "Servo");
     arduino01.connect(port01);
-    
+
     // TEST AUTO DETACH !!!!
 
     assertTrue("isConnected", arduino01.isConnected());
@@ -342,13 +344,13 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     // get DeviceId
     DeviceMapping mapping = arduino01.deviceList.get("servo01");
     assertNotNull("verify arduino mapping exists in device list", mapping);
-    
+
     MrlServo mrlservo = null;
     if (arduino01.isVirtual()) {
       Device device = arduino01.getVirtual().getDevice(mapping.getId());
       assertNotNull("verify virtual device exists", device);
       assertTrue("verify its a servo", device instanceof MrlServo);
-      mrlservo = (MrlServo)device;
+      mrlservo = (MrlServo) device;
     }
 
     // verify its attached
@@ -357,25 +359,25 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     assertTrue("verify servo is not attached to arduino by name", servo.isAttached(arduino01.getName()));
     assertTrue("verify arduino is not attached to servo by name", arduino01.isAttached(servo.getName()));
     assertTrue("arduino is attached and contains a servo in device list", arduino01.getAttached().contains(servo.getName()));
-    
+
     if (arduino01.isVirtual()) {
       assertTrue("verifty virtual mrlservo is enabled", mrlservo.enabled);
     }
-    
+
     // move it
-    servo.moveToBlocking(30.0);    
+    servo.moveToBlocking(30.0);
     if (arduino01.isVirtual()) {
       // FIXME -- fix blocking fix encoders
-      sleep(500); 
+      sleep(500);
       assertTrue("virtual servo moved blocking to 30", mrlservo.targetPosUs == Arduino.degreeToMicroseconds(30));
     }
-    
+
     servo.moveTo(100.0);
     sleep(100);
     if (arduino01.isVirtual()) {
       assertTrue("virtual servo moved to 100", mrlservo.targetPosUs == Arduino.degreeToMicroseconds(100));
     }
-    
+
     // detach it
     arduino01.detach(servo);
     sleep(300); // wait for asynchronous removal of MrlServo
@@ -387,13 +389,11 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
       assertNull("verify device has been removed", arduino01.getVirtual().getDevice(mapping.getId()));
     }
     /*
-    assertFalse("verifty servo is disabled", servo.enabled());
-    if (arduino01.isVirtual()) {
-      assertFalse("verifty virtual mrlservo is disabled", mrlservo.enabled);
-    }
-    */
+     * assertFalse("verifty servo is disabled", servo.enabled()); if
+     * (arduino01.isVirtual()) {
+     * assertFalse("verifty virtual mrlservo is disabled", mrlservo.enabled); }
+     */
 
-    
     assertFalse(servo.isAttached(arduino01));
 
     // attach it the other way
@@ -421,13 +421,10 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
 
     // can we enable to a different pin?
     /*
-    servo.enable(servoPin01 + 1 + "");
-    if (arduino01.isVirtual()) {
-      sleep(100);
-      assertTrue(mrlServo.pin == Integer.parseInt(servoPin01 + 1));
-      assertTrue((mrlServo.pin + "").equals(servo.getPin()));
-    }
-    */
+     * servo.enable(servoPin01 + 1 + ""); if (arduino01.isVirtual()) {
+     * sleep(100); assertTrue(mrlServo.pin == Integer.parseInt(servoPin01 + 1));
+     * assertTrue((mrlServo.pin + "").equals(servo.getPin())); }
+     */
 
     double velocity = 50;
     // degree per second
@@ -439,13 +436,10 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
 
     // attach to the correct pin again
     /*
-    servo.enable(servoPin01);
-    servo.moveTo(30.0);
-    servo.moveTo(130.0);
-    servo.moveTo(30.0);
-    // assertEquals(virtual.servoMoveTo(130));
-    servo.rest();
-    */
+     * servo.enable(servoPin01); servo.moveTo(30.0); servo.moveTo(130.0);
+     * servo.moveTo(30.0); // assertEquals(virtual.servoMoveTo(130));
+     * servo.rest();
+     */
 
     assertTrue(servo.getController().contains(arduino01.getName()));
 
@@ -475,7 +469,6 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     // assertEquals("servoAttach/7/9/5/115/101/114/118/111\n",
     // uart.decode());
     // // assertEquals(servoPin, servo.getPin().intValue());
-    
 
     servo.moveTo(90.0);
     // assertEquals("servoWrite/7/90\n", uart.decode());
@@ -522,29 +515,29 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
 
     arduino01.setBoard(boardType);
   }
-  
+
   @Test
   public void testPin() {
     PinDefinition pin = arduino01.getPin(analogPin);
-    
+
     pinData.clear();
-    arduino01.setBoardUno(); 
+    arduino01.setBoardUno();
     arduino01.isConnected();
     arduino01.connect(port01);
 
-    arduino01.attach((PinListener)this, pin.getAddress());
+    arduino01.attach((PinListener) this, pin.getAddress());
     arduino01.enablePin(pin.getAddress());
     sleep(100);
     arduino01.disablePin(pin.getAddress());
     assertTrue("did not receive pin data int", pinData.containsKey(analogPin));
-    
+
     pinData.clear();
 
-    arduino01.attach((PinListener)this, analogPin);
+    arduino01.attach((PinListener) this, analogPin);
     arduino01.enablePin(analogPin);
     sleep(100);
     assertTrue("did not receive pin data from pin", pinData.containsKey(analogPin));
-    
+
     pinData.clear();
   }
 
@@ -558,5 +551,5 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     // TODO Auto-generated method stub
     return activePins;
   }
-  
+
 }

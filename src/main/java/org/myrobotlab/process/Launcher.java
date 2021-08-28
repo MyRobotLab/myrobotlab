@@ -12,7 +12,6 @@ import java.util.Map;
 
 import org.myrobotlab.framework.CmdOptions;
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.io.StreamGobbler;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Runtime;
@@ -49,7 +48,7 @@ public class Launcher {
 
     // command line to be returned
     List<String> cmd = new ArrayList<String>();
-    
+
     // prepare exe
     String fs = File.separator;
     String ps = File.pathSeparator;
@@ -61,13 +60,13 @@ public class Launcher {
     if (platform.isWindows()) {
       jvmArgs = jvmArgs.replace("/", "\\");
     }
-    
+
     cmd.add(javaExe);
 
     if (options.memory != null) {
       jvmArgs += String.format(" -Xms%s -Xmx%s ", options.memory, options.memory);
     }
-    
+
     cmd.add(jvmArgs);
 
     if (options.jvm != null) {
@@ -91,9 +90,9 @@ public class Launcher {
 
     // main class
     cmd.add("org.myrobotlab.service.Runtime");
-    
+
     options.fromLauncher = true;
-    
+
     cmd.addAll(options.getOutputCmd());
 
     // FIXME - daemonize? does that mean handle stream differently?
@@ -105,7 +104,7 @@ public class Launcher {
     ProcessBuilder builder = new ProcessBuilder(cmd);
     builder.redirectErrorStream(true);
     // builder.inheritIO(); # LAME - JDK BUG FIXED THEN NOT FIXED ...
-    
+
     // one of the nastiest bugs had to do with std out, or std err not
     // being consumed ... now we don't bother with it - instead
     // we have to use this clever redirect to /dev/null (os dependent) :(
@@ -157,7 +156,8 @@ public class Launcher {
 
   /**
    * prints help to the console
-   * @return the help 
+   * 
+   * @return the help
    */
   static public String mainHelp() {
     String help = new CommandLine(new CmdOptions()).getUsageMessage();
@@ -208,7 +208,9 @@ public class Launcher {
    * Start class for myrobotlab.jar. Its primary concern is to build and launch
    * a myrobotlab instance, depending on flags it might also start a client as
    * an interface to the spawned instance
-   * @param args args
+   * 
+   * @param args
+   *          args
    */
   public static void main(String[] args) {
     try {

@@ -8,9 +8,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestName;
@@ -88,9 +86,9 @@ public class AbstractTest {
 
   @BeforeClass
   public static void setUpAbstractTest() throws Exception {
-    
+
     Platform.setVirtual(true);
-    
+
     String junitLogLevel = System.getProperty("junit.logLevel");
     if (junitLogLevel != null) {
       Runtime.setLogLevel(junitLogLevel);
@@ -206,7 +204,7 @@ public class AbstractTest {
     simpleName = this.getClass().getSimpleName();
     if (logWarnTestHeader) {
       log.warn("=========== starting test {} ===========", this.getClass().getSimpleName());
-    }    
+    }
   }
 
   public void setVirtual() {

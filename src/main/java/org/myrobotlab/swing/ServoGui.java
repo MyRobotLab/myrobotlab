@@ -495,7 +495,9 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
 
   /**
    * publish of the "moveTo" from servo
-   * @param servo the servo that moved
+   * 
+   * @param servo
+   *          the servo that moved
    * 
    */
   public void onMoveTo(final Servo servo) {
@@ -777,7 +779,9 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
   /**
    * call back to hand new services registered we want to update our list of
    * possible controllers and encoders
-   * @param s registration
+   * 
+   * @param s
+   *          registration
    * 
    */
   public void onRegistered(Registration s) {
@@ -841,7 +845,6 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
       // Files.write(Paths.get("export.py"), python.toString().getBytes());
       TestCatcher catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
       /// servo.attach((ServoEventListener) catcher);
-
 
       // FIXME - junit for testing return values of moveTo when a blocking call
       // is in progress

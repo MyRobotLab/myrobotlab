@@ -122,9 +122,12 @@ public class Updater extends Service {
 
   /**
    * Checks in the branches directory for the latest version of desired "branch"
-   * @param branch the branch to check
+   * 
+   * @param branch
+   *          the branch to check
    * @return the latest version
-   * @throws MrlException boom
+   * @throws MrlException
+   *           boom
    * 
    */
   public String getLatestLocalVersion(String branch) throws MrlException {
@@ -157,8 +160,11 @@ public class Updater extends Service {
   /**
    * This method gets all the version on a particular branch, if allowed remote
    * access it will ask the build server what successful builds exist
-   * @param branch the branch 
-   * @param allowRemote true/false
+   * 
+   * @param branch
+   *          the branch
+   * @param allowRemote
+   *          true/false
    * @return a set
    * 
    */
@@ -177,7 +183,9 @@ public class Updater extends Service {
 
   /**
    * Get the local versions available for the selected branch.
-   * @param branch the branch 
+   * 
+   * @param branch
+   *          the branch
    * @return the set of local versions
    * 
    */
@@ -201,7 +209,9 @@ public class Updater extends Service {
 
   /**
    * Get remote versions from jenkins
-   * @param branch the branch name
+   * 
+   * @param branch
+   *          the branch name
    * @return the set of remote versions
    * 
    */
@@ -424,7 +434,7 @@ public class Updater extends Service {
               // FIXME check for null etc.. singleton
               // FIXME - merge original
               CmdOptions options = new CmdOptions();
-              new CommandLine(options).parseArgs(new String[] {"-I", "python", "execFile", "export.py"});
+              new CommandLine(options).parseArgs(new String[] { "-I", "python", "execFile", "export.py" });
               ProcessBuilder builder = Launcher.createBuilder(options);
               updated = builder.start();
 
@@ -436,7 +446,7 @@ public class Updater extends Service {
               updated.destroy();
               // FIXME - merge original
               CmdOptions options = new CmdOptions();
-              new CommandLine(options).parseArgs(new String[] {"-I", "python", "execFile", "export.py"});
+              new CommandLine(options).parseArgs(new String[] { "-I", "python", "execFile", "export.py" });
               ProcessBuilder builder = Launcher.createBuilder(options);
               updated = builder.start();
             }
@@ -521,7 +531,7 @@ public class Updater extends Service {
               // FIXME check for null etc.. singleton
               // FIXME - ability to merge more commands !!!
               CmdOptions options = new CmdOptions();
-              new CommandLine(options).parseArgs(new String[] {"-I", "python", "execFile", "export.py"});
+              new CommandLine(options).parseArgs(new String[] { "-I", "python", "execFile", "export.py" });
               ProcessBuilder builder = Launcher.createBuilder(options);
               updated = builder.start();
 
@@ -618,7 +628,7 @@ public class Updater extends Service {
       Updater updater = (Updater) Runtime.start("updater", "Updater");
 
       CmdOptions options = new CmdOptions();
-      new CommandLine(options).parseArgs(new String[] {"-I", "python", "execFile", "export.py"});
+      new CommandLine(options).parseArgs(new String[] { "-I", "python", "execFile", "export.py" });
       ProcessBuilder builder = Launcher.createBuilder(options);
       updater.updated = builder.start();
 

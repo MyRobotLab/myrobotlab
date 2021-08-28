@@ -2,12 +2,10 @@ package org.myrobotlab.opencv;
 
 import static org.junit.Assert.assertNotNull;
 
-import org.bytedeco.javacpp.Loader;
-import org.bytedeco.opencv.global.opencv_video;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Before;
 
-public class OpenCVFilterImageSegmenterTest  extends AbstractOpenCVFilterTest {
+public class OpenCVFilterImageSegmenterTest extends AbstractOpenCVFilterTest {
 
   @Before
   public void setup() {

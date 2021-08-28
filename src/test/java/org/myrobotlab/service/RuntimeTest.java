@@ -79,7 +79,7 @@ public class RuntimeTest extends AbstractTest {
     Runtime runtime = Runtime.getInstance();
     runtime.setLocale("fr-FR");
     assertTrue("expecting concat fr-FR", runtime.getLocale().getTag().equals("fr-FR"));
-    
+
     assertTrue(runtime.getLanguage().equals("fr"));
     Locale l = runtime.getLocale();
     assertTrue(l.toString().equals("fr-FR"));

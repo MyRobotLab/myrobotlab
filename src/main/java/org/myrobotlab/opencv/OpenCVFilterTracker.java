@@ -43,11 +43,11 @@ import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
-import org.bytedeco.opencv.opencv_core.Rect2d;
-import org.bytedeco.opencv.opencv_tracking.Track;
-import org.bytedeco.opencv.opencv_tracking.*;
-import org.bytedeco.opencv.opencv_video.*;
-
+import org.bytedeco.opencv.opencv_tracking.TrackerCSRT;
+import org.bytedeco.opencv.opencv_tracking.TrackerKCF;
+import org.bytedeco.opencv.opencv_video.Tracker;
+import org.bytedeco.opencv.opencv_video.TrackerGOTURN;
+import org.bytedeco.opencv.opencv_video.TrackerMIL;
 /*
 import org.bytedeco.opencv.opencv_tracking.Tracker;
 import org.bytedeco.opencv.opencv_tracking.TrackerBoosting;
@@ -92,7 +92,7 @@ public class OpenCVFilterTracker extends OpenCVFilter {
 
   // TODO: i'm not sure there is really a performance difference here..
   public boolean blackAndWhite = false;
-  //  CSRT,GOTURN,KCF,MIL
+  // CSRT,GOTURN,KCF,MIL
   public String trackerType = "CSRT";
 
   // The current mat that is being processed.
@@ -154,25 +154,25 @@ public class OpenCVFilterTracker extends OpenCVFilter {
   private Tracker createTracker(String trackerType) {
     // TODO: add a switch for all the other types of trackers!
     /*
-    if (trackerType.equalsIgnoreCase("Boosting")) {
-      return TrackerBoosting.create();
-    } else 
-      */
-      if (trackerType.equalsIgnoreCase("CSRT")) {
+     * if (trackerType.equalsIgnoreCase("Boosting")) { return
+     * TrackerBoosting.create(); } else
+     */
+    if (trackerType.equalsIgnoreCase("CSRT")) {
       return TrackerCSRT.create();
     } else if (trackerType.equalsIgnoreCase("GOTURN")) {
       return TrackerGOTURN.create();
     } else if (trackerType.equalsIgnoreCase("KCF")) {
       return TrackerKCF.create();
-    } /*else if (trackerType.equalsIgnoreCase("MedianFlow")) {
-      return TrackerMedianFlow.create(); 
-    } */ else if (trackerType.equalsIgnoreCase("MIL")) {
+    } /*
+       * else if (trackerType.equalsIgnoreCase("MedianFlow")) { return
+       * TrackerMedianFlow.create(); }
+       */ else if (trackerType.equalsIgnoreCase("MIL")) {
       return TrackerMIL.create();
-    } /*else if (trackerType.equalsIgnoreCase("MOSSE")) {
-      return TrackerMOSSE.create();
-    } else if (trackerType.equalsIgnoreCase("TLD")) {
-      return TrackerTLD.create();
-    } */ else {   
+    } /*
+       * else if (trackerType.equalsIgnoreCase("MOSSE")) { return
+       * TrackerMOSSE.create(); } else if (trackerType.equalsIgnoreCase("TLD"))
+       * { return TrackerTLD.create(); }
+       */ else {
 
       log.warn("Unknown Tracker Algorithm {} defaulting to CSRT", trackerType);
       // default to TLD..

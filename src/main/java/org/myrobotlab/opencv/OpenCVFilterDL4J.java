@@ -30,7 +30,7 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
   transient public final static Logger log = LoggerFactory.getLogger(OpenCVFilterDL4J.class.getCanonicalName());
 
   protected Boolean running;
-  
+
   private transient Deeplearning4j dl4j;
   private transient CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
 

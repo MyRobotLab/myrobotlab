@@ -161,14 +161,13 @@ public class Inbox implements Serializable {
           String blockingKey = String.format("%s.%s", msg.getFullName(), msg.getMethod());
           if (blockingList.containsKey(blockingKey)) {
             Object[] returnContainer = blockingList.get(blockingKey);
-            if (msg.data == null)
-            {
+            if (msg.data == null) {
               returnContainer[0] = null;
             } else {
               // transferring data
-              returnContainer[0] = msg.data[0]; 
+              returnContainer[0] = msg.data[0];
             }
-            
+
             synchronized (returnContainer) {
               blockingList.remove(blockingKey);
               returnContainer.notifyAll(); // addListener sender

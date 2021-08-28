@@ -11,14 +11,17 @@ public interface StateSaver {
   public boolean loadFromJson(String json);
 
   /**
-   * save to current default location 
+   * save to current default location
+   * 
    * @return true if successful
    */
   public boolean save();
-  
+
   /**
    * save to a specific location
-   * @param filename the file to save as
+   * 
+   * @param filename
+   *          the file to save as
    * @return true if successful
    */
   public boolean save(String filename);

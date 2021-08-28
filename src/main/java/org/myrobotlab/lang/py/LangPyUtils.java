@@ -55,16 +55,15 @@ public class LangPyUtils implements PythonGenerator {
       content.append("import org.myrobotlab.framework.Platform as Platform\n");
       content.append("import org.myrobotlab.service.Runtime as Runtime\n");
       content.append("\n");
-      
+
       // we make start methods now
       content.append("def start():\n");
 
       content.append(String.format("  " + "print('loading %s of type %s')", si.getName(), si.getSimpleName()));
-      content.append("\n");      
+      content.append("\n");
     }
 
     String safename = LangPyUtils.safeRefName(si);
-    
 
     content.append(String.format("  %s = Runtime.start('%s', '%s')\n", safename, si.getName(), si.getSimpleName()));
     String localeTag = ((Service) si).getLocaleTag();
@@ -75,12 +74,12 @@ public class LangPyUtils implements PythonGenerator {
 
     return content.toString();
   }
-  
+
   public String toDefaultReleasePython(ServiceInterface si, boolean includeHeader) {
     StringBuilder content = new StringBuilder();
-    
+
     String safename = LangPyUtils.safeRefName(si);
-    
+
     if (includeHeader) {
       content.append("\n");
       content.append("def release():\n");
@@ -133,21 +132,23 @@ public class LangPyUtils implements PythonGenerator {
     return null;
   }
 
-  // this method is used as an entry point for generating python - everything done it is done only once
+  // this method is used as an entry point for generating python - everything
+  // done it is done only once
   // recursive calls are confined to buildPython
-  public String toPython(StringBuilder content, Boolean includeHeader, Boolean numericPrefix, String folder, String names, Integer currentDepth, Integer splitLevel, Boolean overwrite, Integer maxDepth) throws IOException {
-    
-    Map<Integer,String> serviceFileWritten = buildPython(content, includeHeader, numericPrefix, folder, names, currentDepth, splitLevel, overwrite, maxDepth);
-    
-    // determine order of creation for the services written to file - sort 
-    
+  public String toPython(StringBuilder content, Boolean includeHeader, Boolean numericPrefix, String folder, String names, Integer currentDepth, Integer splitLevel,
+      Boolean overwrite, Integer maxDepth) throws IOException {
+
+    Map<Integer, String> serviceFileWritten = buildPython(content, includeHeader, numericPrefix, folder, names, currentDepth, splitLevel, overwrite, maxDepth);
+
+    // determine order of creation for the services written to file - sort
+
     List<Integer> order = new ArrayList<>();
-    for(Integer o: serviceFileWritten.keySet()) {
+    for (Integer o : serviceFileWritten.keySet()) {
       order.add(o);
     }
-    
+
     Collections.sort(order);
-    
+
     // write module file
     StringBuilder initContent = new StringBuilder();
     File init = new File(folder + File.separator + "__init__.py");
@@ -167,18 +168,17 @@ public class LangPyUtils implements PythonGenerator {
       initContent.append("  " + CodecUtils.getSafeReferenceName(serviceFileWritten.get(n)) + "_config.release()\n");
     }
     Files.write(init.toPath(), initContent.toString().getBytes());
-    
+
     return null;
   }
-  
 
   // options :
   // force overwrite - default do not overwrite
   // "launch.yml" is the interface - it only saves launch.yml
 
-  public Map<Integer,String> buildPython(StringBuilder content, Boolean includeHeader, Boolean numericPrefix, String folder, String names, Integer currentDepth, Integer splitLevel, Boolean overwrite, Integer maxDepth)
-      throws IOException {
-    
+  public Map<Integer, String> buildPython(StringBuilder content, Boolean includeHeader, Boolean numericPrefix, String folder, String names, Integer currentDepth,
+      Integer splitLevel, Boolean overwrite, Integer maxDepth) throws IOException {
+
     // FIXME - switch to use the default excludes
     Set<String> excludes = new HashSet<>();
     excludes.add("runtime");
@@ -191,7 +191,7 @@ public class LangPyUtils implements PythonGenerator {
     if (currentDepth == null) {
       currentDepth = 0;
     }
-    
+
     // FIXME - remove
     if (numericPrefix == null) {
       numericPrefix = false;
@@ -212,10 +212,10 @@ public class LangPyUtils implements PythonGenerator {
     if (folder == null) {
       folder = Runtime.getInstance().getConfigDir() + File.separator + "default";
     }
-    
-    Map<Integer,String> serviceFileWritten = new HashMap<>();
-    
-    String check = folder.replace("\\", "/");    
+
+    Map<Integer, String> serviceFileWritten = new HashMap<>();
+
+    String check = folder.replace("\\", "/");
     String[] chkdir = check.split("/");
     for (int i = 0; i < chkdir.length; ++i) {
       String chk = CodecUtils.getSafeReferenceName(chkdir[i]);
@@ -262,9 +262,9 @@ public class LangPyUtils implements PythonGenerator {
     // have more than one service, then process them in the order they were
     // created
     List<ServiceInterface> list = new ArrayList<>();
-    list.addAll(all.values());    
+    list.addAll(all.values());
     Collections.sort(list);
-    
+
     // for (ServiceInterface si : all.values()) {
     for (ServiceInterface si : list) {
 
@@ -272,7 +272,7 @@ public class LangPyUtils implements PythonGenerator {
       if (!includes.contains(si.getFullName())) {
         continue;
       }
-      
+
       if (excludes.contains(si.getName())) {
         continue;
       }
@@ -324,7 +324,7 @@ public class LangPyUtils implements PythonGenerator {
       if (si.getName().equals("i01")) {
         log.info("here");
       }
-      
+
       // need to group the def release
       content.append(toDefaultReleasePython(si, currentDepth <= splitLevel));
 
@@ -333,16 +333,14 @@ public class LangPyUtils implements PythonGenerator {
         Files.write(new File(folder + File.separator + prefix + safeRefName(si) + "_config.py").toPath(), content.toString().getBytes());
         serviceFileWritten.put(si.getCreationOrder(), si.getName());
       }
-      
+
       log.info("{}", si.getName());
       content = new StringBuilder();
     } // for each service
 
     // release
-    
 
-    
-    // FIXME - should be void ? 
+    // FIXME - should be void ?
     // conditional write launch file ...
     return serviceFileWritten;
   }

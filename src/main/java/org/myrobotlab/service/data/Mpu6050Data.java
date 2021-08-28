@@ -7,7 +7,7 @@ package org.myrobotlab.service.data;
  *         Digital Motion Processing )
  */
 public class Mpu6050Data {
-  
+
   public static final int MPU6050_ADDRESS_AD0_LOW = 0x68; // address pin low
   // (GND), default
   // for
@@ -413,9 +413,8 @@ public class Mpu6050Data {
   public static final int MPU6050_DMP_MEMORY_BANKS = 8;
   public static final int MPU6050_DMP_MEMORY_BANK_SIZE = 256;
   public static final int MPU6050_DMP_MEMORY_CHUNK_SIZE = 16;
-  
-  public static final byte ACCEL_XOUT_H = 0x3B;
 
+  public static final byte ACCEL_XOUT_H = 0x3B;
 
   // this block of memory gets written to the MPU on start-up, and it seems
   // to be volatile memory, so it has to be done each time (it only takes ~1

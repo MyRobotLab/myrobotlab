@@ -55,7 +55,7 @@ public class PidTest extends AbstractServiceTest {
     } else {
       assertTrue("No calculation done", calculated);
     }
-    
+
   }
 
 }
