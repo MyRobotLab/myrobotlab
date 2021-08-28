@@ -52,8 +52,10 @@ public class WebSocketConnector extends Service implements TextPublisher {
    * 
    * @param url
    *          the url of the websocket
-   * @throws URISyntaxException boom
-   * @throws IOException boom
+   * @throws URISyntaxException
+   *           boom
+   * @throws IOException
+   *           boom
    */
   public void connect(String url) throws URISyntaxException, IOException {
 
@@ -94,8 +96,11 @@ public class WebSocketConnector extends Service implements TextPublisher {
 
   /**
    * Send a message over the websocket
-   * @param message the message to send
-   * @throws IOException boom
+   * 
+   * @param message
+   *          the message to send
+   * @throws IOException
+   *           boom
    * 
    */
   public void send(String message) throws IOException {

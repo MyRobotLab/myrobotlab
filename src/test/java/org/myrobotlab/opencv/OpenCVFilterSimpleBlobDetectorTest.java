@@ -8,7 +8,7 @@ import org.junit.Ignore;
 
 // The simple blob detector test fails.  TODO: fix it
 @Ignore
-public class OpenCVFilterSimpleBlobDetectorTest  extends AbstractOpenCVFilterTest {
+public class OpenCVFilterSimpleBlobDetectorTest extends AbstractOpenCVFilterTest {
 
   @Before
   public void setup() {

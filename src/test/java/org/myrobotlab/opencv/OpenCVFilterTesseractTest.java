@@ -8,7 +8,7 @@ import org.junit.Ignore;
 
 // This unit test also crashes the JVM.
 @Ignore
-public class OpenCVFilterTesseractTest  extends AbstractOpenCVFilterTest {
+public class OpenCVFilterTesseractTest extends AbstractOpenCVFilterTest {
 
   @Before
   public void setup() {

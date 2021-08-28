@@ -216,9 +216,9 @@ public class Servo extends AbstractServo implements ServoControl {
 
   @Override
   public ServiceConfig getConfig() {
-    
+
     ServoConfig config = (ServoConfig) initConfig(new ServoConfig());
-        
+
     config.autoDisable = autoDisable;
     config.enabled = enabled;
 
@@ -232,24 +232,24 @@ public class Servo extends AbstractServo implements ServoControl {
     }
 
     // config.controller = controller;
-    
+
     config.idleTimeout = idleTimeout;
     config.pin = pin;
     config.rest = rest;
     config.speed = speed;
     config.sweepMax = sweepMax;
     config.sweepMin = sweepMin;
-    
+
     return config;
   }
 
   public ServiceConfig load(ServiceConfig c) {
-    ServoConfig config = (ServoConfig)c;
-    
+    ServoConfig config = (ServoConfig) c;
+
     autoDisable = config.autoDisable;
     mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
     mapper.setInverted(config.inverted);
-    mapper.setClip(config.clip);    
+    mapper.setClip(config.clip);
     enabled = config.enabled;
     idleTimeout = config.idleTimeout;
     pin = config.pin;
@@ -260,7 +260,7 @@ public class Servo extends AbstractServo implements ServoControl {
 
     return c;
   }
-  
+
   public static void main(String[] args) throws InterruptedException {
     try {
 
@@ -271,9 +271,9 @@ public class Servo extends AbstractServo implements ServoControl {
       // Platform.setVirtual(true);
 
       // Runtime.start("python", "Python");
-      Runtime runtime = Runtime.getInstance();      
+      Runtime runtime = Runtime.getInstance();
       runtime.load();
-      
+
       boolean done = true;
       if (done) {
         return;
@@ -281,11 +281,11 @@ public class Servo extends AbstractServo implements ServoControl {
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
-      webgui.startService();      
+      webgui.startService();
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
       Servo tilt = (Servo) Runtime.start("tilt", "Servo");
       Servo pan = (Servo) Runtime.start("pan", "Servo");
-      
+
       tilt.setPin(4);
       pan.setPin(5);
       tilt.setMinMax(10, 100);
@@ -293,45 +293,39 @@ public class Servo extends AbstractServo implements ServoControl {
       tilt.setInverted(true);
 
       mega.connect("/dev/ttyACM0");
-            
+
       mega.attach(tilt);
       mega.attach(pan);
-      
+
       runtime.save();
 
       /*
-      mega.save();
-      tilt.save();
-      pan.save();
-      
-      mega.load();
-      tilt.load();
-      pan.load();
-      */
-      
-            
+       * mega.save(); tilt.save(); pan.save();
+       * 
+       * mega.load(); tilt.load(); pan.load();
+       */
+
       // TODO - attach before and after connect..
-      
 
       // mega.setBoardMega();
 
-//      log.info("servo pos {}", tilt.getCurrentInputPos());
-//
-//      // double pos = 170;
-//      // servo03.setPosition(pos);
-//
-//      double min = 3;
-//      double max = 170;
-//      double speed = 60; // degree/s
-//
-//      mega.attach(tilt);
-//      // mega.attach(servo03,3);
-//
-//      for (int i = 0; i < 100; ++i) {
-//        tilt.moveTo(20.0);
-//      }
-//
-//      tilt.sweep(min, max, speed);
+      // log.info("servo pos {}", tilt.getCurrentInputPos());
+      //
+      // // double pos = 170;
+      // // servo03.setPosition(pos);
+      //
+      // double min = 3;
+      // double max = 170;
+      // double speed = 60; // degree/s
+      //
+      // mega.attach(tilt);
+      // // mega.attach(servo03,3);
+      //
+      // for (int i = 0; i < 100; ++i) {
+      // tilt.moveTo(20.0);
+      // }
+      //
+      // tilt.sweep(min, max, speed);
 
       /*
        * Servo servo04 = (Servo) Runtime.start("servo04", "Servo"); Servo

@@ -96,8 +96,10 @@ public class Pingdar extends Service implements RangingControl, RangeListener, E
    * 
    * invoke("publishPingdar", new Point(pos, lastRange)); lastPos = pos; return
    * lastPos; }
-   * @param point p
-    * @return p
+   * 
+   * @param point
+   *          p
+   * @return p
    */
 
   public Point publishPingdar(Point point) {

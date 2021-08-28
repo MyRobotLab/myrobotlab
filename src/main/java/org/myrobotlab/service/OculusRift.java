@@ -503,14 +503,14 @@ public class OculusRift extends Service implements PointPublisher {
     LoggingFactory.init("INFO");
 
     Runtime.createAndStart("gui", "SwingGui");
-    //Runtime.createAndStart("python", "Python");
+    // Runtime.createAndStart("python", "Python");
     OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
 
     String leftEyeURL = "http://10.0.0.2:8080/?action=stream";
     String rightEyeURL = "http://10.0.0.2:8081/?action=stream";
 
-    //rift.setLeftEyeURL(leftEyeURL);
-    //rift.setRightEyeURL(rightEyeURL);
+    // rift.setLeftEyeURL(leftEyeURL);
+    // rift.setRightEyeURL(rightEyeURL);
 
     rift.leftCameraAngle = 0;
     rift.leftCameraDy = 5;
@@ -521,7 +521,7 @@ public class OculusRift extends Service implements PointPublisher {
     rift.initContext();
 
     rift.logOrientation();
-    
+
     rift.leftOpenCV.capture();
     // TODO: configuration to enable left/right camera roll tracking.
     // while (true) {

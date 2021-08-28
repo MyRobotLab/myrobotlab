@@ -298,9 +298,13 @@ public class MetaData implements Serializable {
    * typical adding of a service reservation .. the actual name is left null, so
    * that this template will dynamically generate peer names depending on the
    * parents name
-   * @param key k
-   * @param peerType p 
-   * @param comment c
+   * 
+   * @param key
+   *          k
+   * @param peerType
+   *          p
+   * @param comment
+   *          c
    * 
    */
   public void addPeer(String key, String peerType, String comment) {
@@ -320,7 +324,7 @@ public class MetaData implements Serializable {
   public void setGlobalPeer(String key, String name, String peerType) {
     setGlobalPeer(key, name, peerType, "set by user");
   }
-  
+
   public void setGlobalPeer(String key, String name, String peerType, String comment) {
     ServiceReservation sr = peers.get(name);
     if (sr != null) {
@@ -328,8 +332,8 @@ public class MetaData implements Serializable {
       sr.type = peerType;
       sr.comment = comment;
     } else {
-      peers.put(key, new ServiceReservation(key, name, peerType, comment));    
-    }    
+      peers.put(key, new ServiceReservation(key, name, peerType, comment));
+    }
   }
 
   public void addPeer(String key, String actualName, String peerType, String comment) {

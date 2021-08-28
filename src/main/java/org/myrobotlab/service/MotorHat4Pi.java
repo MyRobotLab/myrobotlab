@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -9,9 +8,7 @@ import org.myrobotlab.framework.Registration;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.config.MotorHat4PiConfig;
-import org.myrobotlab.service.config.MotorPortConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.interfaces.MotorController;
 
 public class MotorHat4Pi extends AbstractMotor {
   private static final long serialVersionUID = 1L;
@@ -92,9 +89,9 @@ public class MotorHat4Pi extends AbstractMotor {
   public String getMotorId() {
     return motorId;
   }
-  
+
   @Override
-  public ServiceConfig getConfig() {    
+  public ServiceConfig getConfig() {
     MotorHat4PiConfig config = (MotorHat4PiConfig) initConfig(new MotorHat4PiConfig());
     config.motorId = motorId;
     return config;
@@ -102,7 +99,7 @@ public class MotorHat4Pi extends AbstractMotor {
 
   public ServiceConfig load(ServiceConfig c) {
     super.load(c);
-    MotorHat4PiConfig config = (MotorHat4PiConfig)c;    
+    MotorHat4PiConfig config = (MotorHat4PiConfig) c;
     setMotor(config.motorId);
     return c;
   }

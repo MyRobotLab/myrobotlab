@@ -63,7 +63,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   }
 
   /**
-   * default bus current bus of raspi service 
+   * default bus current bus of raspi service
    */
   String bus = "1";
 
@@ -76,11 +76,11 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   private static final long serialVersionUID = 1L;
 
   transient GpioController gpio;
-  
+
   protected Map<Integer, Set<String>> validAddresses = new HashMap<>();
 
   /**
-   * for attached devices 
+   * for attached devices
    */
   HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
@@ -274,6 +274,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   /**
    * Check if wiringPi library is used. Returns true when wiringPi library is
    * used
+   * 
    * @return true if library used
    * 
    */
@@ -282,7 +283,8 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     return wiringPi;
   }
 
-  @Override // FIXME - I2CControl has bus why is it supplied here as a parameter or why 
+  @Override // FIXME - I2CControl has bus why is it supplied here as a parameter
+            // or why
   public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
     int bytesRead = 0;
     String key = String.format("%d.%d", busAddress, deviceAddress);
@@ -436,7 +438,9 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   /**
    * Forces usage of wiringPi library (
    * http://wiringpi.com/reference/i2c-library/ )
-   * @param status wiring status for the pi
+   * 
+   * @param status
+   *          wiring status for the pi
    * 
    */
   @Deprecated
@@ -553,7 +557,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   public Integer getAddress(String pin) {
     return Integer.parseInt(pin);
   }
-  
+
   public void scan() {
     scan(null);
   }
@@ -569,17 +573,17 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       I2CBus bus = I2CFactory.getInstance(busNumber);
 
       validAddresses = new HashMap<>();
-      
+
       if (!validAddresses.containsKey(busNumber)) {
         validAddresses.put(busNumber, new HashSet<>());
       }
-      
+
       Set<String> addresses = validAddresses.get(busNumber);
 
       for (int i = 1; i < 128; i++) {
         try {
           I2CDevice device = bus.getDevice(i);
-          device.write((byte) 0); 
+          device.write((byte) 0);
           addresses.add(Integer.toHexString(i));
         } catch (Exception ignore) {
         }
@@ -587,14 +591,14 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
 
       log.info("scan found: ---");
       for (String a : addresses) {
-        log.info("address: "+ a);
+        log.info("address: " + a);
       }
       log.info("----------");
     } catch (Exception e) {
       error("cannot access i2c bus %d", busNumber);
       log.error("scan threw", e);
     }
-    
+
     broadcastState();
   }
 

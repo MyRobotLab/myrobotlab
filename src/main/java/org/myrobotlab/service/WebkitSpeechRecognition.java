@@ -69,7 +69,9 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
   /**
    * If setContinuous is False, this speedup recognition processing If
    * setContinuous is True, you have some time to speak again, in case of error
-   * @param continuous true if continious mode
+   * 
+   * @param continuous
+   *          true if continious mode
    */
   @Deprecated /* artifact of webkit */
   public void setContinuous(boolean continuous) {
@@ -91,11 +93,10 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
         "zh-cmn-Hant-TW", "zh-yue-Hant-HK", "zh-cmn-Hans-CN");
     return ret;
   }
-  
+
   @Override
   public void attachTextListener(String name) {
     addListener("publishText", name);
   }
-
 
 }

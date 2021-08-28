@@ -126,6 +126,7 @@ public class Security extends Service implements AuthorizationProvider {
   /**
    * I think it might be easier concept to use a singleton for this service ...
    * Almost "always" better to have a singleton instance vs static methods !!!
+   * 
    * @return the security service (singleton)
    * 
    */
@@ -345,7 +346,8 @@ public class Security extends Service implements AuthorizationProvider {
   /**
    * 
    * 
-   * @param keyName remove a key from the keystore
+   * @param keyName
+   *          remove a key from the keystore
    */
   public void deleteKey(String keyName) {
     if (store.containsKey(keyName)) {
@@ -711,8 +713,11 @@ public class Security extends Service implements AuthorizationProvider {
    * Set a key with a keyname .. e.g. AWS_SECRET with a value e.g.
    * ERM23!933-df3j2l4kjfu Once a key is set its in an encrypted store and the
    * code which sets the key can be removed
-   * @param keyName name
-   * @param keyValue value
+   * 
+   * @param keyName
+   *          name
+   * @param keyValue
+   *          value
    * @return the name of the key stored
    * 
    */
@@ -750,7 +755,7 @@ public class Security extends Service implements AuthorizationProvider {
   public void onRegistered(String name) {
     log.info("onRegistered({})", name);
   }
-  
+
   public void onStarted(String name) {
     ServiceInterface si = Runtime.getService(name);
     if (si instanceof KeyConsumer) {

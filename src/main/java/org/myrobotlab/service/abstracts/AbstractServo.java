@@ -200,8 +200,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * 
    * * Arduino/MrlComm * Adafruit16CServoController * JMonkeyEngine /
    * Interpolator
- * @param n the name
- * @param id the instance id
+   * 
+   * @param n
+   *          the name
+   * @param id
+   *          the instance id
    * 
    */
 
@@ -237,10 +240,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     }
     currentOutputPos = mapper.calcOutput(targetPos);
   }
-  
+
   /**
-   * if a new service is added to the system
-   * refresh the controllers
+   * if a new service is added to the system refresh the controllers
    */
   public void onStarted(String name) {
     invoke("refreshControllers");
@@ -261,8 +263,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   /**
    * max complexity - minimal parameter EncoderControl attach
- * @param enc the encoder
- * @throws Exception boom
+   * 
+   * @param enc
+   *          the encoder
+   * @throws Exception
+   *           boom
    * 
    */
   public void attach(EncoderControl enc) throws Exception {
@@ -417,7 +422,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   public void disable() {
     stop();
     enabled = false;
-    broadcast("publishServoDisable", (ServoControl)this);
+    broadcast("publishServoDisable", (ServoControl) this);
     broadcastState();
   }
 
@@ -560,8 +565,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   /**
    * formula for calculating the position from microseconds to degrees
- * @param microseconds ms to convert
- * @return the degrees converted
+   * 
+   * @param microseconds
+   *          ms to convert
+   * @return the degrees converted
    * 
    */
   public static double microsecondsToDegree(double microseconds) {
@@ -659,11 +666,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     return sc;
   }
 
-  // TODO: why do we need this method here , invoke message cache misses otherwise.
+  // TODO: why do we need this method here , invoke message cache misses
+  // otherwise.
   public ServoControl publishServoEnable(AbstractServo sc) {
-    return publishServoEnable((ServoControl)sc);
+    return publishServoEnable((ServoControl) sc);
   }
-  
+
   @Override
   public ServoControl publishServoMoveTo(ServoControl sc) {
     return sc;
@@ -817,14 +825,13 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
     speed = degreesPerSecond;
 
-    
     if (degreesPerSecond == null) {
       log.info("disabling speed control");
-    }    
+    }
     broadcast("publishServoSetSpeed", this);
     broadcastState();
   }
-  
+
   @Deprecated /* this is really speed not velocity, velocity is a vector */
   public void setVelocity(Double degreesPerSecond) {
     setSpeed(degreesPerSecond);
@@ -980,12 +987,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     }
     return name;
   }
-  
+
   public void startService() {
     super.startService();
     Runtime.getInstance().subscribeToLifeCycleEvents(getName());
   }
-  
+
   @Override
   public String publishServoEnable(String name) {
     // TODO Nothing calls this now?
@@ -995,15 +1002,17 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public void attachServoControlListener(String name) {
-    // Add the listener calls. 
+    // Add the listener calls.
     addListener("publishServoMoveTo", name);
     addListener("publishMoveTo", name);
-    // TODO: this is an ambigious call because we have two flavors of this method.
-    // one that takes/returns the string name.. the other that takes/returns the ServoControl.
+    // TODO: this is an ambigious call because we have two flavors of this
+    // method.
+    // one that takes/returns the string name.. the other that takes/returns the
+    // ServoControl.
     addListener("publishServoEnable", name);
     addListener("publishServoDisable", name);
     addListener("publishServoStop", name);
-    
+
   }
 
 }

@@ -25,7 +25,7 @@ public class Arduino2Test extends AbstractTest {
   private static final String V_PORT_2 = "test_port_2";
 
   @Before
-  public void setup() throws IOException {    
+  public void setup() throws IOException {
   }
 
   @Test

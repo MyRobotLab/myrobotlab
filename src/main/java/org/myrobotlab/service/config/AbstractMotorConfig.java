@@ -3,7 +3,7 @@ package org.myrobotlab.service.config;
 public class AbstractMotorConfig extends ServiceConfig {
 
   public boolean locked;
-  
+
   // mapper values
   public boolean inverted;
   public boolean clip;

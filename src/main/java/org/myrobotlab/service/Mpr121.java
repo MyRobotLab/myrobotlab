@@ -475,7 +475,9 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
    * This method starts the MPR121 measuring pins = Number of pins to use for
    * measuring starting with ELE0 as number 1 Setting pins = 0 will stop
    * measuring
-   * @param pins pins
+   * 
+   * @param pins
+   *          pins
    */
   public void setRunMode(int pins) {
     writeRegister(ELECTRODE_CONFIGURAION_REGISTER, pins + 1);
@@ -885,7 +887,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     // TODO Auto-generated method stub
     return null;
   }
-  
+
   @Override
   public void setBus(String bus) {
     setDeviceBus(bus);

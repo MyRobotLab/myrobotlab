@@ -35,7 +35,7 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
   public Map<String, Double> lastResult = null;
 
   protected Boolean running;
-  
+
   public CustomModel model = null;
 
   private volatile IplImage lastImage = null;

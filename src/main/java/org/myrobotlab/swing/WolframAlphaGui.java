@@ -69,8 +69,8 @@ public class WolframAlphaGui extends ServiceGui implements ActionListener {
         query.update(query.getGraphics());
         String answer = null;
         try {
-            answer = (String) myService.sendBlocking(boundServiceName, 30000, "wolframAlpha", text, Boolean.TRUE);
-        } catch(Exception e) {
+          answer = (String) myService.sendBlocking(boundServiceName, 30000, "wolframAlpha", text, Boolean.TRUE);
+        } catch (Exception e) {
           log.error("answer took too long");
         }
         // System.out.println(answer);

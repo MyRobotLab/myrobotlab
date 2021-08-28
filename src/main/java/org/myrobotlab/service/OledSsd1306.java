@@ -965,7 +965,7 @@ public class OledSsd1306 extends Service implements I2CControl {
     }
     return false;
   }
-  
+
   @Override
   public void setBus(String bus) {
     setDeviceBus(bus);

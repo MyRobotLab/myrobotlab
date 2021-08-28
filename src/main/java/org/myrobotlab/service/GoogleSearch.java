@@ -103,7 +103,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
       // not sure if locale is supported tag probably is ....
       String request = "https://google.com/search?lr=lang_" + locale.getLanguage() + "&q=" + encodedSearch + "&aqs=chrome..69i57.5547j0j7&sourceid=chrome&ie=UTF-8";
       log.info(String.format("request to google: %s", request));
-      
+
       // Fetch the page
       Document doc = Jsoup.connect(request).userAgent(USER_AGENT).get();
       /*
@@ -284,7 +284,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   public static void main(String[] args) {
     try {
 
-      Runtime.main(new String[] {"--id", "admin", "--from-launcher" });
+      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
       LoggingFactory.init(Level.INFO);
 
       GoogleSearch google = (GoogleSearch) Runtime.start("google", "GoogleSearch");

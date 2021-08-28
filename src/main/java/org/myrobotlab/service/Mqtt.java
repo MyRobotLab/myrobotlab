@@ -31,7 +31,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.mqtt.MqttMsg;
 import org.myrobotlab.net.Connection;
-import org.myrobotlab.net.RouteTable;
 import org.myrobotlab.net.SslUtil;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.KeyConsumer;
@@ -134,7 +133,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
   /**
    * reference to runtime route table
    */
-  //protected transient RouteTable routeTable = null;
+  // protected transient RouteTable routeTable = null;
 
   protected transient Runtime runtime = null;
 
@@ -494,9 +493,9 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
 
       if (msg != null) {
         /**
-         * A new "connection" is made from this topic, because the broker is a dumb
-         * "hub".. and we want to support non-mrl mqtt brokers. This means a
-         * "connection" is really establishing a channel over the broker to
+         * A new "connection" is made from this topic, because the broker is a
+         * dumb "hub".. and we want to support non-mrl mqtt brokers. This means
+         * a "connection" is really establishing a channel over the broker to
          * other mrl instances. The broker nor the connection to the broker need
          * any "special" logic. Mrl instances establish connections and routes
          * based on unique receive topics (rx&lt;-{service}@{id}) they subscribe
@@ -516,9 +515,10 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
           // dynamic routing
           log.warn("found new sender {} - adding adding new connection and route", remoteFullName);
 
-          // FIXME combine Connection, runtime.AddTable, all the stuffs - put in routeTable
+          // FIXME combine Connection, runtime.AddTable, all the stuffs - put in
+          // routeTable
           // FIXME combine again put in AbstractGateway !
-          
+
           String uuid = java.util.UUID.randomUUID().toString();
           // String id = CodecUtils.getId(msg.sender);
           Connection connection = new Connection(uuid, remoteId, getName());
@@ -535,8 +535,10 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
 
           // local gateway key is a key which this gateway can use to get
           // meta-data or connection data outside the actual message
-          // important when sending messages via egress to us it with the routingTable
-          // to select the correct "interface/connection" to begin sending the msg
+          // important when sending messages via egress to us it with the
+          // routingTable
+          // to select the correct "interface/connection" to begin sending the
+          // msg
           // routeTable.addLocalGatewayKey(getName() + " " + rxTopic, uuid);
           runtime.addLocalGatewayKey(getName() + " " + rxTopic, uuid);
           runtime.addConnection(uuid, remoteId, connection);
@@ -574,15 +576,17 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
           sendRemote(describe);
 
         } else if (topic.startsWith(mrlTopicApiPrefix + "/")) {
-          
+
           // check to see if route table needs updating
           String remoteId = msg.getSrcId();
 
           // check if the route exists
           if (!runtime.containsRoute(remoteId)) {
             // FIXME implement 1st in routing table, then in AbstractGateway
-            // add new route to the routeTable - we found a new "id" - it came over interface x - we'll add
-            // a x -> id route entry, in order to do so we need to pull back the uuid of the connection/interface
+            // add new route to the routeTable - we found a new "id" - it came
+            // over interface x - we'll add
+            // a x -> id route entry, in order to do so we need to pull back the
+            // uuid of the connection/interface
             String uuid = runtime.getConnectionUuidFromGatewayKey((getName() + " " + topic));
             runtime.addRoute(remoteId, uuid, 10);
           }
@@ -657,7 +661,9 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
 
   /**
    * publish a null message to a topic - used for "events"
-   * @param topic t
+   * 
+   * @param topic
+   *          t
    * 
    */
   public void publish(String topic) {
@@ -707,7 +713,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
 
     // FIXME put all stuff (isLocal) in routeTable
     // FIXME put this in AbstractGateway
-    
+
     if (msg.getId() == null && msg.getMethod().equals("onConnect")) {
       remoteRxTopic = onConnectTopic;
     } else {
@@ -718,7 +724,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
       Connection conn = runtime.getRoute(msg.getId());
       String rxId = conn.getId();
       Connection connection = runtime.getConnectionFromId(rxId);
-      String remoteFullName = (String)connection.get("remote-gateway");
+      String remoteFullName = (String) connection.get("remote-gateway");
       remoteRxTopic = String.format("mrl/gw/%s/rx<-%s", remoteFullName, getFullName());
     }
 
@@ -810,7 +816,8 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
    * @param qos
    *          the maximum quality of service to receive messages at for this
    *          subscription
-   * @throws MqttException boom
+   * @throws MqttException
+   *           boom
    */
   public void subscribe(String topic, int qos) throws MqttException {
     if (!connected) {

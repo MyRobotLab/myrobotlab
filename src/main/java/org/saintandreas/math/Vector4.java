@@ -40,168 +40,179 @@ package org.saintandreas.math;
  *
  * @author Maarten Steur
  * @author Brad Davis
- * @param <ResultType> result type
+ * @param <ResultType>
+ *          result type
  */
 
 public abstract class Vector4<ResultType extends Vector4<ResultType>> extends Vector<ResultType> implements java.io.Serializable {
-    static final long serialVersionUID = 1;
-    protected abstract ResultType build(float x, float y, float z, float w);
+  static final long serialVersionUID = 1;
 
-    /**
-     * the x value of the vector.
-     */
-    public final float x;
+  protected abstract ResultType build(float x, float y, float z, float w);
 
-    /**
-     * the y value of the vector.
-     */
-    public final float y;
+  /**
+   * the x value of the vector.
+   */
+  public final float x;
 
-    /**
-     * the z value of the vector.
-     */
-    public final float z;
+  /**
+   * the y value of the vector.
+   */
+  public final float y;
 
-    /**
-     * the w value of the vector.
-     */
-    public final float w;
+  /**
+   * the z value of the vector.
+   */
+  public final float z;
 
-    /**
-     * Constructor instantiates a new <code>Vector4f</code> with provides
-     * values.
-     * @param s value
-     */
-    public Vector4(float s) {
-      x = y= z = w = s;
+  /**
+   * the w value of the vector.
+   */
+  public final float w;
+
+  /**
+   * Constructor instantiates a new <code>Vector4f</code> with provides values.
+   * 
+   * @param s
+   *          value
+   */
+  public Vector4(float s) {
+    x = y = z = w = s;
+  }
+
+  /**
+   * Constructor instantiates a new <code>Vector4f</code> with provides values.
+   *
+   * @param x
+   *          the x value of the vector.
+   * @param y
+   *          the y value of the vector.
+   * @param z
+   *          the z value of the vector.
+   * @param w
+   *          the w value of the vector.
+   */
+  public Vector4(float x, float y, float z, float w) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.w = w;
+  }
+
+  /**
+   * are these two vectors the same? they are is they both have the same x,y,
+   * and z values.
+   *
+   * @param o
+   *          the object to compare for equality
+   * @return true if they are equal
+   */
+  @Override
+  public final boolean equals(Object o) {
+    if (!(o instanceof Vector4)) {
+      return false;
     }
 
-    /**
-     * Constructor instantiates a new <code>Vector4f</code> with provides
-     * values.
-     *
-     * @param x
-     *            the x value of the vector.
-     * @param y
-     *            the y value of the vector.
-     * @param z
-     *            the z value of the vector.
-     * @param w
-     *            the w value of the vector.
-     */
-    public Vector4(float x, float y, float z, float w) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.w = w;
+    if (this == o) {
+      return true;
     }
 
+    @SuppressWarnings("unchecked")
+    Vector4<ResultType> comp = (Vector4<ResultType>) o;
+    if (Float.compare(x, comp.x) != 0)
+      return false;
+    if (Float.compare(y, comp.y) != 0)
+      return false;
+    if (Float.compare(z, comp.z) != 0)
+      return false;
+    if (Float.compare(w, comp.w) != 0)
+      return false;
+    return true;
+  }
 
-    /**
-     * are these two vectors the same? they are is they both have the same x,y,
-     * and z values.
-     *
-     * @param o
-     *            the object to compare for equality
-     * @return true if they are equal
-     */
-    @Override
-    public final boolean equals(Object o) {
-        if (!(o instanceof Vector4)) { return false; }
+  /**
+   * <code>toString</code> returns the string representation of this vector. The
+   * format is:
+   *
+   * org.jme.math.Vector3f [X=XX.XXXX, Y=YY.YYYY, Z=ZZ.ZZZZ, W=WW.WWWW]
+   *
+   * @return the string representation of this vector.
+   */
+  @Override
+  public final String toString() {
+    return "(" + x + ", " + y + ", " + z + ", " + w + ")";
+  }
 
-        if (this == o) { return true; }
+  public final float getX() {
+    return x;
+  }
 
-        @SuppressWarnings("unchecked")
-        Vector4<ResultType> comp = (Vector4<ResultType>) o;
-        if (Float.compare(x,comp.x) != 0) return false;
-        if (Float.compare(y,comp.y) != 0) return false;
-        if (Float.compare(z,comp.z) != 0) return false;
-        if (Float.compare(w,comp.w) != 0) return false;
-        return true;
-    }
+  public final float getY() {
+    return y;
+  }
 
-    /**
-     * <code>toString</code> returns the string representation of this vector.
-     * The format is:
-     *
-     * org.jme.math.Vector3f [X=XX.XXXX, Y=YY.YYYY, Z=ZZ.ZZZZ, W=WW.WWWW]
-     *
-     * @return the string representation of this vector.
-     */
-    @Override
-    public final String toString() {
-        return "(" + x + ", " + y + ", " + z + ", " + w + ")";
-    }
+  public final float getZ() {
+    return z;
+  }
 
-    public final float getX() {
+  public final float getW() {
+    return w;
+  }
+
+  /**
+   * <code>angleBetween</code> returns (in radians) the angle between two
+   * vectors. It is assumed that both this vector and the given vector are unit
+   * vectors (iow, normalized).
+   *
+   * @param otherVector
+   *          a unit vector to find the angle against
+   * @return the angle in radians.
+   */
+  @Override
+  public final float angleBetween(ResultType otherVector) {
+    float dotProduct = dot(otherVector);
+    float angle = FastMath.acos(dotProduct);
+    return angle;
+  }
+
+  /**
+   * Saves this Vector3f into the given float[] object.
+   *
+   */
+  @Override
+  public final float[] toArray() {
+    return new float[] { x, y, z, w };
+  }
+
+  /**
+   * @param index
+   *          i
+   * @return x value if index == 0, y value if index == 1 or z value if index ==
+   *         2
+   * @throws IllegalArgumentException
+   *           if index is not one of 0, 1, 2.
+   */
+  public final float get(int index) {
+    switch (index) {
+      case 0:
         return x;
-    }
-
-    public final float getY() {
+      case 1:
         return y;
-    }
-
-    public final float getZ() {
+      case 2:
         return z;
-    }
-
-    public final float getW() {
+      case 3:
         return w;
     }
+    throw new IllegalArgumentException("index must be either 0, 1, 2 or 3");
+  }
 
-    /**
-     * <code>angleBetween</code> returns (in radians) the angle between two vectors.
-     * It is assumed that both this vector and the given vector are unit vectors (iow, normalized).
-     *
-     * @param otherVector a unit vector to find the angle against
-     * @return the angle in radians.
-     */
-    @Override
-    public final float angleBetween(ResultType otherVector) {
-        float dotProduct = dot(otherVector);
-        float angle = FastMath.acos(dotProduct);
-        return angle;
-    }
-    
+  @Override
+  protected ResultType build(float[] v) {
+    return build(v[0], v[1], v[2], v[3]);
+  }
 
-    /**
-     * Saves this Vector3f into the given float[] object.
-     *
-     */
-    @Override
-    public final float[] toArray() {
-      return new float[] { x, y, z, w };
-    }
+  @Override
+  protected ResultType build(float s) {
+    return build(s);
+  }
 
-    /**
-     * @param index i
-     * @return x value if index == 0, y value if index == 1 or z value if index ==
-     *         2
-     * @throws IllegalArgumentException
-     *             if index is not one of 0, 1, 2.
-     */
-    public final float get(int index) {
-        switch (index) {
-            case 0:
-                return x;
-            case 1:
-                return y;
-            case 2:
-                return z;
-            case 3:
-                return w;
-        }
-        throw new IllegalArgumentException("index must be either 0, 1, 2 or 3");
-    }
-
-    @Override
-    protected ResultType build(float[] v) {
-      return build(v[0], v[1], v[2], v[3]);
-    }
-
-    @Override
-    protected ResultType build(float s) {
-      return build(s);
-    }
-    
 }

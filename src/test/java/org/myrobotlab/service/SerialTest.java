@@ -62,7 +62,7 @@ public class SerialTest extends AbstractTest {
     catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
     Thread.sleep(100);
     serial.connect(vport);
-    uart = (Serial)Runtime.getService(vport + ".UART");
+    uart = (Serial) Runtime.getService(vport + ".UART");
     uart.setTimeout(300);
     Thread.sleep(300);
 

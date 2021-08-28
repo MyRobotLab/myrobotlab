@@ -1,12 +1,12 @@
 package org.myrobotlab.service.data;
 
 public class AnalogData {
-  
+
   /**
    * name of the axis
    */
   public String name;
-  
+
   /**
    * value of the axis
    */

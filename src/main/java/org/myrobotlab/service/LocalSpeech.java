@@ -86,7 +86,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   }
 
   /**
-   * @param ttsCommand set the tts command template
+   * @param ttsCommand
+   *          set the tts command template
    * 
    */
   public void setTtsCommand(String ttsCommand) {
@@ -102,7 +103,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   }
 
   /**
-   * @return  setFestival sets the Windows tts template
+   * @return setFestival sets the Windows tts template
    * 
    */
   public boolean setTts() {
@@ -172,7 +173,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * String of characters to filter out of text to create the tts command.
    * Typically double quotes should be filtered out of the command as creating
    * the text to speech process command can be broken by double quotes
-   * @param filter chars to filter.
+   * 
+   * @param filter
+   *          chars to filter.
    * 
    */
   public void setFilter(String filter) {
@@ -221,20 +224,20 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     if (platform.isWindows()) {
       // Runtime.execute("cmd.exe", "/c", "\"" + cmd + "\"");
       List<String> args = new ArrayList<>();
-      
+
       // https://thinkpowershell.com/create-cortana-audio-files-from-text-using-powershell/
       // https://mcpmag.com/articles/2018/03/07/talking-through-powershell.aspx
 
       // windows 10 minimum - power shell interface - output in json
       args.add("Add-Type -AssemblyName System.Speech;");
       args.add("$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;");
-      args.add("$speak.SelectVoice('"+getVoice().getVoiceProvider().toString()+"');");
-      args.add("$speak.SetOutputToWaveFile('"+localFileName+"');");
+      args.add("$speak.SelectVoice('" + getVoice().getVoiceProvider().toString() + "');");
+      args.add("$speak.SetOutputToWaveFile('" + localFileName + "');");
       args.add("$speak.speak('" + toSpeak + "')");
       String ret = Runtime.execute("powershell.exe", args, null, null, null);
-      
+
       log.info("powershell returned : {}", ret);
-      
+
     } else if (platform.isMac()) {
       Runtime.execute(cmd);
     } else if (platform.isLinux()) {
@@ -261,9 +264,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public String getAudioCacheExtension() {
     if (Platform.getLocalInstance().isMac()) {
       return ".aiff";
-    }/*else if (ttsHack) {
-      return "0.mp3"; // ya stoopid no ?
-    }*/
+    } /*
+       * else if (ttsHack) { return "0.mp3"; // ya stoopid no ? }
+       */
     return ".wav"; // hopefully Linux festival can do this (if not can we ?)
   }
 

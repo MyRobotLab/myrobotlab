@@ -465,8 +465,10 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
   /**
    * This method will try to launch a python command with error handling
-   * @param gesture name of the gesture to execute
-   * @return  result from python exec method.
+   * 
+   * @param gesture
+   *          name of the gesture to execute
+   * @return result from python exec method.
    */
   public String execGesture(String gesture) {
     lastGestureExecuted = gesture;
@@ -1568,7 +1570,8 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
    * finish migration )
    * 
    * @return started ProgramAB service
-   * @throws IOException boom
+   * @throws IOException
+   *           boom
    */
   public ProgramAB startBrain() throws IOException {
     if (chatBot == null) {

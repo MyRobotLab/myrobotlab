@@ -85,10 +85,10 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
    * if motor is locked - no position or power commands will work
    */
   protected boolean locked = false;
-  
+
   /**
-   * attached analog publishers to this service - functionally its
-   * a simple "lock" to avoid cyclic attach/detaches - works well
+   * attached analog publishers to this service - functionally its a simple
+   * "lock" to avoid cyclic attach/detaches - works well
    */
   // final protected Set<String> analogPublishers = new HashSet<>();
   // bad idea publishers internally will need to know about subscribers
@@ -143,8 +143,8 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   public void onRegistered(Registration s) {
     if (s.hasInterface(MotorController.class)) {
       controllers.add(s.getName());
-      broadcastState();  
-    }    
+      broadcastState();
+    }
   }
 
   @Override
@@ -154,8 +154,8 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
       broadcastState();
     }
   }
-  
-  public Set <String> refreshControllers() {
+
+  public Set<String> refreshControllers() {
     controllers.clear();
     controllers.addAll(Runtime.getServiceNamesFromInterface(MotorController.class));
     broadcastState();
@@ -329,19 +329,21 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
     error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
   }
-    
+
   @Override
   public void attachAnalogPublisher(AnalogPublisher publisher) {
     publisher.attachAnalogListener(this);
   }
-  
+
   @Override
   public void detachAnalogPublisher(AnalogPublisher publisher) {
-    publisher.detachAnalogListener(this);    
+    publisher.detachAnalogListener(this);
   }
 
-
-  @Deprecated /* I think this was an attempt to control via an analog pin - should be updated to use attachAnalogPublisher */
+  @Deprecated /*
+               * I think this was an attempt to control via an analog pin -
+               * should be updated to use attachAnalogPublisher
+               */
   public void onPin(PinData data) {
     Double pwr = null;
     pwr = data.value.doubleValue();
@@ -477,7 +479,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   @Override /* incoming config is from derived motor type */
   protected ServiceConfig initConfig(ServiceConfig c) {
     super.initConfig(c);
-    AbstractMotorConfig config = (AbstractMotorConfig)c;
+    AbstractMotorConfig config = (AbstractMotorConfig) c;
 
     config.locked = locked;
 

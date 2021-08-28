@@ -8,9 +8,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.config.MotorDualPwmConfig;
-import org.myrobotlab.service.config.MotorHat4PiConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.interfaces.AnalogPublisher;
 
 public class MotorDualPwm extends AbstractMotor {
   private static final long serialVersionUID = 1L;
@@ -71,7 +69,7 @@ public class MotorDualPwm extends AbstractMotor {
   }
 
   @Override
-  public ServiceConfig getConfig() {    
+  public ServiceConfig getConfig() {
     MotorDualPwmConfig config = (MotorDualPwmConfig) initConfig(new MotorDualPwmConfig());
     config.leftPwmPin = leftPwmPin;
     config.rightPwmPin = rightPwmPin;
@@ -81,7 +79,7 @@ public class MotorDualPwm extends AbstractMotor {
 
   public ServiceConfig load(ServiceConfig c) {
     super.load(c);
-    MotorDualPwmConfig config = (MotorDualPwmConfig)c;
+    MotorDualPwmConfig config = (MotorDualPwmConfig) c;
     if (config.leftPwmPin != null) {
       setLeftPwmPin(config.leftPwmPin);
     }
@@ -94,7 +92,6 @@ public class MotorDualPwm extends AbstractMotor {
     return c;
   }
 
-  
   public static void main(String[] args) throws InterruptedException {
 
     LoggingFactory.init(Level.INFO);

@@ -35,16 +35,17 @@ public interface NeoPixelController extends Attachable {
    * @param neopixel
    * @param pin
    * @param numberOfPixels
-   * @param depth 3 RGB 4 RGBW
+   * @param depth
+   *          3 RGB 4 RGBW
    */
   public void neoPixelAttach(String neopixel, int pin, int numberOfPixels, int depth);
 
   /**
-   * Write a series of bytes to the neopixel
-   * Format is 5 bytes for each pixel - since the address is sent with each pixel - optimizations
-   * "could" be done for updating only the changing pixels in an animation
+   * Write a series of bytes to the neopixel Format is 5 bytes for each pixel -
+   * since the address is sent with each pixel - optimizations "could" be done
+   * for updating only the changing pixels in an animation
    * 
-   * |address | red | green | blue | white  
+   * |address | red | green | blue | white
    * 
    * @param neopixel
    * @param buffer
@@ -52,7 +53,8 @@ public interface NeoPixelController extends Attachable {
   public void neoPixelWriteMatrix(String neopixel, int[] buffer);
 
   /**
-   * Sets an "onboard" animation's color and speed values then starts the animation
+   * Sets an "onboard" animation's color and speed values then starts the
+   * animation
    * 
    * @param neopixel
    * @param animation
@@ -60,10 +62,11 @@ public interface NeoPixelController extends Attachable {
    * @param green
    * @param blue
    * @param white
-   * @param wait_ms - number of ms to wait in "show" pixels
+   * @param wait_ms
+   *          - number of ms to wait in "show" pixels
    */
   public void neoPixelSetAnimation(String neopixel, int animation, int red, int green, int blue, int white, int wait_ms);
-  
+
   /**
    * Optimized fill of a continuous segment of pixels
    * 
@@ -79,11 +82,12 @@ public interface NeoPixelController extends Attachable {
 
   /**
    * Sets the brightness of all pixels
+   * 
    * @param neopixel
    * @param brightness
    */
   public void neoPixelSetBrightness(String neopixel, int brightness);
-  
+
   /**
    * Optimize clear of all the pixels, does a memset on board
    */

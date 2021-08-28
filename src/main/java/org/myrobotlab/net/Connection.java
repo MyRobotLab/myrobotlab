@@ -8,13 +8,12 @@ import java.util.Map;
  */
 public class Connection {
 
-  
   public Connection(String uuid, String id, String gateway) {
     put("uuid", uuid);
     put("id", id);
     put("gateway", gateway);
   }
-  
+
   /**
    * serializable references
    */
@@ -41,8 +40,11 @@ public class Connection {
   /**
    * put in objects which should be transient - e.g. sockets all config and
    * other attributes should use put(key, object)
-   * @param key k
-   * @param o o
+   * 
+   * @param key
+   *          k
+   * @param o
+   *          o
    * @return previous value
    * 
    */
@@ -61,25 +63,25 @@ public class Connection {
   }
 
   public String getId() {
-    return (String)serializable.get("id");
+    return (String) serializable.get("id");
   }
 
   public String getUuid() {
-    return (String)serializable.get("uuid");
+    return (String) serializable.get("uuid");
   }
-  
+
   public String toString() {
     StringBuilder sb = new StringBuilder();
     for (String s : serializable.keySet()) {
       sb.append("\n");
-      sb.append(String.format("%s=%s", s, (String)serializable.get(s)));
+      sb.append(String.format("%s=%s", s, (String) serializable.get(s)));
     }
     sb.append("\n");
     return sb.toString();
   }
 
   public String getGateway() {
-    return (String)serializable.get("gateway");
+    return (String) serializable.get("gateway");
   }
 
 }

@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 
 /** represent a set of servo positions at a given point in time */
 public class Sequence {
-  
+
   public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
 
   public String name;

@@ -1,6 +1,11 @@
 package org.saintandreas.gl.textures;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL11.glGenTextures;
+import static org.lwjgl.opengl.GL11.glTexImage2D;
+import static org.lwjgl.opengl.GL11.glTexParameterf;
+import static org.lwjgl.opengl.GL11.glTexParameteri;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -59,24 +64,18 @@ public class Texture {
     glTexParameterf(target, pname, value);
   }
 
-  public void image2d(int internalformat, int width, int height, int format,
-      int type, ByteBuffer pixels) {
-    glTexImage2D(target, 0, internalformat, width, height, 0, format, type,
-        pixels);
+  public void image2d(int internalformat, int width, int height, int format, int type, ByteBuffer pixels) {
+    glTexImage2D(target, 0, internalformat, width, height, 0, format, type, pixels);
   }
-
 
   public void loadImageData(BufferedImage image, int loadTarget) {
     // Flip the image vertically
     AffineTransform tx = AffineTransform.getScaleInstance(1, -1);
     tx.translate(0, -image.getHeight(null));
-    AffineTransformOp op = new AffineTransformOp(tx,
-        AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+    AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
     image = op.filter(image, null);
 
-    GL11.glTexImage2D(loadTarget, 0, GL11.GL_RGBA8, image.getWidth(),
-        image.getHeight(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE,
-        convertImageData(image));
+    GL11.glTexImage2D(loadTarget, 0, GL11.GL_RGBA8, image.getWidth(), image.getHeight(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, convertImageData(image));
   }
 
   public static Texture loadImage(BufferedImage image, int textureType, int loadTarget) {
@@ -95,7 +94,7 @@ public class Texture {
     return loadImage(Images.load(url), textureType, loadTarget);
   }
 
-  public static Texture loadImage(BufferedImage image, int textureType)  {
+  public static Texture loadImage(BufferedImage image, int textureType) {
     return loadImage(image, textureType, textureType);
   }
 
@@ -107,7 +106,7 @@ public class Texture {
     return loadImage(url, textureType, textureType);
   }
 
-  public static Texture loadImage(BufferedImage image)  {
+  public static Texture loadImage(BufferedImage image) {
     return loadImage(image, GL_TEXTURE_2D);
   }
 
@@ -121,7 +120,9 @@ public class Texture {
 
   /**
    * Convert the buffered image to a texture
-   * @param bufferedImage input buffered image
+   * 
+   * @param bufferedImage
+   *          input buffered image
    * @return byteBuffer containing the image.
    */
   public static ByteBuffer convertImageData(BufferedImage bufferedImage) {
@@ -129,13 +130,10 @@ public class Texture {
     WritableRaster raster;
     BufferedImage texImage;
 
-    ColorModel glAlphaColorModel = new ComponentColorModel(
-        ColorSpace.getInstance(ColorSpace.CS_sRGB), new int[] { 8, 8, 8, 8 },
-        true, false, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
-    raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE,
-        bufferedImage.getWidth(), bufferedImage.getHeight(), 4, null);
-    texImage = new BufferedImage(glAlphaColorModel, raster, true,
-        new Hashtable<>());
+    ColorModel glAlphaColorModel = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), new int[] { 8, 8, 8, 8 }, true, false, Transparency.TRANSLUCENT,
+        DataBuffer.TYPE_BYTE);
+    raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE, bufferedImage.getWidth(), bufferedImage.getHeight(), 4, null);
+    texImage = new BufferedImage(glAlphaColorModel, raster, true, new Hashtable<>());
 
     // copy the source image into the produced image
     Graphics g = texImage.getGraphics();
@@ -145,8 +143,7 @@ public class Texture {
 
     // build a byte buffer from the temporary image
     // that be used by OpenGL to produce a texture.
-    byte[] data = ((DataBufferByte) texImage.getRaster().getDataBuffer())
-        .getData();
+    byte[] data = ((DataBufferByte) texImage.getRaster().getDataBuffer()).getData();
 
     BufferUtils.createByteBuffer(data.length);
     imageBuffer = ByteBuffer.allocateDirect(data.length);

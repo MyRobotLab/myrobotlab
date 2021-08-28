@@ -12,7 +12,9 @@ public class WebcamMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * @param name n
+   * 
+   * @param name
+   *          n
    * 
    */
   public WebcamMeta(String name) {
@@ -24,12 +26,13 @@ public class WebcamMeta extends MetaData {
     addDescription("used as a general webcam");
     addCategory("video");
     // if (platform.isLinux()) {
-      addDependency("com.github.sarxos", "webcam-capture-driver-v4l4j", "0.3.13-SNAPSHOT");
+    addDependency("com.github.sarxos", "webcam-capture-driver-v4l4j", "0.3.13-SNAPSHOT");
     // } else {
-      // ?? windows ok with default of v4l4j ???
-      // addDependency("com.github.sarxos", "webcam-capture-driver-v4l4j", "0.3.12");
-      // }
-   
+    // ?? windows ok with default of v4l4j ???
+    // addDependency("com.github.sarxos", "webcam-capture-driver-v4l4j",
+    // "0.3.12");
+    // }
+
   }
 
 }
