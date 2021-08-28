@@ -66,7 +66,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   protected List<String> controllers;
 
   protected String controllerName;
-  
+
   /**
    * frequency
    */
@@ -84,8 +84,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
           refresh();
           invoke("publishOrientation", data.orientation);
           invoke("publishMpu6050Data", data);
-          
-          sleep((int)(1000/sampleRateHz));
+
+          sleep((int) (1000 / sampleRateHz));
         }
       } catch (Exception e) {
         log.error("publisher threw", e);
@@ -110,7 +110,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   static class Mpu6050Data {
-    
+
     Orientation orientation = new Orientation(0.0, 0.0, 0.0);
 
     /**
@@ -142,7 +142,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     protected double gyroDegreeX = 0;
     protected double gyroDegreeY = 0;
     protected double gyroDegreeZ = 0;
-    
+
     public String toString() {
       StringBuilder sb = new StringBuilder();
       sb.append(orientation.toString());
@@ -232,7 +232,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     broadcastState();
   }
 
-  
   /**
    * This method reads all the 7 raw values in one go accelX accelY accelZ
    * temperature ( In degrees Celcius ) gyroX gyroY gyroZ
@@ -245,7 +244,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   public void refresh() {
     getRaw();
     complementaryFilter(data.gyroX, data.gyroY, data.gyroZ, data.accelX, data.accelY, data.accelZ);
-    // log.debug("{} {} {} {} {} {}", data.gyroX, data.gyroY, data.gyroZ, data.accelX, data.accelY, data.accelZ);
+    // log.debug("{} {} {} {} {} {}", data.gyroX, data.gyroY, data.gyroZ,
+    // data.accelX, data.accelY, data.accelZ);
   }
 
   public void getRaw() {
@@ -4146,7 +4146,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Compare the content of two buffers Returns 0 if the two buffers have the same content otherwise 1
+   * Compare the content of two buffers Returns 0 if the two buffers have the
+   * same content otherwise 1
+   * 
    * @param buffer1
    * @param buffer2
    * @param length
@@ -4560,7 +4562,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     controller.detachI2CControl(this);
     publisher.stop();
     controller = null;
-    controllerName = null;    
+    controllerName = null;
     log.info("detachI2CController broadcast");
     broadcastState();
   }
@@ -4569,7 +4571,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Returns all the currently attached services
    */
   @Override
-  public Set<String> getAttached() {    
+  public Set<String> getAttached() {
     Set<String> ret = super.getAttached();
     if (controller != null) {
       ret.add(controller.getName());
@@ -4594,9 +4596,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     }
     return false;
   }
-  
+
   @Override
-  public ServiceConfig getConfig() {    
+  public ServiceConfig getConfig() {
     Mpu6050Config config = (Mpu6050Config) initConfig(new Mpu6050Config());
     config.start = publisher.isRunning;
     config.sampleRate = sampleRateHz;
@@ -4607,8 +4609,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 
   @Override
   public ServiceConfig load(ServiceConfig c) {
-    super.load(c);    
-    Mpu6050Config config = (Mpu6050Config)c;
+    super.load(c);
+    Mpu6050Config config = (Mpu6050Config) c;
     if (config.start) {
       publisher.start();
     }
@@ -4623,7 +4625,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     }
     return c;
   }
-  
+
   public void setSampleRate(double rateHz) {
     if (rateHz < 0.001 && rateHz > 100) {
       error("rate must be 0.001 < rateHz < 100");

@@ -79,7 +79,8 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   EncoderControl getEncoder();
 
   /**
-   * @return The last time the servo was asked to move (system current time in ms?)
+   * @return The last time the servo was asked to move (system current time in
+   *         ms?)
    * 
    */
   long getLastActivityTime();
@@ -136,8 +137,8 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   double getRest();
 
   /**
-   * @return current speed if set - if speed/speed control is not being use it is
-   * null.
+   * @return current speed if set - if speed/speed control is not being use it
+   *         is null.
    * 
    */
   Double getSpeed();
@@ -159,21 +160,22 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   double getTargetOutput();
 
   /**
-   * @return This method returns the input target position of the servo. This is the
-   * input position that the servo was requested to move to.
+   * @return This method returns the input target position of the servo. This is
+   *         the input position that the servo was requested to move to.
    * 
    */
   double getTargetPos();
 
   /**
-   * @return When moveBlocking is in motion, not only should it block the calling thread
-   * until the end of the move, it should also prevent (cancel) other threads
-   * (even ones doing moveTo commands) until its done... conversely
-   * mutli-threaded moveTo commands are a free-for-all .. if you call a servo
-   * thats in process of a moveBlocking with a moveTo - your moveTo is canceled
-   * (not blocked) until the moveToBlocking is done. When a moveToBlocking is
-   * called from a different thread it should be blocked until the original is
-   * finished.
+   * @return When moveBlocking is in motion, not only should it block the
+   *         calling thread until the end of the move, it should also prevent
+   *         (cancel) other threads (even ones doing moveTo commands) until its
+   *         done... conversely mutli-threaded moveTo commands are a
+   *         free-for-all .. if you call a servo thats in process of a
+   *         moveBlocking with a moveTo - your moveTo is canceled (not blocked)
+   *         until the moveToBlocking is done. When a moveToBlocking is called
+   *         from a different thread it should be blocked until the original is
+   *         finished.
    * 
    */
   boolean isBlocking();
@@ -252,9 +254,11 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    *          - true is to invert
    */
   void setInverted(boolean invert);
-  
+
   /**
-   * set a mapper to do the mapping between input and output for this servo control
+   * set a mapper to do the mapping between input and output for this servo
+   * control
+   * 
    * @param m
    */
   void setMapper(Mapper m);
@@ -334,7 +338,9 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
 
   /**
    * synchronizing servos together e.g. leftEye.sync(rightEye)
-   * @param sc the servo to sync with.
+   * 
+   * @param sc
+   *          the servo to sync with.
    */
   void sync(ServoControl sc);
 

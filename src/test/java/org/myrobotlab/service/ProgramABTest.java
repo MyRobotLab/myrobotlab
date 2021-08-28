@@ -37,35 +37,36 @@ public class ProgramABTest extends AbstractServiceTest {
 
   public Service createService() {
     try {
-    // LoggingFactory.init("INFO");
-    log.info("Setting up the Program AB Service ########################################");
-    // Load the service under test
-    // a test robot
-    // TODO: this should probably be created by Runtime,
-    // OOB tags might not know what the service name is ?!
-    testService = (ProgramAB)Runtime.start(botname, "ProgramAB");
-    testService.setPath(path);
-    // testService = new ProgramAB("simple");
-    // testService.setPath("c:/mrl/develop/ProgramAB");
+      // LoggingFactory.init("INFO");
+      log.info("Setting up the Program AB Service ########################################");
+      // Load the service under test
+      // a test robot
+      // TODO: this should probably be created by Runtime,
+      // OOB tags might not know what the service name is ?!
+      testService = (ProgramAB) Runtime.start(botname, "ProgramAB");
+      testService.setPath(path);
+      // testService = new ProgramAB("simple");
+      // testService.setPath("c:/mrl/develop/ProgramAB");
 
-    // start the service.
-    testService.startService();
-    // load the bot brain for the chat with the user
-    testService.startSession(username, botname);
-    // clean out any aimlif the bot that might
-    // have been saved in a previous test run!
-    String aimlIFPath = path + "/bots/" + botname + "/aimlif";
-    File aimlIFPathF = new File(aimlIFPath);
-    if (aimlIFPathF.isDirectory()) {
-      for (File f : aimlIFPathF.listFiles()) {
-        // if there's a file here.
-        log.info("Deleting pre-existing AIMLIF files : {}", f.getAbsolutePath());
-        f.delete();
+      // start the service.
+      testService.startService();
+      // load the bot brain for the chat with the user
+      testService.startSession(username, botname);
+      // clean out any aimlif the bot that might
+      // have been saved in a previous test run!
+      String aimlIFPath = path + "/bots/" + botname + "/aimlif";
+      File aimlIFPathF = new File(aimlIFPath);
+      if (aimlIFPathF.isDirectory()) {
+        for (File f : aimlIFPathF.listFiles()) {
+          // if there's a file here.
+          log.info("Deleting pre-existing AIMLIF files : {}", f.getAbsolutePath());
+          f.delete();
+        }
       }
-    }
-    // TODO: same thing for predicates! (or other artifacts from a previous aiml
-    // test run)
-    } catch(Exception e) {
+      // TODO: same thing for predicates! (or other artifacts from a previous
+      // aiml
+      // test run)
+    } catch (Exception e) {
       log.error("createService threw", e);
     }
     return testService;
@@ -116,7 +117,7 @@ public class ProgramABTest extends AbstractServiceTest {
   public void sraixTest() throws IOException {
     if (Runtime.hasInternet()) {
       // Response resp = testService.getResponse(username, "MRLSRAIX");
-      
+
       Response resp = testService.getResponse(username, "Why is the sky blue?");
       System.out.println(resp);
       // System.out.println(resp);
@@ -144,7 +145,7 @@ public class ProgramABTest extends AbstractServiceTest {
   @Test
   public void testJapanese() throws IOException {
 
-    ProgramAB pikachu = (ProgramAB)Runtime.start("pikachu", "ProgramAB");
+    ProgramAB pikachu = (ProgramAB) Runtime.start("pikachu", "ProgramAB");
     pikachu.setPath(path);
     // pikachu the service.
     pikachu.startService();
@@ -166,7 +167,7 @@ public class ProgramABTest extends AbstractServiceTest {
 
   @Test
   public void testMultiSession() throws IOException {
-    ProgramAB lloyd = (ProgramAB)Runtime.start("lloyd", "ProgramAB");
+    ProgramAB lloyd = (ProgramAB) Runtime.start("lloyd", "ProgramAB");
     lloyd.setPath(path);
     // pikachu the service.
     lloyd.startService();
@@ -268,7 +269,8 @@ public class ProgramABTest extends AbstractServiceTest {
     // pannousTest();
     addCategoryTest();
     sraixOOBTest();
-    // sraixTest();  sraix doesnt appear to work - wikipedia interface is borked on pannous bots
+    // sraixTest(); sraix doesnt appear to work - wikipedia interface is borked
+    // on pannous bots
   }
 
   public void testSets() throws IOException {
@@ -309,7 +311,7 @@ public class ProgramABTest extends AbstractServiceTest {
     // @GroG says - "this is not working"
     assertEquals("He's a character from Guitar Hero!", resp.msg);
   }
-  
+
   @Test
   public void testLocales() {
     // have locales
@@ -317,45 +319,43 @@ public class ProgramABTest extends AbstractServiceTest {
     // lloyd.setPath(path);
     lloyd.addBotsDir(path + File.separator + "bots");
     lloyd.setCurrentBotName("pikachu");
-    Map<String,Locale> locales = lloyd.getLocales();
+    Map<String, Locale> locales = lloyd.getLocales();
     assertTrue(locales.size() > 0);
     assertTrue(locales.containsKey("ja"));
   }
-  
+
   @Test
   public void testReload() {
     // FIXME - TODO
     // reload bot creates a new bot leaves old references :(
     // verify reload
-    /* Preferably with default bot
-    ProgramAB lloyd = (ProgramAB)Runtime.start("lloyd", "ProgramAB");
-    // did not work because lloyd is lame
-    // lloyd.getResponse("my name is george");
-    Response response = lloyd.getResponse("what is my name?");
-      
-    BotInfo botInfo = lloyd.getBotInfo();
-    Bot oldBot = botInfo.getBot();
-    lloyd.reload();    
-    Bot newBotInfo = botInfo.getBot();
-    assertNotEquals(oldBot, newBotInfo);
-
-    response = lloyd.getResponse("what is my name?");
-    assertTrue(response.msg.contains("george"));
-    */
+    /*
+     * Preferably with default bot ProgramAB lloyd =
+     * (ProgramAB)Runtime.start("lloyd", "ProgramAB"); // did not work because
+     * lloyd is lame // lloyd.getResponse("my name is george"); Response
+     * response = lloyd.getResponse("what is my name?");
+     * 
+     * BotInfo botInfo = lloyd.getBotInfo(); Bot oldBot = botInfo.getBot();
+     * lloyd.reload(); Bot newBotInfo = botInfo.getBot();
+     * assertNotEquals(oldBot, newBotInfo);
+     * 
+     * response = lloyd.getResponse("what is my name?");
+     * assertTrue(response.msg.contains("george"));
+     */
   }
-  
+
   @Test
   public void testDefaultSession() throws IOException {
     // minimal startup - create the service get a response
-    ProgramAB lloyd = (ProgramAB)Runtime.start("lloyd", "ProgramAB");
+    ProgramAB lloyd = (ProgramAB) Runtime.start("lloyd", "ProgramAB");
     lloyd.setPath(path);
     lloyd.setCurrentBotName("lloyd");
     assertTrue(lloyd.getBots().size() > 0);
-    
+
     // test for a response
     Response response = lloyd.getResponse("Hello");
     assertTrue(!response.msg.startsWith("I have no"));
-    
+
     // not sure if this is worth testing - there might be more
     // assertEquals("Alice", alice.getCurrentBotName());
     // assertEquals("default", alice.getCurrentUserName());
@@ -366,12 +366,12 @@ public class ProgramABTest extends AbstractServiceTest {
   // set username = default
   // set botname = what is available if NOT set
   // getResponse() -> if current session doesn't exist - get bot
-      // if current bot doesn't exist - attempt to activate it
-  // test - absolute minimal setup and getResponse ... 2 lines ? 1?  
+  // if current bot doesn't exist - attempt to activate it
+  // test - absolute minimal setup and getResponse ... 2 lines ? 1?
   // test - setting direct location addBotInfo(path)
   // test adding new bots from new locations
   // test mrl.properties - and the lack of those properties
   // verify conversation starter
   // verify inactivity conversation trolling
-  
+
 }

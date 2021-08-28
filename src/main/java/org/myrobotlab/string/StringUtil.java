@@ -220,7 +220,9 @@ public class StringUtil {
    * list of the integer values of the bytes. This ensures that the human
    * readable string values for the bytes are considered unsigned. (range 0-255)
    * not (-128 to 127)
-   * @param bytes input array to convert
+   * 
+   * @param bytes
+   *          input array to convert
    * @return string representing the bytes as integers
    * 
    */

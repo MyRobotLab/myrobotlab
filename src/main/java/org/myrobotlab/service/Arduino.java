@@ -292,8 +292,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * String interface - this allows you to easily use url api requests like
    * /attach/nameOfListener/3
- * @param listener the listener
- * @param address the address
+   * 
+   * @param listener
+   *          the listener
+   * @param address
+   *          the address
    */
   public void attach(String listener, int address) {
     attach((PinListener) Runtime.getService(listener), address);
@@ -333,7 +336,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * 
    * @param encoder
    *          - the encoder control to attach
-   * @throws Exception if an error occurred trying to attach the encoder
+   * @throws Exception
+   *           if an error occurred trying to attach the encoder
    */
   @Override
   public void attach(EncoderControl encoder) throws Exception {
@@ -462,7 +466,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   /**
    * 
-   * @param dm the arduino device mapping
+   * @param dm
+   *          the arduino device mapping
    */
   public void reattach(DeviceMapping dm) {
 
@@ -672,8 +677,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * silly Arduino implementation - but keeping it since its familiar
    * digitalWrite/pin/value
- * @param address the address
- * @param value the value to write
+   * 
+   * @param address
+   *          the address
+   * @param value
+   *          the value to write
    */
   public void digitalWrite(int address, int value) {
     log.info("digitalWrite {} {}", address, value);
@@ -954,8 +962,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   /**
    * int type to describe the pin defintion to Pin.h 0 digital 1 analog
- * @param pin the pin definition
- * @return the type of pin
+   * 
+   * @param pin
+   *          the pin definition
+   * @return the type of pin
    * 
    */
   public Integer getMrlPinType(PinDefinition pin) {
@@ -1635,7 +1645,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * error from mrlcom in string form
    * 
-   * @param errorMsg a string representing the error message
+   * @param errorMsg
+   *          a string representing the error message
    * @return the published error message
    */
   // < publishMRLCommError/str errorMsg
@@ -2259,11 +2270,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public void neoPixelClear(String neopixel) {
     msg.neoPixelClear(getDeviceId(neopixel));
   }
- 
+
   @Override
   public ServiceConfig getConfig() {
     ArduinoConfig config = (ArduinoConfig) initConfig(new ArduinoConfig());
-    config.port = port;    
+    config.port = port;
     config.connect = isConnected();
     return config;
   }
@@ -2283,7 +2294,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * 
    * -Djava.library.path=libraries/native -Djna.library.path=libraries/native
    * -Dfile.encoding=UTF-8
-   * @param args command line args
+   * 
+   * @param args
+   *          command line args
    * 
    */
   public static void main(String[] args) {
@@ -2411,5 +2424,5 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       log.error("main threw", e);
     }
   }
- 
+
 }

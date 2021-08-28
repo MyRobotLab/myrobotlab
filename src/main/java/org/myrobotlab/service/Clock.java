@@ -131,7 +131,9 @@ public class Clock extends Service {
 
   /**
    * Date is published at an interval here
-   * @param time t
+   * 
+   * @param time
+   *          t
    * @return t
    */
   public Date pulse(Date time) {
@@ -141,7 +143,7 @@ public class Clock extends Service {
   public Date publishTime(Date time) {
     return time;
   }
-  
+
   public long publishEpoch(Date time) {
     return time.getTime();
   }
@@ -254,6 +256,5 @@ public class Clock extends Service {
       log.error("main threw", e);
     }
   }
-
 
 }

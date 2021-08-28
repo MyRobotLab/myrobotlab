@@ -278,7 +278,8 @@ public class MethodCache {
    * @param params
    *          - actual parameter
    * @return - the method to invoke
- * @throws ClassNotFoundException if the class isn't found
+   * @throws ClassNotFoundException
+   *           if the class isn't found
    */
   public Method getMethod(Class<?> objectType, String methodName, Object... params) throws ClassNotFoundException {
     Class<?>[] paramTypes = getParamTypes(params);
@@ -306,11 +307,16 @@ public class MethodCache {
    * A full string interface to get a method - although this is potentially a
    * easy method to use, the most common use case would be used by the framework
    * which will automatically supply fully qualified type names.
- * @param fullType full type
- * @param methodName method to lookup
- * @param paramTypeNames names of params
- * @return  the looked up method
- * @throws ClassNotFoundException if the fullType class isn't found.
+   * 
+   * @param fullType
+   *          full type
+   * @param methodName
+   *          method to lookup
+   * @param paramTypeNames
+   *          names of params
+   * @return the looked up method
+   * @throws ClassNotFoundException
+   *           if the fullType class isn't found.
    * 
    */
   public Method getMethod(String fullType, String methodName, String[] paramTypeNames) throws ClassNotFoundException {

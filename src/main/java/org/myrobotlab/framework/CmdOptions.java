@@ -1,6 +1,5 @@
 package org.myrobotlab.framework;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -136,10 +135,12 @@ public class CmdOptions {
   }
 
   /**
-   * Command options data object will return the options in List form
-   * to be appended to the ProcessBuilder(List)
- * @return the list of output command
- * @throws IOException boom
+   * Command options data object will return the options in List form to be
+   * appended to the ProcessBuilder(List)
+   * 
+   * @return the list of output command
+   * @throws IOException
+   *           boom
    * 
    */
   public List<String> getOutputCmd() throws IOException {
@@ -218,7 +219,7 @@ public class CmdOptions {
       services.add("python");
       services.add("Python");
     }
-    
+
     if (services.size() % 2 != 0) {
       throw new IOException("invalid choice - services must be -s {name} {type} ...");
     }

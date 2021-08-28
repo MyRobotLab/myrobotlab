@@ -4,30 +4,30 @@ import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.service.data.AnalogData;
 
 public interface AnalogListener extends NameProvider {
-  
+
   /**
-   * Configuration related - set the axis for which AxisPublishers will publish to on
-   * this service
-   *   
+   * Configuration related - set the axis for which AxisPublishers will publish
+   * to on this service
+   * 
    * @param name
    */
   public void setAnalogId(String name);
 
   /**
-   * Configuration related - get the axis for which AxisPublishers will publish to on
-   * this service
-   *   
+   * Configuration related - get the axis for which AxisPublishers will publish
+   * to on this service
+   * 
    * @param name
-   */  
+   */
   public String getAnalogId();
-  
+
   /**
    * call back method to accept AxisData
    * 
    * @param data
    */
   public void onAnalog(AnalogData data);
-  
+
   /**
    * Attaches a publisher to this listener
    * 

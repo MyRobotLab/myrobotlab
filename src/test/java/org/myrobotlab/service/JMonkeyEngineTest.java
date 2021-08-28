@@ -99,7 +99,6 @@ public class JMonkeyEngineTest extends AbstractTest {
      * </pre>
      */
 
-
     InMoov i01 = (InMoov) Runtime.create("i01", "InMoov");// has attach ...
                                                           // runtime does
                                                           // dynamic binding
@@ -114,7 +113,7 @@ public class JMonkeyEngineTest extends AbstractTest {
     // FIXME - there has to be a "default" speed for virtual servos
     s.setVelocity(40.0);
     s.moveTo(0.0); // goes to 30 for rothead - because "min" <-- WRONG 0 should
-                 // be 30 .. but start position should be 90 !!!
+    // be 30 .. but start position should be 90 !!!
     s.moveTo(180.0);
     s.moveTo(90.0);
     s.moveTo(0.0);

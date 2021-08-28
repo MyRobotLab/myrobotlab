@@ -26,7 +26,8 @@ import org.slf4j.Logger;
  * Packet PseudoCode Putc(address); Putc(0); Putc(speed); Putc((address + 0 +
  * speed) &amp; 0b01111111);
  * 
- * Motor controllers should not impose constraints they should expose capabilities
+ * Motor controllers should not impose constraints they should expose
+ * capabilities
  * 
  * @author GroG
  * 
@@ -58,8 +59,8 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
   public static final int OUTPUT = 0x1;
 
   /**
-   * potentially sabertooth can operate at different
-   * serial rates - but at the moment we choose not to 
+   * potentially sabertooth can operate at different serial rates - but at the
+   * moment we choose not to
    */
   protected boolean setSaberToothBaud = false;
 
@@ -101,7 +102,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
   public void disconnect() throws IOException {
     if (serial != null) {
       serial.close();
-    } 
+    }
     isConnected = false;
     broadcastState();
   }
@@ -263,7 +264,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     sleep(3000);
     isConnected = serial.isConnected();
     this.port = port;
-    
+
     broadcastState();
   }
 
@@ -321,16 +322,15 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
   public static void main(String[] args) {
     try {
 
-      Runtime.main(new String[] { "--from-launcher"});
+      Runtime.main(new String[] { "--from-launcher" });
       Runtime.start("intro", "Intro");
       Runtime.start("python", "Python");
       Platform.setVirtual(true);
-      
+
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      // webgui.setSsl(true); 
+      // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
       webgui.startService();
-      
 
       boolean virtual = true;
       //////////////////////////////////////////////////////////////////////////////////
@@ -343,16 +343,13 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
       String port = "COM14";
       // String port = "/dev/ttyUSB0";
-/*
-      // start optional virtual serial service, used for test
-      if (virtual) {
-        // use static method Serial.connectVirtualUart to create
-        // a virtual hardware uart for the serial service to
-        // connect to
-        Serial uart = Serial.connectVirtualUart(port);
-        uart.logRecv(true); // dump bytes sent from sabertooth
-      }
-*/      
+      /*
+       * // start optional virtual serial service, used for test if (virtual) {
+       * // use static method Serial.connectVirtualUart to create // a virtual
+       * hardware uart for the serial service to // connect to Serial uart =
+       * Serial.connectVirtualUart(port); uart.logRecv(true); // dump bytes sent
+       * from sabertooth }
+       */
       // start the services
       Sabertooth sabertooth = (Sabertooth) Runtime.start("sabertooth", "Sabertooth");
       MotorPort m1 = (MotorPort) Runtime.start("m1", "MotorPort");
@@ -369,13 +366,13 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       // attach services
       sabertooth.attach(m1);
       sabertooth.attach(m2);
-      
+
       m1.setAnalogId("y");
       m2.setAnalogId("rz");
-      
+
       // m1.attach(joy.getAxis("y"));
       // m2.attach(joy.getAxis("rz"));
-      
+
       joy.attach(m1);
       joy.attach(m2);
 

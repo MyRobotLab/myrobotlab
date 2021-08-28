@@ -1,10 +1,10 @@
 package org.myrobotlab.service.interfaces;
 
 /**
- * control message listener interface.  These methods get called 
- * when these control events are seen.  
- * for example.  If the ServoControl has it's moveTo method called, 
- * the onMoveTo will be invoked to inform listeners that the servo was moved
+ * control message listener interface. These methods get called when these
+ * control events are seen. for example. If the ServoControl has it's moveTo
+ * method called, the onMoveTo will be invoked to inform listeners that the
+ * servo was moved
  * 
  */
 public interface ServoControlListener {
@@ -20,7 +20,7 @@ public interface ServoControlListener {
   public void onServoDisable(ServoControl sc);
 
   public void onServoStop(ServoControl sc);
-  
-  public void onServoEnable(String name); 
+
+  public void onServoEnable(String name);
 
 }

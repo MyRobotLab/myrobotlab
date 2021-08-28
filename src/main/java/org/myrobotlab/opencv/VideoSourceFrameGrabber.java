@@ -73,7 +73,9 @@ public class VideoSourceFrameGrabber extends FrameGrabber {
 
   /**
    * convert BufferedImages to IplImages
-   * @param src input buffered image
+   * 
+   * @param src
+   *          input buffered image
    * @return opencv frame
    */
   public static Frame bufferedImageToFrame(BufferedImage src) {

@@ -412,8 +412,10 @@ public class OpenKinectOdometry {
   /**
    * If the algorithm implements AccessPointTracks3D, then count the number of
    * inlier features and return a string.
- * @param alg algorithm
- * @return a string
+   * 
+   * @param alg
+   *          algorithm
+   * @return a string
    */
   public static String inlierPercent(VisualOdometry alg) {
     if (!(alg instanceof AccessPointTracks3D))

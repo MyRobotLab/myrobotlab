@@ -36,7 +36,8 @@ public class Stepper_ArduinoGui extends StepperControllerPanel implements Action
     PinArrayControl o = null;
     try {
       o = (PinArrayControl) myService.sendBlocking(controllerName, "publishState", (Object[]) null);
-    } catch(Exception e) {}
+    } catch (Exception e) {
+    }
     pinList = o.getPinList();
 
     for (int i = 0; i < pinList.size(); ++i) {

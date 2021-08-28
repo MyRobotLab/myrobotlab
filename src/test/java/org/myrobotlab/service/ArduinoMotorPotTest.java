@@ -10,7 +10,6 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.data.SensorData;
 import org.slf4j.Logger;

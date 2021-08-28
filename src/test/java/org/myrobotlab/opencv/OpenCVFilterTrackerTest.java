@@ -8,7 +8,7 @@ import org.junit.Ignore;
 
 // TODO: seems to be some issue initializing the tracker.  maybe some missing dependencies or something?
 @Ignore
-public class OpenCVFilterTrackerTest  extends AbstractOpenCVFilterTest {
+public class OpenCVFilterTrackerTest extends AbstractOpenCVFilterTest {
 
   @Before
   public void setup() {

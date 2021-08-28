@@ -133,14 +133,14 @@ public abstract class OpenCVFilter implements Serializable {
     File f = new File(tryfile);
     if (f.exists()) {
       return read(tryfile); // load alpha
-    } 
+    }
 
     // service resources - when jar extracts ?
     tryfile = Service.getResourceDir(OpenCV.class, infile);
     f = new File(tryfile);
     if (f.exists()) {
       return read(tryfile);
-    } 
+    }
 
     // source/ide
     // e.g. src\main\resources\resource\OpenCV
@@ -149,14 +149,14 @@ public abstract class OpenCVFilter implements Serializable {
     f = new File(tryfile);
     if (f.exists()) {
       return read(tryfile);
-    } 
+    }
 
     // src\test\resources\OpenCV
     tryfile = "src" + File.separator + "test" + File.separator + "resources" + File.separator + OpenCV.class.getSimpleName() + File.separator + infile;
     f = new File(tryfile);
     if (f.exists()) {
       return read(tryfile);
-    } 
+    }
 
     log.error("could not load Mat {}", infile);
     return null;
@@ -331,7 +331,8 @@ public abstract class OpenCVFilter implements Serializable {
   /**
    * method which determines if this filter to process its display TODO - have
    * it also decide if its cumulative display or not
- * @return the buffered image to display
+   * 
+   * @return the buffered image to display
    */
   public BufferedImage processDisplay() {
 
@@ -387,8 +388,11 @@ public abstract class OpenCVFilter implements Serializable {
     }
   }
    * </pre>
- * @param keyPart the key
- * @param object the object
+   * 
+   * @param keyPart
+   *          the key
+   * @param object
+   *          the object
    */
 
   public void put(String keyPart, Object object) {
@@ -428,7 +432,7 @@ public abstract class OpenCVFilter implements Serializable {
     return image;
   }
 
-  @Transient /*annotation to remove from yml dump*/
+  @Transient /* annotation to remove from yml dump */
   public void setOpenCV(OpenCV opencv) {
     if (displayColor == null) {
       displayColor = opencv.getColor();
@@ -455,8 +459,10 @@ public abstract class OpenCVFilter implements Serializable {
 
   /**
    * converting IplImages to BufferedImages
- * @param image the iplimage to convert
- * @return the buffered image
+   * 
+   * @param image
+   *          the iplimage to convert
+   * @return the buffered image
    */
   public BufferedImage toBufferedImage(IplImage image) {
     return jconverter.convert(converterToImage.convert(image));
@@ -476,8 +482,10 @@ public abstract class OpenCVFilter implements Serializable {
 
   /**
    * convert BufferedImages to IplImages
- * @param src the buffered image to convert
- * @return the ipl image resulting
+   * 
+   * @param src
+   *          the buffered image to convert
+   * @return the ipl image resulting
    */
   public IplImage toImage(BufferedImage src) {
     return converterToImage.convert(jconverter.convert(src));

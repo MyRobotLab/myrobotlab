@@ -22,7 +22,7 @@ import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
 public class MethodCacheTest extends AbstractTest {
-  
+
   public final static Logger log = LoggerFactory.getLogger(MethodCacheTest.class);
 
   static MethodCache cache;
@@ -48,23 +48,31 @@ public class MethodCacheTest extends AbstractTest {
 
   /**
    * find missing methods which did not appear through first cache pass
- * @throws IllegalAccessException boom
- * @throws IllegalArgumentException boom
- * @throws InvocationTargetException boom
- * @throws ClassNotFoundException boom
+   * 
+   * @throws IllegalAccessException
+   *           boom
+   * @throws IllegalArgumentException
+   *           boom
+   * @throws InvocationTargetException
+   *           boom
+   * @throws ClassNotFoundException
+   *           boom
    * 
    */
   @Test
   public void findTest() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
 
     // FIXME FIXME - CodecUtils.decode("",
-    // FIXME FIXME - verify cache entry exist after being resolved through isAssignable !!!
+    // FIXME FIXME - verify cache entry exist after being resolved through
+    // isAssignable !!!
     Object ret = null;
     Method method = null;
 
-    // testing a method defined with an interface parameter and whos ordinal has several other
-    // definitions - this effectively should be one of the hardest strongly typed situations to resolve
-    method = cache.getMethod(TestCatcher.class, "invokeTest", (HttpDataListener)tester);
+    // testing a method defined with an interface parameter and whos ordinal has
+    // several other
+    // definitions - this effectively should be one of the hardest strongly
+    // typed situations to resolve
+    method = cache.getMethod(TestCatcher.class, "invokeTest", (HttpDataListener) tester);
     ret = method.invoke(tester, tester);
     assertEquals(tester, ret);
 
@@ -87,19 +95,20 @@ public class MethodCacheTest extends AbstractTest {
     method = cache.getMethod(TestCatcher.class, "getPin", new Object[] { testArray });
     ret = method.invoke(tester, new Object[] { testArray });
     assertEquals(testArray, ret);
-    
-    // a null value in a mutli-type call 
-    Object[] jsonParams = new Object[] {"\"hello world\"", "null", "3" };
+
+    // a null value in a mutli-type call
+    Object[] jsonParams = new Object[] { "\"hello world\"", "null", "3" };
     Object[] paramTypes = cache.getDecodedJsonParameters(TestCatcher.class, "testMultipleParamTypes", jsonParams);
     assertTrue(paramTypes[0].getClass().equals(String.class));
     assertTrue(paramTypes[1] == null);
     assertTrue(paramTypes[2].getClass().equals(Integer.class));
-    
-    // method = cache.getMethod(TestCatcher.class, "testMultipleParamTypes", new Object[] {"\"hello world\"", "null", "3" });
-    method = cache.getMethod(TestCatcher.class, "testMultipleParamTypes", new Object[] {"\"hello world\"", "null", "3" });
+
+    // method = cache.getMethod(TestCatcher.class, "testMultipleParamTypes", new
+    // Object[] {"\"hello world\"", "null", "3" });
+    method = cache.getMethod(TestCatcher.class, "testMultipleParamTypes", new Object[] { "\"hello world\"", "null", "3" });
     ret = method.invoke(tester, new Object[] { "hello world", null, 3 });
     assertEquals(ret, "hello world");
-    
+
   }
 
   @Test
@@ -133,7 +142,7 @@ public class MethodCacheTest extends AbstractTest {
     method = cache.getMethod(TestCatcher.class, "stopService");
     ret = method.invoke(tester);
     assertEquals(null, ret);
-        
+
     method = cache.getMethod(TestCatcher.class, "isRunning");
     ret = method.invoke(tester);
     assertEquals(false, ret);
@@ -145,7 +154,7 @@ public class MethodCacheTest extends AbstractTest {
     method = cache.getMethod(TestCatcher.class, "isRunning");
     ret = method.invoke(tester);
     assertEquals(true, ret);
-    
+
     Integer[] testArray = new Integer[] { 3, 5, 10 };
     method = cache.getMethod(TestCatcher.class, "getPin", new Object[] { testArray });
     ret = method.invoke(tester, new Object[] { testArray });
@@ -153,23 +162,31 @@ public class MethodCacheTest extends AbstractTest {
 
   }
 
-
   /**
    * Testing json
- * @throws IllegalAccessException boom
- * @throws IllegalArgumentException boom
- * @throws InvocationTargetException boom
- * @throws ClassNotFoundException boom
- * @throws NoSuchMethodException boom
- * @throws SecurityException boom
- * @throws InstantiationException boom
+   * 
+   * @throws IllegalAccessException
+   *           boom
+   * @throws IllegalArgumentException
+   *           boom
+   * @throws InvocationTargetException
+   *           boom
+   * @throws ClassNotFoundException
+   *           boom
+   * @throws NoSuchMethodException
+   *           boom
+   * @throws SecurityException
+   *           boom
+   * @throws InstantiationException
+   *           boom
    * 
    */
   @Test
-  public void lossyJsonMethodTest() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException {
+  public void lossyJsonMethodTest()
+      throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException {
 
-    String[] encodedParams = new String[] {CodecUtils.toJson("blah")};
-    
+    String[] encodedParams = new String[] { CodecUtils.toJson("blah") };
+
     Object[] params = cache.getDecodedJsonParameters(TestCatcher.class, "invokeTest", encodedParams);
     Method method = cache.getMethod(TestCatcher.class, "invokeTest", params);
     Object ret = method.invoke(tester, params);
@@ -177,14 +194,14 @@ public class MethodCacheTest extends AbstractTest {
     log.info("ret returned {} of type {}", ret, ret.getClass().getSimpleName());
     assertNotNull(ret); // arbitrary that i resolves to string
 
-    encodedParams = new String[] {CodecUtils.toJson(5.0)};
+    encodedParams = new String[] { CodecUtils.toJson(5.0) };
     params = cache.getDecodedJsonParameters(TestCatcher.class, "onDouble", encodedParams);
     method = cache.getMethod(TestCatcher.class, "onDouble", params);
     ret = method.invoke(tester, params);
     log.info("ret returned {} of type {}", ret, ret.getClass().getSimpleName());
     assertEquals(5.0, ret); // arbitrary float vs int/double
 
-    encodedParams = new String[] {CodecUtils.toJson(5)};
+    encodedParams = new String[] { CodecUtils.toJson(5) };
     params = cache.getDecodedJsonParameters(TestCatcher.class, "onInt", encodedParams);
     method = cache.getMethod(TestCatcher.class, "onInt", params);
     ret = method.invoke(tester, params);
@@ -196,30 +213,28 @@ public class MethodCacheTest extends AbstractTest {
     ball.name = "my ball";
     ball.type = "football";
     ball.rating = 5;
-    encodedParams = new String[] {CodecUtils.toJson(ball)};
+    encodedParams = new String[] { CodecUtils.toJson(ball) };
     params = cache.getDecodedJsonParameters(TestCatcher.class, "catchBall", encodedParams);
     method = cache.getMethod(TestCatcher.class, "catchBall", params);
     ret = method.invoke(tester, params);
     log.info("ret returned {} of type {}", ret, ret.getClass().getSimpleName());
-    assertEquals("my ball", ball.name); 
-    assertTrue(5 == ball.rating); 
+    assertEquals("my ball", ball.name);
+    assertTrue(5 == ball.rating);
   }
-  
+
   public static class TestClass {
     public int getInt(int i) {
       return i;
     }
   }
-  
+
   @Test
-  public void unknownClassInvokeOnTest () throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
+  public void unknownClassInvokeOnTest() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
     MethodCache cache = MethodCache.getInstance();
     TestClass test = new TestClass();
-    Integer r = (Integer)cache.invokeOn(test, "getInt", 7);
+    Integer r = (Integer) cache.invokeOn(test, "getInt", 7);
     assertTrue(7 == r);
   }
-  
-  
 
   public static void main(String[] args) {
     try {

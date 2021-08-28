@@ -12,7 +12,6 @@ import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.introspector.BeanAccess;
 
 // service life-cycle
 
@@ -97,7 +96,6 @@ public class LangYmlUtils {
        * suitable.
        */
 
-     
       Yaml yaml = new Yaml(dumperOptions);
       // yaml.setBeanAccess(BeanAccess.FIELD);
       String yml = yaml.dump(si);

@@ -16,15 +16,20 @@ public interface LogPublisher extends NameProvider {
    * its constituent parts instead e.g. timestamp, formatted message, level etc.
    * - if this is desired make a public LogEntry publishLogEntry interface
    * method
-   * @param msg msg to publish
+   * 
+   * @param msg
+   *          msg to publish
    * @return string
    */
   public String publishLog(String msg);
 
   /**
    * a way to publish the log messages and log entries
-   * @param method method
-   * @param params params
+   * 
+   * @param method
+   *          method
+   * @param params
+   *          params
    * @return returned object
    * 
    */

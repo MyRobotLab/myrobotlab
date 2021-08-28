@@ -17,7 +17,6 @@ import org.atmosphere.wasync.Request;
 import org.atmosphere.wasync.RequestBuilder;
 import org.atmosphere.wasync.Socket;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.RemoteMessageHandler;
 import org.slf4j.Logger;
 
@@ -89,12 +88,13 @@ public class WsClient implements Decoder<String, Reader> {
           return new StringReader(s);
         }
       }).decoder(this).transport(Request.TRANSPORT.WEBSOCKET); // Try
-                                                              // WebSocket
-          // .transport(Request.TRANSPORT.LONG_POLLING); // Fallback to
-                                                      // Long-Polling
+                                                               // WebSocket
+      // .transport(Request.TRANSPORT.LONG_POLLING); // Fallback to
+      // Long-Polling
 
       // client.create(client.newOptionsBuilder().reconnect(true).reconnectAttempts(999).runtime(asc).build());
-      // this.socket = client.create(client.newOptionsBuilder().reconnect(false).runtime(getAsyncClient()).build());
+      // this.socket =
+      // client.create(client.newOptionsBuilder().reconnect(false).runtime(getAsyncClient()).build());
       asc = getAsyncClient();
       this.socket = client.create(client.newOptionsBuilder().runtime(asc).build());
       socket.on(Event.CLOSE.name(), new Function<String>() {
@@ -218,7 +218,7 @@ public class WsClient implements Decoder<String, Reader> {
     if (socket != null) {
       socket.close();
     }
-    if(asc != null) {
+    if (asc != null) {
       asc.close();
     }
   }

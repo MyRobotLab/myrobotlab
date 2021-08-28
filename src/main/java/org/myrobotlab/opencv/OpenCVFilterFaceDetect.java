@@ -73,7 +73,7 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
    * bounding boxes of faces
    */
   private ArrayList<Rectangle> bb = null;
-  
+
   int i;
   double scaleFactor = 1.1;
   int minNeighbors = 1;
@@ -102,7 +102,7 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   public OpenCVFilterFaceDetect() {
     super(null);
   }
-  
+
   public OpenCVFilterFaceDetect(String name) {
     super(name);
   }

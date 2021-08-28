@@ -123,23 +123,21 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
     return FastMath.sqrt(distanceSquared(v));
   }
 
-
   /**
    * <code>divide</code> divides the values of this vector by a scalar and
    * returns the result. The values of this vector remain untouched.
    *
    * @param v
-   *            the value to divide this vectors attributes by.
+   *          the value to divide this vectors attributes by.
    * @return the result <code>Vector</code>.
    */
   public final ResultType divide(ResultType v) {
-      return mult(v.inverse());
+    return mult(v.inverse());
   }
-  
+
   public final void fillBuffer(FloatBuffer buffer) {
     buffer.put(toArray());
   }
-
 
   /**
    *
@@ -147,21 +145,20 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
    * given Vector3f.
    *
    * @param scalar
-   *            the value to multiply this vector by.
+   *          the value to multiply this vector by.
    * @param add
-   *            the value to add
+   *          the value to add
    * @return r
    */
   public final ResultType scaleAdd(float scalar, ResultType add) {
     return mult(scalar).add(add);
   }
 
-  public final ResultType project(ResultType other){
-      float n = this.dot(other); // A . B
-      float d = other.lengthSquared(); // |B|^2
-      return other.normalize().mult(n/d);
+  public final ResultType project(ResultType other) {
+    float n = this.dot(other); // A . B
+    float d = other.lengthSquared(); // |B|^2
+    return other.normalize().mult(n / d);
   }
-
 
   public final ResultType add(@Nonnull ResultType v) {
     float[] a = toArray();
@@ -193,9 +190,10 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
   }
 
   /**
-   * Not marked final as quaternions have a different
-   * idea of the inverse 
-   * @param v v
+   * Not marked final as quaternions have a different idea of the inverse
+   * 
+   * @param v
+   *          v
    * @return result type
    */
   public ResultType mult(@Nonnull ResultType v) {
@@ -208,8 +206,8 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
   }
 
   /**
-   * Not marked final as quaternions have a different
-   * idea of the inverse 
+   * Not marked final as quaternions have a different idea of the inverse
+   * 
    * @return r
    */
   public ResultType inverse() {
@@ -220,7 +218,6 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
     return build(a);
   }
 
-  
   public final float dot(@Nonnull ResultType v) {
     float[] a = toArray();
     float[] b = v.toArray();
@@ -240,15 +237,15 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
     return build(a);
   }
 
-
   /**
-   * <code>maxLocal</code> computes the maximum value for each
-   * component in this and <code>other</code> vector. The result is stored
-   * in this vector.
-   * @param v v
+   * <code>maxLocal</code> computes the maximum value for each component in this
+   * and <code>other</code> vector. The result is stored in this vector.
+   * 
+   * @param v
+   *          v
    * @return r
    */
-  public final ResultType max(ResultType v){
+  public final ResultType max(ResultType v) {
     float[] a = toArray();
     float[] b = v.toArray();
     for (int i = 0; i < a.length; ++i) {
@@ -258,13 +255,14 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
   }
 
   /**
-   * <code>minLocal</code> computes the minimum value for each
-   * component in this and <code>other</code> vector. The result is stored
-   * in this vector.
-   * @param v v
+   * <code>minLocal</code> computes the minimum value for each component in this
+   * and <code>other</code> vector. The result is stored in this vector.
+   * 
+   * @param v
+   *          v
    * @return r
    */
-  public final ResultType min(ResultType v){
+  public final ResultType min(ResultType v) {
     float[] a = toArray();
     float[] b = v.toArray();
     for (int i = 0; i < a.length; ++i) {
@@ -279,7 +277,8 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
    * 
    * @param v
    *          the object to compare for equality
-   * @param epsilon e
+   * @param epsilon
+   *          e
    * @return true if they are equal
    */
   public final boolean equalsEpsilon(ResultType v, float epsilon) {
@@ -336,7 +335,6 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
     }
     return true;
   }
-
 
   /**
    * <code>hashCode</code> returns a unique code for this vector object based on

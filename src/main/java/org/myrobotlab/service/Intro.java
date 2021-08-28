@@ -77,7 +77,8 @@ public class Intro extends Service {
   }
 
   /**
-   * @param introScriptName execute an Intro resource script
+   * @param introScriptName
+   *          execute an Intro resource script
    */
   public void execScript(String introScriptName) {
     try {
@@ -91,7 +92,9 @@ public class Intro extends Service {
 
   /**
    * This method will load a python file into the python interpreter.
-   * @param file the python file to load
+   * 
+   * @param file
+   *          the python file to load
    * @return true/false
    */
   @Deprecated
@@ -128,14 +131,14 @@ public class Intro extends Service {
       System.setProperty("java.version", "11.0");
       LoggingFactory.init(Level.INFO);
 
-      Runtime.main(new String[] { "--from-launcher"});
+      Runtime.main(new String[] { "--from-launcher" });
       Runtime.start("intro", "Intro");
       Runtime.start("python", "Python");
 
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      // webgui.setSsl(true); 
+      // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
       webgui.startService();
 

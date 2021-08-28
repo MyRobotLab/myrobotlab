@@ -13,7 +13,9 @@ public interface TextPublisher {
 
   /**
    * the root for any other attachTextListener type
-   * @param name - the name of the text listener
+   * 
+   * @param name
+   *          - the name of the text listener
    */
   public void attachTextListener(String name);
 

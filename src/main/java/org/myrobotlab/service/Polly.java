@@ -63,8 +63,10 @@ public class Polly extends AbstractSpeechSynthesis {
    * for the user's convenience for amazon other cloud providers have single
    * keys or different details
    * 
-   * @param keyId aws polly user key
-   * @param keyIdSecret aws polly user secret
+   * @param keyId
+   *          aws polly user key
+   * @param keyIdSecret
+   *          aws polly user secret
    */
   public void setKeys(String keyId, String keyIdSecret) {
     setKey(AMAZON_POLLY_USER_KEY, keyId);
@@ -101,7 +103,8 @@ public class Polly extends AbstractSpeechSynthesis {
   }
 
   /**
-   * @param regionName set default region for polly
+   * @param regionName
+   *          set default region for polly
    */
   public void setRegion(String regionName) {
     defaultRegion = Regions.fromName(regionName);
@@ -204,141 +207,143 @@ public class Polly extends AbstractSpeechSynthesis {
     try {
       Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
       LoggingFactory.init("INFO");
-      
+
       Runtime.start("python", "Python");
-      
+
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
 
-    // iterate through all speech services
-    // all will "load" voices and adhere to the AbtractSpeechSynthesis
-    // processing of data
+      // iterate through all speech services
+      // all will "load" voices and adhere to the AbtractSpeechSynthesis
+      // processing of data
 
-    // test all caching
+      // test all caching
 
-    // test all effects
+      // test all effects
 
-    // test default
+      // test default
 
-    // test overriding default
+      // test overriding default
 
-    // test setting Runtime.locale
-    Platform.setVirtual(true);
+      // test setting Runtime.locale
+      Platform.setVirtual(true);
 
-    LoggingFactory.init(Level.INFO);
+      LoggingFactory.init(Level.INFO);
 
-    Runtime.getInstance(args); // <-- nice in that you can process command line
-                               // args this way
-    // set language universally
-    // Runtime.setLanguage("pt");
-    // Runtime.start("gui", "SwingGui");
-    
-    Polly polly = (Polly) Runtime.start("polly", "Polly");
-    // polly.setKey(keyName, keyValue);
-    // polly.setKeys("XXXXXXXX", "XXXXXXXXXXXXXXXXXXXXXXXXXX");
+      Runtime.getInstance(args); // <-- nice in that you can process command
+                                 // line
+                                 // args this way
+      // set language universally
+      // Runtime.setLanguage("pt");
+      // Runtime.start("gui", "SwingGui");
 
-    // polly.setLanguage("de");
-    log.info("polly voice is {}", polly.getVoice());
-    // polly.speak(String.format("allo there my name is %s", polly.getVoice().getName()));
+      Polly polly = (Polly) Runtime.start("polly", "Polly");
+      // polly.setKey(keyName, keyValue);
+      // polly.setKeys("XXXXXXXX", "XXXXXXXXXXXXXXXXXXXXXXXXXX");
 
-    boolean b = true;
-    if (b) {
-      return;
-    }
+      // polly.setLanguage("de");
+      log.info("polly voice is {}", polly.getVoice());
+      // polly.speak(String.format("allo there my name is %s",
+      // polly.getVoice().getName()));
 
-    // Runtime.start("gui", "SwingGui");
-    // add your amazon access key & secret
-    // use gui to do this, or force it here only ONCE :
-    // polly.setKeys("key","secret");
-
-    List<Voice> voices = polly.getVoices();
-    for (Voice voice : voices) {
-      // polly.setVoice(voice); String lang = polly.getLanguage();
-      log.info("{}", voice);
-    }
-
-    polly.speak(String.format("Hello my name is %s I will be your voice today", polly.getVoice().getName()));
-    polly.speakBlocking("or to take arms against a see of troubles");
-    polly.speak("the slings and arrows of ourtrageous fortune");
-    polly.speak("#THROAT01_M# hi! it works.");
-
-    for (Voice voice : voices) {
-      polly.setVoice((String) voice.getVoiceProvider());
-      String lang = voice.getLanguage();
-      log.info("{} speaks {}", voice, lang);
-
-      if (lang.startsWith("es")) {
-        polly.speak(String.format("Hola, mi nombre es %s y creo que myrobotlab es genial!", voice));
-      } else if (lang.startsWith("en")) {
-        polly.speak(String.format("Hi my name is %s and I think myrobotlab is great!", voice));
-      } else if (lang.startsWith("fr")) {
-        polly.speak(String.format("Bonjour, mon nom est %s et je pense que myrobotlab est génial!!", voice));
-      } else if (lang.startsWith("nl")) {
-        polly.speak(String.format("Hallo, mijn naam is %s en ik denk dat myrobotlab is geweldig!", voice));
-      } else if (lang.startsWith("ru")) {
-        polly.speak(String.format("Привет, меня зовут %s, и я думаю, что myrobotlab - это здорово!", voice));
-      } else if (lang.startsWith("ro")) {
-        polly.speak(String.format("Buna ziua, numele meu este %s și cred că myrobotlab este mare!", voice));
-      } else if (lang.startsWith("ro")) {
-        polly.speak(String.format("Witam, nazywam się %s i myślę, że myrobotlab jest świetny!", voice));
-      } else if (lang.startsWith("it")) {
-        polly.speak(String.format("Ciao, il mio nome è %s e penso myrobotlab è grande!", voice));
-      } else if (lang.startsWith("is")) {
-        polly.speak(String.format("Halló, Nafn mitt er %s og ég held myrobotlab er frábært!", voice));
-      } else if (lang.startsWith("cy")) {
-        polly.speak(String.format("Helo, fy enw i yw %s a fi yn meddwl myrobotlab yn wych!", voice));
-      } else if (lang.startsWith("de")) {
-        polly.speak(String.format("Hallo, mein Name ist %s und ich denke, myrobotlab ist toll!", voice));
-      } else if (lang.startsWith("da")) {
-        polly.speak(String.format("Hej, mit navn er %s og jeg tror myrobotlab er fantastisk!", voice));
-      } else if (lang.startsWith("sv")) {
-        polly.speak(String.format("Hej, mitt namn %s och jag tror ElektronikWikin är stor!", voice));
-      } else if (lang.startsWith("pl")) {
-        polly.speak(String.format("Witam, nazywam się %s i myślę, że myrobotlab jest świetny!", voice));
-      } else if (lang.startsWith("tr")) {
-        polly.speak(String.format("Merhaba, adım adım %s ve myrobotlab'ın harika olduğunu düşünüyorum!", voice));
-      } else if (lang.startsWith("pt")) {
-        polly.speak(String.format("Olá, meu nome é %s e eu acho que myrobotlab é ótimo!！", voice));
-      } else if (lang.startsWith("ja")) {
-        polly.speak(String.format("こんにちは、私の名前は%sで、私はmyrobotlabが素晴らしいと思います！", voice));
-      } else {
-        log.info("dunno");
+      boolean b = true;
+      if (b) {
+        return;
       }
-    }
 
-    polly.setVoice("Russel");
-    polly.setVoice("Nicole");
+      // Runtime.start("gui", "SwingGui");
+      // add your amazon access key & secret
+      // use gui to do this, or force it here only ONCE :
+      // polly.setKeys("key","secret");
 
-    polly.setVoice("Brian");
-    polly.setVoice("Amy");
-    polly.setVoice("Emma");
+      List<Voice> voices = polly.getVoices();
+      for (Voice voice : voices) {
+        // polly.setVoice(voice); String lang = polly.getLanguage();
+        log.info("{}", voice);
+      }
 
-    polly.setVoice("Brian");
-    polly.setVoice("Kimberly");
+      polly.speak(String.format("Hello my name is %s I will be your voice today", polly.getVoice().getName()));
+      polly.speakBlocking("or to take arms against a see of troubles");
+      polly.speak("the slings and arrows of ourtrageous fortune");
+      polly.speak("#THROAT01_M# hi! it works.");
 
-    polly.setVoice("Justin");
-    polly.setVoice("Joey");
-    polly.setVoice("Raveena");
-    polly.setVoice("Ivy");
-    polly.setVoice("Kendra");
+      for (Voice voice : voices) {
+        polly.setVoice((String) voice.getVoiceProvider());
+        String lang = voice.getLanguage();
+        log.info("{} speaks {}", voice, lang);
 
-    polly.speak("this is a new thing");
+        if (lang.startsWith("es")) {
+          polly.speak(String.format("Hola, mi nombre es %s y creo que myrobotlab es genial!", voice));
+        } else if (lang.startsWith("en")) {
+          polly.speak(String.format("Hi my name is %s and I think myrobotlab is great!", voice));
+        } else if (lang.startsWith("fr")) {
+          polly.speak(String.format("Bonjour, mon nom est %s et je pense que myrobotlab est génial!!", voice));
+        } else if (lang.startsWith("nl")) {
+          polly.speak(String.format("Hallo, mijn naam is %s en ik denk dat myrobotlab is geweldig!", voice));
+        } else if (lang.startsWith("ru")) {
+          polly.speak(String.format("Привет, меня зовут %s, и я думаю, что myrobotlab - это здорово!", voice));
+        } else if (lang.startsWith("ro")) {
+          polly.speak(String.format("Buna ziua, numele meu este %s și cred că myrobotlab este mare!", voice));
+        } else if (lang.startsWith("ro")) {
+          polly.speak(String.format("Witam, nazywam się %s i myślę, że myrobotlab jest świetny!", voice));
+        } else if (lang.startsWith("it")) {
+          polly.speak(String.format("Ciao, il mio nome è %s e penso myrobotlab è grande!", voice));
+        } else if (lang.startsWith("is")) {
+          polly.speak(String.format("Halló, Nafn mitt er %s og ég held myrobotlab er frábært!", voice));
+        } else if (lang.startsWith("cy")) {
+          polly.speak(String.format("Helo, fy enw i yw %s a fi yn meddwl myrobotlab yn wych!", voice));
+        } else if (lang.startsWith("de")) {
+          polly.speak(String.format("Hallo, mein Name ist %s und ich denke, myrobotlab ist toll!", voice));
+        } else if (lang.startsWith("da")) {
+          polly.speak(String.format("Hej, mit navn er %s og jeg tror myrobotlab er fantastisk!", voice));
+        } else if (lang.startsWith("sv")) {
+          polly.speak(String.format("Hej, mitt namn %s och jag tror ElektronikWikin är stor!", voice));
+        } else if (lang.startsWith("pl")) {
+          polly.speak(String.format("Witam, nazywam się %s i myślę, że myrobotlab jest świetny!", voice));
+        } else if (lang.startsWith("tr")) {
+          polly.speak(String.format("Merhaba, adım adım %s ve myrobotlab'ın harika olduğunu düşünüyorum!", voice));
+        } else if (lang.startsWith("pt")) {
+          polly.speak(String.format("Olá, meu nome é %s e eu acho que myrobotlab é ótimo!！", voice));
+        } else if (lang.startsWith("ja")) {
+          polly.speak(String.format("こんにちは、私の名前は%sで、私はmyrobotlabが素晴らしいと思います！", voice));
+        } else {
+          log.info("dunno");
+        }
+      }
 
-    polly.speak("Hello there, i am a cloud service .. i probably sound like the echo");
-    polly.speak("Here is another sentence");
-    polly.speak("To be or not to be that is the question");
-    polly.speakBlocking("now i am blocking my speech");
-    polly.speakBlocking("put one foot in front of the other and"); // xxx
-    polly.speakBlocking("soon you'll be walking out the door");
-    polly.speak("this is a new sentence");
-    polly.speak("to be or not to be that is the question");
-    polly.speak("weather tis nobler in the mind to suffer");
-    polly.speak("the slings and arrows of ourtrageous fortune");
-    polly.speak("or to take arms against a see of troubles");
+      polly.setVoice("Russel");
+      polly.setVoice("Nicole");
 
-    log.info("finished");
-    
+      polly.setVoice("Brian");
+      polly.setVoice("Amy");
+      polly.setVoice("Emma");
+
+      polly.setVoice("Brian");
+      polly.setVoice("Kimberly");
+
+      polly.setVoice("Justin");
+      polly.setVoice("Joey");
+      polly.setVoice("Raveena");
+      polly.setVoice("Ivy");
+      polly.setVoice("Kendra");
+
+      polly.speak("this is a new thing");
+
+      polly.speak("Hello there, i am a cloud service .. i probably sound like the echo");
+      polly.speak("Here is another sentence");
+      polly.speak("To be or not to be that is the question");
+      polly.speakBlocking("now i am blocking my speech");
+      polly.speakBlocking("put one foot in front of the other and"); // xxx
+      polly.speakBlocking("soon you'll be walking out the door");
+      polly.speak("this is a new sentence");
+      polly.speak("to be or not to be that is the question");
+      polly.speak("weather tis nobler in the mind to suffer");
+      polly.speak("the slings and arrows of ourtrageous fortune");
+      polly.speak("or to take arms against a see of troubles");
+
+      log.info("finished");
+
     } catch (Exception e) {
       log.error("main threw", e);
     }

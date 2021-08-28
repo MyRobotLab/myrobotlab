@@ -867,7 +867,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     if (config.pixelCount != null) {
       setPixelCount(config.pixelCount);
     }
-    
+
     setSpeed(config.speed);
     if (config.pin != null) {
       setPin(config.pin);

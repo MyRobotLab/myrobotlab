@@ -206,6 +206,7 @@ public class OscopePinTrace extends JPanel implements ActionListener {
 
   /**
    * used by oscope to set a pin's display
+   * 
    * @return c
    * 
    */

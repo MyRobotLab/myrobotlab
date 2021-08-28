@@ -12,7 +12,9 @@ public class MqttBrokerMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * @param name n
+   * 
+   * @param name
+   *          n
    * 
    */
   public MqttBrokerMeta(String name) {
@@ -22,10 +24,10 @@ public class MqttBrokerMeta extends MetaData {
     addDescription(
         "This is an Mqtt client based on the Paho Mqtt client library. Mqtt is a machine-to-machine (M2M)/'Internet of Things' connectivity protocol. See http://mqtt.org");
     addCategory("cloud", "network");
-    
+
     addDependency("io.moquette", "moquette-broker", "0.12.1");
     exclude("org.slf4j", "slf4j-log4j12");
-    
+
     setCloudService(true);
 
   }

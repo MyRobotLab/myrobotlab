@@ -18,9 +18,10 @@ import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.test.AbstractTest;
+
 @Ignore
 public class ServiceScriptTest extends AbstractTest {
- 
+
   private Map<String, String> pythonScripts;
   private List<String> servicesNeedingPythonScripts = new ArrayList<String>();
   private List<String> pythonScriptsWithNoServiceType = new ArrayList<String>();
@@ -72,17 +73,17 @@ public class ServiceScriptTest extends AbstractTest {
 
   @Test
   public void testServiceScripts() throws Exception {
-    String[] b = new String[] { "LeapMotion", "OpenNi", "Runtime", "SlamBad", "_TemplateService", "WebGui", "JMonkeyEngine", "ImageDisplay", "GoogleAssistant",
-        "PickToLight", "PythonProxy", "Sprinkler", "_TemplateProxy", "SwingGui" };
+    String[] b = new String[] { "LeapMotion", "OpenNi", "Runtime", "SlamBad", "_TemplateService", "WebGui", "JMonkeyEngine", "ImageDisplay", "GoogleAssistant", "PickToLight",
+        "PythonProxy", "Sprinkler", "_TemplateProxy", "SwingGui" };
     Set<String> blacklist = new HashSet<String>(Arrays.asList(b));
 
     pythonScripts = getPyRobotLabServiceScripts();
     log.info("testing {} scripts", pythonScripts.size());
 
     for (String name : pythonScripts.keySet()) {
-      
+
       // name = "AudioFile";
-      
+
       log.info("testing script {}", name);
 
       // clear the stage
@@ -97,7 +98,7 @@ public class ServiceScriptTest extends AbstractTest {
         log.error("testing ######## {} ########", name);
 
         python.execAndWait(pythonScripts.get(name));
-        
+
         // FIXME !!! - look for Python ERRORS !!! - THEY SHOULD BE PUBLISHED !!!
 
       } catch (Exception e) {

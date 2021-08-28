@@ -102,7 +102,7 @@ public class ServiceData implements Serializable {
         if (fullClassName.contains("package-info")) {
           continue;
         }
-        
+
         MetaData serviceType = (MetaData) getMetaData(fullClassName);
 
         if (!fullClassName.equals(serviceType.getType())) {
@@ -209,8 +209,10 @@ public class ServiceData implements Serializable {
 
   /**
    * This method returns the default meta data of a class.
- * @param type of the service
- * @return the service metadata
+   * 
+   * @param type
+   *          of the service
+   * @return the service metadata
    * 
    */
   static public MetaData getMetaData(String type) {
@@ -230,10 +232,14 @@ public class ServiceData implements Serializable {
    * names and types) of peer services before all the peers are created
    * 
    * If a name/instance is not supplied the default meta data is supplied
- * @param serviceName the name of the service
- * @param type the type of the service
- * @param cyclicalCheck to protect against cycles
- * @return the service metadata
+   * 
+   * @param serviceName
+   *          the name of the service
+   * @param type
+   *          the type of the service
+   * @param cyclicalCheck
+   *          to protect against cycles
+   * @return the service metadata
    * 
    */
   public static MetaData getMetaData(String serviceName, String type, Set<String> cyclicalCheck) {
@@ -255,7 +261,6 @@ public class ServiceData implements Serializable {
       }
 
       type = getFullMetaTypeName(type);
-      
 
       // RETRO-GRADED for "nice" sized pr :(
       Class<?> c = Class.forName(type);
@@ -455,9 +460,12 @@ public class ServiceData implements Serializable {
 
   /**
    * Start at root and build all the meta data - add
- * @param serviceName the name of the service
- * @param serviceType type of the service
- * @return a plan for this service type/name
+   * 
+   * @param serviceName
+   *          the name of the service
+   * @param serviceType
+   *          type of the service
+   * @return a plan for this service type/name
    * 
    */
   public static Plan getPlan(String serviceName, String serviceType) {
@@ -483,9 +491,13 @@ public class ServiceData implements Serializable {
   /**
    * Recursively build the peers until the tree is complete. Useful to get a
    * full plan regarding some complex description
- * @param root the plan
- * @param parentName the parent name
- * @param sr the service registration
+   * 
+   * @param root
+   *          the plan
+   * @param parentName
+   *          the parent name
+   * @param sr
+   *          the service registration
    * 
    */
   public static void getPlan(Plan root, String parentName, ServiceReservation sr) {
@@ -558,12 +570,18 @@ public class ServiceData implements Serializable {
    * its an important detail that this has to be a breadth level push of config
    * into the planStore rather than a depth first, since upper/root peers can
    * dictate changes on sub-peers, their "mods" must be pushed first
- * @param name the name 
- * @param type the type
- * @param force true/false
- * @param cyclicalCheck cycle checks
- * @return the metadata
- * @throws MrlException boom 
+   * 
+   * @param name
+   *          the name
+   * @param type
+   *          the type
+   * @param force
+   *          true/false
+   * @param cyclicalCheck
+   *          cycle checks
+   * @return the metadata
+   * @throws MrlException
+   *           boom
    * 
    */
   public static MetaData setMetaData(String name, String type, boolean force, Set<String> cyclicalCheck) throws MrlException {

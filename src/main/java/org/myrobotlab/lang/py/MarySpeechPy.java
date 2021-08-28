@@ -9,12 +9,12 @@ import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
 public class MarySpeechPy extends LangPyUtils implements PythonGenerator {
 
   // FIXME - super inheritance of AbstractSpeechSynthesis
-  
+
   @Override
   public String toPython(ServiceInterface si) {
-    
+
     // common stuff
-    MarySpeech mary = (MarySpeech) si;   
+    MarySpeech mary = (MarySpeech) si;
     StringBuilder content = new StringBuilder();
     String name = safeRefName(mary);
 

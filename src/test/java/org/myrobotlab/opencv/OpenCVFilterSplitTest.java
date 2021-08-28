@@ -8,7 +8,7 @@ import org.junit.Ignore;
 
 // The Split filter crashes the jvm in this test
 @Ignore
-public class OpenCVFilterSplitTest  extends AbstractOpenCVFilterTest {
+public class OpenCVFilterSplitTest extends AbstractOpenCVFilterTest {
 
   @Before
   public void setup() {

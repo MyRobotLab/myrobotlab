@@ -22,8 +22,8 @@ public class ServoPy extends LangPyUtils implements PythonGenerator {
     content.append("  " + "# sets initial position of servo before moving\n");
     content.append("  " + "# in theory this is the position of the servo when this file was created\n");
     content.append("  " + name + String.format(".setPosition(%s)\n", f.format(servo.getCurrentInputPos())));
-    content
-        .append("  " + name + ".map(" + servo.getMapper().getMinX() + "," + servo.getMapper().getMaxX() + "," + servo.getMapper().getMinY() + "," + servo.getMapper().getMaxY() + ")\n");
+    content.append(
+        "  " + name + ".map(" + servo.getMapper().getMinX() + "," + servo.getMapper().getMaxX() + "," + servo.getMapper().getMinY() + "," + servo.getMapper().getMaxY() + ")\n");
     // TODO: add mapper isClipped()
     content.append("  " + name + ".setInverted(" + toPython(servo.isInverted()) + ")\n");
     content.append("  " + name + ".setSpeed(" + toPython(servo.getSpeed()) + ")\n");

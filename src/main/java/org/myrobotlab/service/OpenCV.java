@@ -421,7 +421,9 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * converting IplImages to BufferedImages
-   * @param src the source image
+   * 
+   * @param src
+   *          the source image
    * @return converted to buffered image
    */
   static public BufferedImage toBufferedImage(IplImage src) {
@@ -448,7 +450,9 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * convert BufferedImages to IplImages
-   * @param src input buffered image
+   * 
+   * @param src
+   *          input buffered image
    * @return iplimage converted
    */
   static public IplImage toImage(BufferedImage src) {
@@ -665,8 +669,11 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * add filter by name and type e.g. addFilter("c1","Canny")
-   * @param name name of the filter
-   * @param filterType type of the filter
+   * 
+   * @param name
+   *          name of the filter
+   * @param filterType
+   *          type of the filter
    * @return the filter that was added
    * 
    */
@@ -712,7 +719,9 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * capture from a camera
-   * @param cameraIndex the camera index to capture from
+   * 
+   * @param cameraIndex
+   *          the camera index to capture from
    */
   public void capture(Integer cameraIndex) {
     if (cameraIndex == null) {
@@ -731,7 +740,9 @@ public class OpenCV extends AbstractComputerVision {
    * type is not specifically selected, it will attempt to select the "best"
    * frame grabber for the job. Typically this will the the FFmpeg grabber since
    * its the most capable of decoding different filetypes.
-   * @param filename the file to use as the input filename.
+   * 
+   * @param filename
+   *          the file to use as the input filename.
    * 
    */
   public void capture(String filename) {
@@ -751,7 +762,8 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * default 5 second wait
-   * @return map of classifications 
+   * 
+   * @return map of classifications
    * 
    */
   public Map<String, List<Classification>> getClassifications() {
@@ -828,7 +840,9 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * get a filter by name
-   * @param name filter name to lookup
+   * 
+   * @param name
+   *          filter name to lookup
    * @return the filter by name o/w null
    * 
    */
@@ -1153,9 +1167,13 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * Callback from the SwingGui (e.g. clicking on the display) routes to the
    * appropriate filter through this method.
-   * @param filterName the name of the fitler
-   * @param method the method to invoke
-   * @param params the params to pass
+   * 
+   * @param filterName
+   *          the name of the fitler
+   * @param method
+   *          the method to invoke
+   * @param params
+   *          the params to pass
    */
   public void invokeFilterMethod(String filterName, String method, Object... params) {
     OpenCVFilter filter = getFilter(filterName);
@@ -1187,7 +1205,9 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * conversion from buffered image to base64 encoded jpg
-   * @param img the image to convert
+   * 
+   * @param img
+   *          the image to convert
    * @return base64jpeg version of buffered image
    */
   public String toBase64Jpg(BufferedImage img) {
@@ -1380,7 +1400,9 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * base 64 jpg frame image
-   * @param data webimage data
+   * 
+   * @param data
+   *          webimage data
    * @return the web image data
    */
   public WebImage publishWebDisplay(WebImage data) {
@@ -1457,7 +1479,9 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * Publishing method for filters - used internally
-   * @param filterWrapper wraps a filter
+   * 
+   * @param filterWrapper
+   *          wraps a filter
    * 
    * @return FilterWrapper solves the problem of multiple types being resolved
    *         in the setFilterState(FilterWrapper data) method
@@ -1468,7 +1492,9 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * Publishing method for filters - uses string parameter for remote invocation
-   * @param name name of filter to publish state for
+   * 
+   * @param name
+   *          name of filter to publish state for
    * 
    * @return FilterWrapper solves the problem of multiple types being resolved
    *         in the setFilterState(FilterWrapper data) method
@@ -1502,7 +1528,9 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * the publishing point of all OpenCV goodies ! type conversion is held off
    * until asked for - then its cached SMART ! :)
-   * @param data the opencv data
+   * 
+   * @param data
+   *          the opencv data
    * @return cvdata
    * 
    */
@@ -1533,10 +1561,15 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * creates a new overlay of text
-   * @param x coordinate
-   * @param y coordinate
-   * @param format format string
-   * @param color color
+   * 
+   * @param x
+   *          coordinate
+   * @param y
+   *          coordinate
+   * @param format
+   *          format string
+   * @param color
+   *          color
    * 
    */
   public void putText(int x, int y, String format, String color) {
@@ -1546,8 +1579,11 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * the "light weight" put - it does not create any new cv objects
-   * @param format format for the text
-   * @param args args to format into the text 
+   * 
+   * @param format
+   *          format for the text
+   * @param args
+   *          args to format into the text
    * 
    */
   public void putText(String format, Object... args) {
@@ -1606,7 +1642,9 @@ public class OpenCV extends AbstractComputerVision {
    * non-lossy pngs from OpenCVData.
    * 
    * key- input, filter, or display
-   * @param data data
+   * 
+   * @param data
+   *          data
    */
   public void record(OpenCVData data) {
     try {
@@ -1667,6 +1705,7 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * records a single frame to the filesystem from our data
+   * 
    * @return the filename
    */
   public String recordFrame() {
@@ -1682,7 +1721,8 @@ public class OpenCV extends AbstractComputerVision {
   }
 
   /**
-   * @param name remove a filter by name
+   * @param name
+   *          remove a filter by name
    */
   synchronized public void removeFilter(String name) {
     if (filters.containsKey(name)) {
@@ -1756,7 +1796,9 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * enable() and setDisplayFilter() needed filter
-   * @param name name of the filter to set active
+   * 
+   * @param name
+   *          name of the filter to set active
    *
    */
   public void setActiveFilter(String name) {
@@ -1815,8 +1857,11 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * Json encoded filter to be used to update state information within the named
    * filter
-   * @param name name of the filter
-   * @param data state date to set.
+   * 
+   * @param name
+   *          name of the filter
+   * @param data
+   *          state date to set.
    */
   public void setFilterState(String name, String data) {
     OpenCVFilter filter = getFilter(name);
@@ -2084,11 +2129,11 @@ public class OpenCV extends AbstractComputerVision {
     setGrabberType(config.grabberType);
     setInputFileName(config.inputFile);
     setInputSource(config.inputSource);
-    
+
     setNativeViewer(config.nativeViewer);
-    
+
     setWebViewer(config.webViewer);
-    
+
     filters.clear();
     if (config.filters != null) {
       for (OpenCVFilter f : config.filters.values()) {
@@ -2096,7 +2141,7 @@ public class OpenCV extends AbstractComputerVision {
         // TODO: better configuration of the filter when it's added.
       }
     }
-    
+
     if (config.capturing) {
       capture();
     }

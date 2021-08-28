@@ -31,12 +31,14 @@ public interface NeoPixelControl extends NameProvider {
 
   /**
    * explicit attach no additional parameters
+   * 
    * @param controller
    */
   public void attachNeoPixelController(NeoPixelController controller);
 
   /**
    * explicit detach
+   * 
    * @param controller
    */
   public void detachNeoPixelController(NeoPixelController controller);
@@ -57,15 +59,15 @@ public interface NeoPixelControl extends NameProvider {
    * Send a matrix of pixels to the neopixel hardware
    */
   public void writeMatrix();
-  
+
   public void setPin(int pin);
 
   public Integer getPin();
 
   public int getNumPixel();
-  
+
   public void clear();
-  
+
   public void setAnimation(int animation, int red, int green, int blue, int wait_ms);
 
   public void setAnimation(String animation, int red, int green, int blue, int wait_ms);

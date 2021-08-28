@@ -12,7 +12,7 @@ public class OpenCVConfig extends ServiceConfig {
   public String inputSource;
   public String inputFile;
   public boolean nativeViewer;
-  public boolean webViewer;  
+  public boolean webViewer;
   public boolean capturing;
   public Map<String, OpenCVFilter> filters = new LinkedHashMap<>();
 
