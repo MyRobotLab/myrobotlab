@@ -1226,7 +1226,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   synchronized public void addCategoryToFile(Bot bot, Category c) {
     try {
-      File learnfFile = new File(bot.aiml_path + fs + "learnf.xml");
+      File learnfFile = new File(bot.aiml_path + fs + "learnf.aiml");
 
       if (!learnfFile.exists()) {
         StringBuilder sb = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
