@@ -55,7 +55,7 @@
     java -classpath target/classes:libraries/jar/* org.myrobotlab.service.Runtime &#45;&#45;from-launcher -s webgui WebGui python Python
 
     # jpackage
-    jpackage -verbose -name myrobotlab -input target -main-jar myrobotlab.jar -main-class org.myrobotlab.service.Runtime -java-options '-Xmx512m -Xms512m -Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8' -arguments "-from-launcher -id historical-gates -log-level info -s webgui WebGui intro Intro python Python" -type app-image
+    jpackage &#45;&#45;verbose &#45;&#45;name myrobotlab &#45;&#45;input target &#45;&#45;main-jar myrobotlab.jar &#45;&#45;main-class org.myrobotlab.service.Runtime &#45;&#45;java-options '-Xmx512m -Xms512m -Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8' &#45;&#45;arguments "&#45;&#45;from-launcher &#45;&#45;id historical-gates &#45;&#45;log-level info -s webgui WebGui intro Intro python Python" &#45;&#45;type app-image
   
    -->  
   <modelVersion>4.0.0</modelVersion>
@@ -1126,6 +1126,16 @@
     <artifactId>program-ab-kw</artifactId>
     <version>0.0.8.6</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-core</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
 <!-- Duplicate entry for org.json-json-20090211 skipping -->
   <dependency>
@@ -1224,7 +1234,7 @@
   <dependency>
     <groupId>ch.qos.logback</groupId>
     <artifactId>logback-classic</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.3</version>
   </dependency>
   <dependency>
     <groupId>org.yaml</groupId>
