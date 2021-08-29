@@ -29,7 +29,7 @@ public class DocumentPipelineMeta extends MetaData {
     // for parsing wikitext
     addDependency("org.sweble.wikitext", "swc-engine", "3.1.7");
     addDependency("org.sweble.wom3", "sweble-wom3-core", "3.1.7");
-    addDependency("com.thoughtworks.xstream", "xstream", "1.4.17");
+    addDependency("com.thoughtworks.xstream", "xstream", "1.4.18");
 
     // FIXME - add service page, python script, give example of how to use
     setAvailable(false);

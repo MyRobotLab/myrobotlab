@@ -23,7 +23,7 @@ public class HtmlFilterMeta extends MetaData {
     Platform platform = Platform.getLocalInstance();
     addDescription("This service will strip html markup from the input text");
     addCategory("filter");
-    addDependency("org.jsoup", "jsoup", "1.8.3");
+    addDependency("org.jsoup", "jsoup", "1.14.2");
     addDependency("org.apache.commons", "commons-lang3", "3.3.2");
 
   }

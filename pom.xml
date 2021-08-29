@@ -54,7 +54,8 @@
     sshfs xxxxx@yyyyy.myrobotlab.org:/home/xxxxx /home/xxxxx/sshfs/blade2
     java -classpath target/classes:libraries/jar/* org.myrobotlab.service.Runtime &#45;&#45;from-launcher -s webgui WebGui python Python
 
-
+    # jpackage
+    jpackage -verbose -name myrobotlab -input target -main-jar myrobotlab.jar -main-class org.myrobotlab.service.Runtime -java-options '-Xmx512m -Xms512m -Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8' -arguments "-from-launcher -id historical-gates -log-level info -s webgui WebGui intro Intro python Python" -type app-image
   
    -->  
   <modelVersion>4.0.0</modelVersion>
@@ -337,7 +338,7 @@
   <dependency>
     <groupId>com.thoughtworks.xstream</groupId>
     <artifactId>xstream</artifactId>
-    <version>1.4.17</version>
+    <version>1.4.18</version>
     <scope>provided</scope>
   </dependency>
 <!-- DocumentPipeline end -->
@@ -373,18 +374,18 @@
   <dependency>
     <groupId>org.jsoup</groupId>
     <artifactId>jsoup</artifactId>
-    <version>1.8.3</version>
+    <version>1.14.2</version>
     <scope>provided</scope>
   </dependency>
 <!-- GoogleSearch end -->
 
 <!-- HtmlFilter begin -->
-<!-- Duplicate entry for org.jsoup-jsoup-1.8.3 skipping -->
+<!-- Duplicate entry for org.jsoup-jsoup-1.14.2 skipping -->
 <!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
 <!-- HtmlFilter end -->
 
 <!-- HtmlParser begin -->
-<!-- Duplicate entry for org.jsoup-jsoup-1.8.3 skipping -->
+<!-- Duplicate entry for org.jsoup-jsoup-1.14.2 skipping -->
 <!-- HtmlParser end -->
 
 <!-- ImapEmailConnector begin -->
@@ -1203,7 +1204,7 @@
   <dependency>
     <groupId>org.apache.httpcomponents</groupId>
     <artifactId>httpclient</artifactId>
-    <version>4.5.2</version>
+    <version>4.5.13</version>
   </dependency>
   <dependency>
     <groupId>org.atmosphere</groupId>
@@ -1223,7 +1224,7 @@
   <dependency>
     <groupId>ch.qos.logback</groupId>
     <artifactId>logback-classic</artifactId>
-    <version>1.0.13</version>
+    <version>1.2.0</version>
   </dependency>
   <dependency>
     <groupId>org.yaml</groupId>
