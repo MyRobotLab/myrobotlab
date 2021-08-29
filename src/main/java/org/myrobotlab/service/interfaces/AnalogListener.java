@@ -16,8 +16,6 @@ public interface AnalogListener extends NameProvider {
   /**
    * Configuration related - get the axis for which AxisPublishers will publish
    * to on this service
-   * 
-   * @param name
    */
   public String getAnalogId();
 

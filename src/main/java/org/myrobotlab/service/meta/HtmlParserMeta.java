@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -20,8 +19,7 @@ public class HtmlParserMeta extends MetaData {
   public HtmlParserMeta(String name) {
 
     super(name);
-    Platform platform = Platform.getLocalInstance();
-    addDependency("org.jsoup", "jsoup", "1.8.3");
+    addDependency("org.jsoup", "jsoup", "1.14.2");
     addDescription("html parser");
     addCategory("document");
     // Set to false since no JSoup service exists

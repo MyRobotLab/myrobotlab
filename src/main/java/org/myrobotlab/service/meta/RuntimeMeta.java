@@ -38,7 +38,7 @@ public class RuntimeMeta extends MetaData {
     addDependency("info.picocli", "picocli", "4.4.0");
     // all your logging needs
     addDependency("org.slf4j", "slf4j-api", "1.7.21");
-    addDependency("ch.qos.logback", "logback-classic", "1.2.0");
+    addDependency("ch.qos.logback", "logback-classic", "1.2.3");
     // for config file support.
     addDependency("org.yaml", "snakeyaml", "1.29");
 

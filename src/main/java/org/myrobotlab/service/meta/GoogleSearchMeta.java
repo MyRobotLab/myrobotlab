@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -20,9 +19,8 @@ public class GoogleSearchMeta extends MetaData {
   public GoogleSearchMeta(String name) {
 
     super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription("used as a general google search");
-    addDependency("org.jsoup", "jsoup", "1.8.3");
+    addDependency("org.jsoup", "jsoup", "1.14.2");
     addCategory("search");
 
   }
