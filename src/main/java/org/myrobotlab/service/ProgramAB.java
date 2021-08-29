@@ -1199,44 +1199,29 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     }
   }
 
-  /**
-   * From program-ab - this get called whenever a new category is added to any Graphmaster
-   * You'll need to distinguish between learn, learnf and other categories by their Category.filename
-   * @param category
-   */
-  @Override
-  public void onAddCategory(Category c) {
-    /**<pre>
-    // not quite ready ...
-    
-    try {
-    // log.info("adding category {}", category);
-    
-    String newCategory = Category.categoryToAIML(c) + "\n";
-
-    File newCatFile = new File(bot.aiml_path + fs + String.format("new_%s_categories.aiml", getName()));
-    FileOutputStream fos = null;
-    if (newCatFile.exists()) {
-      fos = new FileOutputStream(newCatFile, true);
-    } else {
-      fos = new FileOutputStream(newCatFile);
-      String header = new String("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".getBytes(), StandardCharsets.UTF_8);
-      fos.write(header.getBytes());
-    }
-
-    fos.write(newCategory.getBytes());
-
-    fos.close();
-  } catch (Exception e) {
-    error(e);
-  }
-    </pre>*/
-    
-  }
-
+ 
   @Override
   public void onChangePredicate(String predicateName, String result) {
     log.info("on predicate change {}={}", predicateName, result);
+  }
+
+  /**
+   * From program-ab - this gets called whenever a new category is added from a learnf tag
+   * @param category
+   */
+  @Override
+  public void onLearnF(Category c) {
+    log.info("onLearnF({})", c);
+  }
+
+  
+  /**
+   * From program-ab - this gets called whenever a new category is added from a learnf tag
+   * @param category
+   */
+  @Override
+  public void onLearn(Category c) {
+    log.info("onLearn({})", c);    
   }
 
 }
