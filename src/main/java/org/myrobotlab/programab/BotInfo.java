@@ -61,8 +61,10 @@ public class BotInfo {
       // lazy loading of bot - created on the first use
       if (properties.containsKey("locale")) {
         bot = new Bot(name, path.getAbsolutePath(), java.util.Locale.forLanguageTag((String)properties.get("locale")));
+        bot.listener = programab;
       } else {
-        bot = new Bot(name, path.getAbsolutePath());
+        bot = new Bot(name, path.getAbsolutePath(), java.util.Locale.forLanguageTag(programab.getLocaleTag()));
+        bot.listener = programab;
       }
 
       // merge properties - potentially there are 2 sets

@@ -1,9 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +13,7 @@ import org.alicebot.ab.AIMLMap;
 import org.alicebot.ab.AIMLSet;
 import org.alicebot.ab.Bot;
 import org.alicebot.ab.Category;
+import org.alicebot.ab.Chat;
 import org.alicebot.ab.MagicBooleans;
 import org.alicebot.ab.ProgramABListener;
 import org.myrobotlab.framework.Service;
@@ -77,11 +76,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * default user name chatting with the bot
    */
   String currentUserName = "human";
-
-  /**
-   * save predicates - default every 5 minutes
-   */
-  public int savePredicatesInterval = 300000;
 
   /**
    * display processing and logging
@@ -356,7 +350,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     if (sessions.containsKey(sessionKey)) {
       return sessions.get(sessionKey);
     } else {
-      warn("%s session does not exist", sessionKey);
       return null;
     }
   }
@@ -732,13 +725,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   }
 
   /**
-   * A category sent "to" program-ab - there is a callback onAddCategory which should
-   * hook to the event when program-ab adds a category
+   * A category sent "to" program-ab - there is a callback onAddCategory which
+   * should hook to the event when program-ab adds a category
+   * 
    * @param c
    */
   public void addCategory(Category c) {
-      Bot bot = getBot(getCurrentBotName());
-      bot.brain.addCategory(c);
+    Bot bot = getBot(getCurrentBotName());
+    bot.brain.addCategory(c);
   }
 
   public void addCategory(String pattern, String template, String that) {
@@ -760,16 +754,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     addCategory(pattern, template, "*");
   }
 
-  public void writeAIML() {
-    // TODO: revisit this method to make sure
-    for (BotInfo bot : bots.values()) {
-      if (bot.isActive()) {
-        // bot.writeAIMLFiles(); NO !!!
-        bot.getBot().writeLearnfIFCategories();
-      }
-    }
-  }
-
   /**
    * writeAndQuit will write brain to disk For learn.aiml is concerned
    */
@@ -780,7 +764,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
         try {
           savePredicates();
           // important to save learnf.aiml
-          writeAIML();
           // bot.writeQuit();
         } catch (IOException e1) {
           log.error("saving predicates threw", e1);
@@ -978,8 +961,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       startPeer("search");
     }
 
-    // FIXME - remove this time - use callback
-    addTask("savePredicates", savePredicatesInterval, 0, "savePredicates");
     logPublisher = new SimpleLogPublisher(this);
     logPublisher.filterClasses(new String[] { "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans", "class org.myrobotlab.programab.MrlSraixHandler" });
     logPublisher.start();
@@ -1199,29 +1180,77 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     }
   }
 
- 
   @Override
-  public void onChangePredicate(String predicateName, String result) {
-    log.info("on predicate change {}={}", predicateName, result);
+  synchronized public void onChangePredicate(Chat chat, String predicateName, String result) {
+    log.info("{} on predicate change {}={}", chat.bot.name, predicateName, result);
+
+    // a little janky because program-ab doesn't know the predicate filename,
+    // because it does know the "user"
+    // but ProgramAB saves predicates in a {username}.predicates.txt format in
+    // the bot directory
+
+    // so we find the session by matching the chat in the callback
+    for (Session s : sessions.values()) {
+      if (s.chat == chat) {
+        // found session saving predicates
+        s.savePredicates();
+        return;
+      }
+    }
+    error("could not find session to save predicates");
   }
 
   /**
-   * From program-ab - this gets called whenever a new category is added from a learnf tag
+   * From program-ab - this gets called whenever a new category is added from a
+   * learnf tag
+   * 
    * @param category
    */
   @Override
-  public void onLearnF(Category c) {
-    log.info("onLearnF({})", c);
+  public void onLearnF(Bot bot, Category c) {
+    log.info("{} onLearnF({})", bot, c);
+    addCategoryToFile(bot, c);
   }
 
-  
   /**
-   * From program-ab - this gets called whenever a new category is added from a learnf tag
+   * From program-ab - this gets called whenever a new category is added from a
+   * learnf tag
+   * 
    * @param category
    */
   @Override
-  public void onLearn(Category c) {
-    log.info("onLearn({})", c);    
+  public void onLearn(Bot bot, Category c) {
+    log.info("{} onLearn({})", bot, c);
+    addCategoryToFile(bot, c);
+  }
+
+  synchronized public void addCategoryToFile(Bot bot, Category c) {
+    try {
+      File learnfFile = new File(bot.aiml_path + fs + "learnf.xml");
+
+      if (!learnfFile.exists()) {
+        StringBuilder sb = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        sb.append("<!-- DO NOT EDIT THIS FILE - \n\tIT IS OVERWRITTEN WHEN CATEGORIES ARE ADDED FROM LEARN AND LEARNF TAGS -->\n");
+        sb.append("<aiml>\n");
+        sb.append("</aiml>\n");
+        FileIO.toFile(learnfFile, sb.toString().getBytes());
+      }
+
+      String learnf = FileIO.toString(learnfFile);
+      int pos = learnf.indexOf("</aiml>");
+
+      if (pos < 0) {
+        error("could not find </aiml> tag in file %s", learnfFile.getAbsolutePath());
+        return;
+      }
+
+      String out = learnf.substring(0, pos) + Category.categoryToAIML(c) + "\n" + learnf.substring(pos);
+
+      FileIO.toFile(learnfFile, out.getBytes());
+
+    } catch (Exception e) {
+      error(e);
+    }
   }
 
 }
