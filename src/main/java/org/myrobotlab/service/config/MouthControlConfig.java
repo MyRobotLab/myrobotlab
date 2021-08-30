@@ -7,3 +7,5 @@ public class MouthControlConfig extends ServiceConfig {
   public int delaytime;
   public int delaytimestop;
   public int delaytimeletter;
+
+}  
