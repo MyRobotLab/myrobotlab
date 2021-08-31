@@ -1203,25 +1203,21 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   /**
    * From program-ab - this gets called whenever a new category is added from a
    * learnf tag
-   * 
-   * @param category
    */
   @Override
-  public void onLearnF(Bot bot, Category c) {
-    log.info("{} onLearnF({})", bot, c);
-    addCategoryToFile(bot, c);
+  public void onLearnF(Chat chat, Category c) {
+    log.info("{} onLearnF({})", chat, c);
+    addCategoryToFile(chat.bot, c);
   }
 
   /**
    * From program-ab - this gets called whenever a new category is added from a
    * learnf tag
-   * 
-   * @param category
    */
   @Override
-  public void onLearn(Bot bot, Category c) {
-    log.info("{} onLearn({})", bot, c);
-    addCategoryToFile(bot, c);
+  public void onLearn(Chat chat, Category c) {
+    log.info("{} onLearn({})", chat, c);
+    addCategoryToFile(chat.bot, c);
   }
 
   synchronized public void addCategoryToFile(Bot bot, Category c) {
