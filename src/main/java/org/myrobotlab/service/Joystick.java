@@ -85,14 +85,19 @@ public class Joystick extends Service implements AnalogPublisher {
   protected Map<String, Set<MRLListener>> idAndServiceSubscription = new HashMap<>();
 
   /**
-   * all analog listeners
+   * services which implement the AnalogListener interface
    */
-  protected Map<String, Set<String>> analogListeners = new HashMap<>();
+  final protected Set<String> analogListenerServices = new HashSet<>();
 
   /**
-   * all digital listeners
+   * all analog listeners which have subscriptions to components
    */
-  protected Map<String, Set<String>> digitalListeners = new HashMap<>();
+  final protected Map<String, Set<String>> analogListeners = new HashMap<>();
+
+  /**
+   * all digital listeners which have subscriptions to components
+   */
+  final protected Map<String, Set<String>> digitalListeners = new HashMap<>();
 
   protected List<Component> hardwareComponents;
 
@@ -247,8 +252,54 @@ public class Joystick extends Service implements AnalogPublisher {
   }
 
   public Joystick(String n, String id) {
-    super(n, id);
+    super(n, id);    
   }
+
+  @Override
+  public void onInterfaceRegistered(String serviceName, String interfaceName) {
+    if (AnalogListener.class.toString().equals(interfaceName)) {
+      analogListenerServices.add(serviceName);
+      broadcastState();
+    }
+  }
+
+  @Override
+  public void onInterfaceReleased(String serviceName, String interfaceName) {
+    if (AnalogListener.class.toString().equals(interfaceName)) {
+      analogListenerServices.remove(serviceName);
+      broadcastState();
+    }
+  }
+  
+  /*
+  @Override
+  public void onRegistered(Registration registration) {
+    
+    if (registration.getName().startsWith("m")) {
+      log.info("here");
+    }
+    
+    if (analogListenerServices.isEmpty()) {
+      // first time - get all pre-existing services
+      analogListenerServices.addAll(Runtime.getServiceNamesFromInterface(AnalogListener.class));
+      broadcastState();
+    } else {
+      // evaluate only the one that was registered
+      ServiceInterface si = Runtime.getService(registration.getFullName());
+      if (si.getClass().isAssignableFrom(AnalogListener.class)) {
+        analogListenerServices.add(registration.getFullName());
+        broadcastState();
+      }
+    }
+  }
+  
+  @Override
+  public void onReleased(String name) {
+    if (analogListenerServices.remove(name)) {
+      broadcastState();
+    }
+  }
+  */
 
   // FIXME - simply set components e.g. getComponents
   public Map<String, Component> getComponents() {
@@ -464,6 +515,8 @@ public class Joystick extends Service implements AnalogPublisher {
     super.startService();
     initNativeLibs();
     invoke("getControllers");
+    // may not be safe for the constructor
+    registerForInterfaceChange(AnalogListener.class);
   }
 
   private void initNativeLibs() {
@@ -593,6 +646,8 @@ public class Joystick extends Service implements AnalogPublisher {
 
       Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
       Runtime.start("webgui", "WebGui");
+      
+      Runtime.start("m1", "MotorPort");
 
       boolean done = true;
       if (done) {

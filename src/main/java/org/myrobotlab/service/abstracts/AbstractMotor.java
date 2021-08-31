@@ -45,6 +45,7 @@ import org.myrobotlab.service.config.AbstractMotorConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AnalogData;
 import org.myrobotlab.service.data.PinData;
+import org.myrobotlab.service.interfaces.AnalogListener;
 import org.myrobotlab.service.interfaces.AnalogPublisher;
 import org.myrobotlab.service.interfaces.ButtonDefinition;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -135,10 +136,29 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     // input limits
     // "bottom" half of the mapper will be set by the controller
     mapper.map(min, max, -1.0, 1.0);
-    Runtime.getInstance().subscribeToLifeCycleEvents(getName());
-    refreshControllers();
+    registerForInterfaceChange(MotorController.class);
+    // Runtime.getInstance().subscribeToLifeCycleEvents(getName());
+    // refreshControllers();
+  }
+  
+  @Override
+  public void onInterfaceRegistered(String serviceName, String interfaceName) {
+    if (MotorController.class.toString().equals(interfaceName)) {
+      controllers.add(serviceName);
+      broadcastState();
+    }
   }
 
+  @Override
+  public void onInterfaceReleased(String serviceName, String interfaceName) {
+    if (MotorController.class.toString().equals(interfaceName)) {
+      controllers.remove(serviceName);
+      broadcastState();
+    }
+  }
+
+
+  /*
   @Override
   public void onRegistered(Registration s) {
     if (s.hasInterface(MotorController.class)) {
@@ -154,8 +174,9 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
       broadcastState();
     }
   }
-
-  public Set<String> refreshControllers() {
+  */
+  
+  public Set <String> refreshControllers() {
     controllers.clear();
     controllers.addAll(Runtime.getServiceNamesFromInterface(MotorController.class));
     broadcastState();
@@ -207,16 +228,23 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
     log.info("{}.move({})", getName(), powerInput);
     this.powerInput = powerInput;
+    
+    invoke("publishPowerChange", powerInput);
+    invoke("publishPowerOutputChange", mapper.calcOutput(powerInput));
+    
     if (controller != null) {
-      invoke("publishPowerChange", powerInput);
       controller.motorMove(this);
     }
-    broadcastState();
+
   }
 
   @Override
   public double publishPowerChange(double powerInput) {
     return powerInput;
+  }
+  
+  public double publishPowerOutputChange(double powerOutput) {
+    return powerOutput;
   }
 
   @Override
@@ -326,10 +354,10 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
       attachAnalogPublisher((AnalogPublisher) service);
       return;
     }
-
     error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
   }
 
+  
   @Override
   public void attachAnalogPublisher(AnalogPublisher publisher) {
     publisher.attachAnalogListener(this);
@@ -400,7 +428,8 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
      * </pre>
      */
     Mapper defaultControllerMapper = controller.getDefaultMapper();
-    mapper.map(mapper.getMinX(), mapper.getMaxX(), defaultControllerMapper.getMinY(), defaultControllerMapper.getMaxY());
+    // interesting idea - but this conflicts with user set config - removing
+    // mapper.map(mapper.getMinX(), mapper.getMaxX(), defaultControllerMapper.getMinY(), defaultControllerMapper.getMaxY());
 
     broadcastState();
     controller.attach(this);
