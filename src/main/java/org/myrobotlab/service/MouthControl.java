@@ -1,11 +1,17 @@
 package org.myrobotlab.service;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.MouthControlConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.interfaces.AnalogListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
@@ -23,27 +29,72 @@ public class MouthControl extends Service {
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(MouthControl.class);
+  @Deprecated /* future releases members will be protected use appropriate methods instead */
   public int mouthClosedPos = 20;
+  @Deprecated /* future releases members will be protected use appropriate methods instead */
   public int mouthOpenedPos = 4;
+  @Deprecated /* future releases members will be protected use appropriate methods instead */
   public int delaytime = 75;
+  @Deprecated /* future releases members will be protected use appropriate methods instead */
   public int delaytimestop = 150;
+  @Deprecated /* future releases members will be protected use appropriate methods instead */
   public int delaytimeletter = 45;
+  
+  protected final Set<String> servoServices = new HashSet<>();
+  protected final Set<String> speechServices = new HashSet<>();
+
   transient private ServoControl jaw;
   transient private SpeechSynthesis mouth;
+  protected String jawName;
+  protected String mouthName;
 
   public MouthControl(String n, String id) {
     super(n, id);
+    registerForInterfaceChange(ServoControl.class);
+    registerForInterfaceChange(SpeechSynthesis.class);
   }
-
+  
   public void attach(Attachable attachable) {
     if (attachable instanceof SpeechSynthesis) {
       mouth = (SpeechSynthesis) attachable;
       subscribe(mouth.getName(), "publishStartSpeaking");
       subscribe(mouth.getName(), "publishEndSpeaking");
+      mouthName = mouth.getName();
+      broadcastState();
     } else if (attachable instanceof ServoControl) {
       jaw = (ServoControl) attachable;
+      jawName = jaw.getName();
+      broadcastState();
     } else {
-      log.error("MouthControl can't attach : {}", attachable);
+      error("MouthControl can't attach : %s", attachable);
+    }
+  }
+
+  @Override
+  public void detach(Attachable attachable) {
+    if (attachable instanceof SpeechSynthesis) {
+      unsubscribe(mouth.getName(), "publishStartSpeaking");
+      unsubscribe(mouth.getName(), "publishEndSpeaking");
+      mouth = null;
+      mouthName = null;
+      broadcastState();
+    } else if (attachable instanceof ServoControl) {
+      jaw = null;
+      jawName = null;
+      broadcastState();
+    } else {
+      error("MouthControl can't detach from : %s", attachable);
+    }
+  }
+
+  
+  @Override
+  public void detach() {
+    if (jaw != null) {
+      detach(jaw);
+    }
+    if (mouth != null) {
+      detach(Runtime.getService(mouth.getName()));
     }
   }
 
@@ -114,24 +165,97 @@ public class MouthControl extends Service {
     jaw.moveTo((double) mouthClosedPos);
   }
 
-  public void setdelays(Integer d1, Integer d2, Integer d3) {
+  public void setDelays(Integer d1, Integer d2, Integer d3) {
     delaytime = d1;
     delaytimestop = d2;
     delaytimeletter = d3;
   }
 
-  public void setmouth(Integer closed, Integer opened) {
-    // jaw.setMinMax(closed, opened);
+  
+  @Deprecated /* use setDelays */
+  public void setdelays(Integer d1, Integer d2, Integer d3) {
+    setDelays(d1, d2, d3);
+  }
+
+  public void setMouth(Integer closed, Integer opened) {
     mouthClosedPos = closed;
     mouthOpenedPos = opened;
-
-    // jaw.setMinMax(closed, opened);
-    // if (closed < opened) {
-    // jaw.map(closed, opened, closed, opened);
-    // } else {
-    // jaw.map(opened, closed, opened, closed);
-    // }
   }
+  
+  @Deprecated /* use setMouth */
+  public void setmouth(Integer closed, Integer opened) {
+    setMouth(closed, opened);
+  }
+
+  
+  @Override
+  public void onInterfaceRegistered(String serviceName, String interfaceName) {
+    if (ServoControl.class.toString().equals(interfaceName)) {
+      servoServices.add(serviceName);
+      broadcastState();
+    }
+    if (SpeechSynthesis.class.toString().equals(interfaceName)) {
+      speechServices.add(serviceName);
+      broadcastState();
+    }
+  }
+
+  @Override
+  public void onInterfaceReleased(String serviceName, String interfaceName) {
+    if (ServoControl.class.toString().equals(interfaceName)) {
+      servoServices.remove(serviceName);
+      broadcastState();
+    }
+    if (SpeechSynthesis.class.toString().equals(interfaceName)) {
+      speechServices.remove(serviceName);
+      broadcastState();
+    }
+  }
+
+  
+  @Override
+  public ServiceConfig getConfig() {
+
+    MouthControlConfig config = (MouthControlConfig) initConfig(new MouthControlConfig());
+    
+    config.jaw = jawName;
+    config.mouth = mouthName;
+    config.mouthClosedPos = mouthClosedPos;
+    config.mouthOpenedPos = mouthOpenedPos;
+    config.delaytime = delaytime;
+    config.delaytimestop = delaytimestop;
+    config.delaytimeletter = delaytimeletter;
+    
+    return config;
+  }
+
+  @Override
+  public ServiceConfig load(ServiceConfig c) {
+    MouthControlConfig config = (MouthControlConfig) c;
+
+    mouthClosedPos = config.mouthClosedPos;
+    mouthOpenedPos = config.mouthOpenedPos;
+    delaytime = config.delaytime;
+    delaytimestop = config.delaytimestop;
+    delaytimeletter = config.delaytimeletter;
+    if (config.jaw != null) {
+      try {
+        attach(config.jaw);
+      } catch(Exception e) {
+        error(e);
+      }
+    }
+    
+    if (config.mouth != null) {
+      try {
+        attach(config.mouth);
+      } catch(Exception e) {
+        error(e);
+      }
+    }
+
+    return c;
+  }  
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.DEBUG);
