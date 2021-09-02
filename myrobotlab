@@ -5,7 +5,7 @@ APPDIR="$(dirname -- "$(readlink -f -- "${0}")" )"
 
 echo APPDIR=${APPDIR}
 
-CLASSPATH="${CLASSPATH}:${APPDIR}/target/classes/*:${APPDIR}/libraries/jars/*:${APPDIR}/myrobotlab.jar"
+CLASSPATH="${CLASSPATH}:${APPDIR}/target/classes/*:${APPDIR}/libraries/jar/*:${APPDIR}/myrobotlab.jar"
 export CLASSPATH
 
 echo CLASSPATH=${CLASSPATH}
