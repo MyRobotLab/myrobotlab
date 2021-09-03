@@ -12,7 +12,9 @@ public class HtmlFilterMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * @param name n
+   * 
+   * @param name
+   *          n
    * 
    */
   public HtmlFilterMeta(String name) {
@@ -21,7 +23,7 @@ public class HtmlFilterMeta extends MetaData {
     Platform platform = Platform.getLocalInstance();
     addDescription("This service will strip html markup from the input text");
     addCategory("filter");
-    addDependency("org.jsoup", "jsoup", "1.8.3");
+    addDependency("org.jsoup", "jsoup", "1.14.2");
     addDependency("org.apache.commons", "commons-lang3", "3.3.2");
 
   }

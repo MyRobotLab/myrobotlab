@@ -89,10 +89,15 @@ public class InProcessCli implements Runnable {
    * process as the mrl instances. Its a general good model to follow, because
    * stdin/stdout is a pipe into and out of the instance, so just like
    * websockets, mqtt or xmpp it should behave the same
-   * @param s service
-   * @param senderName sender name 
-   * @param in input stream
-   * @param out output stream
+   * 
+   * @param s
+   *          service
+   * @param senderName
+   *          sender name
+   * @param in
+   *          input stream
+   * @param out
+   *          output stream
    * 
    */
   public InProcessCli(ServiceInterface s, String senderName, InputStream in, OutputStream out) {
@@ -324,7 +329,9 @@ public class InProcessCli implements Runnable {
    * This is the Cli encoder - it takes a line of text and generates the
    * appropriate msg from it to either invoke (locally) or sendBlockingRemote
    * (remotely)
-   * @param data data
+   * 
+   * @param data
+   *          data
    * @return message
    */
   public Message cliToMsg(String data) {
@@ -345,7 +352,9 @@ public class InProcessCli implements Runnable {
 
   /**
    * get context specific path
-   * @param uuid uuid
+   * 
+   * @param uuid
+   *          uuid
    * @return string representing cli prompt
    * 
    */
@@ -388,7 +397,8 @@ public class InProcessCli implements Runnable {
   }
 
   /**
-   * @param msg Incoming Message - likely from local/remote runtime
+   * @param msg
+   *          Incoming Message - likely from local/remote runtime
    */
   public void onMsg(Message msg) {
 
@@ -445,7 +455,7 @@ public class InProcessCli implements Runnable {
               log.error("write threw", e);
             }
           } else {
-              writeToJson(o);
+            writeToJson(o);
           }
         }
       }

@@ -6,7 +6,7 @@ public class ServoConfig extends ServiceConfig {
   // public String controller;
   public boolean enabled;
   public Integer idleTimeout;
-  
+
   public String pin;
   public Double rest;
   public Double speed;

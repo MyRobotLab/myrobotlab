@@ -125,7 +125,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
       log.warn("{}.attachTextListener(null)", getName());
       return;
     }
-    
+
     attachTextListener(service.getName());
   }
 

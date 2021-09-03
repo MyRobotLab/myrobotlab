@@ -5,15 +5,14 @@ import org.myrobotlab.service.InMoov2;
 
 public class InMoov2Py extends LangPyUtils {
 
-
   public String toPython(ServiceInterface si) {
-    
+
     // common stuff
-    InMoov2 inmoov2 = (InMoov2) si;   
+    InMoov2 inmoov2 = (InMoov2) si;
     StringBuilder content = new StringBuilder();
     String name = safeRefName(si);
 
-    content.append("  " +"# InMoov2 Config : " + name + "\n");
+    content.append("  " + "# InMoov2 Config : " + name + "\n");
 
     if (!inmoov2.isVirtual()) {
       content.append("  " + "# " + name + ".setVirtual(True)\n");

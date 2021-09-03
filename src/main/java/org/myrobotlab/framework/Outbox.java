@@ -81,14 +81,14 @@ public class Outbox implements Runnable, Serializable {
     this.myService = myService;
   }
 
-  public Set<String> getAttached(String publishingPoint) {    
+  public Set<String> getAttached(String publishingPoint) {
     Set<String> unique = new TreeSet<>();
-    for (List<MRLListener> subcribers : notifyList.values()) {      
+    for (List<MRLListener> subcribers : notifyList.values()) {
       for (MRLListener listener : subcribers) {
         if (publishingPoint == null) {
-            unique.add(listener.callbackName);
+          unique.add(listener.callbackName);
         } else if (listener.topicMethod.equals(publishingPoint)) {
-            unique.add(listener.callbackName);
+          unique.add(listener.callbackName);
         }
       }
     }
@@ -116,7 +116,8 @@ public class Outbox implements Runnable, Serializable {
       // we warn if over 10 messages are in the queue - but we will still
       // process them
       if (msgBox.size() > maxQueue) {
-        // log.warn("{} outbox BUFFER OVERRUN size {} Dropping message to {}.{}", myService.getName(), msgBox.size(), msg.name, msg.method);
+        // log.warn("{} outbox BUFFER OVERRUN size {} Dropping message to
+        // {}.{}", myService.getName(), msgBox.size(), msg.name, msg.method);
         log.warn("{} outbox BUFFER OVERRUN size {} Dropping message to {}", myService.getName(), msgBox.size(), msg);
       }
       msgBox.addFirst(msg);
@@ -276,10 +277,10 @@ public class Outbox implements Runnable, Serializable {
         if (sw == null) {
           log.warn("could not find service {} to process {} from sender {} - tearing down route", msg.getName(), msg.method, msg.sender);
           /*
-          ServiceInterface sender = Runtime.getService(msg.sender);
-          if (sender != null) {
-            sender.removeListener(msg.sendingMethod, msg.getName(), msg.method);
-          } */ // removed by GroG 20210523
+           * ServiceInterface sender = Runtime.getService(msg.sender); if
+           * (sender != null) { sender.removeListener(msg.sendingMethod,
+           * msg.getName(), msg.method); }
+           */ // removed by GroG 20210523
           return;
         }
 
@@ -312,7 +313,9 @@ public class Outbox implements Runnable, Serializable {
 
   /**
    * Safe detach for single subscriber
-   * @param name the name of the listener to detach
+   * 
+   * @param name
+   *          the name of the listener to detach
    * 
    */
   synchronized public void detach(String name) {

@@ -78,7 +78,7 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
 
   transient private final OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
   transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
-  
+
   boolean netError = false;
 
   public OpenCVFilterFaceDetectDNN() {
@@ -111,15 +111,15 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
 
   @Override
   public IplImage process(IplImage image) {
-    
+
     if (net == null) {
       if (netError == false) {
-      log.error("DNN net is not ready !");
-      netError = true;
+        log.error("DNN net is not ready !");
+        netError = true;
       }
       return image;
     }
-    
+
     int h = image.height();
     int w = image.width();
     // TODO: cv2.resize(image, (300, 300))

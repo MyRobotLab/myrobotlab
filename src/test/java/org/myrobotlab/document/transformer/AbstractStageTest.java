@@ -20,7 +20,8 @@ public abstract class AbstractStageTest extends AbstractTest {
 
   @Test
   public void test() {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     AbstractStage stage = createStage();
     Document doc = createDocument();
     stage.processDocument(doc);

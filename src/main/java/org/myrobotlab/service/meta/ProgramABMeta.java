@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -12,13 +11,15 @@ public class ProgramABMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * @param name n
+   * 
+   * @param name
+   *          n
    * 
    */
   public ProgramABMeta(String name) {
 
     super(name);
-    Platform platform = Platform.getLocalInstance();
+
     addDescription("AIML 2.0 Reference interpreter based on Program AB");
     addCategory("ai");
 
@@ -35,6 +36,8 @@ public class ProgramABMeta extends MetaData {
 
     addDependency("program-ab", "program-ab-data", null, "zip");
     addDependency("program-ab", "program-ab-kw", "0.0.8.6");
+    exclude("ch.qos.logback", "logback-classic");
+    exclude("ch.qos.logback", "logback-core");
 
     addDependency("org.json", "json", "20090211");
     // used by FileIO

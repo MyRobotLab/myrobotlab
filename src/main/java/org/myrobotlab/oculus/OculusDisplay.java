@@ -2,6 +2,20 @@ package org.myrobotlab.oculus;
 
 import static com.oculusvr.capi.OvrLibrary.OVR_DEFAULT_IPD;
 import static com.oculusvr.capi.OvrLibrary.ovrProjectionModifier.ovrProjection_ClipRangeOpenGL;
+import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
+import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE;
+import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
+import static org.lwjgl.glfw.GLFW.glfwDestroyWindow;
+import static org.lwjgl.glfw.GLFW.glfwInit;
+import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
+import static org.lwjgl.glfw.GLFW.glfwPollEvents;
+import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetFramebufferSizeCallback;
+import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
+import static org.lwjgl.glfw.GLFW.glfwWindowHint;
+import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 import static org.lwjgl.opengl.GL11.GL_BACK;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
@@ -29,16 +43,21 @@ import static org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT0;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glFramebufferTexture2D;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
+import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_XNEG_PNG;
+import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_XPOS_PNG;
+import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YNEG_PNG;
+import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YPOS_PNG;
+import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZNEG_PNG;
+import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZPOS_PNG;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+
 import javax.imageio.ImageIO;
-import static org.lwjgl.glfw.GLFW.*;
+
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
-import org.lwjgl.glfw.GLFWKeyCallback;
-import org.lwjgl.glfw.GLFWMouseButtonCallback;
-import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.io.FileIO;
@@ -58,12 +77,6 @@ import org.saintandreas.math.Quaternion;
 import org.saintandreas.math.Vector2f;
 import org.saintandreas.math.Vector3f;
 import org.saintandreas.resources.Resource;
-import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_XNEG_PNG;
-import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_XPOS_PNG;
-import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YNEG_PNG;
-import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YPOS_PNG;
-import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZNEG_PNG;
-import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZPOS_PNG;
 import org.slf4j.Logger;
 
 import com.oculusvr.capi.EyeRenderDesc;
@@ -98,7 +111,7 @@ public class OculusDisplay implements Runnable {
 
   public final static Logger log = LoggerFactory.getLogger(OculusDisplay.class);
   // handle to the glfw window
-  private long window = 0;  
+  private long window = 0;
   // lwjgl3 callback
   private GLFWErrorCallback errorCallback;
   // A reference to the framebuffer size callback.
@@ -191,33 +204,34 @@ public class OculusDisplay implements Runnable {
     // our size. / resolution? is this configurable? maybe not?
     width = hmdDesc.Resolution.w / 4;
     height = hmdDesc.Resolution.h / 4;
-    // TODO: these were to specify where the glfw window would be placed on the monitor.. 
+    // TODO: these were to specify where the glfw window would be placed on the
+    // monitor..
     // int left = 100;
     // int right = 100;
     // try {
-    //   Display.setDisplayMode(new DisplayMode(width, height));
+    // Display.setDisplayMode(new DisplayMode(width, height));
     // } catch (LWJGLException e) {
-    //   throw new RuntimeException(e);
+    // throw new RuntimeException(e);
     // }
     // Display.setTitle("MRL Oculus Rift Viewer");
-    // TODO: which one?? 
+    // TODO: which one??
     long monitor = 0;
-    long window = glfwCreateWindow(width, height, "MRL Oculus Rift Viewer", monitor, 0);       
-    if(window == 0) {
+    long window = glfwCreateWindow(width, height, "MRL Oculus Rift Viewer", monitor, 0);
+    if (window == 0) {
       throw new RuntimeException("Failed to create window");
     }
     // Make this window's context the current on this thread.
     glfwMakeContextCurrent(window);
     // Let LWJGL know to use this current context.
     GL.createCapabilities();
-    //Setup the framebuffer resize callback.
+    // Setup the framebuffer resize callback.
     glfwSetFramebufferSizeCallback(window, (framebufferSizeCallback = new GLFWFramebufferSizeCallback() {
-        @Override
-        public void invoke(long window, int width, int height) {
-            onResize(width, height);
-        }
+      @Override
+      public void invoke(long window, int width, int height) {
+        onResize(width, height);
+      }
     }));
-    // TODO: set location and vsync?!  Do we need to update these for lwjgl3?
+    // TODO: set location and vsync?! Do we need to update these for lwjgl3?
     // Display.setLocation(left, right);
     // TODO: vsync enabled?
     // Display.setVSyncEnabled(true);
@@ -270,7 +284,8 @@ public class OculusDisplay implements Runnable {
     }
     // TODO: maybe ipd and eyeHeight go away?
     ipd = hmd.getFloat(OvrLibrary.OVR_KEY_IPD, OVR_DEFAULT_IPD);
-    // eyeHeight = hmd.getFloat(OvrLibrary.OVR_KEY_EYE_HEIGHT, OVR_DEFAULT_EYE_HEIGHT);
+    // eyeHeight = hmd.getFloat(OvrLibrary.OVR_KEY_EYE_HEIGHT,
+    // OVR_DEFAULT_EYE_HEIGHT);
     eyeHeight = 0;
   }
 
@@ -279,10 +294,11 @@ public class OculusDisplay implements Runnable {
     internalInit();
     // Load the screen in the scene i guess first.
     while (!glfwWindowShouldClose(window)) {
-      //while (!Display.isCloseRequested()) {
-      // TODO: resize testing.. make sure it's handle via the other callback? or something
+      // while (!Display.isCloseRequested()) {
+      // TODO: resize testing.. make sure it's handle via the other callback? or
+      // something
       // if (Display.wasResized()) {
-      //   onResize(Display.getWidth(), Display.getHeight());
+      // onResize(Display.getWidth(), Display.getHeight());
       // }
       update();
       drawFrame();
@@ -335,7 +351,7 @@ public class OculusDisplay implements Runnable {
         renderScreen(leftTexture, orientationInfo);
       } else if (eye == 1 && currentFrame.right != null) {
         renderScreen(rightTexture, orientationInfo);
-      } 
+      }
       if (trackHead) {
         mv.pop();
       }
@@ -349,7 +365,8 @@ public class OculusDisplay implements Runnable {
     glViewport(0, 0, width, height);
     glClearColor(0.5f, 0.5f, System.currentTimeMillis() % 1000 / 1000.0f, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // render the quad with our images/textures on it, one for the left eye, one for the right eye.
+    // render the quad with our images/textures on it, one for the left eye, one
+    // for the right eye.
     renderTexturedQuad(mirrorTexture.getTextureId());
   }
 
@@ -396,19 +413,20 @@ public class OculusDisplay implements Runnable {
     // ContextAttribs contextAttributes;
     // PixelFormat pixelFormat = new PixelFormat();
     // GLContext glContext = new GLContext();
-    
-    //Initialize GLFW.
+
+    // Initialize GLFW.
     glfwInit();
-    //Setup an error callback to print GLFW errors to the console.
+    // Setup an error callback to print GLFW errors to the console.
     glfwSetErrorCallback(errorCallback = GLFWErrorCallback.createPrint(System.err));
 
-    // contextAttributes = new ContextAttribs(4, 1).withProfileCore(true).withDebug(true);
+    // contextAttributes = new ContextAttribs(4,
+    // 1).withProfileCore(true).withDebug(true);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     // TODO: what about withDebug?
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    
-   // try {
+
+    // try {
     window = setupDisplay();
     // presumably this is called in setupDisplay now?
     // Display.create(pixelFormat, contextAttributes);
@@ -423,12 +441,12 @@ public class OculusDisplay implements Runnable {
     // TODO: maybe get rid of these?
     // Mouse.create();
     // Keyboard.create();
-    //} catch (LWJGLException e) {
-    //  throw new RuntimeException(e);
-    //}
+    // } catch (LWJGLException e) {
+    // throw new RuntimeException(e);
+    // }
     // TODO: vSyncEnabled in lwjgl3
     // Display.setVSyncEnabled(false);
-    
+
     TextureSwapChainDesc desc = new TextureSwapChainDesc();
     desc.Type = OvrLibrary.ovrTextureType.ovrTexture_2D;
     desc.ArraySize = 1;
@@ -473,11 +491,11 @@ public class OculusDisplay implements Runnable {
   protected void update() {
     // TODO: some sort of update logic for the game?
     // while (Keyboard.next()) {
-    //   onKeyboardEvent();
+    // onKeyboardEvent();
     // }
     //
     // while (Mouse.next()) {
-    //   onMouseEvent();
+    // onMouseEvent();
     // }
     // TODO : nothing?
     // Here we could update our projection matrix based on HMD info
@@ -622,12 +640,12 @@ public class OculusDisplay implements Runnable {
     File imageFile = new File("src/main/resources/resource/mrl_logo.jpg");
     BufferedImage lbi = ImageIO.read(imageFile);
     BufferedImage rbi = ImageIO.read(imageFile);
-    SerializableImage lsi = new SerializableImage(lbi,"left");
+    SerializableImage lsi = new SerializableImage(lbi, "left");
     SerializableImage rsi = new SerializableImage(rbi, "right");
     frame.left = lsi;
     frame.right = rsi;
     display.start();
-    display.setCurrentFrame(frame);    
+    display.setCurrentFrame(frame);
   }
-  
+
 }

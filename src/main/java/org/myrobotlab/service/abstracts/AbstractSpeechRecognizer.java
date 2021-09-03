@@ -485,7 +485,9 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   /**
    * length of idle time or silence until the wake word is needed to activate
    * again
-   * @param wakeWordTimeoutSeconds seconds
+   * 
+   * @param wakeWordTimeoutSeconds
+   *          seconds
    * 
    */
   public void setWakeWordTimeout(Integer wakeWordTimeoutSeconds) {

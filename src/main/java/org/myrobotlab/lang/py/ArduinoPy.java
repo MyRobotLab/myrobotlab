@@ -13,9 +13,9 @@ public class ArduinoPy extends LangPyUtils {
 
   @Override
   public String toPython(ServiceInterface si) {
-    
+
     // common stuff
-    Arduino arduino = (Arduino) si;   
+    Arduino arduino = (Arduino) si;
     StringBuilder content = new StringBuilder();
     String name = safeRefName(si);
 

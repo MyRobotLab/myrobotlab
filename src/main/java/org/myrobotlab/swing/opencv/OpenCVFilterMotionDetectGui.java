@@ -19,13 +19,13 @@ public class OpenCVFilterMotionDetectGui extends OpenCVFilterGui implements Acti
   @Override
   public void stateChanged(ChangeEvent e) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void getFilterState(FilterWrapper filterWrapper) {
     // TODO Auto-generated method stub
-    
+
   }
 
 }

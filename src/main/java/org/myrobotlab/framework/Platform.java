@@ -297,7 +297,8 @@ public class Platform implements Serializable {
   }
 
   /**
-   * @return The message of the day. "resistance is futile, we have cookies and robots ..."
+   * @return The message of the day. "resistance is futile, we have cookies and
+   *         robots ..."
    */
   public String getMotd() {
     return motd;
@@ -310,7 +311,6 @@ public class Platform implements Serializable {
     return branch;
   }
 
-  
   public String getBuild() {
     return build;
   }
@@ -325,7 +325,7 @@ public class Platform implements Serializable {
   /**
    * @return CPU Architecture x86, armv6, armv7, armv8
    */
-  
+
   public String getArch() {
     return arch;
   }
@@ -338,8 +338,7 @@ public class Platform implements Serializable {
   }
 
   /**
-   * @return Java virtual machine bitness
-   * either 64 or 32 bit
+   * @return Java virtual machine bitness either 64 or 32 bit
    * 
    */
   public int getJvmBitness() {
@@ -347,8 +346,7 @@ public class Platform implements Serializable {
   }
 
   /**
-   * @return Operating system type
-   * linux, windows, mac
+   * @return Operating system type linux, windows, mac
    * 
    */
   public String getOS() {
@@ -356,8 +354,8 @@ public class Platform implements Serializable {
   }
 
   /**
-   * @return arc bitness and os together
-   * x86.64.linux, armv7.32.linux, x86.32.windows etc..
+   * @return arc bitness and os together x86.64.linux, armv7.32.linux,
+   *         x86.32.windows etc..
    * 
    */
   public String getPlatformId() {
@@ -423,7 +421,8 @@ public class Platform implements Serializable {
         // zf.close(); explodes on closing :(
       } else {
         // IDE - version ...
-        // in = new FileInputStream("target/classes/META-INF/MANIFEST.MF");// Platform.class.getResource("target/classes/META-INF/MANIFEST.MF").openStream();
+        // in = new FileInputStream("target/classes/META-INF/MANIFEST.MF");//
+        // Platform.class.getResource("target/classes/META-INF/MANIFEST.MF").openStream();
         in = new FileInputStream("target/classes/git.properties");// Platform.class.getResource("target/classes/META-INF/MANIFEST.MF").openStream();
       }
       // String manifest = FileIO.toString(in);
@@ -460,8 +459,8 @@ public class Platform implements Serializable {
   }
 
   /**
-   * @return The instance identifier of the current running myrobotlab.
-   * Used for connecting multiple myrobotlabs together
+   * @return The instance identifier of the current running myrobotlab. Used for
+   *         connecting multiple myrobotlabs together
    * 
    */
   public String getId() {
@@ -480,7 +479,8 @@ public class Platform implements Serializable {
   }
 
   /**
-   * @param newId Set your own instance identifier 
+   * @param newId
+   *          Set your own instance identifier
    * 
    */
   public void setId(String newId) {

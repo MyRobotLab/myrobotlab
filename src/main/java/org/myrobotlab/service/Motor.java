@@ -4,7 +4,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.config.MotorConfig;
-import org.myrobotlab.service.config.MotorPortConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.MotorController;
 
@@ -70,9 +69,9 @@ public class Motor extends AbstractMotor {
   public void setPwmFreq(Integer pwmfreq) {
     this.pwmFreq = pwmfreq;
   }
-  
+
   @Override
-  public ServiceConfig getConfig() {    
+  public ServiceConfig getConfig() {
     MotorConfig config = (MotorConfig) initConfig(new MotorConfig());
     config.dirPin = getDirPin();
     config.pwrPin = getPwrPin();
@@ -82,7 +81,7 @@ public class Motor extends AbstractMotor {
 
   public ServiceConfig load(ServiceConfig c) {
     super.load(c);
-    MotorConfig config = (MotorConfig)c;
+    MotorConfig config = (MotorConfig) c;
     if (config.pwrPin != null) {
       setPwrPin(pwrPin);
     }
@@ -94,7 +93,6 @@ public class Motor extends AbstractMotor {
     }
     return c;
   }
-
 
   public static void main(String[] args) {
 

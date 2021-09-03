@@ -3,7 +3,6 @@
  */
 package org.myrobotlab.service;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
@@ -43,7 +42,8 @@ public class NeoPixelTest extends AbstractTest {
   /**
    * Test method for
    * {@link org.myrobotlab.service.NeoPixel#detach(org.myrobotlab.service.interfaces.NeoPixelController)}.
-   * @throws Exception 
+   * 
+   * @throws Exception
    */
   @Test
   public void testDetachNeoPixelController() throws Exception {
@@ -80,7 +80,8 @@ public class NeoPixelTest extends AbstractTest {
   @Test
   public void testSetPixelIntIntIntInt() {
     neopixel.setPixel(2, 255, 0, 0);
-    // assertTrue(neopixel.pixelMatrix.get(2).isEqual(new NeoPixel.PixelColor(2, 255, 0, 0, 0)));
+    // assertTrue(neopixel.pixelMatrix.get(2).isEqual(new NeoPixel.PixelColor(2,
+    // 255, 0, 0, 0)));
   }
 
   /**

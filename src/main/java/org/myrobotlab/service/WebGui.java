@@ -146,7 +146,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   /**
    * needed to get the api key to select the appropriate api processor
-   * @param uri u
+   * 
+   * @param uri
+   *          u
    * @return api key
    * 
    */
@@ -258,10 +260,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public WebGui(String n, String id) {
     super(n, id);
-    
+
     // adding initial route
     // Runtime.getInstance().addRoute(".*", getName(), 10);
-    
+
     if (desktops == null) {
       desktops = new HashMap<String, Map<String, Panel>>();
     }
@@ -309,7 +311,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     // TODO Auto-generated method stub
     return false;
   }
-  
+
   public void autoStartBrowser(boolean autoStartBrowser) {
     this.autoStartBrowser = autoStartBrowser;
   }
@@ -320,8 +322,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   /**
    * String broadcast to specific client
-   * @param uuid u
-   * @param str s
+   * 
+   * @param uuid
+   *          u
+   * @param str
+   *          s
    * 
    */
   public void broadcast(String uuid, String str) {
@@ -488,7 +493,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return address;
   }
 
-
   protected void setBroadcaster(AtmosphereResource r) {
     // FIXME - maintain single broadcaster for each session ?
     String uuid = r.uuid();
@@ -578,21 +582,23 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         // subscribe to its describe
         // send a describe
         OutputStream out = r.getResponse().getOutputStream();
-        
+
         // subscribe to describe
         MRLListener listener = new MRLListener("describe", String.format("runtime@%s", getId()), "onDescribe");
         Message subscribe = Message.createMessage(getFullName(), "runtime", "addListener", listener);
-        // Default serialization to json/text is to json encode the parameter list
+        // Default serialization to json/text is to json encode the parameter
+        // list
         // then json encode the message
         out.write(CodecUtils.toJsonMsg(subscribe).getBytes());
 
         // describe
         Message describe = getDescribeMsg(uuid); // SEND BACK describe(hello)
         // Service.sleep(1000);
-        // log.info(String.format("new connection %s", request.getRequestURI()));
+        // log.info(String.format("new connection %s",
+        // request.getRequestURI()));
         // out.write(CodecUtils.toJson(describe).getBytes());
         // describe.setName("runtime@" + id);
-        out.write(CodecUtils.toJsonMsg(describe).getBytes());//  DOUBLE-ENCODE
+        out.write(CodecUtils.toJsonMsg(describe).getBytes());// DOUBLE-ENCODE
         log.info(String.format("<-- %s", describe));
         return;
 
@@ -949,7 +955,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       // Double encoding - parameters then message
       String json = CodecUtils.toJsonMsg(msg);
-      
+
       if (json.length() > maxMsgSize) {
         log.warn(String.format("sendRemote default msg size (%d) exceeded 65536 for msg %s", json.length(), msg));
         /*
@@ -1164,18 +1170,18 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       jmdns = null;
     }
   }
-  
+
   @Override
   public ServiceConfig getConfig() {
     WebGuiConfig config = (WebGuiConfig) initConfig(new WebGuiConfig());
     config.port = port;
     config.autoStartBrowser = autoStartBrowser;
-    
+
     return config;
   }
-  
+
   public ServiceConfig load(ServiceConfig c) {
-    WebGuiConfig config = (WebGuiConfig)c;
+    WebGuiConfig config = (WebGuiConfig) c;
 
     if (config.port != null && (port != null && config.port.intValue() != port.intValue())) {
       setPort(config.port);
@@ -1183,7 +1189,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     autoStartBrowser(config.autoStartBrowser);
     return config;
   }
-  
+
   public static void main(String[] args) {
     LoggingFactory.init(Level.WARN);
 
@@ -1199,33 +1205,30 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       webgui.autoStartBrowser(false);
       webgui.setPort(8888);
       webgui.startService();
-      
+
       Runtime.start("python", "Python");
-      
 
       boolean done = true;
       if (done) {
         return;
       }
-      
 
-            
-      MqttBroker broker = (MqttBroker)Runtime.start("broker", "MqttBroker");
+      MqttBroker broker = (MqttBroker) Runtime.start("broker", "MqttBroker");
       broker.listen();
-      
-      Mqtt mqtt01 = (Mqtt)Runtime.start("mqtt01", "Mqtt");
+
+      Mqtt mqtt01 = (Mqtt) Runtime.start("mqtt01", "Mqtt");
       /*
-      mqtt01.setCert("certs/home-client/rootCA.pem", "certs/home-client/cert.pem.crt", "certs/home-client/private.key");
-      mqtt01.connect("mqtts://a22mowsnlyfeb6-ats.iot.us-west-2.amazonaws.com:8883");
-      */
+       * mqtt01.setCert("certs/home-client/rootCA.pem",
+       * "certs/home-client/cert.pem.crt", "certs/home-client/private.key");
+       * mqtt01.connect(
+       * "mqtts://a22mowsnlyfeb6-ats.iot.us-west-2.amazonaws.com:8883");
+       */
       mqtt01.connect("mqtt://localhost:1883");
 
-      
       Runtime.start("neo", "NeoPixel");
-      
+
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.connect("/dev/ttyACM0");
-
 
       for (int i = 0; i < 1000; ++i) {
         webgui.display("https://i.kinja-img.com/gawker-media/image/upload/c_scale,f_auto,fl_progressive,q_80,w_800/pytutcxcrfjvuhz2jipa.jpg");

@@ -31,7 +31,6 @@
  */
 package org.saintandreas.math;
 
-
 /**
  * <code>Matrix3f</code> defines a 3x3 matrix. Matrix data is maintained
  * internally and is accessible via the get and set methods. Convenience methods
@@ -81,8 +80,7 @@ public final class Matrix3f implements java.io.Serializable {
    * @param m22
    *          2x2 in the matrix.
    */
-  public Matrix3f(float m00, float m01, float m02, float m10, float m11,
-      float m12, float m20, float m21, float m22) {
+  public Matrix3f(float m00, float m01, float m02, float m10, float m11, float m12, float m20, float m21, float m22) {
 
     this.m00 = m00;
     this.m01 = m01;
@@ -205,33 +203,33 @@ public final class Matrix3f implements java.io.Serializable {
   @SuppressWarnings("fallthrough")
   public float get(int i, int j) {
     switch (i) {
-    case 0:
-      switch (j) {
       case 0:
-        return m00;
+        switch (j) {
+          case 0:
+            return m00;
+          case 1:
+            return m01;
+          case 2:
+            return m02;
+        }
       case 1:
-        return m01;
+        switch (j) {
+          case 0:
+            return m10;
+          case 1:
+            return m11;
+          case 2:
+            return m12;
+        }
       case 2:
-        return m02;
-      }
-    case 1:
-      switch (j) {
-      case 0:
-        return m10;
-      case 1:
-        return m11;
-      case 2:
-        return m12;
-      }
-    case 2:
-      switch (j) {
-      case 0:
-        return m20;
-      case 1:
-        return m21;
-      case 2:
-        return m22;
-      }
+        switch (j) {
+          case 0:
+            return m20;
+          case 1:
+            return m21;
+          case 2:
+            return m22;
+        }
     }
     throw new IllegalArgumentException("Invalid indices into matrix.");
   }
@@ -295,8 +293,7 @@ public final class Matrix3f implements java.io.Serializable {
         data[10] = m22;
       }
     } else {
-      throw new IndexOutOfBoundsException(
-          "Array size must be 9 or 16 in Matrix3f.get().");
+      throw new IndexOutOfBoundsException("Array size must be 9 or 16 in Matrix3f.get().");
     }
   }
 
@@ -311,23 +308,23 @@ public final class Matrix3f implements java.io.Serializable {
   public Vector3f getColumn(int i) {
     float vx, vy, vz;
     switch (i) {
-    case 0:
-      vx = m00;
-      vy = m10;
-      vz = m20;
-      break;
-    case 1:
-      vx = m01;
-      vy = m11;
-      vz = m21;
-      break;
-    case 2:
-      vx = m02;
-      vy = m12;
-      vz = m22;
-      break;
-    default:
-      throw new IllegalArgumentException("Invalid column index. " + i);
+      case 0:
+        vx = m00;
+        vy = m10;
+        vz = m20;
+        break;
+      case 1:
+        vx = m01;
+        vy = m11;
+        vz = m21;
+        break;
+      case 2:
+        vx = m02;
+        vy = m12;
+        vz = m22;
+        break;
+      default:
+        throw new IllegalArgumentException("Invalid column index. " + i);
     }
     return new Vector3f(vx, vy, vz);
   }
@@ -343,23 +340,23 @@ public final class Matrix3f implements java.io.Serializable {
   public Vector3f getRow(int i) {
     float vx, vy, vz;
     switch (i) {
-    case 0:
-      vx = m00;
-      vy = m01;
-      vz = m02;
-      break;
-    case 1:
-      vx = m10;
-      vy = m11;
-      vz = m12;
-      break;
-    case 2:
-      vx = m20;
-      vy = m21;
-      vz = m22;
-      break;
-    default:
-      throw new IllegalArgumentException("Invalid row index. " + i);
+      case 0:
+        vx = m00;
+        vy = m01;
+        vz = m02;
+        break;
+      case 1:
+        vx = m10;
+        vy = m11;
+        vz = m12;
+        break;
+      case 2:
+        vx = m20;
+        vy = m21;
+        vz = m22;
+        break;
+      default:
+        throw new IllegalArgumentException("Invalid row index. " + i);
     }
     return new Vector3f(vx, vy, vz);
   }
@@ -392,9 +389,7 @@ public final class Matrix3f implements java.io.Serializable {
    * @return true if this matrix is identity
    */
   public boolean isIdentity() {
-    return (m00 == 1 && m01 == 0 && m02 == 0)
-        && (m10 == 0 && m11 == 1 && m12 == 0)
-        && (m20 == 0 && m21 == 0 && m22 == 1);
+    return (m00 == 1 && m01 == 0 && m02 == 0) && (m10 == 0 && m11 == 1 && m12 == 0) && (m20 == 0 && m21 == 0 && m22 == 1);
   }
 
   /**
@@ -420,8 +415,7 @@ public final class Matrix3f implements java.io.Serializable {
     temp21 = m20 * mat.m01 + m21 * mat.m11 + m22 * mat.m21;
     temp22 = m20 * mat.m02 + m21 * mat.m12 + m22 * mat.m22;
 
-    return new Matrix3f(temp00, temp01, temp02, temp10, temp11, temp12, temp20,
-        temp21, temp22);
+    return new Matrix3f(temp00, temp01, temp02, temp10, temp11, temp12, temp20, temp21, temp22);
   }
 
   /**
@@ -434,8 +428,7 @@ public final class Matrix3f implements java.io.Serializable {
    * @return the result vector.
    */
   public Vector3f mult(Vector3f v) {
-    return new Vector3f(m00 * v.x + m01 * v.y + m02 * v.z, m10 * v.x + m11
-        * v.y + m12 * v.z, m20 * v.x + m21 * v.y + m22 * v.z);
+    return new Vector3f(m00 * v.x + m01 * v.y + m02 * v.z, m10 * v.x + m11 * v.y + m12 * v.z, m20 * v.x + m21 * v.y + m22 * v.z);
   }
 
   private static class Matrix3fTemp {
@@ -443,7 +436,7 @@ public final class Matrix3f implements java.io.Serializable {
     public float m10, m11, m12;
     public float m20, m21, m22;
   };
-  
+
   /**
    * Inverts this matrix as a new Matrix3f.
    * 
@@ -477,7 +470,6 @@ public final class Matrix3f implements java.io.Serializable {
     store.m22 *= idet;
     return new Matrix3f(store);
   }
-
 
   /**
    * Returns a new matrix representing the adjoint of this matrix.
@@ -610,9 +602,7 @@ public final class Matrix3f implements java.io.Serializable {
    * @return m
    */
   public Matrix3f scale(Vector3f scale) {
-    return new Matrix3f(m00 * scale.x, m01 * scale.y, m02 * scale.z, m10
-        * scale.x, m11 * scale.y, m12 * scale.z, m20 * scale.x, m21 * scale.y,
-        m22 * scale.z);
+    return new Matrix3f(m00 * scale.x, m01 * scale.y, m02 * scale.z, m10 * scale.x, m11 * scale.y, m12 * scale.z, m20 * scale.x, m21 * scale.y, m22 * scale.z);
   }
 
   static boolean equalIdentity(Matrix3f mat) {

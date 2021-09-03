@@ -12,13 +12,16 @@ public class RuntimeMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * @param name n
+   * 
+   * @param name
+   *          n
    * 
    */
   public RuntimeMeta(String name) {
 
     super(name);
-    // TODO: can we remove this line?  it's not used locally, but it does initialize Platform...
+    // TODO: can we remove this line? it's not used locally, but it does
+    // initialize Platform...
     Platform platform = Platform.getLocalInstance();
     addDescription("is a singleton service responsible for the creation, starting, stopping, releasing and registration of all other services");
     addCategory("framework");
@@ -35,7 +38,7 @@ public class RuntimeMeta extends MetaData {
     addDependency("info.picocli", "picocli", "4.4.0");
     // all your logging needs
     addDependency("org.slf4j", "slf4j-api", "1.7.21");
-    addDependency("ch.qos.logback", "logback-classic", "1.2.0");
+    addDependency("ch.qos.logback", "logback-classic", "1.2.3");
     // for config file support.
     addDependency("org.yaml", "snakeyaml", "1.29");
 

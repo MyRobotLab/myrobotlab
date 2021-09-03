@@ -119,7 +119,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   }
 
   public boolean motorDetach(String name) {
-     motors.remove(name);
+    motors.remove(name);
     return true;
   }
 
@@ -519,7 +519,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
     Send: [Address, 1, Value, CRC(2 bytes)]
     Receive: [0xFF]
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
   public void driveBackwardM1(int value) {
     sendPacket(address, 1, value);
@@ -539,7 +541,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Brushed DC Motor Controllers
   RoboClaw Series User Manual 65
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
   public void setMiniMainVoltage(int value) {
     sendPacket(address, 2, value);
@@ -557,7 +561,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 3, Value, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
   public void setMaxMainVoltage(int value) {
     sendPacket(address, 3, value);
@@ -571,7 +577,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 4, Value, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
   public void driveForwardM2(int value) {
     sendPacket(address, 4, value);
@@ -585,7 +593,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 5, Value, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
   public void driveBackwardM2(int value) {
     sendPacket(address, 5, value);
@@ -599,7 +609,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 6, Value, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
   public void driveM1(int value) {
     sendPacket(address, 6, value);
@@ -620,7 +632,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   steering. Before a command is executed, both valid drive and turn data packets are required
   Once RoboClaw begins to operate the motors turn and speed can be updated independently.
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
   public void driveM2(int value) {
     sendPacket(address, 7, value);
@@ -634,7 +648,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 8, Value, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
   public void driveForward(int value) {
     sendPacket(address, 8, value);
@@ -648,7 +664,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 9, Value, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
   public void driveBackward(int value) {
     sendPacket(address, 9, value);
@@ -662,7 +680,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 10, Value, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
   public void turnRight(int value) {
     sendPacket(address, 10, value);
@@ -676,7 +696,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 11, Value, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
   public void turnLeft(int value) {
     sendPacket(address, 11, value);
@@ -690,7 +712,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 12, Value, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
   public void driveForwardOrBackward(int value) {
     sendPacket(address, 12, value);
@@ -704,7 +728,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 13, Value, CRC(2 bytes)]
   Receive: [0xFF
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
   public void turnLeftOrRight(int value) {
     sendPacket(address, 13, value);
@@ -720,6 +746,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   The command will return up to 48 bytes. The return string includes the product name and
   firmware version. The return string is terminated with a line feed (10) and null (0) character.
    * </pre>
+   * 
    * @return the firmware version
    */
   public String readFirmwareVersion() {
@@ -737,6 +764,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 24]
   Receive: [Value(2 bytes), CRC(2 bytes)]
    * </pre>
+   * 
    * @return battery voltage
    */
   public Integer readMainBatteryVoltage() {
@@ -757,6 +785,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 25]
   Receive: [Value.Byte1, Value.Byte0, CRC(2 bytes)]
    * </pre>
+   * 
    * @return voltage
    */
   public Integer readLogicbatteryVoltage() {
@@ -783,7 +812,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 26, Value, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
   public void setMinLogicVoltage(int value) {
     sendPacket(address, 26, value);
@@ -801,7 +832,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 27, Value, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
 
   public void setMaxLogicVoltage(int value) {
@@ -837,7 +870,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 49]
   Receive: [M1 Current(2 bytes), M2 Currrent(2 bytes), CRC(2 bytes)]
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
   public void readMotorCurrents(int value) {
     sendPacket(address, 49);
@@ -852,8 +887,11 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 57, Min(2 bytes), Max(2bytes, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param min min voltage
-   * @param max max voltage
+   * 
+   * @param min
+   *          min voltage
+   * @param max
+   *          max voltage
    */
   public void setMainBatteryVoltages(int min, int max) {
     sendPacket(address, 57, byte1(min), byte0(min), byte1(max), byte0(max));
@@ -883,8 +921,11 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 58, Min(2 bytes), Max(2bytes, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param min voltage
-   * @param max voltage
+   * 
+   * @param min
+   *          voltage
+   * @param max
+   *          voltage
    */
   public void setLogicBatteryVoltages(int min, int max) {
     sendPacket(address, 58, byte1(min), byte0(min), byte1(max), byte0(max));
@@ -922,7 +963,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 68, Accel(4 bytes), CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param accel acc
+   * 
+   * @param accel
+   *          acc
    */
   public void setDefaultDutyAccelM1(int accel) {
     sendPacket(address, 68, byte3(accel), byte2(accel), byte1(accel), byte0(accel));
@@ -936,7 +979,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 69, Accel(4 bytes), CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param accel acc
+   * 
+   * @param accel
+   *          acc
    */
   public void setDefaultDutyAccelM2(int accel) {
     sendPacket(address, 69, byte3(accel), byte2(accel), byte1(accel), byte0(accel));
@@ -963,9 +1008,13 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Voltage Clamp: Sets the signal pin as an output to drive an external voltage clamp circuit
   Home(M1 and M2): will trigger the specific motor to stop and the encoder count to reset to 0.
    * </pre>
- * @param s3 a
- * @param s4 a
- * @param s5 a
+   * 
+   * @param s3
+   *          a
+   * @param s4
+   *          a
+   * @param s5
+   *          a
    */
   public void setModes(int s3, int s4, int s5) {
     sendPacket(address, 74, s3, s4, s5);
@@ -1034,6 +1083,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 82]
   Receive: [Temperature(2 bytes), CRC(2 bytes)]
    * </pre>
+   * 
    * @return temp
    */
   public int readTemp() {
@@ -1119,7 +1169,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 92, Mode, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param mode mode
+   * 
+   * @param mode
+   *          mode
    */
   public void setEncoderModeM1(int mode) {
     sendPacket(address, 92, mode);
@@ -1136,7 +1188,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Brushed DC Motor Controllers
   RoboClaw Series User Manual 75
    * </pre>
-   * @param mode m
+   * 
+   * @param mode
+   *          m
    */
   public void setEncoderModeM2(int mode) {
     sendPacket(address, 93, mode);
@@ -1219,7 +1273,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Brushed DC Motor Controllers
   RoboClaw Series User Manual 77
    * </pre>
-   * @param config config
+   * 
+   * @param config
+   *          config
    */
   public void setStandardConfig(int config) {
     sendPacket(address, 98, byte1(config), byte0(config));
@@ -1289,7 +1345,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [0xFF]
   Set the output state value of CTRL1. See 100 - Set CTRL Modes for valid values.
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
   public void setCtrl1(int value) {
     sendPacket(address, 102, byte1(value), byte0(value));
@@ -1303,7 +1361,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [0xFF]
   Set the output state value of CTRL2. See 100 - Set CTRL Modes for valid values.
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
   public void setCtrl2(int value) {
     sendPacket(address, 103, byte1(value), byte0(value));
@@ -1331,7 +1391,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 134, MaxCurrent(4 bytes), 0, 0, 0, 0, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param maxCurrent current
+   * 
+   * @param maxCurrent
+   *          current
    */
   public void setMaxCurrentM1(int maxCurrent) {
     sendPacket(address, 133, byte3(maxCurrent), byte2(maxCurrent), byte1(maxCurrent), byte0(maxCurrent), 0, 0, 0, 0);
@@ -1346,7 +1408,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 134, MaxCurrent(4 bytes), 0, 0, 0, 0, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param maxCurrent current
+   * 
+   * @param maxCurrent
+   *          current
    */
   public void setMaxCurrentM2(int maxCurrent) {
     sendPacket(address, 134, byte3(maxCurrent), byte2(maxCurrent), byte1(maxCurrent), byte0(maxCurrent), 0, 0, 0, 0);
@@ -1388,7 +1452,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 148, Mode, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param mode pwm mode
+   * 
+   * @param mode
+   *          pwm mode
    */
   public void setPwmMode(int mode) {
     sendPacket(address, 148, mode);
@@ -1401,6 +1467,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 149]
   Receive: [PWMMode, CRC(2 bytes)]
    * </pre>
+   * 
    * @return pwm mode
    */
   public Integer readPwmMode() {
@@ -1433,6 +1500,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Bit6 - Reserved
   Bit7 - Reserved
    * </pre>
+   * 
    * @return encoder data from m1
    */
   public EncoderData readEncoderM1() {
@@ -1481,6 +1549,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Bit6 - Reserved
   Bit7 - Reserved
    * </pre>
+   * 
    * @return encoder data from m2
    */
   public EncoderData readEncoderM2() {
@@ -1538,6 +1607,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [Speed(4 bytes), Status, CRC(2 bytes)]
   Status indicates the direction (0 – forward, 1 - backward).
    * </pre>
+   * 
    * @return encoder speed m1
    */
   public long readEncoderSpeedM1() {
@@ -1565,6 +1635,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [Speed(4 bytes), Status, CRC(2 bytes)]
   Status indicates the direction (0 – forward, 1 - backward).
    * </pre>
+   * 
    * @return encoder speed m2
    */
   public long readEncoderSpeedM2() {
@@ -1606,7 +1677,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 22, Value(4 bytes), CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param value v
+   * 
+   * @param value
+   *          v
    */
   public void setEncoderM1(int value) {
     sendPacket(address, 22, byte3(value), byte2(value), byte1(value), byte0(value));
@@ -1620,7 +1693,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 23, Value(4 bytes), CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param value v 
+   * 
+   * @param value
+   *          v
    */
   public void setEncoderM2(int value) {
     sendPacket(address, 23, byte3(value), byte2(value), byte1(value), byte0(value));
@@ -1637,6 +1712,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [Speed(4 bytes), Status, CRC(2 bytes)]
   The Status byte is direction (0 – forward, 1 - backward).
    * </pre>
+   * 
    * @return speed of m1
    */
   public Long readSpeedM1() {
@@ -1665,6 +1741,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [Speed(4 bytes), Status, CRC(2 bytes)]
   The Status byte is direction (0 – forward, 1 - backward).
    * </pre>
+   * 
    * @return speed m2
    */
   public Long readSpeedM2() {
@@ -1730,10 +1807,15 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 28, D(4 bytes), P(4 bytes), I(4 bytes), QPPS(4 byte), CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param D pid
-   * @param P pid
-   * @param I pid
-   * @param QPPS  see comments
+   * 
+   * @param D
+   *          pid
+   * @param P
+   *          pid
+   * @param I
+   *          pid
+   * @param QPPS
+   *          see comments
    */
   public void setPidQppsM1(int D, int P, int I, int QPPS) {
     sendPacket(address, 28, byte3(D), byte2(D), byte1(D), byte0(D), byte3(P), byte2(P), byte1(P), byte0(P), byte3(I), byte2(I), byte1(I), byte0(I), byte3(QPPS), byte2(QPPS),
@@ -1757,10 +1839,15 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 29, D(4 bytes), P(4 bytes), I(4 bytes), QPPS(4 byte), CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
- * @param D pid
- * @param P pid
- * @param I pid
- * @param QPPS pid
+   * 
+   * @param D
+   *          pid
+   * @param P
+   *          pid
+   * @param I
+   *          pid
+   * @param QPPS
+   *          pid
    */
   public void setPidQppsM2(int D, int P, int I, int QPPS) {
     sendPacket(address, 29, byte3(D), byte2(D), byte1(D), byte0(D), byte3(P), byte2(P), byte1(P), byte0(P), byte3(I), byte2(I), byte1(I), byte0(I), byte3(QPPS), byte2(QPPS),
@@ -1786,7 +1873,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [0xFF]
   The duty value is signed and the range is -32767 to +32767 (eg. +-100% duty).
    * </pre>
-   * @param duty duty m1
+   * 
+   * @param duty
+   *          duty m1
    */
   public void driveDutyM1(int duty) {
     sendPacket(address, 32, byte1(duty), byte0(duty));
@@ -1801,7 +1890,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [0xFF]
   The duty value is signed and the range is -32768 to +32767 (eg. +-100% duty).
    * </pre>
-   * @param duty m2 duty
+   * 
+   * @param duty
+   *          m2 duty
    */
   public void driveDutyM2(int duty) {
     sendPacket(address, 32, byte1(duty), byte0(duty));
@@ -1816,8 +1907,11 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [0xFF]
   The duty value is signed and the range is -32768 to +32767 (eg. +-100% duty).
    * </pre>
-   * @param duty1 m1 duty
-   * @param duty2 m2 duty
+   * 
+   * @param duty1
+   *          m1 duty
+   * @param duty2
+   *          m2 duty
    */
   public void driveDutyM1M2(int duty1, int duty2) {
     sendPacket(address, 34, byte1(duty1), byte0(duty1), byte1(duty2), byte0(duty2));
@@ -1834,7 +1928,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 35, Speed(4 Bytes), CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param speed s
+   * 
+   * @param speed
+   *          s
    */
   public void driveSpeedM1(int speed) {
     sendPacket(address, 35, byte3(speed), byte2(speed), byte1(speed), byte0(speed));
@@ -1851,7 +1947,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 36, Speed(4 Bytes), CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param speed s m2
+   * 
+   * @param speed
+   *          s m2
    */
   public void driveSpeedM2(int speed) {
     sendPacket(address, 36, byte3(speed), byte2(speed), byte1(speed), byte0(speed));
@@ -1868,8 +1966,11 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 37, SpeedM1(4 Bytes), SpeedM2(4 Bytes), CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
- * @param speedM1 m1
- * @param speedM2 m2
+   * 
+   * @param speedM1
+   *          m1
+   * @param speedM2
+   *          m2
    */
   public void driveSpeedM1M2(int speedM1, int speedM2) {
     sendPacket(address, 37, byte3(speedM1), byte2(speedM1), byte1(speedM1), byte0(speedM1), byte3(speedM2), byte2(speedM2), byte1(speedM2), byte0(speedM2));
@@ -1894,8 +1995,11 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Brushed DC Motor Controllers
   RoboClaw Series User Manual 92
    * </pre>
-   * @param accel a
-   * @param speed s
+   * 
+   * @param accel
+   *          a
+   * @param speed
+   *          s
    */
   public void driveSpeedAccelM1(int accel, int speed) {
     sendPacket(address, 38, accel, speed);
@@ -1918,8 +2022,11 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Another example would be an acceleration value of 24,000 QPPS and a speed value of 12,000
   QPPS would accelerate the motor to 12,000 QPPS in 0.5 seconds.
    * </pre>
-   * @param accel a
-   * @param speed s
+   * 
+   * @param accel
+   *          a
+   * @param speed
+   *          s
    */
   public void driveSpeedAccelM2(int accel, int speed) {
     sendPacket(address, 39, accel, speed);
@@ -1943,9 +2050,13 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Another example would be an acceleration value of 24,000 QPPS and a speed value of 12,000
   QPPS would accelerate the motor to 12,000 QPPS in 0.5 seconds.
    * </pre>
-   * @param accel a
-   * @param speedM1 m1 
-   * @param speedM2 m2
+   * 
+   * @param accel
+   *          a
+   * @param speedM1
+   *          m1
+   * @param speedM2
+   *          m2
    */
   public void driveSpeedAccelM1M2(int accel, int speedM1, int speedM2) {
 
@@ -1969,8 +2080,11 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   and executed in the order sent. If a value of 1 is used the current running command is stopped,
   any other commands in the buffer are deleted and the new command is executed.
    * </pre>
-   * @param speed s
-   * @param distance d 
+   * 
+   * @param speed
+   *          s
+   * @param distance
+   *          d
    */
   public void driveSpeedDistM1(int speed, int distance) {
     sendPacket(address, 41, byte3(speed), byte2(speed), byte1(speed), byte0(speed), byte3(distance), byte2(distance), byte1(distance), byte0(distance), buffer);
@@ -1991,8 +2105,11 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   and executed in the order sent. If a value of 1 is used the current running command is stopped,
   any other commands in the buffer are deleted and the new command is executed.
    * </pre>
-   * @param speed s
-   * @param distance d 
+   * 
+   * @param speed
+   *          s
+   * @param distance
+   *          d
    */
   public void driveSpeedDistM2(int speed, int distance) {
     sendPacket(address, 42, byte3(speed), byte2(speed), byte1(speed), byte0(speed), byte3(distance), byte2(distance), byte1(distance), byte0(distance), buffer);
@@ -2014,10 +2131,15 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   and executed in the order sent. If a value of 1 is used the current running command is stopped,
   any other commands in the buffer are deleted and the new command is executed.
    * </pre>
- * @param speedM1 s
- * @param distanceM1 d 
- * @param speedM2 s 
- * @param distanceM2 d
+   * 
+   * @param speedM1
+   *          s
+   * @param distanceM1
+   *          d
+   * @param speedM2
+   *          s
+   * @param distanceM2
+   *          d
    */
   public void driveSpeedDistM1M2(int speedM1, int distanceM1, int speedM2, int distanceM2) {
     sendPacket(address, 43, byte3(speedM1), byte2(speedM1), byte1(speedM1), byte0(speedM1), byte3(distanceM1), byte2(distanceM1), byte1(distanceM1), byte0(distanceM1),
@@ -2048,9 +2170,13 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Brushed DC Motor Controllers
   RoboClaw Series User Manual 94
    * </pre>
-   * @param accel a
-   * @param speed  s
-   * @param distance d
+   * 
+   * @param accel
+   *          a
+   * @param speed
+   *          s
+   * @param distance
+   *          d
    */
   public void driveSpeedAccelDistM1(int accel, int speed, int distance) {
     sendPacket(address, 44, byte3(accel), byte2(accel), byte1(accel), byte0(accel), byte3(speed), byte2(speed), byte1(speed), byte0(speed), byte3(distance), byte2(distance),
@@ -2075,9 +2201,13 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   and executed in the order sent. If a value of 1 is used the current running command is stopped,
   any other commands in the buffer are deleted and the new command is executed.
    * </pre>
-   * @param speed s
-   * @param accel a 
-   * @param distance d 
+   * 
+   * @param speed
+   *          s
+   * @param accel
+   *          a
+   * @param distance
+   *          d
    */
   public void driveSpeedAccelDistM2(int speed, int accel, int distance) {
     sendPacket(address, 45, byte3(speed), byte2(speed), byte1(speed), byte0(speed), byte3(accel), byte2(accel), byte1(accel), byte0(accel), byte3(distance), byte2(distance),
@@ -2103,11 +2233,17 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   and executed in the order sent. If a value of 1 is used the current running command is stopped,
   any other commands in the buffer are deleted and the new command is executed.
    * </pre>
- * @param accel a
- * @param speedM1 s 
- * @param distanceM1 d 
- * @param speedM2 s 
- * @param distanceM2 d 
+   * 
+   * @param accel
+   *          a
+   * @param speedM1
+   *          s
+   * @param distanceM1
+   *          d
+   * @param speedM2
+   *          s
+   * @param distanceM2
+   *          d
    */
   public void driveSpeedAccelDistM1M2(int accel, int speedM1, int distanceM1, int speedM2, int distanceM2) {
     sendPacket(address, 46, byte3(accel), byte2(accel), byte1(accel), byte0(accel), byte3(speedM1), byte2(speedM1), byte1(speedM1), byte0(speedM1), byte3(distanceM1),
@@ -2152,10 +2288,15 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Another example would be an acceleration value of 24,000 QPPS and a speed value of 12,000
   QPPS would accelerate the motor to 12,000 QPPS in 0.5 seconds.
    * </pre>
- * @param accelM1 a
- * @param speedM1 s
- * @param accelM2 a
- * @param speedM2 s
+   * 
+   * @param accelM1
+   *          a
+   * @param speedM1
+   *          s
+   * @param accelM2
+   *          a
+   * @param speedM2
+   *          s
    */
   public void driveSpeedAndIndividualAccelM1M2(int accelM1, int speedM1, int accelM2, int speedM2) {
     sendPacket(address, 50, byte3(accelM1), byte2(accelM1), byte1(accelM1), byte0(accelM1), byte3(speedM1), byte2(speedM1), byte1(speedM1), byte0(speedM1), byte3(accelM2),
@@ -2181,12 +2322,19 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   and executed in the order sent. If a value of 1 is used the current running command is stopped,
   any other commands in the buffer are deleted and the new command is executed.
    * </pre>
-   * @param accelM1 a
-   * @param speedM1 s
-   * @param distanceM1 d 
- *   @param accelM2 a
- * @param speedM2 s
- * @param distanceM2 d 
+   * 
+   * @param accelM1
+   *          a
+   * @param speedM1
+   *          s
+   * @param distanceM1
+   *          d
+   * @param accelM2
+   *          a
+   * @param speedM2
+   *          s
+   * @param distanceM2
+   *          d
    */
   public void driveSpeedAccelDistM1M2(int accelM1, int speedM1, int distanceM1, int accelM2, int speedM2, int distanceM2) {
     sendPacket(address, 51, byte3(accelM1), byte2(accelM1), byte1(accelM1), byte0(accelM1), byte3(speedM1), byte2(speedM1), byte1(speedM1), byte0(speedM1), byte3(distanceM1),
@@ -2206,8 +2354,11 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   The duty value is signed and the range is -32768 to +32767(eg. +-100% duty). The accel value
   range is 0 to 655359(eg maximum acceleration rate is -100% to 100% in 100ms).
    * </pre>
-   * @param duty d
-   * @param accel a
+   * 
+   * @param duty
+   *          d
+   * @param accel
+   *          a
    */
   public void driveDutyAccelM1(int duty, int accel) {
     sendPacket(address, 52, byte1(duty), byte0(duty), byte1(accel), byte0(accel));
@@ -2225,8 +2376,11 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   The duty value is signed and the range is -32768 to +32767 (eg. +-100% duty). The accel value
   range is 0 to 655359 (eg maximum acceleration rate is -100% to 100% in 100ms).
    * </pre>
-   * @param duty d
-   * @param accel a
+   * 
+   * @param duty
+   *          d
+   * @param accel
+   *          a
    */
   public void driveDutyAccelM2(int duty, int accel) {
     sendPacket(address, 53, byte1(duty), byte0(duty), byte1(accel), byte0(accel));
@@ -2245,11 +2399,17 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   The duty value is signed and the range is -32768 to +32767 (eg. +-100% duty). The accel value
   range is 0 to 655359 (eg maximum acceleration rate is -100% to 100% in 100ms).
    * </pre>
-   * @param cmd c
-   * @param dutyM1 d
-   * @param accelM1 a
-   * @param dutyM2 d
-   * @param accelM2 a
+   * 
+   * @param cmd
+   *          c
+   * @param dutyM1
+   *          d
+   * @param accelM1
+   *          a
+   * @param dutyM2
+   *          d
+   * @param accelM2
+   *          a
    */
   public void driveDutyAccelM1M2(int cmd, int dutyM1, int accelM1, int dutyM2, int accelM2) {
     sendPacket(address, 54, cmd, byte1(dutyM1), byte0(dutyM1), byte1(accelM1), byte0(accelM1), byte1(dutyM2), byte0(dutyM2), byte1(accelM2), byte0(accelM2));
@@ -2262,6 +2422,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 55]
   Receive: [P(4 bytes), I(4 bytes), D(4 bytes), QPPS(4 byte), CRC(2 bytes)]
    * </pre>
+   * 
    * @return the pid data
    */
   // FIXME - contain both inside a pair<>
@@ -2285,6 +2446,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Send: [Address, 56]
   Receive: [P(4 bytes), I(4 bytes), D(4 bytes), QPPS(4 byte), CRC(2 bytes)]
    * </pre>
+   * 
    * @return pid data
    */
   public PidData readPidQppsM2() {
@@ -2314,13 +2476,21 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Position constants are used only with the Position commands, 65,66 and 67 or when encoders
   are enabled in RC/Analog modes.
    * </pre>
-   * @param D pid
-   * @param P pid
-   * @param I pid
-   * @param maxI i
-   * @param deadzone dz 
-   * @param minPos min
-   * @param maxPos max
+   * 
+   * @param D
+   *          pid
+   * @param P
+   *          pid
+   * @param I
+   *          pid
+   * @param maxI
+   *          i
+   * @param deadzone
+   *          dz
+   * @param minPos
+   *          min
+   * @param maxPos
+   *          max
    */
   public void setPidM1(int D, int P, int I, int maxI, int deadzone, int minPos, int maxPos) {
     sendPacket(address, 61, byte3(D), byte2(D), byte1(D), byte0(D), byte3(P), byte2(P), byte1(P), byte0(P), byte3(I), byte2(I), byte1(I), byte0(I), byte3(maxI), byte2(maxI),
@@ -2342,13 +2512,21 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Position constants are used only with the Position commands, 65,66 and 67 or when encoders
   are enabled in RC/Analog modes.
    * </pre>
-   * @param D pid
-   * @param P pid
-   * @param I pid
-   * @param maxI max i
-   * @param deadzone dz
-   * @param minPos min
-   * @param maxPos max
+   * 
+   * @param D
+   *          pid
+   * @param P
+   *          pid
+   * @param I
+   *          pid
+   * @param maxI
+   *          max i
+   * @param deadzone
+   *          dz
+   * @param minPos
+   *          min
+   * @param maxPos
+   *          max
    */
   public void setPidM2(int D, int P, int I, int maxI, int deadzone, int minPos, int maxPos) {
     sendPacket(address, 62, byte3(D), byte2(D), byte1(D), byte0(D), byte3(P), byte2(P), byte1(P), byte0(P), byte3(I), byte2(I), byte1(I), byte0(I), byte3(maxI), byte2(maxI),
@@ -2365,6 +2543,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [P(4 bytes), I(4 bytes), D(4 bytes), MaxI(4 byte), Deadzone(4 byte),
   MinPos(4 byte), MaxPos(4 byte), CRC(2 bytes)]
    * </pre>
+   * 
    * @return pid data
    */
   public PidData readPidM1() {
@@ -2393,6 +2572,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [P(4 bytes), I(4 bytes), D(4 bytes), MaxI(4 byte), Deadzone(4 byte),
   MinPos(4 byte), MaxPos(4 byte), CRC(2 bytes)]
    * </pre>
+   * 
    * @return pid data
    */
   public PidData readPidM2() {
@@ -2422,10 +2602,15 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Position(4 Bytes), Buffer, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param accel a
-   * @param speed s
-   * @param deccel d
-   * @param pos p
+   * 
+   * @param accel
+   *          a
+   * @param speed
+   *          s
+   * @param deccel
+   *          d
+   * @param pos
+   *          p
    */
   public void driveSpeedAccelDeccelPosM1(int accel, int speed, int deccel, int pos) {
     sendPacket(address, 65, byte3(accel), byte2(accel), byte1(accel), byte0(accel), byte3(speed), byte2(speed), byte1(speed), byte0(speed), byte3(deccel), byte2(deccel),
@@ -2443,10 +2628,15 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Position(4 Bytes), Buffer, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param accel a
-   * @param speed s
-   * @param deccel d
-   * @param pos p
+   * 
+   * @param accel
+   *          a
+   * @param speed
+   *          s
+   * @param deccel
+   *          d
+   * @param pos
+   *          p
    */
   public void driveSpeedAccelDeccelPosM2(int accel, int speed, int deccel, int pos) {
     sendPacket(address, 66, byte3(accel), byte2(accel), byte1(accel), byte0(accel), byte3(speed), byte2(speed), byte1(speed), byte0(speed), byte3(deccel), byte2(deccel),
@@ -2464,14 +2654,23 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   PositionM2(4 Bytes), Buffer, CRC(2 bytes)]
   Receive: [0xFF]
    * </pre>
-   * @param accelM1 a
-   * @param speedM1 s
-   * @param deccelM1 d
-   * @param posM1 p
-   * @param accelM2 a 
-   * @param speedM2 s
-   * @param deccelM2 d
-   * @param posM2 p
+   * 
+   * @param accelM1
+   *          a
+   * @param speedM1
+   *          s
+   * @param deccelM1
+   *          d
+   * @param posM1
+   *          p
+   * @param accelM2
+   *          a
+   * @param speedM2
+   *          s
+   * @param deccelM2
+   *          d
+   * @param posM2
+   *          p
    */
   public void driveSpeedAccelDeccelPosM1M2(int accelM1, int speedM1, int deccelM1, int posM1, int accelM2, int speedM2, int deccelM2, int posM2) {
 

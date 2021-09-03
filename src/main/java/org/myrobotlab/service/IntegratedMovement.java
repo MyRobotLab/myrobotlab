@@ -69,6 +69,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   public enum ObjectPointLocation {
     ORIGIN_CENTER(0x01, "Center Origin"), ORIGIN_SIDE(0x02, "Side Origin"), END_SIDE(0x04, "Side End"), END_CENTER(0x05, "Center End"), CLOSEST_POINT(0x06,
         "Closest Point"), CENTER(0x07, "Center"), CENTER_SIDE(0x08, "Side Center"), LEFT_SIDE(0x09, "Left Side"), RIGHT_SIDE(0x0A, "Right Side");
+
     public int value;
     public String location;
 
@@ -80,6 +81,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 
   public enum Ai {
     HOLD_POSITION(0x01, "Hold Position"), AVOID_COLLISION(0x02, "Avoid Collision"), KEEP_BALANCE(0x04, "Keep Balance");
+
     public int value;
     public String text;
 

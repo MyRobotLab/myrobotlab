@@ -17,7 +17,9 @@ public interface EncoderControl extends Attachable {
 
   /**
    * publishes the EncoderData from the encoder
-   * @param data the data to publish
+   * 
+   * @param data
+   *          the data to publish
    * @return encoder data
    */
   public EncoderData publishEncoderData(EncoderData data);
@@ -28,7 +30,7 @@ public interface EncoderControl extends Attachable {
   public Boolean isEnabled();
 
   /**
-   * @return  the position of the encoder in degrees or cm for linear encoder ?
+   * @return the position of the encoder in degrees or cm for linear encoder ?
    */
   public Double getPos();
 

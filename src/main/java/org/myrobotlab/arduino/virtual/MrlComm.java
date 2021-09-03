@@ -386,9 +386,13 @@ public class MrlComm implements SerialDataListener {
   /**
    * Attach an encoder of a given type. current supported types are 0 that means
    * only amt203A is supported... but soon type =1 will mean as5048a ...
- * @param deviceId the mrlcomm device id
- * @param type type of this encoder
- * @param pin the pin the encoder is attached to.
+   * 
+   * @param deviceId
+   *          the mrlcomm device id
+   * @param type
+   *          type of this encoder
+   * @param pin
+   *          the pin the encoder is attached to.
    * 
    */
   public void encoderAttach(Integer deviceId, Integer type, Integer pin) {
@@ -900,32 +904,32 @@ public class MrlComm implements SerialDataListener {
 
   public void neoPixelAttach(Integer deviceId, Integer pin, Integer numPixels, Integer depth) {
     // TODO Auto-generated method stub
-    
+
   }
 
   public void neoPixelWriteMatrix(Integer deviceId, int[] buffer) {
     // TODO Auto-generated method stub
-    
+
   }
 
   public void neoPixelSetAnimation(Integer deviceId, Integer animation, Integer red, Integer green, Integer blue, Integer white, Integer speed) {
     // TODO Auto-generated method stub
-    
+
   }
 
   public void neoPixelClear(Integer deviceId) {
     // TODO Auto-generated method stub
-    
+
   }
 
   public void neoPixelFill(Integer deviceId, Integer address, Integer count, Integer red, Integer green, Integer blue, Integer white) {
     // TODO Auto-generated method stub
-    
+
   }
 
   public void neoPixelSetBrightness(Integer deviceId, Integer brightness) {
     // TODO Auto-generated method stub
-    
+
   }
 
 }

@@ -10,7 +10,7 @@ import org.junit.Before;
  * validate the blur detector produces a value..
  *
  */
-public class OpenCVFilterBlurDetectorTest  extends AbstractOpenCVFilterTest {
+public class OpenCVFilterBlurDetectorTest extends AbstractOpenCVFilterTest {
 
   @Before
   public void setup() {

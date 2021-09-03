@@ -1,7 +1,7 @@
 package org.myrobotlab.framework;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -27,20 +27,20 @@ public class AttachTest extends AbstractTest {
     TestCatcher catcher01 = (TestCatcher) Runtime.start("catcher01", "TestCatcher");
     TestCatcher catcher02 = (TestCatcher) Runtime.start("catcher02", "TestCatcher");
     TestThrower thrower = (TestThrower) Runtime.start("thower", "TestThrower");
-    
+
     assertFalse(thrower.isAttached(catcher01));
-    
+
     thrower.attach(catcher01);
-    
+
     // data flow is from the thrower to the catcher
     // definition of attached is to have a subscriber
     assertTrue(thrower.isAttached(catcher01));
     assertFalse(thrower.isAttached(catcher02));
-    
+
     thrower.detach(catcher01);
-    
+
     assertFalse(thrower.isAttached(catcher01));
-    
+
     thrower.attach(catcher01);
     thrower.attach(catcher02);
 
@@ -52,12 +52,12 @@ public class AttachTest extends AbstractTest {
     // goes from thrower to catcher - the catchers are not 'attached'
     assertFalse(catcher01.isAttached(thrower));
     assertFalse(catcher02.isAttached(thrower));
-    
+
     thrower.detach();
 
     assertFalse(thrower.isAttached(catcher01));
     assertFalse(thrower.isAttached(catcher02));
-    
+
   }
 
 }

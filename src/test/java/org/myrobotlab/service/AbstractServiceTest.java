@@ -19,10 +19,9 @@ import org.myrobotlab.test.AbstractTest;
 @Ignore
 public abstract class AbstractServiceTest extends AbstractTest {
 
-  
   // The service object that is created for testing
   public Service service;
-  
+
   // a temporary folder for service tests to use
   @ClassRule
   public static TemporaryFolder testFolder = new TemporaryFolder();

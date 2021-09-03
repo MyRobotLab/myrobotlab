@@ -210,11 +210,17 @@ public class Andrew extends Service {
    * setRightArm({39,1,2,3},{40,1,2,3},{41,1,2,3},{-1,1,2,3},{-1,1,2,3}) Python
    * exemple :
    * Andrew.setRightArm([1,0,180,90],[2,0,180,0],[3,180,90,90],[7,7,4,4],[8,5,8,1])
- * @param shoulder a
- * @param arm a
- * @param biceps a
- * @param elbow a
- * @param wrist a
+   * 
+   * @param shoulder
+   *          a
+   * @param arm
+   *          a
+   * @param biceps
+   *          a
+   * @param elbow
+   *          a
+   * @param wrist
+   *          a
    */
   public void setRightArm(double[] shoulder, double[] arm, double[] biceps, double[] elbow, double[] wrist) {
     rightShoulder = new ServoConfig(shoulder);
@@ -226,11 +232,17 @@ public class Andrew extends Service {
 
   /**
    * Same as setRightArm
- * @param shoulder a
- * @param arm a
- * @param biceps a
- * @param elbow a
- * @param wrist a
+   * 
+   * @param shoulder
+   *          a
+   * @param arm
+   *          a
+   * @param biceps
+   *          a
+   * @param elbow
+   *          a
+   * @param wrist
+   *          a
    */
   public void setLefttArm(double[] shoulder, double[] arm, double[] biceps, double[] elbow, double[] wrist) {
     leftShoulder = new ServoConfig(shoulder);
@@ -242,11 +254,17 @@ public class Andrew extends Service {
 
   /**
    * Same as setRightArm
- * @param thumb a
- * @param index a
- * @param middle a
- * @param ring a
- * @param pinky a
+   * 
+   * @param thumb
+   *          a
+   * @param index
+   *          a
+   * @param middle
+   *          a
+   * @param ring
+   *          a
+   * @param pinky
+   *          a
    */
   public void setLeftHand(double[] thumb, double[] index, double[] middle, double[] ring, double[] pinky) {
     leftThumb = new ServoConfig(thumb);
@@ -258,11 +276,17 @@ public class Andrew extends Service {
 
   /**
    * Same as setRightArm
- * @param thumb a
- * @param index a
- * @param middle a
- * @param ring a
- * @param pinky a
+   * 
+   * @param thumb
+   *          a
+   * @param index
+   *          a
+   * @param middle
+   *          a
+   * @param ring
+   *          a
+   * @param pinky
+   *          a
    */
   public void setRightHand(double[] thumb, double[] index, double[] middle, double[] ring, double[] pinky) {
     rightThumb = new ServoConfig(thumb);
@@ -276,8 +300,11 @@ public class Andrew extends Service {
    * Set pin, min, max, and rest for head tilt and pan . -1 in an array mean "no
    * change" Exemple setHead({39,1,2,3},{40,1,2,3}) Python exemple :
    * Andrew.setHead([1,0,180,90],[2,0,180,0])
- * @param tilt a
- * @param pan a
+   * 
+   * @param tilt
+   *          a
+   * @param pan
+   *          a
    */
   public void setHead(double[] tilt, double[] pan) {
     neckTilt = new ServoConfig(tilt);
@@ -1019,7 +1046,9 @@ public class Andrew extends Service {
 
   /**
    * Start the tracking services
-   * @throws Exception boom
+   * 
+   * @throws Exception
+   *           boom
    */
   public void startTrack() throws Exception {
     tracker = (Tracking) Runtime.start("tracker", "Tracking");

@@ -93,7 +93,7 @@ public class Message implements Serializable {
   public String status;
 
   public String encoding; // null == none |json|cli|xml|stream ...
-  
+
   /**
    * the method which will be invoked on the destination @see Service
    */
@@ -134,7 +134,7 @@ public class Message implements Serializable {
       return name.substring(0, pos);
     }
   }
-  
+
   final public void set(final Message other) {
     msgId = other.msgId;
     name = other.name;
@@ -145,10 +145,10 @@ public class Message implements Serializable {
     // we should add - and history should be checked for
     // loop back "from" remote
     // deep copy
-    
+
     historyList = new ArrayList<String>();
     historyList.addAll(other.historyList);
-    
+
     status = other.status;
     encoding = other.encoding;
     method = other.method;

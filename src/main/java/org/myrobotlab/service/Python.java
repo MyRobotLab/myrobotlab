@@ -232,8 +232,11 @@ public class Python extends Service {
 
   /**
    * Set a Python variable with a value from Java e.g. python.set("my_var", 5)
-   * @param pythonRefName python variable name
-   * @param o value to set
+   * 
+   * @param pythonRefName
+   *          python variable name
+   * @param o
+   *          value to set
    */
   public void set(String pythonRefName, Object o) {
     interp.set(pythonRefName, o);
@@ -255,7 +258,8 @@ public class Python extends Service {
    * Get the value of the Python variable e.g. Integer x =
    * (Integer)python.getValue("my_var")
    * 
-   * @param pythonRefName the reference name for the python object
+   * @param pythonRefName
+   *          the reference name for the python object
    * @return the python object
    */
   public Object get(String pythonRefName) {
@@ -461,9 +465,7 @@ public class Python extends Service {
       sys.path.append(new PyString(modulesDir));
     }
 
-    
     sys.path.append(new PyString(Runtime.getInstance().getConfigDir()));
-    
 
     log.info("Python System Path: {}", sys.path);
 
@@ -478,7 +480,9 @@ public class Python extends Service {
 
   /**
    * execute code (blocking)
-   * @param code string of code to run
+   * 
+   * @param code
+   *          string of code to run
    * @return true/false
    */
   public boolean exec(String code) {
@@ -567,8 +571,9 @@ public class Python extends Service {
    * 
    * @param filename
    *          the full path name of the python file to execute
-   * @return true/false 
-   * @throws IOException boom 
+   * @return true/false
+   * @throws IOException
+   *           boom
    */
   public boolean execFile(String filename) throws IOException {
     return execFile(filename, true);
@@ -576,10 +581,14 @@ public class Python extends Service {
 
   /**
    * executes an external Python file
-   * @param filename file to exec
-   * @param block true if blocking exec
+   * 
+   * @param filename
+   *          file to exec
+   * @param block
+   *          true if blocking exec
    * @return true/false
-   * @throws IOException boom 
+   * @throws IOException
+   *           boom
    * 
    */
   public boolean execFile(String filename, boolean block) throws IOException {
@@ -662,7 +671,8 @@ public class Python extends Service {
   /**
    * load a official "service" script maintained in myrobotlab
    * 
-   * @param serviceType the type of service
+   * @param serviceType
+   *          the type of service
    */
   public void loadServiceScript(String serviceType) {
     String filename = getResourceRoot() + fs + serviceType + fs + String.format("%s.py", serviceType);
@@ -775,7 +785,7 @@ public class Python extends Service {
     for (ServiceInterface s : services.values()) {
       onStarted(s.getName());
     }
-    // register runtime life cycle events for other services 
+    // register runtime life cycle events for other services
     Runtime.getInstance().subscribeToLifeCycleEvents(getName());
   }
 

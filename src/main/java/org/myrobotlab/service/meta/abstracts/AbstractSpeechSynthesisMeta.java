@@ -10,7 +10,9 @@ public class AbstractSpeechSynthesisMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * @param name n
+   * 
+   * @param name
+   *          n
    * 
    */
   public AbstractSpeechSynthesisMeta(String name) {

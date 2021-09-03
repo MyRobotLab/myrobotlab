@@ -126,5 +126,4 @@ public class UltrasonicSensorTest extends AbstractTest {
     sensor.stopRanging();
   }
 
-
 }

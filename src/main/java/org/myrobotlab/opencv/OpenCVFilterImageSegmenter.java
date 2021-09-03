@@ -15,8 +15,9 @@ import org.bytedeco.opencv.opencv_ximgproc.SelectiveSearchSegmentation;
 import org.myrobotlab.service.OpenCV;
 
 /**
- * This stage uses the image segmentation support in OpenCV to extract interesting regions from the image.
- * This is based on :  https://www.pyimagesearch.com/2020/06/29/opencv-selective-search-for-object-detection/
+ * This stage uses the image segmentation support in OpenCV to extract
+ * interesting regions from the image. This is based on :
+ * https://www.pyimagesearch.com/2020/06/29/opencv-selective-search-for-object-detection/
  * 
  * @author kwatters
  *
@@ -24,17 +25,17 @@ import org.myrobotlab.service.OpenCV;
 public class OpenCVFilterImageSegmenter extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
-  
+
   String method = "fast";
-  
+
   RectVector regions = null;
-  // default values 
+  // default values
   int baseK = 150;
   int incrK = 150;
   float sigma = 0.8f;
   // purely for display purposes, only consider the first N regions?
   int numToDisplay = 50;
-  
+
   public OpenCVFilterImageSegmenter() {
     super();
     initModel();
@@ -51,14 +52,15 @@ public class OpenCVFilterImageSegmenter extends OpenCVFilter {
   }
 
   private void initModel() {
-    // Known issue with JavaCV, you need to load opencv_video first before loading
+    // Known issue with JavaCV, you need to load opencv_video first before
+    // loading
     // the ximgproc class.
     Loader.load(opencv_video.class);
   }
 
   @Override
   public void imageChanged(IplImage image) {
-    // NoOp 
+    // NoOp
   }
 
   @Override
@@ -67,19 +69,18 @@ public class OpenCVFilterImageSegmenter extends OpenCVFilter {
     SelectiveSearchSegmentation ss = createSelectiveSearchSegmentation();
     ss.setBaseImage(OpenCV.toMat(image));
     if ("fast".equalsIgnoreCase(method)) {
-      ss.switchToSelectiveSearchFast(baseK,incrK,sigma);
+      ss.switchToSelectiveSearchFast(baseK, incrK, sigma);
     } else {
-      ss.switchToSelectiveSearchQuality(baseK,incrK,sigma);
+      ss.switchToSelectiveSearchQuality(baseK, incrK, sigma);
     }
-    
+
     regions = new RectVector();
     ss.process(regions);
     // TODO: an easier rect list object.
     data.put("regions", regions);
     // return the original image un-altered.
     return image;
-  } 
-
+  }
 
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {

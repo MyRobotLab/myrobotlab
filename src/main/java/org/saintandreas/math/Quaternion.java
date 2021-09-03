@@ -48,14 +48,12 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
 
   static final long serialVersionUID = 1;
 
-  private static final Logger logger = Logger.getLogger(Quaternion.class
-      .getName());
+  private static final Logger logger = Logger.getLogger(Quaternion.class.getName());
   /**
    * Represents the identity quaternion rotation (0, 0, 0, 1).
    */
   public static final Quaternion IDENTITY = new Quaternion(0, 0, 0, 1);
-  public static final Quaternion DIRECTION_Z = fromAxes(Vector3f.UNIT_X,
-      Vector3f.UNIT_Y, Vector3f.UNIT_Z);
+  public static final Quaternion DIRECTION_Z = fromAxes(Vector3f.UNIT_X, Vector3f.UNIT_Y, Vector3f.UNIT_Z);
   public static final Quaternion ZERO = new Quaternion(0, 0, 0, 0);
 
   /**
@@ -68,12 +66,10 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    * @return q
    */
   public static Quaternion fromMatrix3f(Matrix3f matrix) {
-    return fromMatrix3f(matrix.m00, matrix.m01, matrix.m02, matrix.m10, matrix.m11,
-        matrix.m12, matrix.m20, matrix.m21, matrix.m22);
+    return fromMatrix3f(matrix.m00, matrix.m01, matrix.m02, matrix.m10, matrix.m11, matrix.m12, matrix.m20, matrix.m21, matrix.m22);
   }
 
-  public static Quaternion fromMatrix3f(float m00, float m01, float m02, float m10, float m11,
-      float m12, float m20, float m21, float m22) {
+  public static Quaternion fromMatrix3f(float m00, float m01, float m02, float m10, float m11, float m12, float m20, float m21, float m22) {
     // Use the Graphics Gems code, from
     // ftp://ftp.cis.upenn.edu/pub/graphics/shoemake/quatut.ps.Z
     // *NOT* the "Matrix and Quaternions FAQ", which has errors!
@@ -81,7 +77,7 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
     // the trace is the sum of the diagonal elements; see
     // http://mathworld.wolfram.com/MatrixTrace.html
     float t = m00 + m11 + m22;
-    float x,y,z,w;
+    float x, y, z, w;
 
     // we protect the division by s by ensuring that s>=1
     if (t >= 0) { // |w| >= .5
@@ -113,9 +109,9 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
       y = (m21 + m12) * s;
       w = (m10 - m01) * s;
     }
-    return new Quaternion(x,y,z,w);
+    return new Quaternion(x, y, z, w);
   }
-  
+
   /**
    * Constructor instantiates a new <code>Quaternion</code> object initializing
    * all values to zero, except w which is initialized to 1.
@@ -142,7 +138,6 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
     super(x, y, z, w);
   }
 
-
   /**
    * @return true if this Quaternion is {0,0,0,1}
    */
@@ -164,8 +159,8 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    * x) aka (yaw, roll, pitch) but we've ordered them in x, y, and z for
    * convenience.
    * 
-   * @see <a
-   *      href="http://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToQuaternion/index.htm">http://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToQuaternion/index.htm</a>
+   * @see <a href=
+   *      "http://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToQuaternion/index.htm">http://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToQuaternion/index.htm</a>
    * 
    * @param xAngle
    *          the Euler pitch of rotation (in radians). (aka Attitude, often rot
@@ -210,8 +205,8 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    * <code>toAngles</code> returns this quaternion converted to Euler rotation
    * angles (yaw,roll,pitch).
    * 
-   * @see <a
-   *      href="http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm">http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm</a>
+   * @see <a href=
+   *      "http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm">http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm</a>
    * 
    * @param angles
    *          the float[] in which the angles should be stored, or null if you
@@ -222,8 +217,7 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
     if (angles == null) {
       angles = new float[3];
     } else if (angles.length != 3) {
-      throw new IllegalArgumentException(
-          "Angles array must have three elements");
+      throw new IllegalArgumentException("Angles array must have three elements");
     }
 
     float sqw = w * w;
@@ -282,8 +276,7 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
     float zw = w * zs;
 
     // using s=2/norm (instead of 1/norm) saves 9 multiplications by 2 here
-    return new Matrix3f(1 - (yy + zz), (xy - zw), (xz + yw), (xy + zw),
-        1 - (xx + zz), (yz - xw), (xz - yw), (yz + xw), 1 - (xx + yy));
+    return new Matrix3f(1 - (yy + zz), (xy - zw), (xz + yw), (xy + zw), 1 - (xx + zz), (yz - xw), (xz - yw), (yz + xw), 1 - (xx + yy));
   }
 
   /**
@@ -291,6 +284,7 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    * matrix. The result is stored in result. 4th row and 4th column values are
    * untouched. Note: the result is created from a normalized version of this
    * quat.
+   * 
    * @return matrix
    */
   public Matrix4f toRotationMatrix4f() {
@@ -316,8 +310,8 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
 
     // using s=2/norm (instead of 1/norm) saves 9 multiplications by 2 here
     return new Matrix4f( //
-        1 - (yy + zz), (xy - zw), (xz + yw), 0, // 
-        (xy + zw), 1 - (xx + zz), (yz - xw), 0, // 
+        1 - (yy + zz), (xy - zw), (xz + yw), 0, //
+        (xy + zw), 1 - (xx + zz), (yz - xw), 0, //
         (xz - yw), (yz + xw), 1 - (xx + yy), 0, //
         0, 0, 0, 1);
   }
@@ -349,24 +343,24 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
     float rx, ry, rz;
 
     switch (i) {
-    case 0:
-      rx = 1 - 2 * (yy + zz);
-      ry = 2 * (xy + zw);
-      rz = 2 * (xz - yw);
-      break;
-    case 1:
-      rx = 2 * (xy - zw);
-      ry = 1 - 2 * (xx + zz);
-      rz = 2 * (yz + xw);
-      break;
-    case 2:
-      rx = 2 * (xz + yw);
-      ry = 2 * (yz - xw);
-      rz = 1 - 2 * (xx + yy);
-      break;
-    default:
-      logger.warning("Invalid column index.");
-      throw new IllegalArgumentException("Invalid column index. " + i);
+      case 0:
+        rx = 1 - 2 * (yy + zz);
+        ry = 2 * (xy + zw);
+        rz = 2 * (xz - yw);
+        break;
+      case 1:
+        rx = 2 * (xy - zw);
+        ry = 1 - 2 * (xx + zz);
+        rz = 2 * (yz + xw);
+        break;
+      case 2:
+        rx = 2 * (xz + yw);
+        ry = 2 * (yz - xw);
+        rz = 1 - 2 * (xx + yy);
+        break;
+      default:
+        logger.warning("Invalid column index.");
+        throw new IllegalArgumentException("Invalid column index. " + i);
     }
 
     return new Vector3f(rx, ry, rz);
@@ -405,8 +399,7 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
 
     float halfAngle = 0.5f * angle;
     float sin = FastMath.sin(halfAngle);
-    return new Quaternion(sin * axis.x, sin * axis.y, sin * axis.z,
-        FastMath.cos(halfAngle));
+    return new Quaternion(sin * axis.x, sin * axis.y, sin * axis.z, FastMath.cos(halfAngle));
   }
 
   /**
@@ -440,8 +433,7 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
       return this;
     }
 
-    float result = (this.x * q2.x) + (this.y * q2.y) + (this.z * q2.z)
-        + (this.w * q2.w);
+    float result = (this.x * q2.x) + (this.y * q2.y) + (this.z * q2.z) + (this.w * q2.w);
     if (result < 0.0f) {
       // Negate the second quaternion and the result of the dot product
       q2 = q2.negate();
@@ -469,17 +461,16 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
     // Calculate the x, y, z and w values for the quaternion by using a
     // special
     // form of linear interpolation for quaternions.
-    return new Quaternion(
-        (scale0 * this.x) + (scale1 * q2.x),
-        (scale0 * this.y) + (scale1 * q2.y),
-        (scale0 * this.z) + (scale1 * q2.z),
-        (scale0 * this.w) + (scale1 * q2.w));
+    return new Quaternion((scale0 * this.x) + (scale1 * q2.x), (scale0 * this.y) + (scale1 * q2.y), (scale0 * this.z) + (scale1 * q2.z), (scale0 * this.w) + (scale1 * q2.w));
   }
 
   /**
    * Sets the values of this quaternion to the nlerp from itself to q2 by blend.
-   * @param q2 q
-   * @param blend b
+   * 
+   * @param q2
+   *          q
+   * @param blend
+   *          b
    * @return a quaternion
    * 
    */
@@ -565,10 +556,8 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    *          vector representing the z-axis of the coordinate system.
    * @return q
    */
-  public static Quaternion fromAxes(Vector3f xAxis, Vector3f yAxis,
-      Vector3f zAxis) {
-    return Quaternion.fromMatrix3f(new Matrix3f(xAxis.x, yAxis.x, zAxis.x, xAxis.y,
-        yAxis.y, zAxis.y, xAxis.z, yAxis.z, zAxis.z));
+  public static Quaternion fromAxes(Vector3f xAxis, Vector3f yAxis, Vector3f zAxis) {
+    return Quaternion.fromMatrix3f(new Matrix3f(xAxis.x, yAxis.x, zAxis.x, xAxis.y, yAxis.y, zAxis.y, xAxis.z, yAxis.z, zAxis.z));
   }
 
   /**
@@ -596,12 +585,9 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    * @return the new vector.
    */
   public Vector3f mult(Vector3f v) {
-    float tempX = w * w * v.x + 2 * y * w * v.z - 2 * z * w * v.y + x * x * v.x
-        + 2 * y * x * v.y + 2 * z * x * v.z - z * z * v.x - y * y * v.x;
-    float tempY = 2 * x * y * v.x + y * y * v.y + 2 * z * y * v.z + 2 * w * z
-        * v.x - z * z * v.y + w * w * v.y - 2 * x * w * v.z - x * x * v.y;
-    float tempZ = 2 * x * z * v.x + 2 * y * z * v.y + z * z * v.z - 2 * w * y
-        * v.x - y * y * v.z + 2 * w * x * v.y - x * x * v.z + w * w * v.z;
+    float tempX = w * w * v.x + 2 * y * w * v.z - 2 * z * w * v.y + x * x * v.x + 2 * y * x * v.y + 2 * z * x * v.z - z * z * v.x - y * y * v.x;
+    float tempY = 2 * x * y * v.x + y * y * v.y + 2 * z * y * v.z + 2 * w * z * v.x - z * z * v.y + w * w * v.y - 2 * x * w * v.z - x * x * v.y;
+    float tempZ = 2 * x * z * v.x + 2 * y * z * v.y + z * z * v.z - 2 * w * y * v.x - y * y * v.z + 2 * w * x * v.y - x * x * v.z + w * w * v.z;
     return new Vector3f(tempX, tempY, tempZ);
   }
 
@@ -628,8 +614,7 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
     float norm = norm();
     if (norm > 0.0) {
       float invNorm = 1.0f / norm;
-      return new Quaternion(-x * invNorm, -y * invNorm, -z * invNorm, w
-          * invNorm);
+      return new Quaternion(-x * invNorm, -y * invNorm, -z * invNorm, w * invNorm);
     }
     // return an invalid result to flag the error
     return null;

@@ -9,21 +9,21 @@ public class ProgramABPy extends LangPyUtils implements PythonGenerator {
 
   @Override
   public String toPython(ServiceInterface s) {
-    return toPython((ProgramAB)s);
+    return toPython((ProgramAB) s);
   }
-  
+
   public String toPython(ProgramAB si) {
     // common stuff
-    ProgramAB brain = (ProgramAB) si;   
+    ProgramAB brain = (ProgramAB) si;
     StringBuilder content = new StringBuilder();
     String safename = safeRefName(brain);
-    
-    // lang 
+
+    // lang
     content.append(String.format("  " + "%s.setCurrentBotName('" + si.getCurrentBotName() + "')\n", safename));
     content.append(String.format("  " + "%s.setCurrentUserName('" + si.getCurrentUserName() + "')\n", safename));
-    
+
     brain.getAttached();
-    
+
     Set<String> attached = si.getAttached("publishText");
     for (String n : attached) {
       if (!n.contains("@")) {

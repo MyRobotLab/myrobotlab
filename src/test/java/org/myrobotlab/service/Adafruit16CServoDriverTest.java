@@ -25,19 +25,18 @@ public class Adafruit16CServoDriverTest extends AbstractTest {
     // arduino = driver.getArduino();
     arduino = (Arduino) Runtime.start("arduino", "Arduino");
     serial = arduino.getSerial();
-    virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
+    virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
     virtual.connect("COM99");
   }
 
   @Test
   public final void test() throws Exception {
     // virtual.create
-    
+
     // FIXME - make virtual UART
 
     arduino.connect("COM99");
     driver.attach(arduino);
-
 
     driver.setServo(0, SERVOMIN);
     driver.setServo(0, SERVOMAX);

@@ -25,7 +25,6 @@ import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.config.Adafruit16CServoDriverConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -318,7 +317,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   /**
-   * @return Refresh the list of running services that can be selected in the GUI
+   * @return Refresh the list of running services that can be selected in the
+   *         GUI
    */
   public List<String> refreshControllers() {
     controllers = Runtime.getServiceNamesFromInterface(I2CController.class);
@@ -329,7 +329,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
    * function to convert labeled pins into address locations pin examples would
    * be D5, D6, ... on an Arduino or some other string value
    * 
-   * @param pin the string representation of the pin
+   * @param pin
+   *          the string representation of the pin
    * @return the integer representation of the pin address
    */
   public int getAddress(String pin) {
@@ -343,9 +344,13 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   /**
    * type conversion for setting the pwm
- * @param pinAddress the pin address
- * @param pulseWidthOn the on width
- * @param pulseWidthOff the off width
+   * 
+   * @param pinAddress
+   *          the pin address
+   * @param pulseWidthOn
+   *          the on width
+   * @param pulseWidthOff
+   *          the off width
    * 
    */
   public void setPWM(Integer pinAddress, Integer pulseWidthOn, Integer pulseWidthOff) {
@@ -355,9 +360,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   /**
    * Set the pwm pulsewidth
    * 
-   * @param pinLabel a label for the pin
-   * @param pulseWidthOn the on pulse width
-   * @param pulseWidthOff the off pulse width
+   * @param pinLabel
+   *          a label for the pin
+   * @param pulseWidthOn
+   *          the on pulse width
+   * @param pulseWidthOff
+   *          the off pulse width
    */
   public void setPWM(String pinLabel, Integer pulseWidthOn, Integer pulseWidthOff) {
     // TODO - handle pin label mappings if necessary
@@ -371,8 +379,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   /**
    * type conversion to set the pwm frequency
-   * @param pin the pin
-   * @param hz the frequency
+   * 
+   * @param pin
+   *          the pin
+   * @param hz
+   *          the frequency
    * 
    */
   public void setPWMFreq(Integer pin, Integer hz) {
@@ -381,8 +392,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   /**
    * Set the PWM frequency i.e. the frequency between positive pulses.
- * @param pin the pin
- * @param hz the frequency in hz
+   * 
+   * @param pin
+   *          the pin
+   * @param hz
+   *          the frequency in hz
    * 
    */
   public void setPWMFreq(String pin, Integer hz) { // Analog servos run at ~60
@@ -694,7 +708,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     if (controller == null) {
       return false;
     }
-    
+
     // attached controller
     if (controller != null && controller == instance) {
       return isAttached;
@@ -987,10 +1001,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   public String publishServoStopped(String name) {
     return name;
   }
-  
+
   @Override
   public ServiceConfig getConfig() {
-    
+
     Adafruit16CServoDriverConfig config = (Adafruit16CServoDriverConfig) initConfig(new Adafruit16CServoDriverConfig());
     config.deviceBus = deviceBus;
     config.deviceAddress = deviceAddress;
@@ -998,7 +1012,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   public ServiceConfig load(ServiceConfig c) {
-    Adafruit16CServoDriverConfig config = (Adafruit16CServoDriverConfig)c;
+    Adafruit16CServoDriverConfig config = (Adafruit16CServoDriverConfig) c;
     if (config.deviceBus != null) {
       deviceBus = config.deviceBus;
     }
@@ -1027,5 +1041,5 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   public String getAddress() {
     return deviceAddress;
   }
-  
+
 }

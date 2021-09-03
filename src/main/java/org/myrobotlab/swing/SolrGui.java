@@ -113,7 +113,7 @@ public class SolrGui extends ServiceGui implements ActionListener {
     QueryResponse answer = null;
     try {
       answer = (QueryResponse) swingGui.sendBlocking(boundServiceName, 10000, "search", query);
-    } catch(Exception e) {
+    } catch (Exception e) {
       log.error("query took too long");
     }
     // TODO: build up a search result page.

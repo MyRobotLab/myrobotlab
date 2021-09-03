@@ -216,9 +216,12 @@ public class Util {
    * expect full path - the calling Service should be using getResource or if
    * its not a Service it should be using Service.getResource(class,
    * resourceName)
- * @param path the path to the image
- * @param defaultImage a default image to use
- * @return an image
+   * 
+   * @param path
+   *          the path to the image
+   * @param defaultImage
+   *          a default image to use
+   * @return an image
    * 
    */
   @Deprecated
