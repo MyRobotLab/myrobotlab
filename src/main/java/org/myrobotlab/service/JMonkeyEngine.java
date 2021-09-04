@@ -178,7 +178,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   int height = 768;
 
-  List<Jme3Msg> history = new ArrayList<Jme3Msg>();
+  transient List<Jme3Msg> history = new ArrayList<Jme3Msg>();
 
   transient AtomicInteger id = new AtomicInteger();
 
@@ -186,7 +186,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   transient Interpolator interpolator;
 
-  protected Queue<Jme3Msg> jme3MsgQueue = new ConcurrentLinkedQueue<Jme3Msg>();
+  transient protected Queue<Jme3Msg> jme3MsgQueue = new ConcurrentLinkedQueue<Jme3Msg>();
 
   final public String KEY_SEPERATOR = "/";
 
@@ -205,7 +205,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   transient Map<String, List<ServiceGui>> nameMethodCallbackMap = new HashMap<String, List<ServiceGui>>();
 
   // https://stackoverflow.com/questions/16861727/jmonkey-engine-3-0-drawing-points
-  FloatBuffer pointCloudBuffer = null;
+  transient FloatBuffer pointCloudBuffer = null;
 
   transient Material pointCloudMat = null;
 
@@ -222,7 +222,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   int selectIndex = 0;
 
   @Deprecated /* came from jme3ServoController... */
-  Map<String, ServoControl> servos = new TreeMap<String, ServoControl>();
+  transient Map<String, ServoControl> servos = new TreeMap<String, ServoControl>();
 
   transient AppSettings settings;
 
@@ -1975,13 +1975,13 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // TODO - implement !!!
   }
 
-  BulletAppState bulletAppState;
+  transient BulletAppState bulletAppState;
 
   private boolean usePhysics;
 
-  private Thread mainThread;
+  transient private Thread mainThread;
 
-  transient protected JMonkeyEngineConfig config;
+  protected JMonkeyEngineConfig config;
 
   public void simpleInitApp() {
 
