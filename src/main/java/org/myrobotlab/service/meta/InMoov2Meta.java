@@ -51,7 +51,7 @@ public class InMoov2Meta extends MetaData {
     addPeer("rightArm", "InMoov2Arm", "right arm");
     addPeer("rightHand", "InMoov2Hand", "right hand");
     addPeer("mouthControl", "MouthControl", "MouthControl");
-    // addPeer("imageDisplay", "ImageDisplay", "image display service");
+    addPeer("imageDisplay", "ImageDisplay", "image display service");
     addPeer("mouth", "MarySpeech", "InMoov speech service");
     addPeer("ear", "WebkitSpeechRecognition", "InMoov webkit speech recognition service");
 

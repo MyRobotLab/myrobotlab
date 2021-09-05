@@ -185,6 +185,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       InMoov2 i01 = (InMoov2) Runtime.create("i01", "InMoov2");
       i01.setVirtual(false);
       i01.startService();
+      i01.displayFullScreen("https://upload.wikimedia.org/wikipedia/commons/8/87/InMoov_Wheel_1.jpg");
       // Runtime.start("s02", "Servo");
 
       boolean done = true;
@@ -239,7 +240,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   transient Pir pir;
 
-  // transient ImageDisplay imageDisplay;
+  transient ImageDisplay imageDisplay;
 
   /**
    * simple booleans to determine peer state of existence FIXME - should be an
@@ -495,7 +496,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public void displayFullScreen(String src) {
     try {
-      // imageDisplay.displayFullScreen(src);
+      if (imageDisplay == null) {
+        imageDisplay = (ImageDisplay)startPeer("imageDisplay");
+      }
+      imageDisplay.displayFullScreen(src);
       log.error("implement webgui.displayFullScreen");
     } catch (Exception e) {
       error("could not display picture %s", src);
