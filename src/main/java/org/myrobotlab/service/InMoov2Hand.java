@@ -315,11 +315,21 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   }
 
   public void map(double minX, double maxX, double minY, double maxY) {
-    thumb.map(minX, maxX, minY, maxY);
-    index.map(minX, maxX, minY, maxY);
-    majeure.map(minX, maxX, minY, maxY);
-    ringFinger.map(minX, maxX, minY, maxY);
-    pinky.map(minX, maxX, minY, maxY);
+    if (thumb != null) {
+      thumb.map(minX, maxX, minY, maxY);
+    }
+    if (index != null) {
+      index.map(minX, maxX, minY, maxY);
+    }
+    if (majeure != null) {
+      majeure.map(minX, maxX, minY, maxY);
+    }
+    if (ringFinger != null) {
+      ringFinger.map(minX, maxX, minY, maxY);
+    }
+    if (pinky != null) {
+      pinky.map(minX, maxX, minY, maxY);
+    }
   }
 
   // TODO - waving thread fun
@@ -332,11 +342,21 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
       log.debug("{}.moveTo {} {} {} {} {} {}", getName(), thumb, index, majeure, ringFinger, pinky, wrist);
     }
 
-    this.thumb.moveTo(thumb);
-    this.index.moveTo(index);
-    this.majeure.moveTo(majeure);
-    this.ringFinger.moveTo(ringFinger);
-    this.pinky.moveTo(pinky);
+    if (thumb != null) {
+      this.thumb.moveTo(thumb);
+    }
+    if (index != null) {
+      this.index.moveTo(index);
+    }
+    if (majeure != null) {
+      this.majeure.moveTo(majeure);
+    }
+    if (ringFinger != null) {
+      this.ringFinger.moveTo(ringFinger);
+    }
+    if (pinky != null) {
+      this.pinky.moveTo(pinky);
+    }
     if (wrist != null) {
       this.wrist.moveTo(wrist);
     }
