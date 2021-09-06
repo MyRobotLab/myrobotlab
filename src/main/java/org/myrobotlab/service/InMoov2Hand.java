@@ -337,7 +337,9 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     this.majeure.moveTo(majeure);
     this.ringFinger.moveTo(ringFinger);
     this.pinky.moveTo(pinky);
-    this.wrist.moveTo(wrist);
+    if (wrist != null) {
+      this.wrist.moveTo(wrist);
+    }
   }
 
   public void moveToBlocking(double thumb, double index, double majeure, double ringFinger, double pinky) {
