@@ -13,7 +13,9 @@ import org.alicebot.ab.AIMLMap;
 import org.alicebot.ab.AIMLSet;
 import org.alicebot.ab.Bot;
 import org.alicebot.ab.Category;
+import org.alicebot.ab.Chat;
 import org.alicebot.ab.MagicBooleans;
+import org.alicebot.ab.ProgramABListener;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.image.Util;
@@ -48,7 +50,13 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class ProgramAB extends Service implements TextListener, TextPublisher, LocaleProvider, LogPublisher {
+public class ProgramAB extends Service implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener {
+
+  /**
+   * default file name that aiml categories comfing from matching a learnf tag 
+   * will be written to.
+   */
+  private static final String LEARNF_AIML_FILE = "learnf.aiml";
 
   private static final long serialVersionUID = 1L;
 
@@ -76,11 +84,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   String currentUserName = "human";
 
   /**
-   * save predicates - default every 5 minutes
-   */
-  public int savePredicatesInterval = 300000;
-
-  /**
    * display processing and logging
    */
   boolean visualDebug = true;
@@ -92,8 +95,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   boolean peerSearch = true;
 
   transient SimpleLogPublisher logPublisher = null;
-
-  String TROLLING_SEED = "what are you doing?";
 
   /**
    * Default constructor for the program ab service.
@@ -353,7 +354,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     if (sessions.containsKey(sessionKey)) {
       return sessions.get(sessionKey);
     } else {
-      warn("%s session does not exist", sessionKey);
       return null;
     }
   }
@@ -728,6 +728,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     setCurrentBotName(botName);
   }
 
+  /**
+   * A category sent "to" program-ab - there is a callback onAddCategory which
+   * should hook to the event when program-ab adds a category
+   * 
+   * @param c
+   */
   public void addCategory(Category c) {
     Bot bot = getBot(getCurrentBotName());
     bot.brain.addCategory(c);
@@ -752,15 +758,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     addCategory(pattern, template, "*");
   }
 
-  public void writeAIML() {
-    // TODO: revisit this method to make sure
-    for (BotInfo bot : bots.values()) {
-      if (bot.isActive()) {
-        bot.writeAIMLFiles();
-      }
-    }
-  }
-
   /**
    * writeAndQuit will write brain to disk For learn.aiml is concerned
    */
@@ -771,8 +768,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
         try {
           savePredicates();
           // important to save learnf.aiml
-          writeAIML();
-          bot.writeQuit();
+          // bot.writeQuit();
         } catch (IOException e1) {
           log.error("saving predicates threw", e1);
         }
@@ -810,30 +806,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     return path;
   }
 
-  @Deprecated /* for legacy - use addBotPath */
+  @Deprecated /* for legacy - use addBotsDir */
   public String setPath(String path) {
+    // This method is not good, because it doesn't take the full path
+    // from input and there is a buried "hardcoded" value which no one knows
+    // about
+    addBotsDir(path + File.separator + "bots");
 
-    if (path == null) {
-      error("set path can not be null");
-      return null;
-    }
-
-    File check = new File(path);
-    if (!check.exists() || !check.isDirectory()) {
-      error("invalid directory %s", path);
-      return null;
-    }
-
-    check = new File(FileIO.gluePaths(path, "bots"));
-
-    if (check.exists() && check.isDirectory()) {
-      for (File f : check.listFiles()) {
-        addBotPath(f.getAbsolutePath());
-      }
-      return path;
-    }
-
-    return addBotPath(path);
+    return path;
   }
 
   public void setCurrentBotName(String botName) {
@@ -985,7 +965,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       startPeer("search");
     }
 
-    addTask("savePredicates", savePredicatesInterval, 0, "savePredicates");
     logPublisher = new SimpleLogPublisher(this);
     logPublisher.filterClasses(new String[] { "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans", "class org.myrobotlab.programab.MrlSraixHandler" });
     logPublisher.start();
@@ -1025,7 +1004,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     Map<String, Locale> ret = new TreeMap<>();
     for (BotInfo botInfo : bots.values()) {
       if (botInfo.properties.containsKey("locale")) {
-        locale = new Locale(botInfo.properties.get("locale"));
+        locale = new Locale((String) botInfo.properties.get("locale"));
         ret.put(locale.getTag(), locale);
       }
     }
@@ -1158,9 +1137,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
        */
 
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
-      Polly polly = (Polly) Runtime.start("polly", "Polly");
+      // Polly polly = (Polly) Runtime.start("polly", "Polly");
 
-      brain.attach("polly");
+      // brain.attach("polly");
 
       // brain.localize(key);
 
@@ -1179,6 +1158,98 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       webgui.startService();
     } catch (Exception e) {
       log.error("main threw", e);
+    }
+  }
+
+  public void addBotsDir(String path) {
+
+    if (path == null) {
+      error("set path can not be null");
+      return;
+    }
+
+    File check = new File(path);
+    if (!check.exists() || !check.isDirectory()) {
+      error("invalid directory %s", path);
+      return;
+    }
+
+    // check = new File(FileIO.gluePaths(path, "bots"));
+
+    if (check.exists() && check.isDirectory()) {
+      log.info("found %d possible bot directories", check.listFiles().length);
+      for (File f : check.listFiles()) {
+        addBotPath(f.getAbsolutePath());
+      }
+    }
+  }
+
+  @Override
+  synchronized public void onChangePredicate(Chat chat, String predicateName, String result) {
+    log.info("{} on predicate change {}={}", chat.bot.name, predicateName, result);
+
+    // a little janky because program-ab doesn't know the predicate filename,
+    // because it does know the "user"
+    // but ProgramAB saves predicates in a {username}.predicates.txt format in
+    // the bot directory
+
+    // so we find the session by matching the chat in the callback
+    for (Session s : sessions.values()) {
+      if (s.chat == chat) {
+        // found session saving predicates
+        s.savePredicates();
+        return;
+      }
+    }
+    error("could not find session to save predicates");
+  }
+
+  /**
+   * From program-ab - this gets called whenever a new category is added from a
+   * learnf tag
+   */
+  @Override
+  public void onLearnF(Chat chat, Category c) {
+    log.info("{} onLearnF({})", chat, c);
+    addCategoryToFile(chat.bot, c);
+  }
+
+  /**
+   * From program-ab - this gets called whenever a new category is added from a
+   * learnf tag
+   */
+  @Override
+  public void onLearn(Chat chat, Category c) {
+    log.info("{} onLearn({})", chat, c);
+    addCategoryToFile(chat.bot, c);
+  }
+
+  synchronized public void addCategoryToFile(Bot bot, Category c) {
+    try {
+      File learnfFile = new File(bot.aiml_path + fs + LEARNF_AIML_FILE);
+
+      if (!learnfFile.exists()) {
+        StringBuilder sb = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        sb.append("<!-- DO NOT EDIT THIS FILE - \n\tIT IS OVERWRITTEN WHEN CATEGORIES ARE ADDED FROM LEARN AND LEARNF TAGS -->\n");
+        sb.append("<aiml>\n");
+        sb.append("</aiml>\n");
+        FileIO.toFile(learnfFile, sb.toString().getBytes());
+      }
+
+      String learnf = FileIO.toString(learnfFile);
+      int pos = learnf.indexOf("</aiml>");
+
+      if (pos < 0) {
+        error("could not find </aiml> tag in file %s", learnfFile.getAbsolutePath());
+        return;
+      }
+
+      String out = learnf.substring(0, pos) + Category.categoryToAIML(c) + "\n" + learnf.substring(pos);
+
+      FileIO.toFile(learnfFile, out.getBytes());
+
+    } catch (Exception e) {
+      error(e);
     }
   }
 
