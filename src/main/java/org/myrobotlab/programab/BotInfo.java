@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 
 /**
  * container for all the bot info
+ * It serves as a wrapper for a bot to bundle some additional metadata and helper methods
+ * for dealing with a bot.
  */
 public class BotInfo {
 
@@ -22,16 +24,13 @@ public class BotInfo {
 
   public String name;
   public File path;
-  public boolean activated = false;
-  private transient Bot bot;
   public Properties properties = new Properties();
-
+  private transient Bot bot;
   protected org.alicebot.ab.Properties botProperties;
-  
   private transient ProgramAB programab;
 
   /**
-   * base64 png
+   * base64 png that is an icon or image of what the chatbot looks like.
    */
   public String img;
 
@@ -42,12 +41,12 @@ public class BotInfo {
     programab.info("found bot %s", name);
     try {
       properties.load(new FileInputStream(FileIO.gluePaths(path.getAbsolutePath(), "manifest.txt")));
+      log.info("loaded properties");
     } catch(FileNotFoundException e) {
       programab.warn("bot %s does not have a manifest.txt", name);
     } catch(Exception e){
       log.error("BotInfo threw", e);
     }
-    log.info("loaded properties");
   }
 
   /**
@@ -96,18 +95,12 @@ public class BotInfo {
     bot.writeAIMLFiles();
   }
 
-  /*
-  public void writeQuit() {
-    bot.writeQuit();
-  }
-  */
-
   public void setProperty(String name2, String value) {
     properties.put(name2, value);
     saveProperties();
   }
 
-  // FIXME - botProperties should be sent to bot (and verified agains aiml tags ?)
+  // FIXME - botProperties should be sent to bot (and verified against aiml tags ?)
   public void saveProperties() {
     Map<String, String> sorted = new TreeMap<>();
     sorted.putAll(botProperties);

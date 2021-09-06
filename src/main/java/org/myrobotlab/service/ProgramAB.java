@@ -52,6 +52,12 @@ import org.slf4j.Logger;
  */
 public class ProgramAB extends Service implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener {
 
+  /**
+   * default file name that aiml categories comfing from matching a learnf tag 
+   * will be written to.
+   */
+  private static final String LEARNF_AIML_FILE = "learnf.aiml";
+
   private static final long serialVersionUID = 1L;
 
   transient public final static Logger log = LoggerFactory.getLogger(ProgramAB.class);
@@ -89,8 +95,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   boolean peerSearch = true;
 
   transient SimpleLogPublisher logPublisher = null;
-
-  String TROLLING_SEED = "what are you doing?";
 
   /**
    * Default constructor for the program ab service.
@@ -1222,7 +1226,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   synchronized public void addCategoryToFile(Bot bot, Category c) {
     try {
-      File learnfFile = new File(bot.aiml_path + fs + "learnf.aiml");
+      File learnfFile = new File(bot.aiml_path + fs + LEARNF_AIML_FILE);
 
       if (!learnfFile.exists()) {
         StringBuilder sb = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
