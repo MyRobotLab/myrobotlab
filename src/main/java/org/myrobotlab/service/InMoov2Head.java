@@ -263,17 +263,33 @@ public class InMoov2Head extends Service {
     if (log.isDebugEnabled()) {
       log.debug("head.moveTo {} {} {} {} {} {}", neckPos, rotheadPos, eyeXPos, eyeYPos, jawPos, rollNeckPos);
     }
-    this.rothead.moveTo(rotheadPos);
-    this.neck.moveTo(neckPos);
-    this.eyeX.moveTo(eyeXPos);
-    this.eyeY.moveTo(eyeYPos);
-    this.jaw.moveTo(jawPos);
-    this.rollNeck.moveTo(rollNeckPos);
+    if (rothead != null && rotheadPos != null) {
+      rothead.moveTo(rotheadPos);
+    }
+    if (neck != null && neckPos != null) {
+      neck.moveTo(neckPos);
+    }
+    if (eyeX != null && eyeXPos != null) {
+      eyeX.moveTo(eyeXPos);
+    }
+    if (eyeY != null && eyeYPos != null) {
+      eyeY.moveTo(eyeYPos);
+    }
+    if (jaw != null && jawPos != null) {
+      jaw.moveTo(jawPos);
+    }
+    if (rollNeck != null && rollNeckPos != null) {
+      rollNeck.moveTo(rollNeckPos);
+    }
   }
 
   public void moveEyelidsTo(double eyelidleftPos, double eyelidrightPos) {
-    eyelidLeft.moveTo(eyelidleftPos);
-    eyelidRight.moveTo(eyelidrightPos);
+    if (eyelidLeft != null) {
+      eyelidLeft.moveTo(eyelidleftPos);
+    }
+    if (eyelidRight != null) {
+      eyelidRight.moveTo(eyelidrightPos);
+    }
   }
 
   public void moveToBlocking(double neck, double rothead) {
@@ -300,12 +316,24 @@ public class InMoov2Head extends Service {
   }
 
   public void waitTargetPos() {
-    neck.waitTargetPos();
-    rothead.waitTargetPos();
-    eyeX.waitTargetPos();
-    eyeY.waitTargetPos();
-    jaw.waitTargetPos();
-    rollNeck.waitTargetPos();
+    if (neck != null) {
+      neck.waitTargetPos();
+    }
+    if (rothead != null) {
+      rothead.waitTargetPos();
+    }
+    if (eyeX != null) {
+      eyeX.waitTargetPos();
+    }
+    if (eyeY != null) {
+      eyeY.waitTargetPos();
+    }
+    if (jaw != null) {
+      jaw.waitTargetPos();
+    }
+    if (rollNeck != null) {
+      rollNeck.waitTargetPos();
+    }
   }
 
   public void release() {
@@ -325,14 +353,30 @@ public class InMoov2Head extends Service {
   public void rest() {
     // initial positions
     // setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
-    rothead.rest();
-    neck.rest();
-    eyeX.rest();
-    eyeY.rest();
-    jaw.rest();
-    rollNeck.rest();
-    eyelidLeft.rest();
-    eyelidRight.rest();
+    if (rothead != null) {
+      rothead.rest();
+    }
+    if (neck != null) {
+      neck.rest();
+    }
+    if (eyeX != null) {
+      eyeX.rest();
+    }
+    if (eyeY != null) {
+      eyeY.rest();
+    }
+    if (jaw != null) {
+      jaw.rest();
+    }
+    if (rollNeck != null) {
+      rollNeck.rest();
+    }
+    if (eyelidLeft != null) {
+      eyelidLeft.rest();
+    }
+    if (eyelidRight != null) {
+      eyelidRight.rest();
+    }
   }
 
   @Override
