@@ -9,7 +9,7 @@ dexarm1 = Dexarm1(port="COM3")
 dexarm2 = Dexarm2(port="COM4")
 '''mac & linux'''
 # device = Dexarm(port="/dev/tty.usbmodem3086337A34381")
-sleep(2)
+sleep(5)
 dexarm1.go_home1()
 dexarm2.go_home2()
 #sleep(2)
