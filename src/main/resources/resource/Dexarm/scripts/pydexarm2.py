@@ -86,7 +86,7 @@ class Dexarm2:
             travel_acceleration (int): used for moves that include no extrusion.
             retract_acceleration (int): used for extruder retraction moves.
         """
-        cmd = "M204"+"P" + str(acceleration) + "T"+str(travel_acceleration) + "T" + str(retract_acceleration) + "\r\n"
+        cmd = "M204"+"P" + str(acceleration) + "T"+str(travel_acceleration) + "R" + str(retract_acceleration) + "\r\n"
         self._send_cmd2(cmd)
 
     def set_module_type2(self, module_type):
@@ -188,7 +188,7 @@ class Dexarm2:
                 if serial_str.find("ok") > -1:
                     return x, y, z, e, a, b, c
 
-    def dealy_ms12(self, value):
+    def delay_ms12(self, value):
         """
         Pauses the command queue and waits for a period of time in ms
 
@@ -197,7 +197,7 @@ class Dexarm2:
         """
         self._send_cmd2("G4 P" + str(value) + '\r')
 
-    def dealy_s2(self, value):
+    def delay_s2(self, value):
         """
         Pauses the command queue and waits for a period of time in s
 
@@ -205,6 +205,16 @@ class Dexarm2:
             value (int): time in s
         """
         self._send_cmd2("G4 S" + str(value) + '\r')
+
+    def rotate_wrist2(self):
+        #This is a personal test.
+        """
+        Setting the rotation of wrist in way or the other
+
+        Args:
+            value (int): degrees of rotation
+        """
+        self._send_cmd2("M2100\r")    
 
     def soft_gripper_pick2(self):
         """

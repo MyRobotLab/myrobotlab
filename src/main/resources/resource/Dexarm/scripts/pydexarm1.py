@@ -45,10 +45,10 @@ class Dexarm1:
                 else:
                     print("read:", serial_str)
 
-    path = "resource/Dexarm/gcode/hourse.gcode"
+    path = "resource/Dexarm/gcode/test1.gcode"
     def send_gcode1(self, path, wait=True):
-        #This is a personal test.
-        self.ser1.write(path.encode())
+        ####This is a personal test.
+        self.ser1.writeFile(path)
         if not wait:
             self.ser1.reset()
             return
@@ -81,15 +81,25 @@ class Dexarm1:
 
     def read_test1(self):
         #This is a personal test.
-        self._send_cmd1("G0 X-80.33 Y337.72\r")
-        #self._send_cmd1("G1 Z-40\r")
-        self._send_cmd1("G1 X-80.02 Y338.19\r")
-        self._send_cmd1("G1 X-79.70 Y338.35\r")
-        self._send_cmd1("G1 X-79.55 Y338.19\r")
-        self._send_cmd1("G1 X-79.55 Y338.03\r")
-        self._send_cmd1("G1 X-79.70 Y337.40\r")
-        self._send_cmd1("G1 X-79.86 Y336.93\r")
-        self._send_cmd1("G0 Z5\r")   
+        self._send_cmd1("G0 X-80.33 Y338.19\n")
+        self._send_cmd1("G0 Z0\n")
+        self._send_cmd1("G0 X80.33 Y338.19\n")
+        self._send_cmd1("G0 X80.33 Y300.19\n")
+        self._send_cmd1("G0 X-80.33 Y300.19\n")
+        self._send_cmd1("G0 X-80.33 Y338.19\n")
+        self._send_cmd1("G0 X0 Y338.19\n")
+        self._send_cmd1("G0 Z20\n")
+        #self._send_cmd1("G0 X0 Y300\n")
+        #self._send_cmd1("G0 X-25 Y-25\n")
+        #self._send_cmd1("G0 X25 Y-25\n")
+        #self._send_cmd1("G0 X25 Y25\n")
+        #self._send_cmd1("G0 X0 Y50\n")
+        #self._send_cmd1("G0 X-25 Y25\n")
+        #self._send_cmd1("G0 X-25 Y-25\n")
+        #self._send_cmd1("G0 X25 Y25\n")
+        #self._send_cmd1("G0 X-25 Y25\n")
+        #self._send_cmd1("G0 X25 Y-25\n")
+  
 
     def disconnect1(self):
         #This is a personal test.
@@ -99,7 +109,7 @@ class Dexarm1:
         #This is a personal test.
         #path = "resource/Dexarm/gcode/hourse.gcode"
         #self.ser1.write(path.encode())
-        self.ser1.writeFile('resource/Dexarm/gcode/hourse.gcode')
+        self.ser1.writeFile('resource/Dexarm/gcode/letter1.gcode')
         #self._send_cmd1("path\r")    
 
     def set_workorigin1(self):
@@ -117,7 +127,7 @@ class Dexarm1:
             travel_acceleration (int): used for moves that include no extrusion.
             retract_acceleration (int): used for extruder retraction moves.
         """
-        cmd = "M204"+"P" + str(acceleration) + "T"+str(travel_acceleration) + "T" + str(retract_acceleration) + "\r\n"
+        cmd = "M204"+"P" + str(acceleration) + "T"+str(travel_acceleration) + "R" + str(retract_acceleration) + "\r\n"
         self._send_cmd1(cmd)
 
     def set_module_type1(self, module_type):
@@ -219,7 +229,7 @@ class Dexarm1:
                 if serial_str.find("ok") > -1:
                     return x, y, z, e, a, b, c
 
-    def dealy_ms1(self, value):
+    def delay_ms1(self, value):
         """
         Pauses the command queue and waits for a period of time in ms
 
@@ -228,7 +238,7 @@ class Dexarm1:
         """
         self._send_cmd1("G4 P" + str(value) + '\r')
 
-    def dealy_s1(self, value):
+    def delay_s1(self, value):
         """
         Pauses the command queue and waits for a period of time in s
 
@@ -236,6 +246,16 @@ class Dexarm1:
             value (int): time in s
         """
         self._send_cmd1("G4 S" + str(value) + '\r')
+
+    def rotate_wrist1(self, value):
+        #This is a personal test.
+        """
+        Setting the rotation of wrist in way or the other
+
+        Args:
+            value (int): degrees of rotation
+        """
+        self._send_cmd1("M1114" + str(value) + '\r')    
 
     def soft_gripper_pick1(self):
         """
