@@ -7,7 +7,7 @@
 joy = Runtime.start("joy","Joystick")
 #this set which kind of controller you want to poll data from
 #it is the number you can see in the Joystick GUI when you open the list of devices
-joy.setController(1)
+joy.setController(0)
 
 #tell joystick service to send data to python as a message only when new data is aviable
 joy.addInputListener(python)
@@ -20,12 +20,13 @@ def onJoystickInput(data):
  print data.id, data.value
  if (data.id == "Num 3"):
      print("button 3 was pressed its value is", data.value)
-     dexarm1.move_to1(50, 300, -30)
+     dexarm1.move_to1(50, 300, 0)
  elif (data.id == "Num 9"):
      print("script example.py", data.value)
      execfile(RuningFolder+'/Dexarm/scripts/example.py')
  elif (data.id == "Num 1"):
      print("test1", data.value)
+     dexarm2.move_to2(0, 220, 50)
      dexarm1.set_module_type1(0)
      dexarm1.read_Gcode1()
  elif (data.id == "Num 2"):
@@ -45,4 +46,6 @@ def onJoystickInput(data):
  #elif (data.id == "Num 6"):
      #print("Moving down", data.value)
      #dexarm.set_absolute()
-      
+ elif (data.id == "Num 8"):
+     print("Set work origin", data.value)    
+     dexarm1.set_workorigin1()
