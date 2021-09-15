@@ -164,12 +164,15 @@ pipeline {
                   '''
                } else {
                   bat '''
-                     mvn -q javadoc:javadoc
+                     mkdir -p target/dist
+                     mv target/myrobotlab.jar target/myrobotlab
+                     mv myrobotlab.bat target/myrobotlab
+                     mv myrobotlab.sh target/myrobotlab
                   '''
                }
-            }
 
-            zip zipFile: 'target/myrobotlab.zip', archive: true, dir: 'myrobotlab'
+               zip zipFile: 'target/myrobotlab.zip', archive: true, dir: 'myrobotlab'
+            }
 
             archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec, target/site/**'
          }
