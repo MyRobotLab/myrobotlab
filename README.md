@@ -3,48 +3,30 @@ myrobotlab
 
 Open Source Framework for Robotics and Creative Machine Control
 
-Project Website: http://www.myrobotlab.org  (Stop by and say hello in the shoutbox!)
+Project Website: http://myrobotlab.org 
 
 ## Base Requirements
 
-You will need Java 8 or newer.  If you are only running MyRobotLab you need the JRE (Java Runtime Environment.)  If you are going to be building from source, you'll need the JDK (Java Development Kit)
+You will need Java 11 or newer.  If you are only running MyRobotLab you need the JRE (Java Runtime Environment.)  If you are going to be building from source, you'll need the JDK (Java Development Kit) Oracle or OpenJDK will work
 
 ## Download the myrobotlab.jar
 Download
 
-latest [Nixie 1.1.X](http://build.myrobotlab.org:8080/job/myrobotlab/job/develop/lastSuccessfulBuild/artifact/target/myrobotlab.jar)
+latest [Nixie 1.1.X](http://build.myrobotlab.org:8080/job/myrobotlab/job/develop/lastSuccessfulBuild/artifact/target/myrobotlab.zip)
 
 stable [Manticore 1.0.2693](https://github.com/MyRobotLab/myrobotlab/releases/tag/1.0.2693)
 
-## Installing Dependencies
-
-After downloading the myrobtlab.jar into a new folder, dependencies for all services can be installed with the following command 
-### Manticore
-`java -jar myrobotlab.jar -install`
-### Nixie
-`java -jar myrobotlab.jar --install`
-
 ## Running MyRobotLab
 
-Make sure java is in your path. open a terminal window and change to the directory where you've downloaded the myroblab.jar
+After downloading and unzipping myrobtlab.zip into a new folder, start the appropriate script 
+### Linux or MacOS
+`myrobotlab.sh`
+### Windows
+`myrobotlab.bat`
 
-To start MyRobotLab you can do so by running
-
-`java -jar myrobotlab.jar`
-
-If you want to start MyRobotLab and execute a python script on startup, you can use the following command:
-
-`java -jar myrobotlab.jar -service runtime Runtime python Python gui SwingGui -invoke python execFile MyScript.py`
-
-To pass additional arguments to the JVM on startup (such as increasing the java memory / heap size you can use the -jvm arg : 
-
-`java -jar myrobotlab.jar -jvm "-Xmx512m -Xms512m"`  
-
-To start a list of named services on startup, you can use the -service command line arg with a list of service name/type pairs.
-
-`java -jar myrobotlab.jar --service runtime Runtime python Python gui SwingGui wegbui WebGui` 
-
-The above would start runtime, python, the swing gui and lastly the webgui.
+The first time the script runs it will automatically install all services and their dependencies, then it will launch myrobotlab.
+The subsequent starting of myrobotlab will skip the installation stage.  If a browser does not automatically start you
+can go to http://localhost:8888 to see the web user interface.
 
 ## Building Project
 MyRobotLab core is written in Java.  Its web ui is written in AngularJs and html.  
@@ -67,13 +49,12 @@ cd c:\dev\myrobotlab
 If you want to be making core changes, you will need to install a 
 Java developement environment
 
-#### Install Java 8
-https://www.oracle.com/java/technologies/javase-jdk8-downloads.html
+#### Install Java 11
+https://www.oracle.com/java/technologies/downloads/#java11
 
 ### Building with Eclipse
 Download Eclipse for Java Developers At:
 https://www.eclipse.org/downloads/packages/
-
 
 
 ### Building with Maven
@@ -94,7 +75,6 @@ myrobotlab/target/myrobotlab.jar
 If you want to compile and skip the tests, you can use the standard maven approach 
 
 `mvn clean install -DskipTests`
-
 
 ## Contributing
 
