@@ -28,7 +28,7 @@ JAVA_OPTIONS="-Djava.library.path=libraries/native -Djna.library.path=libraries/
 if (( $# > 0 )); 
 then
   echo "USER SUPPLIED ARGS"
-  "${JAVA}" ${JAVA_OPTIONS} org.myrobotlab.service.Runtime --from-launcher $@
+  "${JAVA}" ${JAVA_OPTIONS} -cp ${CLASSPATH} org.myrobotlab.service.Runtime --from-launcher $@
   exit
 fi
 
@@ -36,9 +36,9 @@ if test -f "$REPO_FILE"; then
     echo "$REPO_FILE exists."
 else 
     echo "$REPO_FILE does not exist."
-    "${JAVA}" ${JAVA_OPTIONS} org.myrobotlab.service.Runtime --from-launcher --install
+    "${JAVA}" ${JAVA_OPTIONS} -cp ${CLASSPATH} org.myrobotlab.service.Runtime --from-launcher --install
 fi
 
-"${JAVA}" ${JAVA_OPTIONS} org.myrobotlab.service.Runtime --from-launcher --log-level info -s webgui WebGui intro Intro python Python
+"${JAVA}" ${JAVA_OPTIONS} -cp ${CLASSPATH} org.myrobotlab.service.Runtime --from-launcher --log-level info -s webgui WebGui intro Intro python Python
 
 echo $# $@
