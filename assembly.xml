@@ -15,6 +15,7 @@
             </includes>
             <directory>./</directory>
             <outputDirectory>myrobotlab</outputDirectory>
+            <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
             <includes>
