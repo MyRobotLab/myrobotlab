@@ -14,7 +14,13 @@ rem TODO - option to package jdk for now use bin in path
 set JAVA=java
 
 rem Processing/Arduino handle this in an array - no need for now
-set JAVA_OPTIONS="-Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8"
+set JAVA_OPTIONS=-Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8
+
+IF NOT "%*"=="" (
+    echo "USER SUPPLIED ARGS"
+    "%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime --from-launcher %*
+    exit
+)
 
 IF EXIST "libraries/repo.json" (
     echo "libraries/repo.json exists."
