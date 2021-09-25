@@ -263,33 +263,17 @@ public class InMoov2Head extends Service {
     if (log.isDebugEnabled()) {
       log.debug("head.moveTo {} {} {} {} {} {}", neckPos, rotheadPos, eyeXPos, eyeYPos, jawPos, rollNeckPos);
     }
-    if (rothead != null && rotheadPos != null) {
-      rothead.moveTo(rotheadPos);
-    }
-    if (neck != null && neckPos != null) {
-      neck.moveTo(neckPos);
-    }
-    if (eyeX != null && eyeXPos != null) {
-      eyeX.moveTo(eyeXPos);
-    }
-    if (eyeY != null && eyeYPos != null) {
-      eyeY.moveTo(eyeYPos);
-    }
-    if (jaw != null && jawPos != null) {
-      jaw.moveTo(jawPos);
-    }
-    if (rollNeck != null && rollNeckPos != null) {
-      rollNeck.moveTo(rollNeckPos);
-    }
+    if (rothead != null && rotheadPos != null)   { rothead.moveTo(rotheadPos); }
+    if (neck != null && neckPos != null)         { neck.moveTo(neckPos); }
+    if (eyeX != null && eyeXPos != null)         { eyeX.moveTo(eyeXPos); }
+    if (eyeY != null && eyeYPos != null)         { eyeY.moveTo(eyeYPos); }
+    if (jaw != null && jawPos != null)           { jaw.moveTo(jawPos); }
+    if (rollNeck != null && rollNeckPos != null) { rollNeck.moveTo(rollNeckPos); }
   }
 
   public void moveEyelidsTo(double eyelidleftPos, double eyelidrightPos) {
-    if (eyelidLeft != null) {
-      eyelidLeft.moveTo(eyelidleftPos);
-    }
-    if (eyelidRight != null) {
-      eyelidRight.moveTo(eyelidrightPos);
-    }
+    if (eyelidLeft != null)  { eyelidLeft.moveTo(eyelidleftPos); }
+    if (eyelidRight != null) { eyelidRight.moveTo(eyelidrightPos); }
   }
 
   public void moveToBlocking(double neck, double rothead) {
