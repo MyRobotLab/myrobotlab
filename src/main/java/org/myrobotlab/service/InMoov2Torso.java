@@ -111,33 +111,32 @@ public class InMoov2Torso extends Service {
         lowStom.getCurrentInputPos());
   }
 
-  public void moveTo(double topStom, double midStom, double lowStom) {
+  public void moveTo(Double topStomPos, Double midStomPos, Double lowStomPos) {
     if (log.isDebugEnabled()) {
-      log.debug("{} moveTo {} {} {}", getName(), topStom, midStom, lowStom);
+      log.debug("{} moveTo {} {} {}", getName(), topStomPos, midStomPos, lowStomPos);
     }
-    this.topStom.moveTo(topStom);
-    this.midStom.moveTo(midStom);
-    this.lowStom.moveTo(lowStom);
-
+    if (topStom != null && topStomPos != null) { this.topStom.moveTo(topStomPos); }
+    if (midStom != null && midStomPos != null) { this.midStom.moveTo(midStomPos); }
+    if (lowStom != null && lowStomPos != null) { this.lowStom.moveTo(lowStomPos); }
   }
 
-  public void moveToBlocking(Double topStom, Double midStom, Double lowStom) {
+  public void moveToBlocking(Double topStomPos, Double midStomPos, Double lowStomPos) {
     log.info("init {} moveToBlocking ", getName());
-    moveTo(topStom, midStom, lowStom);
+    moveTo(topStomPos, midStomPos, lowStomPos);
     waitTargetPos();
     log.info("end {} moveToBlocking", getName());
   }
 
   public void waitTargetPos() {
-    topStom.waitTargetPos();
-    midStom.waitTargetPos();
-    lowStom.waitTargetPos();
+    if (topStom != null) { topStom.waitTargetPos(); }
+    if (midStom != null) { midStom.waitTargetPos(); }
+    if (lowStom != null) { lowStom.waitTargetPos(); }
   }
 
   public void rest() {
-    topStom.rest();
-    midStom.rest();
-    lowStom.rest();
+    if (topStom != null) { topStom.rest(); }
+    if (midStom != null) { midStom.rest(); }
+    if (lowStom != null) { lowStom.rest(); }
   }
 
   @Override
