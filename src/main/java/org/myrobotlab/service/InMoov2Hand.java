@@ -337,29 +337,16 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     moveTo(thumb, index, majeure, ringFinger, pinky, null);
   }
 
-  public void moveTo(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
+  public void moveTo(Double thumbPos, Double indexPos, Double majeurePos, Double ringFingerPos, Double pinkyPos, Double wristPos) {
     if (log.isDebugEnabled()) {
-      log.debug("{}.moveTo {} {} {} {} {} {}", getName(), thumb, index, majeure, ringFinger, pinky, wrist);
+      log.debug("{}.moveTo {} {} {} {} {} {}", getName(), thumbPos, indexPos, majeurePos, ringFingerPos, pinkyPos, wristPos);
     }
-
-    if (thumb != null) {
-      this.thumb.moveTo(thumb);
-    }
-    if (index != null) {
-      this.index.moveTo(index);
-    }
-    if (majeure != null) {
-      this.majeure.moveTo(majeure);
-    }
-    if (ringFinger != null) {
-      this.ringFinger.moveTo(ringFinger);
-    }
-    if (pinky != null) {
-      this.pinky.moveTo(pinky);
-    }
-    if (wrist != null) {
-      this.wrist.moveTo(wrist);
-    }
+    if (thumb != null && thumbPos != null)           { thumb.moveTo(thumbPos); }
+    if (index != null && indexPos != null)           { index.moveTo(indexPos); }
+    if (majeure != null && majeurePos != null)       { majeure.moveTo(majeurePos); }
+    if (ringFinger != null && ringFingerPos != null) { ringFinger.moveTo(ringFingerPos); }
+    if (pinky != null && pinkyPos != null)           { pinky.moveTo(pinkyPos); }
+    if (wrist != null && wristPos != null)           { wrist.moveTo(wristPos); }
   }
 
   public void moveToBlocking(double thumb, double index, double majeure, double ringFinger, double pinky) {
