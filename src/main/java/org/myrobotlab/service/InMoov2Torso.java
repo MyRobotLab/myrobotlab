@@ -111,13 +111,13 @@ public class InMoov2Torso extends Service {
         lowStom.getCurrentInputPos());
   }
 
-  public void moveTo(double topStom, double midStom, double lowStom) {
+  public void moveTo(Double topStom, Double midStom, Double lowStom) {
     if (log.isDebugEnabled()) {
       log.debug("{} moveTo {} {} {}", getName(), topStom, midStom, lowStom);
     }
-    this.topStom.moveTo(topStom);
-    this.midStom.moveTo(midStom);
-    this.lowStom.moveTo(lowStom);
+    if (topStom != null) { this.topStom.moveTo(topStom); }
+    if (midStom != null) { this.midStom.moveTo(midStom); }
+    if (lowStom != null) { this.lowStom.moveTo(lowStom); }
 
   }
 

@@ -206,14 +206,14 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     return shoulder;
   }
 
-  public void moveTo(double bicepPos, double rotatePos, double shoulderPos, double omoplatePos) {
+  public void moveTo(Double bicepPos, Double rotatePos, Double shoulderPos, Double omoplatePos) {
     if (log.isDebugEnabled()) {
       log.debug("{} moveTo {} {} {} {}", getName(), bicepPos, rotatePos, shoulderPos, omoplatePos);
     }
-    bicep.moveTo(bicepPos);
-    rotate.moveTo(rotatePos);
-    shoulder.moveTo(shoulderPos);
-    omoplate.moveTo(omoplatePos);
+    if (bicepPos != null)     { bicep.moveTo(bicepPos); }
+    if (rotatePos != null)    { rotate.moveTo(rotatePos); }
+    if (shoulderPos  != null) { shoulder.moveTo(shoulderPos); }
+    if (omoplatePos != null)  { omoplate.moveTo(omoplatePos); }
   }
 
   public void moveToBlocking(double bicep, double rotate, double shoulder, double omoplate) {
