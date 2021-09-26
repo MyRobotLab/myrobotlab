@@ -1124,7 +1124,7 @@
   <dependency>
     <groupId>program-ab</groupId>
     <artifactId>program-ab-kw</artifactId>
-    <version>0.0.8.6</version>
+    <version>0.0.8.7</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1678,6 +1678,27 @@
                     </execution>
                 </executions>
             </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>assembly.xml</descriptor>
+          </descriptors>
+          <finalName>myrobotlab</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
+        </configuration>
+        <executions>
+          <execution>
+            <id>trigger-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>            
     
       <plugin>
         <inherited>true</inherited>

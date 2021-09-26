@@ -345,7 +345,6 @@ public class IvyWrapper extends Repo implements Serializable {
       installedLibraries.put(library.toString(), library);
       info("installed %s platform %s", library, platform.getPlatformId());
       // }
-      save();
 
       ArtifactDownloadReport[] artifacts = report.getAllArtifactsReports();
       for (int i = 0; i < artifacts.length; ++i) {
@@ -369,6 +368,8 @@ public class IvyWrapper extends Repo implements Serializable {
         }
       }
 
+      // save repo.json file
+      save();
       publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of %s", library)));
 
     } catch (Exception e) {
