@@ -1,47 +1,55 @@
 angular.module('mrlapp.main.statusSvc', [])
         .service('statusSvc', ['mrl', function (mrl) {
-                var _self = this;
+                var _self = this
 
                 //START_Status_Notification
-                var updateSubscribtions = [];
+                var updateSubscribtions = []
                 _self.subscribeToUpdates = function (callback) {
-                    updateSubscribtions.push(callback);
-                };
+                    updateSubscribtions.push(callback)
+                }
                 _self.unsubscribeFromUpdates = function (callback) {
-                    var index = updateSubscribtions.indexOf(callback);
+                    var index = updateSubscribtions.indexOf(callback)
                     if (index != -1) {
-                        updateSubscribtions.splice(index, 1);
+                        updateSubscribtions.splice(index, 1)
                     }
-                };
+                }
                 var notifyAllOfUpdate = function (status) {
                     angular.forEach(updateSubscribtions, function (value, key) {
-                        value(status);
-                    });
-                };
+                        value(status)
+                    })
+                }
                 //END_Status_Notification
 
                 //START_Status
-                var statusList = [];
+                var statusList = []
+
+
+                this.error = function (detail) {
+                    this.addStatus({
+                                    "level":"error",
+                                    "detail":detail
+                    })
+                }
+
 
                 this.addStatus = function (status) {
-                    statusList.push(status);
-                };
+                    statusList.push(status)
+                    notifyAllOfUpdate(status)
+                }
 
                 this.getStatuses = function () {
-                    return statusList;
-                };
+                    return statusList
+                }
 
                 this.clearStatuses = function () {
-                    statusList = [];
-                };
+                    statusList = []
+                }
 
                 var onStatus = function (statusMsg) {
-                    _self.addStatus(statusMsg.data[0]);
-                    notifyAllOfUpdate(statusMsg.data[0]);
-                };
+                    _self.addStatus(statusMsg.data[0])
+                }
                 
-                mrl.subscribeToMethod(onStatus, "onStatus");
+                mrl.subscribeToMethod(onStatus, "onStatus")
                 //END_Status
-
    
-            }]);
+            }])

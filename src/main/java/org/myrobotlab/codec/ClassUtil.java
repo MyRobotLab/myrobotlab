@@ -24,13 +24,13 @@ public class ClassUtil {
     }
     
     if (o.isInterface()) {
-      ret.add(o.toString());      
+      ret.add(o.getCanonicalName());      
     }
     
     Class<?>[] inter = o.getInterfaces();
     if (inter != null) {
       for (Class<?> i : inter) {
-        ret.add(i.toString()); 
+        ret.add(i.getCanonicalName()); 
         // breadth interface search
         for (Class<?> imp : i.getInterfaces()) {
           crawlInterfaceAncestry(ret, imp);

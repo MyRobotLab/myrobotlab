@@ -400,6 +400,16 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   }
 
+  /** FIXME - implement
+  public void fill(String color) {
+        
+  }*/
+  
+  public void fill(int r, int g, int b) {
+    fill(0, pixelCount, r, g, b, null);
+  }
+  
+  
   public void fill(int beginAddress, int count, int r, int g, int b) {
     fill(beginAddress, count, r, g, b, null);
   }

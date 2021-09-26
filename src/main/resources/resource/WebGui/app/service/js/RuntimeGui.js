@@ -99,9 +99,9 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         $scope.newType = serviceType
     }
 
-    $scope.setConfigName = function(){
+    $scope.setConfigName = function() {
         console.info('setConfigName')
-        if ($scope.selectedConfig.length > 0){
+        if ($scope.selectedConfig.length > 0) {
             $scope.service.configName = $scope.selectedConfig[0]
             msg.sendTo('runtime', 'setConfigName', $scope.service.configName)
         }
@@ -128,20 +128,21 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     }
 
     this.onMsg = function(inMsg) {
+        let data = inMsg.data[0]
         switch (inMsg.method) {
         case 'onState':
-            _self.updateState(inMsg.data[0])
+            _self.updateState(data)
             break
         case 'onLocalServices':
-            $scope.registry = inMsg.data[0]
+            $scope.registry = data
             //  $scope.$apply()
             break
         case 'onLocale':
-            $scope.locale.selected = inMsg.data[0].language
+            $scope.locale.selected = data.language
             $scope.$apply()
             break
         case 'onLocales':
-            ls = inMsg.data[0]
+            ls = data
             unique = {}
             $scope.service.locales = {}
             // new Set()
@@ -165,14 +166,48 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             break
 
         case 'onConfigList':
-            $scope.service.configList = inMsg.data[0].sort()
+            $scope.service.configList = data.sort()
             $scope.$apply()
             break
 
         case 'onServiceTypes':
 
-            $scope.possibleServices = inMsg.data[0]
+            $scope.possibleServices = data
             mrl.setPossibleServices($scope.possibleServices)
+            break
+
+        case 'onAttachMatrix':
+            console.info('onAttachMatrix', data)
+                for (const [type,interfaze] of Object.entries(data)) {
+                // console.info(requestor, interfaze)
+                let servicesMatchingType = []
+                for (const [name,service] of Object.entries(mrl.getRegistry())) {
+                    if (service.serviceClass == type){
+                        servicesMatchingType.push(name)
+                    }
+                }
+                for (let j = 0; j < servicesMatchingType.length; ++j){
+                    let requestor = servicesMatchingType[j]
+                    for (const [inter,targetServices] of Object.entries(interfaze)) {
+                        targetServices.sort()
+                        // for (const possibleService of targetServices) {
+                            // console.info(requestor, interfaze, possibleService)
+                            // get panel/controller - onMessage ?
+                            let panel = mrl.getPanel(requestor)
+                            let msg = mrl.createMessage(requestor, 'onAttachMatrix', [interfaze])
+                            try {
+                                // WTF - this callback was always available ?
+                                if (panel){
+                                    panel.scope.guictrl.onMsg(msg)
+                                }                            
+                            } catch (e) {
+                                console.error(e)
+                            }
+                        //}
+                    }
+                }
+            }
+            // mrl.getPanel()
             break
 
         case 'onRegistered':
@@ -180,22 +215,25 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             break
 
         case 'onConnections':
-            $scope.connections = inMsg.data[0]
+            $scope.connections = data
             $scope.$apply()
             break
+
         case 'onHosts':
-            $scope.hosts = inMsg.data[0]
+            $scope.hosts = data
             $scope.$apply()
             break
+
         case 'onStatus':
-            $scope.status = inMsg.data[0].name + ' ' + inMsg.data[0].level + ' ' + inMsg.data[0].detail + "\n" + $scope.status
+            $scope.status = data.name + ' ' + data.level + ' ' + data.detail + "\n" + $scope.status
             if ($scope.status.length > 300) {
                 $scope.status = $scope.status.substring(0, statusMaxSize)
             }
             break
+
         case 'onCli':
-            if (inMsg.data[0] != null) {
-                $scope.status = JSON.stringify(inMsg.data[0], null, 2) + "\n" + $scope.status
+            if (data != null) {
+                $scope.status = JSON.stringify(data, null, 2) + "\n" + $scope.status
                 if ($scope.status.length > 300) {
                     $scope.status = $scope.status.substring(0, statusMaxSize)
                 }
@@ -204,11 +242,13 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
                 $scope.status += "null\n"
             }
             break
+
         case 'onReleased':
-            console.info("runtime - onRelease" + inMsg.data[0])
+            console.info("runtime - onRelease" + data)
             break
+
         case 'onHeartbeat':
-            let heartbeat = inMsg.data[0]
+            let heartbeat = data
             let hb = heartbeat.name + '@' + heartbeat.id + ' sent onHeartbeat - ';
             $scope.heartbeatTs = heartbeat.ts
             $scope.$apply()
@@ -312,6 +352,8 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.subscribe("getHosts")
     msg.subscribe("publishStatus")
     msg.subscribe('publishConfigList')
+
+    msg.subscribe('publishAttachMatrix')
 
     //msg.send("getLocalServices")
     msg.send("getConnections")

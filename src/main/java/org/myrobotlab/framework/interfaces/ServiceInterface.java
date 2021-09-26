@@ -2,8 +2,10 @@ package org.myrobotlab.framework.interfaces;
 
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
 
 import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MRLListener;
@@ -149,5 +151,9 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
   public void setLocale(String code);
 
   public int getCreationOrder();
+  
+  public HashMap<String, Timer> getTasks();
+
+  public void purgeTask(String taskName);
 
 }

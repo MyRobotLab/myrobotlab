@@ -169,9 +169,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * a more capable task handler
    */
-  transient HashMap<String, Timer> tasks = new HashMap<String, Timer>();
-
-  // public final static String cfgDir = FileIO.getCfgDir();
+  transient protected HashMap<String, Timer> tasks = new HashMap<String, Timer>();
 
   /**
    * used as a static cache for quick method name testing FIXME - if you make
@@ -185,6 +183,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * a definition. However, since gson will not process statics - we are making
    * it a member variable
    */
+  @Deprecated /* use Runtimes definition of available interfaces */
   protected Map<String, String> interfaceSet;
 
   /**
@@ -856,10 +855,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
           timer.cancel();
           timer.purge();
           timer = null;
-          tasks.remove(taskName);
         } catch (Exception e) {
           log.info(e.getMessage());
         }
+        tasks.remove(taskName);
       }
     } else {
       log.debug("purgeTask - task {} does not exist", taskName);
@@ -1206,6 +1205,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   final public Object invoke(String method, Object... params) {
     return invokeOn(false, this, method, params);
   }
+    
+  @Override
+  final public void invokeFuture(String method, long delayMs) {
+    invokeFuture(method, delayMs, (Object[])null);
+  }
+
+  @Override
+  final public void invokeFuture(String method, long delayMs, Object... params) {
+    addTaskOneShot(delayMs, method, params);
+  }
+
 
   /**
    * Broadcast publishes messages synchronously without queuing ! Messages will

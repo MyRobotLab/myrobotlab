@@ -108,7 +108,7 @@ public class Python extends Service {
 
           } catch (Exception e) {
             log.error("InputQueueThread threw msg: {}", msg, e);
-            python.error(String.format("%s %s", e.getClass().getSimpleName(), e.getMessage()));
+            python.error(String.format("%s %s", e.getClass().getSimpleName(), e.toString()));
           }
         }
       } catch (Exception e) {

@@ -85,12 +85,15 @@ public class InMoov2Torso extends Service {
 
   @Override
   public void broadcastState() {
-    if (topStom != null)
+    if (topStom != null) {
       topStom.broadcastState();
-    if (midStom != null)
+    }
+    if (midStom != null) {
       midStom.broadcastState();
-    if (lowStom != null)
+    }
+    if (lowStom != null) {
       lowStom.broadcastState();
+    }
   }
 
   public void disable() {
@@ -111,14 +114,19 @@ public class InMoov2Torso extends Service {
         lowStom.getCurrentInputPos());
   }
 
-  public void moveTo(double topStom, double midStom, double lowStom) {
+  public void moveTo(Double topStom, Double midStom, Double lowStom) {
     if (log.isDebugEnabled()) {
       log.debug("{} moveTo {} {} {}", getName(), topStom, midStom, lowStom);
     }
-    this.topStom.moveTo(topStom);
-    this.midStom.moveTo(midStom);
-    this.lowStom.moveTo(lowStom);
-
+    if (this.topStom != null && topStom != null) {
+      this.topStom.moveTo(topStom);
+    }
+    if (this.midStom != null && midStom != null) {
+      this.midStom.moveTo(midStom);
+    }
+    if (this.lowStom != null && lowStom != null) {
+      this.lowStom.moveTo(lowStom);
+    }
   }
 
   public void moveToBlocking(Double topStom, Double midStom, Double lowStom) {

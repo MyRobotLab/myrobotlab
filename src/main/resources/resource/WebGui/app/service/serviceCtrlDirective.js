@@ -50,7 +50,7 @@ angular.module('mrlapp.service').directive('serviceCtrlDirective', ['$compile', 
             msg: '=msginterface'
         },
         controller: "@",
-        controllerAs: "guictrl",
+        controllerAs: "guictrl", // FOUND A REFERENCE THAT A SERVICE CAN USE FOR INTRA - CTRL COMMUNICATION !!! WOW !!
         name: "controllerName",
         link: function(scope, elem, attr) {
             console.log(scope.name, '==== serviceCtrlNext-link');

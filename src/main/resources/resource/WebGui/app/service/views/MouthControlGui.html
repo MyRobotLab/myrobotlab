@@ -10,7 +10,7 @@
                 <span class="caret"></span>
             </button>
             <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
-                <li ng-repeat="c in service.speechServices">
+                <li ng-repeat="c in speechServices">
                     <a href="" ng-click="attach(c)">{{mrl.getShortName(c)}}</a>
                 </li>
             </ul>
@@ -25,7 +25,7 @@
                 <span class="caret"></span>
             </button>
             <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
-                <li ng-repeat="c in service.servoServices">
+                <li ng-repeat="c in servos">
                     <a href="" ng-click="attach(c)">{{mrl.getShortName(c)}}</a>
                 </li>
             </ul>

@@ -1,7 +1,8 @@
-angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$timeout', '$scope', 'mrl', function($timeout, $scope, mrl) {
+angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$timeout', '$scope', 'mrl', 'statusSvc', function($timeout, $scope, mrl, statusSvc) {
     console.info('ServoGuiCtrl')
     var _self = this
     var msg = this.msg
+    $scope.mrl = mrl
 
     // mode is either "status" or "control"
     // in status mode we take updates by the servo and its events
@@ -292,15 +293,25 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             // but perhaps its come to mean
             // feedback from the service.moveTo
         case 'onRefreshControllers':
-            $scope.possibleControllers = data
+//            $scope.possibleControllers = data
             $scope.$apply()
             break
+
+        case 'onAttachMatrix':
+            if (data['org.myrobotlab.service.interfaces.ServoController']){
+             $scope.possibleControllers = data['org.myrobotlab.service.interfaces.ServoController']   
+            }            
+            $scope.$apply()
+            break
+
         case 'onEncoderData':
             $scope.service.currentOutputPos = data.angle
             $scope.$apply()
             break
+
         case 'onStatus':
             break
+
         case 'onServoEvent':
             console.info("ServoEvent")
             console.info(data)
@@ -342,6 +353,10 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
 
     $scope.attachController = function(controller, pin) {
         console.info("attachController")
+        if (!pin){
+            statusSvc.error("pin must be set")
+            return
+        }
 
         // FIXME - there needs to be some updates to handle the complexity of taking updates from the servo vs
         // taking updates from the UI ..  some of this would be clearly solved with a (control/status) button
@@ -361,8 +376,9 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
     // msg.subscribe("publishMoveTo")
     msg.subscribe("publishServoEvent")
     //    msg.subscribe("publishEncoderData")
-    msg.subscribe("refreshControllers")
+    // msg.subscribe("refreshControllers")
     msg.subscribe(this)
-    msg.send('refreshControllers')
+    // msg.send('refreshControllers')
+    msg.sendTo('runtime', 'requestAttachMatrix')
 }
 ])

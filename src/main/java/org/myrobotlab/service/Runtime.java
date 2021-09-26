@@ -134,11 +134,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * services which want to know if another service with an interface they are interested
    * in registers or is released
+   * 
+   * requestor type -> interface -> set of applicable service names
    */
-  final static Map<String, Set<String>> interfaceChangeListeners = new HashMap<>();
+  protected final Map<String, Map<String, Set<String>>> requestedAttachMatrix = new HashMap<>();
 
-
-  private String configName = "default";
+  
+  protected String configName = "default";
 
   /**
    * The one config directory where all config is managed the {default} is the
@@ -1243,18 +1245,32 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         // inspect/crawl all interfaces for this service 
         // this processes changes made by the registered service to all services
         // previously registered
-        Set<String> interfaces = ClassUtil.getInterfaces(registration.service.getClass());
-        for (String inter : interfaces) {
-          if (interfaceChangeListeners.containsKey(inter)) {
-            Set<String> listeners = interfaceChangeListeners.get(inter);
+        
+        // cache interfaces --to--> service names ... for quick and convienent access
+        // guard with type checking - only need 1 instance of a type
+        if (registration.service != null) {
+          
+          // new service search for all supported interfaces
+          Set<String> newInterfaces = ClassUtil.getInterfaces(registration.service.getClass());
 
-            // look for callbacks - send messages
-            for (String serviceName : listeners) {
-              runtime.send(serviceName, "onInterfaceRegistered", registration.getFullName(), inter);
-            }
-          }
+
+          // for each interface - register this service name
+          for (String inter : newInterfaces) {
+            for (String requestor : runtime.requestedAttachMatrix.keySet()) {
+              if (runtime.requestedAttachMatrix.get(requestor).containsKey(inter)) 
+              {
+                // this request is interested in the new service's interface add it
+                runtime.requestedAttachMatrix.get(requestor).get(inter).add(fullname);
+                // we do a future to "batch" changes
+                // this is an optimization, as most interface changes rarely happen except
+                // when scripts are run or peers created
+                runtime.invokeFuture("publishAttachMatrix", 2000);
+              }
+            }            
+          } // for (String inter : newInterfaces)
         }
       }
+      
       
       // this handles all changes to the newly registered service - from all other services
       // get all services besides self
@@ -1331,18 +1347,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     if (runtime != null) {
       runtime.broadcast("released", name); // <- DO NOT CHANGE THIS IS CORRECT
                                            // !!
-      Set<String> interfaces = ClassUtil.getInterfaces(sw.getClass());
-      for (String inter : interfaces) {
-        if (interfaceChangeListeners.containsKey(inter)) {
-          Set<String> listeners = interfaceChangeListeners.get(inter);
-
-          // look for callbacks - send messages
-          for (String serviceName : listeners) {
-            runtime.send(serviceName, "onInterfaceReleased", name, inter);
+      
+      // peal out all targeted references from the requested
+      for (Map<String, Set<String>> refs : runtime.requestedAttachMatrix.values()) {
+          for (String interType: refs.keySet()) {
+            Set<String> targetedInstances = refs.get(interType);
+            targetedInstances.remove(name);
+            runtime.invokeFuture("publishAttachMatrix", 2000);
           }
-        }
       }
-    
+          
       // it should be FULLNAME !
       // runtime.broadcast("released", inName);
     }
@@ -3728,35 +3742,57 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     addListener("released", name);
   }
   
-  public void registerForInterfaceChange(String serviceName, Class<?> interfaze) {
-    registerForInterfaceChange(serviceName, interfaze.toString());
+  // FIXME - move this to service and add default (no servicename) method signature
+  public void registerForInterfaceChange(String requestor, Class<?> interestedInterface) {
+    registerForInterfaceChange(requestor, interestedInterface.getCanonicalName());
   }
   
-  public void registerForInterfaceChange(String serviceName, String interfaceName) {
-    ServiceInterface si = getService(serviceName);
-    if (si == null) {
-      error("%s registering for interface %s is not in registry", serviceName, interfaceName);
-      return;
+  public void registerForInterfaceChange(String requestorName, String targetedInterface) {
+    
+    String requestor = getService(requestorName).getType();
+
+    if (!requestedAttachMatrix.containsKey(requestor)) {
+      requestedAttachMatrix.put(requestor, new HashMap<>());
     }
     
-    // if your registering for future interface changes - you probably want existing ones too
-    // so crawl(TODO cache?) all existing interfaces we are interested in
-    // TODO unit test for constructor or start?
-    for (ServiceInterface s : getServices()) {
-      Set<String> ifs = ClassUtil.getInterfaces(s.getClass());
-      if (ifs.contains(interfaceName)) {
-        // we found interface we're looking for
-        si.onInterfaceRegistered(s.getFullName(), interfaceName);
+    Map<String, Set<String>> interfaceKeys = requestedAttachMatrix.get(requestor);
+    
+    if (!interfaceKeys.containsKey(targetedInterface)) {
+      requestedAttachMatrix.get(requestor).put(targetedInterface, new HashSet<>());
+    }
+    
+    // pre-fill - all services that currently fufill this interface
+    for (ServiceInterface si : getServices()) {
+      try {
+        // TODO - optimization... if a type is processed - all names of that type can be added
+        // vs searching for the interface
+        Set<String> interfaces = ClassUtil.getInterfaces(si.getType());
+        if (interfaces.contains(targetedInterface)) {
+          requestedAttachMatrix.get(requestor).get(targetedInterface).add(si.getFullName());
+        }
+      } catch (ClassNotFoundException e) {
+        error(e);
       }
     }
-    
-    // setting up callbacks for future service changes
-    Set<String> callbackServices = interfaceChangeListeners.get(interfaceName);
-    if (callbackServices == null) {
-      callbackServices = new HashSet<>();
-      interfaceChangeListeners.put(interfaceName, callbackServices);
-    }
-    callbackServices.add(serviceName);    
   }
-
+  
+  /**
+   * This publisher gets called whenever the set of interfaces changes for which
+   * this service has registered to listen for changes with
+   * registerForInterfaceChange(Class clazz).  The parameter will contain the current
+   * set of interfaces after the change (either registered or released)
+  */
+  public Map<String, Map<String, Set<String>>> publishAttachMatrix(){
+    return requestedAttachMatrix;
+  }
+  
+  /**
+   * External request for interface changes. This is an optimization as it will
+   * be called rapidly when services or peers start from scripts - so we delay
+   * and batch all the requests until 2s after the initial request 
+   */
+  public void requestAttachMatrix() {
+    invokeFuture("publishAttachMatrix", 2000);
+  }
+  
 }

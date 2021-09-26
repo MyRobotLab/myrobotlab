@@ -2,8 +2,11 @@ angular.module('mrlapp.service.MouthControlGui', []).controller('MouthControlGui
     console.info('MouthControlGuiCtrl')
     let _self = this
     let msg = this.msg
-    $scope.mrl = mrl // should be done in framework
+    $scope.mrl = mrl
+    // should be done in framework
 
+    $scope.servos = []
+    $scope.speechServices = []
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
@@ -17,8 +20,20 @@ angular.module('mrlapp.service.MouthControlGui', []).controller('MouthControlGui
             _self.updateState(data)
             $scope.$apply()
             break
+
+        case 'onAttachMatrix':
+            if (data['org.myrobotlab.service.interfaces.ServoControl']) {
+                $scope.servos = data['org.myrobotlab.service.interfaces.ServoControl']
+            }
+            if (data['org.myrobotlab.service.interfaces.SpeechSynthesis']) {
+                $scope.speechServices = data['org.myrobotlab.service.interfaces.SpeechSynthesis']
+            }
+            $scope.$apply()
+            break
+
         case 'onStatus':
             break
+
         default:
             console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
@@ -29,7 +44,6 @@ angular.module('mrlapp.service.MouthControlGui', []).controller('MouthControlGui
         msg.send('attach', fullname)
     }
 
-
     $scope.update = function() {
         let service = $scope.service
         msg.send('setDelays', service.delaytime, service.delaytimestop, service.delaytimeletter)
@@ -37,6 +51,9 @@ angular.module('mrlapp.service.MouthControlGui', []).controller('MouthControlGui
         msg.send('broadcastState')
     }
 
+    // msg.subscribe('publishAvailableInterfaces')
     msg.subscribe(this)
+    // FIXME - optimize by putting it into msg.subscribe(this)
+    msg.sendTo('runtime', 'requestAttachMatrix')
 }
 ])

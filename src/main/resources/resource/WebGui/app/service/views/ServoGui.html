@@ -21,7 +21,7 @@
                                 <tr>
                                     <td>
                                         <select ng-disabled="service.controller" class="form-control selectController" ng-model="selectedController">
-                                            <option ng-repeat="controller in possibleControllers" value="{{controller}}">{{controller}} </option>
+                                            <option ng-repeat="controller in possibleControllers" value="{{controller}}">{{mrl.getShortName(controller)}} </option>
                                         </select>
                                     </td>
                                     <td>
