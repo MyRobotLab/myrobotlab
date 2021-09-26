@@ -114,7 +114,7 @@ import picocli.CommandLine;
  *
  */
 public class Runtime extends Service implements MessageListener, ServiceLifeCycle, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider {
-  
+
   final static private long serialVersionUID = 1L;
 
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
@@ -129,17 +129,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * thread for non-blocking install of services
    */
   static private transient Thread installerThread = null;
-  
 
   /**
-   * services which want to know if another service with an interface they are interested
-   * in registers or is released
+   * services which want to know if another service with an interface they are
+   * interested in registers or is released
    * 
    * requestor type -> interface -> set of applicable service names
    */
   protected final Map<String, Map<String, Set<String>>> requestedAttachMatrix = new HashMap<>();
 
-  
   protected String configName = "default";
 
   /**
@@ -1239,47 +1237,48 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       if (runtime != null) {
         // TODO - determine rules on re-broadcasting based on configuration
         runtime.broadcast("registered", registration);
-      
+
         // send call backs for services which have registered for interface
         // changes
-        // inspect/crawl all interfaces for this service 
+        // inspect/crawl all interfaces for this service
         // this processes changes made by the registered service to all services
         // previously registered
-        
-        // cache interfaces --to--> service names ... for quick and convienent access
+
+        // cache interfaces --to--> service names ... for quick and convienent
+        // access
         // guard with type checking - only need 1 instance of a type
         if (registration.service != null) {
-          
+
           // new service search for all supported interfaces
           Set<String> newInterfaces = ClassUtil.getInterfaces(registration.service.getClass());
-
 
           // for each interface - register this service name
           for (String inter : newInterfaces) {
             for (String requestor : runtime.requestedAttachMatrix.keySet()) {
-              if (runtime.requestedAttachMatrix.get(requestor).containsKey(inter)) 
-              {
-                // this request is interested in the new service's interface add it
+              if (runtime.requestedAttachMatrix.get(requestor).containsKey(inter)) {
+                // this request is interested in the new service's interface add
+                // it
                 runtime.requestedAttachMatrix.get(requestor).get(inter).add(fullname);
                 // we do a future to "batch" changes
-                // this is an optimization, as most interface changes rarely happen except
+                // this is an optimization, as most interface changes rarely
+                // happen except
                 // when scripts are run or peers created
                 runtime.invokeFuture("publishAttachMatrix", 2000);
-                
+
                 // process callbacks to services who have registered this
                 Set<String> ret = runtime.getServiceNamesFromType(requestor);
                 String shortTypeName = inter.substring(inter.lastIndexOf(".") + 1);
                 for (String n : ret) {
                   runtime.send(n, String.format("on%s", shortTypeName), runtime.requestedAttachMatrix.get(requestor).get(inter));
-                }                
+                }
               }
-            }            
+            }
           } // for (String inter : newInterfaces)
         }
       }
-      
-      
-      // this handles all changes to the newly registered service - from all other services
+
+      // this handles all changes to the newly registered service - from all
+      // other services
       // get all services besides self
 
       // TODO - remove ? already get state from registration
@@ -1296,13 +1295,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   public Set<String> getServiceNamesFromType(String type) {
-    
+
     Set<String> ret = new HashSet<>();
-    
+
     if (type.indexOf(".") == -1) {
       type = String.format("org.myrobotlab.service.%s", type);
-    } 
-    
+    }
+
     for (ServiceInterface si : registry.values()) {
       if (si.getType().equals(type)) {
         ret.add(si.getFullName());
@@ -1370,16 +1369,27 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     if (runtime != null) {
       runtime.broadcast("released", name); // <- DO NOT CHANGE THIS IS CORRECT
                                            // !!
-      
+
       // peal out all targeted references from the requested
-      for (Map<String, Set<String>> refs : runtime.requestedAttachMatrix.values()) {
-          for (String interType: refs.keySet()) {
-            Set<String> targetedInstances = refs.get(interType);
+      for (String type : runtime.requestedAttachMatrix.keySet()) {
+        Map<String, Set<String>> refs = runtime.requestedAttachMatrix.get(type);
+        for (String interType : refs.keySet()) {
+          Set<String> targetedInstances = refs.get(interType);
+          if (targetedInstances.contains(name)) {
             targetedInstances.remove(name);
             runtime.invokeFuture("publishAttachMatrix", 2000);
+
+            // get services of this type that had registered for the interface
+            Set<String> ret = runtime.getServiceNamesFromType(type);
+            String shortTypeName = interType.substring(interType.lastIndexOf(".") + 1);
+            for (String n : ret) {
+              runtime.send(n, String.format("on%s", shortTypeName), targetedInstances);
+            }
           }
+
+        }
       }
-          
+
       // it should be FULLNAME !
       // runtime.broadcast("released", inName);
     }
@@ -3764,30 +3774,32 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     addListener("stopped", name);
     addListener("released", name);
   }
-  
-  // FIXME - move this to service and add default (no servicename) method signature
+
+  // FIXME - move this to service and add default (no servicename) method
+  // signature
   public void registerForInterfaceChange(String requestor, Class<?> interestedInterface) {
     registerForInterfaceChange(requestor, interestedInterface.getCanonicalName());
   }
-  
+
   public void registerForInterfaceChange(String requestorName, String targetedInterface) {
-    
+
     String requestor = getService(requestorName).getType();
 
     if (!requestedAttachMatrix.containsKey(requestor)) {
       requestedAttachMatrix.put(requestor, new HashMap<>());
     }
-    
+
     Map<String, Set<String>> interfaceKeys = requestedAttachMatrix.get(requestor);
-    
+
     if (!interfaceKeys.containsKey(targetedInterface)) {
       requestedAttachMatrix.get(requestor).put(targetedInterface, new HashSet<>());
     }
-    
+
     // pre-fill - all services that currently fufill this interface
     for (ServiceInterface si : getServices()) {
       try {
-        // TODO - optimization... if a type is processed - all names of that type can be added
+        // TODO - optimization... if a type is processed - all names of that
+        // type can be added
         // vs searching for the interface
         Set<String> interfaces = ClassUtil.getInterfaces(si.getType());
         if (interfaces.contains(targetedInterface)) {
@@ -3798,24 +3810,24 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
     }
   }
-  
+
   /**
    * This publisher gets called whenever the set of interfaces changes for which
    * this service has registered to listen for changes with
-   * registerForInterfaceChange(Class clazz).  The parameter will contain the current
-   * set of interfaces after the change (either registered or released)
-  */
-  public Map<String, Map<String, Set<String>>> publishAttachMatrix(){
+   * registerForInterfaceChange(Class clazz). The parameter will contain the
+   * current set of interfaces after the change (either registered or released)
+   */
+  public Map<String, Map<String, Set<String>>> publishAttachMatrix() {
     return requestedAttachMatrix;
   }
-  
+
   /**
    * External request for interface changes. This is an optimization as it will
    * be called rapidly when services or peers start from scripts - so we delay
-   * and batch all the requests until 2s after the initial request 
+   * and batch all the requests until 2s after the initial request
    */
   public void requestAttachMatrix() {
     invokeFuture("publishAttachMatrix", 2000);
   }
-  
+
 }
