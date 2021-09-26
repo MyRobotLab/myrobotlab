@@ -255,52 +255,6 @@ public class Joystick extends Service implements AnalogPublisher {
     super(n, id);    
   }
 
-  @Override
-  public void onInterfaceRegistered(String serviceName, String interfaceName) {
-    if (AnalogListener.class.toString().equals(interfaceName)) {
-      analogListenerServices.add(serviceName);
-      broadcastState();
-    }
-  }
-
-  @Override
-  public void onInterfaceReleased(String serviceName, String interfaceName) {
-    if (AnalogListener.class.toString().equals(interfaceName)) {
-      analogListenerServices.remove(serviceName);
-      broadcastState();
-    }
-  }
-  
-  /*
-  @Override
-  public void onRegistered(Registration registration) {
-    
-    if (registration.getName().startsWith("m")) {
-      log.info("here");
-    }
-    
-    if (analogListenerServices.isEmpty()) {
-      // first time - get all pre-existing services
-      analogListenerServices.addAll(Runtime.getServiceNamesFromInterface(AnalogListener.class));
-      broadcastState();
-    } else {
-      // evaluate only the one that was registered
-      ServiceInterface si = Runtime.getService(registration.getFullName());
-      if (si.getClass().isAssignableFrom(AnalogListener.class)) {
-        analogListenerServices.add(registration.getFullName());
-        broadcastState();
-      }
-    }
-  }
-  
-  @Override
-  public void onReleased(String name) {
-    if (analogListenerServices.remove(name)) {
-      broadcastState();
-    }
-  }
-  */
-
   // FIXME - simply set components e.g. getComponents
   public Map<String, Component> getComponents() {
     components = new HashMap<String, Component>();

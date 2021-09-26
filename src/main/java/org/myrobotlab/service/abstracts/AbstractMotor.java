@@ -141,41 +141,6 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     // refreshControllers();
   }
   
-  @Override
-  public void onInterfaceRegistered(String serviceName, String interfaceName) {
-    if (MotorController.class.toString().equals(interfaceName)) {
-      controllers.add(serviceName);
-      broadcastState();
-    }
-  }
-
-  @Override
-  public void onInterfaceReleased(String serviceName, String interfaceName) {
-    if (MotorController.class.toString().equals(interfaceName)) {
-      controllers.remove(serviceName);
-      broadcastState();
-    }
-  }
-
-
-  /*
-  @Override
-  public void onRegistered(Registration s) {
-    if (s.hasInterface(MotorController.class)) {
-      controllers.add(s.getName());
-      broadcastState();
-    }
-  }
-
-  @Override
-  public void onReleased(String s) {
-    if (controllers.contains(s)) {
-      controllers.remove(s);
-      broadcastState();
-    }
-  }
-  */
-  
   public Set <String> refreshControllers() {
     controllers.clear();
     controllers.addAll(Runtime.getServiceNamesFromInterface(MotorController.class));

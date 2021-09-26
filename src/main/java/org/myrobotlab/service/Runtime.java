@@ -1265,6 +1265,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
                 // this is an optimization, as most interface changes rarely happen except
                 // when scripts are run or peers created
                 runtime.invokeFuture("publishAttachMatrix", 2000);
+                
+                // process callbacks to services who have registered this
+                Set<String> ret = runtime.getServiceNamesFromType(requestor);
+                String shortTypeName = inter.substring(inter.lastIndexOf(".") + 1);
+                for (String n : ret) {
+                  runtime.send(n, String.format("on%s", shortTypeName), runtime.requestedAttachMatrix.get(requestor).get(inter));
+                }                
               }
             }            
           } // for (String inter : newInterfaces)
@@ -1286,6 +1293,22 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
 
     return registration;
+  }
+
+  public Set<String> getServiceNamesFromType(String type) {
+    
+    Set<String> ret = new HashSet<>();
+    
+    if (type.indexOf(".") == -1) {
+      type = String.format("org.myrobotlab.service.%s", type);
+    } 
+    
+    for (ServiceInterface si : registry.values()) {
+      if (si.getType().equals(type)) {
+        ret.add(si.getFullName());
+      }
+    }
+    return ret;
   }
 
   /**

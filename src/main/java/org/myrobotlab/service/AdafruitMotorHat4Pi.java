@@ -147,6 +147,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
     super(n, id);
     refreshControllers();
     subscribeToRuntime("registered");
+    registerForInterfaceChange(I2CController.class);
     map(-1.0, 1.0, -1.0, 1.0);
   }
 

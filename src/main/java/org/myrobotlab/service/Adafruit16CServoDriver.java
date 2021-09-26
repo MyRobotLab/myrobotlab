@@ -1050,21 +1050,4 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     registerForInterfaceChange(I2CController.class);
   }
   
-  @Override
-  public void onInterfaceRegistered(String serviceName, String interfaceName) {
-    if (I2CController.class.toString().equals(interfaceName)) {
-      controllers.add(serviceName);
-      broadcastState();
-    }
-  }
-
-  @Override
-  public void onInterfaceReleased(String serviceName, String interfaceName) {
-    if (I2CController.class.toString().equals(interfaceName)) {
-      controllers.remove(serviceName);
-      broadcastState();
-    }
-  }
-
-  
 }

@@ -11,7 +11,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.MouthControlConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.interfaces.AnalogListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
@@ -186,32 +185,6 @@ public class MouthControl extends Service {
   public void setmouth(Integer closed, Integer opened) {
     setMouth(closed, opened);
   }
-
-  
-  @Override
-  public void onInterfaceRegistered(String serviceName, String interfaceName) {
-    if (ServoControl.class.toString().equals(interfaceName)) {
-      servoServices.add(serviceName);
-      broadcastState();
-    }
-    if (SpeechSynthesis.class.toString().equals(interfaceName)) {
-      speechServices.add(serviceName);
-      broadcastState();
-    }
-  }
-
-  @Override
-  public void onInterfaceReleased(String serviceName, String interfaceName) {
-    if (ServoControl.class.toString().equals(interfaceName)) {
-      servoServices.remove(serviceName);
-      broadcastState();
-    }
-    if (SpeechSynthesis.class.toString().equals(interfaceName)) {
-      speechServices.remove(serviceName);
-      broadcastState();
-    }
-  }
-
   
   @Override
   public ServiceConfig getConfig() {
@@ -255,18 +228,31 @@ public class MouthControl extends Service {
     }
 
     return c;
-  }  
+  }
+
+  public Set<String> onSpeechSynthesis(Set<String> controllers){
+    return controllers;
+  }
+  
+  public Set<String> onServoControl(Set<String> controllers){
+    return controllers;
+  }
 
   public static void main(String[] args) {
-    LoggingFactory.init(Level.DEBUG);
     try {
-      // LoggingFactory.getInstance().setLevel(Level.INFO);
-      MouthControl MouthControl = (MouthControl) Runtime.start("MouthControl", "MouthControl");
-      MouthControl.startService();
+      System.setProperty("java.version", "11.0");
+      LoggingFactory.init(Level.INFO);
 
-      Runtime.createAndStart("gui", "SwingGui");
+      MouthControl mouthcontrol = (MouthControl) Runtime.start("mouthcontrol", "MouthControl");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      // webgui.setSsl(true);
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+      
+      Runtime.start("python","Python");
 
-      MouthControl.onStartSpeaking("test on");
+      mouthcontrol.onStartSpeaking("test on");
+      
     } catch (Exception e) {
       Logging.logError(e);
     }
