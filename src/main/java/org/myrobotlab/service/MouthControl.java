@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.myrobotlab.framework.Service;
@@ -39,9 +38,6 @@ public class MouthControl extends Service {
   @Deprecated /* future releases members will be protected use appropriate methods instead */
   public int delaytimeletter = 45;
   
-  protected final Set<String> servoServices = new HashSet<>();
-  protected final Set<String> speechServices = new HashSet<>();
-
   transient private ServoControl jaw;
   transient private SpeechSynthesis mouth;
   protected String jawName;
@@ -243,6 +239,9 @@ public class MouthControl extends Service {
       System.setProperty("java.version", "11.0");
       LoggingFactory.init(Level.INFO);
 
+      Runtime.start("s1","Servo");
+      Runtime.start("mouth1","LocalSpeech");
+      
       MouthControl mouthcontrol = (MouthControl) Runtime.start("mouthcontrol", "MouthControl");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);

@@ -31,7 +31,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
@@ -45,7 +44,6 @@ import org.myrobotlab.service.config.AbstractMotorConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AnalogData;
 import org.myrobotlab.service.data.PinData;
-import org.myrobotlab.service.interfaces.AnalogListener;
 import org.myrobotlab.service.interfaces.AnalogPublisher;
 import org.myrobotlab.service.interfaces.ButtonDefinition;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -141,11 +139,20 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     // refreshControllers();
   }
   
+  @Deprecated /* no longer needed with registerForInterfaceChange and onMotorController callback*/
   public Set <String> refreshControllers() {
     controllers.clear();
     controllers.addAll(Runtime.getServiceNamesFromInterface(MotorController.class));
     broadcastState();
     return controllers;
+  }
+  
+  public Set<String> onMotorController (Set<String> newControllers){
+    // FIXME - remove - not needed by webgui
+    controllers.clear();
+    controllers.addAll(newControllers);
+    broadcastState();
+    return controllers;    
   }
 
   public MotorController getController() {
