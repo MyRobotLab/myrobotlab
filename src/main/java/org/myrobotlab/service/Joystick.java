@@ -252,7 +252,8 @@ public class Joystick extends Service implements AnalogPublisher {
   }
 
   public Joystick(String n, String id) {
-    super(n, id);    
+    super(n, id); 
+    registerForInterfaceChange(AnalogListener.class);
   }
 
   // FIXME - simply set components e.g. getComponents
@@ -469,8 +470,6 @@ public class Joystick extends Service implements AnalogPublisher {
     super.startService();
     initNativeLibs();
     invoke("getControllers");
-    // may not be safe for the constructor
-    registerForInterfaceChange(AnalogListener.class);
   }
 
   private void initNativeLibs() {
@@ -741,6 +740,18 @@ public class Joystick extends Service implements AnalogPublisher {
   @Override
   public AnalogData publishAnalog(AnalogData data) {
     return data;
+  }
+  
+  /**
+   * Callback for registering for an interface, if the registry changes with the addition or removal of a
+   * service which has the interface of interest an event will be triggered and the set of all current services
+   * which implement this interface will be called here
+   * 
+   * @param listeners - set of all service names currently implementing AnalogListener interface
+   * @return
+   */
+  public Set<String> onAnalogListener(Set<String> listeners) {
+    return listeners;
   }
 
 }

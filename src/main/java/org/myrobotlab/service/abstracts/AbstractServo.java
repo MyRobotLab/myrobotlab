@@ -210,16 +210,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   public AbstractServo(String n, String id) {
     super(n, id);
-    // this servo is interested in new services which support either
-    // ServoControllers or EncoderControl interfaces
-    // we subscribe to runtime here for new services
-    subscribeToRuntime("registered");
-    /*
-     * // new feature - // extracting the currentPos from serialized servo
-     * Double lastCurrentPos = null; try { lastCurrentPos = (Double)
-     * loadField("currentPos"); } catch (IOException e) {
-     * log.info("current pos cannot be found in saved file"); }
-     */
+
+    registerForInterfaceChange(ServoController.class);
+    
     // if no position could be loaded - set to rest
     // we have no "historical" info - assume we are @ rest
     targetPos = rest;
@@ -239,13 +232,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
       }
     }
     currentOutputPos = mapper.calcOutput(targetPos);
-  }
-
-  /**
-   * if a new service is added to the system refresh the controllers
-   */
-  public void onStarted(String name) {
-    invoke("refreshControllers");
   }
 
   /**
@@ -624,11 +610,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     }
   }
 
-  public void onRegistered(Registration s) {
-    refreshControllers();
-    broadcastState();
-  }
-
   /**
    * Servo has the ability to act as an encoder if it is using TimeEncoder.
    * TimeEncoder will use Servo to publish a series of encoder events with
@@ -687,9 +668,14 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     return sc;
   }
 
+  @Deprecated /* use registerForInterfaceChange and onServoController*/
   public List<String> refreshControllers() {
     List<String> cs = Runtime.getServiceNamesFromInterface(ServoController.class);
     return cs;
+  }
+  
+  public Set<String> onServoController(Set<String> controllers) {
+    return controllers;
   }
 
   /**

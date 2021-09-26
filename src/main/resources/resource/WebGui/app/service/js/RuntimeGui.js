@@ -194,7 +194,8 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
                             // console.info(requestor, interfaze, possibleService)
                             // get panel/controller - onMessage ?
                             let panel = mrl.getPanel(requestor)
-                            let msg = mrl.createMessage(requestor, 'onAttachMatrix', [interfaze])
+                            const method = 'on' + inter.substring(inter.lastIndexOf('.') + 1)
+                            let msg = mrl.createMessage(requestor, method, [interfaze[inter]])
                             try {
                                 // WTF - this callback was always available ?
                                 if (panel){

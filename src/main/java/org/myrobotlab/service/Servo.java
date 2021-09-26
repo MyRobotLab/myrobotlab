@@ -66,7 +66,6 @@ public class Servo extends AbstractServo implements ServoControl {
 
   public Servo(String n, String id) {
     super(n, id);
-    registerForInterfaceChange(ServoController.class);
   }
 
   /**
@@ -263,7 +262,7 @@ public class Servo extends AbstractServo implements ServoControl {
 
     return c;
   }
-
+  
   public static void main(String[] args) throws InterruptedException {
     try {
 

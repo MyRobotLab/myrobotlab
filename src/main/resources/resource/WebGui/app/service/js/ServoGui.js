@@ -297,10 +297,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             $scope.$apply()
             break
 
-        case 'onAttachMatrix':
-            if (data['org.myrobotlab.service.interfaces.ServoController']){
-             $scope.possibleControllers = data['org.myrobotlab.service.interfaces.ServoController']   
-            }            
+        case 'onServoController':
+            $scope.possibleControllers = data
             $scope.$apply()
             break
 

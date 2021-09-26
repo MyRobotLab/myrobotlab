@@ -20,14 +20,14 @@ angular.module('mrlapp.service.MouthControlGui', []).controller('MouthControlGui
             _self.updateState(data)
             $scope.$apply()
             break
+            
+        case 'onServoControl':
+            $scope.servos = data
+            $scope.$apply()
+            break
 
-        case 'onAttachMatrix':
-            if (data['org.myrobotlab.service.interfaces.ServoControl']) {
-                $scope.servos = data['org.myrobotlab.service.interfaces.ServoControl']
-            }
-            if (data['org.myrobotlab.service.interfaces.SpeechSynthesis']) {
-                $scope.speechServices = data['org.myrobotlab.service.interfaces.SpeechSynthesis']
-            }
+        case 'onSpeechSynthesis':
+            $scope.speechServices = data
             $scope.$apply()
             break
 

@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -93,6 +94,8 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     motorPorts.add("m2");
     // default mapping for this motor controller
     map(-1.0, 1.0, -127, 127);
+    
+    registerForInterfaceChange(MotorControl.class);    
   }
 
   public void connect(String port) throws Exception {
@@ -317,6 +320,10 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       }
     }
     return c;
+  }
+  
+  public Set<String> onMotorControl(Set<String> motors){
+    return motors;
   }
 
   public static void main(String[] args) {
