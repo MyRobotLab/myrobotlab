@@ -29,8 +29,8 @@ public class ClassUtilTest extends AbstractTest {
     log.warn("Motor class has {} interfaces", interfaces.size());
     log.warn(interfaces.toString());
     
-    assertTrue(ClassUtil.getInterfaces(Motor.class).contains(AnalogListener.class.toString()));
-    assertTrue(ClassUtil.getInterfaces(Motor.class).contains(ServiceInterface.class.toString()));
+    assertTrue(ClassUtil.getInterfaces(Motor.class).contains(AnalogListener.class.getCanonicalName()));
+    assertTrue(ClassUtil.getInterfaces(Motor.class).contains(ServiceInterface.class.getCanonicalName()));
 
   }
 
