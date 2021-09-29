@@ -137,11 +137,12 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public boolean setSay() {
     removeExt(false);
     setTtsHack(false);
-    setTtsCommand("say \"{text}\"" + "-o {filename}");
+    setTtsCommand("/usr/bin/say \"{text}\"" + " -o {filename}");
+    /*
     if (!Runtime.getPlatform().isMac()) {
       error("say only supported on Mac");
       return false;
-    }
+    }*/
     return true;
   }
 
@@ -369,6 +370,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
       Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
       // LoggingFactory.init("WARN");
+      
+      LocalSpeech mouth = (LocalSpeech) Runtime.start("mouth", "LocalSpeech");
+      mouth.setSay();
+      mouth.speakBlocking("test 1 2 3");
 
       String program = "Add-Type -AssemblyName System.Speech";
       // String[] program = new
@@ -386,10 +391,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       webgui.autoStartBrowser(false);
       webgui.startService();
 
-      LocalSpeech mouth = (LocalSpeech) Runtime.start("mouth", "LocalSpeech");
-
+  
       // mouth.setMimic();
-      mouth.speakBlocking("hello there mimic works");
+      
 
       boolean done = true;
       if (done) {
