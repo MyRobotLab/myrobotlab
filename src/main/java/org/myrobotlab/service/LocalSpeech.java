@@ -138,11 +138,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     removeExt(false);
     setTtsHack(false);
     setTtsCommand("/usr/bin/say \"{text}\"" + " -o {filename}");
-    /*
     if (!Runtime.getPlatform().isMac()) {
       error("say only supported on Mac");
       return false;
-    }*/
+    }
     return true;
   }
 
@@ -239,9 +238,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
       log.info("powershell returned : {}", ret);
 
-    } else if (platform.isMac()) {
-      Runtime.execute(cmd);
-    } else if (platform.isLinux()) {
+    } else {
       Runtime.execute("bash", "-c", cmd);
     }
 
@@ -263,11 +260,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * because it appends 0.mp3 :P
    */
   public String getAudioCacheExtension() {
-    if (Platform.getLocalInstance().isMac()) {
-      return ".aiff";
-    } /*
-       * else if (ttsHack) { return "0.mp3"; // ya stoopid no ? }
-       */
     return ".wav"; // hopefully Linux festival can do this (if not can we ?)
   }
 
