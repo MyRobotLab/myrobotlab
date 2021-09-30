@@ -260,11 +260,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * because it appends 0.mp3 :P
    */
   public String getAudioCacheExtension() {
-    if (Platform.getLocalInstance().isMac()) {
-      return ".aiff";
-    } /*
-       * else if (ttsHack) { return "0.mp3"; // ya stoopid no ? }
-       */
     return ".wav"; // hopefully Linux festival can do this (if not can we ?)
   }
 
