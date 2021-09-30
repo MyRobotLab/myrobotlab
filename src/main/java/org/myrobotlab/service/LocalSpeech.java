@@ -138,11 +138,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     removeExt(false);
     setTtsHack(false);
     setTtsCommand("/usr/bin/say \"{text}\"" + " -o {filename}");
-    /*
     if (!Runtime.getPlatform().isMac()) {
       error("say only supported on Mac");
       return false;
-    }*/
+    }
     return true;
   }
 
