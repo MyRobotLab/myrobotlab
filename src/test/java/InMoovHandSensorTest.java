@@ -2,7 +2,7 @@
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.service.Arduino;
-import org.myrobotlab.service.InMoovHand;
+import org.myrobotlab.service.InMoov2Hand;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 
@@ -26,7 +26,7 @@ public class InMoovHandSensorTest {
     Runtime.start("gui", "SwingGui");
     Runtime.start("python", "Python");
     Arduino ard = (Arduino) Runtime.start("ard", "Arduino");
-    InMoovHand leftHand = (InMoovHand) Runtime.start("i01.leftHand", "InMoovHand");
+    InMoov2Hand leftHand = (InMoov2Hand) Runtime.start("i01.leftHand", "InMoov2Hand");
 
     String port = "COM3";
     // ard.setBoard("mega");

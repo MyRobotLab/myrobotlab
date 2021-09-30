@@ -143,11 +143,8 @@ public class InMoovEyelids extends Service {
 
   public boolean enable() {
 
-    sleep(InMoov.attachPauseMs);
     eyelidleft.enable();
-    sleep(InMoov.attachPauseMs);
     eyelidright.enable();
-    sleep(InMoov.attachPauseMs);
     return true;
   }
 
@@ -162,11 +159,9 @@ public class InMoovEyelids extends Service {
   public void disable() {
     if (eyelidleft != null) {
       eyelidleft.disable();
-      sleep(InMoov.attachPauseMs);
     }
     if (eyelidright != null) {
       eyelidright.disable();
-      sleep(InMoov.attachPauseMs);
     }
 
   }

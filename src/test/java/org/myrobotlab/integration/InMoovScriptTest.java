@@ -9,7 +9,7 @@ import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.service.InMoov;
+import org.myrobotlab.service.InMoov2;
 import org.myrobotlab.service.Python;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.test.AbstractTest;
@@ -83,7 +83,7 @@ public class InMoovScriptTest extends AbstractTest {
       log.warn("############### script ends ###############");
       python.exec(content);
 
-      InMoov i01 = (InMoov) Runtime.getService("i01");
+      InMoov2 i01 = (InMoov2) Runtime.getService("i01");
 
       // Assert something
       assertNotNull(i01);

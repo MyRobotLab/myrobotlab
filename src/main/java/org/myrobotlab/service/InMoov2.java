@@ -497,7 +497,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public void displayFullScreen(String src) {
     try {
       if (imageDisplay == null) {
-        imageDisplay = (ImageDisplay)startPeer("imageDisplay");
+        imageDisplay = (ImageDisplay) startPeer("imageDisplay");
       }
       imageDisplay.displayFullScreen(src);
       log.error("implement webgui.displayFullScreen");
@@ -1398,6 +1398,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return opencv;
   }
 
+  public OpenCV getOpenCV() {
+    return opencv;
+  }
+
+  public void setOpenCV(OpenCV opencv) {
+    this.opencv = opencv;
+  }
+
   public Tracking startEyesTracking() throws Exception {
     if (head == null) {
       startHead();
@@ -2201,6 +2209,30 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   @Override
   public void attachTextListener(String name) {
     addListener("publishText", name);
+  }
+
+  public Tracking getEyesTracking() {
+    return eyesTracking;
+  }
+
+  public Tracking getHeadTracking() {
+    return headTracking;
+  }
+
+  public void startBrain() {
+    startChatBot();
+  }
+
+  public void startMouthControl() {
+    speakBlocking(get("STARTINGMOUTHCONTROL"));
+    mouthControl = (MouthControl) startPeer("mouthControl");
+    mouthControl.attach(head.jaw);
+    mouthControl.attach((Attachable) getPeer("mouth"));
+  }
+
+  @Deprecated /* wrong function name should be startPir */
+  public void startPIR(String port, int pin) {
+    startPir(port, pin);
   }
 
 }

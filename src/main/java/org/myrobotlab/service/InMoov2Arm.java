@@ -158,13 +158,9 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
   }
 
   public void enable() {
-    sleep(InMoov.attachPauseMs);
     bicep.enable();
-    sleep(InMoov.attachPauseMs);
     rotate.enable();
-    sleep(InMoov.attachPauseMs);
     shoulder.enable();
-    sleep(InMoov.attachPauseMs);
     omoplate.enable();
   }
 
