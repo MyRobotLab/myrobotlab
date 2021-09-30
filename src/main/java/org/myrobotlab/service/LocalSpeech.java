@@ -239,9 +239,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
       log.info("powershell returned : {}", ret);
 
-    } else if (platform.isMac()) {
-      Runtime.execute(cmd);
-    } else if (platform.isLinux()) {
+    } else {
       Runtime.execute("bash", "-c", cmd);
     }
 
