@@ -1231,7 +1231,7 @@ public class OpenCV extends AbstractComputerVision {
       if (filter.isEnabled()) {
         IplImage input = filter.setData(data);
         if (input == null) {
-          log.error("could not get setData image");
+          // log.error("could not get setData image");
           continue;
         }
 

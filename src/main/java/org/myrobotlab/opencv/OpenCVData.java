@@ -172,9 +172,10 @@ public class OpenCVData extends CvData {
     sources.put(String.format("%s.input.Frame", name), frame);
     sources.put(String.format("%s.output.Frame", name), frame);
 
+    // TODO: should this be removed?
     IplImage firstImage = OpenCV.toImage(frame);
     if (firstImage == null) {
-      log.error("could not convert frame to image !!!!");
+      log.debug("could not convert frame to image !!!!");
     }
     sources.put(String.format("%s.input.IplImage", name), firstImage);
     sources.put(String.format("%s.output.IplImage", name), firstImage);
