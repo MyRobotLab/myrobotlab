@@ -114,31 +114,47 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
   @Override
   public void broadcastState() {
     super.broadcastState();
-    bicep.broadcastState();
-    rotate.broadcastState();
-    shoulder.broadcastState();
-    omoplate.broadcastState();
+    if (bicep != null)
+      bicep.broadcastState();
+    if (rotate != null)
+      rotate.broadcastState();
+    if (shoulder != null)
+      shoulder.broadcastState();
+    if (omoplate != null)
+      omoplate.broadcastState();
   }
 
   public void disable() {
-    bicep.disable();
-    rotate.disable();
-    shoulder.disable();
-    omoplate.disable();
+    if (bicep != null)
+      bicep.disable();
+    if (rotate != null)
+      rotate.disable();
+    if (shoulder != null)
+      shoulder.disable();
+    if (omoplate != null)
+      omoplate.disable();
   }
 
   public void enable() {
-    bicep.enable();
-    rotate.enable();
-    shoulder.enable();
-    omoplate.enable();
+    if (bicep != null)
+      bicep.enable();
+    if (rotate != null)
+      rotate.enable();
+    if (shoulder != null)
+      shoulder.enable();
+    if (omoplate != null)
+      omoplate.enable();
   }
 
   public void fullSpeed() {
-    bicep.fullSpeed();
-    rotate.fullSpeed();
-    shoulder.fullSpeed();
-    omoplate.fullSpeed();
+    if (bicep != null)
+      bicep.fullSpeed();
+    if (rotate != null)
+      rotate.fullSpeed();
+    if (shoulder != null)
+      shoulder.fullSpeed();
+    if (omoplate != null)
+      omoplate.fullSpeed();
   }
 
   public ServoControl getBicep() {
@@ -173,10 +189,14 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
   }
 
   public void moveTo(Double bicepPos, Double rotatePos, Double shoulderPos, Double omoplatePos) {
-      log.debug("{} moveTo {} {} {} {}", getName(), bicepPos, rotatePos, shoulderPos, omoplatePos);
+    log.debug("{} moveTo {} {} {} {}", getName(), bicepPos, rotatePos, shoulderPos, omoplatePos);
+    if (bicep != null)
       bicep.moveTo(bicepPos);
+    if (rotate != null)
       rotate.moveTo(rotatePos);
+    if (shoulder != null)
       shoulder.moveTo(shoulderPos);
+    if (omoplate != null)
       omoplate.moveTo(omoplatePos);
   }
 
@@ -263,19 +283,27 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
   }
 
   public void rest() {
-    bicep.rest();
-    rotate.rest();
-    shoulder.rest();
-    omoplate.rest();
+    if (bicep != null)
+      bicep.rest();
+    if (rotate != null)
+      rotate.rest();
+    if (shoulder != null)
+      shoulder.rest();
+    if (omoplate != null)
+      omoplate.rest();
   }
 
   @Override
   public boolean save() {
     super.save();
-    bicep.save();
-    rotate.save();
-    shoulder.save();
-    omoplate.save();
+    if (bicep != null)
+      bicep.save();
+    if (rotate != null)
+      rotate.save();
+    if (shoulder != null)
+      shoulder.save();
+    if (omoplate != null)
+      omoplate.save();
     return true;
   }
 
@@ -307,10 +335,14 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
   }
 
   public void setAutoDisable(Boolean idleTimeoutMs) {
-    bicep.setAutoDisable(idleTimeoutMs);
-    rotate.setAutoDisable(idleTimeoutMs);
-    shoulder.setAutoDisable(idleTimeoutMs);
-    omoplate.setAutoDisable(idleTimeoutMs);
+    if (bicep != null)
+      bicep.setAutoDisable(idleTimeoutMs);
+    if (rotate != null)
+      rotate.setAutoDisable(idleTimeoutMs);
+    if (shoulder != null)
+      shoulder.setAutoDisable(idleTimeoutMs);
+    if (omoplate != null)
+      omoplate.setAutoDisable(idleTimeoutMs);
   }
 
   public void setBicep(ServoControl bicep) {
@@ -340,10 +372,14 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
    * 
    */
   public void setLimits(double bicepMin, double bicepMax, double rotateMin, double rotateMax, double shoulderMin, double shoulderMax, double omoplateMin, double omoplateMax) {
-    bicep.setMinMaxOutput(bicepMin, bicepMax);
-    rotate.setMinMaxOutput(rotateMin, rotateMax);
-    shoulder.setMinMaxOutput(shoulderMin, shoulderMax);
-    omoplate.setMinMaxOutput(omoplateMin, omoplateMax);
+    if (bicep != null)
+      bicep.setMinMaxOutput(bicepMin, bicepMax);
+    if (rotate != null)
+      rotate.setMinMaxOutput(rotateMin, rotateMax);
+    if (shoulder != null)
+      shoulder.setMinMaxOutput(shoulderMin, shoulderMax);
+    if (omoplate != null)
+      omoplate.setMinMaxOutput(omoplateMin, omoplateMax);
   }
 
   public void setOmoplate(ServoControl omoplate) {
@@ -358,11 +394,15 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     this.shoulder = shoulder;
   }
 
-  public void setSpeed(Double bicep, Double rotate, Double shoulder, Double omoplate) {
-    this.bicep.setSpeed(bicep);
-    this.rotate.setSpeed(rotate);
-    this.shoulder.setSpeed(shoulder);
-    this.omoplate.setSpeed(omoplate);
+  public void setSpeed(Double bicepSpeed, Double rotateSpeed, Double shoulderSpeed, Double omoplateSpeed) {
+    if (bicep != null)
+      bicep.setSpeed(bicepSpeed);
+    if (rotate != null)
+      rotate.setSpeed(rotateSpeed);
+    if (shoulder != null)
+      shoulder.setSpeed(shoulderSpeed);
+    if (omoplate != null)
+      omoplate.setSpeed(omoplateSpeed);
   }
 
   @Deprecated
@@ -371,10 +411,14 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
   }
 
   public void stop() {
-    bicep.stop();
-    rotate.stop();
-    shoulder.stop();
-    omoplate.stop();
+    if (bicep != null)
+      bicep.stop();
+    if (rotate != null)
+      rotate.stop();
+    if (shoulder != null)
+      shoulder.stop();
+    if (omoplate != null)
+      omoplate.stop();
   }
 
   public void test() {
@@ -383,18 +427,26 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
      * connect(baseAddress, address) with overloaded connect("0x48- if
      * (!arduino.isConnected()) { error("arduino not connected"); }
      */
-    bicep.moveTo(bicep.getCurrentInputPos() + 2);
-    rotate.moveTo(rotate.getCurrentInputPos() + 2);
-    shoulder.moveTo(shoulder.getCurrentInputPos() + 2);
-    omoplate.moveTo(omoplate.getCurrentInputPos() + 2);
+    if (bicep != null)
+      bicep.moveTo(bicep.getCurrentInputPos() + 2);
+    if (rotate != null)
+      rotate.moveTo(rotate.getCurrentInputPos() + 2);
+    if (shoulder != null)
+      shoulder.moveTo(shoulder.getCurrentInputPos() + 2);
+    if (omoplate != null)
+      omoplate.moveTo(omoplate.getCurrentInputPos() + 2);
     sleep(300);
   }
 
   public void waitTargetPos() {
-    bicep.waitTargetPos();
-    rotate.waitTargetPos();
-    shoulder.waitTargetPos();
-    omoplate.waitTargetPos();
+    if (bicep != null)
+      bicep.waitTargetPos();
+    if (rotate != null)
+      rotate.waitTargetPos();
+    if (shoulder != null)
+      shoulder.waitTargetPos();
+    if (omoplate != null)
+      omoplate.waitTargetPos();
   }
 
 }

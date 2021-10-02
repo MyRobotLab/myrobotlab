@@ -47,28 +47,40 @@ public class InMoov2Torso extends Service {
   }
 
   public void enable() {
-    topStom.enable();
-    midStom.enable();
-    lowStom.enable();
+    if (topStom != null)
+      topStom.enable();
+    if (midStom != null)
+      midStom.enable();
+    if (lowStom != null)
+      lowStom.enable();
   }
 
   public void setAutoDisable(Boolean param) {
-    topStom.setAutoDisable(param);
-    midStom.setAutoDisable(param);
-    lowStom.setAutoDisable(param);
+    if (topStom != null)
+      topStom.setAutoDisable(param);
+    if (midStom != null)
+      midStom.setAutoDisable(param);
+    if (lowStom != null)
+      lowStom.setAutoDisable(param);
   }
 
   @Override
   public void broadcastState() {
-    topStom.broadcastState();
-    midStom.broadcastState();
-    lowStom.broadcastState();
+    if (topStom != null)
+      topStom.broadcastState();
+    if (midStom != null)
+      midStom.broadcastState();
+    if (lowStom != null)
+      lowStom.broadcastState();
   }
 
   public void disable() {
-    topStom.disable();
-    midStom.disable();
-    lowStom.disable();
+    if (topStom != null)
+      topStom.disable();
+    if (midStom != null)
+      midStom.disable();
+    if (lowStom != null)
+      lowStom.disable();
   }
 
   public long getLastActivityTime() {
@@ -106,23 +118,32 @@ public class InMoov2Torso extends Service {
   }
 
   public void waitTargetPos() {
+    if (topStom != null)
       topStom.waitTargetPos();
+    if (midStom != null)
       midStom.waitTargetPos();
+    if (lowStom != null)
       lowStom.waitTargetPos();
   }
 
   public void rest() {
+    if (topStom != null)
       topStom.rest();
+    if (midStom != null)
       midStom.rest();
+    if (lowStom != null)
       lowStom.rest();
   }
 
   @Override
   public boolean save() {
     super.save();
-    topStom.save();
-    midStom.save();
-    lowStom.save();
+    if (topStom != null)
+      topStom.save();
+    if (midStom != null)
+      midStom.save();
+    if (lowStom != null)
+      lowStom.save();
     return true;
   }
 
@@ -172,9 +193,12 @@ public class InMoov2Torso extends Service {
    * 
    */
   public void setLimits(double topStomMin, double topStomMax, double midStomMin, double midStomMax, double lowStomMin, double lowStomMax) {
-    topStom.setMinMaxOutput(topStomMin, topStomMax);
-    midStom.setMinMaxOutput(midStomMin, midStomMax);
-    lowStom.setMinMaxOutput(lowStomMin, lowStomMax);
+    if (topStom != null)
+      topStom.setMinMaxOutput(topStomMin, topStomMax);
+    if (midStom != null)
+      midStom.setMinMaxOutput(midStomMin, midStomMax);
+    if (lowStom != null)
+      lowStom.setMinMaxOutput(lowStomMin, lowStomMax);
   }
 
   // ------------- added set pins
@@ -194,27 +218,36 @@ public class InMoov2Torso extends Service {
      */
   }
 
-  public void setSpeed(Double topStom, Double midStom, Double lowStom) {
+  public void setSpeed(Double topStomSpeed, Double midStomSpeed, Double lowStomSpeed) {
     log.warn("setspeed deprecated please use setvelocity");
-    this.topStom.setSpeed(topStom);
-    this.midStom.setSpeed(midStom);
-    this.lowStom.setSpeed(lowStom);
+    if (topStom != null)
+      topStom.setSpeed(topStomSpeed);
+    if (midStom != null)
+      midStom.setSpeed(midStomSpeed);
+    if (lowStom != null)
+      lowStom.setSpeed(lowStomSpeed);
   }
 
   public void test() {
 
-    topStom.moveTo(topStom.getCurrentInputPos() + 2);
-    midStom.moveTo(midStom.getCurrentInputPos() + 2);
-    lowStom.moveTo(lowStom.getCurrentInputPos() + 2);
+    if (topStom != null)
+      topStom.moveTo(topStom.getCurrentInputPos() + 2);
+    if (midStom != null)
+      midStom.moveTo(midStom.getCurrentInputPos() + 2);
+    if (lowStom != null)
+      lowStom.moveTo(lowStom.getCurrentInputPos() + 2);
 
     moveTo(35.0, 45.0, 55.0);
   }
 
   @Deprecated /* use setSpeed */
-  public void setVelocity(Double topStom, Double midStom, Double lowStom) {
-    this.topStom.setSpeed(topStom);
-    this.midStom.setSpeed(midStom);
-    this.lowStom.setSpeed(lowStom);
+  public void setVelocity(Double topStomSpeed, Double midStomSpeed, Double lowStomSpeed) {
+    if (topStom != null)
+      topStom.setSpeed(topStomSpeed);
+    if (midStom != null)
+      midStom.setSpeed(midStomSpeed);
+    if (lowStom != null)
+      lowStom.setSpeed(lowStomSpeed);
   }
 
   static public void main(String[] args) {
@@ -232,15 +265,21 @@ public class InMoov2Torso extends Service {
   }
 
   public void fullSpeed() {
-    topStom.fullSpeed();
-    midStom.fullSpeed();
-    lowStom.fullSpeed();
+    if (topStom != null)
+      topStom.fullSpeed();
+    if (midStom != null)
+      midStom.fullSpeed();
+    if (lowStom != null)
+      lowStom.fullSpeed();
   }
 
   public void stop() {
-    topStom.stop();
-    midStom.stop();
-    lowStom.stop();
+    if (topStom != null)
+      topStom.stop();
+    if (midStom != null)
+      midStom.stop();
+    if (lowStom != null)
+      lowStom.stop();
   }
 
 }
