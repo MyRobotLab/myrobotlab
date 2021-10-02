@@ -1345,6 +1345,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     } else if (locale != null && !locale.equals(Runtime.getInstance().getLocale())) {
       config.locale = getLocaleTag();
     }
+    /**
+     * <pre> GroG 20211001 - I don't think this is ready, config should dictate what is to be attached
+     
     Set<String> attached = getAttached();
     // get locals
     for (String n : attached) {
@@ -1355,7 +1358,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         config.attach.add(n);
       }
     }
-
+  */
     return config;
   }
 

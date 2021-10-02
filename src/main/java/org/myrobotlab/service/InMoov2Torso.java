@@ -29,36 +29,11 @@ public class InMoov2Torso extends Service {
 
   public InMoov2Torso(String n, String id) {
     super(n, id);
-    // TODO: just call startPeers here.
-    // // createReserves(n); // Ok this might work but IT CANNOT BE IN SERVICE
-    // // FRAMEWORK !!!!!
-    // topStom = (ServoControl) createPeer("topStom");
-    // midStom = (ServoControl) createPeer("midStom");
-    // lowStom = (ServoControl) createPeer("lowStom");
-    // // controller = (ServoController) createPeer("arduino");
-
-    // FIXME - createPeers ?
   }
 
   public void startService() {
     super.startService();
     startPeers();
-    topStom.setPin(27);
-    midStom.setPin(28);
-    lowStom.setPin(29);
-
-    topStom.map(60.0, 120.0, 60.0, 120.0);
-    midStom.map(0.0, 180.0, 0.0, 180.0);
-    lowStom.map(0.0, 180.0, 0.0, 180.0);
-    topStom.setRest(90.0);
-    topStom.setPosition(90.0);
-    midStom.setRest(90.0);
-    midStom.setPosition(90.0);
-    lowStom.setRest(90.0);
-    lowStom.setPosition(90.0);
-
-    setVelocity(5.0, 5.0, 5.0);
-
   }
 
   public void releaseService() {
@@ -85,12 +60,9 @@ public class InMoov2Torso extends Service {
 
   @Override
   public void broadcastState() {
-    if (topStom != null)
-      topStom.broadcastState();
-    if (midStom != null)
-      midStom.broadcastState();
-    if (lowStom != null)
-      lowStom.broadcastState();
+    topStom.broadcastState();
+    midStom.broadcastState();
+    lowStom.broadcastState();
   }
 
   public void disable() {
@@ -115,9 +87,15 @@ public class InMoov2Torso extends Service {
     if (log.isDebugEnabled()) {
       log.debug("{} moveTo {} {} {}", getName(), topStomPos, midStomPos, lowStomPos);
     }
-    if (topStom != null && topStomPos != null) { this.topStom.moveTo(topStomPos); }
-    if (midStom != null && midStomPos != null) { this.midStom.moveTo(midStomPos); }
-    if (lowStom != null && lowStomPos != null) { this.lowStom.moveTo(lowStomPos); }
+    if (topStom != null && topStomPos != null) {
+      this.topStom.moveTo(topStomPos);
+    }
+    if (midStom != null && midStomPos != null) {
+      this.midStom.moveTo(midStomPos);
+    }
+    if (lowStom != null && lowStomPos != null) {
+      this.lowStom.moveTo(lowStomPos);
+    }
   }
 
   public void moveToBlocking(Double topStomPos, Double midStomPos, Double lowStomPos) {
@@ -128,15 +106,15 @@ public class InMoov2Torso extends Service {
   }
 
   public void waitTargetPos() {
-    if (topStom != null) { topStom.waitTargetPos(); }
-    if (midStom != null) { midStom.waitTargetPos(); }
-    if (lowStom != null) { lowStom.waitTargetPos(); }
+      topStom.waitTargetPos();
+      midStom.waitTargetPos();
+      lowStom.waitTargetPos();
   }
 
   public void rest() {
-    if (topStom != null) { topStom.rest(); }
-    if (midStom != null) { midStom.rest(); }
-    if (lowStom != null) { lowStom.rest(); }
+      topStom.rest();
+      midStom.rest();
+      lowStom.rest();
   }
 
   @Override

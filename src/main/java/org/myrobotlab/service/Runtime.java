@@ -3574,6 +3574,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         }
 
         sc = configs.get(name);
+        /** <pre>GroG:20211001- I don't think this can currently be done just reflecting off of subscriptions
+         A noble idea - but I think at this time configuration should dictate what is attached to what...
+         
         if (sc.attach != null) {
           for (String n : sc.attach) {
             try {
@@ -3590,8 +3593,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
             } catch (Exception e) {
               error(e);
             }
-          }
-        }
+          }          
+        } </pre>*/
       } // attach-life-cycle
 
     } // if registry

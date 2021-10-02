@@ -219,6 +219,10 @@ public class Servo extends AbstractServo implements ServoControl {
 
     ServoConfig config = (ServoConfig) initConfig(new ServoConfig());
 
+    if (getName().contains("rotate")){
+      log.info("here");
+    }
+    
     config.autoDisable = autoDisable;
     config.enabled = enabled;
 
