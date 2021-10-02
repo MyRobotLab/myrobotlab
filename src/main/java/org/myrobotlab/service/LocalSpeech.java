@@ -139,7 +139,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public boolean setSay() {
     removeExt(false);
     setTtsHack(false);
-    setTtsCommand("/usr/bin/say \"{text}\"" + " --data-format=LEF32@22050 -o {filename}");
+    setTtsCommand("/usr/bin/say -v {voice_name} --data-format=LEF32@22050 -o {filename} \"{text}\"");
     if (!Runtime.getPlatform().isMac()) {
       error("say only supported on Mac");
       return false;
@@ -221,6 +221,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
     if (getVoice() != null) {
       cmd = cmd.replace("{voice}", getVoice().getVoiceProvider().toString());
+      cmd = cmd.replace("{voice_name}", getVoice().getName());
     }
 
     if (platform.isWindows()) {
