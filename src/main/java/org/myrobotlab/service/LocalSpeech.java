@@ -137,7 +137,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public boolean setSay() {
     removeExt(false);
     setTtsHack(false);
-    setTtsCommand("/usr/bin/say \"{text}\"" + " -o {filename}");
+    setTtsCommand("/usr/bin/say \"{text}\"" + " --data-format=LEF32@22050 -o {filename}");
     if (!Runtime.getPlatform().isMac()) {
       error("say only supported on Mac");
       return false;
