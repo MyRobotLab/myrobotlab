@@ -70,7 +70,7 @@ htmlfilter.addTextListener(mouth)
 ######################################################################
 # Start up the inmoov and attach stuff.
 ######################################################################
-i01 = Runtime.createAndStart("i01", "InMoov")
+i01 = Runtime.createAndStart("i01", "InMoov2")
 i01.setMute(True)
 if startInMoov:
   i01.startAll(leftPort, rightPort)
