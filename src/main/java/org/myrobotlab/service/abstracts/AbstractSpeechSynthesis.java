@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -1098,7 +1099,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     }
     if (voice != null) {
       config.voice = voice.name;
-    }
+    }    
+    Set<String> listeners = getAttached("publishStartSpeaking");
+    config.speechRecognizers = listeners.toArray(new String[listeners.size()]);
+    
     return config;
   }
 
