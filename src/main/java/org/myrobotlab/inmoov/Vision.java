@@ -21,7 +21,16 @@ import org.slf4j.Logger;
 
 /**
  * InMoov extra methods for OpenCV service
+ * This class provided some helper methods/behaviors ontop of normal opencv.
+ * It made tracking yolo inventory a bit easier I guess?  
+ * It also had helpers for working with the pre filters in the video pipeline
+ * TODO: This functionality needs to be rationalized in the new InMoov2 implementation.
+ * It was used when starting to TrackHumans, TrackPoint,
+ * also it was used to automatically add the preFilters to the video pipeline.
+ * 
  */
+
+@Deprecated
 public class Vision {
   public Boolean openCVenabled;
   transient private boolean ready = false;
