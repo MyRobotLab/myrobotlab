@@ -22,7 +22,7 @@ vleft.connect(leftPort)
 vright.connect(rightPort)
 
 
-i01 = Runtime.createAndStart("i01","InMoov")
+i01 = Runtime.createAndStart("i01","InMoov2")
 
 i01.startAll(leftPort,rightPort)
 

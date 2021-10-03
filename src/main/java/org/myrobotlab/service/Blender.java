@@ -294,54 +294,6 @@ public class Blender extends Service {
       String vLeftPort = "vleft";
       String vRightPort = "vright";
 
-      // Step #0 pre-create MRL Arduino & Serial - an pre connect with tcp ip
-      // port
-      InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
-
-      // Serial i01_left_serial =
-      // (Serial)Runtime.createAndStart("i01.left.serial", "Serial");
-      // i01_left_serial.connectTCP(host, port); // is this better (more access)
-      // - or bury in blender.attach(?)
-
-      Arduino i01_left = (Arduino) Runtime.start("i01.left", "Arduino");
-      Arduino i01_right = (Arduino) Runtime.start("i01.right", "Arduino");
-
-      // Step #1 - setup virtual arduino --- NOT SURE - can be done outside
-      blender.attach(i01_left);
-      sleep(3);
-      blender.attach(i01_right);
-
-      // Step #2 - i01 connects
-      i01.startHead(vLeftPort);
-      // i01.startMouthControl(bogusLeftPort);
-      i01.startLeftArm(vLeftPort);
-      i01.startLeftHand(vLeftPort);
-
-      i01.startRightArm(vRightPort);
-      i01.startRightHand(vRightPort);
-
-      // left.biceps0
-      // i01.head.neck
-      /*
-       * Servo neck = (Servo) Runtime.start("jaw2", "Servo");
-       * 
-       * Service.sleep(4000); // Servo rothead = (Servo)
-       * Runtime.start("i01.head.rothead", // "Servo");
-       * 
-       * neck.attach(arduino01, 7); // rothead.attach(arduino01, 9);
-       * 
-       * // rothead.moveTo(90); neck.moveTo(90); sleep(100); //
-       * rothead.moveTo(120); neck.moveTo(120); sleep(100); //
-       * rothead.moveTo(0); neck.moveTo(0); sleep(100); // rothead.moveTo(90);
-       * neck.moveTo(90); sleep(100); // rothead.moveTo(120); neck.moveTo(120);
-       * sleep(100); // rothead.moveTo(0); neck.moveTo(0); sleep(100);
-       * 
-       * // servo01.sweep(); // servo01.stop(); neck.detach();
-       * 
-       * blender.getVersion(); // blender.toJson(); // blender.toJson();
-       */
-
-      // Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
       Logging.logError(e);
