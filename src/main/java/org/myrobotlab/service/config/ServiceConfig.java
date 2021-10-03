@@ -2,9 +2,9 @@ package org.myrobotlab.service.config;
 
 public class ServiceConfig {
 
-  public String name;
+  // public String name; not normalized
   public String type;
-  public String locale;
+  // public String locale; not desired
   // public boolean isVirtual = false; - "over configured !" just use Runtime's
   // virtual: config
 

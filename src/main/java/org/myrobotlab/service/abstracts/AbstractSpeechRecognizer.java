@@ -9,6 +9,9 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.config.AbstractSpeechRecognizerConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.WebkitSpeechRecognitionConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
@@ -47,11 +50,6 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   protected Map<String, Locale> locales = new HashMap<>();
 
   private static final long serialVersionUID = 1L;
-
-  /**
-   * all currently attached services
-   */
-  protected Set<String> attached = new TreeSet<>();
 
   protected HashMap<String, Message> commands = new HashMap<>();
 
@@ -155,9 +153,12 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   public void attach(Attachable attachable) {
     if (attachable instanceof SpeechSynthesis) {
       attachSpeechSynthesis((SpeechSynthesis) attachable);
-    } else {
-      error("do not know how to attach %s", attachable.getName());
+      return;
+    } else if (attachable instanceof TextListener) {
+      attachTextListener((TextListener) attachable);
+      return;
     }
+    error("do not know how to attach %s", attachable.getName());
   }
 
   /**
@@ -172,14 +173,9 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
       return;
     }
 
-    if (isAttached(mouth.getName())) {
-      log.info("{} already attached", mouth.getName());
-    }
     subscribe(mouth.getName(), "publishStartSpeaking");
     subscribe(mouth.getName(), "publishEndSpeaking");
 
-    // mouth.attachSpeechRecognizer(ear);
-    attached.add(mouth.getName());
   }
 
   public void attachTextListener(TextListener service) {
@@ -202,14 +198,6 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    */
   public String getWakeWord() {
     return wakeWord;
-  }
-
-  public boolean isAttached(Attachable attachable) {
-    return isAttached(attachable.getName());
-  }
-
-  public boolean isAttached(String attachable) {
-    return attached.contains(attachable);
   }
 
   /**
@@ -570,6 +558,31 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    */
   public void unsetWakeWord() {
     setWakeWord(null);
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    WebkitSpeechRecognitionConfig config = (WebkitSpeechRecognitionConfig) initConfig(new WebkitSpeechRecognitionConfig());
+    config.listening = isListening();
+    config.wakeWord = getWakeWord();
+    Set<String> listeners = getAttached("publishText");
+    config.textListeners = listeners.toArray(new String[listeners.size()]);
+    return config;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    WebkitSpeechRecognitionConfig config = (WebkitSpeechRecognitionConfig) c;
+    setWakeWord(config.wakeWord);
+    if (config.listening) {
+      startListening();
+    }
+
+    if (config.textListeners != null) {
+      for (String listener : config.textListeners) {
+        addListener("publishText", listener);
+      }
+    }
+    return c;
   }
 
 }

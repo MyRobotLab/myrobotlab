@@ -361,10 +361,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    */
   @Override
   public void attach(Attachable attachable) {
-    if (attachable instanceof TextPublisher) {
-      attachTextPublisher((TextPublisher) attachable);
-    } else if (attachable instanceof TextPublisher) {
+    if (attachable instanceof SpeechRecognizer) {
       attachSpeechRecognizer((SpeechRecognizer) attachable);
+    } else if (attachable instanceof TextPublisher) {
+      attachTextPublisher((TextPublisher) attachable);
     } else if (attachable instanceof AudioFile) {
       audioFile = (AudioFile) attachable;
     } else {
@@ -437,8 +437,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       log.warn("{}.attachSpeechRecognizer(null)", getName());
       return;
     }
-    addListener("publishStartSpeaking", recognizer.getName(), "onStartSpeaking");
-    addListener("publishEndSpeaking", recognizer.getName(), "onEndSpeaking");
+    addListener("publishStartSpeaking", recognizer.getName());
+    addListener("publishEndSpeaking", recognizer.getName());
   }
 
   /**
@@ -1117,6 +1117,16 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
     if (config.voice != null) {
       setVoice(config.voice);
+    }
+    
+    if (config.speechRecognizers != null) {
+      for (String name : config.speechRecognizers) {
+        try {
+          attach(name);
+        } catch(Exception e) {
+          error(e);
+        }
+      }
     }
 
     return c;

@@ -76,15 +76,32 @@ public class Outbox implements Runnable, Serializable {
   public Map<String, List<MRLListener>> notifyList = new HashMap<String, List<MRLListener>>();
 
   List<MessageListener> listeners = new ArrayList<MessageListener>();
+  
+  private boolean autoClean = true;
+
+  public boolean isAutoClean() {
+    return autoClean;
+  }
+
+  public void setAutoClean(boolean autoClean) {
+    this.autoClean = autoClean;
+  }
 
   public Outbox(NameProvider myService) {
     this.myService = myService;
   }
 
   public Set<String> getAttached(String publishingPoint) {
+    return getAttached(publishingPoint, true);
+  }
+
+  public Set<String> getAttached(String publishingPoint, boolean localOnly) {
     Set<String> unique = new TreeSet<>();
     for (List<MRLListener> subcribers : notifyList.values()) {
       for (MRLListener listener : subcribers) {
+        if (localOnly && listener.callbackName.contains("@")) {
+          continue;
+        }
         if (publishingPoint == null) {
           unique.add(listener.callbackName);
         } else if (listener.topicMethod.equals(publishingPoint)) {
@@ -274,13 +291,12 @@ public class Outbox implements Runnable, Serializable {
         // queue
         // ?
         ServiceInterface sw = Runtime.getService(msg.getName());
-        if (sw == null) {
+        if (sw == null && autoClean) {
           log.warn("could not find service {} to process {} from sender {} - tearing down route", msg.getName(), msg.method, msg.sender);
-          /*
-           * ServiceInterface sender = Runtime.getService(msg.sender); if
-           * (sender != null) { sender.removeListener(msg.sendingMethod,
-           * msg.getName(), msg.method); }
-           */ // removed by GroG 20210523
+          ServiceInterface sender = Runtime.getService(msg.sender);
+          if (sender != null) {
+            sender.removeListener(msg.sendingMethod, msg.getName(), msg.method);
+          }
           return;
         }
 

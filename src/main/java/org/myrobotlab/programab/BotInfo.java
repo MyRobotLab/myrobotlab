@@ -14,9 +14,8 @@ import org.myrobotlab.service.ProgramAB;
 import org.slf4j.Logger;
 
 /**
- * container for all the bot info
- * It serves as a wrapper for a bot to bundle some additional metadata and helper methods
- * for dealing with a bot.
+ * container for all the bot info It serves as a wrapper for a bot to bundle
+ * some additional metadata and helper methods for dealing with a bot.
  */
 public class BotInfo {
 
@@ -42,9 +41,9 @@ public class BotInfo {
     try {
       properties.load(new FileInputStream(FileIO.gluePaths(path.getAbsolutePath(), "manifest.txt")));
       log.info("loaded properties");
-    } catch(FileNotFoundException e) {
+    } catch (FileNotFoundException e) {
       programab.warn("bot %s does not have a manifest.txt", name);
-    } catch(Exception e){
+    } catch (Exception e) {
       log.error("BotInfo threw", e);
     }
   }
@@ -59,10 +58,14 @@ public class BotInfo {
     if (bot == null) {
       // lazy loading of bot - created on the first use
       if (properties.containsKey("locale")) {
-        bot = new Bot(name, path.getAbsolutePath(), java.util.Locale.forLanguageTag((String)properties.get("locale")));
+        bot = new Bot(name, path.getAbsolutePath(), java.util.Locale.forLanguageTag((String) properties.get("locale")));
         bot.listener = programab;
       } else {
-        bot = new Bot(name, path.getAbsolutePath(), java.util.Locale.forLanguageTag(programab.getLocaleTag()));
+        if (programab.getLocaleTag() == null) {
+          bot = new Bot(name, path.getAbsolutePath());
+        } else {
+          bot = new Bot(name, path.getAbsolutePath(), java.util.Locale.forLanguageTag(programab.getLocaleTag()));
+        }
         bot.listener = programab;
       }
 
@@ -100,7 +103,8 @@ public class BotInfo {
     saveProperties();
   }
 
-  // FIXME - botProperties should be sent to bot (and verified against aiml tags ?)
+  // FIXME - botProperties should be sent to bot (and verified against aiml tags
+  // ?)
   public void saveProperties() {
     Map<String, String> sorted = new TreeMap<>();
     sorted.putAll(botProperties);
@@ -113,7 +117,7 @@ public class BotInfo {
     } catch (Exception e) {
       programab.error(e);
     }
-    
+
   }
 
   public void removeProperty(String name2) {
@@ -124,5 +128,5 @@ public class BotInfo {
   public String toString() {
     return String.format("%s - %s", name, path);
   }
-  
+
 }

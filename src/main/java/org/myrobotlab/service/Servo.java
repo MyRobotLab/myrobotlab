@@ -218,10 +218,6 @@ public class Servo extends AbstractServo implements ServoControl {
   public ServiceConfig getConfig() {
 
     ServoConfig config = (ServoConfig) initConfig(new ServoConfig());
-
-    if (getName().contains("rotate")){
-      log.info("here");
-    }
     
     config.autoDisable = autoDisable;
     config.enabled = enabled;
@@ -243,6 +239,8 @@ public class Servo extends AbstractServo implements ServoControl {
     config.speed = speed;
     config.sweepMax = sweepMax;
     config.sweepMin = sweepMin;
+    
+    config.controller = this.controller;
 
     return config;
   }
@@ -261,6 +259,14 @@ public class Servo extends AbstractServo implements ServoControl {
     speed = config.speed;
     sweepMax = config.sweepMax;
     sweepMin = config.sweepMin;
+    
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch(Exception e) {
+        error(e);
+      }
+    }
 
     return c;
   }
