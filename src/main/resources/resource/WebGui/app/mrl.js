@@ -1503,7 +1503,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 "maxMemory": 3543
             },
             "jvmArgs": ["-agentlib:jdwp=transport=dt_socket,suspend=y,address=localhost:37551", "-javaagent:/lhome/grperry/Downloads/eclipse-jee-2019-06-R-linux-gtk-x86_64/eclipse/configuration/org.eclipse.osgi/405/0/.cp/lib/javaagent-shaded.jar", "-Dfile.encoding=UTF-8"],
-            "args": ["--interactive", "--id", "local", "-s", "python", "Python", "--invoke", "python", "execFile", "./InMoov/InMoov.py"],
+            "args": ["--interactive", "--id", "local", "-s", "python", "Python", "--invoke", "python", "execFile", "./InMoov2/InMoov2.py"],
             "locale": "en-us",
             "serviceType": {
                 "name": "org.myrobotlab.service.Runtime",
