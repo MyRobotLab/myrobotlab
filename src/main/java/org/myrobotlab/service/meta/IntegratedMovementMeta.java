@@ -25,7 +25,7 @@ public class IntegratedMovementMeta extends MetaData {
     addDescription("a 3D kinematics service supporting D-H parameters");
     addCategory("robot", "control");
     addPeer("openni", "OpenNi", "Kinect service");
-    addDependency("inmoov.fr", "inmoov", null, "zip");
+    addDependency("fr.inmoov", "inmoov2", null, "zip");
     addDependency("inmoov.fr", "jm3-model", "1.0.0", "zip");
     setAvailable(true);
 

@@ -23,6 +23,7 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Locale;
+import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.ServoControl;
@@ -33,7 +34,7 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class InMoov2 extends Service implements TextListener, TextPublisher, JoystickListener, LocaleProvider {
+public class InMoov2 extends Service implements TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
   public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
 
@@ -497,7 +498,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public void displayFullScreen(String src) {
     try {
       if (imageDisplay == null) {
-        imageDisplay = (ImageDisplay)startPeer("imageDisplay");
+        imageDisplay = (ImageDisplay) startPeer("imageDisplay");
       }
       imageDisplay.displayFullScreen(src);
       log.error("implement webgui.displayFullScreen");
@@ -1394,6 +1395,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return opencv;
   }
 
+  public OpenCV getOpenCV() {
+    return opencv;
+  }
+
+  public void setOpenCV(OpenCV opencv) {
+    this.opencv = opencv;
+  }
+
   public Tracking startEyesTracking() throws Exception {
     if (head == null) {
       startHead();
@@ -2198,5 +2207,154 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public void attachTextListener(String name) {
     addListener("publishText", name);
   }
+
+  public Tracking getEyesTracking() {
+    return eyesTracking;
+  }
+
+  public Tracking getHeadTracking() {
+    return headTracking;
+  }
+
+  public void startBrain() {
+    startChatBot();
+  }
+
+  public void startMouthControl() {
+    speakBlocking(get("STARTINGMOUTHCONTROL"));
+    mouthControl = (MouthControl) startPeer("mouthControl");
+    mouthControl.attach(head.jaw);
+    mouthControl.attach((Attachable) getPeer("mouth"));
+  }
+
+  @Deprecated /* wrong function name should be startPir */
+  public void startPIR(String port, int pin) {
+    startPir(port, pin);
+  }
+  
+  // -----------------------------------------------------------------------------
+  // These are methods added that were in InMoov1 that we no longer had in InMoov2.
+  // From original InMoov1 so we don't loose the 
+
+  @Override
+  public void onJointAngles(Map<String, Double> angleMap) {
+    log.info("onJointAngles {}", angleMap);
+    // here we can make decisions on what ik sets we want to use and
+    // what body parts are to move
+    for (String name : angleMap.keySet()) {
+      ServiceInterface si = Runtime.getService(name);
+      if (si != null && si instanceof ServoControl) {
+        ((Servo) si).moveTo(angleMap.get(name));
+      }
+    }
+  }
+  
+  //  public OpenNi startOpenNI() throws Exception {
+  //    if (openni == null) {
+  //      speakBlocking(languagePack.get("STARTINGOPENNI"));
+  //      openni = (OpenNi) startPeer("openni");
+  //      pid = (Pid) startPeer("pid");
+  //
+  //      pid.setPID("kinect", 10.0, 0.0, 1.0);
+  //      pid.setMode("kinect", Pid.MODE_AUTOMATIC);
+  //      pid.setOutputRange("kinect", -1, 1);
+  //
+  //      pid.setControllerDirection("kinect", 0);
+  //
+  //      // re-mapping of skeleton !
+  //      openni.skeleton.leftElbow.mapXY(0, 180, 180, 0);
+  //      openni.skeleton.rightElbow.mapXY(0, 180, 180, 0);
+  //      if (openNiLeftShoulderInverted) {
+  //        openni.skeleton.leftShoulder.mapYZ(0, 180, 180, 0);
+  //      }
+  //      if (openNiRightShoulderInverted) {
+  //        openni.skeleton.rightShoulder.mapYZ(0, 180, 180, 0);
+  //      }
+  //
+  //      // openni.skeleton.leftShoulder
+  //
+  //      // openni.addListener("publishOpenNIData", this.getName(),
+  //      // "getSkeleton");
+  //      // openni.addOpenNIData(this);
+  //      subscribe(openni.getName(), "publishOpenNIData");
+  //    }
+  //    return openni;
+  //  }
+  //  
+  //  public void onOpenNIData(OpenNiData data) {
+  //
+  //    if (data != null) {
+  //      Skeleton skeleton = data.skeleton;
+  //
+  //      if (firstSkeleton) {
+  //        firstSkeleton = false;
+  //      }
+  //
+  //      if (copyGesture) {
+  //
+  //        if (leftArm != null) {
+  //
+  //          if (!Double.isNaN(skeleton.leftElbow.getAngleXY())) {
+  //            if (skeleton.leftElbow.getAngleXY() >= 0) {
+  //              leftArm.bicep.moveTo((double) skeleton.leftElbow.getAngleXY());
+  //            }
+  //          }
+  //          if (!Double.isNaN(skeleton.leftShoulder.getAngleXY())) {
+  //            if (skeleton.leftShoulder.getAngleXY() >= 0) {
+  //              leftArm.omoplate.moveTo((double) skeleton.leftShoulder.getAngleXY());
+  //            }
+  //          }
+  //          if (!Double.isNaN(skeleton.leftShoulder.getAngleYZ())) {
+  //            if (skeleton.leftShoulder.getAngleYZ() + openNiShouldersOffset >= 0) {
+  //              leftArm.shoulder.moveTo((double) skeleton.leftShoulder.getAngleYZ() - 50);
+  //            }
+  //          }
+  //        }
+  //
+  //        if (rightArm != null) {
+  //
+  //          if (!Double.isNaN(skeleton.rightElbow.getAngleXY())) {
+  //            if (skeleton.rightElbow.getAngleXY() >= 0) {
+  //              rightArm.bicep.moveTo((double) skeleton.rightElbow.getAngleXY());
+  //            }
+  //          }
+  //          if (!Double.isNaN(skeleton.rightShoulder.getAngleXY())) {
+  //            if (skeleton.rightShoulder.getAngleXY() >= 0) {
+  //              rightArm.omoplate.moveTo((double) skeleton.rightShoulder.getAngleXY());
+  //            }
+  //          }
+  //          if (!Double.isNaN(skeleton.rightShoulder.getAngleYZ())) {
+  //            if (skeleton.rightShoulder.getAngleYZ() + openNiShouldersOffset >= 0) {
+  //              rightArm.shoulder.moveTo((double) skeleton.rightShoulder.getAngleYZ() - 50);
+  //            }
+  //          }
+  //        }
+  //
+  //      }
+  //    }
+  //
+  //    // TODO - route data appropriately
+  //    // rgb & depth image to OpenCV
+  //    // servos & depth image to gui (entire InMoov + references to servos)
+  //    
+  //    public boolean copyGesture(boolean b) throws Exception {
+  //      log.info("copyGesture {}", b);
+  //      if (b) {
+  //        if (openni == null) {
+  //          openni = startOpenNI();
+  //        }
+  //        openni.startUserTracking();
+  //      } else {
+  //        if (openni != null) {
+  //          openni.stopCapture();
+  //          firstSkeleton = true;
+  //        }
+  //      }
+  //
+  //      copyGesture = b;
+  //      return b;
+  //    }
+  //    
+  //  }
 
 }

@@ -45,14 +45,15 @@ public class ServiceLifeCycleTest extends AbstractTest {
 
     // push the meta data into the planStore - this will persist
     // overrides if the meta data definition has them
-    ServiceData.setMetaData("i01", "InMoov");
+    ServiceData.setMetaData("i01", "InMoov2");
 
     // pull it back out
-    MetaData data = ServiceData.getMetaData("i01", "InMoov");
+    MetaData data = ServiceData.getMetaData("i01", "InMoov2");
     log.info("static meta data {}", data);
-    assertEquals("i01.left", data.getPeer("head.arduino").actualName);
+    
+    assertEquals("i01.head", data.getPeer("head").actualName);
 
-    Plan plan = ServiceData.getPlan("i01", "InMoov");
+    Plan plan = ServiceData.getPlan("i01", "InMoov2");
     log.info("static plan {}", plan);
     assertNotNull(plan);
 
