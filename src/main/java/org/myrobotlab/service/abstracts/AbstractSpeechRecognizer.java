@@ -11,7 +11,6 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.AbstractSpeechRecognizerConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.WebkitSpeechRecognitionConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
@@ -562,7 +561,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   @Override
   public ServiceConfig getConfig() {
-    WebkitSpeechRecognitionConfig config = (WebkitSpeechRecognitionConfig) initConfig(new WebkitSpeechRecognitionConfig());
+    AbstractSpeechRecognizerConfig config = (AbstractSpeechRecognizerConfig) initConfig(new AbstractSpeechRecognizerConfig());
     config.listening = isListening();
     config.wakeWord = getWakeWord();
     Set<String> listeners = getAttached("publishText");
@@ -571,7 +570,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   public ServiceConfig load(ServiceConfig c) {
-    WebkitSpeechRecognitionConfig config = (WebkitSpeechRecognitionConfig) c;
+    AbstractSpeechRecognizerConfig config = (AbstractSpeechRecognizerConfig) c;
     setWakeWord(config.wakeWord);
     if (config.listening) {
       startListening();
