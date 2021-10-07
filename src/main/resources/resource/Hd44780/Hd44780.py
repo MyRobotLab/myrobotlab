@@ -23,10 +23,9 @@ pcf = Runtime.start("Pcf","Pcf8574")
 # When attaching, we specify the Bus Master Device,
 # the I2C Bus Number
 # and the I2C address
-# FIXME - avoid these attaches if possible - the pcf should be configured
-# first with bus and address - then just pcf.attach(raspi)
-# important for simple service lifecycles ... configuration first, attach next
-pcf.attach(raspi,"1","0x27")
+pcf.setBus("1")
+pcf.setAddress("0x27")
+pcf.attach(raspi)
  
 #pcf.attach(arduinoNano,"0","0x27")
  
