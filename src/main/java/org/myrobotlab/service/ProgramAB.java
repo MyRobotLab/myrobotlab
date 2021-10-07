@@ -1107,6 +1107,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     Set<String> listeners = getAttached("publishText"); 
     config.textListeners = listeners.toArray(new String[listeners.size()]);
     
+    // TODO: textPublishers?
+    
     return config;
   }
 
@@ -1132,6 +1134,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       }
     }
 
+    // TODO: attach to the text publishers... ?
+    
     return config;
   }
 
