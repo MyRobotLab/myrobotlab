@@ -1196,13 +1196,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       log.warn("setTorsoVelocity - I have no torso");
     }
   }
-
-  /**
-   * overridden setVirtual for InMoov sets "all" services to virtual
-   */
-  public boolean setVirtual(boolean virtual) {
-    super.setVirtual(virtual);
-    Platform.setVirtual(virtual);
+  
+  public boolean setAllVirtual(boolean virtual) {
+    Runtime.setAllVirtual(virtual);
     speakBlocking(get("STARTINGVIRTUALHARD"));
     return virtual;
   }

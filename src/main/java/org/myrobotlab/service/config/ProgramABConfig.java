@@ -4,5 +4,6 @@ public class ProgramABConfig extends ServiceConfig {
 
   public String currentBotName;
   public String currentUserName;
+  public String[] textListeners;
 
 }

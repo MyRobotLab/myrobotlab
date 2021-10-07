@@ -47,7 +47,7 @@ public class Locale {
 
   public Locale(String code) {
     if (code == null) {
-      return;
+      code = java.util.Locale.getDefault().toString();
     }
 
     // trim

@@ -3460,6 +3460,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     for (int i = 0; i < s.size(); ++i) {
       config.registry[i] = s.get(i).getName();
     }
+    
+    if (getLocale() != null) {
+      config.locale = getLocale().getTag();
+    }
 
     return config;
   }
@@ -3485,7 +3489,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public ServiceConfig load(ServiceConfig c) {
     super.load(c);
     RuntimeConfig config = (RuntimeConfig) c;
-    setLocale(c.locale);
+    setLocale(config.locale);
     setAllVirtual(config.virtual);
     // setId(config.id); Very Fragile ! Cannot do this yet
     if (config.registry != null) {
@@ -3519,8 +3523,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           }
           // start vs create ??? should we start with create go through all life
           // cycles ?
-          log.info("starting create life-cycle for name: {} type: ", sc.name, sc.type);
-          create(sc.name, sc.type);
+          log.info("starting create life-cycle for name: {} type: ", name, sc.type);
+          create(name, sc.type);
         } catch (Exception e) {
           error(e);
         }
@@ -3574,6 +3578,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         }
 
         sc = configs.get(name);
+        /** <pre>GroG:20211001- I don't think this can currently be done just reflecting off of subscriptions
+         A noble idea - but I think at this time configuration should dictate what is attached to what...
+         
         if (sc.attach != null) {
           for (String n : sc.attach) {
             try {
@@ -3590,8 +3597,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
             } catch (Exception e) {
               error(e);
             }
-          }
-        }
+          }          
+        } </pre>*/
       } // attach-life-cycle
 
     } // if registry

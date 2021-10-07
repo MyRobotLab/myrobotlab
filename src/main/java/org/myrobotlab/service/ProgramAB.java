@@ -939,7 +939,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   public void attach(Attachable attachable) {
     if (attachable instanceof TextPublisher) {
-      addTextPublisher((TextPublisher) attachable);
+      attachTextPublisher((TextPublisher) attachable);
     } else if (attachable instanceof TextListener) {
       addListener("publishText", attachable.getName(), "onText");
     } else {
@@ -988,7 +988,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   @Override
   public void attachTextPublisher(TextPublisher service) {
     if (service == null) {
-      log.warn("{}.attachTextPublisher(null)");
+      log.warn("{}.attachTextPublisher(null)", getName());
       return;
     }
     subscribe(service.getName(), "publishText");
@@ -1103,7 +1103,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
     config.currentBotName = currentBotName;
     config.currentUserName = currentUserName;
-
+    
+    Set<String> listeners = getAttached("publishText"); 
+    config.textListeners = listeners.toArray(new String[listeners.size()]);
+    
+    // TODO: textPublishers?
+    
     return config;
   }
 
@@ -1120,7 +1125,17 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     }
 
     setCurrentSession(currentUserName, currentBotName);
+    
+    // This is "good" in that its using the normalized data from subscription
+    // vs creating a bunch of cluttery local vars to hold state with error
+    if (config.textListeners != null) {
+      for (String local : config.textListeners) {
+        addListener("publishText", local);
+      }
+    }
 
+    // TODO: attach to the text publishers... ?
+    
     return config;
   }
 

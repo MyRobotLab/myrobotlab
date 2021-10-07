@@ -1322,7 +1322,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public ServiceConfig load(ServiceConfig config) {
     log.info("Default service config loading for service: {} type: {}", getName(), getType());
     // setVirtual(config.isVirtual); "overconfigured" - user Runtimes virtual
-    setLocale(config.locale);
+    // setLocale(config.locale);
     return config;
   }
 
@@ -1337,24 +1337,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   protected ServiceConfig initConfig(ServiceConfig config) {
-    config.name = getName();
     config.type = getSimpleName();
-    // config.isVirtual = isVirtual; // "overconfigured" - use Runtime's virtual
-    if (Runtime.isRuntime(this)) {
-      config.locale = getLocaleTag();
-    } else if (locale != null && !locale.equals(Runtime.getInstance().getLocale())) {
-      config.locale = getLocaleTag();
-    }
-    Set<String> attached = getAttached();
-    // get locals
-    for (String n : attached) {
-      if (CodecUtils.isLocal(n, getId())) {
-        if (config.attach == null) {
-          config.attach = new ArrayList<>();
-        }
-        config.attach.add(n);
-      }
-    }
 
     return config;
   }
@@ -1403,15 +1386,21 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     Class<?> clazz = (o == null) ? ServiceConfig.class : o.getClass();
     ServiceConfig config = null;
 
-    String data = FileIO.toString(filename);
-    if ("json".equalsIgnoreCase(format)) {
-      config = (ServiceConfig) CodecUtils.fromJson(data, clazz);
-    } else {
-      config = (ServiceConfig) CodecUtils.fromYaml(data, clazz);
-    }
+    try {
 
-    // be aware - the service may or may not be started
-    load(config);
+      String data = FileIO.toString(filename);
+      if ("json".equalsIgnoreCase(format)) {
+        config = (ServiceConfig) CodecUtils.fromJson(data, clazz);
+      } else {
+        config = (ServiceConfig) CodecUtils.fromYaml(data, clazz);
+      }
+
+      // be aware - the service may or may not be started
+      load(config);
+    } catch (Exception e) {
+      error("%s - %s ", filename, e.getMessage());
+      log.error("loading yml config threw", e);
+    }
 
     // previously used to attempt to process attaches here
     // attaches do not work well before starting - attaching
