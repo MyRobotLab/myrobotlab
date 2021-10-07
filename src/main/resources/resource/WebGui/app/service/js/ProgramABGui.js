@@ -235,7 +235,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
         try {
             return $scope.getBotInfo()['properties'][propName]
         } catch (error){
-            console.warning('getProperty(' + propName + ') not found')
+            console.warn('getProperty(' + propName + ') not found')
             return null
         }
     }

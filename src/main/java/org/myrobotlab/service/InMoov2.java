@@ -104,7 +104,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     try {
       // copy config if it doesn't already exist
       String resourceBotDir = FileIO.gluePaths(getResourceDir(), "config");
-
       List<File> files = FileIO.getFileList(resourceBotDir);
       for (File f : files) {
         String botDir = "data/config/" + f.getName();
@@ -120,6 +119,24 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
           }
         }
       }
+
+      // copy (if they don't already exist) the chatbots which came with InMoov2
+      resourceBotDir = FileIO.gluePaths(getResourceDir(), "chatbot/bots");
+      files = FileIO.getFileList(resourceBotDir);
+      for (File f : files) {
+        String botDir = "data/ProgramAB/" + f.getName();
+        if (new File(botDir).exists()) {
+          log.info("found data/ProgramAB/{} not copying", botDir);
+        } else {
+          log.info("will copy new data/ProgramAB/{}", botDir);
+          try {
+            FileIO.copy(f.getAbsolutePath(), botDir);
+          } catch (Exception e) {
+            error(e);
+          }
+        }
+      }
+
     } catch (Exception e) {
       error(e);
     }
@@ -1196,7 +1213,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       log.warn("setTorsoVelocity - I have no torso");
     }
   }
-  
+
   public boolean setAllVirtual(boolean virtual) {
     Runtime.setAllVirtual(virtual);
     speakBlocking(get("STARTINGVIRTUALHARD"));
@@ -1277,26 +1294,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public ProgramAB startChatBot() {
 
     try {
-
-      // copy (if they don't already exist) the chatbots which came with InMoov2
-      String resourceBotDir = FileIO.gluePaths(getResourceDir(), "chatbot/bots");
-
-      List<File> files = FileIO.getFileList(resourceBotDir);
-      for (File f : files) {
-        // copyResource(f.getAbsolutePath(), FileIO.gluePaths(getResourceDir(),
-        // f.getName()));
-        String botDir = "data/ProgramAB/" + f.getName();
-        if (new File(botDir).exists()) {
-          log.info("found data/ProgramAB/{} not copying", botDir);
-        } else {
-          log.info("will copy new data/ProgramAB/{}", botDir);
-          try {
-            FileIO.copy(f.getAbsolutePath(), botDir);
-          } catch (Exception e) {
-            error(e);
-          }
-        }
-      }
 
       chatBot = (ProgramAB) startPeer("chatBot");
       isChatBotActivated = true;
@@ -2231,10 +2228,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public void startPIR(String port, int pin) {
     startPir(port, pin);
   }
-  
+
   // -----------------------------------------------------------------------------
-  // These are methods added that were in InMoov1 that we no longer had in InMoov2.
-  // From original InMoov1 so we don't loose the 
+  // These are methods added that were in InMoov1 that we no longer had in
+  // InMoov2.
+  // From original InMoov1 so we don't loose the
 
   @Override
   public void onJointAngles(Map<String, Double> angleMap) {
@@ -2248,113 +2246,114 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       }
     }
   }
-  
-  //  public OpenNi startOpenNI() throws Exception {
-  //    if (openni == null) {
-  //      speakBlocking(languagePack.get("STARTINGOPENNI"));
-  //      openni = (OpenNi) startPeer("openni");
-  //      pid = (Pid) startPeer("pid");
+
+  // public OpenNi startOpenNI() throws Exception {
+  // if (openni == null) {
+  // speakBlocking(languagePack.get("STARTINGOPENNI"));
+  // openni = (OpenNi) startPeer("openni");
+  // pid = (Pid) startPeer("pid");
   //
-  //      pid.setPID("kinect", 10.0, 0.0, 1.0);
-  //      pid.setMode("kinect", Pid.MODE_AUTOMATIC);
-  //      pid.setOutputRange("kinect", -1, 1);
+  // pid.setPID("kinect", 10.0, 0.0, 1.0);
+  // pid.setMode("kinect", Pid.MODE_AUTOMATIC);
+  // pid.setOutputRange("kinect", -1, 1);
   //
-  //      pid.setControllerDirection("kinect", 0);
+  // pid.setControllerDirection("kinect", 0);
   //
-  //      // re-mapping of skeleton !
-  //      openni.skeleton.leftElbow.mapXY(0, 180, 180, 0);
-  //      openni.skeleton.rightElbow.mapXY(0, 180, 180, 0);
-  //      if (openNiLeftShoulderInverted) {
-  //        openni.skeleton.leftShoulder.mapYZ(0, 180, 180, 0);
-  //      }
-  //      if (openNiRightShoulderInverted) {
-  //        openni.skeleton.rightShoulder.mapYZ(0, 180, 180, 0);
-  //      }
+  // // re-mapping of skeleton !
+  // openni.skeleton.leftElbow.mapXY(0, 180, 180, 0);
+  // openni.skeleton.rightElbow.mapXY(0, 180, 180, 0);
+  // if (openNiLeftShoulderInverted) {
+  // openni.skeleton.leftShoulder.mapYZ(0, 180, 180, 0);
+  // }
+  // if (openNiRightShoulderInverted) {
+  // openni.skeleton.rightShoulder.mapYZ(0, 180, 180, 0);
+  // }
   //
-  //      // openni.skeleton.leftShoulder
+  // // openni.skeleton.leftShoulder
   //
-  //      // openni.addListener("publishOpenNIData", this.getName(),
-  //      // "getSkeleton");
-  //      // openni.addOpenNIData(this);
-  //      subscribe(openni.getName(), "publishOpenNIData");
-  //    }
-  //    return openni;
-  //  }
-  //  
-  //  public void onOpenNIData(OpenNiData data) {
+  // // openni.addListener("publishOpenNIData", this.getName(),
+  // // "getSkeleton");
+  // // openni.addOpenNIData(this);
+  // subscribe(openni.getName(), "publishOpenNIData");
+  // }
+  // return openni;
+  // }
   //
-  //    if (data != null) {
-  //      Skeleton skeleton = data.skeleton;
+  // public void onOpenNIData(OpenNiData data) {
   //
-  //      if (firstSkeleton) {
-  //        firstSkeleton = false;
-  //      }
+  // if (data != null) {
+  // Skeleton skeleton = data.skeleton;
   //
-  //      if (copyGesture) {
+  // if (firstSkeleton) {
+  // firstSkeleton = false;
+  // }
   //
-  //        if (leftArm != null) {
+  // if (copyGesture) {
   //
-  //          if (!Double.isNaN(skeleton.leftElbow.getAngleXY())) {
-  //            if (skeleton.leftElbow.getAngleXY() >= 0) {
-  //              leftArm.bicep.moveTo((double) skeleton.leftElbow.getAngleXY());
-  //            }
-  //          }
-  //          if (!Double.isNaN(skeleton.leftShoulder.getAngleXY())) {
-  //            if (skeleton.leftShoulder.getAngleXY() >= 0) {
-  //              leftArm.omoplate.moveTo((double) skeleton.leftShoulder.getAngleXY());
-  //            }
-  //          }
-  //          if (!Double.isNaN(skeleton.leftShoulder.getAngleYZ())) {
-  //            if (skeleton.leftShoulder.getAngleYZ() + openNiShouldersOffset >= 0) {
-  //              leftArm.shoulder.moveTo((double) skeleton.leftShoulder.getAngleYZ() - 50);
-  //            }
-  //          }
-  //        }
+  // if (leftArm != null) {
   //
-  //        if (rightArm != null) {
+  // if (!Double.isNaN(skeleton.leftElbow.getAngleXY())) {
+  // if (skeleton.leftElbow.getAngleXY() >= 0) {
+  // leftArm.bicep.moveTo((double) skeleton.leftElbow.getAngleXY());
+  // }
+  // }
+  // if (!Double.isNaN(skeleton.leftShoulder.getAngleXY())) {
+  // if (skeleton.leftShoulder.getAngleXY() >= 0) {
+  // leftArm.omoplate.moveTo((double) skeleton.leftShoulder.getAngleXY());
+  // }
+  // }
+  // if (!Double.isNaN(skeleton.leftShoulder.getAngleYZ())) {
+  // if (skeleton.leftShoulder.getAngleYZ() + openNiShouldersOffset >= 0) {
+  // leftArm.shoulder.moveTo((double) skeleton.leftShoulder.getAngleYZ() - 50);
+  // }
+  // }
+  // }
   //
-  //          if (!Double.isNaN(skeleton.rightElbow.getAngleXY())) {
-  //            if (skeleton.rightElbow.getAngleXY() >= 0) {
-  //              rightArm.bicep.moveTo((double) skeleton.rightElbow.getAngleXY());
-  //            }
-  //          }
-  //          if (!Double.isNaN(skeleton.rightShoulder.getAngleXY())) {
-  //            if (skeleton.rightShoulder.getAngleXY() >= 0) {
-  //              rightArm.omoplate.moveTo((double) skeleton.rightShoulder.getAngleXY());
-  //            }
-  //          }
-  //          if (!Double.isNaN(skeleton.rightShoulder.getAngleYZ())) {
-  //            if (skeleton.rightShoulder.getAngleYZ() + openNiShouldersOffset >= 0) {
-  //              rightArm.shoulder.moveTo((double) skeleton.rightShoulder.getAngleYZ() - 50);
-  //            }
-  //          }
-  //        }
+  // if (rightArm != null) {
   //
-  //      }
-  //    }
+  // if (!Double.isNaN(skeleton.rightElbow.getAngleXY())) {
+  // if (skeleton.rightElbow.getAngleXY() >= 0) {
+  // rightArm.bicep.moveTo((double) skeleton.rightElbow.getAngleXY());
+  // }
+  // }
+  // if (!Double.isNaN(skeleton.rightShoulder.getAngleXY())) {
+  // if (skeleton.rightShoulder.getAngleXY() >= 0) {
+  // rightArm.omoplate.moveTo((double) skeleton.rightShoulder.getAngleXY());
+  // }
+  // }
+  // if (!Double.isNaN(skeleton.rightShoulder.getAngleYZ())) {
+  // if (skeleton.rightShoulder.getAngleYZ() + openNiShouldersOffset >= 0) {
+  // rightArm.shoulder.moveTo((double) skeleton.rightShoulder.getAngleYZ() -
+  // 50);
+  // }
+  // }
+  // }
   //
-  //    // TODO - route data appropriately
-  //    // rgb & depth image to OpenCV
-  //    // servos & depth image to gui (entire InMoov + references to servos)
-  //    
-  //    public boolean copyGesture(boolean b) throws Exception {
-  //      log.info("copyGesture {}", b);
-  //      if (b) {
-  //        if (openni == null) {
-  //          openni = startOpenNI();
-  //        }
-  //        openni.startUserTracking();
-  //      } else {
-  //        if (openni != null) {
-  //          openni.stopCapture();
-  //          firstSkeleton = true;
-  //        }
-  //      }
+  // }
+  // }
   //
-  //      copyGesture = b;
-  //      return b;
-  //    }
-  //    
-  //  }
+  // // TODO - route data appropriately
+  // // rgb & depth image to OpenCV
+  // // servos & depth image to gui (entire InMoov + references to servos)
+  //
+  // public boolean copyGesture(boolean b) throws Exception {
+  // log.info("copyGesture {}", b);
+  // if (b) {
+  // if (openni == null) {
+  // openni = startOpenNI();
+  // }
+  // openni.startUserTracking();
+  // } else {
+  // if (openni != null) {
+  // openni.stopCapture();
+  // firstSkeleton = true;
+  // }
+  // }
+  //
+  // copyGesture = b;
+  // return b;
+  // }
+  //
+  // }
 
 }
