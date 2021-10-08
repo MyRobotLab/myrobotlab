@@ -32,7 +32,7 @@ opencv=tracker.getOpenCV()
 xServo.setMinMax(30, 150)  #minimum and maximum settings for the X servo
 # servoX.setInverted(True) # invert if necessary
 
-xServo.setMinMax(30, 150)  #minimum and maximum settings for the Y servo
+yServo.setMinMax(30, 150)  #minimum and maximum settings for the Y servo
 # servoY.setInverted(True) # invert if necessary
 
 # changing Pid values change the 

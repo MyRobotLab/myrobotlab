@@ -6,9 +6,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.AbstractSpeechSynthesisConfig;
 import org.myrobotlab.service.config.HtmlFilterConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -35,19 +33,6 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
   // if stripHtml is false these tags are used to wrap the input text
   private String preHtmlTag = "<pre>";
   private String postHtmlTag = "</pre>";
-
-  public static void main(String[] args) {
-    LoggingFactory.init("INFO");
-
-    try {
-      Runtime.createAndStart("gui", "SwingGui");
-      Runtime.createAndStart("python", "Python");
-      HtmlFilter htmlFilter = (HtmlFilter) Runtime.createAndStart("htmlFilter", "HtmlFilter");
-      log.info(">>>>>>>>>>" + htmlFilter.stripHtml("This is <a>foo</a> bar."));
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
 
   public HtmlFilter(String n, String id) {
     super(n, id);
@@ -177,6 +162,8 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
     HtmlFilterConfig config = (HtmlFilterConfig) initConfig(new HtmlFilterConfig());
     
     config.stripHtml = stripHtml;
+    config.preHtmlTag = preHtmlTag;
+    config.postHtmlTag = postHtmlTag;
     
     Set<String> listeners = getAttached("publishText");
     config.textListeners = listeners.toArray(new String[listeners.size()]);
@@ -191,6 +178,8 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
     HtmlFilterConfig config = (HtmlFilterConfig) c;
     
     stripHtml = config.stripHtml;
+    preHtmlTag = config.preHtmlTag;
+    postHtmlTag = config.postHtmlTag;
     
     if (config.textListeners != null) {
       for (String serviceName: config.textListeners) {
@@ -205,5 +194,10 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
     }
     return c;
   }
-  
+
+  public static void main(String[] args) {
+    LoggingFactory.init("INFO");
+    HtmlFilter htmlFilter = (HtmlFilter) Runtime.createAndStart("htmlFilter", "HtmlFilter");
+    log.info(">>>>>>>>>>" + htmlFilter.stripHtml("This is <a>foo</a> bar."));
+  }
 }
