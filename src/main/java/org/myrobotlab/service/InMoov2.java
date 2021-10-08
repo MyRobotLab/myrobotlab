@@ -19,8 +19,11 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
@@ -99,6 +102,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public void startService() {
     super.startService();
     Runtime runtime = Runtime.getInstance();
+    // FIXME - shouldn't need this anymore
     runtime.subscribeToLifeCycleEvents(getName());
 
     try {
@@ -140,6 +144,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     } catch (Exception e) {
       error(e);
     }
+        
+    loadGestures();
 
     runtime.invoke("publishConfigList");
   }
@@ -2246,6 +2252,24 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       }
     }
   }
+  
+  @Override
+  public ServiceConfig getConfig() {
+    InMoov2Config config = (InMoov2Config) initConfig(new InMoov2Config());
+    
+    return config;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    InMoov2Config config = (InMoov2Config) c;
+
+    if (config.loadGestures) {
+      loadGestures();
+    }
+
+    return c;
+  }
+
 
   // public OpenNi startOpenNI() throws Exception {
   // if (openni == null) {
