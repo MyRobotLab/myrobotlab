@@ -13,7 +13,7 @@ import java.util.TreeSet;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.opencv.OpenCVFilter;
-import org.myrobotlab.service.InMoov;
+import org.myrobotlab.service.InMoov2;
 import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
@@ -21,11 +21,20 @@ import org.slf4j.Logger;
 
 /**
  * InMoov extra methods for OpenCV service
+ * This class provided some helper methods/behaviors ontop of normal opencv.
+ * It made tracking yolo inventory a bit easier I guess?  
+ * It also had helpers for working with the pre filters in the video pipeline
+ * TODO: This functionality needs to be rationalized in the new InMoov2 implementation.
+ * It was used when starting to TrackHumans, TrackPoint,
+ * also it was used to automatically add the preFilters to the video pipeline.
+ * 
  */
+
+@Deprecated
 public class Vision {
   public Boolean openCVenabled;
   transient private boolean ready = false;
-  transient public InMoov instance;
+  transient public InMoov2 instance;
   public final static Logger log = LoggerFactory.getLogger(Vision.class);
   public Set<String> preFilters = new TreeSet<String>();
   transient public LinkedHashMap<String, Double> collectionPositions = new LinkedHashMap<String, Double>();
@@ -56,22 +65,22 @@ public class Vision {
       return;
     }
     preFilters.add(filter);
-    if (instance.opencv != null && (instance.opencv.getFilter(filter) == null)) {
-      instance.opencv.addFilter(filter).enable();
+    if (instance.getOpenCV() != null && (instance.getOpenCV().getFilter(filter) == null)) {
+      instance.getOpenCV().addFilter(filter).enable();
     }
   }
 
   public void removePreFilter(String filter) {
     if (preFilters.contains(filter)) {
       preFilters.remove(filter);
-      if (instance.opencv != null && !(instance.opencv.getFilter(filter) == null)) {
-        instance.opencv.removeFilter(filter);
+      if (instance.getOpenCV() != null && !(instance.getOpenCV().getFilter(filter) == null)) {
+        instance.getOpenCV().removeFilter(filter);
       }
     }
   }
 
   public void enablePreFilters() {
-    preFilters.forEach(name -> instance.opencv.addFilter(name).enable());
+    preFilters.forEach(name -> instance.getOpenCV().addFilter(name).enable());
   }
 
   /**
@@ -87,22 +96,22 @@ public class Vision {
       return null;
     }
 
-    if (instance.opencv != null && (instance.opencv.getFilter(filterName) == null)) {
-      instance.opencv.addFilter(filterName);
+    if (instance.getOpenCV() != null && (instance.getOpenCV().getFilter(filterName) == null)) {
+      instance.getOpenCV().addFilter(filterName);
     }
-    instance.opencv.setActiveFilter(filterName);
+    instance.getOpenCV().setActiveFilter(filterName);
     // temporary fix overexpand windows
     SwingGui gui = (SwingGui) Runtime.getService("gui");
     if (gui != null) {
       gui.maximize();
     }
-    return (OpenCVFilter) instance.opencv.getFilter(filterName);
+    return (OpenCVFilter) instance.getOpenCV().getFilter(filterName);
   }
 
   public boolean test() {
-    if (instance.opencv != null) {
-      instance.opencv.capture();
-      if (instance.opencv.isCapturing()) {
+    if (instance.getOpenCV() != null) {
+      instance.getOpenCV().capture();
+      if (instance.getOpenCV().isCapturing()) {
         enablePreFilters();
         ready = true;
         return true;
@@ -116,10 +125,10 @@ public class Vision {
    * @return check if robot do eyesTracking or headTracking
    */
   public boolean isTracking() {
-    if (instance.eyesTracking != null && !instance.eyesTracking.isIdle()) {
+    if (instance.getEyesTracking() != null && !instance.getEyesTracking().isIdle()) {
       return true;
     }
-    if (instance.headTracking != null && !instance.headTracking.isIdle()) {
+    if (instance.getHeadTracking() != null && !instance.getHeadTracking().isIdle()) {
       return true;
     }
     return false;

@@ -232,7 +232,12 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     }
 
     $scope.getProperty = function(propName) {
-        return $scope.getBotInfo()['properties'][propName]
+        try {
+            return $scope.getBotInfo()['properties'][propName]
+        } catch (error){
+            console.warn('getProperty(' + propName + ') not found')
+            return null
+        }
     }
 
     $scope.removeBotProperty = function(propName) {

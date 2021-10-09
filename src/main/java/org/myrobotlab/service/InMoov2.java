@@ -19,10 +19,14 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Locale;
+import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.ServoControl;
@@ -33,7 +37,7 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class InMoov2 extends Service implements TextListener, TextPublisher, JoystickListener, LocaleProvider {
+public class InMoov2 extends Service implements TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
   public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
 
@@ -98,12 +102,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public void startService() {
     super.startService();
     Runtime runtime = Runtime.getInstance();
+    // FIXME - shouldn't need this anymore
     runtime.subscribeToLifeCycleEvents(getName());
 
     try {
       // copy config if it doesn't already exist
       String resourceBotDir = FileIO.gluePaths(getResourceDir(), "config");
-
       List<File> files = FileIO.getFileList(resourceBotDir);
       for (File f : files) {
         String botDir = "data/config/" + f.getName();
@@ -119,9 +123,29 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
           }
         }
       }
+
+      // copy (if they don't already exist) the chatbots which came with InMoov2
+      resourceBotDir = FileIO.gluePaths(getResourceDir(), "chatbot/bots");
+      files = FileIO.getFileList(resourceBotDir);
+      for (File f : files) {
+        String botDir = "data/ProgramAB/" + f.getName();
+        if (new File(botDir).exists()) {
+          log.info("found data/ProgramAB/{} not copying", botDir);
+        } else {
+          log.info("will copy new data/ProgramAB/{}", botDir);
+          try {
+            FileIO.copy(f.getAbsolutePath(), botDir);
+          } catch (Exception e) {
+            error(e);
+          }
+        }
+      }
+
     } catch (Exception e) {
       error(e);
     }
+        
+    loadGestures();
 
     runtime.invoke("publishConfigList");
   }
@@ -497,7 +521,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public void displayFullScreen(String src) {
     try {
       if (imageDisplay == null) {
-        imageDisplay = (ImageDisplay)startPeer("imageDisplay");
+        imageDisplay = (ImageDisplay) startPeer("imageDisplay");
       }
       imageDisplay.displayFullScreen(src);
       log.error("implement webgui.displayFullScreen");
@@ -1196,12 +1220,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
-  /**
-   * overridden setVirtual for InMoov sets "all" services to virtual
-   */
-  public boolean setVirtual(boolean virtual) {
-    super.setVirtual(virtual);
-    Platform.setVirtual(virtual);
+  public boolean setAllVirtual(boolean virtual) {
+    Runtime.setAllVirtual(virtual);
     speakBlocking(get("STARTINGVIRTUALHARD"));
     return virtual;
   }
@@ -1280,26 +1300,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public ProgramAB startChatBot() {
 
     try {
-
-      // copy (if they don't already exist) the chatbots which came with InMoov2
-      String resourceBotDir = FileIO.gluePaths(getResourceDir(), "chatbot/bots");
-
-      List<File> files = FileIO.getFileList(resourceBotDir);
-      for (File f : files) {
-        // copyResource(f.getAbsolutePath(), FileIO.gluePaths(getResourceDir(),
-        // f.getName()));
-        String botDir = "data/ProgramAB/" + f.getName();
-        if (new File(botDir).exists()) {
-          log.info("found data/ProgramAB/{} not copying", botDir);
-        } else {
-          log.info("will copy new data/ProgramAB/{}", botDir);
-          try {
-            FileIO.copy(f.getAbsolutePath(), botDir);
-          } catch (Exception e) {
-            error(e);
-          }
-        }
-      }
 
       chatBot = (ProgramAB) startPeer("chatBot");
       isChatBotActivated = true;
@@ -1396,6 +1396,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     subscribeTo(opencv.getName(), "publishOpenCVData");
     isOpenCvActivated = true;
     return opencv;
+  }
+
+  public OpenCV getOpenCV() {
+    return opencv;
+  }
+
+  public void setOpenCV(OpenCV opencv) {
+    this.opencv = opencv;
   }
 
   public Tracking startEyesTracking() throws Exception {
@@ -2202,5 +2210,174 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public void attachTextListener(String name) {
     addListener("publishText", name);
   }
+
+  public Tracking getEyesTracking() {
+    return eyesTracking;
+  }
+
+  public Tracking getHeadTracking() {
+    return headTracking;
+  }
+
+  public void startBrain() {
+    startChatBot();
+  }
+
+  public void startMouthControl() {
+    speakBlocking(get("STARTINGMOUTHCONTROL"));
+    mouthControl = (MouthControl) startPeer("mouthControl");
+    mouthControl.attach(head.jaw);
+    mouthControl.attach((Attachable) getPeer("mouth"));
+  }
+
+  @Deprecated /* wrong function name should be startPir */
+  public void startPIR(String port, int pin) {
+    startPir(port, pin);
+  }
+
+  // -----------------------------------------------------------------------------
+  // These are methods added that were in InMoov1 that we no longer had in
+  // InMoov2.
+  // From original InMoov1 so we don't loose the
+
+  @Override
+  public void onJointAngles(Map<String, Double> angleMap) {
+    log.info("onJointAngles {}", angleMap);
+    // here we can make decisions on what ik sets we want to use and
+    // what body parts are to move
+    for (String name : angleMap.keySet()) {
+      ServiceInterface si = Runtime.getService(name);
+      if (si != null && si instanceof ServoControl) {
+        ((Servo) si).moveTo(angleMap.get(name));
+      }
+    }
+  }
+  
+  @Override
+  public ServiceConfig getConfig() {
+    InMoov2Config config = (InMoov2Config) initConfig(new InMoov2Config());
+    
+    return config;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    InMoov2Config config = (InMoov2Config) c;
+
+    if (config.loadGestures) {
+      loadGestures();
+    }
+
+    return c;
+  }
+
+
+  // public OpenNi startOpenNI() throws Exception {
+  // if (openni == null) {
+  // speakBlocking(languagePack.get("STARTINGOPENNI"));
+  // openni = (OpenNi) startPeer("openni");
+  // pid = (Pid) startPeer("pid");
+  //
+  // pid.setPID("kinect", 10.0, 0.0, 1.0);
+  // pid.setMode("kinect", Pid.MODE_AUTOMATIC);
+  // pid.setOutputRange("kinect", -1, 1);
+  //
+  // pid.setControllerDirection("kinect", 0);
+  //
+  // // re-mapping of skeleton !
+  // openni.skeleton.leftElbow.mapXY(0, 180, 180, 0);
+  // openni.skeleton.rightElbow.mapXY(0, 180, 180, 0);
+  // if (openNiLeftShoulderInverted) {
+  // openni.skeleton.leftShoulder.mapYZ(0, 180, 180, 0);
+  // }
+  // if (openNiRightShoulderInverted) {
+  // openni.skeleton.rightShoulder.mapYZ(0, 180, 180, 0);
+  // }
+  //
+  // // openni.skeleton.leftShoulder
+  //
+  // // openni.addListener("publishOpenNIData", this.getName(),
+  // // "getSkeleton");
+  // // openni.addOpenNIData(this);
+  // subscribe(openni.getName(), "publishOpenNIData");
+  // }
+  // return openni;
+  // }
+  //
+  // public void onOpenNIData(OpenNiData data) {
+  //
+  // if (data != null) {
+  // Skeleton skeleton = data.skeleton;
+  //
+  // if (firstSkeleton) {
+  // firstSkeleton = false;
+  // }
+  //
+  // if (copyGesture) {
+  //
+  // if (leftArm != null) {
+  //
+  // if (!Double.isNaN(skeleton.leftElbow.getAngleXY())) {
+  // if (skeleton.leftElbow.getAngleXY() >= 0) {
+  // leftArm.bicep.moveTo((double) skeleton.leftElbow.getAngleXY());
+  // }
+  // }
+  // if (!Double.isNaN(skeleton.leftShoulder.getAngleXY())) {
+  // if (skeleton.leftShoulder.getAngleXY() >= 0) {
+  // leftArm.omoplate.moveTo((double) skeleton.leftShoulder.getAngleXY());
+  // }
+  // }
+  // if (!Double.isNaN(skeleton.leftShoulder.getAngleYZ())) {
+  // if (skeleton.leftShoulder.getAngleYZ() + openNiShouldersOffset >= 0) {
+  // leftArm.shoulder.moveTo((double) skeleton.leftShoulder.getAngleYZ() - 50);
+  // }
+  // }
+  // }
+  //
+  // if (rightArm != null) {
+  //
+  // if (!Double.isNaN(skeleton.rightElbow.getAngleXY())) {
+  // if (skeleton.rightElbow.getAngleXY() >= 0) {
+  // rightArm.bicep.moveTo((double) skeleton.rightElbow.getAngleXY());
+  // }
+  // }
+  // if (!Double.isNaN(skeleton.rightShoulder.getAngleXY())) {
+  // if (skeleton.rightShoulder.getAngleXY() >= 0) {
+  // rightArm.omoplate.moveTo((double) skeleton.rightShoulder.getAngleXY());
+  // }
+  // }
+  // if (!Double.isNaN(skeleton.rightShoulder.getAngleYZ())) {
+  // if (skeleton.rightShoulder.getAngleYZ() + openNiShouldersOffset >= 0) {
+  // rightArm.shoulder.moveTo((double) skeleton.rightShoulder.getAngleYZ() -
+  // 50);
+  // }
+  // }
+  // }
+  //
+  // }
+  // }
+  //
+  // // TODO - route data appropriately
+  // // rgb & depth image to OpenCV
+  // // servos & depth image to gui (entire InMoov + references to servos)
+  //
+  // public boolean copyGesture(boolean b) throws Exception {
+  // log.info("copyGesture {}", b);
+  // if (b) {
+  // if (openni == null) {
+  // openni = startOpenNI();
+  // }
+  // openni.startUserTracking();
+  // } else {
+  // if (openni != null) {
+  // openni.stopCapture();
+  // firstSkeleton = true;
+  // }
+  // }
+  //
+  // copyGesture = b;
+  // return b;
+  // }
+  //
+  // }
 
 }

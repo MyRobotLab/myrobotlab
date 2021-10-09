@@ -10,11 +10,11 @@ import org.myrobotlab.test.AbstractTest;
 @Ignore
 public class IKInMoovArmTest extends AbstractTest {
 
-  private InMoovArm testArm;
+  private InMoov2Arm testArm;
 
   @Before
   public void setUp() throws Exception {
-    testArm = (InMoovArm) Runtime.start("left", "InMoovArm");
+    testArm = (InMoov2Arm) Runtime.start("left", "InMoov2Arm");
 
   }
 

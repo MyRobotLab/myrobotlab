@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Platform;
@@ -137,7 +139,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public boolean setSay() {
     removeExt(false);
     setTtsHack(false);
-    setTtsCommand("say \"{text}\"" + "-o {filename}");
+    setTtsCommand("/usr/bin/say -v {voice_name} --data-format=LEF32@22050 -o {filename} \"{text}\"");
     if (!Runtime.getPlatform().isMac()) {
       error("say only supported on Mac");
       return false;
@@ -219,6 +221,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
     if (getVoice() != null) {
       cmd = cmd.replace("{voice}", getVoice().getVoiceProvider().toString());
+      cmd = cmd.replace("{voice_name}", getVoice().getName());
     }
 
     if (platform.isWindows()) {
@@ -238,9 +241,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
       log.info("powershell returned : {}", ret);
 
-    } else if (platform.isMac()) {
-      Runtime.execute(cmd);
-    } else if (platform.isLinux()) {
+    } else {
       Runtime.execute("bash", "-c", cmd);
     }
 
@@ -262,11 +263,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * because it appends 0.mp3 :P
    */
   public String getAudioCacheExtension() {
-    if (Platform.getLocalInstance().isMac()) {
-      return ".aiff";
-    } /*
-       * else if (ttsHack) { return "0.mp3"; // ya stoopid no ? }
-       */
     return ".wav"; // hopefully Linux festival can do this (if not can we ?)
   }
 
@@ -335,10 +331,20 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       }
     } else if (platform.isMac()) {
       // https://www.lifewire.com/mac-say-command-with-talking-terminal-2260772
-      voicesText = Runtime.execute("say -v");
+      voicesText = Runtime.execute("bash", "-c", "say -v ?");
 
-      // FIXME - implement parse -v output
-      addVoice("fred", "male", "en-US", "fred"); // in the interim added 1 voice
+      // "say -v ?" outputs a list of available TTS voices under MacOS, oner per line. 
+      //  eg: "Agnes               en_US    # Isn't it nice to have a computer that will talk to you?"
+
+      Pattern pattern = Pattern.compile("^(\\w+)\\s+(\\w+)\\s+(.+)$");
+      String lines[] = voicesText.split("\\r?\\n");
+
+      for (int i = 0; i <= lines.length - 1; i++) {
+          Matcher matcher = pattern.matcher(lines[i]);
+          if (matcher.find()) {
+              addVoice(matcher.group(1).toLowerCase(), "male", matcher.group(2), matcher.group(1).toLowerCase());
+          }
+      }
     } else if (platform.isLinux()) {
       addVoice("Linus", "male", "en-US", "festival");
     }
@@ -369,6 +375,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
       Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
       // LoggingFactory.init("WARN");
+      
+      LocalSpeech mouth = (LocalSpeech) Runtime.start("mouth", "LocalSpeech");
+      mouth.setSay();
+      mouth.speakBlocking("test 1 2 3");
 
       String program = "Add-Type -AssemblyName System.Speech";
       // String[] program = new
@@ -386,10 +396,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       webgui.autoStartBrowser(false);
       webgui.startService();
 
-      LocalSpeech mouth = (LocalSpeech) Runtime.start("mouth", "LocalSpeech");
-
+  
       // mouth.setMimic();
-      mouth.speakBlocking("hello there mimic works");
+      
 
       boolean done = true;
       if (done) {

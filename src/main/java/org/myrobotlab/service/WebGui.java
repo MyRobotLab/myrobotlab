@@ -753,8 +753,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void handleMessagesApi(AtmosphereResource r) {
     try {
       AtmosphereResponse response = r.getResponse();
-      AtmosphereRequest request = r.getRequest();
-      OutputStream out = response.getOutputStream();
 
       if (!r.isSuspended()) {
         r.suspend();
@@ -771,16 +769,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void handleMessagesBlockingApi(AtmosphereResource r) {
     try {
       AtmosphereResponse response = r.getResponse();
-      AtmosphereRequest request = r.getRequest();
-      OutputStream out = response.getOutputStream();
 
       if (!r.isSuspended()) {
         r.suspend();
       }
       response.addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
-
-      // api.process(this, out, r.getRequest().getRequestURI(),
-      // request.body().asString());
 
     } catch (Exception e) {
       log.error("handleMessagesBlockingApi -", e);
@@ -817,19 +810,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return panels;
   }
 
-  /*
-   * FIXME - needs to be LogListener interface with
-   * LogListener.onLogEvent(String logEntry) !!!! THIS SHALL LOG NO ENTRIES OR
-   * ABANDON ALL HOPE !!!
-   * 
-   * This is completely out of band - it does not use the regular queues inbox
-   * or outbox
-   * 
-   * We want to broadcast this - but THERE CAN NOT BE ANY log.info/warn/error
-   * etc !!!! or there will be an infinite loop and you will be at the gates of
-   * hell !
-   * 
-   */
   public void onLogEvent(Message msg) {
     try {
       if (broadcaster != null) {
@@ -838,25 +818,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     } catch (Exception e) {
       System.out.print(e.getMessage());
     }
-  }
-
-  public void onReleased(String serviceName) {
-    log.info("released {}", serviceName);
-  }
-
-  public void onRegistered(Registration r) {
-    // new service
-    // subscribe to the status events
-    // FIXED !!! - these subscribes are no longer needed because
-    // the angular app currently subscribes to them
-    // subscribe(si.getName(), "publishStatus");
-    // subscribe(si.getName(), "publishState");
-    // for distributed Runtimes
-    /*
-     * if (si.isRuntime()) { subscribe(si.getName(), "registered"); }
-     */
-
-    invoke("publishPanel", r.getName());
   }
 
   public String publishHide(String name) {

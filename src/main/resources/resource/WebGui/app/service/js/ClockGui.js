@@ -13,17 +13,18 @@ angular.module('mrlapp.service.ClockGui', []).controller('ClockGuiCtrl', ['$scop
     $scope.onEpoch = null
 
     this.onMsg = function(inMsg) {
+        let data = inMsg.data[0]
         switch (inMsg.method) {
         case 'onState':
-            _self.updateState(inMsg.data[0])
+            _self.updateState(data)
             $scope.$apply()
             break
         case 'onTime':
-            $scope.onTime = inMsg.data[0]
+            $scope.onTime = data
             $scope.$apply()
             break
         case 'onEpoch':
-            $scope.onEpoch = inMsg.data[0]
+            $scope.onEpoch = data
             $scope.$apply()
             break
         default:
