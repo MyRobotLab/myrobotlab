@@ -43,9 +43,60 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public static LinkedHashMap<String, String> lpVars = new LinkedHashMap<String, String>();
 
-  // FIXME - why
+  /**
+   * these should be methods like setRobotCanMoveBodyRandom(true) - which do
+   * what they need and then set config NOT STATIC PUBLIC VARS
+   */
   @Deprecated
   public static boolean RobotCanMoveBodyRandom = true;
+
+  public static boolean isRobotCanMoveBodyRandom() {
+    return RobotCanMoveBodyRandom;
+  }
+
+  public static void setRobotCanMoveBodyRandom(boolean robotCanMoveBodyRandom) {
+    RobotCanMoveBodyRandom = robotCanMoveBodyRandom;
+  }
+
+  public static boolean isRobotCanMoveHeadRandom() {
+    return RobotCanMoveHeadRandom;
+  }
+
+  public static void setRobotCanMoveHeadRandom(boolean robotCanMoveHeadRandom) {
+    RobotCanMoveHeadRandom = robotCanMoveHeadRandom;
+  }
+
+  public static boolean isRobotCanMoveEyesRandom() {
+    return RobotCanMoveEyesRandom;
+  }
+
+  public static void setRobotCanMoveEyesRandom(boolean robotCanMoveEyesRandom) {
+    RobotCanMoveEyesRandom = robotCanMoveEyesRandom;
+  }
+
+  public static boolean isRobotCanMoveRandom() {
+    return RobotCanMoveRandom;
+  }
+
+  public static void setRobotCanMoveRandom(boolean robotCanMoveRandom) {
+    RobotCanMoveRandom = robotCanMoveRandom;
+  }
+
+  public static boolean isRobotIsSleeping() {
+    return RobotIsSleeping;
+  }
+
+  public static void setRobotIsSleeping(boolean robotIsSleeping) {
+    RobotIsSleeping = robotIsSleeping;
+  }
+
+  public static boolean isRobotIsStarted() {
+    return RobotIsStarted;
+  }
+
+  public static void setRobotIsStarted(boolean robotIsStarted) {
+    RobotIsStarted = robotIsStarted;
+  }
 
   @Deprecated
   public static boolean RobotCanMoveHeadRandom = true;
@@ -66,6 +117,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   static String speechRecognizer = "WebkitSpeechRecognition";
 
+  protected boolean loadGestures = true;
+
   /**
    * @param someScriptName
    *          execute a resource script
@@ -78,6 +131,23 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       return p.exec(script, true);
     } catch (Exception e) {
       error("unable to execute script %s", someScriptName);
+      return false;
+    }
+  }
+
+  /**
+   * Single place for InMoov2 service to execute arbitrary code - needed
+   * initially to set "global" vars in python
+   * 
+   * @param pythonCode
+   * @return
+   */
+  public boolean exec(String pythonCode) {
+    try {
+      Python p = (Python) Runtime.start("python", "Python");
+      return p.exec(pythonCode, true);
+    } catch (Exception e) {
+      error("unable to execute script %s", pythonCode);
       return false;
     }
   }
@@ -144,8 +214,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     } catch (Exception e) {
       error(e);
     }
-        
-    loadGestures();
+
+    if (loadGestures) {
+      loadGestures();
+    }
 
     runtime.invoke("publishConfigList");
   }
@@ -269,6 +341,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   /**
    * simple booleans to determine peer state of existence FIXME - should be an
    * auto-peer variable
+   * 
+   * FIXME - sometime in the future there should just be a single simple
+   * reference to a loaded "config" but at the moment the new UI depends on
+   * these individual values :(
+   * 
    */
 
   boolean isChatBotActivated = false;
@@ -305,6 +382,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   boolean isServoMixerActivated = false;
 
+  boolean isController3Activated = false;
+
   // TODO - refactor into a Simulator interface when more simulators are borgd
   transient JMonkeyEngine simulator;
 
@@ -313,10 +392,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   Long lastPirActivityTime;
 
   transient InMoov2Arm leftArm;
-
-  // transient LanguagePack languagePack = new LanguagePack();
-
-  // transient InMoovEyelids eyelids; eyelids are in the head
 
   transient InMoov2Hand leftHand;
 
@@ -359,6 +434,18 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   transient WebGui webgui;
 
   protected List<String> configList;
+
+  private boolean isController4Activated;
+
+  private boolean isLeftHandSensorActivated;
+
+  private boolean isLeftPortActivated;
+
+  private boolean isOpenCVActivated;
+
+  private boolean isRightHandSensorActivated;
+
+  private boolean isRightPortActivated;
 
   public InMoov2(String n, String id) {
     super(n, id);
@@ -1570,7 +1657,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   // and the only thing needed is pubs/subs that are not handled in abstracts
   public SpeechSynthesis startMouth() {
 
-    // FIXME - bad to have a reference, shuld only need the "name" of the
+    // FIXME - bad to have a reference, should only need the "name" of the
     // service !!!
     mouth = (SpeechSynthesis) startPeer("mouth");
 
@@ -2022,6 +2109,28 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return pir;
   }
 
+  /**
+   * config delegated startPir ... hopefully
+   * @return
+   */
+  public Pir startPir() {
+
+    if (pir == null) {
+      speakBlocking(get("STARTINGPIR"));
+      isPirActivated = true;
+
+      pir = (Pir) startPeer("pir");
+      try {
+        pir.load(); // will this work ?
+        // would be great if it did - offloading configuration
+        // to the i01.pir.yml
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+    return pir;
+  }
+
   public ServoMixer startServoMixer() {
 
     servomixer = (ServoMixer) startPeer("servomixer");
@@ -2252,24 +2361,164 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       }
     }
   }
-  
+
   @Override
   public ServiceConfig getConfig() {
     InMoov2Config config = (InMoov2Config) initConfig(new InMoov2Config());
+
+    config.isController3Activated = isController3Activated;
+    config.isController4Activated = isController4Activated;
+    config.isEyeLidsActivated = isEyeLidsActivated;
+    config.isHeadActivated = isHeadActivated;
+    config.isLeftArmActivated = isLeftArmActivated;
+    config.isLeftHandActivated = isLeftHandActivated;
+    config.isLeftHandSensorActivated = isLeftHandSensorActivated;
+    config.isLeftPortActivated = isLeftPortActivated;
+    config.isNeopixelActivated = isNeopixelActivated;
+    config.isOpenCVActivated = isOpenCVActivated;
+    config.isPirActivated = isPirActivated;
+    config.isRightArmActivated = isRightArmActivated;
+    config.isRightHandActivated = isRightHandActivated;
+    config.isRightHandSensorActivated = isRightHandSensorActivated;
+    config.isRightPortActivated = isRightPortActivated;
     
+    config.isSimulatorActivated = isSimulatorActivated;
+
     return config;
   }
 
   public ServiceConfig load(ServiceConfig c) {
     InMoov2Config config = (InMoov2Config) c;
+    try {
+      /**
+       * <pre>
+       * FIXME - 
+       * - there simply should be a single reference to the entire config object in InMoov
+       *   e.g. InMoov2Config config member
+       * - if these booleans are symmetric - there should be corresponding functionality of "stopping/releasing" since they
+       *   are currently starting  
+       * </pre>
+       */
 
-    if (config.loadGestures) {
-      loadGestures();
+      if (config.isController3Activated) {
+        startPeer("controller3"); // FIXME ... this kills me :P
+        exec("isController3Activated = True");
+      }
+
+      if (config.isController4Activated) {
+        startPeer("controller4"); // FIXME ... this kills me :P
+        exec("isController4Activated = True");
+      }
+
+      if (config.isEyeLidsActivated) {
+        // the hell if I know ?
+      }
+
+      if (config.isHeadActivated) {
+        startHead();
+      } else {
+        stopHead();
+      }
+
+      if (config.isLeftArmActivated) {
+        startLeftArm();
+      } else {
+        stopLeftArm();
+      }
+
+      if (config.isLeftHandActivated) {
+        startLeftHand();
+      } else {
+        stopLeftHand();
+      }
+
+      if (config.isLeftHandSensorActivated) {
+        // the hell if I know ?
+      }
+
+      if (config.isLeftPortActivated) {
+        // the hell if I know ? is this an Arduino ?
+        startPeer("left");
+      } // else release peer ?
+
+      if (config.isNeopixelActivated) {
+        startNeopixel();
+      } else {
+        // stopNeopixelAnimation();
+      }
+
+      if (config.isOpenCVActivated) {
+        startOpenCV();
+      } else {
+        stopOpenCV();
+      }
+
+      if (config.isPirActivated) {
+        startPir();
+      } else {
+        stopPir();
+      }
+
+      if (config.isRightArmActivated) {
+        startRightArm();
+      }
+
+      if (config.isRightHandActivated) {
+        startRightHand();
+      } else {
+        stopRightHand();
+      }
+
+      if (config.isRightHandSensorActivated) {
+        // the hell if I know ?
+      }
+
+      if (config.isRightPortActivated) {
+        // the hell if I know ? is this an Arduino ?
+      }
+
+      if (config.isServoMixerActivated) {
+        startServoMixer();
+      }
+
+      if (config.isTorsoActivated) {
+        startTorso();
+      } else {
+        stopTorso();
+      }
+
+      if (config.isUltraSonicLeftActivated) {
+        /// startUltraSonicLeft(); delegate config
+      }
+
+      if (config.isUltraSonicRightActivated) {
+        /// startUltraSonicRight(); delegate config
+      }
+
+      if (config.loadGestures) {
+        loadGestures = true;
+        loadGestures();
+        // will load in startService
+      }
+      
+      
+      if (config.isSimulatorActivated) {
+        startSimulator();
+      }
+      
+      /*
+       * 
+       * if (RobotCanMoveBodyRandom; if (RobotCanMoveEyesRandom; if
+       * (RobotCanMoveHeadRandom; if (RobotCanMoveRandom; if (RobotIsSleeping;
+       * if (RobotIsStarted;
+       */
+
+    } catch (Exception e) {
+      error(e);
     }
 
     return c;
   }
-
 
   // public OpenNi startOpenNI() throws Exception {
   // if (openni == null) {
