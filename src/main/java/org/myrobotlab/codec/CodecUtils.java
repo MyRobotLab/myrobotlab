@@ -11,6 +11,9 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,9 +24,11 @@ import java.util.Set;
 
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -603,23 +608,6 @@ public class CodecUtils {
     return ret;
   }
 
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-
-    try {
-      String json = CodecUtils.fromJson("test", String.class);
-      log.info("json {}", json);
-      json = CodecUtils.fromJson("a test", String.class);
-      log.info("json {}", json);
-      json = CodecUtils.fromJson("\"a/test\"", String.class);
-      log.info("json {}", json);
-      CodecUtils.fromJson("a/test", String.class);
-
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
-  }
-
   /**
    * Creates a properly double encoded Json msg string. Why double encode ? -
    * because initial decode should decode router and header information. The
@@ -752,6 +740,32 @@ public class CodecUtils {
       return true;
     }
     return false;
+  }
+  
+  public static ServiceConfig readServiceConfig(String filename) throws IOException {
+    String data = new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8);
+    Yaml yaml = new Yaml();
+    return (ServiceConfig)yaml.load(data);
+  }
+
+  public static void main(String[] args) {
+    LoggingFactory.init(Level.INFO);
+
+    try {
+      
+      Object o = readServiceConfig("data/config/InMoov2_FingerStarter/i01.chatBot.yml");
+      
+      String json = CodecUtils.fromJson("test", String.class);
+      log.info("json {}", json);
+      json = CodecUtils.fromJson("a test", String.class);
+      log.info("json {}", json);
+      json = CodecUtils.fromJson("\"a/test\"", String.class);
+      log.info("json {}", json);
+      CodecUtils.fromJson("a/test", String.class);
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
   }
 
 }

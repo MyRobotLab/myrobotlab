@@ -961,9 +961,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   @Override
   public void startService() {
     super.startService();
-    if (peerSearch) {
-      startPeer("search");
-    }
 
     logPublisher = new SimpleLogPublisher(this);
     logPublisher.filterClasses(new String[] { "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans", "class org.myrobotlab.programab.MrlSraixHandler" });
@@ -1135,7 +1132,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     }
 
     // TODO: attach to the text publishers... ?
-    
+
     return config;
   }
 

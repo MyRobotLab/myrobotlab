@@ -275,28 +275,24 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return null;
   }
 
+  static public synchronized ServiceInterface create(String name) throws IOException {
+    Runtime runtime = Runtime.getInstance();
+    String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
+    File check = new File(filename);
+    if (!check.exists()) {
+      runtime.error("create(%s) called - but required file %s does not exist", name, filename);
+    }
+    ServiceConfig config = CodecUtils.readServiceConfig(filename);
+    return createService(name, config.type, null);
+  }
+
   static public synchronized ServiceInterface create(String name, String type) {
     return createService(name, type, null);
   }
 
+  @Deprecated /* use start */
   static public ServiceInterface createAndStart(String name, String type) {
-    ServiceInterface s = null;
-    // framework level catch of all startServices
-    // we will catch it here and log it with a stack trace
-    // its not a good idea to let exceptions propegate higher - because
-    // logging format can get challenging (Python trace-back) or they may
-    // be completely lost - this is the last level the error can be handled
-    // before
-    // going into the unknown - so we catch it !
-    try {
-      s = create(name, type);
-      s.startService();
-    } catch (Exception e) {
-      String error = String.format("createAndStart(%s, %s) %s", name, type, e.getClass().getCanonicalName());
-      Runtime.getInstance().error(error);
-      log.error(error, e);
-    }
-    return s;
+    return start(name, type);
   }
 
   /**
@@ -1700,8 +1696,52 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     routeTable.addRoute(remoteId, uuid, metric);
   }
 
+  static public ServiceInterface start(String name) {
+    ServiceInterface si = null;
+    try {
+      si = create(name);
+    } catch (Exception e) {
+      Runtime.getInstance().error(e);
+      log.error("create(%s) threw", name, e);
+    }
+
+    if (si != null) {
+      return start(name, si.getType());
+    }
+
+    return null;
+  }
+
   static public ServiceInterface start(String name, String type) {
-    return createAndStart(name, type);
+    ServiceInterface si = null;
+    // framework level catch of all startServices
+    // we will catch it here and log it with a stack trace
+    // its not a good idea to let exceptions propegate higher - because
+    // logging format can get challenging (Python trace-back) or they may
+    // be completely lost - this is the last level the error can be handled
+    // before
+    // going into the unknown - so we catch it !
+    try {
+      si = create(name, type);
+      Runtime runtime = Runtime.getInstance();
+      String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
+      File check = new File(filename);
+      if (check.exists()) {
+        load(name);
+      } else {
+        log.info("config for %s - %s does not exist", name, filename);
+      }
+    } catch (Exception e) {
+      String error = String.format("createAndStart(%s, %s) %s", name, type, e.getClass().getCanonicalName());
+      Runtime.getInstance().error(error);
+      log.error(error, e);
+    }
+
+    if (si != null) {
+      si.startService();
+    }
+
+    return si;
   }
 
   public Runtime(String n, String id) {
@@ -3460,7 +3500,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     for (int i = 0; i < s.size(); ++i) {
       config.registry[i] = s.get(i).getName();
     }
-    
+
     if (getLocale() != null) {
       config.locale = getLocale().getTag();
     }
@@ -3468,22 +3508,30 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return config;
   }
 
-  @Override
-  public ServiceConfig load(String filename) throws IOException {
-    // When runtime calls load, we expect the full path to the runtime.yml file.
-    // based on the directory structure, we need to set the current config name
-    // so we can find the other services to load.
-    try {
-      if (filename == null) {
-        filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + getName() + ".yml";
-      }
-      File f = new File(filename);
-      setConfigName(f.getParentFile().getName());
-      return super.load(filename);
-    } catch (Exception e) {
-      error("could not load %s", filename);
-    }
-    return null;
+  /**
+   * loads a yaml configuration file from the file system default location will
+   * be data/config/{name}.yml
+   * 
+   * @param filename
+   *          the file to load
+   * @return service config loaded from file.
+   * @throws IOException
+   *           if an error occurs reading the file
+   * 
+   */
+
+  static public ServiceConfig load(String name) throws IOException {
+
+    ServiceInterface si = create(name);
+    Runtime runtime = Runtime.getInstance();
+    String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
+
+    ServiceConfig config = CodecUtils.readServiceConfig(filename);
+    si.load(config);
+    // previously used to attempt to process attaches here
+    // attaches do not work well before starting - attaching
+    // has now been moved out to runtime
+    return config;
   }
 
   public ServiceConfig load(ServiceConfig c) {
@@ -3578,27 +3626,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         }
 
         sc = configs.get(name);
-        /** <pre>GroG:20211001- I don't think this can currently be done just reflecting off of subscriptions
-         A noble idea - but I think at this time configuration should dictate what is attached to what...
-         
-        if (sc.attach != null) {
-          for (String n : sc.attach) {
-            try {
-              // log.warn("attaching {} to {}", si.getName(), n);
-              // TODO: if the services you are attaching have conflicting
-              // interfaces, this call is potentially ambigious as to it's
-              // meaning.
-              // Example: htmlfilter attaching to programab... both are text
-              // listeners, both are text publishers. which direction do we
-              // define
-              // the attach in..
-              si.attach(n);
-              si.broadcastState();
-            } catch (Exception e) {
-              error(e);
-            }
-          }          
-        } </pre>*/
       } // attach-life-cycle
 
     } // if registry
@@ -3691,6 +3718,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     addListener("started", name);
     addListener("stopped", name);
     addListener("released", name);
+  }
+
+  /**
+   * static wrapper around setConfigName - so it can be used in the same way as
+   * all the other common static service methods
+   * 
+   * @param config
+   *          - config dir name under data/config/{config}
+   */
+  public static void setConfig(String config) {
+    Runtime.getInstance().setConfigName(config);
   }
 
 }
