@@ -97,6 +97,7 @@ public class ServiceInterfaceTest extends AbstractTest {
 
     HashSet<String> blacklist = new HashSet<String>();
     blacklist.add("OpenNi");
+    blacklist.add("IntegratedMovement");    
     blacklist.add("VirtualDevice");
     blacklist.add("GoogleAssistant");
     blacklist.add("LeapMotion");

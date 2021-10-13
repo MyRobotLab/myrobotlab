@@ -219,6 +219,19 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   protected Locale locale;
 
   /**
+   * starting all peers on start of service
+   */
+  protected boolean autoStartPeers = true;
+
+  public boolean isAutoStartPeers() {
+    return autoStartPeers;
+  }
+
+  public void setAutoStartPeers(boolean autoStartPeers) {
+    this.autoStartPeers = autoStartPeers;
+  }
+
+  /**
    * copyShallowFrom is used to help maintain state information with
    * 
    * @param target
@@ -921,18 +934,38 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
 
   public synchronized ServiceInterface createPeer(String peerKey) {
+    try {
 
-    ServiceReservation sr = serviceType.getPeer(peerKey);
+      ServiceReservation sr = serviceType.getPeer(peerKey);
 
-    if (sr == null) {
-      error("can not create peer from reservedkey %s - no type definition !", peerKey);
-      return null;
+      if (sr == null) {
+        error("can not create peer from reservedkey %s - no type definition !", peerKey);
+        return null;
+      }
+
+      if (Runtime.getService(sr.actualName) != null) {
+        // peer already created
+        return Runtime.getService(sr.actualName);
+      }
+
+      ServiceInterface si = null;
+
+      Runtime runtime = Runtime.getInstance();
+      String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
+      File check = new File(filename);
+      if (check.exists()) {
+        si = Runtime.create(sr.actualName);
+      } else {
+        si = Runtime.create(sr.actualName, sr.type);
+      }
+
+      sr.state = "created";
+
+      return si;
+    } catch (Exception e) {
+      error(e);
     }
-
-    ServiceInterface si = Runtime.create(sr.actualName, sr.type);
-    sr.state = "created";
-
-    return si;
+    return null;
   }
 
   @Override
@@ -1323,6 +1356,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     log.info("Default service config loading for service: {} type: {}", getName(), getType());
     // setVirtual(config.isVirtual); "overconfigured" - user Runtimes virtual
     // setLocale(config.locale);
+
+    // FIXME - TODO -
+    // assigne a ServiceConfig config member variable the incoming config
     return config;
   }
 
@@ -1342,72 +1378,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return config;
   }
 
-  /**
-   * method of de-serializing default will to load simple xml from name file
-   * 
-   */
   public ServiceConfig load() throws IOException {
-    return load((String) null);
-  }
-
-  /**
-   * loads a yaml configuration file from the file system default location will
-   * be data/config/{name}.yml
-   * 
-   * @param filename
-   *          the file to load
-   * @return service config loaded from file.
-   * @throws IOException
-   *           if an error occurs reading the file
-   * 
-   */
-  public ServiceConfig load(String filename) throws IOException {
-
-    Runtime runtime = Runtime.getInstance();
-
-    if (filename == null) {
-      filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + getName() + ".yml";
-    }
-
-    String format = filename.substring(filename.lastIndexOf(".") + 1);
-
-    Object o = null;
-    try {
-      o = Instantiator.getThrowableNewInstance(null, String.format("org.myrobotlab.service.config.%sConfig", getSimpleName()));
-    } catch (ClassNotFoundException e) {
-      log.info("no specific config available for {} of type {}", getName(), getSimpleName());
-    } catch (Exception e) {
-      error(e);
-    }
-    if (o == null) {
-      log.info("{}Config does not exist - using default ServiceConfig", getSimpleName());
-    }
-
-    Class<?> clazz = (o == null) ? ServiceConfig.class : o.getClass();
-    ServiceConfig config = null;
-
-    try {
-
-      String data = FileIO.toString(filename);
-      if ("json".equalsIgnoreCase(format)) {
-        config = (ServiceConfig) CodecUtils.fromJson(data, clazz);
-      } else {
-        config = (ServiceConfig) CodecUtils.fromYaml(data, clazz);
-      }
-
-      // be aware - the service may or may not be started
-      load(config);
-    } catch (Exception e) {
-      error("%s - %s ", filename, e.getMessage());
-      log.error("loading yml config threw", e);
-    }
-
-    // previously used to attempt to process attaches here
-    // attaches do not work well before starting - attaching
-    // has now been moved out to runtime
-
+    ServiceConfig config = Runtime.getInstance().load(getName());
+    load(config);
     return config;
-
   }
 
   @Override
@@ -1899,6 +1873,42 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     this.thisThread = thisThread;
   }
 
+  /**
+   * loadPeer attempts to create then load a peer with current configuration.  If no
+   * configuration is found it is not an error, since it was a peer there is enough information 
+   * to correctly create a peer service from this services meta data.
+   * 
+   * @param reservedKey
+   * @return
+   */
+  public ServiceInterface loadPeer(String reservedKey) {
+    try {
+      ServiceInterface si = null;
+      ServiceReservation sr = serviceType.getPeer(reservedKey);
+
+      if (sr == null) {
+        error("can not create peer from reservedkey %s - no type definition !", reservedKey);
+        return null;
+      }
+
+      si = createPeer(reservedKey);
+
+      Runtime runtime = Runtime.getInstance();
+      String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
+      File check = new File(filename);
+      if (!check.exists()) {
+        log.info("no config for {} {} {}", getName(), sr.actualName, filename);
+        return si;
+      }
+
+      Runtime.load(sr.actualName);
+      return si;
+    } catch (Exception e) {
+      error(e);
+    }
+    return null;
+  }
+
   public ServiceInterface startPeer(String reservedKey) {
     ServiceInterface si = null;
     try {
@@ -1907,6 +1917,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         error("could not create service from key %s", reservedKey);
         return null;
       }
+
+      loadPeer(reservedKey);
 
       ServiceReservation sr2 = serviceType.getPeer(reservedKey);
       si.startService();
@@ -1962,13 +1974,22 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     } else {
       log.debug("startService request: service {} is already running", name);
     }
+
+    if (autoStartPeers) {
+      startPeers();
+    }
+
   }
 
   public void startPeers() {
     log.info("starting peers");
-    Map<String, ServiceReservation> peers = null;
-
-    peers = serviceType.getPeers();
+    Map<String, ServiceReservation> peers = serviceType.getPeers();
+    
+    if (peers != null) {
+      for (ServiceReservation sr: peers.values()) {
+        startPeer(sr.key);
+      }
+    }
 
     Set<Class<?>> ancestry = new HashSet<Class<?>>();
     Class<?> targetClass = this.getClass();
@@ -1984,6 +2005,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       targetClass = targetClass.getSuperclass();
     }
 
+    // AUTO ASSIGNMENT - a good idea ? or not ?
     for (Class<?> sourceClass : ancestry) {
 
       Field fields[] = sourceClass.getDeclaredFields();

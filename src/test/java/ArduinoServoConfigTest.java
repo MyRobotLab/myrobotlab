@@ -59,8 +59,8 @@ public class ArduinoServoConfigTest {
     // Runtime.createAndStart("webgui", "WebGui");
     // Runtime.createAndStart("gui", "SwingGui");
     // load it up.
-    // Runtime.getInstance().setConfigName("simple");
-    Runtime.getInstance().load("data/config/simple/runtime.yml");
+    Runtime.setConfig("simple");
+    Runtime.getInstance().load(); // "data/config/simple/runtime.yml"
     System.out.println("Loaded...");
 
     Runtime.createAndStart("gui", "SwingGui");
@@ -99,7 +99,7 @@ public class ArduinoServoConfigTest {
     Runtime.createAndStart("webgui", "WebGui");
     Runtime.createAndStart("gui", "SwingGui");
     // load it up.
-    Runtime.getInstance().load("data/config/runtime.yml");
+    Runtime.getInstance().load(); // "data/config/runtime.yml"
     System.out.println("Loaded...");
 
     waitOnAnyKey();
