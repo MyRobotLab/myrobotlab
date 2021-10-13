@@ -66,6 +66,20 @@ public class DiscordBot extends Service {
     this.brain = brain;
   }
 
+  /**
+   * @return the token
+   */
+  public String getToken() {
+    return token;
+  }
+
+  /**
+   * @param token the token to set
+   */
+  public void setToken(String token) {
+    this.token = token;
+  }
+
   public static void main(String[] args) throws Exception {
 
     // Brief example of starting a programab chatbot and connecting it to discord
@@ -76,7 +90,7 @@ public class DiscordBot extends Service {
 
     DiscordBot bot = (DiscordBot)Runtime.start("bot", "DiscordBot");
     bot.setBrain(brain);
-    bot.token = "token_here"; 
+    bot.token = "YOUR_TOKEN_HERE"; 
     bot.connect("Mr. Turing");
 
     System.err.println("done.. press any key.");
