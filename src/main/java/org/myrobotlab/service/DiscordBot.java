@@ -34,7 +34,6 @@ public class DiscordBot extends Service {
   
   @Override
   public ServiceConfig load(ServiceConfig c) {
-    super.load(c);
     DiscordBotConfig config = (DiscordBotConfig)c;
     this.token = config.token;
     return config;
@@ -42,9 +41,12 @@ public class DiscordBot extends Service {
 
   @Override
   public ServiceConfig getConfig() {
-    ServiceConfig c =  super.getConfig();
+    // TODO: this is also an ugly pattern. you can't really call super get config here!
+    // ServiceConfig c =  super.getConfig();
     // TODO: is this unsafe?
-    DiscordBotConfig config = (DiscordBotConfig)c;
+    // TODO: what sets the type of this config?
+    /// TODO: this isn't good OO programming to have to do it this way.
+    DiscordBotConfig config = (DiscordBotConfig) initConfig(new DiscordBotConfig());
     config.token = token;
     return config;
   }
@@ -74,6 +76,7 @@ public class DiscordBot extends Service {
 
     DiscordBot bot = (DiscordBot)Runtime.start("bot", "DiscordBot");
     bot.setBrain(brain);
+    bot.token = "token_here"; 
     bot.connect("Mr. Turing");
 
     System.err.println("done.. press any key.");
