@@ -49,10 +49,10 @@ public class DiscordBot extends Service {
     return config;
   }
 
-  public void connect() throws LoginException {
+  public void connect(String botName) throws LoginException {
     // TOOD: create a bot and connect with our token
     JDABuilder jda = JDABuilder.createDefault(token);
-    MrlDiscordBotListener discordListener = new MrlDiscordBotListener(brain);
+    MrlDiscordBotListener discordListener = new MrlDiscordBotListener(brain, botName);
     jda.addEventListeners(discordListener);
     bot = jda.build();
     // TODO: what now?
@@ -74,7 +74,7 @@ public class DiscordBot extends Service {
 
     DiscordBot bot = (DiscordBot)Runtime.start("bot", "DiscordBot");
     bot.setBrain(brain);
-    bot.connect();
+    bot.connect("Mr. Turing");
 
     System.err.println("done.. press any key.");
     System.in.read();
