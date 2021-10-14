@@ -58,7 +58,6 @@ import org.myrobotlab.framework.repo.IvyWrapper;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.io.StreamGobbler;
 import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.AppenderType;
 import org.myrobotlab.logging.LoggerFactory;
@@ -159,12 +158,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   protected final RouteTable routeTable = new RouteTable();
 
-  /**
-   * map to hide methods we are not interested in
-   */
-  static private Set<String> hideMethods = new HashSet<>();
-
   static private final String RUNTIME_NAME = "runtime";
+
   static public final String DATA_DIR = "data";
 
   static private boolean autoAcceptLicense = true; // at the moment
@@ -418,13 +413,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         log.debug("thread context parent " + Thread.currentThread().getContextClassLoader().getParent().getClass().getCanonicalName());
       }
 
-      Repo repo = Runtime.getInstance().getRepo();
-      if (!repo.isServiceTypeInstalled(fullTypeName)) {
-        log.error("{} is not installed", fullTypeName);
-        if (autoAcceptLicense) {
-          Runtime.getInstance().info("installing %s", type);
-          // repo.install(fullTypeName);
-          install(fullTypeName);
+      if (!name.equals(RUNTIME_NAME)) {
+        // runtime cannot have dependencies - all other services may
+        Repo repo = Runtime.getInstance().getRepo();
+        if (!repo.isServiceTypeInstalled(fullTypeName)) {
+          log.error("{} is not installed", fullTypeName);
+          if (autoAcceptLicense) {
+            Runtime.getInstance().info("installing %s", type);
+            // repo.install(fullTypeName);
+            install(fullTypeName);
+          }
         }
       }
 
@@ -558,8 +556,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       synchronized (INSTANCE_LOCK) {
         if (runtime == null) {
 
-          runtime = new Runtime(RUNTIME_NAME, Platform.getLocalInstance().getId());
-
+          runtime = (Runtime) createService(RUNTIME_NAME, "Runtime", Platform.getLocalInstance().getId());
+          runtime.startService();
+                    
           // setting the singleton security
           Security.getInstance();
           runtime.getRepo().addStatusPublisher(runtime);
@@ -569,8 +568,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           runtime.startingServices.add("security");
           runtime.startingServices.add("webgui");
           runtime.startingServices.add("python");
+          
+          try {
+            runtime.load();
+          } catch(Exception e) {
+            log.info("runtime will not be loading config");
+          }
         }
-      }
+      } 
     }
     return runtime;
   }
@@ -1135,7 +1140,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   public InProcessCli startInteractiveMode(InputStream in, OutputStream out) {
-    stopInteractiveMode();
+    // stopInteractiveMode(); is not fully re-entrant
+    if (cli != null) {
+      log.info("already in interactive mode");
+      return cli;
+    }
 
     cli = new InProcessCli(this, "runtime", in, out);
     Connection c = cli.getConnection();
@@ -1889,24 +1898,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       repo.addStatusPublisher(this);
     }
 
-    hideMethods.add("main");
-    hideMethods.add("loadDefaultConfiguration");
-    hideMethods.add("getDescription");
-    hideMethods.add("run");
-    hideMethods.add("access$0");
-
-    // TODO - good idea for future use - but must have a way to
-    // purge tasks on Junit test or it gets hung in Travis
-    // addTask(1000, "getSystemResources");
-    // TODO - check for updates on startup ???
-
-    // starting this
-    try {
-      startService();
-    } catch (Exception e) {
-      error("OMG Runtime won't start GAME OVER ! :( %s", e.getMessage());
-      log.error("OMG Runtime won't start GAME OVER ! :(", e);
-    }
   }
 
   public String publishDefaultRoute(String defaultRoute) {
@@ -2183,7 +2174,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
             runtime.releaseService();
           }
 
-          options.fromLauncher = true; // ???
+          options.fromLauncher = true; // from launcher meaningless now
 
           // make sure python is included
           // options.services.add("python");
@@ -3212,7 +3203,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         options.id = NameGenerator.getName();
       }
 
-      String id = (options.fromLauncher) ? options.id : String.format("%s-launcher", options.id);
+      // String id = (options.fromLauncherx) ? options.id :
+      // String.format("%s-launcher", options.id);
+      String id = options.id;
 
       // fix paths
       Platform platform = Platform.getLocalInstance();
@@ -3265,63 +3258,23 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         shutdown();
         return;
       }
+      
+      createAndStartServices(options.services);
 
-      if (!options.fromLauncher) {
-        // ===== I AM A LAUNCHER =====
-        // spawn new instance, inherit io
-        // any options need stripping ?
-        // handle daemon
-        // TODO handle more than one instance
-        Process process = null;
-        try {
-          ProcessBuilder builder = Launcher.createBuilder(options);
-          process = builder.start();
-
-          // omg ... crossing the streams !
-          StreamGobbler stdOut = new StreamGobbler(String.format("runtime-main-gobbler-output"), process.getInputStream(), System.out);
-          stdOut.start();
-
-          StreamGobbler stdIn = new StreamGobbler(String.format("runtime-main-gobbler-input"), System.in, process.getOutputStream());
-          stdIn.start();
-
-          process.waitFor();
-        } catch (Exception e) {
-          log.error("runtime main threw", e);
-        }
-        if (process != null) {
-          // kill child ... "clean up"
-          process.destroy();
-        }
-
-        // big hammer
-        shutdown();
-        return;
-
-      } else {
-        // ===== I AM A SPAWNED INSTANCE =====
-        // create service instances
-        createAndStartServices(options.services);
-        // getInstance().startInteractiveMode();
-
-        if (options.invoke != null) {
-          invokeCommands(options.invoke);
-        }
-
-        if (options.connect != null) {
-          Runtime.getInstance().connect(options.connect);
-        }
-
-        if (options.autoUpdate) {
-          // initialize
-          // FIXME - use peer ?
-          Updater.main(args);
-        }
-
-        if (options.fromLauncher) {
-          Runtime.getInstance().startInteractiveMode(System.in, System.out);
-        }
-
+      if (options.invoke != null) {
+        invokeCommands(options.invoke);
       }
+
+      if (options.connect != null) {
+        Runtime.getInstance().connect(options.connect);
+      }
+
+      if (options.autoUpdate) {
+        // initialize
+        // FIXME - use peer ?
+        Updater.main(args);
+      }
+      
 
     } catch (Exception e) {
       log.error("runtime exception", e);
@@ -3533,12 +3486,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // has now been moved out to runtime
     return config;
   }
-
+  
   public ServiceConfig load(ServiceConfig c) {
     super.load(c);
     RuntimeConfig config = (RuntimeConfig) c;
     setLocale(config.locale);
     setAllVirtual(config.virtual);
+
+    if (config.enableCli) {
+      startInteractiveMode();
+    }
+
     // setId(config.id); Very Fragile ! Cannot do this yet
     if (config.registry != null) {
       ServiceConfig sc = null;
@@ -3612,21 +3570,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         }
         si.startService();
       }
-
-      log.info("starting attach life-cycle");
-      // batch service life-cycle start
-      for (String name : config.registry) {
-        if (name.equals("runtime")) {
-          continue;
-        }
-        ServiceInterface si = getService(name);
-        if (si == null) {
-          warn("could not attach %s from config", name);
-          continue;
-        }
-
-        sc = configs.get(name);
-      } // attach-life-cycle
 
     } // if registry
     broadcastState();

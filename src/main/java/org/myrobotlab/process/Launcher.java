@@ -91,7 +91,7 @@ public class Launcher {
     // main class
     cmd.add("org.myrobotlab.service.Runtime");
 
-    options.fromLauncher = true;
+    options.fromLauncher = true; // from launcher meaningless now
 
     cmd.addAll(options.getOutputCmd());
 
