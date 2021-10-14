@@ -76,7 +76,9 @@
         
        -->
       <!-- from jenkins env vars -->
+      <version.prefix>1.1.</version.prefix>      
       <build.number>${BUILD_NUMBER}</build.number>
+      <version>${version.prefix}${build.number}</version>   
       <GitBranch>${git.branch}</GitBranch>
       <username>${NODE_NAME}</username>      
       <platform>${NODE_LABELS}</platform>      
@@ -434,6 +436,13 @@
 
 <!-- IntegratedMovement begin -->
 <!-- skipping fr.inmoov inmoov2 fr.inmoov-inmoov2-null null version/latest -->
+  <dependency>
+    <groupId>inmoov.fr</groupId>
+    <artifactId>jm3-model</artifactId>
+    <version>1.0.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
 <!-- IntegratedMovement end -->
 
 <!-- JFugue begin -->
@@ -1624,7 +1633,7 @@
                         </goals>
                         <configuration>
                             <finalName>myrobotlab</finalName>
-                            <!-- finalName>myrobotlab-${git.branch}-1.1.${build.number}</finalName -->
+                            <!-- finalName>myrobotlab-${git.branch}-${version}</finalName -->
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>myrobotlab-full</shadedClassifierName>
                             <minimizeJar>false</minimizeJar>
@@ -1638,8 +1647,8 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                         <manifestEntries>
                                           <Main-Class>org.myrobotlab.service.Runtime</Main-Class>
-                                          <Major-Version>1.1.${build.number}</Major-Version>
-                                          <Implementation-Version>1.1.${build.number}</Implementation-Version>                               
+                                          <Major-Version>${version}</Major-Version>
+                                          <Implementation-Version>${version}</Implementation-Version>                               
               
                         <Build-Version>${build.number}</Build-Version>
                         <Build-Time>${maven.build.timestamp}</Build-Time>
