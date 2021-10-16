@@ -34,6 +34,7 @@ public class AudioProcessor extends Thread {
   // internal registry ... i think
 
   int currentTrackCount = 0;
+  
   int samplesAdded = 0;
 
   double volume = 1.0f;
@@ -64,7 +65,10 @@ public class AudioProcessor extends Thread {
 
   public AudioData pause(boolean b) {
     if (b) {
-      isPlaying = false;
+      // isPlaying = false; <- DO NOT DO THIS !
+      // someone put this bug in - when a song is 'paused' its still playing
+      // ie - this needs to remain true otherwise it will not resume when
+      // requested !!      
     }
     if (currentAudioData != null) {
       if (b) {
@@ -74,6 +78,7 @@ public class AudioProcessor extends Thread {
           synchronized (currentAudioData.waitForLock) {
             currentAudioData.waitForLock.notifyAll();
             currentAudioData.waitForLock = null; // removing reference
+            isPlaying = true;
           }
         }
       }

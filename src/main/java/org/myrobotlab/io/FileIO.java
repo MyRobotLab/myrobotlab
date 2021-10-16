@@ -1562,5 +1562,17 @@ public class FileIO {
     }
     return String.format("%s%s%s", path1, FileIO.fs, path2);
   }
+  
+  public static String getExt(final String filename) {
+    if (filename == null) {
+      return null;
+    }
+    int pos = filename.lastIndexOf(".");
+    if (pos > -1) {
+      return filename.substring(pos + 1);
+    }
+    return null;
+  }
 
+  
 }
