@@ -7,6 +7,9 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.DiscordBotConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.data.Utterance;
+import org.myrobotlab.service.interfaces.UtteranceListener;
+import org.myrobotlab.service.interfaces.UtterancePublisher;
 import org.slf4j.Logger;
 
 import net.dv8tion.jda.api.JDA;
@@ -18,7 +21,7 @@ import net.dv8tion.jda.api.JDABuilder;
  * with channels.  
  * The bot user also needs a token that is used to authenticate and identify the bot. 
  */
-public class DiscordBot extends Service {
+public class DiscordBot extends Service implements UtterancePublisher, UtteranceListener {
 
   transient public final static Logger log = LoggerFactory.getLogger(DiscordBot.class);
 
@@ -57,10 +60,11 @@ public class DiscordBot extends Service {
     MrlDiscordBotListener discordListener = new MrlDiscordBotListener(brain, botName);
     jda.addEventListeners(discordListener);
     bot = jda.build();
+    // bot.get
     // TODO: what now?
   }
 
-  private void setBrain(ProgramAB brain) {
+  public void attach(ProgramAB brain) {
     // TODO how do we know that we've started...
     // we want to attach our peers properly.
     this.brain = brain;
@@ -89,13 +93,25 @@ public class DiscordBot extends Service {
     brain.setCurrentBotName("Alice");
 
     DiscordBot bot = (DiscordBot)Runtime.start("bot", "DiscordBot");
-    bot.setBrain(brain);
+    bot.attach(brain);
     bot.token = "YOUR_TOKEN_HERE"; 
     bot.connect("Mr. Turing");
 
     System.err.println("done.. press any key.");
     System.in.read();
 
+  }
+
+  @Override
+  public void onUtterance(Utterance utterance) throws Exception {
+    // We probably also care about which service produced the utterance?
+    // in addition to the channel that it came from.
+    // TODO: impl me. 
+  }
+
+  @Override
+  public Utterance publishUtteracnce(Utterance utterance) {
+    return utterance;
   }
 
 }
