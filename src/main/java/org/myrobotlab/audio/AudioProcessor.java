@@ -72,7 +72,7 @@ public class AudioProcessor extends Thread {
    * @return
    */
   public AudioData pause(boolean b) {
-    // isPlaying = false; <- DO NOT DO THIS !
+    // isPlaying = b; <- DO NOT DO THIS !
     // someone put this bug in - when a song is 'paused' its still playing
     // ie - this needs to remain true otherwise it will not resume when
     // requested !!      
