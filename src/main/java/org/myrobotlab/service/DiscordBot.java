@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.TextChannel;
 
 /**
  * Discord Bot to connect to a Discord server / channel 
@@ -57,7 +58,7 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
   public void connect(String botName) throws LoginException {
     // TOOD: create a bot and connect with our token
     JDABuilder jda = JDABuilder.createDefault(token);
-    MrlDiscordBotListener discordListener = new MrlDiscordBotListener(brain, botName);
+    MrlDiscordBotListener discordListener = new MrlDiscordBotListener(this, brain, botName);
     jda.addEventListeners(discordListener);
     bot = jda.build();
     // bot.get
@@ -106,11 +107,19 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
   public void onUtterance(Utterance utterance) throws Exception {
     // We probably also care about which service produced the utterance?
     // in addition to the channel that it came from.
-    // TODO: impl me. 
+    // TODO: impl me.
+    // Ok.. we need the bot to send a message back to the right channel here.
+    // TODO: the idea is if we receive an utterance (from ProgramAB..
+    // we should publish it to the proper channel.. 
+    String channel = utterance.channel;
+    TextChannel discordChannel = bot.getTextChannelById(channel);
+    // TODO: assume that I should this?
+    discordChannel.sendMessage(utterance.text);
+    
   }
 
   @Override
-  public Utterance publishUtteracnce(Utterance utterance) {
+  public Utterance publishUtterance(Utterance utterance) {
     return utterance;
   }
 

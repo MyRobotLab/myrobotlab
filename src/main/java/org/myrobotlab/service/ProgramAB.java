@@ -29,12 +29,15 @@ import org.myrobotlab.programab.Session;
 import org.myrobotlab.service.config.ProgramABConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
+import org.myrobotlab.service.data.Utterance;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.LogPublisher;
 import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
+import org.myrobotlab.service.interfaces.UtteranceListener;
+import org.myrobotlab.service.interfaces.UtterancePublisher;
 import org.slf4j.Logger;
 
 /**
@@ -50,7 +53,7 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class ProgramAB extends Service implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener {
+public class ProgramAB extends Service implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener, UtterancePublisher, UtteranceListener {
 
   /**
    * default file name that aiml categories comfing from matching a learnf tag 
@@ -1263,6 +1266,29 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     } catch (Exception e) {
       error(e);
     }
+  }
+
+  @Override
+  public void onUtterance(Utterance utterance) throws Exception {
+    String userName = utterance.username;
+    // set the session.
+    
+    
+    System.out.println("ON UTTERANCE!!!!!");
+    System.err.print(utterance);
+    // Should I respond?
+    
+    // Response resp = getResponse(userName,utterance.text);
+    // Now we have to send the message back..
+    
+    
+    
+  }
+
+  @Override
+  public Utterance publishUtterance(Utterance utterance) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

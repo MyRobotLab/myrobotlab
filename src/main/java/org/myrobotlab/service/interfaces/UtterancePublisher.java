@@ -15,7 +15,7 @@ public interface UtterancePublisher {
   public static String[] publishMethods = new String[] {"publishUtterance"};
 
   // Define the methods that an utterance publisher should have
-  public Utterance publishUtteracnce(Utterance utterance);
+  public Utterance publishUtterance(Utterance utterance);
 
   // Default way to attach an utterance listener so implementing classes need 
   // not worry about these details.
