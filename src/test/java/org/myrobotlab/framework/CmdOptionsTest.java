@@ -34,7 +34,6 @@ public class CmdOptionsTest {
     // validate defaults
     assertNull(options.addKeys);
     assertEquals(false, options.autoUpdate);
-    assertEquals(false, options.fromLauncher);
     assertNull(options.config);
     assertNull(options.connect);
     assertEquals(0, options.services.size());
@@ -43,7 +42,6 @@ public class CmdOptionsTest {
 
     assertEquals("raspi", options.id);
     assertEquals(4, options.services.size());
-    assertEquals(false, options.fromLauncher);
 
     List<String> cmd = options.getOutputCmd();
     assertTrue(contains(cmd, "webgui"));

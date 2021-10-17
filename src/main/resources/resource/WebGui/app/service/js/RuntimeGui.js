@@ -272,7 +272,9 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         console.info('startConfig')
         if ($scope.selectedConfig.length) {
             for (let i = 0; i < $scope.selectedConfig.length; ++i) {
-                msg.sendTo('runtime', 'load', 'data/config/' + $scope.selectedConfig[i] + '/runtime.yml')
+                // msg.sendTo('runtime', 'load', 'data/config/' + $scope.selectedConfig[i] + '/runtime.yml')
+                msg.sendTo('runtime', 'setConfigName', $scope.selectedConfig[i])
+                msg.sendTo('runtime', 'load', 'runtime')
             }
         }
     }
@@ -281,7 +283,8 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         console.info('releaseConfig')
         if ($scope.selectedConfig && $scope.selectedConfig.length) {
             for (let i = 0; i < $scope.selectedConfig.length; ++i) {
-                msg.sendTo('runtime', 'releaseConfig', 'data/config/' + $scope.selectedConfig[i] + '/runtime.yml')
+                msg.sendTo('runtime', 'setConfigName', $scope.selectedConfig[i])
+                msg.sendTo('runtime', 'releaseConfig', 'runtime')
             }
         }
     }

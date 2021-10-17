@@ -66,7 +66,8 @@ public class CmdOptions {
 
   // if --from-launcher knows to createAndStart service on -s
   @Option(names = { "--from-launcher" }, description = "prevents starting in interactive mode - reading from stdin")
-  public boolean fromLauncher = false;
+  @Deprecated /* no more java launcher - we use scripts now */
+  public boolean fromLauncher = true; // from launcher meaningless now
 
   @Option(names = { "-h", "-?", "--help" }, description = "shows help")
   public boolean help = false;
@@ -179,9 +180,6 @@ public class CmdOptions {
       }
     }
 
-    if (fromLauncher) {
-      cmd.add("--from-launcher");
-    }
 
     if (help) {
       cmd.add("-h");

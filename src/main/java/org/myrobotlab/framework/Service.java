@@ -1374,13 +1374,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   protected ServiceConfig initConfig(ServiceConfig config) {
     config.type = getSimpleName();
-
     return config;
   }
 
   public ServiceConfig load() throws IOException {
-    ServiceConfig config = Runtime.getInstance().load(getName());
-    load(config);
+    ServiceConfig config = Runtime.load(getName());
     return config;
   }
 
