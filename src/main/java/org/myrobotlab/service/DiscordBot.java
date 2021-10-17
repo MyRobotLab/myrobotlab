@@ -65,12 +65,6 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     // TODO: what now?
   }
 
-  public void attach(ProgramAB brain) {
-    // TODO how do we know that we've started...
-    // we want to attach our peers properly.
-    this.brain = brain;
-  }
-
   /**
    * @return the token
    */
@@ -86,21 +80,21 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
   }
 
   public static void main(String[] args) throws Exception {
-
     // Brief example of starting a programab chatbot and connecting it to discord
     LoggingFactory.getInstance().setLevel("INFO");
     // Let's create a programab instance.
     ProgramAB brain = (ProgramAB)Runtime.start("brain", "ProgramAB");
     brain.setCurrentBotName("Alice");
-
     DiscordBot bot = (DiscordBot)Runtime.start("bot", "DiscordBot");
-    bot.attach(brain);
+    
+    bot.attachUtteranceListener(brain.getName());
+    brain.attachUtteranceListener(bot.getName());
+    
+    // bot.attach(brain);
     bot.token = "YOUR_TOKEN_HERE"; 
     bot.connect("Mr. Turing");
-
     System.err.println("done.. press any key.");
     System.in.read();
-
   }
 
   @Override
@@ -111,9 +105,11 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     // Ok.. we need the bot to send a message back to the right channel here.
     // TODO: the idea is if we receive an utterance (from ProgramAB..
     // we should publish it to the proper channel.. 
+    System.err.println("Utterance received from programab perhaps? " + utterance);
     String channel = utterance.channel;
     TextChannel discordChannel = bot.getTextChannelById(channel);
     // TODO: assume that I should this?
+    // TODO: how do i get the channel back so I can respond to it?!  seesh..
     discordChannel.sendMessage(utterance.text);
     
   }

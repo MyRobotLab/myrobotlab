@@ -48,66 +48,67 @@ public class MrlDiscordBotListener extends ListenerAdapter {
     utterance.text = event.getMessage().getContentDisplay();
     // TODO: list of other mentions in the utterance.
     // publish this utterance.  we should see it arrive at programab's onUtterance method.
-    bot.invoke("publishUtterance", utterance);
-
+    
     // TODO: what do  I need to get a handle back to the channel
     MessageChannel channel = event.getChannel();
     //    channel.getId();
     //    channel.getType();
     utterance.channel = channel.getId();
-    // TODO: cleanup this message
-    System.err.println("channel... " + channel);
+    utterance.channelType = channel.getType();
+    
+    System.err.println("Invoking publishUtterance(" + utterance + ")");
+    bot.invoke("publishUtterance", utterance);
 
-    if (event.getAuthor().isBot() && talkToBots) {
-      log.info("Not responding to bots.");
-      return;
-    }
-    String userName = event.getAuthor().getName();
-    log.info("Message Received from " + userName + " : " + event.getMessage().getContentDisplay());
-    // Don't talk to myself!
-    if (userName.contentEquals(botName)) {
-      // System.out.println("not me..");
-      return;
-    }
-    boolean shouldIRespond = false;
-    // always respond to direct messages.
-    if (ChannelType.PRIVATE.equals(event.getChannelType())) {
-      shouldIRespond = true;
-    } else {
-      if (!event.getAuthor().isBot()) {
-        // TODO: don't talk to bots.. it won't go well..
-        List<User> mentioned = event.getMessage().getMentionedUsers();
-        for (User u : mentioned) {
-          if (u.getName().equals(botName)) { 
-            shouldIRespond = true;
-            break;
-          }
-        }
-      } 
-
-    }
-
-    // TODO: is there a better way to test for this?
-    if (shouldIRespond) {
-      log.info("I should respond!");
-      // let's respond to the user to their utterance.
-      String utteranceDisp = event.getMessage().getContentDisplay();
-      // let's strip the @+botname from the beginning of the utterance i guess.
-      utteranceDisp = utteranceDisp.replace("@" + botName, "");
-      Response resp = respond(userName, utteranceDisp);
-      // Ok.. now what? respond to the user ...
-      if (!StringUtils.isEmpty(resp.msg) ) {
-        event.getChannel().sendMessage(resp.msg).queue();
-      } else {
-        log.info("No Response from the chatbot brain... now what?");
-      }
-    }
+    //    if (event.getAuthor().isBot() && talkToBots) {
+    //      log.info("Not responding to bots.");
+    //      return;
+    //    }
+    //    String userName = event.getAuthor().getName();
+    //    log.info("Message Received from " + userName + " : " + event.getMessage().getContentDisplay());
+    //    // Don't talk to myself!
+    //    if (userName.contentEquals(botName)) {
+    //      // System.out.println("not me..");
+    //      return;
+    //    }
+    //    boolean shouldIRespond = false;
+    //    // always respond to direct messages.
+    //    if (ChannelType.PRIVATE.equals(event.getChannelType())) {
+    //      shouldIRespond = true;
+    //    } else {
+    //      if (!event.getAuthor().isBot()) {
+    //        // TODO: don't talk to bots.. it won't go well..
+    //        List<User> mentioned = event.getMessage().getMentionedUsers();
+    //        for (User u : mentioned) {
+    //          if (u.getName().equals(botName)) { 
+    //            shouldIRespond = true;
+    //            break;
+    //          }
+    //        }
+    //      } 
+    //
+    //    }
+    //
+    //    // TODO: is there a better way to test for this?
+    //    if (shouldIRespond) {
+    //      log.info("I should respond!");
+    //      // let's respond to the user to their utterance.
+    //      String utteranceDisp = event.getMessage().getContentDisplay();
+    //      // let's strip the @+botname from the beginning of the utterance i guess.
+    //      utteranceDisp = utteranceDisp.replace("@" + botName, "");
+    //      Response resp = respond(userName, utteranceDisp);
+    //      // Ok.. now what? respond to the user ...
+    //      if (!StringUtils.isEmpty(resp.msg) ) {
+    //        event.getChannel().sendMessage(resp.msg).queue();
+    //      } else {
+    //        log.info("No Response from the chatbot brain... now what?");
+    //      }
+    //    }
   }
 
-  private Response respond(String userName, String utterance) {
-    log.info("Get Response " + userName + " for: " + utterance);
-    Response resp  = brain.getResponse(userName, utterance);
-    return resp;    
-  }
+  //  private Response respond(String userName, String utterance) {
+  //    log.info("Get Response " + userName + " for: " + utterance);
+  //    Response resp  = brain.getResponse(userName, utterance);
+  //    return resp;    
+  //  }
 
 }
