@@ -63,13 +63,19 @@ public class AudioProcessor extends Thread {
     this.track = track;
   }
 
+  /**
+   * Pause the current playing file - if it is paused - it is "still considered" to
+   * be playing so isPlaying needs to remain true (otherwise the file/audio processor
+   * will completely stop)
+   * 
+   * @param b - to pause or not
+   * @return
+   */
   public AudioData pause(boolean b) {
-    if (b) {
-      // isPlaying = false; <- DO NOT DO THIS !
-      // someone put this bug in - when a song is 'paused' its still playing
-      // ie - this needs to remain true otherwise it will not resume when
-      // requested !!      
-    }
+    // isPlaying = false; <- DO NOT DO THIS !
+    // someone put this bug in - when a song is 'paused' its still playing
+    // ie - this needs to remain true otherwise it will not resume when
+    // requested !!      
     if (currentAudioData != null) {
       if (b) {
         currentAudioData.waitForLock = new Object();
