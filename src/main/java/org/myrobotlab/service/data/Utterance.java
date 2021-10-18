@@ -1,7 +1,5 @@
 package org.myrobotlab.service.data;
 
-import net.dv8tion.jda.api.entities.ChannelType;
-
 /**
  * This represents an utterance.  It is a represents a message from one user to another.
  * 
@@ -13,8 +11,8 @@ public class Utterance {
   public boolean isBot;
   // Where the utterance was heard/created.  (could be a private/direct message, or it could be to a channel / group)
   public String channel;
-  // TODO: our own enum
-  public ChannelType channelType;
+  // PUBLIC / PRIVATE 
+  public String channelType;
   // The text of the utterance
   public String text;
   @Override

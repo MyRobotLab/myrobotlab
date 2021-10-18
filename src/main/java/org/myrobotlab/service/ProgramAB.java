@@ -41,9 +41,6 @@ import org.myrobotlab.service.interfaces.UtteranceListener;
 import org.myrobotlab.service.interfaces.UtterancePublisher;
 import org.slf4j.Logger;
 
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.User;
-
 /**
  * Program AB service for MyRobotLab Uses AIML 2.0 to create a ChatBot This is a
  * reboot of the Old AIML spec to be more 21st century.
@@ -1296,7 +1293,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     
     boolean shouldIRespond = false;
     // always respond to direct messages.
-    if (ChannelType.PRIVATE.equals(utterance.channelType)) {
+    if ("PRIVATE".equals(utterance.channelType)) {
       shouldIRespond = true;
     } else {
       if (!utterance.isBot) {
@@ -1307,7 +1304,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
           shouldIRespond = true;
         }
       } 
-
     }
 
     // TODO: is there a better way to test for this?

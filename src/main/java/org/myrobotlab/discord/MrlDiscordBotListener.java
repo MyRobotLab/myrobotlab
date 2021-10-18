@@ -25,21 +25,16 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 public class MrlDiscordBotListener extends ListenerAdapter {
 
   transient public final static Logger log = LoggerFactory.getLogger(MrlDiscordBotListener.class);
-  private final String botName;
-  private final ProgramAB brain;
   private final DiscordBot bot;
   public boolean talkToBots = false;
 
-  public MrlDiscordBotListener(DiscordBot bot, ProgramAB brain, String botName) {
+  public MrlDiscordBotListener(DiscordBot bot) {
     this.bot = bot;
-    this.brain = brain;
-    this.botName = botName;
   }
 
   @Override
   public void onMessageReceived(MessageReceivedEvent event) {
     super.onMessageReceived(event);
-
     // Create an utterance object from the message.
     Utterance utterance = new Utterance();
     utterance.username = event.getAuthor().getName();
@@ -47,68 +42,12 @@ public class MrlDiscordBotListener extends ListenerAdapter {
     // TODO: maybe we want the raw content? maybe the displayed content?
     utterance.text = event.getMessage().getContentDisplay();
     // TODO: list of other mentions in the utterance.
-    // publish this utterance.  we should see it arrive at programab's onUtterance method.
-    
-    // TODO: what do  I need to get a handle back to the channel
+    // get the response channel and add it to the utterance 
     MessageChannel channel = event.getChannel();
-    //    channel.getId();
-    //    channel.getType();
     utterance.channel = channel.getId();
-    utterance.channelType = channel.getType();
-    
-    System.err.println("Invoking publishUtterance(" + utterance + ")");
+    utterance.channelType = channel.getType().toString();
+    // publish the utterance!
     bot.invoke("publishUtterance", utterance);
-
-    //    if (event.getAuthor().isBot() && talkToBots) {
-    //      log.info("Not responding to bots.");
-    //      return;
-    //    }
-    //    String userName = event.getAuthor().getName();
-    //    log.info("Message Received from " + userName + " : " + event.getMessage().getContentDisplay());
-    //    // Don't talk to myself!
-    //    if (userName.contentEquals(botName)) {
-    //      // System.out.println("not me..");
-    //      return;
-    //    }
-    //    boolean shouldIRespond = false;
-    //    // always respond to direct messages.
-    //    if (ChannelType.PRIVATE.equals(event.getChannelType())) {
-    //      shouldIRespond = true;
-    //    } else {
-    //      if (!event.getAuthor().isBot()) {
-    //        // TODO: don't talk to bots.. it won't go well..
-    //        List<User> mentioned = event.getMessage().getMentionedUsers();
-    //        for (User u : mentioned) {
-    //          if (u.getName().equals(botName)) { 
-    //            shouldIRespond = true;
-    //            break;
-    //          }
-    //        }
-    //      } 
-    //
-    //    }
-    //
-    //    // TODO: is there a better way to test for this?
-    //    if (shouldIRespond) {
-    //      log.info("I should respond!");
-    //      // let's respond to the user to their utterance.
-    //      String utteranceDisp = event.getMessage().getContentDisplay();
-    //      // let's strip the @+botname from the beginning of the utterance i guess.
-    //      utteranceDisp = utteranceDisp.replace("@" + botName, "");
-    //      Response resp = respond(userName, utteranceDisp);
-    //      // Ok.. now what? respond to the user ...
-    //      if (!StringUtils.isEmpty(resp.msg) ) {
-    //        event.getChannel().sendMessage(resp.msg).queue();
-    //      } else {
-    //        log.info("No Response from the chatbot brain... now what?");
-    //      }
-    //    }
   }
-
-  //  private Response respond(String userName, String utterance) {
-  //    log.info("Get Response " + userName + " for: " + utterance);
-  //    Response resp  = brain.getResponse(userName, utterance);
-  //    return resp;    
-  //  }
 
 }
