@@ -88,8 +88,9 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
-
         $scope.pickedColor = 'rgb('+ service.red +', '+ service.green +', '+ service.blue +')'
+        $scope.rgb = [service.red, service.green, service.blue]
+        $scope.color = $scope.pickedColor
 
         if ($scope.service.pixelCount != _self.uiPixelCount) {
             $scope.drawPixels()

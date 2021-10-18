@@ -168,6 +168,11 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
    * current selected green value
    */
   protected int green = 120;
+  
+  /**
+   * white if available
+   */
+  protected int white = 0;
 
   /**
    * name of controller currently attached to
@@ -283,7 +288,6 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
   public void attachSpeechSynthesis(SpeechSynthesis mouth) {
     subscribe(mouth.getName(), "publishStartSpeaking");
     subscribe(mouth.getName(), "publishEndSpeaking");
-    // equalizer();
   }
 
   @Override
@@ -344,14 +348,10 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
   }
 
   public void equalizer() {
-    equalizer(null, null, null, null, null, null);
+    equalizer(null, null);
   }
 
-  public void equalizer(int r, int g, int b) {
-    equalizer(null, null, r, g, b, null);
-  }
-
-  public void equalizer(Long wait_ms_per_frame, Integer range, Integer r, Integer g, Integer b, Integer w) {
+  public void equalizer(Long wait_ms_per_frame, Integer range) {
 
     if (wait_ms_per_frame == null) {
       wait_ms_per_frame = 25L;
@@ -361,37 +361,23 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
       range = 25;
     }
 
-    if (r == null) {
-      r = 110;
-    }
-
-    if (g == null) {
-      g = 110;
-    }
-
-    if (b == null) {
-      b = 0;
-    }
-
-    if (w == null) {
-      w = 0;
-    }
-
     Random rand = new Random();
-
     int c = rand.nextInt(range);
 
-    fillMatrix(c, c, 0);
+    fillMatrix(red, green, blue, white);
+    
     if (c < 18) {
       setMatrix(0, 0, 0, 0);
       setMatrix(7, 0, 0, 0);
     }
 
-    fillMatrix(c, c, 0);
+    fillMatrix(red, green, blue, white);
+    
     if (c < 16) {
       setMatrix(0, 0, 0, 0);
       setMatrix(7, 0, 0, 0);
     }
+    
     if (c < 12) {
       setMatrix(1, 0, 0, 0);
       setMatrix(6, 0, 0, 0);

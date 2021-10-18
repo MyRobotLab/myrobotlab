@@ -25,6 +25,7 @@ import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AudioListener;
 import org.myrobotlab.service.interfaces.KeyConsumer;
+import org.myrobotlab.service.interfaces.SpeechListener;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.SpeechSynthesisControl;
@@ -35,9 +36,11 @@ import org.slf4j.Logger;
 public abstract class AbstractSpeechSynthesis extends Service implements SpeechSynthesis, TextListener, KeyConsumer, AudioListener {
 
   private static final long serialVersionUID = 1L;
+  
   public final static Logger log = LoggerFactory.getLogger(AbstractSpeechSynthesis.class);
 
   static String globalFileCacheDir = "audioFile";
+  
   public static final String journalFilename = "journal.txt";
 
   /**
@@ -368,8 +371,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       attachTextPublisher((TextPublisher) attachable);
     } else if (attachable instanceof AudioFile) {
       audioFile = (AudioFile) attachable;
+    } else if (attachable instanceof SpeechListener) {
+      addListener("publishStartSpeaking", attachable.getName());
+      addListener("publishEndSpeaking", attachable.getName());
     } else {
-      log.error("don't know how to attach a %s", attachable.getName());
+      error("don't know how to attach a %s", attachable.getName());
     }
   }
 
