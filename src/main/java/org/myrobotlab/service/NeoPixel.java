@@ -1,6 +1,5 @@
 /**
  *                    
- * @author grog (at) myrobotlab.org
  *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
@@ -43,10 +42,11 @@ import org.myrobotlab.service.config.NeoPixelConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
+import org.myrobotlab.service.interfaces.SpeechListener;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
-public class NeoPixel extends Service implements NeoPixelControl {
+public class NeoPixel extends Service implements NeoPixelControl, SpeechListener {
 
   /**
    * Thread to do animations Java side and push the changing of pixels to the
@@ -55,6 +55,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   private class AnimationRunner implements Runnable {
 
     boolean running = false;
+    
     private transient Thread thread = null;
 
     @Override
@@ -83,6 +84,11 @@ public class NeoPixel extends Service implements NeoPixelControl {
       running = false;
       thread = null;
     }
+  }
+  
+  public void releaseService() {
+    super.releaseService();
+    animationRunner.stop();
   }
 
   public static class Pixel {
@@ -144,7 +150,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   private static final long serialVersionUID = 1L;
 
   /**
-   * thread for doing offboard and in memory animations
+   * thread for doing off board and in memory animations
    */
   protected final AnimationRunner animationRunner;
 
@@ -399,6 +405,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
     writeMatrix();
 
   }
+  
+  public void fill(int r, int g, int b) {
+    fill(0, pixelCount, r, g, b, null);
+  }
 
   public void fill(int beginAddress, int count, int r, int g, int b) {
     fill(beginAddress, count, r, g, b, null);
@@ -525,9 +535,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
   }
 
   // @Override
-  public String onStartSpeaking(String utterance) {
+  public void onStartSpeaking(String utterance) {
     startAnimation();
-    return utterance;
   }
 
   public void playAnimation(String animation) {

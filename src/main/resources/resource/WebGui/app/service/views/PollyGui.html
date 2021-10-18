@@ -5,14 +5,25 @@
     </span>
 </div>
 <div class="row">
-    <ui-select class="col-lg-3 pull-left" ng-model="newVoice.selected" ng-change="msg.setVoice(newVoice.selected.key)" theme="bootstrap" style="width: 15em">
-        <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;voice&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{$select.selected.value.name}} {{$select.selected.value.locale.tag}} {{$select.selected.value.gender}}</ui-select-match>
-        <ui-select-choices repeat="(key, container) in service.voices | filter: $select.search">{{container.value.name}} {{container.value.locale.tag}} {{container.value.gender}}</ui-select-choices>
-    </ui-select>
     <div class="col-md-4">
-       <form class="form-inline">
-        <input class="form-control" type="text" ng-model="text" ng-enter="speak(text);text=''" placeholder="enter text">
-        <button class="btn btn-default form-control" ng-click="speak(text);text=''">Speak</button>
+        <div class="btn-group" uib-dropdown>
+            <button type="button" class="btn btn-default">{{service.voice.name}} - {{service.voice.locale.tag}} - {{service.voice.gender}}</button>
+            <button type="button" class="btn btn-default" uib-dropdown-toggle>
+                <span class="caret"></span>
+            </button>
+            <ul uib-dropdown-menu>
+                <li ng-repeat="(key, container) in service.voices">
+                    <a href="" ng-click="msg.setVoice(key);msg.broadcastState()">{{key}} - {{container.locale.tag}} - {{container.gender}}</a>
+                </li>
+            </ul>
+        </div>
+        <form class="form-inline">
+            autoclear<input type="checkbox" ng-model="autoClear"/>
+            <input class="form-control" type="text" ng-model="text" ng-enter="speak(text)" placeholder="enter text">
+            <!--             <textarea class="form-control" type="text" ng-model="text" ng-enter="speak(text);text=''" placeholder="enter text">
+            </textarea>
+             -->
+            <button class="btn btn-default form-control" ng-click="speak(text)">Speak</button>
         </form>
     </div>
 </div>
