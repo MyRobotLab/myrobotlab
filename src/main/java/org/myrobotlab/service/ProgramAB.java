@@ -1306,13 +1306,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
         if (utterance.text.contains(botName)) {
           shouldIRespond = true;
         }
-        //        List<User> mentioned = event.getMessage().getMentionedUsers();
-        //        for (User u : mentioned) {
-        //          if (u.getName().equals(botName)) { 
-        //            shouldIRespond = true;
-        //            break;
-        //          }
-        //        }
       } 
 
     }
@@ -1338,7 +1331,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
         // send the message back to all utterance listeners
         // TODO: selectively only send this message back to the
         // discordbot (utterance listener ) that sent the message.
-        invoke("publishUtterance", utterance);
+        invoke("publishUtterance", response);
 
       } else {
         log.info("No Response from the chatbot brain... now what?");

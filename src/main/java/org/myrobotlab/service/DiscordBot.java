@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 /**
@@ -90,6 +92,7 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     bot.attachUtteranceListener(brain.getName());
     brain.attachUtteranceListener(bot.getName());
     
+    
     // bot.attach(brain);
     bot.token = "YOUR_TOKEN_HERE"; 
     bot.connect("Mr. Turing");
@@ -105,12 +108,29 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     // Ok.. we need the bot to send a message back to the right channel here.
     // TODO: the idea is if we receive an utterance (from ProgramAB..
     // we should publish it to the proper channel.. 
-    System.err.println("Utterance received from programab perhaps? " + utterance);
-    String channel = utterance.channel;
-    TextChannel discordChannel = bot.getTextChannelById(channel);
-    // TODO: assume that I should this?
-    // TODO: how do i get the channel back so I can respond to it?!  seesh..
-    discordChannel.sendMessage(utterance.text);
+    
+    if (ChannelType.PRIVATE.equals(utterance.channelType)) {
+      // Private message channel.  
+      PrivateChannel discordChannel = bot.getPrivateChannelById(utterance.channel);
+      // TODO: assume that I should this?
+      // TODO: how do i get the channel back so I can respond to it?!  seesh..
+      discordChannel.sendMessage(utterance.text).queue();
+
+    } else {
+      TextChannel discordChannel = bot.getTextChannelById(utterance.channel);
+      discordChannel.sendMessage(utterance.text).queue();
+      // TODO: only public channels? or any channel?
+    }
+    //    System.err.println("Utterance received from programab perhaps? " + utterance);
+    //    String channel = utterance.channel;
+    //    // TextChannel discordChannel = bot.getTextChannelById(channel);
+    //    for (TextChannel cs : bot.getTextChannels()) {
+    //      System.out.println("Channel : " + cs);
+    //    }
+    //    PrivateChannel discordChannel = bot.getPrivateChannelById(channel);
+    //    // TODO: assume that I should this?
+    //    // TODO: how do i get the channel back so I can respond to it?!  seesh..
+    //    discordChannel.sendMessage(utterance.text).queue();
     
   }
 
