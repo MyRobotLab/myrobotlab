@@ -28,6 +28,7 @@ public class MrlDiscordBotListener extends ListenerAdapter {
   private final DiscordBot bot;
   public boolean talkToBots = false;
 
+  
   public MrlDiscordBotListener(DiscordBot bot) {
     this.bot = bot;
   }
@@ -37,16 +38,21 @@ public class MrlDiscordBotListener extends ListenerAdapter {
     super.onMessageReceived(event);
     // Create an utterance object from the message.
     Utterance utterance = new Utterance();
+    // Author of the message.
     utterance.username = event.getAuthor().getName();
     utterance.isBot = event.getAuthor().isBot();
     // TODO: maybe we want the raw content? maybe the displayed content?
+    // TODO: replace the bot name if it occurs at the beginning of the utterance.
     utterance.text = event.getMessage().getContentDisplay();
     // TODO: list of other mentions in the utterance.
     // get the response channel and add it to the utterance 
     MessageChannel channel = event.getChannel();
     utterance.channel = channel.getId();
     utterance.channelType = channel.getType().toString();
+    // copy the name of the bot in the channel that is being used to communicate.
+    utterance.channelBotName = bot.discordBotName;
     // publish the utterance!
+    // TODO: don't publish the message if it came from the bots own self!
     bot.invoke("publishUtterance", utterance);
   }
 

@@ -1277,8 +1277,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     boolean talkToBots = false;
     // TODO: reconcile having different name between the discord bot username 
     // and the programab bot name.  Mr. Turing is not actually Alice.. and vice versa.
-    String botName = "Mr. Turing";
+    String botName = utterance.channelBotName;
 
+    
     // prevent bots going off the rails
     if (utterance.isBot && talkToBots) {
       log.info("Not responding to bots.");
@@ -1324,11 +1325,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
         // Copy these from the utterance we received
         response.channel = utterance.channel;
         response.channelType = utterance.channelType;
+        response.channelBotName = utterance.channelBotName;
         // send the message back to all utterance listeners
         // TODO: selectively only send this message back to the
         // discordbot (utterance listener ) that sent the message.
         invoke("publishUtterance", response);
-
       } else {
         log.info("No Response from the chatbot brain... now what?");
       }

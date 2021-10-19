@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 
@@ -30,8 +29,8 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
 
   private static final long serialVersionUID = 1L;
   private transient JDA bot;
-  public transient ProgramAB brain;
-
+  public String discordBotName;
+  
   String token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
   public DiscordBot(String reservedKey, String inId) {
@@ -57,13 +56,14 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     return config;
   }
 
-  public void connect(String botName) throws LoginException {
+  public void connect() throws LoginException {
     // TOOD: create a bot and connect with our token
     JDABuilder jda = JDABuilder.createDefault(token);
     MrlDiscordBotListener discordListener = new MrlDiscordBotListener(this);
     jda.addEventListeners(discordListener);
     bot = jda.build();
-    // TODO: a hook to properly shutdown the bot i guess?
+    discordBotName = bot.getSelfUser().getName();
+    
   }
 
   /**
@@ -101,10 +101,8 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     
     bot.attachUtteranceListener(brain.getName());
     brain.attachUtteranceListener(bot.getName());
-    
-    // bot.attach(brain);
     bot.token = "YOUR_TOKEN_HERE"; 
-    bot.connect("Mr. Turing");
+    bot.connect();
     //System.err.println("done.. press any key.");
     // System.in.read();
   }
@@ -117,6 +115,7 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     // Ok.. we need the bot to send a message back to the right channel here.
     // TODO: the idea is if we receive an utterance (from ProgramAB..
     // we should publish it to the proper channel.. 
+    
     if ("PRIVATE".equals(utterance.channelType)) {
       // Private message channel.  
       PrivateChannel discordChannel = bot.getPrivateChannelById(utterance.channel);

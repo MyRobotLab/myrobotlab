@@ -15,11 +15,13 @@ public class Utterance {
   public String channelType;
   // The text of the utterance
   public String text;
+  public String channelBotName;
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((channel == null) ? 0 : channel.hashCode());
+    result = prime * result + ((channelBotName == null) ? 0 : channelBotName.hashCode());
     result = prime * result + ((channelType == null) ? 0 : channelType.hashCode());
     result = prime * result + (isBot ? 1231 : 1237);
     result = prime * result + ((text == null) ? 0 : text.hashCode());
@@ -40,7 +42,15 @@ public class Utterance {
         return false;
     } else if (!channel.equals(other.channel))
       return false;
-    if (channelType != other.channelType)
+    if (channelBotName == null) {
+      if (other.channelBotName != null)
+        return false;
+    } else if (!channelBotName.equals(other.channelBotName))
+      return false;
+    if (channelType == null) {
+      if (other.channelType != null)
+        return false;
+    } else if (!channelType.equals(other.channelType))
       return false;
     if (isBot != other.isBot)
       return false;
@@ -58,9 +68,11 @@ public class Utterance {
   }
   @Override
   public String toString() {
-    // TODO: a batter tostring
-    return "Utterance [username=" + username + ", isBot=" + isBot + ", channel=" + channel + ", channelType=" + channelType + ", text=" + text + "]";
+    // TODO: a better tostring.
+    return "Utterance [username=" + username + ", isBot=" + isBot + ", channel=" + channel + ", channelType=" + channelType + ", text=" + text + ", channelBotName="
+        + channelBotName + "]";
   }
   
+
 
 }
