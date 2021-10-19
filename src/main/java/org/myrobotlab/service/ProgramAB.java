@@ -16,6 +16,7 @@ import org.alicebot.ab.Category;
 import org.alicebot.ab.Chat;
 import org.alicebot.ab.MagicBooleans;
 import org.alicebot.ab.ProgramABListener;
+import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.image.Util;
@@ -29,12 +30,15 @@ import org.myrobotlab.programab.Session;
 import org.myrobotlab.service.config.ProgramABConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
+import org.myrobotlab.service.data.Utterance;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.LogPublisher;
 import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
+import org.myrobotlab.service.interfaces.UtteranceListener;
+import org.myrobotlab.service.interfaces.UtterancePublisher;
 import org.slf4j.Logger;
 
 /**
@@ -50,7 +54,7 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class ProgramAB extends Service implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener {
+public class ProgramAB extends Service implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener, UtterancePublisher, UtteranceListener {
 
   /**
    * default file name that aiml categories comfing from matching a learnf tag 
@@ -1263,6 +1267,78 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     } catch (Exception e) {
       error(e);
     }
+  }
+
+  @Override
+  public void onUtterance(Utterance utterance) throws Exception {
+
+    log.info("Utterance Received " + utterance);
+
+    boolean talkToBots = false;
+    // TODO: reconcile having different name between the discord bot username 
+    // and the programab bot name.  Mr. Turing is not actually Alice.. and vice versa.
+    String botName = utterance.channelBotName;
+
+    
+    // prevent bots going off the rails
+    if (utterance.isBot && talkToBots) {
+      log.info("Not responding to bots.");
+      return;
+    }
+    
+    // Don't talk to myself, though I should be a bot..
+    if (utterance.username.contentEquals(botName)) {
+      log.info("Don't talk to myself.");
+      return;
+    }
+    
+    boolean shouldIRespond = false;
+    // always respond to direct messages.
+    if ("PRIVATE".equals(utterance.channelType)) {
+      shouldIRespond = true;
+    } else {
+      if (!utterance.isBot) {
+        // TODO: don't talk to bots.. it won't go well..
+        // TODO: the discord api can provide use the list of mentioned users.
+        // for now.. we'll just see if we see Mr. Turing as a substring.
+        if (utterance.text.contains(botName)) {
+          shouldIRespond = true;
+        }
+      } 
+    }
+
+    // TODO: is there a better way to test for this?
+    if (shouldIRespond) {
+      log.info("I should respond!");
+      // let's respond to the user to their utterance.
+      String utteranceDisp = utterance.text;
+      // let's strip the @+botname from the beginning of the utterance i guess.
+      // Strip the botname from the utterance passed to programab.
+      utteranceDisp = utteranceDisp.replace("@" + botName, "");
+      Response resp = getResponse(utterance.username, utteranceDisp);
+      if (!StringUtils.isEmpty(resp.msg) ) {
+        // Ok.. now what? respond to the user ...
+        Utterance response = new Utterance();
+        response.username = resp.botName;
+        response.text = resp.msg;
+        response.isBot = true;
+        // Copy these from the utterance we received
+        response.channel = utterance.channel;
+        response.channelType = utterance.channelType;
+        response.channelBotName = utterance.channelBotName;
+        // send the message back to all utterance listeners
+        // TODO: selectively only send this message back to the
+        // discordbot (utterance listener ) that sent the message.
+        invoke("publishUtterance", response);
+      } else {
+        log.info("No Response from the chatbot brain... now what?");
+      }
+    }
+  }
+
+  @Override
+  public Utterance publishUtterance(Utterance utterance) {
+    return utterance;
   }
 
 }

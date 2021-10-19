@@ -168,6 +168,9 @@ public abstract class Repo {
       // org.restlet.jee .. not sure where
       remotes.add(new RemoteRepo("maven-restlet", "https://maven.restlet.talend.com", "Public online Restlet repository"));
 
+      // This is the repo for the Java Discord API for the Discord Bot service lives.
+      remotes.add(new RemoteRepo("dv8tion", "https://m2.dv8tion.net/releases", "Discord Bot - m2-dv8tion"));
+      
       load();
     } catch (Exception e) {
       log.error(e.getMessage(), e);

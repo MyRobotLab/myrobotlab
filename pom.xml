@@ -76,9 +76,9 @@
         
        -->
       <!-- from jenkins env vars -->
-      <version.prefix>1.1.</version.prefix>
+      <version.prefix>1.1.</version.prefix>      
       <build.number>${BUILD_NUMBER}</build.number>
-      <version>${version.prefix}${build.number}</version>
+      <version>${version.prefix}${build.number}</version>   
       <GitBranch>${git.branch}</GitBranch>
       <username>${NODE_NAME}</username>      
       <platform>${NODE_LABELS}</platform>      
@@ -139,6 +139,12 @@
           <id>maven-restlet</id>
           <name>maven-restlet</name>
           <url>https://maven.restlet.talend.com</url>
+        </repository>
+        <!-- Discord Bot - m2-dv8tion  -->
+        <repository>
+          <id>dv8tion</id>
+          <name>dv8tion</name>
+          <url>https://m2.dv8tion.net/releases</url>
         </repository>
      </repositories>
   
@@ -306,6 +312,21 @@
   </dependency>
 <!-- Deeplearning4j end -->
 
+<!-- DiscordBot begin -->
+  <dependency>
+    <groupId>net.dv8tion</groupId>
+    <artifactId>JDA</artifactId>
+    <version>4.3.0_277</version>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>net.java.dev.jna</groupId>
+          <artifactId>jna</artifactId>
+        </exclusion>
+      </exclusions>
+  </dependency>
+<!-- DiscordBot end -->
+
 <!-- DocumentPipeline begin -->
   <dependency>
     <groupId>org.apache.tika</groupId>
@@ -399,17 +420,6 @@
   </dependency>
 <!-- ImapEmailConnector end -->
 
-<!-- InMoov begin -->
-<!-- skipping inmoov.fr inmoov inmoov.fr-inmoov-null null version/latest -->
-  <dependency>
-    <groupId>inmoov.fr</groupId>
-    <artifactId>jm3-model</artifactId>
-    <version>1.0.0</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
-<!-- InMoov end -->
-
 <!-- InMoov2 begin -->
 <!-- skipping fr.inmoov inmoov2 fr.inmoov-inmoov2-null null version/latest -->
 <!-- InMoov2 end -->
@@ -425,8 +435,14 @@
 <!-- IndianTts end -->
 
 <!-- IntegratedMovement begin -->
-<!-- skipping inmoov.fr inmoov inmoov.fr-inmoov-null null version/latest -->
-<!-- Duplicate entry for inmoov.fr-jm3-model-1.0.0 skipping -->
+<!-- skipping fr.inmoov inmoov2 fr.inmoov-inmoov2-null null version/latest -->
+  <dependency>
+    <groupId>inmoov.fr</groupId>
+    <artifactId>jm3-model</artifactId>
+    <version>1.0.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
 <!-- IntegratedMovement end -->
 
 <!-- JFugue begin -->
@@ -1698,10 +1714,10 @@
             <goals>
               <goal>single</goal>
             </goals>
-          </execution>
-        </executions>
-      </plugin>            
-    
+         </execution>
+       </executions>
+      </plugin>
+      
       <plugin>
         <inherited>true</inherited>
         <groupId>org.apache.maven.plugins</groupId>
