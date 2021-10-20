@@ -26,18 +26,27 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.audio.AudioProcessor;
 import org.myrobotlab.audio.PlaylistPlayer;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Http;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
@@ -53,8 +62,17 @@ public class AudioFile extends Service {
   
   public static final String DEFAULT_TRACK = "default";
   
-  protected final Set<String> supportedFiles = new HashSet<>();
-
+  // statically initialize the supported files list.
+  protected static Set<String> supportedFiles;
+  static {
+    supportedFiles = new HashSet<>();
+    supportedFiles.add("mp3");
+    supportedFiles.add("wav");
+    supportedFiles.add("ogg");
+    supportedFiles.add("flac");
+    supportedFiles.add("aiff");
+    supportedFiles.add("raw");  
+  }
 
   // FIXME
   // skip(track)
@@ -102,12 +120,6 @@ public class AudioFile extends Service {
 
   public AudioFile(String n, String id) {
     super(n, id);
-    supportedFiles.add("mp3");
-    supportedFiles.add("wav");
-    supportedFiles.add("ogg");
-    supportedFiles.add("flac");
-    supportedFiles.add("aiff");
-    supportedFiles.add("raw");
   }
 
   @Deprecated /* use setTrack */
@@ -407,40 +419,51 @@ public class AudioFile extends Service {
 
   public void addPlaylist(String name, String path) {
     List<String> list = null;
-    int filecount = 0;
     if (!playlists.containsKey(name)) {
       list = new ArrayList<String>();
     } else {
       list = playlists.get(name);
     }
-
-    // scan directory or add file
     File check = new File(path);
     if (!check.exists()) {
       error("%s playlist folder or file %s does not exist", name, path);
       return;
     }
-
     if (check.isDirectory()) {
-      for (File f : check.listFiles()) {
-        String ext = FileIO.getExt(f.getName().toLowerCase());
-        if (supportedFiles.contains(ext)) {
-          list.add(f.getAbsolutePath());
-          log.debug("{} playlist adding {}", name, f.getAbsolutePath());
-          filecount += 1;
-        }
-      }
-    } else {
-      String ext = FileIO.getExt(check.getName().toLowerCase());
-      if (supportedFiles.contains(ext)) {
-        list.add(check.getAbsolutePath());
-        filecount += 1;
-      } else {
-        error("unsupported file type %s", check.getName());
-      }
+      list.addAll(scanForMusicFiles(path));
     }
+    int filecount = list.size();
     playlists.put(name, list);
     log.info("{} playlist added {} files", name, filecount);
+  }
+
+  private List<String> scanForMusicFiles(String path) {
+    // scan directory or add file
+    Stream<Path> walk;
+    try {
+      walk = Files.walk(Paths.get(path));
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      log.warn("Unable to walk file path {}", path, e);
+      return null;
+    }
+    
+    // make sure it's a file and that we can read it
+    List<File> result = walk.map(f -> f.toFile())
+        .filter(f -> f.isFile())
+        .filter(f -> f.canRead())
+        .filter(f -> supportedFiles.contains(StringUtils.lowerCase(FilenameUtils.getExtension(f.getName()))))
+        // .filter(f -> f.getTotalSpace() > 0)
+        .collect(Collectors.toList());
+    List<String> playlist = new ArrayList<String>();
+    for (File file : result) {
+      String absFilePath = file.getAbsolutePath();
+      log.info("Adding file : {}", absFilePath);
+      playlist.add(file.getAbsolutePath());
+    }
+    log.info("Playlist added  {} songs.", playlist.size());
+    walk.close();
+    return playlist;
   }
 
   public List<String> getPlaylist(String name) {
@@ -474,10 +497,13 @@ public class AudioFile extends Service {
   public static void main(String[] args) {
 
     try {
-      
+      LoggingFactory.init("INFO");
       AudioFile audioPlayer = (AudioFile) Runtime.start("audioPlayer", "AudioFile");
-      audioPlayer.play("https://upload.wikimedia.org/wikipedia/commons/1/1f/Bach_-_Brandenburg_Concerto.No.1_in_F_Major-_II._Adagio.ogg");
+      // audioPlayer.play("https://upload.wikimedia.org/wikipedia/commons/1/1f/Bach_-_Brandenburg_Concerto.No.1_in_F_Major-_II._Adagio.ogg");
       audioPlayer.addPlaylist("my list", "/home/greg/Music/acoustic");
+      // audioPlayer.addPlaylist("my list", "Z:\\Music");
+      
+      audioPlayer.playlist("my list" , true, false, "my list");
       Runtime.start("webgui", "WebGui");
       
     } catch (Exception e) {
