@@ -2264,11 +2264,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   @Override
   public void stopService() {
+    super.stopService();
+    
     if (runtime != null) {
       runtime.stopInteractiveMode();
     }
-
-    super.stopService();
 
     // cannot close thread on this connection
     /*
@@ -3575,32 +3575,37 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     broadcastState();
     return c;
   }
+  
+  /**
+   * release the current config
+   */
+  public void releaseConfig() {
+    releaseConfig(getConfigName());
+  }
 
   /**
    * Release a configuration set - this depends on a runtime file - and it will
    * release all the services defined in it, with the exception of the
    * originally started services
    * 
-   * @param filename
-   *          config filename to release
+   * @param configName
+   *          config set to release
    * 
    */
-  public void releaseConfig(String filename) {
+  public void releaseConfig(String configName) {
     try {
+      String filename = Runtime.getInstance().getConfigDir() + fs + configName + fs + getName() + ".yml";
       String releaseData = FileIO.toString(new File(filename));
       RuntimeConfig config = CodecUtils.fromYaml(releaseData, RuntimeConfig.class);
-
-      if (config.registry != null) {
-        for (String name : config.registry) {
-          if (startingServices.contains(name)) {
-            continue;
-          }
-          release(name);
+      Collections.reverse(Arrays.asList(config.registry));
+      for (String name : config.registry) {
+        if (startingServices.contains(name)) {
+          continue;
         }
+        release(name);
       }
-
     } catch (Exception e) {
-      error("could not release %s", filename);
+      error("could not release %s", configName);
     }
   }
 
