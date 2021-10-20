@@ -283,9 +283,11 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         console.info('releaseConfig')
         if ($scope.selectedConfig && $scope.selectedConfig.length) {
             for (let i = 0; i < $scope.selectedConfig.length; ++i) {
-                msg.sendTo('runtime', 'setConfigName', $scope.selectedConfig[i])
-                msg.sendTo('runtime', 'releaseConfig', 'runtime')
+                msg.sendTo('runtime', 'releaseConfig', $scope.selectedConfig[i])
+                // msg.sendTo('runtime', 'releaseConfig', 'runtime')
             }
+        } else {
+            msg.sendTo('runtime', 'releaseConfig')
         }
     }
 

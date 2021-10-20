@@ -349,6 +349,13 @@ public class Polly extends AbstractSpeechSynthesis {
     }
 
   }
+  
+  public void releaseService() {
+    super.stopService();
+    if (polly != null) {
+      polly.shutdown();
+    }
+  }
 
   @Override
   public boolean isReady() {
