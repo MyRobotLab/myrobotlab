@@ -570,7 +570,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           runtime.startingServices.add("python");
           
           try {
-            runtime.load();
+            if (options.config != null) {
+              runtime.setConfigName(options.config);
+              runtime.load();
+            }
           } catch(Exception e) {
             log.info("runtime will not be loading config");
           }
