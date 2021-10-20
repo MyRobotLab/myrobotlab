@@ -60,10 +60,12 @@ public class InProcessCliTest extends AbstractTest {
     clear();
     write("pwd");
     String ret = getResponse();
+    Thread.sleep(200);
     assertTrue(ret.startsWith("\"/\""));
 
     clear();
     write("ls");
+    Thread.sleep(200);
     assertTrue(getResponse().contains(toJson(Runtime.getServiceNames())));
 
     boolean virtual = runtime.isVirtual();
@@ -72,8 +74,10 @@ public class InProcessCliTest extends AbstractTest {
     clear();
     write("/runtime/setVirtual/false");
     ret = getResponse();
+    Thread.sleep(200);
     assertFalse(runtime.isVirtual());
     write("/runtime/setVirtual/true");
+    Thread.sleep(200);
     assertTrue(runtime.isVirtual());
     // replace with original value
     runtime.setVirtual(virtual);
@@ -82,6 +86,7 @@ public class InProcessCliTest extends AbstractTest {
     Clock clockCli = (Clock) Runtime.start("clockCli", "Clock");
     write("/clockCli/setInterval/1234");
     Integer check = 1234;
+    Thread.sleep(200);
     assertEquals(check, clockCli.getInterval());
 
   }
