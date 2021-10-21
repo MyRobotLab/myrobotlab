@@ -2,6 +2,7 @@ package org.myrobotlab.service.interfaces;
 
 import java.util.List;
 
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
@@ -157,6 +158,19 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
    */
   public void attachSpeechControl(SpeechSynthesisControl control);
 
+  /**
+   * Attach a speech listener which gets on started/stopped speaking callbacks.
+   * 
+   * @param listener
+   */
+  default public void attachSpeechListener(Attachable attachable) {
+    addListener("publishStartSpeaking", attachable.getName());
+    addListener("publishEndSpeaking", attachable.getName());
+  }
+
+  // All services implement this. 
+  public void addListener(String topicMethod, String callbackName);
+  
   /**
    * replace one word with another - instead of "biscuit" say "cookie"
    * 

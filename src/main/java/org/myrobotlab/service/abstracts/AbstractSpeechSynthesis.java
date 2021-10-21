@@ -372,8 +372,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     } else if (attachable instanceof AudioFile) {
       audioFile = (AudioFile) attachable;
     } else if (attachable instanceof SpeechListener) {
-      addListener("publishStartSpeaking", attachable.getName());
-      addListener("publishEndSpeaking", attachable.getName());
+      attachSpeechListener(attachable);
     } else {
       error("don't know how to attach a %s", attachable.getName());
     }
