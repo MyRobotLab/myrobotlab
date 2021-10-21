@@ -1,6 +1,5 @@
 /**
  *                    
- * @author grog (at) myrobotlab.org
  *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
@@ -43,10 +42,11 @@ import org.myrobotlab.service.config.NeoPixelConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
+import org.myrobotlab.service.interfaces.SpeechListener;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
-public class NeoPixel extends Service implements NeoPixelControl {
+public class NeoPixel extends Service implements NeoPixelControl, SpeechListener {
 
   /**
    * Thread to do animations Java side and push the changing of pixels to the
@@ -55,6 +55,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   private class AnimationRunner implements Runnable {
 
     boolean running = false;
+    
     private transient Thread thread = null;
 
     @Override
@@ -83,6 +84,11 @@ public class NeoPixel extends Service implements NeoPixelControl {
       running = false;
       thread = null;
     }
+  }
+  
+  public void releaseService() {
+    super.releaseService();
+    animationRunner.stop();
   }
 
   public static class Pixel {
@@ -144,7 +150,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   private static final long serialVersionUID = 1L;
 
   /**
-   * thread for doing offboard and in memory animations
+   * thread for doing off board and in memory animations
    */
   protected final AnimationRunner animationRunner;
 
@@ -162,6 +168,11 @@ public class NeoPixel extends Service implements NeoPixelControl {
    * current selected green value
    */
   protected int green = 120;
+  
+  /**
+   * white if available
+   */
+  protected int white = 0;
 
   /**
    * name of controller currently attached to
@@ -275,9 +286,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   }
 
   public void attachSpeechSynthesis(SpeechSynthesis mouth) {
-    subscribe(mouth.getName(), "publishStartSpeaking");
-    subscribe(mouth.getName(), "publishEndSpeaking");
-    // equalizer();
+    mouth.attachSpeechListener(this);
   }
 
   @Override
@@ -338,14 +347,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
   }
 
   public void equalizer() {
-    equalizer(null, null, null, null, null, null);
+    equalizer(null, null);
   }
 
-  public void equalizer(int r, int g, int b) {
-    equalizer(null, null, r, g, b, null);
-  }
-
-  public void equalizer(Long wait_ms_per_frame, Integer range, Integer r, Integer g, Integer b, Integer w) {
+  public void equalizer(Long wait_ms_per_frame, Integer range) {
 
     if (wait_ms_per_frame == null) {
       wait_ms_per_frame = 25L;
@@ -355,37 +360,23 @@ public class NeoPixel extends Service implements NeoPixelControl {
       range = 25;
     }
 
-    if (r == null) {
-      r = 110;
-    }
-
-    if (g == null) {
-      g = 110;
-    }
-
-    if (b == null) {
-      b = 0;
-    }
-
-    if (w == null) {
-      w = 0;
-    }
-
     Random rand = new Random();
-
     int c = rand.nextInt(range);
 
-    fillMatrix(c, c, 0);
+    fillMatrix(red, green, blue, white);
+    
     if (c < 18) {
       setMatrix(0, 0, 0, 0);
       setMatrix(7, 0, 0, 0);
     }
 
-    fillMatrix(c, c, 0);
+    fillMatrix(red, green, blue, white);
+    
     if (c < 16) {
       setMatrix(0, 0, 0, 0);
       setMatrix(7, 0, 0, 0);
     }
+    
     if (c < 12) {
       setMatrix(1, 0, 0, 0);
       setMatrix(6, 0, 0, 0);
@@ -398,6 +389,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
     writeMatrix();
 
+  }
+  
+  public void fill(int r, int g, int b) {
+    fill(0, pixelCount, r, g, b, null);
   }
 
   public void fill(int beginAddress, int count, int r, int g, int b) {
@@ -525,9 +520,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
   }
 
   // @Override
-  public String onStartSpeaking(String utterance) {
+  public void onStartSpeaking(String utterance) {
     startAnimation();
-    return utterance;
   }
 
   public void playAnimation(String animation) {

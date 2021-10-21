@@ -3,6 +3,8 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
     let _self = this
     let msg = this.msg
 
+    $scope.rgb = []
+
     $scope.color = '000000'
     $scope.address = 0
     $scope.leds = []
@@ -11,6 +13,10 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
     $scope.types = ['RGB', 'RGBW']
     $scope.animations = ['No animation', 'Stop', 'Color Wipe', 'Larson Scanner', 'Theater Chase', 'Theater Chase Rainbow', 'Rainbow', 'Rainbow Cycle', 'Flash Random', 'Ironman', 'equalizer']
     $scope.pixelCount = null
+    
+    // set pixel position
+    $scope.pos = 0
+
     var firstTime = true
     $scope.brightnesses = [1, 2, 3, 4, 5, 6, 7, 8, 10, 15, 20, 25, 50, 75, 100, 125, 150, 175, 200, 225, 255]
 
@@ -50,12 +56,16 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
         preserveInputFormat: true
     }
 
+
     // api event handlers
     $scope.eventApi = {
         onChange: function(api, color, $event) {
             $scope.color = color
-            let rgb = color.substring(4, color.length - 1).replace(/ /g, '').split(',')
+            let colorstr = color.substring(4, color.length - 1).replace(/ /g, '').split(',')
+            $scope.rgb = [parseInt(colorstr[0]), parseInt(colorstr[1]), parseInt(colorstr[2])]
+            msg.send('setColor', $scope.rgb[0], $scope.rgb[1], $scope.rgb[2])
             $scope.address = api.getElement().attr('id')
+            /*
             if ($scope.address == 'select') {
                 msg.send('setColor', parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]))
             } else if ($scope.address == 'fill') {
@@ -63,6 +73,7 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
             } else {
                 msg.send('setPixel', $scope.address, parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]))
             }
+            */
         },
         onBlur: function(api, color, $event) {},
         onOpen: function(api, color, $event) {},
@@ -77,6 +88,10 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
+        $scope.pickedColor = 'rgb('+ service.red +', '+ service.green +', '+ service.blue +')'
+        $scope.rgb = [service.red, service.green, service.blue]
+        $scope.color = $scope.pickedColor
+
         if ($scope.service.pixelCount != _self.uiPixelCount) {
             $scope.drawPixels()
         }
@@ -118,8 +133,12 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
         msg.send('broadcastState')
     }
 
-    $scope.fill = function() {
-        msg.send('fill')
+    $scope.fill =  function(){
+        msg.send('fill', $scope.rgb[0], $scope.rgb[1], $scope.rgb[2])
+    }
+
+    $scope.setPixel = function() {
+        msg.send('setPixel', $scope.pos, $scope.rgb[0], $scope.rgb[1], $scope.rgb[2])
     }
 
     $scope.attach = function() {

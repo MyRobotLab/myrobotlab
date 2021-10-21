@@ -951,7 +951,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       ServiceInterface si = null;
 
       Runtime runtime = Runtime.getInstance();
-      String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
+      // String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
+      String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + sr.actualName + ".yml";
       File check = new File(filename);
       if (check.exists()) {
         si = Runtime.create(sr.actualName);
@@ -1892,7 +1893,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       si = createPeer(reservedKey);
 
       Runtime runtime = Runtime.getInstance();
-      String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
+      String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + sr.actualName + ".yml";
       File check = new File(filename);
       if (!check.exists()) {
         log.info("no config for {} {} {}", getName(), sr.actualName, filename);

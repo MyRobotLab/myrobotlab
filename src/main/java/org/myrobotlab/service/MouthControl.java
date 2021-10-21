@@ -7,6 +7,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.interfaces.SpeechListener;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
@@ -16,7 +17,7 @@ import org.slf4j.Logger;
  * It's peers are the jaw servo, speech service and an arduino.
  *
  */
-public class MouthControl extends Service {
+public class MouthControl extends Service implements SpeechListener {
 
   // TODO: remove Peer & Make it attachable between generic servoControl &
   // SpeechSynthesis
@@ -38,8 +39,7 @@ public class MouthControl extends Service {
   public void attach(Attachable attachable) {
     if (attachable instanceof SpeechSynthesis) {
       mouth = (SpeechSynthesis) attachable;
-      subscribe(mouth.getName(), "publishStartSpeaking");
-      subscribe(mouth.getName(), "publishEndSpeaking");
+      mouth.attachSpeechListener(this);
     } else if (attachable instanceof ServoControl) {
       jaw = (ServoControl) attachable;
     } else {

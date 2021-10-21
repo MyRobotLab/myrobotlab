@@ -18,7 +18,7 @@
 contacts
 <table class="table">
   <tr ng-repeat="contact in contacts">    
-    <td><input type="checkbox"  ng-model="sendToContacts[contact.user]"></td>
+    <td><input type="checkbox"  ng-model="sendToContacts[contact.user]" /></td>
     <td>{{ contact.user }}</td>
     <!-- <td>{{ contact.presence }}</td> -->
     <td><img ng-src="{{contact.presence == 'available' && '../connected.png' || '../disconnected.png'}}"/ width="20"></td>

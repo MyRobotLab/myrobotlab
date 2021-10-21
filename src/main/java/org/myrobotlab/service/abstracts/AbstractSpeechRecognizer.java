@@ -18,6 +18,7 @@ import org.myrobotlab.service.interfaces.TextListener;
 
 public abstract class AbstractSpeechRecognizer extends Service implements SpeechRecognizer {
 
+  
   /**
    * text and confidence (and any additional meta data) to be published
    */
@@ -171,10 +172,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
       log.warn("{}.attachSpeechSynthesis(null)", getName());
       return;
     }
-
-    subscribe(mouth.getName(), "publishStartSpeaking");
-    subscribe(mouth.getName(), "publishEndSpeaking");
-
+    mouth.attachSpeechListener(this);
   }
 
   public void attachTextListener(TextListener service) {
@@ -278,14 +276,14 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   @Override
-  public String onStartSpeaking(String utterance) {
+  public void onStartSpeaking(String utterance) {
     log.info("onStartSpeaking - isSpeaking {} utterance - {}", isSpeaking, utterance);
     // remove any currently pending "no longer listening" delay tasks, because
     // we started a new isSpeaking = true, so the pause window after has moved
     purgeTask("setSpeaking");
     // isSpeaking = true;
     setSpeaking(true, utterance);
-    return utterance;
+    return;
   }
 
   @Override

@@ -34,7 +34,6 @@
                 </li>
             </ul>
         </div>
-
         <div class="btn-group" uib-dropdown ng-disabled="service.controller">
             <button type="button" class="btn btn-default">type {{service.type}}</button>
             <button type="button" class="btn btn-default" uib-dropdown-toggle>
@@ -46,10 +45,8 @@
                 </li>
             </ul>
         </div>
-
         <button type="button" class="btn btn-default" ng-click='attach()' ng-disabled='service.pin == null  || !state.controller' ng-show='!service.controller'>attach</button>
         <button type="button" class="btn btn-default" ng-click='detach()' ng-show='service.controller'>detach</button>
-
         <div class="btn-group" uib-dropdown ng-hide="service.controller == null">
             <button type="button" class="btn btn-default">play animation {{service.currentAnimation}}</button>
             <button type="button" class="btn btn-default" uib-dropdown-toggle>
@@ -73,7 +70,6 @@
                 </li>
             </ul>
         </div>
-
         <div class="btn-group" uib-dropdown ng-hide="service.controller == null">
             <button type="button" class="btn btn-default">brightness {{service.brightness}}</button>
             <button type="button" class="btn btn-default" uib-dropdown-toggle>
@@ -85,7 +81,7 @@
                 </li>
             </ul>
         </div>
-
+        <button type="button" class="btn btn-default" ng-click='fill()' ng-show='service.controller != null'>fill</button>
     </div>
     <div class="col-md-1"></div>
 </div>
@@ -94,10 +90,7 @@
         <table width="100%">
             <tr>
                 <td>
-                    animation color<color-picker id="select" ng-model="pickedColor" options="colorPickerOptions" event-api="eventApi"></color-picker>
-                </td>
-                <td>
-                    fill color<color-picker id="fill" ng-model="pickedColor" options="colorPickerOptions" event-api="eventApi"></color-picker>
+                    color<color-picker id="fill" ng-model="pickedColor" options="colorPickerOptions" event-api="eventApi"></color-picker>
                 </td>
                 <td>
                     <button type="button" ng-style="led.style" class="btn btn-default" ng-click='clear();' tooltip="clear pixels">clear</button>
@@ -107,6 +100,19 @@
     </div>
     <div class="col-md-9">&nbsp;</div>
 </div>
+<table>
+    <tr>
+        <td>set pixel </td>
+        <td>&nbsp;</td>
+        <td>
+            <input type="text" class="form-control" id="set-pixel" ng-model="pos"/>            
+        </td>
+        <td>
+        <button type="button" ng-style="led.style" class="btn btn-default" ng-click='setPixel();' tooltip="set pixel">set pixel</button>
+        </td>
+    </tr>
+</table>
+<!--
 <div class="row">
     <div class="col-md-11">
         <span ng-repeat="led in leds" style="float:left">
@@ -116,3 +122,4 @@
     </div>
     <div class="col-md-1">&nbsp;</div>
 </div>
+-->
