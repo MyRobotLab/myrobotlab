@@ -12,8 +12,6 @@ import org.slf4j.Logger;
  */
 public interface SpeechListener extends NameProvider {
 
-  public final static Logger log = LoggerFactory.getLogger(SpeechListener.class);
-
   /**
    * speech has begun with the this utterance
    * 

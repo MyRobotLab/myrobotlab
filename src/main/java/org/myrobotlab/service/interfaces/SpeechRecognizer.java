@@ -3,7 +3,7 @@ package org.myrobotlab.service.interfaces;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer.ListeningEvent;
 
-public interface SpeechRecognizer extends NameProvider, TextPublisher, LocaleProvider {
+public interface SpeechRecognizer extends NameProvider, TextPublisher, LocaleProvider, SpeechListener {
 
   /**
    * This method should listen for Mouth events
@@ -55,25 +55,6 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
    */
   @Deprecated /* use publishListening(boolean event) */
   public void listeningEvent(Boolean event);
-
-  /**
-   * speech synthesis interface - to not listen while speaking
-   * 
-   * @param utterance
-   *          the utterance that completed
-   * 
-   */
-  public void onEndSpeaking(String utterance);
-
-  /**
-   * speech synthesis interface - to not listen while speaking
-   * 
-   * @param utterance
-   *          the utterance
-   * @return the utterance
-   * 
-   */
-  public String onStartSpeaking(String utterance);
 
   /**
    * method to suppress recognition listening events This is important when a

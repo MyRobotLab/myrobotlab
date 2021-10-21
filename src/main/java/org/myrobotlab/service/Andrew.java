@@ -9,6 +9,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
+import org.myrobotlab.service.interfaces.SpeechListener;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
@@ -19,7 +20,7 @@ import org.slf4j.Logger;
  * Andrew - The Andrew robot service. Maintained by \@beetlejuice
  *
  */
-public class Andrew extends Service {
+public class Andrew extends Service implements SpeechListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -936,10 +937,9 @@ public class Andrew extends Service {
     // configure services
     pir.attach(arduino, pirSensorPin);
 
-    // FIXME - there is likely an "attach" that does this...
-    subscribe(mouth.getName(), "publishStartSpeaking");
-    subscribe(mouth.getName(), "publishEndSpeaking");
-
+    // attach the speech listener
+    mouth.attachSpeechListener(this);
+    
   }
 
   public void startServos() {
