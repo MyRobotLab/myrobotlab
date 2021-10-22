@@ -29,7 +29,7 @@ public class MrlDiscordBotListener extends ListenerAdapter {
     super.onMessageReceived(event);
     // Create an utterance object from the message.
     Utterance utterance = new Utterance();
-    
+    utterance.ts = System.currentTimeMillis();
     utterance.id = event.getMessage().getId();
     
     // Author of the message.
