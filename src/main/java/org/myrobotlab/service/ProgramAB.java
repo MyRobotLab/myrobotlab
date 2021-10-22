@@ -1138,13 +1138,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     // vs creating a bunch of cluttery local vars to hold state with error
     if (config.textListeners != null) {
       for (String local : config.textListeners) {
-        addListener("publishText", local);
+        attachTextListener(local);
       }
     }
 
     if (config.utteranceListeners != null) {
       for (String local : config.utteranceListeners) {
-        addListener("publishUtterance", local);
+        attachUtteranceListener(local);
       }
     }
 
