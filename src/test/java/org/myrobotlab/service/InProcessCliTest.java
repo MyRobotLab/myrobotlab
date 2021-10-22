@@ -55,6 +55,7 @@ public class InProcessCliTest extends AbstractTest {
     Runtime runtime = Runtime.getInstance();
     runtime.startInteractiveMode();
     runtime.stopInteractiveMode();
+    Thread.sleep(300);
     runtime.startInteractiveMode(in, bos);
 
     // wait for pipe to clear
