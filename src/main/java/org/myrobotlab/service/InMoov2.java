@@ -449,6 +449,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public InMoov2(String n, String id) {
     super(n, id);
+    
+    // InMoov2 has a huge amount of peers
+    setAutoStartPeers(false);
 
     // by default all servos will auto-disable
     // Servo.setAutoDisableDefault(true); //until peer servo services for
