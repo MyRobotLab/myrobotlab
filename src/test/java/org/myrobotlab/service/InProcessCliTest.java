@@ -53,6 +53,8 @@ public class InProcessCliTest extends AbstractTest {
   public void testProcess() throws IOException, InterruptedException {
 
     Runtime runtime = Runtime.getInstance();
+    runtime.startInteractiveMode();
+    runtime.stopInteractiveMode();
     runtime.startInteractiveMode(in, bos);
 
     // wait for pipe to clear
