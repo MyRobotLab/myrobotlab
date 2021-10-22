@@ -99,6 +99,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
 
   public WorkE(String n, String id) {
     super(n, id);
+    setAutoStartPeers(false);
 
     // "sticky" auto-attach services attempt to attach to everything
     // they need to run through all currently registered services
