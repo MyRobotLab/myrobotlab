@@ -946,6 +946,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       attachTextPublisher((TextPublisher) attachable);
     } else if (attachable instanceof TextListener) {
       addListener("publishText", attachable.getName(), "onText");
+    } else if (attachable instanceof UtteranceListener) {
+      attachUtteranceListener(attachable.getName());
     } else {
       log.error("don't know how to attach a {}", attachable.getName());
     }
@@ -1108,7 +1110,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     Set<String> listeners = getAttached("publishText"); 
     config.textListeners = listeners.toArray(new String[listeners.size()]);
     
+    listeners = getAttached("publishUtterance"); 
+    config.utteranceListeners = listeners.toArray(new String[listeners.size()]);
+    
+    
     // TODO: textPublishers?
+
     
     return config;
   }
@@ -1132,6 +1139,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     if (config.textListeners != null) {
       for (String local : config.textListeners) {
         addListener("publishText", local);
+      }
+    }
+
+    if (config.utteranceListeners != null) {
+      for (String local : config.utteranceListeners) {
+        addListener("publishUtterance", local);
       }
     }
 
