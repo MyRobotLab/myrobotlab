@@ -6,6 +6,11 @@ package org.myrobotlab.service.data;
  */
 public class Utterance {
 
+  /**
+   * unique id of the message
+   */
+  public String id;
+  
   // The user that produced this utterance
   public String username;
   public boolean isBot;
@@ -16,6 +21,7 @@ public class Utterance {
   // The text of the utterance
   public String text;
   public String channelBotName;
+  
   @Override
   public int hashCode() {
     final int prime = 31;

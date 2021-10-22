@@ -17,7 +17,8 @@
     <form class="form-inline">
         text<br/>
         <input class="form-control" type="text" ng-model="text" placeholder="send text" title="send text">
-        <button class="btn btn-default" ng-click="msg.sendUtterance(text);">send</button>
+        <button class="btn btn-default" ng-click="msg.sendUtterance(text);">send text</button>
+        <button class="btn btn-default" ng-click="msg.sendReaction(text);">send reaction</button>
     </form>
 </div>
 <div class="row">

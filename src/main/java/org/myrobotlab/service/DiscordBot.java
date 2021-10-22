@@ -37,12 +37,14 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
   private transient JDA bot;
 
   protected String botName;
-  
+
   protected transient MrlDiscordBotListener discordListener;
-  
+
   protected transient JDABuilder jda = null;
-  
+
   protected boolean connected = false;
+
+  protected Utterance lastUtterance = null;
 
   protected String token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
@@ -57,8 +59,8 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     setToken(config.token);
 
     if (config.utteranceListeners != null) {
-      for (String local : config.utteranceListeners) {
-        addListener("publishUtterance", local);
+      for (String name : config.utteranceListeners) {
+        attachUtteranceListener(name);
       }
     }
 
@@ -192,25 +194,68 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     }
   }
 
+  /**
+   * Sends text on behalf of the bot to the general channel
+   * 
+   * @param text
+   */
   public void sendUtterance(String text) {
-    sendUtterance(text, "general");
+    sendUtterance(text, null);
   }
 
-  
+  /**
+   * Injects or sends text
+   * 
+   * @param text
+   * @param channelName
+   */
   public void sendUtterance(String text, String channelName) {
+    if (channelName == null) {
+      channelName = "general";
+    }
     List<TextChannel> channels = bot.getTextChannelsByName(channelName, true);
     for (TextChannel channel : channels) {
       channel.sendMessage(text).queue();
     }
   }
 
-  
+  public void sendReaction(String code) {
+    sendReaction(code, null, null);
+  }
+
   /**
-   * this publishing point is omni-directional in that all utterances regardless of
-   * direction or channel are published here
+   * sends a reaction to the a previous message id
+   * 
+   * @param code
+   * @param channelName
+   */
+  public void sendReaction(String code, String id, String channelName) {
+    
+    code = code.trim();
+    
+    if (channelName == null) {
+      channelName = "general";
+    }
+
+    if (id == null && lastUtterance != null) {
+      id = lastUtterance.id;
+    }
+
+    // TODO - dunno how to do this without a message id
+
+    List<TextChannel> channels = bot.getTextChannelsByName(channelName, true);
+    for (TextChannel channel : channels) {
+      channel.addReactionById(id, code).queue();
+    }
+  }
+
+  /**
+   * this publishing point is omni-directional in that all utterances regardless
+   * of direction or channel are published here
    */
   @Override
   public Utterance publishUtterance(Utterance utterance) {
+    lastUtterance = utterance;
     return utterance;
   }
 
