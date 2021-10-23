@@ -5,17 +5,41 @@ package org.myrobotlab.service.data;
  * 
  */
 public class Utterance {
+  
+  /**
+   * timestamp of the creation of the message - epoch ms
+   */
+  public long ts;
 
-  // The user that produced this utterance
+  /**
+   * unique id of the message
+   */
+  public String id;
+  
+  /**
+   * user that produced the utterance
+   */
   public String username;
+  
   public boolean isBot;
-  // Where the utterance was heard/created.  (could be a private/direct message, or it could be to a channel / group)
+  
+  /**
+   * Where the utterance was heard/created.  (could be a private/direct message, or it could be to a channel / group)
+   */
   public String channel;
-  // PUBLIC / PRIVATE 
+  
+  /**
+   * PUBLIC / PRIVATE 
+   */
   public String channelType;
-  // The text of the utterance
+  
+  /**
+   * The text of the utterance
+   */
   public String text;
+  
   public String channelBotName;
+  
   @Override
   public int hashCode() {
     final int prime = 31;
