@@ -100,6 +100,7 @@ public class InProcessCliTest extends AbstractTest {
     Integer check = 1234;
     Thread.sleep(300);
     assertEquals(check, clockCli.getInterval());
+    proc.stop();
     } catch(Exception e) {
       log.error("InProcessCliTest threw", e);
     }
