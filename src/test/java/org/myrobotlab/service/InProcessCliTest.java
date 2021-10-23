@@ -12,6 +12,8 @@ import java.io.PipedOutputStream;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.net.Connection;
+import org.myrobotlab.process.InProcessCli;
 import org.myrobotlab.test.AbstractTest;
 
 public class InProcessCliTest extends AbstractTest {
@@ -51,24 +53,30 @@ public class InProcessCliTest extends AbstractTest {
 
   @Test
   public void testProcess() throws IOException, InterruptedException {
-
     Runtime runtime = Runtime.getInstance();
-    runtime.startInteractiveMode();
-    runtime.stopInteractiveMode();
-    Thread.sleep(300);
-    runtime.startInteractiveMode(in, bos);
+    
+    //InProcessCli proc = new InProcessCli(runtime, "proc-cli-test", in, bos);
+    InProcessCli proc = new InProcessCli(runtime, "proc-cli-test", in, bos);
+    
+    // add the route !
+    Connection c = proc.getConnection();
+    String stdCliUuid = (String) c.get("uuid");
+
+    // addRoute(".*", getName(), 100);
+    runtime.addConnection(stdCliUuid, proc.getId(), c);
+
 
     // wait for pipe to clear
     Thread.sleep(300);
     clear();
     write("pwd");
     String ret = getResponse();
-    Thread.sleep(200);
+    Thread.sleep(300);
     assertTrue(ret.startsWith("\"/\""));
 
     clear();
     write("ls");
-    Thread.sleep(200);
+    Thread.sleep(300);
     assertTrue(getResponse().contains(toJson(Runtime.getServiceNames())));
 
     boolean virtual = runtime.isVirtual();
@@ -77,10 +85,10 @@ public class InProcessCliTest extends AbstractTest {
     clear();
     write("/runtime/setVirtual/false");
     ret = getResponse();
-    Thread.sleep(200);
+    Thread.sleep(300);
     assertFalse(runtime.isVirtual());
     write("/runtime/setVirtual/true");
-    Thread.sleep(200);
+    Thread.sleep(300);
     assertTrue(runtime.isVirtual());
     // replace with original value
     runtime.setVirtual(virtual);
@@ -89,7 +97,7 @@ public class InProcessCliTest extends AbstractTest {
     Clock clockCli = (Clock) Runtime.start("clockCli", "Clock");
     write("/clockCli/setInterval/1234");
     Integer check = 1234;
-    Thread.sleep(200);
+    Thread.sleep(300);
     assertEquals(check, clockCli.getInterval());
 
   }
