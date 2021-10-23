@@ -36,6 +36,7 @@ public class ArduinoServoConfigTest {
 
     // create and connect the arduino to com5
     Arduino ard1 = (Arduino) Runtime.start("ard1", "Arduino");
+    ard1.setVirtual(true);
     ard1.connect("COM5");
     // create a servo
     Servo servo1 = (Servo) Runtime.start("servo1", "Servo");
@@ -45,6 +46,7 @@ public class ArduinoServoConfigTest {
     ard1.attach(servo1);
     // move the servo to 90.
     servo1.moveTo(90.0);
+    ard1.disconnect();
 
     // save this configuration as the "simple" config/
     Runtime.getInstance().setConfigName("simple");

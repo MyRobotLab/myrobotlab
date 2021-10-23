@@ -481,7 +481,7 @@ public class IvyWrapper extends Repo implements Serializable {
             Zip.unzip(filename, "./");
             info("unzipped %s", filename);
           } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("unable to unzip file {}", filename, e);
           }
         }
       }

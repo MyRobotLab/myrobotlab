@@ -88,11 +88,14 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
 
   CustomModel personModel = null;
   boolean enabled = true;
+  
+  transient Thread classifier;
+  boolean running = false;
 
   public OpenCVFilterLloyd() {
     super();
     // start classifier thread
-    Thread classifier = new Thread(this, "YoloClassifierThread");
+    classifier = new Thread(this, "YoloClassifierThread");
     classifier.start();
     log.info("Yolo Classifier thread started : {}", this.name);
   }
@@ -100,7 +103,7 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
   public OpenCVFilterLloyd(String name) {
     super(name);
     // start classifier thread
-    Thread classifier = new Thread(this, "YoloClassifierThread");
+    classifier = new Thread(this, "YoloClassifierThread");
     classifier.start();
     log.info("Yolo Classifier thread started : {}", this.name);
   }
@@ -255,8 +258,9 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
     int count = 0;
     long start = System.currentTimeMillis();
     log.info("Starting the Yolo classifier thread...");
+    running = true;
     // in a loop, grab the current image and classify it and update the result.
-    while (true) {
+    while (running) {
 
       if (!pending || !enabled) {
         log.debug("Skipping frame");
@@ -470,4 +474,8 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
     return image;
   }
 
+  public void release() {
+    running = false;
+  }
+  
 }

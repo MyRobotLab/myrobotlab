@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bytedeco.javacpp.indexer.UByteIndexer;
-import org.bytedeco.javacpp.indexer.UShortRawIndexer;
+import org.bytedeco.javacpp.indexer.UByteRawIndexer;
 import org.bytedeco.javacv.Parallel;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
@@ -132,7 +132,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
         color = IplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3);
       }
 
-      final UShortRawIndexer depthIdx = (UShortRawIndexer) depth.createIndexer();
+      final UByteRawIndexer depthIdx = (UByteRawIndexer) depth.createIndexer();
       final UByteIndexer colorIdx = color.createIndexer();
 
       Parallel.loop(0, depth.height(), new Parallel.Looper() {
