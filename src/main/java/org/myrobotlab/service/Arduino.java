@@ -619,6 +619,16 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public void customMsg(int... params) {
     msg.customMsg(params);
   }
+  
+  public void detach() {
+    // make list copy - to iterate without fear of thread or modify issues
+    ArrayList<DeviceMapping> newList = new ArrayList<>(deviceIndex.values());
+    log.info("detaching all devices");
+    for (DeviceMapping dm: newList) {
+      detach(dm.getDevice());
+      sleep(50);
+    }
+  }
 
   // @Override
   // > deviceDetach/deviceId
@@ -1777,7 +1787,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     if (virtual != null) {
       virtual.releaseService();
     }
-    sleep(300);
+    
+    // remove all devices
+    detach();    
     disconnect();
   }
 
@@ -2304,8 +2316,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
       // Platform.setVirtual(true);
 
-      Runtime.main(new String[] { "--interactive", "--id", "id" });
-
       LoggingFactory.init(Level.INFO);
       // Platform.setVirtual(true);
 
@@ -2321,6 +2331,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       Arduino hub = (Arduino) Runtime.start("hub", "Arduino");
 
       hub.connect("/dev/ttyACM0");
+      Runtime.start("webgui", "WebGui");
 
       // hub.enableAck(false);
 
@@ -2330,6 +2341,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       sc = (ServoControl) Runtime.start("s2", "Servo");
       sc.setPin(9);
       hub.attach(sc);
+      
+      hub.detach();
 
       // hub.enableAck(true);
       /*
