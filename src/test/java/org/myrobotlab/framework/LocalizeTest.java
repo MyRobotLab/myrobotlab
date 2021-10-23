@@ -63,7 +63,7 @@ public class LocalizeTest extends AbstractTest {
     runtime.setLocale("en");
 
     // runtime fr
-    runtime.setLocale("fr");
+    Runtime.setAllLocales("fr");
     String SHUTDOWN = runtime.localize("SHUTDOWN");
     assertEquals("extinction de mon système", SHUTDOWN);
 
