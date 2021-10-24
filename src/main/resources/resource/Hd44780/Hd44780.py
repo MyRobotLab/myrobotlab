@@ -46,7 +46,7 @@ hd44780.clear()
  
 # You can turn the backlight on or off.
 # True will turn it on, False will turn it off.
-hd44780.stBackLight(True)
+hd44780.setBackLight(True)
  
 # Filally to send text to the display
 hd44780.display("Hello World", 0)
