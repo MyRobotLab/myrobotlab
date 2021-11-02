@@ -320,14 +320,18 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     sensor.attach(this, triggerPin, echoPin);
   }
 
-  synchronized private DeviceMapping attachDevice(Attachable device, Object[] attachConfig) {
-    DeviceMapping map = new DeviceMapping(device, attachConfig);
-    map.setId(nextDeviceId);
+  synchronized private DeviceMapping attachDevice(Attachable device, Object[] attachConfig) {    
+    
+    if (deviceList.containsKey(device.getName())) {
+      log.warn("device {} already attached to {}", device.getName(), getName());
+      return deviceList.get(device.getName());
+    }
+    
+    DeviceMapping map = new DeviceMapping(nextDeviceId, device);
     log.info("DEVICE LIST PUT ------ Name: {} Class: {} Map: {}", device.getName(), device.getClass().getSimpleName(), map);
     deviceList.put(device.getName(), map);
     deviceIndex.put(nextDeviceId, map);
     ++nextDeviceId;
-    // return map.getId();
     return map;
   }
 
@@ -624,15 +628,23 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     // make list copy - to iterate without fear of thread or modify issues
     ArrayList<DeviceMapping> newList = new ArrayList<>(deviceIndex.values());
     log.info("detaching all devices");
-    for (DeviceMapping dm: newList) {
-      detach(dm.getDevice());
-      sleep(50);
+    if (isConnected()) {   
+      for (DeviceMapping dm: newList) {
+        detach(dm.getDevice());
+        sleep(50);
+      }
     }
+    deviceIndex.clear();
+    deviceList.clear();
   }
 
   // @Override
   // > deviceDetach/deviceId
   public void detach(Attachable device) {
+    if (device == null) {
+      return;
+    }
+    
     log.info("{} detaching {}", getName(), device.getName());
     // if this service doesn't think its attached, we are done
     if (!isAttached(device)) {
@@ -1834,7 +1846,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   // > servoDetachPin/deviceId
   public void onServoDisable(ServoControl servo) {
-    msg.servoDetachPin(getDeviceId(servo));
+    Integer id = getDeviceId(servo);
+    if (id != null) {
+      msg.servoDetachPin(id);
+    }
   }
 
   @Override
@@ -1880,12 +1895,12 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       speed = servo.getSpeed().intValue();
     }
     log.info("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo), speed);
-    Integer i = getDeviceId(servo);
-    if (i == null) {
+    Integer id = getDeviceId(servo);
+    if (id == null) {
       log.error("{} has null deviceId", servo);
       return;
     }
-    msg.servoSetVelocity(i, speed);
+    msg.servoSetVelocity(id, speed);
   }
 
   /**
@@ -2235,7 +2250,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    */
   @Override
   public void onServoStop(ServoControl servo) {
-    msg.servoStop(getDeviceId(servo));
+    Integer id = getDeviceId(servo);
+    if (id != null) {
+      msg.servoStop(id);
+    }
   }
 
   @Override
@@ -2252,15 +2270,24 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   @Override
   public void neoPixelAttach(String name, int pin, int numberOfPixels, int depth) {
+    if (deviceList.containsKey(name)) {
+      log.info("neopixel {} already attached", name);
+      return;
+    }
     ServiceInterface neopixel = Runtime.getService(name);
-    DeviceMapping dm = attachDevice(neopixel, new Object[] { pin, numberOfPixels, depth });
+    DeviceMapping dm = attachDevice(neopixel, null);
     msg.neoPixelAttach(dm.getId(), pin, numberOfPixels, depth);
   }
 
   @Override
   public void neoPixelWriteMatrix(String neopixel, int[] buffer) {
-    // log.debug("writing {} pixels : {}", buffer.length/5, buffer);
-    msg.neoPixelWriteMatrix(getDeviceId(neopixel), buffer);
+    // 64 byte message size limit (including 3 byte header) !!! - so we bucket them chunks
+    int segments = (int)Math.ceil(buffer.length / 50.0);
+    for (int i = 0; i < segments; ++i ) {
+      int begin = i * 50;
+      int end = Math.min(begin + 49 , buffer.length);
+      msg.neoPixelWriteMatrix(getDeviceId(neopixel), Arrays.copyOfRange(buffer, begin, end));
+    }    
   }
 
   @Override

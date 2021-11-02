@@ -23,6 +23,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -558,7 +559,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
           runtime = (Runtime) createService(RUNTIME_NAME, "Runtime", Platform.getLocalInstance().getId());
           runtime.startService();
-                    
+
           // setting the singleton security
           Security.getInstance();
           runtime.getRepo().addStatusPublisher(runtime);
@@ -568,17 +569,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           runtime.startingServices.add("security");
           runtime.startingServices.add("webgui");
           runtime.startingServices.add("python");
-          
+
           try {
             if (options.config != null) {
               runtime.setConfigName(options.config);
               runtime.load();
             }
-          } catch(Exception e) {
+          } catch (Exception e) {
             log.info("runtime will not be loading config");
           }
         }
-      } 
+      }
     }
     return runtime;
   }
@@ -1335,6 +1336,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
     return list;
   }
+  
+  /**
+   * default - release all
+   */
+  public static void releaseAll() {
+    releaseAll(true, false);
+  }
 
   /**
    * This does not EXIT(1) !!! releasing just releases all services
@@ -1350,43 +1358,61 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * FIXME - send SHUTDOWN event to all running services with a timeout period -
    * end with System.exit() FIXME normalize with releaseAllLocal and
    * releaseAllExcept
+   * 
+   * @param releaseRuntime
    */
-  public static void releaseAll() /* local only? YES !!! LOCAL ONLY !! */
+  public static void releaseAll(boolean releaseRuntime, boolean block) /* local only? YES !!! LOCAL ONLY !! */
   {
+    // a command thread is issuing this command is most likely
+    // tied to one of the services being removed
+    // therefore this needs to happen asynchronously otherwise
+    // the thread that issued the command will try to destroy/release itself
+    // which almost always causes a deadlock
     log.debug("releaseAll");
+    
+    if (block) {
+      processRelease(releaseRuntime);
+    } else {
+    
+    new Thread() {
+      public void run() {
+        processRelease(releaseRuntime);
+      }
+    }.start();
 
-    Map<String, ServiceInterface> local = getLocalServices();
+    }
+  }
+  
+  static private void processRelease(boolean releaseRuntime) {
 
-    for (String serviceName : local.keySet()) {
-      ServiceInterface sw = local.get(serviceName);
+    // reverse release to order of creation
+    Collection<ServiceInterface> local = getLocalServices().values();
+    List<ServiceInterface> ordered = new ArrayList<>(local);
+                                                            
+    Collections.sort(ordered);
+    Collections.reverse(ordered);
 
+    for (ServiceInterface sw : ordered) {
+
+      // no longer needed now - runtime "should be" guaranteed to be last
       if (sw == Runtime.getInstance()) {
         // skipping runtime
         continue;
       }
 
-      log.info("stopping service {}", serviceName);
-
-      if (sw == null) {
-        log.warn("unknown type and/or remote service");
-        continue;
-      }
+      log.info("releasing service {}", sw.getName());
 
       try {
-        if (sw != null) {
-          sw.stopService();
-          runtime.invoke("released", sw.getFullName());
-        }
+        Runtime.release(sw.getName());
       } catch (Exception e) {
-        runtime.error("%s threw while stopping", e);
+        runtime.error("%s threw while releasing", e);
       }
     }
 
-    if (runtime != null) {
-      runtime.stopService();
+    if (runtime != null && releaseRuntime) {
+      runtime.releaseService();
     }
-    log.debug("clearing registry");
-    registry.clear();
+      
   }
 
   /**
@@ -1424,17 +1450,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         service.preShutdown();
       }
 
-      /*
-       * - huge amount of json that is not used for (ServiceInterface service :
-       * getServices()) { service.save(); }
-       */
-
       log.info("releasing all");
+
+      // release
       releaseAll();
     } catch (Exception e) {
       log.error("something threw - continuing to shutdown", e);
     }
 
+    // calling System.exit(0) before some specialized threads
+    // are completed will actually end up in a deadlock
+    Service.sleep(1000);
     System.exit(0);
   }
 
@@ -2266,18 +2292,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * re-entrant in junit tests
    */
   @Override
-  public void stopService() {
-    super.stopService();
-    
+  public void releaseService() {
+    super.releaseService();
     if (runtime != null) {
       runtime.stopInteractiveMode();
     }
-
-    // cannot close thread on this connection
-    /*
-     * (new Thread() { public void run() { closeConnections(); } }).start();
-     */
-
     runtime = null;
   }
 
@@ -3261,7 +3280,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         shutdown();
         return;
       }
-      
+
       createAndStartServices(options.services);
 
       if (options.invoke != null) {
@@ -3277,7 +3296,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         // FIXME - use peer ?
         Updater.main(args);
       }
-      
 
     } catch (Exception e) {
       log.error("runtime exception", e);
@@ -3489,7 +3507,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // has now been moved out to runtime
     return config;
   }
-  
+
   public ServiceConfig load(ServiceConfig c) {
     super.load(c);
     RuntimeConfig config = (RuntimeConfig) c;
@@ -3578,7 +3596,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     broadcastState();
     return c;
   }
-  
+
   /**
    * release the current config
    */

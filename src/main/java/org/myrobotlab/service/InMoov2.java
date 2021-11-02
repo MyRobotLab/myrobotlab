@@ -19,11 +19,10 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.InMoov2Config;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
@@ -330,9 +329,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   transient HtmlFilter htmlFilter;
 
-  transient UltrasonicSensor ultraSonicRight;
+  transient UltrasonicSensor ultrasonicRight;
 
-  transient UltrasonicSensor ultraSonicLeft;
+  transient UltrasonicSensor ultrasonicLeft;
 
   transient Pir pir;
 
@@ -363,6 +362,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   boolean isLeftHandActivated = false;
 
   boolean isMouthActivated = false;
+
+  // adding to the problem :( :( :(
+  boolean isAudioPlayerActivated = false;
 
   boolean isRightArmActivated = false;
 
@@ -411,7 +413,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   transient NeoPixel neopixel;
 
-  transient ServoMixer servomixer;
+  transient ServoMixer servoMixer;
 
   transient Python python;
 
@@ -449,7 +451,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public InMoov2(String n, String id) {
     super(n, id);
-    
+
     // InMoov2 has a huge amount of peers
     setAutoStartPeers(false);
 
@@ -468,6 +470,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       }
     }
 
+    // dynamically gotten from filesystem/bots ?
     locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
     locale = Runtime.getInstance().getLocale();
 
@@ -1352,7 +1355,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // FIXME - publish onText when listening
     invoke("publishText", toSpeak);
 
-    if (!mute) {
+    if (!mute && isPeerStarted("mouth")) {
       // sendToPeer("mouth", "speakBlocking", toSpeak);
       invokePeer("mouth", "speakBlocking", toSpeak);
     }
@@ -1390,9 +1393,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public ProgramAB startChatBot() {
 
     try {
+      InMoov2Config config = (InMoov2Config)this.config;
 
       chatBot = (ProgramAB) startPeer("chatBot");
       isChatBotActivated = true;
+      if (config.locale != null) {
+        chatBot.setCurrentBotName(config.locale);
+      }
 
       speakBlocking(get("CHATBOTACTIVATED"));
 
@@ -1753,8 +1760,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public Double getUltraSonicRightDistance() {
-    if (ultraSonicRight != null) {
-      return ultraSonicRight.range();
+    if (ultrasonicRight != null) {
+      return ultrasonicRight.range();
     } else {
       warn("No UltraSonicRight attached");
       return 0.0;
@@ -1762,8 +1769,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public Double getUltraSonicLeftDistance() {
-    if (ultraSonicLeft != null) {
-      return ultraSonicLeft.range();
+    if (ultrasonicLeft != null) {
+      return ultrasonicLeft.range();
     } else {
       warn("No UltraSonicLeft attached");
       return 0.0;
@@ -2022,8 +2029,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
    *          port for the sensor
    * @return the ultrasonic sensor service
    */
-  public UltrasonicSensor startUltraSonicRight(String port) {
-    return startUltraSonicRight(port, 64, 63);
+  public UltrasonicSensor startUltrasonicRight(String port) {
+    return startUltrasonicRight(port, 64, 63);
   }
 
   /**
@@ -2038,52 +2045,61 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
    * @return the ultrasonic sensor
    * 
    */
-  public UltrasonicSensor startUltraSonicRight(String port, int trigPin, int echoPin) {
+  public UltrasonicSensor startUltrasonicRight(String port, int trigPin, int echoPin) {
 
-    if (ultraSonicRight == null) {
+    if (ultrasonicRight == null) {
       speakBlocking(get("STARTINGULTRASONIC"));
       isUltraSonicRightActivated = true;
 
-      ultraSonicRight = (UltrasonicSensor) startPeer("ultraSonicRight");
+      ultrasonicRight = (UltrasonicSensor) startPeer("ultrasonicRight");
 
       if (port != null) {
         try {
           speakBlocking(port);
           Arduino right = (Arduino) startPeer("right");
           right.connect(port);
-          right.attach(ultraSonicRight, trigPin, echoPin);
+          right.attach(ultrasonicRight, trigPin, echoPin);
         } catch (Exception e) {
           error(e);
         }
       }
     }
-    return ultraSonicRight;
+    return ultrasonicRight;
   }
 
+  public UltrasonicSensor startUltraSonicLeft() {
+    return startUltraSonicLeft(null, 64, 63);
+  }
+
+  public UltrasonicSensor startUltraSonicRight() {
+    return startUltrasonicRight(null, 64, 63);
+  }
+
+  
   public UltrasonicSensor startUltraSonicLeft(String port) {
     return startUltraSonicLeft(port, 64, 63);
   }
 
   public UltrasonicSensor startUltraSonicLeft(String port, int trigPin, int echoPin) {
 
-    if (ultraSonicLeft == null) {
+    if (ultrasonicLeft == null) {
       speakBlocking(get("STARTINGULTRASONIC"));
       isUltraSonicLeftActivated = true;
 
-      ultraSonicLeft = (UltrasonicSensor) startPeer("ultraSonicLeft");
+      ultrasonicLeft = (UltrasonicSensor) startPeer("ultrasonicLeft");
 
       if (port != null) {
         try {
           speakBlocking(port);
           Arduino left = (Arduino) startPeer("left");
           left.connect(port);
-          left.attach(ultraSonicLeft, trigPin, echoPin);
+          left.attach(ultrasonicLeft, trigPin, echoPin);
         } catch (Exception e) {
           error(e);
         }
       }
     }
-    return ultraSonicLeft;
+    return ultrasonicLeft;
   }
 
   public Pir startPir(String port) {
@@ -2114,6 +2130,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * config delegated startPir ... hopefully
+   * 
    * @return
    */
   public Pir startPir() {
@@ -2136,12 +2153,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public ServoMixer startServoMixer() {
 
-    servomixer = (ServoMixer) startPeer("servomixer");
+    servoMixer = (ServoMixer) startPeer("servoMixer");
     isServoMixerActivated = true;
 
     speakBlocking(get("STARTINGSERVOMIXER"));
     broadcastState();
-    return servomixer;
+    return servoMixer;
   }
 
   public void stop() {
@@ -2243,13 +2260,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public void stopUltraSonicRight() {
     speakBlocking(get("STOPULTRASONIC"));
-    releasePeer("ultraSonicRight");
+    releasePeer("ultrasonicRight");
     isUltraSonicRightActivated = false;
   }
 
   public void stopUltraSonicLeft() {
     speakBlocking(get("STOPULTRASONIC"));
-    releasePeer("ultraSonicLeft");
+    releasePeer("ultrasonicLeft");
     isUltraSonicLeftActivated = false;
   }
 
@@ -2269,7 +2286,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public void stopServoMixer() {
     speakBlocking(get("STOPSERVOMIXER"));
-    releasePeer("servomixer");
+    releasePeer("servoMixer");
     isServoMixerActivated = false;
   }
 
@@ -2369,133 +2386,150 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public ServiceConfig getConfig() {
     InMoov2Config config = (InMoov2Config) initConfig(new InMoov2Config());
 
-    config.isController3Activated = isController3Activated;
-    config.isController4Activated = isController4Activated;
-    config.isEyeLidsActivated = isEyeLidsActivated;
-    config.isHeadActivated = isHeadActivated;
-    config.isLeftArmActivated = isLeftArmActivated;
-    config.isLeftHandActivated = isLeftHandActivated;
-    config.isLeftHandSensorActivated = isLeftHandSensorActivated;
-    config.isLeftPortActivated = isLeftPortActivated;
-    config.isNeopixelActivated = isNeopixelActivated;
-    config.isOpenCVActivated = isOpenCVActivated;
-    config.isPirActivated = isPirActivated;
-    config.isRightArmActivated = isRightArmActivated;
-    config.isRightHandActivated = isRightHandActivated;
-    config.isRightHandSensorActivated = isRightHandSensorActivated;
-    config.isRightPortActivated = isRightPortActivated;
-    
-    config.isSimulatorActivated = isSimulatorActivated;
+    // config.isController3Activated = isController3Activated;
+    // config.isController4Activated = isController4Activated;
+    // config.enableEyelids = isEyeLidsActivated;
+    config.enableHead = isHeadActivated;
+    config.enableLeftArm = isLeftArmActivated;
+    config.enableLeftHand = isLeftHandActivated;
+    config.enableLeftHandSensor = isLeftHandSensorActivated;
+    // config.isLeftPortActivated = isLeftPortActivated;
+    // config.enableNeoPixel = isNeopixelActivated;
+    config.enableOpenCV = isOpenCVActivated;
+    // config.enablePir = isPirActivated;
+    config.enableRightArm = isRightArmActivated;
+    config.enableRightHand = isRightHandActivated;
+    config.enableRightHandSensors = isRightHandSensorActivated;
+    // config.isRightPortActivated = isRightPortActivated;
+    // config.enableSimulator = isSimulatorActivated;
 
     return config;
+  }
+
+  public void startAudioPlayer() {
+    startPeer("audioPlayer");
+  }
+
+  public void stopAudioPlayer() {
+    releasePeer("audioPlayer");
   }
 
   public ServiceConfig load(ServiceConfig c) {
     InMoov2Config config = (InMoov2Config) c;
     try {
+      
+      if (config.locale != null) {
+        Runtime.setAllLocales(config.locale);
+      }
+
+      if (config.enableAudioPlayer) {
+        startAudioPlayer();
+      } else {
+        stopAudioPlayer();
+      }
+
       /**
        * <pre>
        * FIXME - 
        * - there simply should be a single reference to the entire config object in InMoov
        *   e.g. InMoov2Config config member
        * - if these booleans are symmetric - there should be corresponding functionality of "stopping/releasing" since they
-       *   are currently starting  
+       *   are currently starting
        * </pre>
        */
 
-      if (config.isController3Activated) {
-        startPeer("controller3"); // FIXME ... this kills me :P
-        exec("isController3Activated = True");
-      }
+      /*
+       * FIXME - very bad - need some coordination with this
+       * 
+       * if (config.isController3Activated) { startPeer("controller3"); // FIXME
+       * ... this kills me :P exec("isController3Activated = True"); }
+       * 
+       * if (config.isController4Activated) { startPeer("controller4"); // FIXME
+       * ... this kills me :P exec("isController4Activated = True"); }
+       */
+      /*
+       * if (config.enableEyelids) { // the hell if I know ? }
+       */
 
-      if (config.isController4Activated) {
-        startPeer("controller4"); // FIXME ... this kills me :P
-        exec("isController4Activated = True");
-      }
-
-      if (config.isEyeLidsActivated) {
-        // the hell if I know ?
-      }
-
-      if (config.isHeadActivated) {
+      if (config.enableHead) {
         startHead();
       } else {
         stopHead();
       }
 
-      if (config.isLeftArmActivated) {
+      if (config.enableLeftArm) {
         startLeftArm();
       } else {
         stopLeftArm();
       }
 
-      if (config.isLeftHandActivated) {
+      if (config.enableLeftHand) {
         startLeftHand();
       } else {
         stopLeftHand();
       }
 
-      if (config.isLeftHandSensorActivated) {
+      if (config.enableLeftHandSensor) {
         // the hell if I know ?
       }
 
-      if (config.isLeftPortActivated) {
-        // the hell if I know ? is this an Arduino ?
-        startPeer("left");
-      } // else release peer ?
+      /*
+       * if (config.isLeftPortActivated) { // the hell if I know ? is this an
+       * Arduino ? startPeer("left"); } // else release peer ?
+       * 
+       * if (config.enableNeoPixel) { startNeopixel(); } else { //
+       * stopNeopixelAnimation(); }
+       */
 
-      if (config.isNeopixelActivated) {
-        startNeopixel();
-      } else {
-        // stopNeopixelAnimation();
-      }
-
-      if (config.isOpenCVActivated) {
+      if (config.enableOpenCV) {
         startOpenCV();
       } else {
         stopOpenCV();
       }
 
-      if (config.isPirActivated) {
-        startPir();
-      } else {
-        stopPir();
-      }
+      /*
+       * if (config.enablePir) { startPir(); } else { stopPir(); }
+       */
 
-      if (config.isRightArmActivated) {
+      if (config.enableRightArm) {
         startRightArm();
+      } else {
+        stopRightArm();
       }
 
-      if (config.isRightHandActivated) {
+      if (config.enableRightHand) {
         startRightHand();
       } else {
         stopRightHand();
       }
 
-      if (config.isRightHandSensorActivated) {
+      if (config.enableRightHandSensors) {
         // the hell if I know ?
       }
 
-      if (config.isRightPortActivated) {
-        // the hell if I know ? is this an Arduino ?
-      }
+      /*
+       * if (config.isRightPortActivated) { // the hell if I know ? is this an
+       * Arduino ? }
+       */
 
-      if (config.isServoMixerActivated) {
+      if (config.enableServoMixer) {
         startServoMixer();
+      } else {
+        stopServoMixer();
       }
 
-      if (config.isTorsoActivated) {
+      if (config.enableTorso) {
         startTorso();
       } else {
         stopTorso();
       }
 
-      if (config.isUltraSonicLeftActivated) {
-        /// startUltraSonicLeft(); delegate config
+      if (config.enableUltrasonicLeft) {
+        startUltraSonicLeft();
       }
 
-      if (config.isUltraSonicRightActivated) {
-        /// startUltraSonicRight(); delegate config
+      if (config.enableUltrasonicRight) {
+        startUltraSonicRight();
       }
 
       if (config.loadGestures) {
@@ -2503,12 +2537,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
         loadGestures();
         // will load in startService
       }
-      
-      
-      if (config.isSimulatorActivated) {
+
+      if (config.enableSimulator) {
         startSimulator();
       }
-      
+
       /*
        * 
        * if (RobotCanMoveBodyRandom; if (RobotCanMoveEyesRandom; if

@@ -5,9 +5,8 @@ package org.myrobotlab.service;
 
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.test.AbstractTest;
 
 /**
@@ -15,20 +14,23 @@ import org.myrobotlab.test.AbstractTest;
  *
  */
 public class NeoPixelTest extends AbstractTest {
-  private static final String V_PORT_1 = "test_port_1";
-  public Arduino arduino;
-  private NeoPixel neopixel;
+  private static final String VIRTUAL_PORT = "COM13";
+  private static Arduino arduino;
+  private static NeoPixel neopixel;
 
-  @Before
-  public void setUp() throws Exception {
-    arduino = (Arduino) Runtime.start("ard", "Arduino");
-    arduino.connect(V_PORT_1);
+  @BeforeClass
+  static public void setUp() throws Exception {
+    Runtime.setAllVirtual(true);
+    arduino = (Arduino) Runtime.start("neoArduino", "Arduino");
+    arduino.connect(VIRTUAL_PORT);
     neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
     neopixel.setPin(16);
     neopixel.setPixelCount(32);
     neopixel.attach(arduino);
 
   }
+  
+  // FIXME - do teardown 
 
   /**
    * Test method for
@@ -47,7 +49,7 @@ public class NeoPixelTest extends AbstractTest {
    */
   @Test
   public void testDetachNeoPixelController() throws Exception {
-    neopixel.detach((NeoPixelController) arduino);
+//    neopixel.detach(arduino);
     neopixel.setPin(16);
     neopixel.setPixelCount(32);
     // assertFalse(neopixel.isAttached);
@@ -61,7 +63,7 @@ public class NeoPixelTest extends AbstractTest {
    */
   @Test
   public void testSendPixelIntIntIntInt() {
-    neopixel.setPixel(3, 128, 128, 128);
+    neopixel.setPixel(3, 24, 53, 87);
   }
 
   /**

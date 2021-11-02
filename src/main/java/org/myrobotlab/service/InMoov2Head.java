@@ -3,8 +3,6 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.myrobotlab.framework.Service;
@@ -26,17 +24,15 @@ public class InMoov2Head extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(InMoov2Head.class);
 
+  // peers
   transient public ServoControl jaw;
   transient public ServoControl eyeX;
   transient public ServoControl eyeY;
   transient public ServoControl rothead;
   transient public ServoControl neck;
   transient public ServoControl rollNeck;
-
   transient public ServoControl eyelidLeft;
   transient public ServoControl eyelidRight;
-
-  transient Timer blinkEyesTimer = new Timer();
 
   public InMoov2Head(String n, String id) {
     super(n, id);
@@ -52,29 +48,8 @@ public class InMoov2Head extends Service {
       eyelidRight.setSpeed(tmpVelo);
     moveToBlocking(180, 180);
     moveToBlocking(0, 0);
-
   }
 
-  @Override
-  public void startService() {
-    super.startService();
-    startPeers();
-  }
-
-  class blinkEyesTimertask extends TimerTask {
-    @Override
-    public void run() {
-      int delay = ThreadLocalRandom.current().nextInt(10, 40 + 1);
-      blinkEyesTimer.schedule(new blinkEyesTimertask(), delay * 1000);
-
-      blink();
-      // random double blink
-      if (ThreadLocalRandom.current().nextInt(0, 1 + 1) == 1) {
-        sleep(ThreadLocalRandom.current().nextInt(1000, 2000 + 1));
-        blink();
-      }
-    }
-  }
 
   public void enable() {
     if (eyeX != null)
@@ -150,9 +125,9 @@ public class InMoov2Head extends Service {
     if (rollNeck != null)
       rollNeck.disable();
     if (eyelidLeft != null)
-      eyelidLeft.enable();
+      eyelidLeft.disable();
     if (eyelidRight != null)
-      eyelidRight.enable();
+      eyelidRight.disable();
   }
 
   public long getLastActivityTime() {
@@ -316,13 +291,8 @@ public class InMoov2Head extends Service {
   }
 
   public void releaseService() {
-    try {
-      disable();
-      releasePeers();
-      super.releaseService();
-    } catch (Exception e) {
-      error(e);
-    }
+    disable();
+    super.releaseService();
   }
 
   public void rest() {
@@ -502,15 +472,12 @@ public class InMoov2Head extends Service {
       eyelidRight.moveToBlocking(1.0);
   }
 
-  public void autoBlink(boolean param) {
-    if (blinkEyesTimer != null) {
-      blinkEyesTimer.cancel();
-      blinkEyesTimer = null;
-    }
-    if (param) {
-      blinkEyesTimer = new Timer();
-      new blinkEyesTimertask().run();
-    }
+  /**
+   * FIXME - implement
+   * @param b
+   */
+  public void autoBlink(boolean b) {
+
   }
 
   @Deprecated /* use setSpeed */

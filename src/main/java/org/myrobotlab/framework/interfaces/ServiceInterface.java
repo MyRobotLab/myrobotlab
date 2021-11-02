@@ -89,7 +89,7 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
 
   public void setInstanceId(URI uri);
 
-  public void setName(String prefix);
+  //public void setName(String prefix);
 
   public void startService();
 

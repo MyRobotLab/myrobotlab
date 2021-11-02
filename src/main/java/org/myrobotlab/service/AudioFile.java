@@ -27,6 +27,9 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,9 +38,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -48,6 +48,8 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Http;
+import org.myrobotlab.service.config.AudioFileConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
@@ -59,9 +61,9 @@ import org.slf4j.Logger;
 public class AudioFile extends Service {
   static final long serialVersionUID = 1L;
   static final Logger log = LoggerFactory.getLogger(AudioFile.class);
-  
+
   public static final String DEFAULT_TRACK = "default";
-  
+
   // statically initialize the supported files list.
   protected static Set<String> supportedFiles;
   static {
@@ -71,7 +73,7 @@ public class AudioFile extends Service {
     supportedFiles.add("ogg");
     supportedFiles.add("flac");
     supportedFiles.add("aiff");
-    supportedFiles.add("raw");  
+    supportedFiles.add("raw");
   }
 
   // FIXME
@@ -115,6 +117,10 @@ public class AudioFile extends Service {
   double volume = 1.0f;
   // if set to true, playback will become a no-op
   private boolean mute = false;
+
+  protected String currentPlaylist = "default";
+
+  protected Map<String, List<String>> playlists = new HashMap<>();
 
   final private transient PlaylistPlayer playlistPlayer = new PlaylistPlayer(this);
 
@@ -287,7 +293,7 @@ public class AudioFile extends Service {
       processors.get(key).pause(true);
       // do what you have to do here
       // In your case, an other loop.
-    }    
+    }
     playlistPlayer.stop();
   }
 
@@ -406,9 +412,6 @@ public class AudioFile extends Service {
     this.mute = mute;
   }
 
-  protected String currentPlaylist = "default";
-  protected Map<String, List<String>> playlists = new HashMap<>();
-
   public void setPlaylist(String name) {
     currentPlaylist = name;
   }
@@ -447,11 +450,9 @@ public class AudioFile extends Service {
       log.warn("Unable to walk file path {}", path, e);
       return null;
     }
-    
+
     // make sure it's a file and that we can read it
-    List<File> result = walk.map(f -> f.toFile())
-        .filter(f -> f.isFile())
-        .filter(f -> f.canRead())
+    List<File> result = walk.map(f -> f.toFile()).filter(f -> f.isFile()).filter(f -> f.canRead())
         .filter(f -> supportedFiles.contains(StringUtils.lowerCase(FilenameUtils.getExtension(f.getName()))))
         // .filter(f -> f.getTotalSpace() > 0)
         .collect(Collectors.toList());
@@ -474,38 +475,68 @@ public class AudioFile extends Service {
     return playlists;
   }
 
-  public void playlist(String playlist) {
-    playlist(playlist, false, false, playlist);
+  public void startPlaylist() {
+    startPlaylist(currentPlaylist, false, false, currentPlaylist);
   }
 
-  public void playlist(String playlist, boolean shuffle, boolean repeat) {
-    playlist(playlist, shuffle, repeat, playlist);
+  public void startPlaylist(String playlist) {
+    startPlaylist(playlist, false, false, playlist);
   }
 
-  public void playlist(String playlist, boolean shuffle, boolean repeat, String track) {
+  public void startPlaylist(String playlist, boolean shuffle, boolean repeat) {
+    startPlaylist(playlist, shuffle, repeat, playlist);
+  }
+
+  public void startPlaylist(String playlist, boolean shuffle, boolean repeat, String track) {
     if (!playlists.containsKey(playlist)) {
       error("cannot play playlist %s does not exists", playlist);
       return;
     }
     playlistPlayer.start(playlists.get(playlist), shuffle, repeat, track);
   }
-  
-  public void playlistStop() {
+
+  public void stopPlaylist() {
     playlistPlayer.stop();
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+
+    AudioFileConfig config = (AudioFileConfig) initConfig(new AudioFileConfig());
+    config.mute = mute;
+    config.currentTrack = currentTrack;
+    config.currentPlaylist = currentPlaylist;
+    config.volume = volume;
+    config.playlists = playlists;
+
+    return config;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    AudioFileConfig config = (AudioFileConfig) c;
+    setMute(config.mute);
+    setTrack(config.currentTrack);
+    setVolume(config.volume);
+    setPlaylist(config.currentPlaylist);
+    playlists = config.playlists;
+    return c;
   }
 
   public static void main(String[] args) {
 
     try {
       LoggingFactory.init("INFO");
-      AudioFile audioPlayer = (AudioFile) Runtime.start("audioPlayer", "AudioFile");
+      AudioFile audioPlayer = (AudioFile) Runtime.start("AudioPlayer", "AudioFile");
       // audioPlayer.play("https://upload.wikimedia.org/wikipedia/commons/1/1f/Bach_-_Brandenburg_Concerto.No.1_in_F_Major-_II._Adagio.ogg");
-      audioPlayer.addPlaylist("my list", "/home/greg/Music/acoustic");
+      audioPlayer.addPlaylist("acoustic", "/home/greg/Music/acoustic");
+      audioPlayer.addPlaylist("electronica", "/home/greg/Music/electronica");
+      audioPlayer.setPlaylist("electronica");
+      audioPlayer.startPlaylist("electronica");
       // audioPlayer.addPlaylist("my list", "Z:\\Music");
-      
-      audioPlayer.playlist("my list" , true, false, "my list");
+
+      // audioPlayer.playlist("my list" , true, false, "my list");
       Runtime.start("webgui", "WebGui");
-      
+
     } catch (Exception e) {
       log.error("main threw", e);
     }

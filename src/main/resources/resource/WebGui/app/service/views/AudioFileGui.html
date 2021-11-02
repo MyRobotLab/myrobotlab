@@ -1,31 +1,41 @@
-<div class="row">
-    <div class="input-group col-lg-12">
-    <!--
-
-<div
-    data-angular-treeview="true"
-	data-tree-id="abc"
-	data-tree-model="treedata"
-	data-node-id="id"
-	data-node-label="label"
-	data-node-children="children" >
+<div class="col-md-6">
+    <table border="1" class="table table-hover table-condensed table-striped table-bordered">
+        <tr>
+            <td>playing</td>
+            <td>{{playing}}</td>
+        </tr>
+        <tr>
+            <td>track</td>
+            <td>{{service.currentTrack}}</td>
+        </tr>
+        <tr>
+            <td>volume</td>
+            <td>{{service.volume}}</td>
+        </tr>
+        <tr>
+            <td>
+            <button class="btn btn-default" ng-click="play()"><span class="glyphicon glyphicon-play"/></button>
+                
+                <span class="glyphicon glyphicon-pause"/>
+                <span class="glyphicon glyphicon-stop"/>
+                <span class="glyphicon glyphicon-stop"/>
+                <span class="glyphicon glyphicon-volume-off"/>
+                <span class="glyphicon glyphicon-volume-up"/>
+            </td>
+            <td></td>
+        </tr>
+    </table>
 </div>
-
-
-        <div class="custom-file">
-            <input type="file" class="custom-file-input" id="customFile" ng-model="selectedFile" />
-        </div>
-        <button class="btn btn-default" ng-click="playFile(selectedFile)">play</button>
-    </div>
-</div>
-
-<br>
-here
-<br>
-<label class="import-file">
-    <input type="file" onchange="angular.element(this).scope().fileNameChanged(this)">
-    <div>Import file...</div>
-</label>
--->
-    </div>
+<div class="col-md-6">
+    selected playlist {{service.currentPlaylist}}<br/>
+    <table border="1" class="table table-hover table-condensed table-striped table-bordered">
+        <tr ng-repeat="(name, fileset) in service.playlists">
+            <td>{{name}}</td>
+        </tr>
+        <tr>
+            <td>
+                <button>add</button>
+            </td>
+        </tr>
+    </table>
 </div>

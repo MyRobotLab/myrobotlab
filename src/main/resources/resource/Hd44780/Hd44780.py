@@ -18,7 +18,7 @@ raspi = Runtime.start("raspi","RasPi")
 #################################################################
 # Next start the PCF8574 service                                #
 #################################################################
-pcf = Runtime.start("Pcf","Pcf8574")
+pcf = Runtime.start("pcf","Pcf8574")
 # Then attach it to the I2C Bus Master
 # When attaching, we specify the Bus Master Device,
 # the I2C Bus Number
