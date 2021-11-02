@@ -1075,7 +1075,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @param blocking
    *          if this should block until done.
    *
-   */
+   */  
   synchronized static public void install(String serviceType, Boolean blocking) {
     Runtime r = getInstance();
 
@@ -1500,6 +1500,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return configList;
   }
 
+  @Deprecated /* use releaseAll(b,b) */
   public static void releaseAllServicesExcept(HashSet<String> saveMe) {
     log.info("releaseAllServicesExcept");
     List<ServiceInterface> list = Runtime.getServices();
@@ -2296,6 +2297,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     super.releaseService();
     if (runtime != null) {
       runtime.stopInteractiveMode();
+      
+      runtime.getRepo().removeStatusPublishers();
     }
     runtime = null;
   }
