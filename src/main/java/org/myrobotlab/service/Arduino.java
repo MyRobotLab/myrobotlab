@@ -628,12 +628,17 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     // make list copy - to iterate without fear of thread or modify issues
     ArrayList<DeviceMapping> newList = new ArrayList<>(deviceIndex.values());
     log.info("detaching all devices");
+    /* DOESN'T MATTER IF CONNECTED - IF RECONNECT ARDUINO DEMANDS ITS 
+     * CURRENT STATE ONTO MrlComm
     if (isConnected()) {   
       for (DeviceMapping dm: newList) {
+        if (dm.getDevice().getName().equals(getName())) {
+          continue;
+        }
         detach(dm.getDevice());
         sleep(50);
       }
-    }
+    }*/
     deviceIndex.clear();
     deviceList.clear();
   }
@@ -1801,7 +1806,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     }
     
     // remove all devices
-    detach();    
     disconnect();
   }
 
