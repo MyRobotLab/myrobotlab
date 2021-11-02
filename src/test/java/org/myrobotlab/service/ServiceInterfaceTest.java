@@ -106,6 +106,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     blacklist.add("_TemplateService");
     blacklist.add("Lloyd");
     blacklist.add("Solr");
+    blacklist.add("Proxy"); // interesting idea - but no worky
     blacklist.add("Sphinx");
     blacklist.add("SwingGui");
     // This one just takes so darn long.
