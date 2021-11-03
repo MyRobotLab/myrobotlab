@@ -33,12 +33,12 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$location','$scope', '
         $scope.panels = panels
 
         if (!$scope.view_tab && panels.length > 0 && $scope.panels[$scope.panels.length - 1].name.startsWith('intro')) {
-            $scope.changeTab($scope.panels[0].name)
+          //  $scope.changeTab($scope.panels[0].name)
         }
 
         // if /#/service/{servicename} - change the tab
         if ($scope.servicename) {
-//            $scope.changeTab($scope.servicename)
+          //   $scope.changeTab($scope.servicename)
         }
     }
 

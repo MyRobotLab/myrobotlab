@@ -147,7 +147,7 @@ public class InProcessCli implements Runnable {
           c = in.read();
         } else {
           try {
-            Thread.sleep(100);
+            Thread.sleep(50);
           } catch (InterruptedException e) {
           }
           continue;

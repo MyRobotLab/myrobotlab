@@ -5,8 +5,21 @@ import org.myrobotlab.service.VirtualArduino;
 
 public class MrlNeopixel extends Device {
 
+  int id;
+  int pin;
+  int numPixels;
+  int depth;
+  
   public MrlNeopixel(int deviceId, VirtualArduino virtual) {
     super(deviceId, Msg.DEVICE_TYPE_NEOPIXEL, virtual);
+  }
+
+  public MrlNeopixel(Integer deviceId, Integer pin, Integer numPixels, Integer depth) {
+    super(deviceId);
+    this.id = deviceId;
+    this.pin = pin;
+    this.numPixels = numPixels;
+    this.depth = depth;
   }
 
   public void setAnimation(Integer animation, Integer red, Integer green, Integer blue, Integer speed) {

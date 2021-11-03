@@ -86,8 +86,6 @@ public class ServiceInterfaceTest extends AbstractTest {
 
   @Test
   public final void testAllServices() throws ClassNotFoundException, IOException {
-    if (printMethods)
-      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
 
     ArrayList<String> servicesWithoutWebPages = new ArrayList<String>();
     ArrayList<String> servicesWithoutScripts = new ArrayList<String>();
@@ -108,6 +106,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     blacklist.add("_TemplateService");
     blacklist.add("Lloyd");
     blacklist.add("Solr");
+    blacklist.add("Proxy"); // interesting idea - but no worky
     blacklist.add("Sphinx");
     blacklist.add("SwingGui");
     // This one just takes so darn long.
@@ -143,14 +142,16 @@ public class ServiceInterfaceTest extends AbstractTest {
       // System.out.println("SYSTEM TESTING " + service);
       // System.out.flush();
 
-      // service = "org.myrobotlab.service.EddieControlBoard";
+      // service = "org.myrobotlab.service.Hd44780";
 
       if (blacklist.contains(
           service)/* || !serviceType.getSimpleName().equals("Emoji") */) {
         log.info("White listed testing of service {}", service);
         continue;
       }
-      log.info("Testing Service: {}", service);
+      // log.info("Testing Service: {}", service);
+      
+      System.out.println("testing " + service);
 
       MetaData st = ServiceData.getMetaData("org.myrobotlab.service." + service);
       if (st == null) {

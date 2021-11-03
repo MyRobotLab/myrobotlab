@@ -1,8 +1,10 @@
 package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -61,6 +63,37 @@ public class RuntimeProcessTest extends AbstractTest {
     assertEquals("runtime", msg.getName());
     assertEquals("ls", msg.method);
     assertEquals(getName(), msg.getSrcName());
+
+    // make sure runtime is running
+    Runtime runtime = Runtime.getInstance();
+    // remove all except runtime
+    Runtime.releaseAll(false, true);
+    String[] services = Runtime.getServiceNames();
+
+    assertTrue(String.format("releasedAll(false) should have 1 remaining runtime services are %s", Arrays.toString(services)), services.length == 1);
+    
+    // releasing "self" test
+    runtime.releaseService();
+    services = Runtime.getServiceNames();
+    assertTrue(String.format("releasedAll(false) should have 0 remaining runtime services are %s", Arrays.toString(services)), services.length == 0);
+    
+    // testing re-entrant -
+    runtime = Runtime.getInstance();
+    assertTrue("testing re-entrant - expecting runtime service", Arrays.toString(Runtime.getServiceNames()).contains("runtime"));
+    
+    // removing all 
+    Runtime.releaseAll(true, true);
+
+    // better be 0
+    services = Runtime.getServiceNames();
+    assertTrue(String.format("releasedAll(false) should have 0 remaining runtime services are %s", Arrays.toString(services)), services.length == 0);
+
+    // better be re-entrant
+    runtime = Runtime.getInstance();
+    services = Runtime.getServiceNames();
+    assertTrue(String.format("releasedAll(false) should have new runtime services are %s", Arrays.toString(services)), services.length > 0);
+    assertTrue("testing re-entrant again - expecting runtime service", Arrays.toString(Runtime.getServiceNames()).contains("runtime"));
+    
 
     /**
      * cli

@@ -1048,7 +1048,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void startService() {
     super.startService();
     start();
-    startMdns();
   }
 
   public void stop() {
@@ -1058,6 +1057,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // Must not be called from a I/O-Thread to prevent deadlocks!
       new Thread() {
         public void run() {
+          nettosphere.framework().removeAllAtmosphereHandler();
           nettosphere.stop();
           nettosphere = null;
           log.warn("==== nettosphere STOPPED ====");
@@ -1066,8 +1066,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
 
-  public void stopService() {
-    super.stopService();
+  public void releaseService() {
+    super.releaseService();
     stopMdns();
     stop();
   }
@@ -1148,6 +1148,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       setPort(config.port);
     }
     autoStartBrowser(config.autoStartBrowser);
+    if (config.enableMdns) {
+      startMdns();
+    }    
     return config;
   }
 

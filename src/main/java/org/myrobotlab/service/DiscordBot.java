@@ -68,7 +68,6 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
       try {
         connect();
       } catch (Exception e) {
-        log.error("connect threw", e);
         error("could not connect %s", e.getMessage());
       }
     }
@@ -257,6 +256,10 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
   public Utterance publishUtterance(Utterance utterance) {
     lastUtterance = utterance;
     return utterance;
+  }
+
+  public void setBotName(String name) {
+    this.botName = name;
   }
 
 }

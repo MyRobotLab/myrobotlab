@@ -241,6 +241,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   }
 
   public void releaseService() {
+    super.releaseService();
     if (runner != null) {
       runner.stop();
     }

@@ -97,6 +97,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   protected MetaData serviceType;
 
   private static final long serialVersionUID = 1L;
+  
+  protected ServiceConfig config;
 
   transient public final static Logger log = LoggerFactory.getLogger(Service.class);
 
@@ -951,7 +953,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       ServiceInterface si = null;
 
       Runtime runtime = Runtime.getInstance();
-      // String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
+      // String filename = runtime.getConfigDir() + fs + runtime.getConfigName()
+      // + fs + name + ".yml";
       String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + sr.actualName + ".yml";
       File check = new File(filename);
       if (check.exists()) {
@@ -1481,7 +1484,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   // FIXME - startPeers sets fields - this method should "unset" fields !!!
   synchronized private void releasePeers(String peerKey) {
-    log.info("{}.releasePeers ({})", getName());
+    log.info("{}.releasePeers ({})", getName(), peerKey);
     try {
       // get sub peers climbing tree
       Map<String, ServiceReservation> peers = serviceType.getPeers();
@@ -1853,11 +1856,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * services by re-writing names with prefixes
    */
 
-  @Override
-  public void setName(String name) {
-    // this.name = String.format("%s%s", prefix, name);
-    this.name = name;
-  }
 
   @Override
   public String getName() {
@@ -1873,9 +1871,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
-   * loadPeer attempts to create then load a peer with current configuration.  If no
-   * configuration is found it is not an error, since it was a peer there is enough information 
-   * to correctly create a peer service from this services meta data.
+   * loadPeer attempts to create then load a peer with current configuration. If
+   * no configuration is found it is not an error, since it was a peer there is
+   * enough information to correctly create a peer service from this services
+   * meta data.
    * 
    * @param reservedKey
    * @return
@@ -1983,9 +1982,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public void startPeers() {
     log.info("starting peers");
     Map<String, ServiceReservation> peers = serviceType.getPeers();
-    
+
     if (peers != null) {
-      for (ServiceReservation sr: peers.values()) {
+      for (ServiceReservation sr : peers.values()) {
         startPeer(sr.key);
       }
     }
@@ -2804,6 +2803,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public int getCreationOrder() {
     return creationOrder;
+  }
+
+  public boolean isPeerStarted(String peerKey) {
+    if (serviceType.peers != null) {
+      if (!serviceType.peers.containsKey(peerKey)) {
+        return false;
+      }
+      ServiceReservation sr = serviceType.peers.get(peerKey);
+      return "started".equals(sr.state);
+    }
+    return false;
   }
 
 }

@@ -93,10 +93,10 @@ public class TimeEncoder implements Runnable, EncoderControl {
     static Positions instance = null;
     Map<String, Double> positions = null;
     transient private Thread worker;
-    transient boolean running = false;
+    transient boolean isSavingPositions = false;
     String filename = null;
     // reference counter - when 0 shuts thread down
-    int refCount;
+    int refCount = 0;
 
     public Positions() {
       // load previous positions
@@ -123,9 +123,9 @@ public class TimeEncoder implements Runnable, EncoderControl {
     @Override
     public void run() {
 
-      running = true;
+      isSavingPositions = true;
 
-      while (running) {
+      while (isSavingPositions) {
         try {
           Thread.sleep(2000);
           log.debug("saving {} positions of {} servos", filename, positions.size());
@@ -143,7 +143,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
       if (refCount == 0) {
         // no one is using time encoders....
         // shutting down
-        running = false;
+          isSavingPositions = false;
       }
     }
 

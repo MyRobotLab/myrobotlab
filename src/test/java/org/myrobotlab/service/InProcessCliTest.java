@@ -24,6 +24,9 @@ public class InProcessCliTest extends AbstractTest {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
+    // set config to this tests name - so will not conflict with other
+    // tests
+    Runtime.setConfig("InProcessCliTest");
     pipe = new PipedOutputStream();
     in = new PipedInputStream(pipe);
     bos = new ByteArrayOutputStream();
@@ -54,54 +57,61 @@ public class InProcessCliTest extends AbstractTest {
   @Test
   public void testProcess() throws IOException, InterruptedException {
     try {
-    Runtime runtime = Runtime.getInstance();
-    
-    //InProcessCli proc = new InProcessCli(runtime, "proc-cli-test", in, bos);
-    InProcessCli proc = new InProcessCli(runtime, "proc-cli-test", in, bos);
-    
-    // add the route !
-    Connection c = proc.getConnection();
-    String stdCliUuid = (String) c.get("uuid");
+      Runtime runtime = Runtime.getInstance();
+      // runtime.stopInteractiveMode();
 
-    // addRoute(".*", getName(), 100);
-    runtime.addConnection(stdCliUuid, proc.getId(), c);
+      InProcessCli proc = new InProcessCli(runtime, "proc-cli-testz", in, bos);
 
+      // FIXME - adding route should be automagic
 
-    // wait for pipe to clear
-    Thread.sleep(300);
-    clear();
-    write("pwd");
-    String ret = getResponse();
-    Thread.sleep(300);
-    assertTrue(ret.startsWith("\"/\""));
+      // add the route !
+      Connection c = proc.getConnection();
+      String stdCliUuid = (String) c.get("uuid");
 
-    clear();
-    write("ls");
-    Thread.sleep(300);
-    assertTrue(getResponse().contains(toJson(Runtime.getServiceNames())));
+      // addRoute(".*", getName(), 100);
+      runtime.addConnection(stdCliUuid, proc.getId(), c);
 
-    boolean virtual = runtime.isVirtual();
+      // wait for pipe to clear
+      Thread.sleep(300);
+      clear();
+      write("pwd");
+      Thread.sleep(300);
+      String ret = getResponse();
+      log.warn("pwd expected {} got {}", "/", ret);
+      assertTrue("expecting to start with \"/\"", ret.startsWith("\"/\""));
 
-    // boolean conversion
-    clear();
-    write("/runtime/setVirtual/false");
-    ret = getResponse();
-    Thread.sleep(300);
-    assertFalse(runtime.isVirtual());
-    write("/runtime/setVirtual/true");
-    Thread.sleep(300);
-    assertTrue(runtime.isVirtual());
-    // replace with original value
-    runtime.setVirtual(virtual);
+      clear();
+      write("ls");
+      Thread.sleep(300);
+      String response = getResponse();
+      log.warn("ls response is {}", response);
+      String services = toJson(Runtime.getServiceNames());
+      log.warn("ls expected {} got {}", services, response);
+      assertTrue(String.format("expecting a list of service names expecting %s got %s", services, response), response.contains(services));
 
-    // integer conversion
-    Clock clockCli = (Clock) Runtime.start("clockCli", "Clock");
-    write("/clockCli/setInterval/1234");
-    Integer check = 1234;
-    Thread.sleep(300);
-    assertEquals(check, clockCli.getInterval());
-    proc.stop();
-    } catch(Exception e) {
+      boolean virtual = runtime.isVirtual();
+
+      // boolean conversion
+      clear();
+      write("/runtime/setVirtual/false");
+      Thread.sleep(300);
+      ret = getResponse();
+      assertFalse("virtual better be false", runtime.isVirtual());
+      write("/runtime/setVirtual/true");
+      Thread.sleep(300);
+      assertTrue("this better be virtual", runtime.isVirtual());
+      // replace with original value
+      runtime.setVirtual(virtual);
+
+      // integer conversion
+      Clock clockCli = (Clock) Runtime.start("clockCli", "Clock");
+      write("/clockCli/setInterval/1234");
+      Thread.sleep(300);
+      Integer check = 1234;
+      log.warn("/clockCli/setInterval/ expected 1234 got {}", ret);
+      assertEquals(check, clockCli.getInterval());
+      proc.stop();
+    } catch (Exception e) {
       log.error("InProcessCliTest threw", e);
     }
   }

@@ -249,6 +249,15 @@ public class Servo extends AbstractServo implements ServoControl {
     ServoConfig config = (ServoConfig) c;
 
     autoDisable = config.autoDisable;
+    
+    // important - if starting up
+    // and autoDisable - then the assumption at this point
+    // is it is currently disabled, otherwise it will take
+    // a move to disable
+    if (config.autoDisable) {
+      disable();
+    }
+    
     mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
     mapper.setInverted(config.inverted);
     mapper.setClip(config.clip);

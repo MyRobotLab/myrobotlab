@@ -101,7 +101,7 @@ audioPlayer.addPlaylist('my list', 'data')
 # so you can run more sounds or voices in the foreground
 
 # start my playlist in the background
-audioPlayer.playlist('my list')
+audioPlayer.startPlaylist('my list')
 
 # repeat good evening in the foreground 3 times
 audioPlayer.repeat("data/good_evening.wav", 3)
