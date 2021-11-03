@@ -19,6 +19,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
     $scope.testTime = 300
     $scope.sliderEnabled = false
     $scope.speedDisplay = 0
+    $scope.controller = null
 
     $scope.speed = null
     $scope.lockInputOutput = true
@@ -147,15 +148,9 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
     }
     $scope.outputFieldMin = function() {
-        if ($scope.lockInputOutput) {
-            $scope.inputSlider.minValue = $scope.outputSlider.minValue
-        }
         msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
     }
     $scope.outputFieldMax = function() {
-        if ($scope.lockInputOutput) {
-            $scope.inputSlider.maxValue = $scope.outputSlider.maxValue
-        }
         msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
     }
     $scope.restField = function() {
@@ -175,11 +170,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             onStart: function() {},
             /* - changing only on mouse up event - look in ServoGui.html - cannot do this !!! - sliding to the end an letting go doesnt do what you expect */
             onChange: function() {
-                if ($scope.lockInputOutput) {
-                    $scope.inputSlider.minValue = $scope.outputSlider.minValue
-                    $scope.inputSlider.maxValue = $scope.outputSlider.maxValue
-                }
-                msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
+                // msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
+                msg.send('setMinMax', $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
             },
             onEnd: function() {}
         }
