@@ -122,23 +122,11 @@
           <name>oss-snapshots-repo</name>
           <url>https://oss.sonatype.org/content/groups/public</url>
         </repository>
-        <!-- swinggui mxgraph  -->
-        <repository>
-          <id>talend</id>
-          <name>talend</name>
-          <url>https://nexus.talanlabs.com/content/repositories/releases/</url>
-        </repository>
         <!-- some marytts voices  -->
         <repository>
           <id>marytts</id>
           <name>marytts</name>
           <url>http://mary.dfki.de/repo</url>
-        </repository>
-        <!-- Public online Restlet repository  -->
-        <repository>
-          <id>maven-restlet</id>
-          <name>maven-restlet</name>
-          <url>https://maven.restlet.talend.com</url>
         </repository>
         <!-- Discord Bot - m2-dv8tion  -->
         <repository>
