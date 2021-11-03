@@ -3488,15 +3488,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * loads a yaml configuration file from the file system default location will
    * be data/config/{name}.yml
-   * 
-   * @param filename
-   *          the file to load
-   * @return service config loaded from file.
+   *  
+   * @param name
+   * @return
    * @throws IOException
-   *           if an error occurs reading the file
-   * 
    */
-
   static public ServiceConfig load(String name) throws IOException {
 
     ServiceInterface si = create(name);

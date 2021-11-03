@@ -161,7 +161,7 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
   /**
    * Attach a speech listener which gets on started/stopped speaking callbacks.
    * 
-   * @param listener
+   * @param attachable
    */
   default public void attachSpeechListener(Attachable attachable) {
     addListener("publishStartSpeaking", attachable.getName());
