@@ -177,7 +177,7 @@ public class AbstractTest {
       log.warn("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
     }
     
-    log.warn("end of test - id {} remaining services {}", Platform.getLocalInstance().getId(), Arrays.toString(Runtime.getServiceNames()));
+    log.warn("end of test - id {} remaining services after release {}", Platform.getLocalInstance().getId(), Arrays.toString(Runtime.getServiceNames()));
   }
 
   public AbstractTest() {

@@ -170,9 +170,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * a more capable task handler
    */
-  transient HashMap<String, Timer> tasks = new HashMap<String, Timer>();
-
-  // public final static String cfgDir = FileIO.getCfgDir();
+  transient Map<String, Timer> tasks = new HashMap<String, Timer>();
 
   /**
    * used as a static cache for quick method name testing FIXME - if you make
@@ -788,14 +786,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return false;
   }
 
+  @Override
   public void addTask(long intervalMs, String method) {
     addTask(intervalMs, method, new Object[] {});
   }
 
+  @Override
   public void addTask(long intervalMs, String method, Object... params) {
     addTask(method, intervalMs, 0, method, params);
   }
 
+  @Override
   public void addTaskOneShot(long delayMs, String method, Object... params) {
     addTask(method, 0, delayMs, method, params);
   }
@@ -814,6 +815,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @param params
    *          the params to pass
    */
+  @Override
   synchronized public void addTask(String taskName, long intervalMs, long delayMs, String method, Object... params) {
     if (tasks.containsKey(taskName)) {
       log.info("already have active task \"{}\"", taskName);
@@ -826,14 +828,27 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     tasks.put(taskName, timer);
   }
 
-  public HashMap<String, Timer> getTasks() {
+  @Override
+  public Map<String, Timer> getTasks() {
     return tasks;
   }
 
+  @Override
   public boolean containsTask(String taskName) {
     return tasks.containsKey(taskName);
   }
+  
+  @Override
+  final public void invokeFuture(String method, long delayMs) {
+    invokeFuture(method, delayMs, (Object[])null);
+  }
 
+  @Override
+  final public void invokeFuture(String method, long delayMs, Object... params) {
+    addTaskOneShot(delayMs, method, params);
+  }
+
+  @Override
   synchronized public void purgeTask(String taskName) {
     if (tasks.containsKey(taskName)) {
       log.info("remove task {}", taskName);
@@ -843,7 +858,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
           timer.cancel();
           timer.purge();
           timer = null;
-          tasks.remove(taskName);
         } catch (Exception e) {
           log.info(e.getMessage());
         }
@@ -851,8 +865,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     } else {
       log.debug("purgeTask - task {} does not exist", taskName);
     }
+    tasks.remove(taskName);
   }
 
+  @Override
   public void purgeTasks() {
     for (String taskName : tasks.keySet()) {
       Timer timer = tasks.get(taskName);
