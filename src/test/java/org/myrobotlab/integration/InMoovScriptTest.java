@@ -62,8 +62,6 @@ public class InMoovScriptTest extends AbstractTest {
 
   @Test
   public void testInMoovScript() throws IOException {
-    if (printMethods)
-      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
 
     if (!isHeadless()) {
       Runtime.start("gui", "SwingGui");

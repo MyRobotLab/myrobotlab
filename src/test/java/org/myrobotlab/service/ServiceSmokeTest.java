@@ -43,6 +43,7 @@ public class ServiceSmokeTest extends AbstractTest {
       blacklist.add("org.myrobotlab.service.Sphinx");
       blacklist.add("org.myrobotlab.service.LeapMotion");
       blacklist.add("org.myrobotlab.service.Runtime");
+      blacklist.add("org.myrobotlab.service.Proxy"); // interesting idea - but no worky
       blacklist.add("org.myrobotlab.service.JMonkeyEngine");
       blacklist.add("org.myrobotlab.service.Lloyd");
       blacklist.add("org.myrobotlab.service._TemplateService");

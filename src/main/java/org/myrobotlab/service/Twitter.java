@@ -91,11 +91,6 @@ public class Twitter extends Service {
     twitter = tf.getInstance();
   }
 
-  @Override
-  public void releaseService() {
-    super.releaseService();
-  }
-
   public void setSecurity(String consumerKey, String consumerSecret, String accessToken, String accessTokenSecret) {
 
     this.consumerKey = consumerKey;

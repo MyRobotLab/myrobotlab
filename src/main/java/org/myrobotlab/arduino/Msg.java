@@ -2656,6 +2656,12 @@ public class Msg {
   
   synchronized byte[] sendMessage(ByteArrayOutputStream baos) throws Exception {
     byte[] message = baos.toByteArray();
+
+    if (message.length > MAX_MSG_SIZE) {
+      log.error("**** message size {} > MAX_MSG_SIZE {} - not sending ****", MAX_MSG_SIZE, message.length);
+      return message;
+    }
+
     if (ackEnabled) {
       // wait for a pending ack to be received before we process our message.^M
       waitForAck();

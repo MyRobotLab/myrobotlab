@@ -81,7 +81,7 @@ public class VirtualMsg {
   private int method = -1;
   public boolean debug = false;
   // when using a real service, invoke should be true, for unit tests, this should be false.
-  private boolean invoke = true;
+  private boolean invoke = false;
   
   private int errorServiceToHardwareRxCnt = 0;
   private int errorHardwareToServiceRxCnt = 0;
@@ -1761,6 +1761,12 @@ public class VirtualMsg {
   
   synchronized byte[] sendMessage(ByteArrayOutputStream baos) throws Exception {
     byte[] message = baos.toByteArray();
+
+    if (message.length > MAX_MSG_SIZE) {
+      log.error("**** message size {} > MAX_MSG_SIZE {} - not sending ****", MAX_MSG_SIZE, message.length);
+      return message;
+    }
+
     if (ackEnabled) {
       // wait for a pending ack to be received before we process our message.^M
       waitForAck();

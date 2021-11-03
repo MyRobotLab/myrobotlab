@@ -508,4 +508,8 @@ public abstract class Repo {
     }
   }
 
+  public void removeStatusPublishers() {
+    installStatusPublishers.clear();   
+  }
+
 }

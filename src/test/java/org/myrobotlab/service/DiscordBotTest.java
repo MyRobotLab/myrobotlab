@@ -20,10 +20,10 @@ public class DiscordBotTest extends AbstractServiceTest {
   public void testService() throws Exception {
 
     DiscordBot bot = (DiscordBot)service;
-    bot.setName("Awesom-O-4000");
+    bot.setBotName("Awesom-O-4000");
     bot.setToken("BOGUS_FAKE_TOKEN");
     
-    assertEquals("Awesom-O-4000", bot.getName());
+    assertEquals("Awesom-O-4000", bot.getBotName());
     assertEquals("BOGUS_FAKE_TOKEN", bot.getToken());
     
     // TODO: mock out the ProgramAB "brain" 

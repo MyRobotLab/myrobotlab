@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.framework.Service;
@@ -35,9 +36,6 @@ public class ServoTest extends AbstractTest {
 
   @Before /* start initial state */
   public void setUp() throws Exception {
-
-    // Platform.setVirtual(false); - force to make real servo
-
     servo01 = (Servo) Runtime.start("s1", "Servo");
     arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     arduino01.connect(port01);
@@ -48,23 +46,27 @@ public class ServoTest extends AbstractTest {
     servo01.map(0, 180, 0, 180);
     servo01.setRest(90.0);
   }
+  
+  @AfterClass
+  static public void afterClass() throws Exception {
+    servo01.releaseService();
+    arduino01.releaseService();
+  }
 
   @Test
   public void disabledMove() throws Exception {
     // take off speed control
-    log.error("HERE 0 ----------------");
     servo01.fullSpeed();
     servo01.moveTo(0.0);
     servo01.setInverted(false);
     Service.sleep(1000);
-    log.error("HERE 1 ----------------");
 
     // begin long slow move
     servo01.setSpeed(5.0);
     servo01.moveTo(180.0);
     Service.sleep(300);
     assertTrue(servo01.isMoving());
-    log.error("HERE 2 ----------------");
+    
     // after 1/10 of a second we should be moving
     assertTrue(servo01.isMoving());
     double pos = servo01.getCurrentInputPos();
@@ -119,7 +121,6 @@ public class ServoTest extends AbstractTest {
     // then detach
     Runtime runtime = Runtime.getInstance();
     runtime.setVirtual(true);
-    // Runtime.start("gui", "SwingGui");
 
     Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     arduino01.connect(port01);
@@ -164,15 +165,23 @@ public class ServoTest extends AbstractTest {
     // detach the servo.
     // ard2.detach(s);
     s.detach(arduino01);
-
-    //
+    
+    // detaching an re-attaching requires
+    // asynch communication - time is needed
+    // to come to 'eventual' synchronized consistency
+    
+    Service.sleep(300);
     s.attach(arduino01, 10, 1.0);
+    Service.sleep(300);
     s.enable();
     assertTrue(s.isEnabled());
     s.disable();
     assertFalse(s.isEnabled());
 
     s.detach(arduino01);
+    
+    s.releaseService();
+    arduino01.releaseService();
 
   }
 

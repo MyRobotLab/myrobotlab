@@ -1,6 +1,7 @@
 package org.myrobotlab.test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
@@ -19,8 +20,6 @@ import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 public class AbstractTest {
-
-  private static long coolDownTimeMs = 100;
 
   /** cached network test value for tests */
   static Boolean hasInternet = null;
@@ -41,11 +40,11 @@ public class AbstractTest {
 
   protected Set<Attachable> attached = new HashSet<>();
 
-  protected boolean printMethods = true;
-
   @Rule
   public final TestName testName = new TestName();
+  
   static public String simpleName;
+  
   private static boolean lineFeedFooter = true;
 
   public String getSimpleName() {
@@ -100,9 +99,7 @@ public class AbstractTest {
     if (threadSetStart == null) {
       threadSetStart = Thread.getAllStackTraces().keySet();
     }
-
     installAll();
-
   }
 
   static public List<String> getThreadNames() {
@@ -114,19 +111,10 @@ public class AbstractTest {
     return ret;
   }
 
-  static public void sleep(int sleepMs) {
-    try {
-      Thread.sleep(sleepMs);
-    } catch (InterruptedException e) {
-      // don't care
-    }
-  }
-
   public static void sleep(long sleepTimeMs) {
     try {
-      Thread.sleep(coolDownTimeMs);
+      Thread.sleep(sleepTimeMs);
     } catch (Exception e) {
-
     }
   }
 
@@ -150,30 +138,21 @@ public class AbstractTest {
   static protected void installAll() {
     if (!installed) {
       log.warn("=====================installing all services=====================");
+      // install all service while blocking until done
       Runtime.install(null, true);
       installed = true;
     }
   }
 
+  /**
+   * release all services except runtime ?
+   */
   public static void releaseServices() {
 
-    // services to be cleaned up/released
-    String[] services = Runtime.getServiceNames();
-    Set<String> releaseServices = new TreeSet<>();
-    for (String service : services) {
-      // don't kill runtime - although in the future i hope this is possible
-      if (!"runtime".equals(service)) {
-        releaseServices.add(service);
-        log.info("service {} left in registry - releasing", service);
-        Runtime.releaseService(service);
-      }
-    }
-
-    if (releaseServices.size() > 0) {
-      log.info("attempted to release the following {} services [{}]", releaseServices.size(), String.join(",", releaseServices));
-      log.info("cooling down for {}ms for dependencies with asynchronous shutdown", coolDownTimeMs);
-      sleep(coolDownTimeMs);
-    }
+    log.warn("end of test - id {} remaining services {}", Platform.getLocalInstance().getId(), Arrays.toString(Runtime.getServiceNames()));
+    
+    // release all including runtime - be careful of default runtime.yml
+    Runtime.releaseAll(true, true);
 
     // check threads - kill stragglers
     // Set<Thread> stragglers = new HashSet<Thread>();
@@ -197,7 +176,8 @@ public class AbstractTest {
     if (threadsRemaining.size() > 0) {
       log.warn("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
     }
-    // log.warn("finished the killing ...");
+    
+    log.warn("end of test - id {} remaining services {}", Platform.getLocalInstance().getId(), Arrays.toString(Runtime.getServiceNames()));
   }
 
   public AbstractTest() {
@@ -213,10 +193,6 @@ public class AbstractTest {
 
   public boolean isVirtual() {
     return Platform.isVirtual();
-  }
-
-  public void testFunction() {
-    log.info("tested testFunction");
   }
 
 }

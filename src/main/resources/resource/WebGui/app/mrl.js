@@ -42,7 +42,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // FIXME - let the webgui pass up the id unless configured not to
     function generateId() {
         // one id to rule them all !
-        
+
         // non unique
         return 'webgui-client'
 
@@ -109,7 +109,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         maxRequest: 100,
         maxReconnectOnClose: 100,
         enableProtocol: true,
-        timeout: -1, // infinite idle timeout
+        timeout: -1,
+        // infinite idle timeout
         fallbackTransport: 'long-polling',
         reconnectInterval: 1000,
         maxReconnectOnClose: 50,
@@ -167,7 +168,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         // remote subscription - runtime@id handles all callback for this js client
         _self.sendTo(toServiceName, "addListener", method, 'runtime@' + _self.id)
     }
-    
 
     this.subscribeToMethod = function(callback, methodName) {
         if (!(methodName in methodCallbackMap)) {
@@ -253,8 +253,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             // js implementation -
             var pos = msg.data.length - 1
             for (let i = pos; i > -1; --i) {
-                if (typeof msg.data[i] == 'undefined') {
-                } else {
+                if (typeof msg.data[i] == 'undefined') {} else {
                     msg.data[i] = JSON.stringify(msg.data[i])
                 }
             }
@@ -383,7 +382,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                     return
                 }
 
-                if (msg.method == 'onDescribe'){
+                if (msg.method == 'onDescribe') {
                     console.info('here')
                 }
 
@@ -393,7 +392,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                         msg.data[x] = jQuery.parseJSON(msg.data[x])
                     }
                 }
-
 
                 // GREAT FOR DEBUGGING INCOMING MSGS
                 // console.warn(msg.sender + '---> ' + msg.name + '.' + msg.method)
@@ -418,10 +416,19 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                     }
                 }
 
+                // on all onState msg - from broadcastState update the 
+                // registry
+                let senderFullName = _self.getFullName(msg.sender)
+                if (msg.method == 'onState'){
+                    let s = registry[senderFullName]
+                    if (s){
+                       registry[senderFullName] = msg.data[0]
+                    }
+                }
+
                 // THE CENTER OF ALL CALLBACKS
                 // process name callbacks - most common
                 // console.log('nameCallbackMap')
-                let senderFullName = _self.getFullName(msg.sender)
                 if (nameCallbackMap.hasOwnProperty(senderFullName) && msg.method != 'onMethodMap') {
                     let cbs = nameCallbackMap[senderFullName]
                     for (var i = 0; i < cbs.length; i++) {
@@ -470,13 +477,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     this.onStatus = function(status) {
         console.log(status)
     }
-    
 
-    this.onReconnect = function(request, response){
+    this.onReconnect = function(request, response) {
         console.info('onReconnect')
     }
 
-    this.onReopen = function(request, response){
+    this.onReopen = function(request, response) {
         console.info('onReopen')
         initialize(response)
     }
@@ -584,6 +590,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
     this.addService = function(service) {
         registry[_self.getFullName(service)] = service
+        return service
     }
 
     this.removeService = function(name) {
@@ -661,7 +668,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     /**
      * initialization after a successful open or reOpen
      */
-    var initialize = function(response){
+    var initialize = function(response) {
         console.info('initialize')
         // FIXME - does this need to be done later when ids are setup ?
         connected = true
@@ -805,7 +812,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             angular.forEach(panelReleasedSubscribers, function(value, key) {
                 value(panelName)
             })
-            _self.changeTab('runtime')
+            // _self.changeTab('runtime')
         }
 
         var notifyAllOfUpdate = function() {
@@ -922,9 +929,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             let name = _self.getFullName(serviceName)
             if (panels.hasOwnProperty(name)) {
                 return panels[name]
-            } else {
-                // TOO CHATTY - BROWSER KILLER !
-                // console.error('could not find panel ' + name)
+            } else {// TOO CHATTY - BROWSER KILLER !
+            // console.error('could not find panel ' + name)
             }
             return null
         }
@@ -1302,6 +1308,15 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                             }
                         },
 
+                        isPeerStarted(peerName) {
+                            try {
+                                let service = _self.getService(name)
+                                return service.serviceType.peers[peerName].state == 'started'
+                            } catch (e) {
+                                return false;
+                            }
+                        },
+
                         subscribe: function(data) {
                             if ((typeof arguments[0]) == "string") {
                                 // regular subscribe when used - e.g. msg.subscribe('publishData')
@@ -1387,7 +1402,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 _self.addService(service)
             },
             init: function() {
-                console.debug('mrl.init connected ' + connected + ' connecting ' +  connecting)
+                console.debug('mrl.init connected ' + connected + ' connecting ' + connecting)
                 _self.connect()
             },
             isConnected: function() {
@@ -1431,13 +1446,15 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             getStyle: _self.getStyle,
             subscribe: _self.subscribe,
             unsubscribe: _self.unsubscribe,
+            isPeerStarted: _self.isPeerStarted,
             subscribeToService: _self.subscribeToService,
             getFullName: _self.getFullName,
             sendBlockingMessage: _self.sendBlockingMessage,
             subscribeConnected: _self.subscribeConnected,
             subscribeToMethod: _self.subscribeToMethod,
             subscribeToServiceMethod: _self.subscribeToServiceMethod,
-            subscribeTo: _self.subscribeTo, // better name
+            subscribeTo: _self.subscribeTo,
+            // better name
             getProperties: _self.getProperties,
             sendMessage: _self.sendMessage // setViewType: _self.setViewType,
             // getViewType: _self.getViewType

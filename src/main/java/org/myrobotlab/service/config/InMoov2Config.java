@@ -4,24 +4,31 @@ public class InMoov2Config extends ServiceConfig {
   
       // ;----------------------------- BASIC CONFIGURATION ----------------------------------------
       // [MAIN]
-      public String ScriptType="Virtual";
+      // FIXME - should be runtime virtual not controlled or needed by scripts
+      // public String ScriptType="Virtual";
       // RightSide: Also called FINGERSTARTER : connect one arduino ( called right ) to use FingerStarter + inmoov right side
       // LeftSide: connect one arduino ( called left) to use head / inmoov left side
       // setup your com ports inside service_6_Arduino.config
       // NoArduino: vocal Only
       // Full: Both side arduinos connected
       // Virtual: virtual arduino and inmoov !
-      public boolean debug=false;
+      
+      // FIXME - does nothing ????
+      // public boolean debug=false;
 
-      String Language="en-US";
+  /*
+      public String Language="en-US";
       // ; en-US,fr-FR,es-ES,de-DE,nl-NL,ru-RU,hi-IN,it-IT,fi-FI,pt-PT,tr-TR
+      
+      
+
 
       // ;----------------------------------- END --------------------------------------------------
 
       // ;----------------------------- ADVANCED & OPTIONAL CONFIGURATION -------------------------------------
 
       // [VOCAL]
-      public boolean IsMute=false;
+      public boolean mute=false;
       // ;if true; : robot don't talk about starting actions
 
       // [GENERAL]
@@ -148,7 +155,7 @@ public class InMoov2Config extends ServiceConfig {
 
           // ;----------------------------- NEOPIXEL RX/TX CONFIG ----------------------------------------
           // [MAIN]
-          public boolean isNeopixelActivated=false;
+          public boolean enableNeoPixel=false;
           public String NeopixelMaster="left";
           // ;NeopixelMaster= right / left
           public String NeopixelMasterPort="Serial2";
@@ -174,7 +181,7 @@ public class InMoov2Config extends ServiceConfig {
           //////////////////// service_C_Pir.config.default ////////////////////////////
           // ;----------------------------- PIR CONFIGURATION ----------------------------------------
           // [MAIN]
-          public boolean isPirActivated=false;
+          public boolean enablePir=false;
 
           // ;witch arduino control pir :
           public String pirControlerArduino="right";
@@ -215,7 +222,7 @@ public class InMoov2Config extends ServiceConfig {
           //////////////////// service_D_OpenCv.config.default ////////////////////////////
           // ;----------------------------- VIRTUAL INMOOV CONFIGURATION ----------------------------------------
           // [MAIN]
-          public boolean isSimulatorActivated=true;
+          public boolean enableSimulator=true;
           // ;use real arduino + virtual inmoov
           public boolean VinmoovMonitorActivated=false;
           // ;some kind of control center, unfinished
@@ -354,7 +361,7 @@ public class InMoov2Config extends ServiceConfig {
           
        // ;----------------------------- EYELID CONFIGURATION ----------------------------------------
        // [MAIN]
-       public boolean isEyeLidsActivated=false;
+       public boolean enableEyelids=false;
        public String EyeLidsConnectedToArduino="right";
        // ;chose left or right existing and connected arduino
 
@@ -412,25 +419,19 @@ public class InMoov2Config extends ServiceConfig {
        
   public boolean isController3Activated = false;
   public boolean isController4Activated = false;
-  public boolean isHeadActivated = true;
-  public boolean isLeftArmActivated = false;
-  public boolean isLeftHandActivated = false;
-  public boolean isLeftHandSensorActivated = false;
   public boolean isLeftPortActivated = false;;
-  public boolean isOpenCVActivated = false;
-  public boolean isRightArmActivated = false;
-  public boolean isRightHandActivated = false;
-  public boolean isRightHandSensorActivated = false;
   public boolean isRightPortActivated = false;
-  public boolean isServoMixerActivated = false;
-  public boolean isTorsoActivated = false;
-  public boolean isUltraSonicLeftActivated = false;
-  public boolean isUltraSonicRightActivated = false;
-
-  public boolean loadGestures = false;
 
 
-
+  public boolean RobotCanMoveBodyRandom;
+  public boolean RobotCanMoveEyesRandom;
+  public boolean RobotCanMoveHeadRandom;
+  public boolean RobotCanMoveRandom;
+  public boolean RobotIsSleeping;
+  public boolean RobotIsStarted;
+*/  
+  ////////////////// VET'D CONFIG BEGINS ///////////////////////////
+  
   /**
    * Wake word functionality is activated when it is set (ie not null) This
    * means recognizing events will be processed "after" it hears the wake word.
@@ -439,13 +440,42 @@ public class InMoov2Config extends ServiceConfig {
    * 'must' keep listening since in this idle state it needs to search for the
    * wake word
    */
-  public String wakeWord;
+  // public String wakeWord; - needs to be in the speech syntheis config
 
-  public boolean RobotCanMoveBodyRandom;
-  public boolean RobotCanMoveEyesRandom;
-  public boolean RobotCanMoveHeadRandom;
-  public boolean RobotCanMoveRandom;
-  public boolean RobotIsSleeping;
-  public boolean RobotIsStarted;
+  
+  public boolean enableHead = true;
+  public boolean enableLeftArm = false;
+  public boolean enableLeftHand = false;
+  public boolean enableLeftHandSensor = false;
+  public boolean enableOpenCV = false;
+  public boolean enableRightArm = false;
+  public boolean enableRightHand = false;
+  public boolean enableRightHandSensors = false;
+  public boolean enableServoMixer = false;
+  public boolean enableTorso = false;
+  public boolean enableSimulator = false;
+  public boolean enableUltrasonicLeft = false;
+  public boolean enableUltrasonicRight = false;
 
+  public boolean pirWakeUp = false;
+  public boolean pirEnableTracking = false;
+  
+  public boolean loadGestures = false;
+
+  public boolean virtual = false;
+
+  public String locale = "en-US";
+
+  /**
+   * enables the audio player
+   */
+  public boolean enableAudioPlayer = true;
+
+  /**
+   * startup and shutdown will pause inmoov - set the speed to this value
+   * then attempt to move to rest
+   */
+  public double shutdownStartupSpeed = 50;
+  
+  
 }

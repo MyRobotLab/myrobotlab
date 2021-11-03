@@ -188,6 +188,13 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   protected double actualAngleDeltaError = 0.1;
 
   /**
+   * load the last position the servo was in
+   * in general I think this is a bad idea - TimeEncoder
+   * does this - but I don't think its desired in general
+   */
+  protected boolean loadSavedPositions = false;
+
+  /**
    * if true - a single moveTo command will be published for servo controllers
    * or other services which implement their own speed contrl
    * 
@@ -232,7 +239,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
       // if the encoder has a current value - we initialize the
       // servo with that value
       Double savedPos = encoder.getPos();
-      if (savedPos != null) {
+      if (savedPos != null && loadSavedPositions ) {
         log.info("found previous values for {} setting initial position to {}", getName(), savedPos);
         // TODO: kw: output position shouldn't be set to the targetPos..
         currentOutputPos = targetPos = savedPos;
@@ -360,9 +367,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     addListener("publishServoSetSpeed", sc);
     addListener("publishServoEnable", sc);
     addListener("publishServoDisable", sc);
-    controller = sc; // <-- bad - don't set a reference (even string reference
-                     // :( )
-
+    controller = sc;
+    
     // FIXME - remove !!!
     // FIXME change to broadcast ?
     // TODO: there is a race condition here.. we need to know that
@@ -413,7 +419,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     send(sc, "detach", getName());
     // 20210703 - grog I don't know why a sleep was put here
     // junit ServoTest will fail without this :P
-    sleep(500);
+//    sleep(500);
     firstMove = true;
     broadcastState();
   }
@@ -696,6 +702,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * will disable then detach this servo from all controllers
    */
   public void releaseService() {
+    
+    disable();
+
     if (encoder != null) {
       encoder.disable();
     }
@@ -852,18 +861,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
     broadcast("publishServoStop", this);
     broadcastState();
-  }
-
-  /**
-   * disable servo
-   */
-  public void stopService() {
-    super.stopService();
-    disable();
-    // not happy - too type specific
-    if (encoder != null) {
-      encoder.disable();
-    }
   }
 
   public void sweep() {

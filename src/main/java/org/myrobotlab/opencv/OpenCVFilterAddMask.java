@@ -106,7 +106,7 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
       final UByteIndexer dstIdx = dstImg.createIndexer();
       final int rows = rgbaImg.rows(), cols = rgbaImg.cols();
 
-      log.warn("cnt {}", ++cnt);
+      log.debug("cnt {}", ++cnt);
       Parallel.loop(0, rows, new Parallel.Looper() {
         public void loop(int from, int to, int looperID) {
           for (int i = from; i < to; i++) {

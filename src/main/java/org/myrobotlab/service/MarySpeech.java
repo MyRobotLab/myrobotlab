@@ -51,6 +51,11 @@ public class MarySpeech extends AbstractSpeechSynthesis {
   }
 
   synchronized MaryInterface getMaryTts() {
+    // Lame hacky workaround because of a bug in MarySpeech not being able to parse the java version for java 11
+//    float version = Float.parseFloat(System.getProperty("java.version"));
+    // put a zero on it so mary tts gets it right.
+//    System.setProperty("java.version",Float.toString(version));
+    //  System.err.println(System.getProperty("java.version"));
     if (marytts != null) {
       return marytts;
     }

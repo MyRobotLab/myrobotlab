@@ -20,16 +20,18 @@ public class InMoov2Meta extends MetaData {
   public InMoov2Meta(String name) {
 
     super(name);
-    Platform platform = Platform.getLocalInstance();
+    // platform if there are different dependencies based on different platforms
+    // Platform platform = Platform.getLocalInstance();
+    
     addDescription("InMoov2 Service");
     addCategory("robot");
 
     addPeer("mouthControl", "mouth", "MarySpeech", "shared Speech");
 
     addPeer("opencv", "OpenCV", "opencv");
-    addPeer("servomixer", "ServoMixer", "for making gestures");
-    addPeer("ultraSonicRight", "UltrasonicSensor", "measure distance");
-    addPeer("ultraSonicLeft", "UltrasonicSensor", "measure distance");
+    addPeer("servoMixer", "ServoMixer", "for making gestures");
+    addPeer("ultrasonicRight", "UltrasonicSensor", "measure distance on the right");
+    addPeer("ultrasonicLeft", "UltrasonicSensor", "measure distance on the left");
     addPeer("pir", "Pir", "infrared sensor");
 
     // the two legacy controllers .. :(
@@ -64,7 +66,10 @@ public class InMoov2Meta extends MetaData {
     addPeer("headTracking.y", "head.neck", "Servo", "shared servo");
 
     addPeer("neopixel", "NeoPixel", "neopixel animation");
-
+    
+    addPeer("audioPlayer", "AudioFile", "audio file");
+  
+    
     // Global - undecorated by self name
     // currently InMoov manually calls releasePeers - when it does
     // the interpreter is in a process of shutdown while all inmoov peer

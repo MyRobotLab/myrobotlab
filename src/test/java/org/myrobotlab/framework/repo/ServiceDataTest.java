@@ -23,8 +23,6 @@ public class ServiceDataTest extends AbstractTest {
 
   @Test
   public void testAdd() {
-    if (printMethods)
-      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     ServiceData sd = ServiceData.getLocalInstance();
     // TODO: add a valid assert for this test.
     List<MetaData> types = sd.getAvailableServiceTypes();
@@ -33,8 +31,6 @@ public class ServiceDataTest extends AbstractTest {
 
   @Test
   public void testGenerate() throws IOException {
-    if (printMethods)
-      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     ServiceData sd = ServiceData.getLocalInstance();
     ServiceData generated = ServiceData.generate();
     assertNotNull(sd);
@@ -43,8 +39,6 @@ public class ServiceDataTest extends AbstractTest {
 
   @Test
   public void testGetLocalInstance() {
-    if (printMethods)
-      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     ServiceData sd = ServiceData.getLocalInstance();
     String[] srn = sd.getServiceTypeNames();
     log.info("{}", srn.length);

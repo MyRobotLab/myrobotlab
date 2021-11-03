@@ -29,6 +29,9 @@ public class Hd44780 extends Service {
   public final static Logger log = LoggerFactory.getLogger(Hd44780.class);
   private static final long serialVersionUID = 1L;
 
+  /** 
+   * FIXME - changed to I2CController  !!!! 
+   */
   private Pcf8574 pcf8574;
 
   private final byte LCD_CLEARDISPLAY = (byte) 0x01;
@@ -77,7 +80,11 @@ public class Hd44780 extends Service {
   private final byte Rs = (byte) 0b00000001; // Register select bit
 
   public boolean backLight;
+  
+  // FIXME - change to protected use simple methods to add text
   public Map<Integer, String> screenContent = new HashMap<Integer, String>();
+  
+  protected boolean initialized = false;
 
   public void attach(Pcf8574 pcf8574) {
     // we need more checkup here...
@@ -94,6 +101,10 @@ public class Hd44780 extends Service {
    * INIT LCD panel
    */
   public void init() {
+    if (initialized) {
+      log.warn("already initialized");
+      return;
+    }
     log.info("Init I2C Display");
     lcdWrite((byte) 0x03);
     lcdWrite((byte) 0x03);
@@ -103,6 +114,7 @@ public class Hd44780 extends Service {
     lcdWrite((byte) (LCD_DISPLAYCONTROL | LCD_DISPLAYON));
     lcdWrite((byte) (LCD_CLEARDISPLAY));
     lcdWrite((byte) (LCD_ENTRYMODESET | LCD_ENTRYLEFT));
+    initialized = true;
   }
 
   /**
@@ -155,18 +167,20 @@ public class Hd44780 extends Service {
     screenContent.put(line, string);
     broadcastState();
     switch (line) {
-      case 1:
+      case 0:
         lcdWrite((byte) 0x80);
         break;
-      case 2:
+      case 1:
         lcdWrite((byte) 0xC0);
         break;
-      case 3:
+      case 2:
         lcdWrite((byte) 0x94);
         break;
-      case 4:
+      case 3:
         lcdWrite((byte) 0xD4);
         break;
+      default:
+        error("valid line values are 0 - 4");
     }
 
     for (int i = 0; i < string.length(); i++) {
@@ -213,7 +227,7 @@ public class Hd44780 extends Service {
     }
     super.stopService();
   }
-
+  
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
     Platform.setVirtual(true);

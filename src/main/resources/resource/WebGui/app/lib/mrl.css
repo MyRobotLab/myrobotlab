@@ -2940,3 +2940,27 @@ height: calc(100vh - 453px);
   top: -6px;
   z-index: 50;
 }
+
+
+#table-wrapper {
+  position:relative;
+}
+#table-scroll {
+  height:150px;
+  overflow:auto;  
+  margin-top:20px;
+}
+#table-wrapper table {
+  width:100%;
+
+}
+#table-wrapper table thead th .text {
+  position:absolute;   
+  z-index:2;
+  width:35%;
+}
+
+
+
+
+

@@ -254,6 +254,10 @@ public class Log extends Service implements Appender<ILoggingEvent> {
     getLogLevel();
     broadcastState();
   }
+  
+  @Override
+  public void setName(String name) {    
+  }
 
   @Override
   public void start() {
