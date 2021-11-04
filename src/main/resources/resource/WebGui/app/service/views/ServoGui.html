@@ -19,23 +19,24 @@
                         <div class="col-md-12">
                             <table class="tableController">
                                 <tr>
-                                    <td>Controller<br/>
+                                    <td>
                                         <select ng-disabled="service.controller" class="form-control selectController" ng-model="selectedController">
                                             <option ng-repeat="controller in possibleControllers" value="{{controller}}">{{controller}} </option>
                                         </select>
                                     </td>
-                                    <td>Pin<br/>
+                                    <td>
+                                        <!-- TODO - send pos ! ??? -->
+                                        <button ng-show="!service.controller" class="btn btn-default" ng-click="attachController(selectedController, service.pin)">attach</button>
+                                        <button ng-show="service.controller" class="btn btn-default" ng-click="msg.detach()">detach</button>
+                                    </td>
+                                    <td>Pin</td>
+                                    <td>
                                         <select class="form-control" ng-model="service.pin" ng-change="setPin()" ng-options="item for item in pinList">
                                             <option>{{item}}</option>
                                         </select>
                                     </td>
-                                    <td><br/>
-                                        <!-- TODO - send pos ! ??? -->
-                                        <button ng-show="!service.controller" class="btn btn-default" ng-click="attachController(selectedController, service.pin)">attach</button>
-                                        <button ng-show="service.controller" class="btn btn-default" ng-click="msg.detach()">detach</button>
-                                    </td>                                    
-                                    
-                                    <td>Enable <br/>
+                                    <td>Enable</td>
+                                    <td>
                                         <toggle class="miniBTN" ng-model="service.enabled" ng-change="service.enabled?msg.enable():msg.disable()" on="enabled" off="disabled"/></toggle>
                                     </td>
                                 </tr>
@@ -121,19 +122,19 @@
                     <table class="table tableLimits preventDragSelect" style="margin-bottom: 0px!important;">
                         <tbody>
                             <tr>
-                            <!--
                                 <td class="bigLabel inputColor">Input</td>
                                 <td class="inputColor">Min</td>
                                 <td>
 
+                                    <!-- {{service.mapper.minX}} -->
                                     <input type="number" min="0" max="180" ng-change="inputFieldMin()" ng-model="inputSlider.minValue" class="limitNumbersFieldInput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
                                 </td>
                                 <td class="inputColor">Max</td>
                                 <td>
-
+                                    <!-- {{service.mapper.maxX}} -->
                                     <input type="number" min="0" max="180" ng-change="inputFieldMax()" ng-model="inputSlider.maxValue" class="limitNumbersFieldInput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
                                 </td>
-                                <td></td> -->
+                                <td></td>
                                 <td class="bigLabel restColor">
                                     <!--<span ng-click="msg.rest()" title="Go to Rest">Rest</span>-->
                                     <span ng-click="pos.value=restSlider.value; msg.rest()" title="Go to Rest">Rest</span>
@@ -187,23 +188,20 @@
                                     </div>
                                     
                                     <div class="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(outputSlider.minValue*100/180)}}%)); width: calc(100% - ({{100 -((outputSlider.maxValue-outputSlider.minValue)*100/180)}}%));"></div>
-                                    <!-- <div class="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(inputSlider.minValue*100/180)}}%)); width: calc(100% - ({{100 -((inputSlider.maxValue-inputSlider.minValue)*100/180)}}%));"></div> -->
+                                    <div class="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(inputSlider.minValue*100/180)}}%)); width: calc(100% - ({{100 -((inputSlider.maxValue-inputSlider.minValue)*100/180)}}%));"></div>
                                 </div>
                                 <div class="rzPos">
                                     <rzslider class="custom-slider2 sliderPosition" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
                                 </div>
                                 <div class="rzRest">
                                     <rzslider title="Set Rest position" class="custom-slider" rz-slider-model="restSlider.value" rz-slider-options="restSlider.options"/>
-                                </div>    
-                                <!--                            
+                                </div>                                
                                 <div class="rzInput">
                                     <rzslider title="Set input limits" class="custom-slider sliderPosition" rz-slider-model="inputSlider.minValue" rz-slider-high="inputSlider.maxValue" rz-slider-options="inputSlider.options"/>
                                 </div>                                
-                                -->
                                 <div class="rzOutput">
                                     <rzslider title="Set output limits" class="custom-slider" rz-slider-model="outputSlider.minValue" rz-slider-high="outputSlider.maxValue" rz-slider-options="outputSlider.options"/>
                                 </div>
-<!--                                
                                 <div class="lockInputOutputButton" ng-model="lockInputOutput">
                                     <div ng-show="lockInputOutput">
                                         <img src="../service/img/inPutLocked.png" ng-click="toggleLock()" title="Input limits are locked with output">
@@ -212,7 +210,6 @@
                                         <img src="../service/img/inPutUnLocked.png" ng-click="toggleLock()" title="Input limits are unlocked with output">
                                     </div>   
                                 </div>
--->                                
                             </div>
                             
                             <!-- /sliderContainer -->
