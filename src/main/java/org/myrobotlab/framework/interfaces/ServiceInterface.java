@@ -13,16 +13,12 @@ import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 
 public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker,
-    StatePublisher, StatusPublisher, ServiceStatus, Attachable, Comparable<ServiceInterface> {
+    StatePublisher, StatusPublisher, ServiceStatus, TaskManager, Attachable, Comparable<ServiceInterface> {
 
   /**
-   * this is a local method which adds a request from some foreign service with
-   * address information (otherService/callback) for a topic callback Adds an
-   * entry on the notify list
-   * 
-   * 
-   * virtualize the service, in this mode the service should not use any "real"
-   * hardware
+   * When set service will attempt to provide services with no hardware dependencies.
+   * Some services have the capablity to mock hardware such as the Serial and Arduino
+   * services. 
    * 
    * @param b
    *          true to set the virtual mode
@@ -59,11 +55,17 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
 
   public String getSimpleName();
 
-  // important to maintain a method to return canonical type
-  // important in the future when other services are expressed differently
-  // e.g.(node js services)
+  /**
+   * equivalent to getClass().getCanonicalName()
+   * @return
+   */
   public String getType();
 
+  /**
+   * Does the meta data of this service define peers
+   * 
+   * @return
+   */
   public boolean hasPeers();
 
   /**
@@ -72,6 +74,11 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
    */
   public void releasePeers();
 
+  /**
+   * Service life-cycle method:
+   * releaseService will call stopService, release its peers, do any derived business logic
+   * to release resources, then un-register itself
+   */
   public void releaseService();
 
   /**
@@ -89,8 +96,9 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
 
   public void setInstanceId(URI uri);
 
-  //public void setName(String prefix);
-
+  /**
+   * Service life cycle method - calls create, and starts any necessary resources to function
+   */
   public void startService();
 
   /**
@@ -113,6 +121,12 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
    */
   public void loadAndStart();
 
+  /**
+   * Service life-cycle method, stops the inbox and outbox threads - typically does not
+   * release "custom" resources. It's purpose primarily is to stop messaging from flowing
+   * in or out of this service - which is handled in the base Service class.  Most times
+   * this method will not need to be overriden
+   */
   public void stopService();
 
   public String clearLastError();
@@ -123,7 +137,6 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
 
   public boolean isRuntime();
 
-  // FIXME - meta data needs to be infused into instance
   public String getDescription();
 
   public Map<String, MethodEntry> getMethodMap();
