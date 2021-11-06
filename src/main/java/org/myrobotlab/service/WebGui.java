@@ -46,7 +46,6 @@ import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
@@ -68,6 +67,8 @@ import org.slf4j.Logger;
  * message wrapper
  */
 public class WebGui extends Service implements AuthorizationProvider, Gateway, Handler {
+  
+  protected WebGuiConfig config = new WebGuiConfig();
 
   public static class LiveVideoStreamHandler implements Handler {
 
@@ -193,10 +194,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       throw new Error("Failed to initialize SSLContext", e);
     }
   }
+  
 
   String address = "0.0.0.0";
 
-  boolean autoStartBrowser = true;
+  // boolean autoStartBrowser = true;
 
   transient Broadcaster broadcaster;
 
@@ -221,7 +223,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   // just marking as transient to remove some of the data load 10240 max frame
   transient Map<String, Panel> panels = new HashMap<String, Panel>();
 
-  public Integer port;
+  // public Integer port;
 
   public String root = "root";
 
@@ -313,11 +315,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   public void autoStartBrowser(boolean autoStartBrowser) {
-    this.autoStartBrowser = autoStartBrowser;
+    config.autoStartBrowser = autoStartBrowser;
   }
 
   public boolean getAutoStartBrowser() {
-    return autoStartBrowser;
+    return config.autoStartBrowser;
   }
 
   /**
@@ -438,7 +440,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     configBuilder.maxWebSocketFrameAggregatorContentLength(maxMsgSize);
     configBuilder.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport");
     configBuilder.initParam(ApplicationConfig.SCAN_CLASSPATH, "false");
-    configBuilder.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host(address); // all
+    configBuilder.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(config.port).host(address); // all
     configBuilder.maxChunkContentLength(maxMsgSize);
     configBuilder.maxWebSocketFrameSize(maxMsgSize);
     // ips
@@ -486,7 +488,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    */
 
   public Integer getPort() {
-    return port;
+    return config.port;
   }
 
   public String getAddress() {
@@ -966,7 +968,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   public void setPort(Integer port) {
-    this.port = port; // restart service ?
+    config.port = port; // restart service ?
   }
 
   public void show(String name) {
@@ -983,17 +985,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       log.info("starting webgui service....");
 
-      if (port == null) {
-        port = 8888;
-      }
-
       // Broadcaster b = broadcasterFactory.get();
       // a session "might" be nice - but for now we are stateless
       // SessionSupport ss = new SessionSupport();
 
       if (nettosphere != null && nettosphere.isStarted()) {
         // is running
-        log.info("webgui already started on port {}", port);
+        log.info("webgui already started on port {}", config.port);
         return;
       }
 
@@ -1014,7 +1012,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
                                                        // because already
                                                        // created !
 
-      log.info("WebGui {} started on port {}", getName(), port);
+      log.info("WebGui {} started on port {}", getName(), config.port);
       // get all instances
 
       // 20191126 - REMOVED ... does it make a difference ? Groot ?
@@ -1031,9 +1029,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       subscribe(runtime.getName(), "registered");
       subscribe(runtime.getName(), "released");
 
-      if (autoStartBrowser) {
+      if (config.autoStartBrowser) {
         log.info("auto starting default browser");
-        BareBonesBrowserLaunch.openURL(String.format(startURL, port));
+        BareBonesBrowserLaunch.openURL(String.format(startURL, config.port));
       }
 
     } catch (Exception e) {
@@ -1042,7 +1040,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   public void startBrowser(String URL) {
-    BareBonesBrowserLaunch.openURL(String.format(URL, port));
+    BareBonesBrowserLaunch.openURL(String.format(URL, config.port));
   }
 
   public void startService() {
@@ -1132,22 +1130,44 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
 
+  
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
+    /*
     WebGuiConfig config = (WebGuiConfig) initConfig(new WebGuiConfig());
     config.port = port;
     config.autoStartBrowser = autoStartBrowser;
-
+    */
+    ServiceConfig sc = getConfig();
+    assert(sc == config);
     return config;
   }
+  
+  
+  // TODO - implement in Service - default configName file
+  public ServiceConfig getFileConfig() {
+    return null;
+  }
+  
+  //TODO - implement in Service - default configName file
+  public ServiceConfig getFileConfig(String fullFileName) {
+    return null;
+  }
 
+
+  // rename to apply ?
   public ServiceConfig load(ServiceConfig c) {
-    WebGuiConfig config = (WebGuiConfig) c;
+    WebGuiConfig newConfig = (WebGuiConfig) c;
+    
+    config = newConfig;
 
-    if (config.port != null && (port != null && config.port.intValue() != port.intValue())) {
+    /*
+    if (config.port != null && (config.port != null && config.port.intValue() != port.intValue())) {
       setPort(config.port);
     }
     autoStartBrowser(config.autoStartBrowser);
+    */
+    
     if (config.enableMdns) {
       startMdns();
     }    
@@ -1155,20 +1175,24 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   public static void main(String[] args) {
-    LoggingFactory.init(Level.WARN);
+    LoggingFactory.init(Level.INFO);
 
     try {
 
-      // Platform.setVirtual(true);
-
-      Runtime.main(new String[] { "--id", "w1", "--from-launcher", "--log-level", "WARN" });
-      // Runtime.start("python", "Python");
-      // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      // webgui.setSsl(true);
+      WebGui webgui = (WebGui) Runtime.start("webgui", "WebGui");
+      WebGuiConfig c = (WebGuiConfig)webgui.getConfig();
+      log.info("port {}", c.port);
       webgui.autoStartBrowser(false);
-      webgui.setPort(8888);
-      webgui.startService();
+      webgui.save();
+      webgui.load();
+      c = (WebGuiConfig)webgui.getConfig();
+      log.info("port {}", c.port);
+      // webgui.setSsl(true);
+//      webgui.autoStartBrowser(false);
+//      webgui.setPort(8888);
+//      webgui.startService();
+      
+      
 
       Runtime.start("python", "Python");
 

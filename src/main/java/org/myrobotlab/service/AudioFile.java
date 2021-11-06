@@ -500,7 +500,7 @@ public class AudioFile extends Service {
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
 
     AudioFileConfig config = (AudioFileConfig) initConfig(new AudioFileConfig());
     config.mute = mute;

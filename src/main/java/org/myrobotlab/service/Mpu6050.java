@@ -4598,7 +4598,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
     Mpu6050Config config = (Mpu6050Config) initConfig(new Mpu6050Config());
     config.start = publisher.isRunning;
     config.sampleRate = sampleRateHz;

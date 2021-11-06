@@ -675,7 +675,7 @@ public class Joystick extends Service implements AnalogPublisher {
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
     JoystickConfig config = (JoystickConfig) initConfig(new JoystickConfig());
     config.controller = controller;
 

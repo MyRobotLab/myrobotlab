@@ -558,7 +558,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
     AbstractSpeechRecognizerConfig config = (AbstractSpeechRecognizerConfig) initConfig(new AbstractSpeechRecognizerConfig());
     config.listening = isListening();
     config.wakeWord = getWakeWord();

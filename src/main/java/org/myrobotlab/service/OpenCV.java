@@ -2107,7 +2107,7 @@ public class OpenCV extends AbstractComputerVision {
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
     OpenCVConfig config = (OpenCVConfig) initConfig(new OpenCVConfig());
     config.capturing = capturing;
     config.cameraIndex = cameraIndex;

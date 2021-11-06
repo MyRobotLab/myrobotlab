@@ -69,7 +69,7 @@ public class MotorDualPwm extends AbstractMotor {
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
     MotorDualPwmConfig config = (MotorDualPwmConfig) initConfig(new MotorDualPwmConfig());
     config.leftPwmPin = leftPwmPin;
     config.rightPwmPin = rightPwmPin;

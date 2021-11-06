@@ -837,7 +837,7 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
 
     NeoPixelConfig config = (NeoPixelConfig) initConfig(new NeoPixelConfig());
     config.pin = pin;

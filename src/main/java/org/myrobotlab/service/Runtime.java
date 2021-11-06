@@ -569,6 +569,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           runtime.startingServices.add("security");
           runtime.startingServices.add("webgui");
           runtime.startingServices.add("python");
+          
+          // current DEFAULT config - before external config is applied
+          // important because there may not even be a runtime.yml
+          // if (((RuntimeConfig)runtime.config).enableCli) {
+            
+          // }
 
           try {
             if (options.config != null) {
@@ -3423,7 +3429,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       Collections.sort(s);
       for (ServiceInterface si : s) {
-        sc.add(si.getConfig());
+        sc.add(si.getConfigLegacy());
       }
 
       String yaml = CodecUtils.allToYaml(sc.iterator());
@@ -3458,7 +3464,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
 
     RuntimeConfig config = (RuntimeConfig) initConfig(new RuntimeConfig());
     // config.id = getId(); Not ready yet
@@ -3487,7 +3493,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * loads a yaml configuration file from the file system default location will
-   * be data/config/{name}.yml
+   * be data/config/{configName}/{name}.yml
    *  
    * @param name
    * @return
@@ -3513,8 +3519,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     setLocale(config.locale);
     setAllVirtual(config.virtual);
 
+    // 3 possible states true/false ... and load(ServiceConfig c) is never called :P
     if (config.enableCli) {
       startInteractiveMode();
+    } else {
+      stopInteractiveMode();
     }
 
     // setId(config.id); Very Fragile ! Cannot do this yet
@@ -3645,7 +3654,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       String format = filename.substring(filename.lastIndexOf(".") + 1);
-      ServiceConfig config = getConfig();
+      ServiceConfig config = getConfigLegacy();
       String data = null;
 
       if ("json".equals(format.toLowerCase())) {

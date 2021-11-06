@@ -71,7 +71,7 @@ public class Motor extends AbstractMotor {
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
     MotorConfig config = (MotorConfig) initConfig(new MotorConfig());
     config.dirPin = getDirPin();
     config.pwrPin = getPwrPin();

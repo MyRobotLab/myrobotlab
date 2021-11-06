@@ -105,7 +105,7 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
    * @return get a services current config
    *
    */
-  public ServiceConfig getConfig();
+  public ServiceConfig getConfigLegacy();
 
   /**
    * Configure a service by merging in configuration

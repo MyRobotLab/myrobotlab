@@ -93,7 +93,7 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
     // TODO: this is also an ugly pattern. you can't really call super get
     // config here!
     // ServiceConfig c = super.getConfig();

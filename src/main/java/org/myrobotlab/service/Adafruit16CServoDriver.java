@@ -1003,7 +1003,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
 
     Adafruit16CServoDriverConfig config = (Adafruit16CServoDriverConfig) initConfig(new Adafruit16CServoDriverConfig());
     config.deviceBus = deviceBus;

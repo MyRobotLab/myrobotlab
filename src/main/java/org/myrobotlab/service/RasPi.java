@@ -139,12 +139,12 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     // This part adds the service to the mapping between
     // busAddress||DeviceAddress
     // and the service name to be able to send data back to the invoker
-    String key = String.format("%d.%d", Integer.parseInt(control.getDeviceBus()), Integer.decode(control.getDeviceAddress()));
+    String key = String.format("%d.%d", Integer.parseInt(control.getBus()), Integer.decode(control.getAddress()));
 
     if (i2cDevices.containsKey(key)) {
-      log.error("Device {} {} {} already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName());
+      log.error("Device {} {} {} already exists.", control.getBus(), control.getAddress(), control.getName());
     } else {
-      createI2cDevice(Integer.parseInt(control.getDeviceBus()), Integer.decode(control.getDeviceAddress()), control.getName());
+      createI2cDevice(Integer.parseInt(control.getBus()), Integer.decode(control.getAddress()), control.getName());
       control.attachI2CController(this);
     }
   }

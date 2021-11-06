@@ -215,7 +215,7 @@ public class Servo extends AbstractServo implements ServoControl {
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
 
     ServoConfig config = (ServoConfig) initConfig(new ServoConfig());
     

@@ -1094,7 +1094,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
     AbstractSpeechSynthesisConfig config = (AbstractSpeechSynthesisConfig) initConfig(new AbstractSpeechSynthesisConfig());
     config.mute = mute;
     config.blocking = blocking;

@@ -91,7 +91,7 @@ public class MotorHat4Pi extends AbstractMotor {
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
     MotorHat4PiConfig config = (MotorHat4PiConfig) initConfig(new MotorHat4PiConfig());
     config.motorId = motorId;
     return config;

@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -123,24 +124,55 @@ public class Intro extends Service {
     }
     return true;
   }
-
+  
   public static void main(String[] args) {
     try {
+      
+      Map<String,String> blah = new HashMap<>();
+      blah.remove("blah");
+      blah.remove(null);
 
       // for mary tts on java11...
       System.setProperty("java.version", "11.0");
       LoggingFactory.init(Level.INFO);
-
-      Runtime.main(new String[] { "--from-launcher" });
+      
+      Runtime.start("runtime", "Runtime");
+      Runtime.start("webgui", "WebGui");
       Runtime.start("intro", "Intro");
       Runtime.start("python", "Python");
+      
+      
+     boolean done = true;
+     if (done) {
+       return;
+     }
+      
+      DiscordBot bot = (DiscordBot)Runtime.start("bot", "DiscordBot");
+      ProgramAB brain = (ProgramAB)Runtime.start("brain", "ProgramAB");
+      brain.setCurrentBotName("Alice");
+      bot.connect();
+      brain.attach(bot);
+      bot.attach(brain);
 
+ 
+      
+
+      
+      // Runtime.main(new String[] { "--from-launcher" });// FIXME - get rid of
+                                                       // this !
+      // similar to a peer reserve - ie - specifying type - now autoload
+      // ProgramAB brain = (ProgramAB)Runtime.start("brain");
+      Runtime.start("brain", "ProgramAB");
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+      Runtime.start("webgui", "WebGui");
+      Runtime.setConfig("InMoov2_FingerStarter");
 
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      // webgui.setSsl(true);
-      webgui.autoStartBrowser(false);
-      webgui.startService();
+      Runtime.create("i01.chatBot");
+      Runtime.load("i01.chatBot");
+      Runtime.start("i01.chatBot");
+
+      Runtime.start("intro", "Intro");
+      Runtime.start("python", "Python");
 
     } catch (Exception e) {
       log.error("main threw", e);

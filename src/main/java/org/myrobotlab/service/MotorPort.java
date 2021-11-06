@@ -32,7 +32,7 @@ public class MotorPort extends AbstractMotor {
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
 
     MotorPortConfig config = (MotorPortConfig) initConfig(new MotorPortConfig());
     config.port = port;

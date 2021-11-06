@@ -158,7 +158,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
     HtmlFilterConfig config = (HtmlFilterConfig) initConfig(new HtmlFilterConfig());
     
     config.stripHtml = stripHtml;

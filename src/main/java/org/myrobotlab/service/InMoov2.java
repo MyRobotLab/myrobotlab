@@ -42,6 +42,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public static LinkedHashMap<String, String> lpVars = new LinkedHashMap<String, String>();
 
+  protected InMoov2Config config = new InMoov2Config();
+  
   /**
    * these should be methods like setRobotCanMoveBodyRandom(true) - which do
    * what they need and then set config NOT STATIC PUBLIC VARS
@@ -1393,7 +1395,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public ProgramAB startChatBot() {
 
     try {
-      InMoov2Config config = (InMoov2Config)this.config;
+      // InMoov2Config config = (InMoov2Config)this.config;
 
       chatBot = (ProgramAB) startPeer("chatBot");
       isChatBotActivated = true;
@@ -2383,7 +2385,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
     InMoov2Config config = (InMoov2Config) initConfig(new InMoov2Config());
 
     // config.isController3Activated = isController3Activated;

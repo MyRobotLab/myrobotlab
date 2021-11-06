@@ -97,8 +97,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   protected MetaData serviceType;
 
   private static final long serialVersionUID = 1L;
-  
-  protected ServiceConfig config;
+
+  // protected ServiceConfig config;
 
   transient public final static Logger log = LoggerFactory.getLogger(Service.class);
 
@@ -837,10 +837,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public boolean containsTask(String taskName) {
     return tasks.containsKey(taskName);
   }
-  
+
   @Override
   final public void invokeFuture(String method, long delayMs) {
-    invokeFuture(method, delayMs, (Object[])null);
+    invokeFuture(method, delayMs, (Object[]) null);
   }
 
   @Override
@@ -1382,20 +1382,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return config;
   }
 
-  /**
-   * Default getConfig returns name and type with null service specific config
-   * 
-   */
-  public ServiceConfig getConfig() {
-    ServiceConfig sc = new ServiceConfig();
-    initConfig(sc);
-    return sc;
-  }
-
-  protected ServiceConfig initConfig(ServiceConfig config) {
-    config.type = getSimpleName();
-    return config;
-  }
 
   public ServiceConfig load() throws IOException {
     ServiceConfig config = Runtime.load(getName());
@@ -1668,7 +1654,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       }
 
       String format = filename.substring(filename.lastIndexOf(".") + 1);
-      ServiceConfig config = getConfig();
+      ServiceConfig config = getConfigLegacy();
 
       // bad idea of an optimizaton
       /**
@@ -1871,7 +1857,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * rarely should this be used. Gateways use it to provide x-route natting
    * services by re-writing names with prefixes
    */
-
 
   @Override
   public String getName() {
@@ -2830,6 +2815,41 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       return "started".equals(sr.state);
     }
     return false;
+  }
+  
+  /**
+   * Default getConfig returns name and type with null service specific config
+   * 
+   */
+  @Deprecated
+  public ServiceConfig getConfigLegacy() {
+    ServiceConfig sc = new ServiceConfig();
+    initConfig(sc);
+    return sc;
+  }
+
+  @Deprecated
+  protected ServiceConfig initConfig(ServiceConfig config) {
+    config.type = getSimpleName();
+    return config;
+  }
+
+
+  public ServiceConfig getConfig() {
+    Field configField = null;
+    ServiceConfig sc = null;
+    try {
+      configField = this.getClass().getDeclaredField("config");
+      configField.setAccessible(true);
+      sc = ((ServiceConfig) configField.get(this));
+    } catch (Exception e) {
+      return null;
+    }
+    return sc;
+  }
+
+  public void loadConfigV2() {
+
   }
 
 }

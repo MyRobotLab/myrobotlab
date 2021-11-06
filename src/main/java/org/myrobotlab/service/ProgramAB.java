@@ -1101,7 +1101,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
     ProgramABConfig config = (ProgramABConfig) initConfig(new ProgramABConfig());
 
     config.currentBotName = currentBotName;

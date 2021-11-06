@@ -1275,7 +1275,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public ServiceConfig getConfigLegacy() {
     SerialConfig config = (SerialConfig) initConfig(new SerialConfig());
     config.port = lastPortName;
     return config;
