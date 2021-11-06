@@ -33,10 +33,12 @@ import org.slf4j.Logger;
  *         References:
  *         http://www.digikey.com/product-detail/en/nxp-semiconductors
  *         /PCF8574T-3,518/568-1077-1-ND/735791
+ *         
+ *         FIXME - this is a i2c controller as well as an i2c device
  * 
  */
 
-public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
+public class Pcf8574 extends Service implements I2CControl, /*FIXME - add I2CController */ PinArrayControl {
   /**
    * Publisher - Publishes pin data at a regular interval
    * 
@@ -197,21 +199,18 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
     }
   }
 
+  @Deprecated /* use attach(controller) */
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
 
-    if (isAttached && this.controller != controller) {
-      log.error("Already attached to {}, use detach({}) first", this.controllerName);
+    if (deviceBus != null) {
+      setBus(deviceBus);
     }
-
-    controllerName = controller.getName();
-    log.info("{} attach {}", getName(), controllerName);
-
-    this.deviceBus = deviceBus;
-    this.deviceAddress = deviceAddress;
-
+    
+    if (deviceAddress != null) {
+      setAddress(deviceAddress);
+    }
+    
     attachI2CController(controller);
-    isAttached = true;
-    broadcastState();
   }
 
   @Override
@@ -265,18 +264,16 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 
   public void attachI2CController(I2CController controller) {
 
-    if (isAttached(controller))
-      return;
-
-    if (this.controllerName != controller.getName()) {
-      log.error("Trying to attached to {}, but already attached to ({})", controller.getName(), this.controllerName);
+    if (this.controllerName == controller.getName()) {
+      log.info("already attached to {}, use detach({}) first", controllerName, controllerName);
       return;
     }
 
     this.controller = controller;
+    controllerName = controller.getName();
     isAttached = true;
     controller.attachI2CControl(this);
-    log.info("Attached {} device on bus: {} address {}", controllerName, deviceBus, deviceAddress);
+    log.info("attached {} device on bus: {} address {}", controllerName, deviceBus, deviceAddress);
     broadcastState();
   }
 
@@ -325,6 +322,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
       return;
 
     controller.detachI2CControl(this);
+    controllerName = null;
     isAttached = false;
     broadcastState();
   }
@@ -547,20 +545,12 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 
   @Override
   public void setDeviceAddress(String deviceAddress) {
-    if (isAttached) {
-      log.error("Already attached to {}, use detach({}) first", this.controllerName);
-      return;
-    }
     this.deviceAddress = deviceAddress;
     broadcastState();
   }
 
   @Override
   public void setDeviceBus(String deviceBus) {
-    if (isAttached) {
-      log.error("Already attached to {}, use detach({}) first", this.controllerName);
-      return;
-    }
     this.deviceBus = deviceBus;
     broadcastState();
   }
@@ -612,17 +602,6 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
     return null;
   }
 
-  public static void main(String[] args) {
-    LoggingFactory.init("info");
-
-    try {
-      Pcf8574 pcf8574t = (Pcf8574) Runtime.start("Pcf8574t", "Pcf8574t");
-      Runtime.start("gui", "SwingGui");
-
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
 
   @Override
   public void setBus(String bus) {
@@ -644,4 +623,37 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
     return deviceAddress;
   }
 
+
+  public static void main(String[] args) {
+    LoggingFactory.init("info");
+
+    try {
+      
+      RasPi raspi = (RasPi)Runtime.start("raspi","RasPi");
+      //arduino = Runtime.start("arduino","Arduino")
+      //arduino.setBoardMega()
+      //arduino.connect("COM3")
+
+
+      int KeyColumn = 0;
+      int LastKeyPress = 0;
+      Pcf8574 KeyPad = (Pcf8574)Runtime.start("KeyPad","Pcf8574");
+      // Before we can use this, 
+      // we need to configure the I2C Bus 
+      //KeyPad.setBus("1")
+      // and address then connect it.
+      //KeyPad.setAddress("0x20")
+      //KeyPad.attachI2CController(raspi)
+      // KeyPad.attach(raspi, "1", "0x20");
+      // KeyPad.attach(raspi, "1", "0x20");
+      KeyPad.attach(raspi);
+      KeyPad.setBus("1");
+      KeyPad.setAddress("0x20");
+      
+      
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
 }
