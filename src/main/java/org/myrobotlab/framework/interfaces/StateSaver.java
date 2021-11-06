@@ -8,8 +8,6 @@ public interface StateSaver {
 
   public ServiceConfig load() throws IOException;
 
-  public boolean loadFromJson(String json);
-
   /**
    * save to current default location
    * 

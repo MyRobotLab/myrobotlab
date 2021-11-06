@@ -1402,30 +1402,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return config;
   }
 
-  @Override
-  public boolean loadFromJson(String json) {
-    return loadFromJson(this, json);
-  }
-
-  public boolean loadFromJson(Object o, String json) {
-
-    if (o == null) {
-      o = this;
-    }
-
-    try {
-
-      Object saved = CodecUtils.fromJson(json, o.getClass());
-      copyShallowFrom(o, saved);
-      broadcastState();
-      return true;
-
-    } catch (Exception e) {
-      log.error("failed loading {}", e);
-    }
-    return false;
-  }
-
   public void out(Message msg) {
     outbox.add(msg);
   }
