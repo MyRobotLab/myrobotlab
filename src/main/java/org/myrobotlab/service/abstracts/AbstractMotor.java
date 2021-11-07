@@ -478,8 +478,12 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   public ServiceConfig load(ServiceConfig c) {
     AbstractMotorConfig config = (AbstractMotorConfig) c;
-
-    mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
+    
+    if (config.minIn != null) {
+      mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
+    } else {
+      mapper = new MapperLinear();
+    }
     mapper.setInverted(config.inverted);
     mapper.setClip(config.clip);
 
