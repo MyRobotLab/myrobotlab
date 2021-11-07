@@ -22,6 +22,15 @@ if [ -x "${APPDIR}/java/bin/java" ]; then
   JAVA=${APPDIR}/java/bin/java
 fi
 
+# verify java exists
+if command -v ${JAVA}; then
+  echo "found java"
+else
+  echo "ERROR ${JAVA} not found" 
+  echo " please install e.g. sudo apt install openjdk-11-jdk"
+  exit
+fi
+
 # Processing/Arduino handle this in an array - no need for now
 JAVA_OPTIONS="-Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8"
 
