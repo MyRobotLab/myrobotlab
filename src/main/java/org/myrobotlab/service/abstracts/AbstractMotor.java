@@ -476,25 +476,6 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     move(data.value);
   }
 
-  @Override /* incoming config is from derived motor type */
-  protected ServiceConfig initConfig(ServiceConfig c) {
-    super.initConfig(c);
-    AbstractMotorConfig config = (AbstractMotorConfig) c;
-
-    config.locked = locked;
-
-    if (mapper != null) {
-      config.clip = mapper.isClip();
-      config.maxIn = mapper.getMaxX();
-      config.maxOut = mapper.getMaxY();
-      config.minIn = mapper.getMinX();
-      config.minOut = mapper.getMinY();
-      config.inverted = mapper.isInverted();
-    }
-
-    return config;
-  }
-
   public ServiceConfig load(ServiceConfig c) {
     AbstractMotorConfig config = (AbstractMotorConfig) c;
 

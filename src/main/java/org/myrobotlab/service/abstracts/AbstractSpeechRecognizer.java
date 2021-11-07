@@ -559,7 +559,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   @Override
   public ServiceConfig getConfig() {
-    AbstractSpeechRecognizerConfig config = (AbstractSpeechRecognizerConfig) initConfig(new AbstractSpeechRecognizerConfig());
+    AbstractSpeechRecognizerConfig config = new AbstractSpeechRecognizerConfig();
     config.listening = isListening();
     config.wakeWord = getWakeWord();
     Set<String> listeners = getAttached("publishText");

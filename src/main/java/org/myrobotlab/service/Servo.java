@@ -217,7 +217,7 @@ public class Servo extends AbstractServo implements ServoControl {
   @Override
   public ServiceConfig getConfig() {
 
-    ServoConfig config = (ServoConfig) initConfig(new ServoConfig());
+    ServoConfig config = new ServoConfig();
     
     config.autoDisable = autoDisable;
     config.enabled = enabled;
