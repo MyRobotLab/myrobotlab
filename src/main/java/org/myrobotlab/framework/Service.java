@@ -1387,7 +1387,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * 
    */
   public ServiceConfig getConfig() {
-    return null;
+    // FIXME !!! - this should be null for services that do not have it !
+    return new ServiceConfig();
   }
 
   public ServiceConfig load() throws IOException {
