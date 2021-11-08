@@ -98,8 +98,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   private static final long serialVersionUID = 1L;
   
-  protected ServiceConfig config;
-
   transient public final static Logger log = LoggerFactory.getLogger(Service.class);
 
   /**

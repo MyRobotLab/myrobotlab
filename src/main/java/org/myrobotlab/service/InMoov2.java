@@ -117,6 +117,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   static String speechRecognizer = "WebkitSpeechRecognition";
 
   protected boolean loadGestures = true;
+  
+  InMoov2Config config = new InMoov2Config();
 
   /**
    * @param someScriptName
@@ -1393,8 +1395,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public ProgramAB startChatBot() {
 
     try {
-      InMoov2Config config = (InMoov2Config)this.config;
-
+      
       chatBot = (ProgramAB) startPeer("chatBot");
       isChatBotActivated = true;
       if (config.locale != null) {
