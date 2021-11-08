@@ -27,7 +27,7 @@ public class AndrewTest extends AbstractServiceTest {
     Platform.setVirtual(true);
     // TODO Auto-generated method stub
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-    webgui.autoStartBrowser = false;
+    webgui.autoStartBrowser(false);
 
     Andrew andrew = (Andrew) Runtime.start("andrew", "Andrew");
     return andrew;
