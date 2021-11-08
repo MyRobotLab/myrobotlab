@@ -12,6 +12,7 @@ import java.util.Set;
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.i2c.I2CFactory;
 import org.myrobotlab.logging.LoggerFactory;
@@ -114,6 +115,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     }
   }
 
+  /*
   @Override
   public void attach(String name) {
     ServiceInterface si = Runtime.getService(name);
@@ -130,7 +132,24 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       detachI2CControl((I2CControl) si);
       return;
     }
+  } */
+  
+  @Override
+  public void attach(Attachable service) throws Exception {
+    if (I2CControl.class.isAssignableFrom(service.getClass())) {
+      attachI2CControl((I2CControl) service);
+      return;
+    }
   }
+  
+  @Override
+  public void detach(Attachable service){
+    if (I2CControl.class.isAssignableFrom(service.getClass())) {
+      detachI2CControl((I2CControl) service);
+      return;
+    }
+  }
+
 
   @Override
   public void attachI2CControl(I2CControl control) {
@@ -139,12 +158,12 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     // This part adds the service to the mapping between
     // busAddress||DeviceAddress
     // and the service name to be able to send data back to the invoker
-    String key = String.format("%d.%d", Integer.parseInt(control.getDeviceBus()), Integer.decode(control.getDeviceAddress()));
+    String key = String.format("%d.%d", Integer.parseInt(control.getBus()), Integer.decode(control.getAddress()));
 
     if (i2cDevices.containsKey(key)) {
-      log.error("Device {} {} {} already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName());
+      log.error("Device {} {} {} already exists.", control.getBus(), control.getAddress(), control.getName());
     } else {
-      createI2cDevice(Integer.parseInt(control.getDeviceBus()), Integer.decode(control.getDeviceAddress()), control.getName());
+      createI2cDevice(Integer.parseInt(control.getBus()), Integer.decode(control.getAddress()), control.getName());
       control.attachI2CController(this);
     }
   }
