@@ -129,7 +129,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static private transient Thread installerThread = null;
 
   private String configName = "default";
-
+  
   /**
    * The one config directory where all config is managed the {default} is the
    * current configuration set
@@ -570,14 +570,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           runtime.startingServices.add("webgui");
           runtime.startingServices.add("python");
           
-          // current DEFAULT config - before external config is applied
-          // important because there may not even be a runtime.yml
-          // if (((RuntimeConfig)runtime.config).enableCli) {
-            
-          // }
+          runtime.startInteractiveMode();
 
           try {
-            if (options.config != null) {
+            if (options.config != null) {              
               runtime.setConfigName(options.config);
               runtime.load();
             }

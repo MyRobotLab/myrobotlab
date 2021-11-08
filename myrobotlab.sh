@@ -22,6 +22,28 @@ if [ -x "${APPDIR}/java/bin/java" ]; then
   JAVA=${APPDIR}/java/bin/java
 fi
 
+# verify java exists
+if type -p java; then
+    echo found java executable in PATH
+    _java=java
+elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
+    echo found java executable in JAVA_HOME
+    _java="$JAVA_HOME/bin/java"
+else
+    echo "java is not installed please install java 11 e.g. sudo apt install openjdk-11-jdk "
+    exit
+fi
+
+JAVA_VER=$(java -version 2>&1 | sed -n ';s/.* version "\(.*\)\.\(.*\)\..*".*/\1\2/p;')
+
+if [ "$JAVA_VER" -ge 11 ]; then
+    echo "found java version equal or greater to 11"
+else
+    echo "incompatible version of java, java 11 required"
+    exit
+fi
+
+
 # Processing/Arduino handle this in an array - no need for now
 JAVA_OPTIONS="-Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8"
 

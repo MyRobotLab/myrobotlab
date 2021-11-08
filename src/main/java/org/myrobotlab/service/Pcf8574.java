@@ -444,14 +444,16 @@ public class Pcf8574 extends Service implements I2CControl, /*FIXME - add I2CCon
     if (controller != null && controller.getName().equals(instance.getName())) {
       return isAttached;
     }
-    ;
     return false;
   }
 
   @Override
   public boolean isAttached(String name) {
-    // TODO Auto-generated method stub
-    return false;
+    boolean ret = false;
+    try {
+      ret = isAttached(Runtime.getService(name));
+    } catch(Exception e) {}
+    return ret;    
   }
 
   public void onRegistered(Registration s) {
