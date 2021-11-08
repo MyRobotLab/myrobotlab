@@ -557,6 +557,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     setWakeWord(null);
   }
 
+  /*
   @Override
   public ServiceConfig getConfig() {
     AbstractSpeechRecognizerConfig config = new AbstractSpeechRecognizerConfig();
@@ -566,6 +567,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     config.textListeners = listeners.toArray(new String[listeners.size()]);
     return config;
   }
+  */
 
   public ServiceConfig load(ServiceConfig c) {
     AbstractSpeechRecognizerConfig config = (AbstractSpeechRecognizerConfig) c;
