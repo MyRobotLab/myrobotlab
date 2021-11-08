@@ -59,6 +59,7 @@ public class InProcessCliTest extends AbstractTest {
     try {
       Runtime runtime = Runtime.getInstance();
       // runtime.stopInteractiveMode();
+      runtime.stopInteractiveMode();
 
       InProcessCli proc = new InProcessCli(runtime, "proc-cli-testz", in, bos);
 
