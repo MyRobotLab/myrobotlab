@@ -3462,7 +3462,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   @Override
   public ServiceConfig getConfig() {
 
-    RuntimeConfig config = (RuntimeConfig) initConfig(new RuntimeConfig());
+    RuntimeConfig config = new RuntimeConfig();
     // config.id = getId(); Not ready yet
     config.virtual = Platform.isVirtual();
 
@@ -3489,7 +3489,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * loads a yaml configuration file from the file system default location will
-   * be data/config/{name}.yml
+   * be data/config/{configName}/{name}.yml
    *  
    * @param name
    * @return
@@ -3515,8 +3515,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     setLocale(config.locale);
     setAllVirtual(config.virtual);
 
+    // 3 possible states true/false ... and load(ServiceConfig c) is never called :P
     if (config.enableCli) {
       startInteractiveMode();
+    } else {
+      stopInteractiveMode();
     }
 
     // setId(config.id); Very Fragile ! Cannot do this yet

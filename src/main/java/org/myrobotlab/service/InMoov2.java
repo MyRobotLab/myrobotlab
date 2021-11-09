@@ -1393,12 +1393,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public ProgramAB startChatBot() {
 
     try {
-      InMoov2Config config = (InMoov2Config)this.config;
 
       chatBot = (ProgramAB) startPeer("chatBot");
       isChatBotActivated = true;
-      if (config.locale != null) {
-        chatBot.setCurrentBotName(config.locale);
+      if (locale != null) {
+        chatBot.setCurrentBotName(locale.getTag());
       }
 
       speakBlocking(get("CHATBOTACTIVATED"));
@@ -2384,7 +2383,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   @Override
   public ServiceConfig getConfig() {
-    InMoov2Config config = (InMoov2Config) initConfig(new InMoov2Config());
+    InMoov2Config config = new InMoov2Config();
 
     // config.isController3Activated = isController3Activated;
     // config.isController4Activated = isController4Activated;

@@ -4599,7 +4599,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 
   @Override
   public ServiceConfig getConfig() {
-    Mpu6050Config config = (Mpu6050Config) initConfig(new Mpu6050Config());
+    Mpu6050Config config = new Mpu6050Config();
     config.start = publisher.isRunning;
     config.sampleRate = sampleRateHz;
     config.bus = deviceBus;

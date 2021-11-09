@@ -33,8 +33,8 @@ public class MotorPort extends AbstractMotor {
 
   @Override
   public ServiceConfig getConfig() {
-
-    MotorPortConfig config = (MotorPortConfig) initConfig(new MotorPortConfig());
+    // FIXME - may need to do call super.config for config that has parent :(
+    MotorPortConfig config = new MotorPortConfig();
     config.port = port;
     return config;
   }

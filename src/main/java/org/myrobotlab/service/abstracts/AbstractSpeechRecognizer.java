@@ -18,7 +18,6 @@ import org.myrobotlab.service.interfaces.TextListener;
 
 public abstract class AbstractSpeechRecognizer extends Service implements SpeechRecognizer {
 
-  
   /**
    * text and confidence (and any additional meta data) to be published
    */
@@ -557,26 +556,26 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     setWakeWord(null);
   }
 
-  @Override
-  public ServiceConfig getConfig() {
-    AbstractSpeechRecognizerConfig config = (AbstractSpeechRecognizerConfig) initConfig(new AbstractSpeechRecognizerConfig());
-    config.listening = isListening();
-    config.wakeWord = getWakeWord();
-    Set<String> listeners = getAttached("publishText");
-    config.textListeners = listeners.toArray(new String[listeners.size()]);
-    return config;
-  }
+  /*
+   * @Override public ServiceConfig getConfig() { AbstractSpeechRecognizerConfig
+   * config = new AbstractSpeechRecognizerConfig(); config.listening =
+   * isListening(); config.wakeWord = getWakeWord(); Set<String> listeners =
+   * getAttached("publishText"); config.textListeners = listeners.toArray(new
+   * String[listeners.size()]); return config; }
+   */
 
   public ServiceConfig load(ServiceConfig c) {
-    AbstractSpeechRecognizerConfig config = (AbstractSpeechRecognizerConfig) c;
-    setWakeWord(config.wakeWord);
-    if (config.listening) {
-      startListening();
-    }
+    if (c instanceof AbstractSpeechRecognizerConfig) {
+      AbstractSpeechRecognizerConfig config = (AbstractSpeechRecognizerConfig) c;
+      setWakeWord(config.wakeWord);
+      if (config.listening) {
+        startListening();
+      }
 
-    if (config.textListeners != null) {
-      for (String listener : config.textListeners) {
-        addListener("publishText", listener);
+      if (config.textListeners != null) {
+        for (String listener : config.textListeners) {
+          addListener("publishText", listener);
+        }
       }
     }
     return c;

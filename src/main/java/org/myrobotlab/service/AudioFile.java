@@ -502,7 +502,7 @@ public class AudioFile extends Service {
   @Override
   public ServiceConfig getConfig() {
 
-    AudioFileConfig config = (AudioFileConfig) initConfig(new AudioFileConfig());
+    AudioFileConfig config = new AudioFileConfig();
     config.mute = mute;
     config.currentTrack = currentTrack;
     config.currentPlaylist = currentPlaylist;

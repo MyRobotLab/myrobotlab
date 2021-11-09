@@ -72,7 +72,8 @@ public class Motor extends AbstractMotor {
 
   @Override
   public ServiceConfig getConfig() {
-    MotorConfig config = (MotorConfig) initConfig(new MotorConfig());
+    // FIXME - may need to do call super.config for config that has parent :(
+    MotorConfig config = new MotorConfig();
     config.dirPin = getDirPin();
     config.pwrPin = getPwrPin();
     config.pwmFreq = getPwmFreq();
