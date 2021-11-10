@@ -100,7 +100,7 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     // TODO: is this unsafe?
     // TODO: what sets the type of this config?
     /// TODO: this isn't good OO programming to have to do it this way.
-    DiscordBotConfig config = (DiscordBotConfig) initConfig(new DiscordBotConfig());
+    DiscordBotConfig config = new DiscordBotConfig();
     config.token = token;
 
     Set<String> listeners = getAttached("publishUtterance");

@@ -1385,14 +1385,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * 
    */
   public ServiceConfig getConfig() {
-    ServiceConfig sc = new ServiceConfig();
-    initConfig(sc);
-    return sc;
-  }
-
-  protected ServiceConfig initConfig(ServiceConfig config) {
-    config.type = getSimpleName();
-    return config;
+    // FIXME !!! - this should be null for services that do not have it !
+    log.info("{} of type {} does not currently define its own config", getName(), getSimpleName());
+    return new ServiceConfig();
   }
 
   public ServiceConfig load() throws IOException {

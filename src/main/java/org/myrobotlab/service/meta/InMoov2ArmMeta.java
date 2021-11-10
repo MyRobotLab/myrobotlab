@@ -28,7 +28,7 @@ public class InMoov2ArmMeta extends MetaData {
     addPeer("rotate", "Servo", "Rotate servo");
     addPeer("shoulder", "Servo", "Shoulder servo");
     addPeer("omoplate", "Servo", "Omoplate servo");
-    addPeer("arduino", "Arduino", "Arduino controller for this arm");
+    // addPeer("arduino", "Arduino", "Arduino controller for this arm");
 
   }
 

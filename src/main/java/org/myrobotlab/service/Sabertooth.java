@@ -300,7 +300,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
   @Override
   public ServiceConfig getConfig() {
-    SabertoothConfig config = (SabertoothConfig) initConfig(new SabertoothConfig());
+    SabertoothConfig config = new SabertoothConfig();
     config.port = getSerialPort();
     config.connect = isConnected;
     return config;

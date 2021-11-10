@@ -2566,7 +2566,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   @Override
   public ServiceConfig getConfig() {
-    JMonkeyEngineConfig config = (JMonkeyEngineConfig) initConfig(new JMonkeyEngineConfig());
+    JMonkeyEngineConfig config = new JMonkeyEngineConfig();
     config.cameraLookAt = cameraLookAt;
     config.modelPaths = new ArrayList<>();
     for (String path : this.modelPaths) {

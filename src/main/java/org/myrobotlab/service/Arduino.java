@@ -2316,7 +2316,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   @Override
   public ServiceConfig getConfig() {
-    ArduinoConfig config = (ArduinoConfig) initConfig(new ArduinoConfig());
+    ArduinoConfig config = new ArduinoConfig();
     config.port = port;
     config.connect = isConnected();
     return config;

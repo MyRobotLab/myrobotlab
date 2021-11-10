@@ -839,7 +839,7 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
   @Override
   public ServiceConfig getConfig() {
 
-    NeoPixelConfig config = (NeoPixelConfig) initConfig(new NeoPixelConfig());
+    NeoPixelConfig config = new NeoPixelConfig();
     config.pin = pin;
     config.pixelCount = pixelCount;
     config.pixelDepth = pixelDepth;

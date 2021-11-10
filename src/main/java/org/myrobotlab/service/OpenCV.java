@@ -2108,7 +2108,7 @@ public class OpenCV extends AbstractComputerVision {
 
   @Override
   public ServiceConfig getConfig() {
-    OpenCVConfig config = (OpenCVConfig) initConfig(new OpenCVConfig());
+    OpenCVConfig config = new OpenCVConfig();
     config.capturing = capturing;
     config.cameraIndex = cameraIndex;
     // TODO: make the grabber config a nested object to clean this up..

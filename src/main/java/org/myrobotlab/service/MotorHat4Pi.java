@@ -92,7 +92,8 @@ public class MotorHat4Pi extends AbstractMotor {
 
   @Override
   public ServiceConfig getConfig() {
-    MotorHat4PiConfig config = (MotorHat4PiConfig) initConfig(new MotorHat4PiConfig());
+    // FIXME - may need to do call super.config for config that has parent :(
+    MotorHat4PiConfig config = new MotorHat4PiConfig();
     config.motorId = motorId;
     return config;
   }
