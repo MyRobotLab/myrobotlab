@@ -30,7 +30,7 @@ public class InMoov2HandMeta extends MetaData {
     addPeer("ringFinger", "Servo", "RingFinger servo");
     addPeer("pinky", "Servo", "Pinky servo");
     addPeer("wrist", "Servo", "Wrist servo");
-    addPeer("arduino", "Arduino", "Arduino controller for this hand");
+    // addPeer("arduino", "Arduino", "Arduino controller for this hand");
     // Currently if the LeapMotion service is loaded and the jni is not there -
     // the
     // whole jvm crashes :(

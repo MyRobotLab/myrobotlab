@@ -28,7 +28,7 @@ public class InMoov2TorsoMeta extends MetaData {
     addPeer("topStom", "Servo", "Top Stomach servo");
     addPeer("midStom", "Servo", "Mid Stomach servo");
     addPeer("lowStom", "Servo", "Low Stomach servo");
-    addPeer("arduino", "Arduino", "Arduino controller for torso");
+    // addPeer("arduino", "Arduino", "Arduino controller for torso");
 
   }
 
