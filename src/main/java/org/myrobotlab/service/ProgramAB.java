@@ -451,9 +451,17 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   }
 
   public String getPredicate(String userName, String botName, String predicateName) {
-    return getSession(userName, botName).getPredicate(predicateName);
+    Session s = getSession(userName, botName);
+    if (s == null) {
+      // If that session doesn't currently exist, let's start it.
+      s = startSession(userName, botName);
+      if (s == null) {
+        log.warn("Error starting programAB session between bot {} and user {}", userName, botName);
+        return null;
+      }
+    }
+    return s.getPredicate(predicateName);
   }
-
   /**
    * Only respond if the last response was longer than delay ms ago
    * 
