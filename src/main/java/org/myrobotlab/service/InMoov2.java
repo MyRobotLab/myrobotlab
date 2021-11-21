@@ -366,7 +366,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   boolean isMouthActivated = false;
 
   // adding to the problem :( :( :(
-  boolean isAudioPlayerActivated = false;
+  boolean isAudioPlayerActivated = true;
 
   boolean isRightArmActivated = false;
 
