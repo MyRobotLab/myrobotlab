@@ -1,25 +1,11 @@
-<style>
-table, th , td {
-  border: 1px solid grey;
-  border-collapse: collapse;
-  padding: 5px;
-  width: 100%;
-}
-table tr:nth-child(odd) {
-  background-color: #f1f1f1;
-}
-table tr:nth-child(even) {
-  background-color: #ffffff;
-}
-</style>
-
 <b>PID parameters, inputs and output</b><p>
 
 <div class="row">
   <div class="col-lg-12">
   <div style="overflow-x:auto;">
-    <table>
+    <table background-color="#f1f1f1">
       <tr>
+        <table border="1px solid grey" border-collapse="collapse" padding="5px" width="100%">
         <th>Key</th>
         <th>sampletime (ms)</th>
         <th>kp</th>
@@ -40,8 +26,8 @@ table tr:nth-child(even) {
               <td>{{value.setpoint}}
               <td>{{value.input || 0 | number:3}}
               <td>{{value.output || 0 | number:3}}
-         </span>
-        </td>
+         </td>
+        </span>
       </tr>
     </table>
     </div>

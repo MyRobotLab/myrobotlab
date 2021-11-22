@@ -366,7 +366,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   boolean isMouthActivated = false;
 
   // adding to the problem :( :( :(
-  boolean isAudioPlayerActivated = false;
+  boolean isAudioPlayerActivated = true;
 
   boolean isRightArmActivated = false;
 
@@ -1439,8 +1439,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
         log.error("saving predicates threw", e);
       }
       // start session based on last recognized person
-      if (!chatBot.getPredicate("default", "lastUsername").isEmpty() && !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
-        chatBot.startSession(chatBot.getPredicate("lastUsername"));
+      //if (!chatBot.getPredicate("default", "lastUsername").isEmpty() && !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
+        //chatBot.startSession(chatBot.getPredicate("lastUsername"));
+      //}
+      if (!chatBot.getPredicate("Friend", "firstinit").isEmpty() && !chatBot.getPredicate("Friend", "firstinit").equals("unknown") && !chatBot.getPredicate("Friend", "firstinit").equals("started")) {
+        chatBot.getResponse("FIRST_INIT");
+      }  
+      else {
+        chatBot.getResponse("WAKE_UP");
       }
 
       htmlFilter = (HtmlFilter) startPeer("htmlFilter");// Runtime.start("htmlFilter",
