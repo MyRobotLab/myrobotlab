@@ -1444,7 +1444,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       //}
       if (!chatBot.getPredicate("Friend", "firstinit").isEmpty() && !chatBot.getPredicate("Friend", "firstinit").equals("unknown") && !chatBot.getPredicate("Friend", "firstinit").equals("started")) {
         chatBot.getResponse("FIRST_INIT");
-      else:
+      }  
+      else {
         chatBot.getResponse("WAKE_UP");
       }
 
