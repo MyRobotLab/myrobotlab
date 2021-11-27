@@ -17,6 +17,12 @@ import org.myrobotlab.service.config.RandomConfig.RandomMessageConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
+/**
+ * A service for random events to add interest to bots
+ * 
+ * @author GroG
+ *
+ */
 public class Random extends Service {
 
   private static final long serialVersionUID = 1L;
@@ -24,12 +30,11 @@ public class Random extends Service {
   public final static Logger log = LoggerFactory.getLogger(Random.class);
 
   /**
-   * A service for random events to add interest to bots
    * 
-   * @param n
-   * @param id
+   * RandomMessage is used to contain the ranges of values and
+   * intervals for which random messages will be sent
+   *
    */
-
   public class RandomMessage {
     public String name;
     public String method;
@@ -56,10 +61,20 @@ public class Random extends Service {
 
   }
 
+  /**
+   * all random message data is located here
+   */
   Map<String, RandomMessage> randomData = new HashMap<>();
 
+  /**
+   * Java's random value generator
+   */
   transient private java.util.Random random = new java.util.Random();
 
+  /**
+   * global enable will determines if "all" random messages will be enabled or disabled
+   * without changing their individual enable/disable state
+   */
   protected boolean enabled = true;
 
   public Random(String n, String id) {
@@ -167,8 +182,8 @@ public class Random extends Service {
     RandomMessage msg = randomData.get(key);
     if (!msg.enabled) {
       return;
-    }    
-    
+    }
+
     Message m = Message.createMessage(getName(), msg.name, msg.method, null);
     if (msg.data != null) {
       List<Object> data = new ArrayList<>();
@@ -180,7 +195,7 @@ public class Random extends Service {
           Object param = null;
 
           if (range.set != null) {
-            int rand = getRandom(0, range.set.size()-1);
+            int rand = getRandom(0, range.set.size() - 1);
             param = range.set.get(rand);
           } else if (range.min instanceof Double) {
             param = getRandom((Double) range.min, (Double) range.max);
@@ -305,7 +320,7 @@ public class Random extends Service {
       }
     }
   }
-  
+
   public void purge() {
     randomData.clear();
     purgeTasks();

@@ -13,8 +13,8 @@ public interface Invoker {
   
   /**
    * Invoke method in the future without params and wait delayMs
-   * @param method
-   * @param delayMs
+   * @param method - method to be invoked
+   * @param delayMs - the delay from "now" before invoking this method
    */
   public void invokeFuture(String method, long delayMs);
 
@@ -30,8 +30,8 @@ public interface Invoker {
   
   /**
    * checks if a named tasks exist
-   * @param taskName
-   * @return
+   * @param taskName - name of task
+   * @return - returns task if defined
    */
   public boolean containsTask(String taskName);
 
