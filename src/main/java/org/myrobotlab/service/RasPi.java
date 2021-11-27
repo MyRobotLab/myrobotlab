@@ -13,12 +13,15 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.i2c.I2CFactory;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.service.abstracts.AbstractMicrocontroller;
+import org.myrobotlab.service.config.RasPiConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -116,24 +119,17 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   }
 
   /*
-  @Override
-  public void attach(String name) {
-    ServiceInterface si = Runtime.getService(name);
-    if (I2CControl.class.isAssignableFrom(si.getClass())) {
-      attachI2CControl((I2CControl) si);
-      return;
-    }
-  }
+   * @Override public void attach(String name) { ServiceInterface si =
+   * Runtime.getService(name); if
+   * (I2CControl.class.isAssignableFrom(si.getClass())) {
+   * attachI2CControl((I2CControl) si); return; } }
+   * 
+   * @Override public void detach(String name) { ServiceInterface si =
+   * Runtime.getService(name); if
+   * (I2CControl.class.isAssignableFrom(si.getClass())) {
+   * detachI2CControl((I2CControl) si); return; } }
+   */
 
-  @Override
-  public void detach(String name) {
-    ServiceInterface si = Runtime.getService(name);
-    if (I2CControl.class.isAssignableFrom(si.getClass())) {
-      detachI2CControl((I2CControl) si);
-      return;
-    }
-  } */
-  
   @Override
   public void attach(Attachable service) throws Exception {
     if (I2CControl.class.isAssignableFrom(service.getClass())) {
@@ -141,15 +137,14 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       return;
     }
   }
-  
+
   @Override
-  public void detach(Attachable service){
+  public void detach(Attachable service) {
     if (I2CControl.class.isAssignableFrom(service.getClass())) {
       detachI2CControl((I2CControl) service);
       return;
     }
   }
-
 
   @Override
   public void attachI2CControl(I2CControl control) {
@@ -619,6 +614,18 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     }
 
     broadcastState();
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    RasPiConfig config = new RasPiConfig();
+    return config;
+  }
+
+  @Override
+  public ServiceConfig load(ServiceConfig c) {
+    RasPiConfig config = (RasPiConfig) c;
+    return c;
   }
 
 }

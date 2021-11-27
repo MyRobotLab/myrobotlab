@@ -1,5 +1,13 @@
 <div class="row">
 
+    If you will be using I2C GPIO pins make sure you have enabled i2c with raspiconfig
+    <pre>
+        sudo apt-get install -y i2c-tools
+        
+    </pre>
+
+    More recent rasbian distributions require building and installing this library - <a href=https://github.com/WiringPi/WiringPi>https://github.com/WiringPi/WiringPi</a>
+
     <div class="col-md-3">
         <b>board type</b>
         {{service.boardType}}<br/>
