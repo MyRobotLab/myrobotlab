@@ -849,7 +849,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   synchronized public void purgeTask(String taskName) {
     if (tasks.containsKey(taskName)) {
-      log.info("remove task {}", taskName);
+      log.debug("remove task {}", taskName);
       Timer timer = tasks.get(taskName);
       if (timer != null) {
         try {
@@ -1387,7 +1387,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public ServiceConfig getConfig() {
     // FIXME !!! - this should be null for services that do not have it !
     log.info("{} of type {} does not currently define its own config", getName(), getSimpleName());
-    return new ServiceConfig();
+    // return new ServiceConfig();
+    return null;
   }
 
   public ServiceConfig load() throws IOException {
@@ -1638,6 +1639,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
       String format = filename.substring(filename.lastIndexOf(".") + 1);
       ServiceConfig config = getConfig();
+      
+      if (config == null) {
+        log.info("{} has null config - not saving", getName());
+        return false;
+      }
 
       // bad idea of an optimizaton
       /**
