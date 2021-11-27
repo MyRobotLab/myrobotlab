@@ -38,11 +38,11 @@ pipeline {
     stages {
 
          // using CleanBeforeCheckout - in configuration
-         // stage('clean') {
-         //    steps {
-         //       cleanWs()
-         //    }
-         // }
+         stage('clean') {
+            steps {
+               cleanWs()
+            }
+         }
 
         stage ('initialize') {
             steps {
