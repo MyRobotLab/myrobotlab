@@ -1,0 +1,15 @@
+<div class="row">
+    <h3>Random Methods</h3>
+    <b>service.method</b>(param ranges) every interval<br/><br/>
+        <div ng-repeat="(key, value) in service.randomData">            
+            <b>{{key}}</b>(
+            <span ng-repeat="param in value.data">
+                {{param.min}} - {{param.max}}
+                <span ng-repeat="item in param.set">
+                    {{item}}
+                </span>
+            </span>
+            )
+        </span> every <span> {{value.minIntervalMs}} ms to {{value.maxIntervalMs}} ms
+        </div>
+</div>
