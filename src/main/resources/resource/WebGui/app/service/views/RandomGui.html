@@ -1,7 +1,10 @@
 <div class="row">
-    <h3>Random Methods</h3>
+    <h3>Random Methods 
+    <toggle width="30" height="28" ng-model="service.enabled" ng-change="service.enabled?msg.enable():msg.disable()" on=" " off=" "></toggle>
+    </h3>
     <b>service.method</b>(param ranges) every interval<br/><br/>
-        <div ng-repeat="(key, value) in service.randomData">            
+        <div ng-repeat="(key, value) in service.randomData">
+            <toggle width="30" height="28" ng-model="value.enabled" ng-change="value.enabled?msg.enable(key):msg.disable(key)" on=" " off=" "></toggle>
             <b>{{key}}</b>(
             <span ng-repeat="param in value.data">
                 {{param.min}} - {{param.max}}
