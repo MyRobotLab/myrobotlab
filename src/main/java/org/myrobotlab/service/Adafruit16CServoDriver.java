@@ -1006,6 +1006,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   public ServiceConfig getConfig() {
 
     Adafruit16CServoDriverConfig config = new Adafruit16CServoDriverConfig();
+    config.controller = controllerName;
     config.deviceBus = deviceBus;
     config.deviceAddress = deviceAddress;
     return config;
@@ -1018,6 +1019,13 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     }
     if (config.deviceAddress != null) {
       deviceAddress = config.deviceAddress;
+    }
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch (Exception e) {
+        log.error("attaching controller failed", e);
+      }
     }
     return c;
   }
