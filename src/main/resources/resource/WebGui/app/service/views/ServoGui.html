@@ -19,25 +19,39 @@
                         <div class="col-md-12">
                             <table class="tableController">
                                 <tr>
+                                    <td>Controller</td>
+                                    <td>Pin</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td>Enable</td>
+                                    <td>AutoDisable</td>
+                                    <td>TimeOut = {{autoDisableSlider.value}} s</td>
+                                </tr>
+                                <tr>
                                     <td>
                                         <select ng-disabled="service.controller" class="form-control selectController" ng-model="selectedController">
                                             <option ng-repeat="controller in possibleControllers" value="{{controller}}">{{controller}} </option>
                                         </select>
                                     </td>
                                     <td>
-                                        <!-- TODO - send pos ! ??? -->
-                                        <button ng-show="!service.controller" class="btn btn-default" ng-click="attachController(selectedController, service.pin)">attach</button>
-                                        <button ng-show="service.controller" class="btn btn-default" ng-click="msg.detach()">detach</button>
-                                    </td>
-                                    <td>Pin</td>
-                                    <td>
                                         <select class="form-control" ng-model="service.pin" ng-change="setPin()" ng-options="item for item in pinList">
                                             <option>{{item}}</option>
                                         </select>
                                     </td>
-                                    <td>Enable</td>
+                                    <td>&nbsp;</td>
                                     <td>
-                                        <toggle class="miniBTN" ng-model="service.enabled" ng-change="service.enabled?msg.enable():msg.disable()" on="enabled" off="disabled"/></toggle>
+                                        <!-- TODO - send pos ! ??? -->
+                                        <button ng-show="!service.controller" class="btn btn-default" ng-click="attachController(selectedController, service.pin)">attach</button>
+                                        <button ng-show="service.controller" class="btn btn-default" ng-click="msg.detach()">detach</button>
+                                    </td>
+                                    <td>
+                                        <toggle ng-model="service.enabled" class="miniBTN" ng-change="service.enabled?msg.enable():msg.disable()" on="" off="" size="btn-lg"/></toggle>
+                                    </td>
+                                    <td>
+                                        <toggle ng-model="service.autoDisable" class="miniBTN" ng-change="msg.setAutoDisable(service.autoDisable)" on="" off="" size="btn-lg"/>
+                                    </td>
+                                    <td>
+                                        &nbsp;<rzslider class="custom-slider3 autoDisableSlider" ng-click="" rz-slider-model="autoDisableSlider.value" rz-slider-options="autoDisableSlider.options"/>
                                     </td>
                                 </tr>
                             </table>
@@ -229,12 +243,12 @@
                     <table class="table tableAdvanced preventDragSelect">
                         <tbody>
                             <tr>
+                                <!--
                                 <td>
                                     Auto-disable
                                     <toggle ng-model="service.autoDisable" class="miniBTN" ng-change="msg.setAutoDisable(service.autoDisable)" on="" off="" size="btn-lg"/>
                                     <rzslider class="custom-slider3 autoDisableSlider" ng-click="" rz-slider-model="autoDisableSlider.value" rz-slider-options="autoDisableSlider.options"/>
                                 </td>
-                                <!--
                                 <td>
                                     Blocking                                    
                                     
@@ -249,14 +263,14 @@
                                 </td>
                                 <td>Encoder</td>
                                 <td>
-                                    <select class="form-goup form-control" title="Encoders list">
+                                    <select class="form-group form-control" title="Encoders list">
                                         <option selected>TimeEncoder</option>
                                     </select>
                                 </td>
                             </tr>
-                            <tr class="valuesRow">
+                            <!--tr class="valuesRow">
                                 <td>Timeout = {{autoDisableSlider.value}} s</td>
-                                <td colspan="4"></td>
+                                <td colspan="4"></td-->
                             </tr>
                         </tbody>
                     </table>
