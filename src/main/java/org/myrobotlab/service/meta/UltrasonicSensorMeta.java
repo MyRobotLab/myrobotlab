@@ -24,7 +24,6 @@ public class UltrasonicSensorMeta extends MetaData {
 
     addDescription("ranging sensor");
     addCategory("sensors");
-    addPeer("controller", "Arduino", "default sensor controller will be an Arduino");
 
   }
 
