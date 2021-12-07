@@ -13,6 +13,8 @@ public interface ServoControlListener {
 
   public void onMoveTo(ServoControl sc);
 
+  // FIXME - static, unimplemented body ? because most
+  // rely on the TimeEncoder (except Arduino) so it would be a NOOP ?
   public void onServoSetSpeed(ServoControl sc);
 
   public void onServoEnable(ServoControl sc);

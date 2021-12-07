@@ -65,6 +65,8 @@ import org.myrobotlab.service.interfaces.RecordControl;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.ServoEvent;
+import org.myrobotlab.service.interfaces.ServoSpeed;
 import org.myrobotlab.service.interfaces.ServoStatusPublisher;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
@@ -1766,14 +1768,18 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
     if (getDevice(deviceId) != null) {
+      Attachable attachable = getDevice(deviceId);
       if (eventType == 0) {
         // ((ServoStatusPublisher)
         // getDevice(deviceId)).publishServoStarted(getDevice(deviceId).getName());
-        broadcast("publishServoStarted", getDevice(deviceId).getName());
+        // FIXME - getCurrentOutputPos
+        broadcast("publishServoStarted", getDevice(deviceId).getName(), ((ServoControl)attachable).getCurrentOutputPos());
       } else if (eventType == 1) {
         // ((ServoStatusPublisher)
         // getDevice(deviceId)).publishServoStopped(getDevice(deviceId).getName());
-        broadcast("publishServoStopped", getDevice(deviceId).getName());
+        
+        // FIXME - getCurrentOutputPos
+        broadcast("publishServoStopped", getDevice(deviceId).getName(), ((ServoControl)attachable).getCurrentOutputPos());
       } else {
         log.error("unknown servo event type {}", eventType);
       }
@@ -1801,6 +1807,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   public void releaseService() {
     super.releaseService();
+    
+    // SHUTDOWN ACKING - use case - port no longer exists
+    msg.enableAck(false);
+    
     if (virtual != null) {
       virtual.releaseService();
     }
@@ -1849,22 +1859,23 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   // > servoDetachPin/deviceId
-  public void onServoDisable(ServoControl servo) {
-    Integer id = getDeviceId(servo);
+  public void onServoDisable(String servoName) {
+    Integer id = getDeviceId(servoName);
     if (id != null) {
       msg.servoDetachPin(id);
     }
   }
 
   @Override
-  public void onServoEnable(ServoControl servo) {
-    Integer deviceId = getDeviceId(servo);
+  public void onServoEnable(String servoName) {
+    Integer deviceId = getDeviceId(servoName);
     if (deviceId == null) {
-      log.warn("servoEnable servo {} does not have a corresponding device currently - did you attach?", servo.getName());
+      log.warn("servoEnable servo {} does not have a corresponding device currently - did you attach?", servoName);
       return;
     }
     if (isConnected()) {
-      msg.servoAttachPin(deviceId, getAddress(servo.getPin()));
+      ServoControl sc = (ServoControl)Runtime.getService(servoName);
+      msg.servoAttachPin(deviceId, getAddress(sc.getPin()));
     } else {
       log.info("not currently connected");
     }
@@ -1893,10 +1904,19 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   @Override
   // > servoSetVelocity/deviceId/b16 velocity
-  public void onServoSetSpeed(ServoControl servo) {
+  public void onServoSetSpeed(ServoSpeed servoSpeed) {
+    
+    // FIXME - FIND OTHER FUNCTIONS THAT CANNOT BE SET WHEN NOT CONNECTED
+    // AND HANDLE THE SAME AS BELOW !!!
+    if (!isConnected()) {
+      error("Arduino cannot set speed when not connected");
+      return;
+    }
+    
     int speed = -1;
-    if (servo.getSpeed() != null) {
-      speed = servo.getSpeed().intValue();
+    Servo servo = (Servo)Runtime.getService(servoSpeed.name);
+    if (servoSpeed.speed != null) {
+      speed = servoSpeed.speed.intValue();
     }
     log.info("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo), speed);
     Integer id = getDeviceId(servo);
@@ -2261,15 +2281,15 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   @Override
-  public String publishServoStarted(String name) {
+  public ServoEvent publishServoStarted(String name, Double position) {
     log.debug("CONTROLLER SERVO_STARTED {}", name);
-    return name;
+    return new ServoEvent(name, position);
   }
 
   @Override
-  public String publishServoStopped(String name) {
-    log.debug("CONTROLLER SERVO_STOPPED {}", name);
-    return name;
+  public ServoEvent publishServoStopped(String name, Double position) {
+    log.debug("CONTROLLER SERVO_STOPPED {} {}", name, position);
+    return new ServoEvent(name, position);
   }
 
   @Override

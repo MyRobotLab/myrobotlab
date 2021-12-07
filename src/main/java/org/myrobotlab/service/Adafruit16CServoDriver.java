@@ -32,7 +32,7 @@ import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.ServoStatusPublisher;
+import org.myrobotlab.service.interfaces.ServoSpeed;
 import org.slf4j.Logger;
 
 /**
@@ -44,7 +44,7 @@ import org.slf4j.Logger;
  *         https://learn.adafruit.com/16-channel-pwm-servo-driver
  */
 @Ignore
-public class Adafruit16CServoDriver extends Service implements I2CControl, ServoController, MotorController, ServoStatusPublisher {
+public class Adafruit16CServoDriver extends Service implements I2CControl, ServoController, MotorController /*, ServoStatusPublisher*/ {
 
   /**
    * SpeedControl, calculates the next position at regular intervals to make the
@@ -674,9 +674,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   @Override
-  public void onServoSetSpeed(ServoControl servo) {
-    ServoEvent ServoEvent = servoMap.get(servo.getName());
-    ServoEvent.velocity = servo.getSpeed();
+  public void onServoSetSpeed(ServoSpeed servoSpeed) {
+    ServoEvent ServoEvent = servoMap.get(servoSpeed.name);
+    ServoEvent.velocity = servoSpeed.speed;
   }
 
   public List<PinDefinition> getPinList() {
@@ -934,27 +934,27 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   @Override
-  public void onServoEnable(ServoControl servo) {
-    ServoEvent ServoEvent = servoMap.get(servo.getName());
+  public void onServoEnable(String servoName) {
+    ServoEvent ServoEvent = servoMap.get(servoName);
     if (ServoEvent == null) {
-      log.error("servo data {} could not get servo from map", servo.getName());
+      log.error("servo data {} could not get servo from map", servoName);
       return;
     }
     setPWM(ServoEvent.pin, 0, 4096);
     ServoEvent.isEnergized = true;
-    log.info("pin " + ServoEvent.pin + " enabled from " + servo.getName());
+    log.info("pin " + ServoEvent.pin + " enabled from " + servoName);
   }
 
   @Override
-  public void onServoDisable(ServoControl servo) {
-    ServoEvent ServoEvent = servoMap.get(servo.getName());
+  public void onServoDisable(String servoName) {
+    ServoEvent ServoEvent = servoMap.get(servoName);
     if (ServoEvent == null) {
-      log.error("servo data {} could not get servo from map", servo.getName());
+      log.error("servo data {} could not get servo from map", servoName);
       return;
     }
     setPWM(ServoEvent.pin, 4096, 0);
     ServoEvent.isEnergized = false;
-    log.info("pin " + ServoEvent.pin + " disabled from " + servo.getName());
+    log.info("pin " + ServoEvent.pin + " disabled from " + servoName);
   }
 
   // currently not a "real" motor control - it has to wait for merging of Servo
@@ -992,12 +992,14 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   }
 
-  @Override
+  @Deprecated /* controllers shouldn't publish "servo events" - they should broacast encoder data back to a ServoControl */
+  // @Override
   public String publishServoStarted(String name) {
     return name;
   }
 
-  @Override
+  @Deprecated /* controllers shouldn't publish "servo events" - they should broacast encoder data back to a ServoControl */
+  // @Override
   public String publishServoStopped(String name) {
     return name;
   }

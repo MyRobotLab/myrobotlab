@@ -11,12 +11,17 @@ public interface ServoControlPublisher {
 
   public ServoControl publishMoveTo(ServoControl sc);
 
-  public ServoControl publishServoSetSpeed(ServoControl sc);
+  // FIXME - IMPLEMENTED AS A STATIC WITH A BODY - NOT REACHABLE BY METHOD CACHE
+  public ServoSpeed publishServoSetSpeed(ServoControl sc);
+  /* { 
+    return new ServoSpeed(sc.getName(), sc.getSpeed());
+  }*/
 
-  public ServoControl publishServoEnable(ServoControl sc);
+  public String publishServoEnable(ServoControl sc);
 
-  public ServoControl publishServoDisable(ServoControl sc);
+  public String publishServoDisable(ServoControl sc);
 
+  /* FIXME these should be returning name - the event itself is enough info - sending whole servo is excessive */
   public ServoControl publishServoStop(ServoControl sc);
 
   public String publishServoEnable(String name);
