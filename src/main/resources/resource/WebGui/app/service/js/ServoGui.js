@@ -14,7 +14,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
     $scope.state = {
         useEncoderData: false,
         attached: false,
-        showLimits: true,
+        showLimits: false,
         rest: 90
     }
 
