@@ -82,6 +82,8 @@ public class TimeEncoder implements Runnable, EncoderControl {
 
   boolean enabled = true;
 
+  protected boolean stopMove = false;
+
   public TimeEncoder(ServoControl servo) {
     this.servo = servo;
     this.name = servo.getName();
@@ -135,9 +137,13 @@ public class TimeEncoder implements Runnable, EncoderControl {
 
       isRunning = true;
       while (isRunning) {
+        
+        
         // wait for next move ...
         synchronized (this) {
+          stopMove  = false;
           this.wait();
+          stopMove  = false;
         }
 
         if (speedDegreesPerMs == 0) {
@@ -150,6 +156,11 @@ public class TimeEncoder implements Runnable, EncoderControl {
         boolean started = true;
 
         while (now < endMoveTs && isRunning) {
+          
+          if (stopMove) {
+            endMoveTs = now;
+            break;
+          }
 
           now = System.currentTimeMillis();
           // speed has +/- direction
@@ -349,5 +360,9 @@ public class TimeEncoder implements Runnable, EncoderControl {
   public Set<String> getAttached(String publishingPoint) {
     // TODO Auto-generated method stub
     return null;
+  }
+  
+  public void stopMove() {
+    stopMove = true;
   }
 }

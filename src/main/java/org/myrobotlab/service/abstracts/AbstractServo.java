@@ -872,6 +872,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   @Override
   public void stop() {
     isSweeping = false;
+    if (encoder.getClass() == TimeEncoder.class) {
+      ((TimeEncoder)encoder).stopMove();
+    }
     targetPos = getCurrentInputPos();
     broadcast("publishServoStop", this);
   }
