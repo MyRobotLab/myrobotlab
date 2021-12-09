@@ -16,13 +16,13 @@ import org.myrobotlab.sensor.EncoderPublisher;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.data.AngleData;
+import org.myrobotlab.service.data.ServoSpeed;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoControlPublisher;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoEvent;
-import org.myrobotlab.service.interfaces.ServoSpeed;
 import org.myrobotlab.service.interfaces.ServoStatusPublisher;
 import org.slf4j.Logger;
 

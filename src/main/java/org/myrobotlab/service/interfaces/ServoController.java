@@ -26,6 +26,7 @@
 package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.service.data.ServoSpeed;
 
 public interface ServoController extends Attachable {
 

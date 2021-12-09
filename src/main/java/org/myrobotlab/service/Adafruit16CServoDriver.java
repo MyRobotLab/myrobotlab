@@ -25,6 +25,7 @@ import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.config.Adafruit16CServoDriverConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.data.ServoSpeed;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -32,7 +33,6 @@ import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.ServoSpeed;
 import org.slf4j.Logger;
 
 /**

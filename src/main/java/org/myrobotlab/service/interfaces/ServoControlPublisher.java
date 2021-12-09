@@ -1,5 +1,7 @@
 package org.myrobotlab.service.interfaces;
 
+import org.myrobotlab.service.data.ServoSpeed;
+
 /**
  * Servo will invoke these when various control methods are called.
  * ServoControlListeners will be informed of the control message.
