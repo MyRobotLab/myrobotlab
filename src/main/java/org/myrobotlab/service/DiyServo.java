@@ -46,7 +46,6 @@ import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoEvent;
-import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
 import org.slf4j.Logger;
 
 /**
@@ -691,7 +690,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   }
 
   public ServoEvent publishServoEvent(Integer eventType, double currentPos) {
-    ServoEvent sd = new ServoEvent(ServoStatus.SERVO_STARTED, getName(), currentPos);
+    ServoEvent sd = new ServoEvent(getName(), currentPos);
     return sd;
   }
 

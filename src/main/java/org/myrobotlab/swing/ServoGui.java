@@ -69,7 +69,6 @@ import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoEvent;
-import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
 import org.myrobotlab.swing.widget.CheckBoxTitledBorder;
 import org.slf4j.Logger;
 
@@ -514,11 +513,13 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
       @Override
       public void run() {
         currentPos.setText(String.format("%.1f", data.pos));
+        /*
         if (ServoStatus.SERVO_STARTED.equals(data.state)) {
           moving.setVisible(true);
         } else {
           moving.setVisible(false);
         }
+        */
       }
     });
   }

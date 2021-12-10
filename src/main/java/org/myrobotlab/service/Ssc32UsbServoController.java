@@ -9,6 +9,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.ServoSpeed;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.myrobotlab.service.interfaces.ServoControl;
@@ -166,7 +167,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   }
 
   @Override
-  public void onServoSetSpeed(ServoControl servo) {
+  public void onServoSetSpeed(ServoSpeed servo) {
     // TODO Auto-generated method stub
 
   }
@@ -348,13 +349,13 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
    * Integer, java.lang.Integer)
    */
   @Override
-  public void onServoEnable(ServoControl servo) {
+  public void onServoEnable(String servoName) {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void onServoDisable(ServoControl servo) {
+  public void onServoDisable(String servoName) {
     // TODO Auto-generated method stub
 
   }

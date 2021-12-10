@@ -16,11 +16,13 @@ import org.myrobotlab.sensor.EncoderPublisher;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.data.AngleData;
+import org.myrobotlab.service.data.ServoSpeed;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoControlPublisher;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.ServoEvent;
 import org.myrobotlab.service.interfaces.ServoStatusPublisher;
 import org.slf4j.Logger;
 
@@ -188,9 +190,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   protected double actualAngleDeltaError = 0.1;
 
   /**
-   * load the last position the servo was in
-   * in general I think this is a bad idea - TimeEncoder
-   * does this - but I don't think its desired in general
+   * load the last position the servo was in in general I think this is a bad
+   * idea - TimeEncoder does this - but I don't think its desired in general
    */
   protected boolean loadSavedPositions = false;
 
@@ -239,7 +240,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
       // if the encoder has a current value - we initialize the
       // servo with that value
       Double savedPos = encoder.getPos();
-      if (savedPos != null && loadSavedPositions ) {
+      if (savedPos != null && loadSavedPositions) {
         log.info("found previous values for {} setting initial position to {}", getName(), savedPos);
         // TODO: kw: output position shouldn't be set to the targetPos..
         currentOutputPos = targetPos = savedPos;
@@ -322,6 +323,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public AngleData publishJointAngle(AngleData angle) {
+    log.warn("publishJointAngle(angle)");
     return angle;
   }
 
@@ -368,7 +370,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     addListener("publishServoEnable", sc);
     addListener("publishServoDisable", sc);
     controller = sc;
-    
+
     // FIXME - remove !!!
     // FIXME change to broadcast ?
     // TODO: there is a race condition here.. we need to know that
@@ -398,28 +400,33 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   public void detach(ServoController sc) {
     detach(sc.getName());
-    broadcastState();
   }
 
-  public void detach(String sc) {
-
-    if (controller != null && !controller.equals(sc)) {
-      log.info("{} already detached from {}", getName(), sc);
+  public void detach(String controllerName) {
+    if (controller == null) {
+      log.info("already detached");
       return;
     }
-    // the subscribes .... or addListeners in this case ...
-    removeListener("publishServoMoveTo", sc);
-    removeListener("publishServoStop", sc);
-    removeListener("publishServoWriteMicroseconds", sc);
-    removeListener("publishServoSetSpeed", sc);
-    removeListener("publishServoEnable", sc);
-    removeListener("publishServoDisable", sc);
-    controller = null;
+
+    if (controller != null && !controller.equals(controllerName)) {
+      log.info("{} already detached from {}", getName(), controllerName);
+      return;
+    }
+
     disable();
-    send(sc, "detach", getName());
+    send(controllerName, "detach", getName());
+
+    // the subscribes .... or addListeners in this case ...
+    removeListener("publishServoMoveTo", controllerName);
+    removeListener("publishServoStop", controllerName);
+    removeListener("publishServoWriteMicroseconds", controllerName);
+    removeListener("publishServoSetSpeed", controllerName);
+    removeListener("publishServoEnable", controllerName);
+    removeListener("publishServoDisable", controllerName);
+    controller = null;
     // 20210703 - grog I don't know why a sleep was put here
     // junit ServoTest will fail without this :P
-//    sleep(500);
+    // sleep(500);
     firstMove = true;
     broadcastState();
   }
@@ -429,7 +436,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     stop();
     enabled = false;
     broadcast("publishServoDisable", (ServoControl) this);
-    broadcastState();
   }
 
   @Override
@@ -445,7 +451,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
     enabled = true;
     broadcast("publishServoEnable", this);
-    broadcastState();
+    // broadcastState();
   }
 
   public void fullSpeed() {
@@ -566,7 +572,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   @Override
   public void map(double minX, double maxX, double minY, double maxY) {
     mapper.map(minX, maxX, minY, maxY);
-    broadcastState();
+    // broadcastState();
   }
 
   /**
@@ -632,7 +638,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   public void onRegistered(Registration s) {
     refreshControllers();
-    broadcastState();
+    // broadcastState();
   }
 
   /**
@@ -642,6 +648,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public EncoderData publishEncoderData(EncoderData data) {
+    log.warn("publishEncoderData(encoderData)");
     return data;
   }
 
@@ -649,6 +656,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * moveTo requests are published through this publishing point
    */
   public ServoControl publishMoveTo(ServoControl sc) {
+    log.warn("publishMoveTo(servo)");
     return sc;
   }
 
@@ -662,34 +670,46 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   abstract protected boolean processMove(Double newPos, boolean blocking, Long timeoutMs);
 
-  @Override
-  public ServoControl publishServoDisable(ServoControl sc) {
-    return sc;
+  @Override /*
+             * FIXME these should be returning null - the event itself is enough
+             * info - sending whole servo is excessive
+             */
+  public String publishServoDisable(ServoControl sc) {
+    log.warn("publishServoDisable(name)");
+    return sc.getName();
   }
 
-  @Override
-  public ServoControl publishServoEnable(ServoControl sc) {
-    return sc;
+  @Override /*
+             * FIXME these should be returning null - the event itself is enough
+             * info - sending whole servo is excessive
+             */
+  public String publishServoEnable(ServoControl sc) {
+    log.warn("publishServoEnable(name)");
+    return sc.getName();
   }
 
   // TODO: why do we need this method here , invoke message cache misses
   // otherwise.
-  public ServoControl publishServoEnable(AbstractServo sc) {
+  public String publishServoEnable(AbstractServo sc) {
+    log.warn("publishServoEnable(servo)");
     return publishServoEnable((ServoControl) sc);
   }
 
   @Override
   public ServoControl publishServoMoveTo(ServoControl sc) {
+    log.warn("publishServoMoveTo(servo)");
     return sc;
   }
 
   @Override
-  public ServoControl publishServoSetSpeed(ServoControl sc) {
-    return sc;
+  public ServoSpeed publishServoSetSpeed(ServoControl sc) {
+    log.warn("publishServoSetSpeed(servo)");
+    return new ServoSpeed(sc.getName(), sc.getSpeed());
   }
 
   @Override
   public ServoControl publishServoStop(ServoControl sc) {
+    log.warn("publishServoStop(servo)");
     return sc;
   }
 
@@ -702,7 +722,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * will disable then detach this servo from all controllers
    */
   public void releaseService() {
-    
+
     disable();
 
     if (encoder != null) {
@@ -835,10 +855,13 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     speed = degreesPerSecond;
 
     if (degreesPerSecond == null) {
-      log.info("disabling speed control");
+      log.debug("disabling speed control");
     }
+
+    // FIXME 1. remove broadcastState 2. send speed and name over
+    // publishServoSetSpeed
     broadcast("publishServoSetSpeed", this);
-    broadcastState();
+    // broadcastState();
   }
 
   @Deprecated /* this is really speed not velocity, velocity is a vector */
@@ -846,21 +869,14 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     setSpeed(degreesPerSecond);
   }
 
-  // FIXME targetPos = pos, reportedSpeed, vs speed - set
   @Override
   public void stop() {
     isSweeping = false;
-    // moveTo(getCurrentInputPos());
-    targetPos = getCurrentInputPos();
-
-    if (encoder != null && encoder instanceof TimeEncoder) {
-      TimeEncoder timeEncoder = (TimeEncoder) encoder;
-      // calculate trajectory calculates and processes this move
-      timeEncoder.calculateTrajectory(getCurrentOutputPos(), getTargetOutput(), getSpeed());
+    if (encoder.getClass() == TimeEncoder.class) {
+      ((TimeEncoder)encoder).stopMove();
     }
-
+    targetPos = getCurrentInputPos();
     broadcast("publishServoStop", this);
-    broadcastState();
   }
 
   public void sweep() {
@@ -888,7 +904,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     isSweeping = true;
     sweepingToMax = false;
     moveTo(sweepMin);
-    broadcastState();
+    // broadcastState();
   }
 
   @Override
@@ -934,19 +950,28 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * supports it
    */
   @Override
-  public String publishServoStarted(String name) {
-    log.info("TIME-ENCODER SERVO_STARTED - {}", name);
+  public ServoEvent publishServoStarted(String name, Double position) {
+    log.warn("publishServoStarted(name)");
     isMoving = true;
-    return name;
+    // FIXME currentOutputPos or currentInputPos
+    return new ServoEvent(name, position);
   }
 
   /**
    * Proxied servo event "stopped" from either TimeEncoder or a Controller that
    * supports it
+   * 
+   * FIXME - it would be nice to push this up into the interface as a static -
+   * but there are "many" local vars here :(
+   * 
+   * FYI - this method is called by the TimeEncoder
+   * 
    */
   @Override
-  public String publishServoStopped(String name) {
-    log.info("TIME-ENCODER SERVO_STOPPED - {}", name);
+  public ServoEvent publishServoStopped(String name, Double position) {
+    log.warn("publishServoStopped(name, position)");
+
+    // log.info("TIME-ENCODER SERVO_STOPPED - {}", name);
     // if currently configured to autoDisable - the timer starts now
     // if we are "stopping" going from moving to not moving
     if (autoDisable && isMoving) {
@@ -982,7 +1007,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
         send(getName(), "moveTo", sweepMin);
       }
     }
-    return name;
+    // FIXME currentOutputPos or currentInputPos ????
+    return new ServoEvent(name, position);
   }
 
   public void startService() {
@@ -992,8 +1018,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public String publishServoEnable(String name) {
-    // TODO Nothing calls this now?
-    log.info("Publish Servo Enable {}", name);
+    log.warn("publishServoEnable(name)");
     return name;
   }
 

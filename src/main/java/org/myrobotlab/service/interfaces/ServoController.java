@@ -26,6 +26,7 @@
 package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.service.data.ServoSpeed;
 
 public interface ServoController extends Attachable {
 
@@ -79,22 +80,18 @@ public interface ServoController extends Attachable {
    * 
    * @param servo
    */
-  void onServoSetSpeed(ServoControl servo);
+  void onServoSetSpeed(ServoSpeed speed);
 
   /**
-   * enable the pwm to a servo
-   * 
-   * @param servo
-   *          - the servo to enable
+   * enable the pwm on this servo
+   * @param servoName
    */
-  void onServoEnable(ServoControl servo);
+  void onServoEnable(String servoName);
 
   /**
-   * disable the pwm to a servo
-   * 
-   * @param servo
-   *          - the servo to disable
+   * disable servo
+   * @param servoName
    */
-  void onServoDisable(ServoControl servo);
+  void onServoDisable(String servoName);
 
 }

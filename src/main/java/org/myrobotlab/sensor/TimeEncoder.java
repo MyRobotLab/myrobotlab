@@ -1,17 +1,11 @@
 package org.myrobotlab.sensor;
 
-import java.io.File;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
-import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Broadcaster;
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
@@ -88,7 +82,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
 
   boolean enabled = true;
 
-  protected boolean enableServoEvents = true;
+  protected boolean stopMove = false;
 
   public TimeEncoder(ServoControl servo) {
     this.servo = servo;
@@ -143,9 +137,13 @@ public class TimeEncoder implements Runnable, EncoderControl {
 
       isRunning = true;
       while (isRunning) {
+        
+        
         // wait for next move ...
         synchronized (this) {
+          stopMove  = false;
           this.wait();
+          stopMove  = false;
         }
 
         if (speedDegreesPerMs == 0) {
@@ -158,6 +156,11 @@ public class TimeEncoder implements Runnable, EncoderControl {
         boolean started = true;
 
         while (now < endMoveTs && isRunning) {
+          
+          if (stopMove) {
+            endMoveTs = now;
+            break;
+          }
 
           now = System.currentTimeMillis();
           // speed has +/- direction
@@ -175,10 +178,10 @@ public class TimeEncoder implements Runnable, EncoderControl {
           // targetPos, estimatedPos) !!!
           EncoderData d = new EncoderData(name, null, estimatedPos, estimatedPos);
 
-          if (enableServoEvents && started) {
+          if (started) {
             // ((Broadcaster)servo).broadcast("publishedServoStopped",
             // ServoStatus.SERVO_STOPPED, estimatedPos);
-            ((Broadcaster) servo).broadcast("publishServoStarted", servo.getName());
+            ((Broadcaster) servo).broadcast("publishServoStarted", servo.getName(), estimatedPos);
             started = false;
           }
           servo.onEncoderData(d);// FIXME !! - broadcast this
@@ -189,11 +192,10 @@ public class TimeEncoder implements Runnable, EncoderControl {
         // log.info("finished moved");
         EncoderData d = new EncoderData(name, null, estimatedPos, estimatedPos);
         servo.onEncoderData(d);
-        if (enableServoEvents) {
-          // ((Broadcaster)servo).broadcast("publishedServoStopped",
-          // ServoStatus.SERVO_STOPPED, estimatedPos);
-          ((Broadcaster) servo).broadcast("publishServoStopped", servo.getName());
-        }
+        // ((Broadcaster)servo).broadcast("publishedServoStopped",
+        // ServoStatus.SERVO_STOPPED, estimatedPos);
+        // FYI - broadcast by-passes queues, but can publish based on notify entries
+        ((Broadcaster) servo).broadcast("publishServoStopped", servo.getName(), estimatedPos);
       }
     } catch (InterruptedException e) {
       log.info("stopping TimeEncoder Timer ...");
@@ -358,5 +360,9 @@ public class TimeEncoder implements Runnable, EncoderControl {
   public Set<String> getAttached(String publishingPoint) {
     // TODO Auto-generated method stub
     return null;
+  }
+  
+  public void stopMove() {
+    stopMove = true;
   }
 }

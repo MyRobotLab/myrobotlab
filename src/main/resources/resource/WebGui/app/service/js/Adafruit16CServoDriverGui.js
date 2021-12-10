@@ -41,6 +41,10 @@ angular.module('mrlapp.service.Adafruit16CServoDriverGui', []).controller('Adafr
         msg.send('detach')        
     }
 
+    msg.subscribe('refreshControllers')
+    msg.send('refreshControllers')
+    msg.send('broadcastState')
+
     msg.subscribe(this)
 }
 ])
