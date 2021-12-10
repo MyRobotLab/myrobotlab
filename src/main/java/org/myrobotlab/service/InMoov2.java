@@ -266,51 +266,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return true;
   }
 
-  public static void main(String[] args) {
-    try {
-
-      LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(true);
-      Runtime.main(new String[] { "--from-launcher", "--id", "inmoov" });
-      // Runtime.start("s01", "Servo");
-      Runtime.start("intro", "Intro");
-
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.startService();
-
-      InMoov2 i01 = (InMoov2) Runtime.create("i01", "InMoov2");
-      i01.setVirtual(false);
-      i01.startService();
-      i01.displayFullScreen("https://upload.wikimedia.org/wikipedia/commons/8/87/InMoov_Wheel_1.jpg");
-      // Runtime.start("s02", "Servo");
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
-      i01.startChatBot();
-
-      i01.startAll("COM3", "COM4");
-      Runtime.start("python", "Python");
-      // Runtime.start("log", "Log");
-
-      /*
-       * OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
-       * cv.setCameraIndex(2);
-       */
-      // i01.startSimulator();
-      /*
-       * Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-       * mega.connect("/dev/ttyACM0");
-       */
-
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
-  }
-
   boolean autoStartBrowser = false;
 
   transient ProgramAB chatBot;
@@ -963,6 +918,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
+  public void moveLeftArm(double bicep, double rotate, double shoulder, double omoplate) {
+    moveArm("left", bicep, rotate, shoulder, omoplate);
+  }
+
+  public void moveRightArm(double bicep, double rotate, double shoulder, double omoplate) {
+    moveArm("right", bicep, rotate, shoulder, omoplate);
+  }
+  
   public void moveArm(String which, double bicep, double rotate, double shoulder, double omoplate) {
     InMoov2Arm arm = getArm(which);
     if (arm == null) {
@@ -988,6 +951,22 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
+  public void moveRightHand(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
+    moveHand("right", thumb, index, majeure, ringFinger, pinky, wrist);
+  }
+
+  public void moveRightHand(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    moveHand("right", (double)thumb, (double)index, (double)majeure, (double)ringFinger, (double)pinky, (double)wrist);
+  }
+
+  public void moveLeftHand(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
+    moveHand("left", thumb, index, majeure, ringFinger, pinky, wrist);
+  }
+
+  public void moveLeftHand(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    moveHand("left", (double)thumb, (double)index, (double)majeure, (double)ringFinger, (double)pinky, (double)wrist);
+  }
+
   public void moveHand(String which, double thumb, double index, double majeure, double ringFinger, double pinky) {
     moveHand(which, thumb, index, majeure, ringFinger, pinky, null);
   }
@@ -995,7 +974,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public void moveHand(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     InMoov2Hand hand = getHand(which);
     if (hand == null) {
-      log.warn("{} hand does not exist");
+      log.warn("{} hand does not exist", hand);
       return;
     }
     hand.moveTo(thumb, index, majeure, ringFinger, pinky, wrist);
@@ -1013,6 +992,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     moveHead(rollNeck, rothead, null, null, null, rollNeck);
   }
 
+  public void moveHead(Integer neck, Integer rothead, Integer rollNeck) {
+    moveHead((double)rollNeck, (double)rothead, null, null, null, (double)rollNeck);
+  }
+  
   public void moveHead(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
     if (head != null) {
       head.moveTo(neck, rothead, eyeX, eyeY, jaw, rollNeck);
@@ -1153,6 +1136,22 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       torso.rest();
     }
   }
+  
+  public void setLeftArmSpeed(Double bicep, Double rotate, Double shoulder, Double omoplate) {
+    setArmSpeed("left", bicep, rotate, shoulder, omoplate);
+  }
+
+  public void setLeftArmSpeed(Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
+    setArmSpeed("left", (double)bicep, (double)rotate, (double)shoulder, (double)omoplate);
+  }
+
+  public void setRightArmSpeed(Double bicep, Double rotate, Double shoulder, Double omoplate) {
+    setArmSpeed("right", bicep, rotate, shoulder, omoplate);
+  }
+
+  public void setRightArmSpeed(Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
+    setArmSpeed("right", (double)bicep, (double)rotate, (double)shoulder, (double)omoplate);
+  }
 
   public void setArmSpeed(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
     InMoov2Arm arm = getArm(which);
@@ -1196,6 +1195,22 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
+  public void setLeftHandSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
+    setHandSpeed("left", thumb, index, majeure, ringFinger, pinky, wrist);
+  }
+
+  public void setLeftHandSpeed(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    setHandSpeed("left", (double)thumb, (double)index, (double)majeure, (double)ringFinger, (double)pinky, (double)wrist);
+  }
+
+  public void setRightHandSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
+    setHandSpeed("right", thumb, index, majeure, ringFinger, pinky, wrist);
+  }
+
+  public void setRightHandSpeed(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    setHandSpeed("right", (double)thumb, (double)index, (double)majeure, (double)ringFinger, (double)pinky, (double)wrist);
+  }
+
   public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     InMoov2Hand hand = getHand(which);
     if (hand == null) {
@@ -1221,6 +1236,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public void setHeadSpeed(Double rothead, Double neck, Double rollNeck) {
     setHeadSpeed(rothead, neck, null, null, null, rollNeck);
+  }
+  
+  public void setHeadSpeed(Integer rothead, Integer neck, Integer rollNeck) {
+    setHeadSpeed((double)rothead, (double)neck, null, null, null, (double)rollNeck);
   }
 
   public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
@@ -1304,6 +1323,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     } else {
       log.warn("setTorsoSpeed - I have no torso");
     }
+  }
+
+  public void setTorsoSpeed(Integer topStom, Integer midStom, Integer lowStom) {
+    setTorsoSpeed((double)topStom, (double)midStom, (double)lowStom);
   }
 
   @Deprecated
@@ -1402,14 +1425,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       }
 
       speakBlocking(get("CHATBOTACTIVATED"));
-
-      // GOOD EXAMPLE ! - no type, uses name - does a set of subscriptions !
-      // attachTextPublisher(chatBot.getName());
-
-      /*
-       * not necessary - ear needs to be attached to mouth not chatBot if (ear
-       * != null) { ear.attachTextListener(chatBot); }
-       */
 
       chatBot.attachTextPublisher(ear);
 
@@ -2671,4 +2686,74 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   //
   // }
 
+  public static void main(String[] args) {
+    try {
+
+      LoggingFactory.init(Level.INFO);
+      Platform.setVirtual(true);
+      // Runtime.start("s01", "Servo");
+      Runtime.start("intro", "Intro");
+
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+
+      Random random = (Random)Runtime.start("random", "Random");
+
+      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+      
+      random.addRandom(3000, 8000, "i01", "setLeftArmSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+      random.addRandom(3000, 8000, "i01", "setRightArmSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+
+      random.addRandom(3000, 8000, "i01", "moveRightArm", 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
+      random.addRandom(3000, 8000, "i01", "moveLeftArm", 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
+      
+      random.addRandom(3000, 8000, "i01", "setLeftHandSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+      random.addRandom(3000, 8000, "i01", "setRightHandSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+
+      random.addRandom(3000, 8000, "i01", "moveRightHand", 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 130.0, 175.0);
+      random.addRandom(3000, 8000, "i01", "moveLeftHand", 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 5.0, 40.0);
+      
+      random.addRandom(200, 1000, "i01", "setHeadSpeed", 8.0, 20.0, 8.0, 20.0, 8.0, 20.0);
+      random.addRandom(200, 1000, "i01", "moveHead", 70.0, 110.0, 65.0, 115.0, 70.0, 110.0);
+
+      random.addRandom(200, 1000, "i01", "setTorsoSpeed", 2.0, 5.0, 2.0, 5.0, 2.0, 5.0);
+      random.addRandom(200, 1000, "i01", "moveTorso", 85.0, 95.0, 88.0, 93.0, 70.0, 110.0);
+
+      random.save();
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      // i01.setVirtual(false);
+      // i01.displayFullScreen("https://upload.wikimedia.org/wikipedia/commons/8/87/InMoov_Wheel_1.jpg");
+      // i01.getConfig();
+      // i01.save();
+
+
+
+      // Runtime.start("s02", "Servo");
+
+      i01.startChatBot();
+
+      i01.startAll("COM3", "COM4");
+      Runtime.start("python", "Python");
+      // Runtime.start("log", "Log");
+
+      /*
+       * OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+       * cv.setCameraIndex(2);
+       */
+      // i01.startSimulator();
+      /*
+       * Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+       * mega.connect("/dev/ttyACM0");
+       */
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
 }
