@@ -34,8 +34,8 @@ public interface ServoController extends Attachable {
    * attach with pin or address parameter - this will just call
    * servo.setPin(int) then servoController.attach(servo)
    * 
-   * @param servo
-   * @param pinOrAddress
+   * @param servo - servo reference
+   * @param pinOrAddress - pin or address to attach
    * @throws Exception
    */
   @Deprecated /* use attachServo(ServoControl sc) */
@@ -47,7 +47,7 @@ public interface ServoController extends Attachable {
    * functions on ServoControl except possibly
    * ServoContro.attach(ServoController sc)
    * 
-   * @param sc
+   * @param sc - servo reference
    */
   void attachServoControl(ServoControl sc);
 
@@ -56,41 +56,41 @@ public interface ServoController extends Attachable {
    * ServoControl is passed as a parameter such that the controller can get all
    * the necessary information to process the move correctly
    * 
-   * @param servo
+   * @param servo - servo reference
    */
   void onServoMoveTo(ServoControl servo);
 
   /**
    * Stop the servo regardless of where it is in its move
    * 
-   * @param servo
+   * @param servo - servo reference
    */
   void onServoStop(ServoControl servo);
 
   /**
    * A direct call using micro-seconds instead of degrees
    * 
-   * @param servo
-   * @param uS
+   * @param servo - servo reference
+   * @param uS - micro seconds of pwm
    */
   void onServoWriteMicroseconds(ServoControl servo, int uS);
 
   /**
    * set the speed of the servo
    * 
-   * @param servo
+   * @param speed - contains the servo name and desired speed
    */
   void onServoSetSpeed(ServoSpeed speed);
 
   /**
    * enable the pwm on this servo
-   * @param servoName
+   * @param servoName - name of servo
    */
   void onServoEnable(String servoName);
 
   /**
    * disable servo
-   * @param servoName
+   * @param servoName - name of servo
    */
   void onServoDisable(String servoName);
 
