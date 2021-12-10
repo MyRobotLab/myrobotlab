@@ -78,18 +78,6 @@ public class Servo extends AbstractServo implements ServoControl {
    * @param timeoutMs
    */
   protected boolean processMove(Double newPos, boolean blocking, Long timeoutMs) {
-    // FIXME - implement encoder blocking ...
-    // FIXME - when and what should a servo publish and when ?
-    // FIXME FIXME FIXME !!!! @*@*!!! - currentPos is the reported position of
-    // the servo, targetPos is
-    // the desired position of the servo - currentPos should NEVER be set in
-    // this function
-    // even with no hardware encoder a servo can have a TimeEncoder from which
-    // position would be guessed - but
-    if (newPos == null) {
-      error("cannot move to null position - not moving");
-      return false;
-    }
 
     // This is to allow attaching disabled
     // then delay enabling until the first moveTo command
@@ -114,7 +102,7 @@ public class Servo extends AbstractServo implements ServoControl {
       return false;
     }
     targetPos = newPos;
-    log.info("pos {} output {}", targetPos, getTargetOutput());
+    log.debug("pos {} output {}", targetPos, getTargetOutput());
 
     /**
      * <pre>
@@ -188,7 +176,7 @@ public class Servo extends AbstractServo implements ServoControl {
     // and that
     // might be without a controller !
     if (controller == null) { // <-- NOT NEEDED :)
-      log.info("controller is null");
+      log.debug("controller is null");
       // FIXME - need to still go through the default 'move'
     } else {
       broadcast("publishServoMoveTo", this);
@@ -245,6 +233,7 @@ public class Servo extends AbstractServo implements ServoControl {
     return config;
   }
 
+  @Override
   public ServiceConfig load(ServiceConfig c) {
     ServoConfig config = (ServoConfig) c;
 
