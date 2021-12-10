@@ -323,6 +323,8 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    */
   void setRest(double rest);
 
+  public void setSpeed(Integer degreesPerSecond);
+  
   /**
    * set the speed of the servo measured in degrees per second.
    * 
