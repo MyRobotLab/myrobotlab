@@ -1212,6 +1212,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   public void traverseLoadModels(String dirPath) {
+    dirPath = FileIO.normalize(dirPath);
     log.info("loading models from {}", dirPath);
     File dir = new File(dirPath);
     if (!dir.exists()) {
