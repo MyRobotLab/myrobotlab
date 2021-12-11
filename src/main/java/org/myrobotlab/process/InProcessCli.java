@@ -386,7 +386,7 @@ public class InProcessCli implements Runnable {
       worker.interrupt();
     }
 
-    if (in != null && in != System.in) {
+    if (in != null && !System.in.equals(in)) {
       try {
         in.close();
       } catch (Exception e) {
@@ -394,7 +394,7 @@ public class InProcessCli implements Runnable {
       }
     }
 
-    if (out != null  && out != System.out) {
+    if (out != null  && !System.out.equals(out)) {
       try {
         out.close();
       } catch (Exception e) {

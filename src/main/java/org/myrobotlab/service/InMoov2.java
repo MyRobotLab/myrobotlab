@@ -117,7 +117,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   static String speechRecognizer = "WebkitSpeechRecognition";
 
   protected boolean loadGestures = true;
-  
+
   InMoov2Config config = new InMoov2Config();
 
   /**
@@ -918,15 +918,15 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
-  public void moveLeftArm(double bicep, double rotate, double shoulder, double omoplate) {
+  public void moveLeftArm(Double bicep, Double rotate, Double shoulder, Double omoplate) {
     moveArm("left", bicep, rotate, shoulder, omoplate);
   }
 
-  public void moveRightArm(double bicep, double rotate, double shoulder, double omoplate) {
+  public void moveRightArm(Double bicep, Double rotate, Double shoulder, Double omoplate) {
     moveArm("right", bicep, rotate, shoulder, omoplate);
   }
-  
-  public void moveArm(String which, double bicep, double rotate, double shoulder, double omoplate) {
+
+  public void moveArm(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
     InMoov2Arm arm = getArm(which);
     if (arm == null) {
       info("%s arm not started", which);
@@ -935,7 +935,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     arm.moveTo(bicep, rotate, shoulder, omoplate);
   }
 
-  public void moveEyelids(double eyelidleftPos, double eyelidrightPos) {
+  public void moveEyelids(Double eyelidleftPos, Double eyelidrightPos) {
     if (head != null) {
       head.moveEyelidsTo(eyelidleftPos, eyelidrightPos);
     } else {
@@ -943,7 +943,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
-  public void moveEyes(double eyeX, double eyeY) {
+  public void moveEyes(Double eyeX, Double eyeY) {
     if (head != null) {
       head.moveTo(null, null, eyeX, eyeY, null, null);
     } else {
@@ -956,7 +956,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void moveRightHand(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
-    moveHand("right", (double)thumb, (double)index, (double)majeure, (double)ringFinger, (double)pinky, (double)wrist);
+    moveHand("right", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
   }
 
   public void moveLeftHand(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
@@ -964,10 +964,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void moveLeftHand(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
-    moveHand("left", (double)thumb, (double)index, (double)majeure, (double)ringFinger, (double)pinky, (double)wrist);
+    moveHand("left", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
   }
 
-  public void moveHand(String which, double thumb, double index, double majeure, double ringFinger, double pinky) {
+  public void moveHand(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky) {
     moveHand(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
@@ -980,11 +980,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     hand.moveTo(thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
-  public void moveHead(double neck, double rothead) {
+  public void moveHead(Double neck, Double rothead) {
     moveHead(neck, rothead, null, null, null, null);
   }
 
-  public void moveHead(double neck, double rothead, double eyeX, double eyeY, double jaw) {
+  public void moveHead(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw) {
     moveHead(neck, rothead, eyeX, eyeY, jaw, null);
   }
 
@@ -993,9 +993,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void moveHead(Integer neck, Integer rothead, Integer rollNeck) {
-    moveHead((double)rollNeck, (double)rothead, null, null, null, (double)rollNeck);
+    moveHead((double) rollNeck, (double) rothead, null, null, null, (double) rollNeck);
   }
-  
+
   public void moveHead(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
     if (head != null) {
       head.moveTo(neck, rothead, eyeX, eyeY, jaw, rollNeck);
@@ -1004,15 +1004,15 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
-  public void moveHeadBlocking(double neck, double rothead) {
+  public void moveHeadBlocking(Double neck, Double rothead) {
     moveHeadBlocking(neck, rothead, null);
   }
 
-  public void moveHeadBlocking(double neck, double rothead, Double rollNeck) {
+  public void moveHeadBlocking(Double neck, Double rothead, Double rollNeck) {
     moveHeadBlocking(neck, rothead, null, null, null, rollNeck);
   }
 
-  public void moveHeadBlocking(double neck, double rothead, Double eyeX, Double eyeY, Double jaw) {
+  public void moveHeadBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw) {
     moveHeadBlocking(neck, rothead, eyeX, eyeY, jaw, null);
   }
 
@@ -1024,7 +1024,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
-  public void moveTorso(double topStom, double midStom, double lowStom) {
+  public void moveTorso(Double topStom, Double midStom, Double lowStom) {
     if (torso != null) {
       torso.moveTo(topStom, midStom, lowStom);
     } else {
@@ -1032,7 +1032,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
-  public void moveTorsoBlocking(double topStom, double midStom, double lowStom) {
+  public void moveTorsoBlocking(Double topStom, Double midStom, Double lowStom) {
     if (torso != null) {
       torso.moveToBlocking(topStom, midStom, lowStom);
     } else {
@@ -1136,13 +1136,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       torso.rest();
     }
   }
-  
+
   public void setLeftArmSpeed(Double bicep, Double rotate, Double shoulder, Double omoplate) {
     setArmSpeed("left", bicep, rotate, shoulder, omoplate);
   }
 
   public void setLeftArmSpeed(Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
-    setArmSpeed("left", (double)bicep, (double)rotate, (double)shoulder, (double)omoplate);
+    setArmSpeed("left", (double) bicep, (double) rotate, (double) shoulder, (double) omoplate);
   }
 
   public void setRightArmSpeed(Double bicep, Double rotate, Double shoulder, Double omoplate) {
@@ -1150,7 +1150,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void setRightArmSpeed(Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
-    setArmSpeed("right", (double)bicep, (double)rotate, (double)shoulder, (double)omoplate);
+    setArmSpeed("right", (double) bicep, (double) rotate, (double) shoulder, (double) omoplate);
   }
 
   public void setArmSpeed(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
@@ -1200,7 +1200,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void setLeftHandSpeed(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
-    setHandSpeed("left", (double)thumb, (double)index, (double)majeure, (double)ringFinger, (double)pinky, (double)wrist);
+    setHandSpeed("left", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
   }
 
   public void setRightHandSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
@@ -1208,7 +1208,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void setRightHandSpeed(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
-    setHandSpeed("right", (double)thumb, (double)index, (double)majeure, (double)ringFinger, (double)pinky, (double)wrist);
+    setHandSpeed("right", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
   }
 
   public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
@@ -1237,9 +1237,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public void setHeadSpeed(Double rothead, Double neck, Double rollNeck) {
     setHeadSpeed(rothead, neck, null, null, null, rollNeck);
   }
-  
+
   public void setHeadSpeed(Integer rothead, Integer neck, Integer rollNeck) {
-    setHeadSpeed((double)rothead, (double)neck, null, null, null, (double)rollNeck);
+    setHeadSpeed((double) rothead, (double) neck, null, null, null, (double) rollNeck);
   }
 
   public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
@@ -1326,7 +1326,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void setTorsoSpeed(Integer topStom, Integer midStom, Integer lowStom) {
-    setTorsoSpeed((double)topStom, (double)midStom, (double)lowStom);
+    setTorsoSpeed((double) topStom, (double) midStom, (double) lowStom);
   }
 
   @Deprecated
@@ -1454,13 +1454,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
         log.error("saving predicates threw", e);
       }
       // start session based on last recognized person
-      //if (!chatBot.getPredicate("default", "lastUsername").isEmpty() && !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
-        //chatBot.startSession(chatBot.getPredicate("lastUsername"));
-      //}
-      if (!chatBot.getPredicate("Friend", "firstinit").isEmpty() && !chatBot.getPredicate("Friend", "firstinit").equals("unknown") && !chatBot.getPredicate("Friend", "firstinit").equals("started")) {
+      // if (!chatBot.getPredicate("default", "lastUsername").isEmpty() &&
+      // !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
+      // chatBot.startSession(chatBot.getPredicate("lastUsername"));
+      // }
+      if (!chatBot.getPredicate("Friend", "firstinit").isEmpty() && !chatBot.getPredicate("Friend", "firstinit").equals("unknown")
+          && !chatBot.getPredicate("Friend", "firstinit").equals("started")) {
         chatBot.getResponse("FIRST_INIT");
-      }  
-      else {
+      } else {
         chatBot.getResponse("WAKE_UP");
       }
 
@@ -2096,7 +2097,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return startUltrasonicRight(null, 64, 63);
   }
 
-  
   public UltrasonicSensor startUltraSonicLeft(String port) {
     return startUltraSonicLeft(port, 64, 63);
   }
@@ -2438,7 +2438,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public ServiceConfig load(ServiceConfig c) {
     InMoov2Config config = (InMoov2Config) c;
     try {
-      
+
       if (config.locale != null) {
         Runtime.setAllLocales(config.locale);
       }
@@ -2563,128 +2563,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
         startSimulator();
       }
 
-      /*
-       * 
-       * if (RobotCanMoveBodyRandom; if (RobotCanMoveEyesRandom; if
-       * (RobotCanMoveHeadRandom; if (RobotCanMoveRandom; if (RobotIsSleeping;
-       * if (RobotIsStarted;
-       */
-
     } catch (Exception e) {
       error(e);
     }
 
     return c;
   }
-
-  // public OpenNi startOpenNI() throws Exception {
-  // if (openni == null) {
-  // speakBlocking(languagePack.get("STARTINGOPENNI"));
-  // openni = (OpenNi) startPeer("openni");
-  // pid = (Pid) startPeer("pid");
-  //
-  // pid.setPID("kinect", 10.0, 0.0, 1.0);
-  // pid.setMode("kinect", Pid.MODE_AUTOMATIC);
-  // pid.setOutputRange("kinect", -1, 1);
-  //
-  // pid.setControllerDirection("kinect", 0);
-  //
-  // // re-mapping of skeleton !
-  // openni.skeleton.leftElbow.mapXY(0, 180, 180, 0);
-  // openni.skeleton.rightElbow.mapXY(0, 180, 180, 0);
-  // if (openNiLeftShoulderInverted) {
-  // openni.skeleton.leftShoulder.mapYZ(0, 180, 180, 0);
-  // }
-  // if (openNiRightShoulderInverted) {
-  // openni.skeleton.rightShoulder.mapYZ(0, 180, 180, 0);
-  // }
-  //
-  // // openni.skeleton.leftShoulder
-  //
-  // // openni.addListener("publishOpenNIData", this.getName(),
-  // // "getSkeleton");
-  // // openni.addOpenNIData(this);
-  // subscribe(openni.getName(), "publishOpenNIData");
-  // }
-  // return openni;
-  // }
-  //
-  // public void onOpenNIData(OpenNiData data) {
-  //
-  // if (data != null) {
-  // Skeleton skeleton = data.skeleton;
-  //
-  // if (firstSkeleton) {
-  // firstSkeleton = false;
-  // }
-  //
-  // if (copyGesture) {
-  //
-  // if (leftArm != null) {
-  //
-  // if (!Double.isNaN(skeleton.leftElbow.getAngleXY())) {
-  // if (skeleton.leftElbow.getAngleXY() >= 0) {
-  // leftArm.bicep.moveTo((double) skeleton.leftElbow.getAngleXY());
-  // }
-  // }
-  // if (!Double.isNaN(skeleton.leftShoulder.getAngleXY())) {
-  // if (skeleton.leftShoulder.getAngleXY() >= 0) {
-  // leftArm.omoplate.moveTo((double) skeleton.leftShoulder.getAngleXY());
-  // }
-  // }
-  // if (!Double.isNaN(skeleton.leftShoulder.getAngleYZ())) {
-  // if (skeleton.leftShoulder.getAngleYZ() + openNiShouldersOffset >= 0) {
-  // leftArm.shoulder.moveTo((double) skeleton.leftShoulder.getAngleYZ() - 50);
-  // }
-  // }
-  // }
-  //
-  // if (rightArm != null) {
-  //
-  // if (!Double.isNaN(skeleton.rightElbow.getAngleXY())) {
-  // if (skeleton.rightElbow.getAngleXY() >= 0) {
-  // rightArm.bicep.moveTo((double) skeleton.rightElbow.getAngleXY());
-  // }
-  // }
-  // if (!Double.isNaN(skeleton.rightShoulder.getAngleXY())) {
-  // if (skeleton.rightShoulder.getAngleXY() >= 0) {
-  // rightArm.omoplate.moveTo((double) skeleton.rightShoulder.getAngleXY());
-  // }
-  // }
-  // if (!Double.isNaN(skeleton.rightShoulder.getAngleYZ())) {
-  // if (skeleton.rightShoulder.getAngleYZ() + openNiShouldersOffset >= 0) {
-  // rightArm.shoulder.moveTo((double) skeleton.rightShoulder.getAngleYZ() -
-  // 50);
-  // }
-  // }
-  // }
-  //
-  // }
-  // }
-  //
-  // // TODO - route data appropriately
-  // // rgb & depth image to OpenCV
-  // // servos & depth image to gui (entire InMoov + references to servos)
-  //
-  // public boolean copyGesture(boolean b) throws Exception {
-  // log.info("copyGesture {}", b);
-  // if (b) {
-  // if (openni == null) {
-  // openni = startOpenNI();
-  // }
-  // openni.startUserTracking();
-  // } else {
-  // if (openni != null) {
-  // openni.stopCapture();
-  // firstSkeleton = true;
-  // }
-  // }
-  //
-  // copyGesture = b;
-  // return b;
-  // }
-  //
-  // }
 
   public static void main(String[] args) {
     try {
@@ -2698,22 +2582,22 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       webgui.autoStartBrowser(false);
       webgui.startService();
 
-      Random random = (Random)Runtime.start("random", "Random");
+      Random random = (Random) Runtime.start("random", "Random");
 
       InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
-      
+
       random.addRandom(3000, 8000, "i01", "setLeftArmSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
       random.addRandom(3000, 8000, "i01", "setRightArmSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
 
       random.addRandom(3000, 8000, "i01", "moveRightArm", 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
       random.addRandom(3000, 8000, "i01", "moveLeftArm", 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
-      
+
       random.addRandom(3000, 8000, "i01", "setLeftHandSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
       random.addRandom(3000, 8000, "i01", "setRightHandSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
 
       random.addRandom(3000, 8000, "i01", "moveRightHand", 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 130.0, 175.0);
       random.addRandom(3000, 8000, "i01", "moveLeftHand", 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 5.0, 40.0);
-      
+
       random.addRandom(200, 1000, "i01", "setHeadSpeed", 8.0, 20.0, 8.0, 20.0, 8.0, 20.0);
       random.addRandom(200, 1000, "i01", "moveHead", 70.0, 110.0, 65.0, 115.0, 70.0, 110.0);
 
@@ -2721,7 +2605,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       random.addRandom(200, 1000, "i01", "moveTorso", 85.0, 95.0, 88.0, 93.0, 70.0, 110.0);
 
       random.save();
-      
+
       boolean done = true;
       if (done) {
         return;
@@ -2731,8 +2615,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       // i01.displayFullScreen("https://upload.wikimedia.org/wikipedia/commons/8/87/InMoov_Wheel_1.jpg");
       // i01.getConfig();
       // i01.save();
-
-
 
       // Runtime.start("s02", "Servo");
 

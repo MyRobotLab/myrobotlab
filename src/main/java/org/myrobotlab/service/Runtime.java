@@ -1146,7 +1146,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   public InProcessCli startInteractiveMode(InputStream in, OutputStream out) {
-    // stopInteractiveMode(); is not fully re-entrant
     if (cli != null) {
       log.info("already in interactive mode");
       return cli;
