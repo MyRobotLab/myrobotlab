@@ -370,7 +370,7 @@ public class FileIO {
 
       return found;
     }
-    log.warn("not extracting source is not a jar");
+    log.info("not extracting source is not a jar");
     return false;
   }
 
