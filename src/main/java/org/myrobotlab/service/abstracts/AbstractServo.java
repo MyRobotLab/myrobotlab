@@ -597,7 +597,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
      */
 
     if (newPos == null) {
-      log.info("cannot move to null position - not moving");
+      log.info("will not move to null position - not moving");
       return false;
     }
 
