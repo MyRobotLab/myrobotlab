@@ -31,8 +31,8 @@ public class Random extends Service {
 
   /**
    * 
-   * RandomMessage is used to contain the ranges of values and
-   * intervals for which random messages will be sent
+   * RandomMessage is used to contain the ranges of values and intervals for
+   * which random messages will be sent
    *
    */
   public class RandomMessage {
@@ -72,8 +72,8 @@ public class Random extends Service {
   transient private java.util.Random random = new java.util.Random();
 
   /**
-   * global enable will determines if "all" random messages will be enabled or disabled
-   * without changing their individual enable/disable state
+   * global enable will determines if "all" random messages will be enabled or
+   * disabled without changing their individual enable/disable state
    */
   protected boolean enabled = true;
 
@@ -245,9 +245,13 @@ public class Random extends Service {
     RandomConfig config = (RandomConfig) c;
     enabled = config.enabled;
 
-    for (String key : config.addRandom.keySet()) {
-      RandomMessageConfig msgc = config.addRandom.get(key);
-      addRandom(msgc.minIntervalMs, msgc.maxIntervalMs, key.substring(0, key.indexOf(".")), key.substring(key.indexOf(".") + 1), msgc.data);
+    try {
+      for (String key : config.addRandom.keySet()) {
+        RandomMessageConfig msgc = config.addRandom.get(key);
+        addRandom(msgc.minIntervalMs, msgc.maxIntervalMs, key.substring(0, key.lastIndexOf(".")), key.substring(key.lastIndexOf(".") + 1), msgc.data);
+      }
+    } catch (Exception e) {
+      error(e);
     }
 
     return c;
@@ -335,12 +339,14 @@ public class Random extends Service {
 
       Python python = (Python) Runtime.start("python", "Python");
       Random random = (Random) Runtime.start("random", "Random");
-      // random.addRandom(1000, 3000, "c1", "setInterval", 80, 775);
-      // random.addRandom(1000, 3000, "c1", "setInterval", random.intRange(80,
-      // 775));
 
-      // random.addRandom(1000, 3000, "python", "on_random_string",
-      // random.intRange(80, 775));
+      random.addRandom(200, 1000, "i01", "setHeadSpeed", 8, 20, 8, 20, 8, 20);
+      random.addRandom(200, 1000, "i01", "moveHead", 65, 115, 65, 115, 65, 115);
+
+      random.addRandom(3000, 8000, "i01", "setLeftHandSpeed", 8, 25, 8, 25, 8, 25, 8, 25, 8, 25, 8, 25);
+      random.addRandom(3000, 8000, "i01", "setRightHandSpeed", 8, 25, 8, 25, 8, 25, 8, 25, 8, 25, 8, 25);
+
+      random.addRandom(200, 1000, "i01", "moveHead", 65, 115, 65, 115, 65, 115);
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);

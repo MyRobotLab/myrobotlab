@@ -59,6 +59,7 @@ import java.util.zip.ZipException;
 
 import org.apache.commons.io.Charsets;
 import org.myrobotlab.cmdline.CmdLine;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -369,7 +370,7 @@ public class FileIO {
 
       return found;
     }
-    log.warn("not extracting source is not a jar");
+    log.info("not extracting source is not a jar");
     return false;
   }
 
@@ -1572,6 +1573,24 @@ public class FileIO {
       return filename.substring(pos + 1);
     }
     return null;
+  }
+
+  
+  /**
+   * flips all \ to / or / to \ depending on OS
+   * @param - dirPath non normalized path
+   * @return - fixed path
+   */
+  public static String normalize(String dirPath) {
+    if (dirPath == null) {
+      return null;
+    }
+    Platform platform = Platform.getLocalInstance();
+    if (platform.isWindows()) {
+      return dirPath.replace("/", "\\");
+    } else {
+      return dirPath.replace("\\", "/");
+    }    
   }
 
   

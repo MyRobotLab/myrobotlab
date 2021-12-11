@@ -455,7 +455,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   }
 
   public void fullSpeed() {
-    setSpeed(null);
+    setSpeed((Double)null);
   }
 
   @Override
@@ -595,13 +595,42 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
      * weather a move request was successful. The cases it would be false is no
      * controller or calling moveTo when blocking is in process
      */
+
+    if (newPos == null) {
+      log.info("will not move to null position - not moving");
+      return false;
+    }
+
     boolean validMoveRequest = processMove(newPos, false, null);
     return validMoveRequest;
   }
 
   @Override
+  public Double moveToBlocking(Integer pos) {
+
+    try {
+      return moveToBlocking((double) pos, null);
+    } catch (Exception e) {
+      log.error("moveToBlocking threw", e);
+    }
+
+    return null;
+  }
+
+  @Override
   public Double moveToBlocking(Double pos) {
     return moveToBlocking(pos, null);
+  }
+
+  @Override
+  public Double moveToBlocking(Integer newPos, Long timeoutMs) {
+    try {
+      processMove((double) newPos, true, timeoutMs);
+      return mapper.calcInput(currentOutputPos);
+    } catch (Exception e) {
+      log.error("moveToBlocking threw", e);
+    }
+    return null;
   }
 
   @Override
@@ -842,7 +871,15 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   }
 
   @Override
-  @Config
+  public void setSpeed(Integer degreesPerSecond) {
+    try {
+      setSpeed((double)degreesPerSecond);
+    } catch (Exception e) {
+      log.error("setSpeed threw", e);
+    }
+  }
+
+  @Override
   public void setSpeed(Double degreesPerSecond) {
     // KW: TODO: technically the Arduino will read this speed as a 16 bit int..
     // so max Speed is 32,767 ...
@@ -1020,6 +1057,17 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   public String publishServoEnable(String name) {
     log.warn("publishServoEnable(name)");
     return name;
+  }
+
+  @Override
+  public boolean moveTo(Integer newPos) {
+    try {
+      moveTo((double) newPos);
+      return true;
+    } catch (Exception e) {
+      log.error("AbsolutePositionControl threw", e);
+    }
+    return false;
   }
 
   @Override

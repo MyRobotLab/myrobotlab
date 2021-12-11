@@ -158,48 +158,52 @@ public class Jme3Util {
    * 
    */
   public void rotateTo(String name, String axis, double degrees) {
-    UserData o = jme.getUserData(name);
-    if (o == null && !nullUserData.contains(name)) {
-      // error only once
-      jme.error("no user data for %s", name);
-      nullUserData.add(name);
-      return;
-    }
+    try {
+      UserData o = jme.getUserData(name);
+      if (o == null && !nullUserData.contains(name)) {
+        // error only once
+        jme.error("no user data for %s", name);
+        nullUserData.add(name);
+        return;
+      }
 
-    // default rotation is around Y axis unless specified
-    Vector3f rotMask = Vector3f.UNIT_Y;
-    if (axis == null && o.rotationMask != null) {
-      axis = o.rotationMask;
-    }
+      // default rotation is around Y axis unless specified
+      Vector3f rotMask = Vector3f.UNIT_Y;
+      if (axis == null && o.rotationMask != null) {
+        axis = o.rotationMask;
+      }
 
-    // highest priority override is if the parameter is supplied
-    if (axis != null) {
-      rotMask = getUnitVector(axis);
-    }
+      // highest priority override is if the parameter is supplied
+      if (axis != null) {
+        rotMask = getUnitVector(axis);
+      }
 
-    log.debug("rotateTo {}, degrees {} around axis {}", name, degrees, rotMask);
-    // int angleIndex = getIndexFromUnitVector(rotMask);
-    if (o.mapper != null) {
-      degrees = o.mapper.calcOutput(degrees);
-      log.debug(String.format("rotateTo map %s, degrees %.2f", name, degrees));
-    }
+      log.debug("rotateTo {}, degrees {} around axis {}", name, degrees, rotMask);
+      // int angleIndex = getIndexFromUnitVector(rotMask);
+      if (o.mapper != null) {
+        degrees = o.mapper.calcOutput(degrees);
+        log.debug(String.format("rotateTo map %s, degrees %.2f", name, degrees));
+      }
 
-    // get current local rotations
-    Node n = o.getNode();
+      // get current local rotations
+      Node n = o.getNode();
 
-    // convert current local to euler representation
-    Quaternion q = n.getLocalRotation();
-    float[] euler = new float[3];
-    q.toAngles(euler);
+      // convert current local to euler representation
+      Quaternion q = n.getLocalRotation();
+      float[] euler = new float[3];
+      q.toAngles(euler);
 
-    // find the masking axis - replace that value with desired value
-    int indexOfAxisRotation = getIndexFromUnitVector(rotMask);
-    euler[indexOfAxisRotation] = ((float) degrees) * FastMath.PI / 180;
-    q.fromAngles(euler[0], euler[1], euler[2]);
-    n.setLocalRotation(q);
+      // find the masking axis - replace that value with desired value
+      int indexOfAxisRotation = getIndexFromUnitVector(rotMask);
+      euler[indexOfAxisRotation] = ((float) degrees) * FastMath.PI / 180;
+      q.fromAngles(euler[0], euler[1], euler[2]);
+      n.setLocalRotation(q);
 
-    if (currentMenuView != null && n == selectedForView) {
-      currentMenuView.putText(selectedForView);
+      if (currentMenuView != null && n == selectedForView) {
+        currentMenuView.putText(selectedForView);
+      }
+    } catch (Exception e) {
+      log.error("{}.rotateTo threw", jme.getName(), e);
     }
   }
 

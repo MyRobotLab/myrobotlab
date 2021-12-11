@@ -219,7 +219,6 @@ public class InMoov2Torso extends Service {
   }
 
   public void setSpeed(Double topStomSpeed, Double midStomSpeed, Double lowStomSpeed) {
-    log.warn("setspeed deprecated please use setvelocity");
     if (topStom != null)
       topStom.setSpeed(topStomSpeed);
     if (midStom != null)
