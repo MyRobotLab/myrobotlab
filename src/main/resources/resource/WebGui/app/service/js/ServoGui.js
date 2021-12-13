@@ -29,7 +29,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
     $scope.idleSeconds = 0
 
     $scope.speed = null
-    $scope.lockInputOutput = true
+    $scope.lockInputOutput = false
 
     $scope.activeTabIndex = 1
 
