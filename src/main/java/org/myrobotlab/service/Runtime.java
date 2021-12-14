@@ -1404,10 +1404,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // check to see if any of our interfaces can fullfill requested ones
       Set<String> myInterfaces = runtime.typeToInterface.get(type);
-      for (String inter : myInterfaces) {
-        if (runtime.interfaceToPossibleServices.containsKey(inter)) {
-          runtime.interfaceToPossibleServices.get(inter).remove(name);
-          updatedServiceLists = true;
+      if (myInterfaces != null) {
+        for (String inter : myInterfaces) {
+          if (runtime.interfaceToPossibleServices.containsKey(inter)) {
+            runtime.interfaceToPossibleServices.get(inter).remove(name);
+            updatedServiceLists = true;
+          }
         }
       }
 
