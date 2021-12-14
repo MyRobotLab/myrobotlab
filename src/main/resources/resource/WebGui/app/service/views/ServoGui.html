@@ -160,9 +160,8 @@
                                 <toggle class="miniBTN" title="This will display the limits mappings"
                                     ng-model="state.showLimits" on="" off="" />
                             </td>
-                            <td class="bigLabel restColor">
-                                <!--<span ng-click="msg.rest()" title="Go to Rest">Rest</span>-->
-                                <span ng-click="pos.value=restSlider.value; msg.rest()" title="Go to Rest">Rest</span>
+                            <td>
+                                <button class="miniBTN restColor" ng-click="pos.value=restSlider.value; msg.rest()" title="Go to Rest">&nbsp;Rest&nbsp;</button>
                             </td>
                         </tr>
                     </table>
