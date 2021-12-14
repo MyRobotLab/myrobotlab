@@ -38,6 +38,7 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.myrobotlab.codec.ClassUtil;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.CodecUtils.ApiDescription;
 import org.myrobotlab.framework.CmdOptions;
@@ -128,8 +129,38 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   static private transient Thread installerThread = null;
 
-  private String configName = "default";
-  
+  /**
+   * services which want to know if another service with an interface they are
+   * interested in registers or is released
+   * 
+   * requestor type -> interface -> set of applicable service names
+   */
+  protected final Map<String, Set<String>> interfaceToPossibleServices = new HashMap<>();
+
+  protected final Map<String, Set<String>> typeToNames = new HashMap<>();
+
+  protected final Map<String, Set<String>> interfaceToType = new HashMap<>();
+
+  protected final Map<String, Set<String>> typeToInterface = new HashMap<>();
+
+  /**
+   * FILTERED_INTERFACES are the set of low level interfaces which we are
+   * interested in filtering out if we want to maintain a data structure which
+   * has "interfaces of interest"
+   */
+  protected final static Set<String> FILTERED_INTERFACES = new HashSet<>(Arrays.asList("org.myrobotlab.framework.interfaces.Broadcaster",
+      "org.myrobotlab.service.interfaces.QueueReporter", "org.myrobotlab.framework.interfaces.ServiceQueue", "org.myrobotlab.framework.interfaces.MessageSubscriber",
+      "org.myrobotlab.framework.interfaces.Invoker", "java.lang.Runnable", "org.myrobotlab.framework.interfaces.ServiceStatus", "org.atmosphere.nettosphere.Handler",
+      "org.myrobotlab.framework.interfaces.NameProvider", "org.myrobotlab.framework.interfaces.NameTypeProvider", "org.myrobotlab.framework.interfaces.ServiceInterface",
+      "org.myrobotlab.framework.interfaces.TaskManager", "org.myrobotlab.framework.interfaces.LoggingSink", "org.myrobotlab.framework.interfaces.StatusPublisher",
+      "org.myrobotlab.framework.interfaces.TypeProvider", "java.io.Serializable", "org.myrobotlab.framework.interfaces.Attachable",
+      "org.myrobotlab.framework.interfaces.StateSaver", "org.myrobotlab.framework.interfaces.MessageSender", "java.lang.Comparable",
+      "org.myrobotlab.service.interfaces.ServiceLifeCycleListener", "org.myrobotlab.framework.interfaces.StatePublisher"));
+
+  protected final Set<String> serviceTypes = new HashSet<>();
+
+  protected String configName = "default";
+
   /**
    * The one config directory where all config is managed the {default} is the
    * current configuration set
@@ -569,11 +600,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           runtime.startingServices.add("security");
           runtime.startingServices.add("webgui");
           runtime.startingServices.add("python");
-          
+
           runtime.startInteractiveMode();
 
           try {
-            if (options.config != null) {              
+            if (options.config != null) {
               runtime.setConfigName(options.config);
               runtime.load();
             }
@@ -862,13 +893,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    *          the interface
    * @return a list of service names that have the interface
    * @throws ClassNotFoundException
-   *           boom
    * 
    */
   public static List<String> getServiceNamesFromInterface(String interfaze) throws ClassNotFoundException {
     if (!interfaze.contains(".")) {
       interfaze = "org.myrobotlab.service.interfaces." + interfaze;
     }
+
     return getServiceNamesFromInterface(Class.forName(interfaze));
   }
 
@@ -964,6 +995,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @return list of service interfaces
    * 
    */
+  // FIXME !!! - use single implementation that gets parents
+  @Deprecated /*
+               * no longer used or needed - change events are pushed no longer
+               * pulled
+               */
   public static synchronized List<ServiceInterface> getServicesFromInterface(Class<?> interfaze) {
     List<ServiceInterface> ret = new ArrayList<ServiceInterface>();
 
@@ -1077,7 +1113,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @param blocking
    *          if this should block until done.
    *
-   */  
+   */
   synchronized static public void install(String serviceType, Boolean blocking) {
     Runtime r = getInstance();
 
@@ -1235,6 +1271,55 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       registry.put(fullname, registration.service);
 
       if (runtime != null) {
+
+        String type = registration.getTypeKey();
+        Set<String> names = runtime.typeToNames.get(type);
+        if (names == null) {
+          names = new HashSet<>();
+          runtime.typeToNames.put(type, names);
+        }
+        names.add(fullname);
+
+        // FIXME - most of this could be static as it represents meta data of
+        // class and interfaces
+
+        boolean updatedServiceLists = false;
+
+        // maintaining interface type relations
+        // see if this service type is new
+        // PROCESS INDEXES ! - FIXME - will need this in unregister
+        // ALL CLASS/TYPE PROCESSING only needs to happen once per type
+        if (!runtime.serviceTypes.contains(type)) {
+          // CHECK IF "CAN FULFILL"
+          // add the interfaces of the new service type
+          Set<String> interfaces = ClassUtil.getInterfaces(registration.getTypeKey(), FILTERED_INTERFACES);
+          for (String interfaze : interfaces) {
+            Set<String> types = runtime.interfaceToType.get(interfaze);
+            if (types == null) {
+              types = new HashSet<>();
+            }
+            types.add(registration.getTypeKey());
+            runtime.interfaceToType.put(interfaze, types);
+          }
+
+          runtime.typeToInterface.put(type, interfaces);
+          runtime.serviceTypes.add(registration.getTypeKey());
+          updatedServiceLists = true;
+        }
+
+        // check to see if any of our interfaces can fullfill requested ones
+        Set<String> myInterfaces = runtime.typeToInterface.get(type);
+        for (String inter : myInterfaces) {
+          if (runtime.interfaceToPossibleServices.containsKey(inter)) {
+            runtime.interfaceToPossibleServices.get(inter).add(fullname);
+            updatedServiceLists = true;
+          }
+        }
+
+        if (updatedServiceLists) {
+          runtime.broadcast("publishInterfaceToPossibleServices");
+        }
+
         // TODO - determine rules on re-broadcasting based on configuration
         runtime.broadcast("registered", registration);
       }
@@ -1313,6 +1398,23 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
                                            // !!
       // it should be FULLNAME !
       // runtime.broadcast("released", inName);
+      String type = sw.getType();
+
+      boolean updatedServiceLists = false;
+
+      // check to see if any of our interfaces can fullfill requested ones
+      Set<String> myInterfaces = runtime.typeToInterface.get(type);
+      for (String inter : myInterfaces) {
+        if (runtime.interfaceToPossibleServices.containsKey(inter)) {
+          runtime.interfaceToPossibleServices.get(inter).remove(name);
+          updatedServiceLists = true;
+        }
+      }
+
+      if (updatedServiceLists) {
+        runtime.broadcast("publishInterfaceToPossibleServices");
+      }
+
     }
 
     // last step - remove from registry
@@ -1337,7 +1439,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
     return list;
   }
-  
+
   /**
    * default - release all
    */
@@ -1360,36 +1462,37 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * end with System.exit() FIXME normalize with releaseAllLocal and
    * releaseAllExcept
    * 
+   * local only? YES !!! LOCAL ONLY !!
+   * 
    * @param releaseRuntime
    */
-  public static void releaseAll(boolean releaseRuntime, boolean block) /* local only? YES !!! LOCAL ONLY !! */
-  {
+  public static void releaseAll(boolean releaseRuntime, boolean block) {
     // a command thread is issuing this command is most likely
     // tied to one of the services being removed
     // therefore this needs to happen asynchronously otherwise
     // the thread that issued the command will try to destroy/release itself
     // which almost always causes a deadlock
     log.debug("releaseAll");
-    
+
     if (block) {
       processRelease(releaseRuntime);
     } else {
-    
-    new Thread() {
-      public void run() {
-        processRelease(releaseRuntime);
-      }
-    }.start();
+
+      new Thread() {
+        public void run() {
+          processRelease(releaseRuntime);
+        }
+      }.start();
 
     }
   }
-  
+
   static private void processRelease(boolean releaseRuntime) {
 
     // reverse release to order of creation
     Collection<ServiceInterface> local = getLocalServices().values();
     List<ServiceInterface> ordered = new ArrayList<>(local);
-                                                            
+
     Collections.sort(ordered);
     Collections.reverse(ordered);
 
@@ -1413,7 +1516,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     if (runtime != null && releaseRuntime) {
       runtime.releaseService();
     }
-      
+
   }
 
   /**
@@ -2298,7 +2401,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     super.releaseService();
     if (runtime != null) {
       runtime.stopInteractiveMode();
-      
+
       runtime.getRepo().removeStatusPublishers();
     }
     runtime = null;
@@ -3489,7 +3592,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * loads a yaml configuration file from the file system default location will
    * be data/config/{configName}/{name}.yml
-   *  
+   * 
    * @param name
    * @return
    * @throws IOException
@@ -3514,7 +3617,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     setLocale(config.locale);
     setAllVirtual(config.virtual);
 
-    // 3 possible states true/false ... and load(ServiceConfig c) is never called :P
     if (config.enableCli) {
       startInteractiveMode();
     } else {
@@ -3701,6 +3803,68 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   public static void setConfig(String config) {
     Runtime.getInstance().setConfigName(config);
+  }
+
+  // FIXME - move this to service and add default (no servicename) method
+  // signature
+  public void registerForInterfaceChange(String requestor, Class<?> interestedInterface) {
+    registerForInterfaceChange(interestedInterface.getCanonicalName());
+  }
+
+  /**
+   * Builds the requestedAttachMatrix which is a mapping between new types and
+   * their requested interfaces - interfaces they are interested in.
+   * 
+   * This data should be published whenever new "Type" definitions are found
+   * 
+   * @param requestingType
+   *          - service that is requesting FIXME - should not be necessary ...
+   *          should be type
+   * 
+   * @param targetedInterface
+   *          - interface this
+   * 
+   *          add new interface to requested interfaces - add current names of
+   *          services which fulfill that interface "IS ASKING"
+   */
+  public void registerForInterfaceChange(String targetedInterface) {
+    // boolean changed
+    Set<String> namesForRequestedInterface = interfaceToPossibleServices.get(targetedInterface);
+    if (namesForRequestedInterface == null) {
+      namesForRequestedInterface = new HashSet<>();
+      interfaceToPossibleServices.put(targetedInterface, namesForRequestedInterface);
+    }
+
+    // search through interfaceToType to find all types that implement this
+    // interface
+
+    if (interfaceToType.containsKey(targetedInterface)) {
+      Set<String> types = interfaceToType.get(targetedInterface);
+      if (types != null) {
+        for (String type : types) {
+          Set<String> names = typeToNames.get(type);
+          namesForRequestedInterface.addAll(names);
+        }
+      }
+    }
+
+  }
+
+  public void addServiceToRequestedInteface(String serviceName) {
+    ServiceInterface si = Runtime.getService(serviceName);
+  }
+
+  /**
+   * Published whenever a new service type definition if found
+   * 
+   * @return
+   */
+  public Map<String, Set<String>> publishInterfaceTypeMatrix() {
+    return interfaceToType;
+  }
+
+  public Map<String, Set<String>> publishInterfaceToPossibleServices() {
+    return interfaceToPossibleServices;
   }
 
 }

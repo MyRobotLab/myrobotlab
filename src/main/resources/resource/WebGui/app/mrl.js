@@ -26,6 +26,10 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // dictionary of images to display and their display properties
     let displayImages = {}
 
+    // set of services that are appropriate to select from to attach 
+    // depends on requested and provided interfaces
+    _self.possibleAttachServices = {}
+
     // list of callback functions to display images
     let displayCallbacks = []
 
@@ -504,6 +508,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
 
     this.getShortName = function(name) {
+        if (!name){
+            return;
+        }
         if (name.includes('@')) {
             return name.substring(0, name.indexOf("@"))
         } else {
@@ -1308,7 +1315,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                             }
                         },
 
-                        isPeerStarted(peerName) {
+                        isPeerStarted(peerName) { // IS THIS USED ??? not = function(peerName) format
                             try {
                                 let service = _self.getService(name)
                                 return service.serviceType.peers[peerName].state == 'started'
@@ -1316,6 +1323,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                                 return false;
                             }
                         },
+
+                        possibleAttachServices:_self.possibleAttachServices,
 
                         subscribe: function(data) {
                             if ((typeof arguments[0]) == "string") {
@@ -1456,8 +1465,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             subscribeTo: _self.subscribeTo,
             // better name
             getProperties: _self.getProperties,
-            sendMessage: _self.sendMessage // setViewType: _self.setViewType,
+            sendMessage: _self.sendMessage, // setViewType: _self.setViewType,
             // getViewType: _self.getViewType
+            possibleAttachServices: _self.possibleAttachServices
 
         }
 
