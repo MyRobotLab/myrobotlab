@@ -178,13 +178,15 @@
                             <td>
                             </td>
                         </tr>
+                            <td>&nbsp;</td>
+                        <tr>
+                        </tr>    
                         <tr ng-show="state.showLimits">
                             <td colspan="3">
                                 <input class="base-slider rest-slider" type="range" name="inputMin" ng-model="service.rest" min="0"
                                     max="180" ng-change="setRest()">
                             </td>
                         </tr>
-
                         <tr ng-show="state.showLimits" class="inputColor">
                             <td>
                                 Min {{service.mapper.minX}}
@@ -196,14 +198,12 @@
                         </tr>
                         <tr ng-show="state.showLimits">
                             <td colspan="3">
-                                <input class="base-slider input-slider" name="minInput" type="range" ng-model="service.mapper.minX"
+                                <input class="base-slider minX-slider" name="minInput" type="range" ng-model="service.mapper.minX"
                                     min="0" max="180" ng-change="map()"/>
-                                <input class="base-slider input-slider" type="range" ng-model="service.mapper.maxX"
+                                <input class="base-slider maxX-slider" type="range" ng-model="service.mapper.maxX"
                                     min="0" max="180" ng-change="map()"/>
                             </td>
                         </tr>
-                        </div>
-                        </div>
                         <tr ng-show="state.showLimits" class="outputColor">
                             <td>
                                 Min  {{service.mapper.minY}}
@@ -219,9 +219,9 @@
                         </tr>
                         <tr ng-show="state.showLimits">
                             <td colspan="3">
-                                <input class="base-slider output-slider" type="range" ng-model="service.mapper.minY"
+                                <input class="base-slider minY-slider" type="range" ng-model="service.mapper.minY"
                                     min="0" max="180" ng-change="map()"/>
-                                <input class="base-slider output-slider" type="range" ng-model="service.mapper.maxY"
+                                <input class="base-slider maxY-slider" type="range" ng-model="service.mapper.maxY"
                                     min="0" max="180" ng-change="map()"/>
                             </td>
                         </tr>
