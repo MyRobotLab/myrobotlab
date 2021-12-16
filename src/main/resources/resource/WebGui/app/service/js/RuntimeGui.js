@@ -99,9 +99,9 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         $scope.newType = serviceType
     }
 
-    $scope.setConfigName = function(){
+    $scope.setConfigName = function() {
         console.info('setConfigName')
-        if ($scope.selectedConfig.length > 0){
+        if ($scope.selectedConfig.length > 0) {
             $scope.service.configName = $scope.selectedConfig[0]
             msg.sendTo('runtime', 'setConfigName', $scope.service.configName)
         }
@@ -128,20 +128,51 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     }
 
     this.onMsg = function(inMsg) {
+        let data = inMsg.data[0]
         switch (inMsg.method) {
         case 'onState':
-            _self.updateState(inMsg.data[0])
+            _self.updateState(data)
             break
         case 'onLocalServices':
-            $scope.registry = inMsg.data[0]
+            $scope.registry = data
             //  $scope.$apply()
             break
+//         case 'onInterfaceTypeMatrix':
+//         // FIXME probably don't need this - runtime pre-processes it
+//             $scope.service.interfaceTypeMatrix = data
+//             // $scope.$apply()
+//             break
+        case 'onInterfaceToPossibleServices':
+            $scope.service.requestedInterfaces = data
+            mrl.possibleAttachServices = data
+//             let registry = mrl.getRegistry()
+//             // scan through requested interfaces
+//             for (const serviceName in registry) {
+//                 let s = mrl.getService(serviceName)
+//                 for (const i = 0; i < data.length; ++i) {
+//                     let requested = data[i]
+//                     let typesForTheRequestedInterface = $scope.service.interfaceTypeMatrix[requested]
+
+//                     for (const typeName in typesForTheRequestedInterface) {
+//                         if (s.serviceType.name == typesForTheRequestedInterface) {
+//                             if (!mrl.possibleAttachServices[requested]) {
+//                                 mrl.possibleAttachServices[requested] = []
+//                             }
+//                             mrl.possibleAttachServices[requested].push(serviceName)
+//                         }
+//                     }
+
+//                 }
+//             }
+            $scope.$apply()
+            // $scope.$apply()
+            break
         case 'onLocale':
-            $scope.locale.selected = inMsg.data[0].language
+            $scope.locale.selected = data.language
             $scope.$apply()
             break
         case 'onLocales':
-            ls = inMsg.data[0]
+            ls = data
             unique = {}
             $scope.service.locales = {}
             // new Set()
@@ -165,13 +196,13 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             break
 
         case 'onConfigList':
-            $scope.service.configList = inMsg.data[0].sort()
+            $scope.service.configList = data.sort()
             $scope.$apply()
             break
 
         case 'onServiceTypes':
 
-            $scope.possibleServices = inMsg.data[0]
+            $scope.possibleServices = data
             mrl.setPossibleServices($scope.possibleServices)
             break
 
@@ -180,22 +211,22 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             break
 
         case 'onConnections':
-            $scope.connections = inMsg.data[0]
+            $scope.connections = data
             $scope.$apply()
             break
         case 'onHosts':
-            $scope.hosts = inMsg.data[0]
+            $scope.hosts = data
             $scope.$apply()
             break
         case 'onStatus':
-            $scope.status = inMsg.data[0].name + ' ' + inMsg.data[0].level + ' ' + inMsg.data[0].detail + "\n" + $scope.status
+            $scope.status = data.name + ' ' + data.level + ' ' + data.detail + "\n" + $scope.status
             if ($scope.status.length > 300) {
                 $scope.status = $scope.status.substring(0, statusMaxSize)
             }
             break
         case 'onCli':
-            if (inMsg.data[0] != null) {
-                $scope.status = JSON.stringify(inMsg.data[0], null, 2) + "\n" + $scope.status
+            if (data != null) {
+                $scope.status = JSON.stringify(data, null, 2) + "\n" + $scope.status
                 if ($scope.status.length > 300) {
                     $scope.status = $scope.status.substring(0, statusMaxSize)
                 }
@@ -205,10 +236,10 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             }
             break
         case 'onReleased':
-            console.info("runtime - onRelease" + inMsg.data[0])
+            console.info("runtime - onRelease" + data)
             break
         case 'onHeartbeat':
-            let heartbeat = inMsg.data[0]
+            let heartbeat = data
             let hb = heartbeat.name + '@' + heartbeat.id + ' sent onHeartbeat - ';
             $scope.heartbeatTs = heartbeat.ts
             $scope.$apply()
@@ -317,12 +348,17 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.subscribe("getHosts")
     msg.subscribe("publishStatus")
     msg.subscribe('publishConfigList')
+//    msg.subscribe('publishInterfaceTypeMatrix')
+    msg.subscribe('publishInterfaceToPossibleServices')
 
     //msg.send("getLocalServices")
     msg.send("getConnections")
     msg.send("getServiceTypes")
     msg.send("getLocale")
     msg.send("getLocales")
+//    msg.send("publishInterfaceTypeMatrix")
+    // comes with runtime - needed ? or race condition
+    msg.send("publishInterfaceToPossibleServices")
     // msg.send("getHosts")
     msg.subscribe(this)
 }
