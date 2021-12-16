@@ -14,27 +14,34 @@
         </tr>
         <tr>
             <td>
-            <button class="btn btn-default" ng-click="play()"><span class="glyphicon glyphicon-play"/></button>
-                
-                <span class="glyphicon glyphicon-pause"/>
-                <span class="glyphicon glyphicon-stop"/>
-                <span class="glyphicon glyphicon-stop"/>
-                <span class="glyphicon glyphicon-volume-off"/>
-                <span class="glyphicon glyphicon-volume-up"/>
+                <button class="btn btn-default" ng-click="msg.play(service.currentTrack)"><span class="glyphicon glyphicon-play" title="play"/></button>
+                <button class="btn btn-default" ng-click="msg.pause()"><span class="glyphicon glyphicon-pause" title="pause"/></button>
+                <button class="btn btn-default" ng-click="msg.resume()"><span class="glyphicon glyphicon-step-forward" title="resume"/></button>
+                <!--button class="btn btn-default" ng-click="msg.random()"><span class="glyphicon glyphicon-random" title="random"/></button-->
+                <button class="btn btn-default" ng-click="msg.stop()"><span class="glyphicon glyphicon-stop" title="stop"/></button>
+                <button class="btn btn-default" ng-click="msg.mute(true)"><span class="glyphicon glyphicon-volume-off" title="mute"/></button>
+                <button class="btn btn-default" ng-click="msg.volume(2.0)"><span class="glyphicon glyphicon-volume-up" title="pump up the volume"/></button>
             </td>
-            <td></td>
         </tr>
     </table>
 </div>
 <div class="col-md-6">
-    selected playlist {{service.currentPlaylist}}<br/>
+    Selected playlist: {{service.currentPlaylist}}<br/>
     <table border="1" class="table table-hover table-condensed table-striped table-bordered">
-        <tr ng-repeat="(name, fileset) in service.playlists">
-            <td>{{name}}</td>
-        </tr>
+        <!--tr ng-repeat="(name, fileset) in service.playlists">
+            <td>{{name}}{{fileset}}</td>
+        </tr-->
         <tr>
             <td>
-                <button>add</button>
+                <!--input class="form-control ng-pristine ng-untouched ng-valid ng-empty directoryName" type="text" ng-model="service.currentPlaylist" name="directoryName" id="directoryName" ng-init="" placeholder="Playlist directory" style="width:200px">
+                <button class="btn btn-default" ng-click="msg.addPlaylist(service.currentPlaylist)">Add</button-->
+                <input class="form-control ng-pristine ng-untouched ng-valid ng-empty" type="text" ng-model="service.currentPlaylist" placeholder="Playlist directory" style="width:200px">
+                <button class="btn btn-default" ng-click="msg.addPlaylist(service.currentPlaylist)">Add playlist</button>
+                <div class="form-group">
+                    <select ng-repeat="(name, playlists) in service.playlists" multiple class="form-control vertical-menu" ng-change="setTrack()" ng-model="service.currentTrack" id="service.currentTrack" title="select your track">
+                        <option ng-value="{{name}}{{playlists}}">{{name}}{{playlists}}</option>
+                    </select>
+                </div>
             </td>
         </tr>
     </table>
