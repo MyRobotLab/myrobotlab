@@ -71,7 +71,7 @@ body {
     line-height: 34px;
 }
 
-.preventDragSelect {
+.prevent-drag-select {
     -webkit-user-select: none!important;
     /* Chrome all / Safari all */
     -moz-user-select: none!important;
@@ -722,30 +722,7 @@ table, th, td {
     visibility: visible!important;
 }
 
-.output-limit {
-    margin-top: 22px;
-    position: absolute;
-    background-color: #61b6b9;
-    width: 100%;
-    top: 18px;
-    /* top: 115px; */
-    left: 0px;
-    height: 8px;
-    z-index: 40;
-    pointer-events: none;
-}
 
-.input-limit {
-    margin-top: 4px;
-    position: absolute;
-    background-color: #92ca7f;
-    width: 100%;
-    top: -8px;
-    left: 0px;
-    height: 8px;
-    z-index: 12;
-    pointer-events: none;
-}
 
 .custom-slider2.rzslider .rz-bubble:nth-child(6) {
     bottom: -17px;
@@ -847,14 +824,12 @@ table, th, td {
     /* width: 358px; */
 }
 
-.rzMixer .sliderMixer {
+.sliderMixer {
     width: 365px;
     float: left;
     padding-right: 6px;
     margin-right: 40px;
-    /* background-color: antiquewhite; */
-    padding-bottom: 20px;
-    padding-top: 10px;
+    padding-top: 0px;
     border-bottom: 1px solid #afe1ec;
 }
 
@@ -867,14 +842,6 @@ table, th, td {
     background-color: #e48b53;
 }
 
-.rzMixer .restColor {
-    /* width: 64px; */
-    float: left;
-    /* background-color: blue; */
-    text-align: center;
-    /* margin-right: 5px; */
-    line-height: 24px;
-}
 
 .MixerRow {
     width: 360px;
@@ -1428,11 +1395,10 @@ table, th, td {
 }
 
 .restColor {
-    cursor: pointer;
+/*    cursor: pointer;*/
     color: #e48b53;
-    font-size: 14px;
+/*    font-size: 14px;*/
     font-weight: bold;
-    font-family: Arial, Helvetica, sans-serif!important;
 }
 
 .dataColor {
@@ -3116,37 +3082,6 @@ background-color: #337ab7!important;
     pointer-events: none;
 }
 
-.servo-move-to-slider {
-  -webkit-appearance: none;
-  margin-top: 18px;
-  width: 100%;
-  height: 25px;
-  background: #8edadd;
-  outline: none;
-  opacity: 0.7;
-  -webkit-transition: .2s;
-  transition: opacity .2s;
-}
-
-.servo-move-to-slider:hover {
-  opacity: 1;
-}
-
-.servo-move-to-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 10px;
-  height: 30px;
-  background: #169ec6;
-  cursor: pointer;
-}
-
-.servo-move-to-slider::-moz-range-thumb {
-  width: 10px;
-  height: 30px;
-  background: #169ec6;
-  cursor: pointer;
-}
 
 .servoBasic1 {
     width: 350px;
@@ -3162,77 +3097,6 @@ background-color: #337ab7!important;
     white-space: nowrap;
 }
 
-.servo-control-position {
-    margin-top: 2px;
-    position: absolute!important;
-    top: -34px;
-    display: flex;
-    font-size: medium;
-    z-index: 44!important;
-    /* background-color: #ffffff; */
-    pointer-events: none;
-    height: 16px;
-    line-height: 16px;
-    z-index: 52!important;
-    /* margin-left: 2px; */
-    color: #666;
-}
-
-.servoCursor {
-    position: absolute;
-    background-color: #666;
-    height: 20px;
-    width: 2px;
-    top: 14px;
-}
-
-.servo-position {
-    margin-top: 2px;
-    position: absolute!important;
-    top: -21px;
-    display: flex;
-    font-size: medium;
-    z-index: 44!important;
-    /* background-color: #ffffff; */
-    pointer-events: none;
-    height: 16px;
-    line-height: 16px;
-    z-index: 52!important;
-    /* margin-left: 2px; */
-    color: #999999;
-}
-
-.servoOutputCursor {
-    position: absolute;
-    background-color: #dcdcdc;
-    height: 13px;
-    width: 2px;
-    top: 13px;
-}
-
-.rest-position {
-    margin-top: 35px;
-    position: absolute!important;
-    top: 16px;
-    display: flex;
-    font-size: medium;
-    z-index: 44!important;
-    /* background-color: #ffffff; */
-    pointer-events: none;
-    height: 16px;
-    line-height: 16px;
-    z-index: 52!important;
-    /* margin-left: 2px; */
-    color: #e48b53;
-}
-
-.restCursor {
-    position: absolute;
-    background-color: #e48b53;
-    height: 13px;
-    width: 2px;
-    top: -12px;
-}
 
 /* base slider style - begin */
 .base-slider {
@@ -3532,3 +3396,137 @@ background-color: #337ab7!important;
 .align-right {
     text-align: right;
 }
+
+/* ==================== ServoGui begin ====================== */
+
+.servo-control-position {
+    margin-top: 2px;
+    position: absolute!important;
+    top: -34px;
+    display: flex;
+    font-size: medium;
+    z-index: 44!important;
+    /* background-color: #ffffff; */
+    pointer-events: none;
+    height: 16px;
+    line-height: 16px;
+    z-index: 52!important;
+    /* margin-left: 2px; */
+    color: #666;
+}
+
+.servoCursor {
+    position: absolute;
+    background-color: #666;
+    height: 20px;
+    width: 2px;
+    top: 14px;
+}
+
+.servo-position {
+    margin-top: 48px;
+    position: absolute!important;
+    top: -21px;
+    display: flex;
+    font-size: medium;
+    z-index: 44!important;
+    /* background-color: #ffffff; */
+    pointer-events: none;
+    height: 16px;
+    line-height: 16px;
+    z-index: 52!important;
+    /* margin-left: 2px; */
+    color: #999999;
+}
+
+.servoOutputCursor {
+    position: absolute;
+    background-color: #dcdcdc;
+    height: 13px;
+    width: 2px;
+    top: 13px;
+}
+
+.rest-position {
+    margin-top: 10px;
+    position: absolute!important;
+    top: 16px;
+    display: flex;
+    font-size: medium;
+    z-index: 44!important;
+    /* background-color: #ffffff; */
+    pointer-events: none;
+    height: 16px;
+    line-height: 16px;
+    z-index: 52!important;
+    /* margin-left: 2px; */
+    color: #e48b53;
+}
+
+.restCursor {
+    position: absolute;
+    background-color: #e48b53;
+    height: 13px;
+    width: 2px;
+    top: -12px;
+}
+
+
+.servo-move-to-slider {
+  -webkit-appearance: none;
+  /*margin-top: 18px;*/
+  width: 100%;
+  height: 25px;
+  background: #8edadd;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.servo-move-to-slider:hover {
+  opacity: 1;
+}
+
+.servo-move-to-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 30px;
+  background: #169ec6;
+  cursor: pointer;
+}
+
+.servo-move-to-slider::-moz-range-thumb {
+  width: 10px;
+  height: 30px;
+  background: #169ec6;
+  cursor: pointer;
+}
+
+.servo-input-limit {
+    margin-top: -8px;
+    position: absolute;
+    background-color: #92ca7f;
+    width: 100%;
+    top: -8px;
+    left: 0px;
+    height: 8px;
+    z-index: 12;
+    pointer-events: none;
+}
+
+.output-limit {
+    /* margin-top: 0px;*/
+    position: absolute;
+    background-color: #61b6b9;
+    width: 100%;
+    top: 18px;
+    /* top: 115px; */
+    left: 0px;
+    height: 8px;
+    z-index: 40;
+    pointer-events: none;
+}
+
+/* ==================== ServoGui end ====================== */

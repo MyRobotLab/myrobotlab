@@ -107,8 +107,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
         }
 
         $scope.idleSeconds = service.idleTimeout / 1000
-        $scope.pos.options.minLimit = service.mapper.minX
-        $scope.pos.options.maxLimit = service.mapper.maxX
+//         $scope.pos.options.minLimit = service.mapper.minX
+//         $scope.pos.options.maxLimit = service.mapper.maxX
 
 
         // ui initialization - good idea !
@@ -120,7 +120,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
             // initialization
             $scope.state.rest = service.rest
 
-            $scope.pos.value = service.currentOutputPos
+            // $scope.pos.value = service.currentOutputPos
             $scope.sliderEnabled = true
 
             $scope.activeTabIndex = service.controller == null ? 0 : 1

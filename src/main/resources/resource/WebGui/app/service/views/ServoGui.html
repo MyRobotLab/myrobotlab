@@ -6,7 +6,7 @@
         <uib-tab heading="Control" index="0" class="servoController">
             <div class="row">
                 <div class="col-md-12">
-                    <nav class="settingsbar preventDragSelect">
+                    <nav class="settingsbar prevent-drag-select">
                         <span>
                             <h6>
                                 You need to attach a controller to a servo.<br />For example real and virtual
@@ -126,7 +126,7 @@
                                     ng-model="state.showLimits" on="" off="" />
                             </td>
                             <td>
-                                <button class="miniBTN restColor" ng-click="pos.value=restSlider.value; msg.rest()" title="Servo moves to Rest">&nbsp;Rest&nbsp;</button>
+                                <button class="restColor" ng-click="pos.value=restSlider.value;msg.rest()" title="Servo moves to Rest">Rest</button>
                             </td>
                         </tr>
                     </table>
@@ -137,26 +137,26 @@
                             <td colspan="3">
                                 <div class="limitsZone">
                                     <!-- Cursors Begin -->
-                                    <div class="servo-control-position" class="preventDragSelect"
+                                    <div class="servo-control-position prevent-drag-select"
                                         style="left: calc(100% - (({{100 -(service.targetPos*100/180)}}%) + 1px));">
-                                        <span class="preventDragSelect">{{service.targetPos}}º</span>
-                                        <div class="servoCursor"></div>
+                                        <span class="prevent-drag-select">{{service.targetPos}}º</span>
+                                        <!-- div class="servoCursor"></div -->
                                     </div>
-                                    <div class="servo-position" class="preventDragSelect"
+                                    <div class="servo-position prevent-drag-select"
                                         style="left: calc(100% - (({{100 -(service.currentOutputPos*100/180)}}%) + 1px));">
-                                        <span class="preventDragSelect">{{service.currentOutputPos.toFixed(0)}}º</span>
-                                        <div class="servoOutputCursor"></div>
+                                        <span class="prevent-drag-select">{{service.currentOutputPos.toFixed(0)}}º</span>
+                                        <!-- div class="servoOutputCursor"></div -->
                                     </div>
                                     <div class="rest-position"
                                         style="left: calc(100% - (({{100 -(service.rest*100/180)}}%) + 1px));">
-                                        <span class="preventDragSelect">{{service.rest}}º</span>
-                                        <div class="restCursor"></div>
+                                        <span class="prevent-drag-select">{{service.rest}}º</span>
+                                        <!-- div class="restCursor"></div -->
                                     </div>
                                     <!-- Cursors Begin -->
-                                    <div class="output-limit" class="preventDragSelect"
+                                    <div class="output-limit prevent-drag-select" 
                                         style="left: calc(100% - ({{100 -(service.mapper.minY*100/180)}}%)); width: calc(100% - ({{100 -((service.mapper.maxY-service.mapper.minY)*100/180)}}%));">
                                     </div>
-                                    <div class="input-limit" class="preventDragSelect"
+                                    <div class="servo-input-limit prevent-drag-select"
                                         style="left: calc(100% - ({{100 -(service.mapper.minX*100/180)}}%)); width: calc(100% - ({{100 -((service.mapper.maxX-service.mapper.minX)*100/180)}}%));">
                                     </div>
                                 </div>
