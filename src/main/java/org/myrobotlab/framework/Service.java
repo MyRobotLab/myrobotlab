@@ -2317,6 +2317,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * 
    * @param service
    *          - the service to detach from this service
+   *          
+   *          
+   *  FIXME !!! - although this is a nice pub/sub function
+   *  to clear out pubs - it will often have to be overriden
+   *  and therefore will be extremely easy to forget to call super
+   *  a "framework" method should replace this - so that a
+   *  service.detachOutbox()
+   *  calls -> a detach that can be overidden !
+   *          
    */
   @Override
   public void detach(Attachable service) {
@@ -2806,6 +2815,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       return "started".equals(sr.state);
     }
     return false;
+  }
+
+  protected void registerForInterfaceChange(Class<?> clazz) {
+    Runtime.getInstance().registerForInterfaceChange(getClass().getCanonicalName(), clazz);
   }
 
 }
