@@ -36,7 +36,7 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
 
   JButton savePoseButton = new JButton("Save Pose");
   JButton loadPoseButton = new JButton("Load Pose");
-  JTextField poseName = new JTextField("defaultPose", 16);
+  JTextField servoMixerPose = new JTextField("defaultPose", 16);
   JPanel servoControlPanel = new JPanel();
   JPanel poseControls = new JPanel();
 
@@ -78,7 +78,7 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
 
     //
     poseControls.add(saveLabel);
-    poseControls.add(poseName);
+    poseControls.add(servoMixerPose);
     poseControls.add(savePoseButton);
     poseControls.add(loadPoseButton);
 
@@ -109,7 +109,7 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
       //
       // TODO: get the list of selected servos to save
       // for now. just all servos in the system
-      String name = poseName.getText();
+      String name = servoMixerPose.getText();
       List<ServoControl> scs = servoMixer.listAllServos();
       try {
         servoMixer.savePose(name, scs);
@@ -119,7 +119,7 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
       }
     } else if (o == loadPoseButton) {
       //
-      String name = poseName.getText();
+      String name = servoMixerPose.getText();
       Pose p = servoMixer.loadPose(name);
       servoMixer.moveToPose(p);
       refreshPanel();

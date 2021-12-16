@@ -386,7 +386,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    * The most important method, that tells the servo what position it should
    * move to
    */
-  public boolean moveTo(Double pos) {
+  public Double moveTo(Double pos) {
     synchronized (moveToBlocked) {
       moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
     }
@@ -395,7 +395,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
 
     if (motorControl == null) {
       error(String.format("%s's controller is not set", getName()));
-      return false;
+      return pos;
     }
 
     if (!isEnabled()) {
@@ -431,7 +431,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     // }
 
     broadcastState();
-    return true;
+    return pos;
   }
 
   /*

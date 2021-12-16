@@ -590,7 +590,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   }
 
   @Override
-  public boolean moveTo(Double newPos) {
+  public Double moveTo(Double newPos) {
     /**
      * weather a move request was successful. The cases it would be false is no
      * controller or calling moveTo when blocking is in process
@@ -598,11 +598,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
     if (newPos == null) {
       log.info("will not move to null position - not moving");
-      return false;
+      return newPos;
     }
 
     boolean validMoveRequest = processMove(newPos, false, null);
-    return validMoveRequest;
+    return newPos;
   }
 
   @Override
@@ -1060,14 +1060,13 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   }
 
   @Override
-  public boolean moveTo(Integer newPos) {
+  public Double moveTo(Integer newPos) {
     try {
-      moveTo((double) newPos);
-      return true;
+      return moveTo((double) newPos);
     } catch (Exception e) {
       log.error("AbsolutePositionControl threw", e);
     }
-    return false;
+    return null;
   }
 
   @Override
