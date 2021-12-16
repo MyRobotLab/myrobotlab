@@ -218,7 +218,7 @@
                 <tr ng-show="!service.isVirtual">
                     <td>
                         <p>
-                            Now select the arduino controller in the dropdown menu, select any pin number(we are in virtual) and click "attach".<br>Clicking "Enable" will energize the servo. Clicking "AutoDisable" automatically stops energizing the servo after a given amount of seconds.<br> Now you should be able to control the servo with the slider bar in Basic Tab.
+                            In Control Tab, select the arduino controller in the dropdown menu.<br>Select the correct signal pin the servo is connected to and click "attach". Clicking "Enable" will energize the servo. Invert button allows you to invert the direction of the servo. Clicking "AutoDisable" automatically stops energizing the servo after a given amount of seconds.<br> Now you should be able to control the servo with the slider bar in Basic Tab.
                             Note in this demo, "AutoDisable" is set by default to prevent burning servo. But it automaticaly Enables the servo if you move the slider or send a python "moveTo()" code.
                         
                         </p>
@@ -228,7 +228,7 @@
                 <tr ng-show="service.isVirtual">
                     <td>
                         <p>
-                            Now select the arduino controller in the dropdown menu.<br>Select the correct signal pin the servo is connected to and click "attach". Clicking "Enable" will energize the servo. Clicking "AutoDisable" automatically stops energizing the servo after a given amount of seconds.<br> Now you should be able to control the servo with the slider bar in Basic Tab.
+                            In Control Tab, select the arduino controller in the dropdown menu, select any pin number(we are in virtual) and click "attach".<br>Clicking "Enable" will energize the servo. Clicking "AutoDisable" automatically stops energizing the servo after a given amount of seconds.<br> Now you should be able to control the servo with the slider bar in Basic Tab.
                             Note in this demo, "AutoDisable" is set by default to prevent burning servo. But it automaticaly Enables the servo if you move the slider or send a python "moveTo()" code.
                         
                         </p>
@@ -255,11 +255,12 @@
                 <tr>
                     <td>
                         <p>
-                            By selecting the Limits Tab, you can set the limits of your servo.<br>
+                            By clicking the Limits button, you can set the limits of your servo.<br>
                             There is two types of limits, the input and the output.<br>
                             Input limits are the max and min values you expect to measure, after any scaling. Output limits are the min and max angle that the microcontroller will tell the servo to move to.<br>
                             Moving the slider to a position and clicking on MIN or MAX will set the limits.<br>Generally we modify only the Output mapping. <br>The REST position is where the servo will be set when initialized.<br>
-                            In the Advanced Tab you can set your servo inverted.<br>
+                            You can save your configuration by selecting Servo drop down menu<br>
+                            and click "save service config".<br>
                         </p>
                     </td>
                 </tr>
@@ -456,5 +457,3 @@
 <!-- panels end -->
 </td></tr></table>
 <!------------------------------INTRO-PAGE END---------------------------->
-
-
