@@ -1,5 +1,4 @@
 <!-- ServoGui.html -->
-
 <div class="col-md-12">
     <uib-tabset active="activeTabIndex">
         <!------------- CONTROL BEGIN ------------------->
@@ -162,7 +161,7 @@
                                 </div>
                                 <input class="servo-move-to-slider" type="range" name="targetPos"
                                     ng-model="service.targetPos" min="0" max="180"
-                                    ng-change="moveTo(service.targetPos)">
+                                    ng-change="moveTo(service.targetPos)" ng-mousedown="disableUpdates()" ng-mouseup="enableUpdates()">
                             </td>
                         </tr>
                         <!------------- SERVO SLIDER AND LIMIT DISPLAY END ------------------->

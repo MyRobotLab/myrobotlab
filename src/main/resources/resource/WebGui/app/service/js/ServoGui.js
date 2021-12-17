@@ -3,6 +3,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
     var _self = this
     var msg = this.msg
 
+    $scope.disableServicePosUpdates = false
+
     // mode is either "status" or "control"
     // in status mode we take updates by the servo and its events
     // in control mode we take updates by the user
@@ -34,14 +36,14 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
     $scope.activeTabIndex = 1
 
     $scope.optionsWithoutStart = {
-      connect: true,
-      range: {
-        min: 0,
-        max: 100,
-      },
+        connect: true,
+        range: {
+            min: 0,
+            max: 100,
+        },
     };
 
-    $scope.sliderPositions = [20, 80];    
+    $scope.sliderPositions = [20, 80];
 
     // TODO - should be able to build this based on
     // current selection of controller
@@ -51,11 +53,9 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
         // make strings 
     }
 
-
     $scope.setRest = function() {
         msg.send('setRest', $scope.service.rest)
     }
-
 
     $scope.toggleLock = function() {
         $scope.lockInputOutput = !$scope.lockInputOutput
@@ -107,9 +107,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
         }
 
         $scope.idleSeconds = service.idleTimeout / 1000
-//         $scope.pos.options.minLimit = service.mapper.minX
-//         $scope.pos.options.maxLimit = service.mapper.maxX
-
+        //         $scope.pos.options.minLimit = service.mapper.minX
+        //         $scope.pos.options.maxLimit = service.mapper.maxX
 
         // ui initialization - good idea !
         // first time is 'status' - otherwise control
@@ -159,6 +158,16 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
         case 'onEncoderData':
             $scope.service.currentOutputPos = Math.floor(data.angle)
             $scope.$apply()
+            break
+        case 'onServoMoveTo':
+            if (!$scope.disableServicePosUpdates) {
+                // if the user is not controlling the slider - let the servo service
+                if (data.pos) {
+                    $scope.service.targetPos = data.pos.toFixed(0)
+                    $scope.$apply()
+
+                }
+            }
             break
         case 'onServoEnable':
             $scope.service.enabled = true
@@ -232,19 +241,25 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
             $scope.service.mapper.minY = $scope.service.mapper.minX
             $scope.service.mapper.maxY = $scope.service.mapper.maxX
         }
-                        
+
         msg.send('map', $scope.service.mapper.minX, $scope.service.mapper.maxX, $scope.service.mapper.minY, $scope.service.mapper.maxY)
         msg.send("broadcastState")
     }
 
-
+    $scope.disableUpdates = function() {
+        $scope.disableServicePosUpdates = true
+    }
+    $scope.enableUpdates = function() {
+        $scope.disableServicePosUpdates = false
+    }
 
     // msg.subscribe("publishMoveTo") - can cause a infinite loopback control-> status
     // msg.subscribe("publishEncoderData") - not a good idea will swamp with data
     msg.subscribe("publishServoEnable")
     msg.subscribe("publishServoDisable")
     msg.subscribe("publishServoStopped")
-    msg.subscribe("publishServoStarted")
+    // msg.subscribe("publishServoStarted")
+    msg.subscribe("publishServoMoveTo")
     msg.subscribe("publishServoSetSpeed")
     msg.subscribe("refreshControllers")
     msg.subscribe(this)

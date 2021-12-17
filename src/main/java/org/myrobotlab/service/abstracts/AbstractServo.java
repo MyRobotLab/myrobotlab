@@ -16,6 +16,7 @@ import org.myrobotlab.sensor.EncoderPublisher;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.data.AngleData;
+import org.myrobotlab.service.data.ServoMove;
 import org.myrobotlab.service.data.ServoSpeed;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
@@ -323,7 +324,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public AngleData publishJointAngle(AngleData angle) {
-    log.warn("publishJointAngle(angle)");
+    log.info("publishJointAngle(angle)");
     return angle;
   }
 
@@ -601,7 +602,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
       return newPos;
     }
 
-    boolean validMoveRequest = processMove(newPos, false, null);
+    broadcast("publishServoMoveTo", newPos);
+    processMove(newPos, false, null);
     return newPos;
   }
 
@@ -677,7 +679,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public EncoderData publishEncoderData(EncoderData data) {
-    log.warn("publishEncoderData(encoderData)");
+    log.info("publishEncoderData(encoderData)");
     return data;
   }
 
@@ -685,7 +687,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * moveTo requests are published through this publishing point
    */
   public ServoControl publishMoveTo(ServoControl sc) {
-    log.warn("publishMoveTo(servo)");
+    log.info("publishMoveTo(servo)");
     return sc;
   }
 
@@ -704,7 +706,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
              * info - sending whole servo is excessive
              */
   public String publishServoDisable(ServoControl sc) {
-    log.warn("publishServoDisable(name)");
+    log.info("publishServoDisable(name)");
     return sc.getName();
   }
 
@@ -713,32 +715,32 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
              * info - sending whole servo is excessive
              */
   public String publishServoEnable(ServoControl sc) {
-    log.warn("publishServoEnable(name)");
+    log.info("publishServoEnable(name)");
     return sc.getName();
   }
 
   // TODO: why do we need this method here , invoke message cache misses
   // otherwise.
   public String publishServoEnable(AbstractServo sc) {
-    log.warn("publishServoEnable(servo)");
+    log.info("publishServoEnable(servo)");
     return publishServoEnable((ServoControl) sc);
   }
 
   @Override
-  public ServoControl publishServoMoveTo(ServoControl sc) {
-    log.warn("publishServoMoveTo(servo)");
-    return sc;
+  public ServoMove publishServoMoveTo(Double pos) {
+    log.info("publishServoMoveTo({})");
+    return new ServoMove(getName(), pos);
   }
 
   @Override
   public ServoSpeed publishServoSetSpeed(ServoControl sc) {
-    log.warn("publishServoSetSpeed(servo)");
+    log.info("publishServoSetSpeed(servo)");
     return new ServoSpeed(sc.getName(), sc.getSpeed());
   }
 
   @Override
   public ServoControl publishServoStop(ServoControl sc) {
-    log.warn("publishServoStop(servo)");
+    log.info("publishServoStop(servo)");
     return sc;
   }
 
@@ -988,7 +990,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public ServoEvent publishServoStarted(String name, Double position) {
-    log.warn("publishServoStarted(name)");
+    log.info("publishServoStarted(name)");
     isMoving = true;
     // FIXME currentOutputPos or currentInputPos
     return new ServoEvent(name, position);
@@ -1006,7 +1008,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public ServoEvent publishServoStopped(String name, Double position) {
-    log.warn("publishServoStopped(name, position)");
+    log.info("publishServoStopped({}, {})", name, position);
 
     // log.info("TIME-ENCODER SERVO_STOPPED - {}", name);
     // if currently configured to autoDisable - the timer starts now
@@ -1055,7 +1057,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public String publishServoEnable(String name) {
-    log.warn("publishServoEnable(name)");
+    log.info("publishServoEnable(name)");
     return name;
   }
 
