@@ -43,10 +43,10 @@
                         <span ng-show="service.isRanging">stop ranging</span>
                         <span ng-show="!service.isRanging">begin ranging</span>
                     </button>
-                    rate<toggle ng-model="service.useRate" ng-change="toggleRate()" class="miniBTN" on="" off="" size="btn-lg"/></toggle>
+                    rate <toggle ng-model="service.useRate" ng-change="toggleRate()" class="miniBTN" on="" off="" size="btn-lg"/></toggle>
                 </td>
                 <td>
-                    <button ng-show="service.controllerName" type="button" class="btn btn-default" ng-click="msg.ping()">single ping</button>
+                    &nbsp;<button ng-show="service.controllerName" type="button" class="btn btn-default" ng-click="msg.ping()">single ping</button>
                 </td>
             </tr>
             <tr ng-show="service.useRate">
@@ -55,7 +55,7 @@
                     
                 </td>
                 <td>
-                <input type="text" class="form-control small-text-form" ng-model="service.rateHz" ng-change="setRate()"/> hz
+                &nbsp;<input type="text" class="form-control small-text-form" ng-model="service.rateHz" ng-change="setRate()"/> hz
                     <!-- button type="button" class="btn btn-default" ng-click="setRate()">set rate</button -->
                 </td>
             </tr>

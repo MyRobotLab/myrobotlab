@@ -3541,3 +3541,7 @@ background-color: #337ab7!important;
     text-align: center;
 }
 /* ==================== UltrasonicSensor end ====================== */
+
+.small-text-form {
+    width: 50px;
+}
