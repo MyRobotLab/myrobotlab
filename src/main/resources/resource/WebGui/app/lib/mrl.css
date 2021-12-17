@@ -3530,3 +3530,14 @@ background-color: #337ab7!important;
 }
 
 /* ==================== ServoGui end ====================== */
+/* ==================== UltrasonicSensor begin ====================== */
+
+.output {
+    color: #666;
+    font-size: 40px;
+}
+
+.center {
+    text-align: center;
+}
+/* ==================== UltrasonicSensor end ====================== */

@@ -1,10 +1,81 @@
 <!-- nvd3 options="options" data="data"></nvd3 -->
-
-type {{service.type}}
-
-<port service-name="{{service.controller.name}}" ng-model="formPort" ></port>	
-
-<div class="btn-group">
-<!-- WTF ? -->
-  <!-- a class="btn btn-primary pull-right" ng-click="toggleArchive(true)" >Archive patient</a -->
+<div class="row">
+    <div class="col-md-6">
+        <table>
+            <tr>
+                <td class="output center">{{range}} cm</td>
+                <td class="small">
+                    &nbsp;&nbsp;count {{service.pingCount}}<br/>
+                    &nbsp;&nbsp;min {{service.min}}<br/>&nbsp;&nbsp;max {{service.max}}
+                </td>
+                <td>
+                    <button type="button" class="btn btn-default" ng-click="msg.clear()">clear</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <attach options='options'/>
+                </td>
+                <td>&nbsp;</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>trigger pin </td>
+                <td>
+                    <input type="text" ng-readonly="service.isAttached" class="form-control small-text-form" ng-model="service.trigPin"/>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>echo pin </td>
+                <td>
+                    <input type="text" ng-readonly="service.isAttached" class="form-control small-text-form" ng-model="service.echoPin"/>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>
+                    <button ng-show="!service.isAttached" type="button" class="btn btn-default" ng-click="attach()">attach</button>
+                    <button ng-show="service.isAttached" type="button" class="btn btn-default" ng-click="detach()">detach</button>
+                </td>
+                <td>
+                    <button type="button" ng-disabled="!service.isAttached" class="btn btn-default" ng-click="toggleRanging()">
+                        <span ng-show="service.isRanging">stop ranging</span>
+                        <span ng-show="!service.isRanging">begin ranging</span>
+                    </button>
+                    rate<toggle ng-model="service.useRate" ng-change="toggleRate()" class="miniBTN" on="" off="" size="btn-lg"/></toggle>
+                </td>
+                <td>
+                    <button ng-show="service.controllerName" type="button" class="btn btn-default" ng-click="msg.ping()">single ping</button>
+                </td>
+            </tr>
+            <tr ng-show="service.useRate">
+                <td></td>
+                <td>
+                    
+                </td>
+                <td>
+                <input type="text" class="form-control small-text-form" ng-model="service.rateHz" ng-change="setRate()"/> hz
+                    <!-- button type="button" class="btn btn-default" ng-click="setRate()">set rate</button -->
+                </td>
+            </tr>
+<!--            
+            <tr>
+                <td>threshold</td>
+                <td>
+                    <input type="text" class="form-control small-text-form" ng-readonly="service.controller" ng-model="service.echoPin"/> min
+                    <input type="text" class="form-control small-text-form" ng-readonly="service.controller" ng-model="service.echoPin"/> max
+                    <button type="button" class="btn btn-default" ng-click="attach()">set</button>
+                    <button type="button" class="btn btn-default" ng-click="attach()">unset</button>
+                </td>
+                <td></td>
+            </tr>
+-->
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
 </div>
