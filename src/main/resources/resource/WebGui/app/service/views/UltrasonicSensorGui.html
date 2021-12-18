@@ -31,23 +31,23 @@
                 </td>
             </tr>
             <tr>
-                <td>
-                    &nbsp;<button ng-show="service.controllerName" type="button" class="btn btn-default" ng-click="msg.ping()">single ping</button>
-                </td>
-            </tr>
-            <tr>
-                <td>
+                <td>&nbsp;
                     <button type="button" ng-disabled="!service.isAttached" class="btn btn-default" ng-click="toggleRanging()">
                         <span ng-show="service.isRanging">stop ranging</span>
-                        <span ng-show="!service.isRanging">begin ranging</span>
+                        <span ng-model="service.isRanging" ng-show="!service.isRanging">begin ranging</span>
                     </button>
                  </td>
-                <td>
+                 <td>
                     rate <toggle ng-model="service.useRate" ng-change="toggleRate()" class="miniBTN" on="" off="" size="btn-lg"/></toggle>
                 </td>
                 <td>
                 <input ng-show="service.useRate" type="text" class="form-control small-text-form" ng-model="service.rateHz" ng-change="setRate()"/><label ng-show="service.useRate">&nbsp;hz</label>&nbsp;
                     <!-- button type="button" class="btn btn-default" ng-click="setRate()">set rate</button -->
+                </td>
+            </tr>
+            <tr>
+                <td>&nbsp;&nbsp;&nbsp;
+                    <button type="button" ng-show="!service.isRanging"class="btn btn-default" ng-click="msg.ping()">single ping</button>
                 </td>
             </tr>
 <!--            
