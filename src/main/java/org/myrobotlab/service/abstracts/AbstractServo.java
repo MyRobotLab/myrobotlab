@@ -637,6 +637,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public Double moveToBlocking(Double newPos, Long timeoutMs) {
+    broadcast("publishServoMoveTo", newPos);
     processMove(newPos, true, timeoutMs);
     return mapper.calcInput(currentOutputPos); // should be requested pos -
                                                // unless timeout occured
