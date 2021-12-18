@@ -171,7 +171,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
       log.warn("{}.attachSpeechSynthesis(null)", getName());
       return;
     }
-    mouth.attachSpeechListener(this);
+    mouth.attachSpeechListener(this.getName());
   }
 
   public void attachTextListener(TextListener service) {

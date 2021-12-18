@@ -59,15 +59,7 @@
     <div class="form-group col-md-6">
         <b>route table default</b>
         {{service.routeTable.defaultRoute.destination}}
-
-
-
-
-
-
-
-
-</br>
+<br/>
 <table class="table table-hover">
     <thead>
         <tr>
@@ -89,22 +81,22 @@
 <div class="row">
     <div class="form-group col-md-6">
         <b>channels</b>
-</br>
-<table class="table table-hover">
-    <thead>
-        <tr>
-            <th>remote id</th>
-            <th>gateway type</th>
-            <th>gateway</th>
-            <th>connection id</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr ng-repeat="(id, entry) in connections">
-            <!-- td>{{id}}</td -->
-            <td>{{entry.serializable.id}}</td>
-            <td>
-                <img ng-src="{{'/' + entry.serializable['c-type'] + '.png'}}" width="18"/>{{entry.serializable['c-type']}}
+        <br/>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>remote id</th>
+                    <th>gateway type</th>
+                    <th>gateway</th>
+                    <th>connection id</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="(id, entry) in connections">
+                    <!-- td>{{id}}</td -->
+                    <td>{{entry.serializable.id}}</td>
+                    <td>
+                        <img ng-src="{{'/' + entry.serializable['c-type'] + '.png'}}" width="18"/>{{entry.serializable['c-type']}}
                     
             
             
@@ -114,12 +106,17 @@
             
             
             
-            </td>
-            <td>{{entry.serializable.gateway}}</td>
-            <td>
-                {{id}} 	<span ng-click="msg.removeConnection(id)" class="glyphicon glyphicon-remove"/>
-            </td>
-        </tr>
-    </tbody>
-</table>
-</div></div>
+            
+                    
+                    </td>
+                    <td>{{entry.serializable.gateway}}</td>
+                    <td>
+                        {{id}} 	<span ng-click="msg.removeConnection(id)" class="glyphicon glyphicon-remove"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<br/>
+<h1>HERE {{mrl.possibleAttachServices.UltrasonicSensorController}}</h1>

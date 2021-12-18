@@ -938,7 +938,7 @@ public class Andrew extends Service implements SpeechListener {
     pir.attach(arduino, pirSensorPin);
 
     // attach the speech listener
-    mouth.attachSpeechListener(this);
+    mouth.attachSpeechListener(this.getName());
     
   }
 

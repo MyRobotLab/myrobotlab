@@ -159,17 +159,36 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
   public void attachSpeechControl(SpeechSynthesisControl control);
 
   /**
+   * These are the methods that a speech listener should subscribe to.
+   */
+  public static String[] publishSpeechListenerMethods = new String[] {"publishStartSpeaking", "publishEndSpeaking"};
+  
+  /**
    * Attach a speech listener which gets on started/stopped speaking callbacks.
    * 
-   * @param attachable
+   * @param name
    */
-  default public void attachSpeechListener(Attachable attachable) {
-    addListener("publishStartSpeaking", attachable.getName());
-    addListener("publishEndSpeaking", attachable.getName());
+  default public void attachSpeechListener(String name) {
+    for (String method : publishSpeechListenerMethods) {
+      addListener(method, name);
+    }
+  }
+
+  /**
+   * Detach a speech listener that will remove the listeners for the speech listener methods.
+   * 
+   * @param name
+   */
+  default public void detachSpeechListener(String name) {
+    for (String method : publishSpeechListenerMethods) {
+      removeListener(method, name);
+    }
   }
 
   // All services implement this. 
   public void addListener(String topicMethod, String callbackName);
+  // All services implement this. 
+  public void removeListener(String topicMethod, String callbackName);
   
   /**
    * replace one word with another - instead of "biscuit" say "cookie"

@@ -372,7 +372,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     } else if (attachable instanceof AudioFile) {
       audioFile = (AudioFile) attachable;
     } else if (attachable instanceof SpeechListener) {
-      attachSpeechListener(attachable);
+      attachSpeechListener(attachable.getName());
     } else {
       error("don't know how to attach a %s", attachable.getName());
     }
@@ -443,8 +443,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       log.warn("{}.attachSpeechRecognizer(null)", getName());
       return;
     }
-    addListener("publishStartSpeaking", recognizer.getName());
-    addListener("publishEndSpeaking", recognizer.getName());
+    attachSpeechListener(recognizer.getName());
   }
 
   /**
