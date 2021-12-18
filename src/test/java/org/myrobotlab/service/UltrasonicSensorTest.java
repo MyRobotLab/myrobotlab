@@ -106,8 +106,9 @@ public class UltrasonicSensorTest extends AbstractTest {
   public final void test() throws Exception {
 
     TestCatcher catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
+    Arduino mega = (Arduino) Runtime.start("ultrasonic_arduino", "TestCatcher");
     sensor.addRangeListener(catcher);
-    sensor.attach(port, trigPin, echoPin);
+    sensor.attach(mega, trigPin, echoPin);
     sensor.startRanging();
     log.info("here");
     sensor.stopRanging();
