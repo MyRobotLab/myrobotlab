@@ -51,11 +51,13 @@ public class MarySpeech extends AbstractSpeechSynthesis {
   }
 
   synchronized MaryInterface getMaryTts() {
-    // Lame hacky workaround because of a bug in MarySpeech not being able to parse the java version for java 11
-//    float version = Float.parseFloat(System.getProperty("java.version"));
-    // put a zero on it so mary tts gets it right.
-//    System.setProperty("java.version",Float.toString(version));
-    //  System.err.println(System.getProperty("java.version"));
+    // If the javaVersion is just 2 numbers, like 11, 12,13... we need to add a .0 to it, so that
+    // mary tts will recognize it as being newer than java8..  (lame I know.)
+    String javaVersion = System.getProperty("java.version");
+    if (javaVersion.matches("[1-9][0-9]")) {
+      System.setProperty("java.version",javaVersion + ".0");
+    }
+    
     if (marytts != null) {
       return marytts;
     }
