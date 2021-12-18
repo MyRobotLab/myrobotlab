@@ -286,7 +286,7 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
   }
 
   public void attachSpeechSynthesis(SpeechSynthesis mouth) {
-    mouth.attachSpeechListener(this);
+    mouth.attachSpeechListener(this.getName());
   }
 
   @Override
