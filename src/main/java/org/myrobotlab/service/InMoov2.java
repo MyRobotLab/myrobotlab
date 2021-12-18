@@ -335,9 +335,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   boolean isPirActivated = false;
 
-  boolean isUltraSonicRightActivated = false;
+  boolean isUltrasonicRightActivated = false;
 
-  boolean isUltraSonicLeftActivated = false;
+  boolean isUltrasonicLeftActivated = false;
 
   boolean isServoMixerActivated = false;
 
@@ -834,12 +834,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return isPirActivated;
   }
 
-  public boolean isUltraSonicRightActivated() {
-    return isUltraSonicRightActivated;
+  public boolean isUltrasonicRightActivated() {
+    return isUltrasonicRightActivated;
   }
 
-  public boolean isUltraSonicLeftActivated() {
-    return isUltraSonicLeftActivated;
+  public boolean isUltrasonicLeftActivated() {
+    return isUltrasonicLeftActivated;
   }
   // by default all servos will auto-disable
   // TODO: KW : make peer servo services for InMoov2 have the auto disable
@@ -1781,20 +1781,20 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return rightHand;
   }
 
-  public Double getUltraSonicRightDistance() {
+  public Double getUltrasonicRightDistance() {
     if (ultrasonicRight != null) {
       return ultrasonicRight.range();
     } else {
-      warn("No UltraSonicRight attached");
+      warn("No UltrasonicRight attached");
       return 0.0;
     }
   }
 
-  public Double getUltraSonicLeftDistance() {
+  public Double getUltrasonicLeftDistance() {
     if (ultrasonicLeft != null) {
       return ultrasonicLeft.range();
     } else {
-      warn("No UltraSonicLeft attached");
+      warn("No UltrasonicLeft attached");
       return 0.0;
     }
   }
@@ -2071,7 +2071,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     if (ultrasonicRight == null) {
       speakBlocking(get("STARTINGULTRASONIC"));
-      isUltraSonicRightActivated = true;
+      isUltrasonicRightActivated = true;
 
       ultrasonicRight = (UltrasonicSensor) startPeer("ultrasonicRight");
 
@@ -2089,23 +2089,23 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return ultrasonicRight;
   }
 
-  public UltrasonicSensor startUltraSonicLeft() {
-    return startUltraSonicLeft(null, 64, 63);
+  public UltrasonicSensor startUltrasonicLeft() {
+    return startUltrasonicLeft(null, 64, 63);
   }
 
-  public UltrasonicSensor startUltraSonicRight() {
+  public UltrasonicSensor startUltrasonicRight() {
     return startUltrasonicRight(null, 64, 63);
   }
 
-  public UltrasonicSensor startUltraSonicLeft(String port) {
-    return startUltraSonicLeft(port, 64, 63);
+  public UltrasonicSensor startUltrasonicLeft(String port) {
+    return startUltrasonicLeft(port, 64, 63);
   }
 
-  public UltrasonicSensor startUltraSonicLeft(String port, int trigPin, int echoPin) {
+  public UltrasonicSensor startUltrasonicLeft(String port, int trigPin, int echoPin) {
 
     if (ultrasonicLeft == null) {
       speakBlocking(get("STARTINGULTRASONIC"));
-      isUltraSonicLeftActivated = true;
+      isUltrasonicLeftActivated = true;
 
       ultrasonicLeft = (UltrasonicSensor) startPeer("ultrasonicLeft");
 
@@ -2279,16 +2279,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     isSimulatorActivated = false;
   }
 
-  public void stopUltraSonicRight() {
+  public void stopUltrasonicRight() {
     speakBlocking(get("STOPULTRASONIC"));
     releasePeer("ultrasonicRight");
-    isUltraSonicRightActivated = false;
+    isUltrasonicRightActivated = false;
   }
 
-  public void stopUltraSonicLeft() {
+  public void stopUltrasonicLeft() {
     speakBlocking(get("STOPULTRASONIC"));
     releasePeer("ultrasonicLeft");
-    isUltraSonicLeftActivated = false;
+    isUltrasonicLeftActivated = false;
   }
 
   public void stopPir() {
@@ -2418,6 +2418,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // config.enableNeoPixel = isNeopixelActivated;
     config.enableOpenCV = isOpenCVActivated;
     // config.enablePir = isPirActivated;
+    config.enableUltrasonicRight = isUltrasonicRightActivated;
+    config.enableUltrasonicLeft = isUltrasonicLeftActivated;
     config.enableRightArm = isRightArmActivated;
     config.enableRightHand = isRightHandActivated;
     config.enableRightHandSensors = isRightHandSensorActivated;
@@ -2546,11 +2548,15 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       }
 
       if (config.enableUltrasonicLeft) {
-        startUltraSonicLeft();
+        startUltrasonicLeft();
+      } else {
+        stopUltrasonicLeft();  
       }
 
       if (config.enableUltrasonicRight) {
-        startUltraSonicRight();
+        startUltrasonicRight();
+      } else {
+        stopUltrasonicRight();  
       }
 
       if (config.loadGestures) {
