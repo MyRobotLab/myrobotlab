@@ -1784,7 +1784,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       } else {
         log.error("unknown servo event type {}", eventType);
       }
-      log.info("publishServoEvent deviceId {} event {} currentPos {}", deviceId, eventType, currentPos);
+      log.debug("publishServoEvent deviceId {} event {} currentPos {}", deviceId, eventType, currentPos);
     } else {
       error("no servo found at device id %d", deviceId);
     }

@@ -31,6 +31,7 @@ import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.ServoConfig;
+import org.myrobotlab.service.data.ServoMove;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
@@ -129,7 +130,7 @@ public class Servo extends AbstractServo implements ServoControl {
       return false;
     }
     
-    broadcast("publishServoMoveTo", getTargetOutput());
+    broadcast("publishServoMoveTo", new ServoMove(getName(), newPos));
     
     // TODO: this block isn't tested by ServoTest
     if (isBlocking && blocking) {

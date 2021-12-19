@@ -10,7 +10,7 @@ import org.myrobotlab.service.data.ServoSpeed;
  */
 public interface ServoControlPublisher {
 
-  public ServoMove publishServoMoveTo(Double pos);
+  public ServoMove publishServoMoveTo(ServoMove pos);
 
   public ServoControl publishMoveTo(ServoControl sc);
 

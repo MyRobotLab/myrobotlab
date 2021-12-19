@@ -327,7 +327,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   @Deprecated
   @Override   /* Servos Do Not publish Joint Angles - they only publish their position ! */
   public AngleData publishJointAngle(AngleData angle) {
-    log.info("{}.publishJointAngle({})", getName(), angle);
+    log.debug("{}.publishJointAngle({})", getName(), angle);
     return angle;
   }
 
@@ -729,9 +729,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   }
 
   @Override
-  public ServoMove publishServoMoveTo(Double pos) {
-    log.debug("{}.publishServoMoveTo({})", getName(), pos);
-    return new ServoMove(getName(), pos);
+  public ServoMove publishServoMoveTo(ServoMove move) {
+    log.debug("{}.publishServoMoveTo({})", getName(), move);
+    return move;
   }
 
   @Override
@@ -767,7 +767,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public void rest() {
-    log.info("here");
+    log.info("rest");
     targetPos = rest;
     moveTo(rest);
   }
