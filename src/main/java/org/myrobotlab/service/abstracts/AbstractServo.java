@@ -296,6 +296,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     attach(sc, null, null, null);
   }
 
+  @Deprecated /* setPin then attach(String) */
   public void attach(ServoController sc, Integer pin) {
     attachServoController(sc.getName(), pin, null, null);
   }
@@ -304,6 +305,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     attachServoController(sc.getName(), pin, pos, null);
   }
 
+  @Deprecated /*setPin setPos setSpeed then attach(String)*/
   public void attach(ServoController sc, Integer pin, Double pos, Double speed) {
     attachServoController(sc.getName(), pin, pos, speed);
   }
@@ -312,17 +314,18 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     attachServoController(sc, null, null, null);
   }
 
-  // @Override
+  @Deprecated /*setPin then attach(String)*/
   public void attach(String controllerName, Integer pin) {
     attach(controllerName, pin, null);
   }
 
-  // @Override
+  @Deprecated /*setPin setPos then attach(String)*/
   public void attach(String controllerName, Integer pin, Double pos) {
     attach(controllerName, pin, pos, null);
   }
 
-  @Override
+  @Deprecated
+  @Override   /* Servos Do Not publish Joint Angles - they only publish their position ! */
   public AngleData publishJointAngle(AngleData angle) {
     log.info("{}.publishJointAngle({})", getName(), angle);
     return angle;
@@ -601,8 +604,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
       log.info("will not move to null position - not moving");
       return newPos;
     }
-
-    broadcast("publishServoMoveTo", newPos);
+    
     processMove(newPos, false, null);
     return newPos;
   }
@@ -637,7 +639,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public Double moveToBlocking(Double newPos, Long timeoutMs) {
-    broadcast("publishServoMoveTo", newPos);
     processMove(newPos, true, timeoutMs);
     return mapper.calcInput(currentOutputPos); // should be requested pos -
                                                // unless timeout occured

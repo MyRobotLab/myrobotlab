@@ -1868,7 +1868,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * enough information to correctly create a peer service from this services
    * meta data.
    * 
-   * @param reservedKey
+   * @param reservedKey - key name of peer
    * @return
    */
   public ServiceInterface loadPeer(String reservedKey) {
@@ -2324,7 +2324,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    *  and therefore will be extremely easy to forget to call super
    *  a "framework" method should replace this - so that a
    *  service.detachOutbox()
-   *  calls -> a detach that can be overidden !
+   *  calls -&gt; a detach that can be overidden !
    *          
    */
   @Override

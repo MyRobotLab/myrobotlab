@@ -25,6 +25,7 @@ import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.config.Adafruit16CServoDriverConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.data.ServoMove;
 import org.myrobotlab.service.data.ServoSpeed;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -469,7 +470,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   @Override
-  public void onServoMoveTo(ServoControl servo) {
+  public void onServoMoveTo(ServoMove move) {
+    ServoControl servo = (ServoControl)Runtime.getService(move.name);
     ServoEvent ServoEvent = servoMap.get(servo.getName());
     if (!pwmFreqSet) {
       setPWMFreq(ServoEvent.pin, defaultPwmFreq);

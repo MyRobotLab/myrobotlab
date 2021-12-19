@@ -133,7 +133,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * services which want to know if another service with an interface they are
    * interested in registers or is released
    * 
-   * requestor type -> interface -> set of applicable service names
+   * requestor type &gt; interface &gt; set of applicable service names
    */
   protected final Map<String, Set<String>> interfaceToPossibleServices = new HashMap<>();
 
@@ -3818,16 +3818,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * their requested interfaces - interfaces they are interested in.
    * 
    * This data should be published whenever new "Type" definitions are found
-   * 
-   * @param requestingType
-   *          - service that is requesting FIXME - should not be necessary ...
-   *          should be type
-   * 
+   *  
    * @param targetedInterface
-   *          - interface this
-   * 
+   *          - interface this    
    *          add new interface to requested interfaces - add current names of
    *          services which fulfill that interface "IS ASKING"
+   * 
    */
   public void registerForInterfaceChange(String targetedInterface) {
     // boolean changed

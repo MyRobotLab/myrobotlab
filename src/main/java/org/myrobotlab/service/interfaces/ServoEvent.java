@@ -9,20 +9,19 @@ package org.myrobotlab.service.interfaces;
  *
  */
 public class ServoEvent {
-  // final public ServoStatus state;
   final public String name;
   final public Double pos;
 
-  
-/*  static public enum ServoStatus {
-    SERVO_STARTED, SERVO_STOPPED;
-  }
-  */
-
   public ServoEvent(final String name, final Double pos) {
-    // this.state = state;
     this.name = name;
     this.pos = pos;
+  }
+  
+  public String toString() {
+    if (pos == null) {
+      return String.format("%s null", name);
+    }
+    return String.format("%s %.2f", name, pos);
   }
 
 }

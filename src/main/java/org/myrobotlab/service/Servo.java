@@ -128,6 +128,9 @@ public class Servo extends AbstractServo implements ServoControl {
       log.info("{} is currently blocking - ignoring request to moveTo({})", getName(), newPos);
       return false;
     }
+    
+    broadcast("publishServoMoveTo", getTargetOutput());
+    
     // TODO: this block isn't tested by ServoTest
     if (isBlocking && blocking) {
       // if isBlocking already, and incoming request is a blocking one - we

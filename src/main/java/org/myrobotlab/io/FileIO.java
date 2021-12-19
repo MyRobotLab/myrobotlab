@@ -1578,7 +1578,8 @@ public class FileIO {
   
   /**
    * flips all \ to / or / to \ depending on OS
-   * @param - dirPath non normalized path
+   * 
+   * @param dirPath - non normalized path
    * @return - fixed path
    */
   public static String normalize(String dirPath) {
