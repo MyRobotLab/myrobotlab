@@ -28,7 +28,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
     // set of services that are appropriate to select from to attach 
     // depends on requested and provided interfaces
-    _self.possibleAttachServices = {}
+    _self.interfaceToPossibleServices = {}
 
     // list of callback functions to display images
     let displayCallbacks = []
@@ -1324,7 +1324,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                             }
                         },
 
-                        possibleAttachServices:_self.possibleAttachServices,
+                        interfaceToPossibleServices:_self.interfaceToPossibleServices,
 
                         subscribe: function(data) {
                             if ((typeof arguments[0]) == "string") {
@@ -1467,7 +1467,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             getProperties: _self.getProperties,
             sendMessage: _self.sendMessage, // setViewType: _self.setViewType,
             // getViewType: _self.getViewType
-            possibleAttachServices: _self.possibleAttachServices
+            interfaceToPossibleServices: _self.interfaceToPossibleServices
 
         }
 
