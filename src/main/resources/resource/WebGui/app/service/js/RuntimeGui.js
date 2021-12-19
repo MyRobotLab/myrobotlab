@@ -9,12 +9,6 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         $scope.service = service
         $scope.locale.selected = service.locale.language
         $scope.localeTag.selected = service.locale
-        /*
-        service.serviceData.categoryTypes["show all"] = {
-            "name": "show all",
-            "serviceTypes": []
-        }
-        */
     }
 
     $scope.locales = {}
@@ -99,9 +93,9 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         $scope.newType = serviceType
     }
 
-    $scope.setConfigName = function() {
+    $scope.setConfigName = function(){
         console.info('setConfigName')
-        if ($scope.selectedConfig.length > 0) {
+        if ($scope.selectedConfig.length > 0){
             $scope.service.configName = $scope.selectedConfig[0]
             msg.sendTo('runtime', 'setConfigName', $scope.service.configName)
         }
@@ -137,36 +131,6 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             $scope.registry = data
             //  $scope.$apply()
             break
-//         case 'onInterfaceTypeMatrix':
-//         // FIXME probably don't need this - runtime pre-processes it
-//             $scope.service.interfaceTypeMatrix = data
-//             // $scope.$apply()
-//             break
-        case 'onInterfaceToPossibleServices':
-            $scope.service.requestedInterfaces = data
-            mrl.possibleAttachServices = data
-//             let registry = mrl.getRegistry()
-//             // scan through requested interfaces
-//             for (const serviceName in registry) {
-//                 let s = mrl.getService(serviceName)
-//                 for (const i = 0; i < data.length; ++i) {
-//                     let requested = data[i]
-//                     let typesForTheRequestedInterface = $scope.service.interfaceTypeMatrix[requested]
-
-//                     for (const typeName in typesForTheRequestedInterface) {
-//                         if (s.serviceType.name == typesForTheRequestedInterface) {
-//                             if (!mrl.possibleAttachServices[requested]) {
-//                                 mrl.possibleAttachServices[requested] = []
-//                             }
-//                             mrl.possibleAttachServices[requested].push(serviceName)
-//                         }
-//                     }
-
-//                 }
-//             }
-            $scope.$apply()
-            // $scope.$apply()
-            break
         case 'onLocale':
             $scope.locale.selected = data.language
             $scope.$apply()
@@ -200,11 +164,15 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             $scope.$apply()
             break
 
-        case 'onServiceTypes':
+        case 'onInterfaceToPossibleServices':
+            $scope.interfaceToPossibleServices = data
+            mrl.interfaceToPossibleServices = data
+            break
 
+        case 'onServiceTypes':
             $scope.possibleServices = data
             mrl.setPossibleServices($scope.possibleServices)
-            break
+            break            
 
         case 'onRegistered':
             console.log("onRegistered")
@@ -348,17 +316,16 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.subscribe("getHosts")
     msg.subscribe("publishStatus")
     msg.subscribe('publishConfigList')
-//    msg.subscribe('publishInterfaceTypeMatrix')
     msg.subscribe('publishInterfaceToPossibleServices')
+
 
     //msg.send("getLocalServices")
     msg.send("getConnections")
     msg.send("getServiceTypes")
     msg.send("getLocale")
     msg.send("getLocales")
-//    msg.send("publishInterfaceTypeMatrix")
-    // comes with runtime - needed ? or race condition
     msg.send("publishInterfaceToPossibleServices")
+    
     // msg.send("getHosts")
     msg.subscribe(this)
 }

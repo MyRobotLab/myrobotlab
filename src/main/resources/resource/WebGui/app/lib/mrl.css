@@ -3418,13 +3418,13 @@ background-color: #337ab7!important;
 .servoCursor {
     position: absolute;
     background-color: #666;
-    height: 20px;
-    width: 2px;
-    top: 14px;
+    height: 8px;
+    width: 3px;
+    top: 16px;
 }
 
 .servo-position {
-    margin-top: 48px;
+    margin-top: 60px;
     position: absolute!important;
     top: -21px;
     display: flex;
@@ -3432,7 +3432,7 @@ background-color: #337ab7!important;
     z-index: 44!important;
     /* background-color: #ffffff; */
     pointer-events: none;
-    height: 16px;
+    height: 5px;
     line-height: 16px;
     z-index: 52!important;
     /* margin-left: 2px; */
@@ -3441,10 +3441,10 @@ background-color: #337ab7!important;
 
 .servoOutputCursor {
     position: absolute;
-    background-color: #dcdcdc;
-    height: 13px;
-    width: 2px;
-    top: 13px;
+    background-color: #999999;
+    height: 8px;
+    width: 3px;
+    top: -21px;
 }
 
 .rest-position {
@@ -3466,15 +3466,21 @@ background-color: #337ab7!important;
 .restCursor {
     position: absolute;
     background-color: #e48b53;
-    height: 13px;
-    width: 2px;
-    top: -12px;
+    height: 8px;
+    width: 5px;
+    top: -8px;
+}
+
+.rest-text {
+    position: absolute;
+    margin-top: -10px;
+    font-size: 100%;
 }
 
 
 .servo-move-to-slider {
   -webkit-appearance: none;
-  /*margin-top: 18px;*/
+  margin-top: 1px;
   width: 100%;
   height: 25px;
   background: #8edadd;
@@ -3491,16 +3497,18 @@ background-color: #337ab7!important;
 .servo-move-to-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 10px;
-  height: 30px;
-  background: #169ec6;
+  width: 12px;
+  height: 25px;
+  border-radius: 10px;
+  border: 1px solid #1c676a;
+  background: #6e6c6c;
   cursor: pointer;
 }
 
 .servo-move-to-slider::-moz-range-thumb {
-  width: 10px;
-  height: 30px;
-  background: #169ec6;
+  width: 12px;
+  height: 25px;
+  background: #6e6c6c;
   cursor: pointer;
 }
 
