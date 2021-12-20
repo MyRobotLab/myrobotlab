@@ -26,6 +26,7 @@
 package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.service.data.ServoMove;
 import org.myrobotlab.service.data.ServoSpeed;
 
 public interface ServoController extends Attachable {
@@ -56,9 +57,9 @@ public interface ServoController extends Attachable {
    * ServoControl is passed as a parameter such that the controller can get all
    * the necessary information to process the move correctly
    * 
-   * @param servo - servo reference
+   * @param move - servo reference
    */
-  void onServoMoveTo(ServoControl servo);
+  void onServoMoveTo(ServoMove move);
 
   /**
    * Stop the servo regardless of where it is in its move

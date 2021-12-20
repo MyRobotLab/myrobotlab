@@ -9,20 +9,26 @@ package org.myrobotlab.service.interfaces;
  *
  */
 public class ServoEvent {
-  // final public ServoStatus state;
+  /**
+   * name of the servo this event came from
+   */
   final public String name;
+  /**
+   * I believe this is OUTPUT since it comes from the controller ???
+   * IS IT ALWAYS OUTPUT ?
+   */
   final public Double pos;
 
-  
-/*  static public enum ServoStatus {
-    SERVO_STARTED, SERVO_STOPPED;
-  }
-  */
-
   public ServoEvent(final String name, final Double pos) {
-    // this.state = state;
     this.name = name;
     this.pos = pos;
+  }
+  
+  public String toString() {
+    if (pos == null) {
+      return String.format("%s null", name);
+    }
+    return String.format("%s %.2f", name, pos);
   }
 
 }

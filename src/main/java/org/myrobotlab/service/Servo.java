@@ -31,6 +31,7 @@ import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.ServoConfig;
+import org.myrobotlab.service.data.ServoMove;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
@@ -128,6 +129,10 @@ public class Servo extends AbstractServo implements ServoControl {
       log.info("{} is currently blocking - ignoring request to moveTo({})", getName(), newPos);
       return false;
     }
+    
+    
+    broadcast("publishServoMoveTo", new ServoMove(getName(), newPos, mapper.calcOutput(newPos)));
+    
     // TODO: this block isn't tested by ServoTest
     if (isBlocking && blocking) {
       // if isBlocking already, and incoming request is a blocking one - we
@@ -165,24 +170,8 @@ public class Servo extends AbstractServo implements ServoControl {
       // calculate trajectory calculates and processes this move
       blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentOutputPos(), getTargetOutput(), getSpeed());
     }
-    // grog: I think in the long run this direct call vs using invoke/send is
-    // less preferrable
-    // thinking on a distributed network level you can't do this when the other
-    // thing is in
-    // a different process
-    // This still need adjustment - if we do not mandate jme must be a servo
-    // controller
-    // then this control needs to be able to broadcast "control" angles !!! -
-    // and that
-    // might be without a controller !
-    if (controller == null) { // <-- NOT NEEDED :)
-      log.debug("controller is null");
-      // FIXME - need to still go through the default 'move'
-    } else {
-      broadcast("publishServoMoveTo", this);
-    }
-    // invoke("publishServoMoveTo", this);
-    // broadcastState();
+    
+
     if (isBlocking) {
       // our thread did a blocking call - we will wait until encoder notifies us
       // to continue or timeout (if supplied) has been reached

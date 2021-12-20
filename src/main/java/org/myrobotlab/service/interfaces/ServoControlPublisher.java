@@ -1,5 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
+import org.myrobotlab.service.data.ServoMove;
 import org.myrobotlab.service.data.ServoSpeed;
 
 /**
@@ -9,7 +10,7 @@ import org.myrobotlab.service.data.ServoSpeed;
  */
 public interface ServoControlPublisher {
 
-  public ServoControl publishServoMoveTo(ServoControl sc);
+  public ServoMove publishServoMoveTo(ServoMove pos);
 
   public ServoControl publishMoveTo(ServoControl sc);
 

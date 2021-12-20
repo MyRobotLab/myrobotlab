@@ -44,6 +44,7 @@ import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
+import org.myrobotlab.service.data.ServoMove;
 import org.myrobotlab.service.data.ServoSpeed;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.EncoderController;
@@ -1783,7 +1784,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       } else {
         log.error("unknown servo event type {}", eventType);
       }
-      log.info("publishServoEvent deviceId {} event {} currentPos {}", deviceId, eventType, currentPos);
+      log.debug("publishServoEvent deviceId {} event {} currentPos {}", deviceId, eventType, currentPos);
     } else {
       error("no servo found at device id %d", deviceId);
     }
@@ -1889,16 +1890,17 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    */
   @Override
   // > servoWrite/deviceId/target
-  public void onServoMoveTo(ServoControl servo) {
-    Integer deviceId = getDeviceId(servo);
+  public void onServoMoveTo(ServoMove move) {
+    // ServoControl s = (ServoControl)Runtime.getService(move.name);
+    Integer deviceId = getDeviceId(move.name);
     if (deviceId == null) {
-      log.warn("servoMoveTo servo {} does not have a corresponding device currently - did you attach?", servo.getName());
+      log.warn("servoMoveTo servo {} does not have a corresponding device currently - did you attach?", move.name);
       return;
     }
     // getTargetOutput ALWAYS ALWAYS Degrees !
     // so we convert to microseconds
-    int us = degreeToMicroseconds(servo.getTargetOutput());
-    log.debug("servoMoveToMicroseconds servo {} id {} {}->{} us", servo.getName(), deviceId, servo.getCurrentInputPos(), us);
+    int us = degreeToMicroseconds(move.outputPos);
+    log.debug("servoMoveToMicroseconds servo {} id {} {}->{} us", move.name, deviceId, move.outputPos, us);
     msg.servoMoveToMicroseconds(deviceId, us);
   }
 

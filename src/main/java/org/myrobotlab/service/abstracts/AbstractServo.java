@@ -16,6 +16,7 @@ import org.myrobotlab.sensor.EncoderPublisher;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.data.AngleData;
+import org.myrobotlab.service.data.ServoMove;
 import org.myrobotlab.service.data.ServoSpeed;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
@@ -295,6 +296,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     attach(sc, null, null, null);
   }
 
+  @Deprecated /* setPin then attach(String) */
   public void attach(ServoController sc, Integer pin) {
     attachServoController(sc.getName(), pin, null, null);
   }
@@ -303,6 +305,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     attachServoController(sc.getName(), pin, pos, null);
   }
 
+  @Deprecated /*setPin setPos setSpeed then attach(String)*/
   public void attach(ServoController sc, Integer pin, Double pos, Double speed) {
     attachServoController(sc.getName(), pin, pos, speed);
   }
@@ -311,19 +314,20 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     attachServoController(sc, null, null, null);
   }
 
-  // @Override
+  @Deprecated /*setPin then attach(String)*/
   public void attach(String controllerName, Integer pin) {
     attach(controllerName, pin, null);
   }
 
-  // @Override
+  @Deprecated /*setPin setPos then attach(String)*/
   public void attach(String controllerName, Integer pin, Double pos) {
     attach(controllerName, pin, pos, null);
   }
 
-  @Override
+  @Deprecated
+  @Override   /* Servos Do Not publish Joint Angles - they only publish their position ! */
   public AngleData publishJointAngle(AngleData angle) {
-    log.warn("publishJointAngle(angle)");
+    log.debug("{}.publishJointAngle({})", getName(), angle);
     return angle;
   }
 
@@ -600,8 +604,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
       log.info("will not move to null position - not moving");
       return newPos;
     }
-
-    boolean validMoveRequest = processMove(newPos, false, null);
+    
+    processMove(newPos, false, null);
     return newPos;
   }
 
@@ -677,7 +681,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public EncoderData publishEncoderData(EncoderData data) {
-    log.warn("publishEncoderData(encoderData)");
+    log.debug("{}.publishEncoderData({})", getName(), data);
     return data;
   }
 
@@ -685,7 +689,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * moveTo requests are published through this publishing point
    */
   public ServoControl publishMoveTo(ServoControl sc) {
-    log.warn("publishMoveTo(servo)");
+    log.debug("{}.publishMoveTo()", getName());
     return sc;
   }
 
@@ -704,7 +708,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
              * info - sending whole servo is excessive
              */
   public String publishServoDisable(ServoControl sc) {
-    log.warn("publishServoDisable(name)");
+    log.debug("{}.publishServoDisable()", getName());
     return sc.getName();
   }
 
@@ -713,32 +717,32 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
              * info - sending whole servo is excessive
              */
   public String publishServoEnable(ServoControl sc) {
-    log.warn("publishServoEnable(name)");
+    log.debug("{}.publishServoEnable()", getName());
     return sc.getName();
   }
 
   // TODO: why do we need this method here , invoke message cache misses
   // otherwise.
   public String publishServoEnable(AbstractServo sc) {
-    log.warn("publishServoEnable(servo)");
+    log.debug("{}.publishServoEnable()", getName());
     return publishServoEnable((ServoControl) sc);
   }
 
   @Override
-  public ServoControl publishServoMoveTo(ServoControl sc) {
-    log.warn("publishServoMoveTo(servo)");
-    return sc;
+  public ServoMove publishServoMoveTo(ServoMove move) {
+    log.debug("{}.publishServoMoveTo({})", getName(), move);
+    return move;
   }
 
   @Override
   public ServoSpeed publishServoSetSpeed(ServoControl sc) {
-    log.warn("publishServoSetSpeed(servo)");
+    log.debug("{}.publishServoSetSpeed() {}", getName(), getSpeed());
     return new ServoSpeed(sc.getName(), sc.getSpeed());
   }
 
   @Override
   public ServoControl publishServoStop(ServoControl sc) {
-    log.warn("publishServoStop(servo)");
+    log.debug("{}.publishServoStop()", getName());
     return sc;
   }
 
@@ -763,7 +767,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public void rest() {
-    log.info("here");
+    log.info("rest");
     targetPos = rest;
     moveTo(rest);
   }
@@ -988,7 +992,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public ServoEvent publishServoStarted(String name, Double position) {
-    log.warn("publishServoStarted(name)");
+    log.debug("{}.publishServoStarted({},{})", name, name, position);
     isMoving = true;
     // FIXME currentOutputPos or currentInputPos
     return new ServoEvent(name, position);
@@ -1006,7 +1010,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public ServoEvent publishServoStopped(String name, Double position) {
-    log.warn("publishServoStopped(name, position)");
+    log.debug("publishServoStopped({}, {})", name, position);
 
     // log.info("TIME-ENCODER SERVO_STOPPED - {}", name);
     // if currently configured to autoDisable - the timer starts now
@@ -1055,7 +1059,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public String publishServoEnable(String name) {
-    log.warn("publishServoEnable(name)");
+    log.debug("{}.publishServoEnable()", name);
     return name;
   }
 

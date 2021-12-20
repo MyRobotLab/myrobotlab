@@ -306,7 +306,8 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     assertTrue("isConnected", arduino01.isConnected());
 
     // attach it
-    servo.attach(arduino01, Integer.parseInt(servoPin01));
+    servo.setPin(Integer.parseInt(servoPin01));
+    servo.attach(arduino01);
     sleep(300); // wait for asynchronous creation over serial of an MrlComm
                 // servo
 
