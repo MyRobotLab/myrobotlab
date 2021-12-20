@@ -2070,7 +2070,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public UltrasonicSensor startUltrasonicRight(String port, int trigPin, int echoPin) {
 
     if (ultrasonicRight == null) {
-      speakBlocking(get("STARTINGULTRASONIC"));
+      speakBlocking(get("STARTINGULTRASONICRIGHT"));
       isUltrasonicRightActivated = true;
 
       ultrasonicRight = (UltrasonicSensor) startPeer("ultrasonicRight");
@@ -2104,7 +2104,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public UltrasonicSensor startUltrasonicLeft(String port, int trigPin, int echoPin) {
 
     if (ultrasonicLeft == null) {
-      speakBlocking(get("STARTINGULTRASONIC"));
+      speakBlocking(get("STARTINGULTRASONICLEFT"));
       isUltrasonicLeftActivated = true;
 
       ultrasonicLeft = (UltrasonicSensor) startPeer("ultrasonicLeft");
