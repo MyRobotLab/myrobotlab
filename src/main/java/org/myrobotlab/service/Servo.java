@@ -130,7 +130,8 @@ public class Servo extends AbstractServo implements ServoControl {
       return false;
     }
     
-    broadcast("publishServoMoveTo", new ServoMove(getName(), newPos));
+    
+    broadcast("publishServoMoveTo", new ServoMove(getName(), newPos, mapper.calcOutput(newPos)));
     
     // TODO: this block isn't tested by ServoTest
     if (isBlocking && blocking) {

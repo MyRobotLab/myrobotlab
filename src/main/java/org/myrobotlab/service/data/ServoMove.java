@@ -6,12 +6,27 @@ package org.myrobotlab.service.data;
  *
  */
 public class ServoMove {
-  final public String name;
-  final public Double pos;
+  /**
+   * name of the servo moving
+   */
+  public String name;
+  /**
+   * the target input value sent to the servo
+   */
+  public Double inputPos;
+  /**
+   * the input value after the servos mapper has been applied
+   */
+  public Double outputPos;
   
-  public ServoMove(final String name, final Double pos) {
+  public ServoMove(final String name, final Double inputPos, final Double outputPos) {
     this.name = name;
-    this.pos = pos;
+    this.inputPos = inputPos;
+    this.outputPos = outputPos;
   }
 
+  public String toString() {
+    return String.format("%s inputPos %.2f outputPos %.2f", name, inputPos, outputPos);
+  }
+  
 }

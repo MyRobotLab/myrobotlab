@@ -1891,16 +1891,16 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   // > servoWrite/deviceId/target
   public void onServoMoveTo(ServoMove move) {
-    ServoControl s = (ServoControl)Runtime.getService(move.name);
+    // ServoControl s = (ServoControl)Runtime.getService(move.name);
     Integer deviceId = getDeviceId(move.name);
     if (deviceId == null) {
-      log.warn("servoMoveTo servo {} does not have a corresponding device currently - did you attach?", s.getName());
+      log.warn("servoMoveTo servo {} does not have a corresponding device currently - did you attach?", move.name);
       return;
     }
     // getTargetOutput ALWAYS ALWAYS Degrees !
     // so we convert to microseconds
-    int us = degreeToMicroseconds(s.getTargetOutput());
-    log.debug("servoMoveToMicroseconds servo {} id {} {}->{} us", s.getName(), deviceId, s.getCurrentInputPos(), us);
+    int us = degreeToMicroseconds(move.outputPos);
+    log.debug("servoMoveToMicroseconds servo {} id {} {}->{} us", move.name, deviceId, move.outputPos, us);
     msg.servoMoveToMicroseconds(deviceId, us);
   }
 
