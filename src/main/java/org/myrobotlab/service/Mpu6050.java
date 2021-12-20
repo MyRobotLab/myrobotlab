@@ -3309,7 +3309,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @see MPU6050_RA_PWR_MGMT_1
    * @see MPU6050_PWR1_DEVICE_RESET_BIT
    */
-  void reset() {
+  public void reset() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_DEVICE_RESET_BIT, true);
   }
 
@@ -4531,7 +4531,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 
   public void detach() {
     log.info("detaching");
-    super.detach();
+    // super.detach(); BAD NOT DESIRED
     if (controller != null) {
       detachI2CController(controller);
     }

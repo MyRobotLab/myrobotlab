@@ -88,7 +88,7 @@ public class MouthControl extends Service implements SpeechListener {
       detach(jaw);
     }
     if (mouth != null) {
-      detach(Runtime.getService(mouth.getName()));
+      detach(mouth.getName());
     }
   }
 
