@@ -228,7 +228,7 @@ public class Hd44780 extends Service {
     lcdWrite(cmd, (byte) 0);
   }
 
-  private void lcdWrite(byte cmd, byte mode) {
+  synchronized private void lcdWrite(byte cmd, byte mode) {
     lcdWriteFourBits((byte) (mode | (cmd & 0xF0)));
     lcdWriteFourBits((byte) (mode | ((cmd << 4) & 0xF0)));
     sleep(30); //  heh fun typing effect
