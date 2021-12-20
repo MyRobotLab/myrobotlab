@@ -1,40 +1,44 @@
-<div class="row">
-  <div class="col-lg-12">
-
-   <!-- simple dropdown -->
-  <div class="input-group">
-  
-   <span class="input-group-btn">
-         <button class="btn btn-default" ng-show="!isAttached"  ng-click="msg.attach(controllerName,deviceBus,deviceAddress)">attach</button>  
-         <button class="btn btn-default" ng-show="isAttached"  ng-click="msg.detach(controllerName)">detach</button>
-   </span>
-   
-  <input type="text" ng-readonly="true" class="form-control" ng-model="controllerLabel"><!-- FIXME - type-ahead -->          
-  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
-      <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">{{controllerName}}<span class="caret"></span></a>
-      <ul uib-dropdown-menu>
-        <li ng-repeat="possibleController in controllers" ng-click="setControllerName(possibleController)">{{possibleController}}</li>
-      </ul>
-  </span>
-
-  <input type="text" ng-readonly="true" class="form-control" ng-model="deviceBusLabel"><!-- FIXME - type-ahead -->        
-  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
-      <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">{{deviceBus}}<span class="caret"></span></a>
-      <ul uib-dropdown-menu>
-        <li ng-repeat="possibledeviceBus in deviceBusList" ng-click="setDeviceBus(possibledeviceBus)">{{possibledeviceBus}}</li>
-      </ul>
-  </span>
-  
-  <input type="text" ng-readonly="true" class="form-control" ng-model="deviceAddressLabel"><!-- FIXME - type-ahead -->     
-  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
-    <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">{{deviceAddress}}<span class="caret"></span></a>
-    <ul uib-dropdown-menu>
-    <li ng-repeat="possibleDeviceAddress in deviceAddressList" ng-click="setDeviceAddress(possibleDeviceAddress)">{{possibleDeviceAddress}}</li>
-    </ul>
-  </span>
-
-  </div>
-
-<div>
-  <oscope id="oscope" service-name="{{service.name}}" ></oscope>
-</div>
+<table>
+    <tr>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>
+            <form class="form-inline">
+                <attach options='options'/>
+                bus
+                <select class="form-control" ng-model="service.deviceBus" ng-change="setBus()" ng-options="bus for bus in service.deviceBusList">
+                    <option>{{bus}}</option>
+                </select>
+                address
+                <select class="form-control" ng-model="service.deviceAddress" ng-change="setAddress()" ng-options="address for address in service.deviceAddressList">
+                    <option>{{address}}</option>
+                </select>
+            </form>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <button class="btn btn-default" ng-show="!service.isAttached" ng-click="attach()">attach</button>
+            <button class="btn btn-default" ng-show="service.isAttached" ng-click="msg.detach(service.controllerName)">detach</button>
+        </td>
+    </tr>    
+    <tr>
+        <td>&nbsp;</td>
+    </tr>    
+    <tr ng-show="service.isAttached">
+        <td>
+            <form class="form-inline">
+                <button class="btn btn-default" ng-click="msg.detach(controllerName)">write</button>
+                <input type="text" class="form-control" ng-model="service.trigPin"/>
+                <button class="btn btn-default" ng-click="msg.detach(controllerName)">read</button>
+                <input type="text" readonly="true" ng-readonly="service.isAttached" class="form-control" ng-model="service.trigPin"/>
+            </form>
+        </td>
+    </tr>
+    <tr ng-show="service.isAttached">
+        <td>
+            <oscope id="oscope" service-name="{{service.name}}"></oscope>
+        </td>
+    </tr>
+</table>

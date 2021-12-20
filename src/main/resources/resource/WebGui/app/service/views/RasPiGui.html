@@ -1,50 +1,48 @@
-<div class="row">
-
-    If you will be using I2C GPIO pins make sure you have enabled i2c with raspiconfig
-    <pre>
-        sudo apt-get install -y i2c-tools
-        
-    </pre>
-
-    More recent rasbian distributions require building and installing this library - <a href=https://github.com/WiringPi/WiringPi>https://github.com/WiringPi/WiringPi</a>
-
-    <div class="col-md-3">
-        <b>board type</b>
-        {{service.boardType}}<br/>
-    </div>
-    <div class="col-md-9">&nbsp;</div>
-
-
-    <div class="col-md-1">
-        <button class="form-goup btn btn-default" title="clear consoles" ng-click="scan(service.bus)">scan i2c</button>
-    </div>
-    <div class="col-md-1">
-        <select ng-model="service.bus" class="form-goup form-control" title="format the data recieved as ascii, decimal or hex">
-            <option>0</option>
-            <option>1</option>
-            <option>2</option>
-            <option>3</option>
-            <option>4</option>
-            <option>5</option>
-        </select>
-    </div>
-    
-    <div class="col-md-10">&nbsp;</div>
-    <div class="col-md-1">
-        <b>bus</b><div ng-repeat="(index, pin) in service.validAddresses">{{index}} {{pin}}</div>
-
-    </div>
-    <div class="col-md-11">&nbsp;</div>
-
-
-    <div class="row col-md-4"></div>
-    <div class="row col-md-3"></div>
-    <div class="row col-md-12">
-        <img src="RasPi/raspi-3-pin-out.png" width="400"/>
-    </div>
-    <div class="row col-md-12">
-        <img src="RasPi/raspi-3-model-b-rev-1.2.png" width="400"/>
-    </div>
+<div class="col-md-3">
+    <table>
+        <tr>
+            <td>
+                If you will be using I2C GPIO pins make sure you have enabled 
+     i2c with raspiconfig
+    <pre>sudo apt-get install -y i2c-tools</pre>
+                More recent rasbian distributions require building and installing this library 
+    <a href=https://github.com/WiringPi/WiringPi>https://github.com/WiringPi/WiringPi</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <b>board type</b>
+                {{service.boardType}}<br/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <button class="form-goup btn btn-default" title="clear consoles" ng-click="scan(service.bus)">scan i2c</button>
+                <br/>
+                <select ng-model="service.bus" class="form-goup form-control" title="format the data recieved as ascii, decimal or hex">
+                    <option>0</option>
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                </select>
+                <br/>
+                <b>bus</b>
+                <div ng-repeat="(index, pin) in service.validAddresses">{{index}} {{pin}}</div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <img src="RasPi/raspi-3-pin-out.png" width="400"/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <img src="RasPi/raspi-3-model-b-rev-1.2.png" width="400"/>
+            </td>
+        </tr>
+    </table>
 </div>
 <!-- 
 

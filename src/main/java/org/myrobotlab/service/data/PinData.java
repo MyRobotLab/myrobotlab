@@ -19,16 +19,16 @@ public class PinData implements Serializable {
 
   public PinData(String pin, int value) {
     this.pin = pin;
-    this.value = new Double(value);
+    this.value = (double)value;
   }
 
   public PinData(int pin, int value) {
-    this.pin = String.format("%.2f", pin);
-    this.value = new Double(value);
+    this.pin = String.format("%d", pin);
+    this.value = (double)value;
   }
 
   public PinData(int pin, double value) {
-    this.pin = String.format("%.2f", pin);
+    this.pin = String.format("%d", pin);
     this.value = value;
   }
 
