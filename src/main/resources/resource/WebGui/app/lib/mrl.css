@@ -722,8 +722,6 @@ table, th, td {
     visibility: visible!important;
 }
 
-
-
 .custom-slider2.rzslider .rz-bubble:nth-child(6) {
     bottom: -17px;
     padding: 0px 0px;
@@ -841,7 +839,6 @@ table, th, td {
     z-index: 90;
     background-color: #e48b53;
 }
-
 
 .MixerRow {
     width: 360px;
@@ -1395,9 +1392,9 @@ table, th, td {
 }
 
 .restColor {
-/*    cursor: pointer;*/
+    /*    cursor: pointer;*/
     color: #e48b53;
-/*    font-size: 14px;*/
+    /*    font-size: 14px;*/
     font-weight: bold;
 }
 
@@ -3082,7 +3079,6 @@ background-color: #337ab7!important;
     pointer-events: none;
 }
 
-
 .servoBasic1 {
     width: 350px;
     display: block;
@@ -3096,7 +3092,6 @@ background-color: #337ab7!important;
 .nowrap1 {
     white-space: nowrap;
 }
-
 
 /* base slider style - begin */
 .base-slider {
@@ -3201,9 +3196,7 @@ background-color: #337ab7!important;
 }
 
 /* base slider style - end */
-
 /* rest slider style - begin */
-
 .rest-slider::-webkit-slider-runnable-track {
     height: 10px;
     background: #e48b53;
@@ -3237,9 +3230,7 @@ background-color: #337ab7!important;
 }
 
 /* rest slider style - end */
-
 /* input slider style - begin */
-
 .minX-slider::-webkit-slider-runnable-track {
     margin-top: 28px;
     background: #92ca7f;
@@ -3305,9 +3296,7 @@ background-color: #337ab7!important;
 }
 
 /* input slider style - end */
-
 /* output slider style - begin */
-
 .minY-slider::-webkit-slider-runnable-track {
     margin-top: 28px;
     background: #61b6b9;
@@ -3373,13 +3362,9 @@ background-color: #337ab7!important;
 }
 
 /* output slider style - end */
-
 /* ==================== double slider ====================== */
-
 /* double slider style - begin */
-.
-
-.double-slider-container {
+. .double-slider-container {
     position: relative!important;
     background-color: #92ca7f;
     width: 100%;
@@ -3392,13 +3377,11 @@ background-color: #337ab7!important;
 }
 
 /* double slider style - end */
-
 .align-right {
     text-align: right;
 }
 
 /* ==================== ServoGui begin ====================== */
-
 .servo-control-position {
     margin-top: 2px;
     position: absolute!important;
@@ -3477,39 +3460,38 @@ background-color: #337ab7!important;
     font-size: 100%;
 }
 
-
 .servo-move-to-slider {
-  -webkit-appearance: none;
-  margin-top: 1px;
-  width: 100%;
-  height: 25px;
-  background: #8edadd;
-  outline: none;
-  opacity: 0.7;
-  -webkit-transition: .2s;
-  transition: opacity .2s;
+    -webkit-appearance: none;
+    margin-top: 1px;
+    width: 100%;
+    height: 25px;
+    background: #8edadd;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
 }
 
 .servo-move-to-slider:hover {
-  opacity: 1;
+    opacity: 1;
 }
 
 .servo-move-to-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 12px;
-  height: 25px;
-  border-radius: 10px;
-  border: 1px solid #1c676a;
-  background: #6e6c6c;
-  cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 25px;
+    border-radius: 10px;
+    border: 1px solid #1c676a;
+    background: #6e6c6c;
+    cursor: pointer;
 }
 
 .servo-move-to-slider::-moz-range-thumb {
-  width: 12px;
-  height: 25px;
-  background: #6e6c6c;
-  cursor: pointer;
+    width: 12px;
+    height: 25px;
+    background: #6e6c6c;
+    cursor: pointer;
 }
 
 .servo-input-limit {
@@ -3539,7 +3521,6 @@ background-color: #337ab7!important;
 
 /* ==================== ServoGui end ====================== */
 /* ==================== UltrasonicSensor begin ====================== */
-
 .output {
     color: #666;
     font-size: 40px;
@@ -3548,8 +3529,11 @@ background-color: #337ab7!important;
 .center {
     text-align: center;
 }
-/* ==================== UltrasonicSensor end ====================== */
 
+/* ==================== UltrasonicSensor end ====================== */
 .small-text-form {
     width: 50px;
 }
+
+table.padded-table td { padding:2px; }
+

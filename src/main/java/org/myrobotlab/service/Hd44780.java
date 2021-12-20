@@ -139,14 +139,22 @@ public class Hd44780 extends Service {
     broadcastState();
   }
 
+  public void reset() {
+    init();
+  }
+  
+
   /**
    * clear lcd and set to home
    */
   public void clear() {
+    if (!initialized) {
+      init();
+    }
     lcdWrite((byte) LCD_CLEARDISPLAY);
     lcdWrite((byte) LCD_RETURNHOME);
     screenContent.clear();
-    log.info("LCD content cleared");
+    log.info("lcd cleared");
   }
 
   /**
@@ -159,6 +167,9 @@ public class Hd44780 extends Service {
    * 
    */
   public void display(String string, int line) {
+    if (!initialized) {
+      init();
+    }
     screenContent.put(line, string);
     broadcastState();
     switch (line) {
@@ -175,7 +186,7 @@ public class Hd44780 extends Service {
         lcdWrite((byte) 0xD4);
         break;
       default:
-        error("valid line values are 0 - 4");
+        error("line %d is invalid, valid line values are 0 - 3");
     }
 
     for (int i = 0; i < string.length(); i++) {
@@ -191,9 +202,9 @@ public class Hd44780 extends Service {
    * INIT LCD panel
    */
   public void init() {
-    if (initialized) {
-      log.warn("already initialized");
-      return;
+
+    if (!isAttached) {
+      warn("must be attached to initialize");
     }
     log.info("Init I2C Display");
     lcdWrite((byte) 0x03);
@@ -217,9 +228,10 @@ public class Hd44780 extends Service {
     lcdWrite(cmd, (byte) 0);
   }
 
-  private void lcdWrite(byte cmd, byte mode) {
+  synchronized private void lcdWrite(byte cmd, byte mode) {
     lcdWriteFourBits((byte) (mode | (cmd & 0xF0)));
     lcdWriteFourBits((byte) (mode | ((cmd << 4) & 0xF0)));
+    sleep(30); //  heh fun typing effect
   }
 
   private void lcdWriteFourBits(byte data) {

@@ -32,21 +32,22 @@ pcf.attach(raspi)
 #################################################################
 # Next start the Hd44780 service                                #
 #################################################################
-hd44780 = Runtime.start("hd44780","Hd44780")
+lcd = Runtime.start("lcd","Hd44780")
  
 # Once the service has been started, we need to attach it to
 # the PCF service
-hd44780.attach(pcf)
+lcd.attach(pcf)
  
 # this will initalise the display.
-hd44780.init()
+# not needed now unless you want to manually reset
+# lcd.reset() 
  
 # when we want to clear the screen call this
-hd44780.clear()
+lcd.clear()
  
 # You can turn the backlight on or off.
 # True will turn it on, False will turn it off.
-hd44780.setBackLight(True)
+lcd.setBackLight(True)
  
 # Filally to send text to the display
-hd44780.display("Hello World", 0)
+lcd.display("Hello World", 0)

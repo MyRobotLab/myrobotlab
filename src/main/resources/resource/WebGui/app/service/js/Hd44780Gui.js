@@ -32,6 +32,8 @@ angular.module('mrlapp.service.Hd44780Gui', []).controller('Hd44780GuiCtrl', ['$
         let data = inMsg.data[0]
         
         switch (inMsg.method) {
+        case 'onStatus':
+            break
         case 'onState':
             _self.updateState(data)
             $scope.$apply()
@@ -51,7 +53,7 @@ angular.module('mrlapp.service.Hd44780Gui', []).controller('Hd44780GuiCtrl', ['$
         msg.send("clear")
         var lines = textArea.split('\n')
         for (var i = 0; i < lines.length && i < 4; i++) {
-            msg.send("display", lines[i], i + 1)
+            msg.send("display", lines[i], i)
             //console.info("Hd44780 Msg send !")
         }
     }
@@ -76,6 +78,15 @@ angular.module('mrlapp.service.Hd44780Gui', []).controller('Hd44780GuiCtrl', ['$
     $scope.detach = function() {
         msg.send("detach")
     }
+
+    $scope.clear = function() {
+        msg.send("clear")
+    }
+
+    $scope.reset = function() {
+        msg.send("reset")
+    }
+    
 
     // subscribe to the response
     msg.subscribe(this)
