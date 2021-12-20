@@ -246,37 +246,37 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacpp</artifactId>
-    <version>1.5.5</version>
+    <version>1.5.6</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>openblas</artifactId>
-    <version>0.3.13-1.5.5</version>
+    <version>0.3.17-1.5.6</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-core</artifactId>
-    <version>1.0.0-M1</version>
+    <version>1.0.0-M1.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-zoo</artifactId>
-    <version>1.0.0-M1</version>
+    <version>1.0.0-M1.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-nn</artifactId>
-    <version>1.0.0-M1</version>
+    <version>1.0.0-M1.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-modelimport</artifactId>
-    <version>1.0.0-M1</version>
+    <version>1.0.0-M1.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -289,7 +289,7 @@
   <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-platform</artifactId>
-    <version>1.0.0-M1</version>
+    <version>1.0.0-M1.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -424,13 +424,6 @@
 
 <!-- IntegratedMovement begin -->
 <!-- skipping fr.inmoov inmoov2 fr.inmoov-inmoov2-null null version/latest -->
-  <dependency>
-    <groupId>inmoov.fr</groupId>
-    <artifactId>jm3-model</artifactId>
-    <version>1.0.0</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
 <!-- IntegratedMovement end -->
 
 <!-- JFugue begin -->
@@ -976,7 +969,7 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv-platform</artifactId>
-    <version>1.5.5</version>
+    <version>1.5.6</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -1349,13 +1342,13 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract</artifactId>
-    <version>4.1.1-1.5.5</version>
+    <version>4.1.1-1.5.6</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract-platform</artifactId>
-    <version>4.1.1-1.5.5</version>
+    <version>4.1.1-1.5.6</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
