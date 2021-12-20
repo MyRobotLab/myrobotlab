@@ -162,8 +162,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
         case 'onServoMoveTo':
             if (!$scope.disableServicePosUpdates) {
                 // if the user is not controlling the slider - let the servo service
-                if (data.pos) {
-                    $scope.service.targetPos = data.pos.toFixed(0)
+                if (data.inputPos) {
+                    $scope.service.targetPos = data.inputPos.toFixed(0)
                     $scope.$apply()
 
                 }
