@@ -120,10 +120,10 @@ pipeline {
       } // stage compile
       
       stage('javadoc') {
-         when {
-                 // expression { params.javadoc == 'true' }
-                 expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }
-         }
+         // when {
+         //         // expression { params.javadoc == 'true' }
+         //         expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }
+         // }
          steps {
             script {
                if (isUnix()) {
