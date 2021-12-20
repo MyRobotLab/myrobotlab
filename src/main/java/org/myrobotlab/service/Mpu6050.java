@@ -3305,9 +3305,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * Trigger a full device reset. A small delay of ~50ms may be desirable after
    * triggering a reset.
-   * 
-   * @see MPU6050_RA_PWR_MGMT_1
-   * @see MPU6050_PWR1_DEVICE_RESET_BIT
    */
   public void reset() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_DEVICE_RESET_BIT, true);
