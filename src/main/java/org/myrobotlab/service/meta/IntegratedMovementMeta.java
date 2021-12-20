@@ -26,9 +26,10 @@ public class IntegratedMovementMeta extends MetaData {
     addCategory("robot", "control");
     addPeer("openni", "OpenNi", "Kinect service");
     addDependency("fr.inmoov", "inmoov2", null, "zip");
-    addDependency("inmoov.fr", "jm3-model", "1.0.0", "zip");
+    // This is the old inmoov1 model.  Commenting this out
+    // TODO: revisit integrated movement after  InMoov2 migration.
+    // addDependency("inmoov.fr", "jm3-model", "1.0.0", "zip");
     setAvailable(true);
-
   }
 
 }

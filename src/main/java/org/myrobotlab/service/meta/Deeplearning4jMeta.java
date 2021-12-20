@@ -19,7 +19,7 @@ public class Deeplearning4jMeta extends MetaData {
   public Deeplearning4jMeta(String name) {
 
     super(name);
-    String dl4jVersion = "1.0.0-M1";
+    String dl4jVersion = "1.0.0-M1.1";
 
     boolean cudaEnabled = Boolean.valueOf(System.getProperty("gpu.enabled", "false"));
     boolean supportRasPi = false;
@@ -28,8 +28,8 @@ public class Deeplearning4jMeta extends MetaData {
     addCategory("ai");
 
     // Force javacpp 1.5.3 to resolve conflict between dl4j and javacv
-    addDependency("org.bytedeco", "javacpp", "1.5.5");
-    addDependency("org.bytedeco", "openblas", "0.3.13-" + "1.5.5");
+    addDependency("org.bytedeco", "javacpp", "1.5.6");
+    addDependency("org.bytedeco", "openblas", "0.3.17-" + "1.5.6");
 
     // dl4j deps.
     addDependency("org.deeplearning4j", "deeplearning4j-core", dl4jVersion);
