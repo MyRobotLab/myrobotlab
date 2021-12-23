@@ -10,6 +10,9 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.Hd44780Config;
+import org.myrobotlab.service.config.Pcf8574Config;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.slf4j.Logger;
 
@@ -315,5 +318,33 @@ public class Hd44780 extends Service {
       log.error("main threw", e);
     }
 
+  }
+  
+  @Override
+  public ServiceConfig getConfig() {
+    Hd44780Config config = new Hd44780Config();
+    if (pcfName != null) {      
+      config.controller = pcfName;
+    }
+    config.backlight = backLight;
+    return config;
+  }
+
+  @Override
+  public ServiceConfig load(ServiceConfig c) {
+    Hd44780Config config = (Hd44780Config) c;
+    
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch(Exception e) {
+        error(e);
+      }
+    }
+    
+    if (config.backlight != null && config.backlight) {
+      setBackLight(config.backlight);
+    }
+    return c;
   }
 }

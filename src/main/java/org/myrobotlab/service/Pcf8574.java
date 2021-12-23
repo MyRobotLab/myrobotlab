@@ -217,13 +217,13 @@ public class Pcf8574 extends Service
     attachI2CController(controller);
   }
 
-  @Override
+//  @Override
   public void attachPinArrayListener(PinArrayListener listener) {
     pinArrayListeners.put(listener.getName(), listener);
 
   }
 
-  @Override
+  // @Override
   public void attachPinListener(PinListener listener, int address) {
     attach(listener, String.format("%d", address));
   }
