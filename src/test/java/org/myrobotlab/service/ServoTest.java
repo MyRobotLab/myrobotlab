@@ -36,7 +36,7 @@ public class ServoTest extends AbstractTest {
 
   @Before /* start initial state */
   public void setUp() throws Exception {
-    servo01 = (Servo) Runtime.start("s1", "Servo");
+    servo01 = (Servo) Runtime.start("s3", "Servo");
     arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     arduino01.connect(port01);
     servo01.setPin(3);
