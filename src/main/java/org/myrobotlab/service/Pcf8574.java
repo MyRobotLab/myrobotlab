@@ -227,6 +227,11 @@ public class Pcf8574 extends Service
   public void attachPinListener(PinListener listener, int address) {
     attach(listener, String.format("%d", address));
   }
+  
+  @Deprecated /* remove */
+  public void attach(PinListener listener, int pin) {
+    attach(listener, String.format("%d", pin));
+  }
 
   public void attach(PinListener listener, String pin) {
     String name = listener.getName();
