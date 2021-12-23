@@ -375,15 +375,17 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     addListener("publishServoDisable", sc);
     controller = sc;
 
+    ServoController servoController = (ServoController)Runtime.getService(sc);
+    servoController.attachServoControl(this);
     // FIXME - remove !!!
     // FIXME change to broadcast ?
     // TODO: there is a race condition here.. we need to know that
     // the servo control ackowledged this.
-    try {
-      sendBlocking(sc, "attachServoControl", this); // <-- change to broadcast ?
-    } catch (Exception e) {
-      log.error("sendBlocking attachServoControl threw", e);
-    }
+//    try {
+//      sendBlocking(sc, "attachServoControl", this); // <-- change to broadcast ?
+//    } catch (Exception e) {
+//      log.error("sendBlocking attachServoControl threw", e);
+//    }
     // TOOD: we need to wait here for the servo controller to acknowledge that
     // it was attached.
 
