@@ -222,13 +222,18 @@ public class Pcf8574 extends Service
     pinArrayListeners.put(listener.getName(), listener);
 
   }
+  
+  @Deprecated /* remove ! use attachPinArrayListener */
+  public void attach(PinArrayListener listener) {
+    attachPinArrayListener(listener);
+  }
 
   // @Override
   public void attachPinListener(PinListener listener, int address) {
     attach(listener, String.format("%d", address));
   }
   
-  @Deprecated /* remove */
+  @Deprecated /* remove use attachPinListener */
   public void attach(PinListener listener, int pin) {
     attach(listener, String.format("%d", pin));
   }
