@@ -15,6 +15,8 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.Pcf8574Config;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -216,13 +218,13 @@ public class Pcf8574 extends Service
   }
 
   @Override
-  public void attach(PinArrayListener listener) {
+  public void attachPinArrayListener(PinArrayListener listener) {
     pinArrayListeners.put(listener.getName(), listener);
 
   }
 
   @Override
-  public void attach(PinListener listener, int address) {
+  public void attachPinListener(PinListener listener, int address) {
     attach(listener, String.format("%d", address));
   }
 
@@ -264,7 +266,7 @@ public class Pcf8574 extends Service
 
   @Deprecated /* use attach(String) */
   public void attach(String listener, int pinAddress) {
-    attach((PinListener) Runtime.getService(listener), pinAddress);
+    attachPinListener((PinListener) Runtime.getService(listener), pinAddress);
   }
 
   @Deprecated /* use attach(String) */
@@ -307,6 +309,12 @@ public class Pcf8574 extends Service
     }
 
     return pinMap;
+  }
+  
+  public void detach() {
+    if (controller != null) {
+      detachI2CController(controller);
+    }
   }
 
   @Override
@@ -667,5 +675,39 @@ public class Pcf8574 extends Service
       log.error("main threw", e);
     }
   }
+  
+  @Override
+  public ServiceConfig getConfig() {
+
+    Pcf8574Config config = new Pcf8574Config();
+    config.address = deviceAddress;
+    config.bus = deviceBus;
+    if (controller != null) {      
+      config.controller = controllerName;
+    }
+
+    return config;
+  }
+
+  @Override
+  public ServiceConfig load(ServiceConfig c) {
+    Pcf8574Config config = (Pcf8574Config) c;
+    if (config.address != null) {
+      setAddress(config.address);
+    }
+    if (config.bus != null) {
+      setBus(config.bus);
+    }
+    
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch(Exception e) {
+        error(e);
+      }
+    }
+    return c;
+  }
+  
 
 }
