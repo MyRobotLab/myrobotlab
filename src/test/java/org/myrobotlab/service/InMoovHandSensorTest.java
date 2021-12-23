@@ -52,7 +52,7 @@ public class InMoovHandSensorTest {
 
     Thread.sleep(1000);
 
-    ard.attach((PinArrayListener) leftHand);
+    ard.attachPinArrayListener((PinArrayListener) leftHand);
 
     leftHand.sensorsEnabled = true;
 

@@ -210,7 +210,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   public void digitalWrite(int pin, int value) {
     log.info("digitalWrite {} {}", pin, value);
     // msg.digitalWrite(pin, value);
-    PinDefinition pinDef = pinIndex.get(pin);
+    PinDefinition pinDef = addressIndex.get(pin);
     GpioPinDigitalMultipurpose gpio = ((GpioPinDigitalMultipurpose) pinDef.getPinImpl());
     if (value == 0) {
       gpio.low();
@@ -222,10 +222,10 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
 
   @Override
   public void disablePin(int address) {
-    PinDefinition pin = pinIndex.get(address);
+    PinDefinition pin = addressIndex.get(address);
     pin.setEnabled(false);
     ((GpioPinDigitalMultipurpose) pin.getPinImpl()).removeListener();
-    PinDefinition pinDef = pinIndex.get(address);
+    PinDefinition pinDef = addressIndex.get(address);
     invoke("publishPinDefinition", pinDef);
   }
 
@@ -236,7 +236,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
 
   @Override
   public void enablePin(int address, int rate) {
-    PinDefinition pinDef = pinIndex.get(address);
+    PinDefinition pinDef = addressIndex.get(address);
     GpioPinDigitalMultipurpose gpio = ((GpioPinDigitalMultipurpose) pinDef.getPinImpl());
     gpio.addListener(this);
     pinDef.setEnabled(true);
@@ -271,8 +271,8 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
         pindef.setAnalog(true);
       }
 
-      pinIndex.put(pin.getAddress(), pindef);
-      pinMap.put(pin.getName(), pindef);
+      addressIndex.put(pin.getAddress(), pindef);
+      pinIndex.put(pin.getName(), pindef);
 
       // GpioPinDigitalInput provisionedPin = gpio.provisionDigitalInputPin(pin,
       // pull);
@@ -282,7 +282,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       // collection
     }
 
-    return new ArrayList<PinDefinition>(pinIndex.values());
+    return new ArrayList<PinDefinition>(addressIndex.values());
   }
 
   /**
@@ -381,7 +381,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
 
   public void pinMode(int pin, int mode) {
 
-    PinDefinition pinDef = pinIndex.get(pin);
+    PinDefinition pinDef = addressIndex.get(pin);
     if (mode == INPUT) {
       pinDef.setPinImpl(gpio.provisionDigitalMultipurposePin(RaspiPin.getPinByAddress(pin), PinMode.DIGITAL_INPUT));
     } else {
@@ -511,7 +511,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   @Override
   public void write(int address, int value) {
 
-    PinDefinition pinDef = pinIndex.get(address);
+    PinDefinition pinDef = addressIndex.get(address);
     pinMode(address, Arduino.OUTPUT);
     digitalWrite(address, value);
     // cache value

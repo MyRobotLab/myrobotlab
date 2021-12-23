@@ -43,7 +43,10 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.HttpData;
+import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.HttpDataListener;
+import org.myrobotlab.service.interfaces.PinArrayListener;
+import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -55,7 +58,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class TestCatcher extends Service implements SerialDataListener, HttpDataListener {
+public class TestCatcher extends Service implements SerialDataListener, HttpDataListener, PinArrayListener, PinListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -86,6 +89,14 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   public Set<String> onReleased = new HashSet<>();
 
   public Set<String> onStopped = new HashSet<>();
+
+  public Set<PinData[]> pinSet = new HashSet<>();
+
+  public String[] activePins = null;
+
+  public PinData pinData = null;
+
+  public String pin;
 
   /**
    * awesome override to simulate remote services - e.g. in
@@ -136,8 +147,13 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     }
   }
 
+  /**
+   * put all recv structures here to clear
+   */
   public void clear() {
     msgs.clear();
+    pinData = null;
+    pinSet.clear();
   }
 
   public Message getMsg(long timeout) throws InterruptedException {
@@ -473,6 +489,48 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   public void onReleased(String serviceName) {
     onReleased.add(serviceName);
+  }
+
+  @Override
+  public void onPinArray(PinData[] pindata) {
+    log.info("onPinArray {}", pinData);
+    pinSet.add(pindata);
+  }
+
+  public void setActivePins(String[] activePins) {
+    this.activePins = activePins;
+  }
+
+  @Override
+  public String[] getActivePins() {
+    return activePins;
+  }
+
+  @Override
+  public void onPin(PinData pinData) {
+    log.info("onPin {}", pinData);
+    this.pinData = pinData;
+  }
+
+  @Override
+  public void setPin(String pin) {
+    this.pin = pin;
+  }
+
+  @Override
+  public String getPin() {
+    return pin;
+  }
+
+  public boolean containsPinArrayFromPin(String pin) {
+    for (PinData[] pa : pinSet) {
+      for (PinData pd : pa) {
+        if (pin.equals(pd.pin)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
 }

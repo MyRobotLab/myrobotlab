@@ -63,7 +63,7 @@ import org.slf4j.Logger;
  * 
  */
 
-abstract public class AbstractMotor extends Service implements MotorControl, EncoderListener, PinListener {
+abstract public class AbstractMotor extends Service implements MotorControl, EncoderListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -340,27 +340,6 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     publisher.detachAnalogListener(this);
   }
 
-  @Deprecated /*
-               * I think this was an attempt to control via an analog pin -
-               * should be updated to use attachAnalogPublisher
-               */
-  public void onPin(PinData data) {
-    Double pwr = null;
-    pwr = data.value.doubleValue();
-    move(pwr);
-  }
-
-  public void attach(PinDefinition pindef) {
-    // SINGLE PIN MAN !! not ALL PINS !
-    // must be local now :P
-    // FIXME this "should" be cable of adding vi
-    // e.g send(pindef.getName(), "attach", getName(), pindef.getAddress());
-    // attach(pindef.getName(), pindef.getAddress)
-    PinArrayControl pac = (PinArrayControl) Runtime.getService(pindef.getName());
-    pac.attach(this, pindef.getAddress());
-    // subscribe(pindef.getName(), "publishPin", getName(), "move");
-  }
-
   public void attach(ButtonDefinition buttondef) {
     subscribe(buttondef.getName(), "publishButton", getName(), "move");
   }
@@ -412,7 +391,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   public void detach() {
-    super.detach();
+    // super.detach(); BAD NOT DESIRED !
     if (controller != null) {
       detach(controller.getName());
     }

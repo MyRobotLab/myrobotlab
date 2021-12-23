@@ -340,11 +340,11 @@ public class Bno055 extends Service implements I2CControl, PinListener {
 
   private PinArrayControl pinControl = null;
 
-  private Integer pin = null;
+  private String pin = null;
 
-  private boolean isEnabled = false;
+  protected boolean isEnabled = false;
 
-  public boolean isActive = false;
+  protected boolean isActive = false;
 
   public class Bno055Data {
     public double w;
@@ -1495,8 +1495,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
 
   public void attachInterruptPin(PinArrayControl control, int pin) {
     pinControl = control;
-    this.pin = pin;
-    control.attach(this, pin);
+    this.pin = String.format("%d", pin);
+    control.attachPinListener(this, pin);
   }
 
   @Override
@@ -1693,6 +1693,16 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   @Override
   public String getAddress() {
     return deviceAddress;
+  }
+
+  @Override
+  public void setPin(String pin) {
+    this.pin = pin;
+  }
+
+  @Override
+  public String getPin() {
+    return pin;
   }
 
 }

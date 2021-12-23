@@ -42,7 +42,7 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 
   boolean canWrite = true;
 
-  Double value;
+  Integer value;
 
   transient Object pinImpl;
 
@@ -60,12 +60,8 @@ public class PinDefinition extends SensorDefinition implements Serializable {
     return value.intValue();
   }
 
-  public void setValue(Double value) {
-    this.value = value;
-  }
-
   public void setValue(int value) {
-    this.value = new Double(value);
+    this.value = value;
   }
 
   public String getPinName() {
