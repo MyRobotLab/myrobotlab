@@ -250,7 +250,7 @@ public class ServoTest extends AbstractTest {
     long start = System.currentTimeMillis();
     servo01.moveToBlocking(180.0);
     long delta = System.currentTimeMillis() - start;
-    assertTrue("Move to blocking should have taken more than 3 seconds.", delta > 3000);
+    assertTrue("Move to blocking should have taken more than 3 seconds time was " + delta, delta > 3000);
     // log.info("Move to blocking took {} milliseconds", delta);
     assertTrue("Servo should be ebabled", servo01.isEnabled());
     assertFalse("Servo should not be moving now.", servo01.isMoving());

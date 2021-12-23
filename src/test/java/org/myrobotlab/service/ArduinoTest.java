@@ -73,7 +73,7 @@ public class ArduinoTest extends AbstractTest {
 
   @Before
   public void setUp() throws Exception {
-    arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
+    arduino01 = (Arduino) Runtime.start("arduino03", "Arduino");
     catcher = (TestCatcher) Runtime.start("arduinoTestCatcher", "TestCatcher");
     arduino01.connect(port01);
     assertTrue(String.format("arduino could not connect to port %s", port01), arduino01.isConnected());
