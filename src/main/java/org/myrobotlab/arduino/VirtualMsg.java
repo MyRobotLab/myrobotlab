@@ -1914,8 +1914,10 @@ public class VirtualMsg {
   
 
   public void add(int value) {
-    sendBuffer[sendBufferSize] = (value & 0xFF);
-    sendBufferSize += 1;
+    // this explodes - sendBufferSize increases forever ... duh index not valid
+    // is this suppose to be round robin buffer ?
+    // sendBuffer[sendBufferSize] = (value & 0xFF);
+    // sendBufferSize += 1;
   }
   
   public int[] getBuffer() {    
