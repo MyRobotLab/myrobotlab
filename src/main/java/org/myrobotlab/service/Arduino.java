@@ -111,6 +111,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   public static final int MRL_IO_SERIAL_3 = 4;
   public static final int OUTPUT = 0x1;
+  public static final int PULLUP = 0x2;
 
   private static final long serialVersionUID = 1L;
 
@@ -206,10 +207,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     // get list of board types
     getBoardTypes();
 
-    // FIXME - load from unzipped resource directory ? - no more jar access like
-    // below
-    String mrlcomm = FileIO.resourceToString("Arduino/MrlComm/MrlComm.ino");
-
     // add self as an attached device
     // to handle pin events
     attachDevice(this, (Object[]) null);
@@ -219,6 +216,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public void analogWrite(int address, int value) {
     log.info("analogWrite({},{})", address, value);
     msg.analogWrite(address, value);
+    PinDefinition pinDef = addressIndex.get(address);
+    pinDef.setValue(value);
   }
 
   public void analogWrite(String pin, Integer value) {
@@ -1023,11 +1022,17 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
         PinDefinition pindef = new PinDefinition(getName(), i);
         // begin wacky pin def logic
         String pinName = null;
-        if (i == 0) {
+        if (i == 0  || i == 15 || i == 17 || i == 19 ) {
           pindef.setRx(true);
         }
-        if (i == 1) {
+        if (i == 1 || i == 14 || i == 16 || i == 18 ) {
           pindef.setTx(true);
+        }
+        if (i == 20 ) {
+          pindef.setSda(true);
+        }
+        if (i == 21 ) {
+          pindef.setScl(true);
         }
         if (i < 1 || (i > 13 && i < 54)) {
           pinName = String.format("D%d", i);
@@ -1466,7 +1471,14 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * // > pinMode/pin/mode
    */
   public void pinMode(int address, String modeStr) {
-    pinMode(address, modeStr.equalsIgnoreCase("INPUT") ? Arduino.INPUT : Arduino.OUTPUT);
+    if (modeStr.equalsIgnoreCase("OUTPUT")) {
+      pinMode(address, Arduino.OUTPUT);
+    } else if (modeStr.equalsIgnoreCase("PULLUP")) {
+      pinMode(address, Arduino.PULLUP);
+    }else {
+      // default arduino pin mode
+      pinMode(address, Arduino.INPUT);
+    }
   }
 
   // the "important pinMode" - with types Arduino supports
@@ -2257,7 +2269,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
       Arduino hub = (Arduino) Runtime.start("hub", "Arduino");
 
-      hub.connect("/dev/ttyACM2");
+      hub.connect("/dev/ttyACM0");
       Runtime.start("webgui", "WebGui");
       
 

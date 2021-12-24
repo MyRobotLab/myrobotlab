@@ -1,5 +1,5 @@
-angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
-    $log.info('ArduinoGuiCtrl')
+angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$scope', 'mrl', function($scope, mrl) {
+    console.info('ArduinoGuiCtrl')
     var _self = this
     var msg = this.msg
     $scope.editor = null
@@ -51,6 +51,11 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
             $scope.versionStatus = " with firmware version " + service.mrlCommVersion
         } else {
             $scope.versionStatus = null
+        }
+
+        for (const [pin, pinDef] of Object.entries(service.addressIndex)) {
+            pinDef.readWrite = (pinDef.mode == 'OUTPUT')?true:false
+            pinDef.valueDisplay = (pinDef.value == 0)?false:true
         }
     }
 
@@ -194,9 +199,27 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
 
     $scope.aceChanged = function(e) {}
 
-    $scope.oink = function(e) {
-        $log.info('hello')
+    $scope.readWrite = function(pinDef) {
+        console.info(pinDef)
+        msg.send('pinMode', pinDef.pin, pinDef.readWrite?'OUTPUT':'INPUT')
     }
+
+    $scope.write = function(pinDef) {
+        console.info(pinDef)
+        msg.send('digitalWrite', pinDef.pin, pinDef.valueDisplay?1:0)
+    }
+
+    $scope.pwm = function(pinDef) {
+        console.info(pinDef)
+        msg.send('analogWrite', pinDef.pin, pinDef.value)
+    }
+
+    $scope.inputMode = function(pinDef) {
+        console.info(pinDef)
+        msg.send('pinMode', pinDef.pin, pinDef.inputModeDisplay?'PULLUP':'INPUT')
+    }
+
+
 
     // get version
     msg.subscribe('publishVersion')

@@ -38,6 +38,26 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 
   boolean isTx = false;
 
+  public boolean isSda() {
+    return isSda;
+  }
+
+  public void setSda(boolean isSda) {
+    this.isSda = isSda;
+  }
+
+  public boolean isScl() {
+    return isScl;
+  }
+
+  public void setScl(boolean isScl) {
+    this.isScl = isScl;
+  }
+
+  boolean isSda = false;
+  
+  boolean isScl = false;
+
   boolean canRead = true;
 
   boolean canWrite = true;
