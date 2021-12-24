@@ -46,7 +46,7 @@ public class ServoTest extends AbstractTest {
     servo.map(0, 180, 0, 180);
     servo.setRest(90.0);
   }
-  
+
   @AfterClass
   static public void afterClass() throws Exception {
     servo.releaseService();
@@ -66,7 +66,7 @@ public class ServoTest extends AbstractTest {
     servo.moveTo(180.0);
     Service.sleep(300);
     assertTrue(servo.isMoving());
-    
+
     // after 1/10 of a second we should be moving
     assertTrue(servo.isMoving());
     double pos = servo.getCurrentInputPos();
@@ -165,11 +165,11 @@ public class ServoTest extends AbstractTest {
     // detach the servo.
     // ard2.detach(s);
     s.detach(arduino01);
-    
+
     // detaching an re-attaching requires
     // asynch communication - time is needed
     // to come to 'eventual' synchronized consistency
-    
+
     Service.sleep(300);
     s.attach(arduino01, 10, 1.0);
     Service.sleep(300);
@@ -179,7 +179,7 @@ public class ServoTest extends AbstractTest {
     assertFalse(s.isEnabled());
 
     s.detach(arduino01);
-    
+
     s.releaseService();
     arduino01.releaseService();
 
@@ -195,7 +195,9 @@ public class ServoTest extends AbstractTest {
 
   @Test
   public void testAutoDisable() throws Exception {
-    // Start the test servo.
+    // Start the test servo
+    arduino01 = (Arduino) Runtime.start(arduino01.getName(), "Arduino");
+    arduino01.connect(port01);
     servo.detach();
     servo.setPin(pin);
     servo.setPosition(0.0);
