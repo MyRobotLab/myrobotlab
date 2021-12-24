@@ -199,6 +199,7 @@ public class ServoTest extends AbstractTest {
     arduino01 = (Arduino) Runtime.start(arduino01.getName(), "Arduino");
     arduino01.connect(port01);
     servo.detach();
+    sleep(300);
     servo.setPin(pin);
     servo.setPosition(0.0);
 
