@@ -201,6 +201,7 @@ public class ServoTest extends AbstractTest {
     servo.setPosition(0.0);
 
     arduino01.attach(servo);
+    assertTrue("verifying arduino is attached to the servo.", arduino01.isAttached(servo.getName()));
     assertTrue("verifying servo is attached to the arduino.", servo.isAttached(arduino01.getName()));
     servo.moveTo(30.0);
     assertTrue("verifying servo should be enabled", servo.isEnabled());
