@@ -4,6 +4,9 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.PirConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.UltrasonicSensorConfig;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinListener;
@@ -15,17 +18,25 @@ public class Pir extends Service implements PinListener {
 
   private static final long serialVersionUID = 1L;
 
-  protected boolean isActive = false;
+  boolean isActive = false;
 
-  protected boolean isEnabled = false;
+  boolean isEnabled = false;
 
-  protected boolean isVerbose = true;
+  String pin;
 
-  protected String pin;
+  int rateHz = 1;
 
-  transient protected PinArrayControl pinControl;
+  public int getRate() {
+    return rateHz;
+  }
 
-  protected String controllerName;
+  public void setRate(int rateHz) {
+    this.rateHz = rateHz;
+  }
+
+  transient PinArrayControl pinControl;
+
+  String controllerName;
 
   public Pir(String n, String id) {
     super(n, id);
@@ -83,10 +94,10 @@ public class Pir extends Service implements PinListener {
         log.warn("detaching null");
         return;
       }
-      
+
       if (controllerName != null) {
-        if (controllerName.equals(control.getName())) {
-          log.warn("attempting to detach %s but this pir is attached to %s", control.getName(), controllerName);
+        if (!controllerName.equals(control.getName())) {
+          log.warn("attempting to detach {} but this pir is attached to {}", control.getName(), controllerName);
           return;
         }
       }
@@ -122,7 +133,7 @@ public class Pir extends Service implements PinListener {
   }
 
   public void enable() {
-    enable(1);
+    enable(rateHz);
   }
 
   public void enable(int pollBySecond) {
@@ -143,9 +154,9 @@ public class Pir extends Service implements PinListener {
 
   @Override
   public void onPin(PinData pindata) {
-    if (isVerbose) {
-      log.info("onPin {}", pindata);
-    }
+
+    log.info("onPin {}", pindata);
+
     boolean sense = (pindata.value != 0);
 
     if (isActive != sense) {
@@ -153,6 +164,10 @@ public class Pir extends Service implements PinListener {
       invoke("publishSense", sense);
       isActive = sense;
     }
+  }
+
+  public boolean isActive() {
+    return isActive;
   }
 
   public Boolean publishSense(Boolean b) {
@@ -185,12 +200,10 @@ public class Pir extends Service implements PinListener {
       if (done) {
         return;
       }
-      
+
       mega.attach(pir);
 
       // Runtime.setAllVirtual(true);
-
-
 
       mega.connect("/dev/ttyACM0");
       pir.setPin("D23");
@@ -200,6 +213,47 @@ public class Pir extends Service implements PinListener {
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+  
+  @Override
+  public PirConfig getConfig() {
+
+    PirConfig config = new PirConfig();
+
+    config.controller = controllerName;
+    config.pin = pin;
+    config.enable = isEnabled;
+    config.rate = rateHz;
+
+    return config;
+  }
+
+
+  @Override
+  public ServiceConfig load(ServiceConfig c) {
+    PirConfig config = (PirConfig) c;
+
+    if (config.pin != null)
+      setPin(config.pin);
+
+    if (config.rate != null)
+      setRate(config.rate);
+
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+
+    if (config.enable) {
+      enable();
+    } else {
+      disable();
+    }
+
+    return c;
   }
 
   @Override

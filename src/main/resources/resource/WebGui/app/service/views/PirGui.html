@@ -1,16 +1,21 @@
-<form class="form-inline" role="forms">
-    <div class="row">
-        <div class="col-md-12">&nbsp;</div>
+<div class="row">
+    <div class="col-md-6">
+        <br/>
+        <img ng-src="{{(service.isActive)?'../../green.png':'../../grey.png'}}"/>
+        <br/>
+        <br/>
+        <form class="form-inline" role="forms">
+            <div class="row">
+                <attach options='options'/>
+                pin
+                <select class="form-control" ng-model="service.pin" ng-change="setPin()" ng-options="item for item in pinList">
+                    <option>{{item}}</option>
+                </select>
+                <button ng-show="!service.controllerName" type="button" class="btn btn-default" ng-click="attach()">attach</button>
+                <button ng-show="service.controllerName" type="button" class="btn btn-default" ng-click="detach()">detach</button>
+                <button class="form-control" ng-show="service.controllerName && !service.isEnabled" ng-click="enable()">enable</button>
+                <button class="form-control" ng-show="service.controllerName && service.isEnabled" ng-click="disable()">disable</button>
+            </div>
+        </form>
     </div>
-    <div class="row">
-        <div class="form-group">
-            &nbsp;&nbsp;&nbsp;<img ng-src="{{(service.isActive)?'../../green.png':'../../grey.png'}}" />
-            <label for="pin">&nbsp;</label>   
-            <button class="form-control" ng-show="!service.isEnabled" ng-click="enable()">enable</button><button class="form-control" ng-show="service.isEnabled" ng-click="disable()">disable</button>
-            <label for="controller">&nbsp;</label>           
-            <input class="form-control" id="controller" title="Select your controller for this device" type="text" placeholder="controller" ng-model="service.pinControl.name" ng-disabled="service.isAttached"/>
-            <label for="pin">&nbsp;</label>
-            <input class="form-control" id="pin" title="Which pin will trigger this device" type="text" placeholder="pin" ng-model="service.pin" ng-disabled="service.isAttached"/>
-        </div>
-    </div>
-</form>
+</div>

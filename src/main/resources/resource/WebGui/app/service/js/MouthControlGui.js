@@ -51,19 +51,27 @@ angular.module('mrlapp.service.MouthControlGui', []).controller('MouthControlGui
         msg.send('broadcastState')
     }
 
-    $scope.servoOptions = {
+    $scope.speechOptions = {
         interface: 'SpeechSynthesis',
         attach: $scope.attach,
         // callback: function...
-        attachName: $scope.mouth
+        attachName: $scope.mouth,
+        controllerTitle: 'speech controller'
     }
 
-    $scope.speechOptions = {
+    $scope.servoOptions = {
         interface: 'ServoControl',
         attach: $scope.attach,
         // callback: function...
-        attachName: $scope.servo
+        attachName: $scope.servo,
+        controllerTitle: 'servo controller'
     }
+
+
+    // FIXME - which i could get rid of this
+    // makes attach directive worky on first load
+    msg.sendTo("runtime","publishInterfaceToPossibleServices")
+
 
     // msg.subscribe('publishAvailableInterfaces')
     msg.subscribe(this)

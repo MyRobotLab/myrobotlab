@@ -861,20 +861,6 @@ table, th, td {
     text-align: right;
 }
 
-.rzMixer .btn-default {
-    height: 24px;
-    color: #333;
-    background-color: #ebf5ff;
-    border-color: #ccc;
-    padding: 3px;
-    padding-left: 6px;
-    padding-right: 6px;
-    vertical-align: middle;
-    line-height: 18px;
-    margin-bottom: 4px;
-    /* margin-top: 4px; */
-}
-
 .directoryName {
     height: 24px !important;
     margin-right: 0px;
@@ -3531,9 +3517,28 @@ background-color: #337ab7!important;
 }
 
 /* ==================== UltrasonicSensor end ====================== */
+
+/* =============== arduino pins ===================================== */
+
 .small-text-form {
     width: 50px;
 }
 
-table.padded-table td { padding:2px; }
+table.padded-table td {
+    padding: 2px;
+}
+
+
+toggle.toggle-text .btn-sm {
+    height: 28px!important;
+    width: 56px!important;
+}
+
+toggle.toggle-text .toggle-handle {
+    width: 5px!important;
+}
+
+.columns {
+  columns: 4;
+}
 
