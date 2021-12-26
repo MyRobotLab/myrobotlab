@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -842,11 +843,17 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   @Override
   public Set<String> getAttached() {
-    return deviceList.keySet();
+    Set<String> ret = new HashSet<>();
+    // all services which use subscriptions
+    ret.addAll(super.getAttached());
+    // services which some do direct calls
+    ret.addAll(deviceList.keySet());
+    return ret;
   }
 
-  public int getAttachedCount() {
-    return deviceList.size();
+  @Deprecated /* what's the point?   - get the list from getAttached() */
+  public int getAttachedCount() {    
+    return getAttached().size();
   }
 
   /**
@@ -1267,8 +1274,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   @Override
-  public boolean isAttached(Attachable device) {
-    return deviceList.containsKey(device.getName());
+  public boolean isAttached(Attachable service) {
+    return getAttached().contains(service.getName());
   }
 
   @Override
@@ -2256,6 +2263,14 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       // Platform.setVirtual(true);
 
       LoggingFactory.init(Level.INFO);
+      
+      Runtime.start("webgui", "WebGui");
+      
+      boolean isDone = true;
+
+      if (isDone) {
+        return;
+      }
       // Platform.setVirtual(true);
 
       /*
@@ -2268,16 +2283,13 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       Serial.listPorts();
 
       Arduino hub = (Arduino) Runtime.start("hub", "Arduino");
+      Runtime.start("pir", "Pir");
 
       hub.connect("/dev/ttyACM0");
-      Runtime.start("webgui", "WebGui");
+      
       
 
-      boolean isDone = true;
 
-      if (isDone) {
-        return;
-      }
 
 
       // hub.enableAck(false);
