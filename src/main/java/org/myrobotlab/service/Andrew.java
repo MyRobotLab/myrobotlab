@@ -112,7 +112,7 @@ public class Andrew extends Service implements SpeechListener {
   int SHIFT = 14;
   int LATCH = 15;
   int DATA = 16;
-  int pirSensorPin = 17;
+  String pirSensorPin = "17";
 
   int pin = 0;
   int min = 1;
@@ -394,7 +394,7 @@ public class Andrew extends Service implements SpeechListener {
     arduino.pinMode(SHIFT, Arduino.OUTPUT);
     arduino.pinMode(LATCH, Arduino.OUTPUT);
     arduino.pinMode(DATA, Arduino.OUTPUT);
-    arduino.pinMode(pirSensorPin, Arduino.INPUT);
+    arduino.pinMode(pirSensorPin, "INPUT");
   }
 
   /**
@@ -934,6 +934,7 @@ public class Andrew extends Service implements SpeechListener {
     webgui = (WebGui) Runtime.start("webgui", "WebGui");
     pir = (Pir) Runtime.start("pir", "Pir");
 
+    pir.setPin(pirSensorPin);
     // configure services
     pir.attach(arduino, pirSensorPin);
 

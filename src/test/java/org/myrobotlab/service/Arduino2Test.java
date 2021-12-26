@@ -13,7 +13,6 @@ import org.junit.Test;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Arduino.Sketch;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
@@ -97,22 +96,6 @@ public class Arduino2Test extends AbstractTest {
     assertEquals(ard.getBoard(), "mega");
   }
 
-  // TODO: this seems broken.
-  // @Test
-  // public void testResetArduino() {
-  // Arduino ard = (Arduino) Runtime.createAndStart("ard01", "Arduino");
-  // // TODO: add some devices and then validate that the device list is empty
-  // ard.reset();
-  // assertEquals(ard.deviceList.size(), 0);
-  // }
 
-  // TODO: this is broken! but not in eclipse!
-  // @Test
-  public void testSketch() {
-    Arduino ard = (Arduino) Runtime.start("ard01", "Arduino");
-    Sketch s = ard.getSketch();
-    assertNotNull(s.name);
-    assertNotNull(s.data);
-  }
 
 }

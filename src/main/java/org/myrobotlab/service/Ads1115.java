@@ -438,12 +438,12 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
   }
 
   @Override
-  public void attach(PinArrayListener listener) {
+  public void attachPinArrayListener(PinArrayListener listener) {
     pinArrayListeners.put(listener.getName(), listener);
 
   }
 
-  public void attach(PinListener listener, int pinAddress) {
+  public void attachPinListener(PinListener listener, int pinAddress) {
     attach(listener, String.format("%d", pinAddress));
   }
 
@@ -479,7 +479,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
   }
 
   public void attach(String listener, int pinAddress) {
-    attach((PinListener) Runtime.getService(listener), pinAddress);
+    attachPinListener((PinListener) Runtime.getService(listener), pinAddress);
   }
 
   public void attach(String controllerName, String deviceBus, String deviceAddress) {

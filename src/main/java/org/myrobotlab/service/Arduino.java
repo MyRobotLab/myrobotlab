@@ -6,11 +6,9 @@ import static org.myrobotlab.arduino.Msg.MRLCOMM_VERSION;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +18,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.myrobotlab.arduino.ArduinoUtils;
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.arduino.DeviceSummary;
@@ -84,21 +81,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     public String deviceAddress;
   }
 
-  public static class Sketch implements Serializable {
-    private static final long serialVersionUID = 1L;
-    public String data;
-    public String name;
-
-    public Sketch(String name, String data) {
-      this.name = name;
-      this.data = data;
-    }
-  }
-
   public static final int ANALOG = 1;
 
   public transient static final int BOARD_TYPE_ID_ADK_MEGA = 3;
-
   public transient static final int BOARD_TYPE_ID_MEGA = 1;
   public transient static final int BOARD_TYPE_ID_NANO = 4;
   public transient static final int BOARD_TYPE_ID_PRO_MINI = 5;
@@ -126,14 +111,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   public static final int MRL_IO_SERIAL_3 = 4;
   public static final int OUTPUT = 0x1;
+  public static final int PULLUP = 0x2;
 
   private static final long serialVersionUID = 1L;
-
-  /**
-   * path of the Arduino IDE must be set by user should not be static - since
-   * gson will not serialize it, and it won't be 'saved()'
-   */
-  public String arduinoPath;
 
   String aref;
 
@@ -199,12 +179,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   transient Serial serial;
 
   /**
-   * MrlComm sketch
+   * virtual arduino for testing purposes
    */
-  public Sketch sketch;
-
-  public String uploadSketchResult = "";
-
   transient private VirtualArduino virtual;
 
   int mrlCommBegin = 0;
@@ -214,7 +190,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * the port the user attempted to connect to
    */
-  protected String port;
+  String port;
 
   public Arduino(String n, String id) {
     super(n, id);
@@ -231,12 +207,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     // get list of board types
     getBoardTypes();
 
-    // FIXME - load from unzipped resource directory ? - no more jar access like
-    // below
-    String mrlcomm = FileIO.resourceToString("Arduino/MrlComm/MrlComm.ino");
-
-    setSketch(new Sketch("MrlComm", mrlcomm));
-
     // add self as an attached device
     // to handle pin events
     attachDevice(this, (Object[]) null);
@@ -246,6 +216,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public void analogWrite(int address, int value) {
     log.info("analogWrite({},{})", address, value);
     msg.analogWrite(address, value);
+    PinDefinition pinDef = addressIndex.get(address);
+    pinDef.setValue(value);
   }
 
   public void analogWrite(String pin, Integer value) {
@@ -270,7 +242,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * methods for this class
    */
   @Override
-  public void attach(Attachable service) throws Exception {
+  public void attach(String name) throws Exception {
+    ServiceInterface service = Runtime.getService(name);
     if (ServoControl.class.isAssignableFrom(service.getClass())) {
       attachServoControl((ServoControl) service);
       ((ServoControl) service).attach(this);
@@ -278,9 +251,14 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     } else if (MotorControl.class.isAssignableFrom(service.getClass())) {
       attachMotorControl((MotorControl) service);
       return;
-    } else if (EncoderControl.class.isAssignableFrom(service.getClass())) {
-      // need to determine the encoder type!
-      attach((EncoderControl) service);
+    } else if (service instanceof EncoderControl) {
+      attachEncoderControl((EncoderControl) service);
+      return;
+    } else if (service instanceof PinArrayListener) {
+      attachPinArrayListener((PinArrayListener) service);
+      return;
+    } else if (service instanceof PinListener) {
+      attachPinListener((PinListener) service);
       return;
     }
     error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
@@ -301,8 +279,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * @param address
    *          the address
    */
+  @Deprecated /* using single attach parameter attach(String) */
   public void attach(String listener, int address) {
-    attach((PinListener) Runtime.getService(listener), address);
+    attachPinListener((PinListener) Runtime.getService(listener), address);
   }
 
   @Override
@@ -347,7 +326,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    *           if an error occurred trying to attach the encoder
    */
   @Override
-  public void attach(EncoderControl encoder) throws Exception {
+  public void attachEncoderControl(EncoderControl encoder) throws Exception {
     // need to get a new device id! wtf is this !
     // let's get the max current id
     // send data to micro-controller
@@ -716,6 +695,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public void digitalWrite(int address, int value) {
     log.info("digitalWrite {} {}", address, value);
     msg.digitalWrite(address, value);
+    PinDefinition pinDef = addressIndex.get(address);
+    pinDef.setValue(value);
   }
 
   public void digitalWrite(String pin, int value) {
@@ -853,10 +834,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
     PinDefinition pinDef = getPin(pin);
     enablePin(pinDef.getAddress(), rate);
-  }
-
-  public String getArduinoPath() {
-    return arduinoPath;
   }
 
   public String getAref() {
@@ -1029,14 +1006,14 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     // mega-like & uno like
 
     // if no change - just return the values
-    if ((pinIndex != null && board.contains("mega") && pinIndex.size() == 70) || (pinIndex != null && !board.contains("mega") && pinIndex.size() == 20)) {
-      return new ArrayList<PinDefinition>(pinIndex.values());
+    if ((addressIndex != null && board.contains("mega") && addressIndex.size() == 70) || (addressIndex != null && !board.contains("mega") && addressIndex.size() == 20)) {
+      return new ArrayList<PinDefinition>(addressIndex.values());
     }
 
     // create 2 indexes for fast retrieval
     // based on "name" or "address"
-    pinMap.clear();
     pinIndex.clear();
+    addressIndex.clear();
 
     List<PinDefinition> pinList = new ArrayList<PinDefinition>();
 
@@ -1045,11 +1022,17 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
         PinDefinition pindef = new PinDefinition(getName(), i);
         // begin wacky pin def logic
         String pinName = null;
-        if (i == 0) {
+        if (i == 0  || i == 15 || i == 17 || i == 19 ) {
           pindef.setRx(true);
         }
-        if (i == 1) {
+        if (i == 1 || i == 14 || i == 16 || i == 18 ) {
           pindef.setTx(true);
+        }
+        if (i == 20 ) {
+          pindef.setSda(true);
+        }
+        if (i == 21 ) {
+          pindef.setScl(true);
         }
         if (i < 1 || (i > 13 && i < 54)) {
           pinName = String.format("D%d", i);
@@ -1063,10 +1046,12 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
           pinName = String.format("D%d", i);
           pindef.setPwm(true);
         }
+        pindef.setMode("INPUT");
+        pindef.setValue(0);
         pindef.setPinName(pinName);
         pindef.setAddress(i);
-        pinMap.put(pinName, pindef);
-        pinIndex.put(pindef.getAddress(), pindef);
+        pinIndex.put(pinName, pindef);
+        addressIndex.put(pindef.getAddress(), pindef);
         pinList.add(pindef);
       }
     } else {
@@ -1094,8 +1079,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
         }
         pindef.setPinName(pinName);
         pindef.setAddress(i);
-        pinMap.put(pinName, pindef);
-        pinIndex.put(pindef.getAddress(), pindef);
+        pinIndex.put(pinName, pindef);
+        addressIndex.put(pindef.getAddress(), pindef);
         pinList.add(pindef);
       }
 
@@ -1131,17 +1116,14 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     return ret;
   }
 
-  /*
-   * Use the serial service for serial activities ! No reason to replicate
-   * methods
+  /**
+   * Get the serial service for this device
+   * @return - serial service
    */
   public Serial getSerial() {
     return serial;
   }
 
-  public Sketch getSketch() {
-    return sketch;
-  }
 
   /**
    * Internal Arduino method to create an i2cBus object in MrlComm that is
@@ -1460,39 +1442,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     invoke("publishDisconnect", portName);
   }
 
-  public void openMrlComm(String path) {
-    try {
-      if (!setArduinoPath(path)) {
-        return;
-      }
-      String mrlCommFiles = null;
-      if (FileIO.isJar()) {
-        mrlCommFiles = getResourceDir() + "/Arduino/MrlComm";
-        // FIXME - don't do this every time :P
-        Zip.extractFromSelf(getResourceDir() + File.separator + "Arduino" + File.separator + "MrlComm", "resource/Arduino/MrlComm");
-      } else {
-        // running in IDE ?
-        mrlCommFiles = getResourceDir() + File.separator + "Arduino" + File.separator + "MrlComm";
-      }
-      File mrlCommDir = new File(mrlCommFiles);
-      if (!mrlCommDir.exists() || !mrlCommDir.isDirectory()) {
-        error("mrlcomm script directory %s is not a valid", mrlCommDir);
-        return;
-      }
-      String exePath = arduinoPath + File.separator + ArduinoUtils.getExeName();
-      String inoPath = mrlCommDir.getAbsolutePath() + File.separator + "/MrlComm.ino";
-      List<String> cmd = new ArrayList<String>();
-      cmd.add(exePath);
-      cmd.add(inoPath);
-      ProcessBuilder builder = new ProcessBuilder(cmd);
-      builder.start();
-
-    } catch (Exception e) {
-      error(String.format("%s %s", e.getClass().getSimpleName(), e.getMessage()));
-      log.error("openMrlComm threw", e);
-    }
-  }
-
   public String getBase64ZippedMrlComm() {
     return Base64.getEncoder().encodeToString((getZippedMrlComm()));
   }
@@ -1522,11 +1471,27 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * // > pinMode/pin/mode
    */
   public void pinMode(int address, String modeStr) {
-    pinMode(address, modeStr.equalsIgnoreCase("INPUT") ? Arduino.INPUT : Arduino.OUTPUT);
+    if (modeStr.equalsIgnoreCase("OUTPUT")) {
+      pinMode(address, Arduino.OUTPUT);
+    } else if (modeStr.equalsIgnoreCase("PULLUP")) {
+      pinMode(address, Arduino.PULLUP);
+    }else {
+      // default arduino pin mode
+      pinMode(address, Arduino.INPUT);
+    }
   }
 
+  // the "important pinMode" - with types Arduino supports
   public void pinMode(int address, int mode) {
+    log.info("pinMode {} {}", address, mode);
     msg.pinMode(address, mode);
+    PinDefinition pinDef = addressIndex.get(address);
+    pinDef.setMode(mode == Arduino.OUTPUT?"OUTPUT":"INPUT");
+  }
+  
+  public void pinMode(String pin, int mode) {
+    PinDefinition pinDef = getPin(pin);
+    pinMode(pinDef.getAddress(), mode);
   }
 
   /**
@@ -1710,16 +1675,19 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       pinArray[i] = pinData;
 
       // handle individual pins
-      if (pinListeners.containsKey(address)) {
-        Set<PinListener> set = pinListeners.get(address);
-        for (PinListener pinListner : set) {
+//      if (pinListeners.containsKey(address)) {
+//        Set<PinListener> set = pinListeners.get(address);
+//        for (PinListener pinListner : set) {
+          /*
           if (pinListner.isLocal()) {
             pinListner.onPin(pinData);
           } else {
             invoke("publishPin", pinData);
           }
-        }
-      }
+          */
+          broadcast("publishPin", pinData);
+//        }
+//      }
     }
 
     // TODO: improve this logic so it doesn't something more effecient.
@@ -1730,6 +1698,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       }
     }
 
+    // FIXME !!! - simple pub/sub with broadcast like PinListener
+    
     for (String name : pinArrayListeners.keySet()) {
       // put the pin data into a map for quick lookup
       PinArrayListener pal = pinArrayListeners.get(name);
@@ -1941,26 +1911,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     msg.servoMoveToMicroseconds(deviceId, uS);
   }
 
-  public boolean setArduinoPath(String path) {
-
-    path = path.replace("\\", "/");
-    path = path.trim();
-    if (!path.endsWith("/")) {
-      path += "/";
-    }
-
-    File dir = new File(path);
-    if (!dir.exists() || !dir.isDirectory()) {
-      error(String.format("%s is not a valid directory", path));
-      return false;
-    }
-    arduinoPath = path;
-    ArduinoUtils.arduinoPath = arduinoPath; // THIS IS SILLY AND NOT
-    // NORMALIZED !
-    save();
-    return true;
-  }
-
   public void setAref(String aref) {
     aref = aref.toUpperCase();
     if (this.getBoard().contains("mega")) {
@@ -2023,7 +1973,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    *
    * Affects all reading of pins setting to 0 sets it off
    *
-   * TODO - implement on MrlComm side ...
+   * TODO - implement on MrlComm side ... or remove completely
    * 
    */
   // > setDebounce/pin/delay
@@ -2044,11 +1994,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   // > setSerialRate/b32 rate
   public void setSerialRate(int rate) {
     msg.setSerialRate(rate);
-  }
-
-  public void setSketch(Sketch sketch) {
-    this.sketch = sketch;
-    broadcastState();
   }
 
   /*
@@ -2111,14 +2056,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     msg.ultrasonicSensorStopRanging(getDeviceId(sensor));
   }
 
-  public void uploadSketch(String arduinoPath) throws IOException {
-    uploadSketch(arduinoPath, serial.getLastPortName());
-  }
-
-  public void uploadSketch(String arudinoPath, String comPort) throws IOException {
-    uploadSketch(arudinoPath, comPort, getBoard());
-  }
-
   static public String getBoardType(int boardId) {
     String boardName;
     switch (boardId) {
@@ -2169,57 +2106,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
         break;
     }
     return boardId;
-  }
-
-  public void uploadSketch(String arduinoIdePath, String port, String type) throws IOException {
-    log.info("uploadSketch ({}, {}, {})", arduinoIdePath, port, type);
-
-    if (!setArduinoPath(arduinoIdePath)) {
-      return;
-    }
-
-    // hail mary - if we have no idea
-    // guess uno
-    if (type == null || type.equals("")) {
-      type = BOARD_TYPE_UNO;
-    }
-
-    log.info("arduino IDE Path={}", arduinoIdePath);
-    log.info("Port={}", port);
-    log.info("type={}", type);
-    /*
-     * not needed if (arduinoIdePath != null &&
-     * !arduinoIdePath.equals(ArduinoUtils.arduinoPath)) { this.arduinoPath =
-     * arduinoIdePath; ArduinoUtils.arduinoPath = arduinoIdePath; save(); }
-     */
-
-    uploadSketchResult = String.format("Uploaded %s ", new Date());
-
-    boolean connectedState = isConnected();
-    try {
-
-      if (connectedState) {
-        log.info("disconnecting...");
-        disconnect();
-      }
-      ArduinoUtils.uploadSketch(port, type.toLowerCase());
-
-    } catch (Exception e) {
-      log.info("ArduinoUtils threw trying to upload", e);
-    }
-
-    if (connectedState) {
-      log.info("reconnecting...");
-      serial.connect();
-    }
-
-    // perhaps you can reduce the inter-process information
-    // to succeed | fail .. perhaps you can't
-    // I would prefer transparency - send all output to the ui
-    uploadSketchResult += ArduinoUtils.getOutput();
-
-    log.info(uploadSketchResult);
-    broadcastState();
   }
 
   /**
@@ -2385,6 +2271,14 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
       hub.connect("/dev/ttyACM0");
       Runtime.start("webgui", "WebGui");
+      
+
+      boolean isDone = true;
+
+      if (isDone) {
+        return;
+      }
+
 
       // hub.enableAck(false);
 
@@ -2407,12 +2301,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       // hub.connect("COM6"); // uno
 
       // hub.startTcpServer();
-
-      boolean isDone = true;
-
-      if (isDone) {
-        return;
-      }
 
       VirtualArduino vmega = null;
 

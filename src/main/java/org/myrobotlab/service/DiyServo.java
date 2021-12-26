@@ -652,7 +652,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     // %s",pinArrayControl.getClass(), pinArrayControl.getName(),resolution));
 
     int rate = 1000 / sampleTime;
-    pinArrayControl.attach(this, pin);
+    pinArrayControl.attachPinListener(this, pin);
     pinArrayControl.enablePin(pin, rate);
     broadcastState();
   }
@@ -803,7 +803,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
 
       encoder.setPin(3);
 
-      arduino.attach(encoder);
+      arduino.attachEncoderControl(encoder);
       Thread.sleep(1000);
 
       // Ads1115 ads = (Ads1115) Runtime.start("Ads1115", "Ads1115");

@@ -24,7 +24,7 @@ public class WorkEMeta extends MetaData {
     addPeer("git", "Git", "synching repos");
 
     // motor control - output
-    addPeer("joystick", "Joystick", "a way to steer the bot");
+    // addPeer("joystick", "Joystick", "a way to steer the bot");
     addPeer("controller", "Sabertooth", "power motor controller for wheels");
     addPeer("motorLeft", "MotorPort", "left wheel motor");
     addPeer("motorRight", "MotorPort", "right wheel motor");

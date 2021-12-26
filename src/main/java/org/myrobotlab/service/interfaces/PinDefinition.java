@@ -38,11 +38,31 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 
   boolean isTx = false;
 
+  public boolean isSda() {
+    return isSda;
+  }
+
+  public void setSda(boolean isSda) {
+    this.isSda = isSda;
+  }
+
+  public boolean isScl() {
+    return isScl;
+  }
+
+  public void setScl(boolean isScl) {
+    this.isScl = isScl;
+  }
+
+  boolean isSda = false;
+  
+  boolean isScl = false;
+
   boolean canRead = true;
 
   boolean canWrite = true;
 
-  Double value;
+  Integer value;
 
   transient Object pinImpl;
 
@@ -60,12 +80,8 @@ public class PinDefinition extends SensorDefinition implements Serializable {
     return value.intValue();
   }
 
-  public void setValue(Double value) {
-    this.value = value;
-  }
-
   public void setValue(int value) {
-    this.value = new Double(value);
+    this.value = value;
   }
 
   public String getPinName() {

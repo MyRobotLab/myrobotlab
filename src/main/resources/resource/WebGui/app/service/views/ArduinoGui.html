@@ -1,6 +1,5 @@
 <div class="row">
-    <div class="col-md-6">&nbsp;
-    </div>
+    <div class="col-md-6">&nbsp;</div>
 </div>
 <form class="form-inline" role="forms">
     <div class="row">
@@ -49,24 +48,39 @@
     <br/>
     <span ng-repeat="device in boardInfo.deviceSummary">
         <b>{{device.name}}</b>
-        id:{{device.id}} 
-    
-    
-    
-    
-    </span>
+        id:{{device.id}}</span>
 </div>
 <!-- end status and control for board to be viewed in above all tabs -->
 <div class="col-md-12">
     <uib-tabset active="active">
         <!-- begin -->
-        <uib-tab heading="Oscope">
-            <oscope id="{{service.name}}-oscope" service-name="{{service.name + '@' + service.id}}"></oscope>
+        <uib-tab heading="Pins">
+        <div class="row">
+            <div class="col-md-8">
+             <br/>
+                <div class="columns">
+                    <div class="content" ng-repeat="(pinKey, pinDef) in service.addressIndex">
+                        {{ pinDef.pin }} 
+            <toggle ng-model="pinDef.readWrite" class="toggle-text" ng-change="readWrite(pinDef)" size="btn-sm" on-class="btn-success" on="write" off="read"></toggle>
+                        <toggle ng-show="!pinDef.readWrite" ng-model="pinDef.inputModeDisplay" class="toggle-text" on-class="btn-warning" ng-change="inputMode(pinDef)" size="btn-sm" on="pullup" off="input"></toggle>
+                        <span ng-show="pinDef.isRx" class="badge badge-danger" style="background:red">Rx</span>
+                        <span ng-show="pinDef.isTx" class="badge badge-primary" style="background:yellow;color:grey">Tx</span>
+                        <span ng-show="pinDef.isPwm && !pinDef.readWrite" class="badge badge-primary" style="background:aquamarine;color:grey">Pwm</span>
+                        <span ng-show="pinDef.isSda" class="badge badge-primary" style="background:lightcyan;color:grey">Sda</span>
+                        <span ng-show="pinDef.isScl" class="badge badge-primary" style="background:lightskyblue;color:grey">Scl</span>
+                        <toggle ng-show="pinDef.readWrite" ng-model="pinDef.valueDisplay" class="toggle-text" ng-change="write(pinDef)" size="btn-sm" on="1" off="0" on-class="btn-success"></toggle>
+                        <input ng-show="pinDef.readWrite" min="0" max="255" value="pinDef.value" class="base-slider slider-width100" ng-show="service.autoDisable" type="range" name="idleSeconds" ng-model="pinDef.value" min="1" max="10" ng-change="pwm(pinDef)">
+                        <span ng-show="pinDef.readWrite" class="badge badge-secondary">{{pinDef.value}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
         </uib-tab>
         <!-- end -->
         <!-- begin -->
-        <uib-tab heading="Pins">
-            <img src="{{image}}" width="500"/>
+        <uib-tab heading="Oscope">
+            <!-- img src="{{image}}" width="500"/ -->
+            <oscope id="{{service.name}}-oscope" service-name="{{service.name + '@' + service.id}}"></oscope>
         </uib-tab>
         <!-- end -->
         <!-- begin -->
@@ -83,5 +97,4 @@
         </uib-tab>
         <!-- end -->
     </uib-tabset>
-</div>
 </div>

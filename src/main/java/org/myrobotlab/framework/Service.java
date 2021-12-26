@@ -2254,7 +2254,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * Detaches ALL listeners/subscribers from this service if services have
    * special requirements, they can override this
+   * WARNING - if used this will remove all UI and other perhaps necessary 
+   * subscriptions 
    */
+  @Deprecated /* dangerous method, not to be used as lazy detach when you don't know the controller name */
   public void detach() {
     outbox.reset();
   }
@@ -2358,53 +2361,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return outbox.getAttached(publishPoint);
   }
 
-  /**
-   * This attach when overriden "routes" to the appropriately typed
-   * parameterized attach within a service.
-   * 
-   * When overriden, the first thing it should do is check to see if the
-   * referenced service is already attached. If it is already attached it should
-   * simply return.
-   * 
-   * If its attached to this service, it should first attach itself, modifying
-   * its own data if necessary. The last thing it should do is call the
-   * parameterized service's attach. This gives the other service an opportunity
-   * to attach. e.g.
-   * 
-   * <pre>
-   * 
-   * public void attach(Attachable service) {
-   *    if (ServoControl.class.isAssignableFrom(service.getClass())) {
-   *        attachServoControl((ServoControl) service);
-   *        return;
-   *    }
-   *    
-   *    ...  route to more attach functions   ....
-   *    
-   *    error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
-   *  }
-   *  
-   *  And within attachServoControl :
-   *  
-   *  public void attachServoControl(ServoControl service) {
-   *       // guard
-   *       if (!isAttached(service)){
-   *           return;
-   *       }
-   *       
-   *       ... attach logic ....
-   * 
-   *       // call to attaching service
-   *       service.attach(this);  
-   * }
-   * </pre>
-   * 
-   * @param service
-   *          - the service to attach from this service
-   */
-  @Override
+ /**
+  * Attaches takes instance then calls the derived service attach(name) to route appropriately
+  */
+  @Override  
   public void attach(Attachable service) throws Exception {
-    warn(String.format("Service.attach does not know how to attach %s to a %s", service.getClass().getSimpleName(), this.getClass().getSimpleName()));
+    attach(service.getName());
   }
 
   public boolean setVirtual(boolean b) {

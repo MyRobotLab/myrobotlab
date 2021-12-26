@@ -28,7 +28,7 @@ public class AbstractPinEncoder extends Service implements EncoderControl {
       log.info("{} already attached to controller {}", getName(), controller.getName());
     }
     this.controller = controller;
-    controller.attach(this);
+    controller.attachEncoderControl(this);
     lastUpdate = System.currentTimeMillis();
   }
 

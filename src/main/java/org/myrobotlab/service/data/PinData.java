@@ -15,22 +15,18 @@ public class PinData implements Serializable {
   /**
    * The value of the pin - can support analog or digital pins
    */
-  public Double value;
+  public Integer value;
 
   public PinData(String pin, int value) {
     this.pin = pin;
-    this.value = (double)value;
+    this.value = value;
   }
 
   public PinData(int pin, int value) {
     this.pin = String.format("%d", pin);
-    this.value = (double)value;
-  }
-
-  public PinData(int pin, double value) {
-    this.pin = String.format("%d", pin);
     this.value = value;
   }
+
 
   public String toString() {
     return String.format("pin=%s value=%.2f", pin, value);

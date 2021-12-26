@@ -581,11 +581,11 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   public void attach(String listener, int pinAddress) {
-    attach((PinListener) Runtime.getService(listener), pinAddress);
+    attachPinListener((PinListener) Runtime.getService(listener), pinAddress);
   }
 
   @Override
-  public void attach(PinListener listener, int pinAddress) {
+  public void attachPinListener(PinListener listener, int pinAddress) {
     String name = listener.getName();
 
     if (listener.isLocal()) {
@@ -610,7 +610,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   @Override
-  public void attach(PinArrayListener listener) {
+  public void attachPinArrayListener(PinArrayListener listener) {
     pinArrayListeners.put(listener.getName(), listener);
 
   }
@@ -849,7 +849,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
 
   @Override
   public void attach(PinListener listener, String pin) {
-    attach(listener, getPin(pin).getAddress());
+    attachPinListener(listener, getPin(pin).getAddress());
   }
 
   @Override
