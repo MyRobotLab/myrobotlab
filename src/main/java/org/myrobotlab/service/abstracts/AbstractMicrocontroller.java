@@ -57,6 +57,7 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
    * name index of pins to pin definitions
    */
   protected Map<String, PinDefinition> pinIndex = new TreeMap<>();
+  
 
   /**
    * possible types of boards
@@ -104,16 +105,11 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
     String name = listener.getName();
 
     // get pin of interest
-    String pin = listener.getPin();
+    PinDefinition pin = getPin(listener.getPin());
     if (pin == null) {
-      error("%s pin needs to be set before attaching", listener.getName());
+      error("%s pin cannot be found", listener.getPin());
       return;
     }
-
-    if (!pinIndex.containsKey(pin)) {
-      error("pin %s not found", pin);
-    }
-
     addListener("publishPin", name);
   }
 
@@ -160,6 +156,14 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
     if (pinIndex.containsKey(pinName)) {
       return pinIndex.get(pinName);
     }
+    
+    // another attempt - if user used address instead of pin
+    try {
+     int address = Integer.parseInt(pinName);
+     return addressIndex.get(address);
+    } catch(Exception e) {
+    }
+    
     // log.error("pinMap does not contain pin {}", pinName);
     return null;
   }
