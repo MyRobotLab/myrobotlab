@@ -32,13 +32,12 @@ public class PidTest extends AbstractServiceTest {
 
     float[] series = new float[] { 210 };
 
-    // for (Float in : series) {
-    boolean done = false;
-    float in = 210;
-    while (!done) {
+    
+    //boolean done = false;
+    for (Float in : series) {
       // double mout = mpid.getOutput(in, target);
       double pout = pid.compute(key, in);
-      log.warn("in {} mout {} pout {}", in, pout);
+      log.warn("in {} pout {}", in, pout);
     }
 
     pid.setMode(key, Pid.MODE_AUTOMATIC);
@@ -63,7 +62,7 @@ public class PidTest extends AbstractServiceTest {
     // Test the P(roportional value)
     calculated = pid.compute(key, 0.5);
     if (calculated != null) {
-      assertEquals("Incorrect Pid output", 25.0, calculated, 3);
+      assertEquals("Incorrect Pid output", 33.0, calculated, 3);
     } else {
       assertTrue("No calculation done", calculated == null);
     }

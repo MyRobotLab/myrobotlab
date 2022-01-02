@@ -408,6 +408,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     detach(sc.getName());
   }
 
+  // AbstractServo -
   public void detach(String controllerName) {
     if (controller == null) {
       log.info("already detached");
@@ -415,12 +416,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     }
 
     if (controller != null && !controller.equals(controllerName)) {
-      log.info("{} already detached from {}", getName(), controllerName);
+      log.warn("{} not attached to {}", getName(), controllerName);
       return;
     }
 
     disable();
-    send(controllerName, "detach", getName());
 
     // the subscribes .... or addListeners in this case ...
     removeListener("publishServoMoveTo", controllerName);
@@ -434,6 +434,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // junit ServoTest will fail without this :P
     // sleep(500);
     firstMove = true;
+    
+    send(controllerName, "detach", getName());
     broadcastState();
   }
 
