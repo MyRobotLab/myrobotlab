@@ -58,7 +58,7 @@ import org.slf4j.Logger;
  * introduction/
  * 
  * TODO - handle integral windup - reset to avoid windup - bumpless transfer
- * usually sets output & and removes sets the ITerm to 0
+ * usually sets output and removes sets the ITerm to 0
  * https://en.wikipedia.org/wiki/PID_controller#Integral_windup
  * 
  */
@@ -207,9 +207,7 @@ public class Pid extends Service implements PidControl {
    * 
    * @param key
    *          - key of pid of interest
-   * @return
    */
-
   public void direct(String key) {
     setControllerDirection(key, DIRECTION_DIRECT);
   }

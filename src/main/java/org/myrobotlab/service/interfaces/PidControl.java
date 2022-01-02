@@ -10,7 +10,7 @@ public interface PidControl extends NameProvider {
    * delete and existing pid - if successful the PidData is returned
    * if the pid does not exist null is returned
    * 
-   * @param key
+   * @param key - key of pid params
    * @return
    */
   PidData deletePid(String key);
@@ -19,7 +19,7 @@ public interface PidControl extends NameProvider {
    * Add a new pid controller to the service.  The PidData.key will be
    * the way to refer to this controller in subsequent method calls.
    * 
-   * @param pid
+   * @param pid - all pid parameters for this controller
    * @return
    */
   PidData addPid(PidData pid);
@@ -42,8 +42,8 @@ public interface PidControl extends NameProvider {
    * The function that drives the pid. Typically, this would be called by the
    * sensor.
    * 
-   * @param key
-   * @param sensorValue
+   * @param key - key of pid params
+   * @param sensorValue - input data
    * @return
    */
   public Double compute(String key, double sensorValue);
@@ -52,8 +52,8 @@ public interface PidControl extends NameProvider {
    * Setting the set point - in general simple systems, this is usually done once
    * for the desired PV (Plant Value)
    * 
-   * @param key
-   * @param setPoint
+   * @param key - key of pid params
+   * @param setPoint - set point target
    */
   void setSetpoint(String key, double setPoint);
   
