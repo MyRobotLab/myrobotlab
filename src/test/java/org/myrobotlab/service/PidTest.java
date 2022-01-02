@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.math.MiniPID;
 
 public class PidTest extends AbstractServiceTest {
 
