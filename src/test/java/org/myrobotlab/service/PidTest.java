@@ -29,7 +29,7 @@ public class PidTest extends AbstractServiceTest {
     pid.setSetpoint(key, target);
     pid.setOutputRange(key, -400.0, 400.0);
     
-    MiniPID mpid = new MiniPID(0.1, 1.0, 0);
+    // MiniPID mpid = new MiniPID(0.1, 1.0, 0);
 
     float[] series = new float[] { 210 };
 
@@ -37,9 +37,9 @@ public class PidTest extends AbstractServiceTest {
     boolean done = false;
     float in = 210;
     while (!done) {
-      double mout = mpid.getOutput(in, target);
+      // double mout = mpid.getOutput(in, target);
       double pout = pid.compute(key, in);
-      log.warn("in {} mout {} pout {}", in, mout, pout);
+      log.warn("in {} mout {} pout {}", in, pout);
     }
 
     pid.setMode(key, Pid.MODE_AUTOMATIC);
