@@ -610,6 +610,25 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     processMove(newPos, false, null);
     return newPos;
   }
+  
+  /**
+   * incrementally move - takes the servo's current position (could be in the middle of a move)
+   * adds the increment and tells the servo to go to the new location. Returns the new location
+   * if the moveTo was successfully started - otherwise returns null
+   * @param increment
+   * @return
+   */
+  public Double moveIncr(Double increment) {
+    if (increment == null) {
+      log.info("will not move to null position - not moving");
+      return null;
+    }
+    double newPos = getCurrentInputPos() + increment;
+    if (processMove(newPos, false, null)) {
+      return newPos;
+    }
+    return null;
+  }
 
   @Override
   public Double moveToBlocking(Integer pos) {

@@ -20,13 +20,15 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'angular-intro', // intro
 'angularScreenfull', // screenfull
 'angular-clipboard', 'rzModule', 'ngFlash', //'charts',
-'nvd3ChartDirectives', 'ui.ace', //funky editor
+// 'nvd3ChartDirectives', 
+'ui.ace', //funky editor
 'timer', 'luegg.directives', // scrollglue
 'mrlapp.mrl', //mrl.js (/mrl.js) - core communication and service registry
 //'mrlapp.main.mainCtrl', 
 'mrlapp.main.statusSvc', //very basic service for storing "statuses"
 'ModalController',
 'modalService',
+'chart.js',
 'mrlapp.main.noWorkySvc', //send a noWorky !
 'mrlapp.widget.startCtrl', 'mrlapp.nav', //Navbar & Co. (/nav)
 'mrlapp.service', //Service & Co. (/service)

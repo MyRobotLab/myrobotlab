@@ -3528,6 +3528,10 @@ table.padded-table td {
     padding: 2px;
 }
 
+table.padded-table th {
+    padding: 2px;
+}
+
 
 toggle.toggle-text .btn-sm {
     height: 28px!important;

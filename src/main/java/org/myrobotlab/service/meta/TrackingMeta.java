@@ -21,10 +21,9 @@ public class TrackingMeta extends MetaData {
 
     super(name);
     Platform platform = Platform.getLocalInstance();
-    addDescription("uses a video input and vision library to visually track objects");
-    addCategory("vision", "video", "sensors", "control");
-    addPeer("pid", "Pid", "Pid service - for all your pid needs");
-    addPeer("opencv", "OpenCV", "Tracking OpenCV instance");
+
+    addDescription("tracks objects through video stream given a simple pan, tilt servo camera rig");
+    addCategory("sensors","tracking", "vision");
 
   }
 

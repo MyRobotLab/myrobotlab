@@ -219,12 +219,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * starting all peers on start of service
    */
+  @Deprecated /* peers are dead use config */
   protected boolean autoStartPeers = true;
 
+  @Deprecated /* peers are dead use config */
   public boolean isAutoStartPeers() {
     return autoStartPeers;
   }
 
+  @Deprecated /* peers are dead use config */
   public void setAutoStartPeers(boolean autoStartPeers) {
     this.autoStartPeers = autoStartPeers;
   }
@@ -1646,16 +1649,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         return false;
       }
 
-      // bad idea of an optimizaton
-      /**
-       * <pre>
-       * if (config.getClass().equals(ServiceConfig.class) && !saveNonConfigServices && config.listeners == null) {
-       *   log.info("service {} without config - will not save file", getName());
-       *   return true;
-       * }
-       * </pre>
-       */
-
       String data = null;
       if ("json".equals(format.toLowerCase())) {
         data = CodecUtils.toJson(config);
@@ -1674,6 +1667,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return false;
   }
 
+  @Deprecated /* peers are dead */
   public ServiceInterface getPeer(String peerKey) {
     String peerName = serviceType.getPeerActualName(peerKey);
     return Runtime.getService(peerName);
@@ -1683,14 +1677,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     send(name, method, (Object[]) null);
   }
 
+  @Deprecated /* peers are dead */
   public void sendToPeer(String peerName, String method) {
     send(String.format("%s.%s", name, peerName), method, (Object[]) null);
   }
 
+  @Deprecated /* peers are dead */
   public Object invokePeer(String peerName, String method) {
     return invokeOn(false, getPeer(peerName), method, (Object[]) null);
   }
 
+  @Deprecated /* peers are dead */
   public Object invokePeer(String peerName, String method, Object... data) {
     return invokeOn(false, getPeer(peerName), method, data);
   }
@@ -1700,6 +1697,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public void send(String name, String method, Object... data) {
+    // if you know the service is local - use same thread
+    // to call directly
+    ServiceInterface si = Runtime.getService(name);
+    if (si != null) {
+      invokeOn(true, si, method, data);
+      return;
+    }
+    
+    // if unknown assume remote - fire and forget on outbox
     Message msg = Message.createMessage(getName(), name, method, data);
     msg.sender = this.getFullName();
     // All methods which are invoked will
@@ -1966,11 +1972,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
 
     if (autoStartPeers) {
-      startPeers();
+      // startPeers();
     }
 
   }
 
+  @Deprecated /* peers are dead - use config */
   public void startPeers() {
     log.info("starting peers");
     Map<String, ServiceReservation> peers = serviceType.getPeers();
