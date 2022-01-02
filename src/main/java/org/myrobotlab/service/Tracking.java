@@ -293,6 +293,8 @@ public class Tracking extends Service {
     TrackingConfig config = new TrackingConfig();
     // an interesting problem - the ui uses full name (rightfully so)
     // but local config should be short name
+    // FIXME - the UI should determine if the two attaching services are local
+    // to one another - if they are - then it should use shortnames
     config.cv = CodecUtils.shortName(cv);
     config.tilt = CodecUtils.shortName(tilt);
     config.pan = CodecUtils.shortName(pan);
