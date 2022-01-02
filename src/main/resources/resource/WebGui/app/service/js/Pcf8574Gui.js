@@ -10,6 +10,17 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
+
+        for (var key in service.pinMap) {
+            if (service.pinMap.hasOwnProperty(key)) {
+                console.log(key, service.pinMap[key]);
+
+                service.pinMap[key].value = 0
+                if (key == 'D3') {
+                    service.pinMap[key].value = 1
+                }
+            }
+        }
     }
 
     this.onMsg = function(inMsg) {
@@ -36,9 +47,8 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
         msg.send('setAddress', $scope.service.deviceAddress)
     }
 
-    _self.setControllerName = function() {
-        // $scope.service.controllerName = controller
-        // msg.send('attach', $scope.service.deviceAddress)
+    _self.setControllerName = function() {// $scope.service.controllerName = controller
+    // msg.send('attach', $scope.service.deviceAddress)
     }
 
     $scope.options = {
@@ -48,9 +58,13 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
         attachName: $scope.service.controllerName
     }
 
-    $scope.attach = function(){
+    $scope.attach = function() {
         msg.send('attach', $scope.options.attachName)
     }
+
+    // FIXME - which i could get rid of this
+    // makes attach directive worky on first load
+    msg.sendTo("runtime", "publishInterfaceToPossibleServices")
 
     // regrettably the onMethodMap dynamic
     // generation of methods failed on this overloaded

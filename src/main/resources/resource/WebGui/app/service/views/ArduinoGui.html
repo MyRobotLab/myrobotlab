@@ -84,17 +84,15 @@
         </uib-tab>
         <!-- end -->
         <!-- begin -->
+        <!--
         <uib-tab heading="Settings">
-            <!-- AngularJs preferred access is through an object - most if not all data points should be in $scope.service - so "take" data from there -->
             <input type="text" class="form-control" id="{{service.name}}-arduinoPath" ng-model="service.arduinoPath" placeholder="Arduino IDE executable Path">
-            <!-- current implementation will not work as a jar -->
-            <!-- button class="btn btn-default pull-right" ng-click="msg.openMrlComm()">Open in IDE</button -->
-            <!-- FIXME - for an successful upload the "FIELDS!" portname, arduinoPath & boardType all need to be filled in -->
             <button class="btn btn-default pull-right" ng-click="upload(service.arduinoPath, formPort, boardType)">Upload</button>
             <button class="btn btn-default pull-right" ng-model="mrlComm.enableBoardInfo" uib-btn-checkbox ng-change="(mrlComm.enableBoardInfo)?msg.enableBoardInfo(true):msg.enableBoardInfo(false)">Status</button>
             <pre>{{service.uploadSketchResult}}
 		</pre>
         </uib-tab>
+        -->
         <!-- end -->
     </uib-tabset>
 </div>

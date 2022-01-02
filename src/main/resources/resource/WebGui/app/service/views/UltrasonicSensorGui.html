@@ -46,9 +46,9 @@
                     rate <toggle ng-model="service.useRate" ng-change="toggleRate()" class="miniBTN" on="" off="" size="btn-lg"/></toggle>
                 </td>
                 <td>
-                <label ng-show="service.useRate">
+                <span ng-show="service.useRate">
                     <input ng-show="service.useRate" type="text" class="form-control small-text-form" ng-model="service.rateHz" ng-change="setRate()"/>
-                    &nbsp;hz</label>
+                    &nbsp;hz</span>
                     <!-- button type="button" class="btn btn-default" ng-click="setRate()">set rate</button -->
                 </td>
             </tr>

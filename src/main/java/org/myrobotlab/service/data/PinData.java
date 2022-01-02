@@ -29,7 +29,7 @@ public class PinData implements Serializable {
 
 
   public String toString() {
-    return String.format("pin=%s value=%.2f", pin, value);
+    return String.format("pin=%s value=%d", pin, value);
   }
 
 }
