@@ -1,4 +1,4 @@
-angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templateCache', 'mrl', 'modalService', function($compile, $templateCache, mrl, modalService) {
+angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templateCache', 'mrl', 'modalService', '$state', '$stateParams', function($compile, $templateCache, mrl, modalService, $state, $stateParams) {
     return {
         scope: {
             panel: '='
@@ -89,9 +89,16 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                     // when the html was in a hidden state but all the properties where ng-repeated as part of the dom
                     // newscope.properties = mrl.getProperties(newscope.service)
                     $compile(elem.contents())(newscope)
-                    if (newscope.name.startsWith('intro@')){
-                      mrl.changeTab(newscope.name)                            
+
+                    if (newscope.name == $stateParams.servicename) {
+                        // exact match with url e.g. /python@blah
+                        mrl.changeTab($stateParams.servicename)
                     }
+                    // FIXME - if first time - 
+//                     if (newscope.name.startsWith('intro@')) {
+//                         // mrl.changeTab(newscope.name)
+//                         mrl.changeTab($stateParams.servicename)
+//                     }
                 }
             })
         }

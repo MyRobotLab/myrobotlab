@@ -38,133 +38,14 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
      */
     $scope.filterMetaData = {
         'AdaptiveThreshold': {
-            algorithm: 'mean',
-            blockSize: {
-                options: {
-                    floor: 3,
-                    ceil: 13,
-                    minLimit: 3,
-                    maxLimit: 13,
-                    value: 11,
-                    step: 2,
-                    showTicks: true,
-                    onChange: function(id) {
-                        $scope.setFilterState()
-                    }
-                }
-            },
-            param1: {
-                options: {
-                    floor: -10,
-                    ceil: 10,
-                    minLimit: -10,
-                    maxLimit: 10,
-                    showTicks: true,
-                    value: 2,
-                    step: 1,
-                    onChange: function(id) {
-                        $scope.setFilterState()
-                    }
-                }
-            },
-
+            algorithm: 'mean'
         },
         'Affine': {
-            angle: {
-                options: {
-                    floor: 0,
-                    ceil: 360,
-                    step: 1,
-                    onChange: function(id) {
-                        $scope.setFilterState()
-                    }
-                }
-            }
         },
 
         'Canny': {
-            apertureSize: {
-                options: {
-                    floor: 3,
-                    ceil: 7,
-                    minLimit: 3,
-                    maxLimit: 7,
-                    step: 2,
-                    showTicks: true,
-                    onChange: function(id) {
-                        $scope.setFilterState()
-                    }
-                }
-            },
-            lowThreshold: {
-                options: {
-                    floor: 0,
-                    ceil: 500,
-                    minLimit: 0,
-                    maxLimit: 500,
-                    step: 1,
-                    onChange: function(id) {
-                        $scope.setFilterState()
-                    }
-                }
-            },
-            highThreshold: {
-                options: {
-                    floor: 0,
-                    ceil: 500,
-                    minLimit: 0,
-                    maxLimit: 500,
-                    step: 1,
-                    onChange: function(id) {
-                        $scope.setFilterState()
-                    }
-                }
-            }
         },
-        // Canny
         'LKOpticalTrack': {
-            maxPointCnt: {
-                options: {
-                    floor: 0,
-                    ceil: 256,
-                    step: 1,
-                    onChange: function(id) {
-                        $scope.setFilterState()
-                    }
-                }
-            },
-            minDistance: {
-                options: {
-                    floor: 0,
-                    ceil: 256,
-                    step: 1,
-                    onChange: function(id) {
-                        $scope.setFilterState()
-                    }
-                }
-            },
-            blockSize: {
-                options: {
-                    floor: 0,
-                    ceil: 500,
-                    minLimit: 0,
-                    maxLimit: 500,
-                    step: 1,
-                    onChange: function(id) {
-                        $scope.setFilterState()
-                    }
-                }
-            },
-            quality: {
-                options: {
-                    floor: 0,
-                    ceil: 100,
-                    step: 1,
-                    onChange: function(id) {
-                        $scope.setFilterState()
-                    }
-                }
-            }
         }// LKOpticalTrack
 
     }

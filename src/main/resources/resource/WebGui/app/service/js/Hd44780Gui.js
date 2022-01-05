@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.Hd44780Gui', []).controller('Hd44780GuiCtrl', ['$scope', 'mrl', function($scope, mrl) {
+angular.module('mrlapp.service.Hd44780Gui', []).controller('Hd44780GuiCtrl', ['$scope', 'mrl', function ($scope, mrl) {
     // $modal ????
     console.info('Hd44780GuiCtrl')
     // grab the self and message
@@ -14,12 +14,12 @@ angular.module('mrlapp.service.Hd44780Gui', []).controller('Hd44780GuiCtrl', ['$
     $scope.rows = []
 
     // following the template.
-    this.updateState = function(service) {
+    this.updateState = function (service) {
         // use another scope var to transfer/merge selection
         // from user - service.currentSession is always read-only
         // all service data should never be written to, only read from
         $scope.screenContent = ''
-        Object.keys(service.screenContent).forEach(function(key) {
+        Object.keys(service.screenContent).forEach(function (key) {
             $scope.screenContent += service.screenContent[key].trim() + '\n'
             //console.log(service.screenContent[key])
         })
@@ -27,28 +27,32 @@ angular.module('mrlapp.service.Hd44780Gui', []).controller('Hd44780GuiCtrl', ['$
         $scope.service = service
     }
 
-    this.onMsg = function(inMsg) {
+    this.onMsg = function (inMsg) {
         console.info("Hd44780 Msg !")
         let data = inMsg.data[0]
-        
+
         switch (inMsg.method) {
-        case 'onStatus':
-            break
-        case 'onState':
-            _self.updateState(data)
-            $scope.$apply()
-            break
-        default:
-            console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
-            break
+            case 'onStatus':
+                break
+            case 'onClear':
+                $scope.screenContent = ''
+                $scope.$apply()
+                break
+            case 'onState':
+                _self.updateState(data)
+                $scope.$apply()
+                break
+            default:
+                console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
+                break
         }
     }
 
-    $scope.setBackLight = function(status) {
+    $scope.setBackLight = function (status) {
         msg.send("setBackLight", status)
     }
 
-    $scope.display = function(textArea) {
+    $scope.display = function (textArea) {
         console.info('setBackLicght')
         msg.send("clear")
         var lines = textArea.split('\n')
@@ -59,7 +63,7 @@ angular.module('mrlapp.service.Hd44780Gui', []).controller('Hd44780GuiCtrl', ['$
     }
 
 
-    _self.setControllerName = function() {
+    _self.setControllerName = function () {
         // $scope.service.controllerName = controller
         // msg.send('attach', $scope.service.deviceAddress)
     }
@@ -71,22 +75,23 @@ angular.module('mrlapp.service.Hd44780Gui', []).controller('Hd44780GuiCtrl', ['$
         attachName: $scope.service.pcfName
     }
 
-    $scope.attach = function() {
+    $scope.attach = function () {
         msg.send("attach", $scope.options.attachName)
     }
 
-    $scope.detach = function() {
+    $scope.detach = function () {
         msg.send("detach")
     }
 
-    $scope.clear = function() {
+    $scope.clear = function () {
         msg.send("clear")
     }
 
-    $scope.reset = function() {
+    $scope.reset = function () {
         msg.send("reset")
     }
-    
+
+    msg.subscribe('clear')
 
     // subscribe to the response
     msg.subscribe(this)

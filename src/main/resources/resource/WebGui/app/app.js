@@ -10,7 +10,6 @@
 // http://odetocode.com/blogs/scott/archive/2014/05/20/using-resolve-in-angularjs-routes.aspx
 angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'ui.router', //Angular UI Router - Yeah!
-'ct.ui.router.extras.previous', //Angular UI Router Extras _ PreviousState - Yeah!Yeah!
 'ui.bootstrap', //BootstrapUI (in Angular style)
 'oc.lazyLoad', //lazyload
 'sticky', //sticky elements
@@ -19,8 +18,8 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'color.picker',
 'angular-intro', // intro
 'angularScreenfull', // screenfull
-'angular-clipboard', 'rzModule', 'ngFlash', //'charts',
-// 'nvd3ChartDirectives', 
+'angular-clipboard', 
+'ngFlash',
 'ui.ace', //funky editor
 'timer', 'luegg.directives', // scrollglue
 'mrlapp.mrl', //mrl.js (/mrl.js) - core communication and service registry
@@ -37,23 +36,29 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'ui.select', // select option with images
 'mrlapp.utils'//general, helful tools, directives, services, ...
 ]).config(['$provide', '$stateProvider', '$urlRouterProvider', 'mrlProvider', function($provide, $stateProvider, $urlRouterProvider, mrlProvider) {
-    console.info('app.js - starting');
-    $urlRouterProvider.otherwise("/service/runtime");
+    console.info('app.js - starting')
+    console.info('app.js - config defining routes')
+    
+    $urlRouterProvider.otherwise("/service/runtime"); // default redirect
+    
     $stateProvider.state('tabs2', {
         url: "/service/:servicename",
         views: {
             '': {
                 templateUrl: 'main/main.html'
-            },
+            }
+            ,
             'navbar@tabs2': {
                 templateUrl: 'nav/nav.html',
                 controller: 'navCtrl'
-            },
+            }
+           ,
             'content@tabs2': {
                 templateUrl: 'views/tabsView.html',
                 controller: 'tabsViewCtrl'
             }
-        },
+        }
+        ,
         resolve: {
             test: function($stateParams, mrl) {
                 console.info('tabs2.main state in router')
