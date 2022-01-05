@@ -90,15 +90,16 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                     // newscope.properties = mrl.getProperties(newscope.service)
                     $compile(elem.contents())(newscope)
 
+                    // at this point we are guaranteed a panel exist - so  we process the url path
+                    // default to intro
+                    if ($stateParams.servicename == 'intro' && newscope.name.startsWith('intro@')) {
+                        mrl.changeTab($stateParams.servicename)
+                    }
+                    // if we have an exact match swith to that tab
                     if (newscope.name == $stateParams.servicename) {
                         // exact match with url e.g. /python@blah
                         mrl.changeTab($stateParams.servicename)
                     }
-                    // FIXME - if first time - 
-//                     if (newscope.name.startsWith('intro@')) {
-//                         // mrl.changeTab(newscope.name)
-//                         mrl.changeTab($stateParams.servicename)
-//                     }
                 }
             })
         }
