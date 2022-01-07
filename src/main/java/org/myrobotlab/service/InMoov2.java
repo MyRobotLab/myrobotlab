@@ -1856,8 +1856,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     simulator.setRotation(getName() + ".head.rollNeck", "z");
     simulator.setRotation(getName() + ".head.eyeY", "x");
     simulator.setRotation(getName() + ".head.eyeX", "y");
-    simulator.setRotation(getName() + ".head.eyelidLeft", "x");
-    simulator.setRotation(getName() + ".head.eyelidRight", "x");
+    //simulator.setRotation(getName() + ".head.eyelidLeft", "x");FIXME we need to modelize them in Blender
+    //simulator.setRotation(getName() + ".head.eyelidRight", "x");FIXME we need to modelize them in Blender
     simulator.setRotation(getName() + ".torso.topStom", "z");
     simulator.setRotation(getName() + ".torso.midStom", "y");
     simulator.setRotation(getName() + ".torso.lowStom", "x");
@@ -1882,8 +1882,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // to be
     // two eyeX (left and
     // right?)
-    simulator.setMapper(getName() + ".head.eyelidLeft", 0, 180, 40, 140);
-    simulator.setMapper(getName() + ".head.eyelidRight", 0, 180, 40, 140);
+    //simulator.setMapper(getName() + ".head.eyelidLeft", 0, 180, 40, 140);FIXME we need to modelize them in Blender
+    //simulator.setMapper(getName() + ".head.eyelidRight", 0, 180, 40, 140);FIXME we need to modelize them in Blender
     simulator.setMapper(getName() + ".rightArm.bicep", 0, 180, 0, -150);
     simulator.setMapper(getName() + ".leftArm.bicep", 0, 180, 0, -150);
 
