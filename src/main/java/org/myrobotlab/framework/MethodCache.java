@@ -121,18 +121,6 @@ public class MethodCache {
     }
     return instance;
   }
-  /*
-   * public static void main(String[] args) { try {
-   * 
-   * // LoggingFactory.init(Level.INFO);
-   * 
-   * MethodCache cache = MethodCache.getInstance(); //
-   * cache.cacheMethodEntries(Runtime.class);
-   * cache.cacheMethodEntries(Clock.class);
-   * 
-   * 
-   * } catch(Exception e) { log.error("main threw", e); } }
-   */
 
   Set<String> excludeMethods = new TreeSet<>();
 
@@ -170,7 +158,7 @@ public class MethodCache {
       // m.getParameterTypes().length == 1) {
       // log.info("here");
       // }
-
+      
       String key = getMethodKey(object, m);
       String ordinalKey = getMethodOrdinalKey(object, m);
       boolean hasInterfaceInParamList = hasInterface(m);
@@ -254,6 +242,18 @@ public class MethodCache {
       size += mi.methodsIndex.size();
     }
     return size;
+  }
+  
+  public Method getDefaultInvokeMethod(String fullType) {    
+    try {
+      // last ditch effort - try default msg handler method
+      Class<?> c = Class.forName(fullType);
+      Method m = c.getMethod("defaultInvokeMethod", String.class, Object[].class);
+      return m;
+    } catch(Exception e) {
+      // no default
+    }    
+    return null;
   }
 
   public Method getMethod(Class<?> object, String methodName, Class<?>... paramTypes) throws ClassNotFoundException {
@@ -341,9 +341,13 @@ public class MethodCache {
       String ordinalKey = getMethodOrdinalKey(fullType, methodName, paramTypeNames.length);
       List<MethodEntry> possibleMatches = mi.methodOrdinalIndex.get(ordinalKey);
       if (possibleMatches == null) {
-        // log.error("there were no possible matches for ordinal key {} - does
-        // the method exist?", ordinalKey);
+
         log.error("Method Cache look up Failed! {}.{}.({})", fullType, methodName, StringUtils.join(paramTypeNames, ","));
+        
+        // if a service provides a methodCacheDefaultMethod - it means whenever no match is found
+        // call "this" method, similar to preProcessHook which intercepts msgs when they come off a msg queue
+        // but before invoke is called
+        
         return null;
       }
       if (possibleMatches.size() == 1) {
@@ -423,8 +427,6 @@ public class MethodCache {
     MethodCache cache = MethodCache.getInstance();
     Method method = cache.getMethod(obj.getClass(), methodName, params);
     retobj = method.invoke(obj, params);
-    out(methodName, retobj); // <-- FIXME clean this up !!!
-
     return retobj;
   }
 
@@ -471,19 +473,6 @@ public class MethodCache {
   private String getMethodOrdinalKey(String fullType, String methodName, int parameterSize) {
     String key = String.format("%s.%s-%s", fullType, methodName, parameterSize);
     return key;
-  }
-
-  public void out(String method, Object o) {
-    /*
-     * Message m = Message.createMessage(this, null, method, o); // create a //
-     * un-named // message // as output
-     * 
-     * if (m.sender.length() == 0) { m.sender = this.getName(); } if
-     * (m.sendingMethod.length() == 0) { m.sendingMethod = method; } if (outbox
-     * == null) {
-     * log.info("******************OUTBOX IS NULL*************************");
-     * return; } outbox.add(m);
-     */
   }
 
   public List<MethodEntry> getOrdinalMethods(Class<?> object, String methodName, int parameterSize) {
