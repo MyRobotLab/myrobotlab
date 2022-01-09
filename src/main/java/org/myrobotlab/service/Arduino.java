@@ -1786,6 +1786,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public void releaseService() {
     super.releaseService();
     
+    poller.stop();
+    
     // SHUTDOWN ACKING - use case - port no longer exists
     msg.enableAck(false);
     
@@ -2158,7 +2160,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     // The device list always has "Arduino" in it for some reason..
     if (deviceList.size() > 1) {
       log.info("Need to sync devices to mrlcomm. Num Devices: {} Devices: {}", deviceList.size(), deviceList);
-      send(getName(), "sync");
+      sendAsync(getName(), "sync");
     } else {
       log.info("no devices to sync, clear to resume.");
     }
