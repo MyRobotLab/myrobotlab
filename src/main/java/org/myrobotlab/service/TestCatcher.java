@@ -69,6 +69,8 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    */
   transient public BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
 
+  transient public Map<String, Object[]> methodsCalled = new HashMap<>();
+
   public static class Ball {
     public String name;
     public String type;
@@ -154,6 +156,7 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     msgs.clear();
     pinData = null;
     pinSet.clear();
+    methodsCalled.clear();
   }
 
   public Message getMsg(long timeout) throws InterruptedException {
@@ -216,11 +219,13 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   @Override
   public void onConnect(String portName) {
     info("connected to %s", portName);
+    methodsCalled.put(Thread.currentThread().getStackTrace()[1].getMethodName(), new Object[] { portName });
   }
 
   @Override
   public void onDisconnect(String portName) {
     info("disconnect to %s", portName);
+    methodsCalled.put(Thread.currentThread().getStackTrace()[1].getMethodName(), new Object[] { portName });
   }
 
   public void checkMsg(String method) throws InterruptedException, IOException {
@@ -531,6 +536,27 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
       }
     }
     return false;
+  }
+
+  public void verifyCallback(String method, Object... params) throws IOException {
+    if (!methodsCalled.containsKey(method)) {
+      throw new IOException(String.format("callback %s not found", method));
+    }
+    Object[] recvdParams = methodsCalled.get(method);
+    if (recvdParams.length != params.length) {
+      throw new IOException(String.format("parameter misalignment for method %s - expecting %d got %d", method, params.length, recvdParams.length));
+    }
+    for (int i = 0; i < params.length; ++i) {
+      Object verify = params[i];
+      Object recvd = params[i];
+      if (verify == null && recvd != null) {
+        throw new IOException(String.format("parameter invalid for method %s - expecting null got %s", method, recvd));
+      }
+
+      if (!verify.equals(recvd)) {
+        throw new IOException(String.format("parameter incorrect for method %s - expecting %s got %s", method, verify, recvd));
+      }
+    }
   }
 
 }
