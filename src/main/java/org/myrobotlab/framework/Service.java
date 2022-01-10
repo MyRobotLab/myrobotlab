@@ -1728,6 +1728,20 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     outbox.add(msg);
   }
 
+  public void sendAsync(String name, String method, Object... data) {
+    // if unknown assume remote - fire and forget on outbox
+    Message msg = Message.createMessage(getName(), name, method, data);
+    msg.sender = this.getFullName();
+    // All methods which are invoked will
+    // get the correct sendingMethod
+    // here its hardcoded
+    msg.sendingMethod = "send";
+    // log.info(CodecUtils.toJson(msg));
+    send(msg);
+    
+    outbox.add(msg);
+  }
+  
   public Object sendBlocking(String name, Integer timeout, String method, Object... data) throws InterruptedException, TimeoutException {
     Message msg = Message.createMessage(getName(), name, method, data);
     msg.sender = this.getFullName();

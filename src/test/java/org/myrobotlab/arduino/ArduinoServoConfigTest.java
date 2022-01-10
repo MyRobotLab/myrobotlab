@@ -2,9 +2,8 @@ package org.myrobotlab.arduino;
 import java.io.IOException;
 import java.text.ParseException;
 
-import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Python;
 import org.myrobotlab.service.Runtime;
@@ -25,12 +24,10 @@ import org.myrobotlab.service.Servo;
  * @author kwatters
  *
  */
+
+@Ignore
 public class ArduinoServoConfigTest {
 
-  @Before
-  public void init() {
-    LoggingFactory.init("info");
-  }
 
   @Test
   public void generateSimpleConfigs() throws Exception {
