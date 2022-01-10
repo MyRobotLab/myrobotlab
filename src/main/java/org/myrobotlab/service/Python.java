@@ -777,6 +777,19 @@ public class Python extends Service {
     save();
     broadcastState();
   }
+  
+  // @Override /* FIXME - make interface for it */
+  public void defaultInvokeMethod (String method, Object... params) {
+    if (interp == null) {
+      createPythonInterpreter();
+    }
+    Message msg = Message.createMessage(getName(), getName(), method, params);
+    // handling call-back input needs to be
+    // done by another thread - in case its doing blocking
+    // or is executing long tasks - the inbox thread needs to
+    // be freed of such tasks - it has to do all the inbound routing
+    inputQueue.add(msg);
+  }
 
   @Override
   synchronized public void startService() {

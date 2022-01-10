@@ -97,7 +97,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   protected MetaData serviceType;
 
   private static final long serialVersionUID = 1L;
-  
+
   transient public final static Logger log = LoggerFactory.getLogger(Service.class);
 
   /**
@@ -219,12 +219,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * starting all peers on start of service
    */
+  @Deprecated /* peers are dead use config */
   protected boolean autoStartPeers = true;
 
+  @Deprecated /* peers are dead use config */
   public boolean isAutoStartPeers() {
     return autoStartPeers;
   }
 
+  @Deprecated /* peers are dead use config */
   public void setAutoStartPeers(boolean autoStartPeers) {
     this.autoStartPeers = autoStartPeers;
   }
@@ -835,10 +838,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public boolean containsTask(String taskName) {
     return tasks.containsKey(taskName);
   }
-  
+
   @Override
   final public void invokeFuture(String method, long delayMs) {
-    invokeFuture(method, delayMs, (Object[])null);
+    invokeFuture(method, delayMs, (Object[]) null);
   }
 
   @Override
@@ -1312,15 +1315,23 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
               } else {
                 Method m = cache.getMethod(si.getClass(), listener.callbackMethod, retobj);
                 if (m == null) {
-                  log.warn("Null Method as a result of cache lookup. {} {} {}", si.getClass(), listener.callbackMethod, retobj);
-                }
-                try {
-                  m.invoke(si, retobj);
-                } catch (Throwable e) {
-                  // we attempted to invoke this , it blew up. Catch it here,
-                  // continue
-                  // through the rest of the listeners instead of bombing out.
-                  log.error("Invoke blew up! on: {} calling method {} ", si.getName(), m.toString(), e);
+
+                  // attempt to get defaultInvokeMethod
+                  m = cache.getDefaultInvokeMethod(si.getClass().getCanonicalName());
+                  if (m != null) {
+                    m.invoke(si, listener.callbackMethod, new Object[] {retobj});
+                  } else {
+                    log.warn("Null Method as a result of cache lookup. {} {} {}", si.getClass(), listener.callbackMethod, retobj);
+                  }
+                } else {
+                  try {
+                    m.invoke(si, retobj);
+                  } catch (Throwable e) {
+                    // we attempted to invoke this , it blew up. Catch it here,
+                    // continue
+                    // through the rest of the listeners instead of bombing out.
+                    log.error("Invoke blew up! on: {} calling method {} ", si.getName(), m.toString(), e);
+                  }
                 }
               }
             } else {
@@ -1640,21 +1651,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
       String format = filename.substring(filename.lastIndexOf(".") + 1);
       ServiceConfig config = getConfig();
-      
+
       if (config == null) {
         log.info("{} has null config - not saving", getName());
         return false;
       }
-
-      // bad idea of an optimizaton
-      /**
-       * <pre>
-       * if (config.getClass().equals(ServiceConfig.class) && !saveNonConfigServices && config.listeners == null) {
-       *   log.info("service {} without config - will not save file", getName());
-       *   return true;
-       * }
-       * </pre>
-       */
 
       String data = null;
       if ("json".equals(format.toLowerCase())) {
@@ -1674,6 +1675,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return false;
   }
 
+  @Deprecated /* peers are dead */
   public ServiceInterface getPeer(String peerKey) {
     String peerName = serviceType.getPeerActualName(peerKey);
     return Runtime.getService(peerName);
@@ -1683,14 +1685,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     send(name, method, (Object[]) null);
   }
 
+  @Deprecated /* peers are dead */
   public void sendToPeer(String peerName, String method) {
     send(String.format("%s.%s", name, peerName), method, (Object[]) null);
   }
 
+  @Deprecated /* peers are dead */
   public Object invokePeer(String peerName, String method) {
     return invokeOn(false, getPeer(peerName), method, (Object[]) null);
   }
 
+  @Deprecated /* peers are dead */
   public Object invokePeer(String peerName, String method, Object... data) {
     return invokeOn(false, getPeer(peerName), method, data);
   }
@@ -1700,6 +1705,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public void send(String name, String method, Object... data) {
+    // if you know the service is local - use same thread
+    // to call directly
+    ServiceInterface si = Runtime.getService(name);
+    if (si != null) {
+      invokeOn(true, si, method, data);
+      return;
+    }
+
+    // if unknown assume remote - fire and forget on outbox
     Message msg = Message.createMessage(getName(), name, method, data);
     msg.sender = this.getFullName();
     // All methods which are invoked will
@@ -1714,6 +1728,20 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     outbox.add(msg);
   }
 
+  public void sendAsync(String name, String method, Object... data) {
+    // if unknown assume remote - fire and forget on outbox
+    Message msg = Message.createMessage(getName(), name, method, data);
+    msg.sender = this.getFullName();
+    // All methods which are invoked will
+    // get the correct sendingMethod
+    // here its hardcoded
+    msg.sendingMethod = "send";
+    // log.info(CodecUtils.toJson(msg));
+    send(msg);
+    
+    outbox.add(msg);
+  }
+  
   public Object sendBlocking(String name, Integer timeout, String method, Object... data) throws InterruptedException, TimeoutException {
     Message msg = Message.createMessage(getName(), name, method, data);
     msg.sender = this.getFullName();
@@ -1848,7 +1876,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * services by re-writing names with prefixes
    */
 
-
   @Override
   public String getName() {
     return name;
@@ -1868,7 +1895,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * enough information to correctly create a peer service from this services
    * meta data.
    * 
-   * @param reservedKey - key name of peer
+   * @param reservedKey
+   *          - key name of peer
    * @return
    */
   public ServiceInterface loadPeer(String reservedKey) {
@@ -1966,11 +1994,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
 
     if (autoStartPeers) {
-      startPeers();
+      // startPeers();
     }
 
   }
 
+  @Deprecated /* peers are dead - use config */
   public void startPeers() {
     log.info("starting peers");
     Map<String, ServiceReservation> peers = serviceType.getPeers();
@@ -2253,11 +2282,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   /**
    * Detaches ALL listeners/subscribers from this service if services have
-   * special requirements, they can override this
-   * WARNING - if used this will remove all UI and other perhaps necessary 
-   * subscriptions 
+   * special requirements, they can override this WARNING - if used this will
+   * remove all UI and other perhaps necessary subscriptions
    */
-  @Deprecated /* dangerous method, not to be used as lazy detach when you don't know the controller name */
+  @Deprecated /*
+               * dangerous method, not to be used as lazy detach when you don't
+               * know the controller name
+               */
   public void detach() {
     outbox.reset();
   }
@@ -2320,15 +2351,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * 
    * @param service
    *          - the service to detach from this service
-   *          
-   *          
-   *  FIXME !!! - although this is a nice pub/sub function
-   *  to clear out pubs - it will often have to be overriden
-   *  and therefore will be extremely easy to forget to call super
-   *  a "framework" method should replace this - so that a
-   *  service.detachOutbox()
-   *  calls -&gt; a detach that can be overidden !
-   *          
+   * 
+   * 
+   *          FIXME !!! - although this is a nice pub/sub function to clear out
+   *          pubs - it will often have to be overriden and therefore will be
+   *          extremely easy to forget to call super a "framework" method should
+   *          replace this - so that a service.detachOutbox() calls -&gt; a
+   *          detach that can be overidden !
+   * 
    */
   @Override
   public void detach(Attachable service) {
@@ -2361,10 +2391,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return outbox.getAttached(publishPoint);
   }
 
- /**
-  * Attaches takes instance then calls the derived service attach(name) to route appropriately
-  */
-  @Override  
+  /**
+   * Attaches takes instance then calls the derived service attach(name) to
+   * route appropriately
+   */
+  @Override
   public void attach(Attachable service) throws Exception {
     attach(service.getName());
   }
