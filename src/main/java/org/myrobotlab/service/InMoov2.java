@@ -1529,6 +1529,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (head == null) {
       startHead();
     }
+    // TODO: pass the PID values for the eye tracking
     return startHeadTracking(head.eyeX, head.eyeY);
   }
 
@@ -1612,7 +1613,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       headTracking.attach(opencv.getName());
       headTracking.attachPan(head.rothead.getName());
       headTracking.attachTilt(head.neck.getName());
-
+      // TODO: where are the PID values?
     }
   }
 
@@ -1628,6 +1629,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       headTracking.attach(opencv.getName());
       headTracking.attachPan(rothead.getName());
       headTracking.attachTilt(neck.getName());
+      // TODO: where are the PID values?
     }
     return headTracking;
   }
