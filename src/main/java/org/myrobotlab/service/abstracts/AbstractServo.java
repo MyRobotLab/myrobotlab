@@ -54,7 +54,7 @@ import org.slf4j.Logger;
  *         vs status of angles
  *
  */
-public abstract class AbstractServo extends Service implements ServoControl, ServoControlPublisher, ServoStatusPublisher, EncoderPublisher, IKJointAnglePublisher {
+public abstract class AbstractServo extends Service implements ServoControl, ServoControlPublisher, ServoStatusPublisher, EncoderPublisher {
 
   public final static Logger log = LoggerFactory.getLogger(AbstractServo.class);
 
@@ -322,13 +322,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   @Deprecated /*setPin setPos then attach(String)*/
   public void attach(String controllerName, Integer pin, Double pos) {
     attach(controllerName, pin, pos, null);
-  }
-
-  @Deprecated
-  @Override   /* Servos Do Not publish Joint Angles - they only publish their position ! */
-  public AngleData publishJointAngle(AngleData angle) {
-    log.debug("{}.publishJointAngle({})", getName(), angle);
-    return angle;
   }
 
   // @Override
