@@ -100,6 +100,12 @@ angular.module('mrlapp.service.MotorDualPwmGui', []).controller('MotorDualPwmGui
         msg.send('moveTo', $scope.moveToPos)
     }
 
+    
+    $scope.setSpeed = function() {
+        msg.send('setSpeed', $scope.requestedPower)
+    }
+
+
     msg.subscribe("publishPowerChange")
     msg.subscribe("publishPowerOutputChange")
     msg.subscribe(this)

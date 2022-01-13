@@ -44,75 +44,119 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.PidConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.interfaces.PidControl;
 import org.slf4j.Logger;
 
 /**
  * 
- * Pid - control service from
+ * Pid - a controller service, supports multiple pid loops
  * 
+ * General idea gratefully inspired by:
  * http://brettbeauregard.com/blog/2011/04/improving-the-beginners-pid-
- * introduction/ This will likely get merged/replaced with Pid service.
+ * introduction/
  * 
- * TODO - handle integral windup -
+ * TODO - handle integral windup - reset to avoid windup - bumpless transfer
+ * usually sets output and removes sets the ITerm to 0
  * https://en.wikipedia.org/wiki/PID_controller#Integral_windup
  * 
  */
-public class Pid extends Service {
+public class Pid extends Service implements PidControl {
+
+  public static class PidOutput {
+    public long ts;
+    public String src;
+    public String key;
+    public Double input;
+    public Double value;
+
+    public PidOutput(String src, String key, long ts, double input, double output) {
+      this.src = src;
+      this.key = key;
+      this.ts = ts;
+      this.input = input;
+      this.value = output;
+    }
+
+    public String toString() {
+      return String.format("%s %d %f %f", key, ts, input, value);
+    }
+  }
 
   public static class PidData implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * original user entered data for Kp value
-     */
-    double dispKp;
+    public boolean firstTime = true;
 
     /**
-     * original user entered data for Ki value
+     * The key identifier of this control loop. This is how to support multiple
+     * pid loops with different tuning.
      */
-    double dispKi;
-
-    /**
-     * original user data entered for Kd value
-     */
-    double dispKd;
+    public String key;
 
     /**
      * (P)roportional Tuning Parameter
      */
-    double kp;
+    public double kp;
     /**
      * (I)ntegral Tuning Parameter
      */
-    double ki;
+    public double ki;
     /**
      * (D)erivative Tuning Parameter
      */
-    double kd;
+    public double kd;
 
-    int controllerDirection;
+    @Deprecated /* use just a invert boolean */
+    public int controllerDirection;
 
-    double input; // * Pointers to the Input, Output, and Setpoint
-    // variables
-    double output; // This creates a hard link between the variables
-    // and
-    // the
-    double setpoint; // Pid, freeing the user from having to
-    // constantly
-    // tell us
-    // what these values are. with pointers we'll just know.
+    /**
+     * saved current input value
+     */
+    public double input;
 
-    double deadband;
+    /**
+     * saved current output value
+     */
+    public double output;
 
-    long lastTime;
-    double ITerm, lastInput;
+    /**
+     * the set point where the pid "wishes" to be
+     */
+    public double setpoint;
 
-    long sampleTime = 100; // default Controller Sample Time is 0.1
-    // seconds
-    double outMin, outMax, outCenter;
+    /**
+     * deadband amount before output is changed
+     */
+    public double deadband;
 
-    boolean inAuto;
+    public long lastTime;
+
+    public double iTerm;
+    
+    public double lastInput;
+
+    public long sampleTime = 100; 
+    
+    public Double outMin;
+
+    public Double outMax;
+
+    public double outCenter = 0.0;
+
+    /**
+     * enabled == true pid will be calculate and published, enabled == false
+     * will not
+     */
+    public boolean enabled = true;
+
+    @Deprecated /*
+                 * what is inAuto auto vs manual ? does it even make sense in
+                 * this context ?
+                 */
+    public boolean inAuto = true;
 
     public String toString() {
       return String.format("kp %f ki %f kd %f direction %d input %f output %f setpoint %f deadband %f outMin %f outMax %f", kp, ki, kd, controllerDirection, input, output,
@@ -128,8 +172,10 @@ public class Pid extends Service {
 
   static final public int MODE_MANUAL = 0;
   // direction
+  @Deprecated /* use just a invert boolean */
   static final public int DIRECTION_DIRECT = 0;
 
+  @Deprecated /* use just a invert boolean */
   static final public int DIRECTION_REVERSE = 1;
 
   public Map<String, PidData> data = new HashMap<String, PidData>();
@@ -138,55 +184,30 @@ public class Pid extends Service {
     super(n, id);
   }
 
-  /*
-   * compute()
-   * **********************************************************************
+  public PidData addPid(PidData pid) {
+    log.info("adding pid {}", pid);
+    data.put(pid.key, pid);
+    broadcastState();
+    return pid;
+  }
+
+  public PidData deletePid(String key) {
+    PidData pid = data.remove(key);
+    if (pid != null) {
+      broadcastState();
+    }
+    return pid;
+  }
+
+  /**
    * This, as they say, is where the magic happens. this function should be
    * called every time "void loop()" executes. the function will decide for
    * itself whether a new pid Output needs to be computed. returns true when the
-   * output is computed, false when nothing has been done. *****************
-   * ***************************************************************
+   * output is computed, false when nothing has been done
+   * 
+   * @param key
+   *          - key of pid of interest
    */
-  public boolean compute(String key) {
-    PidData piddata = data.get(key);
-
-    if (!piddata.inAuto)
-      return false;
-    long now = System.currentTimeMillis();
-    long timeChange = (now - piddata.lastTime);
-    if (timeChange >= piddata.sampleTime) {
-      // ++sampleCount;
-      /* compute all the working error variables */
-      double error = piddata.setpoint - piddata.input;
-      piddata.ITerm += (piddata.ki * error);
-      if (piddata.ITerm > piddata.outMax)
-        piddata.ITerm = piddata.outMax;
-      else if (piddata.ITerm < piddata.outMin)
-        piddata.ITerm = piddata.outMin;
-      double dInput = (piddata.input - piddata.lastInput);
-
-      /* compute Pid Output */
-      double output = piddata.kp * error + piddata.ITerm - piddata.kd * dInput;
-
-      if (output > piddata.outMax)
-        output = piddata.outMax;
-      else if (output < piddata.outMin)
-        output = piddata.outMin;
-
-      if (Math.abs(piddata.output - output) > piddata.deadband) {
-        piddata.output = output;
-      }
-      // keep calm and save MORE cpu ! ( buffer overrun )
-      // broadcastState();
-
-      /* Remember some variables for next time */
-      piddata.lastInput = piddata.input;
-      piddata.lastTime = now;
-      return true;
-    } else
-      return false;
-  }
-
   public void direct(String key) {
     setControllerDirection(key, DIRECTION_DIRECT);
   }
@@ -196,35 +217,23 @@ public class Pid extends Service {
     return piddata.controllerDirection;
   }
 
-  public double getKd(String key) {
-    PidData piddata = data.get(key);
-    return piddata.dispKd;
-  }
-
-  public double getKi(String key) {
-    PidData piddata = data.get(key);
-    return piddata.dispKi;
-  }
-
-  public double getKp(String key) {
-    PidData piddata = data.get(key);
-    return piddata.dispKp;
-  }
-
   public int getMode(String key) {
     PidData piddata = data.get(key);
     return piddata.inAuto ? MODE_AUTOMATIC : MODE_MANUAL;
   }
 
-  public double getOutput(String key) {
-    PidData piddata = data.get(key);
-    return piddata.output + piddata.outCenter;
-  }
-
-  public void setOutput(String key, double Output) {
+  /**
+   * Forcefully sets the output to a manual value putting the controller into
+   * manual mode
+   * 
+   * @param key
+   *          - pid
+   * @param output
+   */
+  public void setOutput(String key, double output) {
     setMode(key, MODE_MANUAL);
     PidData piddata = data.get(key);
-    piddata.output = Output - piddata.outCenter;
+    piddata.output = output - piddata.outCenter;
   }
 
   public double getSetpoint(String key) {
@@ -233,6 +242,8 @@ public class Pid extends Service {
   }
 
   /**
+   * FIXME - relates to firstTime ?
+   * 
    * does all the things that need to happen to ensure a bumpless transfer from
    * manual to automatic mode.
    * 
@@ -241,33 +252,30 @@ public class Pid extends Service {
    */
   public void init(String key) {
     PidData piddata = data.get(key);
-    piddata.ITerm = piddata.output;
+    piddata.iTerm = piddata.output;
     piddata.lastInput = piddata.input;
-    if (piddata.ITerm > piddata.outMax) {
-      piddata.ITerm = piddata.outMax;
-    } else if (piddata.ITerm < piddata.outMin) {
-      piddata.ITerm = piddata.outMin;
+    if (piddata.outMax != null && piddata.iTerm > piddata.outMax) {
+      piddata.iTerm = piddata.outMax;
+    } else if (piddata.outMin != null && piddata.iTerm < piddata.outMin) {
+      piddata.iTerm = piddata.outMin;
     }
 
-    piddata.lastTime = System.currentTimeMillis() - piddata.sampleTime; // FIXME
-    // -
-    // is
-    // this
-    // correct ??? (was
-    // in constructor)
+    piddata.lastTime = System.currentTimeMillis() - piddata.sampleTime;
   }
 
   public void invert(String key) {
     setControllerDirection(key, DIRECTION_REVERSE);
   }
 
-  /*
-   * SetControllerDirection(...)***********************************************
-   * ** The Pid will either be connected to a DIRECT acting process (+Output
-   * leads to +Input) or a REVERSE acting process(+Output leads to -Input.) we
-   * need to know which one, because otherwise we may increase the output when
-   * we should be decreasing. This is called from the constructor. *************
-   * ***************************************************************
+  /**
+   * SetControllerDirection - The Pid will either be connected to a DIRECT
+   * acting process (+Output leads to +Input) or a REVERSE acting
+   * process(+Output leads to -Input.) we need to know which one, because
+   * otherwise we may increase the output when we should be decreasing. This is
+   * called from the constructor.
+   * 
+   * @param key
+   * @param direction
    */
   public void setControllerDirection(String key, Integer direction) {
     PidData piddata = data.get(key);
@@ -278,11 +286,6 @@ public class Pid extends Service {
     }
     piddata.controllerDirection = direction;
     broadcastState();
-  }
-
-  public void setInput(String key, double input) {
-    PidData piddata = data.get(key);
-    piddata.input = input;
   }
 
   /**
@@ -317,11 +320,10 @@ public class Pid extends Service {
    * @param key
    *          - named pid compute instance, so the Pid "service" can manage pid
    *          systems
-   * @param min
-   *          m
-   * @param max
-   *          m
    * 
+   * @param key
+   * @param min
+   * @param max
    */
   public void setOutputRange(String key, double min, double max) {
     PidData piddata = data.get(key);
@@ -340,10 +342,10 @@ public class Pid extends Service {
       else if (piddata.output < piddata.outMin)
         piddata.output = piddata.outMin;
 
-      if (piddata.ITerm > piddata.outMax)
-        piddata.ITerm = piddata.outMax;
-      else if (piddata.ITerm < piddata.outMin)
-        piddata.ITerm = piddata.outMin;
+      if (piddata.iTerm > piddata.outMax)
+        piddata.iTerm = piddata.outMax;
+      else if (piddata.iTerm < piddata.outMin)
+        piddata.iTerm = piddata.outMin;
     }
     broadcastState();
   }
@@ -356,49 +358,41 @@ public class Pid extends Service {
    * @param key
    *          - named pid compute instance, so the Pid "service" can manage pid
    *          systems
-   * @param Kp
+   * @param kp
    *          - constant proportional value
-   * @param Ki
+   * @param ki
    *          - constant integral value
-   * @param Kd
+   * @param kd
    *          - constant derivative value
    */
-  public void setPID(String key, Double Kp, Double Ki, Double Kd) {
+  public void setPid(String key, double kp, double ki, double kd) {
     PidData piddata = new PidData();
-
-    if (Kp < 0 || Ki < 0 || Kd < 0) {
-      error("kp < 0 || ki < 0 || kd < 0");
-      return;
-    }
 
     if (data.containsKey(key)) {
       piddata = data.get(key);
     }
 
-    piddata.dispKp = Kp;
-    piddata.dispKi = Ki;
-    piddata.dispKd = Kd;
-
     double SampleTimeInSec = ((double) piddata.sampleTime) / 1000;
-    piddata.kp = Kp;
-    piddata.ki = Ki * SampleTimeInSec;
-    piddata.kd = Kd / SampleTimeInSec;
+    piddata.kp = kp;
+    piddata.ki = ki * SampleTimeInSec;
+    piddata.kd = kd / SampleTimeInSec;
 
     if (piddata.controllerDirection == DIRECTION_REVERSE) {
       piddata.kp = (0 - piddata.kp);
       piddata.ki = (0 - piddata.ki);
       piddata.kd = (0 - piddata.kd);
     }
-
+    piddata.key = key;
     data.put(key, piddata);
     broadcastState();
   }
 
-  /*
-   * setSampleTime(...)
-   * ********************************************************* sets the period,
-   * in Milliseconds, at which the calculation is performed ************
-   * ****************************************************************
+  /**
+   * setSampleTime - sets the period, in Milliseconds, at which the calculation
+   * is performed
+   * 
+   * @param key
+   * @param NewSampleTime
    */
   public void setSampleTime(String key, int NewSampleTime) {
     PidData piddata = data.get(key);
@@ -408,8 +402,6 @@ public class Pid extends Service {
       piddata.kd /= ratio;
       piddata.sampleTime = NewSampleTime;
     }
-
-    broadcastState();
   }
 
   public void setSetpoint(String key, double setPoint) {
@@ -426,31 +418,147 @@ public class Pid extends Service {
     return data;
   }
 
+  public Double compute(String key, double sensorValue) {
+    PidData piddata = null;
+    if (data.containsKey(key)) {
+      piddata = data.get(key);
+    } else {
+      log.error("Unknown key for PID control.  Key: {}", key);
+      return null;
+    }
+    
+    piddata.input = sensorValue;
+    //////////////////////////////////////////////////////////////
+
+    if (!piddata.enabled) {
+      return null;
+    }
+
+    // TODO - remove this
+    if (!piddata.inAuto)
+      return null;
+
+    if (piddata.firstTime) {
+      init(key);
+      piddata.firstTime = false;
+    }
+
+    long now = System.currentTimeMillis();
+
+    long timeChange = (now - piddata.lastTime);
+
+    if (timeChange < piddata.sampleTime) {
+      // input overflow - will not compute
+      // although its more efficient to do flow control at the source
+      log.warn("{} {} overflow will not compute", getName(), key);
+      return null;
+    }
+    // ++sampleCount;
+
+    /* compute all the working error variables */
+    double error = piddata.setpoint - piddata.input;
+    piddata.iTerm += (piddata.ki * error);
+    piddata.iTerm = constrain(piddata.iTerm, piddata.outMin, piddata.outMax);
+    double dInput = (piddata.input - piddata.lastInput);
+
+    /* compute Pid Output */
+    double output = piddata.kp * error + piddata.iTerm - piddata.kd * dInput;
+
+    output = constrain(output, piddata.outMin, piddata.outMax);
+
+    if (Math.abs(piddata.output - output) > piddata.deadband) {
+      piddata.output = output;
+    }
+
+    /* Remember some variables for next time */
+    piddata.lastInput = piddata.input;
+    piddata.lastTime = now;
+
+    double newOutput = piddata.output + piddata.outCenter;
+
+    // WTH is outCenter - offCenter ?
+    send(getName(), "publishPid", new PidOutput(getName(), key, now, piddata.input, newOutput));
+
+    return newOutput;
+  }
+
+  private double constrain(double value, Double min, Double max) {
+    if (max != null && value > max) {
+      return max;
+    }
+    if (min != null && value < min) {
+      return min;
+    }
+    return value;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    PidConfig config = new PidConfig();
+    config.data = data;
+    return config;
+  }
+
+  @Override
+  public void reset(String key) {
+    PidData piddata = data.get(key);
+    piddata.firstTime = true;
+    piddata.iTerm = 0;
+  }
+
+  @Override
+  public ServiceConfig load(ServiceConfig c) {
+    PidConfig config = (PidConfig) c;
+    if (config.data != null) {
+      data = config.data;
+    }
+    broadcastState();
+    return config;
+  }
+
+  @Override
+  public boolean enable(String key, boolean b) {
+    PidData piddata = data.get(key);
+    piddata.enabled = b;
+    return b;
+  }
+
   public static void main(String[] args) throws ClassNotFoundException {
 
     try {
 
       LoggingFactory.init(Level.INFO);
 
-      Runtime.start("gui", "SwingGui");
-      Pid pid = (Pid) Runtime.start("pid", "Pid");
-      String key = "test";
-      pid.setPID(key, 2.0, 5.0, 1.0);
-      pid.setControllerDirection(key, DIRECTION_DIRECT);
+      Runtime.start("webgui", "WebGui");
+      Pid pid = (Pid) Runtime.start("test", "Pid");
+      pid.setPid("pan", 1.0, 0.1, 0.0);
+      pid.setSetpoint("pan", 320);
+
+      pid.setPid("tilt", 1.0, 0.1, 0.0);
+      pid.setSetpoint("tilt", 240);
+
+      // pid.setControllerDirection(key, DIRECTION_DIRECT);
       // pid.setMode(key, MODE_AUTOMATIC);
-      pid.setOutputRange(key, 0, 255);
-      pid.setSetpoint(key, 100);
-      pid.setSampleTime(key, 40);
+      // pid.setOutputRange(key, 0, 255);
+      // pid.setSampleTime(key, 40);
+      boolean done = false;
+      // for (int i = 0; i < 200; ++i) {
+      while (!done) {
 
-      // SwingGui gui = new SwingGui("gui");
-      // gui.startService();
-
-      for (int i = 0; i < 200; ++i) {
-        pid.setInput(key, i);
-        Service.sleep(30);
-        if (pid.compute(key)) {
-          log.info("{} {}", i, pid.getOutput(key));
+        int i = (int) ((Math.random() * (440 - 200)) + 200);
+        // pid.setInput(key, i);
+        // Service.sleep(30);
+        if (pid.compute("pan", i) == null) {
+          log.warn("pan overrun");
         }
+
+        i = (int) ((Math.random() * (440 - 200)) + 200);
+
+        if (pid.compute("tilt", i) == null) {
+          log.warn("tilt overrun");
+        }
+
+        Service.sleep(100);
       }
 
     } catch (Exception e) {

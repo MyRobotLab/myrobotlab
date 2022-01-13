@@ -1,9 +1,8 @@
-angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$location','$scope', '$log', '$filter', '$timeout', 'mrl', '$state', '$stateParams', function($location, $scope, $log, $filter, $timeout, mrl, $state, $stateParams) {
+angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$location', '$scope', '$log', '$filter', '$timeout', 'mrl', '$state', '$stateParams', function($location, $scope, $log, $filter, $timeout, mrl, $state, $stateParams) {
     $log.info('tabsViewCtrl $scope.$id - ' + $scope.$id)
     _self = this
 
     $scope.view_tab = null
-    // $scope.viewType = mrl.getViewType()
     $scope.servicename = $stateParams.servicename
     $scope.mrl = mrl
 
@@ -32,35 +31,36 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$location','$scope', '
         console.debug('tabsViewCtrl.panelsUpdated ' + panels.length)
         $scope.panels = panels
 
-        if (!$scope.view_tab && panels.length > 0 && $scope.panels[$scope.panels.length - 1].name.startsWith('intro')) {
-          //  $scope.changeTab($scope.panels[0].name)
+        if (!$scope.view_tab && panels.length > 0 && $scope.panels[$scope.panels.length - 1].name.startsWith('intro')) {//  $scope.changeTab($scope.panels[0].name)
         }
 
         // if /#/service/{servicename} - change the tab
-        if ($scope.servicename) {
-          //   $scope.changeTab($scope.servicename)
+        if ($scope.servicename) {//   $scope.changeTab($scope.servicename)
         }
     }
 
     $scope.changeTab = function(tab) {
         tab = mrl.getFullName(tab)
         $scope.view_tab = tab
-        $timeout(function() {
-            // lame hack rzSlider recommened
-            $scope.$broadcast('rzSliderForceRender')
-        })
+
         var newId = "s1"
         // $location.path('service/' + tab, false)
         // $state.go('tabs2','/service/' + tab)
 
-        $state.transitionTo('tabs2', {id: tab}, {
-            location: true,
-            inherit: true,
-            relative: $state.$current,
-            notify: false
-        })
+        //         $state.transitionTo('tabs2', {id: tab}, {
+        //             location: true,
+        //             inherit: true,
+        //             relative: $state.$current,
+        //             notify: false
+        //         })
 
-        $state.go('tabs2', { servicename: tab }, {notify:false, reload:true})
+        $state.go('tabs2', {
+            servicename: tab
+        }, {
+            notify: false,
+            reload: false
+        })
+        //        $state.go('tabs2', { servicename: tab }, {notify:false, reload:true})
         // $state.go($state.current, {}, {reload: true})
         /*
         $state.transitionTo('tabs2', {
@@ -77,7 +77,6 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$location','$scope', '
     }
 
     $scope.hasNewStatus = true
-
     _self.changeTab = $scope.changeTab
     panelsUpdated(mrl.getPanelList())
     mrl.setSearchFunction($scope.setSearchText)

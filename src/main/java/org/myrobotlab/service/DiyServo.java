@@ -37,7 +37,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.math.interfaces.Mapper;
-import org.myrobotlab.service.abstracts.AbstractPinEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.EncoderControl;
@@ -77,121 +76,16 @@ import org.slf4j.Logger;
 
 public class DiyServo extends AbstractServo implements ServoControl, PinListener {
 
+  double lastOutput = 0.0;
   /**
-   * MotorUpdater The control loop to update the MotorControl with new values
-   * based on the PID calculations
-   * 
+   * In most cases TargetPos is never reached So we need to emulate it ! if
+   * currentPosInput is the same since X we guess it is reached based on
+   * targetPosAngleTolerence
    */
-  public class MotorUpdater extends Thread {
-
-    double lastOutput = 0.0;
-    /**
-     * In most cases TargetPos is never reached So we need to emulate it ! if
-     * currentPosInput is the same since X we guess it is reached based on
-     * targetPosAngleTolerence
-     */
-    private int nbSamePosInputSinceX = 0;
-    private double lastCurrentPosInput = 0;
-    // goal is to not use this
-    private double targetPosAngleTolerence = 15;
-
-    public MotorUpdater(String name) {
-      super(String.format("%s.motorUpdater", name));
-    }
-
-    @Override
-    public void run() {
-      try {
-        while (isEnabled()) {
-          if (motorControl != null) {
-            // Calculate the new value for the motor
-            if (pid.compute(pidKey)) {
-              // double setPoint = pid.getSetpoint(pidKey);
-
-              // TEMP SANTA TRICK TO CONTROL MAX VELOCITY
-              deltaVelocity = 1;
-
-              if (currentVelocity > maxVelocity && maxVelocity > 0) {
-                deltaVelocity = currentVelocity / maxVelocity;
-              }
-              // END TEMP SANTA TRICK
-
-              double output = pid.getOutput(pidKey) / deltaVelocity;
-
-              // motorControl.setPowerLevel(output);
-              // log.debug(String.format("setPoint(%s), processVariable(%s),
-              // output(%s)", setPoint, processVariable, output));
-              if (output != lastOutput) {
-                motorControl.move(output);
-                lastOutput = output;
-
-                if (isMoving()) {
-
-                  // tolerance
-                  if (currentPosInput == lastCurrentPosInput && Math.abs(targetPos - getTargetOutput()) <= targetPosAngleTolerence) {
-                    nbSamePosInputSinceX += 1;
-                  } else {
-                    nbSamePosInputSinceX = 0;
-                  }
-
-                  // ok targetPos is reached ( with tolerance )
-                  if (nbSamePosInputSinceX >= 3 || getTargetOutput() == targetPos) {
-                    publishServoEvent(SERVO_EVENT_STOPPED, getTargetOutput());
-                  } else {
-
-                    if (getTargetOutput() != targetPos) {
-                      publishServoEvent(SERVO_EVENT_STARTED, getTargetOutput());
-                    }
-
-                  }
-
-                }
-
-              }
-
-            }
-            lastCurrentPosInput = currentPosInput;
-            Thread.sleep(1000 / sampleTime);
-          }
-
-        }
-
-      } catch (Exception e) {
-        if (e instanceof InterruptedException) {
-          // info("Shutting down MotorUpdater");
-        } else {
-          log.error("motor updater threw", e);
-        }
-      }
-
-    }
-  }
-
-  public class EncoderUpdater extends Thread {
-
-    public EncoderUpdater(String name) {
-      super(String.format("%s.encoderUpdater", name));
-    }
-
-    //
-    public void run() {
-      // here we want to poll the encoder control to keep our "currentPosition"
-      // value up to date..
-      // effectively this replaces onPin ...
-      while (true) {
-        currentPosInput = ((AbstractPinEncoder) encoderControl).lastPosition;
-        try {
-          // someting to keep the cpu from thrashing.
-          pid.setInput(pidKey, currentPosInput);
-          Thread.sleep(1);
-        } catch (InterruptedException e) {
-          // TODO: clean this up.
-          e.printStackTrace();
-          break;
-        }
-      }
-    }
-  }
+  private int nbSamePosInputSinceX = 0;
+  private double lastCurrentPosInput = 0;
+  // goal is to not use this
+  private double targetPosAngleTolerence = 15;
 
   private static final long serialVersionUID = 1L;
 
@@ -201,6 +95,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    * controls low level methods of the motor
    */
   transient MotorControl motorControl;
+
   public String motorControlName = "motor";
 
   /**
@@ -263,9 +158,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    */
   int sampleTime = 20;
 
-  transient MotorUpdater motorUpdater = null;
-  transient EncoderUpdater encoderUpdater = null;
-
   double powerLevel = 0;
   double maxPower = 1.0;
   double minPower = -1.0;
@@ -322,7 +214,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   void initPid() {
     pid = (Pid) createPeer("pid");
     pidKey = this.getName();
-    pid.setPID(pidKey, kp, ki, kd); // Create a PID with the name of this
+    pid.setPid(pidKey, kp, ki, kd); // Create a PID with the name of this
     // service instance
     pid.setMode(pidKey, MODE_AUTOMATIC); // Initial mode is manual
     pid.setOutputRange(pidKey, -1.0, 1.0); // Set the Output range to match
@@ -404,20 +296,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
       }
     }
 
-    if (lastPosInput != pos) {
-      // moving = true;
-      if (motorUpdater == null) {
-        // log.info("Starting MotorUpdater");
-        motorUpdater = new MotorUpdater(getName());
-        motorUpdater.start();
-        // log.info("MotorUpdater started");
-      }
-      if (encoderUpdater == null) {
-        encoderUpdater = new EncoderUpdater(getName());
-        encoderUpdater.start();
-      }
-    }
-
     targetPos = pos;
     double targetOutput = getTargetOutput();
 
@@ -450,18 +328,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   public List<String> refreshPinArrayControls() {
     pinArrayControls = Runtime.getServiceNamesFromInterface(PinArrayControl.class);
     return pinArrayControls;
-  }
-
-  @Override
-  public void releaseService() {
-    // FYI - super.releaseService() calls detach
-    // detach();
-    if (motorUpdater != null) {
-      // shutting down motor updater thread
-      motorUpdater.interrupt();
-    }
-
-    super.releaseService();
   }
 
   public void rest() {
@@ -607,7 +473,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
 
     // info(currentVelocity + " " + currentPosInput);
 
-    pid.setInput(pidKey, currentPosInput);
+    // pid.setInput(pidKey, currentPosInput);
 
     // offline feedback ! if diy servo is disabled
     // useful to "learn" gestures ( later ... ) or simply start a moveTo() at
@@ -620,6 +486,57 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     // mapped input position.
     currentOutputPos = currentPosInput;
 
+    ///////////////////////////////////////////////
+
+    if (isEnabled()) {
+      if (motorControl != null) {
+        // Calculate the new value for the motor
+        Double newValue = pid.compute(pidKey, pindata.value);
+        if (newValue != null) {
+          // double setPoint = pid.getSetpoint(pidKey);
+
+          // TEMP SANTA TRICK TO CONTROL MAX VELOCITY
+          deltaVelocity = 1;
+
+          if (currentVelocity > maxVelocity && maxVelocity > 0) {
+            deltaVelocity = currentVelocity / maxVelocity;
+          }
+          // END TEMP SANTA TRICK
+
+          // double output = pid.getOutput(pidKey) / deltaVelocity;
+
+          // motorControl.setPowerLevel(output);
+          // log.debug(String.format("setPoint(%s), processVariable(%s),
+          // output(%s)", setPoint, processVariable, output));
+          if (newValue != lastOutput) {
+            motorControl.move(newValue);
+            lastOutput = newValue;
+
+            if (isMoving()) {
+
+              // tolerance
+              if (currentPosInput == lastCurrentPosInput && Math.abs(targetPos - getTargetOutput()) <= targetPosAngleTolerence) {
+                nbSamePosInputSinceX += 1;
+              } else {
+                nbSamePosInputSinceX = 0;
+              }
+
+              // ok targetPos is reached ( with tolerance )
+              if (nbSamePosInputSinceX >= 3 || getTargetOutput() == targetPos) {
+                publishServoEvent(SERVO_EVENT_STOPPED, getTargetOutput());
+              } else {
+
+                if (getTargetOutput() != targetPos) {
+                  publishServoEvent(SERVO_EVENT_STARTED, getTargetOutput());
+                }
+              }
+            }
+          }
+        }
+        lastCurrentPosInput = currentPosInput;
+        // Thread.sleep(1000 / sampleTime);
+      }
+    }
   }
 
   public void attach(EncoderControl encoder) {
@@ -722,10 +639,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     return currentVelocity;
   }
 
-  /*
-   * public boolean isMoving() { return moving; }
-   */
-
   public void setDisableDelayGrace(int disableDelayGrace) {
     this.disableDelayGrace = disableDelayGrace;
   }
@@ -737,22 +650,14 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     isAttached = true;
 
     motorControl.unlock();
-    if (motorUpdater == null) {
-      motorUpdater = new MotorUpdater(getName());
-    }
-    if (!motorUpdater.isAlive()) {
-      motorUpdater.start();
-    }
+    enabled = true;
     broadcastState();
   }
 
   @Override
   public void disable() {
     motorControl.stopAndLock();
-    if (motorUpdater != null) {
-      motorUpdater.interrupt();
-      motorUpdater = null;
-    }
+    enabled = false;
     broadcastState();
   }
 
@@ -816,7 +721,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
 
       // diyServo.map(0, 180, 60, 175);
       diyServo = (DiyServo) Runtime.start("diyServo", "DiyServo");
-      diyServo.pid.setPID("diyServo", 1.0, 0.2, 0.1);
+      diyServo.pid.setPid("diyServo", 1.0, 0.2, 0.1);
       // diyServo.pid.setOutputRange("diyServo", 1, -1);
       // diyServo.pid.setOutput("diyS, Output);
       // diyServo.attach((PinArrayControl) arduino, 14); // PIN 14 = A0

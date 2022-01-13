@@ -30,6 +30,7 @@ import static org.bytedeco.opencv.global.opencv_dnn.blobFromImage;
 import static org.bytedeco.opencv.global.opencv_dnn.readNetFromCaffe;
 import static org.bytedeco.opencv.global.opencv_imgproc.resize;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -57,26 +58,23 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
   // int x0, y0, x1, y1;
 
   private String FACE_LABEL = "face";
+
   transient private Net net;
   /**
    * bounding boxes of faces
    */
   final List<Rectangle> bb = new ArrayList<>();
+
   final Map<String, List<Classification>> classifications = new TreeMap<>();
-  // if deps were checked in it would be like this
-  /*
-   * public String model =
-   * FileIO.gluePaths(Service.getResourceDir(OpenCV.class),
-   * "models/facedetectdnn/res10_300x300_ssd_iter_140000.caffemodel"); public
-   * String protoTxt = FileIO.gluePaths(Service.getResourceDir(OpenCV.class),
-   * "models/facedetectdnn/deploy.prototxt.txt");
-   */
-  // but
+
   public String model = "resource/OpenCV/models/facedetectdnn/res10_300x300_ssd_iter_140000.caffemodel";
+
   public String protoTxt = "resource/OpenCV/models/facedetectdnn/deploy.prototxt.txt";
+
   double threshold = .2;
 
   transient private final OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
+
   transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 
   boolean netError = false;
@@ -180,6 +178,7 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
         Rectangle rect = new Rectangle(tx, ty, bx - tx, by - ty);
         List<Classification> cl = null;
         Classification classification = new Classification(FACE_LABEL, confidence, rect);
+        classification.setTs(getOpenCV().getFrameStartTs());
         if (classifications.containsKey(FACE_LABEL)) {
           classifications.get(FACE_LABEL).add(classification);
         } else {
@@ -204,8 +203,13 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
       List<Classification> cl = classifications.get(label);
       for (Classification c : cl) {
         Rectangle rect = c.getBoundingBox();
-        graphics.drawString(String.format("%s %.3f", c.getLabel(), c.getConfidence()), (int) rect.x, (int) rect.y);
+        int centerX = (int) (rect.x + rect.width / 2);
+        int centerY = (int) (rect.y + rect.height / 2);
+        graphics.drawString(String.format("%s %d,%d %.3f", c.getLabel(), centerX, centerY, c.getConfidence()), (int) rect.x, (int) rect.y);
         graphics.drawRect((int) rect.x, (int) rect.y, (int) rect.width, (int) rect.height);
+        graphics.setColor(Color.RED);
+        graphics.drawLine(centerX - 2, centerY, centerX + 2, centerY);
+        graphics.drawLine(centerX, centerY - 2, centerX, centerY + 2);
       }
     }
     return image;

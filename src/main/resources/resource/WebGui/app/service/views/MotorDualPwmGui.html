@@ -119,7 +119,7 @@
             <tr>
                 <td>
                     <b>power</b>
-                    <rzslider class="custom-slider3" rz-slider-model="requestedPower" rz-slider-options="powerSlider.options"/>
+                            <input type="range" ng-model="requestedPower" min="-100" max="100" step="1" ng-change="setSpeed()"/>
                 </td>
                 <td>&nbsp;</td>
                 <td></td>

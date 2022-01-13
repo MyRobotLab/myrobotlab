@@ -49,7 +49,7 @@
 <div class="row">
     <div class="col-md-6">
         <b>power</b>
-        <rzslider class="custom-slider3" rz-slider-model="requestedPower" rz-slider-options="powerSlider.options"/>
+        <input type="range" ng-model="requestedPower" min="-100" max="100" step="1" ng-change="setSpeed()"/>
     </div>
     <div class="col-md-6">&nbsp;</div>
 </div>

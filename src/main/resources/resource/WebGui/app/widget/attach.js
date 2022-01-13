@@ -3,6 +3,8 @@
 *        interface: 'UltrasonicSensorController',
 *        attach: - call back function on change        
 *        attachName: - name of selected model
+* FIXME - the UI should determine if the two attaching services are local
+* to one another - if they are - then it should use shortnames
 *
 */
 angular.module('mrlapp.service').directive('attach', ['mrl', function(mrl) {

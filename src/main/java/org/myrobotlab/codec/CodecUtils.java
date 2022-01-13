@@ -159,6 +159,9 @@ public class CodecUtils {
   }
 
   static public final String shortName(String name) {
+    if (name == null) {
+      return null;
+    }
     if (name.contains("@")) {
       return name.substring(0, name.indexOf("@"));
     } else {

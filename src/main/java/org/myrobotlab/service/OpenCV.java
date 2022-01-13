@@ -93,6 +93,7 @@ import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.cv.CvData;
+import org.myrobotlab.cv.CvFilter;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.document.Classifications;
 import org.myrobotlab.framework.Instantiator;
@@ -204,7 +205,7 @@ public class OpenCV extends AbstractComputerVision {
           if (lengthInFrames > 1 && loop && frameIndex > lengthInFrames - 2) {
             grabber.setFrameNumber(0);
             frameIndex = 0;
-          }
+          } 
         } // end of while - no longer capturing
 
       } catch (Exception e) {
@@ -515,7 +516,7 @@ public class OpenCV extends AbstractComputerVision {
   long frameEndTs;
   int frameIndex = 0;
   long frameStartTs;
-
+  
   StringBuffer frameTitle = new StringBuffer();
   transient FrameGrabber grabber = null;
 
@@ -662,25 +663,17 @@ public class OpenCV extends AbstractComputerVision {
    *          - name of filter
    * @return the filter
    */
-  public OpenCVFilter addFilter(String filterName) {
+  public CvFilter addFilter(String filterName) {
     String filterType = filterName.substring(0, 1).toUpperCase() + filterName.substring(1);
     return addFilter(filterName, filterType);
   }
 
-  /**
-   * add filter by name and type e.g. addFilter("c1","Canny")
-   * 
-   * @param name
-   *          name of the filter
-   * @param filterType
-   *          type of the filter
-   * @return the filter that was added
-   * 
-   */
-  public OpenCVFilter addFilter(String name, String filterType) {
+
+  public CvFilter addFilter(String name, String filterType) {
     String type = String.format("org.myrobotlab.opencv.OpenCVFilter%s", filterType);
     OpenCVFilter filter = (OpenCVFilter) Instantiator.getNewInstance(type, name);
-    return addFilter(filter);
+    addFilter(filter);
+    return (CvFilter)filter;
   }
 
   /**
@@ -2147,6 +2140,10 @@ public class OpenCV extends AbstractComputerVision {
     }
 
     return c;
+  }
+  
+  public long getFrameStartTs() {
+    return frameStartTs;
   }
 
   public static void main(String[] args) throws Exception {

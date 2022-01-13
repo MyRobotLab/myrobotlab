@@ -15,6 +15,11 @@ angular.module('mrlapp.service.RasPiGui', []).controller('RasPiGuiCtrl', ['$scop
             _self.updateState(data)
             $scope.$apply()
             break
+        case 'XXXonPinDefinition':
+            $scope.service.pinIndex[data.pin] = data
+            $scope.service.addressIndex[data.address] = data
+            $scope.$apply()
+            break
         default:
             $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
@@ -25,6 +30,17 @@ angular.module('mrlapp.service.RasPiGui', []).controller('RasPiGuiCtrl', ['$scop
         msg.send('scan', bus)
     }
 
+    $scope.write = function(pinDef){
+        msg.send('write', pinDef.address, pinDef.valueDisplay?1:0)
+    }
+
+    $scope.readWrite = function(pinDef) {
+        console.info(pinDef)
+        // FIXME - standardize interface with Arduino :(
+        msg.send('pinMode', pinDef.pin, pinDef.readWrite?1:0)
+    }
+
+    msg.subscribe('publishPinDefinition')
     msg.subscribe(this)
 }
 ])

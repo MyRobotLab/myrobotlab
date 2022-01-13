@@ -483,9 +483,9 @@ public class Joystick extends Service implements AnalogPublisher {
     return controller;
   }
 
-  public void stopService() {
-    super.stopService();
-    stopPolling();
+  public void releaseService() {
+    super.releaseService();
+    stopPolling();    
   }
 
   public Component getAxis(String name) {

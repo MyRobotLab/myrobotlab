@@ -1,5 +1,7 @@
 angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$filter', '$timeout', '$location', '$anchorScroll', '$state', '$uibModal', 'mrl', 'statusSvc', 'noWorkySvc', 'Flash', function($scope, $filter, $timeout, $location, $anchorScroll, $state, $uibModal, mrl, statusSvc, noWorkySvc, Flash) {
-    
+
+    console.info('mrlapp.nav - navCtrl initializing and injecting mrl')
+
     $scope.errorStatus = null
     $scope.warningStatus = null
     $scope.infoStatus = null
@@ -15,39 +17,37 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$filter', '$timeo
     // initial query for connection state LED
     // need the depth of state - because of angular's watch process
     $scope.state = {
-      'connected' : mrl.isConnected()
+        'connected': mrl.isConnected()
     }
 
     // callback setup from the connected state of the websocket
     mrl.subscribeConnected(function(connected) {
         console.info('nav:connection update', connected)
-            $scope.state.connected = connected
-            $scope.$apply()
+        $scope.state.connected = connected
+        $scope.$apply()
     })
-
 
     // callback from the describe call - to process info relating to the instance we
     // are currently connected to
-    $scope.onDescribe = function(onDescribeMsg){
-            let data = onDescribeMsg.data[0]
-            // $scope.connected = connected
-            $scope.platform = mrl.getPlatform()
-            $scope.remotePlatform = data.platform
-            $scope.id = mrl.getId()
-            $scope.platform.vmVersion
-            if ($scope.remotePlatform && $scope.remotePlatform.vmVersion != '1.8') {
-                $scope.status = {
-                    level: "error",
-                    key: "BadJVM",
-                    detail: "unsupported Java " + $scope.platform.vmVersion + "- please uninstall and install Java 1.8"
-                }
-            }  
+    $scope.onDescribe = function(onDescribeMsg) {
+        let data = onDescribeMsg.data[0]
+        // $scope.connected = connected
+        $scope.platform = mrl.getPlatform()
+        $scope.remotePlatform = data.platform
+        $scope.id = mrl.getId()
+        $scope.platform.vmVersion
+        if ($scope.remotePlatform && $scope.remotePlatform.vmVersion != '1.8') {
+            $scope.status = {
+                level: "error",
+                key: "BadJVM",
+                detail: "unsupported Java " + $scope.platform.vmVersion + "- please uninstall and install Java 1.8"
+            }
+        }
     }
-  
+
     // we subscribe to the onDescribe method - to get info regarding the java instance
     // we are currently connected to
-    mrl.subscribeTo('runtime','describe', $scope.onDescribe)
-
+    mrl.subscribeTo('runtime', 'describe', $scope.onDescribe)
 
     // load type ahead service types
     $scope.possibleServices = Object.values(mrl.getPossibleServices())
@@ -150,7 +150,7 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$filter', '$timeo
         })
     }
 
-/*
+    /*
     $scope.displayImage = function(ev) {
         var modalInstance = $uibModal.open({
             template: '<div ngsf-fullscreen><img class="fullscreen" src="https://static01.nyt.com/images/2020/02/13/world/13uk-plane/13uk-plane-articleLarge.jpg"/><button ngsf-toggle-fullscreen>Toggle fullscreen</button></div>',
@@ -178,7 +178,6 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$filter', '$timeo
     $scope.displayImage = function(imgSrc) {
         $scope.$apply()
     }
-
 
     // set the display callback function for webgui.display(x)
     mrl.setDisplayCallback($scope.displayImage)

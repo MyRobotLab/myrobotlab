@@ -36,6 +36,7 @@ public class InMoov2Head extends Service {
 
   public InMoov2Head(String n, String id) {
     super(n, id);
+    startPeers();
   }
 
   public void blink() {
