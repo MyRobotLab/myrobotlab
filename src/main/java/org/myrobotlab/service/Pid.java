@@ -419,7 +419,14 @@ public class Pid extends Service implements PidControl {
   }
 
   public Double compute(String key, double sensorValue) {
-    PidData piddata = data.get(key);
+    PidData piddata = null;
+    if (data.containsKey(key)) {
+      piddata = data.get(key);
+    } else {
+      log.error("Unknown key for PID control.  Key: {}", key);
+      return null;
+    }
+    
     piddata.input = sensorValue;
     //////////////////////////////////////////////////////////////
 
