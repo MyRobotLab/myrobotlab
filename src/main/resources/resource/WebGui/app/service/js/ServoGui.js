@@ -122,7 +122,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
             // $scope.pos.value = service.currentOutputPos
             $scope.sliderEnabled = true
 
-            $scope.activeTabIndex = service.controller == null ? 0 : 1
+            // $scope.activeTabIndex = service.controller == null ? 0 : 1
 
             $scope.state.inputMin = service.mapper.minX
             $scope.state.inputMax = service.mapper.maxX

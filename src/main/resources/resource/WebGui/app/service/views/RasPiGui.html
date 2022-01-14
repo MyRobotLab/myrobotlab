@@ -32,33 +32,41 @@
                 <div ng-repeat="(index, pin) in service.validAddresses">{{index}} {{pin}}</div>
             </td>
         </tr>
-        <tr>
-            <td>
-                <img src="RasPi/raspi-3-pin-out.png" width="400"/>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <img src="RasPi/raspi-3-model-b-rev-1.2.png" width="400"/>
-            </td>
-        </tr>
     </table>
 </div>
-<!-- 
-
-        <table>
-            <tr>
-                <th>pin</th>
-                <th>enable</th>
-                <th>input /<br/>output</th>
-                <th>digital /<br/>analog</th>
-            </tr>
-            <tr ng-repeat="(index, pin) in service.pinIndex">
-                <td><b>{{pin.pin}}</b></td>
-                
-                <td><toggle on-class="btn-success" width="35" height="28" ng-model="selectedEnable" ng-change="makeDigital(pin.address)" width="80" height="30" on="" off=""/></td>
-                <td><toggle width="70" height="28" ng-model="selectedIo" ng-change="makeDigital(pin.address)" width="80" height="30" on="input" off="output"/></td>
-                <td ng-show={{pin.isAnalog}}><toggle width="70" height="28" ng-model="selectedAnalog" title="Virtual or Real Hardware" ng-change="makeDigital(pin.address)" width="80" height="30" on="analog" off="digital"/></td>
-            </tr>
-        </table>
--->
+<br/>
+<div class="col-md-12">
+    <uib-tabset active="active">
+        <!-- begin -->
+        <uib-tab heading="Pins">
+        <div class="row">
+            <div class="col-md-8">
+             <br/>
+                <div class="columns">
+                    <div class="content" ng-repeat="(pinKey, pinDef) in service.addressIndex">
+                        {{ pinDef.pin }} 
+            <toggle ng-model="pinDef.readWrite" class="toggle-text" ng-change="readWrite(pinDef)" size="btn-sm" on-class="btn-success" on="write" off="read"></toggle>
+                        <span ng-show="pinDef.isRx" class="badge badge-danger" style="background:red">Rx</span>
+                        <span ng-show="pinDef.isTx" class="badge badge-primary" style="background:yellow;color:grey">Tx</span>
+                        <span ng-show="pinDef.isPwm && !pinDef.readWrite" class="badge badge-primary" style="background:aquamarine;color:grey">Pwm</span>
+                        <span ng-show="pinDef.isSda" class="badge badge-primary" style="background:lightcyan;color:grey">Sda</span>
+                        <span ng-show="pinDef.isScl" class="badge badge-primary" style="background:lightskyblue;color:grey">Scl</span>
+                        <toggle ng-show="pinDef.readWrite" ng-model="pinDef.valueDisplay" class="toggle-text" ng-change="write(pinDef)" size="btn-sm" on="1" off="0" on-class="btn-success"></toggle>
+                        <!-- input ng-show="pinDef.readWrite" min="0" max="255" value="pinDef.value" class="base-slider slider-width100" ng-show="service.autoDisable" type="range" name="idleSeconds" ng-model="pinDef.value" min="1" max="10" ng-change="pwm(pinDef)" -->
+                        <span ng-show="pinDef.readWrite" class="badge badge-secondary">{{pinDef.value}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </uib-tab>
+        <!-- end -->
+        <!-- begin -->
+        <uib-tab heading="Oscope">
+            <!-- img src="{{image}}" width="500"/ -->
+            <oscope id="{{service.name}}-oscope" service-name="{{service.name + '@' + service.id}}"></oscope>
+        </uib-tab>
+        <uib-tab heading="Diagram">
+            <img src="RasPi/raspi-3-model-b-rev-1.2.png"/>
+        </uib-tab>
+    </uib-tabset>
+</div>

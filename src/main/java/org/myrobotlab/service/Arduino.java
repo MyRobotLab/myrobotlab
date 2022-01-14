@@ -640,12 +640,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       return;
     }
 
-    // Servo requirements
+    // when a Servo detaches it wants to send a "disable()"
+    // so the Servo needs to detach first - and send that disable,
+    // before we detach it from this arduino
     if (device instanceof ServoControl && device.isAttached(this)) {
-      // if the other service thinks its attached - give it a chance to detach
-      // this is important for Servo - because servo will want to disable()
-      // before
-      // detaching - and it needs the controller to do so...
       device.detach(this);
     }
 
@@ -656,6 +654,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       deviceIndex.remove(id);
     }
     deviceList.remove(device.getName());
+    
   }
 
   @Override

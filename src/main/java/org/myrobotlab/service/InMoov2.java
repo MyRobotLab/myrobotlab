@@ -1529,6 +1529,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (head == null) {
       startHead();
     }
+    // TODO: pass the PID values for the eye tracking
     return startHeadTracking(head.eyeX, head.eyeY);
   }
 
@@ -1538,7 +1539,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
     speakBlocking(get("TRACKINGSTARTED"));
     eyesTracking = (Tracking) this.startPeer("eyesTracking");
-    eyesTracking.connect(opencv, head.eyeX, head.eyeY);
+    eyesTracking.attach(opencv.getName());
+    eyesTracking.attachPan(head.eyeX.getName());
+    eyesTracking.attachTilt(head.eyeY.getName());
     return eyesTracking;
   }
 
@@ -1606,7 +1609,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (headTracking == null) {
       speakBlocking(get("TRACKINGSTARTED"));
       headTracking = (Tracking) this.startPeer("headTracking");
-      headTracking.connect(this.opencv, head.rothead, head.neck);
+      
+      headTracking.attach(opencv.getName());
+      headTracking.attachPan(head.rothead.getName());
+      headTracking.attachTilt(head.neck.getName());
+      // TODO: where are the PID values?
     }
   }
 
@@ -1617,8 +1624,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     if (headTracking == null) {
       speakBlocking(get("TRACKINGSTARTED"));
-      headTracking = (Tracking) this.startPeer("headTracking");
-      headTracking.connect(this.opencv, rothead, neck);
+      headTracking = (Tracking) this.startPeer("headTracking");      
+      
+      headTracking.attach(opencv.getName());
+      headTracking.attachPan(rothead.getName());
+      headTracking.attachTilt(neck.getName());
+      // TODO: where are the PID values?
     }
     return headTracking;
   }

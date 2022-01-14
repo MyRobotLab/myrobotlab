@@ -1,8 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.interfaces.NameProvider;
-import org.myrobotlab.logging.LoggerFactory;
-import org.slf4j.Logger;
 
 /**
  * This interface listens to speech
@@ -15,14 +13,14 @@ public interface SpeechListener extends NameProvider {
   /**
    * speech has begun with the this utterance
    * 
-   * @param utterance
+   * @param utterance - the speech that fragment was started in text form
    */
   public void onStartSpeaking(String utterance);
 
   /**
    * speech has ended with the this utterance
    * 
-   * @param utterance
+   * @param utterance - the speech fragement that was finished
    */
   public void onEndSpeaking(String utterance);
 }

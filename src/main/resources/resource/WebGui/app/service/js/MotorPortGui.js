@@ -3,59 +3,26 @@ angular.module('mrlapp.service.MotorPortGui', []).controller('MotorPortGuiCtrl',
     var _self = this;
     var msg = this.msg;
 
-
-
-
-
-
     $scope.requestedPower = 0
 
-    $scope.powerSlider = {
-        value: 501,
-        options: {
-            floor: -100,
-            ceil: 100,
-            minLimit: -100,
-            maxLimit: 100,
-            // hideLimitLabels: true,
-            onStart: function() {},
-            onChange: function() {
-                if ($scope.sliderEnabled) {
-                    if ($scope.speedSlider.value == 501) {
-                        msg.send('fullSpeed')
-                    } else {
-                        msg.send('setSpeed', $scope.speedSlider.value)
-                    }
-                }
-            },
-            onEnd: function() {}
-        }
+    $scope.setSpeed = function() {
+        msg.send('setSpeed', $scope.requestedPower)
     }
 
-
-
-
-
-
-
-
-
-
-    
     // init scope variables
     $scope.isAttached = false;
-    $scope.newEncoderType = null ;
-    $scope.newEncoderPin = null ;
+    $scope.newEncoderType = null;
+    $scope.newEncoderPin = null;
     $scope.controller = '';
     $scope.controllers = [];
-    $scope.controllerName='';
+    $scope.controllerName = '';
     $scope.newType = '';
     $scope.pins = [];
     for (i = 0; i < 54; ++i) {
         $scope.pins.push(i);
     }
-    $scope.newPin0 = null ;
-    $scope.newPin1 = null ;
+    $scope.newPin0 = null;
+    $scope.newPin1 = null;
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service;
@@ -64,7 +31,7 @@ angular.module('mrlapp.service.MotorPortGui', []).controller('MotorPortGuiCtrl',
         $scope.newEncoderPin = service.encoderPin;
         $scope.controllers = service.controllers;
         $scope.newController = service.controllerName;
-        if (service.config != null ) {
+        if (service.config != null) {
             var type = service.config.type;
             $scope.newType = type;
             if (type == 'MotorConfigDualPwm') {
@@ -73,7 +40,7 @@ angular.module('mrlapp.service.MotorPortGui', []).controller('MotorPortGuiCtrl',
             }
         }
         $scope.position = service.currentOutputPos;
-        $scope.isAttached = !(angular.isUndefined(service.controllerName) || service.controllerName === null );
+        $scope.isAttached = !(angular.isUndefined(service.controllerName) || service.controllerName === null);
         // combo boxes need a "passthrough" model 
         // and should not be assigned the service variable to the model
         // directly
@@ -121,7 +88,7 @@ angular.module('mrlapp.service.MotorPortGui', []).controller('MotorPortGuiCtrl',
         $scope.service.powerLevel = Math.round(($scope.service.powerLevel + 0.1) * 100) / 100;
         msg.send('move', $scope.service.powerLevel);
     }
-    
+
     msg.subscribe("updatePosition")
     msg.subscribe(this);
 }
