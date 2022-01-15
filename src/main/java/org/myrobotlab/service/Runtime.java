@@ -3818,11 +3818,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * their requested interfaces - interfaces they are interested in.
    * 
    * This data should be published whenever new "Type" definitions are found
-   *  
+   * 
    * @param targetedInterface
-   *          - interface this    
-   *          add new interface to requested interfaces - add current names of
-   *          services which fulfill that interface "IS ASKING"
+   *          - interface this add new interface to requested interfaces - add
+   *          current names of services which fulfill that interface "IS ASKING"
    * 
    */
   public void registerForInterfaceChange(String targetedInterface) {
@@ -3863,6 +3862,87 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   public Map<String, Set<String>> publishInterfaceToPossibleServices() {
     return interfaceToPossibleServices;
+  }
+  
+  /**
+   * Saves a "sane" set of embedded defaults constructed for this service
+   * @param className - the class whos defaults will be saved
+   * @return - returns the set of configuration sets successfully saved
+   */
+  static public Set<String> saveDefaults(String className) {
+    try {
+      return saveDefaults(className, null, null);
+    } catch (Exception e) {
+      log.error("saving default config failed", e);
+    }
+    return null;
+  }
+
+  /**
+   * Saves a "sane" set of embedded defaults constructed for this service
+   * @param className - name of the class with the desired defaults
+   * @param configPrefixPath - prefix location to where the configuration sets will be saved
+   * @param overwrite - force overwriting existing config sets
+   * @return - set of successfully saved configuration sets
+   * @throws IOException
+   */
+  static public Set<String> saveDefaults(String className, String configPrefixPath, Boolean overwrite) throws IOException {
+
+    className = CodecUtils.getServiceType(className);
+
+    log.info("saving defaults for {}", className);
+
+    if (overwrite == null) {
+      overwrite = true;
+    }
+
+    if (configPrefixPath == null) {
+      configPrefixPath = "data/config";
+    }
+
+    Set<String> savedPaths = new HashSet<>();
+
+    try {
+      Class<?> clazz = Class.forName(className);
+
+      Method method = clazz.getMethod("getDefaultConfigs");      
+      Map<String, Map<String, ServiceConfig>> configs = (Map<String, Map<String, ServiceConfig>>)method.invoke(clazz);
+
+      if (configs.keySet().size() == 0) {
+        if (runtime != null) {
+          runtime.warn("%s does not currently have any default configurations", className);
+        } else {
+          log.warn("{} does not currently have any default configurations", className);
+        }
+      }
+
+      // multiple defaults are possible - minimally there
+      // should be one which has minimal dependencies called
+      // "{ClassName.toLower()}"
+      for (String configName : configs.keySet()) {
+
+        File dir = new File(FileIO.gluePaths(configPrefixPath, configName));
+
+        if (dir.exists() && !overwrite) {
+          log.warn("skipping %s - directory already exists", configName);
+          continue;
+        }
+
+        dir.mkdirs();
+
+        Map<String, ServiceConfig> config = configs.get(configName);
+        for (String service : config.keySet()) {
+          String path = FileIO.gluePaths(dir.getAbsolutePath(), service + ".yml");
+          FileIO.toFile(path, CodecUtils.toYaml(config.get(service)));
+        }
+        savedPaths.add(dir.getPath());
+      }
+
+    } catch (Exception e) {
+      log.error("saveDefaults threw", e);
+    }
+
+    return savedPaths;
   }
 
 }

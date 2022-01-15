@@ -1,20 +1,31 @@
 package org.myrobotlab.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.Pid.PidOutput;
+import org.myrobotlab.service.config.ArduinoConfig;
+import org.myrobotlab.service.config.OpenCVConfig;
+import org.myrobotlab.service.config.PidConfig;
+import org.myrobotlab.service.config.RuntimeConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.config.TrackingConfig;
 import org.myrobotlab.service.interfaces.ComputerVision;
 import org.myrobotlab.service.interfaces.PidControl;
@@ -233,7 +244,7 @@ public class Tracking extends Service {
         // PV - measured value
         send(pid, "compute", pan, 320 - x);
         send(pid, "compute", tilt, 240 - y);
-        
+
         // if largestFaceOnly
 
         if (state == TrackingState.SEARCHING) {
@@ -303,6 +314,67 @@ public class Tracking extends Service {
     return config;
   }
 
+  static public Map<String, Map<String, ServiceConfig>> getDefaultConfigs() {
+
+    Map<String, ServiceConfig> config = new HashMap<>();
+
+    RuntimeConfig runtime = new RuntimeConfig();
+    runtime.registry = new String[] { "controller", "cv", "tilt", "pan", "pid", "tracking" };
+
+    ArduinoConfig controller = new ArduinoConfig();
+    controller.connect = true;
+    controller.port = "/dev/ttyACM0";
+
+    OpenCVConfig cv = new OpenCVConfig();
+    cv.cameraIndex = 0;
+    cv.capturing = true;
+    cv.inputSource = "camera";
+    cv.grabberType = "OpenCV";
+
+    ServoConfig pan = new ServoConfig();
+    pan.pin = "7";
+    pan.autoDisable = true;
+    pan.idleTimeout = 3000; // AHAHAH - I did 3 originally
+    pan.controller = "controller";
+
+    ServoConfig tilt = new ServoConfig();
+    tilt.pin = "5";
+    tilt.autoDisable = true;
+    tilt.idleTimeout = 3000;
+    tilt.controller = "controller";
+
+    PidConfig pid = new PidConfig();
+
+    PidData panData = new PidData();
+    panData.kp = 0.03;
+
+    pid.data.put("pan", panData);
+
+    PidData tiltData = new PidData();
+    tiltData.kp = 0.03;
+    pid.data.put("tilt", tiltData);
+
+    TrackingConfig tracking = new TrackingConfig();
+    tracking.cv = "cv";
+    tracking.tilt = "tilt";
+    tracking.pan = "pan";
+    tracking.pid = "pid";
+    tracking.enabled = true;
+
+    config.put("runtime", runtime);
+    config.put("controller", controller);
+    config.put("cv", cv);
+    config.put("pan", pan);
+    config.put("tilt", tilt);
+    config.put("pid", pid);
+    config.put("tracking", tracking);
+
+    // single config
+    Map<String, Map<String, ServiceConfig>> configs = new HashMap<String, Map<String, ServiceConfig>>();
+    configs.put(Tracking.class.getSimpleName().toLowerCase(), config);
+    return configs;
+  }
+
   @Override
   public ServiceConfig load(ServiceConfig c) {
     TrackingConfig config = (TrackingConfig) c;
@@ -329,7 +401,7 @@ public class Tracking extends Service {
     }
     return config;
   }
-  
+
   public boolean isIdle() {
     return state == TrackingState.IDLE;
   }
@@ -365,20 +437,23 @@ public class Tracking extends Service {
 
       LoggingFactory.init(Level.INFO);
 
-      Tracking track = (Tracking) Runtime.start("track", "Tracking");
+      Runtime.saveDefaults("Tracking");
+
+      // Tracking track = (Tracking) Runtime.start("track", "Tracking");
       Runtime.start("webgui", "WebGui");
       boolean done = true;
       if (done) {
         return;
       }
-      
+
       // Pid2 pid = (Pid2) Runtime.start("pid", "Pid2");
 
-      // pid.addPid("neck", 0.5, 1.0, 0.0, 240); // how does fractional Gain mean
-                                            // initial setpoint change ??
-      
+      // pid.addPid("neck", 0.5, 1.0, 0.0, 240); // how does fractional Gain
+      // mean
+      // initial setpoint change ??
+
       // pid.addPid("rothead", 0.5, 1.0, 0.0, 320);
-      
+
       // pid.addPid("neck", 1, 1, 0, 240);// why ???? 480 should be 240 ! /2
       // somewhere ?
       /*
@@ -386,7 +461,6 @@ public class Tracking extends Service {
        * Runtime.start("pid", "Pid"); Runtime.start("legacy", "Tracking");
        */
       // track.startWithDefaults();
-      
 
     } catch (Exception e) {
       log.error("main threw", e);

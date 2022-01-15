@@ -2813,5 +2813,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   protected void registerForInterfaceChange(Class<?> clazz) {
     Runtime.getInstance().registerForInterfaceChange(getClass().getCanonicalName(), clazz);
   }
+  
 
+  /**
+   * default emtpy getDefaultConfigs - will be overriden by services which provide sane defaults
+   * @return
+   */
+ static public Map<String, Map<String, ServiceConfig>> getDefaultConfigs() {
+   Map<String, Map<String, ServiceConfig>> ret = new HashMap<String, Map<String, ServiceConfig>>();
+   return ret;
+ }
 }
