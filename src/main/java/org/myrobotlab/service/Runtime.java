@@ -1868,6 +1868,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // going into the unknown - so we catch it !
     try {
       si = create(name, type);
+      
+      if (si != null) {
+        si.startService();
+      }
+
       Runtime runtime = Runtime.getInstance();
       String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
       File check = new File(filename);
@@ -1876,14 +1881,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       } else {
         log.info("config for {} - {} does not exist", name, filename);
       }
+      
     } catch (Exception e) {
       String error = String.format("createAndStart(%s, %s) %s", name, type, e.getClass().getCanonicalName());
       Runtime.getInstance().error(error);
       log.error(error, e);
-    }
-
-    if (si != null) {
-      si.startService();
     }
 
     return si;
@@ -3607,9 +3609,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     ServiceConfig config = CodecUtils.readServiceConfig(filename);
     si.load(config);
-    // previously used to attempt to process attaches here
-    // attaches do not work well before starting - attaching
-    // has now been moved out to runtime
     return config;
   }
 
@@ -3617,12 +3616,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     super.load(c);
     RuntimeConfig config = (RuntimeConfig) c;
     setLocale(config.locale);
+    info("setting locale to %s", config.locale);
     setAllVirtual(config.virtual);
+    info("setting virtual to %b", config.virtual);
 
     if (config.enableCli) {
       startInteractiveMode();
+      info("enabled cli");
     } else {
       stopInteractiveMode();
+      info("disabled cli");
     }
 
     // setId(config.id); Very Fragile ! Cannot do this yet
@@ -3634,6 +3637,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         }
         try {
           File scFile = new File(getConfigDir() + fs + getConfigName() + fs + name + ".yml");
+          info("reading file %s", scFile.getName());
           if (!scFile.exists()) {
             warn("could not find service config file %s", scFile.getAbsolutePath());
             continue;
@@ -3657,37 +3661,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           }
           // start vs create ??? should we start with create go through all life
           // cycles ?
-          log.info("starting create life-cycle for name: {} type: ", name, sc.type);
+          info("creating service name: %s type: %s", name, sc.type);
           create(name, sc.type);
         } catch (Exception e) {
           error(e);
         }
       } // for each service
 
-      // batch service life-cycle load
-      // keep configs around until after started - then attach
-      Map<String, ServiceConfig> configs = new HashMap<>();
-      log.info("starting load life-cycle");
-      for (String name : config.registry) {
-        if (name.equals("runtime")) {
-          continue;
-        }
-        ServiceInterface si = getService(name);
-        if (si == null) {
-          error("service not found %s", name);
-          continue;
-        }
-        try {
-          sc = si.load();
-          configs.put(name, sc);
-        } catch (Exception e) {
-          error(e);
-        }
-      }
-
       log.info("starting start life-cycle");
       // batch service life-cycle start
       for (String name : config.registry) {
+        try {
         if (name.equals("runtime")) {
           continue;
         }
@@ -3696,7 +3680,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           warn("could not start %s from config", name);
           continue;
         }
+        info("starting %s", name);
         si.startService();
+        sc = si.load();
+        } catch(Exception e) {
+          error("starting and loading of service %s threw", name, e);
+        }
       }
 
     } // if registry
@@ -3905,38 +3894,41 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     try {
       Class<?> clazz = Class.forName(className);
 
-      Method method = clazz.getMethod("getDefaultConfigs");      
-      Map<String, Map<String, ServiceConfig>> configs = (Map<String, Map<String, ServiceConfig>>)method.invoke(clazz);
+      Method method = clazz.getMethod("getDefaultConfig");      
+      Map<String, ServiceConfig> config = (Map<String, ServiceConfig>)method.invoke(clazz);
 
-      if (configs.keySet().size() == 0) {
+      if (config == null || config.keySet().size() == 0) {
         if (runtime != null) {
           runtime.warn("%s does not currently have any default configurations", className);
         } else {
           log.warn("{} does not currently have any default configurations", className);
         }
+        return savedPaths;
       }
 
       // multiple defaults are possible - minimally there
       // should be one which has minimal dependencies called
       // "{ClassName.toLower()}"
-      for (String configName : configs.keySet()) {
+      //for (String configName : configs.keySet()) {
+      
+       String configName = clazz.getSimpleName().toLowerCase();
 
         File dir = new File(FileIO.gluePaths(configPrefixPath, configName));
 
         if (dir.exists() && !overwrite) {
           log.warn("skipping %s - directory already exists", configName);
-          continue;
+          return savedPaths;
+          // continue;
         }
 
         dir.mkdirs();
 
-        Map<String, ServiceConfig> config = configs.get(configName);
         for (String service : config.keySet()) {
           String path = FileIO.gluePaths(dir.getAbsolutePath(), service + ".yml");
           FileIO.toFile(path, CodecUtils.toYaml(config.get(service)));
         }
         savedPaths.add(dir.getPath());
-      }
+      // }
 
     } catch (Exception e) {
       log.error("saveDefaults threw", e);

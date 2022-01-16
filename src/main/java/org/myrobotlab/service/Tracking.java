@@ -309,7 +309,7 @@ public class Tracking extends Service {
     return config;
   }
 
-  static public Map<String, Map<String, ServiceConfig>> getDefaultConfigs() {
+  static public Map<String, ServiceConfig> getDefaultConfig() {
 
     Map<String, ServiceConfig> config = new HashMap<>();
 
@@ -365,9 +365,8 @@ public class Tracking extends Service {
     config.put("tracking", tracking);
 
     // single config
-    Map<String, Map<String, ServiceConfig>> configs = new HashMap<String, Map<String, ServiceConfig>>();
-    configs.put(Tracking.class.getSimpleName().toLowerCase(), config);
-    return configs;
+
+    return config;
   }
 
   @Override

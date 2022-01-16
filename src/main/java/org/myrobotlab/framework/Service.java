@@ -1476,11 +1476,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * peers - it should fufill the request
    */
   @Override
+  @Deprecated
   public void releasePeers() {
-    releasePeers(null);
+    // releasePeers(null);
   }
 
   // FIXME - startPeers sets fields - this method should "unset" fields !!!
+  @Deprecated
   synchronized private void releasePeers(String peerKey) {
     log.info("{}.releasePeers ({})", getName(), peerKey);
     try {
@@ -2816,11 +2818,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   
 
   /**
-   * default emtpy getDefaultConfigs - will be overriden by services which provide sane defaults
+   * default emtpy getDefaultConfig - will be overriden by services which provide sane defaults
    * @return
    */
- static public Map<String, Map<String, ServiceConfig>> getDefaultConfigs() {
-   Map<String, Map<String, ServiceConfig>> ret = new HashMap<String, Map<String, ServiceConfig>>();
+ static public Map<String, ServiceConfig> getDefaultConfig() {
+   Map<String, ServiceConfig> ret = new HashMap<>();
    return ret;
  }
+ 
 }
