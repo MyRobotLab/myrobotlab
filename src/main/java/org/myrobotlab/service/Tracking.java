@@ -1,19 +1,14 @@
 package org.myrobotlab.service;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -323,10 +318,10 @@ public class Tracking extends Service {
 
     ArduinoConfig controller = new ArduinoConfig();
     controller.connect = true;
-    controller.port = "/dev/ttyACM0";
+    controller.port = "/dev/ttyACM1";
 
     OpenCVConfig cv = new OpenCVConfig();
-    cv.cameraIndex = 0;
+    cv.cameraIndex = 4;
     cv.capturing = true;
     cv.inputSource = "camera";
     cv.grabberType = "OpenCV";
@@ -437,7 +432,7 @@ public class Tracking extends Service {
 
       LoggingFactory.init(Level.INFO);
 
-      Runtime.saveDefaults("Tracking");
+      // Runtime.saveDefaults("Tracking");
 
       // Tracking track = (Tracking) Runtime.start("track", "Tracking");
       Runtime.start("webgui", "WebGui");

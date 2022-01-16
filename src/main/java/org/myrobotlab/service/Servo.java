@@ -235,12 +235,15 @@ public class Servo extends AbstractServo implements ServoControl {
     if (config.autoDisable) {
       disable();
     }
-    
-    mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
+    if (config.minIn != null && config.maxIn != null && config.minOut != null && config.maxOut != null) {
+      mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
+    }
     mapper.setInverted(config.inverted);
     mapper.setClip(config.clip);
     enabled = config.enabled;
-    idleTimeout = config.idleTimeout;
+    if (config.idleTimeout != null) {
+      idleTimeout = config.idleTimeout;
+    }
     pin = config.pin;
     rest = config.rest;
     speed = config.speed;

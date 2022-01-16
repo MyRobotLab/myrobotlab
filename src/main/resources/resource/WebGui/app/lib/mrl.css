@@ -3067,3 +3067,7 @@ toggle.toggle-text .toggle-handle {
   columns: 4;
 }
 
+.width100pct {
+    width: 100%;
+    max-width: none;
+}

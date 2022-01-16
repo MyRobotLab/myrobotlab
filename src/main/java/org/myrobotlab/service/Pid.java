@@ -88,7 +88,7 @@ public class Pid extends Service implements PidControl {
 
     private static final long serialVersionUID = 1L;
 
-    public boolean firstTime = true;
+    transient public boolean firstTime = true;
 
     /**
      * The key identifier of this control loop. This is how to support multiple
@@ -511,6 +511,14 @@ public class Pid extends Service implements PidControl {
     PidConfig config = (PidConfig) c;
     if (config.data != null) {
       data = config.data;
+      for (String key : config.data.keySet()) {
+        PidData pd = config.data.get(key);
+        if (pd.key == null || !pd.key.equals(key)){
+          warn("re-assigning config pid key %s to %s", pd.key, key);
+        }
+        pd.key = key; // normalize
+        data.put(key, pd);
+      }
     }
     broadcastState();
     return config;

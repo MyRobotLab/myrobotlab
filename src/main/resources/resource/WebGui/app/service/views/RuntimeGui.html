@@ -17,10 +17,13 @@ create a new service
     <input class="form-control" type="text" ng-model="newName" placeholder="name" title="name of new service to be created" press-enter="start(newName, newType)">
     <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" press-enter="start(newName, newType)" title="service type of the new instance to be created" uib-typeahead="service as service.name.substring(23) for service in possibleServices | filter:{name:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html"/>
     <button class="btn btn-default" title="press to create a new service, you must give the new service a name and type" ng-click="start(newName, newType)">start service</button>
+    <button class="btn btn-default" ng-click="saveDefaults()">save defaults</button>
     <button class="btn btn-default" ng-click="msg.install()">install all services</button>
+    <br/>
+    {{defaultsSaved}}
 </div>
 <br/>
-<div class="form-inline">
+<div>
     configurations
     <br/>
     
