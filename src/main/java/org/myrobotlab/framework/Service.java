@@ -2817,7 +2817,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     Runtime.getInstance().registerForInterfaceChange(getClass().getCanonicalName(), clazz);
   }
 
-  public Map<String, ServiceConfig> getDefault() {
+  final public LinkedHashMap<String, ServiceConfig> getDefault() {
     return ServiceInterface.getDefault(getName(), this.getClass().getSimpleName());
   }
 
