@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.myrobotlab.framework.Service;
@@ -67,8 +68,8 @@ public class RandomTest extends AbstractServiceTest {
     random.disable();
     clock.setInterval(999999);
     sleep(200);
-    assertTrue("clock should not be started", !clock.isClockRunning());
-    assertTrue("random method should be == 999999 values", 999999 == clock.getInterval());
+    assertTrue("clock should not be started", !clock.isClockRunning());   
+    assertEquals(999999, (long)clock.getInterval());
 
     // re-enable all that were previously enabled but not explicitly disabled ones
     random.enable();
