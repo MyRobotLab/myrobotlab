@@ -305,68 +305,6 @@ public class Tracking extends Service {
     return config;
   }
 
-  static public Map<String, ServiceConfig> getDefaultConfig() {
-
-    Map<String, ServiceConfig> config = new HashMap<>();
-
-    // RuntimeConfig runtimex = new RuntimeConfig();
-    // runtime.registry = new String[] { "controller", "cv", "tilt", "pan",
-    // "pid", "tracking" };
-
-    ArduinoConfig controller = new ArduinoConfig();
-    controller.connect = true;
-    controller.port = "/dev/ttyACM1";
-
-    OpenCVConfig cv = new OpenCVConfig();
-    cv.cameraIndex = 4;
-    cv.capturing = true;
-    cv.inputSource = "camera";
-    cv.grabberType = "OpenCV";
-
-    ServoConfig pan = new ServoConfig();
-    pan.pin = "7";
-    pan.autoDisable = true;
-    pan.idleTimeout = 3000; // AHAHAH - I did 3 originally
-    pan.controller = "controller";
-
-    ServoConfig tilt = new ServoConfig();
-    tilt.pin = "5";
-    tilt.autoDisable = true;
-    tilt.idleTimeout = 3000;
-    tilt.controller = "controller";
-
-    PidConfig pid = new PidConfig();
-
-    PidData panData = new PidData();
-    panData.kp = 0.015;
-    panData.ki = 0.001;
-
-    pid.data.put("pan", panData);
-
-    PidData tiltData = new PidData();
-    tiltData.kp = 0.015;
-    tiltData.ki = 0.001;
-    pid.data.put("tilt", tiltData);
-
-    TrackingConfig tracking = new TrackingConfig();
-    tracking.cv = "cv";
-    tracking.tilt = "tilt";
-    tracking.pan = "pan";
-    tracking.pid = "pid";
-    tracking.enabled = true;
-
-    // config.put("runtime", runtime);
-    config.put("controller", controller);
-    config.put("cv", cv);
-    config.put("pan", pan);
-    config.put("tilt", tilt);
-    config.put("pid", pid);
-    config.put("tracking", tracking);
-
-    // single config
-    return config;
-  }
-
   @Override
   public ServiceConfig load(ServiceConfig c) {
     TrackingConfig config = (TrackingConfig) c;
@@ -449,13 +387,16 @@ public class Tracking extends Service {
     PidConfig pidConfig = (PidConfig) config.get(trackingConfig.pid);
     PidData panData = new PidData();
     panData.kp = 0.015;
-    panData.ki = 0.005;
+    panData.ki = 0.001;
+    panData.kd = 0.0;
 
     pidConfig.data.put(trackingConfig.pan, panData);
 
     PidData tiltData = new PidData();
-    tiltData.kp = 0.015;
-    tiltData.ki = 0.005;
+    tiltData.kp = 0.035;
+    tiltData.ki = 0.001;
+    tiltData.kd = 0.0;
+
     pidConfig.data.put(trackingConfig.tilt, tiltData);
 
     // put self in
