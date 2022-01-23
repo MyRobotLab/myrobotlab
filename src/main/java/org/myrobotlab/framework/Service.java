@@ -1319,7 +1319,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
                   // attempt to get defaultInvokeMethod
                   m = cache.getDefaultInvokeMethod(si.getClass().getCanonicalName());
                   if (m != null) {
-                    m.invoke(si, listener.callbackMethod, new Object[] {retobj});
+                    m.invoke(si, listener.callbackMethod, new Object[] { retobj });
                   } else {
                     log.warn("Null Method as a result of cache lookup. {} {} {}", si.getClass(), listener.callbackMethod, retobj);
                   }
@@ -1740,10 +1740,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     msg.sendingMethod = "send";
     // log.info(CodecUtils.toJson(msg));
     send(msg);
-    
+
     outbox.add(msg);
   }
-  
+
   public Object sendBlocking(String name, Integer timeout, String method, Object... data) throws InterruptedException, TimeoutException {
     Message msg = Message.createMessage(getName(), name, method, data);
     msg.sender = this.getFullName();

@@ -1868,7 +1868,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // going into the unknown - so we catch it !
     try {
       si = create(name, type);
-      
       if (si != null) {
         si.startService();
       }
@@ -3672,18 +3671,18 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // batch service life-cycle start
       for (String name : config.registry) {
         try {
-        if (name.equals("runtime")) {
-          continue;
-        }
-        ServiceInterface si = getService(name);
-        if (si == null) {
-          warn("could not start %s from config", name);
-          continue;
-        }
-        info("starting %s", name);
-        si.startService();
-        sc = si.load();
-        } catch(Exception e) {
+          if (name.equals("runtime")) {
+            continue;
+          }
+          ServiceInterface si = getService(name);
+          if (si == null) {
+            warn("could not start %s from config", name);
+            continue;
+          }
+          info("starting %s", name);
+          si.startService();
+          sc = si.load();
+        } catch (Exception e) {
           error("starting and loading of service %s threw", name, e);
         }
       }
@@ -3928,6 +3927,105 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           FileIO.toFile(path, CodecUtils.toYaml(config.get(service)));
         }
         savedPaths.add(dir.getPath());
+      // }
+
+    } catch (Exception e) {
+      log.error("saveDefaults threw", e);
+    }
+
+    return savedPaths;
+  }
+
+  static public Set<String> saveDefaults(String className) {
+    try {
+      return saveDefaults(null, className, null, null);
+    } catch (Exception e) {
+      log.error("saving default config failed", e);
+    }
+    return null;
+  }
+
+  /**
+   * Saves a "sane" set of embedded defaults constructed for this service
+   * 
+   * @param className
+   *          - the class whos defaults will be saved
+   * @return - returns the set of configuration sets successfully saved
+   */
+  static public Set<String> saveDefaults(String name, String className) {
+    try {
+      return saveDefaults(name, className, null, null);
+    } catch (Exception e) {
+      log.error("saving default config failed", e);
+    }
+    return null;
+  }
+
+  /**
+   * Saves a "sane" set of embedded defaults constructed for this service
+   * 
+   * @param type
+   *          - name of the class with the desired defaults
+   * @param configPrefixPath
+   *          - prefix location to where the configuration sets will be saved
+   * @param overwrite
+   *          - force overwriting existing config sets
+   * @return - set of successfully saved configuration sets
+   * @throws IOException
+   */
+  static public Set<String> saveDefaults(String name, String type, String configPrefixPath, Boolean overwrite) throws IOException {
+
+    Set<String> savedPaths = new HashSet<>();
+
+    if (type == null) {
+      log.error("saveDefaults className is required");
+      return savedPaths;
+    }
+
+    if (name == null) {
+      name = type.toLowerCase();
+    }
+
+    log.info("saving defaults for {}", type);
+
+    if (overwrite == null) {
+      overwrite = true;
+    }
+
+    if (configPrefixPath == null) {
+      configPrefixPath = "data/config";
+    }
+
+    try {
+
+      Map<String, ServiceConfig> config = ServiceConfig.getDefault(name, type);
+
+      File dir = new File(FileIO.gluePaths(configPrefixPath, name));
+
+      if (dir.exists() && !overwrite) {
+        log.warn("skipping %s - directory already exists", name);
+        return savedPaths;
+        // continue;
+      }
+
+      dir.mkdirs();
+
+      for (String service : config.keySet()) {
+        String path = FileIO.gluePaths(dir.getAbsolutePath(), service + ".yml");
+        FileIO.toFile(path, CodecUtils.toYaml(config.get(service)));
+      }
+      
+      if (!config.containsKey("runtime")) {
+        // config did not come with an explicit runtime
+        // therefore we will create one with the order of the keyset
+        Map<String, ServiceConfig> runtimeConfig  = ServiceConfig.getDefault("runtime", "Runtime");
+        RuntimeConfig rconfig = (RuntimeConfig)runtimeConfig.get("runtime");
+        rconfig.registry = config.keySet().toArray(new String[] {});
+        String path = FileIO.gluePaths(dir.getAbsolutePath(), "runtime.yml");
+        FileIO.toFile(path, CodecUtils.toYaml(runtimeConfig.get("runtime")));
+      }
+      
+      savedPaths.add(dir.getPath());
       // }
 
     } catch (Exception e) {

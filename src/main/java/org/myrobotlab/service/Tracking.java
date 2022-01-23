@@ -49,10 +49,6 @@ public class Tracking extends Service {
   // and let the control system deal with that - having "servos" is
   // too device specific
 
-  PidData xPid = new PidData();
-
-  PidData yPid = new PidData();
-
   String pan;
 
   String tilt;
@@ -399,39 +395,13 @@ public class Tracking extends Service {
   public boolean isIdle() {
     return state == TrackingState.IDLE;
   }
-
-  public void startWithDefaults() {
-    if (pan == null) {
-      pan = String.format("%s.pan", getName());
-      Runtime.start(pan, "Servo");
-      attachPan(pan);
-    }
-    if (tilt == null) {
-      tilt = String.format("%s.tilt", getName());
-      Runtime.start(tilt, "Servo");
-      attachTilt(tilt);
-    }
-    if (pid == null) {
-      pid = String.format("%s.pid", getName());
-      Runtime.start(pid, "Pid");
-      attach(pid);
-    }
-
-    if (cv == null) {
-      cv = String.format("%s.cv", getName());
-      Runtime.start(cv, "OpenCV");
-      attach(cv);
-    }
-
-    enable();
-  }
-
+  
   public static void main(String[] args) {
     try {
 
       LoggingFactory.init(Level.INFO);
 
-      // Runtime.saveDefaults("Tracking");
+      Runtime.saveDefaults("Tracking");
 
       // Tracking track = (Tracking) Runtime.start("track", "Tracking");
       Runtime.start("webgui", "WebGui");
@@ -451,7 +421,7 @@ public class Tracking extends Service {
       // pid.addPid("neck", 1, 1, 0, 240);// why ???? 480 should be 240 ! /2
       // somewhere ?
       /*
-       * Runtime.start("pan", "Servo"); Runtime.start("tilt", "Servo");
+       * Runtime.start("pan", "Servo"); Runtime.start(tiltName, "Servo");
        * Runtime.start("pid", "Pid"); Runtime.start("legacy", "Tracking");
        */
       // track.startWithDefaults();
