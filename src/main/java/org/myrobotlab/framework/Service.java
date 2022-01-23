@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -2815,15 +2816,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   protected void registerForInterfaceChange(Class<?> clazz) {
     Runtime.getInstance().registerForInterfaceChange(getClass().getCanonicalName(), clazz);
   }
-  
 
-  /**
-   * default emtpy getDefaultConfig - will be overriden by services which provide sane defaults
-   * @return
-   */
- static public Map<String, ServiceConfig> getDefaultConfig() {
-   Map<String, ServiceConfig> ret = new HashMap<>();
-   return ret;
- }
- 
+  public Map<String, ServiceConfig> getDefault() {
+    return ServiceInterface.getDefault(getName(), this.getClass().getSimpleName());
+  }
+
 }

@@ -3915,7 +3915,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     try {
 
-      Map<String, ServiceConfig> config = ServiceConfig.getDefault(name, type);
+      Map<String, ServiceConfig> config = ServiceInterface.getDefault(name, type);
 
       File dir = new File(FileIO.gluePaths(configPrefixPath, name));
 
@@ -3935,7 +3935,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       if (!config.containsKey("runtime")) {
         // config did not come with an explicit runtime
         // therefore we will create one with the order of the keyset
-        Map<String, ServiceConfig> runtimeConfig = ServiceConfig.getDefault("runtime", "Runtime");
+        Map<String, ServiceConfig> runtimeConfig = ServiceInterface.getDefault("runtime", "Runtime");
         RuntimeConfig rconfig = (RuntimeConfig) runtimeConfig.get("runtime");
         rconfig.registry = config.keySet().toArray(new String[] {});
         String path = FileIO.gluePaths(dir.getAbsolutePath(), "runtime.yml");

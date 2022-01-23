@@ -12,6 +12,7 @@ import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -38,6 +39,7 @@ import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.abstracts.AbstractMicrocontroller;
 import org.myrobotlab.service.config.ArduinoConfig;
+import org.myrobotlab.service.config.SerialConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.PinData;
@@ -2242,6 +2244,26 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       connect(config.port);
     }
     return c;
+  }
+  
+  static public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
+    ArduinoConfig arduinoConfig = new ArduinoConfig();
+
+    // set local names and config
+    arduinoConfig.serial = name + ".serial";
+    
+    // build a config with all peer defaults
+    config.putAll(ServiceInterface.getDefault(arduinoConfig.serial, "Serial"));
+    
+    // pull out specific config and modify
+    SerialConfig serialConfig = (SerialConfig)config.get(arduinoConfig.serial);
+    serialConfig.port = arduinoConfig.port;
+    
+    // put self in
+    config.put(name, arduinoConfig);
+
+    return config; 
   }
 
   /**

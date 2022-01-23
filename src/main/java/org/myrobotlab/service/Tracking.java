@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -309,7 +310,8 @@ public class Tracking extends Service {
     Map<String, ServiceConfig> config = new HashMap<>();
 
     // RuntimeConfig runtimex = new RuntimeConfig();
-    // runtime.registry = new String[] { "controller", "cv", "tilt", "pan", "pid", "tracking" };
+    // runtime.registry = new String[] { "controller", "cv", "tilt", "pan",
+    // "pid", "tracking" };
 
     ArduinoConfig controller = new ArduinoConfig();
     controller.connect = true;
@@ -395,14 +397,79 @@ public class Tracking extends Service {
   public boolean isIdle() {
     return state == TrackingState.IDLE;
   }
-  
+
+  static public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+
+    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
+
+    TrackingConfig trackingConfig = new TrackingConfig();
+
+    // RuntimeConfig runtime = new RuntimeConfig();
+    // runtime.registry = new String[] { controllerName, cvName, tiltName,
+    // panName, pidName, trackingName };
+
+    // set local names and config
+    String controller = name + ".controller";
+    trackingConfig.cv = name + ".cv";
+    trackingConfig.pan = name + ".pan";
+    trackingConfig.tilt = name + ".tilt";
+    trackingConfig.pid = name + ".pid";
+    trackingConfig.enabled = false;
+
+    // build a config with all peer defaults
+    config.putAll(ServiceInterface.getDefault(controller, "Arduino"));
+    config.putAll(ServiceInterface.getDefault(trackingConfig.cv, "OpenCV"));
+    config.putAll(ServiceInterface.getDefault(trackingConfig.pan, "Servo"));
+    config.putAll(ServiceInterface.getDefault(trackingConfig.tilt, "Servo"));
+    config.putAll(ServiceInterface.getDefault(trackingConfig.pid, "Pid"));
+
+    // pull out config this service default wants to modify
+    ArduinoConfig controllerConfig = (ArduinoConfig) config.get(controller);
+    controllerConfig.connect = true;
+    controllerConfig.port = "/dev/ttyACM0";
+
+    OpenCVConfig cvConfig = (OpenCVConfig) config.get(trackingConfig.cv);
+    cvConfig.cameraIndex = 0;
+    cvConfig.capturing = true;
+    cvConfig.inputSource = "camera";
+    cvConfig.grabberType = "OpenCV";
+
+    ServoConfig panConfig = (ServoConfig) config.get(trackingConfig.pan);
+    panConfig.pin = "7";
+    panConfig.autoDisable = true;
+    panConfig.idleTimeout = 3000; // AHAHAH - I did 3 originally
+    panConfig.controller = controller;
+
+    ServoConfig tiltConfig = (ServoConfig) config.get(trackingConfig.tilt);
+    tiltConfig.pin = "5";
+    tiltConfig.autoDisable = true;
+    tiltConfig.idleTimeout = 3000;
+    tiltConfig.controller = controller;
+
+    PidConfig pidConfig = (PidConfig) config.get(trackingConfig.pid);
+    PidData panData = new PidData();
+    panData.kp = 0.015;
+    panData.ki = 0.005;
+
+    pidConfig.data.put(trackingConfig.pan, panData);
+
+    PidData tiltData = new PidData();
+    tiltData.kp = 0.015;
+    tiltData.ki = 0.005;
+    pidConfig.data.put(trackingConfig.tilt, tiltData);
+
+    // put self in
+    config.put(name, trackingConfig);
+
+    return config;
+  }
+
   public static void main(String[] args) {
     try {
 
       LoggingFactory.init(Level.INFO);
 
       Runtime.saveDefault("Tracking");
-      
 
       // Tracking track = (Tracking) Runtime.start("track", "Tracking");
       Runtime.start("webgui", "WebGui");
