@@ -1788,7 +1788,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     poller.stop();
     
     // SHUTDOWN ACKING - use case - port no longer exists
-    msg.enableAck(false);
+    if (msg != null) {
+      msg.enableAck(false);
+    }
     
     if (virtual != null) {
       virtual.releaseService();
