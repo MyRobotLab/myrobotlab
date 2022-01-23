@@ -211,7 +211,7 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
         config.put(name, configObject);
 
       } catch (Exception e) {
-        log.warn("{} of type {} does not have a Config object - creating default service config", name, type, e);
+        log.warn("{} of type {} does not have a Config object - creating default service config", name, type);
         ServiceConfig serviceConfig = new ServiceConfig();
         serviceConfig.type = type;
         config.put(name, serviceConfig);
