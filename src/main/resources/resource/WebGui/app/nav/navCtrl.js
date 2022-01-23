@@ -1,10 +1,15 @@
-angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$filter', '$timeout', '$location', '$anchorScroll', '$state', '$uibModal', 'mrl', 'statusSvc', 'noWorkySvc', 'Flash', function($scope, $filter, $timeout, $location, $anchorScroll, $state, $uibModal, mrl, statusSvc, noWorkySvc, Flash) {
+angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$timeout', '$state', '$uibModal', 'mrl', 'statusSvc', 'noWorkySvc', function($scope, $timeout, $state, $uibModal, mrl, statusSvc, noWorkySvc) {
 
     console.info('mrlapp.nav - navCtrl initializing and injecting mrl')
 
     $scope.errorStatus = null
     $scope.warningStatus = null
     $scope.infoStatus = null
+
+    $scope.lastStatusName = null
+    $scope.lastStatusLevel = null
+    $scope.lastStatusDetail = null
+
     $scope.mrl = mrl
 
     $scope.errorCount = 0
@@ -57,6 +62,11 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$filter', '$timeo
     $scope.statusList = statusSvc.getStatuses()
     statusSvc.subscribeToUpdates(function(status) {
         $timeout(function() {
+            
+            $scope.lastStatusName = status.name
+            $scope.lastStatusLevel = status.name
+            $scope.lastStatusDetail = status.name
+
             if (status.level == "error") {
                 $scope.errorStatus = status
                 $scope.errorCount += 1
