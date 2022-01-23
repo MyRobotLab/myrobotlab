@@ -1880,7 +1880,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       } else {
         log.info("config for {} - {} does not exist", name, filename);
       }
-      
+
     } catch (Exception e) {
       String error = String.format("createAndStart(%s, %s) %s", name, type, e.getClass().getCanonicalName());
       Runtime.getInstance().error(error);
@@ -3851,99 +3851,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public Map<String, Set<String>> publishInterfaceToPossibleServices() {
     return interfaceToPossibleServices;
   }
-  
-  /**
-   * Saves a "sane" set of embedded defaults constructed for this service
-   * @param className - the class whos defaults will be saved
-   * @return - returns the set of configuration sets successfully saved
-   */
-  static public Set<String> saveDefaults(String className) {
-    try {
-      return saveDefaults(className, null, null);
-    } catch (Exception e) {
-      log.error("saving default config failed", e);
-    }
-    return null;
-  }
-
-  /**
-   * Saves a "sane" set of embedded defaults constructed for this service
-   * @param className - name of the class with the desired defaults
-   * @param configPrefixPath - prefix location to where the configuration sets will be saved
-   * @param overwrite - force overwriting existing config sets
-   * @return - set of successfully saved configuration sets
-   * @throws IOException
-   */
-  static public Set<String> saveDefaults(String className, String configPrefixPath, Boolean overwrite) throws IOException {
-
-    className = CodecUtils.getServiceType(className);
-
-    log.info("saving defaults for {}", className);
-
-    if (overwrite == null) {
-      overwrite = true;
-    }
-
-    if (configPrefixPath == null) {
-      configPrefixPath = "data/config";
-    }
-
-    Set<String> savedPaths = new HashSet<>();
-
-    try {
-      Class<?> clazz = Class.forName(className);
-
-      Method method = clazz.getMethod("getDefaultConfig");      
-      Map<String, ServiceConfig> config = (Map<String, ServiceConfig>)method.invoke(clazz);
-
-      if (config == null || config.keySet().size() == 0) {
-        if (runtime != null) {
-          runtime.warn("%s does not currently have any default configurations", className);
-        } else {
-          log.warn("{} does not currently have any default configurations", className);
-        }
-        return savedPaths;
-      }
-
-      // multiple defaults are possible - minimally there
-      // should be one which has minimal dependencies called
-      // "{ClassName.toLower()}"
-      //for (String configName : configs.keySet()) {
-      
-       String configName = clazz.getSimpleName().toLowerCase();
-
-        File dir = new File(FileIO.gluePaths(configPrefixPath, configName));
-
-        if (dir.exists() && !overwrite) {
-          log.warn("skipping %s - directory already exists", configName);
-          return savedPaths;
-          // continue;
-        }
-
-        dir.mkdirs();
-
-        for (String service : config.keySet()) {
-          String path = FileIO.gluePaths(dir.getAbsolutePath(), service + ".yml");
-          FileIO.toFile(path, CodecUtils.toYaml(config.get(service)));
-        }
-        savedPaths.add(dir.getPath());
-      // }
-
-    } catch (Exception e) {
-      log.error("saveDefaults threw", e);
-    }
-
-    return savedPaths;
-  }
-
-  static public Set<String> saveDefaults(String className) {
-    try {
-      return saveDefaults(null, className, null, null);
-    } catch (Exception e) {
-      log.error("saving default config failed", e);
-    }
-    return null;
-  }
 
   /**
    * Saves a "sane" set of embedded defaults constructed for this service
@@ -3952,9 +3859,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    *          - the class whos defaults will be saved
    * @return - returns the set of configuration sets successfully saved
    */
-  static public Set<String> saveDefaults(String name, String className) {
+  static public Set<String> saveDefaults(String className) {
     try {
-      return saveDefaults(name, className, null, null);
+      return saveDefaults(null, className, null, null);
     } catch (Exception e) {
       log.error("saving default config failed", e);
     }
@@ -4014,17 +3921,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         String path = FileIO.gluePaths(dir.getAbsolutePath(), service + ".yml");
         FileIO.toFile(path, CodecUtils.toYaml(config.get(service)));
       }
-      
+
       if (!config.containsKey("runtime")) {
         // config did not come with an explicit runtime
         // therefore we will create one with the order of the keyset
-        Map<String, ServiceConfig> runtimeConfig  = ServiceConfig.getDefault("runtime", "Runtime");
-        RuntimeConfig rconfig = (RuntimeConfig)runtimeConfig.get("runtime");
+        Map<String, ServiceConfig> runtimeConfig = ServiceConfig.getDefault("runtime", "Runtime");
+        RuntimeConfig rconfig = (RuntimeConfig) runtimeConfig.get("runtime");
         rconfig.registry = config.keySet().toArray(new String[] {});
         String path = FileIO.gluePaths(dir.getAbsolutePath(), "runtime.yml");
         FileIO.toFile(path, CodecUtils.toYaml(runtimeConfig.get("runtime")));
       }
-      
+
       savedPaths.add(dir.getPath());
       // }
 
