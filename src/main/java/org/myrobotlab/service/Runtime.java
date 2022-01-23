@@ -3852,16 +3852,26 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return interfaceToPossibleServices;
   }
 
+  static public Set<String> saveDefault(String className) {
+    try {
+      return saveDefault(className.toLowerCase(), className, null, null);
+    } catch (Exception e) {
+      log.error("saving default config failed", e);
+    }
+    return null;
+  }
+
+  
   /**
    * Saves a "sane" set of embedded defaults constructed for this service
-   * 
+   * @param name - name of service
    * @param className
    *          - the class whos defaults will be saved
    * @return - returns the set of configuration sets successfully saved
    */
-  static public Set<String> saveDefaults(String className) {
+  static public Set<String> saveDefault(String name, String className) {
     try {
-      return saveDefaults(null, className, null, null);
+      return saveDefault(null, className, null, null);
     } catch (Exception e) {
       log.error("saving default config failed", e);
     }
@@ -3880,12 +3890,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @return - set of successfully saved configuration sets
    * @throws IOException
    */
-  static public Set<String> saveDefaults(String name, String type, String configPrefixPath, Boolean overwrite) throws IOException {
+  static public Set<String> saveDefault(String name, String type, String configPrefixPath, Boolean overwrite) throws IOException {
 
     Set<String> savedPaths = new HashSet<>();
 
     if (type == null) {
-      log.error("saveDefaults className is required");
+      log.error("saveDefault className is required");
       return savedPaths;
     }
 
@@ -3936,7 +3946,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // }
 
     } catch (Exception e) {
-      log.error("saveDefaults threw", e);
+      log.error("saveDefault threw", e);
     }
 
     return savedPaths;

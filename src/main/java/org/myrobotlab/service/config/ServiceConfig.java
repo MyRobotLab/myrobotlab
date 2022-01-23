@@ -37,8 +37,8 @@ public class ServiceConfig {
     type = serviceType;
   }
 
-  static public Map<String, ServiceConfig> getDefault(String name, String type) {
-    Map<String, ServiceConfig> config = new LinkedHashMap<>();
+  static public LinkedHashMap<String, ServiceConfig> getDefault(String name, String type) {
+    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
     try {
       
       String configClass = "org.myrobotlab.service.config." + type + "Config";
@@ -52,7 +52,7 @@ public class ServiceConfig {
       
       // I chose "non"-static method for getDefault - because Java has
       // an irritating rule of not allowing static overloads and abstracts
-      config = (Map<String, ServiceConfig>)method.invoke(configObject, name);
+      config = (LinkedHashMap<String, ServiceConfig>)method.invoke(configObject, name);
 
       if (config == null || config.keySet().size() == 0) {
           log.warn("{} does not currently have any default configurations", configClass);
@@ -64,8 +64,8 @@ public class ServiceConfig {
     return config;
   }
   
-  public Map<String, ServiceConfig> getDefault(String name) {
-    Map<String, ServiceConfig> config = new LinkedHashMap<>();
+  public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
     config.put(name, this);
     return config; 
   }

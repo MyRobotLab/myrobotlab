@@ -18,7 +18,6 @@ import org.myrobotlab.service.Pid.PidOutput;
 import org.myrobotlab.service.config.ArduinoConfig;
 import org.myrobotlab.service.config.OpenCVConfig;
 import org.myrobotlab.service.config.PidConfig;
-import org.myrobotlab.service.config.RuntimeConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.config.TrackingConfig;
@@ -309,8 +308,8 @@ public class Tracking extends Service {
 
     Map<String, ServiceConfig> config = new HashMap<>();
 
-    RuntimeConfig runtime = new RuntimeConfig();
-    runtime.registry = new String[] { "controller", "cv", "tilt", "pan", "pid", "tracking" };
+    // RuntimeConfig runtimex = new RuntimeConfig();
+    // runtime.registry = new String[] { "controller", "cv", "tilt", "pan", "pid", "tracking" };
 
     ArduinoConfig controller = new ArduinoConfig();
     controller.connect = true;
@@ -337,12 +336,14 @@ public class Tracking extends Service {
     PidConfig pid = new PidConfig();
 
     PidData panData = new PidData();
-    panData.kp = 0.03;
+    panData.kp = 0.015;
+    panData.ki = 0.001;
 
     pid.data.put("pan", panData);
 
     PidData tiltData = new PidData();
-    tiltData.kp = 0.03;
+    tiltData.kp = 0.015;
+    tiltData.ki = 0.001;
     pid.data.put("tilt", tiltData);
 
     TrackingConfig tracking = new TrackingConfig();
@@ -352,7 +353,7 @@ public class Tracking extends Service {
     tracking.pid = "pid";
     tracking.enabled = true;
 
-    config.put("runtime", runtime);
+    // config.put("runtime", runtime);
     config.put("controller", controller);
     config.put("cv", cv);
     config.put("pan", pan);
@@ -361,7 +362,6 @@ public class Tracking extends Service {
     config.put("tracking", tracking);
 
     // single config
-
     return config;
   }
 
@@ -401,7 +401,8 @@ public class Tracking extends Service {
 
       LoggingFactory.init(Level.INFO);
 
-      Runtime.saveDefaults("Tracking");
+      Runtime.saveDefault("Tracking");
+      
 
       // Tracking track = (Tracking) Runtime.start("track", "Tracking");
       Runtime.start("webgui", "WebGui");

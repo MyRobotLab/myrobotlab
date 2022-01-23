@@ -14,9 +14,10 @@ public class TrackingConfig extends ServiceConfig {
   public boolean enabled;
   public long lostTrackingDelayMs = 1000;
 
-  public Map<String, ServiceConfig> getDefault(String name) {
+  @Override
+  public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
 
-    Map<String, ServiceConfig> config = new LinkedHashMap<>();
+    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
 
     // RuntimeConfig runtime = new RuntimeConfig();
     // runtime.registry = new String[] { controllerName, cvName, tiltName,

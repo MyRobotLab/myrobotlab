@@ -1,11 +1,6 @@
 package org.myrobotlab.service.config;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
-
-import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Arduino;
-import org.slf4j.Logger;
 
 public class ArduinoConfig extends ServiceConfig {
   
@@ -14,8 +9,9 @@ public class ArduinoConfig extends ServiceConfig {
   public boolean connect;
   public String serial; // name of serial service 
   
-  public Map<String, ServiceConfig> getDefault(String name) {
-    Map<String, ServiceConfig> config = new LinkedHashMap<>();
+  @Override
+  public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
 
     // set local names and config
     serial = name + ".serial";
