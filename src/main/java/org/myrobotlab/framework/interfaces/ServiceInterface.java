@@ -176,7 +176,7 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
     LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
     try {
 
-      String configClass = "org.myrobotlab.service." + type;
+      String configClass = type.contains(".")?type:"org.myrobotlab.service." + type;
 
       Class<?> clazz = Class.forName(configClass);
       Method method = clazz.getMethod("getDefault", String.class);
