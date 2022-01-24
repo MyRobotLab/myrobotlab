@@ -30,6 +30,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -1847,7 +1848,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       si = create(name);
     } catch (Exception e) {
       Runtime.getInstance().error(e);
-      log.error("create(%s) threw", name, e);
+      log.error("create({}) threw", name, e);
     }
 
     if (si != null) {
@@ -1876,9 +1877,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
       File check = new File(filename);
       if (check.exists()) {
+        // this loads a file from the file system - for the current config name
         load(name);
       } else {
-        log.info("config for {} - {} does not exist", name, filename);
+        log.info("config for {} - {} does not exist loading default", name, filename);
+        ServiceConfig c = ServiceInterface.getDefault(name, type).get(name);
+        si.load(c);
       }
 
     } catch (Exception e) {
@@ -3915,7 +3919,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     try {
 
-      Map<String, ServiceConfig> config = ServiceInterface.getDefault(name, type);
+      LinkedHashMap<String, ServiceConfig> config = ServiceInterface.getDefault(name, type);
 
       File dir = new File(FileIO.gluePaths(configPrefixPath, name));
 
@@ -3935,7 +3939,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       if (!config.containsKey("runtime")) {
         // config did not come with an explicit runtime
         // therefore we will create one with the order of the keyset
-        Map<String, ServiceConfig> runtimeConfig = ServiceInterface.getDefault("runtime", "Runtime");
+        LinkedHashMap<String, ServiceConfig> runtimeConfig = ServiceInterface.getDefault("runtime", "Runtime");
         RuntimeConfig rconfig = (RuntimeConfig) runtimeConfig.get("runtime");
         rconfig.registry = config.keySet().toArray(new String[] {});
         String path = FileIO.gluePaths(dir.getAbsolutePath(), "runtime.yml");
