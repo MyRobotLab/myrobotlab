@@ -2237,7 +2237,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     ArduinoConfig config = (ArduinoConfig) c;
     
     if (config.serial != null) {
-      serial = (Serial)Runtime.start(config.serial);
+      // FIXME THIS IS NOT GOOD - BUT NEEDED
+      serial = (Serial)Runtime.start(config.serial, "Serial");
     }
 
     if (config.port != null) {
