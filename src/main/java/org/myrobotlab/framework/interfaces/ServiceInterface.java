@@ -174,9 +174,17 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
 
   static public LinkedHashMap<String, ServiceConfig> getDefault(String name, String type) {
     LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
+    
+    String simpleTypeName = null;
+    if (type.contains(".")) {
+      simpleTypeName = type.substring(type.lastIndexOf(".")+1);
+    } else {
+      simpleTypeName = type;
+    }
+    
     try {
 
-      String configClass = type.contains(".")?type:"org.myrobotlab.service." + type;
+      String configClass = "org.myrobotlab.service." + simpleTypeName;
 
       Class<?> clazz = Class.forName(configClass);
       Method method = clazz.getMethod("getDefault", String.class);
@@ -198,7 +206,7 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
 
         log.info("{} of type {} does not have a getDefault", name, type);
 
-        String configClass = "org.myrobotlab.service.config." + type + "Config";
+        String configClass = "org.myrobotlab.service.config." + simpleTypeName + "Config";
 
         Class<?> clazz = Class.forName(configClass);
 
