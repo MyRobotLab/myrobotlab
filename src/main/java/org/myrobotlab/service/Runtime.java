@@ -1597,7 +1597,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       String n = file.getName();
 
       if (!file.isDirectory()) {
-        warn("ignoring %s expecting directory not file", n);
+        // warn("ignoring %s expecting directory not file", n);
+        log.info("ignoring {} expecting directory not file", n);
         continue;
       }
 
@@ -3875,7 +3876,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   static public Set<String> saveDefault(String name, String className) {
     try {
-      return saveDefault(null, className, null, null);
+      return saveDefault(name, className, null, null);
     } catch (Exception e) {
       log.error("saving default config failed", e);
     }
