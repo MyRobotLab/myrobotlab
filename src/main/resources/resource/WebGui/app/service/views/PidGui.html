@@ -30,15 +30,15 @@
                 <td>
                     <b>{{key}}</b>
                 </td>
-                <td>{{value.sampleTime.toFixed(3)}} </td>
-                <td>{{value.kp.toFixed(3)}} </td>
-                <td>{{value.ki.toFixed(3)}} </td>
-                <td>{{value.kd.toFixed(3)}} </td>
+                <td>{{value.sampleTime}} </td>
+                <td>{{value.kp}} </td>
+                <td>{{value.ki}} </td>
+                <td>{{value.kd}} </td>
                 <td>{{value.controllerDirection}}</td>
                 <td>{{value.setpoint}}</td>
-                <td>{{value.outMin.toFixed(3)}}</td>
-                <td>{{value.outMax.toFixed(3)}}</td>
-                <td>{{value.deadband.toFixed(3)}}</td>
+                <td>{{value.outMin}}</td>
+                <td>{{value.outMax}}</td>
+                <td>{{value.deadband}}</td>
                 <td class="form-inline">
                     <button type="button" class="btn btn-default btn-xs" ng-click="enable(value)">{{value.enabled?'disable':'enable'}}</button>
                     <button type="button" class="btn btn-default btn-xs" ng-click="delete(key)">delete</button>
