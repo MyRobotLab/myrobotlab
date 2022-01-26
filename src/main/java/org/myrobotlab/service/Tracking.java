@@ -1,6 +1,8 @@
 package org.myrobotlab.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +16,11 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.Pid.PidOutput;
+import org.myrobotlab.service.config.ArduinoConfig;
+import org.myrobotlab.service.config.OpenCVConfig;
+import org.myrobotlab.service.config.PidConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.config.TrackingConfig;
 import org.myrobotlab.service.interfaces.ComputerVision;
 import org.myrobotlab.service.interfaces.PidControl;
@@ -42,10 +48,6 @@ public class Tracking extends Service {
   // FIXME - should just be publishing a normalized x,y polar coordinate
   // and let the control system deal with that - having "servos" is
   // too device specific
-
-  PidData xPid = new PidData();
-
-  PidData yPid = new PidData();
 
   String pan;
 
@@ -233,7 +235,7 @@ public class Tracking extends Service {
         // PV - measured value
         send(pid, "compute", pan, 320 - x);
         send(pid, "compute", tilt, 240 - y);
-        
+
         // if largestFaceOnly
 
         if (state == TrackingState.SEARCHING) {
@@ -329,35 +331,78 @@ public class Tracking extends Service {
     }
     return config;
   }
-  
+
   public boolean isIdle() {
     return state == TrackingState.IDLE;
   }
 
-  public void startWithDefaults() {
-    if (pan == null) {
-      pan = String.format("%s.pan", getName());
-      Runtime.start(pan, "Servo");
-      attachPan(pan);
-    }
-    if (tilt == null) {
-      tilt = String.format("%s.tilt", getName());
-      Runtime.start(tilt, "Servo");
-      attachTilt(tilt);
-    }
-    if (pid == null) {
-      pid = String.format("%s.pid", getName());
-      Runtime.start(pid, "Pid");
-      attach(pid);
-    }
+  static public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
 
-    if (cv == null) {
-      cv = String.format("%s.cv", getName());
-      Runtime.start(cv, "OpenCV");
-      attach(cv);
-    }
+    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
 
-    enable();
+    TrackingConfig trackingConfig = new TrackingConfig();
+
+    // RuntimeConfig runtime = new RuntimeConfig();
+    // runtime.registry = new String[] { controllerName, cvName, tiltName,
+    // panName, pidName, trackingName };
+
+    // set local names and config
+    String controller = name + ".controller";
+    trackingConfig.cv = name + ".cv";
+    trackingConfig.pan = name + ".pan";
+    trackingConfig.tilt = name + ".tilt";
+    trackingConfig.pid = name + ".pid";
+    trackingConfig.enabled = false;
+
+    // build a config with all peer defaults
+    config.putAll(ServiceInterface.getDefault(controller, "Arduino"));
+    config.putAll(ServiceInterface.getDefault(trackingConfig.cv, "OpenCV"));
+    config.putAll(ServiceInterface.getDefault(trackingConfig.pan, "Servo"));
+    config.putAll(ServiceInterface.getDefault(trackingConfig.tilt, "Servo"));
+    config.putAll(ServiceInterface.getDefault(trackingConfig.pid, "Pid"));
+
+    // pull out config this service default wants to modify
+    ArduinoConfig controllerConfig = (ArduinoConfig) config.get(controller);
+    controllerConfig.connect = true;
+    controllerConfig.port = "/dev/ttyACM0";
+
+    OpenCVConfig cvConfig = (OpenCVConfig) config.get(trackingConfig.cv);
+    cvConfig.cameraIndex = 0;
+    cvConfig.capturing = true;
+    cvConfig.inputSource = "camera";
+    cvConfig.grabberType = "OpenCV";
+
+    ServoConfig panConfig = (ServoConfig) config.get(trackingConfig.pan);
+    panConfig.pin = "7";
+    panConfig.autoDisable = true;
+    panConfig.idleTimeout = 3000; // AHAHAH - I did 3 originally
+    panConfig.controller = controller;
+
+    ServoConfig tiltConfig = (ServoConfig) config.get(trackingConfig.tilt);
+    tiltConfig.pin = "5";
+    tiltConfig.autoDisable = true;
+    tiltConfig.idleTimeout = 3000;
+    tiltConfig.controller = controller;
+
+    PidConfig pidConfig = (PidConfig) config.get(trackingConfig.pid);
+    PidData panData = new PidData();
+    panData.kp = 0.015;
+    panData.ki = 0.001;
+    panData.kd = 0.0;
+
+    pidConfig.data.put(trackingConfig.pan, panData);
+
+    PidData tiltData = new PidData();
+    tiltData.kp = 0.035;
+    tiltData.ki = 0.001;
+    tiltData.kd = 0.0;
+
+    pidConfig.data.put(trackingConfig.tilt, tiltData);
+
+    // put self in
+    config.put(name, trackingConfig);
+
+    return config;
   }
 
   public static void main(String[] args) {
@@ -365,28 +410,30 @@ public class Tracking extends Service {
 
       LoggingFactory.init(Level.INFO);
 
-      Tracking track = (Tracking) Runtime.start("track", "Tracking");
+      Runtime.saveDefault("Tracking");
+
+      // Tracking track = (Tracking) Runtime.start("track", "Tracking");
       Runtime.start("webgui", "WebGui");
       boolean done = true;
       if (done) {
         return;
       }
-      
+
       // Pid2 pid = (Pid2) Runtime.start("pid", "Pid2");
 
-      // pid.addPid("neck", 0.5, 1.0, 0.0, 240); // how does fractional Gain mean
-                                            // initial setpoint change ??
-      
+      // pid.addPid("neck", 0.5, 1.0, 0.0, 240); // how does fractional Gain
+      // mean
+      // initial setpoint change ??
+
       // pid.addPid("rothead", 0.5, 1.0, 0.0, 320);
-      
+
       // pid.addPid("neck", 1, 1, 0, 240);// why ???? 480 should be 240 ! /2
       // somewhere ?
       /*
-       * Runtime.start("pan", "Servo"); Runtime.start("tilt", "Servo");
+       * Runtime.start("pan", "Servo"); Runtime.start(tiltName, "Servo");
        * Runtime.start("pid", "Pid"); Runtime.start("legacy", "Tracking");
        */
       // track.startWithDefaults();
-      
 
     } catch (Exception e) {
       log.error("main threw", e);

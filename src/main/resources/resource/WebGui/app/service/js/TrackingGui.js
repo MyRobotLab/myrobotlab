@@ -19,6 +19,7 @@ angular.module('mrlapp.service.TrackingGui', []).controller('TrackingGuiCtrl', [
         switch (inMsg.method) {
         case 'onStatus':
             // FIXME - do something with this
+            console.info('onStatus', data)
             break
         case 'onStats':
             // FIXME - do something with this
