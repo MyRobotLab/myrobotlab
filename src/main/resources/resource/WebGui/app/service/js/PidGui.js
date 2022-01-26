@@ -138,6 +138,11 @@ angular.module('mrlapp.service.PidGui', []).controller('PidGuiCtrl', ['$scope', 
     }
 
     $scope.options = {
+        scales: {
+      y: {
+        max: 80
+      }
+    },
         elements: {
             line: {
                 fill: false

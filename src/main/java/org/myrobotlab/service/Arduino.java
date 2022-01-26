@@ -12,6 +12,7 @@ import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -38,6 +39,7 @@ import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.abstracts.AbstractMicrocontroller;
 import org.myrobotlab.service.config.ArduinoConfig;
+import org.myrobotlab.service.config.SerialConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.PinData;
@@ -497,12 +499,12 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
     try {
 
-      initSerial();
-
       if (isConnected() && port.equals(serial.getPortName())) {
         log.info("already connected to port {}", port);
         return;
       }
+      
+      initSerial();
 
       if (isVirtual()) {
         if (virtual == null) {
@@ -1788,7 +1790,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     poller.stop();
     
     // SHUTDOWN ACKING - use case - port no longer exists
-    msg.enableAck(false);
+    if (msg != null) {
+      msg.enableAck(false);
+    }
     
     if (virtual != null) {
       virtual.releaseService();
@@ -2031,16 +2035,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   @Override
-  public void startService() {
-    super.startService();
-    try {
-      initSerial();
-    } catch (Exception e) {
-      log.error("Arduino.startService threw", e);
-    }
-  }
-
-  @Override
   public void stopRecording() {
     msg.stopRecording();
   }
@@ -2241,11 +2235,36 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   public ServiceConfig load(ServiceConfig c) {
     ArduinoConfig config = (ArduinoConfig) c;
+    
+    if (config.serial != null) {
+      // FIXME THIS IS NOT GOOD - BUT NEEDED
+      serial = (Serial)Runtime.start(config.serial, "Serial");
+    }
 
     if (config.port != null) {
       connect(config.port);
     }
     return c;
+  }
+  
+  static public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
+    ArduinoConfig arduinoConfig = new ArduinoConfig();
+
+    // set local names and config
+    arduinoConfig.serial = name + ".serial";
+    
+    // build a config with all peer defaults
+    config.putAll(ServiceInterface.getDefault(arduinoConfig.serial, "Serial"));
+    
+    // pull out specific config and modify
+    SerialConfig serialConfig = (SerialConfig)config.get(arduinoConfig.serial);
+    serialConfig.port = arduinoConfig.port;
+    
+    // put self in
+    config.put(name, arduinoConfig);
+
+    return config; 
   }
 
   /**
@@ -2283,7 +2302,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       // Runtime.start("gui", "SwingGui");
       Serial.listPorts();
 
-      Arduino hub = (Arduino) Runtime.start("hub", "Arduino");
+      Arduino hub = (Arduino) Runtime.start("controller", "Arduino");
       Runtime.start("pir", "Pir");
 
       hub.connect("/dev/ttyACM0");
