@@ -899,6 +899,60 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
     return true;
   }
+  
+    public String captureGesture() {
+    return captureGesture(null);
+  }
+
+  public String captureGesture(String gestureName) {
+    StringBuffer script = new StringBuffer();
+    Date date = new Date();
+
+    String indentSpace = "";
+    script.append("# - " + date + " - Captured gesture :\n");
+
+    if (gestureName != null) {
+      indentSpace = "  ";
+      script.append(String.format("def %s():\n", gestureName));
+    }
+
+    if (head != null) {
+      script.append(indentSpace);
+      script.append(head.getScript(getName()));
+    }
+
+    if (leftArm != null) {
+      script.append(indentSpace);
+      script.append(leftArm.getScript(getName()));
+    }
+    if (rightArm != null) {
+      script.append(indentSpace);
+      script.append(rightArm.getScript(getName()));
+    }
+
+    if (leftHand != null) {
+      script.append(indentSpace);
+      script.append(leftHand.getScript(getName()));
+    }
+    if (rightHand != null) {
+      script.append(indentSpace);
+      script.append(rightHand.getScript(getName()));
+    }
+
+    if (torso != null) {
+      script.append(indentSpace);
+      script.append(torso.getScript(getName()));
+    }
+
+    if (eyelids != null) {
+      script.append(indentSpace);
+      script.append(eyelids.getScript(getName()));
+    }
+
+    send("python", "appendScript", script.toString());
+
+    return script.toString();
+  }
 
   public void cameraOff() {
     if (opencv != null) {
