@@ -900,7 +900,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return true;
   }
   
-    public String captureGesture() {
+  public String captureGesture() {
     return captureGesture(null);
   }
 
