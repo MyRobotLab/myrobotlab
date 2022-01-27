@@ -36,34 +36,20 @@
         </tr-->
         <tr>
             <td>
-                <input class="form-control ng-pristine ng-untouched ng-valid ng-empty directoryName" type="text" ng-model="ccccc" name="directoryName" id="directoryName" ng-init="" placeholder="Playlist directory" style="width:200px">
+                <input class="form-control ng-pristine ng-untouched ng-valid ng-empty directoryName" type="text" ng-model="service.currentPlaylist" name="directoryName" id="directoryName" ng-init="" placeholder="Playlist directory" style="width:200px">
                 <button class="btn btn-default" ng-click="msg.addPlaylist(service.currentPlaylist)">Add playlist</button>
-                <!--input class="form-control ng-pristine ng-untouched ng-valid ng-empty" type="text" ng-model="service.currentPlaylist" placeholder="Playlist directory" style="width:200px">
-                <button class="btn btn-default" ng-click="msg.addPlaylist(service.currentPlaylist)">Add playlist</button-->
                 <div class="form-group">
                     <label>Select playlist:</label>
-                <select multiple class="form-control vertical-menu" ng-change="setPlaylist(name)" ng-model="service.currentPlaylist" id="service.playlists" title="select your playlist">
+                <select multiple class="form-control vertical-menu" ng-change="setPlaylist(name)" ng-model="service.playlists" id="service.playlists" title="select your playlist">
                     <option ng-repeat="(name, fileset) in service.playlists" ng-value="{{name}}">{{name}}</option>
                 </select>
             </div>
-                <div ng-show="service.currentPlaylist" class="form-group">
+                <div ng-show="service.playlists" class="form-group">
                     <label>Select track:</label>
                     <select multiple class="form-control vertical-menu" ng-model="service.currentTrack" ng-change="setTrack(fileset)" title="select your track">
                         <option ng-repeat="(name, fileset) in service.playlists" ng-value="{{fileset}}">{{fileset}}</option>
                     </select>
                 </div>
-                <!--div class="form-group">
-                    <label>Select playlist:</label>
-                    <select ng-repeat="(name, fileset) in service.playlists" multiple class="form-control vertical-menu" ng-model="service.currentPlaylist" ng-change="setPlaylist(name)" id="service.currentPlaylist" title="select your playlist">
-                        <option ng-value="{{name}}">{{name}}</option>
-                    </select>
-                </div-->   
-                <!--div ng-show="service.currentPlaylist" class="form-group">
-                    Select track:
-                    <select ng-repeat="(name, fileset) in service.playlists" multiple class="form-control vertical-menu" ng-model="service.currentTrack" ng-change="setTrack(fileset)" title="select your track">
-                        <option ng-value="{{fileset}}">{{fileset}}</option>
-                    </select>
-                </div-->
             </td>
         </tr>
     </table>
