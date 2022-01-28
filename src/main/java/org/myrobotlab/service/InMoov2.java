@@ -2426,9 +2426,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     config.enableLeftHand = isLeftHandActivated;
     config.enableLeftHandSensor = isLeftHandSensorActivated;
     // config.isLeftPortActivated = isLeftPortActivated;
-    // config.enableNeoPixel = isNeopixelActivated;
+    config.enableNeoPixel = isNeopixelActivated;
     config.enableOpenCV = isOpenCVActivated;
-    // config.enablePir = isPirActivated;
+    config.enablePir = isPirActivated;
     config.enableUltrasonicRight = isUltrasonicRightActivated;
     config.enableUltrasonicLeft = isUltrasonicLeftActivated;
     config.enableRightArm = isRightArmActivated;
@@ -2568,6 +2568,18 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
         startUltrasonicRight();
       } else {
         stopUltrasonicRight();  
+      }
+      
+      if (config.enablePir) {
+        startPir();
+      } else {
+        stopPir();
+      }
+      
+      if (config.enableNeoPixel) {
+        startNeopixel();
+      } else {
+        stopNeopixelAnimation();
       }
 
       if (config.loadGestures) {

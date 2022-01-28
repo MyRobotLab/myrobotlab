@@ -456,7 +456,8 @@ public class InMoov2Config extends ServiceConfig {
   public boolean enableSimulator = false;
   public boolean enableUltrasonicLeft = false;
   public boolean enableUltrasonicRight = false;
-
+  public boolean enableNeoPixel = false;
+  public boolean enablePir = false;
   public boolean pirWakeUp = false;
   public boolean pirEnableTracking = false;
   
