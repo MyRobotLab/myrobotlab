@@ -2569,6 +2569,18 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       } else {
         stopUltrasonicRight();  
       }
+      
+      if (config.enablePir) {
+        startPir();
+      } else {
+        stopPir();
+      }
+      
+      if (config.enableNeoPixel) {
+        startNeopixel();
+      } else {
+        stopNeopixelAnimation();
+      }
 
       if (config.loadGestures) {
         loadGestures = true;
