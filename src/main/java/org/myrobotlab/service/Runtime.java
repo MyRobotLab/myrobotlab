@@ -3865,6 +3865,21 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
     return null;
   }
+  
+  /**
+   * Helper method - returns if a service is started
+   * @param name - name of service
+   * @return - true if started
+   */
+ static public boolean isStarted(String name) {
+
+    if (registry.containsKey(name)) {
+      ServiceInterface si = registry.get(name);
+      return si.isRunning();
+    }
+    
+    return false;
+ }
 
   
   /**

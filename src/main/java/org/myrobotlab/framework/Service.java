@@ -2779,13 +2779,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // service life-cycle callback - override if interested in these events
   }
 
-  public boolean isStarted(String peerKey) {
-    ServiceInterface si = getPeer(peerKey);
-    if (si == null || !si.isRunning()) {
-      return false;
-    }
-    return true;
-  }
 
   @Override
   public int compareTo(ServiceInterface o) {
