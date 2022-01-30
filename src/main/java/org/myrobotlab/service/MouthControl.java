@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 public class MouthControl extends Service implements SpeechListener {
 
   private static final long serialVersionUID = 1L;
-  
+
   public final static Logger log = LoggerFactory.getLogger(MouthControl.class);
 
   int mouthClosedPos;
@@ -197,7 +197,7 @@ public class MouthControl extends Service implements SpeechListener {
    * 
    * @param delaytime
    * @param delaytimestop
-   * @param d3
+   * @param delaytimeletter
    */
   public void setDelays(Integer delaytime, Integer delaytimestop, Integer delaytimeletter) {
     this.delaytime = delaytime;
@@ -250,7 +250,7 @@ public class MouthControl extends Service implements SpeechListener {
     neoPixel = config.neoPixel;
 
     // mouth needs to attach to us
-    // it needs to create notify entries 
+    // it needs to create notify entries
     // so we fire a message to attach to us
     mouth = config.mouth;
     if (config.mouth != null) {
@@ -261,18 +261,19 @@ public class MouthControl extends Service implements SpeechListener {
     return c;
   }
 
-
   public static void main(String[] args) {
     try {
       System.setProperty("java.version", "11.0");
       LoggingFactory.init(Level.INFO);
-      
-      // MouthControl mouthcontrol = (MouthControl) Runtime.start("mc", "MouthControl");
+
+      // MouthControl mouthcontrol = (MouthControl) Runtime.start("mc",
+      // "MouthControl");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
+      webgui.setPort(8889);
       webgui.startService();
-      
+
       boolean done = true;
       if (done) {
         return;
@@ -282,8 +283,6 @@ public class MouthControl extends Service implements SpeechListener {
       Runtime.start("mouth1", "LocalSpeech");
       Runtime.start("mega", "Arduino");
       Runtime.start("neo", "NeoPixel");
-
-  
 
       // Runtime.start("python", "Python");
 
