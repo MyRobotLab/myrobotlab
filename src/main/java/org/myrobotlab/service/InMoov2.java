@@ -400,8 +400,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   private boolean isLeftPortActivated;
 
-  private boolean isOpenCvActivated;
-
   private boolean isRightHandSensorActivated;
 
   private boolean isRightPortActivated;
