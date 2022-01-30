@@ -55,7 +55,7 @@ angular.module('mrlapp.service.MouthControlGui', []).controller('MouthControlGui
         interface: 'SpeechSynthesis',
         attach: $scope.attach,
         // callback: function...
-        attachName: $scope.mouth,
+        attachName: $scope.service.mouth,
         controllerTitle: 'speech controller'
     }
 
@@ -63,8 +63,16 @@ angular.module('mrlapp.service.MouthControlGui', []).controller('MouthControlGui
         interface: 'ServoControl',
         attach: $scope.attach,
         // callback: function...
-        attachName: $scope.servo,
+        attachName: $scope.service.jaw,
         controllerTitle: 'servo controller'
+    }
+
+    $scope.neoPixelOptions = {
+        interface: 'NeoPixelControl',
+        attach: $scope.attach,
+        // callback: function...
+        attachName: $scope.service.neoPixel,
+        controllerTitle: 'neopixel'
     }
 
 
