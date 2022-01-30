@@ -9,6 +9,9 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.config.AbstractSpeechSynthesisConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.WebkitSpeechSynthesisConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
@@ -109,6 +112,12 @@ public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis {
   protected void loadVoices() throws Exception {
     // done in the webbrowser - this method is a NOOP
 
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    WebkitSpeechSynthesisConfig config = (WebkitSpeechSynthesisConfig) super.getConfig((AbstractSpeechSynthesisConfig) new WebkitSpeechSynthesisConfig());
+    return config;
   }
 
   public static void main(String[] args) {

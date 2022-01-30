@@ -1092,11 +1092,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     return mute;
   }
 
-  @Override
-  public ServiceConfig getConfig() {
-    AbstractSpeechSynthesisConfig config = new AbstractSpeechSynthesisConfig();
-    return getConfig(config);
-  }
+//  @Override
+//  public ServiceConfig getConfig() {
+//    AbstractSpeechSynthesisConfig config = new AbstractSpeechSynthesisConfig();
+//    return getConfig(config);
+//  }
 
   public ServiceConfig load(ServiceConfig c) {
     AbstractSpeechSynthesisConfig config = (AbstractSpeechSynthesisConfig) c;
