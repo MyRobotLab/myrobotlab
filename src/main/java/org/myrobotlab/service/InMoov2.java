@@ -400,7 +400,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   private boolean isLeftPortActivated;
 
-  private boolean isOpenCVActivated;
+  private boolean isOpenCvActivated;
 
   private boolean isRightHandSensorActivated;
 
@@ -2427,7 +2427,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     config.enableLeftHandSensor = isLeftHandSensorActivated;
     // config.isLeftPortActivated = isLeftPortActivated;
     config.enableNeoPixel = isNeopixelActivated;
-    config.enableOpenCV = isOpenCVActivated;
+    config.enableOpenCV = isOpenCvActivated;
     config.enablePir = isPirActivated;
     config.enableUltrasonicRight = isUltrasonicRightActivated;
     config.enableUltrasonicLeft = isUltrasonicLeftActivated;
