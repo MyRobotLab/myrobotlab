@@ -577,8 +577,8 @@ public class InMoov2Head extends Service {
 
     ServoConfig jaw = (ServoConfig) config.get(headConfig.jaw);
     jaw.autoDisable = true;
-    jaw.controller = "i01.left";
     jaw.clip = true;
+    jaw.controller = "i01.left";
     jaw.idleTimeout = 3000;
     jaw.inverted = false;
     jaw.maxIn = 180.0;
@@ -594,6 +594,7 @@ public class InMoov2Head extends Service {
     ServoConfig eyeX = (ServoConfig) config.get(headConfig.eyeX);
     eyeX.autoDisable = true;
     eyeX.clip = true;
+    eyeX.controller = "i01.left";
     eyeX.idleTimeout = 3000;
     eyeX.inverted = false;
     eyeX.maxIn = 180.0;
@@ -609,6 +610,7 @@ public class InMoov2Head extends Service {
     ServoConfig eyeY = (ServoConfig) config.get(headConfig.eyeY);
     eyeY.autoDisable = true;
     eyeY.clip = true;
+    eyeY.controller = "i01.left";
     eyeY.idleTimeout = 3000;
     eyeY.inverted = false;
     eyeY.maxIn = 180.0;
