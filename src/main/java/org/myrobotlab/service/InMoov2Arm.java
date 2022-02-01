@@ -2,18 +2,23 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
+import org.myrobotlab.service.config.InMoov2HeadConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
@@ -108,7 +113,6 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
   @Override
   public void startService() {
     super.startService();
-    startPeers();
   }
 
   @Override
@@ -275,7 +279,6 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
   public void releaseService() {
     try {
       disable();
-      releasePeers();
       super.releaseService();
     } catch (Exception e) {
       error(e);
@@ -447,6 +450,96 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
       shoulder.waitTargetPos();
     if (omoplate != null)
       omoplate.waitTargetPos();
+  }
+
+  static public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+
+    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
+
+    InMoov2ArmConfig armConfig = new InMoov2ArmConfig();
+
+    // RuntimeConfig runtime = new RuntimeConfig();
+    // runtime.registry = new String[] { controllerName, cvName, tiltName,
+    // panName, pidName, trackingName };
+
+    // set local names and config
+    armConfig.omoplate = name + ".omoplate";
+    armConfig.shoulder = name + ".shoulder";
+    armConfig.rotate = name + ".rotate";
+    armConfig.bicep = name + ".bicep";
+
+    // build a config with all peer defaults
+    config.putAll(ServiceInterface.getDefault(armConfig.omoplate, "Servo"));
+    config.putAll(ServiceInterface.getDefault(armConfig.shoulder, "Servo"));
+    config.putAll(ServiceInterface.getDefault(armConfig.rotate, "Servo"));
+    config.putAll(ServiceInterface.getDefault(armConfig.bicep, "Servo"));
+
+    ServoConfig omoplate = (ServoConfig) config.get(armConfig.omoplate);
+    omoplate.autoDisable = true;
+    // omoplate.controller = "i01.left";
+    omoplate.clip = true;
+    omoplate.idleTimeout = 3000;
+    omoplate.inverted = false;
+    omoplate.maxIn = 80.0;
+    omoplate.maxOut = 80.0;
+    omoplate.minIn = 10.0;
+    omoplate.minOut = 10.0;
+    omoplate.pin = "11";
+    omoplate.rest = 10.0;
+    omoplate.speed = 45.0;
+    omoplate.sweepMax = null;
+    omoplate.sweepMin = null;
+
+    ServoConfig shoulder = (ServoConfig) config.get(armConfig.shoulder);
+    shoulder.autoDisable = true;
+    // shoulder.controller = "i01.left";
+    shoulder.clip = true;
+    shoulder.idleTimeout = 3000;
+    shoulder.inverted = false;
+    shoulder.maxIn = 180.0;
+    shoulder.maxOut = 180.0;
+    shoulder.minIn = 0.0;
+    shoulder.minOut = 0.0;
+    shoulder.pin = "10";
+    shoulder.rest = 30.0;
+    shoulder.speed = 45.0;
+    shoulder.sweepMax = null;
+    shoulder.sweepMin = null;
+
+    ServoConfig rotate = (ServoConfig) config.get(armConfig.rotate);
+    rotate.autoDisable = true;
+    // rotate.controller = "i01.left";
+    rotate.clip = true;
+    rotate.idleTimeout = 3000;
+    rotate.inverted = false;
+    rotate.maxIn = 180.0;
+    rotate.maxOut = 180.0;
+    rotate.minIn = 40.0;
+    rotate.minOut = 40.0;
+    rotate.pin = "9";
+    rotate.rest = 90.0;
+    rotate.speed = 45.0;
+    rotate.sweepMax = null;
+    rotate.sweepMin = null;
+
+    ServoConfig bicep = (ServoConfig) config.get(armConfig.bicep);
+    bicep.autoDisable = true;
+    // bicep.controller = "i01.left";
+    bicep.clip = true;
+    bicep.idleTimeout = 3000;
+    bicep.inverted = false;
+    bicep.maxIn = 90.0;
+    bicep.maxOut = 90.0;
+    bicep.minIn = 0.0;
+    bicep.minOut = 0.0;
+    bicep.pin = "8";
+    bicep.rest = 0.0;
+    bicep.speed = 45.0;
+    bicep.sweepMax = null;
+    bicep.sweepMin = null;
+
+    return config;
+
   }
 
 }
