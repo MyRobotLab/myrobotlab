@@ -16,7 +16,7 @@ import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
-import org.myrobotlab.service.config.InMoov2HeadConfig;
+import org.myrobotlab.service.config.InMoov2ArmConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.interfaces.ServoControl;
@@ -476,7 +476,7 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
 
     ServoConfig omoplate = (ServoConfig) config.get(armConfig.omoplate);
     omoplate.autoDisable = true;
-    // omoplate.controller = "i01.left";
+    omoplate.controller = "i01.left";
     omoplate.clip = true;
     omoplate.idleTimeout = 3000;
     omoplate.inverted = false;
@@ -492,7 +492,7 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
 
     ServoConfig shoulder = (ServoConfig) config.get(armConfig.shoulder);
     shoulder.autoDisable = true;
-    // shoulder.controller = "i01.left";
+    shoulder.controller = "i01.left";
     shoulder.clip = true;
     shoulder.idleTimeout = 3000;
     shoulder.inverted = false;
@@ -508,7 +508,7 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
 
     ServoConfig rotate = (ServoConfig) config.get(armConfig.rotate);
     rotate.autoDisable = true;
-    // rotate.controller = "i01.left";
+    rotate.controller = "i01.left";
     rotate.clip = true;
     rotate.idleTimeout = 3000;
     rotate.inverted = false;
@@ -524,7 +524,7 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
 
     ServoConfig bicep = (ServoConfig) config.get(armConfig.bicep);
     bicep.autoDisable = true;
-    // bicep.controller = "i01.left";
+    bicep.controller = "i01.left";
     bicep.clip = true;
     bicep.idleTimeout = 3000;
     bicep.inverted = false;
