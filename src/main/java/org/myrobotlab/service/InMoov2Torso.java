@@ -38,13 +38,11 @@ public class InMoov2Torso extends Service {
 
   public void startService() {
     super.startService();
-    startPeers();
   }
 
   public void releaseService() {
     try {
       disable();
-      releasePeers();
       super.releaseService();
     } catch (Exception e) {
       error(e);
