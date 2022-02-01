@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -9,6 +10,7 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
@@ -19,6 +21,9 @@ import org.myrobotlab.service.data.LeapHand;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.myrobotlab.service.interfaces.PinArrayListener;
+import org.myrobotlab.service.config.InMoov2HandConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
@@ -99,7 +104,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   public void startService() {
     super.startService();
-    startPeers();
   }
 
   public void bird() {
@@ -168,7 +172,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   public void releaseService() {
     try {
       disable();
-      releasePeers();
       super.releaseService();
     } catch (Exception e) {
       error(e);
@@ -757,6 +760,128 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
       ret.add(controller.getName());
     }
     return ret;
+  }
+
+  static public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+
+    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
+
+    InMoov2HandConfig handConfig = new InMoov2HandConfig();
+
+    // RuntimeConfig runtime = new RuntimeConfig();
+    // runtime.registry = new String[] { controllerName, cvName, tiltName,
+    // panName, pidName, trackingName };
+
+    // set local names and config
+    handConfig.thumb = name + ".thumb";
+    handConfig.index = name + ".index";
+    handConfig.majeure = name + ".majeure";
+    handConfig.ringFinger = name + ".ringFinger";
+
+    // build a config with all peer defaults
+    config.putAll(ServiceInterface.getDefault(handConfig.thumb, "Servo"));
+    config.putAll(ServiceInterface.getDefault(handConfig.index, "Servo"));
+    config.putAll(ServiceInterface.getDefault(handConfig.majeure, "Servo"));
+    config.putAll(ServiceInterface.getDefault(handConfig.ringFinger, "Servo"));
+
+    ServoConfig thumb = (ServoConfig) config.get(handConfig.thumb);
+    thumb.autoDisable = true;
+    thumb.controller = "i01.left";
+    thumb.clip = true;
+    thumb.idleTimeout = 3000;
+    thumb.inverted = false;
+    thumb.maxIn = 180.0;
+    thumb.maxOut = 180.0;
+    thumb.minIn = 0.0;
+    thumb.minOut = 0.0;
+    thumb.pin = "2";
+    thumb.rest = 0.0;
+    thumb.speed = 45.0;
+    thumb.sweepMax = null;
+    thumb.sweepMin = null;
+
+    ServoConfig index = (ServoConfig) config.get(handConfig.index);
+    index.autoDisable = true;
+    index.controller = "i01.left";
+    index.clip = true;
+    index.idleTimeout = 3000;
+    index.inverted = false;
+    index.maxIn = 180.0;
+    index.maxOut = 180.0;
+    index.minIn = 0.0;
+    index.minOut = 0.0;
+    index.pin = "3";
+    index.rest = 0.0;
+    index.speed = 45.0;
+    index.sweepMax = null;
+    index.sweepMin = null;
+
+    ServoConfig majeure = (ServoConfig) config.get(handConfig.majeure);
+    majeure.autoDisable = true;
+    majeure.controller = "i01.left";
+    majeure.clip = true;
+    majeure.idleTimeout = 3000;
+    majeure.inverted = false;
+    majeure.maxIn = 180.0;
+    majeure.maxOut = 180.0;
+    majeure.minIn = 0.0;
+    majeure.minOut = 0.0;
+    majeure.pin = "4";
+    majeure.rest = 0.0;
+    majeure.speed = 45.0;
+    majeure.sweepMax = null;
+    majeure.sweepMin = null;
+
+    ServoConfig ringFinger = (ServoConfig) config.get(handConfig.ringFinger);
+    ringFinger.autoDisable = true;
+    ringFinger.controller = "i01.left";
+    ringFinger.clip = true;
+    ringFinger.idleTimeout = 3000;
+    ringFinger.inverted = false;
+    ringFinger.maxIn = 180.0;
+    ringFinger.maxOut = 180.0;
+    ringFinger.minIn = 0.0;
+    ringFinger.minOut = 0.0;
+    ringFinger.pin = "5";
+    ringFinger.rest = 0.0;
+    ringFinger.speed = 45.0;
+    ringFinger.sweepMax = null;
+    ringFinger.sweepMin = null;
+
+    ServoConfig pinky = (ServoConfig) config.get(handConfig.pinky);
+    pinky.autoDisable = true;
+    pinky.controller = "i01.left";
+    pinky.clip = true;
+    pinky.idleTimeout = 3000;
+    pinky.inverted = false;
+    pinky.maxIn = 180.0;
+    pinky.maxOut = 180.0;
+    pinky.minIn = 0.0;
+    pinky.minOut = 0.0;
+    pinky.pin = "6";
+    pinky.rest = 0.0;
+    pinky.speed = 45.0;
+    pinky.sweepMax = null;
+    pinky.sweepMin = null;
+
+    ServoConfig wrist = (ServoConfig) config.get(handConfig.wrist);
+    wrist.autoDisable = true;
+    wrist.controller = "i01.left";
+    wrist.clip = true;
+    wrist.idleTimeout = 3000;
+    wrist.inverted = false;
+    wrist.maxIn = 180.0;
+    wrist.maxOut = 180.0;
+    wrist.minIn = 0.0;
+    wrist.minOut = 0.0;
+    wrist.pin = "7";
+    wrist.rest = 0.0;
+    wrist.speed = 45.0;
+    wrist.sweepMax = null;
+    wrist.sweepMin = null;
+
+    return config;
+
   }
 
 }
