@@ -11,7 +11,7 @@ public interface PidControl extends NameProvider {
    * if the pid does not exist null is returned
    * 
    * @param key - key of pid params
-   * @return
+   * @return - the data that was deleted
    */
   PidData deletePid(String key);
   
@@ -20,7 +20,7 @@ public interface PidControl extends NameProvider {
    * the way to refer to this controller in subsequent method calls.
    * 
    * @param pid - all pid parameters for this controller
-   * @return
+   * @return the data added
    */
   PidData addPid(PidData pid);
   
@@ -32,7 +32,7 @@ public interface PidControl extends NameProvider {
    * If value cannot be caculated - it isn't published
    * 
    * @param data - contains the input, source, time and computed value of the controller
-   * @return
+   * @return the data pid published
    */
   public default PidOutput publishPid(PidOutput data) {
     return data;
@@ -44,7 +44,7 @@ public interface PidControl extends NameProvider {
    * 
    * @param key - key of pid params
    * @param sensorValue - input data
-   * @return
+   * @return the computed value
    */
   public Double compute(String key, double sensorValue);
 
