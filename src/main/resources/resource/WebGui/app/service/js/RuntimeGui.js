@@ -305,7 +305,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
         let onOK = function() {
             msg.sendTo('runtime', 'setConfigName', $scope.service.configName)
-            msg.sendTo('runtime', 'save', $scope.service.configDir + '/' + $scope.service.configName + "/runtime.yml")
+            msg.sendTo('runtime', 'save')
         }
 
         let onCancel = function() {
