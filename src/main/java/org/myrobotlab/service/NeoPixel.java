@@ -851,6 +851,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
     if (config.brightness != null) {
       setBrightness(config.brightness);
     }
+    
+    if (config.fill) {
+      fillMatrix(red, green, blue);
+    }
 
     return c;
   }
