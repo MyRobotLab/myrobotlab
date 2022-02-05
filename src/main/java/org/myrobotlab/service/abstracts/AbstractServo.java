@@ -376,7 +376,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     controller = sc;
 
     ServoController servoController = (ServoController)Runtime.getService(sc);
-    servoController.attachServoControl(this);
+    if (servoController != null) {
+      servoController.attachServoControl(this);
+    }
     // FIXME - remove !!!
     // FIXME change to broadcast ?
     // TODO: there is a race condition here.. we need to know that

@@ -27,6 +27,7 @@ package org.myrobotlab.service;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.config.ServiceConfig;
@@ -243,16 +244,19 @@ public class Servo extends AbstractServo implements ServoControl {
       idleTimeout = config.idleTimeout;
     }
     pin = config.pin;
-    // rest = config.rest;
-    if (config.rest != null) {
-      rest = config.rest;
-      currentOutputPos = mapper.calcOutput(targetPos);
-      targetPos = rest;
-    }
+
     speed = config.speed;
     sweepMax = config.sweepMax;
     sweepMin = config.sweepMin;
 
+    // rest = config.rest;
+    if (config.rest != null) {
+      rest = config.rest;
+      targetPos = config.rest;
+      currentOutputPos = mapper.calcOutput(config.rest);
+      broadcast("publishEncoderData", new EncoderData(getName(), pin, config.rest, config.rest));
+    }
+    
     if (config.controller != null) {
       try {
         attach(config.controller);
