@@ -2,15 +2,16 @@ package org.myrobotlab.service.config;
 
 public class NeoPixelConfig extends ServiceConfig {
 
-  public Integer pin;
-  public Integer pixelCount;
-  public int pixelDepth;
-  public int speed;
-  public int red;
-  public int green;
-  public int blue;
-  public String controller;
-  public String currentAnimation;
-  public Integer brightness;
+  public Integer pin = null;
+  public Integer pixelCount = null;
+  public int pixelDepth = 3;
+  public int speed = 10;
+  public int red = 0;
+  public int green = 0;
+  public int blue = 0;
+  public String controller = null;
+  public String currentAnimation = null;
+  public Integer brightness = 255;
+  public boolean fill = false;
 
 }
