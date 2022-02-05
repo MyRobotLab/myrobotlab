@@ -2603,8 +2603,10 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       }
     }
 
-    for (String name : config.multiMapped.keySet()) {
-      multiMap(name, config.multiMapped.get(name));
+    if (config.multiMapped != null) {
+      for (String name : config.multiMapped.keySet()) {
+        multiMap(name, config.multiMapped.get(name));
+      }
     }
 
     if (config.cameraLookAt != null) {
