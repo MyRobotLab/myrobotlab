@@ -1395,17 +1395,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
 
     // get reference from registry
-    ServiceInterface sw = registry.get(name);
-    if (sw == null) {
+    ServiceInterface si = registry.get(name);
+    if (si == null) {
       log.warn("cannot release {} - not in registry");
       return false;
     }
-
+    
     // FIXME - TODO invoke and or blocking on preRelease - Future
 
     // send msg to service to self terminate
-    if (sw.isLocal()) {
-      sw.releaseService();
+    if (si.isLocal()) {
+      si.releaseService();
     } else {
       if (runtime != null) {
         runtime.send(name, "releaseService");
@@ -1413,7 +1413,22 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
 
     unregister(name);
-
+    
+    // REMOVE PEERS BASED ON DEFAULTS BEGIN
+    LinkedHashMap<String, ServiceConfig> config = ServiceInterface.getDefault(inName, si.getType());
+    
+    List<String> reverse = new ArrayList<String>(config.keySet());
+    Collections.reverse(reverse);
+    
+    if (config != null) {
+      for (String peerName: reverse) {
+        if (peerName.equals(inName)) {
+          continue;
+        }
+        release(peerName);
+      }
+    }
+    // REMOVE PEERS BASED ON DEFAULTS END
     return true;
   }
 
