@@ -777,16 +777,27 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     handConfig.index = name + ".index";
     handConfig.majeure = name + ".majeure";
     handConfig.ringFinger = name + ".ringFinger";
+    handConfig.pinky = name + ".pinky";
+    handConfig.wrist = name + ".wrist";
+    String cname = null;
+    
+    if (name.endsWith("leftHand")) {
+      cname = "i01.left"; // FIXME - still terrible to have a i01 here :( 
+    } else if (name.endsWith("rightHand")) {
+      cname = "i01.right"; // FIXME - still terrible to have a i01 here :( 
+    }
 
     // build a config with all peer defaults
     config.putAll(ServiceInterface.getDefault(handConfig.thumb, "Servo"));
     config.putAll(ServiceInterface.getDefault(handConfig.index, "Servo"));
     config.putAll(ServiceInterface.getDefault(handConfig.majeure, "Servo"));
     config.putAll(ServiceInterface.getDefault(handConfig.ringFinger, "Servo"));
+    config.putAll(ServiceInterface.getDefault(handConfig.pinky, "Servo"));
+    config.putAll(ServiceInterface.getDefault(handConfig.wrist, "Servo"));
 
     ServoConfig thumb = (ServoConfig) config.get(handConfig.thumb);
     thumb.autoDisable = true;
-    thumb.controller = "i01.left";
+    thumb.controller = cname;
     thumb.clip = true;
     thumb.idleTimeout = 3000;
     thumb.inverted = false;
@@ -802,7 +813,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
     ServoConfig index = (ServoConfig) config.get(handConfig.index);
     index.autoDisable = true;
-    index.controller = "i01.left";
+    index.controller = cname;
     index.clip = true;
     index.idleTimeout = 3000;
     index.inverted = false;
@@ -818,7 +829,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
     ServoConfig majeure = (ServoConfig) config.get(handConfig.majeure);
     majeure.autoDisable = true;
-    majeure.controller = "i01.left";
+    majeure.controller = cname;
     majeure.clip = true;
     majeure.idleTimeout = 3000;
     majeure.inverted = false;
@@ -834,7 +845,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
     ServoConfig ringFinger = (ServoConfig) config.get(handConfig.ringFinger);
     ringFinger.autoDisable = true;
-    ringFinger.controller = "i01.left";
+    ringFinger.controller = cname;
     ringFinger.clip = true;
     ringFinger.idleTimeout = 3000;
     ringFinger.inverted = false;
@@ -850,7 +861,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
     ServoConfig pinky = (ServoConfig) config.get(handConfig.pinky);
     pinky.autoDisable = true;
-    pinky.controller = "i01.left";
+    pinky.controller = cname;
     pinky.clip = true;
     pinky.idleTimeout = 3000;
     pinky.inverted = false;
@@ -866,7 +877,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
     ServoConfig wrist = (ServoConfig) config.get(handConfig.wrist);
     wrist.autoDisable = true;
-    wrist.controller = "i01.left";
+    wrist.controller = cname;
     wrist.clip = true;
     wrist.idleTimeout = 3000;
     wrist.inverted = false;
