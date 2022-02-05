@@ -4601,6 +4601,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     config.sampleRate = sampleRateHz;
     config.bus = deviceBus;
     config.address = deviceAddress;
+    config.controller = controllerName;
     return config;
   }
 
