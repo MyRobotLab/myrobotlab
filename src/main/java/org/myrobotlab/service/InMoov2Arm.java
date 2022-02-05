@@ -461,7 +461,13 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     // RuntimeConfig runtime = new RuntimeConfig();
     // runtime.registry = new String[] { controllerName, cvName, tiltName,
     // panName, pidName, trackingName };
-
+    String cname = null;
+    if (name.endsWith("leftArm")) {
+      cname = "i01.left"; // FIXME - still terrible to have a i01 here :( 
+    } else if (name.endsWith("rightArm")) {
+      cname = "i01.right"; // FIXME - still terrible to have a i01 here :( 
+    }
+    
     // set local names and config
     armConfig.omoplate = name + ".omoplate";
     armConfig.shoulder = name + ".shoulder";
@@ -476,7 +482,7 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
 
     ServoConfig omoplate = (ServoConfig) config.get(armConfig.omoplate);
     omoplate.autoDisable = true;
-    omoplate.controller = "i01.left";
+    omoplate.controller = cname;
     omoplate.clip = true;
     omoplate.idleTimeout = 3000;
     omoplate.inverted = false;
@@ -492,7 +498,7 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
 
     ServoConfig shoulder = (ServoConfig) config.get(armConfig.shoulder);
     shoulder.autoDisable = true;
-    shoulder.controller = "i01.left";
+    shoulder.controller = cname;
     shoulder.clip = true;
     shoulder.idleTimeout = 3000;
     shoulder.inverted = false;
@@ -508,7 +514,7 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
 
     ServoConfig rotate = (ServoConfig) config.get(armConfig.rotate);
     rotate.autoDisable = true;
-    rotate.controller = "i01.left";
+    rotate.controller = cname;
     rotate.clip = true;
     rotate.idleTimeout = 3000;
     rotate.inverted = false;
@@ -524,7 +530,7 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
 
     ServoConfig bicep = (ServoConfig) config.get(armConfig.bicep);
     bicep.autoDisable = true;
-    bicep.controller = "i01.left";
+    bicep.controller = cname;
     bicep.clip = true;
     bicep.idleTimeout = 3000;
     bicep.inverted = false;
