@@ -446,6 +446,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         log.debug("thread context parent " + Thread.currentThread().getContextClassLoader().getParent().getClass().getCanonicalName());
       }
 
+      // FIXME - error if deps are missing - prompt license
+      // require restart !
       if (!name.equals(RUNTIME_NAME)) {
         // runtime cannot have dependencies - all other services may
         Repo repo = Runtime.getInstance().getRepo();
@@ -482,6 +484,37 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         // runtime.addListener("stopped", name);
         // runtime.addListener("released", name);
       }
+
+      // LOADING BEGIN
+      Runtime runtime = Runtime.getInstance();
+      String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
+      File check = new File(filename);
+      if (check.exists()) {
+        // this loads a file from the file system - for the current config name
+        load(name);
+      } else {
+        log.info("config for {} - {} does not exist loading default", name, filename);
+        // multi-service definition possible with getDefault
+        // we need to spin through them in order - create them and apply config
+        LinkedHashMap<String, ServiceConfig> configSet = ServiceInterface.getDefault(name, type);
+        if (configSet != null) {
+          for (String peerName : configSet.keySet()) {
+            ServiceConfig peerConfig = configSet.get(peerName);
+            // BELOW BECOMES A RECURSIVE CALL SPAWNING PEERS
+            ServiceInterface peerIntf = create(peerName, peerConfig.type); 
+            
+            peerIntf.load(peerConfig);
+            // IS THIS CORRECT ?!?!? - the parent service was only told to be
+            // created,
+            // yet we are creating loading and starting peer services ?!?!?!?
+            peerIntf.startService();
+          }
+
+          ServiceConfig c = configSet.get(name);
+          si.load(c);
+        }
+      }
+      // LOADING END
 
       // initialization of the new service - it gets local registery events
       // for pre-existing registered? created/started - NO !!!
@@ -591,6 +624,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
           runtime = (Runtime) createService(RUNTIME_NAME, "Runtime", Platform.getLocalInstance().getId());
           runtime.startService();
+          // platform virtual is higher priority than service virtual
+          Runtime.setAllVirtual(Platform.isVirtual());
 
           // setting the singleton security
           Security.getInstance();
@@ -1872,18 +1907,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       si = create(name, type);
       if (si != null) {
         si.startService();
-      }
-
-      Runtime runtime = Runtime.getInstance();
-      String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
-      File check = new File(filename);
-      if (check.exists()) {
-        // this loads a file from the file system - for the current config name
-        load(name);
-      } else {
-        log.info("config for {} - {} does not exist loading default", name, filename);
-        ServiceConfig c = ServiceInterface.getDefault(name, type).get(name);
-        si.load(c);
       }
 
     } catch (Exception e) {
@@ -3621,8 +3644,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     RuntimeConfig config = (RuntimeConfig) c;
     setLocale(config.locale);
     info("setting locale to %s", config.locale);
-    setAllVirtual(config.virtual);
-    info("setting virtual to %b", config.virtual);
+    if (config.virtual != null) {
+      info("setting virtual to %b", config.virtual);
+      setAllVirtual(config.virtual);
+    }
 
     if (config.enableCli) {
       startInteractiveMode();
@@ -3730,20 +3755,20 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
   }
 
-  public boolean save() {
-    return save(null);
-  }
-
   /**
-   * Save runtime yml as well as all services configuration is saved in the
-   * configDir
+   * Saves the current runtime, all services and all configuration for each
+   * service in the current "config name", if the config name does not exist
+   * will error
    */
-  public boolean save(String filename) {
+  public boolean save() {
     try {
 
-      if (filename == null) {
-        filename = Runtime.getInstance().getConfigDir() + fs + getConfigName() + fs + getName() + ".yml";
+      if (getConfigName() == null || getConfigName().trim().length() == 0) {
+        error("cannot save config - set config name first");
+        return false;
       }
+
+      String filename = Runtime.getInstance().getConfigDir() + fs + getConfigName() + fs + getName() + ".yml";
 
       String format = filename.substring(filename.lastIndexOf(".") + 1);
       ServiceConfig config = getConfig();
@@ -3774,7 +3799,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   public void setConfigName(String configName) {
-    this.configName = configName;
+    if (configName == null || configName.trim().length() == 0) {
+      error("config name cannot be empty");
+      return;
+    }
+    this.configName = configName.trim();
   }
 
   public String getConfigName() {
@@ -3865,26 +3894,29 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
     return null;
   }
-  
+
   /**
    * Helper method - returns if a service is started
-   * @param name - name of service
+   * 
+   * @param name
+   *          - name of service
    * @return - true if started
    */
- static public boolean isStarted(String name) {
+  static public boolean isStarted(String name) {
 
     if (registry.containsKey(name)) {
       ServiceInterface si = registry.get(name);
       return si.isRunning();
     }
-    
-    return false;
- }
 
-  
+    return false;
+  }
+
   /**
    * Saves a "sane" set of embedded defaults constructed for this service
-   * @param name - name of service
+   * 
+   * @param name
+   *          - name of service
    * @param className
    *          - the class whos defaults will be saved
    * @return - returns the set of configuration sets successfully saved
@@ -3969,7 +4001,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       log.error("saveDefault threw", e);
     }
 
+    if (runtime != null) {
+      runtime.invoke("publishConfigList");
+    }
+
     return savedPaths;
   }
+
+  // public void loadDefault(String name) {
+  // xxx
+  // }
 
 }
