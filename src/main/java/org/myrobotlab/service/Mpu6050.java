@@ -4620,6 +4620,14 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     if (config.address != null) {
       setDeviceAddress(config.address);
     }
+    
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch (Exception e) {
+        log.error("attach threw", e);
+      }
+    }
     return c;
   }
 
