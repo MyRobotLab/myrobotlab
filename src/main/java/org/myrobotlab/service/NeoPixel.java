@@ -89,7 +89,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   public void releaseService() {
     super.releaseService();
-    animationRunner.stop();
+    clear();
   }
 
   public static class Pixel {
