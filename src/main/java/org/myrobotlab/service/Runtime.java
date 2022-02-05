@@ -624,6 +624,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
           runtime = (Runtime) createService(RUNTIME_NAME, "Runtime", Platform.getLocalInstance().getId());
           runtime.startService();
+          // platform virtual is higher priority than service virtual
+          Runtime.setAllVirtual(Platform.isVirtual());
 
           // setting the singleton security
           Security.getInstance();
@@ -3642,8 +3644,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     RuntimeConfig config = (RuntimeConfig) c;
     setLocale(config.locale);
     info("setting locale to %s", config.locale);
-    setAllVirtual(config.virtual);
-    info("setting virtual to %b", config.virtual);
+    if (config.virtual != null) {
+      info("setting virtual to %b", config.virtual);
+      setAllVirtual(config.virtual);
+    }
 
     if (config.enableCli) {
       startInteractiveMode();
