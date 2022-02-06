@@ -42,8 +42,6 @@ import org.myrobotlab.service.config.NeoPixelConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
-import org.myrobotlab.service.interfaces.SpeechListener;
-import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
 public class NeoPixel extends Service implements NeoPixelControl {
@@ -260,11 +258,6 @@ public class NeoPixel extends Service implements NeoPixelControl {
   @Override
   public void attach(Attachable service) throws Exception {
 
-    if (SpeechSynthesis.class.isAssignableFrom(service.getClass())) {
-      attachSpeechSynthesis((SpeechSynthesis) service);
-      return;
-    }
-
     if (NeoPixelController.class.isAssignableFrom(service.getClass())) {
       attachNeoPixelController((NeoPixelController) service);
       return;
@@ -303,12 +296,13 @@ public class NeoPixel extends Service implements NeoPixelControl {
     return instance.getName().equals(controller);
   }
 
-  public void attachSpeechSynthesis(SpeechSynthesis mouth) {
-    mouth.attachSpeechListener(this.getName());
-  }
-
   @Override
   public void clear() {
+    if (controller == null) {
+      error("%s cannot clear - not attached to controller", getName());
+      return;
+    }
+
     // stop java animations
     animationRunner.stop();
     // stop on board controller animations
@@ -851,7 +845,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     if (config.brightness != null) {
       setBrightness(config.brightness);
     }
-    
+
     if (config.fill) {
       fillMatrix(red, green, blue);
     }
