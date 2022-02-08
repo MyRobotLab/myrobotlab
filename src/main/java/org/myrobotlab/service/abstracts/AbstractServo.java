@@ -469,10 +469,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     setSpeed((Double)null);
   }
   
-  public void setMaxSpeed() {
-    setSpeed((Double)null);
-  }
-
   @Override
   public boolean isAutoDisable() {
     return autoDisable;
