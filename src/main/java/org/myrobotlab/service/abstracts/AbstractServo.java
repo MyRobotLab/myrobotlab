@@ -464,7 +464,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // broadcastState();
   }
 
+  @Deprecated /* use setMaxSpeed */
   public void fullSpeed() {
+    setSpeed((Double)null);
+  }
+  
+  public void setMaxSpeed() {
     setSpeed((Double)null);
   }
 
@@ -1097,6 +1102,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     }
     return null;
   }
+  
+  
 
   @Override
   public void attachServoControlListener(String name) {

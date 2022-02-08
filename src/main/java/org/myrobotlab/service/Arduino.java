@@ -1844,7 +1844,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   // > servoDetachPin/deviceId
   public void onServoDisable(String servoName) {
     Integer id = getDeviceId(servoName);
-    if (id != null) {
+    if (id != null && msg != null) {
       msg.servoDetachPin(id);
     }
   }

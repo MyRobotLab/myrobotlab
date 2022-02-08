@@ -73,7 +73,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     try {
 
       InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
-      i01.startRightHand("COM15");
+      i01.startRightHand();
 
       ServoController controller = (ServoController) Runtime.getService("i01.right");
       // arduino.pinMode(13, ServoController.OUTPUT);
