@@ -199,9 +199,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     super(n, id);
 
     // config - if saved is loaded - if not default to uno
-    if (board == null) {
-      board = "uno";
-    }
+//    if (board == null) {
+//      board = "uno";
+//    }
 
     // board is set
     // now we can create a pin list
@@ -1012,6 +1012,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     // 2 board types have been identified (perhaps this is based on
     // processor?)
     // mega-like & uno like
+    if (board == null) {
+      return new ArrayList<PinDefinition>();
+    }
 
     // if no change - just return the values
     if ((addressIndex != null && board.contains("mega") && addressIndex.size() == 70) || (addressIndex != null && !board.contains("mega") && addressIndex.size() == 20)) {
