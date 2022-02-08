@@ -516,16 +516,6 @@ public class NeoPixel extends Service implements NeoPixelControl {
     return red;
   }
 
-  @Override
-  public void onStarted(String name) {
-    refreshControllers();
-  }
-
-  @Override
-  public void onReleased(String name) {
-    refreshControllers();
-  }
-
   public void playAnimation(String animation) {
 
     if (animations.containsKey(animation)) {
