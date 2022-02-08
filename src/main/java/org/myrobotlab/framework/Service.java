@@ -1989,7 +1989,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       isRunning = true;
       Runtime runtime = Runtime.getInstance();
       if (runtime != null) {
-        runtime.broadcast("started", getFullName());
+        runtime.broadcast("started", getName()); //getFullName()); - removed fullname
       }
 
     } else {
@@ -2753,32 +2753,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return serviceClass.equals(clazz);
   }
-
-  @Override
-  public void onRegistered(Registration registration) {
-    // service life-cycle callback - override if interested in these events
-  }
-
-  @Override
-  public void onCreated(String fullname) {
-    // service life-cycle callback - override if interested in these events
-  }
-
-  @Override
-  public void onStarted(String fullname) {
-    // service life-cycle callback - override if interested in these events
-  }
-
-  @Override
-  public void onStopped(String fullname) {
-    // service life-cycle callback - override if interested in these events
-  }
-
-  @Override
-  public void onReleased(String fullname) {
-    // service life-cycle callback - override if interested in these events
-  }
-
 
   @Override
   public int compareTo(ServiceInterface o) {

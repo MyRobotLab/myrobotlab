@@ -14,10 +14,10 @@ import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
+
 import org.slf4j.Logger;
 
-public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker,
+public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker,
     StatePublisher, StatusPublisher, ServiceStatus, TaskManager, Attachable, Comparable<ServiceInterface> {
 
   // does this work ?

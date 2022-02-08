@@ -1445,7 +1445,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     // you have to send released before removing from registry
     if (runtime != null) {
-      runtime.broadcast("released", name); // <- DO NOT CHANGE THIS IS CORRECT
+      runtime.broadcast("released", inName); // <- DO NOT CHANGE THIS IS CORRECT
                                            // !!
       // it should be FULLNAME !
       // runtime.broadcast("released", inName);
@@ -3172,6 +3172,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   @Override
   public String started(String serviceName) {
+    // if this is to be used as a callback in Python
+    // users typically would want simple name ... not "fullname"
+    
+    
     return serviceName;
   }
 

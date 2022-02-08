@@ -13,6 +13,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
@@ -22,6 +23,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Script;
+import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.python.core.Py;
 import org.python.core.PyException;
@@ -45,7 +47,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class Python extends Service {
+public class Python extends Service implements ServiceLifeCycleListener {
 
   /**
    * this thread handles all callbacks to Python process all input and sets msg
@@ -724,6 +726,11 @@ public class Python extends Service {
     registerScript += String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(s.getName()), s.getName());
     exec(registerScript, false);
   }
+  
+  public void onReleased(String serviceName) {
+    String registerScript =  String.format("del %s\n",CodecUtils.getSafeReferenceName(serviceName));
+    exec(registerScript, false);
+  }
 
   /**
    * preProcessHook is used to intercept messages and process or route them
@@ -870,6 +877,24 @@ public class Python extends Service {
       log.error("main threw", e);
     }
 
+  }
+
+  @Override
+  public void onCreated(String fullname) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void onRegistered(Registration registration) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void onStopped(String fullname) {
+    // TODO Auto-generated method stub
+    
   }
 
 }
