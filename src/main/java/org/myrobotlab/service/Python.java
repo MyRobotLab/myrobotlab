@@ -24,6 +24,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Script;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
+import org.myrobotlab.service.interfaces.ServiceLifeCyclePublisher;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.python.core.Py;
 import org.python.core.PyException;
@@ -707,6 +708,7 @@ public class Python extends Service implements ServiceLifeCycleListener {
     openScript(filename, data);
   }
 
+  @Override
   public void onStarted(String serviceName) {
     ServiceInterface s = Runtime.getService(serviceName);
     if (s == null) {
@@ -727,6 +729,7 @@ public class Python extends Service implements ServiceLifeCycleListener {
     exec(registerScript, false);
   }
   
+  @Override
   public void onReleased(String serviceName) {
     String registerScript =  String.format("del %s\n",CodecUtils.getSafeReferenceName(serviceName));
     exec(registerScript, false);
@@ -806,7 +809,7 @@ public class Python extends Service implements ServiceLifeCycleListener {
       onStarted(s.getName());
     }
     // register runtime life cycle events for other services
-    Runtime.getInstance().subscribeToLifeCycleEvents(getName());
+    Runtime.getInstance().attachServiceLifeCycleListener(getName());
   }
 
   @Override

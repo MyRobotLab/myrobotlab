@@ -739,8 +739,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   public void startService() {
     super.startService();
     refreshControllers();
-    Runtime runtime = Runtime.getInstance();
-    runtime.subscribeToLifeCycleEvents(getName());
+    Runtime.getInstance().attachServiceLifeCycleListener(getName());
   }
 
   public void setColor(int red, int green, int blue) {

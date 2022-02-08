@@ -1080,7 +1080,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   public void startService() {
     super.startService();
-    Runtime.getInstance().subscribeToLifeCycleEvents(getName());
+    Runtime.getInstance().attachServiceLifeCycleListener(getName());
   }
 
   @Override
