@@ -234,7 +234,7 @@ public class Random extends Service {
       m.maxIntervalMs = msg.maxIntervalMs;
       m.minIntervalMs = msg.minIntervalMs;
       m.data = msg.data;
-      config.addRandom.put(key, m);
+      config.randomMessages.put(key, m);
     }
 
     return config;
@@ -246,8 +246,8 @@ public class Random extends Service {
     enabled = config.enabled;
 
     try {
-      for (String key : config.addRandom.keySet()) {
-        RandomMessageConfig msgc = config.addRandom.get(key);
+      for (String key : config.randomMessages.keySet()) {
+        RandomMessageConfig msgc = config.randomMessages.get(key);
         addRandom(msgc.minIntervalMs, msgc.maxIntervalMs, key.substring(0, key.lastIndexOf(".")), key.substring(key.lastIndexOf(".") + 1), msgc.data);
       }
     } catch (Exception e) {
@@ -343,10 +343,10 @@ public class Random extends Service {
       random.addRandom(200, 1000, "i01", "setHeadSpeed", 8, 20, 8, 20, 8, 20);
       random.addRandom(200, 1000, "i01", "moveHead", 65, 115, 65, 115, 65, 115);
 
-      random.addRandom(3000, 8000, "i01", "setLeftHandSpeed", 8, 25, 8, 25, 8, 25, 8, 25, 8, 25, 8, 25);
-      random.addRandom(3000, 8000, "i01", "setRightHandSpeed", 8, 25, 8, 25, 8, 25, 8, 25, 8, 25, 8, 25);
+      // random.addRandom(3000, 8000, "i01", "setLeftHandSpeed", 8, 25, 8, 25, 8, 25, 8, 25, 8, 25, 8, 25);
+      // random.addRandom(3000, 8000, "i01", "setRightHandSpeed", 8, 25, 8, 25, 8, 25, 8, 25, 8, 25, 8, 25);
 
-      random.addRandom(200, 1000, "i01", "moveHead", 65, 115, 65, 115, 65, 115);
+      // random.addRandom(200, 1000, "i01", "moveHead", 65, 115, 65, 115, 65, 115);
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
