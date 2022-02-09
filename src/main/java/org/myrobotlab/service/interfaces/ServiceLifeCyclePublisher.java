@@ -21,6 +21,14 @@ public interface ServiceLifeCyclePublisher extends NameProvider {
   public String released(String name) ;
   
   // public void attachServiceLifeCycleListener(ServiceLifeCyclePublisher service);
-  public void attachServiceLifeCycleListener(String name);
+  default public void attachServiceLifeCycleListener(String name) {
+      addListener("registered", name);
+      addListener("created", name);
+      addListener("started", name);
+      addListener("stopped", name);
+      addListener("released", name);
+  }
+  
+  public void addListener(String localTopic, String otherService);
 
 }

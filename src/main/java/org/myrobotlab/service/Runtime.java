@@ -3830,16 +3830,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
 
-  @Override
-  public void attachServiceLifeCycleListener(String name) {
-    addListener("registered", name);
-    addListener("created", name);
-    addListener("started", name);
-    addListener("stopped", name);
-    addListener("released", name);
-  }
-
-
   /**
    * static wrapper around setConfigName - so it can be used in the same way as
    * all the other common static service methods
