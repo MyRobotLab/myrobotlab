@@ -410,10 +410,12 @@ public class Tracking extends Service {
 
       LoggingFactory.init(Level.INFO);
 
-      Runtime.saveDefault("Tracking");
+      //Runtime.saveDefault("Tracking");
 
+      Runtime.start("intro", "Intro");
       // Tracking track = (Tracking) Runtime.start("track", "Tracking");
       Runtime.start("webgui", "WebGui");
+      
       boolean done = true;
       if (done) {
         return;

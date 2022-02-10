@@ -135,11 +135,10 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     // input limits
     // "bottom" half of the mapper will be set by the controller
     mapper.map(min, max, -1.0, 1.0);
-    Runtime.getInstance().subscribeToLifeCycleEvents(getName());
+    Runtime.getInstance().attachServiceLifeCycleListener(getName());
     refreshControllers();
   }
 
-  @Override
   public void onRegistered(Registration s) {
     if (s.hasInterface(MotorController.class)) {
       controllers.add(s.getName());
@@ -147,7 +146,6 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     }
   }
 
-  @Override
   public void onReleased(String s) {
     if (controllers.contains(s)) {
       controllers.remove(s);

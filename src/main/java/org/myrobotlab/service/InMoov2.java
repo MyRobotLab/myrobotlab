@@ -174,7 +174,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     super.startService();
     Runtime runtime = Runtime.getInstance();
     // FIXME - shouldn't need this anymore
-    runtime.subscribeToLifeCycleEvents(getName());
+    Runtime.getInstance().attachServiceLifeCycleListener(getName());
 
     try {
       // copy config if it doesn't already exist

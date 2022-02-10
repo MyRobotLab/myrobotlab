@@ -82,7 +82,7 @@ import org.myrobotlab.service.interfaces.ConnectionManager;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.RemoteMessageHandler;
-import org.myrobotlab.service.interfaces.ServiceLifeCycle;
+import org.myrobotlab.service.interfaces.ServiceLifeCyclePublisher;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
@@ -114,7 +114,7 @@ import picocli.CommandLine;
  * check for 64 bit OS and 32 bit JVM is is64bit()
  *
  */
-public class Runtime extends Service implements MessageListener, ServiceLifeCycle, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider {
+public class Runtime extends Service implements MessageListener, ServiceLifeCyclePublisher, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider {
   final static private long serialVersionUID = 1L;
 
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
@@ -1445,7 +1445,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     // you have to send released before removing from registry
     if (runtime != null) {
-      runtime.broadcast("released", name); // <- DO NOT CHANGE THIS IS CORRECT
+      runtime.broadcast("released", inName); // <- DO NOT CHANGE THIS IS CORRECT
                                            // !!
       // it should be FULLNAME !
       // runtime.broadcast("released", inName);
@@ -2294,8 +2294,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * this event is triggered
    * 
    */
-  public String released(String serviceName) {
-    return serviceName;
+  public String released(String name) {
+    return name;
   }
 
   /**
@@ -3166,18 +3166,22 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   @Override
-  public String created(String serviceName) {
-    return serviceName;
+  public String created(String name) {
+    return name;
   }
 
   @Override
-  public String started(String serviceName) {
-    return serviceName;
+  public String started(String name) {
+    // if this is to be used as a callback in Python
+    // users typically would want simple name ... not "fullname"
+    
+    
+    return name;
   }
 
   @Override
-  public String stopped(String serviceName) {
-    return serviceName;
+  public String stopped(String name) {
+    return name;
   }
 
   public static void setPeer(String fullKey, String actualName, String serviceType) {
@@ -3825,13 +3829,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return configName;
   }
 
-  public void subscribeToLifeCycleEvents(String name) {
-    addListener("registered", name);
-    addListener("created", name);
-    addListener("started", name);
-    addListener("stopped", name);
-    addListener("released", name);
-  }
 
   /**
    * static wrapper around setConfigName - so it can be used in the same way as
@@ -4022,9 +4019,5 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     return savedPaths;
   }
-
-  // public void loadDefault(String name) {
-  // xxx
-  // }
 
 }
