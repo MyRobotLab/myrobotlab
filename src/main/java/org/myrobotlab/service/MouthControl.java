@@ -61,6 +61,7 @@ public class MouthControl extends Service implements SpeechListener {
   public void attach(Attachable attachable) {
     if (attachable instanceof SpeechSynthesis) {
       ((SpeechSynthesis) attachable).attachSpeechListener(getName());
+      mouth = attachable.getName();
     } else if (attachable instanceof ServoControl) {
       jaw = attachable.getName();
       broadcastState();
@@ -76,6 +77,10 @@ public class MouthControl extends Service implements SpeechListener {
   public void detach(Attachable attachable) {
     if (attachable instanceof SpeechSynthesis) {
       ((SpeechSynthesis) attachable).detachSpeechListener(getName());
+      if (mouth != null) {
+        send(mouth, "detach", getName());
+      }
+      mouth = null;
     } else if (attachable instanceof ServoControl) {
       // jaw = null;
       jaw = null;
