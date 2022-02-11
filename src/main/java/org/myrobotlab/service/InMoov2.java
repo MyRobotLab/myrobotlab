@@ -1460,7 +1460,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
           && !chatBot.getPredicate("default", "firstinit").equals("started")) {
         chatBot.getResponse("FIRST_INIT");
       } else {
-        chatBot.startSession(chatBot.getPredicate("lastUsername"));
+        chatBot.startSession(chatBot.getPredicate("default", "lastUsername"));
         chatBot.getResponse("WAKE_UP");
       }
 
