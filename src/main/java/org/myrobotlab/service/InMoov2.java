@@ -1441,7 +1441,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       chatBot.setPredicate("null", "");
       // load last user session
       if (!chatBot.getPredicate("name").isEmpty()) {
-        if (chatBot.getPredicate("lastUsername").isEmpty() || chatBot.getPredicate("lastUsername").equals("unknown")) {
+        if (chatBot.getPredicate("lastUsername").isEmpty() || chatBot.getPredicate("lastUsername").equals("unknown") || chatBot.getPredicate("lastUsername").equals("default")) {
           chatBot.setPredicate("lastUsername", chatBot.getPredicate("name"));
         }
       }
