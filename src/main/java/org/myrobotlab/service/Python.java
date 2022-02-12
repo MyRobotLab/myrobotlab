@@ -345,11 +345,6 @@ public class Python extends Service implements ServiceLifeCycleListener {
 
     localPythonFiles = getFileListing();
 
-    log.info("creating module directory pythonModules");
-    new File("pythonModules").mkdir();
-
-    //////// was in startService
-
     createPythonInterpreter();
     attachPythonConsole();
 

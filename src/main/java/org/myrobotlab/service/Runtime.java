@@ -160,7 +160,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   protected final Set<String> serviceTypes = new HashSet<>();
 
-  protected String configName = "default";
+  // protected String configName = "default";
+  protected String configName = null;
 
   /**
    * The one config directory where all config is managed the {default} is the
@@ -487,31 +488,41 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // LOADING BEGIN
       Runtime runtime = Runtime.getInstance();
-      String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
-      File check = new File(filename);
-      if (check.exists()) {
-        // this loads a file from the file system - for the current config name
-        load(name);
-      } else {
-        log.info("config for {} - {} does not exist loading default", name, filename);
-        // multi-service definition possible with getDefault
-        // we need to spin through them in order - create them and apply config
-        LinkedHashMap<String, ServiceConfig> configSet = ServiceInterface.getDefault(name, type);
-        if (configSet != null) {
-          for (String peerName : configSet.keySet()) {
-            ServiceConfig peerConfig = configSet.get(peerName);
-            // BELOW BECOMES A RECURSIVE CALL SPAWNING PEERS
-            ServiceInterface peerIntf = create(peerName, peerConfig.type); 
-            
-            peerIntf.load(peerConfig);
-            // IS THIS CORRECT ?!?!? - the parent service was only told to be
-            // created,
-            // yet we are creating loading and starting peer services ?!?!?!?
-            peerIntf.startService();
-          }
+      if (runtime.getConfigName() != null) {
+        String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
+        File check = new File(filename);
+        if (check.exists()) {
+          // this loads a file from the file system - for the current config
+          // name
+          load(name);
+        } else {
+          log.info("config for {} - {} does not exist loading default", name, filename);
+          // multi-service definition possible with getDefault
+          // we need to spin through them in order - create them and apply
+          // config
+          LinkedHashMap<String, ServiceConfig> configSet = ServiceInterface.getDefault(name, type);
+          if (configSet != null) {
+            for (String peerName : configSet.keySet()) {
+              ServiceConfig peerConfig = configSet.get(peerName);
+              // BELOW BECOMES A RECURSIVE CALL SPAWNING PEERS
+              ServiceInterface peerIntf = create(peerName, peerConfig.type);
 
-          ServiceConfig c = configSet.get(name);
-          si.load(c);
+              peerIntf.load(peerConfig);
+              // IS THIS CORRECT ?!?!? - the parent service was only told to be
+              // created,
+              // yet we are creating loading and starting peer services ?!?!?!?
+              if (!peerName.equals(name)) {
+                // I don't know if this is correct - we were asked to only
+                // create
+                // the service yet here we are both creating and starting the
+                // peers in config
+                peerIntf.startService();
+              }
+            }
+
+            ServiceConfig c = configSet.get(name);
+            si.load(c);
+          }
         }
       }
       // LOADING END
@@ -1400,7 +1411,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       log.warn("cannot release {} - not in registry");
       return false;
     }
-    
+
     // FIXME - TODO invoke and or blocking on preRelease - Future
 
     // send msg to service to self terminate
@@ -1413,15 +1424,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
 
     unregister(name);
-    
+
     // REMOVE PEERS BASED ON DEFAULTS BEGIN
     LinkedHashMap<String, ServiceConfig> config = ServiceInterface.getDefault(inName, si.getType());
-    
+
     List<String> reverse = new ArrayList<String>(config.keySet());
     Collections.reverse(reverse);
-    
+
     if (config != null) {
-      for (String peerName: reverse) {
+      for (String peerName : reverse) {
         if (peerName.equals(inName)) {
           continue;
         }
@@ -1446,7 +1457,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // you have to send released before removing from registry
     if (runtime != null) {
       runtime.broadcast("released", inName); // <- DO NOT CHANGE THIS IS CORRECT
-                                           // !!
+      // !!
       // it should be FULLNAME !
       // runtime.broadcast("released", inName);
       String type = sw.getType();
@@ -3174,8 +3185,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public String started(String name) {
     // if this is to be used as a callback in Python
     // users typically would want simple name ... not "fullname"
-    
-    
+
     return name;
   }
 
@@ -3365,18 +3375,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         return;
       }
 
-      // if a you specify a config file it becomes the "base" of configuration
-      // inline flags will still override values
-      if (options.config != null) {
-        try {
-          log.info("loading options {}", options.config);
-          options = (CmdOptions) CodecUtils.fromJson(FileIO.toString(options.config), CmdOptions.class);
-        } catch (Exception e) {
-          log.error("config file {} was specified but could not be read", options.config);
-          shutdown();
-        }
-      }
-
       // id always required
       if (options.id == null) {
         options.id = NameGenerator.getName();
@@ -3452,6 +3450,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         // initialize
         // FIXME - use peer ?
         Updater.main(args);
+      }
+      
+      // if a you specify a config file it becomes the "base" of configuration
+      // inline flags will still override values
+      if (options.config != null) {
+        // if this is a valid config, it will load 
+        Runtime.getInstance();
       }
 
     } catch (Exception e) {
@@ -3828,7 +3833,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public String getConfigName() {
     return configName;
   }
-
 
   /**
    * static wrapper around setConfigName - so it can be used in the same way as
