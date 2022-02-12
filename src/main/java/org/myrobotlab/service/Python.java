@@ -206,6 +206,8 @@ public class Python extends Service implements ServiceLifeCycleListener {
 
   final List<String> startScripts = new ArrayList<>();
 
+  final List<String> stopScripts = new ArrayList<>();
+
   /**
    * Any script executed is put in a openedScripts map... Helpful in IDE
    * displays
@@ -729,7 +731,7 @@ public class Python extends Service implements ServiceLifeCycleListener {
 
   @Override
   public void onReleased(String serviceName) {
-    String registerScript = String.format("del %s\n", CodecUtils.getSafeReferenceName(serviceName));
+    String registerScript = String.format("%s = None\n", CodecUtils.getSafeReferenceName(serviceName));
     exec(registerScript, false);
   }
 
@@ -811,7 +813,12 @@ public class Python extends Service implements ServiceLifeCycleListener {
 
     // run start scripts if there are any
     for (String script : startScripts) {
-      exec(script);
+      // i think in this context its safer to block
+      try {
+        execFile(script, true);
+      } catch (IOException e) {
+        log.error("starting scripts threw",e);
+      }
     }
   }
 
@@ -852,8 +859,19 @@ public class Python extends Service implements ServiceLifeCycleListener {
    */
   @Override
   public void stopService() {
+    // run any stop scripts 
+    for (String script : stopScripts) {
+      // i think in this context its safer to block
+      try {
+        execFile(script, true);
+      } catch (IOException e) {
+        log.error("stopping scripts threw", e);
+      }
+    }
+    // shutdown inbox/outbox
     super.stopService();
-    stop();// release the interpeter
+    // release the interpeter
+    stop();
   }
 
   public boolean isOpenOnExecute() {
@@ -922,6 +940,12 @@ public class Python extends Service implements ServiceLifeCycleListener {
         }
       }
     }
+    
+    if (config.stopScripts != null && config.stopScripts.size() > 0) {
+      stopScripts.clear();
+      stopScripts.addAll(config.stopScripts);
+    }
+        
     return c;
   }
 

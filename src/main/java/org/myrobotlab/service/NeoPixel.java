@@ -257,6 +257,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   @Override
   public void attach(Attachable service) throws Exception {
+    if (service == null) {
+      log.error("cannot attache to null service");
+      return;
+    }
 
     if (NeoPixelController.class.isAssignableFrom(service.getClass())) {
       attachNeoPixelController((NeoPixelController) service);
@@ -364,6 +368,11 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   public void equalizer(Long wait_ms_per_frame, Integer range) {
 
+    if (controller == null) {
+      log.warn("controller not set");
+      return;
+    }
+    
     if (wait_ms_per_frame == null) {
       wait_ms_per_frame = 25L;
     }
@@ -840,6 +849,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
     }
 
     return c;
+  }
+  
+  public String onStarted(String name){
+    return name;
   }
 
   public static void main(String[] args) throws InterruptedException {

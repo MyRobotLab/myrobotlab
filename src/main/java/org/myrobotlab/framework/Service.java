@@ -1989,7 +1989,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       isRunning = true;
       Runtime runtime = Runtime.getInstance();
       if (runtime != null) {
-        runtime.broadcast("started", getName()); //getFullName()); - removed fullname
+        runtime.invoke("started", getName()); //getFullName()); - removed fullname
       }
 
     } else {
@@ -2092,7 +2092,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     thisThread = null;
 
     Runtime runtime = Runtime.getInstance();
-    runtime.broadcast("stopped", getFullName());
+    runtime.invoke("stopped", getFullName());
   }
 
   // -------------- Messaging Begins -----------------------
