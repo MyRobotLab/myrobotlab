@@ -1451,6 +1451,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       } catch (IOException e) {
         log.error("saving predicates threw", e);
       }
+      htmlFilter = (HtmlFilter) startPeer("htmlFilter");// Runtime.start("htmlFilter",
+      // "HtmlFilter");
+      chatBot.attachTextListener(htmlFilter);
+      htmlFilter.attachTextListener((TextListener) getPeer("mouth"));
+      chatBot.attachTextListener(this);
       // start session based on last recognized person
       // if (!chatBot.getPredicate("default", "lastUsername").isEmpty() &&
       // !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
@@ -1464,12 +1469,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
         chatBot.startSession(chatBot.getPredicate("default", "lastUsername"));
         chatBot.getResponse("WAKE_UP");
       }
-
-      htmlFilter = (HtmlFilter) startPeer("htmlFilter");// Runtime.start("htmlFilter",
-      // "HtmlFilter");
-      chatBot.attachTextListener(htmlFilter);
-      htmlFilter.attachTextListener((TextListener) getPeer("mouth"));
-      chatBot.attachTextListener(this);
     } catch (Exception e) {
       speak("could not load chatBot");
       error(e.getMessage());
