@@ -1441,7 +1441,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       chatBot.setPredicate("null", "");
       // load last user session
       if (!chatBot.getPredicate("name").isEmpty()) {
-        if (chatBot.getPredicate("lastUsername").isEmpty() || chatBot.getPredicate("lastUsername").equals("unknown")) {
+        if (chatBot.getPredicate("lastUsername").isEmpty() || chatBot.getPredicate("lastUsername").equals("unknown") || chatBot.getPredicate("lastUsername").equals("default")) {
           chatBot.setPredicate("lastUsername", chatBot.getPredicate("name"));
         }
       }
@@ -1451,23 +1451,24 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       } catch (IOException e) {
         log.error("saving predicates threw", e);
       }
-      // start session based on last recognized person
-      // if (!chatBot.getPredicate("default", "lastUsername").isEmpty() &&
-      // !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
-      // chatBot.startSession(chatBot.getPredicate("lastUsername"));
-      // }
-      if (!chatBot.getPredicate("Friend", "firstinit").isEmpty() && !chatBot.getPredicate("Friend", "firstinit").equals("unknown")
-          && !chatBot.getPredicate("Friend", "firstinit").equals("started")) {
-        chatBot.getResponse("FIRST_INIT");
-      } else {
-        chatBot.getResponse("WAKE_UP");
-      }
-
       htmlFilter = (HtmlFilter) startPeer("htmlFilter");// Runtime.start("htmlFilter",
       // "HtmlFilter");
       chatBot.attachTextListener(htmlFilter);
       htmlFilter.attachTextListener((TextListener) getPeer("mouth"));
       chatBot.attachTextListener(this);
+      // start session based on last recognized person
+      // if (!chatBot.getPredicate("default", "lastUsername").isEmpty() &&
+      // !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
+      // chatBot.startSession(chatBot.getPredicate("lastUsername"));
+      // }
+      if (chatBot.getPredicate("default", "firstinit").isEmpty() || chatBot.getPredicate("default", "firstinit").equals("unknown")
+          || chatBot.getPredicate("default", "firstinit").equals("started")) {
+        chatBot.startSession(chatBot.getPredicate("default", "lastUsername"));
+        chatBot.getResponse("FIRST_INIT");
+      } else {
+        chatBot.startSession(chatBot.getPredicate("default", "lastUsername"));
+        chatBot.getResponse("WAKE_UP");
+      }
     } catch (Exception e) {
       speak("could not load chatBot");
       error(e.getMessage());
