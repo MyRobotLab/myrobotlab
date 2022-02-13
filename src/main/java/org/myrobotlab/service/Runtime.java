@@ -17,8 +17,6 @@ import java.net.NetworkInterface;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -476,7 +474,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       if (runtime != null) {
 
-        runtime.broadcast("created", getFullName(name));
+        runtime.invoke("created", getFullName(name));
 
         // add all the service life cycle subscriptions
         // runtime.addListener("registered", name);
@@ -1364,11 +1362,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         }
 
         if (updatedServiceLists) {
-          runtime.broadcast("publishInterfaceToPossibleServices");
+          runtime.invoke("publishInterfaceToPossibleServices");
         }
 
         // TODO - determine rules on re-broadcasting based on configuration
-        runtime.broadcast("registered", registration);
+        runtime.invoke("registered", registration);
       }
 
       // TODO - remove ? already get state from registration
@@ -1456,7 +1454,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     // you have to send released before removing from registry
     if (runtime != null) {
-      runtime.broadcast("released", inName); // <- DO NOT CHANGE THIS IS CORRECT
+      runtime.invoke("released", inName); // <- DO NOT CHANGE THIS IS CORRECT
       // !!
       // it should be FULLNAME !
       // runtime.broadcast("released", inName);
@@ -1476,7 +1474,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       if (updatedServiceLists) {
-        runtime.broadcast("publishInterfaceToPossibleServices");
+        runtime.invoke("publishInterfaceToPossibleServices");
       }
 
     }
@@ -3394,12 +3392,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         dataDir.mkdirs();
       }
 
-      try {
-        Files.write(Paths.get(dataDir + File.separator + "lastOptions.json"), CodecUtils.toPrettyJson(options).getBytes());
-      } catch (Exception e) {
-        log.error("writing lastOption.json failed", e);
-      }
-
       if (options.virtual) {
         Platform.setVirtual(true);
       }
@@ -3437,6 +3429,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       createAndStartServices(options.services);
+      
+      // if a you specify a config file it becomes the "base" of configuration
+      // inline flags will still override values
+      if (options.config != null) {
+        // if this is a valid config, it will load
+        Runtime.getInstance();
+      }
 
       if (options.invoke != null) {
         invokeCommands(options.invoke);
@@ -3450,13 +3449,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         // initialize
         // FIXME - use peer ?
         Updater.main(args);
-      }
-      
-      // if a you specify a config file it becomes the "base" of configuration
-      // inline flags will still override values
-      if (options.config != null) {
-        // if this is a valid config, it will load 
-        Runtime.getInstance();
       }
 
     } catch (Exception e) {
@@ -3660,7 +3652,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     ServiceConfig config = CodecUtils.readServiceConfig(filename);
     si.load(config);
+
+    if (runtime != null) {
+      runtime.invoke("publishConfigLoaded", name);
+    }
     return config;
+  }
+  
+  public String publishConfigLoaded(String name) {
+    return name;
   }
 
   public ServiceConfig load(ServiceConfig c) {
