@@ -10,6 +10,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.io.FilenameUtils;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -28,6 +29,7 @@ import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.LocaleProvider;
+import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.Simulator;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
@@ -36,7 +38,7 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class InMoov2 extends Service implements TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
+public class InMoov2 extends Service implements ServiceLifeCycleListener,TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
   public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
 
@@ -2664,5 +2666,17 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  @Override
+  public void onRegistered(Registration registration) {
+  }
+
+  @Override
+  public void onStopped(String name) {
+  }
+
+  @Override
+  public void onReleased(String name) {
   }
 }
