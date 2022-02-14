@@ -155,6 +155,6 @@ public class LeapMotionListener extends Listener {
   @Override
   public void onInit(Controller controller) {
     log.info("publishInit");
-    myService.invoke("onInit", controller);
+    // myService.invoke("onInit", controller);
   }
 }

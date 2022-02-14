@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.myrobotlab.framework.Service;
@@ -8,7 +7,6 @@ import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.leap.LeapMotionListener;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.LeapData;
 import org.myrobotlab.service.interfaces.LeapDataListener;
@@ -146,8 +144,12 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
   @Override
   public void startService() {
     super.startService();
-    listener = new LeapMotionListener(this);
-    controller = new Controller();
+    if (listener == null) {
+      listener = new LeapMotionListener(this);
+    }
+    if (controller == null) {
+      controller = new Controller();
+    }
     // we've been asked to start.. we should start tracking !
     this.startTracking();
   }
@@ -160,32 +162,6 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
     controller.removeListener(listener);
   }
 
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-    try {
-
-      LeapMotion leap = (LeapMotion) Runtime.start("leap", "LeapMotion");
-      leap.startService();
-      Runtime.start("gui", "SwingGui");
-      Runtime.start("webgui", "WebGui");
-
-      // Have the sample listener receive events from the controller
-
-      // leap.startTracking();
-      // Keep this process running until Enter is pressed
-      log.info("Press Enter to quit...");
-      try {
-        System.in.read();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-
-      // Remove the sample listener when done
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
-
   @Override
   public List<Point> publishPoints(List<Point> points) {
     return points;
@@ -194,6 +170,26 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
   public void addPointsListener(Service s) {
     // TODO - reflect on a public heard method - if doesn't exist error ?
     addListener("publishPoints", s.getName(), "onPoints");
+  }
+
+  
+  public static void main(String[] args) {
+    LoggingFactory.init(Level.INFO);
+    try {
+      
+      // leap.startService();
+      // Runtime.start("gui", "SwingGui");
+      Runtime.start("webgui", "WebGui");
+      Runtime.start("leap", "LeapMotion");
+      Runtime.start("intro", "Intro");
+      Runtime.start("i01", "InMoov2");
+
+      // Have the sample listener receive events from the controller
+
+      // Remove the sample listener when done
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
   }
 
 }
