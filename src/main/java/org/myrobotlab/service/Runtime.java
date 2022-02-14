@@ -3918,9 +3918,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @return - true if started
    */
   static public boolean isStarted(String name) {
-
-    if (registry.containsKey(name)) {
-      ServiceInterface si = registry.get(name);
+    String fullname = null;
+    if (!name.contains("@")) {
+      fullname = name + "@" + Runtime.getInstance().getId();
+    } else {
+      fullname = name;
+    }
+    if (registry.containsKey(fullname)) {
+      ServiceInterface si = registry.get(fullname);
       return si.isRunning();
     }
 
