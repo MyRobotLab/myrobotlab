@@ -253,6 +253,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   /**
    * if a new service is added to the system refresh the controllers
    */
+  @Deprecated /* lifecycle events not necessary for ui, probably should be pulled out */
   public void onStarted(String name) {
     invoke("refreshControllers");
   }

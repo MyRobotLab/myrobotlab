@@ -33,6 +33,7 @@ import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.data.ServoMove;
+import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
@@ -59,7 +60,7 @@ import org.slf4j.Logger;
  * 
  */
 
-public class Servo extends AbstractServo implements ServoControl {
+public class Servo extends AbstractServo implements ServoControl, ServiceLifeCycleListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -380,6 +381,18 @@ public class Servo extends AbstractServo implements ServoControl {
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  @Override
+  public void onCreated(String name) {
+  }
+
+  @Override
+  public void onStopped(String name) {
+  }
+
+  @Override
+  public void onReleased(String name) {
   }
 
 }

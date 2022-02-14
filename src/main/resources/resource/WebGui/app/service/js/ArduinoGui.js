@@ -9,8 +9,7 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
     $scope.possibleBaud = ['600', '1200', '2400', '4800', '9600', '19200', '38400', '57600', '115200']
     $scope.versionStatus = ""
     $scope.rate = '115200'
-    $scope.singleModel = 0
-    $scope.isConnected = "disconnected"
+    $scope.isConnected = false
 
     $scope.boardInfo = {
         "boardType": null,
@@ -139,6 +138,7 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
             // FIXME - this should be in a prototype    
         case 'onSerial':
             $scope.serial = data
+            /*
             if ($scope.serial != null) {
                 $scope.isConnected = ($scope.serial.portName != null)
                 $scope.isConnectedImage = ($scope.serial.portName != null) ? "connected" : "disconnected"
@@ -148,7 +148,7 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
                 } else {
                     $scope.portName = $scope.serial.lastPortName
                 }
-            }
+            }*/
             break
         case 'onPin':
             break

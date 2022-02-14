@@ -486,41 +486,40 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // LOADING BEGIN
       Runtime runtime = Runtime.getInstance();
-      if (runtime.getConfigName() != null) {
-        String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
-        File check = new File(filename);
-        if (check.exists()) {
-          // this loads a file from the file system - for the current config
-          // name
-          load(name);
-        } else {
-          log.info("config for {} - {} does not exist loading default", name, filename);
-          // multi-service definition possible with getDefault
-          // we need to spin through them in order - create them and apply
-          // config
-          LinkedHashMap<String, ServiceConfig> configSet = ServiceInterface.getDefault(name, type);
-          if (configSet != null) {
-            for (String peerName : configSet.keySet()) {
-              ServiceConfig peerConfig = configSet.get(peerName);
-              // BELOW BECOMES A RECURSIVE CALL SPAWNING PEERS
-              ServiceInterface peerIntf = create(peerName, peerConfig.type);
 
-              peerIntf.load(peerConfig);
-              // IS THIS CORRECT ?!?!? - the parent service was only told to be
-              // created,
-              // yet we are creating loading and starting peer services ?!?!?!?
-              if (!peerName.equals(name)) {
-                // I don't know if this is correct - we were asked to only
-                // create
-                // the service yet here we are both creating and starting the
-                // peers in config
-                peerIntf.startService();
-              }
+      String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
+      File check = new File(filename);
+      if (runtime.getConfigName() != null && check.exists()) {
+        // this loads a file from the file system - for the current config
+        // name
+        load(name);
+      } else {
+        log.info("config for {} - {} does not exist loading default", name, filename);
+        // multi-service definition possible with getDefault
+        // we need to spin through them in order - create them and apply
+        // config
+        LinkedHashMap<String, ServiceConfig> configSet = ServiceInterface.getDefault(name, type);
+        if (configSet != null) {
+          for (String peerName : configSet.keySet()) {
+            ServiceConfig peerConfig = configSet.get(peerName);
+            // BELOW BECOMES A RECURSIVE CALL SPAWNING PEERS
+            ServiceInterface peerIntf = create(peerName, peerConfig.type);
+
+            peerIntf.load(peerConfig);
+            // IS THIS CORRECT ?!?!? - the parent service was only told to be
+            // created,
+            // yet we are creating loading and starting peer services ?!?!?!?
+            if (!peerName.equals(name)) {
+              // I don't know if this is correct - we were asked to only
+              // create
+              // the service yet here we are both creating and starting the
+              // peers in config
+              peerIntf.startService();
             }
-
-            ServiceConfig c = configSet.get(name);
-            si.load(c);
           }
+
+          ServiceConfig c = configSet.get(name);
+          si.load(c);
         }
       }
       // LOADING END
@@ -3429,7 +3428,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       createAndStartServices(options.services);
-      
+
       // if a you specify a config file it becomes the "base" of configuration
       // inline flags will still override values
       if (options.config != null) {
@@ -3658,7 +3657,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
     return config;
   }
-  
+
   public String publishConfigLoaded(String name) {
     return name;
   }

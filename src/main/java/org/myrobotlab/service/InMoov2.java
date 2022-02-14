@@ -1556,8 +1556,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public InMoov2Head startHead(String port, String type, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin) {
 
     speakBlocking(get("STARTINGHEAD"));
+    
+    head = (InMoov2Head)Runtime.start(getName() + ".head", "InMoov2Head");
 
-    head = (InMoov2Head) startPeer("head");
+    // head = (InMoov2Head) startPeer("head");
     isHeadActivated = true;
 
     if (headYPin != null) {
