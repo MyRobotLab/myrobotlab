@@ -67,36 +67,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   boolean isAttached = false;
 
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-
-    try {
-
-      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
-      i01.startRightHand();
-
-      ServoController controller = (ServoController) Runtime.getService("i01.right");
-      // arduino.pinMode(13, ServoController.OUTPUT);
-      // arduino.digitalWrite(13, 1);
-
-      InMoov2Hand rightHand = (InMoov2Hand) Runtime.start("r01", "InMoov2Hand");// InMoovHand("r01");
-      Runtime.createAndStart("gui", "SwingGui");
-
-      Runtime.createAndStart("webgui", "WebGui");
-      // rightHand.connect("COM12"); TEST RECOVERY !!!
-      rightHand.close();
-      rightHand.open();
-      rightHand.openPinch();
-      rightHand.closePinch();
-      rightHand.rest();
-      /*
-       * SwingGui gui = new SwingGui("gui"); gui.startService();
-       */
-
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
-  }
 
   public InMoov2Hand(String n, String id) {
     super(n, id);
@@ -104,6 +74,12 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   public void startService() {
     super.startService();
+    thumb = (Servo) Runtime.start(getName() + ".thumb", "Servo");
+    index = (Servo) Runtime.start(getName() + ".index", "Servo");
+    majeure = (Servo) Runtime.start(getName() + ".majeure", "Servo");
+    ringFinger = (Servo) Runtime.start(getName() + ".ringFinger", "Servo");
+    pinky = (Servo) Runtime.start(getName() + ".pinky", "Servo");
+    wrist = (Servo) Runtime.start(getName() + ".wrist", "Servo");
   }
 
   public void bird() {
@@ -444,9 +420,9 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
         log.info("Right(unknown) hand frame not valid.");
         // return this hand isn't valid
         return data;
-      }      
+      }
     }
-    
+
     // If the hand data came from a valid frame, update the finger postions.
     // move all fingers
     if (index != null) {
@@ -474,7 +450,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     } else {
       log.debug("Middle(Majeure) finger isn't attached or is null.");
     }
-    
 
     return data;
   }
@@ -809,11 +784,11 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     handConfig.pinky = name + ".pinky";
     handConfig.wrist = name + ".wrist";
     String cname = null;
-    
+
     if (name.endsWith("leftHand")) {
-      cname = "i01.left"; // FIXME - still terrible to have a i01 here :( 
+      cname = "i01.left"; // FIXME - still terrible to have a i01 here :(
     } else if (name.endsWith("rightHand")) {
-      cname = "i01.right"; // FIXME - still terrible to have a i01 here :( 
+      cname = "i01.right"; // FIXME - still terrible to have a i01 here :(
     }
 
     // build a config with all peer defaults
@@ -924,4 +899,29 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   }
 
+  public static void main(String[] args) {
+    LoggingFactory.init(Level.INFO);
+
+    try {
+
+      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+      i01.startRightHand();
+
+      ServoController controller = (ServoController) Runtime.getService("i01.right");
+
+      InMoov2Hand rightHand = (InMoov2Hand) Runtime.start("r01", "InMoov2Hand");// InMoovHand("r01");
+      Runtime.createAndStart("gui", "SwingGui");
+
+      Runtime.createAndStart("webgui", "WebGui");
+      // rightHand.connect("COM12"); TEST RECOVERY !!!
+      rightHand.close();
+      rightHand.open();
+      rightHand.openPinch();
+      rightHand.closePinch();
+      rightHand.rest();
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
 }
