@@ -251,11 +251,11 @@ public class OpenWeatherMap extends HttpClient {
   public ServiceConfig getConfig() {
 
     OpenWeatherMapConfig config = new OpenWeatherMapConfig();
-    config.currentApikey = currentApikey;
-    config.currentUnits = currentUnits;
-    config.currentLocalUnits = currentLocalUnits;
-    config.currentTown = currentTown;
-    //config.currentPeriod = currentPeriod;
+    config.currentApikey = apikey;
+    config.currentUnits = units;
+    config.currentLocalUnits = localUnits;
+    config.currentTown = location;
+    //config.currentPeriod = period;
     return config;
   }
 
