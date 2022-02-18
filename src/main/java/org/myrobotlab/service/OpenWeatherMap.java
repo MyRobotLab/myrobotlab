@@ -253,9 +253,7 @@ public class OpenWeatherMap extends HttpClient {
     OpenWeatherMapConfig config = new OpenWeatherMapConfig();
     config.currentApikey = apikey;
     config.currentUnits = units;
-    config.currentLocalUnits = localUnits;
     config.currentTown = location;
-    //config.currentPeriod = period;
     return config;
   }
 
@@ -263,9 +261,7 @@ public class OpenWeatherMap extends HttpClient {
     OpenWeatherMapConfig config = (OpenWeatherMapConfig) c;
     setKey(config.currentApikey);
     setUnits(config.currentUnits);
-    setLocalUnits(config.currentLocalUnits);
     setLocation(config.currentTown);
-    //setPeriod(config.currentPeriod);
     return c;
   }
 
