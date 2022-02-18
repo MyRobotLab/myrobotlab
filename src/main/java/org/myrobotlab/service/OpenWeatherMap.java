@@ -255,7 +255,7 @@ public class OpenWeatherMap extends HttpClient {
     config.currentUnits = currentUnits;
     config.currentLocalUnits = currentLocalUnits;
     config.currentTown = currentTown;
-    config.currentPeriod = currentPeriod;
+    //config.currentPeriod = currentPeriod;
     return config;
   }
 
@@ -265,7 +265,7 @@ public class OpenWeatherMap extends HttpClient {
     setUnits(config.currentUnits);
     setLocalUnits(config.currentLocalUnits);
     setLocation(config.currentTown);
-    setPeriod(config.currentPeriod);
+    //setPeriod(config.currentPeriod);
     return c;
   }
 
