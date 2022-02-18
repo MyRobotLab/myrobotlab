@@ -1,7 +1,7 @@
 <div class="col-md-6">
     <table border="1" class="table table-hover table-condensed table-striped table-bordered">
         <tr>
-            <td>Current apikey: {{service.currentApikey}}<br/>
+            <td>
                 <input class="form-control ng-pristine ng-untouched ng-valid ng-empty" title="Get your KEY : https://home.openweathermap.org" type="text" ng-model="service.currentApikey" placeholder="Your apikey" style="width:200px">
                 <button class="btn btn-default" ng-click="msg.setKey(service.currentApikey)">Add apikey</button>
             </td>
