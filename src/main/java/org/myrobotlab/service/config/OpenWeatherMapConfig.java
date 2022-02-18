@@ -9,6 +9,6 @@ public class OpenWeatherMapConfig extends ServiceConfig {
   public String currentUnits;
   public String currentlocalUnits;
   public String currentTown;
-  public String currentPeriod;
+  public Integer currentPeriod;
 
 }
