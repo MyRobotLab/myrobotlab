@@ -9,14 +9,8 @@ angular.module('mrlapp.service.OpenWeatherMapGui', []).controller('OpenWeatherMa
     $scope.setUnits = function() {
         msg.send('setUnits', $scope.currentUnits)
     }
-    $scope.setLocalUnits = function() {
-        msg.send('setLocalUnits', $scope.currentLocalUnits)
-    }
     $scope.setLocation = function() {
         msg.send('setLocation', $scope.currentTown)
-    }
-    $scope.setPeriod = function() {
-        msg.send('setPeriod', $scope.currentPeriod)
     }
 
     // init
