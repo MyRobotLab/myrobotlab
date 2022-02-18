@@ -13,21 +13,9 @@
             </td>
         </tr>
         <tr>
-            <td>Current local unit: {{service.currentLocalUnits}}<br/>
-                <input class="form-control ng-pristine ng-untouched ng-valid ng-empty" title="fahrenheit or celcius" type="text" ng-model="service.currentLocalUnits" placeholder="Your local units" style="width:200px">
-                <button class="btn btn-default" ng-click="msg.setUnits(service.currentLocalUnits)">Set local units</button>
-            </td>
-        </tr>
-        <tr>
             <td>Current town: {{service.currentTown}}<br/>
                 <input class="form-control ng-pristine ng-untouched ng-valid ng-empty" title="your town and country" type="text" ng-model="service.currentTown" placeholder="paris,FR" style="width:200px">
                 <button class="btn btn-default" ng-click="msg.setLocation(service.currentTown)">Set your town</button>
-            </td>
-        </tr>
-        <tr>
-            <td>Current period: {{service.currentPeriod}}<br/>
-                <input class="form-control ng-pristine ng-untouched ng-valid ng-empty" title="period is 3 hours per index, 40 is maximum for free api key" type="text" ng-model="service.currentPeriod" placeholder="1" style="width:200px">
-                <button class="btn btn-default" ng-click="msg.setPeriod(service.currentPeriod)">Set your period</button>
             </td>
         </tr>
     </table>
