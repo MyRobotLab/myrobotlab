@@ -5,7 +5,10 @@ import java.net.URLEncoder;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.OpenWeatherMapConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 /**
@@ -240,6 +243,27 @@ public class OpenWeatherMap extends HttpClient {
 
   public String getLocalUnits() {
     return localUnits;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+
+    OpenWeatherMapConfig config = new OpenWeatherMapConfig();
+    config.currentApikey = currentApikey;
+    config.currentUnits = currentUnits;
+    config.currentTown = currentTown;
+    config.currentPeriod = currentPeriod;
+
+    return config;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    OpenWeatherMapConfig config = (OpenWeatherMapConfig) c;
+    setKey(config.currentApikey);
+    setUnits(config.currentUnits);
+    setTown(config.currentTown);
+    setPeriod(config.currentPeriod);
+    return c;
   }
 
   public static void main(String[] args) {
