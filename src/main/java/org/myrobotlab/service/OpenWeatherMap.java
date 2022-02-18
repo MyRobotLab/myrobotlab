@@ -251,7 +251,6 @@ public class OpenWeatherMap extends HttpClient {
   public ServiceConfig getConfig() {
 
     OpenWeatherMapConfig config = new OpenWeatherMapConfig();
-    config.currentApikey = apikey;
     config.currentUnits = units;
     config.currentTown = location;
     return config;
@@ -259,7 +258,6 @@ public class OpenWeatherMap extends HttpClient {
 
   public ServiceConfig load(ServiceConfig c) {
     OpenWeatherMapConfig config = (OpenWeatherMapConfig) c;
-    setKey(config.currentApikey);
     setUnits(config.currentUnits);
     setLocation(config.currentTown);
     return c;
