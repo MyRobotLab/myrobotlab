@@ -251,8 +251,8 @@ public class OpenWeatherMap extends HttpClient {
   public ServiceConfig getConfig() {
 
     OpenWeatherMapConfig config = new OpenWeatherMapConfig();
-    config.currentUnits = units;
-    config.currentTown = location;
+    config.currentUnits = currentUnits;
+    config.currentTown = currentTown;
     return config;
   }
 
