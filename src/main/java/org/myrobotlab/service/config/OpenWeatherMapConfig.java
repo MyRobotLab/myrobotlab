@@ -7,8 +7,6 @@ public class OpenWeatherMapConfig extends ServiceConfig {
 
   public String currentApikey;
   public String currentUnits;
-  public String currentlocalUnits;
   public String currentTown;
-  //public Integer currentPeriod;
 
 }
