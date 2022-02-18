@@ -1,0 +1,22 @@
+<div class="col-md-6">
+    <table border="1" class="table table-hover table-condensed table-striped table-bordered">
+        <tr>
+            <td>Current apikey: {{service.currentPlaylist}}<br/>
+                <input class="form-control ng-pristine ng-untouched ng-valid ng-empty" title="Get your KEY : https://home.openweathermap.org" type="text" ng-model="service.currentApikey" placeholder="Your apikey" style="width:200px">
+                <button class="btn btn-default" ng-click="msg.setKey(service.currentApikey)">Add apikey</button>
+            </td>
+        </tr>
+        <tr>
+            <td>Current unit: {{service.currentUnits}}<br/>
+                <input class="form-control ng-pristine ng-untouched ng-valid ng-empty" title="metric or imperial" type="text" ng-model="service.currentUnits" placeholder="Your units" style="width:200px">
+                <button class="btn btn-default" ng-click="msg.setUnits(service.currentUnits)">Set unit</button>
+            </td>
+        </tr>
+        <tr>
+            <td>Current town: {{service.currentTown}}<br/>
+                <input class="form-control ng-pristine ng-untouched ng-valid ng-empty" title="your town and country" type="text" ng-model="service.currentTown" placeholder="paris,FR" style="width:200px">
+                <button class="btn btn-default" ng-click="msg.setLocation(service.currentTown)">Set your town</button>
+            </td>
+        </tr>
+    </table>
+</div>
