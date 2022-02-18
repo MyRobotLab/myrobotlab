@@ -5,6 +5,8 @@ import java.net.URLEncoder;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import java.util.LinkedHashMap;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.OpenWeatherMapConfig;
