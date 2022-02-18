@@ -25,10 +25,10 @@ public class OpenWeatherMap extends HttpClient {
 
   private static final long serialVersionUID = 1L;
   private String apiForecast = "http://api.openweathermap.org/data/2.5/forecast/?q=";
-  private String units = "imperial"; // or metric
+  protected String units = "imperial"; // or metric
   private String localUnits = "fahrenheit"; // or celcius
   private String lang = "en";
-  private String location = "Paris,FR";
+  protected String location = "Paris,FR";
   private Integer period = 1; // next 3 hours by default
 
   // OWM objects
@@ -251,8 +251,8 @@ public class OpenWeatherMap extends HttpClient {
   public ServiceConfig getConfig() {
 
     OpenWeatherMapConfig config = new OpenWeatherMapConfig();
-    config.currentUnits = currentUnits;
-    config.currentTown = currentTown;
+    config.currentUnits = units;
+    config.currentTown = location;
     return config;
   }
 
