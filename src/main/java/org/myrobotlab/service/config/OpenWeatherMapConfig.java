@@ -5,7 +5,6 @@ import java.util.Map;
 
 public class OpenWeatherMapConfig extends ServiceConfig {
 
-  public String currentApikey;
   public String currentUnits;
   public String currentTown;
 
