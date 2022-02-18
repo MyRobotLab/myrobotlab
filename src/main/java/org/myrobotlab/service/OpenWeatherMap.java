@@ -256,7 +256,6 @@ public class OpenWeatherMap extends HttpClient {
     config.currentLocalUnits = currentLocalUnits;
     config.currentTown = currentTown;
     config.currentPeriod = currentPeriod;
-
     return config;
   }
 
