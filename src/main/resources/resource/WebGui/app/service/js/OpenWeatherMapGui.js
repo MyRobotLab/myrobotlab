@@ -2,18 +2,21 @@ angular.module('mrlapp.service.OpenWeatherMapGui', []).controller('OpenWeatherMa
     console.info('OpenWeatherMapGuiCtrl')
     var _self = this
     var msg = this.msg
+    $scope.forecast = null
+
+    $scope.units = ['metric', 'imperial']
 
     $scope.setKey = function() {
-        msg.send('setKey', $scope.currentApikey)
+        msg.send('setKey', $scope.key)
     }
-    $scope.setUnits = function() {
-        msg.send('setUnits', $scope.currentUnits)
+    $scope.setUnits = function(unit) {
+        msg.send('setUnits', unit)
+        msg.send('broadcastState')
     }
     $scope.setLocation = function() {
-        msg.send('setLocation', $scope.currentTown)
+        msg.send('setLocation', $scope.service.location)
+        msg.send('broadcastState')
     }
-
-    // init
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
@@ -27,13 +30,24 @@ angular.module('mrlapp.service.OpenWeatherMapGui', []).controller('OpenWeatherMa
             _self.updateState(data)
             $scope.$apply()
             break
+        case 'onKey':
+            $scope.key = data;
+            $scope.$apply()
+            break
+        case 'onFetchForecast':
+            $scope.forecast = data;
+            $scope.$apply()
+            break
         default:
-            $log.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method)
+            console.log("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method)
             break
         }
 
     }
 
+    msg.subscribe('fetchForecast')
+    msg.subscribe('getKey')
+    msg.send('getKey')
     msg.subscribe(this)
 }
-])    
+])

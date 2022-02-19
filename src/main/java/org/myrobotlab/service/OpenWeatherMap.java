@@ -60,6 +60,9 @@ public class OpenWeatherMap extends HttpClient {
       log.info("apiUrl: {}", apiUrl);
       log.info("Response: {}", response);
       obj = new JSONObject(response);
+      if (obj.getInt("cod") != 200) {
+        error(obj.getString("message"));
+      }
     } catch (Exception e) {
       error("Cannot get json from OWM : %s", e);
       e.printStackTrace();
@@ -168,7 +171,7 @@ public class OpenWeatherMap extends HttpClient {
    */
   public void setLocation(String location) {
     this.location = location;
-    if (!location.contains(",")) {
+    if (location != null && !location.contains(",")) {
       warn("Recommended location for OWM is TOWN,COUNTRY CODE, exemple : paris,FR");
     }
   }
@@ -245,6 +248,10 @@ public class OpenWeatherMap extends HttpClient {
 
   public String getLocalUnits() {
     return localUnits;
+  }
+  
+  public String getApiKey() {
+    return  Runtime.getSecurity().getKey("OPENWEATHERMAP");
   }
 
   @Override
