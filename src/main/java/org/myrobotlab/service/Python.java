@@ -936,7 +936,11 @@ public class Python extends Service implements ServiceLifeCycleListener {
       // the startService method will run the start scripts
       if (isRunning()) {
         for (String script : startScripts) {
-          exec(script);
+          try {
+            execFile(script);
+          } catch(Exception e) {
+            error(e);
+          }
         }
       }
     }
