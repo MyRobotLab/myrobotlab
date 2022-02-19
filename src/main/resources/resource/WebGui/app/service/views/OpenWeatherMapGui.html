@@ -1,0 +1,39 @@
+<div class="col-md-6">
+    <table border="1" class="table table-hover table-condensed table-striped table-bordered">
+        <tr>
+            <td>
+                <input class="form-control ng-pristine ng-untouched ng-valid ng-empty" title="Get your KEY : https://home.openweathermap.org" type="password" ng-model="key" placeholder="Your apikey" style="width:200px">
+                <button class="btn btn-default" ng-click="setKey()">Add apikey</button>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Current unit: {{service.units}}<br/>
+                <div class="btn-group" uib-dropdown>
+                    <button type="button" class="btn btn-default">units {{service.units}}</button>
+                    <button type="button" class="btn btn-default" uib-dropdown-toggle>
+                        <span class="caret"></span>
+                    </button>
+                    <ul uib-dropdown-menu>
+                        <li ng-repeat="unit in units">
+                            <a href="" ng-click="setUnits(unit)">{{unit}}</a>
+                        </li>
+                    </ul>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Current town: {{service.location}}<br/>
+                <input class="form-control ng-pristine ng-untouched ng-valid ng-empty" title="your town and country" type="text" ng-model="service.location" placeholder="paris,FR" style="width:200px">
+                <button class="btn btn-default" ng-click="msg.setLocation(service.location)">Set your town</button>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <button class="btn btn-default" ng-click="msg.fetchForecast()">Fetch Forcast</button><br>
+                {{forecast}}
+            </td>
+        </tr>
+    </table>
+</div>
