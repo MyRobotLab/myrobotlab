@@ -75,9 +75,7 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
     }
 
     // FIXME - which i could get rid of this
-    // makes attach directive worky on first load
-    msg.sendTo("runtime", "publishInterfaceToPossibleServices")
-
+    // makes attach directive worky on first load   
     msg.subscribe('publishSense')
     msg.subscribe(this)
 }

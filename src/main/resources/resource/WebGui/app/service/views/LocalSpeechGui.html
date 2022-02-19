@@ -1,12 +1,14 @@
-<br/>
-voice
-<br/>
-<select ng-model="service.voice.name" ng-change="setVoice(voice)" class="form-control"  title="select a voice">
-    <option ng-repeat="(key, voice) in service.voices" ng-value="{{voice.name}}">{{voice.name}}</option>
-</select>
-<br/>
-
-<textarea type="text" class="form-control" placeholder="type here" ng-model="text"/>
-<br/>
-<button class="btn btn-default" ng-click="speak(text)">speak</button>
-<button class="btn btn-default" ng-click="text=''">clear</button>
+<div class="row">
+    <div class="col-md-4">
+        <br/>
+        voice <br/>
+        <select ng-model="service.voice.name" ng-change="setVoice(voice)" class="form-control" title="select a voice">
+            <option ng-repeat="(key, voice) in service.voices" ng-value="{{voice.name}}">{{voice.name}}</option>
+        </select>
+        <br/>
+        <textarea type="text" class="form-control" placeholder="type here" ng-model="text"/>
+        <br/>
+        <button class="btn btn-default" ng-click="speak(text)">speak</button>
+        <button class="btn btn-default" ng-click="text=''">clear</button>
+    </div>
+</div>
