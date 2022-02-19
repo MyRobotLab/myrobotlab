@@ -26,7 +26,6 @@ package org.myrobotlab.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -179,11 +178,6 @@ public class NeoPixel extends Service implements NeoPixelControl {
   protected String controller = null;
 
   /**
-   * list of possible controllers
-   */
-  protected Set<String> controllers = new HashSet<>();
-
-  /**
    * name of current matrix
    */
   protected String currentMatrix = "default";
@@ -241,6 +235,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   public NeoPixel(String n, String id) {
     super(n, id);
+    registerForInterfaceChange(NeoPixelController.class);
     animationRunner = new AnimationRunner();
     animations.put("Stop", 1);
     animations.put("Color Wipe", 2);
@@ -542,19 +537,6 @@ public class NeoPixel extends Service implements NeoPixelControl {
     broadcastState();
   }
 
-  public Set<String> refreshControllers() {
-    try {
-      Set<String> ret = new HashSet<>();
-      List<String> c = Runtime.getServiceNamesFromInterface("NeoPixelController");
-      ret.addAll(c);
-      controllers = ret;
-      broadcastState();
-    } catch (Exception e) {
-      error(e);
-    }
-    return controllers;
-  }
-
   public void stopAnimation() {
     setAnimation(1, red, green, blue, speedFps);
   }
@@ -743,12 +725,6 @@ public class NeoPixel extends Service implements NeoPixelControl {
    */
   public void startAnimation(String name) {
     animationRunner.start();
-  }
-
-  public void startService() {
-    super.startService();
-    refreshControllers();
-    Runtime.getInstance().attachServiceLifeCycleListener(getName());
   }
 
   public void setColor(int red, int green, int blue) {
