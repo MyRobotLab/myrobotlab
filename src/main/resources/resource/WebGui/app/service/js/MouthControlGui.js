@@ -76,10 +76,6 @@ angular.module('mrlapp.service.MouthControlGui', []).controller('MouthControlGui
     }
 
 
-    // FIXME - which i could get rid of this
-    // makes attach directive worky on first load
-    msg.sendTo("runtime","publishInterfaceToPossibleServices")
-
 
     // msg.subscribe('publishAvailableInterfaces')
     msg.subscribe(this)

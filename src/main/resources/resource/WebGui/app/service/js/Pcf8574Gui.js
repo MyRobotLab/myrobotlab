@@ -64,7 +64,6 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
 
     // FIXME - which i could get rid of this
     // makes attach directive worky on first load
-    msg.sendTo("runtime", "publishInterfaceToPossibleServices")
 
     // regrettably the onMethodMap dynamic
     // generation of methods failed on this overloaded

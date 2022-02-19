@@ -1,30 +1,49 @@
 <div class="row">
-    <span class="col-lg-6">
-        <img ng-src="{{(service.ready)?'../green.png':'../red.png'}}"/>
-        <span ng-show="!service.ready">Polly requires AWS Keys</span>
-    </span>
-</div>
-<div class="row">
-    <div class="col-md-4">
-        <div class="btn-group" uib-dropdown>
-            <button type="button" class="btn btn-default">{{service.voice.name}} - {{service.voice.locale.tag}} - {{service.voice.gender}}</button>
-            <button type="button" class="btn btn-default" uib-dropdown-toggle>
-                <span class="caret"></span>
-            </button>
-            <ul uib-dropdown-menu>
-                <li ng-repeat="(key, container) in service.voices">
-                    <a href="" ng-click="msg.setVoice(key);msg.broadcastState()">{{key}} - {{container.locale.tag}} - {{container.gender}}</a>
-                </li>
-            </ul>
-        </div>
-        <form class="form-inline">
-            autoclear<input type="checkbox" ng-model="autoClear"/>
-            <input class="form-control" type="text" ng-model="text" ng-enter="speak(text)" placeholder="enter text">
-            <!--             <textarea class="form-control" type="text" ng-model="text" ng-enter="speak(text);text=''" placeholder="enter text">
-            </textarea>
-             -->
-            <button class="btn btn-default form-control" ng-click="speak(text)">Speak</button>
-        </form>
+    <div class="col-md-6">
+        <table>
+            <tr>
+                <td>
+                    <img ng-src="{{(service.ready)?'../green.png':'../red.png'}}"/>
+                    <span ng-show="!service.ready">Polly requires AWS Keys</span>
+                </td>
+                <td colspan="3">
+                    <div class="btn-group" uib-dropdown>
+                        <button type="button" class="btn btn-default">{{service.voice.name}} - {{service.voice.locale.tag}} - {{service.voice.gender}}</button>
+                        <button type="button" class="btn btn-default" uib-dropdown-toggle>
+                            <span class="caret"></span>
+                        </button>
+                        <ul uib-dropdown-menu>
+                            <li ng-repeat="(key, container) in service.voices">
+                                <a href="" ng-click="msg.setVoice(key);msg.broadcastState()">{{key}} - {{container.locale.tag}} - {{container.gender}}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <input class="form-control" ng-keyup="$event.keyCode == 13 && speak(text)" ng-show="!textArea" type="text" ng-model="text" placeholder="enter text">
+                    <textarea type="text" ng-show="textArea" class="form-control" placeholder="type here" ng-model="text"/>
+                </td>
+            </tr>
+            <tr>
+                <td>auto-clear &nbsp;&nbsp;</td>
+                <td>
+                    <input type="checkbox" ng-model="autoClear"/>
+                </td>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;text area</td>
+                <td>
+                    <input type="checkbox" ng-model="textArea"/>
+                </td>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>
+                    <button class="btn btn-default" ng-click="speak(text)">Speak</button>
+                </td>
+            </tr>
+        </table>
     </div>
 </div>
 <div class="row" ng-show="!service.ready">

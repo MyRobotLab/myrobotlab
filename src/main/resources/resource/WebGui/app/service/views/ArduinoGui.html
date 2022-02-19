@@ -6,16 +6,7 @@
         <div class="form-group">
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label for="boardType">board type</label>
             {{boardType}}
-            <!--
-            <select ng-model="boardType" id="{{service.name}}-boardType" ng-change="onBoardChange(boardType)" class="form-control">
-                <option>uno</option>
-                <option>mega</option>
-                <option>mega.atmega2560</option>
-                <option>nano</option>
-                <option>micro</option>
-            </select> 
-            <button class="btn btn-default" ng-click="">Serial</button>
-            -->
+        
         </div>
     </div>
     <div class="row">
@@ -24,11 +15,11 @@
     <div class="row">
         <div class="form-group">
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label for="port">port</label>
-            <input class="form-control" type="text" id="{{service.name}}-port" ng-model="portName"  uib-typeahead="portName for portName in possiblePorts | filter:$viewValue" typeahead-min-length="0" title="Serial port to connect to - &#10; clicking on this box should show a list of possible ports. &#10; Typically Windows list serial ports as COM1,COM2 etc and Linux or Mac will have /dev/ttyS1 .. etc &#10; You may create a virtual port just by typing some arbitrary name and making sure the service is in virtual mode, &#10; then pressing the connect button"/>
+            <input class="form-control" type="text" id="{{service.name}}-port" ng-model="service.port" uib-typeahead="portName for portName in possiblePorts | filter:$viewValue" typeahead-min-length="0" title="Serial port to connect to - &#10; clicking on this box should show a list of possible ports. &#10; Typically Windows list serial ports as COM1,COM2 etc and Linux or Mac will have /dev/ttyS1 .. etc &#10; You may create a virtual port just by typing some arbitrary name and making sure the service is in virtual mode, &#10; then pressing the connect button"/>
             <label for="rate">rate</label>
             <input type="text" class="form-control" ng-readonly="isConnected" id="{{service.name}}-rate" ng-model="rate" uib-typeahead="rate for rate in possibleBaud | filter:$viewValue" typeahead-min-length="0"/>
             <button class="btn btn-default" ng-show="!isConnected" ng-click="msg.getPortNames()">refresh</button>
-            <button class="btn btn-default" ng-show="!isConnected" ng-click="msg.connect(portName, rate)">connect</button>
+            <button class="btn btn-default" ng-show="!isConnected" ng-click="msg.connect(service.port, rate)">connect</button>
             <button class="btn btn-default" ng-show="isConnected" ng-click="msg.disconnect()">disconnect</button>
             <img ng-src="../../{{isConnectedImage}}.png" tilte="connected light &#10; green is connected &#10; red is disconnected"/>
             <button class="btn btn-default" ng-click="msg.getBase64ZippedMrlComm()">Get MrlComm Library</button>
@@ -36,46 +27,44 @@
     </div>
 </form>
 <div class="row">
-    <!-- TODO - make directive -->
     <label ng-show="isConnected" title="line speed - the data rate which this serial port is actually recieving,&#10; which can vary significantly from the data rate depending on the amount of data sampled">{{stats.lineSpeed}} Kbps</label>
 </div>
 <div class="col-md-12">
-    <!-- TODO reduce this with show -->
     {{service.boardType}} {{connectedStatus}} {{versionStatus}} <br>
     <span ng-show="boardInfo != null">version {{boardInfo.version}}</span>
-    <!-- span ng-show="boardInfo != null">boardTypeId {{boardInfo.boardTypeName}}</span -->
     <span ng-show="boardInfo != null">load {{boardInfo.microsPerLoop}}
     sram {{boardInfo.sram}} - {{boardInfo.activePins}} active pins {{boardInfo.receiveTs}} heartbeat {{boardInfo.heartbeatMs}} ms</span>
     <br/>
     <span ng-repeat="device in boardInfo.deviceSummary">
         <b>{{device.name}}</b>
-        id:{{device.id}}</span>
+        id:{{device.id}}
+    </span>
 </div>
 <!-- end status and control for board to be viewed in above all tabs -->
 <div class="col-md-12">
     <uib-tabset active="active">
         <!-- begin -->
         <uib-tab heading="Pins">
-        <div class="row">
-            <div class="col-md-8">
-             <br/>
-                <div class="columns">
-                    <div class="content" ng-repeat="(pinKey, pinDef) in service.addressIndex">
-                        {{ pinDef.pin }} 
+            <div class="row">
+                <div class="col-md-8">
+                    <br/>
+                    <div class="columns">
+                        <div class="content" ng-repeat="(pinKey, pinDef) in service.addressIndex">
+                            {{ pinDef.pin }} 
             <toggle ng-model="pinDef.readWrite" class="toggle-text" ng-change="readWrite(pinDef)" size="btn-sm" on-class="btn-success" on="write" off="read"></toggle>
-                        <toggle ng-show="!pinDef.readWrite" ng-model="pinDef.inputModeDisplay" class="toggle-text" on-class="btn-warning" ng-change="inputMode(pinDef)" size="btn-sm" on="pullup" off="input"></toggle>
-                        <span ng-show="pinDef.isRx" class="badge badge-danger" style="background:red">Rx</span>
-                        <span ng-show="pinDef.isTx" class="badge badge-primary" style="background:yellow;color:grey">Tx</span>
-                        <span ng-show="pinDef.isPwm && !pinDef.readWrite" class="badge badge-primary" style="background:aquamarine;color:grey">Pwm</span>
-                        <span ng-show="pinDef.isSda" class="badge badge-primary" style="background:lightcyan;color:grey">Sda</span>
-                        <span ng-show="pinDef.isScl" class="badge badge-primary" style="background:lightskyblue;color:grey">Scl</span>
-                        <toggle ng-show="pinDef.readWrite" ng-model="pinDef.valueDisplay" class="toggle-text" ng-change="write(pinDef)" size="btn-sm" on="1" off="0" on-class="btn-success"></toggle>
-                        <input ng-show="pinDef.readWrite" min="0" max="255" value="pinDef.value" class="base-slider slider-width100" ng-show="service.autoDisable" type="range" name="idleSeconds" ng-model="pinDef.value" min="1" max="10" ng-change="pwm(pinDef)">
-                        <span ng-show="pinDef.readWrite" class="badge badge-secondary">{{pinDef.value}}</span>
+                            <toggle ng-show="!pinDef.readWrite" ng-model="pinDef.inputModeDisplay" class="toggle-text" on-class="btn-warning" ng-change="inputMode(pinDef)" size="btn-sm" on="pullup" off="input"></toggle>
+                            <span ng-show="pinDef.isRx" class="badge badge-danger" style="background:red">Rx</span>
+                            <span ng-show="pinDef.isTx" class="badge badge-primary" style="background:yellow;color:grey">Tx</span>
+                            <span ng-show="pinDef.isPwm && !pinDef.readWrite" class="badge badge-primary" style="background:aquamarine;color:grey">Pwm</span>
+                            <span ng-show="pinDef.isSda" class="badge badge-primary" style="background:lightcyan;color:grey">Sda</span>
+                            <span ng-show="pinDef.isScl" class="badge badge-primary" style="background:lightskyblue;color:grey">Scl</span>
+                            <toggle ng-show="pinDef.readWrite" ng-model="pinDef.valueDisplay" class="toggle-text" ng-change="write(pinDef)" size="btn-sm" on="1" off="0" on-class="btn-success"></toggle>
+                            <input ng-show="pinDef.readWrite" min="0" max="255" value="pinDef.value" class="base-slider slider-width100" ng-show="service.autoDisable" type="range" name="idleSeconds" ng-model="pinDef.value" min="1" max="10" ng-change="pwm(pinDef)">
+                            <span ng-show="pinDef.readWrite" class="badge badge-secondary">{{pinDef.value}}</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
         </uib-tab>
         <!-- end -->
         <!-- begin -->
@@ -83,17 +72,6 @@
             <!-- img src="{{image}}" width="500"/ -->
             <oscope id="{{service.name}}-oscope" service-name="{{service.name + '@' + service.id}}"></oscope>
         </uib-tab>
-        <!-- end -->
-        <!-- begin -->
-        <!--
-        <uib-tab heading="Settings">
-            <input type="text" class="form-control" id="{{service.name}}-arduinoPath" ng-model="service.arduinoPath" placeholder="Arduino IDE executable Path">
-            <button class="btn btn-default pull-right" ng-click="upload(service.arduinoPath, formPort, boardType)">Upload</button>
-            <button class="btn btn-default pull-right" ng-model="mrlComm.enableBoardInfo" uib-btn-checkbox ng-change="(mrlComm.enableBoardInfo)?msg.enableBoardInfo(true):msg.enableBoardInfo(false)">Status</button>
-            <pre>{{service.uploadSketchResult}}
-		</pre>
-        </uib-tab>
-        -->
         <!-- end -->
     </uib-tabset>
 </div>

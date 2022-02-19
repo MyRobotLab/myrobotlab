@@ -14,6 +14,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
     var firstTime = true
 
     $scope.state = {
+        controller:null,
         useEncoderData: false,
         attached: false,
         showLimits: false,
@@ -82,6 +83,12 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
+
+        if (service.controller){
+            // set the ui state - if it has a value
+            $scope.state.controller = service.controller
+        }
+
         $scope.service = service
 
         // service.controller like many parts is overloaded status & control :(
@@ -231,7 +238,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
     $scope.attachController = function() {
         console.info("attachController")
         msg.send("setPin", $scope.service.pin)
-        msg.send("attach", $scope.service.controller)
+        msg.send("attach", $scope.state.controller)
         msg.send("broadcastState")
     }
 

@@ -174,7 +174,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             }
             break
 
-        case 'onInterfaceToPossibleServices':
+        case 'onInterfaceToNames':
             $scope.interfaceToPossibleServices = data
             mrl.interfaceToPossibleServices = data
             break
@@ -332,14 +332,14 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.subscribe("getHosts")
     msg.subscribe("publishStatus")
     msg.subscribe('publishConfigList')
-    msg.subscribe('publishInterfaceToPossibleServices')
+    msg.subscribe('publishInterfaceToNames')
 
     //msg.send("getLocalServices")
     msg.send("getConnections")
     msg.send("getServiceTypes")
     msg.send("getLocale")
     msg.send("getLocales")
-    msg.send("publishInterfaceToPossibleServices")
+    msg.send("publishInterfaceToNames")
 
     // msg.send("getHosts")
     msg.subscribe(this)

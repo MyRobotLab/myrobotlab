@@ -134,7 +134,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * 
    * requestor type &gt; interface &gt; set of applicable service names
    */
-  protected final Map<String, Set<String>> interfaceToPossibleServices = new HashMap<>();
+  protected final Map<String, Set<String>> interfaceToNames = new HashMap<>();
 
   protected final Map<String, Set<String>> typeToNames = new HashMap<>();
 
@@ -1327,6 +1327,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         // FIXME - most of this could be static as it represents meta data of
         // class and interfaces
 
+        // FIXME - was false - setting now to true .. because
+        // 1 edge case - "can something fulfill my need of an interface - is not currently
+        // switching to true
         boolean updatedServiceLists = false;
 
         // maintaining interface type relations
@@ -1351,17 +1354,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           updatedServiceLists = true;
         }
 
-        // check to see if any of our interfaces can fullfill requested ones
+        // check to see if any of our interfaces can fulfill requested ones
         Set<String> myInterfaces = runtime.typeToInterface.get(type);
         for (String inter : myInterfaces) {
-          if (runtime.interfaceToPossibleServices.containsKey(inter)) {
-            runtime.interfaceToPossibleServices.get(inter).add(fullname);
+          if (runtime.interfaceToNames.containsKey(inter)) {
+            runtime.interfaceToNames.get(inter).add(fullname);
             updatedServiceLists = true;
           }
         }
 
         if (updatedServiceLists) {
-          runtime.invoke("publishInterfaceToPossibleServices");
+          runtime.invoke("publishInterfaceToNames");
         }
 
         // TODO - determine rules on re-broadcasting based on configuration
@@ -1465,15 +1468,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       Set<String> myInterfaces = runtime.typeToInterface.get(type);
       if (myInterfaces != null) {
         for (String inter : myInterfaces) {
-          if (runtime.interfaceToPossibleServices.containsKey(inter)) {
-            runtime.interfaceToPossibleServices.get(inter).remove(name);
+          if (runtime.interfaceToNames.containsKey(inter)) {
+            runtime.interfaceToNames.get(inter).remove(name);
             updatedServiceLists = true;
           }
         }
       }
 
       if (updatedServiceLists) {
-        runtime.invoke("publishInterfaceToPossibleServices");
+        runtime.invoke("publishToNames");
       }
 
     }
@@ -3863,10 +3866,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   public void registerForInterfaceChange(String targetedInterface) {
     // boolean changed
-    Set<String> namesForRequestedInterface = interfaceToPossibleServices.get(targetedInterface);
+    Set<String> namesForRequestedInterface = interfaceToNames.get(targetedInterface);
     if (namesForRequestedInterface == null) {
       namesForRequestedInterface = new HashSet<>();
-      interfaceToPossibleServices.put(targetedInterface, namesForRequestedInterface);
+      interfaceToNames.put(targetedInterface, namesForRequestedInterface);
     }
 
     // search through interfaceToType to find all types that implement this
@@ -3881,7 +3884,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         }
       }
     }
-
+    invoke("publishInterfaceToNames");    
   }
 
   public void addServiceToRequestedInteface(String serviceName) {
@@ -3897,8 +3900,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return interfaceToType;
   }
 
-  public Map<String, Set<String>> publishInterfaceToPossibleServices() {
-    return interfaceToPossibleServices;
+  public Map<String, Set<String>> publishInterfaceToNames() {
+    return interfaceToNames;
   }
 
   static public Set<String> saveDefault(String className) {
