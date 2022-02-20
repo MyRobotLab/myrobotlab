@@ -6,7 +6,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.PirConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.UltrasonicSensorConfig;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinListener;
@@ -18,25 +17,21 @@ public class Pir extends Service implements PinListener {
 
   private static final long serialVersionUID = 1L;
 
-  boolean isActive = false;
+  String controllerName;
+
+  /**
+   * yep there are 3 states to a binary sensor true/false .... and unknown - we
+   * start with "unknown"
+   */
+  Boolean isActive = null;
 
   boolean isEnabled = false;
 
   String pin;
 
-  int rateHz = 1;
-
-  public int getRate() {
-    return rateHz;
-  }
-
-  public void setRate(int rateHz) {
-    this.rateHz = rateHz;
-  }
-
   transient PinArrayControl pinControl;
 
-  String controllerName;
+  int rateHz = 1;
 
   public Pir(String n, String id) {
     super(n, id);
@@ -59,16 +54,6 @@ public class Pir extends Service implements PinListener {
     }
   }
 
-  @Override
-  public void detach(String name) {
-    ServiceInterface si = Runtime.getService(name);
-    if (si instanceof PinArrayControl) {
-      detachPinArrayControl((PinArrayControl) si);
-    } else {
-      error("do not know how to attach to %s of type %s", name, si.getSimpleName());
-    }
-  }
-
   public void attachPinArrayControl(PinArrayControl control) {
     try {
       if (this.pinControl != null) {
@@ -86,6 +71,22 @@ public class Pir extends Service implements PinListener {
     } catch (Exception e) {
       error(e);
     }
+  }
+
+  @Override
+  public void detach(String name) {
+    ServiceInterface si = Runtime.getService(name);
+    if (si instanceof PinArrayControl) {
+      // FIXME - problem - what if someone else is using this pin ?
+      // FIXME - should disable in the context of this service's name
+      ((PinArrayControl) si).disablePin(pin);
+      detachPinArrayControl((PinArrayControl) si);
+    } else {
+      error("do not know how to attach to %s of type %s", name, si.getSimpleName());
+    }
+    isActive = false;
+    isEnabled = false;
+    broadcastState();
   }
 
   public void detachPinArrayControl(PinArrayControl control) {
@@ -129,6 +130,7 @@ public class Pir extends Service implements PinListener {
     // FixMe - sendTo(pincontrolName,"disablePin", pin)
     pinControl.disablePin(pin);
     isEnabled = false;
+    isActive = false;
     broadcastState();
   }
 
@@ -153,21 +155,78 @@ public class Pir extends Service implements PinListener {
   }
 
   @Override
+  public PirConfig getConfig() {
+
+    PirConfig config = new PirConfig();
+
+    config.controller = controllerName;
+    config.pin = pin;
+    config.enable = isEnabled;
+    config.rate = rateHz;
+
+    return config;
+  }
+
+  @Override
+  public String getPin() {
+    return pin;
+  }
+
+  public int getRate() {
+    return rateHz;
+  }
+
+  public boolean isActive() {
+    return isActive;
+  }
+
+  public boolean isEnabled() {
+    return isEnabled;
+  }
+
+  @Override
+  public ServiceConfig load(ServiceConfig c) {
+    PirConfig config = (PirConfig) c;
+
+    if (config.pin != null)
+      setPin(config.pin);
+
+    if (config.rate != null)
+      setRate(config.rate);
+
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+
+    if (config.enable) {
+      enable();
+    } else {
+      disable();
+    }
+
+    return c;
+  }
+
+  @Override
   public void onPin(PinData pindata) {
 
     log.info("onPin {}", pindata);
 
     boolean sense = (pindata.value != 0);
 
-    if (isActive != sense) {
+    // sparse publishing only on state change
+    if (isActive == null) {
+      invoke("publishSense", sense);
+      isActive = sense;
+    } else if (isActive != sense) {
       // state change
       invoke("publishSense", sense);
       isActive = sense;
     }
-  }
-
-  public boolean isActive() {
-    return isActive;
   }
 
   public Boolean publishSense(Boolean b) {
@@ -182,6 +241,10 @@ public class Pir extends Service implements PinListener {
   public void setPinArrayControl(PinArrayControl pinControl) {
     this.pinControl = pinControl;
     controllerName = pinControl.getName();
+  }
+
+  public void setRate(int rateHz) {
+    this.rateHz = rateHz;
   }
 
   public static void main(String[] args) {
@@ -214,50 +277,5 @@ public class Pir extends Service implements PinListener {
       log.error("main threw", e);
     }
   }
-  
-  @Override
-  public PirConfig getConfig() {
 
-    PirConfig config = new PirConfig();
-
-    config.controller = controllerName;
-    config.pin = pin;
-    config.enable = isEnabled;
-    config.rate = rateHz;
-
-    return config;
-  }
-
-
-  @Override
-  public ServiceConfig load(ServiceConfig c) {
-    PirConfig config = (PirConfig) c;
-
-    if (config.pin != null)
-      setPin(config.pin);
-
-    if (config.rate != null)
-      setRate(config.rate);
-
-    if (config.controller != null) {
-      try {
-        attach(config.controller);
-      } catch (Exception e) {
-        error(e);
-      }
-    }
-
-    if (config.enable) {
-      enable();
-    } else {
-      disable();
-    }
-
-    return c;
-  }
-
-  @Override
-  public String getPin() {
-    return pin;
-  }
 }

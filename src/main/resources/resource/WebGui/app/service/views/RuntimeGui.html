@@ -26,7 +26,7 @@ create a new service
 <div class="row">
     <div class="form-group col-md-6">
         <div>
-            configurations <span class="glyphicon glyphicon-refresh" ng-click="msg.publishConfigList()"></span>
+            configurations <span class="glyphicon glyphicon-refresh" ng-click="msg.publishConfigList()"></span> <b>{{service.configName}}</b>
             <br/>
             <select multiple class="form-control width100pct" ng-change="setConfigName()" ng-model="selectedConfig" id="selectedConfig-id" title="configurations">
                 <option ng-repeat="config in service.configList" ng-value="{{config}}">{{config}}</option>

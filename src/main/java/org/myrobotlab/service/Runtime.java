@@ -1476,7 +1476,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       if (updatedServiceLists) {
-        runtime.invoke("publishToNames");
+        runtime.invoke("publishInterfaceToNames");
       }
 
     }

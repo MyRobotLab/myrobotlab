@@ -25,25 +25,19 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
     $scope.portDirectiveScope = {}
 
     $scope.toBoardType = function(boardName) {
-        if (boardName.includes('mega')){
+        if (boardName.includes('mega')) {
             return 'mega'
         }
-        if (boardName.includes('uno')){
+        if (boardName.includes('uno')) {
             return uno
         }
         return boardName
     }
 
-    // Status - from the Arduino service
-    $scope.statusLine = ""
     this.updateState = function(service) {
         $scope.service = service
-        $scope.boardType = service.board // $scope.toBoardType(service.boardInfo.boardTypeName)
-        $scope.arduinoPath = service.arduinoIdePath
+        $scope.boardType = service.board
         $scope.image = "Arduino/" + service.board + ".png"
-        var serial = $scope.service.serial
-
-        $scope.serialName = null
 
         // === service.serial begin ===
         if (service.mrlCommVersion != null) {
@@ -52,9 +46,9 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
             $scope.versionStatus = null
         }
 
-        for (const [pin, pinDef] of Object.entries(service.addressIndex)) {
-            pinDef.readWrite = (pinDef.mode == 'OUTPUT')?true:false
-            pinDef.valueDisplay = (pinDef.value == 0)?false:true
+        for (const [pin,pinDef] of Object.entries(service.addressIndex)) {
+            pinDef.readWrite = (pinDef.mode == 'OUTPUT') ? true : false
+            pinDef.valueDisplay = (pinDef.value == 0) ? false : true
         }
     }
 
@@ -64,7 +58,6 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
         const bytes = new Uint8Array(binaryString.length);
         return bytes.map((byte,i)=>binaryString.charCodeAt(i));
     }
-
 
     this.onMsg = function(inMsg) {
         // TODO - make "super call" as below
@@ -77,7 +70,6 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
             break
         case 'onStatus':
             // FIXME - onStatus needs to be handled in the Framework !!!
-            // $scope.statusLine = data
             break
         case 'onPinArray':
             // a NOOP - but necessary 
@@ -124,7 +116,23 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
             $scope.possiblePorts = data
             $scope.$apply()
             break
-            // FIXME - this should be in a prototype    
+
+            // it may seem silly that there are 3 callbacks related
+            // to determining the connected state of the Arduino
+            // onConnect and onDisconnect are events owned by the SerialDevice
+            // and propegated through the Arduino - since they are only events
+            // its required to ask the Arduino onLoad if its in a connected state
+            // hence the onIsConnected callback
+        case 'onIsConnected':
+            $scope.isConnected = data
+            if (data) {
+                $scope.isConnectedImage = "connected"
+            } else {
+                $scope.isConnectedImage = "disconnected"
+            }
+            $scope.$apply()
+            break
+
         case 'onConnect':
             $scope.isConnectedImage = "connected"
             $scope.isConnected = true
@@ -135,21 +143,6 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
             $scope.isConnected = false
             $scope.$apply()
             break
-            // FIXME - this should be in a prototype    
-        case 'onSerial':
-            $scope.serial = data
-            /*
-            if ($scope.serial != null) {
-                $scope.isConnected = ($scope.serial.portName != null)
-                $scope.isConnectedImage = ($scope.serial.portName != null) ? "connected" : "disconnected"
-                $scope.connectText = ($scope.serial.portName == null) ? "connect" : "disconnect"
-                if ($scope.isConnected) {
-                    $scope.portName = $scope.serial.portName
-                } else {
-                    $scope.portName = $scope.serial.lastPortName
-                }
-            }*/
-            break
         case 'onPin':
             break
         case 'onTX':
@@ -158,7 +151,7 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
             $scope.$apply()
             break
         default:
-            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
+            console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
         }
     }
@@ -170,43 +163,14 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
         }
     }
 
-    $scope.upload = function(arduinoPath, portDirectiveScope, type) {
-        // FIXME !!! - nicer global check empty method
-        // FIXME !!! - parent error warn info - publishes to the appropriate service
-        if (angular.isUndefined(arduinoPath) || arduinoPath == null || arduinoPath == "") {
-            msg.send('error', 'arduino path is not set')
-            return
-        }
-        if (angular.isUndefined(portDirectiveScope) || portDirectiveScope.portName == null || portDirectiveScope.portName == "") {
-            msg.send('error', 'port name not set')
-            return
-        }
-        if (angular.isUndefined(type) || type == null || type == "") {
-            msg.send('error', 'board type not set')
-            return
-        }
-        msg.send('uploadSketch', arduinoPath, portDirectiveScope.portName, type)
-    }
-
-    $scope.aceLoaded = function(editor) {
-        // FIXME - can't we get a handle to it earlier ?
-        $scope.editor = editor
-        // Options
-        editor.setReadOnly(true)
-        editor.$blockScrolling = Infinity
-        editor.setValue($scope.service.sketch.data, -1)
-    }
-
-    $scope.aceChanged = function(e) {}
-
     $scope.readWrite = function(pinDef) {
         console.info(pinDef)
-        msg.send('pinMode', pinDef.pin, pinDef.readWrite?'OUTPUT':'INPUT')
+        msg.send('pinMode', pinDef.pin, pinDef.readWrite ? 'OUTPUT' : 'INPUT')
     }
 
     $scope.write = function(pinDef) {
         console.info(pinDef)
-        msg.send('digitalWrite', pinDef.pin, pinDef.valueDisplay?1:0)
+        msg.send('digitalWrite', pinDef.pin, pinDef.valueDisplay ? 1 : 0)
     }
 
     $scope.pwm = function(pinDef) {
@@ -216,10 +180,8 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
 
     $scope.inputMode = function(pinDef) {
         console.info(pinDef)
-        msg.send('pinMode', pinDef.pin, pinDef.inputModeDisplay?'PULLUP':'INPUT')
+        msg.send('pinMode', pinDef.pin, pinDef.inputModeDisplay ? 'PULLUP' : 'INPUT')
     }
-
-
 
     // get version
     msg.subscribe('publishVersion')
@@ -228,15 +190,12 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
     msg.subscribe('publishConnect')
     msg.subscribe('publishDisconnect')
     msg.subscribe('getPortNames')
-    msg.subscribe('getSerial')
+    msg.subscribe('isConnected')
     msg.subscribe('publishPinArray')
-    // msg.subscribe('getZippedMrlComm')
     msg.subscribe('getBase64ZippedMrlComm')
 
     msg.send('getPortNames')
-    msg.send('getSerial')
-    // FIXME - onSerial ...
-    // msg.subscribe('publishSensorData')
+    msg.send('isConnected')
     msg.subscribe(this)
 }
 ])
