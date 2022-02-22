@@ -33,7 +33,7 @@ public class RandomTest extends AbstractServiceTest {
     assertTrue("random method should be => 5000 values", 5000 <= clock.getInterval());
     assertTrue("random method should be <= 10000 values", clock.getInterval() <= 10000);
     
-    random.removeRandom("clock", "setInterval");
+    random.remove("clock", "setInterval");
     
     assertTrue("should not have method", !random.getKeySet().contains("clock.setInterval"));
 

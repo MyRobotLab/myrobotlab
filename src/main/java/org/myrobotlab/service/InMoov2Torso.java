@@ -38,6 +38,9 @@ public class InMoov2Torso extends Service {
 
   public void startService() {
     super.startService();
+    topStom = (ServoControl) startPeer("topStom");
+    midStom = (ServoControl) startPeer("midStom");
+    lowStom = (ServoControl) startPeer("lowStom");
   }
 
   public void releaseService() {

@@ -159,6 +159,13 @@ public class Random extends Service {
     return ranges.toArray(r);
 
   }
+  
+  /**
+   * remove all random events
+   */
+  public void removeAll() {
+    purge();
+  }
 
   public void addRandom(long minIntervalMs, long maxIntervalMs, String name, String method, Range... ranges) {
 
@@ -184,7 +191,7 @@ public class Random extends Service {
     }
 
     RandomMessage msg = randomData.get(key);
-    if (!msg.enabled) {
+    if (msg == null || !msg.enabled) {
       return;
     }
 
@@ -261,8 +268,13 @@ public class Random extends Service {
     return c;
   }
 
-  public void removeRandom(String name, String method) {
-    randomData.remove(String.format("%s.%s", name, method));
+  public RandomMessage remove(String name, String method) {
+    return remove(String.format("%s.%s", name, method));
+  }
+  
+  public RandomMessage remove(String key) {
+    purgeTask(key);
+    return randomData.remove(key);
   }
 
   public Set<String> getKeySet() {
