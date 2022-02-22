@@ -23,7 +23,7 @@ public class Pir extends Service implements PinListener {
    * yep there are 3 states to a binary sensor true/false .... and unknown - we
    * start with "unknown"
    */
-  Boolean isActive = null;
+  Boolean active = null;
 
   boolean isEnabled = false;
 
@@ -32,6 +32,8 @@ public class Pir extends Service implements PinListener {
   transient PinArrayControl pinControl;
 
   int rateHz = 1;
+
+  Long lastChangeTs = null;
 
   public Pir(String n, String id) {
     super(n, id);
@@ -82,9 +84,9 @@ public class Pir extends Service implements PinListener {
       ((PinArrayControl) si).disablePin(pin);
       detachPinArrayControl((PinArrayControl) si);
     } else {
-      error("do not know how to attach to %s of type %s", name, si.getSimpleName());
+      error("do not know how to detach to %s of type %s", name, si.getSimpleName());
     }
-    isActive = false;
+    active = false;
     isEnabled = false;
     broadcastState();
   }
@@ -130,7 +132,7 @@ public class Pir extends Service implements PinListener {
     // FixMe - sendTo(pincontrolName,"disablePin", pin)
     pinControl.disablePin(pin);
     isEnabled = false;
-    isActive = false;
+    active = false;
     broadcastState();
   }
 
@@ -177,7 +179,7 @@ public class Pir extends Service implements PinListener {
   }
 
   public boolean isActive() {
-    return isActive;
+    return active;
   }
 
   public boolean isEnabled() {
@@ -219,13 +221,14 @@ public class Pir extends Service implements PinListener {
     boolean sense = (pindata.value != 0);
 
     // sparse publishing only on state change
-    if (isActive == null) {
+    if (active == null) {
       invoke("publishSense", sense);
-      isActive = sense;
-    } else if (isActive != sense) {
+      active = sense;
+    } else if (active != sense) {
       // state change
       invoke("publishSense", sense);
-      isActive = sense;
+      active = sense;
+      lastChangeTs = System.currentTimeMillis();
     }
   }
 
@@ -245,6 +248,10 @@ public class Pir extends Service implements PinListener {
 
   public void setRate(int rateHz) {
     this.rateHz = rateHz;
+  }
+  
+  public Long getLastChangeTs() {
+    return lastChangeTs;
   }
 
   public static void main(String[] args) {

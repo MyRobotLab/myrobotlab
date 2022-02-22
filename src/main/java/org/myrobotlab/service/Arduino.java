@@ -489,7 +489,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       }
 
     } else if (attachable instanceof I2CControl) {
-
+      error("I2CControl sync not implemented");
     } else {
       error("cannot reattach device of type %s do not know how", dm.getDevice().getClass().getSimpleName());
     }
