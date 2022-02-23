@@ -184,21 +184,17 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
     
     try {
 
-      String configClass = "org.myrobotlab.service." + simpleTypeName;
+      String metaClass = "org.myrobotlab.service.meta." + simpleTypeName + "Meta";
 
-      Class<?> clazz = Class.forName(configClass);
+      Class<?> clazz = Class.forName(metaClass);
       Method method = clazz.getMethod("getDefault", String.class);
-
-      // create new instance
-      // Constructor<?> ctor = clazz.getConstructor();
-      // Object configObject = ctor.newInstance();
 
       // I chose "non"-static method for getDefault - because Java has
       // an irritating rule of not allowing static overloads and abstracts
       config = (LinkedHashMap<String, ServiceConfig>) method.invoke(null, name);
 
       if (config == null || config.keySet().size() == 0) {
-        log.warn("{} does not currently have any default configurations", configClass);
+        log.warn("{} does not currently have any default configurations", metaClass);
       }
     } catch (NoSuchMethodException em) {
 

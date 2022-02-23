@@ -1,5 +1,7 @@
 package org.myrobotlab.service.config;
 
+import java.util.Map;
+
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -16,6 +18,8 @@ public class ServiceConfig {
    * type of service defined for this config
    */
   public String type;
+  
+  public Map<String,String> peerz;
 
   // public String name; I DO NOT WANT TO PUT THIS IN
 
