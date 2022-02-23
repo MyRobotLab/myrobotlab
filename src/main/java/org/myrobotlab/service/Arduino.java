@@ -2258,6 +2258,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     return c;
   }
   
+  @Override
+  public void startService() {
+    super.startService();
+    initSerial();
+  }  
 
   /**
    * DO NOT FORGET INSTALL AND VMARGS !!!
