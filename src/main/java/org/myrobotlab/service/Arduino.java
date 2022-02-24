@@ -473,6 +473,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
         msg.servoAttachPin(dm.getId(), pin);
       }
     } else if (attachable instanceof UltrasonicSensorControl) {
+        log.warn("UltrasonicSensorControl not implemented")
       // reattach logic
       // } else if (attachable instanceof Pir) { Pir is a PinListener
       // reattach logic - FIXME Pir has no Control interface :(
