@@ -2258,32 +2258,12 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     }
     return c;
   }
-
-  static public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
-    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
-    ArduinoConfig arduinoConfig = new ArduinoConfig();
-
-    // set local names and config
-    arduinoConfig.serial = name + ".serial";
-
-    // build a config with all peer defaults
-    config.putAll(ServiceInterface.getDefault(arduinoConfig.serial, "Serial"));
-
-    // pull out specific config and modify
-    SerialConfig serialConfig = (SerialConfig) config.get(arduinoConfig.serial);
-    serialConfig.port = arduinoConfig.port;
-
-    // put self in
-    config.put(name, arduinoConfig);
-
-    return config;
-  }
-
+  
   @Override
   public void startService() {
     super.startService();
     initSerial();
-  }
+  }  
 
   /**
    * DO NOT FORGET INSTALL AND VMARGS !!!
