@@ -92,7 +92,16 @@
     </div>
 </div>
 <!--
-
+<div class="alert alert-info alert-dismissable mb-0" ng-hide="infoStatus == null" align="center">
+    <span class="label label-info">info</span>
+    {{infoStatus.name}} : {{infoStatus.key}} : {{infoStatus.detail}}  
+            <span ng-hide="infoCount < 2" class="badge">{{infoCount}}</span>
+    <button type="button" class="close" data-ng-click="infoStatus = null;infoCount = 0" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+-->
+<!--
 <button ng-click="displayImage()">display image</button>
 
 -->

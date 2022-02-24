@@ -8,10 +8,10 @@
     export PATH=$JAVA_HOME/bin:$PATH
 
     # shows system vars and env vars
-    mvn -DskipTests -DBUILD_NUMBER=71 help:system
+    mvn -DskipTests help:system
     
     # fast build
-    mvn -DskipTests -DBUILD_NUMBER=180 compile package -o 
+    mvn -DskipTests package -o 
 
     # compile only sync with raspi
     rsync -zarvh target/classes pi@192.168.0.104:/opt/mrl/myrobotlab/target
@@ -76,8 +76,11 @@
         
        -->
       <!-- from jenkins env vars -->
-      <version.prefix>1.1.</version.prefix>      
-      <build.number>${BUILD_NUMBER}</build.number>
+      <version.prefix>1.1.</version.prefix>
+      <!-- force overriding property at command line, use ${maven.build.timestamp}-->
+      <timestamp>${maven.build.timestamp}</timestamp>
+      <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>      
+      <build.number>${timestamp}</build.number>
       <version>${version.prefix}${build.number}</version>   
       <GitBranch>${git.branch}</GitBranch>
       <username>${NODE_NAME}</username>      
@@ -349,7 +352,7 @@
   <dependency>
     <groupId>com.thoughtworks.xstream</groupId>
     <artifactId>xstream</artifactId>
-    <version>1.4.18</version>
+    <version>1.4.19</version>
     <scope>provided</scope>
   </dependency>
 <!-- DocumentPipeline end -->

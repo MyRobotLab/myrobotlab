@@ -1,4 +1,4 @@
-@ECHO OFF
+@ECHO ON
 
 rem TODO move vars to top
 rem TODO have --id as an optional var
@@ -19,15 +19,15 @@ set JAVA_OPTIONS=-Djava.library.path=libraries/native -Djna.library.path=librari
 IF NOT "%*"=="" (
     echo "USER SUPPLIED ARGS"
     "%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime --from-launcher %*
-    exit
-)
-
-IF EXIST "libraries/repo.json" (
-    echo "libraries/repo.json exists."
 ) ELSE (
-    echo "libraries/repo.json does not exist."
-    "%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime --from-launcher --install
+
+    IF EXIST "libraries/repo.json" (
+        echo "libraries/repo.json exists."
+    ) ELSE (
+        echo "libraries/repo.json does not exist."
+        "%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime --from-launcher --install
+    )
+
+    "%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime --from-launcher --log-level info -s webgui WebGui intro Intro python Python
+
 )
-
-"%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime --from-launcher --log-level info -s webgui WebGui intro Intro python Python
-

@@ -1,4 +1,4 @@
-angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templateCache', 'mrl', 'modalService', function($compile, $templateCache, mrl, modalService) {
+angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templateCache', 'mrl', 'modalService', '$state', '$stateParams', function($compile, $templateCache, mrl, modalService, $state, $stateParams) {
     return {
         scope: {
             panel: '='
@@ -6,7 +6,7 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
         // controller: 'serviceCtrl',
         link: function(scope, elem, attr) {
 
-            console.log('serviceBodyDirective - link')
+            console.info('serviceBodyDirective - link')
             /*
             elem.css({
                 'overflow-x': 'auto',
@@ -14,9 +14,11 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
             })
             */
 
-            if (!scope.panel){
-                    console.error('service directive panel is null')
-                    return
+            if (!scope.panel) {
+                // Intro is trying to access panels probably in ng-show="false" state
+                // but it will still explode since they are just being registered
+                console.error('service directive panel is null')
+                return
             }
 
             scope.panel.notifySizeYChanged = function(height) {
@@ -24,12 +26,10 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                     height: height + 'px'
                 })
             }
-            
 
             scope.panel.getCurrentHeight = function() {
                 return elem.height()
             }
-            
 
             var isUndefinedOrNull = function(val) {
                 return angular.isUndefined(val) || val === null
@@ -43,7 +43,7 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                     console.info('=== creating new scope for service ', scope.panel.name)
                     var newscope = scope.panel.scope
                     newscope.parentPanel = scope.panel
-                    
+
                     newscope.updateServiceData = function() {
                         //get an updated / fresh servicedata & convert it to json
                         var servicedata = mrl.getService(scope.panel.name)
@@ -57,28 +57,15 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                     }
 
                     newscope.showPeers = function(show) {
-                       scope.panel.showPeerTable = show
+                        scope.panel.showPeerTable = show
+                    }
+
+                    newscope.saveDefault = function() {
+                        mrl.sendTo('runtime', 'saveDefault', scope.panel.displayName, scope.panel.simpleName)
                     }
 
                     newscope.export = function() {
                         mrl.sendTo('runtime', 'export', scope.panel.displayName)
-                        /*
-                        console.info('promptConfigDir')
-        
-                        let onOK = function () {
-                            mrl.sendTo('runtime', 'export', scope.panel.displayName)
-                        }
-                
-                        let onCancel = function () {
-                            console.info('save config cancelled')
-                        }
-
-                        // scope.configDir = mrl.getConfigDir() + "/" + mrl.getConfigName() + "/" + scope.panel.displayName
-                
-                        let ret = modalService.openOkCancel('widget/modal-save-config-menu.html', 'Save Configuration', 'Save your current configuration for this service in a directory named', onOK, onCancel, scope);
-                        console.info('ret ' + ret);       
-                        */         
-
                     }
 
                     var header = $templateCache.get('service/tab-header.html')
@@ -89,6 +76,20 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                     // when the html was in a hidden state but all the properties where ng-repeated as part of the dom
                     // newscope.properties = mrl.getProperties(newscope.service)
                     $compile(elem.contents())(newscope)
+
+                    // default the id if one was not supplied
+                    let tab = null
+                    if ($stateParams.servicename && $stateParams.servicename.includes('@')) {
+                        tab = $stateParams.servicename
+                    } else {
+                        tab = $stateParams.servicename + '@' + mrl.getRemoteId()
+                    }
+
+                    // if we have an exact match swith to that tab
+                    if (newscope.name == tab) {
+                        // exact match with url e.g. /python@blah
+                        mrl.changeTab(tab)
+                    }
                 }
             })
         }

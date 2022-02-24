@@ -1055,7 +1055,10 @@ public class Andrew extends Service implements SpeechListener {
     tracker = (Tracking) Runtime.start("tracker", "Tracking");
     openCV = (OpenCV) Runtime.start("openCv", "OpenCV");
     sleep(1000);
-    tracker.connect(openCV, neckPanServo, neckTiltServo);
+    tracker.attach(openCV);
+    tracker.attachPan(neckPanServo.getName());
+    tracker.attachTilt(neckTiltServo.getName());
+    // tracker.connect(openCV, neckPanServo, neckTiltServo);
     // tracker.pid.invert("y");
     // tracker.clearPreFilters();
 
@@ -1093,8 +1096,7 @@ public class Andrew extends Service implements SpeechListener {
    *           e
    */
   public void stopTrack() throws Exception {
-    tracker.opencv.stopCapture();
-    tracker.releaseService();
+    tracker.disable();
   }
 
   public OpenNi startOpenNI() throws Exception {
@@ -1109,7 +1111,7 @@ public class Andrew extends Service implements SpeechListener {
 
       pid.setMode("kinect", Pid.MODE_AUTOMATIC);
       pid.setOutputRange("kinect", -1, 1);
-      pid.setPID("kinect", 10.0, 0.0, 1.0);
+      pid.setPid("kinect", 10.0, 0.0, 1.0);
       pid.setControllerDirection("kinect", 0);
 
       // re-mapping of skeleton !

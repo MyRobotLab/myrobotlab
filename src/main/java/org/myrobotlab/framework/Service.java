@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -1319,7 +1320,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
                   // attempt to get defaultInvokeMethod
                   m = cache.getDefaultInvokeMethod(si.getClass().getCanonicalName());
                   if (m != null) {
-                    m.invoke(si, listener.callbackMethod, new Object[] {retobj});
+                    m.invoke(si, listener.callbackMethod, new Object[] { retobj });
                   } else {
                     log.warn("Null Method as a result of cache lookup. {} {} {}", si.getClass(), listener.callbackMethod, retobj);
                   }
@@ -1476,11 +1477,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * peers - it should fufill the request
    */
   @Override
+  @Deprecated
   public void releasePeers() {
-    releasePeers(null);
+    // releasePeers(null);
   }
 
   // FIXME - startPeers sets fields - this method should "unset" fields !!!
+  @Deprecated
   synchronized private void releasePeers(String peerKey) {
     log.info("{}.releasePeers ({})", getName(), peerKey);
     try {
@@ -1738,10 +1741,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     msg.sendingMethod = "send";
     // log.info(CodecUtils.toJson(msg));
     send(msg);
-    
+
     outbox.add(msg);
   }
-  
+
   public Object sendBlocking(String name, Integer timeout, String method, Object... data) throws InterruptedException, TimeoutException {
     Message msg = Message.createMessage(getName(), name, method, data);
     msg.sender = this.getFullName();
@@ -1986,7 +1989,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       isRunning = true;
       Runtime runtime = Runtime.getInstance();
       if (runtime != null) {
-        runtime.broadcast("started", getFullName());
+        runtime.invoke("started", getName()); //getFullName()); - removed fullname
       }
 
     } else {
@@ -2089,7 +2092,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     thisThread = null;
 
     Runtime runtime = Runtime.getInstance();
-    runtime.broadcast("stopped", getFullName());
+    runtime.invoke("stopped", getFullName());
   }
 
   // -------------- Messaging Begins -----------------------
@@ -2752,39 +2755,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   @Override
-  public void onRegistered(Registration registration) {
-    // service life-cycle callback - override if interested in these events
-  }
-
-  @Override
-  public void onCreated(String fullname) {
-    // service life-cycle callback - override if interested in these events
-  }
-
-  @Override
-  public void onStarted(String fullname) {
-    // service life-cycle callback - override if interested in these events
-  }
-
-  @Override
-  public void onStopped(String fullname) {
-    // service life-cycle callback - override if interested in these events
-  }
-
-  @Override
-  public void onReleased(String fullname) {
-    // service life-cycle callback - override if interested in these events
-  }
-
-  public boolean isStarted(String peerKey) {
-    ServiceInterface si = getPeer(peerKey);
-    if (si == null || !si.isRunning()) {
-      return false;
-    }
-    return true;
-  }
-
-  @Override
   public int compareTo(ServiceInterface o) {
     if (this.creationOrder == o.getCreationOrder()) {
       return 0;
@@ -2812,6 +2782,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   protected void registerForInterfaceChange(Class<?> clazz) {
     Runtime.getInstance().registerForInterfaceChange(getClass().getCanonicalName(), clazz);
+  }
+
+  final public LinkedHashMap<String, ServiceConfig> getDefault() {
+    return ServiceInterface.getDefault(getName(), this.getClass().getSimpleName());
   }
 
 }

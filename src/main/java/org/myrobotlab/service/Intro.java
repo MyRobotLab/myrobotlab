@@ -2,17 +2,15 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
+// import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
@@ -27,23 +25,8 @@ public class Intro extends Service {
 
   public Intro(String n, String id) {
     super(n, id);
-
-    // subscribe("*", "publishStatus");
-
-    List<ServiceInterface> registry = Runtime.getServices();
-    for (ServiceInterface si : registry) {
-      try {
-        attach(si);
-      } catch (Exception e) {
-        log.error("attaching {} threw", si.getName(), e);
-      }
-    }
-
-    // subscribe("runtime", "created")
-    // to much type info - life-cycle happens before peers started
     subscribe("runtime", "registered", getName(), "registered");
     subscribe("runtime", "released", getName(), "released");
-    // subscribe("runtime", "started");
   }
 
   public String registered(Registration registration) {
@@ -129,18 +112,50 @@ public class Intro extends Service {
 
       // for mary tts on java11...
       System.setProperty("java.version", "11.0");
-      LoggingFactory.init(Level.INFO);
+      LoggingFactory.init("info");
 
-      Runtime.main(new String[] { "--from-launcher" });
-      Runtime.start("intro", "Intro");
-      Runtime.start("python", "Python");
-
-      // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
-
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      // webgui.setSsl(true);
+      // Runtime.main(new String[]{"--config", "i01-9"});
+      // Runtime.start("runtime", "Runtime"); i
+      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
+      
+      Runtime.start("intro", "Intro");
+      //Runtime.start("python", "Python");
+      // Runtime.start("mega", "Arduino");
+      // Runtime.start("ada", "Adafruit16CServoDriver");
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      
+      Runtime.start("i01", "InMoov2");
+
+
+      DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
+      ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
+      brain.setCurrentBotName("Alice");
+      bot.connect();
+      brain.attach(bot);
+      bot.attach(brain);
+
+      // Runtime.main(new String[] { "--from-launcher" });// FIXME - get rid of
+      // this !
+      // similar to a peer reserve - ie - specifying type - now autoload
+      // ProgramAB brain = (ProgramAB)Runtime.start("brain");
+      Runtime.start("brain", "ProgramAB");
+      // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+      Runtime.create("webgui", "WebGui");
+      Runtime.setConfig("InMoov2_FingerStarter");
+
+      Runtime.create("i01.chatBot");
+      Runtime.load("i01.chatBot");
+      Runtime.start("i01.chatBot");
+
+      Runtime.start("intro", "Intro");
+      Runtime.start("python", "Python");
 
     } catch (Exception e) {
       log.error("main threw", e);

@@ -23,7 +23,6 @@ pipeline {
     tools {
         maven 'M3' // defined in global tools - maven is one of the only installers that works well for global tool
         // jdk 'openjdk-11-linux' // defined in global tools
-        // git 
     }
     
     // JAVA_HOME="${tool 'openjdk-11-linux'}/jdk-11.0.1"
@@ -76,10 +75,10 @@ pipeline {
             script {
                if (isUnix()) {
                   sh '''
-                     mvn -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -q clean compile
+                     mvn -Dbuild.number=${BUILD_NUMBER} -DskipTests -q clean compile
                   '''
                } else {
-                  bat(/"${MAVEN_HOME}\bin\mvn" -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -q clean compile  /)
+                  bat(/"${MAVEN_HOME}\bin\mvn" -Dbuild.number=${BUILD_NUMBER} -DskipTests -q clean compile  /)
                }
             }
          }
@@ -110,10 +109,10 @@ pipeline {
             script {
                if (isUnix()) {
                   sh '''
-                     mvn -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -q package
+                     mvn -Dbuild.number=${BUILD_NUMBER} -DskipTests -q package
                   '''
                } else {
-                  bat(/"${MAVEN_HOME}\bin\mvn" -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -q package  /)
+                  bat(/"${MAVEN_HOME}\bin\mvn" -Dbuild.number=${BUILD_NUMBER} -DskipTests -q package  /)
                }
             }
          }

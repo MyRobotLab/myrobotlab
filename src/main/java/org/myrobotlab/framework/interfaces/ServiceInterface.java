@@ -1,7 +1,9 @@
 package org.myrobotlab.framework.interfaces;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,16 +11,22 @@ import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 
-public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker,
+import org.slf4j.Logger;
+
+public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker,
     StatePublisher, StatusPublisher, ServiceStatus, TaskManager, Attachable, Comparable<ServiceInterface> {
 
+  // does this work ?
+  public final static Logger log = LoggerFactory.getLogger(Service.class);
+
   /**
-   * When set service will attempt to provide services with no hardware dependencies.
-   * Some services have the capablity to mock hardware such as the Serial and Arduino
-   * services. 
+   * When set service will attempt to provide services with no hardware
+   * dependencies. Some services have the capablity to mock hardware such as the
+   * Serial and Arduino services.
    * 
    * @param b
    *          true to set the virtual mode
@@ -57,6 +65,7 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
 
   /**
    * equivalent to getClass().getCanonicalName()
+   * 
    * @return
    */
   public String getType();
@@ -75,9 +84,9 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
   public void releasePeers();
 
   /**
-   * Service life-cycle method:
-   * releaseService will call stopService, release its peers, do any derived business logic
-   * to release resources, then un-register itself
+   * Service life-cycle method: releaseService will call stopService, release
+   * its peers, do any derived business logic to release resources, then
+   * un-register itself
    */
   public void releaseService();
 
@@ -97,7 +106,8 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
   public void setInstanceId(URI uri);
 
   /**
-   * Service life cycle method - calls create, and starts any necessary resources to function
+   * Service life cycle method - calls create, and starts any necessary
+   * resources to function
    */
   public void startService();
 
@@ -122,10 +132,10 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
   public void loadAndStart();
 
   /**
-   * Service life-cycle method, stops the inbox and outbox threads - typically does not
-   * release "custom" resources. It's purpose primarily is to stop messaging from flowing
-   * in or out of this service - which is handled in the base Service class.  Most times
-   * this method will not need to be overriden
+   * Service life-cycle method, stops the inbox and outbox threads - typically
+   * does not release "custom" resources. It's purpose primarily is to stop
+   * messaging from flowing in or out of this service - which is handled in the
+   * base Service class. Most times this method will not need to be overriden
    */
   public void stopService();
 
@@ -161,5 +171,60 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
   public void setLocale(String code);
 
   public int getCreationOrder();
+
+  static public LinkedHashMap<String, ServiceConfig> getDefault(String name, String type) {
+    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
+    
+    String simpleTypeName = null;
+    if (type.contains(".")) {
+      simpleTypeName = type.substring(type.lastIndexOf(".")+1);
+    } else {
+      simpleTypeName = type;
+    }
+    
+    try {
+
+      String metaClass = "org.myrobotlab.service.meta." + simpleTypeName + "Meta";
+
+      Class<?> clazz = Class.forName(metaClass);
+      Method method = clazz.getMethod("getDefault", String.class);
+
+      // I chose "non"-static method for getDefault - because Java has
+      // an irritating rule of not allowing static overloads and abstracts
+      config = (LinkedHashMap<String, ServiceConfig>) method.invoke(null, name);
+
+      if (config == null || config.keySet().size() == 0) {
+        log.warn("{} does not currently have any default configurations", metaClass);
+      }
+    } catch (NoSuchMethodException em) {
+
+      try {
+
+        log.info("{} of type {} does not have a getDefault", name, type);
+
+        String configClass = "org.myrobotlab.service.config." + simpleTypeName + "Config";
+
+        Class<?> clazz = Class.forName(configClass);
+
+        // create new instance
+        Constructor<?> ctor = clazz.getConstructor();
+        ServiceConfig configObject = (ServiceConfig) ctor.newInstance();
+
+        // I chose "non"-static method for getDefault - because Java has
+        // an irritating rule of not allowing static overloads and abstracts
+        config.put(name, configObject);
+
+      } catch (Exception e) {
+        log.warn("{} of type {} does not have a Config object - creating default service config", name, type);
+        ServiceConfig serviceConfig = new ServiceConfig();
+        serviceConfig.type = type;
+        config.put(name, serviceConfig);
+      }
+
+    } catch (Exception e) {
+      log.error("ServiceConfig.getDefault({},{}) threw", name, type, e);
+    }
+    return config;
+  }
 
 }

@@ -76,7 +76,6 @@ angular.module('mrlapp.service.IntroGui', []).controller('IntroGuiCtrl', ['$scop
         if (panelNames.has(panelName)) {
             $scope.subPanels[panelName]           
         }
-        console.info('here')
     }
 
     // initialize all services which have panel references in Intro

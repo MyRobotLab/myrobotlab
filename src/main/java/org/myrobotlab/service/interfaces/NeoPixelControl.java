@@ -32,14 +32,16 @@ public interface NeoPixelControl extends NameProvider {
   /**
    * explicit attach no additional parameters
    * 
-   * @param controller attach this neopixel controller
+   * @param controller
+   *          attach this neopixel controller
    */
   public void attachNeoPixelController(NeoPixelController controller);
 
   /**
    * explicit detach
    * 
-   * @param controller - detach this neopixel controller
+   * @param controller
+   *          - detach this neopixel controller
    */
   public void detachNeoPixelController(NeoPixelController controller);
 
@@ -48,10 +50,14 @@ public interface NeoPixelControl extends NameProvider {
    * send directly to the Neopixel Hardware but send with the sendPixelMatrix()
    * method
    * 
-   * @param address - address of neopixel pixel
-   * @param red - color value 0 - 255
-   * @param green - color value 0 - 255
-   * @param blue - color value 0 - 255
+   * @param address
+   *          - address of neopixel pixel
+   * @param red
+   *          - color value 0 - 255
+   * @param green
+   *          - color value 0 - 255
+   * @param blue
+   *          - color value 0 - 255
    */
   public void setPixel(int address, int red, int green, int blue);
 
@@ -67,6 +73,8 @@ public interface NeoPixelControl extends NameProvider {
   public int getNumPixel();
 
   public void clear();
+
+  public void playAnimation(String animation);
 
   public void setAnimation(int animation, int red, int green, int blue, int wait_ms);
 

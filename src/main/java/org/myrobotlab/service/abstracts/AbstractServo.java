@@ -253,6 +253,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   /**
    * if a new service is added to the system refresh the controllers
    */
+  @Deprecated /* lifecycle events not necessary for ui, probably should be pulled out */
   public void onStarted(String name) {
     invoke("refreshControllers");
   }
@@ -369,7 +370,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     controller = sc;
 
     ServoController servoController = (ServoController)Runtime.getService(sc);
-    servoController.attachServoControl(this);
+    if (servoController != null) {
+      servoController.attachServoControl(this);
+    }
     // FIXME - remove !!!
     // FIXME change to broadcast ?
     // TODO: there is a race condition here.. we need to know that
@@ -401,6 +404,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     detach(sc.getName());
   }
 
+  // AbstractServo -
   public void detach(String controllerName) {
     if (controller == null) {
       log.info("already detached");
@@ -408,12 +412,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     }
 
     if (controller != null && !controller.equals(controllerName)) {
-      log.info("{} already detached from {}", getName(), controllerName);
+      log.warn("{} not attached to {}", getName(), controllerName);
       return;
     }
 
     disable();
-    send(controllerName, "detach", getName());
 
     // the subscribes .... or addListeners in this case ...
     removeListener("publishServoMoveTo", controllerName);
@@ -427,6 +430,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // junit ServoTest will fail without this :P
     // sleep(500);
     firstMove = true;
+    
+    send(controllerName, "detach", getName());
     broadcastState();
   }
 
@@ -453,10 +458,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // broadcastState();
   }
 
+  @Deprecated /* use setMaxSpeed */
   public void fullSpeed() {
     setSpeed((Double)null);
   }
-
+  
   @Override
   public boolean isAutoDisable() {
     return autoDisable;
@@ -602,6 +608,25 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     
     processMove(newPos, false, null);
     return newPos;
+  }
+  
+  /**
+   * incrementally move - takes the servo's current position (could be in the middle of a move)
+   * adds the increment and tells the servo to go to the new location. Returns the new location
+   * if the moveTo was successfully started - otherwise returns null
+   * @param increment
+   * @return
+   */
+  public Double moveIncr(Double increment) {
+    if (increment == null) {
+      log.info("will not move to null position - not moving");
+      return null;
+    }
+    double newPos = getCurrentInputPos() + increment;
+    if (processMove(newPos, false, null)) {
+      return newPos;
+    }
+    return null;
   }
 
   @Override
@@ -1049,7 +1074,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   public void startService() {
     super.startService();
-    Runtime.getInstance().subscribeToLifeCycleEvents(getName());
+    Runtime.getInstance().attachServiceLifeCycleListener(getName());
   }
 
   @Override
@@ -1067,6 +1092,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     }
     return null;
   }
+  
+  
 
   @Override
   public void attachServoControlListener(String name) {

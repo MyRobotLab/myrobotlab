@@ -33,6 +33,9 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.config.AbstractSpeechSynthesisConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.VoiceRssConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
@@ -126,6 +129,12 @@ public class VoiceRss extends AbstractSpeechSynthesis {
     addVoice("Isabella", "female", "es-mx", "es-mx"); // Spanish (Mexico)
     addVoice("Camila", "female", "es-es", "es-es"); // Spanish (Spain)
     addVoice("Elsa", "female", "sv-se", "sv-se"); // Swedish (Sweden)
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    VoiceRssConfig config = (VoiceRssConfig) super.getConfig((AbstractSpeechSynthesisConfig) new VoiceRssConfig());
+    return config;
   }
 
   public static void main(String[] args) {

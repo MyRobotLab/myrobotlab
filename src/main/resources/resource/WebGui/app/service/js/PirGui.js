@@ -30,7 +30,7 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
             break
         case 'onSense':
             console.info('onSense', data)
-            $scope.service.isActive = data
+            $scope.service.active = data
             $scope.$apply()
             break
         default:
@@ -75,9 +75,7 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
     }
 
     // FIXME - which i could get rid of this
-    // makes attach directive worky on first load
-    msg.sendTo("runtime", "publishInterfaceToPossibleServices")
-
+    // makes attach directive worky on first load   
     msg.subscribe('publishSense')
     msg.subscribe(this)
 }

@@ -177,12 +177,14 @@ public class Joystick extends Service implements AnalogPublisher {
         if (pollingController == null) {
           error("controller is null - can not poll");
           stopPolling();
+          break;
         }
 
         // get the data
         if (isPolling && !pollingController.poll()) {
           error("failed to poll controller");
           stopPolling();
+          break;
         }
 
         // iterate through each component and compare last values
@@ -483,9 +485,9 @@ public class Joystick extends Service implements AnalogPublisher {
     return controller;
   }
 
-  public void stopService() {
-    super.stopService();
-    stopPolling();
+  public void releaseService() {
+    super.releaseService();
+    stopPolling();    
   }
 
   public Component getAxis(String name) {

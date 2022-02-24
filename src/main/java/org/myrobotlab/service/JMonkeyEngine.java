@@ -1055,12 +1055,12 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     Spatial spatial = get(path);
 
     if (spatial == null) {
-      error("geteUserData %s cannot be found", path);
+      log.warn("geteUserData {} cannot be found", path);
       return null;
     }
 
     if (spatial instanceof Geometry) {
-      error("geteUserData %s found but is Geometry not Node", path);
+      log.warn("geteUserData {} found but is Geometry not Node", path);
       return null;
     }
 
@@ -1207,6 +1207,10 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   public void loadModels(String dirPath) {
+    if (modelPaths.contains(dirPath)) {
+      info("already loaded %s", dirPath);
+      return;
+    }
     modelPaths.add(dirPath);
     traverseLoadModels(dirPath);
   }
@@ -2603,8 +2607,10 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       }
     }
 
-    for (String name : config.multiMapped.keySet()) {
-      multiMap(name, config.multiMapped.get(name));
+    if (config.multiMapped != null) {
+      for (String name : config.multiMapped.keySet()) {
+        multiMap(name, config.multiMapped.get(name));
+      }
     }
 
     if (config.cameraLookAt != null) {

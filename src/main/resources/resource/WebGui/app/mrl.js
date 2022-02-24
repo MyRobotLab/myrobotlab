@@ -8,7 +8,7 @@
 */
 
 angular.module('mrlapp.mrl', []).provider('mrl', [function() {
-    console.debug('mrl.js - begin')
+    console.info('mrl.js - begin')
 
     // TODO - get 'real' platform info - browser type - node version - etc
     let platform = {
@@ -314,7 +314,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     _self.register = function(registration) {
 
         let fullname = registration.name + '@' + registration.id
-        console.log("--> onRegistered " + fullname)
+            console.log("--> onRegistered " + fullname)
 
         let simpleTypeName = _self.getSimpleName(registration.typeKey)
 
@@ -1145,6 +1145,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         }
 
         this.connect = function(url, proxy) {
+            console.info('mrl.connect()')
             if (connected) {
                 console.debug("aleady connected")
                 return this
@@ -1466,7 +1467,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             // better name
             getProperties: _self.getProperties,
             sendMessage: _self.sendMessage, // setViewType: _self.setViewType,
-            // getViewType: _self.getViewType
             interfaceToPossibleServices: _self.interfaceToPossibleServices
 
         }

@@ -24,7 +24,6 @@ import java.util.Set;
 
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -159,6 +158,9 @@ public class CodecUtils {
   }
 
   static public final String shortName(String name) {
+    if (name == null) {
+      return null;
+    }
     if (name.contains("@")) {
       return name.substring(0, name.indexOf("@"));
     } else {

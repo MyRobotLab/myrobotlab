@@ -7,13 +7,13 @@ import org.myrobotlab.opencv.OpenCVFilter;
 
 public class OpenCVConfig extends ServiceConfig {
 
-  public Integer cameraIndex;
-  public String grabberType;
-  public String inputSource;
-  public String inputFile;
-  public boolean nativeViewer;
-  public boolean webViewer;
-  public boolean capturing;
+  public Integer cameraIndex = 0;
+  public String grabberType = "OpenCV";
+  public String inputSource = "camera";
+  public String inputFile = null;
+  public boolean nativeViewer = true;
+  public boolean webViewer = false;
+  public boolean capturing = false;
   public Map<String, OpenCVFilter> filters = new LinkedHashMap<>();
 
 }

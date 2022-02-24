@@ -278,7 +278,7 @@ public class Hd44780 extends Service {
    * 
    */
   public void writeRegister(byte cmd) {
-    if (isReady()) {
+    if (isReady() && pcf != null) {
       pcf.writeRegister(cmd);
     } else {
       log.error("LCD is not ready / attached !");
@@ -342,7 +342,7 @@ public class Hd44780 extends Service {
       }
     }
     
-    if (config.backlight != null && config.backlight) {
+    if (pcf != null && config.backlight != null && config.backlight) {
       setBackLight(config.backlight);
     }
     return c;

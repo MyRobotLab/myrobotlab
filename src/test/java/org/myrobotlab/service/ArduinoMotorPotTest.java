@@ -77,10 +77,8 @@ public class ArduinoMotorPotTest {
     int[] data = (int[]) event.getData();
     count++;
     int value = data[0];
-    log.info("Data: {}", data);
-    pid.setInput(key, value);
-    pid.compute(key);
-    double output = pid.getOutput(key);
+    log.info("Data: {}", data);    
+    Double output = pid.compute(key, value);    
     log.info("Data {} , Output : {}", data, output);
     if (Math.abs(pid.getSetpoint(key) - value) > tolerance) {
       // log.info("Setting pin mode as a test.");
@@ -213,7 +211,7 @@ public class ArduinoMotorPotTest {
     // Create the pid controller
     pid = (Pid) Runtime.createAndStart("pid", "Pid");
     // # set the pid parameters KP KI KD (for now just porportial control)
-    pid.setPID(key, kp, ki, kd);
+    pid.setPid(key, kp, ki, kd);
     int direction = 1;
     pid.setControllerDirection(key, direction);
     pid.setMode(key, 1);

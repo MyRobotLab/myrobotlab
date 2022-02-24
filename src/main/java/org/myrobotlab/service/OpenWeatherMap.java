@@ -5,7 +5,12 @@ import java.net.URLEncoder;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import java.util.LinkedHashMap;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.OpenWeatherMapConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 /**
@@ -55,6 +60,9 @@ public class OpenWeatherMap extends HttpClient {
       log.info("apiUrl: {}", apiUrl);
       log.info("Response: {}", response);
       obj = new JSONObject(response);
+      if (obj.getInt("cod") != 200) {
+        error(obj.getString("message"));
+      }
     } catch (Exception e) {
       error("Cannot get json from OWM : %s", e);
       e.printStackTrace();
@@ -163,7 +171,7 @@ public class OpenWeatherMap extends HttpClient {
    */
   public void setLocation(String location) {
     this.location = location;
-    if (!location.contains(",")) {
+    if (location != null && !location.contains(",")) {
       warn("Recommended location for OWM is TOWN,COUNTRY CODE, exemple : paris,FR");
     }
   }
@@ -240,6 +248,26 @@ public class OpenWeatherMap extends HttpClient {
 
   public String getLocalUnits() {
     return localUnits;
+  }
+  
+  public String getApiKey() {
+    return  Runtime.getSecurity().getKey("OPENWEATHERMAP");
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+
+    OpenWeatherMapConfig config = new OpenWeatherMapConfig();
+    config.currentUnits = units;
+    config.currentTown = location;
+    return config;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    OpenWeatherMapConfig config = (OpenWeatherMapConfig) c;
+    setUnits(config.currentUnits);
+    setLocation(config.currentTown);
+    return c;
   }
 
   public static void main(String[] args) {

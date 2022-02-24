@@ -767,7 +767,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
 
     // if mouth has not started
     // no point in speaking
-    if (!isStarted("mouth")) {
+    if (!Runtime.isStarted(getName() + ".mouth")) {
       return text;
     }
 

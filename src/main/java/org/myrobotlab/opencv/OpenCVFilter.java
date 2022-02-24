@@ -49,6 +49,7 @@ import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.myrobotlab.cv.CvFilter;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
@@ -56,7 +57,7 @@ import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
-public abstract class OpenCVFilter implements Serializable {
+public abstract class OpenCVFilter implements Serializable, CvFilter {
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilter.class.toString());
 
   private static final long serialVersionUID = 1L;

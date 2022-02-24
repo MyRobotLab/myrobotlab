@@ -1,4 +1,4 @@
-<!-- div class="OpenCVStyle preventDragSelect" prevents dropdown-->
+<!-- div class="OpenCVStyle prevent-drag-select" prevents dropdown-->
 <div class="row">
     <div class="form-inline">
         <div class="form-group">
@@ -7,10 +7,12 @@
                 &nbsp;Start Capture
             
             
+            
             </button>
             <button class="btn btn-default" ng-hide="!service.capturing" class="btn btn-default" ng-click="msg.stopCapture()">
                 <span class="glyphicon glyphicon-stop"></span>
                 &nbsp;Stop Capture
+            
             
             
             </button>
@@ -44,6 +46,11 @@
                 <option>5</option>
                 <option>6</option>
                 <option>7</option>
+                <option>8</option>
+                <option>9</option>
+                <option>10</option>
+                <option>11</option>
+                <option>12</option>
             </select>
         </div>
         <div id="File" ng-show="service.inputSource == 'imagefile'">
@@ -79,6 +86,7 @@
             <span class="glyphicon glyphicon-info-sign gray1"></span>
             {{service.displayFilter}} mouse x y {{samplePoint.x}}x{{samplePoint.y}} {{stats.fps}} fps  latency {{stats.latency}} ms
         
+        
         </div>
         <br/>
         <label>Output</label>
@@ -100,123 +108,126 @@
                     </select>
                 </td>
                 -->
-                <td style="width:104px">
-                    <button ng-click="msg.record()" class="btn btn-default" style="width:100px" ng-show="!service.recording">
-                        <span class="glyphicon glyphicon-record"></span>
-                        REC
-                    </button>
-                    <button ng-click="msg.stopRecording()" class="btn btn-default" style="width:100px" ng-show="service.recording">
-                        <span class="glyphicon glyphicon-stop"></span>
-                        STOP
-                    </button>
-                </td>
-                <td style="width:132px">
-                    <button class="btn btn-default" style="width:126px" ng-click="msg.recordFrame()">
-                        <span class="glyphicon glyphicon-camera"></span>
-                        Snapshot
-                        </button>
-                </td>
-            </tr>
-            <td colspan="3" ng-show="service.recording">
-                <!-- RECORDING -->
-                <div class="progress-bar progress-bar-danger  progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                    <span></span>
-                    RECORDING
-                
-                </div>
+            <td style="width:104px">
+                <button ng-click="msg.record()" class="btn btn-default" style="width:100px" ng-show="!service.recording">
+                    <span class="glyphicon glyphicon-record"></span>
+                    REC
+                    
+                </button>
+                <button ng-click="msg.stopRecording()" class="btn btn-default" style="width:100px" ng-show="service.recording">
+                    <span class="glyphicon glyphicon-stop"></span>
+                    STOP
+                    
+                </button>
             </td>
-        </table>
+            <td style="width:132px">
+                <button class="btn btn-default" style="width:126px" ng-click="msg.recordFrame()">
+                    <span class="glyphicon glyphicon-camera"></span>
+                    Snapshot
+                        
+                </button>
+            </td>
+</tr>
+<td colspan="3" ng-show="service.recording">
+    <!-- RECORDING -->
+    <div class="progress-bar progress-bar-danger  progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+        <span></span>
+        RECORDING
+                
+                
     </div>
-    <div class="col-md-6">
-        <table class="col-md-12">
-            <tr>
-                <td>
-                    <label>Current filters</label>
-                </td>
-                <td></td>
-                <td>
-                    <label>Available filters</label>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <select class="custom-select col-md-12" size="7" ng-model="service.displayFilter" ng-change="setDisplayFilter(service.displayFilter)">
-                        <option ng-repeat="(key, value) in service.filters">{{ key }}</option>
-                    </select>
-                </td>
-                <td class="text-center align-middle cellPadding">
-                    <button class="btn btn-default" ng-click="addFilter()">
-                        <span class="glyphicon glyphicon-arrow-left"></span>
-                    </button>
-                    <br/>
-                    <br/>
-                    <button class="btn btn-default" ng-click="msg.removeFilter(service.displayFilter)">
-                        <span class="glyphicon glyphicon-arrow-right"></span>
-                    </button>
-                </td>
-                <td>
-                    <select class="custom-select col-md-12" ng-model="selectedFilterType" size="7">
-                        <option ng-repeat="filter in possibleFilters">{{ filter }}</option>
-                    </select>
-                </td>
-            </tr>
-        </table>
-        <!-- =================================== FILTER DIALOGS START =================================== -->
-        &nbsp;<hr>
-        <div ng-show="isFilterType('AdaptiveThreshold')" class="col-md-12">
-            Adaptive threshold applies a threshold value based on a small region around a pixel.und it. 
+</td>
+</table></div>
+<div class="col-md-6">
+    <table class="col-md-12">
+        <tr>
+            <td>
+                <label>Current filters</label>
+            </td>
+            <td></td>
+            <td>
+                <label>Available filters</label>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <select class="custom-select col-md-12" size="7" ng-model="service.displayFilter" ng-change="setDisplayFilter(service.displayFilter)">
+                    <option ng-repeat="(key, value) in service.filters">{{ key }}</option>
+                </select>
+            </td>
+            <td class="text-center align-middle cellPadding">
+                <button class="btn btn-default" ng-click="addFilter()">
+                    <span class="glyphicon glyphicon-arrow-left"></span>
+                </button>
+                <br/>
+                <br/>
+                <button class="btn btn-default" ng-click="msg.removeFilter(service.displayFilter)">
+                    <span class="glyphicon glyphicon-arrow-right"></span>
+                </button>
+            </td>
+            <td>
+                <select class="custom-select col-md-12" ng-model="selectedFilterType" size="7">
+                    <option ng-repeat="filter in possibleFilters">{{ filter }}</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+    <!-- =================================== FILTER DIALOGS START =================================== -->
+    &nbsp;<hr>
+    <div ng-show="isFilterType('AdaptiveThreshold')" class="col-md-12">
+        Adaptive threshold applies a threshold value based on a small region around a pixel.und it. 
         So we get different thresholds for different regions of the same image which gives better results for images with varying illumination.
             <hr>
-            Block Size {{getFilter().blockSize}}  <rzslider class="custom-slider3" rz-slider-model="getFilter().blockSize" rz-slider-options="getFilterType().blockSize.options"/>
-            <br/>
-            Subtracted {{getFilter().param1}}  <rzslider class="custom-slider3" rz-slider-model="getFilter().param1" rz-slider-options="getFilterType().param1.options"/>
-            <select class="form-control" ng-change="setFilterState()" ng-model="getFilter().algorithm">
-                <option>mean</option>
-                <option>gaussian</option>
-            </select>
-        </div>
-        <div ng-show="isFilterType('AdaptiveThreshold')" class="col-md-12">
-            AddMask allows you to add a png with transparency as an overlay. This could be useful to mask off information for training.  For example, removing a face portrait from its background.
+        Block Size {{getFilter().blockSize}}  <input type="range" ng-model="getFilter().blockSize" min="3" step="2" max="13" ng-change="setFilterState()"/>
+        Subtracted {{getFilter().param1}}  <input type="range" ng-model="getFilter().param1" min="-10" max="10" step="1" ng-change="setFilterState()"/>
+        <select class="form-control" ng-change="setFilterState()" ng-model="getFilter().algorithm">
+            <option>mean</option>
+            <option>gaussian</option>
+        </select>
+    </div>
+    <div ng-show="isFilterType('AddMask')" class="col-md-12">
+        AddMask allows you to add a png with transparency as an overlay. This could be useful to mask off information for training.  For example, removing a face portrait from its background.
             <hr>
-            <button>browse</button>
-        </div>
-        <div ng-show="isFilterType('Affine')" class="col-md-12">
-            In Euclidean geometry, an affine transformation is a geometric transformation that preserves lines and parallelism (but not necessarily distances and angles). 
+        <button>browse</button>
+    </div>
+    <div ng-show="isFilterType('Affine')" class="col-md-12">
+        In Euclidean geometry, an affine transformation is a geometric transformation that preserves lines and parallelism (but not necessarily distances and angles). 
             Rotational transformation would be an example.
             <hr>
-            angle {{getFilter().angle}}  <rzslider class="custom-slider3" rz-slider-model="getFilter().angle" rz-slider-options="getFilterType().angle.options"/>
-        </div>
-        <div ng-show="isFilterType('Canny')" class="col-md-12">
-            Canny edge detection is a technique to extract useful structural information from different vision objects and dramatically reduce the amount of data to be processed. 
+        angle {{getFilter().angle}}  <input type="range" ng-model="getFilter().angle" min="0" step="1" max="360" ng-change="setFilterState()"/>
+        <br/>
+    </div>
+    <div ng-show="isFilterType('Canny')" class="col-md-12">
+        Canny edge detection is a technique to extract useful structural information from different vision objects and dramatically reduce the amount of data to be processed. 
             It has been widely applied in various computer vision systems.             
             <br/>
-            <hr>
-            Aperture Size {{getFilter().apertureSize}}  <rzslider class="custom-slider3" rz-slider-model="getFilter().apertureSize" rz-slider-options="getFilterType().apertureSize.options"/>
-            <br/>
-            Low Threshold {{getFilter().lowThreshold}}  <rzslider class="custom-slider3" rz-slider-model="getFilter().lowThreshold" rz-slider-options="getFilterType().lowThreshold.options"/>
-            <br/>
-            High Threshold {{getFilter().highThreshold}} <rzslider class="custom-slider3" rz-slider-model="getFilter().highThreshold" rz-slider-options="getFilterType().highThreshold.options"/>
-        </div>
-        <div ng-show="isFilterType('LKOpticalTrack')" class="col-md-12">
-            <a href="https://docs.opencv.org/3.4.1/d7/d8b/tutorial_py_lucas_kanade.html">Optical flow</a>
-            is the pattern of apparent motion of image objects between two consecutive frames caused by the movemement of object or camera. 
+        <hr>
+        Aperture Size {{getFilter().apertureSize}}  <input type="range" ng-model="getFilter().apertureSize" min="3" max="7" step="2" ng-change="setFilterState()"/>
+        <br/>
+        Low Threshold {{getFilter().lowThreshold}} <input type="range" ng-model="getFilter().lowThreshold" min="0" max="500" step="1" ng-change="setFilterState()"/>
+        <br/>
+        High Threshold {{getFilter().highThreshold}} <input type="range" ng-model="getFilter().highThreshold" min="0" max="500" step="1" ng-change="setFilterState()"/>
+    </div>
+    <div ng-show="isFilterType('LKOpticalTrack')" class="col-md-12">
+        <a href="https://docs.opencv.org/3.4.1/d7/d8b/tutorial_py_lucas_kanade.html">Optical flow</a>
+        is the pattern of apparent motion of image objects between two consecutive frames caused by the movemement of object or camera. 
             It is 2D vector field where each vector is a displacement vector showing the movement of points from first frame to second..             
             <br/>
-            <hr>
-            Max Points {{getFilter().maxPointCnt}}  <rzslider class="custom-slider3" rz-slider-model="getFilter().maxPointCnt" rz-slider-options="getFilterType().maxPointCnt.options"/>
-            <hr>
-            Min Distance {{getFilter().minDistance}}  <rzslider class="custom-slider3" rz-slider-model="getFilter().minDistance" rz-slider-options="getFilterType().minDistance.options"/>
-            <br/>
-            Block Size {{getFilter().blockSize}} <rzslider class="custom-slider3" rz-slider-model="getFilter().blockSize" rz-slider-options="getFilterType().blockSize.options"/>
-            <br/>
-            Quality {{getFilter().quality/100}} <rzslider class="custom-slider3" rz-slider-model="getFilter().quality" rz-slider-options="getFilterType().quality.options"/>
-            <button class="btn btn-default" ng-click="getFilter().needTrackingPoints=true;getFilter().clearPoints=false;setFilterState()">Get Features</button>
-            <button class="btn btn-default" ng-click="getFilter().clearPoints=true;setFilterState()">Clear Point</button>
-        </div>
-        <!-- =================================== FILTER DIALOGS STOP =================================== -->
+        <hr>
+        Max Points {{getFilter().maxPointCnt}} <input type="range" ng-model="getFilter().maxPointCnt" min="0" max="256" step="1" ng-change="setFilterState()"/>
+        <hr>
+        Min Distance {{getFilter().minDistance}} <input type="range" ng-model="getFilter().minDistance" min="0" max="256" step="1" ng-change="setFilterState()"/>
+        <br/>
+        Block Size {{getFilter().blockSize}}<input type="range" ng-model="getFilter().blockSize" min="0" max="500" step="1" ng-change="setFilterState()"/>
+        <br/>
+        Quality {{getFilter().quality/100}} <input type="range" ng-model="getFilter().quality" min="0" max="100" step="1" ng-change="setFilterState()"/>
+        <button class="btn btn-default" ng-click="getFilter().needTrackingPoints=true;getFilter().clearPoints=false;setFilterState()">Get Features</button>
+        <button class="btn btn-default" ng-click="getFilter().clearPoints=true;setFilterState()">Clear Point</button>
     </div>
+    <!-- =================================== FILTER DIALOGS STOP =================================== -->
 </div>
-<script type="text/ng-template" id="addFilterDialog.html">
+</div><script type="text/ng-template" id="addFilterDialog.html">
+    
     
     <div class="modal-header">
         <button type="button" class="close" ng-click="cancel()" aria-hidden="true">&times;</button>
@@ -233,5 +244,6 @@
             <span class="input-group-btn"><button class="btn btn-default" ng-click="addNamedFilter(newUserName)">add</button></span>        
             <!-- <button ng-click="cancel()" class="btn btn-primary">Close</button> -->
         </div>
+
 
 </script>

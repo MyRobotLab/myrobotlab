@@ -16,6 +16,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.jmdns.JmDNS;
@@ -59,6 +61,7 @@ import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.WebGuiConfig;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
+import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.slf4j.Logger;
 
 /**
@@ -67,7 +70,7 @@ import org.slf4j.Logger;
  * services are already APIs - perhaps a data API - same as service without the
  * message wrapper
  */
-public class WebGui extends Service implements AuthorizationProvider, Gateway, Handler {
+public class WebGui extends Service implements AuthorizationProvider, Gateway, Handler, ServiceLifeCycleListener {
 
   public static class LiveVideoStreamHandler implements Handler {
 
@@ -94,6 +97,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       }
     }
   }
+
+  private final transient IncomingMsgQueue inMsgQueue = new IncomingMsgQueue();
 
   public static class Panel {
 
@@ -544,8 +549,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         // warning - r can change through the ws:// life-cycle
         // we upsert it to keep it fresh ;)
         newPersistentConnection = upsertConnection(r);
-
-        r.suspend();
+        if (newPersistentConnection) {
+          r.suspend();
+        }
         // FIXME - needed ?? - we use BroadcastFactory now !
         setBroadcaster(r);
       }
@@ -556,6 +562,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       AtmosphereRequest request = r.getRequest();
 
       String bodyData = request.body().asString();
+      // request.c
+      request.destroy();
       String logData = null;
 
       if (debugConnectivity) {
@@ -599,6 +607,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         // out.write(CodecUtils.toJson(describe).getBytes());
         // describe.setName("runtime@" + id);
         out.write(CodecUtils.toJsonMsg(describe).getBytes());// DOUBLE-ENCODE
+        // i assume that flush/close happen when out of scope - but do it
+        // explicitly here
+        out.flush();
+        out.close();
         log.info(String.format("<-- %s", describe));
         return;
 
@@ -666,10 +678,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
           }
 
           ServiceInterface si = Runtime.getService(serviceName);
-          ret = method.invoke(si, params);
+
+          // now asychronous
+          // ret = method.invoke(si, params);
+
+          inMsgQueue.add(si, method, params);
 
           // propagate return data to subscribers
-          si.out(msg.method, ret);
+          // si.out(msg.method, ret);
 
         } else {
           // msg came is and is NOT local - we will attempt to route it on its
@@ -683,6 +699,72 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       error(e);
       // log.error("handle threw", e);
     }
+  }
+
+  public class InvokeData {
+    public ServiceInterface si = null;
+    public Method method = null;
+    public Object[] params = null;
+
+    public InvokeData(Method method, ServiceInterface si, Object[] params) {
+      this.method = method;
+      this.si = si;
+      this.params = params;
+    }
+
+  }
+
+  public class IncomingMsgQueue implements Runnable {
+
+    boolean isRunning = false;
+
+    Thread worker = null;
+
+    Object lock = new Object();
+
+    private transient LinkedBlockingQueue<InvokeData> inMsgQueue = new LinkedBlockingQueue<>();
+
+    @Override
+    public void run() {
+      isRunning = true;
+      try {
+        while (isRunning) {
+          InvokeData data = inMsgQueue.poll(1, TimeUnit.SECONDS);
+          if (data != null) {
+            Object ret = data.method.invoke(data.si, data.params);
+            data.si.out(data.method.getName(), ret);
+          }
+        }
+      } catch (Exception e) {
+        log.error("IncomingMessageQueue threw", e);
+      }
+
+      isRunning = false;
+      worker = null;
+    }
+
+    public void add(ServiceInterface si, Method method, Object[] params) {
+      // TODO Auto-generated method stub
+      inMsgQueue.add(new InvokeData(method, si, params));
+    }
+
+    public void start() {
+      synchronized (lock) {
+        if (worker == null) {
+          worker = new Thread(this, getName() + "-incoming-msg-queue");
+          worker.start();
+        }
+      }
+    }
+
+    public void stop() {
+      synchronized (lock) {
+        if (worker == null) {
+          worker.interrupt();
+        }
+      }
+    }
+
   }
 
   public boolean isLocal(Message msg) {
@@ -1047,6 +1129,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public void startService() {
     super.startService();
+    inMsgQueue.start();
     start();
   }
 
@@ -1070,6 +1153,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     super.releaseService();
     stopMdns();
     stop();
+    inMsgQueue.stop();
   }
 
   /**
@@ -1150,7 +1234,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     autoStartBrowser(config.autoStartBrowser);
     if (config.enableMdns) {
       startMdns();
-    }    
+    }
     return config;
   }
 
@@ -1237,5 +1321,25 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  @Override
+  public void onCreated(String name) {
+  }
+
+  @Override
+  public void onRegistered(Registration registration) {
+  }
+
+  @Override
+  public void onStarted(String name) {
+  }
+
+  @Override
+  public void onStopped(String name) {
+  }
+
+  @Override
+  public void onReleased(String name) {
   }
 }
