@@ -8,8 +8,12 @@ angular.module('mrlapp.service.RandomGui', []).controller('RandomGuiCtrl', ['$sc
         showMethods: false,
         showMethodEntries: false,
         selectedService: null,
-        selectedMethod: null
+        selectedMethod: null,
+        minTime: null,
+        maxTime: null
     }
+
+    $scope.parameters = {}
 
     $scope.serviceList = null
     $scope.methodList = null
@@ -63,11 +67,41 @@ angular.module('mrlapp.service.RandomGui', []).controller('RandomGuiCtrl', ['$sc
         // $scope.state.showMethods = true
     }
 
-    $scope.addMethodEntries = function(name) {
-        // $scope.state.selectedMethod = name
-        // msg.send('methodQuery', name)
-        // $scope.state.showMethods = true
+    $scope.addMethodEntries = function(name) {// $scope.state.selectedMethod = name
+    // msg.send('methodQuery', name)
+    // $scope.state.showMethods = true
     }
+
+    $scope.addRandom = function(index) {
+        console.info(index)
+        ranges = []
+
+        rs = $scope.parameters[index];
+        for (var key in rs) {
+            ranges.push(rs[key])
+        }
+
+        ranges.push()
+        args = []
+        // args.push('addRandom')
+        args.push($scope.state.minTime)
+        args.push($scope.state.maxTime)
+        args.push($scope.state.selectedService)
+        args.push($scope.state.selectedMethod)
+        args.push(ranges)
+
+        msg.sendArgs('addRandom', args)
+
+        $scope.state.selectedService = null
+        $scope.state.selectedMethod = null
+    }
+
+    $scope.remove = function(key) {
+        msg.send('remove', key)
+        msg.send('broadcastState')
+        
+    }
+
 
     msg.subscribe('getServiceList')
     msg.subscribe('getMethodsFromName')

@@ -74,12 +74,12 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   public void startService() {
     super.startService();
-    thumb = (Servo) Runtime.start(getName() + ".thumb", "Servo");
-    index = (Servo) Runtime.start(getName() + ".index", "Servo");
-    majeure = (Servo) Runtime.start(getName() + ".majeure", "Servo");
-    ringFinger = (Servo) Runtime.start(getName() + ".ringFinger", "Servo");
-    pinky = (Servo) Runtime.start(getName() + ".pinky", "Servo");
-    wrist = (Servo) Runtime.start(getName() + ".wrist", "Servo");
+    thumb = (ServoControl) startPeer("thumb");
+    index = (ServoControl) startPeer("index");
+    majeure = (ServoControl) startPeer("majeure");
+    ringFinger = (ServoControl) startPeer("ringFinger");
+    pinky = (ServoControl) startPeer("pinky");
+    wrist = (ServoControl) startPeer("wrist");
   }
 
   public void bird() {
