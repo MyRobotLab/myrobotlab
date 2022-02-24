@@ -30,7 +30,7 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
             break
         case 'onSense':
             console.info('onSense', data)
-            $scope.service.isActive = data
+            $scope.service.active = data
             $scope.$apply()
             break
         default:
