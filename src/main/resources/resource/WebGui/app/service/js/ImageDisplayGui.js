@@ -9,6 +9,9 @@ angular.module('mrlapp.service.ImageDisplayGui', []).controller('ImageDisplayGui
     $scope.setNativeViewer = function() {
         msg.send('setNativeViewer')
     }
+    $scope.setAlwaysOnTop = function() {
+        msg.send('setAlwaysOnTop')
+    }
 
     // init
 
