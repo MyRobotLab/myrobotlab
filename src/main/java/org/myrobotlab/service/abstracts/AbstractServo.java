@@ -253,6 +253,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   /**
    * if a new service is added to the system refresh the controllers
    */
+  @Deprecated /* lifecycle events not necessary for ui, probably should be pulled out */
   public void onStarted(String name) {
     invoke("refreshControllers");
   }
@@ -369,7 +370,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     controller = sc;
 
     ServoController servoController = (ServoController)Runtime.getService(sc);
-    servoController.attachServoControl(this);
+    if (servoController != null) {
+      servoController.attachServoControl(this);
+    }
     // FIXME - remove !!!
     // FIXME change to broadcast ?
     // TODO: there is a race condition here.. we need to know that
@@ -455,10 +458,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // broadcastState();
   }
 
+  @Deprecated /* use setMaxSpeed */
   public void fullSpeed() {
     setSpeed((Double)null);
   }
-
+  
   @Override
   public boolean isAutoDisable() {
     return autoDisable;
@@ -1070,7 +1074,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   public void startService() {
     super.startService();
-    Runtime.getInstance().subscribeToLifeCycleEvents(getName());
+    Runtime.getInstance().attachServiceLifeCycleListener(getName());
   }
 
   @Override
@@ -1088,6 +1092,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     }
     return null;
   }
+  
+  
 
   @Override
   public void attachServoControlListener(String name) {

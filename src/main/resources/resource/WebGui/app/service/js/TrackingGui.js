@@ -19,6 +19,7 @@ angular.module('mrlapp.service.TrackingGui', []).controller('TrackingGuiCtrl', [
         switch (inMsg.method) {
         case 'onStatus':
             // FIXME - do something with this
+            console.info('onStatus', data)
             break
         case 'onStats':
             // FIXME - do something with this
@@ -115,7 +116,6 @@ angular.module('mrlapp.service.TrackingGui', []).controller('TrackingGuiCtrl', [
 
     // FIXME - which i could get rid of this
     // makes attach directive worky on first load
-    msg.sendTo("runtime", "publishInterfaceToPossibleServices")
     msg.subscribe('publishTrackingState')
     msg.subscribe('publishStats')
     msg.subscribe(this)

@@ -28,11 +28,14 @@ public class InMoov2Meta extends MetaData {
 
     addPeer("mouthControl", "mouth", "MarySpeech", "shared Speech");
 
+    // Sensors -----------------
     addPeer("opencv", "OpenCV", "opencv");
-    addPeer("servoMixer", "ServoMixer", "for making gestures");
     addPeer("ultrasonicRight", "UltrasonicSensor", "measure distance on the right");
     addPeer("ultrasonicLeft", "UltrasonicSensor", "measure distance on the left");
     addPeer("pir", "Pir", "infrared sensor");
+
+    
+    addPeer("servoMixer", "ServoMixer", "for making gestures");
 
     // the two legacy controllers .. :(
     addPeer("left", "Arduino", "legacy controller");

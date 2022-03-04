@@ -36,11 +36,11 @@ import org.slf4j.Logger;
 public abstract class AbstractSpeechSynthesis extends Service implements SpeechSynthesis, TextListener, KeyConsumer, AudioListener {
 
   private static final long serialVersionUID = 1L;
-  
+
   public final static Logger log = LoggerFactory.getLogger(AbstractSpeechSynthesis.class);
 
   static String globalFileCacheDir = "audioFile";
-  
+
   public static final String journalFilename = "journal.txt";
 
   /**
@@ -1092,23 +1092,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     return mute;
   }
 
-  @Override
-  public ServiceConfig getConfig() {
-    AbstractSpeechSynthesisConfig config = new AbstractSpeechSynthesisConfig();
-    config.mute = mute;
-    config.blocking = blocking;
-    if (substitutions != null && substitutions.size() > 0) {
-      config.substitutions = new HashMap<>();
-      config.substitutions.putAll(substitutions);
-    }
-    if (voice != null) {
-      config.voice = voice.name;
-    }    
-    Set<String> listeners = getAttached("publishStartSpeaking");
-    config.speechRecognizers = listeners.toArray(new String[listeners.size()]);
-    
-    return config;
-  }
+//  @Override
+//  public ServiceConfig getConfig() {
+//    AbstractSpeechSynthesisConfig config = new AbstractSpeechSynthesisConfig();
+//    return getConfig(config);
+//  }
 
   public ServiceConfig load(ServiceConfig c) {
     AbstractSpeechSynthesisConfig config = (AbstractSpeechSynthesisConfig) c;
@@ -1126,12 +1114,12 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     if (config.voice != null) {
       setVoice(config.voice);
     }
-    
+
     if (config.speechRecognizers != null) {
       for (String name : config.speechRecognizers) {
         try {
           attach(name);
-        } catch(Exception e) {
+        } catch (Exception e) {
           error(e);
         }
       }
@@ -1147,6 +1135,23 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     addListener(control.getName(), "publishSetVolume");
     addListener(control.getName(), "publishSetMute");
     addListener(control.getName(), "publishReplaceWord");
+  }
+
+  // Hacky way to get normalized code to work - inheritance not so helpful here
+  public AbstractSpeechSynthesisConfig getConfig(AbstractSpeechSynthesisConfig config) {
+    config.mute = mute;
+    config.blocking = blocking;
+    if (substitutions != null && substitutions.size() > 0) {
+      config.substitutions = new HashMap<>();
+      config.substitutions.putAll(substitutions);
+    }
+    if (voice != null) {
+      config.voice = voice.name;
+    }
+    Set<String> listeners = getAttached("publishStartSpeaking");
+    config.speechRecognizers = listeners.toArray(new String[listeners.size()]);
+
+    return config;
   }
 
 }

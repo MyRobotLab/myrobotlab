@@ -26,7 +26,6 @@ package org.myrobotlab.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -42,11 +41,9 @@ import org.myrobotlab.service.config.NeoPixelConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
-import org.myrobotlab.service.interfaces.SpeechListener;
-import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
-public class NeoPixel extends Service implements NeoPixelControl, SpeechListener {
+public class NeoPixel extends Service implements NeoPixelControl {
 
   /**
    * Thread to do animations Java side and push the changing of pixels to the
@@ -55,7 +52,7 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
   private class AnimationRunner implements Runnable {
 
     boolean running = false;
-    
+
     private transient Thread thread = null;
 
     @Override
@@ -74,6 +71,7 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
       }
     }
 
+    // FIXME - this should just wait/notify - not start a thread
     public synchronized void start() {
       running = false;
       thread = new Thread(this, String.format("%s-animation-runner", getName()));
@@ -85,10 +83,10 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
       thread = null;
     }
   }
-  
+
   public void releaseService() {
     super.releaseService();
-    animationRunner.stop();
+    clear();
   }
 
   public static class Pixel {
@@ -168,7 +166,7 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
    * current selected green value
    */
   protected int green = 120;
-  
+
   /**
    * white if available
    */
@@ -178,11 +176,6 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
    * name of controller currently attached to
    */
   protected String controller = null;
-
-  /**
-   * list of possible controllers
-   */
-  protected Set<String> controllers = new HashSet<>();
 
   /**
    * name of current matrix
@@ -234,16 +227,33 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
    */
   protected int brightness = 255;
 
+  final Map<String, Integer> animations = new HashMap<>();
+
+  public Set<String> getAnimations() {
+    return animations.keySet();
+  }
+
   public NeoPixel(String n, String id) {
     super(n, id);
+    registerForInterfaceChange(NeoPixelController.class);
     animationRunner = new AnimationRunner();
+    animations.put("Stop", 1);
+    animations.put("Color Wipe", 2);
+    animations.put("Larson Scanner", 3);
+    animations.put("Theater Chase", 4);
+    animations.put("Theater Chase Rainbow", 5);
+    animations.put("Rainbow", 6);
+    animations.put("Rainbow Cycle", 7);
+    animations.put("Flash Random", 8);
+    animations.put("Ironman", 9);
+    // > 99 is java side animations
+    animations.put("Equalizer", 100);
   }
 
   @Override
   public void attach(Attachable service) throws Exception {
-
-    if (SpeechSynthesis.class.isAssignableFrom(service.getClass())) {
-      attachSpeechSynthesis((SpeechSynthesis) service);
+    if (service == null) {
+      log.error("cannot attache to null service");
       return;
     }
 
@@ -285,12 +295,13 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
     return instance.getName().equals(controller);
   }
 
-  public void attachSpeechSynthesis(SpeechSynthesis mouth) {
-    mouth.attachSpeechListener(this.getName());
-  }
-
   @Override
   public void clear() {
+    if (controller == null) {
+      error("%s cannot clear - not attached to controller", getName());
+      return;
+    }
+
     // stop java animations
     animationRunner.stop();
     // stop on board controller animations
@@ -352,6 +363,11 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
 
   public void equalizer(Long wait_ms_per_frame, Integer range) {
 
+    if (controller == null) {
+      log.warn("controller not set");
+      return;
+    }
+    
     if (wait_ms_per_frame == null) {
       wait_ms_per_frame = 25L;
     }
@@ -364,19 +380,19 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
     int c = rand.nextInt(range);
 
     fillMatrix(red, green, blue, white);
-    
+
     if (c < 18) {
       setMatrix(0, 0, 0, 0);
       setMatrix(7, 0, 0, 0);
     }
 
     fillMatrix(red, green, blue, white);
-    
+
     if (c < 16) {
       setMatrix(0, 0, 0, 0);
       setMatrix(7, 0, 0, 0);
     }
-    
+
     if (c < 12) {
       setMatrix(1, 0, 0, 0);
       setMatrix(6, 0, 0, 0);
@@ -390,7 +406,7 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
     writeMatrix();
 
   }
-  
+
   public void fill(int r, int g, int b) {
     fill(0, pixelCount, r, g, b, null);
   }
@@ -504,95 +520,21 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
     return red;
   }
 
-  // @Override
-  public void onEndSpeaking(String utterance) {
-    clear();
-  }
-
-  @Override
-  public void onStarted(String name) {
-    refreshControllers();
-  }
-
-  @Override
-  public void onReleased(String name) {
-    refreshControllers();
-  }
-
-  // @Override
-  public void onStartSpeaking(String utterance) {
-    startAnimation();
-  }
-
   public void playAnimation(String animation) {
-    switch (animation) {
-      // onboard animations
-      case "No animation":
-        clear();
-        break;
-      case "Stop":
-        setAnimation(1, red, green, blue, speedFps);
-        break;
-      case "Color Wipe":
-        setAnimation(2, red, green, blue, speedFps);
-        currentAnimation = "Color Wipe";
-        break;
-      case "Larson Scanner":
-        setAnimation(3, red, green, blue, speedFps);
-        currentAnimation = "Larson Scanner";
-        break;
-      case "Theater Chase":
-        setAnimation(4, red, green, blue, speedFps);
-        currentAnimation = "Theater Chase";
-        break;
-      case "Theater Chase Rainbow":
-        setAnimation(5, red, green, blue, speedFps);
-        currentAnimation = "Theater Chase Rainbow";
-        break;
-      case "Rainbow":
-        setAnimation(6, red, green, blue, speedFps);
-        currentAnimation = "Rainbow";
-        break;
-      case "Rainbow Cycle":
-        setAnimation(7, red, green, blue, speedFps);
-        currentAnimation = "Rainbow Cycle";
-        break;
-      case "Flash Random":
-        setAnimation(8, red, green, blue, speedFps);
-        currentAnimation = "Flash Random";
-        break;
-      case "Ironman":
-        setAnimation(9, red, green, blue, speedFps);
-        currentAnimation = "Ironman";
-        break;
 
-      // TODO functional java animations
-      case "equalizer":
-        // setAnimation(9, red, green, blue, speedFps);
-        currentAnimation = "equalizer";
+    if (animations.containsKey(animation)) {
+      currentAnimation = animation;
+      if (animations.get(animation) < 99) {
+        setAnimation(animations.get(animation), red, green, blue, speedFps);
+      } else {
+        // only 1 java side animation at the moment
         equalizer();
         animationRunner.start();
-        break;
-
-      // TODO memory matrix driven animations
-
-      default:
-        error("could not find animation %s", animation);
+      }
+    } else {
+      error("could not find animation %s", animation);
     }
     broadcastState();
-  }
-
-  public Set<String> refreshControllers() {
-    try {
-      Set<String> ret = new HashSet<>();
-      List<String> c = Runtime.getServiceNamesFromInterface("NeoPixelController");
-      ret.addAll(c);
-      controllers = ret;
-      broadcastState();
-    } catch (Exception e) {
-      error(e);
-    }
-    return controllers;
   }
 
   public void stopAnimation() {
@@ -785,13 +727,6 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
     animationRunner.start();
   }
 
-  public void startService() {
-    super.startService();
-    refreshControllers();
-    Runtime runtime = Runtime.getInstance();
-    runtime.subscribeToLifeCycleEvents(getName());
-  }
-
   public void setColor(int red, int green, int blue) {
     this.red = red;
     this.green = green;
@@ -885,19 +820,31 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
       setBrightness(config.brightness);
     }
 
+    if (config.fill) {
+      fillMatrix(red, green, blue);
+    }
+
     return c;
+  }
+  
+  public String onStarted(String name){
+    return name;
   }
 
   public static void main(String[] args) throws InterruptedException {
 
     try {
 
-      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
       LoggingFactory.init(Level.INFO);
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
 
       Runtime.start("python", "Python");
       Polly polly = (Polly) Runtime.start("polly", "Polly");
@@ -907,12 +854,7 @@ public class NeoPixel extends Service implements NeoPixelControl, SpeechListener
 
       NeoPixel neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
-      neopixel.setPin(8);
+      neopixel.setPin(26);
       neopixel.setPixelCount(8);
       // neopixel.attach(arduino, 5, 8, 3);
       neopixel.attach(arduino);

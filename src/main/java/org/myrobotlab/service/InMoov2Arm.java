@@ -2,18 +2,23 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
+import org.myrobotlab.service.config.InMoov2ArmConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
@@ -108,7 +113,10 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
   @Override
   public void startService() {
     super.startService();
-    startPeers();
+    bicep = (ServoControl)startPeer("bicep");
+    rotate = (ServoControl)startPeer("rotate");
+    shoulder = (ServoControl)startPeer("shoulder");
+    omoplate = (ServoControl)startPeer("omoplate");
   }
 
   @Override
@@ -275,7 +283,6 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
   public void releaseService() {
     try {
       disable();
-      releasePeers();
       super.releaseService();
     } catch (Exception e) {
       error(e);

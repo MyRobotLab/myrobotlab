@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
+// import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.repo.Repo;
@@ -113,15 +114,25 @@ public class Intro extends Service {
       System.setProperty("java.version", "11.0");
       LoggingFactory.init("info");
 
+      // Runtime.main(new String[]{"--config", "i01-9"});
       // Runtime.start("runtime", "Runtime"); i
-      Runtime.start("webgui", "WebGui");
+      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+      
       Runtime.start("intro", "Intro");
-      Runtime.start("python", "Python");
-
+      //Runtime.start("python", "Python");
+      // Runtime.start("mega", "Arduino");
+      // Runtime.start("ada", "Adafruit16CServoDriver");
+      
       boolean done = true;
       if (done) {
         return;
       }
+
+      
+      Runtime.start("i01", "InMoov2");
+
 
       DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
@@ -136,7 +147,7 @@ public class Intro extends Service {
       // ProgramAB brain = (ProgramAB)Runtime.start("brain");
       Runtime.start("brain", "ProgramAB");
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
-      Runtime.start("webgui", "WebGui");
+      Runtime.create("webgui", "WebGui");
       Runtime.setConfig("InMoov2_FingerStarter");
 
       Runtime.create("i01.chatBot");

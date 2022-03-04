@@ -3,6 +3,7 @@ angular.module('mrlapp.service.PollyGui', []).controller('PollyGuiCtrl', ['peer'
     var _self = this
     var msg = this.msg
     $scope.autoClear = false
+    $scope.textArea = false
 
     // new selected voice "container" - since it comes from a map next leaves are
     // key & value ... value contains the entire voice selected
@@ -38,7 +39,6 @@ angular.module('mrlapp.service.PollyGui', []).controller('PollyGuiCtrl', ['peer'
         if ($scope.autoClear) {
             $scope.text = ''
         }
-
     }
 
     $scope.setVoice = function(text) {

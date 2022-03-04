@@ -60,25 +60,12 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                         scope.panel.showPeerTable = show
                     }
 
+                    newscope.saveDefault = function() {
+                        mrl.sendTo('runtime', 'saveDefault', scope.panel.displayName, scope.panel.simpleName)
+                    }
+
                     newscope.export = function() {
                         mrl.sendTo('runtime', 'export', scope.panel.displayName)
-                        /*
-                        console.info('promptConfigDir')
-        
-                        let onOK = function () {
-                            mrl.sendTo('runtime', 'export', scope.panel.displayName)
-                        }
-                
-                        let onCancel = function () {
-                            console.info('save config cancelled')
-                        }
-
-                        // scope.configDir = mrl.getConfigDir() + "/" + mrl.getConfigName() + "/" + scope.panel.displayName
-                
-                        let ret = modalService.openOkCancel('widget/modal-save-config-menu.html', 'Save Configuration', 'Save your current configuration for this service in a directory named', onOK, onCancel, scope);
-                        console.info('ret ' + ret);       
-                        */
-
                     }
 
                     var header = $templateCache.get('service/tab-header.html')

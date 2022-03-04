@@ -12,6 +12,7 @@ import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -38,6 +39,7 @@ import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.abstracts.AbstractMicrocontroller;
 import org.myrobotlab.service.config.ArduinoConfig;
+import org.myrobotlab.service.config.SerialConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.PinData;
@@ -164,10 +166,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   transient int[] ioCmd = new int[MAX_MSG_SIZE];
 
-  @Deprecated /*
-               * use attachables like everything else - power mapping should be
-               * inside the motorcontrol
-               */
   transient Mapper motorPowerMapper = new MapperLinear(-1.0, 1.0, -255.0, 255.0);
 
   public transient Msg msg;
@@ -195,11 +193,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   public Arduino(String n, String id) {
     super(n, id);
-
-    // config - if saved is loaded - if not default to uno
-    if (board == null) {
-      board = "uno";
-    }
 
     // board is set
     // now we can create a pin list
@@ -252,6 +245,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     } else if (MotorControl.class.isAssignableFrom(service.getClass())) {
       attachMotorControl((MotorControl) service);
       return;
+    } else if (service instanceof UltrasonicSensorControl) {
+      attach((UltrasonicSensorControl) service);
+      return;
     } else if (service instanceof EncoderControl) {
       attachEncoderControl((EncoderControl) service);
       return;
@@ -303,13 +299,13 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     sensor.attach(this, triggerPin, echoPin);
   }
 
-  synchronized private DeviceMapping attachDevice(Attachable device, Object[] attachConfig) {    
-    
+  synchronized private DeviceMapping attachDevice(Attachable device, Object[] attachConfig) {
+
     if (deviceList.containsKey(device.getName())) {
       log.warn("device {} already attached to {}", device.getName(), getName());
       return deviceList.get(device.getName());
     }
-    
+
     DeviceMapping map = new DeviceMapping(nextDeviceId, device);
     log.info("DEVICE LIST PUT ------ Name: {} Class: {} Map: {}", device.getName(), device.getClass().getSimpleName(), map);
     deviceList.put(device.getName(), map);
@@ -452,15 +448,22 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   /**
+   * reattach - if the serial connection breaks or gets disconnected and we have
+   * a device list - when the serial connection is established again we go
+   * through all the devices and make sure any initialization communication to
+   * mrlcomm is done to sync the states
    * 
    * @param dm
-   *          the arduino device mapping
    */
   public void reattach(DeviceMapping dm) {
-
+    log.info("reattaching {}", dm);
     Attachable attachable = dm.getDevice();
-    if (attachable instanceof Servo) {
-      Servo servo = (Servo) attachable;
+    if (attachable.getName().equals(getName())) {
+      // re-attaching ourselves only requires that a record is in
+      // the device list ... so we don't need to do anything
+      return;
+    } else if (attachable instanceof ServoControl) {
+      ServoControl servo = (ServoControl) attachable;
       int uS = degreeToMicroseconds(servo.getTargetOutput());
       double speed = (servo.getSpeed() == null) ? -1 : servo.getSpeed();
       int pin = getAddress(servo.getPin());
@@ -469,6 +472,27 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       if (servo.isEnabled()) {
         msg.servoAttachPin(dm.getId(), pin);
       }
+    } else if (attachable instanceof UltrasonicSensorControl) {
+        log.warn("UltrasonicSensorControl not implemented");
+      // reattach logic
+      // } else if (attachable instanceof Pir) { Pir is a PinListener
+      // reattach logic - FIXME Pir has no Control interface :(
+    } else if (attachable instanceof PinListener) {
+      PinListener pl = (PinListener) attachable;
+      attachPinListener((PinListener) pl);
+
+      // on reattach get back to its previous state enabled/disabled
+      if (attachable instanceof Pir) {
+        Pir pir = (Pir) attachable;
+        if (pir.isEnabled()) {
+          pir.enable();
+        }
+      }
+
+    } else if (attachable instanceof I2CControl) {
+      error("I2CControl sync not implemented");
+    } else {
+      error("cannot reattach device of type %s do not know how", dm.getDevice().getClass().getSimpleName());
     }
   }
 
@@ -496,8 +520,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     this.port = port;
 
     try {
-
-      initSerial();
 
       if (isConnected() && port.equals(serial.getPortName())) {
         log.info("already connected to port {}", port);
@@ -590,7 +612,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       List<PinDefinition> list = getPinList();
       for (PinDefinition pindef : list) {
         if (pindef.isEnabled()) {
-          enablePin(pindef.getPinName());
+          enablePin(pindef.getPinName(), pindef.getPollRate());
         }
       }
 
@@ -606,22 +628,17 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public void customMsg(int... params) {
     msg.customMsg(params);
   }
-  
+
   public void detach() {
     // make list copy - to iterate without fear of thread or modify issues
     ArrayList<DeviceMapping> newList = new ArrayList<>(deviceIndex.values());
     log.info("detaching all devices");
-    /* DOESN'T MATTER IF CONNECTED - IF RECONNECT ARDUINO DEMANDS ITS 
-     * CURRENT STATE ONTO MrlComm
-    if (isConnected()) {   
-      for (DeviceMapping dm: newList) {
-        if (dm.getDevice().getName().equals(getName())) {
-          continue;
-        }
-        detach(dm.getDevice());
-        sleep(50);
-      }
-    }*/
+    /*
+     * DOESN'T MATTER IF CONNECTED - IF RECONNECT ARDUINO DEMANDS ITS CURRENT
+     * STATE ONTO MrlComm if (isConnected()) { for (DeviceMapping dm: newList) {
+     * if (dm.getDevice().getName().equals(getName())) { continue; }
+     * detach(dm.getDevice()); sleep(50); } }
+     */
     deviceIndex.clear();
     deviceList.clear();
   }
@@ -632,7 +649,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     if (device == null) {
       return;
     }
-    
+
     log.info("{} detaching {}", getName(), device.getName());
     // if this service doesn't think its attached, we are done
     if (!isAttached(device)) {
@@ -654,7 +671,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       deviceIndex.remove(id);
     }
     deviceList.remove(device.getName());
-    
+
   }
 
   @Override
@@ -820,6 +837,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     PinDefinition pinDef = getPin(address);
     msg.enablePin(address, getMrlPinType(pinDef), rate);
     pinDef.setEnabled(true);
+    pinDef.setPollRate(rate);
     invoke("publishPinDefinition", pinDef); // broadcast pin change
   }
 
@@ -827,13 +845,16 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * start polling reads of selected pin enablePin/address/type/b16 rate
    */
   public void enablePin(String pin, int rate) {
-    if (!isConnected()) {
-      error("must be connected to enable pins");
-      return;
-    }
+    // no longer a hard requirement
+    // if (!isConnected()) {
+    // error("must be connected to enable pins");
+    // return;
+    // }
 
-    PinDefinition pinDef = getPin(pin);
-    enablePin(pinDef.getAddress(), rate);
+    if (isConnected()) {
+      PinDefinition pinDef = getPin(pin);
+      enablePin(pinDef.getAddress(), rate);
+    }
   }
 
   public String getAref() {
@@ -850,8 +871,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     return ret;
   }
 
-  @Deprecated /* what's the point?   - get the list from getAttached() */
-  public int getAttachedCount() {    
+  @Deprecated /* what's the point? - get the list from getAttached() */
+  public int getAttachedCount() {
     return getAttached().size();
   }
 
@@ -1010,6 +1031,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     // 2 board types have been identified (perhaps this is based on
     // processor?)
     // mega-like & uno like
+    if (board == null) {
+      return new ArrayList<PinDefinition>();
+    }
 
     // if no change - just return the values
     if ((addressIndex != null && board.contains("mega") && addressIndex.size() == 70) || (addressIndex != null && !board.contains("mega") && addressIndex.size() == 20)) {
@@ -1028,16 +1052,16 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
         PinDefinition pindef = new PinDefinition(getName(), i);
         // begin wacky pin def logic
         String pinName = null;
-        if (i == 0  || i == 15 || i == 17 || i == 19 ) {
+        if (i == 0 || i == 15 || i == 17 || i == 19) {
           pindef.setRx(true);
         }
-        if (i == 1 || i == 14 || i == 16 || i == 18 ) {
+        if (i == 1 || i == 14 || i == 16 || i == 18) {
           pindef.setTx(true);
         }
-        if (i == 20 ) {
+        if (i == 20) {
           pindef.setSda(true);
         }
-        if (i == 21 ) {
+        if (i == 21) {
           pindef.setScl(true);
         }
         if (i < 1 || (i > 13 && i < 54)) {
@@ -1124,12 +1148,12 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   /**
    * Get the serial service for this device
+   * 
    * @return - serial service
    */
   public Serial getSerial() {
     return serial;
   }
-
 
   /**
    * Internal Arduino method to create an i2cBus object in MrlComm that is
@@ -1481,7 +1505,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       pinMode(address, Arduino.OUTPUT);
     } else if (modeStr.equalsIgnoreCase("PULLUP")) {
       pinMode(address, Arduino.PULLUP);
-    }else {
+    } else {
       // default arduino pin mode
       pinMode(address, Arduino.INPUT);
     }
@@ -1492,9 +1516,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     log.info("pinMode {} {}", address, mode);
     msg.pinMode(address, mode);
     PinDefinition pinDef = addressIndex.get(address);
-    pinDef.setMode(mode == Arduino.OUTPUT?"OUTPUT":"INPUT");
+    pinDef.setMode(mode == Arduino.OUTPUT ? "OUTPUT" : "INPUT");
   }
-  
+
   public void pinMode(String pin, int mode) {
     PinDefinition pinDef = getPin(pin);
     pinMode(pinDef.getAddress(), mode);
@@ -1681,19 +1705,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       pinArray[i] = pinData;
 
       // handle individual pins
-//      if (pinListeners.containsKey(address)) {
-//        Set<PinListener> set = pinListeners.get(address);
-//        for (PinListener pinListner : set) {
-          /*
-          if (pinListner.isLocal()) {
-            pinListner.onPin(pinData);
-          } else {
-            invoke("publishPin", pinData);
-          }
-          */
-          broadcast("publishPin", pinData);
-//        }
-//      }
+      broadcast("publishPin", pinData);
+
     }
 
     // TODO: improve this logic so it doesn't something more effecient.
@@ -1705,7 +1718,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     }
 
     // FIXME !!! - simple pub/sub with broadcast like PinListener
-    
+
     for (String name : pinArrayListeners.keySet()) {
       // put the pin data into a map for quick lookup
       PinArrayListener pal = pinArrayListeners.get(name);
@@ -1750,13 +1763,13 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
         // ((ServoStatusPublisher)
         // getDevice(deviceId)).publishServoStarted(getDevice(deviceId).getName());
         // FIXME - getCurrentOutputPos
-        broadcast("publishServoStarted", getDevice(deviceId).getName(), ((ServoControl)attachable).getCurrentOutputPos());
+        broadcast("publishServoStarted", getDevice(deviceId).getName(), ((ServoControl) attachable).getCurrentOutputPos());
       } else if (eventType == 1) {
         // ((ServoStatusPublisher)
         // getDevice(deviceId)).publishServoStopped(getDevice(deviceId).getName());
-        
+
         // FIXME - getCurrentOutputPos
-        broadcast("publishServoStopped", getDevice(deviceId).getName(), ((ServoControl)attachable).getCurrentOutputPos());
+        broadcast("publishServoStopped", getDevice(deviceId).getName(), ((ServoControl) attachable).getCurrentOutputPos());
       } else {
         log.error("unknown servo event type {}", eventType);
       }
@@ -1784,16 +1797,18 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   public void releaseService() {
     super.releaseService();
-    
+
     poller.stop();
-    
+
     // SHUTDOWN ACKING - use case - port no longer exists
-    msg.enableAck(false);
-    
+    if (msg != null) {
+      msg.enableAck(false);
+    }
+
     if (virtual != null) {
       virtual.releaseService();
     }
-    
+
     // remove all devices
     disconnect();
   }
@@ -1840,7 +1855,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   // > servoDetachPin/deviceId
   public void onServoDisable(String servoName) {
     Integer id = getDeviceId(servoName);
-    if (id != null) {
+    if (id != null && msg != null) {
       msg.servoDetachPin(id);
     }
   }
@@ -1853,7 +1868,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       return;
     }
     if (isConnected()) {
-      ServoControl sc = (ServoControl)Runtime.getService(servoName);
+      ServoControl sc = (ServoControl) Runtime.getService(servoName);
       msg.servoAttachPin(deviceId, getAddress(sc.getPin()));
     } else {
       log.info("not currently connected");
@@ -1885,16 +1900,16 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   // > servoSetVelocity/deviceId/b16 velocity
   public void onServoSetSpeed(ServoSpeed servoSpeed) {
-    
+
     // FIXME - FIND OTHER FUNCTIONS THAT CANNOT BE SET WHEN NOT CONNECTED
     // AND HANDLE THE SAME AS BELOW !!!
     if (!isConnected()) {
       error("Arduino cannot set speed when not connected");
       return;
     }
-    
+
     int speed = -1;
-    Servo servo = (Servo)Runtime.getService(servoSpeed.name);
+    Servo servo = (Servo) Runtime.getService(servoSpeed.name);
     if (servoSpeed.speed != null) {
       speed = servoSpeed.speed.intValue();
     }
@@ -2028,16 +2043,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   // > softReset
   public void softReset() {
     msg.softReset();
-  }
-
-  @Override
-  public void startService() {
-    super.startService();
-    try {
-      initSerial();
-    } catch (Exception e) {
-      log.error("Arduino.startService threw", e);
-    }
   }
 
   @Override
@@ -2201,13 +2206,14 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   @Override
   public void neoPixelWriteMatrix(String neopixel, int[] buffer) {
-    // 64 byte message size limit (including 3 byte header) !!! - so we bucket them chunks
-    int segments = (int)Math.ceil(buffer.length / 50.0);
-    for (int i = 0; i < segments; ++i ) {
+    // 64 byte message size limit (including 3 byte header) !!! - so we bucket
+    // them chunks
+    int segments = (int) Math.ceil(buffer.length / 50.0);
+    for (int i = 0; i < segments; ++i) {
       int begin = i * 50;
-      int end = Math.min(begin + 49 , buffer.length);
+      int end = Math.min(begin + 49, buffer.length);
       msg.neoPixelWriteMatrix(getDeviceId(neopixel), Arrays.copyOfRange(buffer, begin, end));
-    }    
+    }
   }
 
   @Override
@@ -2242,11 +2248,22 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public ServiceConfig load(ServiceConfig c) {
     ArduinoConfig config = (ArduinoConfig) c;
 
+    if (config.serial != null) {
+      // FIXME THIS IS NOT GOOD - BUT NEEDED
+      serial = (Serial) Runtime.start(config.serial, "Serial");
+    }
+
     if (config.port != null) {
       connect(config.port);
     }
     return c;
   }
+  
+  @Override
+  public void startService() {
+    super.startService();
+    initSerial();
+  }  
 
   /**
    * DO NOT FORGET INSTALL AND VMARGS !!!
@@ -2264,9 +2281,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       // Platform.setVirtual(true);
 
       LoggingFactory.init(Level.INFO);
-      
+
       Runtime.start("webgui", "WebGui");
-      
+
       boolean isDone = true;
 
       if (isDone) {
@@ -2283,15 +2300,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       // Runtime.start("gui", "SwingGui");
       Serial.listPorts();
 
-      Arduino hub = (Arduino) Runtime.start("hub", "Arduino");
+      Arduino hub = (Arduino) Runtime.start("controller", "Arduino");
       Runtime.start("pir", "Pir");
 
       hub.connect("/dev/ttyACM0");
-      
-      
-
-
-
 
       // hub.enableAck(false);
 
@@ -2301,7 +2313,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       sc = (ServoControl) Runtime.start("s2", "Servo");
       sc.setPin(9);
       hub.attach(sc);
-      
+
       hub.detach();
 
       // hub.enableAck(true);

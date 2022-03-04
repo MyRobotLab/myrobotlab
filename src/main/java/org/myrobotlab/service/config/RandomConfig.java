@@ -14,6 +14,6 @@ public class RandomConfig extends ServiceConfig {
   }
   
   public boolean enabled = true;
-  public Map<String, RandomMessageConfig> addRandom = new HashMap<>();
+  public Map<String, RandomMessageConfig> randomMessages = new HashMap<>();
 
 }

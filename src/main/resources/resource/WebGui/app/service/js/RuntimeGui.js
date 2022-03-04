@@ -93,9 +93,9 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         $scope.newType = serviceType
     }
 
-    $scope.setConfigName = function(){
+    $scope.setConfigName = function() {
         console.info('setConfigName')
-        if ($scope.selectedConfig.length > 0){
+        if ($scope.selectedConfig.length > 0) {
             $scope.service.configName = $scope.selectedConfig[0]
             msg.sendTo('runtime', 'setConfigName', $scope.service.configName)
         }
@@ -164,7 +164,17 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             $scope.$apply()
             break
 
-        case 'onInterfaceToPossibleServices':
+        case 'onSaveDefaults':
+            if (data.length > 0) {
+                $scope.defaultsSaved = 'saved defaults to ' + data
+                msg.send('publishConfigList')
+                $scope.$apply()
+            } else {
+                'service does not have defaults'
+            }
+            break
+
+        case 'onInterfaceToNames':
             $scope.interfaceToPossibleServices = data
             mrl.interfaceToPossibleServices = data
             break
@@ -172,7 +182,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         case 'onServiceTypes':
             $scope.possibleServices = data
             mrl.setPossibleServices($scope.possibleServices)
-            break            
+            break
 
         case 'onRegistered':
             console.log("onRegistered")
@@ -295,7 +305,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
         let onOK = function() {
             msg.sendTo('runtime', 'setConfigName', $scope.service.configName)
-            msg.sendTo('runtime', 'save', $scope.service.configDir + '/' + $scope.service.configName + "/runtime.yml")
+            msg.sendTo('runtime', 'save')
         }
 
         let onCancel = function() {
@@ -306,7 +316,13 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         console.info('ret ' + ret);
     }
 
+    $scope.saveDefaults = function() {
+        console.info('saveDefaults')
+        msg.send('saveDefaults', $scope.newType.simpleName)
+    }
+
     // $scope.possibleServices = Object.values(mrl.getPossibleServices())
+    msg.subscribe("saveDefaults")
     msg.subscribe("getServiceTypes")
     msg.subscribe("getLocalServices")
     msg.subscribe("registered")
@@ -316,16 +332,15 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.subscribe("getHosts")
     msg.subscribe("publishStatus")
     msg.subscribe('publishConfigList')
-    msg.subscribe('publishInterfaceToPossibleServices')
-
+    msg.subscribe('publishInterfaceToNames')
 
     //msg.send("getLocalServices")
     msg.send("getConnections")
     msg.send("getServiceTypes")
     msg.send("getLocale")
     msg.send("getLocales")
-    msg.send("publishInterfaceToPossibleServices")
-    
+    msg.send("publishInterfaceToNames")
+
     // msg.send("getHosts")
     msg.subscribe(this)
 }

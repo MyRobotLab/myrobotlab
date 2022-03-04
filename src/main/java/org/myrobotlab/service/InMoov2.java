@@ -10,6 +10,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.io.FilenameUtils;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -28,6 +29,7 @@ import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.LocaleProvider;
+import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.Simulator;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
@@ -36,7 +38,7 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class InMoov2 extends Service implements TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
+public class InMoov2 extends Service implements ServiceLifeCycleListener,  TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
   public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
 
@@ -174,7 +176,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     super.startService();
     Runtime runtime = Runtime.getInstance();
     // FIXME - shouldn't need this anymore
-    runtime.subscribeToLifeCycleEvents(getName());
+    Runtime.getInstance().attachServiceLifeCycleListener(getName());
 
     try {
       // copy config if it doesn't already exist
@@ -399,8 +401,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   private boolean isLeftHandSensorActivated;
 
   private boolean isLeftPortActivated;
-
-  private boolean isOpenCVActivated;
 
   private boolean isRightHandSensorActivated;
 
@@ -1443,7 +1443,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       chatBot.setPredicate("null", "");
       // load last user session
       if (!chatBot.getPredicate("name").isEmpty()) {
-        if (chatBot.getPredicate("lastUsername").isEmpty() || chatBot.getPredicate("lastUsername").equals("unknown")) {
+        if (chatBot.getPredicate("lastUsername").isEmpty() || chatBot.getPredicate("lastUsername").equals("unknown") || chatBot.getPredicate("lastUsername").equals("default")) {
           chatBot.setPredicate("lastUsername", chatBot.getPredicate("name"));
         }
       }
@@ -1453,23 +1453,24 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       } catch (IOException e) {
         log.error("saving predicates threw", e);
       }
-      // start session based on last recognized person
-      // if (!chatBot.getPredicate("default", "lastUsername").isEmpty() &&
-      // !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
-      // chatBot.startSession(chatBot.getPredicate("lastUsername"));
-      // }
-      if (!chatBot.getPredicate("Friend", "firstinit").isEmpty() && !chatBot.getPredicate("Friend", "firstinit").equals("unknown")
-          && !chatBot.getPredicate("Friend", "firstinit").equals("started")) {
-        chatBot.getResponse("FIRST_INIT");
-      } else {
-        chatBot.getResponse("WAKE_UP");
-      }
-
       htmlFilter = (HtmlFilter) startPeer("htmlFilter");// Runtime.start("htmlFilter",
       // "HtmlFilter");
       chatBot.attachTextListener(htmlFilter);
       htmlFilter.attachTextListener((TextListener) getPeer("mouth"));
       chatBot.attachTextListener(this);
+      // start session based on last recognized person
+      // if (!chatBot.getPredicate("default", "lastUsername").isEmpty() &&
+      // !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
+      // chatBot.startSession(chatBot.getPredicate("lastUsername"));
+      // }
+      if (chatBot.getPredicate("default", "firstinit").isEmpty() || chatBot.getPredicate("default", "firstinit").equals("unknown")
+          || chatBot.getPredicate("default", "firstinit").equals("started")) {
+        chatBot.startSession(chatBot.getPredicate("default", "lastUsername"));
+        chatBot.getResponse("FIRST_INIT");
+      } else {
+        chatBot.startSession(chatBot.getPredicate("default", "lastUsername"));
+        chatBot.getResponse("WAKE_UP");
+      }
     } catch (Exception e) {
       speak("could not load chatBot");
       error(e.getMessage());
@@ -1557,8 +1558,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public InMoov2Head startHead(String port, String type, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin) {
 
     speakBlocking(get("STARTINGHEAD"));
+    
+    head = (InMoov2Head)Runtime.start(getName() + ".head", "InMoov2Head");
 
-    head = (InMoov2Head) startPeer("head");
+    // head = (InMoov2Head) startPeer("head");
     isHeadActivated = true;
 
     if (headYPin != null) {
@@ -2426,9 +2429,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     config.enableLeftHand = isLeftHandActivated;
     config.enableLeftHandSensor = isLeftHandSensorActivated;
     // config.isLeftPortActivated = isLeftPortActivated;
-    // config.enableNeoPixel = isNeopixelActivated;
-    config.enableOpenCV = isOpenCVActivated;
-    // config.enablePir = isPirActivated;
+    config.enableNeoPixel = isNeopixelActivated;
+    config.enableOpenCV = isOpenCvActivated;
+    config.enablePir = isPirActivated;
     config.enableUltrasonicRight = isUltrasonicRightActivated;
     config.enableUltrasonicLeft = isUltrasonicLeftActivated;
     config.enableRightArm = isRightArmActivated;
@@ -2569,6 +2572,18 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       } else {
         stopUltrasonicRight();  
       }
+      
+      if (config.enablePir) {
+        startPir();
+      } else {
+        stopPir();
+      }
+      
+      if (config.enableNeoPixel) {
+        startNeopixel();
+      } else {
+        stopNeopixelAnimation();
+      }
 
       if (config.loadGestures) {
         loadGestures = true;
@@ -2654,5 +2669,23 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  @Override
+  public void onRegistered(Registration registration) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void onStopped(String name) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void onReleased(String name) {
+    // TODO Auto-generated method stub
+    
   }
 }

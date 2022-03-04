@@ -1,15 +1,35 @@
-<div class="row">
-    <div class="col-md-12">
-        Node Count
-
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-3">
-        <form class="form-inline">
-            <label>Interval</label>
-            <input class="form-control" type="text" ng-model="searchText"/>
-            <button class="btn btn-default" ng-if="!service.isClockRunning" ng-click="">Search</button>
-        </form>
-    </div>
-</div>
+<h3>nodes</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>name</th>
+            <th>map</th>
+            <th>axis</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="(id, entry) in service.nodes">
+            <td>{{id}}</td>
+            <td>
+                <div ng-if="entry.mapper">({{entry.mapper.minX}},{{entry.mapper.maxX}},{{entry.mapper.minY}},{{entry.mapper.maxY}})</div>
+            </td>
+            <td>{{entry.rotationMask}}</td>
+        </tr>
+    </tbody>
+</table>
+<h3>multi-mapped nodes</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>name</th>
+            <th>mapped to</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="(id, entry) in service.multiMapped">
+            <!-- td>{{id}}</td -->
+            <td>{{id}}</td>
+            <td>{{entry}}</td>
+        </tr>
+    </tbody>
+</table>

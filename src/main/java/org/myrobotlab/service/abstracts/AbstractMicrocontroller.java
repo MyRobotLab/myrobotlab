@@ -103,13 +103,6 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
    */
   public void attachPinListener(PinListener listener) {
     String name = listener.getName();
-
-    // get pin of interest
-    PinDefinition pin = getPin(listener.getPin());
-    if (pin == null) {
-      error("%s pin cannot be found", listener.getPin());
-      return;
-    }
     addListener("publishPin", name);
   }
 

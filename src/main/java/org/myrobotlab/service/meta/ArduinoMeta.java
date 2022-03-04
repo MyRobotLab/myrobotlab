@@ -1,7 +1,13 @@
 package org.myrobotlab.service.meta;
 
+import java.util.LinkedHashMap;
+
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.ArduinoConfig;
+import org.myrobotlab.service.config.SerialConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
@@ -28,4 +34,23 @@ public class ArduinoMeta extends MetaData {
 
   }
 
+  static public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
+    ArduinoConfig arduinoConfig = new ArduinoConfig();
+
+    // set local names and config
+    arduinoConfig.serial = name + ".serial";
+
+    // build a config with all peer defaults
+    config.putAll(ServiceInterface.getDefault(arduinoConfig.serial, "Serial"));
+
+    // pull out specific config and modify
+    SerialConfig serialConfig = (SerialConfig) config.get(arduinoConfig.serial);
+    serialConfig.port = arduinoConfig.port;
+
+    // put self in
+    config.put(name, arduinoConfig);
+
+    return config;
+  }
 }

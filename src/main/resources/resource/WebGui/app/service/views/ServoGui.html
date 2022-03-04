@@ -30,8 +30,8 @@
                         </tr>
                         <tr>
                             <td>
-                                <!-- controller -->
-                                <select ng-disabled="state.attached" class="form-control" ng-model="service.controller">
+                                <!-- controller FIXME - replace with attach directive -->
+                                <select ng-disabled="service.controller != null" class="form-control" ng-model="state.controller">
                                     <option ng-repeat="controller in possibleControllers" value="{{controller}}">
                                         {{controller}} </option>
                                 </select>

@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +15,11 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.Pid.PidOutput;
+import org.myrobotlab.service.config.ArduinoConfig;
+import org.myrobotlab.service.config.OpenCVConfig;
+import org.myrobotlab.service.config.PidConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.config.TrackingConfig;
 import org.myrobotlab.service.interfaces.ComputerVision;
 import org.myrobotlab.service.interfaces.PidControl;
@@ -42,10 +47,6 @@ public class Tracking extends Service {
   // FIXME - should just be publishing a normalized x,y polar coordinate
   // and let the control system deal with that - having "servos" is
   // too device specific
-
-  PidData xPid = new PidData();
-
-  PidData yPid = new PidData();
 
   String pan;
 
@@ -233,7 +234,7 @@ public class Tracking extends Service {
         // PV - measured value
         send(pid, "compute", pan, 320 - x);
         send(pid, "compute", tilt, 240 - y);
-        
+
         // if largestFaceOnly
 
         if (state == TrackingState.SEARCHING) {
@@ -329,64 +330,46 @@ public class Tracking extends Service {
     }
     return config;
   }
-  
+
   public boolean isIdle() {
     return state == TrackingState.IDLE;
   }
-
-  public void startWithDefaults() {
-    if (pan == null) {
-      pan = String.format("%s.pan", getName());
-      Runtime.start(pan, "Servo");
-      attachPan(pan);
-    }
-    if (tilt == null) {
-      tilt = String.format("%s.tilt", getName());
-      Runtime.start(tilt, "Servo");
-      attachTilt(tilt);
-    }
-    if (pid == null) {
-      pid = String.format("%s.pid", getName());
-      Runtime.start(pid, "Pid");
-      attach(pid);
-    }
-
-    if (cv == null) {
-      cv = String.format("%s.cv", getName());
-      Runtime.start(cv, "OpenCV");
-      attach(cv);
-    }
-
-    enable();
-  }
+  
 
   public static void main(String[] args) {
     try {
 
       LoggingFactory.init(Level.INFO);
 
-      Tracking track = (Tracking) Runtime.start("track", "Tracking");
-      Runtime.start("webgui", "WebGui");
+      //Runtime.saveDefault("Tracking");
+
+      Runtime.start("intro", "Intro");
+      Runtime.start("track", "Tracking");
+      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+
+      
       boolean done = true;
       if (done) {
         return;
       }
-      
+
       // Pid2 pid = (Pid2) Runtime.start("pid", "Pid2");
 
-      // pid.addPid("neck", 0.5, 1.0, 0.0, 240); // how does fractional Gain mean
-                                            // initial setpoint change ??
-      
+      // pid.addPid("neck", 0.5, 1.0, 0.0, 240); // how does fractional Gain
+      // mean
+      // initial setpoint change ??
+
       // pid.addPid("rothead", 0.5, 1.0, 0.0, 320);
-      
+
       // pid.addPid("neck", 1, 1, 0, 240);// why ???? 480 should be 240 ! /2
       // somewhere ?
       /*
-       * Runtime.start("pan", "Servo"); Runtime.start("tilt", "Servo");
+       * Runtime.start("pan", "Servo"); Runtime.start(tiltName, "Servo");
        * Runtime.start("pid", "Pid"); Runtime.start("legacy", "Tracking");
        */
       // track.startWithDefaults();
-      
 
     } catch (Exception e) {
       log.error("main threw", e);

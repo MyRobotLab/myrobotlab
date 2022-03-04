@@ -443,7 +443,7 @@ public class InMoov2Config extends ServiceConfig {
   // public String wakeWord; - needs to be in the speech syntheis config
 
   
-  public boolean enableHead = true;
+  public boolean enableHead = false;
   public boolean enableLeftArm = false;
   public boolean enableLeftHand = false;
   public boolean enableLeftHandSensor = false;
@@ -456,7 +456,8 @@ public class InMoov2Config extends ServiceConfig {
   public boolean enableSimulator = false;
   public boolean enableUltrasonicLeft = false;
   public boolean enableUltrasonicRight = false;
-
+  public boolean enableNeoPixel = false;
+  public boolean enablePir = false;
   public boolean pirWakeUp = false;
   public boolean pirEnableTracking = false;
   
