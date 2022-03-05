@@ -305,7 +305,7 @@ public class Tracking extends Service {
   }
 
   @Override
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     TrackingConfig config = (TrackingConfig) c;
 
     config.lostTrackingDelayMs = lostTrackingDelayMs;

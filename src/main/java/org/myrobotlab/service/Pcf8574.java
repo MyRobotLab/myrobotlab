@@ -690,7 +690,7 @@ public class Pcf8574 extends Service
   }
 
   @Override
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     Pcf8574Config config = (Pcf8574Config) c;
     if (config.address != null) {
       setAddress(config.address);

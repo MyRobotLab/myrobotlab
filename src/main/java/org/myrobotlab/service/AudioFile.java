@@ -512,7 +512,7 @@ public class AudioFile extends Service {
     return config;
   }
 
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     AudioFileConfig config = (AudioFileConfig) c;
     setMute(config.mute);
     setTrack(config.currentTrack);

@@ -4606,8 +4606,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   @Override
-  public ServiceConfig load(ServiceConfig c) {
-    super.load(c);
+  public ServiceConfig apply(ServiceConfig c) {
+    super.apply(c);
     Mpu6050Config config = (Mpu6050Config) c;
     if (config.start) {
       publisher.start();

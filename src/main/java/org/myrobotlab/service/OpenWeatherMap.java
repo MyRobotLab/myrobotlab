@@ -263,7 +263,7 @@ public class OpenWeatherMap extends HttpClient {
     return config;
   }
 
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     OpenWeatherMapConfig config = (OpenWeatherMapConfig) c;
     setUnits(config.currentUnits);
     setLocation(config.currentTown);

@@ -252,7 +252,7 @@ public class Random extends Service {
   }
 
   @Override
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     RandomConfig config = (RandomConfig) c;
     enabled = config.enabled;
 

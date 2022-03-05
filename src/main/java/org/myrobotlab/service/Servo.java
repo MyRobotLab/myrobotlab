@@ -223,7 +223,7 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
   }
 
   @Override
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     ServoConfig config = (ServoConfig) c;
 
     autoDisable = config.autoDisable;
