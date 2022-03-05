@@ -2,8 +2,6 @@ package org.myrobotlab.service.meta;
 
 import java.util.LinkedHashMap;
 
-import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.InMoov2HandConfig;
 import org.myrobotlab.service.config.ServiceConfig;
@@ -19,14 +17,11 @@ public class InMoov2HandMeta extends MetaData {
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
    * 
-   * @param name
+   * @param type
    *          n
    * 
    */
-  public InMoov2HandMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public InMoov2HandMeta() {
     addDescription("an easier way to create gestures for InMoov");
     addCategory("robot");
 
@@ -36,11 +31,10 @@ public class InMoov2HandMeta extends MetaData {
     addPeer("ringFinger", "Servo", "RingFinger servo");
     addPeer("pinky", "Servo", "Pinky servo");
     addPeer("wrist", "Servo", "Wrist servo");
-    
+
   }
 
-  
-  static public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+  public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
 
     LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
 
@@ -66,12 +60,12 @@ public class InMoov2HandMeta extends MetaData {
     }
 
     // build a config with all peer defaults
-    config.putAll(ServiceInterface.getDefault(handConfig.thumb, "Servo"));
-    config.putAll(ServiceInterface.getDefault(handConfig.index, "Servo"));
-    config.putAll(ServiceInterface.getDefault(handConfig.majeure, "Servo"));
-    config.putAll(ServiceInterface.getDefault(handConfig.ringFinger, "Servo"));
-    config.putAll(ServiceInterface.getDefault(handConfig.pinky, "Servo"));
-    config.putAll(ServiceInterface.getDefault(handConfig.wrist, "Servo"));
+    config.putAll(MetaData.getDefault(handConfig.thumb, "Servo"));
+    config.putAll(MetaData.getDefault(handConfig.index, "Servo"));
+    config.putAll(MetaData.getDefault(handConfig.majeure, "Servo"));
+    config.putAll(MetaData.getDefault(handConfig.ringFinger, "Servo"));
+    config.putAll(MetaData.getDefault(handConfig.pinky, "Servo"));
+    config.putAll(MetaData.getDefault(handConfig.wrist, "Servo"));
 
     ServoConfig thumb = (ServoConfig) config.get(handConfig.thumb);
     thumb.autoDisable = true;
@@ -171,5 +165,5 @@ public class InMoov2HandMeta extends MetaData {
 
     return config;
 
-  }  
+  }
 }

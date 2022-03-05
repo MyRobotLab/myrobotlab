@@ -17,9 +17,8 @@ public class JoystickMeta extends MetaData {
    *          n
    * 
    */
-  public JoystickMeta(String name) {
+  public JoystickMeta() {
 
-    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("service allows interfacing with a keyboard, joystick or gamepad");
     addCategory("control", "telerobotics");

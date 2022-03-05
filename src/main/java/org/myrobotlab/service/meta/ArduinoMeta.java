@@ -2,8 +2,6 @@ package org.myrobotlab.service.meta;
 
 import java.util.LinkedHashMap;
 
-import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.ArduinoConfig;
 import org.myrobotlab.service.config.SerialConfig;
@@ -20,21 +18,17 @@ public class ArduinoMeta extends MetaData {
    * to be constructed. It has description, categories, dependencies, and peer
    * definitions.
    * 
-   * @param name
+   * @param type
    *          n
    */
-  public ArduinoMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
-
+  public ArduinoMeta() {
     addDescription("controls an Arduino microcontroller as a slave, which allows control of all the devices the Arduino is attached to, such as servos, motors and sensors");
     addCategory("microcontroller");
     addPeer("serial", "Serial", "serial device for this Arduino");
-
   }
 
-  static public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+  public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+        
     LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
     ArduinoConfig arduinoConfig = new ArduinoConfig();
 
@@ -42,7 +36,7 @@ public class ArduinoMeta extends MetaData {
     arduinoConfig.serial = name + ".serial";
 
     // build a config with all peer defaults
-    config.putAll(ServiceInterface.getDefault(arduinoConfig.serial, "Serial"));
+    config.putAll(MetaData.getDefault(arduinoConfig.serial, "Serial"));
 
     // pull out specific config and modify
     SerialConfig serialConfig = (SerialConfig) config.get(arduinoConfig.serial);

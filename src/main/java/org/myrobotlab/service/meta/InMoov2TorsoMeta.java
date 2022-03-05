@@ -2,8 +2,6 @@ package org.myrobotlab.service.meta;
 
 import java.util.LinkedHashMap;
 
-import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.InMoov2TorsoConfig;
 import org.myrobotlab.service.config.ServiceConfig;
@@ -19,15 +17,11 @@ public class InMoov2TorsoMeta extends MetaData {
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
    * 
-   * @param name
+   * @param type
    *          n
    * 
    */
-  public InMoov2TorsoMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
-
+  public InMoov2TorsoMeta() {
     addDescription("InMoov Torso");
     addCategory("robot");
 
@@ -37,7 +31,7 @@ public class InMoov2TorsoMeta extends MetaData {
 
   }
 
-  static public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+  public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
 
     LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
 
@@ -53,9 +47,9 @@ public class InMoov2TorsoMeta extends MetaData {
     torsoConfig.lowStom = name + ".lowStom";
 
     // build a config with all peer defaults
-    config.putAll(ServiceInterface.getDefault(torsoConfig.topStom, "Servo"));
-    config.putAll(ServiceInterface.getDefault(torsoConfig.midStom, "Servo"));
-    config.putAll(ServiceInterface.getDefault(torsoConfig.lowStom, "Servo"));
+    config.putAll(MetaData.getDefault(torsoConfig.topStom, "Servo"));
+    config.putAll(MetaData.getDefault(torsoConfig.midStom, "Servo"));
+    config.putAll(MetaData.getDefault(torsoConfig.lowStom, "Servo"));
 
     ServoConfig topStom = (ServoConfig) config.get(torsoConfig.topStom);
     topStom.autoDisable = true;

@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.AbstractSpeechSynthesisMeta;
 import org.slf4j.Logger;
@@ -17,10 +16,7 @@ public class VoiceRssMeta extends AbstractSpeechSynthesisMeta {
    *          n
    * 
    */
-  public VoiceRssMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public VoiceRssMeta() {
     addDescription("VoiceRss speech synthesis service.");
     addCategory("speech");
     setSponsor("moz4r");
@@ -28,7 +24,6 @@ public class VoiceRssMeta extends AbstractSpeechSynthesisMeta {
     addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
     setCloudService(true);
     addDependency("com.voicerss", "tts", "1.0");
-
   }
 
 }

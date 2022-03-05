@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,7 @@ public class EddieControlBoardMeta extends MetaData {
    *          n
    * 
    */
-  public EddieControlBoardMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public EddieControlBoardMeta() {
     addDescription("microcontroller designed for robotics");
     addCategory("microcontroller");
     // John Harland no longer uses this hardware

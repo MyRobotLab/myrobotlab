@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,8 @@ public class LeapMotionMeta extends MetaData {
    *          n
    * 
    */
-  public LeapMotionMeta(String name) {
+  public LeapMotionMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription("Leap Motion Service");
     addCategory("sensors", "telerobotics");
     addDependency("leapmotion", "leap", "2.1.3");

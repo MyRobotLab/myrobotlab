@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,14 +16,10 @@ public class KafkaConnectorMeta extends MetaData {
    *          n
    * 
    */
-  public KafkaConnectorMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public KafkaConnectorMeta() {
     addDescription("Provides a string/string consumer for a kafka topic.");
     addCategory("cloud");
     addDependency("org.apache.kafka", "kafka-clients", "1.0.1");
-
   }
 
 }

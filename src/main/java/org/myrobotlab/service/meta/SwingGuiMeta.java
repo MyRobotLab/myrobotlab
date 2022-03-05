@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,8 @@ public class SwingGuiMeta extends MetaData {
    *          n
    * 
    */
-  public SwingGuiMeta(String name) {
+  public SwingGuiMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription("Service used to graphically display and control other services");
     addCategory("display");
 

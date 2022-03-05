@@ -2,8 +2,6 @@ package org.myrobotlab.service.meta;
 
 import java.util.LinkedHashMap;
 
-import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.InMoov2ArmConfig;
 import org.myrobotlab.service.config.ServiceConfig;
@@ -19,14 +17,11 @@ public class InMoov2ArmMeta extends MetaData {
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
    * 
-   * @param name
+   * @param type
    *          n
    * 
    */
-  public InMoov2ArmMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public InMoov2ArmMeta() {
     addDescription("the InMoov Arm Service");
     addCategory("robot");
 
@@ -38,7 +33,7 @@ public class InMoov2ArmMeta extends MetaData {
 
   }
 
-  static public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+  public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
 
     LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
 
@@ -49,11 +44,11 @@ public class InMoov2ArmMeta extends MetaData {
     // panName, pidName, trackingName };
     String cname = null;
     if (name.endsWith("leftArm")) {
-      cname = "i01.left"; // FIXME - still terrible to have a i01 here :( 
+      cname = "i01.left"; // FIXME - still terrible to have a i01 here :(
     } else if (name.endsWith("rightArm")) {
-      cname = "i01.right"; // FIXME - still terrible to have a i01 here :( 
+      cname = "i01.right"; // FIXME - still terrible to have a i01 here :(
     }
-    
+
     // set local names and config
     armConfig.omoplate = name + ".omoplate";
     armConfig.shoulder = name + ".shoulder";
@@ -61,10 +56,10 @@ public class InMoov2ArmMeta extends MetaData {
     armConfig.bicep = name + ".bicep";
 
     // build a config with all peer defaults
-    config.putAll(ServiceInterface.getDefault(armConfig.omoplate, "Servo"));
-    config.putAll(ServiceInterface.getDefault(armConfig.shoulder, "Servo"));
-    config.putAll(ServiceInterface.getDefault(armConfig.rotate, "Servo"));
-    config.putAll(ServiceInterface.getDefault(armConfig.bicep, "Servo"));
+    config.putAll(MetaData.getDefault(armConfig.omoplate, "Servo"));
+    config.putAll(MetaData.getDefault(armConfig.shoulder, "Servo"));
+    config.putAll(MetaData.getDefault(armConfig.rotate, "Servo"));
+    config.putAll(MetaData.getDefault(armConfig.bicep, "Servo"));
 
     ServoConfig omoplate = (ServoConfig) config.get(armConfig.omoplate);
     omoplate.autoDisable = true;

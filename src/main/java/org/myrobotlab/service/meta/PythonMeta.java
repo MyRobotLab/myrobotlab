@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,7 @@ public class PythonMeta extends MetaData {
    *          n
    * 
    */
-  public PythonMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public PythonMeta() {
 
     addDescription("the Jython script engine compatible with pure Python 2.7 scripts");
     addCategory("programming", "control");

@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,7 @@ public class I2cMuxMeta extends MetaData {
    *          n
    * 
    */
-  public I2cMuxMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public I2cMuxMeta() {
     addDescription("Multiplexer for i2c to be able to use multiple i2c devices");
     addCategory("i2c", "control");
     setAvailable(true);

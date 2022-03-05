@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,8 @@ public class XMLConnectorMeta extends MetaData {
    *          n
    * 
    */
-  public XMLConnectorMeta(String name) {
+  public XMLConnectorMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription("This is an XML Connector that will parse a large xml file into many small xml documents");
     addCategory("filter");
     // FIXME - make a service page, and /python/service example

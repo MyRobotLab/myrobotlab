@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,8 @@ public class JMonkeyEngineMeta extends MetaData {
    *          n
    * 
    */
-  public JMonkeyEngineMeta(String name) {
+  public JMonkeyEngineMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription("is a 3d game engine, used for simulators");
 
     String jmeVersion = "3.3.2-stable";

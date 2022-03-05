@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,7 @@ public class ImapEmailConnectorMeta extends MetaData {
    *          n
    * 
    */
-  public ImapEmailConnectorMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public ImapEmailConnectorMeta() {
     addDescription("This connector will connect to an IMAP based email server and crawl the emails");
     addCategory("monitor", "cloud", "network");
     addDependency("javax.mail", "mail", "1.4.7");

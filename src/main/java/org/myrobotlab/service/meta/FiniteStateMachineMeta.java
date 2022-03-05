@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,7 @@ public class FiniteStateMachineMeta extends MetaData {
    *          n
    * 
    */
-  public FiniteStateMachineMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public FiniteStateMachineMeta() {
     addDescription("general service which can create and maintaine multiple finite state machines");
     // addDependency("orgId", "artifactId", "2.4.0");
     addCategory("general", "ai");

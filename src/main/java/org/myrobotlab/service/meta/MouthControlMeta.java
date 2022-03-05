@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,7 @@ public class MouthControlMeta extends MetaData {
    *          n
    * 
    */
-  public MouthControlMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public MouthControlMeta() {
     addDescription("Mouth movements based on spoken text");
     addCategory("control");
 

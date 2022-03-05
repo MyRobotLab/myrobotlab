@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,8 @@ public class MqttBrokerMeta extends MetaData {
    *          n
    * 
    */
-  public MqttBrokerMeta(String name) {
+  public MqttBrokerMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription(
         "This is an Mqtt client based on the Paho Mqtt client library. Mqtt is a machine-to-machine (M2M)/'Internet of Things' connectivity protocol. See http://mqtt.org");
     addCategory("cloud", "network");

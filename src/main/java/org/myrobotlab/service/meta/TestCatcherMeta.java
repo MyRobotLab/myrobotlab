@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,7 @@ public class TestCatcherMeta extends MetaData {
    *          n
    * 
    */
-  public TestCatcherMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public TestCatcherMeta() {
 
     addDescription("This service is used to test messaging");
     setAvailable(false);

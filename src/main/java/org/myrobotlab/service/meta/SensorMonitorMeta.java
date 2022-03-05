@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,8 @@ public class SensorMonitorMeta extends MetaData {
    *          n
    * 
    */
-  public SensorMonitorMeta(String name) {
+  public SensorMonitorMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription("sensor monitor - capable of displaying sensor information in a crude oscilliscope fasion");
     addCategory("sensors", "display");
 

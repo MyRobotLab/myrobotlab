@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,7 @@ public class MyoThalmicMeta extends MetaData {
    *          n
    * 
    */
-  public MyoThalmicMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public MyoThalmicMeta() {
 
     addDescription("Myo service to control with the Myo armband");
     addCategory("control", "sensors");

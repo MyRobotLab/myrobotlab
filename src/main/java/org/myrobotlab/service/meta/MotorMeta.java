@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,11 +16,7 @@ public class MotorMeta extends MetaData {
    *          n
    * 
    */
-  public MotorMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
-
+  public MotorMeta() {
     addDescription("Motor service which supports 1 pwr pwm pin and 1 direction pin");
     addCategory("motor");
 

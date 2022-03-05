@@ -16,9 +16,7 @@ public class GoogleSearchMeta extends MetaData {
    *          n
    * 
    */
-  public GoogleSearchMeta(String name) {
-
-    super(name);
+  public GoogleSearchMeta() {
     addDescription("used as a general google search");
     addDependency("org.jsoup", "jsoup", "1.14.2");
     addCategory("search");

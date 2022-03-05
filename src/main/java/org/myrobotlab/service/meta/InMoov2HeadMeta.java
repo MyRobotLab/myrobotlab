@@ -2,8 +2,6 @@ package org.myrobotlab.service.meta;
 
 import java.util.LinkedHashMap;
 
-import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.InMoov2HeadConfig;
 import org.myrobotlab.service.config.ServiceConfig;
@@ -19,14 +17,11 @@ public class InMoov2HeadMeta extends MetaData {
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
    * 
-   * @param name
+   * @param type
    *          n
    * 
    */
-  public InMoov2HeadMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public InMoov2HeadMeta() {
     addDescription("The inmoov2 head");
     addPeer("jaw", "Servo", "Jaw servo");
     addPeer("eyeX", "Servo", "Eyes pan servo");
@@ -41,7 +36,7 @@ public class InMoov2HeadMeta extends MetaData {
 
   }
 
-  static public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+  public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
 
     LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
 
@@ -52,6 +47,7 @@ public class InMoov2HeadMeta extends MetaData {
     // panName, pidName, trackingName };
 
     // set local names and config
+    // PEERS ???? I think so ....
     headConfig.jaw = name + ".jaw";
     headConfig.eyeX = name + ".eyeX";
     headConfig.eyeY = name + ".eyeY";
@@ -62,14 +58,15 @@ public class InMoov2HeadMeta extends MetaData {
     headConfig.eyelidRight = name + ".eyelidRight";
 
     // build a config with all peer defaults
-    config.putAll(ServiceInterface.getDefault(headConfig.jaw, "Servo"));
-    config.putAll(ServiceInterface.getDefault(headConfig.eyeX, "Servo"));
-    config.putAll(ServiceInterface.getDefault(headConfig.eyeY, "Servo"));
-    config.putAll(ServiceInterface.getDefault(headConfig.rothead, "Servo"));
-    config.putAll(ServiceInterface.getDefault(headConfig.neck, "Servo"));
-    config.putAll(ServiceInterface.getDefault(headConfig.rollNeck, "Servo"));
-    config.putAll(ServiceInterface.getDefault(headConfig.eyelidLeft, "Servo"));
-    config.putAll(ServiceInterface.getDefault(headConfig.eyelidRight, "Servo"));
+    config.putAll(MetaData.getDefault(headConfig.jaw, "Servo"));
+    config.putAll(MetaData.getDefault(headConfig.eyeX, "Servo"));
+    config.putAll(MetaData.getDefault(headConfig.eyeY, "Servo"));
+    config.putAll(MetaData.getDefault(headConfig.rothead, "Servo"));
+    config.putAll(MetaData.getDefault(headConfig.neck, "Servo"));
+    config.putAll(MetaData.getDefault(headConfig.rollNeck, "Servo"));
+    config.putAll(MetaData.getDefault(headConfig.eyelidLeft, "Servo"));
+    config.putAll(MetaData.getDefault(headConfig.eyelidRight, "Servo"));
+    config.put(name, headConfig);
 
     ServoConfig jaw = (ServoConfig) config.get(headConfig.jaw);
     jaw.autoDisable = true;
@@ -135,7 +132,7 @@ public class InMoov2HeadMeta extends MetaData {
     rothead.speed = 45.0;
     rothead.sweepMax = null;
     rothead.sweepMin = null;
-    
+
     ServoConfig neck = (ServoConfig) config.get(headConfig.neck);
     neck.autoDisable = true;
     neck.clip = true;
@@ -186,7 +183,7 @@ public class InMoov2HeadMeta extends MetaData {
     eyelidLeft.speed = 50.0;
     eyelidLeft.sweepMax = null;
     eyelidLeft.sweepMin = null;
-    
+
     ServoConfig eyelidRight = (ServoConfig) config.get(headConfig.eyelidRight);
     eyelidRight.autoDisable = true;
     eyelidRight.clip = true;
@@ -206,6 +203,6 @@ public class InMoov2HeadMeta extends MetaData {
 
     return config;
 
-  }  
-  
+  }
+
 }

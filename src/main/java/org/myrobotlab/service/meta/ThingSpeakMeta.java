@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,8 @@ public class ThingSpeakMeta extends MetaData {
    *          n
    * 
    */
-  public ThingSpeakMeta(String name) {
+  public ThingSpeakMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription("Service which can relay data to a ThingSpeak account");
     addCategory("monitor", "cloud");
 

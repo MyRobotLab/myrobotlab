@@ -2,8 +2,6 @@ package org.myrobotlab.service.meta;
 
 import java.util.LinkedHashMap;
 
-import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.config.ArduinoConfig;
@@ -23,21 +21,31 @@ public class TrackingMeta extends MetaData {
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
    * 
-   * @param name
+   * @param type
    *          n
    * 
    */
-  public TrackingMeta(String name) {
+  public TrackingMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+    addPeer("cv", "OpenCV");
+    addPeer("pan", "Servo");
+    addPeer("tilt", "Servo");
+    addPeer("pid", "Pid");
+    // TODO - controller ? naw probably not
 
     addDescription("tracks objects through video stream given a simple pan, tilt servo camera rig");
-    addCategory("sensors","tracking", "vision");
-    // addPeer
+    addCategory("sensors", "tracking", "vision");
+
   }
 
-  static public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+  /**
+   * Default config of a service that has peers and the config for those peers
+   * 
+   * @param name
+   *          - name of our service
+   * @return map of peer names to their appropriate config
+   */
+  public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
 
     LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
 
@@ -45,6 +53,9 @@ public class TrackingMeta extends MetaData {
 
     // set local names and config
     String controller = name + ".controller";
+    // String controller = Runtime.getAlias(name + ".controller");
+    // FIXME - do i need aliases here or does the parent service modify all this
+    // (probably)
     trackingConfig.cv = name + ".cv";
     trackingConfig.pan = name + ".pan";
     trackingConfig.tilt = name + ".tilt";
@@ -52,20 +63,21 @@ public class TrackingMeta extends MetaData {
     trackingConfig.enabled = false;
 
     // build a config with all peer defaults
-    config.putAll(ServiceInterface.getDefault(controller, "Arduino"));
-    config.putAll(ServiceInterface.getDefault(trackingConfig.cv, "OpenCV"));
-    config.putAll(ServiceInterface.getDefault(trackingConfig.pan, "Servo"));
-    config.putAll(ServiceInterface.getDefault(trackingConfig.tilt, "Servo"));
-    config.putAll(ServiceInterface.getDefault(trackingConfig.pid, "Pid"));
+    config.putAll(MetaData.getDefault(controller, "Arduino"));
+    config.putAll(MetaData.getDefault(trackingConfig.cv, "OpenCV"));
+    config.putAll(MetaData.getDefault(trackingConfig.pan, "Servo"));
+    config.putAll(MetaData.getDefault(trackingConfig.tilt, "Servo"));
+    config.putAll(MetaData.getDefault(trackingConfig.pid, "Pid"));
 
     // pull out config this service default wants to modify
     ArduinoConfig controllerConfig = (ArduinoConfig) config.get(controller);
     controllerConfig.connect = true;
-    controllerConfig.port = "/dev/ttyACM0";
+    // controllerConfig.port = "/dev/ttyACM0"; wtf are you doing?
+    controllerConfig.port = null;
 
     OpenCVConfig cvConfig = (OpenCVConfig) config.get(trackingConfig.cv);
     cvConfig.cameraIndex = 0;
-    cvConfig.capturing = true;
+    cvConfig.capturing = false;
     cvConfig.inputSource = "camera";
     cvConfig.grabberType = "OpenCV";
 
@@ -100,6 +112,6 @@ public class TrackingMeta extends MetaData {
     config.put(name, trackingConfig);
 
     return config;
-  }  
-  
+  }
+
 }

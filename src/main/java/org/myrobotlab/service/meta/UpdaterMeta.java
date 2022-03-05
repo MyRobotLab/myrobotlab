@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,8 @@ public class UpdaterMeta extends MetaData {
    *          n
    * 
    */
-  public UpdaterMeta(String name) {
+  public UpdaterMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription("used to manage updates");
     addCategory("system");
 
