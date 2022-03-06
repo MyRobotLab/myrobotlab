@@ -2620,7 +2620,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     return c;
   }
 
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     if (app != null) {
       // if there is an app we can load immediately
       loadDelayed(c);

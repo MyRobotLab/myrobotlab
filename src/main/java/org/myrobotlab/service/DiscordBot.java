@@ -53,7 +53,7 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
   }
 
   @Override
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     DiscordBotConfig config = (DiscordBotConfig) c;
 
     setToken(config.token);

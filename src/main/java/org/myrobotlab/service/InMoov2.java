@@ -2451,7 +2451,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener,  TextL
     releasePeer("audioPlayer");
   }
 
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     InMoov2Config config = (InMoov2Config) c;
     try {
 
@@ -2487,6 +2487,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener,  TextL
       /*
        * if (config.enableEyelids) { // the hell if I know ? }
        */
+      loadGestures = config.loadGestures;
 
       if (config.enableHead) {
         startHead();

@@ -80,8 +80,8 @@ public class Motor extends AbstractMotor {
     return config;
   }
 
-  public ServiceConfig load(ServiceConfig c) {
-    super.load(c);
+  public ServiceConfig apply(ServiceConfig c) {
+    super.apply(c);
     MotorConfig config = (MotorConfig) c;
     if (config.pwrPin != null) {
       setPwrPin(pwrPin);

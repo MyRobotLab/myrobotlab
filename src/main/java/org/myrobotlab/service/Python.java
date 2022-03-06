@@ -926,7 +926,7 @@ public class Python extends Service implements ServiceLifeCycleListener {
   }
 
   @Override
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     PythonConfig config = (PythonConfig) c;
     if (config.startScripts != null && config.startScripts.size() > 0) {
       startScripts.clear();

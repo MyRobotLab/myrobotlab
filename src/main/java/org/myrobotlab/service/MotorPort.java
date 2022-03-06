@@ -39,8 +39,8 @@ public class MotorPort extends AbstractMotor {
     return config;
   }
 
-  public ServiceConfig load(ServiceConfig c) {
-    super.load(c);
+  public ServiceConfig apply(ServiceConfig c) {
+    super.apply(c);
     MotorPortConfig config = (MotorPortConfig) c;
     setPort(config.port);
     return c;

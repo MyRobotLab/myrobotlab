@@ -507,7 +507,7 @@ public class Pid extends Service implements PidControl {
   }
 
   @Override
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     PidConfig config = (PidConfig) c;
     if (config.data != null) {
       data = config.data;

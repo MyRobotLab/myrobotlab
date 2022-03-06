@@ -203,7 +203,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
   }
 
   @Override
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     UltrasonicSensorConfig config = (UltrasonicSensorConfig) c;
 
     if (config.triggerPin != null)
