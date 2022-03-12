@@ -2012,6 +2012,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static public ServiceInterface start(Plan inPlan, String name, String type) {
     // hand back immediately if a service with that name exists
     // and is running
+    if (inPlan == null && runtime != null) {
+      inPlan = runtime.plan;
+    }
+    
     ServiceInterface si = null;
 
     si = Runtime.getService(name);
