@@ -19,9 +19,14 @@ public class ServiceConfig {
    */
   public String type;
   
-  public Map<String,String> peerz;
+  // public Map<String,String> peerz;
 
   // public String name; I DO NOT WANT TO PUT THIS IN
+  
+  /**
+   * if this service is a peer - autostart it first when creating its parent
+   */
+  public boolean autoStart = true;
 
   public ServiceConfig() {
     String configTypeName = this.getClass().getSimpleName();
