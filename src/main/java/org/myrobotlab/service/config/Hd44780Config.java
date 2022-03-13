@@ -10,5 +10,9 @@ public class Hd44780Config extends ServiceConfig {
   public String line2;
   public String line3;
   */
+  /**
+   * delays in ms between characters
+   */
+  public Integer delay;
 
 }
