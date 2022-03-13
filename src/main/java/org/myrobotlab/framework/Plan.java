@@ -4,22 +4,32 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.ArduinoConfig;
+import org.myrobotlab.service.config.OpenCVConfig;
+import org.myrobotlab.service.config.SerialConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
+import org.slf4j.Logger;
 
 public class Plan {
   /**
    * the root of the tree of configuration
    */
-  String root;
+  final String name;
 
+  public final static Logger log = LoggerFactory.getLogger(Plan.class);
+  
   LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
+  
+  public Map<String, Map<String, ServiceReservation>> peers = new TreeMap<String, Map<String, ServiceReservation>>();
 
-  final MetaData metaData;
+  // final MetaData metaData;
 
-  public Plan(MetaData metaData) {
-    this.metaData = metaData;
+  public Plan(String name) {
+    this.name = name;
   }
 
   public String toString() {
@@ -69,9 +79,9 @@ public class Plan {
       replaceMatching = false;
     }
 
-    for (String peerName : ret.metaData.peers.keySet()) {
-      if (replaceMatching || !metaData.peers.containsKey(peerName)) {
-        metaData.peers.put(peerName, ret.metaData.peers.get(peerName));
+    for (String peerName : ret.peers.keySet()) {
+      if (replaceMatching || !peers.containsKey(peerName)) {
+        peers.put(peerName, ret.peers.get(peerName));
       }
     }
     
@@ -84,26 +94,20 @@ public class Plan {
   }
 
   public String getPath(String peerKey) {
-    if (root == null) {
+    if (name == null) {
       return peerKey;
     } else {
-      return root + "." + peerKey;
+      return name + "." + peerKey;
     }
   }
 
-  public ServiceConfig getPeer(String name, String type, Boolean autoStart) {
-    Plan plan = MetaData.getDefault(name, type, autoStart);
+  // NOTE ! - this uses actualName
+  private ServiceConfig addConfig(String actualName, String type, Boolean autoStart) {
+    Plan plan = MetaData.getDefault(actualName, type, autoStart);
     // merge config - do not replace root
     merge(plan);
-    return config.get(name);
+    return config.get(actualName);
   }
-
-  // public ServiceConfig addPeer(String peerKey, String type) {
-  // Plan plan = MetaData.getDefault(getPath(peerKey), type);
-  // // merge config - do not replace root
-  // mergeConfig(plan.config);
-  // return config.get(getPath(peerKey));
-  // }
 
   public ServiceConfig remove(String name) {
     return config.remove(name);
@@ -122,9 +126,84 @@ public class Plan {
     return sc;
   }
 
-  public ServiceConfig getPeer(String key) {
-    // TODO Auto-generated method stub
-    return null;
+//  public ServiceConfig getPeer(String key) {
+//    // TODO Auto-generated method stub
+//    return null;
+//  }
+
+  // THIS WILL BUILD OUT DEFAULT CONFIG
+  public void putPeers(String name, Map<String, ServiceReservation> peers, Boolean autoStart) {
+    this.peers.put(name, peers);
+    if (peers != null) {
+      for (String peerKey: peers.keySet()) {
+        if (peerKey.contains("3")) {
+          log.info("here");
+        }
+        addPeerConfig(peerKey, autoStart);
+      }
+    }
+  }
+
+  public void setPeerName(String peerKey, String actualName) {
+    Map<String, ServiceReservation> myPeers = peers.get(name);
+    if (myPeers == null) {
+      log.error("setPeerName({},{}) but {} peers do not exist", peerKey, actualName, name);
+      return;
+    }
+    ServiceReservation sr = myPeers.get(peerKey);
+    if (sr == null) {
+      log.error("setPeerName({},{}) but {} service reservation does not exist", peerKey, actualName, name);
+      return;
+    }
+    sr.actualName = actualName;
+  }
+
+  public ServiceConfig addPeerConfig(String peerKey, Boolean autoStart) {
+    if (autoStart == null) {
+      autoStart = true;
+    }
+    ServiceReservation sr = peers.get(name).get(peerKey);
+    String actualName = null;
+    if (sr == null) {
+      log.error("%s key %s not found", name, peerKey);
+      return null;
+    }
+    if (sr.actualName != null) {
+      actualName = sr.actualName;
+    } else {
+      actualName = name + "." + peerKey;
+    }
+    return addConfig(actualName, sr.type, autoStart);  
+  }
+
+  public ServiceConfig addConfig(ServiceConfig sc, Boolean autoStart) {
+    if (autoStart != null) {
+      sc.autoStart = autoStart;
+    }
+    return config.put(name, sc);
+  }
+
+  public ServiceConfig getPeerConfig(String peerKey) {
+    ServiceReservation sr = peers.get(name).get(peerKey);
+    String actualName = null;
+    if (sr == null) {
+      log.error("%s key %s not found", name, peerKey);
+      return null;
+    }
+    if (sr.actualName != null) {
+      actualName = sr.actualName;
+    } else {
+      actualName = name + "." + peerKey;
+    }    
+    return config.get(actualName);
+  }
+
+  public ServiceConfig removeConfig(String actualName) {
+    return config.remove(actualName);
+  }
+
+  public Map<String,Map<String,ServiceReservation>> getPeers() {
+    return peers;
   }
 
 }

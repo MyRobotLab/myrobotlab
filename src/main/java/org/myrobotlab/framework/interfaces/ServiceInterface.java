@@ -111,6 +111,12 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    *
    */
   public ServiceConfig getConfig();
+  
+  /**
+   * sets config - just before apply
+   * @param config
+   */
+  public void setConfig(ServiceConfig config);
 
   /**
    * Configure a service by merging in configuration
@@ -166,8 +172,6 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
   public void setLocale(String code);
 
   public int getCreationOrder();
-
-  public Plan setPlan(Plan plan);
 
   
 }

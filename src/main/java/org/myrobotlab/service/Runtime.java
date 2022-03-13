@@ -51,6 +51,7 @@ import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -125,7 +126,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * current plan to build when a service is built - a reference is saved so the
    * service knows where it came from
    */
-  Plan plan = null;
+  Plan plan = new Plan("runtime");
 
   /**
    * plan which was last built
@@ -311,12 +312,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return null;
   }
 
-  static public synchronized ServiceInterface create(String name, String type) {
-    return create(null, name, type);
-  }
 
   static public synchronized ServiceInterface create(String name) {
-    return create(null, name, null);
+    return create(name, null);
   }
 
   /**
@@ -332,14 +330,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @param type
    * @return
    */
-  static public synchronized ServiceInterface create(Plan plan, String name, String type) {
+  static public synchronized ServiceInterface create(String name, String type) {
     ServiceInterface si = Runtime.getService(name);
     if (si != null) {
       return si;
     }
 
     // Runtime.clear(); - turns out you don't want to do this
-    Runtime.load(plan, name, type); // FIXME evaluate appropriate return for
+    Runtime.load(name, type); // FIXME evaluate appropriate return for
                                     // load
     Runtime.check(name, type);
     // at this point - the plan should be loaded, now its time to create the
@@ -384,31 +382,35 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
 
     // iterate through plan
-    for (String peerName : plan.keySet()) {
-      if ("runtime".equals(peerName)) {
+    for (String serviceName : plan.keySet()) {
+      if ("runtime".equals(serviceName)) {
         // already handled runtime
         // apply the config
-        runtime.apply(plan.get("runtime"));
+        runtime.setConfig(rc);
+        runtime.apply(rc);
         continue;
       }
 
-      ServiceConfig sc = plan.get(peerName);
-      if (sc.autoStart) {
-        ServiceInterface si = createService(peerName, sc.type, null);
+      ServiceConfig sc = plan.get(serviceName);
+      if (sc.autoStart || serviceName.equals(name)) {
+        ServiceInterface si = createService(serviceName, sc.type, null);
 
-        si.setPlan(plan);
+        // FIXME - bad idea
+        // si.setPlan(plan);
 
         // ANOTHER DESIGN CONSIDERATION - SHOULD CONFIG APPLY BE DONE BETWEEN
         // CREATE AND START ???
+        si.setConfig(sc);
         si.apply(sc);
 
         if (si != null) {
           if (si.getName().equals(name)) {
             ret = si;
           }
-          si.startService(); // FIXME - although this is createServices() and
-                             // may require started peers - then it should
-                             // just start
+          if (!si.isRunning()) {
+            si.startService(); // FIXME - although this is createServices() and
+          } // may require started peers - then it should
+            // just start
         }
       }
     }
@@ -449,7 +451,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
         log.info("attempting to invoke : {} of type {}", name, type);
 
-        ServiceInterface s = Runtime.create(null, name, type);
+        ServiceInterface s = Runtime.create(name, type);
 
         if (s != null) {
           try {
@@ -1467,6 +1469,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * 
    */
   public synchronized static boolean release(String inName) {
+    if (inName == null) {
+      log.error("release (null)");
+      return false;
+    }
+
     String name = getFullName(inName);
 
     log.info("releasing service {}", name);
@@ -1493,16 +1500,20 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         runtime.send(name, "releaseService");
       }
     }
-
+    
     unregister(name);
 
     // REMOVE PEERS BASED ON DEFAULTS BEGIN
+    // probably not a good idea - probably if it is going to release
+    // all peers it should use the "current" plan not a default
+    // Additionally, perhaps there should be a parameterized release
+    /**<pre>
     Plan plan = MetaData.getDefault(inName, si.getType());
+    if (plan != null) {
 
     List<String> reverse = new ArrayList<String>(plan.keySet());
     Collections.reverse(reverse);
 
-    if (plan != null) {
       for (String peerName : reverse) {
         if (peerName.equals(inName)) {
           continue;
@@ -1510,6 +1521,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         release(peerName);
       }
     }
+    </pre>*/
     // REMOVE PEERS BASED ON DEFAULTS END
     return true;
   }
@@ -1521,7 +1533,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // get reference from registry
     ServiceInterface sw = registry.get(name);
     if (sw == null) {
-      log.info("{} already unregistered", name);
+      log.debug("{} already unregistered", name);
       return;
     }
 
@@ -1976,45 +1988,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   static public ServiceInterface start() {
-    return start(null, null, null);
-  }
-
-  static public ServiceInterface start(String name, String type) {
-    return start(null, name, type);
+    return start(null, null);
   }
 
   static public ServiceInterface start(String name) {
-    return start(null, name, null);
+    return start(name, null);
   }
 
-  static public ServiceInterface start(Plan inPlan, String name) {
-    return start(inPlan, name, null);
-  }
-
-  /**
-   * start(name, type) goes through the full service lifecycle of:
-   * 
-   * <pre>
-   * clear  - clearing the plan for construction of service(s) needed 
-   * load   - loading the plan for desired services 
-   * check  - checking all planned service have met appropriate licensing and dependency checks create -
-   * create - create the service and its peers
-   * start  - start the service and all specified
-   * </pre>
-   * 
-   * if name and type are null - then process whatever is currently in the Plan
-   * 
-   * @param name
-   * @param type
-   *          - can be null, if file exists on the file system or already loaded
-   * @return
-   */
-  static public ServiceInterface start(Plan inPlan, String name, String type) {
+  static public ServiceInterface start(String name, String type) {
     // hand back immediately if a service with that name exists
     // and is running
-    if (inPlan == null && runtime != null) {
-      inPlan = runtime.plan;
-    }
+
     
     ServiceInterface si = null;
 
@@ -2029,29 +2013,28 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
     }
 
-    si = create(inPlan, name, type);
+    // did not find an existing service - try to create it
+    si = create(name, type);
     if (si != null && !si.isRunning()) {
       si.startService();
     }
 
     // clear the plan
-    Runtime.clear();
+    // trying not to clear it
+    // Runtime.clear();
 
     return si;
   }
 
-  public static ServiceConfig load(String name, String type) {
-    return load(null, name, type);
-  }
 
   public static ServiceConfig load(String name) {
-    return load(null, name, null);
+    return load(name, null);
   }
 
-  public static ServiceConfig load(Plan plan, String name, String type) {
+  public static ServiceConfig load(String name, String type) {
     Runtime runtime = Runtime.getInstance();
     try {
-      return runtime.loadService(plan, name, type, null, null);
+      return runtime.loadService(name, type, null, null);
     } catch (IOException e) {
       runtime.error(e);
     }
@@ -3323,7 +3306,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static public void clear() {
     Runtime runtime = Runtime.getInstance();
     runtime.lastPlan = runtime.plan;
-    runtime.plan = new Plan(runtime.serviceType);
+    runtime.plan = new Plan("runtime");
 
   }
 
@@ -3659,7 +3642,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static public ServiceInterface loadAndStart(String name, String type) {
     ServiceInterface s = null;
     try {
-      s = create(null, name, type);
+      s = create(name, type);
       s.load();
       s.startService();
     } catch (Exception e) {
@@ -3704,7 +3687,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @return
    * @throws IOException
    */
-  private ServiceConfig loadService(Plan inPlan, String name, String type, Boolean overwrite, Boolean overwritePeers) throws IOException {
+  private ServiceConfig loadService(String name, String type, Boolean overwrite, Boolean overwritePeers) throws IOException {
     // FIXME - get default if file doesn't exist !
     // FIXME - special handling for runtime
     // ServiceInterface si = create(name);
@@ -3716,16 +3699,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       overwritePeers = false;
     }
 
-    if (inPlan == null) {
-      // root plan
-      plan = new Plan(runtime.serviceType);
-    } else {
-      plan = inPlan;
-    }
-
     if (name == null && type == null) {
       log.info("no new name or type information provided - we will use existing plan");
-      log.info("looking for runtime config");
       ServiceConfig sc = plan.get("runtime");
       if (sc != null) {
         log.info("found runtime config");
@@ -3765,6 +3740,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         return null;
       } else {
         log.info("could not find config in file trying default of type {}", type);
+        // find a default plan for this name and type 
         Plan plan = MetaData.getDefault(name, type);
         runtime.plan.merge(plan);
         // minimally, the service we've requested the plan for should have
@@ -3781,7 +3757,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   public ServiceConfig apply(ServiceConfig c) {
-    super.apply(c);
     RuntimeConfig config = (RuntimeConfig) c;
     setLocale(config.locale);
     info("setting locale to %s", config.locale);
@@ -4083,6 +4058,91 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
 
     return savedPaths;
+  }
+
+  public ServiceInterface startPeer(String name, String reservedKey) {
+
+    ServiceInterface si = null;
+
+    Map<String, ServiceReservation> servicePeers = plan.peers.get(name);
+    if (servicePeers == null) {
+      log.error("startPeer cannot find any entries for {} include {}", name, reservedKey);
+      return null;
+    }
+
+    ServiceReservation sr = servicePeers.get(reservedKey);
+    if (sr == null) {
+      error("%s startPeer %s does not exist", name, reservedKey);
+      return null;
+    }
+    String peerName = null;
+    if (sr.actualName == null) {
+      peerName = String.format("%s.%s", name, reservedKey);
+    } else {
+      peerName = sr.actualName;
+    }
+
+    // heh so, simple
+    ServiceConfig sc = runtime.getPlan().get(peerName);
+
+    if (sc == null) {
+      error("%s not found - was it defined as a peer?", peerName);
+      return null;
+    }
+    // FIXME - is this correct ??? - i think so
+    sc.autoStart = true;
+
+    // FIXME - get rid of this completely
+    si = Runtime.start(peerName, sr.type);
+
+    if (sr != null) {
+      sr.state = "started";
+    }
+
+    broadcastState();
+    return si;
+
+  }
+
+  public void releasePeer(String name, String reservedKey) {
+
+    Map<String, ServiceReservation> servicePeers = plan.peers.get(name);
+    if (servicePeers == null) {
+      log.error("startPeer cannot find any entries for {} include {}", name, reservedKey);
+      return;
+    }
+
+    ServiceReservation sr = servicePeers.get(reservedKey);
+    if (sr == null) {
+      error("%s startPeer %s does not exist", name, reservedKey);
+      return;
+    }
+    String peerName = null;
+    if (sr.actualName == null) {
+      peerName = String.format("%s.%s", name, reservedKey);
+    } else {
+      peerName = sr.actualName;
+    }
+
+    // heh so, simple
+    ServiceConfig sc = runtime.getPlan().get(peerName);
+
+    if (sc == null) {
+      error("%s not found - was it defined as a peer?", peerName);
+      return;
+    }
+
+    sc.autoStart = false;
+
+    // FIXME - get rid of this completely
+    Runtime.release(peerName);
+
+    if (sr != null) {
+      sr.state = "idle";
+    }
+
+    broadcastState();
+
   }
 
 }

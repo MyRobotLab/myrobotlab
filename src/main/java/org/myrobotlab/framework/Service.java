@@ -64,6 +64,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
@@ -131,6 +132,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   transient protected Thread thisThread = null;
 
   transient protected Inbox inbox = null;
+  
   transient protected Outbox outbox = null;
 
   protected String serviceVersion = null;
@@ -139,6 +141,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * default en.properties - if there is one
    */
   protected Properties defaultLocalization = null;
+  
+  /**
+   * the last config applied to this service
+   */
+  protected ServiceConfig config; 
 
   /**
    * map of keys to localizations -
@@ -186,7 +193,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * plan which was used to build this service
    */
-  protected Plan buildPlan = null;
+  protected Plan buildPlanx = null;
 
   /**
    * order which this service was created
@@ -1334,14 +1341,19 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   public ServiceConfig getConfig() {
     // FIXME !!! - this should be null for services that do not have it !
-    log.info("{} of type {} does not currently define its own config", getName(), getSimpleName());
-    ServiceConfig config = new ServiceConfig();
-    config.type = getClass().getSimpleName();
+//    log.info("{} of type {} does not currently define its own config", getName(), getSimpleName());
+//    ServiceConfig config = new ServiceConfig();
+//    config.type = getClass().getSimpleName();
     return config;
+  }
+  
+  @Override
+  public void setConfig(ServiceConfig config) {
+    this.config = config;
   }
 
   public ServiceConfig load() throws IOException {
-    ServiceConfig config = Runtime.load(null, getName(), getClass().getSimpleName());
+    ServiceConfig config = Runtime.load(getName(), getClass().getSimpleName());
     return config;
   }
 
@@ -1776,76 +1788,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public ServiceInterface startPeer(String reservedKey) {
-    ServiceInterface si = null;
-    try {
-      
-      ServiceReservation sr = buildPlan.metaData.peers.get(reservedKey);
-      if (sr == null) {
-        error("%s startPeer %s does not exist", getName(), reservedKey);
-        return null;
-      }
-      String peerName = null;
-      if (sr.actualName == null) {
-        peerName = String.format("%s.%s", getName(), reservedKey);
-      } else {
-        peerName = sr.actualName;
-      }
-      
-      // heh so, simple
-      ServiceConfig sc = buildPlan.get(peerName);
-      
-      if (sc == null) {
-        error("%s not found - was it defined as a peer?", peerName);
-        return null;
-      }
-      
-      sc.autoStart = true;
-      
-      si = Runtime.start(buildPlan, peerName);
-
-      if (sr != null) {
-        sr.state = "started";
-      }
-
-    } catch (Exception e) {
-      error(e.getMessage());
-      log.error("startPeer threw", e);
-    }
-    broadcastState();
-    return si;
+   Runtime runtime = Runtime.getInstance();
+   return runtime.startPeer(getName(), reservedKey);
   }
   
-  public ServiceInterface releasePeer(String reservedKey) {
-    ServiceInterface si = null;
-    try {
-      
-      ServiceReservation sr = buildPlan.metaData.peers.get(reservedKey);
-      if (sr == null) {
-        error("%s startPeer %s does not exist", getName(), reservedKey);
-        return null;
-      }
-      String peerName = null;
-      if (sr.actualName == null) {
-        peerName = String.format("%s.%s", getName(), reservedKey);
-      } else {
-        peerName = sr.actualName;
-      }
-      
-      Runtime.release(peerName);
-      
-      ServiceConfig sc = buildPlan.get(peerName);
-      sc.autoStart = false;
-      
-      if (sr != null) {
-        sr.state = "idle";
-      }
-
-    } catch (Exception e) {
-      error(e.getMessage());
-      log.error("startPeer threw", e);
-    }
-    broadcastState();
-    return si;
+  public void releasePeer(String reservedKey) {    
+    Runtime runtime = Runtime.getInstance();
+    runtime.releasePeer(getName(), reservedKey);
   }
 
   @Override
@@ -2590,13 +2539,5 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return MetaData.getDefault(getName(), this.getClass().getSimpleName(), null);
   }
 
-  public Plan setPlan(Plan plan) {
-    if (this.buildPlan != null) {
-      log.warn("cannot set plan once it is set");
-      return null;
-    }
-    this.buildPlan = plan;
-    return plan;
-  }
   
 }
