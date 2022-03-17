@@ -2,9 +2,9 @@ package org.myrobotlab.service.config;
 
 public class ServoConfig extends ServiceConfig {
 
-  public boolean autoDisable;
+  public boolean autoDisable = false;
   // public String controller;
-  public boolean enabled;
+  public boolean enabled = true;
   public Integer idleTimeout;
 
   public String pin;
@@ -12,8 +12,8 @@ public class ServoConfig extends ServiceConfig {
   public Double speed;
 
   // mapper values
-  public boolean inverted;
-  public boolean clip;
+  public boolean inverted = false;
+  public boolean clip = true;
   public Double minIn = 0.0;
   public Double maxIn = 180.0;
   public Double minOut = 0.0;
