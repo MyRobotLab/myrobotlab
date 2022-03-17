@@ -3199,7 +3199,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   public static Plan getPlan(String serviceName, String serviceType) {
-    return ServiceData.getPlan(serviceName, serviceType);
+    // return ServiceData.getPlan(serviceName, serviceType);
+    return null;
   }
 
   public static void clearPlan() {

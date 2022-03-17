@@ -1128,7 +1128,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     return config;
   }
 
-  @Override
   public ServiceConfig apply(ServiceConfig c) {
     ProgramABConfig config = (ProgramABConfig) c;
 

@@ -1,10 +1,8 @@
 package org.myrobotlab.service.meta;
 
-import java.util.LinkedHashMap;
-
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.InMoov2TorsoConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -16,10 +14,6 @@ public class InMoov2TorsoMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param type
-   *          n
-   * 
    */
   public InMoov2TorsoMeta() {
     addDescription("InMoov Torso");
@@ -31,27 +25,27 @@ public class InMoov2TorsoMeta extends MetaData {
 
   }
 
-  public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
-
-    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
-
-    InMoov2TorsoConfig torsoConfig = new InMoov2TorsoConfig();
+  @Override
+  public Plan getDefault(String name, Boolean autoStart) {
+    
+    Plan plan = new Plan(name);
+    // load default peers from meta here
+    plan.putPeers(name, peers, autoStart);
+    
+    InMoov2TorsoConfig torso = new InMoov2TorsoConfig();
 
     // RuntimeConfig runtime = new RuntimeConfig();
     // runtime.registry = new String[] { controllerName, cvName, tiltName,
     // panName, pidName, trackingName };
 
     // set local names and config
-    torsoConfig.topStom = name + ".topStom";
-    torsoConfig.midStom = name + ".midStom";
-    torsoConfig.lowStom = name + ".lowStom";
+    torso.topStom = name + ".topStom";
+    torso.midStom = name + ".midStom";
+    torso.lowStom = name + ".lowStom";
 
     // build a config with all peer defaults
-    config.putAll(MetaData.getDefault(torsoConfig.topStom, "Servo"));
-    config.putAll(MetaData.getDefault(torsoConfig.midStom, "Servo"));
-    config.putAll(MetaData.getDefault(torsoConfig.lowStom, "Servo"));
 
-    ServoConfig topStom = (ServoConfig) config.get(torsoConfig.topStom);
+    ServoConfig topStom = (ServoConfig) plan.getPeerConfig("topStom");
     topStom.autoDisable = true;
     topStom.clip = true;
     topStom.controller = "i01.left";
@@ -67,7 +61,7 @@ public class InMoov2TorsoMeta extends MetaData {
     topStom.sweepMax = null;
     topStom.sweepMin = null;
 
-    ServoConfig midStom = (ServoConfig) config.get(torsoConfig.midStom);
+    ServoConfig midStom = (ServoConfig) plan.getPeerConfig("midStom");
     midStom.autoDisable = true;
     midStom.clip = true;
     midStom.controller = "i01.left";
@@ -83,7 +77,7 @@ public class InMoov2TorsoMeta extends MetaData {
     midStom.sweepMax = null;
     midStom.sweepMin = null;
 
-    ServoConfig lowStom = (ServoConfig) config.get(torsoConfig.lowStom);
+    ServoConfig lowStom = (ServoConfig) plan.getPeerConfig("lowStom");
     lowStom.autoDisable = true;
     lowStom.clip = true;
     lowStom.controller = "i01.left";
@@ -98,8 +92,10 @@ public class InMoov2TorsoMeta extends MetaData {
     lowStom.speed = 20.0;
     lowStom.sweepMax = null;
     lowStom.sweepMin = null;
+    
+    plan.addConfig(torso, autoStart);
 
-    return config;
+    return plan;
 
   }
 

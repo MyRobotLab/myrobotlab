@@ -186,7 +186,6 @@ public class Pir extends Service implements PinListener {
     return isEnabled;
   }
 
-  @Override
   public ServiceConfig apply(ServiceConfig c) {
     PirConfig config = (PirConfig) c;
 
