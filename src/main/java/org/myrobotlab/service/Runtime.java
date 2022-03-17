@@ -28,6 +28,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -312,7 +313,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return null;
   }
 
-
   static public synchronized ServiceInterface create(String name) {
     return create(name, null);
   }
@@ -338,7 +338,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     // Runtime.clear(); - turns out you don't want to do this
     Runtime.load(name, type); // FIXME evaluate appropriate return for
-                                    // load
+                              // load
     Runtime.check(name, type);
     // at this point - the plan should be loaded, now its time to create the
     // children peers
@@ -381,8 +381,22 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
     }
 
+    // choose the appropriate keyset - it will either be
+    // the whole plan - affected by autoStart
+    // or the RuntimeConfig's registry if available.
+    // RuntimeConfig has priority
+
+    Set<String> services = new LinkedHashSet<String>();
+    if (rc != null) {
+      for (String s : rc.registry) {
+        services.add(s);
+      }
+    } else {
+      services = plan.keySet();
+    }
+
     // iterate through plan
-    for (String serviceName : plan.keySet()) {
+    for (String serviceName : services) {
       if ("runtime".equals(serviceName)) {
         // already handled runtime
         // apply the config
@@ -392,7 +406,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       ServiceConfig sc = plan.get(serviceName);
-      if (sc.autoStart || serviceName.equals(name)) {
+      // if runtime config - then you better start, if no runtime config
+      // thne if autostart or is target name - then start
+      if ((sc.autoStart || rc != null) || serviceName.equals(name)) {
         ServiceInterface si = createService(serviceName, sc.type, null);
 
         // FIXME - bad idea
@@ -1500,28 +1516,30 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         runtime.send(name, "releaseService");
       }
     }
-    
+
     unregister(name);
 
     // REMOVE PEERS BASED ON DEFAULTS BEGIN
     // probably not a good idea - probably if it is going to release
     // all peers it should use the "current" plan not a default
     // Additionally, perhaps there should be a parameterized release
-    /**<pre>
-    Plan plan = MetaData.getDefault(inName, si.getType());
-    if (plan != null) {
-
-    List<String> reverse = new ArrayList<String>(plan.keySet());
-    Collections.reverse(reverse);
-
-      for (String peerName : reverse) {
-        if (peerName.equals(inName)) {
-          continue;
-        }
-        release(peerName);
-      }
-    }
-    </pre>*/
+    /**
+     * <pre>
+     * Plan plan = MetaData.getDefault(inName, si.getType());
+     * if (plan != null) {
+     * 
+     *   List<String> reverse = new ArrayList<String>(plan.keySet());
+     *   Collections.reverse(reverse);
+     * 
+     *   for (String peerName : reverse) {
+     *     if (peerName.equals(inName)) {
+     *       continue;
+     *     }
+     *     release(peerName);
+     *   }
+     * }
+     * </pre>
+     */
     // REMOVE PEERS BASED ON DEFAULTS END
     return true;
   }
@@ -1999,7 +2017,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // hand back immediately if a service with that name exists
     // and is running
 
-    
     ServiceInterface si = null;
 
     si = Runtime.getService(name);
@@ -2025,7 +2042,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     return si;
   }
-
 
   public static ServiceConfig load(String name) {
     return load(name, null);
@@ -3740,7 +3756,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         return null;
       } else {
         log.info("could not find config in file trying default of type {}", type);
-        // find a default plan for this name and type 
+        // find a default plan for this name and type
         Plan plan = MetaData.getDefault(name, type);
         runtime.plan.merge(plan);
         // minimally, the service we've requested the plan for should have
@@ -4060,26 +4076,36 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return savedPaths;
   }
 
+  /**
+   * A concept of a peer is a "good thing". This is where a service depends on
+   * another service to complete its functionality. This "should" be done with
+   * pub/sub messaging. This should not be done by a direct reference. It
+   * prevents distributed instances from working, there is always a chance of an
+   * NPE error. It adds complexity when attaching. If done correctly, you don't
+   * need to "startPeer". You should just have peer name variable in config that
+   * is used to send messages to. Granted, reading or callbacks can be a little
+   * more tricky.
+   * 
+   * @param name
+   * @param reservedKey
+   * @return
+   */
+  @Deprecated /*
+               * you should be using pub/sub messaging - not direct references
+               */
   public ServiceInterface startPeer(String name, String reservedKey) {
 
     ServiceInterface si = null;
+    ServiceReservation sr = null;
+
+    String peerName = String.format("%s.%s", name, reservedKey);
 
     Map<String, ServiceReservation> servicePeers = plan.peers.get(name);
-    if (servicePeers == null) {
-      log.error("startPeer cannot find any entries for {} include {}", name, reservedKey);
-      return null;
-    }
-
-    ServiceReservation sr = servicePeers.get(reservedKey);
-    if (sr == null) {
-      error("%s startPeer %s does not exist", name, reservedKey);
-      return null;
-    }
-    String peerName = null;
-    if (sr.actualName == null) {
-      peerName = String.format("%s.%s", name, reservedKey);
-    } else {
-      peerName = sr.actualName;
+    if (servicePeers != null) {
+      sr = servicePeers.get(reservedKey);
+      if (sr != null && sr.actualName != null) {
+        peerName = sr.actualName;
+      }
     }
 
     // heh so, simple
@@ -4093,7 +4119,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     sc.autoStart = true;
 
     // FIXME - get rid of this completely
-    si = Runtime.start(peerName, sr.type);
+    if (sr != null) {
+      si = Runtime.start(peerName, sr.type);
+    } else {
+      si = Runtime.start(peerName);
+    }
 
     if (sr != null) {
       sr.state = "started";
@@ -4104,6 +4134,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   }
 
+  @Deprecated // you should be using pub/sub messaging - not direct references
   public void releasePeer(String name, String reservedKey) {
 
     Map<String, ServiceReservation> servicePeers = plan.peers.get(name);
@@ -4143,6 +4174,49 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     broadcastState();
 
+  }
+
+  public static void loadConfigSet(String configDirName) {
+
+    Runtime.setConfig(configDirName);
+    Runtime runtime = Runtime.getInstance();
+
+    String configSetDir = runtime.getConfigDir() + fs + runtime.getConfigName();
+    File check = new File(configSetDir);
+    if (configDirName == null || configDirName.isEmpty() || !check.exists() || !check.isDirectory()) {
+      runtime.error("config set %s does not exist or is not a directory", check.getAbsolutePath());
+      return;
+    }
+
+    File[] configFiles = check.listFiles();
+    runtime.info("%d config files found", configFiles.length);
+    for (File f : configFiles) {
+      if (!f.getName().toLowerCase().endsWith(".yml")) {
+        log.info("{} - none yml file found in config set", f.getAbsolutePath());
+        continue;
+      } else {
+        runtime.loadFile(f.getAbsolutePath(), true);
+      }
+    }
+  }
+
+  public void loadFile(String absolutePath) {
+    loadFile(absolutePath, null);
+  }
+
+  // max complexity - overwrite etc..
+  public void loadFile(String path, Boolean overwrite) {
+    try {
+      if (overwrite == null) {
+        overwrite = true;
+      }
+      File f = new File(path);
+      String name = f.getName().substring(0, f.getName().length() - 4);
+      // ServiceConfig sc = CodecUtils.readServiceConfig(absolutePath);
+      loadService(name, null, overwrite, overwrite);
+    } catch (Exception e) {
+      error(e);
+    }
   }
 
 }

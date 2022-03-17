@@ -94,7 +94,7 @@ public class Pid extends Service implements PidControl {
      * The key identifier of this control loop. This is how to support multiple
      * pid loops with different tuning.
      */
-    public String key;
+    transient public String key;
 
     /**
      * (P)roportional Tuning Parameter
@@ -109,18 +109,18 @@ public class Pid extends Service implements PidControl {
      */
     public double kd;
 
-    @Deprecated /* use just a invert boolean */
-    public int controllerDirection;
+    
+    public boolean inverted = false;
 
     /**
      * saved current input value
      */
-    public double input;
+    transient public double input;
 
     /**
      * saved current output value
      */
-    public double output;
+    transient public double output;
 
     /**
      * the set point where the pid "wishes" to be
@@ -132,14 +132,14 @@ public class Pid extends Service implements PidControl {
      */
     public double deadband;
 
-    public long lastTime;
+    transient public long lastTime;
 
-    public double iTerm;
-    
-    public double lastInput;
+    transient public double iTerm;
 
-    public long sampleTime = 100; 
-    
+    transient public double lastInput;
+
+    public long sampleTime = 100;
+
     public Double outMin;
 
     public Double outMax;
@@ -159,17 +159,20 @@ public class Pid extends Service implements PidControl {
     public boolean inAuto = true;
 
     public String toString() {
-      return String.format("kp %f ki %f kd %f direction %d input %f output %f setpoint %f deadband %f outMin %f outMax %f", kp, ki, kd, controllerDirection, input, output,
-          setpoint, deadband, outMin, outMax);
+      return String.format("kp %f ki %f kd %f inverted %b input %f output %f setpoint %f deadband %f outMin %f outMax %f", kp, ki, kd, inverted, input, output, setpoint, deadband,
+          outMin, outMax);
     }
   }
 
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(Pid.class.getCanonicalName());
-  // mode
+
   static final public int MODE_AUTOMATIC = 1;
 
+  @Deprecated /*
+               * copied from C code - this should be a boolean called inverted
+               */
   static final public int MODE_MANUAL = 0;
   // direction
   @Deprecated /* use just a invert boolean */
@@ -214,7 +217,18 @@ public class Pid extends Service implements PidControl {
 
   public int getControllerDirection(String key) {
     PidData piddata = data.get(key);
-    return piddata.controllerDirection;
+    return (piddata.inverted ? 1 : 0);
+  }
+
+  public boolean getInverted(String key) {
+    PidData piddata = data.get(key);
+    return piddata.inverted;
+  }
+
+  public boolean setInverted(String key, boolean b) {
+    PidData piddata = data.get(key);
+    piddata.inverted = b;
+    return b;
   }
 
   public int getMode(String key) {
@@ -274,17 +288,20 @@ public class Pid extends Service implements PidControl {
    * otherwise we may increase the output when we should be decreasing. This is
    * called from the constructor.
    * 
+   * DIRECT = 0 REVERSE = 1
+   * 
    * @param key
    * @param direction
    */
   public void setControllerDirection(String key, Integer direction) {
     PidData piddata = data.get(key);
-    if (piddata.inAuto && direction != piddata.controllerDirection) {
+    boolean inverted = (direction != 0);
+    if (piddata.inAuto && inverted != piddata.inverted) {
       piddata.kp = (0 - piddata.kp);
       piddata.ki = (0 - piddata.ki);
       piddata.kd = (0 - piddata.kd);
     }
-    piddata.controllerDirection = direction;
+    piddata.inverted = inverted;
     broadcastState();
   }
 
@@ -377,7 +394,7 @@ public class Pid extends Service implements PidControl {
     piddata.ki = ki * SampleTimeInSec;
     piddata.kd = kd / SampleTimeInSec;
 
-    if (piddata.controllerDirection == DIRECTION_REVERSE) {
+    if (piddata.inverted) {
       piddata.kp = (0 - piddata.kp);
       piddata.ki = (0 - piddata.ki);
       piddata.kd = (0 - piddata.kd);
@@ -426,7 +443,7 @@ public class Pid extends Service implements PidControl {
       log.error("Unknown key for PID control.  Key: {}", key);
       return null;
     }
-    
+
     piddata.input = sensorValue;
     //////////////////////////////////////////////////////////////
 
@@ -513,7 +530,7 @@ public class Pid extends Service implements PidControl {
       data = config.data;
       for (String key : config.data.keySet()) {
         PidData pd = config.data.get(key);
-        if (pd.key == null || !pd.key.equals(key)){
+        if (pd.key == null || !pd.key.equals(key)) {
           warn("re-assigning config pid key %s to %s", pd.key, key);
         }
         pd.key = key; // normalize

@@ -113,7 +113,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         }
 
         if (typeof $scope.newType == 'object') {
-            $scope.newType = $scope.newType.name
+            $scope.newType = $scope.newType.simpleName
         }
         msg.send('start', $scope.newName, $scope.newType)
 
