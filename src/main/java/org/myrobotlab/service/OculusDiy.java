@@ -163,7 +163,7 @@ public class OculusDiy extends Service implements OrientationListener {
   public void releaseService() {
     mpu6050.releaseService();
     arduino.releaseService();
-    arduino.serialService.releaseService();
+    arduino.serial.releaseService();
     super.releaseService();
   }
 
