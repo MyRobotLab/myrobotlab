@@ -408,16 +408,25 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       ServiceConfig sc = plan.get(serviceName);
       // if runtime config - then you better start, if no runtime config
       // thne if autostart or is target name - then start
-      if ((sc.autoStart || rc != null) || serviceName.equals(name)) {
-        ServiceInterface si = createService(serviceName, sc.type, null);
+      // if ((sc.autoStart || rc != null) || serviceName.equals(name)) {
+      ServiceInterface si = null;
+      if (sc != null) {
+        si = createService(serviceName, sc.type, null);
+      } else {
+        si = createService(serviceName, null, null);
+      }
 
         // FIXME - bad idea
         // si.setPlan(plan);
 
         // ANOTHER DESIGN CONSIDERATION - SHOULD CONFIG APPLY BE DONE BETWEEN
         // CREATE AND START ???
+        if (sc != null) {
         si.setConfig(sc);
         si.apply(sc);
+        } else {
+          log.error("could not fine %s config", serviceName);
+        }
 
         if (si != null) {
           if (si.getName().equals(name)) {
@@ -427,7 +436,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
             si.startService(); // FIXME - although this is createServices() and
           } // may require started peers - then it should
             // just start
-        }
+//         }
       }
     }
 

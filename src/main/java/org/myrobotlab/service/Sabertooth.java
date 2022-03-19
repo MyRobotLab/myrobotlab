@@ -307,7 +307,6 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
   }
 
   public ServiceConfig apply(ServiceConfig c) {
-    super.apply(c);
     SabertoothConfig config = (SabertoothConfig) c;
     if (config.connect) {
       try {

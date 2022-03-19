@@ -1,10 +1,8 @@
 package org.myrobotlab.service.meta;
 
-import java.util.LinkedHashMap;
-
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.InMoov2HandConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -16,10 +14,6 @@ public class InMoov2HandMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param type
-   *          n
-   * 
    */
   public InMoov2HandMeta() {
     addDescription("an easier way to create gestures for InMoov");
@@ -34,23 +28,27 @@ public class InMoov2HandMeta extends MetaData {
 
   }
 
-  public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+  @Override
+  public Plan getDefault(String name, Boolean autoStart) {
 
-    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
+    InMoov2HandConfig hand = new InMoov2HandConfig();
 
-    InMoov2HandConfig handConfig = new InMoov2HandConfig();
+    Plan plan = new Plan(name);
+    // load default peers from meta here
+    plan.putPeers(name, peers, autoStart);
 
+        
     // RuntimeConfig runtime = new RuntimeConfig();
     // runtime.registry = new String[] { controllerName, cvName, tiltName,
     // panName, pidName, trackingName };
 
     // set local names and config
-    handConfig.thumb = name + ".thumb";
-    handConfig.index = name + ".index";
-    handConfig.majeure = name + ".majeure";
-    handConfig.ringFinger = name + ".ringFinger";
-    handConfig.pinky = name + ".pinky";
-    handConfig.wrist = name + ".wrist";
+    hand.thumb = name + ".thumb";
+    hand.index = name + ".index";
+    hand.majeure = name + ".majeure";
+    hand.ringFinger = name + ".ringFinger";
+    hand.pinky = name + ".pinky";
+    hand.wrist = name + ".wrist";
     String cname = null;
 
     if (name.endsWith("leftHand")) {
@@ -60,14 +58,8 @@ public class InMoov2HandMeta extends MetaData {
     }
 
     // build a config with all peer defaults
-    config.putAll(MetaData.getDefault(handConfig.thumb, "Servo"));
-    config.putAll(MetaData.getDefault(handConfig.index, "Servo"));
-    config.putAll(MetaData.getDefault(handConfig.majeure, "Servo"));
-    config.putAll(MetaData.getDefault(handConfig.ringFinger, "Servo"));
-    config.putAll(MetaData.getDefault(handConfig.pinky, "Servo"));
-    config.putAll(MetaData.getDefault(handConfig.wrist, "Servo"));
 
-    ServoConfig thumb = (ServoConfig) config.get(handConfig.thumb);
+    ServoConfig thumb = (ServoConfig) plan.getPeerConfig("thumb");
     thumb.autoDisable = true;
     thumb.controller = cname;
     thumb.clip = true;
@@ -83,7 +75,7 @@ public class InMoov2HandMeta extends MetaData {
     thumb.sweepMax = null;
     thumb.sweepMin = null;
 
-    ServoConfig index = (ServoConfig) config.get(handConfig.index);
+    ServoConfig index = (ServoConfig) plan.getPeerConfig("index");
     index.autoDisable = true;
     index.controller = cname;
     index.clip = true;
@@ -99,7 +91,7 @@ public class InMoov2HandMeta extends MetaData {
     index.sweepMax = null;
     index.sweepMin = null;
 
-    ServoConfig majeure = (ServoConfig) config.get(handConfig.majeure);
+    ServoConfig majeure = (ServoConfig) plan.getPeerConfig("majeure");
     majeure.autoDisable = true;
     majeure.controller = cname;
     majeure.clip = true;
@@ -115,7 +107,7 @@ public class InMoov2HandMeta extends MetaData {
     majeure.sweepMax = null;
     majeure.sweepMin = null;
 
-    ServoConfig ringFinger = (ServoConfig) config.get(handConfig.ringFinger);
+    ServoConfig ringFinger = (ServoConfig) plan.getPeerConfig("ringFinger");
     ringFinger.autoDisable = true;
     ringFinger.controller = cname;
     ringFinger.clip = true;
@@ -131,7 +123,7 @@ public class InMoov2HandMeta extends MetaData {
     ringFinger.sweepMax = null;
     ringFinger.sweepMin = null;
 
-    ServoConfig pinky = (ServoConfig) config.get(handConfig.pinky);
+    ServoConfig pinky = (ServoConfig) plan.getPeerConfig("pinky");    
     pinky.autoDisable = true;
     pinky.controller = cname;
     pinky.clip = true;
@@ -147,7 +139,7 @@ public class InMoov2HandMeta extends MetaData {
     pinky.sweepMax = null;
     pinky.sweepMin = null;
 
-    ServoConfig wrist = (ServoConfig) config.get(handConfig.wrist);
+    ServoConfig wrist = (ServoConfig) plan.getPeerConfig("wrist");
     wrist.autoDisable = true;
     wrist.controller = cname;
     wrist.clip = true;
@@ -163,7 +155,9 @@ public class InMoov2HandMeta extends MetaData {
     wrist.sweepMax = null;
     wrist.sweepMin = null;
 
-    return config;
+    plan.addConfig(hand, autoStart);
+
+    return plan;
 
   }
 }
