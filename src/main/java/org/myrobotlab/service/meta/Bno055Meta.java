@@ -16,9 +16,8 @@ public class Bno055Meta extends MetaData {
    * @param name
    *          n
    */
-  public Bno055Meta(String name) {
+  public Bno055Meta() {
 
-    super(name);
     addDescription("General BNO055 acclerometer and gyro");
     addCategory("microcontroller", "sensors");
     setSponsor("calamity");

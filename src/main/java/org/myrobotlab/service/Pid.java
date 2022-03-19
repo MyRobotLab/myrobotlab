@@ -506,8 +506,7 @@ public class Pid extends Service implements PidControl {
     piddata.iTerm = 0;
   }
 
-  @Override
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     PidConfig config = (PidConfig) c;
     if (config.data != null) {
       data = config.data;

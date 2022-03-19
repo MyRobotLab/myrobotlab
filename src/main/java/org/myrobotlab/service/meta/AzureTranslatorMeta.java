@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,17 +16,12 @@ public class AzureTranslatorMeta extends MetaData {
    * @param name
    *          n
    */
-  public AzureTranslatorMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
-
+  public AzureTranslatorMeta() {
     addDescription("interface to Azure translation services");
     addCategory("translation", "cloud", "ai");
     addDependency("io.github.firemaples", "microsoft-translator-java-api", "0.8.3");
     setCloudService(true);
     setRequiresKeys(true);
-
   }
 
 }

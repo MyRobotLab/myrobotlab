@@ -16,16 +16,11 @@ public class LocalSpeechMeta extends AbstractSpeechSynthesisMeta {
    *          n
    * 
    */
-  public LocalSpeechMeta(String name) {
-
-    super(name);
+  public LocalSpeechMeta() {
     addCategory("speech", "sound");
     addDescription("Local OS text to speech ( tts.exe / say etc ... )");
     setAvailable(true);
     addCategory("speech");
-    // addDependency("com.microsoft", "tts", "1.1", "zip");
-    // addDependency("mycroftai.mimic", "mimic_win64", "1.0", "zip");
-
   }
 
 }

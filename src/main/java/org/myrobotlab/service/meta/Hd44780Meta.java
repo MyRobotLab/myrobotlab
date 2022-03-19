@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,13 +16,9 @@ public class Hd44780Meta extends MetaData {
    *          n
    * 
    */
-  public Hd44780Meta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public Hd44780Meta() {
     addDescription("I2C LCD Display driver");
     addCategory("i2c", "display");
-
   }
 
 }

@@ -478,5 +478,27 @@ public class InMoov2Config extends ServiceConfig {
    */
   public double shutdownStartupSpeed = 50;
   
-  
+  // PEERS ????
+  public String headTracking; 
+  public String head;
+  public String pid;
+  public String eyeTracking;
+  // public String cv; which one ?
+  public String imageDisplay;
+  public String chatBot;
+  public String ear;
+  public String htmlFilter;
+  public String mouth;
+  public String leftArm;
+  public String leftHand;
+  public String rightArm;
+  public String rightHand;
+  public String torso;
+  public String simulator;
+  public String ultrasonicRight;
+  public String ultrasonicLeft;
+  public String pir;
+  public String servoMixer;
+  public String opencv;
+    
 }

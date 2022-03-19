@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,8 @@ public class DocumentPipelineMeta extends MetaData {
    *          n
    * 
    */
-  public DocumentPipelineMeta(String name) {
+  public DocumentPipelineMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription("This service will pass a document through a document processing pipeline made up of transformers");
     addCategory("ingest");
     addDependency("org.apache.tika", "tika-core", "1.22");

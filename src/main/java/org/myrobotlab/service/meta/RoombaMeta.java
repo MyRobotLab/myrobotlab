@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,8 @@ public class RoombaMeta extends MetaData {
    *          n
    * 
    */
-  public RoombaMeta(String name) {
+  public RoombaMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription("controls a Roomba robot through a blue-tooth serial port");
     addCategory("robot", "control");
     addPeer("serial", "Serial", "serial");

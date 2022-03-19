@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,13 +16,9 @@ public class ChessGameMeta extends MetaData {
    * @param name
    *          n
    */
-  public ChessGameMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public ChessGameMeta() {
     addCategory("game");
     addDependency("ChessBoard", "ChessBoard", "1.0.0");
     addDescription("Would you like to play a game?");
-
   }
 }

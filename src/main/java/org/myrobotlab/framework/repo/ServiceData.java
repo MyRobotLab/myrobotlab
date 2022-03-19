@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -15,7 +14,6 @@ import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MrlException;
-import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
@@ -262,15 +260,7 @@ public class ServiceData implements Serializable {
 
       type = getFullMetaTypeName(type);
 
-      // RETRO-GRADED for "nice" sized pr :(
-      Class<?> c = Class.forName(type);
-      Constructor<?> mc = c.getConstructor(String.class);
-      MetaData metaData = (MetaData) mc.newInstance(serviceName);
-
-      // if this is an instance description of the meta data
-      // there is the possibility of overrides
-      // if (serviceName != null) {
-      // metaData.setServiceName(serviceName);
+      MetaData metaData = MetaData.get(type);
 
       Map<String, ServiceReservation> peers = metaData.getPeers();
       for (ServiceReservation sr : peers.values()) {
@@ -458,62 +448,7 @@ public class ServiceData implements Serializable {
     return false;
   }
 
-  /**
-   * Start at root and build all the meta data - add
-   * 
-   * @param serviceName
-   *          the name of the service
-   * @param serviceType
-   *          type of the service
-   * @return a plan for this service type/name
-   * 
-   */
-  public static Plan getPlan(String serviceName, String serviceType) {
-
-    Plan root = new Plan();
-
-    // get the root meta data
-    MetaData temp = getMetaData(serviceName, serviceType);
-    if (temp != null) {
-      root.put(serviceName, serviceType);
-    }
-
-    // recursively process all the children and add them to peers
-    Map<String, ServiceReservation> peers = temp.getPeers();
-    for (ServiceReservation peer : peers.values()) {
-      // just get overrides :P
-      getPlan(root, serviceName, peer);
-    }
-
-    return root;
-  }
-
-  /**
-   * Recursively build the peers until the tree is complete. Useful to get a
-   * full plan regarding some complex description
-   * 
-   * @param root
-   *          the plan
-   * @param parentName
-   *          the parent name
-   * @param sr
-   *          the service registration
-   * 
-   */
-  public static void getPlan(Plan root, String parentName, ServiceReservation sr) {
-    // FIXME figure out if overrides can happen here !?!?!?
-
-    MetaData branch = getMetaData(sr.actualName, sr.type);
-    // root.getPeers().putAll(branch.getPeers());
-    root.put(sr.actualName, sr.type);
-    for (ServiceReservation peer : branch.getPeers().values()) {
-      // just get overrides :PT
-      root.put(sr.actualName, sr.type);
-      getPlan(root, getPeerKey(parentName, sr.actualName), peer);
-    }
-
-  }
-
+ 
   public static void main(String[] args) {
     try {
       // LoggingFactory.init(); - don't change logging for mvn

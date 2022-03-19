@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,8 @@ public class OpenWeatherMapMeta extends MetaData {
    *          n
    * 
    */
-  public OpenWeatherMapMeta(String name) {
+  public OpenWeatherMapMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription("This service will query OpenWeatherMap for the current weather.  Get an API key at http://openweathermap.org/");
     addCategory("weather");
     setCloudService(true);

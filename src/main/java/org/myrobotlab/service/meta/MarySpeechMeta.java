@@ -16,9 +16,8 @@ public class MarySpeechMeta extends AbstractSpeechSynthesisMeta {
    *          n
    * 
    */
-  public MarySpeechMeta(String name) {
+  public MarySpeechMeta() {
 
-    super(name);
     addPeer("audioFile", "AudioFile", "audioFile");
     addCategory("speech", "sound");
     addDescription("Speech synthesis based on MaryTTS");

@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,8 @@ public class SphinxMeta extends MetaData {
    *          n
    * 
    */
-  public SphinxMeta(String name) {
+  public SphinxMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription("open source pure Java speech recognition");
     addCategory("speech recognition");
 

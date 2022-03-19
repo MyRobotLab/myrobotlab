@@ -453,7 +453,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     move(data.value);
   }
 
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     AbstractMotorConfig config = (AbstractMotorConfig) c;
     
     if (config.minIn != null) {

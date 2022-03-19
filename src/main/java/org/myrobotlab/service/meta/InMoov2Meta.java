@@ -1,7 +1,13 @@
 package org.myrobotlab.service.meta;
+import java.util.LinkedHashMap;
 
-import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Pid.PidData;
+import org.myrobotlab.service.config.InMoov2Config;
+import org.myrobotlab.service.config.PidConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.TrackingConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
@@ -12,21 +18,42 @@ public class InMoov2Meta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
-  public InMoov2Meta(String name) {
+  public InMoov2Meta() {
 
-    super(name);
-    // platform if there are different dependencies based on different platforms
-    // Platform platform = Platform.getLocalInstance();
-    
     addDescription("InMoov2 Service");
     addCategory("robot");
 
-    addPeer("mouthControl", "mouth", "MarySpeech", "shared Speech");
+    // skeletal parts
+    addPeer("head", "InMoov2Head");
+    addPeer("torso", "InMoov2Torso");
+    // addPeer("eyelids", "InMoovEyelids", "eyelids");
+    addPeer("leftArm", "InMoov2Arm");
+    addPeer("leftHand", "InMoov2Hand");
+    addPeer("rightArm", "InMoov2Arm");
+    addPeer("rightHand", "InMoov2Hand");
+
+    addPeer("opencv", "OpenCV");
+
+    addPeer("left", "Arduino");
+    addPeer("right", "Arduino");
+
+    addPeer("mouthControl", "MouthControl");
+    addPeer("ultrasonicRight", "UltrasonicSensor");
+    addPeer("ultrasonicLeft", "UltrasonicSensor");
+    addPeer("pir", "Pir");
+    addPeer("pid", "Pid");
+
+    addPeer("servoMixer", "ServoMixer");
+
+    // the two legacy controllers .. :(
+    addPeer("left", "Arduino");
+    addPeer("right", "Arduino");
+    addPeer("controller3", "Arduino");
+    addPeer("controller4", "Arduino");
+
+    // FIXME - needed ?
+    addPeer("htmlFilter", "HtmlFilter");
 
     // Sensors -----------------
     addPeer("opencv", "OpenCV", "opencv");
@@ -34,57 +61,123 @@ public class InMoov2Meta extends MetaData {
     addPeer("ultrasonicLeft", "UltrasonicSensor", "measure distance on the left");
     addPeer("pir", "Pir", "infrared sensor");
 
-    
-    addPeer("servoMixer", "ServoMixer", "for making gestures");
+    addPeer("mouth", "MarySpeech");
+    addPeer("ear", "WebkitSpeechRecognition");
 
-    // the two legacy controllers .. :(
-    addPeer("left", "Arduino", "legacy controller");
-    addPeer("right", "Arduino", "legacy controller");
-    addPeer("controller3", "Arduino", "legacy controller");
-    addPeer("controller4", "Arduino", "legacy controller");
+    addPeer("imageDisplay", "ImageDisplay");
 
-    addPeer("htmlFilter", "HtmlFilter", "filter speaking html");
+    addPeer("headTracking", "Tracking");
+    addPeer("eyeTracking", "Tracking");
 
-    addPeer("chatBot", "ProgramAB", "chatBot");
-    addPeer("simulator", "JMonkeyEngine", "simulator");
+    addPeer("neopixel", "NeoPixel");
 
-    addPeer("head", "InMoov2Head", "head");
-    addPeer("torso", "InMoov2Torso", "torso");
-    // addPeer("eyelids", "InMoovEyelids", "eyelids");
-    addPeer("leftArm", "InMoov2Arm", "left arm");
-    addPeer("leftHand", "InMoov2Hand", "left hand");
-    addPeer("rightArm", "InMoov2Arm", "right arm");
-    addPeer("rightHand", "InMoov2Hand", "right hand");
-    addPeer("mouthControl", "MouthControl", "MouthControl");
-    addPeer("imageDisplay", "ImageDisplay", "image display service");
-    addPeer("mouth", "MarySpeech", "InMoov speech service");
-    addPeer("ear", "WebkitSpeechRecognition", "InMoov webkit speech recognition service");
+    addPeer("audioPlayer", "AudioFile");
+    addPeer("random", "Random");
+    addPeer("simulator", "JMonkeyEngine");
 
-    addPeer("headTracking", "Tracking", "Head tracking system");
-
-    addPeer("headTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
-    // sharePeer("headTracking.controller", "left", "Arduino", "shared head
-    // Arduino"); NO !!!!
-    addPeer("headTracking.x", "head.rothead", "Servo", "shared servo");
-    addPeer("headTracking.y", "head.neck", "Servo", "shared servo");
-
-    addPeer("neopixel", "NeoPixel", "neopixel animation");
-    
-    addPeer("audioPlayer", "AudioFile", "audio file");
-  
-    
-    // Global - undecorated by self name
-    // currently InMoov manually calls releasePeers - when it does
-    // the interpreter is in a process of shutdown while all inmoov peer
-    // services have not
-    // run their initialization scripts - npe and other errors can happen when
-    // creating and
-    // releasing all peers in quick succession
-    // addPeer("python", "python", "Python", "shared Python service");
-
-    // latest - not ready until repo is ready
     addDependency("fr.inmoov", "inmoov2", null, "zip");
 
+    // the two legacy controllers .. :(
+    addPeer("left", "Arduino");
+    addPeer("right", "Arduino");
+    addPeer("controller3", "Arduino");
+    addPeer("controller4", "Arduino");
   }
+
+  @Override
+  public Plan getDefault(String name, Boolean autoStart) {
+    autoStart = false;
+    InMoov2Config inmoov = new InMoov2Config();
+    
+    Plan plan = new Plan(name);
+    // load default peers from meta here
+    plan.putPeers(name, peers, autoStart);
+
+
+    // == Peer - head ==========================================
+    inmoov.head = name + ".head";
+    inmoov.torso = name + ".torso";
+    inmoov.leftArm = name + ".leftArm";
+    inmoov.rightArm = name + ".rightArm";
+    inmoov.leftHand = name + ".leftHand";
+    inmoov.rightHand = name + ".rightHand";
+    inmoov.opencv = name + ".opencv";
+    inmoov.headTracking = name + ".headTracking";
+    inmoov.eyeTracking = name + ".eyeTracking";
+
+//    addPeerConfig(name, "head", autoStart);
+//    addPeerConfig(name, "torso", autoStart);
+//    addPeerConfig(name, "leftArm", autoStart);
+//    addPeerConfig(name, "rightArm", autoStart);
+//    addPeerConfig(name, "leftHand", autoStart);
+//    addPeerConfig(name, "rightHand", autoStart);
+//    addPeerConfig(name, "opencv", autoStart);
+//
+//    addPeerConfig(name, "left", autoStart);
+//    addPeerConfig(name, "right", autoStart);
+
+    
+    // == Peer - headTracking =============================
+    TrackingConfig headTracking = (TrackingConfig) plan.getPeerConfig("headTracking");
+
+    // setup name references to different services
+    headTracking.tilt = name + ".head.neck";
+    headTracking.pan = name + ".head.rothead";
+    headTracking.cv = name + ".cv";
+    headTracking.pid = name + ".pid";
+
+    // == Peer - eyeTracking =============================
+    TrackingConfig eyeTracking = (TrackingConfig) plan.getPeerConfig("eyeTracking");
+
+    // setup name references to different services
+    eyeTracking.tilt = name + ".head.eyeY";
+    eyeTracking.pan = name + ".head.eyeX";
+    eyeTracking.cv = name + ".cv";
+    eyeTracking.pid = name + ".pid";
+
+    // == Peer - pid =============================
+    inmoov.pid = name + ".pid";
+    PidConfig pid = (PidConfig) plan.getPeerConfig("pid");
+
+    PidData tiltPid = new PidData();
+    tiltPid.ki = 0.001;
+    tiltPid.kp = 0.035;
+    pid.data.put(headTracking.tilt, tiltPid);
+
+    PidData panPid = new PidData();
+    panPid.ki = 0.001;
+    panPid.kp = 0.015;
+    pid.data.put(headTracking.pan, panPid);
+
+    PidData eyeTiltPid = new PidData();
+    eyeTiltPid.ki = 0.001;
+    eyeTiltPid.kp = 0.035;
+    pid.data.put(eyeTracking.tilt, eyeTiltPid);
+
+    PidData eyePanPid = new PidData();
+    eyePanPid.ki = 0.001;
+    eyePanPid.kp = 0.015;
+    pid.data.put(eyeTracking.pan, eyePanPid);
+
+    // remove undesired defaults from our default
+    plan.removeConfig(name + ".headTracking.tilt");
+    plan.removeConfig(name + ".headTracking.pan");
+    plan.removeConfig(name + ".headTracking.pid");
+    plan.removeConfig(name + ".headTracking.controller");
+    plan.removeConfig(name + ".headTracking.controller.serial");
+    plan.removeConfig(name + ".headTracking.cv");
+
+    plan.removeConfig(name + ".eyeTracking.tilt");
+    plan.removeConfig(name + ".eyeTracking.pan");
+    plan.removeConfig(name + ".eyeTracking.pid");
+    plan.removeConfig(name + ".eyeTracking.controller");
+    plan.removeConfig(name + ".eyeTracking.controller.serial");
+    plan.removeConfig(name + ".eyeTracking.cv");
+
+    plan.addConfig(inmoov, autoStart);
+
+    return plan;
+  }
+
 
 }

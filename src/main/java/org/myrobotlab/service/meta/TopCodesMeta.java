@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,8 @@ public class TopCodesMeta extends MetaData {
    *          n
    * 
    */
-  public TopCodesMeta(String name) {
+  public TopCodesMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription("Topcodes finds visual references and identifiers");
     addCategory("vision", "video", "sensors");
     addDependency("topcodes", "topcodes", "1.0.0");

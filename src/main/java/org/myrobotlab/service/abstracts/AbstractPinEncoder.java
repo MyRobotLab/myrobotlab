@@ -5,7 +5,7 @@ import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.EncoderController;
 
-public class AbstractPinEncoder extends Service implements EncoderControl {
+public abstract class AbstractPinEncoder extends Service implements EncoderControl {
 
   private static final long serialVersionUID = 1L;
   public String pin;

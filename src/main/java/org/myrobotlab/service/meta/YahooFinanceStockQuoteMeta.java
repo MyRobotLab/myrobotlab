@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,10 +16,8 @@ public class YahooFinanceStockQuoteMeta extends MetaData {
    *          n
    * 
    */
-  public YahooFinanceStockQuoteMeta(String name) {
+  public YahooFinanceStockQuoteMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription("This service will query Yahoo Finance to get the current stock price.  more info @ https://developer.yahoo.com/yql/");
     addCategory("filter", "finance");
     setAvailable(false);

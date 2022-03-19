@@ -16,9 +16,7 @@ public class HtmlParserMeta extends MetaData {
    *          n
    * 
    */
-  public HtmlParserMeta(String name) {
-
-    super(name);
+  public HtmlParserMeta() {
     addDependency("org.jsoup", "jsoup", "1.14.2");
     addDescription("html parser");
     addCategory("document");

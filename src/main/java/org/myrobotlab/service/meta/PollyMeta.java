@@ -16,9 +16,8 @@ public class PollyMeta extends AbstractSpeechSynthesisMeta {
    *          n
    * 
    */
-  public PollyMeta(String name) {
+  public PollyMeta() {
 
-    super(name);
     addDescription("Amazon speech synthesis - requires keys");
     setAvailable(true); // false if you do not want it viewable in a
     // gui
@@ -33,11 +32,6 @@ public class PollyMeta extends AbstractSpeechSynthesisMeta {
     // force using Runtimes httpclient version exclude here
     exclude("org.apache.httpcomponents", "httpcore");
     exclude("org.apache.httpcomponents", "httpclient");
-
-    // <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-polly
-    // -->
-    // <dependency org="com.amazonaws" name="aws-java-sdk-polly"
-    // rev="1.11.118"/>
 
     addCategory("speech", "cloud");
     setCloudService(true);

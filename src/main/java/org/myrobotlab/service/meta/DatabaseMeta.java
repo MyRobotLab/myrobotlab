@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,15 +16,9 @@ public class DatabaseMeta extends MetaData {
    *          n
    * 
    */
-  public DatabaseMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public DatabaseMeta() {
     addDescription("database - wrapper around jdbc access");
     setAvailable(true); // false if you do not want it viewable in a
-    // gui
-    // add dependency if necessary
-    // addDependency("org.coolproject", "1.0.0");
     addCategory("storage");
 
   }

@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -17,11 +16,7 @@ public class ArmMeta extends MetaData {
    * @param name
    *          n
    */
-  public ArmMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
-
+  public ArmMeta() {
     addDescription("robot arm service");
     addCategory("robot");
     setLicenseApache();

@@ -15,15 +15,10 @@ public class WebkitSpeechSynthesisMeta extends AbstractSpeechSynthesisMeta {
    * @param name
    *          n
    */
-  public WebkitSpeechSynthesisMeta(String name) {
-
-    super(name);
+  public WebkitSpeechSynthesisMeta() {
     addDescription("Web speech api using Chrome or Firefox speech synthesis");
     setAvailable(true); // false if you do not want it viewable in a
-    // gui
-    // add dependency if necessary
     addCategory("speech", "sound");
-
   }
 
 }

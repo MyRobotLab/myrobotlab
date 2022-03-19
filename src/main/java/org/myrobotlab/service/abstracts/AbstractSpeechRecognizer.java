@@ -564,7 +564,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    * String[listeners.size()]); return config; }
    */
 
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     if (c instanceof AbstractSpeechRecognizerConfig) {
       AbstractSpeechRecognizerConfig config = (AbstractSpeechRecognizerConfig) c;
       setWakeWord(config.wakeWord);
