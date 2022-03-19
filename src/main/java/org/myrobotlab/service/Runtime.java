@@ -3198,11 +3198,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     ServiceData.setPeer(fullKey, actualName, serviceType);
   }
 
-  public static Plan getPlan(String serviceName, String serviceType) {
-    // return ServiceData.getPlan(serviceName, serviceType);
-    return null;
-  }
-
   public static void clearPlan() {
     ServiceData.clearOverrides();
   }
