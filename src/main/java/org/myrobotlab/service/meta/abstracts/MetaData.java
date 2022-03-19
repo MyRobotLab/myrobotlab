@@ -31,7 +31,7 @@ import org.slf4j.Logger;
  * name and type information.
  * 
  */
-public class MetaData implements Serializable {
+public abstract class MetaData implements Serializable {
 
   transient private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(MetaData.class);
