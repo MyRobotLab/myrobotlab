@@ -314,7 +314,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       } catch (Exception e) {
         error(e);
       }
-    }
+    }	
     return c;
   }
 

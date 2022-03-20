@@ -2,6 +2,7 @@ package org.myrobotlab.framework;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;

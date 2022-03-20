@@ -222,7 +222,6 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
     return config;
   }
 
-  @Override
   public ServiceConfig apply(ServiceConfig c) {
     ServoConfig config = (ServoConfig) c;
 

@@ -202,7 +202,6 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     return this.controller == controller;
   }
 
-  @Override
   public ServiceConfig apply(ServiceConfig c) {
     UltrasonicSensorConfig config = (UltrasonicSensorConfig) c;
 

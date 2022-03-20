@@ -52,7 +52,6 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     super(reservedKey, inId);
   }
 
-  @Override
   public ServiceConfig apply(ServiceConfig c) {
     DiscordBotConfig config = (DiscordBotConfig) c;
 

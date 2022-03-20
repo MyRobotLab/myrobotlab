@@ -1281,7 +1281,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     return config;
   }
 
-  @Override
   public ServiceConfig apply(ServiceConfig c) {
     SerialConfig config = (SerialConfig) c;
 

@@ -698,7 +698,6 @@ public class Joystick extends Service implements AnalogPublisher {
   }
 
   public ServiceConfig apply(ServiceConfig c) {
-    super.apply(c);
 
     // "special" needs native libs
     initNativeLibs();

@@ -286,7 +286,6 @@ public class Tracking extends Service {
     return config;
   }
 
-  @Override
   public ServiceConfig apply(ServiceConfig c) {
     TrackingConfig config = (TrackingConfig) c;
 
