@@ -99,7 +99,8 @@ public class ServiceInterfaceTest extends AbstractTest {
     ArrayList<String> servicesNotInServiceDataJson = new ArrayList<String>();
 
     HashSet<String> blacklist = new HashSet<String>();
-    blacklist.add("OpenNi");
+    blacklist.add("OpenNi");    
+    blacklist.add("As5048AEncoder");    
     blacklist.add("IntegratedMovement");    
     blacklist.add("VirtualDevice");
     blacklist.add("GoogleAssistant");
