@@ -63,6 +63,11 @@ public class ServiceInterfaceTest extends AbstractTest {
       return false;
     }
     System.out.println("Service Test:" + service);
+
+    if (service.equals("As5048AEncoder")){
+      log.info("here");
+    }
+
     System.out.flush();
     // Assert.assertNotNull(foo.getCategories());
     Assert.assertNotNull(foo.getDescription());
@@ -105,6 +110,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     blacklist.add("WorkE");
     blacklist.add("JMonkeyEngine");
     blacklist.add("_TemplateService");
+    blacklist.add("EddieControlBoard");// band because peer is Keyboard
     blacklist.add("Lloyd");
     blacklist.add("Solr");
     blacklist.add("Proxy"); // interesting idea - but no worky
