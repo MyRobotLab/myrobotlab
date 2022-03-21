@@ -2160,7 +2160,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public boolean setVirtual(boolean b) {
     this.isVirtual = b;
-    broadcastState();
     return isVirtual;
   }
 

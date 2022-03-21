@@ -17,7 +17,7 @@ public class Adafruit16CServoDriverMeta extends MetaData {
    *          n
    * 
    */
-  public Adafruit16CServoDriverMeta(String name) {
+  public Adafruit16CServoDriverMeta() {
 
     addDescription("controls 16 pwm pins for 16 servos/LED or 8 motors");
     addCategory("shield", "servo", "pwm");

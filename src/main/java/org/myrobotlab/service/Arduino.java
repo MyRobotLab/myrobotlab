@@ -12,7 +12,6 @@ import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -39,7 +38,6 @@ import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.abstracts.AbstractMicrocontroller;
 import org.myrobotlab.service.config.ArduinoConfig;
-import org.myrobotlab.service.config.SerialConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.PinData;
@@ -174,6 +172,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   /**
    * Serial service - the Arduino's serial connection
+   * FIXME - remove this - its not pub/sub !
    */
   transient Serial serial;
 
@@ -515,6 +514,19 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    */
   @Override
   public void connect(String port, int rate, int databits, int stopbits, int parity) {
+
+	ArduinoConfig c = (ArduinoConfig)config;
+	  
+    if (port == null) {
+      warn("%s attempted to connect with a null port", getName());
+      return;
+    }
+    
+    if (serial == null) {
+      serial = (Serial) startPeer(c.serial);
+      msg = new Msg(this, serial);
+      serial.addByteListener(this);
+    }
 
     // test to see if we've been started. the serial might be null
     this.port = port;
@@ -1282,17 +1294,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       }
       // Time out, no data returned
       return -1;
-    }
-  }
-
-  private void initSerial() {
-    if (msg == null) {
-      serial = (Serial) startPeer("serial");
-      msg = new Msg(this, serial);
-      serial.addByteListener(this);
-    } else {
-      // TODO: figure out why this gets called so often.
-      log.info("Init serial we already have a msg class.");
     }
   }
 
@@ -2129,7 +2130,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    */
   @Override
   public void write(int address, int value) {
-    info("write (%d,%d) to %s", address, value, serial.getName());
+    info("write (%d,%d)", address, value);
     PinDefinition pinDef = getPin(address);
     pinMode(address, "OUTPUT");
     if (pinDef.isPwm() && value > 1) { // CHEESEY HACK !!
@@ -2146,7 +2147,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   public void ackTimeout() {
-    log.warn("Ack Timeout seen.  TODO: consider resetting the com port {}, reconnecting and re syncing all devices.", port);
+    log.warn("{} Ack Timeout seen.  TODO: consider resetting the com port {}, reconnecting and re syncing all devices.", getName(), port);
   }
 
   public void publishMrlCommBegin(Integer version) {
@@ -2239,29 +2240,51 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   public ServiceConfig getConfig() {
     ArduinoConfig config = new ArduinoConfig();
+    
+    // FIXME - shouldn't need the this copying to local fields
+    // config is already set by the framework as part of an apply
+    // so the super.getConfig should be sufficient if 
+    // the state of the config is updated during runtime
+    
     config.port = port;
     config.connect = isConnected();
+    if (serial != null) {
+      config.serial = serial.getName();
+    }
+    
     return config;
   }
 
-  public ServiceConfig load(ServiceConfig c) {
-    ArduinoConfig config = (ArduinoConfig) c;
+  @Override
+  public ServiceConfig apply(ServiceConfig c) {
+    ArduinoConfig arduinoConfig = (ArduinoConfig) c;
 
-    if (config.serial != null) {
-      // FIXME THIS IS NOT GOOD - BUT NEEDED
-      serial = (Serial) Runtime.start(config.serial, "Serial");
+    if (isRunning() && arduinoConfig.connect) {
+      connect(arduinoConfig.port);
     }
-
-    if (config.port != null) {
-      connect(config.port);
-    }
+    
     return c;
   }
   
-  @Override
+    @Override
   public void startService() {
     super.startService();
-    initSerial();
+    
+    if (msg == null) {
+      serial = (Serial) startPeer("serial");
+      msg = new Msg(this, serial);
+      serial.addByteListener(this);
+    } else {
+      // TODO: figure out why this gets called so often.
+      log.info("Init serial we already have a msg class.");
+    }    
+    
+    ArduinoConfig c = (ArduinoConfig)config;
+    
+    if (c.connect && c.port != null) {
+      connect(c.port);
+    }
+    
   }  
 
   /**
