@@ -101,6 +101,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     blacklist.add("LeapMotion");
     blacklist.add("Python"); // python's interpreter cannot be restarted cleanly
     blacklist.add("Runtime");
+    blacklist.add("InMoov2");
     blacklist.add("WorkE");
     blacklist.add("JMonkeyEngine");
     blacklist.add("_TemplateService");
