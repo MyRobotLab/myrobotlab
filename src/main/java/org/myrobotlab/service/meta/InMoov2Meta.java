@@ -31,7 +31,7 @@ public class InMoov2Meta extends MetaData {
     addPeer("rightArm", "InMoov2Arm");
     addPeer("rightHand", "InMoov2Hand");
 
-    addPeer("leap", "Leap");
+    addPeer("leap", "LeapMotion");
 
     addPeer("opencv", "OpenCV");
 
