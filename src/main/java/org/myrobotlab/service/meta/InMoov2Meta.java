@@ -1,12 +1,10 @@
 package org.myrobotlab.service.meta;
-import java.util.LinkedHashMap;
-
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.PidConfig;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.RuntimeConfig;
 import org.myrobotlab.service.config.TrackingConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -32,6 +30,8 @@ public class InMoov2Meta extends MetaData {
     addPeer("leftHand", "InMoov2Hand");
     addPeer("rightArm", "InMoov2Arm");
     addPeer("rightHand", "InMoov2Hand");
+
+    addPeer("leap", "Leap");
 
     addPeer("opencv", "OpenCV");
 
@@ -174,6 +174,10 @@ public class InMoov2Meta extends MetaData {
     plan.removeConfig(name + ".eyeTracking.cv");
 
     plan.addConfig(inmoov, autoStart);
+    
+    RuntimeConfig runtime = new RuntimeConfig();
+    runtime.registry = new String[]{name};
+    plan.put("runtime", runtime);
 
     return plan;
   }

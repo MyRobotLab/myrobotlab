@@ -120,8 +120,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener,  TextL
 
   protected boolean loadGestures = true;
 
-  InMoov2Config config = new InMoov2Config();
-
   /**
    * @param someScriptName
    *          execute a resource script
