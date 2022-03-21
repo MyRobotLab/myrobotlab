@@ -428,28 +428,32 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       } else {
         si = createService(serviceName, null, null);
       }
+      
+      if (si == null) {
+        log.info("ere");
+      }
 
-        // FIXME - bad idea
-        // si.setPlan(plan);
+      // FIXME - bad idea
+      // si.setPlan(plan);
 
-        // ANOTHER DESIGN CONSIDERATION - SHOULD CONFIG APPLY BE DONE BETWEEN
-        // CREATE AND START ???
-        if (sc != null) {
+      // ANOTHER DESIGN CONSIDERATION - SHOULD CONFIG APPLY BE DONE BETWEEN
+      // CREATE AND START ???
+      if (sc != null) {
         si.setConfig(sc);
         si.apply(sc);
-        } else {
-          log.error("could not fine %s config", serviceName);
-        }
+      } else {
+        log.error("could not fine %s config", serviceName);
+      }
 
-        if (si != null) {
-          if (si.getName().equals(name)) {
-            ret = si;
-          }
-          if (!si.isRunning()) {
-            si.startService(); // FIXME - although this is createServices() and
-          } // may require started peers - then it should
-            // just start
-//         }
+      if (si != null) {
+        if (si.getName().equals(name)) {
+          ret = si;
+        }
+        if (!si.isRunning()) {
+          si.startService(); // FIXME - although this is createServices() and
+        } // may require started peers - then it should
+          // just start
+        // }
       }
     }
 
