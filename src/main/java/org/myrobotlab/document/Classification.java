@@ -28,6 +28,12 @@ public class Classification extends Document {
     setBoundingBox(rect);
   }
 
+  public Classification(String FACE_LABEL, float confidence, Rectangle rect, double centerX, double centerY) {
+    this(FACE_LABEL, confidence, rect);
+    setCenterX(centerX);
+    setCenterY(centerY);
+  }
+
   public void setTs(long ts) {
     setField("ts", ts);
   }
@@ -42,6 +48,22 @@ public class Classification extends Document {
 
   public Float getConfidence() {
     return (Float) getValue("confidence");
+  }
+  
+  public void setCenterX(double confidence) {
+    setField("centerX", confidence);
+  }
+
+  public Double getCenterX() {
+    return (Double) getValue("centerX");
+  }
+
+  public void setCenterY(double confidence) {
+    setField("centerY", confidence);
+  }
+
+  public Double getCenterY() {
+    return (Double) getValue("centerY");
   }
 
   public void setBoundingBox(int x, int y, int width, int height) {

@@ -193,7 +193,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   public DiyServo(String n, String id) {
     super(n, id);
     refreshPinArrayControls();
-    motorControl = (MotorControl) createPeer("motor");
+    motorControl = (MotorControl) startPeer("motor");
     initPid();
     subscribeToRuntime("registered");
     lastActivityTimeTs = System.currentTimeMillis();
@@ -212,7 +212,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    * Initiate the PID controller
    */
   void initPid() {
-    pid = (Pid) createPeer("pid");
+    pid = (Pid) startPeer("pid");
     pidKey = this.getName();
     pid.setPid(pidKey, kp, ki, kd); // Create a PID with the name of this
     // service instance

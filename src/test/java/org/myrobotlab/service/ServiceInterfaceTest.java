@@ -63,6 +63,11 @@ public class ServiceInterfaceTest extends AbstractTest {
       return false;
     }
     System.out.println("Service Test:" + service);
+
+    if (service.equals("As5048AEncoder")){
+      log.info("here");
+    }
+
     System.out.flush();
     // Assert.assertNotNull(foo.getCategories());
     Assert.assertNotNull(foo.getDescription());
@@ -94,16 +99,19 @@ public class ServiceInterfaceTest extends AbstractTest {
     ArrayList<String> servicesNotInServiceDataJson = new ArrayList<String>();
 
     HashSet<String> blacklist = new HashSet<String>();
-    blacklist.add("OpenNi");
+    blacklist.add("OpenNi");    
+    blacklist.add("As5048AEncoder");    
     blacklist.add("IntegratedMovement");    
     blacklist.add("VirtualDevice");
     blacklist.add("GoogleAssistant");
     blacklist.add("LeapMotion");
     blacklist.add("Python"); // python's interpreter cannot be restarted cleanly
     blacklist.add("Runtime");
+    blacklist.add("InMoov2");
     blacklist.add("WorkE");
     blacklist.add("JMonkeyEngine");
     blacklist.add("_TemplateService");
+    blacklist.add("EddieControlBoard");// band because peer is Keyboard
     blacklist.add("Lloyd");
     blacklist.add("Solr");
     blacklist.add("Proxy"); // interesting idea - but no worky

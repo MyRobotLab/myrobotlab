@@ -17,7 +17,7 @@ public class CronMeta extends MetaData {
    *          n
    * 
    */
-  public CronMeta(String name) {
+  public CronMeta() {
 
     addDescription("is a cron like service capable of scheduling future actions using cron syntax");
     addCategory("scheduling");
