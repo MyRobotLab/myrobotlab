@@ -177,7 +177,13 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
         float by = f4 * h;// bottom right point's y
         Rectangle rect = new Rectangle(tx, ty, bx - tx, by - ty);
         List<Classification> cl = null;
-        Classification classification = new Classification(FACE_LABEL, confidence, rect);
+        
+        // coordinate system is typical 4 quadrant
+        // x -1.0 to 1.0 y -1.0 to 1.0 with 0,0 middle
+        double centerX = ((rect.x + rect.width/2)- w/2)/w;
+        // many displays are in the inverted y
+        double centerY = -1 * ((rect.y + rect.height/2)-h/2)/h;
+        Classification classification = new Classification(FACE_LABEL, confidence, rect, centerX, centerY);
         classification.setTs(getOpenCV().getFrameStartTs());
         if (classifications.containsKey(FACE_LABEL)) {
           classifications.get(FACE_LABEL).add(classification);

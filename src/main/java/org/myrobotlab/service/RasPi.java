@@ -622,7 +622,6 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     return config;
   }
 
-  @Override
   public ServiceConfig apply(ServiceConfig c) {
     RasPiConfig config = (RasPiConfig) c;
     return c;

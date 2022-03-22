@@ -3,7 +3,7 @@ package org.myrobotlab.service.meta.abstracts;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-public class AbstractSpeechSynthesisMeta extends MetaData {
+public abstract class AbstractSpeechSynthesisMeta extends MetaData {
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(AbstractSpeechSynthesisMeta.class);
 

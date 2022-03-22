@@ -1603,6 +1603,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public void send(String name, String method, Object... data) {
+    if (name == null) {
+      log.debug("{}.send null, {} address", getName(), method);
+      return;
+    }
     // if you know the service is local - use same thread
     // to call directly
     ServiceInterface si = Runtime.getService(name);
@@ -2156,7 +2160,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public boolean setVirtual(boolean b) {
     this.isVirtual = b;
-    broadcastState();
     return isVirtual;
   }
 

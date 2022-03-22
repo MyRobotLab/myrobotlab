@@ -2776,7 +2776,7 @@ public class Msg {
   }
   
   public void waitForAck(){
-    if (!ackEnabled) {
+    if (!ackEnabled || serial == null || !serial.isConnected()) {
       return;
     }
     // if there's a pending message, we need to wait for the ack to be received.

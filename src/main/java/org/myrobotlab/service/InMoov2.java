@@ -120,8 +120,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener,  TextL
 
   protected boolean loadGestures = true;
 
-  InMoov2Config config = new InMoov2Config();
-
   /**
    * @param someScriptName
    *          execute a resource script
@@ -410,7 +408,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener,  TextL
     super(n, id);
 
     // InMoov2 has a huge amount of peers
-    setAutoStartPeers(false);
 
     // by default all servos will auto-disable
     // Servo.setAutoDisableDefault(true); //until peer servo services for
@@ -1107,7 +1104,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener,  TextL
   public void releaseService() {
     try {
       disable();
-      releasePeers();
       super.releaseService();
     } catch (Exception e) {
       error(e);

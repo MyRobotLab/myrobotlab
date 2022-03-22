@@ -1,11 +1,9 @@
 package org.myrobotlab.service.meta;
 
-import java.util.LinkedHashMap;
-
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.ArduinoConfig;
 import org.myrobotlab.service.config.SerialConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
@@ -27,24 +25,28 @@ public class ArduinoMeta extends MetaData {
     addPeer("serial", "Serial", "serial device for this Arduino");
   }
 
-  public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
-        
-    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
+  @Override
+  public Plan getDefault(String name, Boolean autoStart) {
+    
+    Plan plan = new Plan(name);
+    plan.putPeers(name, peers, autoStart);
+    // NOTE: you want to do any aliasing at the beginning
+    // plan.setPeerName("serial", "serialx");
+    
     ArduinoConfig arduinoConfig = new ArduinoConfig();
-
-    // set local names and config
     arduinoConfig.serial = name + ".serial";
+    
 
-    // build a config with all peer defaults
-    config.putAll(MetaData.getDefault(arduinoConfig.serial, "Serial"));
+    // == Peer serial - TODO - automagically add it when you add peers (meta's peers have type info)
+    SerialConfig serialConfig = (SerialConfig) plan.addPeerConfig("serial", autoStart);
 
     // pull out specific config and modify
-    SerialConfig serialConfig = (SerialConfig) config.get(arduinoConfig.serial);
     serialConfig.port = arduinoConfig.port;
+    
+    // add self last - desired order or construction
+    plan.addConfig(arduinoConfig, autoStart);
 
-    // put self in
-    config.put(name, arduinoConfig);
-
-    return config;
+    return plan;
   }
+
 }

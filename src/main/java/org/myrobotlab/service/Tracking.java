@@ -1,7 +1,6 @@
 package org.myrobotlab.service;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,14 +11,8 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.geometry.Rectangle;
-import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.Pid.PidOutput;
-import org.myrobotlab.service.config.ArduinoConfig;
-import org.myrobotlab.service.config.OpenCVConfig;
-import org.myrobotlab.service.config.PidConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.config.TrackingConfig;
 import org.myrobotlab.service.interfaces.ComputerVision;
 import org.myrobotlab.service.interfaces.PidControl;
@@ -197,19 +190,6 @@ public class Tracking extends Service {
     return null;
   }
 
-  /**
-   * FIXME - should be simple (non opencv) data here as a parameter FIXME -
-   * rename onClassification to onTracked - not classification specific
-   * publishDetected boundingbox + label
-   * 
-   * publishClassifications
-   * 
-   * @param data
-   */
-  // public void onOpenCVData(OpenCVData data) {
-  //
-  // }
-
   public void onClassification(Map<String, List<Classification>> data) {
     stats.inputCnt++;
 
@@ -227,13 +207,15 @@ public class Tracking extends Service {
         // log.info("found {}", classification);
         // get center of bounding box
         stats.latency = System.currentTimeMillis() - classification.getTs();
-        Rectangle bb = classification.getBoundingBox();
-        double x = bb.x + bb.width / 2;
-        double y = bb.y + bb.height / 2;
+
+        double x = classification.getCenterX();
+        double y = classification.getCenterY();
+
+        log.info("input {} {}", x, y);
 
         // PV - measured value
-        send(pid, "compute", pan, 320 - x);
-        send(pid, "compute", tilt, 240 - y);
+        send(pid, "compute", pan, x);
+        send(pid, "compute", tilt, y);
 
         // if largestFaceOnly
 
@@ -304,7 +286,6 @@ public class Tracking extends Service {
     return config;
   }
 
-  @Override
   public ServiceConfig apply(ServiceConfig c) {
     TrackingConfig config = (TrackingConfig) c;
 
@@ -334,22 +315,25 @@ public class Tracking extends Service {
   public boolean isIdle() {
     return state == TrackingState.IDLE;
   }
-  
+
+  public void rest() {
+    send(pan, "rest");
+    send(tilt, "rest");
+  }
 
   public static void main(String[] args) {
     try {
 
       LoggingFactory.init(Level.INFO);
 
-      //Runtime.saveDefault("Tracking");
+      // Runtime.saveDefault("Tracking");
 
       Runtime.start("intro", "Intro");
       Runtime.start("track", "Tracking");
-      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
 
-      
       boolean done = true;
       if (done) {
         return;
