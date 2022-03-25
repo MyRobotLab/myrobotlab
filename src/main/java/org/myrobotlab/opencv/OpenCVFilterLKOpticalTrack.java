@@ -81,57 +81,35 @@ import org.slf4j.Logger;
 public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterLKOpticalTrack.class);
-
   private static final long serialVersionUID = 1L;
-
   public boolean addRemovePoint2dfPoint = false;
-
   protected boolean getSubPixels = false;
-
   public boolean clearPoints = false;
-
   protected int maxPointCnt = 50;
-
   // protected double quality = 0.05;
   protected double quality = 5; // percent quality
-  //
   protected int blockSize = 3;
-
   protected double minDistance = 5.0;
-
   public boolean needTrackingPoints = false;
-
   protected List<Point> pointsToPublish = new ArrayList<>();
-
   protected boolean printCount = true;
-
   protected Point samplePoint = null;
-
   protected Map<Integer, TrackingPoint> trackingPoints = new HashMap<>();
-
   /**
    * name or id of the point to track in current index of points
    */
   protected Map<String, Integer> nameToIndex = new HashMap<>();
-
   protected int winSize = 15;
-
   protected long currentPntCnt;
-
   transient Mat zeroPoints = toMat(IplImage.create(new CvSize().width(0).height(0), 32, 2));
-
   transient Mat cornersA = null;
   transient Mat cornersB = null;
-
   transient Mat featureErrors = null;
   transient Mat featuresFound = null;
-
   transient IplImage grayImgA = null;
   transient IplImage grayImgB = null;
-
   transient Mat matA = null;
   transient Mat matB = null;
-
   // 0-based maximal pyramid level number; if set to 0, pyramids are not used
   // (single level), if set to 1, two levels are used, and so on; if pyramids
   // are passed to input then algorithm will use as many levels as pyramids have
@@ -163,8 +141,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
     FloatIndexer idx = cornersA.createIndexer();
 
-    idx.put(idx.size(0) - 1, 0, x);
-    idx.put(idx.size(0) - 1, 1, y);
+    idx.put(0,idx.size(0) - 1, 0, x);
+    idx.put(0,idx.size(0) - 1, 1, y);
     idx.release();
 
     return id;
@@ -179,8 +157,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     FloatIndexer newIdx = tmp.createIndexer();
     // copy contents
     for (int i = 0; i < idx.size(0); i++) {
-      newIdx.put(i, 0, idx.get(i, 0));
-      newIdx.put(i, 1, idx.get(i, 1));
+      newIdx.put(0, i, 0, idx.get(0, i, 0));
+      newIdx.put(0, i, 1, idx.get(0, i, 1));
       log.info("here");
     }
     toResize.release();
@@ -208,7 +186,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
     // copy contents
     for (int i = 0; i < idx.size(0); i++) {
-      sb.append(String.format("(%d,%d)", (int) idx.get(i), (int) idx.get(i + 1)));
+      sb.append(String.format("(%d,%d)", (int) idx.get(0,i,0), (int) idx.get(0,i,1)));
     }
     idx.release();
     log.info(sb.toString());
@@ -264,6 +242,11 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
       pointsToPublish.clear();
     }
 
+    if (cornersA.address() == 0) {
+      // No corners!  null matrix!!
+      return image;
+    }
+    
     FloatIndexer cornersAidx = cornersA.createIndexer();
     if (cornersAidx.size(0) == 0) {
       // no requested tracking points
@@ -306,8 +289,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
         // continue;
 
       }
-      TrackingPoint direction = new TrackingPoint(i, Math.round(cornersAidx.get(i, 0)), Math.round(cornersAidx.get(i, 1)), Math.round(cornersBidx.get(i, 0)),
-          Math.round(cornersBidx.get(i, 1)));
+      TrackingPoint direction = new TrackingPoint(i, Math.round(cornersAidx.get(0,i, 0)), Math.round(cornersAidx.get(0,i, 1)), Math.round(cornersBidx.get(0,i, 0)),
+          Math.round(cornersBidx.get(0,i, 1)));
 
       direction.found = featuresFoundIdx.get(i);
       direction.error = featureErrorsIdx.get(i);

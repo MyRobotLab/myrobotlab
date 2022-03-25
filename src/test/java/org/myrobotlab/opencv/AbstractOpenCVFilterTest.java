@@ -103,6 +103,7 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
   public IplImage defaultImage() {
     // a default image to use
     IplImage lena = cvLoadImage("src/test/resources/OpenCV/rachel.jpg");
+    
     return lena;
   }
 

@@ -179,12 +179,12 @@ public abstract class OpenCVFilter implements Serializable, CvFilter {
   /**
    * converters for the filter
    */
-  transient protected OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
+  // transient protected OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
 
   /**
    * converter for the filter
    */
-  transient protected OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
+  // transient protected OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
 
   /**
    * reference to the last OpenCVData processed and the one this filter will
@@ -445,7 +445,7 @@ public abstract class OpenCVFilter implements Serializable, CvFilter {
     return (OpenCVFilter) Service.copyShallowFrom(this, other);
   }
 
-  public CanvasFrame show(final IplImage image, final String title) {
+  public static CanvasFrame show(final IplImage image, final String title) {
     CanvasFrame canvas = new CanvasFrame(title);
     // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     canvas.showImage(toFrame(image));
@@ -466,19 +466,31 @@ public abstract class OpenCVFilter implements Serializable, CvFilter {
    * @return the buffered image
    */
   public BufferedImage toBufferedImage(IplImage image) {
-    return jconverter.convert(converterToImage.convert(image));
+    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
+    BufferedImage img = jconverter.convert(converterToImage.convert(image));
+    //converterToImage.close();
+    return img;
   }
 
   public BufferedImage toBufferedImage(Mat image) {
-    return jconverter.convert(converterToImage.convert(image));
+    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
+    BufferedImage img = jconverter.convert(converterToImage.convert(image));
+    //converterToImage.close();
+    return img;
   }
 
-  public Frame toFrame(IplImage image) {
-    return converterToImage.convert(image);
+  public static Frame toFrame(IplImage image) {
+    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
+    Frame f = converterToImage.convert(image);;
+    //converterToImage.close();
+    return f;
   }
 
   public Frame toFrame(Mat image) {
-    return converterToImage.convert(image);
+    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
+    Frame f = converterToImage.convert(image);
+    //converterToImage.close();
+    return f;
   }
 
   /**
@@ -489,23 +501,40 @@ public abstract class OpenCVFilter implements Serializable, CvFilter {
    * @return the ipl image resulting
    */
   public IplImage toImage(BufferedImage src) {
-    return converterToImage.convert(jconverter.convert(src));
+    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
+    IplImage img = converterToImage.convert(jconverter.convert(src));
+    //converterToImage.close();
+    return img; 
   }
 
   public IplImage toImage(Frame image) {
-    return converterToImage.convertToIplImage(image);
+    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
+    IplImage img = converterToImage.convertToIplImage(image);
+    //converterToImage.close();    
+    return img; 
   }
 
   public IplImage toImage(Mat image) {
-    return converterToImage.convert(converterToMat.convert(image));
+    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
+    OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
+    IplImage img = converterToImage.convert(converterToMat.convert(image));
+    //converterToImage.close();
+    //converterToMat.close();
+    return img;
   }
 
-  public Mat toMat(Frame image) {
-    return converterToImage.convertToMat(image);
+  public static Mat toMat(Frame image) {
+    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
+    Mat m = converterToImage.convertToMat(image);
+    //converterToImage.close();
+    return m;
   }
 
-  public Mat toMat(IplImage image) {
-    return converterToMat.convert(converterToMat.convert(image));
+  public static Mat toMat(IplImage image) {
+    OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
+    Mat mat = converterToMat.convert(converterToMat.convert(image));
+    // converterToMat.close();
+    return mat;
   }
 
   public boolean isEnabled() {

@@ -577,7 +577,7 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
     if (cascade != null) {
       // CvSeq faces = cvHaarDetectObjects(image, cascade, storage, scaleFactor,
       // minNeighbors, option);
-      Mat imageMat = converterToImage.convertToMat(converterToMat.convert(image));
+      Mat imageMat = toMat(image);
       RectVector vec = new RectVector();
       cascade.detectMultiScale(imageMat, vec);
 

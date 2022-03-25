@@ -507,7 +507,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   private Frame makeGrayScale(IplImage image) {
     IplImage imageBW = IplImage.create(image.width(), image.height(), 8, 1);
     cvCvtColor(image, imageBW, CV_BGR2GRAY);
-    return converterToMat.convert(imageBW);
+    return toFrame(imageBW);
   }
 
   private Mat makeGrayScaleMat(IplImage image) {
