@@ -132,7 +132,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   transient protected Thread thisThread = null;
 
   transient protected Inbox inbox = null;
-  
+
   transient protected Outbox outbox = null;
 
   protected String serviceVersion = null;
@@ -141,11 +141,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * default en.properties - if there is one
    */
   protected Properties defaultLocalization = null;
-  
+
   /**
    * the last config applied to this service
    */
-  protected ServiceConfig config; 
+  protected ServiceConfig config;
 
   /**
    * map of keys to localizations -
@@ -189,7 +189,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * it a member variable
    */
   protected Map<String, String> interfaceSet;
-  
+
   /**
    * plan which was used to build this service
    */
@@ -1341,12 +1341,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   public ServiceConfig getConfig() {
     // FIXME !!! - this should be null for services that do not have it !
-//    log.info("{} of type {} does not currently define its own config", getName(), getSimpleName());
-//    ServiceConfig config = new ServiceConfig();
-//    config.type = getClass().getSimpleName();
+    // log.info("{} of type {} does not currently define its own config",
+    // getName(), getSimpleName());
+    // ServiceConfig config = new ServiceConfig();
+    // config.type = getClass().getSimpleName();
     return config;
   }
-  
+
   @Override
   public void setConfig(ServiceConfig config) {
     this.config = config;
@@ -1414,29 +1415,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return this;
   }
 
-
   /**
    * Releases resources, and unregisters service from the runtime
    */
   @Override
   synchronized public void releaseService() {
-
-    purgeTasks();
-
-    // recently added - preference over detach(Runtime.getService(getName()));
-    // since this service is releasing - it should be detached from all existing
-    // services
-    detach();
-
-    // note - if stopService is overwritten with extra
-    // threads - releaseService will need to be overwritten too
-    stopService();
-
-    // TODO ? detach all other services currently attached
-    // detach();
-    // @grog is it ok for now ?
-
-    Runtime.unregister(getName());
+    Runtime.release(getName());
   }
 
   /**
@@ -1792,13 +1776,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public ServiceInterface startPeer(String reservedKey) {
-   Runtime runtime = Runtime.getInstance();
-   return runtime.startPeer(getName(), reservedKey);
+    String actualName = getPeerName(reservedKey);
+    return Runtime.start(actualName);
   }
-  
-  public void releasePeer(String reservedKey) {    
-    Runtime runtime = Runtime.getInstance();
-    runtime.releasePeer(getName(), reservedKey);
+
+  public void releasePeer(String reservedKey) {
+    String actualName = getPeerName(reservedKey);
+    Runtime.release(actualName);
   }
 
   @Override
@@ -1832,7 +1816,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       log.debug("startService request: service {} is already running", name);
     }
   }
-
 
   /**
    * Stops the service. Stops threads.
@@ -2523,15 +2506,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return creationOrder;
   }
 
+  public String getPeerName(String peerKey) {
+    return Runtime.getPeerName(peerKey, config, serviceType.peers);
+  }
+
   public boolean isPeerStarted(String peerKey) {
-    if (serviceType.peers != null) {
-      if (!serviceType.peers.containsKey(peerKey)) {
-        return false;
-      }
-      ServiceReservation sr = serviceType.peers.get(peerKey);
-      return "started".equals(sr.state);
-    }
-    return false;
+    return Runtime.isStarted(getPeerName(peerKey));
   }
 
   protected void registerForInterfaceChange(Class<?> clazz) {
@@ -2539,8 +2519,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   final public Plan getDefault() {
-    return MetaData.getDefault(getName(), this.getClass().getSimpleName(), null);
+    return MetaData.getDefault(getName(), this.getClass().getSimpleName());
   }
 
-  
 }

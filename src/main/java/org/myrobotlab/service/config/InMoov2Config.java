@@ -500,5 +500,7 @@ public class InMoov2Config extends ServiceConfig {
   public String pir;
   public String servoMixer;
   public String opencv;
+  public String audioPlayer;
+  public String mouthControl;
     
 }

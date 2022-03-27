@@ -19,14 +19,21 @@ public class ServiceConfig {
    */
   public String type;
   
-  // public Map<String,String> peerz;
+  // FIXME - change to enum !
+  // heh non transient makes it easy to debug !
+  transient public String state = "INIT"; // INIT | LOADED | CREATED | STARTED | STOPPED | RELEASED
 
   // public String name; I DO NOT WANT TO PUT THIS IN
   
   /**
+   * if this service has peers - auto start them / and autoRelease them
+   */
+  public boolean autoStartPeers = true;
+  
+  /**
    * if this service is a peer - autostart it first when creating its parent
    */
-  public boolean autoStart = true;
+  // public boolean autoStart = true;
 
   public ServiceConfig() {
     String configTypeName = this.getClass().getSimpleName();

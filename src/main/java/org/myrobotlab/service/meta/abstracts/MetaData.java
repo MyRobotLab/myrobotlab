@@ -121,7 +121,7 @@ public class MetaData implements Serializable {
    * service life-cycle state inactive | created | registered | running |
    * stopped | released
    */
-  String state = null;
+//   String state = null;
 
   /**
    * what is left TODO on this service for it to be ready for release
@@ -378,7 +378,7 @@ public class MetaData implements Serializable {
    * @param type
    * @return
    */
-  public static Plan getDefault(String name, String type, Boolean autoStart) {
+  public static Plan getDefault(String name, String type) {
 
     try {
 
@@ -392,7 +392,7 @@ public class MetaData implements Serializable {
       Class<?> c = Class.forName(type);
       Constructor<?> mc = c.getConstructor();
       MetaData meta = (MetaData) mc.newInstance();
-      return meta.getDefault(name, autoStart);
+      return meta.getDefault(name);
 
       // FIXME - add runtime ? - or should this be available to the concrete
       // metadata ?
@@ -404,27 +404,18 @@ public class MetaData implements Serializable {
     return null;
   }
 
-  
-  public static Plan getDefault(String name, String type) {
-    return getDefault(name, type, null);
-  }
-  
-  public Plan getDefault(String name, Boolean autoStart) {
     
-    if (autoStart == null) {
-      autoStart = true;
-    }    
+  public Plan getDefault(String name) {
 
     // LinkedHashMap<String, ServiceConfig> ret = new LinkedHashMap<>();
     Plan plan = new Plan(name);
-    plan.putPeers(name, peers, autoStart);
+    plan.putPeers(name, peers);
     
     try {
 
       Class<?> c = Class.forName("org.myrobotlab.service.config." + simpleName + "Config");
       Constructor<?> con = c.getConstructor();
       ServiceConfig sc = (ServiceConfig) con.newInstance();
-      sc.autoStart = autoStart;
 
       // FIXME handle no Config object ... just Service
       plan.put(name, sc);
@@ -432,7 +423,6 @@ public class MetaData implements Serializable {
     } catch (Exception e) {
       log.info("could not find {} loading generalized ServiceConfig", type);
       ServiceConfig sc = new ServiceConfig();
-      sc.autoStart = autoStart;
       sc.type = simpleName;
       plan.put(name, sc);
     }
@@ -456,42 +446,7 @@ public class MetaData implements Serializable {
     }
     return null;
   }
-/*
-  protected ServiceConfig getConfig(String name, String peerKey, Boolean autoStart) {
-    if (autoStart == null) {
-      autoStart = true;
-    }
-    ServiceReservation sr = getPeer(peerKey);
-    String actualName = null;
-    if (sr == null) {
-      log.error("%s key %s not found", name, peerKey);
-      return null;
-    }
-    if (sr.actualName != null) {
-      actualName = sr.actualName;
-    } else {
-      actualName = name + "." + peerKey;
-    }
-    return plan.getPeer(actualName, sr.type, autoStart);
-  }
 
-  protected Plan getPlan() {
-    return plan;
-  }
-
-  protected ServiceConfig addConfig(String name, ServiceConfig config, Boolean autoStart) {
-    if (autoStart == null) {
-      autoStart = true;
-    }
-    config.autoStart = autoStart;
-    if (!plan.containsKey(name)) {
-      plan.addPeer(name, config);
-      return config;
-    } else {
-      return plan.get(name);
-    }
-  }
-  */
 
   protected void setPeerName(String key, String actualName) {
     // FIXME - do we bother to check if a peer exists or just make one? - we don't have type info ...
@@ -503,10 +458,5 @@ public class MetaData implements Serializable {
       log.error("key {} does not for peer", key);
     }
   }
-
-/*  
-  public void removeConfig(String name) {
-    plan.remove(name);
-  }
-*/  
+ 
 }
