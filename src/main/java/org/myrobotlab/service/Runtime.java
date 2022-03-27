@@ -2049,6 +2049,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static public ServiceInterface start(String name, String type) {
     // hand back immediately if a service with that name exists
     // and is running
+    
+    if (name == null && type == null) {
+      RuntimeConfig rconfig = (RuntimeConfig)Runtime.getInstance().readServiceConfig("runtime");
+      for (String rname: rconfig.registry) {
+        start(rname);
+      }      
+      return runtime;
+    }
 
     ServiceInterface si = null;
 
@@ -3766,13 +3774,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       return originalSc;
     }
 
-    // if config name set and yaml file exists - it takes precedence
-    String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
-    File check = new File(filename);
-    ServiceConfig sc = null;
-    if (runtime.getConfigName() != null && check.exists()) {
-      sc = CodecUtils.readServiceConfig(filename);
-    }
+    ServiceConfig sc = readServiceConfig(name);
 
     if (sc != null) {
       log.info("{} found yml file - loading into plan", name);
@@ -3804,6 +3806,21 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
     }
 
+    return sc;
+  }
+  
+  public ServiceConfig readServiceConfig(String name) { 
+  // if config name set and yaml file exists - it takes precedence
+  String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
+  File check = new File(filename);
+  ServiceConfig sc = null;
+  if (runtime.getConfigName() != null && check.exists()) {
+    try {
+      sc = CodecUtils.readServiceConfig(filename);
+    } catch (IOException e) {
+      error(e);
+    }
+  }
     return sc;
   }
 
