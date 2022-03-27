@@ -390,7 +390,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // the children up
       for (String peer : peers.keySet()) {
         // get actual Name
-        String actualPeerName = getPeerName(peer, sc, peers);
+        String actualPeerName = getPeerName(peer, sc, peers, name);
+        if (actualPeerName == null) {
+          // default 
+          actualPeerName = String.format("%s.%s", name, peer);
+        }
+        
         if (actualPeerName != null && !isStarted(actualPeerName)) {
           start(actualPeerName);
         }
@@ -414,7 +419,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return si;
   }
 
-  public static String getPeerName(String peerKey, ServiceConfig config, Map<String, ServiceReservation> peers) {
+  public static String getPeerName(String peerKey, ServiceConfig config, Map<String, ServiceReservation> peers, String parentName) {
 
     if (peerKey == null || !peers.containsKey(peerKey)) {
       return null;
@@ -452,6 +457,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           }
         }
       }
+    }
+    // last ditch attempt at getting the name - will default it if parentName is supplied
+    if (parentName != null) {
+      return String.format("%s.%s", parentName, peerKey);
     }
     return null;
   }
@@ -1570,7 +1579,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         // the children up
         for (String peer : peers.keySet()) {
           // get actual Name
-          String actualPeerName = getPeerName(peer, sc, peers);
+          String actualPeerName = getPeerName(peer, sc, peers, inName);
           if (actualPeerName != null && isStarted(actualPeerName)) {
             release(actualPeerName);
           }

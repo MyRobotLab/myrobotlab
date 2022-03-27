@@ -2507,7 +2507,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public String getPeerName(String peerKey) {
-    return Runtime.getPeerName(peerKey, config, serviceType.peers);
+    return Runtime.getPeerName(peerKey, config, serviceType.peers, getName());
   }
 
   public boolean isPeerStarted(String peerKey) {
