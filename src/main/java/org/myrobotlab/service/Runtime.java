@@ -1541,7 +1541,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       si.stopService();
       Plan plan = runtime.getPlan();
       ServiceConfig sc = plan.get(inName);
-      sc.state = "STOPPED";
+      if (sc == null) {
+       log.debug("service config not available for {}", inName);
+      } else {
+        sc.state = "STOPPED";
+      }
     } else {
       if (runtime != null) {
         runtime.send(name, "releaseService");
