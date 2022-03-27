@@ -299,6 +299,10 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
       trackingPoints.put(i, direction);
     }
 
+    // Set the tracking points in the cv data output
+    if (!trackingPoints.isEmpty()) {
+      data.put("points", trackingPoints);
+    }
     // FIXME !!! - close all resources
     // releasing previous frame
     matA.release();

@@ -21,6 +21,7 @@ import org.myrobotlab.test.AbstractTest;
 @Ignore
 public abstract class AbstractOpenCVFilterTest extends AbstractTest {
 
+  public static final String TESTIMG = "testimg";
   public boolean debug = false;
 
   public abstract OpenCVFilter createFilter();
@@ -83,7 +84,7 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
   }
 
   private IplImage processTestImage(OpenCVFilter filter, IplImage input, long now, int frameIndex) throws InterruptedException {
-    filter.setData(new OpenCVData("testimg", now, frameIndex, OpenCV.toFrame(input)));
+    filter.setData(new OpenCVData(TESTIMG, now, frameIndex, OpenCV.toFrame(input)));
     // call process on the filter with the input image.
     long start = System.currentTimeMillis();
     IplImage output = filter.process(input);
