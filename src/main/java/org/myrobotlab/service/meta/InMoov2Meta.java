@@ -3,6 +3,7 @@ import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.config.InMoov2Config;
+import org.myrobotlab.service.config.NeoPixelConfig;
 import org.myrobotlab.service.config.PidConfig;
 import org.myrobotlab.service.config.RuntimeConfig;
 import org.myrobotlab.service.config.TrackingConfig;
@@ -53,7 +54,6 @@ public class InMoov2Meta extends MetaData {
     addPeer("controller4", "Arduino");
 
     addPeer("htmlFilter", "HtmlFilter");
-    addPeer("chatBot", "ProgramAB");
 
     // Sensors -----------------
     addPeer("opencv", "OpenCV", "opencv");
@@ -89,11 +89,6 @@ public class InMoov2Meta extends MetaData {
 
     InMoov2Config inmoov = new InMoov2Config();
     
-    // InMoov is a controller service and wants to 
-    // starte / release its own peers - usually the
-    // framework would auto start and auto release all peers
-    inmoov.autoStartPeers = false;
-    
     Plan plan = new Plan(name);
     // load default peers from meta here
     plan.putPeers(name, peers);
@@ -109,22 +104,17 @@ public class InMoov2Meta extends MetaData {
     inmoov.opencv = name + ".opencv";
     inmoov.headTracking = name + ".headTracking";
     inmoov.eyeTracking = name + ".eyeTracking";
-    inmoov.mouth = name + ".mouth";
-    inmoov.audioPlayer = name + ".audioPlayer";
-    inmoov.mouthControl = name + ".mouthControl";
-    
-    
-    
-//    addPeerConfig(name, "head");
-//    addPeerConfig(name, "torso");
-//    addPeerConfig(name, "leftArm");
-//    addPeerConfig(name, "rightArm");
-//    addPeerConfig(name, "leftHand");
-//    addPeerConfig(name, "rightHand");
-//    addPeerConfig(name, "opencv");
+
+//    addPeerConfig(name, "head", autoStart);
+//    addPeerConfig(name, "torso", autoStart);
+//    addPeerConfig(name, "leftArm", autoStart);
+//    addPeerConfig(name, "rightArm", autoStart);
+//    addPeerConfig(name, "leftHand", autoStart);
+//    addPeerConfig(name, "rightHand", autoStart);
+//    addPeerConfig(name, "opencv", autoStart);
 //
-//    addPeerConfig(name, "left");
-//    addPeerConfig(name, "right");
+//    addPeerConfig(name, "left", autoStart);
+//    addPeerConfig(name, "right", autoStart);
 
     
     // == Peer - headTracking =============================
@@ -135,7 +125,6 @@ public class InMoov2Meta extends MetaData {
     headTracking.pan = name + ".head.rothead";
     headTracking.cv = name + ".opencv";
     headTracking.pid = name + ".pid";
-    headTracking.controller = name + ".left";
 
     // == Peer - eyeTracking =============================
     TrackingConfig eyeTracking = (TrackingConfig) plan.getPeerConfig("eyeTracking");
@@ -170,6 +159,14 @@ public class InMoov2Meta extends MetaData {
     eyePanPid.ki = 0.001;
     eyePanPid.kp = 0.015;
     pid.data.put(eyeTracking.pan, eyePanPid);
+    
+    NeoPixelConfig neopixel = (NeoPixelConfig) plan.getPeerConfig("neopixel");
+    neopixel.pin = 2;
+    neopixel.controller = String.format("%s.left", name);
+    neopixel.red = 12;
+    neopixel.green = 180;
+    neopixel.blue = 212;
+    neopixel.currentAnimation = "Ironman";
 
     // remove undesired defaults from our default
     plan.removeConfig(name + ".headTracking.tilt");
