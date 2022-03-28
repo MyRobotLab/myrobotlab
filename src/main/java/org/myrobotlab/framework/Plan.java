@@ -24,6 +24,7 @@ public class Plan {
   
   LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
   
+  @Deprecated /* use definition in config and contract of String fieldnames */
   public Map<String, Map<String, ServiceReservation>> peers = new TreeMap<String, Map<String, ServiceReservation>>();
 
   // final MetaData metaData;
@@ -102,8 +103,8 @@ public class Plan {
   }
 
   // NOTE ! - this uses actualName
-  private ServiceConfig addConfig(String actualName, String type, Boolean autoStart) {
-    Plan plan = MetaData.getDefault(actualName, type, autoStart);
+  private ServiceConfig addConfig(String actualName, String type) {
+    Plan plan = MetaData.getDefault(actualName, type);
     // merge config - do not replace root
     merge(plan);
     return config.get(actualName);
@@ -126,20 +127,15 @@ public class Plan {
     return sc;
   }
 
-//  public ServiceConfig getPeer(String key) {
-//    // TODO Auto-generated method stub
-//    return null;
-//  }
-
   // THIS WILL BUILD OUT DEFAULT CONFIG
-  public void putPeers(String name, Map<String, ServiceReservation> peers, Boolean autoStart) {
+  public void putPeers(String name, Map<String, ServiceReservation> peers) {
     this.peers.put(name, peers);
     if (peers != null) {
       for (String peerKey: peers.keySet()) {
         if (peerKey.contains("3")) {
           log.info("here");
         }
-        addPeerConfig(peerKey, autoStart);
+        addPeerConfig(peerKey);
       }
     }
   }
@@ -158,10 +154,7 @@ public class Plan {
     sr.actualName = actualName;
   }
 
-  public ServiceConfig addPeerConfig(String peerKey, Boolean autoStart) {
-    if (autoStart == null) {
-      autoStart = true;
-    }
+  public ServiceConfig addPeerConfig(String peerKey) {
     ServiceReservation sr = peers.get(name).get(peerKey);
     String actualName = null;
     if (sr == null) {
@@ -173,13 +166,10 @@ public class Plan {
     } else {
       actualName = name + "." + peerKey;
     }
-    return addConfig(actualName, sr.type, autoStart);  
+    return addConfig(actualName, sr.type);  
   }
 
-  public ServiceConfig addConfig(ServiceConfig sc, Boolean autoStart) {
-    if (autoStart != null) {
-      sc.autoStart = autoStart;
-    }
+  public ServiceConfig addConfig(ServiceConfig sc) {
     return config.put(name, sc);
   }
 
@@ -204,6 +194,10 @@ public class Plan {
 
   public Map<String,Map<String,ServiceReservation>> getPeers() {
     return peers;
+  }
+
+  public int size() {
+    return config.size();
   }
 
 }

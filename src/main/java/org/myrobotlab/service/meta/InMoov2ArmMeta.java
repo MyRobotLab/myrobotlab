@@ -29,11 +29,11 @@ public class InMoov2ArmMeta extends MetaData {
   }
 
   @Override
-  public Plan getDefault(String name, Boolean autoStart) {
+  public Plan getDefault(String name) {
     
     Plan plan = new Plan(name);
     // load default peers from meta here
-    plan.putPeers(name, peers, autoStart);
+    plan.putPeers(name, peers);
 
 
     InMoov2ArmConfig arm = new InMoov2ArmConfig();
@@ -54,7 +54,7 @@ public class InMoov2ArmMeta extends MetaData {
     arm.rotate = name + ".rotate";
     arm.bicep = name + ".bicep";
 
-    ServoConfig omoplate = (ServoConfig) plan.addPeerConfig("omoplate", autoStart);
+    ServoConfig omoplate = (ServoConfig) plan.addPeerConfig("omoplate");
     omoplate.autoDisable = true;
     omoplate.controller = cname;
     omoplate.clip = true;
@@ -70,7 +70,7 @@ public class InMoov2ArmMeta extends MetaData {
     omoplate.sweepMax = null;
     omoplate.sweepMin = null;
 
-    ServoConfig shoulder = (ServoConfig) plan.addPeerConfig("shoulder", autoStart);
+    ServoConfig shoulder = (ServoConfig) plan.addPeerConfig("shoulder");
     shoulder.autoDisable = true;
     shoulder.controller = cname;
     shoulder.clip = true;
@@ -86,7 +86,7 @@ public class InMoov2ArmMeta extends MetaData {
     shoulder.sweepMax = null;
     shoulder.sweepMin = null;
 
-    ServoConfig rotate = (ServoConfig) plan.addPeerConfig("rotate", autoStart);
+    ServoConfig rotate = (ServoConfig) plan.addPeerConfig("rotate");
     rotate.autoDisable = true;
     rotate.controller = cname;
     rotate.clip = true;
@@ -102,7 +102,7 @@ public class InMoov2ArmMeta extends MetaData {
     rotate.sweepMax = null;
     rotate.sweepMin = null;
 
-    ServoConfig bicep = (ServoConfig) plan.addPeerConfig("bicep", autoStart);
+    ServoConfig bicep = (ServoConfig) plan.addPeerConfig("bicep");
     bicep.autoDisable = true;
     bicep.controller = cname;
     bicep.clip = true;
@@ -118,7 +118,7 @@ public class InMoov2ArmMeta extends MetaData {
     bicep.sweepMax = null;
     bicep.sweepMin = null;
 
-    plan.addConfig(arm, autoStart);
+    plan.addConfig(arm);
 
     return plan;
 
