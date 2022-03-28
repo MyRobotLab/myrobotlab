@@ -2057,16 +2057,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static public ServiceInterface start(String name, String type) {
     // hand back immediately if a service with that name exists
     // and is running
-    
+
     if (name == null && type == null) {
-      RuntimeConfig rconfig = (RuntimeConfig)Runtime.getInstance().readServiceConfig("runtime");
+      RuntimeConfig rconfig = (RuntimeConfig) Runtime.getInstance().readServiceConfig("runtime");
       if (rconfig == null) {
         log.error("name null type null and rconfig null");
         return null;
       }
-      for (String rname: rconfig.registry) {
+      for (String rname : rconfig.registry) {
         start(rname);
-      }      
+      }
       return runtime;
     }
 
@@ -3945,6 +3945,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       error("config name cannot be empty");
       return null;
     }
+    
+    invoke("publishConfigList");
+    
     return this.configName = configName.trim();
   }
 
@@ -4009,6 +4012,23 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   public void addServiceToRequestedInteface(String serviceName) {
     ServiceInterface si = Runtime.getService(serviceName);
+  }
+
+  public void savePlan(String configSetName) {
+    setConfigName(configSetName);
+    File f = new File(configSetName);
+    f.mkdirs();
+    Set<String> services = plan.keySet();
+    for (String s : services) {
+      String filename = Runtime.getInstance().getConfigDir() + fs + Runtime.getInstance().getConfigName() + fs + s + ".yml";
+      String data = CodecUtils.toYaml(plan.get(s));
+      try {
+        FileIO.toFile(filename, data.getBytes());
+      } catch (Exception e) {
+        error(e);
+      }
+      info("saved %s config to %s", getName(), filename);
+    }
   }
 
   /**

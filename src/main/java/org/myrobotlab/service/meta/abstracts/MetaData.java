@@ -101,11 +101,6 @@ public class MetaData implements Serializable {
   Boolean requiresKeys = false;
 
   /**
-   * instance name of service this MetaData belongs to e.g. "i01"
-   */
-  // String serviceName;
-
-  /**
    * simple class name of this service
    */
   String simpleName;
@@ -114,12 +109,6 @@ public class MetaData implements Serializable {
    * the single sponsor of this service
    */
   String sponsor;
-
-  /**
-   * service life-cycle state inactive | created | registered | running |
-   * stopped | released
-   */
-//   String state = null;
 
   /**
    * what is left TODO on this service for it to be ready for release
@@ -365,13 +354,11 @@ public class MetaData implements Serializable {
     return null;
   }
 
-    
   public Plan getDefault(String name) {
 
     // LinkedHashMap<String, ServiceConfig> ret = new LinkedHashMap<>();
     Plan plan = new Plan(name);
     plan.putPeers(name, peers);
-    
     try {
 
       Class<?> c = Class.forName("org.myrobotlab.service.config." + simpleName + "Config");
@@ -388,7 +375,6 @@ public class MetaData implements Serializable {
       plan.put(name, sc);
     }
 
-    
     // plan.setConfig(ret);
     // plan.merge(plan);
 
@@ -408,9 +394,9 @@ public class MetaData implements Serializable {
     return null;
   }
 
-
   protected void setPeerName(String key, String actualName) {
-    // FIXME - do we bother to check if a peer exists or just make one? - we don't have type info ...
+    // FIXME - do we bother to check if a peer exists or just make one? - we
+    // don't have type info ...
     // FIXME - do we bother to check if its already set ? (merge ???)
     ServiceReservation sr = peers.get(key);
     if (sr != null) {
@@ -419,5 +405,4 @@ public class MetaData implements Serializable {
       log.error("key {} does not for peer", key);
     }
   }
- 
 }
