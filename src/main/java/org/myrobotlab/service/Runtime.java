@@ -357,28 +357,41 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   private static ServiceInterface startServicesFromPlan(String name) {
     Runtime runtime = Runtime.getInstance();
-    // get plan
-    Plan plan = runtime.plan;
+    Plan plan = runtime.getPlan();
 
-    ServiceInterface ret = null;
+    ServiceConfig sc = plan.get(name);
 
-    // FIXME - Design Problem ... doesn't it make sense to "start" peers but not
-    // start the parent
-    // service ? Seems like the only reason to create without starting is a
-    // design problem
-    // of the implementation of the service (like webgui and it's port or
-    // autoStartBrowser) and
-    // the ability to load
+    if (sc == null) {
+      log.error("this might be an error - or maybe not");
+      // FIXME try to load ????
+      return null;
+    }
 
-    // if Runtime definition exists - pre-load it
-    // special handling of runtime - runtime has a registry
-    // it will be loaded now into the plan so our plan will not be modified
-    // while executing it (bad idea) FIXME - make runtime config required !
-    RuntimeConfig rc = (RuntimeConfig) plan.get("runtime");
-    if (rc != null) {
-      for (String n : rc.registry) {
-        if (!"runtime".equals(n)) {
-          load(n);
+    if (si != null) {
+      if (si.isRunning()) {
+        si.startService();
+      }
+      sc.state = "STARTED";
+      return si;
+    }
+
+    if (sc.autoStartPeers) {
+      // get peers from meta data
+      MetaData md = MetaData.get(sc.type);
+      Map<String, ServiceReservation> peers = md.getPeers();
+      log.info("auto start peers and {} of type {} has {} peers", name, sc.type, peers.size());
+      // RECURSE ! - if we found peers and autoStartPeers is true - we start all
+      // the children up
+      for (String peer : peers.keySet()) {
+        // get actual Name
+        String actualPeerName = getPeerName(peer, sc, peers, name);
+        if (actualPeerName == null) {
+          // default
+          actualPeerName = String.format("%s.%s", name, peer);
+        }
+
+        if (actualPeerName != null && !isStarted(actualPeerName)) {
+          start(actualPeerName);
         }
       }
     }
@@ -456,8 +469,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         // }
       }
     }
-
-    return ret;
+    // last ditch attempt at getting the name - will default it if parentName is
+    // supplied
+    if (parentName != null) {
+      return String.format("%s.%s", parentName, peerKey);
+    }
+    return null;
   }
 
   public static void check(String name, String type) {
@@ -1536,7 +1553,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     // send msg to service to self terminate
     if (si.isLocal()) {
-      si.releaseService();
+      si.purgeTasks();
+      si.stopService();
+      Plan plan = runtime.getPlan();
+      ServiceConfig sc = plan.get(inName);
+      if (sc == null) {
+        log.debug("service config not available for {}", inName);
+      } else {
+        sc.state = "STOPPED";
+      }
     } else {
       if (runtime != null) {
         runtime.send(name, "releaseService");
@@ -2042,6 +2067,18 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static public ServiceInterface start(String name, String type) {
     // hand back immediately if a service with that name exists
     // and is running
+
+    if (name == null && type == null) {
+      RuntimeConfig rconfig = (RuntimeConfig) Runtime.getInstance().readServiceConfig("runtime");
+      if (rconfig == null) {
+        log.error("name null type null and rconfig null");
+        return null;
+      }
+      for (String rname : rconfig.registry) {
+        start(rname);
+      }
+      return runtime;
+    }
 
     ServiceInterface si = null;
 
@@ -3337,12 +3374,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     ServiceData.setPeer(fullKey, actualName, serviceType);
   }
 
-  public Plan getPlan() {
-    return plan;
+  public static Plan getPlan() {
+    Runtime runtime = Runtime.getInstance();
+    return runtime.getLocalPlan();
   }
 
-  public Plan getLastPlan() {
-    return lastPlan;
+  public Plan getLocalPlan() {
+    return plan;
   }
 
   static public void clear() {
@@ -3746,7 +3784,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       ServiceConfig sc = plan.get("runtime");
       if (sc != null) {
         log.info("found runtime config");
-        return sc;
       } else {
         log.warn("did not find runtime config");
         return null;
@@ -3783,14 +3820,36 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       } else {
         log.info("could not find config in file trying default of type {}", type);
         // find a default plan for this name and type
-        Plan plan = MetaData.getDefault(name, type);
-        runtime.plan.merge(plan);
+        Plan newPlan = MetaData.getDefault(name, type);
+        if (newPlan == null) {
+          log.info("here");
+        }
+
+        for (String scs : newPlan.getConfig().keySet()) {
+          newPlan.getConfig().get(scs).state = "LOADED";
+        }
+
         // minimally, the service we've requested the plan for should have
         // that service's config
         sc = plan.get(name);
       }
     }
 
+    return plan;
+  }
+
+  public ServiceConfig readServiceConfig(String name) {
+    // if config name set and yaml file exists - it takes precedence
+    String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
+    File check = new File(filename);
+    ServiceConfig sc = null;
+    if (runtime.getConfigName() != null && check.exists()) {
+      try {
+        sc = CodecUtils.readServiceConfig(filename);
+      } catch (IOException e) {
+        error(e);
+      }
+    }
     return sc;
   }
 
@@ -3900,6 +3959,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       error("config name cannot be empty");
       return null;
     }
+    
+    invoke("publishConfigList");
+    
     return this.configName = configName.trim();
   }
 
@@ -3965,6 +4027,23 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   public void addServiceToRequestedInteface(String serviceName) {
     ServiceInterface si = Runtime.getService(serviceName);
+  }
+
+  public void savePlan(String configSetName) {
+    setConfigName(configSetName);
+    File f = new File(configSetName);
+    f.mkdirs();
+    Set<String> services = plan.keySet();
+    for (String s : services) {
+      String filename = Runtime.getInstance().getConfigDir() + fs + Runtime.getInstance().getConfigName() + fs + s + ".yml";
+      String data = CodecUtils.toYaml(plan.get(s));
+      try {
+        FileIO.toFile(filename, data.getBytes());
+      } catch (Exception e) {
+        error(e);
+      }
+      info("saved %s config to %s", getName(), filename);
+    }
   }
 
   /**

@@ -28,7 +28,8 @@ public class ServiceLifeCycleTest extends AbstractTest {
     
     // test saving out runtime.yml
     
-    // clearing and reloading 
+    // FIXME i02.releasePeers()
+    // FIXME - checkPeerState ? RELEASED ?
     
   }
 

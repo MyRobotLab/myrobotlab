@@ -333,6 +333,22 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         console.info('ret ' + ret);
     }
 
+    $scope.savePlan = function() {
+        console.info('saveConfig')
+
+        let onOK = function() {
+            msg.sendTo('runtime', 'savePlan', $scope.service.configName)
+            // msg.sendTo('runtime', 'save')
+        }
+
+        let onCancel = function() {
+            console.info('save config cancelled')
+        }
+
+        let ret = modalService.openOkCancel('widget/modal-dialog.view.html', 'Save Plan Configuration', 'Save your current configuration in a directory named', onOK, onCancel, $scope);
+        console.info('ret ' + ret);
+    }
+
     $scope.saveDefaults = function() {
         console.info('saveDefaults')
         msg.send('saveDefaults', $scope.newType.simpleName)
