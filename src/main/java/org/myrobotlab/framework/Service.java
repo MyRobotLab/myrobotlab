@@ -1558,8 +1558,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public ServiceInterface getPeer(String peerKey) {
-    String peerName = serviceType.getPeerActualName(peerKey);
-    return Runtime.getService(peerName);
+    String actualName = getPeerName(peerKey);
+    return Runtime.getService(actualName);
   }
 
   public void send(String name, String method) {

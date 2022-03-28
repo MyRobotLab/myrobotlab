@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.io.FilenameUtils;
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
@@ -1310,7 +1311,9 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public String setSpeechType(String speechType) {
-    serviceType.setPeer("mouth", speechType);
+    Plan plan = Runtime.getPlan();    
+    plan.remove(getPeerName("mouth"));
+    Runtime.load(getPeerName("mouth"), speechType);
     broadcastState();
     return speechType;
   }

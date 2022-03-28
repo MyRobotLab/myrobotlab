@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +15,6 @@ import org.myrobotlab.framework.repo.ServiceArtifact;
 import org.myrobotlab.framework.repo.ServiceDependency;
 import org.myrobotlab.framework.repo.ServiceExclude;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.config.ArduinoConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
@@ -326,45 +324,8 @@ public class MetaData implements Serializable {
     peers.put(key, new ServiceReservation(key, null, peerType, null));
   }
 
-  public void setPeer(String key, String peerType) {
-    ServiceReservation sr = peers.get(key);
-    if (sr != null) {
-      sr.key = key;
-      sr.type = peerType;
-    } else {
-      addPeer(key, peerType, "set by user");
-    }
-  }
-
-  public void setGlobalPeer(String key, String name, String peerType) {
-    setGlobalPeer(key, name, peerType, "set by user");
-  }
-
-  public void setGlobalPeer(String key, String name, String peerType, String comment) {
-    ServiceReservation sr = peers.get(name);
-    if (sr != null) {
-      sr.actualName = name;
-      sr.type = peerType;
-      sr.comment = comment;
-    } else {
-      peers.put(key, new ServiceReservation(key, name, peerType, comment));
-    }
-  }
-
   public void addPeer(String key, String actualName, String peerType, String comment) {
     peers.put(key, new ServiceReservation(key, actualName, peerType, comment));
-  }
-
-  public String getPeerActualName(String peerKey) {
-
-    // return local defined name
-    ServiceReservation peer = peers.get(peerKey);
-    if (peer != null) {
-      if (peer.actualName != null) {
-        return peer.actualName;
-      }
-    }
-    return null;
   }
 
   public String getType() {

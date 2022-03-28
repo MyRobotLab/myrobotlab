@@ -1517,7 +1517,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   public synchronized static boolean release(String inName) {
     if (inName == null) {
-      log.error("release (null)");
+      log.debug("release (null)");
       return false;
     }
 
@@ -2060,6 +2060,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     
     if (name == null && type == null) {
       RuntimeConfig rconfig = (RuntimeConfig)Runtime.getInstance().readServiceConfig("runtime");
+      if (rconfig == null) {
+        log.error("name null type null and rconfig null");
+        return null;
+      }
       for (String rname: rconfig.registry) {
         start(rname);
       }      
@@ -3360,9 +3364,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     ServiceData.setPeer(fullKey, actualName, serviceType);
   }
 
-  public Plan getPlan() {
+  public static Plan getPlan() {
+    Runtime runtime = Runtime.getInstance();
+    return runtime.getLocalPlan();
+  }
+  
+  public Plan getLocalPlan() {
     return plan;
   }
+  
 
   static public void clear() {
     Runtime runtime = Runtime.getInstance();
@@ -3795,6 +3805,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         log.info("could not find config in file trying default of type {}", type);
         // find a default plan for this name and type
         Plan newPlan = MetaData.getDefault(name, type);
+        if (newPlan == null) {
+          log.info("here");
+        }
+        
         for (String scs : newPlan.getConfig().keySet()) {
           newPlan.getConfig().get(scs).state = "LOADED";
         }
