@@ -28,13 +28,13 @@ public class InMoov2HeadMeta extends MetaData {
   }
 
   @Override
-  public Plan getDefault(String name, Boolean autoStart) {
+  public Plan getDefault(String name) {
 
     InMoov2HeadConfig head = new InMoov2HeadConfig();
     
     Plan plan = new Plan(name);
     // load default peers from meta here
-    plan.putPeers(name, peers, autoStart);
+    plan.putPeers(name, peers);
 
 
     // RuntimeConfig runtime = new RuntimeConfig();
@@ -185,7 +185,7 @@ public class InMoov2HeadMeta extends MetaData {
     eyelidRight.sweepMax = null;
     eyelidRight.sweepMin = null;
     
-    plan.addConfig(head, autoStart);
+    plan.addConfig(head);
 
     return plan;
 

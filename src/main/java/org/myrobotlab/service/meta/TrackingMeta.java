@@ -45,27 +45,21 @@ public class TrackingMeta extends MetaData {
    * @return map of peer names to their appropriate config
    */
   @Override
-  public Plan getDefault(String name, Boolean autoStart) {
+  public Plan getDefault(String name) {
 
     Plan plan = new Plan(name);
     // load default peers from meta here
-    plan.putPeers(name, peers, autoStart);
+    plan.putPeers(name, peers);
     // NOTE: you want to do any aliasing at the beginning
     // plan.setPeerName("tilt", name + ".head.neck");
 
     
     TrackingConfig tracking = new TrackingConfig();
 
-    // set local names and config
-    // FIXME - add a controller ... or not ?
-    String controllerName = name + ".controller";
-    // String controller = Runtime.getAlias(name + ".controller");
-    // FIXME - do i need aliases here or does the parent service modify all this
-    // (probably)
+    tracking.controller = name + ".controller";
     tracking.cv = name + ".cv";
     tracking.pan = name + ".pan";
     tracking.tilt = name + ".tilt";
-    // tracking.tilt = name + ".head.neck";
     tracking.pid = name + ".pid";
     tracking.enabled = false;
 
@@ -85,13 +79,13 @@ public class TrackingMeta extends MetaData {
     pan.pin = "7";
     pan.autoDisable = true;
     pan.idleTimeout = 3000;
-    pan.controller = controllerName;
+    pan.controller = tracking.controller;
 
     ServoConfig tilt = (ServoConfig) plan.getPeerConfig("tilt");
     tilt.pin = "5";
     tilt.autoDisable = true;
     tilt.idleTimeout = 3000;
-    tilt.controller = controllerName;
+    tilt.controller = tracking.controller;
 
     PidConfig pid = (PidConfig) plan.getPeerConfig("pid");
     PidData panData = new PidData();
@@ -108,7 +102,7 @@ public class TrackingMeta extends MetaData {
 
     pid.data.put(tracking.tilt, tiltData);
     
-    plan.addConfig(tracking, autoStart);
+    plan.addConfig(tracking);
 
     return plan;
   }
