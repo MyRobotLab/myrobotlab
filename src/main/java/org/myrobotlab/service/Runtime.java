@@ -131,11 +131,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   Plan plan = new Plan("runtime");
 
   /**
-   * plan which was last built
-   */
-  Plan lastPlan = null;
-
-  /**
    * thread for non-blocking install of services
    */
   static private transient Thread installerThread = null;
@@ -2097,11 +2092,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return si;
   }
 
-  public static ServiceConfig load(String name) {
+  public static Plan load(String name) {
     return load(name, null);
   }
 
-  public static ServiceConfig load(String name, String type) {
+  public static Plan load(String name, String type) {
     Runtime runtime = Runtime.getInstance();
     try {
       return runtime.loadService(name, type, null, null);
@@ -3369,15 +3364,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return plan;
   }
 
-  public Plan getLastPlan() {
-    return lastPlan;
-  }
-
   static public void clear() {
     Runtime runtime = Runtime.getInstance();
-    runtime.lastPlan = runtime.plan;
     runtime.plan = new Plan("runtime");
-
   }
 
   public static MetaData getMetaData(String serviceName, String serviceType) {
@@ -3757,7 +3746,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @return
    * @throws IOException
    */
-  private ServiceConfig loadService(String name, String type, Boolean overwrite, Boolean overwritePeers) throws IOException {
+  private Plan loadService(String name, String type, Boolean overwrite, Boolean overwritePeers) throws IOException {
     // FIXME - get default if file doesn't exist !
     // FIXME - special handling for runtime
     // ServiceInterface si = create(name);
@@ -3773,18 +3762,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       log.info("no new name or type information provided - we will use existing plan");
       ServiceConfig sc = plan.get("runtime");
       if (sc != null) {
-        log.info("found runtime config");
-        return sc;
+        log.info("found runtime config");        
       } else {
         log.warn("did not find runtime config");
-        return null;
       }
+      return plan;
     }
 
     ServiceConfig originalSc = plan.get(name);
     if (!overwrite && originalSc != null) {
       log.info("will not overwrite and plan entry already exists for {}", name);
-      return originalSc;
+      return plan;
     }
 
     ServiceConfig sc = readServiceConfig(name);
@@ -3792,8 +3780,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     if (sc != null) {
       log.info("{} found yml file - loading into plan", name);
       sc.state = "LOADED";
-      runtime.plan.put(name, sc);
-      return sc;
+      plan.put(name, sc);
+      return plan;
     } else {
       log.info("no {}.yml found", name);
     }
@@ -3806,20 +3794,20 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       } else {
         log.info("could not find config in file trying default of type {}", type);
         // find a default plan for this name and type
-        Plan plan = MetaData.getDefault(name, type);
-        for (String scs : plan.getConfig().keySet()) {
-          plan.getConfig().get(scs).state = "LOADED";
+        Plan newPlan = MetaData.getDefault(name, type);
+        for (String scs : newPlan.getConfig().keySet()) {
+          newPlan.getConfig().get(scs).state = "LOADED";
         }
 
         // minimally, the service we've requested the plan for should have
         // that service's config
-        sc = plan.get(name);
+        sc = newPlan.get(name);
 
-        runtime.plan.merge(plan);
+        plan.merge(newPlan);
       }
     }
 
-    return sc;
+    return plan;
   }
   
   public ServiceConfig readServiceConfig(String name) { 

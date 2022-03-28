@@ -1354,8 +1354,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public ServiceConfig load() throws IOException {
-    ServiceConfig config = Runtime.load(getName(), getClass().getSimpleName());
-    return config;
+    Plan plan = Runtime.load(getName(), getClass().getSimpleName());
+    return plan.get(getName());
   }
 
   public void out(Message msg) {
@@ -1557,7 +1557,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return false;
   }
 
-  @Deprecated /* peers are dead */
   public ServiceInterface getPeer(String peerKey) {
     String peerName = serviceType.getPeerActualName(peerKey);
     return Runtime.getService(peerName);

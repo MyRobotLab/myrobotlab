@@ -196,4 +196,8 @@ public class Plan {
     return peers;
   }
 
+  public int size() {
+    return config.size();
+  }
+
 }
