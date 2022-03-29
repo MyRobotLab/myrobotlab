@@ -23,6 +23,7 @@ import org.myrobotlab.service.config.ArduinoConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.WebGuiConfig;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
@@ -103,10 +104,11 @@ public class ServiceLifeCycleTest extends AbstractTest {
     plan = Runtime.load("i02", "InMoov2");
 
     log.info("plan has {} services", plan.size());
-    assertEquals(68, plan.size());
+    MetaData md = MetaData.get("InMoov2");
+    assertTrue(md.getPeers().size() < plan.size());
 
     List<ServiceInterface> sis = Runtime.getServices();
-    assertTrue(sis.size() < 68);
+    assertTrue(sis.size() < plan.size());
 
     InMoov2 i02 = (InMoov2) Runtime.start("i02");
     assertNotNull(i02);
