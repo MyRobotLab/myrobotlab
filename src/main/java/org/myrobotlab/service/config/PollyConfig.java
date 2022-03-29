@@ -1,5 +1,5 @@
 package org.myrobotlab.service.config;
 
-public class PollyConfig extends AbstractSpeechSynthesisConfig {
+public class PollyConfig extends SpeechSynthesisConfig {
 
 }

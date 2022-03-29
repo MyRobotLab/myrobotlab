@@ -19,7 +19,7 @@ import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.AudioFile;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Security;
-import org.myrobotlab.service.config.AbstractSpeechSynthesisConfig;
+import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
@@ -1099,7 +1099,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 //  }
 
   public ServiceConfig apply(ServiceConfig c) {
-    AbstractSpeechSynthesisConfig config = (AbstractSpeechSynthesisConfig) c;
+    SpeechSynthesisConfig config = (SpeechSynthesisConfig) c;
 
     setMute(config.mute);
 
@@ -1138,7 +1138,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   // Hacky way to get normalized code to work - inheritance not so helpful here
-  public AbstractSpeechSynthesisConfig getConfig(AbstractSpeechSynthesisConfig config) {
+  public SpeechSynthesisConfig getConfig(SpeechSynthesisConfig config) {
     config.mute = mute;
     config.blocking = blocking;
     if (substitutions != null && substitutions.size() > 0) {

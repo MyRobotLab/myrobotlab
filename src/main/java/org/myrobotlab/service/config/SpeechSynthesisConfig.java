@@ -2,7 +2,7 @@ package org.myrobotlab.service.config;
 
 import java.util.Map;
 
-abstract public class AbstractSpeechSynthesisConfig extends ServiceConfig {
+public class SpeechSynthesisConfig extends ServiceConfig {
 
   public boolean mute;
   public boolean blocking;

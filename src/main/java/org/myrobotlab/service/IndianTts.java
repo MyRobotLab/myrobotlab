@@ -8,7 +8,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
-import org.myrobotlab.service.config.AbstractSpeechSynthesisConfig;
+import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.config.IndianTtsConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
@@ -102,7 +102,7 @@ public class IndianTts extends AbstractSpeechSynthesis {
 
   @Override
   public ServiceConfig getConfig() {
-    IndianTtsConfig config = (IndianTtsConfig) super.getConfig((AbstractSpeechSynthesisConfig) new IndianTtsConfig());
+    IndianTtsConfig config = (IndianTtsConfig) super.getConfig((SpeechSynthesisConfig) new IndianTtsConfig());
     return config;
   }
 

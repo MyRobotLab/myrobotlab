@@ -486,8 +486,10 @@ public class InMoov2Config extends ServiceConfig {
   public String imageDisplay;
   public String chatBot;
   public String ear;
+  public String fsm;
   public String htmlFilter;
   public String mouth;
+  public String mouthControl;
   public String leftArm;
   public String leftHand;
   public String rightArm;
@@ -501,6 +503,5 @@ public class InMoov2Config extends ServiceConfig {
   public String servoMixer;
   public String opencv;
   public String audioPlayer;
-  public String mouthControl;
     
 }

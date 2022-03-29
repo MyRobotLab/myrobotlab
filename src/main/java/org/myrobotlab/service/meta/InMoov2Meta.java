@@ -2,6 +2,7 @@ package org.myrobotlab.service.meta;
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Pid.PidData;
+import org.myrobotlab.service.config.FiniteStateMachineConfig;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.NeoPixelConfig;
 import org.myrobotlab.service.config.PidConfig;
@@ -82,6 +83,8 @@ public class InMoov2Meta extends MetaData {
     addPeer("right", "Arduino");
     addPeer("controller3", "Arduino");
     addPeer("controller4", "Arduino");
+    
+    addPeer("fsm", "FiniteStateMachine");
   }
 
   @Override
@@ -97,6 +100,7 @@ public class InMoov2Meta extends MetaData {
     inmoov.chatBot = name + ".chatBot";
     inmoov.ear = name + ".ear";
     inmoov.eyeTracking = name + ".eyeTracking";
+    inmoov.fsm = name + ".fsm";
     inmoov.head = name + ".head";
     inmoov.headTracking = name + ".headTracking"; 
     inmoov.htmlFilter = name + ".htmlFilter";
@@ -116,6 +120,23 @@ public class InMoov2Meta extends MetaData {
     inmoov.torso = name + ".torso";
     inmoov.ultrasonicRight = name + ".ultrasonicRight";
     inmoov.ultrasonicLeft = name + ".ultrasonicLeft";
+    
+    FiniteStateMachineConfig fsm = (FiniteStateMachineConfig) plan.getPeerConfig("fsm");
+    fsm.states.add("start"); // fist time
+    fsm.states.add("init"); // fist time
+    fsm.states.add("identify_user"); // fist time
+    fsm.states.add("detected_face"); // fist time
+    fsm.states.add("sleeping"); // pir running ? wake word ?
+    fsm.states.add("executing_gesture"); // gesture running
+    fsm.states.add("safe_random_movements");  // random movements
+    fsm.states.add("unsafe_random_movements");  // random movements
+    fsm.states.add("tracking"); // tracking
+    fsm.states.add("power_down"); // process of shutting down stuff
+    
+    fsm.transitions.add(new FiniteStateMachineConfig.Transition("start","first_time","init"));
+    fsm.transitions.add(new FiniteStateMachineConfig.Transition("init","first_time","identify_user"));
+    fsm.transitions.add(new FiniteStateMachineConfig.Transition("detected_face","first_time","identify_user"));
+    
     
     // == Peer - headTracking =============================
     TrackingConfig headTracking = (TrackingConfig) plan.getPeerConfig("headTracking");

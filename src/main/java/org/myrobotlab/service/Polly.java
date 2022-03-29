@@ -9,7 +9,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
-import org.myrobotlab.service.config.AbstractSpeechSynthesisConfig;
+import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.config.PollyConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
@@ -365,7 +365,7 @@ public class Polly extends AbstractSpeechSynthesis {
 
   @Override
   public ServiceConfig getConfig() {
-    PollyConfig config = (PollyConfig) super.getConfig((AbstractSpeechSynthesisConfig) new PollyConfig());
+    PollyConfig config = (PollyConfig) super.getConfig((SpeechSynthesisConfig) new PollyConfig());
     return config;
   }
 

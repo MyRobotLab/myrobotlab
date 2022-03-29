@@ -64,7 +64,6 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;

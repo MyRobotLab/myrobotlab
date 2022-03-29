@@ -33,7 +33,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
-import org.myrobotlab.service.config.AbstractSpeechSynthesisConfig;
+import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.VoiceRssConfig;
 import org.myrobotlab.service.data.AudioData;
@@ -133,7 +133,7 @@ public class VoiceRss extends AbstractSpeechSynthesis {
 
   @Override
   public ServiceConfig getConfig() {
-    VoiceRssConfig config = (VoiceRssConfig) super.getConfig((AbstractSpeechSynthesisConfig) new VoiceRssConfig());
+    VoiceRssConfig config = (VoiceRssConfig) super.getConfig((SpeechSynthesisConfig) new VoiceRssConfig());
     return config;
   }
 

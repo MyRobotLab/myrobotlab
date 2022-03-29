@@ -1,6 +1,6 @@
 package org.myrobotlab.service.config;
 
-public abstract class AbstractSpeechRecognizerConfig extends ServiceConfig {
+public class SpeechRecognizerConfig extends ServiceConfig {
 
   public boolean listening;
   public String[] textListeners;

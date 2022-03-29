@@ -41,7 +41,7 @@ import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.sensor.EncoderPublisher;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.config.AbstractMotorConfig;
+import org.myrobotlab.service.config.GeneralMotorConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AnalogData;
 import org.myrobotlab.service.data.PinData;
@@ -454,7 +454,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   public ServiceConfig apply(ServiceConfig c) {
-    AbstractMotorConfig config = (AbstractMotorConfig) c;
+    GeneralMotorConfig config = (GeneralMotorConfig) c;
     
     if (config.minIn != null) {
       mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);

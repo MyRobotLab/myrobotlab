@@ -12,7 +12,7 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
-import org.myrobotlab.service.config.AbstractSpeechSynthesisConfig;
+import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.config.LocalSpeechConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
@@ -377,7 +377,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
   @Override
   public ServiceConfig getConfig() {
-    LocalSpeechConfig config = (LocalSpeechConfig) super.getConfig((AbstractSpeechSynthesisConfig) new LocalSpeechConfig());
+    LocalSpeechConfig config = (LocalSpeechConfig) super.getConfig((SpeechSynthesisConfig) new LocalSpeechConfig());
     return config;
   }
 
