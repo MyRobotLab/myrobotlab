@@ -483,7 +483,6 @@ public class InMoov2Config extends ServiceConfig {
   public String head;
   public String pid;
   public String eyeTracking;
-  // public String cv; which one ?
   public String imageDisplay;
   public String chatBot;
   public String ear;
@@ -494,6 +493,7 @@ public class InMoov2Config extends ServiceConfig {
   public String rightArm;
   public String rightHand;
   public String torso;
+  public String random;
   public String simulator;
   public String ultrasonicRight;
   public String ultrasonicLeft;

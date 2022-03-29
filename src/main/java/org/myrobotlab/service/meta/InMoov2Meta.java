@@ -93,29 +93,29 @@ public class InMoov2Meta extends MetaData {
     // load default peers from meta here
     plan.putPeers(name, peers);
 
-
-    // == Peer - head ==========================================
-    inmoov.head = name + ".head";
-    inmoov.torso = name + ".torso";
-    inmoov.leftArm = name + ".leftArm";
-    inmoov.rightArm = name + ".rightArm";
-    inmoov.leftHand = name + ".leftHand";
-    inmoov.rightHand = name + ".rightHand";
-    inmoov.opencv = name + ".opencv";
-    inmoov.headTracking = name + ".headTracking";
+    inmoov.audioPlayer = name + ".audioPlayer";
+    inmoov.chatBot = name + ".chatBot";
+    inmoov.ear = name + ".ear";
     inmoov.eyeTracking = name + ".eyeTracking";
-
-//    addPeerConfig(name, "head", autoStart);
-//    addPeerConfig(name, "torso", autoStart);
-//    addPeerConfig(name, "leftArm", autoStart);
-//    addPeerConfig(name, "rightArm", autoStart);
-//    addPeerConfig(name, "leftHand", autoStart);
-//    addPeerConfig(name, "rightHand", autoStart);
-//    addPeerConfig(name, "opencv", autoStart);
-//
-//    addPeerConfig(name, "left", autoStart);
-//    addPeerConfig(name, "right", autoStart);
-
+    inmoov.head = name + ".head";
+    inmoov.headTracking = name + ".headTracking"; 
+    inmoov.htmlFilter = name + ".htmlFilter";
+    inmoov.imageDisplay = name + ".imageDisplay";
+    inmoov.leftArm = name + ".leftArm";
+    inmoov.leftHand = name + ".leftHand";
+    inmoov.mouth = name + ".mouth";
+    inmoov.mouthControl = name + ".mouthControl";    
+    inmoov.opencv = name + ".opencv";
+    inmoov.pid = name + ".pid";
+    inmoov.pir = name + ".pir";
+    inmoov.random = name + ".random";
+    inmoov.rightArm = name + ".rightArm";
+    inmoov.rightHand = name + ".rightHand";
+    inmoov.servoMixer = name + ".servoMixer";
+    inmoov.simulator = name + ".simulator";
+    inmoov.torso = name + ".torso";
+    inmoov.ultrasonicRight = name + ".ultrasonicRight";
+    inmoov.ultrasonicLeft = name + ".ultrasonicLeft";
     
     // == Peer - headTracking =============================
     TrackingConfig headTracking = (TrackingConfig) plan.getPeerConfig("headTracking");
@@ -166,6 +166,7 @@ public class InMoov2Meta extends MetaData {
     neopixel.red = 12;
     neopixel.green = 180;
     neopixel.blue = 212;
+    neopixel.pixelCount = 16;
     neopixel.currentAnimation = "Ironman";
 
     // remove undesired defaults from our default
@@ -183,6 +184,7 @@ public class InMoov2Meta extends MetaData {
     plan.removeConfig(name + ".eyeTracking.controller.serial");
     plan.removeConfig(name + ".eyeTracking.cv");
 
+    inmoov.autoStartPeers = false;
     plan.addConfig(inmoov);
     
     RuntimeConfig runtime = new RuntimeConfig();

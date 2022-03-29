@@ -25,6 +25,7 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.WebGuiConfig;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
@@ -2565,14 +2566,18 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       Platform.setVirtual(true);
       // Runtime.start("s01", "Servo");
       Runtime.start("intro", "Intro");
+      InMoov2 i01 = (InMoov2)Runtime.start("i01", "InMoov2");
+      Plan plan = Runtime.load("webgui", "WebGui");
+      WebGuiConfig webgui = (WebGuiConfig)plan.get("webgui");
+      webgui.autoStartBrowser = false;
+      Runtime.start("webgui");
 
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.startService();
-
+      boolean done = true;
+      if (done) {
+        return;
+      }
+      
       Random random = (Random) Runtime.start("random", "Random");
-
-      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
 
       random.addRandom(3000, 8000, "i01", "setLeftArmSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
       random.addRandom(3000, 8000, "i01", "setRightArmSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
@@ -2594,10 +2599,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
       random.save();
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       // i01.setVirtual(false);
       // i01.displayFullScreen("https://upload.wikimedia.org/wikipedia/commons/8/87/InMoov_Wheel_1.jpg");
