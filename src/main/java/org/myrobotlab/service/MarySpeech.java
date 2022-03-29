@@ -15,7 +15,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
-import org.myrobotlab.service.config.AbstractSpeechSynthesisConfig;
+import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.config.MarySpeechConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
@@ -230,7 +230,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
 
   @Override
   public ServiceConfig getConfig() {
-    MarySpeechConfig config = (MarySpeechConfig) super.getConfig((AbstractSpeechSynthesisConfig) new MarySpeechConfig());
+    MarySpeechConfig config = (MarySpeechConfig) super.getConfig((SpeechSynthesisConfig) new MarySpeechConfig());
     return config;
   }
 
