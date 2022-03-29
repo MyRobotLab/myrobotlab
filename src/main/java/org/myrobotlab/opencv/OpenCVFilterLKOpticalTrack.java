@@ -55,6 +55,7 @@ import org.bytedeco.opencv.opencv_core.TermCriteria;
 import org.myrobotlab.cv.TrackingPoint;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Point;
+import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 /**
@@ -101,7 +102,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
   protected Map<String, Integer> nameToIndex = new HashMap<>();
   protected int winSize = 15;
   protected long currentPntCnt;
-  transient Mat zeroPoints = toMat(IplImage.create(new CvSize().width(0).height(0), 32, 2));
+  transient Mat zeroPoints = OpenCV.toMat(IplImage.create(new CvSize().width(0).height(0), 32, 2));
   transient Mat cornersA = null;
   transient Mat cornersB = null;
   transient Mat featureErrors = null;
@@ -153,7 +154,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     FloatIndexer idx = toResize.createIndexer();
     CvSize sz = new CvSize();
     sz.width(1).height((int) idx.size(0) + amount);
-    Mat tmp = toMat(IplImage.create(sz, 32, 2));
+    Mat tmp = OpenCV.toMat(IplImage.create(sz, 32, 2));
     FloatIndexer newIdx = tmp.createIndexer();
     // copy contents
     for (int i = 0; i < idx.size(0); i++) {
@@ -211,12 +212,12 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
     // load 1st prev image - must have at least 2 images
     if (matA == null) {
-      matA = toMat(grayImgA);
+      matA = OpenCV.toMat(grayImgA);
       return image;
     }
 
     // current image
-    matB = toMat(grayImgB);
+    matB = OpenCV.toMat(grayImgB);
 
     if (samplePoint != null) {
       addPoint(samplePoint.x, samplePoint.y);

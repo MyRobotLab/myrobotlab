@@ -499,7 +499,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     UUID randValue = UUID.randomUUID();
     String filename = trainingDir + File.separator + label + File.separator + randValue + ".png";
     // TODO: we need to be able to write a unicode filename with a path here..
-    BufferedImage buffImg = toBufferedImage(dFaceMat);
+    BufferedImage buffImg = OpenCV.toBufferedImage(dFaceMat);
     ImageIO.write(buffImg, "png", new File(filename));
     log.info("Saved Training image {} ", filename);
   }
@@ -507,11 +507,11 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   private Frame makeGrayScale(IplImage image) {
     IplImage imageBW = IplImage.create(image.width(), image.height(), 8, 1);
     cvCvtColor(image, imageBW, CV_BGR2GRAY);
-    return toFrame(imageBW);
+    return OpenCV.toFrame(imageBW);
   }
 
   private Mat makeGrayScaleMat(IplImage image) {
-    return toMat(makeGrayScale(image));
+    return OpenCV.toMat(makeGrayScale(image));
   }
 
   private ArrayList<DetectedFace> extractDetectedFaces(Mat bwImgMat) {

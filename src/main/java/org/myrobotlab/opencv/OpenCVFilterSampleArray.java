@@ -31,6 +31,7 @@ import java.awt.image.BufferedImage;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.image.ColoredPoint;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 public class OpenCVFilterSampleArray extends OpenCVFilter {
@@ -62,7 +63,7 @@ public class OpenCVFilterSampleArray extends OpenCVFilter {
   @Override
   public IplImage process(IplImage image) {
 
-    frameBuffer = toBufferedImage(image);// image.getBufferedImage();
+    frameBuffer = OpenCV.toBufferedImage(image);// image.getBufferedImage();
 
     points[0].x = image.width() / 2;
     points[0].y = image.height() - 20;

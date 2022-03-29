@@ -51,6 +51,7 @@ import org.bytedeco.opencv.opencv_core.CvRect;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 // TODO - http://opencv.willowgarage.com/wiki/FastMatchTemplate
@@ -140,7 +141,7 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
       cvSetImageROI(image, rect);
       cvCopy(image, template, null);
       cvResetImageROI(image);
-      invoke("publishTemplate", name, toBufferedImage(template), 0);
+      invoke("publishTemplate", name, OpenCV.toBufferedImage(template), 0);
       invoke("publishIplImageTemplate", template); // FYI -
       // IplImage
       // is not

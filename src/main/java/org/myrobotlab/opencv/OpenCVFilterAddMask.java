@@ -71,7 +71,7 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
 
     if (transparency != null) {
       transparency = OpenCVFilter.loadMat("transparent-bubble.png");
-      Mat targetImage = toMat(image.clone()); // toMat(image);
+      Mat targetImage = OpenCV.toMat(image.clone()); // toMat(image);
       Mat resultImage = targetImage.clone();
       // IplImage src = cvCreateImage(cvGetSize(srcColor), IPL_DEPTH_8U, 1);
       // blendFast(transparency, targetImage, resultImage);
@@ -90,7 +90,7 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
        log.info("here");
        * </pre>
        */
-      return toImage(resultImage.clone());
+      return OpenCV.toImage(resultImage.clone());
     }
 
     return image;

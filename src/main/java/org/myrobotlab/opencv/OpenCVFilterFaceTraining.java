@@ -78,6 +78,7 @@ import org.bytedeco.opencv.opencv_face.FaceRecognizer;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
+import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 public class OpenCVFilterFaceTraining extends OpenCVFilter {
@@ -352,7 +353,7 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
 
           // END STANDARDIZE SUPERVISORS IMAGES INTO CACHE_DIR
 
-          images.put(counter, toMat(merged));
+          images.put(counter, OpenCV.toMat(merged));
           log.warn("{} {}-{}", totalImageFiles, label, counter);
           labelsBuf.put(counter, label.hashCode());
           idToLabelMap.put(label.hashCode(), label);
@@ -577,7 +578,7 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
     if (cascade != null) {
       // CvSeq faces = cvHaarDetectObjects(image, cascade, storage, scaleFactor,
       // minNeighbors, option);
-      Mat imageMat = toMat(image);
+      Mat imageMat = OpenCV.toMat(image);
       RectVector vec = new RectVector();
       cascade.detectMultiScale(imageMat, vec);
 
@@ -664,7 +665,7 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
                 label.close();
                 return image;
               }
-              classifier.recognizer.predict(toMat(merged), label, confidence);
+              classifier.recognizer.predict(OpenCV.toMat(merged), label, confidence);
 
               // IF HIGH ENOUGH CONFIDENCE GO TO APPROPRIATE DIRECTORIES
               if (confidence.get() > 50) {

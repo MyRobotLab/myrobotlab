@@ -46,6 +46,7 @@ import javax.swing.ImageIcon;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.Java2DFrameConverter;
+import org.bytedeco.javacv.Java2DFrameUtils;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -212,8 +213,6 @@ public abstract class OpenCVFilter implements Serializable, CvFilter {
   protected boolean enabled = true;
 
   protected int height;
-
-  transient protected Java2DFrameConverter jconverter = new Java2DFrameConverter();
 
   final public String name;
 
@@ -448,93 +447,14 @@ public abstract class OpenCVFilter implements Serializable, CvFilter {
   public static CanvasFrame show(final IplImage image, final String title) {
     CanvasFrame canvas = new CanvasFrame(title);
     // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    canvas.showImage(toFrame(image));
+    canvas.showImage(OpenCV.toFrame(image));
     return canvas;
   }
 
   public void show(final Mat image, final String title) {
     CanvasFrame canvas = new CanvasFrame(title);
     // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    canvas.showImage(toFrame(image));
-  }
-
-  /**
-   * converting IplImages to BufferedImages
-   * 
-   * @param image
-   *          the iplimage to convert
-   * @return the buffered image
-   */
-  public BufferedImage toBufferedImage(IplImage image) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    BufferedImage img = jconverter.convert(converterToImage.convert(image));
-    //converterToImage.close();
-    return img;
-  }
-
-  public BufferedImage toBufferedImage(Mat image) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    BufferedImage img = jconverter.convert(converterToImage.convert(image));
-    //converterToImage.close();
-    return img;
-  }
-
-  public static Frame toFrame(IplImage image) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    Frame f = converterToImage.convert(image);;
-    //converterToImage.close();
-    return f;
-  }
-
-  public Frame toFrame(Mat image) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    Frame f = converterToImage.convert(image);
-    //converterToImage.close();
-    return f;
-  }
-
-  /**
-   * convert BufferedImages to IplImages
-   * 
-   * @param src
-   *          the buffered image to convert
-   * @return the ipl image resulting
-   */
-  public IplImage toImage(BufferedImage src) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    IplImage img = converterToImage.convert(jconverter.convert(src));
-    //converterToImage.close();
-    return img; 
-  }
-
-  public IplImage toImage(Frame image) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    IplImage img = converterToImage.convertToIplImage(image);
-    //converterToImage.close();    
-    return img; 
-  }
-
-  public IplImage toImage(Mat image) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
-    IplImage img = converterToImage.convert(converterToMat.convert(image));
-    //converterToImage.close();
-    //converterToMat.close();
-    return img;
-  }
-
-  public static Mat toMat(Frame image) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    Mat m = converterToImage.convertToMat(image);
-    //converterToImage.close();
-    return m;
-  }
-
-  public static Mat toMat(IplImage image) {
-    OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
-    Mat mat = converterToMat.convert(converterToMat.convert(image));
-    // converterToMat.close();
-    return mat;
+    canvas.showImage(OpenCV.toFrame(image));
   }
 
   public boolean isEnabled() {

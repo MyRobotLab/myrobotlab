@@ -113,6 +113,8 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetectDNN;
 import org.myrobotlab.opencv.OpenCVFilterKinectDepth;
+import org.myrobotlab.opencv.OpenCVFilterLKOpticalTrack;
+import org.myrobotlab.opencv.OpenCVFilterMiniXception;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
@@ -434,11 +436,17 @@ public class OpenCV extends AbstractComputerVision {
     return converter.getBufferedImage(frame, 1);
   }
 
-  public static BufferedImage toBufferedImage(Frame inputFrame) {
+  static public BufferedImage toBufferedImage(Frame inputFrame) {
     Java2DFrameConverter converter = new Java2DFrameConverter();
     return converter.getBufferedImage(inputFrame);
   }
 
+  static public BufferedImage toBufferedImage(Mat image) {
+    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
+    Java2DFrameConverter jconverter = new Java2DFrameConverter();
+    return jconverter.convert(converterToImage.convert(image));
+  }
+  
   static public Frame toFrame(IplImage image) {
     OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
     return converterToImage.convert(image);
@@ -2152,11 +2160,18 @@ public class OpenCV extends AbstractComputerVision {
       Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
       LoggingFactory.init("INFO");
 
-      Runtime.getInstance().load();
+     // Runtime.getInstance().load();
 
       // Runtime.start("python", "Python");
       OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
 
+//      OpenCVFilterLKOpticalTrack lk = new OpenCVFilterLKOpticalTrack("lk");
+//      cv.addFilter(lk);
+      
+      OpenCVFilterMiniXception mini = new OpenCVFilterMiniXception("mini");
+      cv.addFilter(mini);
+      
+      
       // OpenCVFilterTextDetector td = new OpenCVFilterTextDetector("td");
       // cv.addFilter(td);
 
@@ -2172,7 +2187,7 @@ public class OpenCV extends AbstractComputerVision {
       // Runtime.start("gui", "SwingGui");
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
+      webgui.autoStartBrowser(true);
       webgui.startService();
 
       // FFmpegFrameRecorder test = new

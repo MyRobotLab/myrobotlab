@@ -38,15 +38,15 @@ import org.slf4j.Logger;
 public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
 
   private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterMiniXception.class.getCanonicalName());
+  public transient final static Logger log = LoggerFactory.getLogger(OpenCVFilterMiniXception.class.getCanonicalName());
 
   private transient Deeplearning4j dl4j;
-  private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
+  private transient CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
   protected Boolean running;
 
   public Map<String, Double> lastResult = null;
   private volatile IplImage lastImage = null;
-  transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
+//  transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 
   // the additional border around the face detection to include in the emotion
   // classification. (in pixels)
@@ -117,7 +117,7 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
 
   private IplImage extractSubImage(Mat inputMat, Rect boundingBox) {
     Mat cropped = new Mat(inputMat, boundingBox);
-    IplImage image = converterToIpl.convertToIplImage(converterToIpl.convert(cropped));
+    IplImage image = OpenCV.toImage(cropped);
     return image;
   }
 
