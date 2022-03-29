@@ -365,6 +365,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    */
   @Override
   public void attach(Attachable attachable) {
+    if (attachable == null) {
+      return;
+    }
     if (attachable instanceof SpeechRecognizer) {
       attachSpeechRecognizer((SpeechRecognizer) attachable);
     } else if (attachable instanceof TextPublisher) {
