@@ -208,10 +208,6 @@ public class InMoov2Meta extends MetaData {
     inmoov.autoStartPeers = false;
     plan.addConfig(inmoov);
     
-    RuntimeConfig runtime = new RuntimeConfig();
-    runtime.registry = new String[]{name};
-    plan.put("runtime", runtime);
-
     return plan;
   }
 

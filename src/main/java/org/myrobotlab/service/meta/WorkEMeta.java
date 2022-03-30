@@ -1,6 +1,8 @@
 package org.myrobotlab.service.meta;
 
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.WorkEConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
@@ -58,5 +60,18 @@ public class WorkEMeta extends MetaData {
     addCategory("robot");
 
   }
+  
+  @Override
+  public Plan getDefault(String name) {
 
+    WorkEConfig worke = new WorkEConfig();
+    
+    Plan plan = new Plan(name);
+    // load default peers from meta here
+    plan.putPeers(name, peers);
+    worke.autoStartPeers = false;
+    plan.addConfig(worke);
+    
+    return plan;
+  }
 }
