@@ -44,10 +44,6 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 
 import org.bytedeco.javacv.CanvasFrame;
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.Java2DFrameConverter;
-import org.bytedeco.javacv.Java2DFrameUtils;
-import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.myrobotlab.cv.CvFilter;
@@ -176,16 +172,6 @@ public abstract class OpenCVFilter implements Serializable, CvFilter {
    * number of channels of incoming image
    */
   protected int channels;
-
-  /**
-   * converters for the filter
-   */
-  // transient protected OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-
-  /**
-   * converter for the filter
-   */
-  // transient protected OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
 
   /**
    * reference to the last OpenCVData processed and the one this filter will
@@ -451,7 +437,7 @@ public abstract class OpenCVFilter implements Serializable, CvFilter {
     return canvas;
   }
 
-  public void show(final Mat image, final String title) {
+  public static void show(final Mat image, final String title) {
     CanvasFrame canvas = new CanvasFrame(title);
     // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     canvas.showImage(OpenCV.toFrame(image));

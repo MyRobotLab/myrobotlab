@@ -39,15 +39,11 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
 
   private static final long serialVersionUID = 1L;
   public transient final static Logger log = LoggerFactory.getLogger(OpenCVFilterMiniXception.class.getCanonicalName());
-
   private transient Deeplearning4j dl4j;
   private transient CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
   protected Boolean running;
-
   public Map<String, Double> lastResult = null;
   private volatile IplImage lastImage = null;
-//  transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
-
   // the additional border around the face detection to include in the emotion
   // classification. (in pixels)
   private int boxSlop = 10;
@@ -91,7 +87,6 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
       return image;
     }
     // here we want to update the lastImage as the one with the bounding box.
-
     List<Rectangle> boxes = data.getBoundingBoxArray();
     // we should grab the center of the first box..
     // crop a square around that center.. and set that as the last image to pass
