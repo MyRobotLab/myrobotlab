@@ -77,7 +77,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   public RecognizerType recognizerType = RecognizerType.FISHER;
   // when in training mode, this is the name to associate with the face.
   public String trainName = null;
-  private FaceRecognizer faceRecognizer;
+  transient private FaceRecognizer faceRecognizer;
   private boolean trained = false;
   // the directory to store the training images.
   private String trainingDir = "training";
@@ -86,7 +86,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   // We read in the face filter when training the first time, and use it for all
   // subsequent
   // training and for masking images prior to comparison.
-  private Mat facemask = null;
+  transient private Mat facemask = null;
 
   // cannot be this because - gets changed to src/main/resources/resource/OpenCV
   // if src is present !!!!
@@ -94,12 +94,12 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   // FileIO.gluePathsForwardSlash(Service.getResourceDir(OpenCV.class),"haarcascades");
   public String cascadeDir = "resource/OpenCV/haarcascades";
 
-  private CascadeClassifier faceCascade;
-  private CascadeClassifier eyeCascade;
+  transient private CascadeClassifier faceCascade;
+  transient private CascadeClassifier eyeCascade;
   // private CascadeClassifier mouthCascade;
   // These are cv converts that help us convert between mat,frame and iplimage
-  private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
-  private CvFont fontWarning = cvFont(CV_FONT_HERSHEY_PLAIN);
+  transient private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
+  transient private CvFont fontWarning = cvFont(CV_FONT_HERSHEY_PLAIN);
   private boolean debug = false;
   // KW: I made up this word, but I think it's fitting.
   private boolean dePicaso = true;

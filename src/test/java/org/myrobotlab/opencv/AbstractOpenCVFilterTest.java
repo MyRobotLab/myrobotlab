@@ -13,6 +13,7 @@ import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.test.AbstractTest;
@@ -40,7 +41,11 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
     List<IplImage> inputs = createTestImages();
     numFrames = inputs.size();
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
+    
     for (OpenCVFilter filter : filters) {
+      // Verify that the filters can be serialized!
+      String json = CodecUtils.toJson(filter);
+      assertNotNull(json);
       filter.setOpenCV(opencv);
     }
     
