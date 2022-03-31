@@ -58,12 +58,11 @@ public class OpenCVFilterSolr extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
   transient public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSolr.class);
 
-  private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
-  private CvFont fontWarning = cvFont(CV_FONT_HERSHEY_PLAIN);
+  transient private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
 
   private String formattedSearchResult = "No Result";
 
-  private Solr solr = null;
+  transient private Solr solr = null;
   private String solrUrl = "http://localhost:8983/solr/wikipedia";
 
   public OpenCVFilterSolr() {

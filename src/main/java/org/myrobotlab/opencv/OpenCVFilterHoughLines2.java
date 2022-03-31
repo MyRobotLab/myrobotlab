@@ -60,14 +60,14 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
   double lowThreshold = 0.0;
   double highThreshold = 50.0;
   int apertureSize = 5;
-  Pointer storage = null;
+  transient Pointer storage = null;
   transient IplImage inlines = null;
 
-  CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
+  transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
 
-  CvPoint p0 = cvPoint(0, 0);
+  transient CvPoint p0 = cvPoint(0, 0);
 
-  CvPoint p1 = cvPoint(0, 0);
+  transient CvPoint p1 = cvPoint(0, 0);
 
   public OpenCVFilterHoughLines2(String name) {
     super(name);

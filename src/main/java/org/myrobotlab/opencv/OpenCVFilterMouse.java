@@ -68,13 +68,10 @@ public class OpenCVFilterMouse extends OpenCVFilter {
   }
 
   private static final long serialVersionUID = 1L;
-
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterMouse.class.getCanonicalName());
+  public transient final static Logger log = LoggerFactory.getLogger(OpenCVFilterMouse.class.getCanonicalName());
   int stepSize = 1;
-
-  CvPoint startPoint = null;
-
-  CvPoint mousePos = null;
+  transient CvPoint startPoint = null;
+  transient CvPoint mousePos = null;
   final public int NONE = -1;
   final public int NORTH = 1;
   final public int NORTHWEST = 2;
@@ -83,34 +80,24 @@ public class OpenCVFilterMouse extends OpenCVFilter {
   final public int SOUTH = 5;
   final public int SOUTHEAST = 6;
   final public int EAST = 7;
-
   final public int NORTHEAST = 8;
   int lastWallChecked = NONE;
-
   int lastWall = NONE;
   int width = 0;
-
   int height = 0;
   double BLACK = 0.0;
   boolean doneMoving = false;
-
   boolean doneSweeping = false;
   double lowThreshold = 90.0;
   double highThreshold = 210.0;
   int apertureSize = 3;
   transient IplImage gray = null;
-
   transient IplImage src = null;
-
-  ArrayList<CvPoint> path = new ArrayList<CvPoint>();
-  HashMap<String, CvPoint> unique = new HashMap<String, CvPoint>();
-
-  CvPoint p0 = cvPoint(0, 0);
-
-  CvPoint p1 = cvPoint(0, 0);
-
-  CvScalar pathColor = cvScalar(0.0, 255.0, 0.0, 1.0);
-
+  transient ArrayList<CvPoint> path = new ArrayList<CvPoint>();
+  transient HashMap<String, CvPoint> unique = new HashMap<String, CvPoint>();
+  transient CvPoint p0 = cvPoint(0, 0);
+  transient CvPoint p1 = cvPoint(0, 0);
+  transient CvScalar pathColor = cvScalar(0.0, 255.0, 0.0, 1.0);
   int nextDirection = 0;
 
   public OpenCVFilterMouse() {

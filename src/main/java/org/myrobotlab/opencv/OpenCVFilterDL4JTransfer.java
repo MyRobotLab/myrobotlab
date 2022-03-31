@@ -30,13 +30,13 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterDL4JTransfer.class);
 
   private transient Deeplearning4j dl4j;
-  private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
+  private transient CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
 
   public Map<String, Double> lastResult = null;
 
   protected Boolean running;
 
-  public CustomModel model = null;
+  public transient CustomModel model = null;
 
   private volatile IplImage lastImage = null;
 

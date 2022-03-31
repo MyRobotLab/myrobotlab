@@ -86,10 +86,10 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
 
   int x0, y0, x1, y1;
 
-  public CvRect rect = new CvRect();
+  transient public CvRect rect = new CvRect();
   public boolean makeTemplate = false;
-  CvPoint textpt = cvPoint(10, 20);
-  private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
+  transient CvPoint textpt = cvPoint(10, 20);
+  transient private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
 
   public int matchRatio = Integer.MAX_VALUE;
 

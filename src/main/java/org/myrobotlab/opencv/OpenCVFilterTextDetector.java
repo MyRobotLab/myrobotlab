@@ -71,7 +71,7 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
   // non-maximum suppression threshold for de-dup of overlapping results.
   float nmsThreshold = (float) 0.3;
   // the actual east text classification network
-  Net detector = null;
+  transient Net detector = null;
   //
   boolean thresholdEnabled = false;
   // milage may vary..
