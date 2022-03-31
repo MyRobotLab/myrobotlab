@@ -7,7 +7,12 @@ import java.util.List;
 
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Before;
+import org.junit.Ignore;
 
+// ignoring this test for now, because there's not an easy way
+// to assert that it's working as expected because the classification
+// happens on a different thread and doesn't show up in the cv data..
+@Ignore
 public class OpenCVFilterMiniXceptionTest extends AbstractOpenCVFilterTest {
 
   @Before

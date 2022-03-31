@@ -25,6 +25,10 @@
 
 package org.myrobotlab.service;
 
+import static org.bytedeco.opencv.global.opencv_core.cvCopy;
+import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
+import static org.bytedeco.opencv.global.opencv_core.cvSetImageROI;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -86,7 +90,9 @@ import static org.bytedeco.opencv.global.opencv_videostab.*;
 */
 import org.bytedeco.opencv.opencv_core.CvPoint;
 import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
+import org.bytedeco.opencv.opencv_core.CvRect;
 import org.bytedeco.opencv.opencv_core.CvScalar;
+import org.bytedeco.opencv.opencv_core.CvSize;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
@@ -489,6 +495,16 @@ public class OpenCV extends AbstractComputerVision {
   static public Mat toMat(IplImage image) {
     OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
     return converterToMat.convert(converterToMat.convert(image));
+  }
+  
+  public static IplImage cropImage(IplImage img, CvRect rect) {
+    CvSize sz = new CvSize();
+    sz.width(rect.width()).height(rect.height());
+    cvSetImageROI(img, rect);
+    IplImage cropped = cvCreateImage(sz, img.depth(), img.nChannels());
+    // Copy original image (only ROI) to the cropped image
+    cvCopy(img, cropped);
+    return cropped;
   }
 
   transient BlockingQueue<Map<String, List<Classification>>> blockingClassification = new LinkedBlockingQueue<>();
@@ -2167,9 +2183,11 @@ public class OpenCV extends AbstractComputerVision {
 
 //      OpenCVFilterLKOpticalTrack lk = new OpenCVFilterLKOpticalTrack("lk");
 //      cv.addFilter(lk);
-      
-      OpenCVFilterMiniXception mini = new OpenCVFilterMiniXception("mini");
-      cv.addFilter(mini);
+
+      OpenCVFilterFaceDetectDNN faceDnn = new OpenCVFilterFaceDetectDNN("face");
+      cv.addFilter(faceDnn);
+     // OpenCVFilterMiniXception mini = new OpenCVFilterMiniXception("mini");
+     // cv.addFilter(mini);
       
       
       // OpenCVFilterTextDetector td = new OpenCVFilterTextDetector("td");

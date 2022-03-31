@@ -51,9 +51,7 @@ import org.bytedeco.opencv.opencv_video.TrackerMIL;
 /*
 import org.bytedeco.opencv.opencv_tracking.Tracker;
 import org.bytedeco.opencv.opencv_tracking.TrackerBoosting;
-import org.bytedeco.opencv.opencv_tracking.TrackerCSRT;
 import org.bytedeco.opencv.opencv_tracking.TrackerGOTURN;
-import org.bytedeco.opencv.opencv_tracking.TrackerKCF;
 import org.bytedeco.opencv.opencv_tracking.TrackerMIL;
 import org.bytedeco.opencv.opencv_tracking.TrackerMOSSE;
 import org.bytedeco.opencv.opencv_tracking.TrackerMedianFlow;
@@ -61,6 +59,7 @@ import org.bytedeco.opencv.opencv_tracking.TrackerTLD;
 */
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Point2df;
+import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 /**
@@ -73,8 +72,6 @@ public class OpenCVFilterTracker extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
   private final static Logger log = LoggerFactory.getLogger(OpenCVFilterTracker.class);
-  transient private static final OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
-  transient private static final OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 
   // The current tracker and it's associated boundingBox
   private Tracker tracker;
@@ -112,7 +109,7 @@ public class OpenCVFilterTracker extends OpenCVFilter {
   private Frame makeGrayScale(IplImage image) {
     IplImage imageBW = IplImage.create(image.width(), image.height(), 8, 1);
     cvCvtColor(image, imageBW, CV_BGR2GRAY);
-    return converterToMat.convert(imageBW);
+    return OpenCV.toFrame(imageBW);
   }
 
   @Override
@@ -124,14 +121,16 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     if (blackAndWhite) {
       frame = makeGrayScale(image);
     } else {
-      frame = converterToIpl.convert(image);
+      frame = OpenCV.toFrame(image);
     }
-    mat = converterToMat.convert(frame);
+    mat = OpenCV.toMat(frame);
     if (boundingBox != null && tracker != null) {
       // log.info("Yes ! Bounding box : {} {} {} {} " , boundingBox.x(),
       // boundingBox.y(), boundingBox.width()
       // ,boundingBox.height());
-      tracker.update(mat, boundingBox);
+      synchronized(tracker) {
+        tracker.update(mat, boundingBox);
+      }
       // boundingBox.x()
       int x0 = (int) (boundingBox.x());
       int y0 = (int) (boundingBox.y());
@@ -153,30 +152,36 @@ public class OpenCVFilterTracker extends OpenCVFilter {
 
   private Tracker createTracker(String trackerType) {
     // TODO: add a switch for all the other types of trackers!
-    /*
-     * if (trackerType.equalsIgnoreCase("Boosting")) { return
-     * TrackerBoosting.create(); } else
-     */
+    // if (trackerType.equalsIgnoreCase("Boosting")) { 
+    //  return TrackerBoosting.create(); 
+    // } else 
     if (trackerType.equalsIgnoreCase("CSRT")) {
-      return TrackerCSRT.create();
+      TrackerCSRT tracker =TrackerCSRT.create();
+      return tracker;
     } else if (trackerType.equalsIgnoreCase("GOTURN")) {
       return TrackerGOTURN.create();
     } else if (trackerType.equalsIgnoreCase("KCF")) {
       return TrackerKCF.create();
-    } /*
-       * else if (trackerType.equalsIgnoreCase("MedianFlow")) { return
-       * TrackerMedianFlow.create(); }
-       */ else if (trackerType.equalsIgnoreCase("MIL")) {
+    } else 
+      
+    //if (trackerType.equalsIgnoreCase("MedianFlow")) { 
+    //  return TrackerMedianFlow.create(); 
+    //} else 
+      if (trackerType.equalsIgnoreCase("MIL")) {
       return TrackerMIL.create();
-    } /*
-       * else if (trackerType.equalsIgnoreCase("MOSSE")) { return
-       * TrackerMOSSE.create(); } else if (trackerType.equalsIgnoreCase("TLD"))
-       * { return TrackerTLD.create(); }
-       */ else {
-
+    } else
+    //if (trackerType.equalsIgnoreCase("MOSSE")) { 
+    //  return TrackerMOSSE.create(); 
+    //} else 
+    //if (trackerType.equalsIgnoreCase("TLD")) {
+    //  return TrackerTLD.create(); 
+    //} else 
+    {
+      // TODO: why?
       log.warn("Unknown Tracker Algorithm {} defaulting to CSRT", trackerType);
       // default to TLD..
-      return TrackerCSRT.create();
+      TrackerCSRT tracker = TrackerCSRT.create(); 
+      return tracker;
     }
 
   }
@@ -195,13 +200,17 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     // the tracker will initialize on the next frame.. (I know , I know. it'd be
     // better to have the current frame and do the
     // initialization here.)
-    tracker = createTracker(trackerType);
-    // log.info("Init tracker");
+    if (tracker == null) {
+        tracker = createTracker(trackerType);
+    }
+    log.info("Created tracker");
     // TODO: I'm worried about thread safety with the "mat" object.
     if (mat != null) {
-      synchronized (mat) {
+      // TODO: what happens if we're already initalized?
+      synchronized(tracker) {
         tracker.init(mat, boundingBox);
       }
+      log.info("Initialized tracker");
     } else {
       log.warn("Sample point called on a null mat.");
     }

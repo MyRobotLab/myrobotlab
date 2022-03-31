@@ -10,22 +10,15 @@ import java.util.Map;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.opencv.opencv_java;
 import org.bytedeco.opencv.opencv_core.CvRect;
-import org.bytedeco.opencv.opencv_core.CvSize;
 import org.bytedeco.opencv.opencv_core.IplImage;
-import static org.bytedeco.opencv.global.opencv_core.cvCopy;
-import static org.bytedeco.opencv.global.opencv_core.cvSize;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
-import static org.bytedeco.opencv.global.opencv_core.cvSetImageROI;
-import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
 import org.junit.Before;
 import org.myrobotlab.cv.TrackingPoint;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point;
+import org.myrobotlab.service.OpenCV;
 
 public class OpenCVFilterLKOpticalTrackTest extends AbstractOpenCVFilterTest {
 
-  int frameIndex = 0;
-  int numFrames = 0;
   @Before
   public void setup() {
     LoggingFactory.init("info");
@@ -59,7 +52,7 @@ public class OpenCVFilterLKOpticalTrackTest extends AbstractOpenCVFilterTest {
     rect.height(300);
     for (int i = 0; i < 25; i+=5) {
       rect.x(rect.x()+i);
-      IplImage cropped = cropImage(img,rect);
+      IplImage cropped = OpenCV.cropImage(img,rect);
       //OpenCVFilter.show(cropped, "Cropped " + i);
       images.add(cropped);
     }
@@ -67,21 +60,17 @@ public class OpenCVFilterLKOpticalTrackTest extends AbstractOpenCVFilterTest {
     numFrames = images.size();
     return images;
   }
-
-  private IplImage cropImage(IplImage img, CvRect rect) {
-    CvSize sz = new CvSize();
-    sz.width(rect.width()).height(rect.height());
-    cvSetImageROI(img, rect);
-    IplImage cropped = cvCreateImage(sz, img.depth(), img.nChannels());
-    // Copy original image (only ROI) to the cropped image
-    cvCopy(img, cropped);
-    return cropped;
+  
+  @Override
+  public IplImage createTestImage() {
+    return defaultImage();
   }
 
   @Override
   public void verify(OpenCVFilter filter, IplImage input, IplImage output) {
 
-    frameIndex++;
+    log.info("Verify for {}", frameIndex);
+    // frameIndex++;
     // log.info("Frame: {} CVData: {}", frameIndex, filter.data);
     if (frameIndex == 1) {
       log.info("Sampling a point");
@@ -121,11 +110,6 @@ public class OpenCVFilterLKOpticalTrackTest extends AbstractOpenCVFilterTest {
     if (debug) {
       waitOnAnyKey();
     }
-  }
-
-  @Override
-  public IplImage createTestImage() {
-    return defaultImage();
   }
 
 }

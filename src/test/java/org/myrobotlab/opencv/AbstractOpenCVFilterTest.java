@@ -30,17 +30,20 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
 
   private CanvasFrame sourceImage = null;
   private CanvasFrame outputImage = null;
-
+  public int frameIndex = 0;
+  public int numFrames = 0;
+  
   @Test
   public void testFilter() throws InterruptedException {
     List<OpenCVFilter> filters = createFilters();
     assertNotNull("Filter was null.", filters);
     List<IplImage> inputs = createTestImages();
+    numFrames = inputs.size();
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
     for (OpenCVFilter filter : filters) {
       filter.setOpenCV(opencv);
     }
-    int frameIndex = -1;
+    
     for (IplImage input : inputs) {
       frameIndex++;
       long now = System.currentTimeMillis();
