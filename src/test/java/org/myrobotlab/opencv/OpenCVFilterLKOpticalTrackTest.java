@@ -100,7 +100,7 @@ public class OpenCVFilterLKOpticalTrackTest extends AbstractOpenCVFilterTest {
     if (frameIndex == numFrames) {
       // verify stuff!
       // System.err.println("OPENCVDATA: " + filter.data); 
-      Map<Integer, TrackingPoint> data = (Map<Integer, TrackingPoint>)filter.data.getObject(TESTIMG + "." + filter.name + ".points");
+      Map<Integer, TrackingPoint> data = (Map<Integer, TrackingPoint>)filter.data.getObject(CVSERVICENAME + "." + filter.name + ".points");
       
       // there should be 3 tracking points.
       assertEquals(data.size(), 3);

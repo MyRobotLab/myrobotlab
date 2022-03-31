@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 
@@ -18,15 +19,13 @@ public class Deeplearning4jTest extends AbstractServiceTest {
 
   @Override
   public void testService() throws Exception {
-    // TODO Auto-generated method stub
     Deeplearning4j dl4j = (Deeplearning4j)service;
-    
     // miniXception test.
     dl4j.loadMiniEXCEPTION();
     double confidence = 0.001;
-    IplImage testImage = cvLoadImage("src/test/resources/OpenCV/rachel.jpg");
+    IplImage testImage = cvLoadImage("src/test/resources/OpenCV/rachel_face.png");
     HashMap<String,Double> res = dl4j.classifyImageMiniEXCEPTION(testImage, confidence);
-    System.out.println(res);
+    assertTrue(res.get("neutral") > 0.9);
   }
 
 }

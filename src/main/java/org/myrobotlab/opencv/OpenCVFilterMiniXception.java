@@ -113,6 +113,7 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
   private IplImage extractSubImage(Mat inputMat, Rect boundingBox) {
     Mat cropped = new Mat(inputMat, boundingBox);
     IplImage image = OpenCV.toImage(cropped);
+    show(image, "sub image from miniXception.");
     return image;
   }
 
@@ -148,7 +149,7 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
 
   @Override
   public void imageChanged(IplImage image) {
-    // TODO Auto-generated method stub
+    // NoOp
   }
 
   @Override

@@ -21,7 +21,7 @@ import org.myrobotlab.test.AbstractTest;
 @Ignore
 public abstract class AbstractOpenCVFilterTest extends AbstractTest {
 
-  public static final String TESTIMG = "testimg";
+  public static final String CVSERVICENAME = "opencv";
   public boolean debug = false;
 
   public abstract OpenCVFilter createFilter();
@@ -43,6 +43,9 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
     int frameIndex = -1;
     for (IplImage input : inputs) {
       frameIndex++;
+      long now = System.currentTimeMillis();
+      // create the OpenCVData object that will run with this image through the pipeline.
+      OpenCVData data = new OpenCVData(CVSERVICENAME, now, frameIndex, OpenCV.toFrame(input));
       for (OpenCVFilter filter : filters) {
         if (debug) {
           sourceImage = filter.show(input, "Filter " + filter.name + " Input Image " + frameIndex);
@@ -50,9 +53,7 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
         // we need to set the CV Data object on the filter before we process.
         // This calls imageChanged .. (some filters initialize their stuff in that
         // method!
-        long now = System.currentTimeMillis();
-        OpenCVData data = new OpenCVData(TESTIMG, now, frameIndex, OpenCV.toFrame(input));
-        IplImage output = processTestImage(filter, data, input, now, frameIndex);
+        IplImage output = processTestImage(filter, data, input, frameIndex);
         // TODO: we want to verify the resulting opencv data? and methods that are
         // invoked , we probably need to know what frame number it was.
         verify(filter, input, output);
@@ -93,17 +94,20 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
     return images;
   }
 
-  private IplImage processTestImage(OpenCVFilter filter, OpenCVData data, IplImage input, long now, int frameIndex) throws InterruptedException {
+  private IplImage processTestImage(OpenCVFilter filter, OpenCVData data, IplImage input, int frameIndex) throws InterruptedException {
     filter.setData(data);
     // call process on the filter with the input image.
     long start = System.currentTimeMillis();
     IplImage output = filter.process(input);
+    filter.postProcess(output);
     long delta = System.currentTimeMillis() - start;
     log.info("Process method took {} ms", delta);
     filter.enabled = true;
     filter.displayEnabled = true;
     // verify that processDisplay doesn't blow up!
     BufferedImage bi = filter.processDisplay();
+    
+    
     if (debug) {
       IplImage displayVal = OpenCV.toImage(bi);
       outputImage = filter.show(displayVal, "Filter " + filter.name + " Output Image " + frameIndex);

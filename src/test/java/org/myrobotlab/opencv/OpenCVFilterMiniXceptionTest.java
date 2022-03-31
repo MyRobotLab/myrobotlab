@@ -21,7 +21,7 @@ public class OpenCVFilterMiniXceptionTest extends AbstractOpenCVFilterTest {
     // first to detect a face.. second to run the emotion detection on the
     // detected bounding box.
     ArrayList<OpenCVFilter> filters = new ArrayList<OpenCVFilter>();
-//    filters.add(new OpenCVFilterFaceDetect("face"));
+    // filters.add(new OpenCVFilterFaceDetect("face"));
     filters.add(new OpenCVFilterFaceDetectDNN("facednn"));
     filters.add(new OpenCVFilterMiniXception("mini"));
     return filters;
