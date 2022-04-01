@@ -49,6 +49,7 @@ import org.bytedeco.opencv.opencv_dnn.Net;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
+import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
@@ -72,10 +73,6 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
   public String protoTxt = "resource/OpenCV/models/facedetectdnn/deploy.prototxt.txt";
 
   double threshold = .2;
-
-  transient private final OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
-
-  transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 
   boolean netError = false;
 
@@ -121,7 +118,7 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
     int h = image.height();
     int w = image.width();
     // TODO: cv2.resize(image, (300, 300))
-    Mat srcMat = grabberConverter.convertToMat(grabberConverter.convert(image));
+    Mat srcMat = OpenCV.toMat(image);
     Mat inputMat = new Mat();
     resize(srcMat, inputMat, new Size(300, 300));// resize the image to match
     // the input size of the model
@@ -198,7 +195,7 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
     }
 
     publishClassification(classifications);
-    IplImage result = grabberConverter.convert(converterToIpl.convert(srcMat));
+    IplImage result = OpenCV.toImage(srcMat);
     ne.close();
     return result;
   }

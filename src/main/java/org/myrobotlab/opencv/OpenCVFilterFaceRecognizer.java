@@ -77,7 +77,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   public RecognizerType recognizerType = RecognizerType.FISHER;
   // when in training mode, this is the name to associate with the face.
   public String trainName = null;
-  private FaceRecognizer faceRecognizer;
+  transient private FaceRecognizer faceRecognizer;
   private boolean trained = false;
   // the directory to store the training images.
   private String trainingDir = "training";
@@ -86,7 +86,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   // We read in the face filter when training the first time, and use it for all
   // subsequent
   // training and for masking images prior to comparison.
-  private Mat facemask = null;
+  transient private Mat facemask = null;
 
   // cannot be this because - gets changed to src/main/resources/resource/OpenCV
   // if src is present !!!!
@@ -94,12 +94,12 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   // FileIO.gluePathsForwardSlash(Service.getResourceDir(OpenCV.class),"haarcascades");
   public String cascadeDir = "resource/OpenCV/haarcascades";
 
-  private CascadeClassifier faceCascade;
-  private CascadeClassifier eyeCascade;
+  transient private CascadeClassifier faceCascade;
+  transient private CascadeClassifier eyeCascade;
   // private CascadeClassifier mouthCascade;
   // These are cv converts that help us convert between mat,frame and iplimage
-  private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
-  private CvFont fontWarning = cvFont(CV_FONT_HERSHEY_PLAIN);
+  transient private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
+  transient private CvFont fontWarning = cvFont(CV_FONT_HERSHEY_PLAIN);
   private boolean debug = false;
   // KW: I made up this word, but I think it's fitting.
   private boolean dePicaso = true;
@@ -499,7 +499,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     UUID randValue = UUID.randomUUID();
     String filename = trainingDir + File.separator + label + File.separator + randValue + ".png";
     // TODO: we need to be able to write a unicode filename with a path here..
-    BufferedImage buffImg = toBufferedImage(dFaceMat);
+    BufferedImage buffImg = OpenCV.toBufferedImage(dFaceMat);
     ImageIO.write(buffImg, "png", new File(filename));
     log.info("Saved Training image {} ", filename);
   }
@@ -507,11 +507,11 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   private Frame makeGrayScale(IplImage image) {
     IplImage imageBW = IplImage.create(image.width(), image.height(), 8, 1);
     cvCvtColor(image, imageBW, CV_BGR2GRAY);
-    return converterToMat.convert(imageBW);
+    return OpenCV.toFrame(imageBW);
   }
 
   private Mat makeGrayScaleMat(IplImage image) {
-    return toMat(makeGrayScale(image));
+    return OpenCV.toMat(makeGrayScale(image));
   }
 
   private ArrayList<DetectedFace> extractDetectedFaces(Mat bwImgMat) {

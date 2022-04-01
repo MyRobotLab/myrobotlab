@@ -18,6 +18,6 @@ public class TrackingPoint {
   }
 
   public String toString() {
-    return String.format("%d %s->%s found %d error %.2f", id, p0, p1, found, error);
+    return String.format("%s %s->%s found %s error %.2f", id, p0, p1, found, error);
   }
 }

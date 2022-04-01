@@ -38,6 +38,7 @@ import java.awt.image.BufferedImage;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 public class OpenCVFilterAnd extends OpenCVFilter {
@@ -63,7 +64,7 @@ public class OpenCVFilterAnd extends OpenCVFilter {
   }
 
   public void loadMask(BufferedImage mask) {
-    this.and = toImage(mask);// IplImage.createFrom(mask);
+    this.and = OpenCV.toImage(mask);// IplImage.createFrom(mask);
   }
 
   public void loadMask(IplImage mask) {

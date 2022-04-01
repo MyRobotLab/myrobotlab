@@ -25,6 +25,10 @@
 
 package org.myrobotlab.service;
 
+import static org.bytedeco.opencv.global.opencv_core.cvCopy;
+import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
+import static org.bytedeco.opencv.global.opencv_core.cvSetImageROI;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -86,7 +90,9 @@ import static org.bytedeco.opencv.global.opencv_videostab.*;
 */
 import org.bytedeco.opencv.opencv_core.CvPoint;
 import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
+import org.bytedeco.opencv.opencv_core.CvRect;
 import org.bytedeco.opencv.opencv_core.CvScalar;
+import org.bytedeco.opencv.opencv_core.CvSize;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
@@ -113,6 +119,8 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetectDNN;
 import org.myrobotlab.opencv.OpenCVFilterKinectDepth;
+import org.myrobotlab.opencv.OpenCVFilterLKOpticalTrack;
+import org.myrobotlab.opencv.OpenCVFilterMiniXception;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
@@ -434,11 +442,17 @@ public class OpenCV extends AbstractComputerVision {
     return converter.getBufferedImage(frame, 1);
   }
 
-  public static BufferedImage toBufferedImage(Frame inputFrame) {
+  static public BufferedImage toBufferedImage(Frame inputFrame) {
     Java2DFrameConverter converter = new Java2DFrameConverter();
     return converter.getBufferedImage(inputFrame);
   }
 
+  static public BufferedImage toBufferedImage(Mat image) {
+    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
+    Java2DFrameConverter jconverter = new Java2DFrameConverter();
+    return jconverter.convert(converterToImage.convert(image));
+  }
+  
   static public Frame toFrame(IplImage image) {
     OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
     return converterToImage.convert(image);
@@ -481,6 +495,16 @@ public class OpenCV extends AbstractComputerVision {
   static public Mat toMat(IplImage image) {
     OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
     return converterToMat.convert(converterToMat.convert(image));
+  }
+  
+  public static IplImage cropImage(IplImage img, CvRect rect) {
+    CvSize sz = new CvSize();
+    sz.width(rect.width()).height(rect.height());
+    cvSetImageROI(img, rect);
+    IplImage cropped = cvCreateImage(sz, img.depth(), img.nChannels());
+    // Copy original image (only ROI) to the cropped image
+    cvCopy(img, cropped);
+    return cropped;
   }
 
   transient BlockingQueue<Map<String, List<Classification>>> blockingClassification = new LinkedBlockingQueue<>();
@@ -2152,11 +2176,20 @@ public class OpenCV extends AbstractComputerVision {
       Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
       LoggingFactory.init("INFO");
 
-      Runtime.getInstance().load();
+     // Runtime.getInstance().load();
 
       // Runtime.start("python", "Python");
       OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
 
+//      OpenCVFilterLKOpticalTrack lk = new OpenCVFilterLKOpticalTrack("lk");
+//      cv.addFilter(lk);
+
+      OpenCVFilterFaceDetectDNN faceDnn = new OpenCVFilterFaceDetectDNN("face");
+      cv.addFilter(faceDnn);
+     // OpenCVFilterMiniXception mini = new OpenCVFilterMiniXception("mini");
+     // cv.addFilter(mini);
+      
+      
       // OpenCVFilterTextDetector td = new OpenCVFilterTextDetector("td");
       // cv.addFilter(td);
 
@@ -2172,7 +2205,7 @@ public class OpenCV extends AbstractComputerVision {
       // Runtime.start("gui", "SwingGui");
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
+      webgui.autoStartBrowser(true);
       webgui.startService();
 
       // FFmpegFrameRecorder test = new
