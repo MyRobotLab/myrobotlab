@@ -75,6 +75,8 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
   double threshold = .2;
 
   boolean netError = false;
+  transient private CloseableFrameConverter converter1 = new CloseableFrameConverter();
+  transient private CloseableFrameConverter converter2 = new CloseableFrameConverter();
 
   public OpenCVFilterFaceDetectDNN() {
     this(null);
@@ -118,7 +120,7 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
     int h = image.height();
     int w = image.width();
     // TODO: cv2.resize(image, (300, 300))
-    Mat srcMat = OpenCV.toMat(image);
+    Mat srcMat = converter1.toMat(image);
     Mat inputMat = new Mat();
     resize(srcMat, inputMat, new Size(300, 300));// resize the image to match
     // the input size of the model
@@ -195,9 +197,17 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
     }
 
     publishClassification(classifications);
-    IplImage result = OpenCV.toImage(srcMat);
+    IplImage result = converter2.toImage(srcMat);
     ne.close();
     return result;
+  }
+
+  @Override
+  public void release() {
+    // TODO Auto-generated method stub
+    super.release();
+    converter1.close();
+    converter2.close();
   }
 
   @Override

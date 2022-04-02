@@ -141,7 +141,9 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
       cvSetImageROI(image, rect);
       cvCopy(image, template, null);
       cvResetImageROI(image);
-      invoke("publishTemplate", name, OpenCV.toBufferedImage(template), 0);
+      CloseableFrameConverter converter = new CloseableFrameConverter();
+      invoke("publishTemplate", name, converter.toBufferedImage(template), 0);
+      converter.close();
       invoke("publishIplImageTemplate", template); // FYI -
       // IplImage
       // is not

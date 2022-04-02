@@ -48,6 +48,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.opencv.CloseableFrameConverter;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.programab.Response;
@@ -423,7 +424,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   public byte[] imageToBytes(IplImage image) throws IOException {
 
     // lets make a buffered image
-    BufferedImage buffImage = OpenCV.toBufferedImage(image);
+    CloseableFrameConverter converter = new CloseableFrameConverter();
+    BufferedImage buffImage = converter.toBufferedImage(image);
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
     try {
       ImageIO.write(buffImage, "png", stream);
@@ -432,6 +434,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       // somehow does happen, then we don't want to just ignore it
       throw new RuntimeException(e);
     }
+    converter.close();
     return stream.toByteArray();
   }
 

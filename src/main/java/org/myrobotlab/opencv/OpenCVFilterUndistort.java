@@ -39,6 +39,8 @@ public class OpenCVFilterUndistort extends OpenCVFilter {
   // now what's the distVec?
   transient private Mat distVec = new Mat(1, 5, CV_32FC1);
 
+  transient private CloseableFrameConverter converter = new CloseableFrameConverter();
+  
   public OpenCVFilterUndistort() {
     super();
     initCameraAndDistortionMatrix();
@@ -113,8 +115,16 @@ public class OpenCVFilterUndistort extends OpenCVFilter {
     undistort(matIn, matOut, camMat, distVec);
     // show(matOut, "output");
     // mat to image now!
-    IplImage unDistImage = OpenCV.toImage(matOut);
+    IplImage unDistImage = converter.toImage(matOut);
     return unDistImage;
+  }
+
+  @Override
+  public void release() {
+    // TODO Auto-generated method stub
+    super.release();
+    converter.close();
+  
   }
 
   @Override

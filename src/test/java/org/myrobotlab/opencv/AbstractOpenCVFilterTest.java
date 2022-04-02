@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.opencv.opencv_core.IplImage;
+import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.codec.CodecUtils;
@@ -33,6 +34,8 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
   private CanvasFrame outputImage = null;
   public int frameIndex = 0;
   public int numFrames = 0;
+  private CloseableFrameConverter converter1 = new CloseableFrameConverter();
+  private CloseableFrameConverter converter2 = new CloseableFrameConverter();
   
   @Test
   public void testFilter() throws InterruptedException {
@@ -53,7 +56,7 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
       frameIndex++;
       long now = System.currentTimeMillis();
       // create the OpenCVData object that will run with this image through the pipeline.
-      OpenCVData data = new OpenCVData(CVSERVICENAME, now, frameIndex, OpenCV.toFrame(input));
+      OpenCVData data = new OpenCVData(CVSERVICENAME, now, frameIndex, converter1.toFrame(input));
       for (OpenCVFilter filter : filters) {
         if (debug) {
           sourceImage = filter.show(input, "Filter " + filter.name + " Input Image " + frameIndex);
@@ -117,7 +120,7 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
     
     
     if (debug) {
-      IplImage displayVal = OpenCV.toImage(bi);
+      IplImage displayVal = converter2.toImage(bi);
       outputImage = filter.show(displayVal, "Filter " + filter.name + " Output Image " + frameIndex);
     }
     return output;
@@ -164,4 +167,9 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
     }
   }
 
+  @After
+  public void afterTest() {
+    converter1.close();
+    converter2.close();
+  }
 }

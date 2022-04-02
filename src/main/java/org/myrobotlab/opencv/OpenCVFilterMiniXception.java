@@ -50,6 +50,8 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
   // a confidence threshold typically from 0.0 to 1.0 on how confident the
   // classification is.
   private double confidence = 0.25;
+  transient private CloseableFrameConverter converter1 = new CloseableFrameConverter();
+  transient private CloseableFrameConverter converter2 = new CloseableFrameConverter();
 
   public OpenCVFilterMiniXception(String name) {
     super(name);
@@ -102,7 +104,7 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
         // int miniExceptionWidth = 64;
         Rect miniBox = new Rect(x - miniExceptionWidth / 2, y - miniExceptionWidth / 2, miniExceptionWidth, miniExceptionWidth);
         // now.. we need to crap the image for this bounding box..
-        lastImage = extractSubImage(OpenCV.toMat(image), miniBox);
+        lastImage = extractSubImage(converter1.toMat(image), miniBox);
         // Here
       }
     }
@@ -112,7 +114,7 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
 
   private IplImage extractSubImage(Mat inputMat, Rect boundingBox) {
     Mat cropped = new Mat(inputMat, boundingBox);
-    IplImage image = OpenCV.toImage(cropped);
+    IplImage image = converter2.toImage(cropped);
     show(image, "sub image from miniXception.");
     return image;
   }
@@ -155,6 +157,8 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
   @Override
   public void release() {
     running = false;
+    converter1.close();
+    converter2.close();
   }
 
   @Override

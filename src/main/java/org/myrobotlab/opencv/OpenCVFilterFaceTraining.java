@@ -187,6 +187,8 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
    * to train from. If the number of files change, or the number of directories
    * without underscore - it will likely cause a 're-train'
    */
+  transient private CloseableFrameConverter converter1 = new CloseableFrameConverter();
+  
   public class OpenCVClassifier {
     File root;
     FaceRecognizer recognizer;
@@ -285,6 +287,7 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
 
       int counter = 0;
 
+      ArrayList<CloseableFrameConverter> converters = new ArrayList<CloseableFrameConverter>();
       for (File subclass : subclassDirs) {
         String label = subclass.getName();
         intToLabel.put(label.hashCode(), label);
@@ -352,8 +355,9 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
           saveToFile(imageFile.getParent() + File.separator + CACHE_DIR + File.separator + imageFile.getName(), merged);
 
           // END STANDARDIZE SUPERVISORS IMAGES INTO CACHE_DIR
-
-          images.put(counter, OpenCV.toMat(merged));
+          CloseableFrameConverter convert = new CloseableFrameConverter();
+          converters.add(convert);
+          images.put(counter, convert.toMat(merged));
           log.warn("{} {}-{}", totalImageFiles, label, counter);
           labelsBuf.put(counter, label.hashCode());
           idToLabelMap.put(label.hashCode(), label);
@@ -372,6 +376,12 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
       recognizer.train(images, labels);
       log.error("training done in {}", (System.currentTimeMillis() - startTrainingTs) / 1000L);
       log.info("here");
+      
+      // clean up the frame converters
+      for (CloseableFrameConverter c : converters) {
+        c.close();
+      }
+      converters = null;      
     }
   }
 
@@ -578,7 +588,7 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
     if (cascade != null) {
       // CvSeq faces = cvHaarDetectObjects(image, cascade, storage, scaleFactor,
       // minNeighbors, option);
-      Mat imageMat = OpenCV.toMat(image);
+      Mat imageMat = converter1.toMat(image);
       RectVector vec = new RectVector();
       cascade.detectMultiScale(imageMat, vec);
 
@@ -665,8 +675,9 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
                 label.close();
                 return image;
               }
-              classifier.recognizer.predict(OpenCV.toMat(merged), label, confidence);
-
+              CloseableFrameConverter converter = new CloseableFrameConverter();
+              classifier.recognizer.predict(converter.toMat(merged), label, confidence);
+              converter.close();
               // IF HIGH ENOUGH CONFIDENCE GO TO APPROPRIATE DIRECTORIES
               if (confidence.get() > 50) {
                 String labelStr = idToLabelMap.get(label.get());

@@ -84,8 +84,6 @@ public class OpenCVFilterInRange extends OpenCVFilter {
 
   transient IplImage ret = null;
 
-  transient BufferedImage frameBuffer = null;
-
   transient CvScalar hueMin = cvScalar(hueMinValue, 0.0, 0.0, 0.0);
   transient CvScalar hueMax = cvScalar(hueMaxValue, 0.0, 0.0, 0.0);
   transient CvScalar valueMin = cvScalar(valueMinValue, 0.0, 0.0, 0.0);
@@ -238,10 +236,11 @@ public class OpenCVFilterInRange extends OpenCVFilter {
   }
 
   public void samplePoint(Integer x, Integer y) {
-
-    frameBuffer = OpenCV.toBufferedImage(hsv);
+    CloseableFrameConverter converter = new CloseableFrameConverter();
+    BufferedImage frameBuffer = converter.toBufferedImage(hsv);
     int rgb = frameBuffer.getRGB(x, y);
     Color c = new Color(rgb);
+    converter.close();
     log.error(x + "," + y + " h " + c.getRed() + " s " + c.getGreen() + " v " + c.getBlue());
   }
 
