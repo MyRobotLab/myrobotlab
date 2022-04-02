@@ -271,8 +271,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   boolean autoStartBrowser = false;
 
   transient ProgramAB chatBot;
-  
-  transient GoogleSearch chatBotSearch;
 
   String currentConfigurationName = "default";
   transient SpeechRecognizer ear;
@@ -309,8 +307,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
    */
 
   boolean isChatBotActivated = false;
-  
-  boolean isChatBotSearchActivated = false;
 
   boolean isEarActivated = false;
 
