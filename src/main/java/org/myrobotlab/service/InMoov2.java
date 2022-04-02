@@ -2390,7 +2390,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     config.enableLeftHandSensor = isLeftHandSensorActivated;
     // config.isLeftPortActivated = isLeftPortActivated;
     config.enableNeopixel = isNeopixelActivated;
-    config.enableOpencv = isOpencvActivated;
+    config.enableOpencv = isOpenCvActivated;
     config.enablePir = isPirActivated;
     config.enableChatBot = isChatBotActivated;
     config.enableChatBotSearch = isChatBotSearchActivated;
@@ -2552,12 +2552,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
         startChatBot();
       } else {
         stopChatBot();
-      }
-      
-      if (config.enableChatBotSearch) {
-        startChatBotSearch();
-      } else {
-        stopChatBotSearch();
       }
 
       if (config.loadGestures) {
