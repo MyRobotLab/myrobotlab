@@ -48,6 +48,7 @@ import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 // import org.bytedeco.opencv.opencv_objdetect.CvHaarClassifierCascade;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
+import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 public class OpenCVFilterFaceDetect extends OpenCVFilter {
@@ -218,8 +219,10 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
     if (cascade != null) {
       RectVector vec = new RectVector();
 
-      Mat imageMat = converterToImage.convertToMat(converterToMat.convert(image));
+      CloseableFrameConverter converter = new CloseableFrameConverter();
+      Mat imageMat = converter.toMat(image);
       cascade.detectMultiScale(imageMat, vec);
+      converter.close();
       // CvSeq faces = cvHaarDetectObjects(image, cascade, storage, scaleFactor,
       // minNeighbors, option);
       if (vec != null) {

@@ -51,6 +51,7 @@ import org.bytedeco.opencv.opencv_core.CvRect;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 // TODO - http://opencv.willowgarage.com/wiki/FastMatchTemplate
@@ -85,10 +86,10 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
 
   int x0, y0, x1, y1;
 
-  public CvRect rect = new CvRect();
+  transient public CvRect rect = new CvRect();
   public boolean makeTemplate = false;
-  CvPoint textpt = cvPoint(10, 20);
-  private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
+  transient CvPoint textpt = cvPoint(10, 20);
+  transient private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
 
   public int matchRatio = Integer.MAX_VALUE;
 
@@ -140,7 +141,9 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
       cvSetImageROI(image, rect);
       cvCopy(image, template, null);
       cvResetImageROI(image);
-      invoke("publishTemplate", name, toBufferedImage(template), 0);
+      CloseableFrameConverter converter = new CloseableFrameConverter();
+      invoke("publishTemplate", name, converter.toBufferedImage(template), 0);
+      converter.close();
       invoke("publishIplImageTemplate", template); // FYI -
       // IplImage
       // is not

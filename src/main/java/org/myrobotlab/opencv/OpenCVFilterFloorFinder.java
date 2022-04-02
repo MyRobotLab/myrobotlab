@@ -47,10 +47,10 @@ public class OpenCVFilterFloorFinder extends OpenCVFilter {
 
   transient IplImage buffer = null;
 
-  CvPoint startPoint = cvPoint(180, 120);
-  CvScalar fillColor = cvScalar(255.0, 255.0, 255.0, 1.0);
-  CvScalar lo_diff = CV_RGB(2, 2, 2);// cvScalar(20, 0.0, 0.5, 1.0);
-  CvScalar up_diff = CV_RGB(2, 2, 2);
+  transient CvPoint startPoint = cvPoint(180, 120);
+  transient CvScalar fillColor = cvScalar(255.0, 255.0, 255.0, 1.0);
+  transient CvScalar lo_diff = CV_RGB(2, 2, 2);// cvScalar(20, 0.0, 0.5, 1.0);
+  transient CvScalar up_diff = CV_RGB(2, 2, 2);
 
   public OpenCVFilterFloorFinder() {
     super();
