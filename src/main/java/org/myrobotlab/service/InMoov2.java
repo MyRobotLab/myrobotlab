@@ -343,8 +343,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   boolean isServoMixerActivated = false;
 
-  boolean isController3Activated = false;
-
   // TODO - refactor into a Simulator interface when more simulators are borgd
   transient JMonkeyEngine simulator;
 
@@ -395,6 +393,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   transient WebGui webgui;
 
   protected List<String> configList;
+  
+  private boolean isController3Activated;
 
   private boolean isController4Activated;
 
@@ -1611,7 +1611,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   public InMoov2Arm startLeftArm(String port) {
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
-    // speakBlocking(get("STARTINGHEAD") + " " + port);
+    // speakBlocking(get("STARTINGLEFTARM") + " " + port);
     // ??? SHOULD THERE BE REFERENCES AT ALL ??? ... probably not
 
     speakBlocking(get("STARTINGLEFTARM"));
@@ -2385,8 +2385,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     config.enableLeftHand = isLeftHandActivated;
     config.enableLeftHandSensor = isLeftHandSensorActivated;
     // config.isLeftPortActivated = isLeftPortActivated;
-    config.enableNeoPixel = isNeopixelActivated;
-    config.enableOpenCV = isOpenCvActivated;
+    config.enableNeopixel = isNeopixelActivated;
+    config.enableOpencv = isOpenCvActivated;
     config.enablePir = isPirActivated;
     config.enableUltrasonicRight = isUltrasonicRightActivated;
     config.enableUltrasonicLeft = isUltrasonicLeftActivated;
@@ -2475,7 +2475,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
        * stopNeopixelAnimation(); }
        */
 
-      if (config.enableOpenCV) {
+      if (config.enableOpencv) {
         startOpenCV();
       } else {
         stopOpenCV();
@@ -2536,7 +2536,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
         stopPir();
       }
 
-      if (config.enableNeoPixel) {
+      if (config.enableNeopixel) {
         startNeopixel();
       } else {
         stopNeopixelAnimation();
@@ -2546,6 +2546,12 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
         loadGestures = true;
         loadGestures();
         // will load in startService
+      }
+      
+      if (config.enableChatBot) {
+        startChatBot();
+      } else {
+        stopChatBot();
       }
 
       if (config.enableSimulator) {
