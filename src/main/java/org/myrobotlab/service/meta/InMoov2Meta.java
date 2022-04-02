@@ -57,7 +57,7 @@ public class InMoov2Meta extends MetaData {
     addPeer("ultrasonicLeft", "UltrasonicSensor", "measure distance on the left");
     addPeer("pir", "Pir", "infrared sensor");
     addPeer("leap", "LeapMotion");
-    addPeer("kinect", "Kinect");
+    addPeer("kinect", "OpenNI");
 
     addPeer("mouth", "MarySpeech");
     addPeer("ear", "WebkitSpeechRecognition");
