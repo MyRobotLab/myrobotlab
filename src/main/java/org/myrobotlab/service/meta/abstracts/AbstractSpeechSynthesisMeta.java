@@ -8,9 +8,11 @@ public abstract class AbstractSpeechSynthesisMeta extends MetaData {
   public final static Logger log = LoggerFactory.getLogger(AbstractSpeechSynthesisMeta.class);
 
   public AbstractSpeechSynthesisMeta() {
-    addPeer("audioFile", "AudioFile", "audioFile");
+    addPeer("audioFile", "AudioFile");
     addCategory("speech");
     addDependency("org.myrobotlab.audio", "voice-effects", "1.0", "zip");
   }
+  
+
 
 }

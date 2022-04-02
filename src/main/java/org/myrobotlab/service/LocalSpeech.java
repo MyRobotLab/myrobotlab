@@ -375,12 +375,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     return Locale.getLocaleMap("en-US");
   }
 
-  @Override
-  public ServiceConfig getConfig() {
-    LocalSpeechConfig config = (LocalSpeechConfig) super.getConfig((SpeechSynthesisConfig) new LocalSpeechConfig());
-    return config;
-  }
-
   public static void main(String[] args) {
     try {
 
