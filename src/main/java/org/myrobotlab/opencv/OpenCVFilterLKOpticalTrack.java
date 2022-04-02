@@ -102,7 +102,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
   protected Map<String, Integer> nameToIndex = new HashMap<>();
   protected int winSize = 15;
   protected long currentPntCnt;
-  transient Mat zeroPoints = OpenCV.toMat(IplImage.create(new CvSize().width(0).height(0), 32, 2));
+  // TODO: can i just create a new Mat instead of having to convert an IplImage to a mat first?!
+  transient Mat zeroPoints = null;
   transient Mat cornersA = null;
   transient Mat cornersB = null;
   transient Mat featureErrors = null;
@@ -116,6 +117,10 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
   // are passed to input then algorithm will use as many levels as pyramids have
   // but no more than maxLevel.
   protected int maxLevel = 5;
+  transient private CloseableFrameConverter converter1 = new CloseableFrameConverter();
+  transient private CloseableFrameConverter converter2 = new CloseableFrameConverter();
+  transient private CloseableFrameConverter converter3 = new CloseableFrameConverter();
+  transient private CloseableFrameConverter converter4 = new CloseableFrameConverter();
 
   public OpenCVFilterLKOpticalTrack() {
     this(null);
@@ -123,6 +128,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
   public OpenCVFilterLKOpticalTrack(String name) {
     super(name);
+    
+    zeroPoints = converter1.toMat(IplImage.create(new CvSize().width(0).height(0), 32, 2));
     cornersA = zeroPoints;
   }
 
@@ -154,7 +161,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     FloatIndexer idx = toResize.createIndexer();
     CvSize sz = new CvSize();
     sz.width(1).height((int) idx.size(0) + amount);
-    Mat tmp = OpenCV.toMat(IplImage.create(sz, 32, 2));
+    Mat tmp = converter2.toMat(IplImage.create(sz, 32, 2));
     FloatIndexer newIdx = tmp.createIndexer();
     // copy contents
     for (int i = 0; i < idx.size(0); i++) {
@@ -212,12 +219,12 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
     // load 1st prev image - must have at least 2 images
     if (matA == null) {
-      matA = OpenCV.toMat(grayImgA);
+      matA = converter3.toMat(grayImgA);
       return image;
     }
 
     // current image
-    matB = OpenCV.toMat(grayImgB);
+    matB = converter4.toMat(grayImgB);
 
     if (samplePoint != null) {
       addPoint(samplePoint.x, samplePoint.y);
@@ -327,6 +334,15 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     matB.release();
 
     return image;
+  }
+
+  @Override
+  public void release() {
+    super.release();
+    converter1.close();
+    converter2.close();
+    converter3.close();
+    converter4.close();
   }
 
   @Override

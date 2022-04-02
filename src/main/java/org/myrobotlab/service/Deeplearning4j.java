@@ -87,6 +87,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.opencv.CloseableFrameConverter;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.nd4j.linalg.activations.Activation;
@@ -534,17 +535,18 @@ public class Deeplearning4j extends Service {
 
   public HashMap<String, Double> classifyImageMiniEXCEPTION(IplImage iplImage, Double confidence) throws IOException {
 
+    CloseableFrameConverter converter = new CloseableFrameConverter();
     // resize the image to the target size of 64x64
     // resize to 64x64
     IplImage ret = IplImage.create(64, 64, iplImage.depth(), iplImage.nChannels());
     cvResize(iplImage, ret, Imgproc.INTER_AREA);
 
-    show(ret, "resized");
+    // show(ret, "resized");
     // log.info("Resized Image is : height {} width {}", ret.height(),
     // ret.width());
     // ok.. here we probably need to re-size the input? possibly some other
     // input transforms?
-    BufferedImage buffImg = OpenCV.toBufferedImage(ret);
+    BufferedImage buffImg = converter.toBufferedImage(ret);
     
     // Mat mat = OpenCV.toMat(ret);
     // OpenCVFilter.show(buffImg, "buff");
@@ -586,6 +588,8 @@ public class Deeplearning4j extends Service {
       }
       // now for each label, we have the confidence
     }
+    // free up the converter
+    converter.close();
     // sort the resulting map accoring to the confidence
     return sortHashMapByValues(emotionMap);
   }
@@ -632,8 +636,9 @@ public class Deeplearning4j extends Service {
   }
 
   public List<List<ClassPrediction>> classifyImageDarknet(IplImage iplImage) throws IOException {
+    CloseableFrameConverter converter = new CloseableFrameConverter();
     NativeImageLoader loader = new NativeImageLoader(224, 224, 3, new ColorConversionTransform(COLOR_BGR2RGB));
-    BufferedImage buffImg = OpenCV.toBufferedImage(iplImage);
+    BufferedImage buffImg = converter.toBufferedImage(iplImage);
     INDArray image = loader.asMatrix(buffImg);
     DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
     scaler.transform(image);
@@ -642,18 +647,19 @@ public class Deeplearning4j extends Service {
     List<List<ClassPrediction>> predictions = labels.decodePredictions(result, 10);
     // check output labels of result
     log.info(predictions.toString());
+    converter.close();
     return predictions;
   }
 
   public ArrayList<YoloDetectedObject> classifyImageTinyYolo(IplImage iplImage, int frameIndex) throws IOException {
     // set up input and feed forward
-
+    CloseableFrameConverter converter = new CloseableFrameConverter();
     // TODO: what the heck? how do we know what these are?!
     int gridWidth = 13;
     int gridHeight = 13;
 
     NativeImageLoader loader = new NativeImageLoader(416, 416, 3, new ColorConversionTransform(COLOR_BGR2RGB));
-    BufferedImage buffImg = OpenCV.toBufferedImage(iplImage);
+    BufferedImage buffImg = converter.toBufferedImage(iplImage);
     INDArray image = loader.asMatrix(buffImg);
     DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
     scaler.transform(image);
@@ -711,6 +717,7 @@ public class Deeplearning4j extends Service {
         results.add(yoloobj);
       }
     }
+    converter.close();
     return results;
   }
 
@@ -782,12 +789,14 @@ public class Deeplearning4j extends Service {
 
   public Map<String, Double> classifyImageCustom(IplImage iplImage, ComputationGraph model, List<String> labels) throws IOException {
     // this height width channel info is for VGG16 based models.
+    CloseableFrameConverter converter = new CloseableFrameConverter();
     NativeImageLoader loader = new NativeImageLoader(224, 224, 3);
-    BufferedImage buffImg = OpenCV.toBufferedImage(iplImage);
+    BufferedImage buffImg = converter.toBufferedImage(iplImage);
     INDArray image = loader.asMatrix(buffImg);
     DataNormalization scaler = new VGG16ImagePreProcessor();
     scaler.transform(image);
     INDArray[] output = model.output(false, image);
+    converter.close();
     return decodePredictions(output[0], labels);
   }
 
@@ -821,8 +830,9 @@ public class Deeplearning4j extends Service {
   }
 
   public Map<String, Double> classifyImageVGG16(IplImage iplImage) throws IOException {
+    CloseableFrameConverter converter = new CloseableFrameConverter();
     NativeImageLoader loader = new NativeImageLoader(224, 224, 3);
-    BufferedImage buffImg = OpenCV.toBufferedImage(iplImage);
+    BufferedImage buffImg = converter.toBufferedImage(iplImage);
     INDArray image = loader.asMatrix(buffImg);
     // TODO: we should consider the model as not only the model, but also the
     // input transforms
@@ -835,7 +845,7 @@ public class Deeplearning4j extends Service {
     // TODO: return a more native datastructure!
     // String predictions = TrainedModels.VGG16.decodePredictions(output[0]);
     // log.info("Image Predictions: {}", predictions);
-
+    converter.close();
     return decodeVGG16Predictions(output[0]);
   }
 

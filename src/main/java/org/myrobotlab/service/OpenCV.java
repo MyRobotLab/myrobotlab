@@ -113,14 +113,14 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point2df;
 import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.net.Http;
+import org.myrobotlab.opencv.CloseableFrameConverter;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.FrameFileRecorder;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetectDNN;
+import org.myrobotlab.opencv.OpenCVFilterFaceRecognizer;
 import org.myrobotlab.opencv.OpenCVFilterKinectDepth;
-import org.myrobotlab.opencv.OpenCVFilterLKOpticalTrack;
-import org.myrobotlab.opencv.OpenCVFilterMiniXception;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
@@ -158,6 +158,9 @@ public class OpenCV extends AbstractComputerVision {
 
     @Override
     synchronized public void run() {
+      // create a closeable frame converter
+      CloseableFrameConverter converter = new CloseableFrameConverter();
+
       try {
         log.info("run - capturing");
 
@@ -177,6 +180,7 @@ public class OpenCV extends AbstractComputerVision {
           loops++;
         }
 
+        
         while (capturing && !stopping) {
           Frame newFrame = null;
 
@@ -205,7 +209,7 @@ public class OpenCV extends AbstractComputerVision {
             // here we need ot add the video
 
             IplImage video = ((OpenKinectFrameGrabber) grabber).grabVideo();
-            data.putKinect(toImage(newFrame), video);
+            data.putKinect(converter.toImage(newFrame), video);
           }
 
           processVideo(data);
@@ -234,7 +238,7 @@ public class OpenCV extends AbstractComputerVision {
         }
       }
       grabber = null;
-
+      converter.close();
       // end of stopping
 
       // stopCapture();
@@ -426,75 +430,6 @@ public class OpenCV extends AbstractComputerVision {
     singleFrame = false;
     lastFrame = null;
     blockingData.clear();
-  }
-
-  /**
-   * converting IplImages to BufferedImages
-   * 
-   * @param src
-   *          the source image
-   * @return converted to buffered image
-   */
-  static public BufferedImage toBufferedImage(IplImage src) {
-    OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
-    Java2DFrameConverter converter = new Java2DFrameConverter();
-    Frame frame = grabberConverter.convert(src);
-    return converter.getBufferedImage(frame, 1);
-  }
-
-  static public BufferedImage toBufferedImage(Frame inputFrame) {
-    Java2DFrameConverter converter = new Java2DFrameConverter();
-    return converter.getBufferedImage(inputFrame);
-  }
-
-  static public BufferedImage toBufferedImage(Mat image) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    Java2DFrameConverter jconverter = new Java2DFrameConverter();
-    return jconverter.convert(converterToImage.convert(image));
-  }
-  
-  static public Frame toFrame(IplImage image) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    return converterToImage.convert(image);
-  }
-
-  static public Frame toFrame(Mat image) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    return converterToImage.convert(image);
-  }
-
-  /**
-   * convert BufferedImages to IplImages
-   * 
-   * @param src
-   *          input buffered image
-   * @return iplimage converted
-   */
-  static public IplImage toImage(BufferedImage src) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    Java2DFrameConverter jconverter = new Java2DFrameConverter();
-    return converterToImage.convert(jconverter.convert(src));
-  }
-
-  static public IplImage toImage(Frame image) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    return converterToImage.convertToIplImage(image);
-  }
-
-  static public IplImage toImage(Mat image) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
-    return converterToImage.convert(converterToMat.convert(image));
-  }
-
-  static public Mat toMat(Frame image) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    return converterToImage.convertToMat(image);
-  }
-
-  static public Mat toMat(IplImage image) {
-    OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
-    return converterToMat.convert(converterToMat.convert(image));
   }
   
   public static IplImage cropImage(IplImage img, CvRect rect) {
@@ -1787,19 +1722,21 @@ public class OpenCV extends AbstractComputerVision {
   }
 
   static public void saveToFile(String filename, IplImage image) {
+    CloseableFrameConverter converter = new CloseableFrameConverter(); 
     try {
       int i = filename.lastIndexOf(".");
       String ext = "png";
       if (i > 0) {
         ext = filename.substring(i + 1).toLowerCase();
       }
-      BufferedImage bi = toBufferedImage(image);
+      BufferedImage bi = converter.toBufferedImage(image);
       FileOutputStream fos = new FileOutputStream(filename);
       ImageIO.write(bi, ext, new MemoryCacheImageOutputStream(fos));
       fos.close();
     } catch (IOException e) {
       log.error("saveToFile threw", e);
     }
+    converter.close();
   }
 
   public Integer setCameraIndex(Integer index) {
@@ -2181,14 +2118,16 @@ public class OpenCV extends AbstractComputerVision {
       // Runtime.start("python", "Python");
       OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
 
-//      OpenCVFilterLKOpticalTrack lk = new OpenCVFilterLKOpticalTrack("lk");
-//      cv.addFilter(lk);
-
-      OpenCVFilterFaceDetectDNN faceDnn = new OpenCVFilterFaceDetectDNN("face");
-      cv.addFilter(faceDnn);
-     // OpenCVFilterMiniXception mini = new OpenCVFilterMiniXception("mini");
-     // cv.addFilter(mini);
-      
+      OpenCVFilter fr = new OpenCVFilterFaceRecognizer("fr");
+      cv.addFilter(fr);
+      //OpenCVFilterTracker tracker = new OpenCVFilterTracker("tracker");
+      //cv.addFilter(tracker);
+      // OpenCVFilterLKOpticalTrack lk = new OpenCVFilterLKOpticalTrack("lk");
+      // cv.addFilter(lk);
+      // OpenCVFilterFaceDetectDNN faceDnn = new OpenCVFilterFaceDetectDNN("face");
+      // cv.addFilter(faceDnn);
+      // OpenCVFilterMiniXception mini = new OpenCVFilterMiniXception("mini");
+      // cv.addFilter(mini);
       
       // OpenCVFilterTextDetector td = new OpenCVFilterTextDetector("td");
       // cv.addFilter(td);

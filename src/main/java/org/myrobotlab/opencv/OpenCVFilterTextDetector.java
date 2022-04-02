@@ -118,14 +118,16 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
 
   private ArrayList<DetectedText> detectText(IplImage image) {
     StringBuilder detectedTextLine = new StringBuilder();
-    Mat originalImageMat = OpenCV.toMat(image);
+    CloseableFrameConverter converter1 = new CloseableFrameConverter();
+    Mat originalImageMat = converter1.toMat(image);
     // This is a ratio between the size of the input image vs the input for the
     // east detector.
     Point2f ratio = new Point2f((float) image.width() / newWidth, (float) image.height() / newHeight);
     // Resize the image to mat
     IplImage ret = IplImage.create(newWidth, newHeight, image.depth(), image.nChannels());
     cvResize(image, ret, Imgproc.INTER_AREA);
-    Mat frame = OpenCV.toMat(ret);
+    CloseableFrameConverter converter2 = new CloseableFrameConverter();
+    Mat frame = converter2.toMat(ret);
     // Create the blob to put into the EAST text detector
     Mat blob = blobFromImage(frame, 1.0, new Size(newWidth, newHeight), new Scalar(123.68, 116.78, 103.94, 0.0), true, false, CV_32F);
     detector.setInput(blob);
@@ -175,6 +177,8 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
       System.err.println("Detected Text : " + detectedTextLine.toString());
       // stuff this in the opencvdata.
     }
+    converter1.close();
+    converter2.close();
     return results;
   }
 
@@ -195,7 +199,8 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
 
   private String ocrMat(Mat input) {
     String result = null;
-    BufferedImage candidate = OpenCV.toBufferedImage(OpenCV.toFrame(input));
+    CloseableFrameConverter converter = new CloseableFrameConverter();
+    BufferedImage candidate = converter.toBufferedImage(input);
     try {
       if (tesseract == null) {
         tesseract = (TesseractOcr) Runtime.start("tesseract", "TesseractOcr");
@@ -204,6 +209,7 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     } catch (IOException e) {
       log.warn("Tesseract failure.", e);
     }
+    converter.close();
     // show(input, result);
     return result;
   }

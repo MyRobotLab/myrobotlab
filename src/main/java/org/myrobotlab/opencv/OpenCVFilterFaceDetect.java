@@ -219,8 +219,10 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
     if (cascade != null) {
       RectVector vec = new RectVector();
 
-      Mat imageMat = OpenCV.toMat(image);
+      CloseableFrameConverter converter = new CloseableFrameConverter();
+      Mat imageMat = converter.toMat(image);
       cascade.detectMultiScale(imageMat, vec);
+      converter.close();
       // CvSeq faces = cvHaarDetectObjects(image, cascade, storage, scaleFactor,
       // minNeighbors, option);
       if (vec != null) {

@@ -433,14 +433,20 @@ public abstract class OpenCVFilter implements Serializable, CvFilter {
   public static CanvasFrame show(final IplImage image, final String title) {
     CanvasFrame canvas = new CanvasFrame(title);
     // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    canvas.showImage(OpenCV.toFrame(image));
+    CloseableFrameConverter convert = new CloseableFrameConverter();
+    canvas.showImage(convert.toFrame(image));
+    // TODO: verify that this doesn't blow up
+    convert.close();
     return canvas;
   }
 
   public static void show(final Mat image, final String title) {
     CanvasFrame canvas = new CanvasFrame(title);
     // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    canvas.showImage(OpenCV.toFrame(image));
+    CloseableFrameConverter conv = new CloseableFrameConverter();
+    canvas.showImage(conv.toFrame(image));
+    // TODO: does this cause the canvas to blow up?
+    conv.close();
   }
 
   public boolean isEnabled() {

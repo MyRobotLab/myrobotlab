@@ -97,6 +97,8 @@ public class OpenCVFilterTracker extends OpenCVFilter {
 
   // To hold x,y,w,h
   int[] points = new int[4];
+  
+  transient private CloseableFrameConverter converter = new CloseableFrameConverter();
 
   public OpenCVFilterTracker() {
     super();
@@ -106,24 +108,25 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     super(name);
   }
 
-  private Frame makeGrayScale(IplImage image) {
+  private IplImage makeGrayScale(IplImage image) {
     IplImage imageBW = IplImage.create(image.width(), image.height(), 8, 1);
     cvCvtColor(image, imageBW, CV_BGR2GRAY);
-    return OpenCV.toFrame(imageBW);
+    return imageBW;
   }
 
   @Override
   public IplImage process(IplImage image) {
-
     // TODO: I suspect this would be faster if we cut color first.
     // cvCutColor()
-    Frame frame = null;
+    
     if (blackAndWhite) {
-      frame = makeGrayScale(image);
+      IplImage imageBw = makeGrayScale(image); 
+      // frame = converter.toFrame(imageBw);
+      mat = converter.toMat(imageBw);
     } else {
-      frame = OpenCV.toFrame(image);
+      // frame = converter.toFrame(image);
+      mat = converter.toMat(image);
     }
-    mat = OpenCV.toMat(frame);
     if (boundingBox != null && tracker != null) {
       // log.info("Yes ! Bounding box : {} {} {} {} " , boundingBox.x(),
       // boundingBox.y(), boundingBox.width()
@@ -147,7 +150,15 @@ public class OpenCVFilterTracker extends OpenCVFilter {
       data.put("TrackingPoints", pointsToPublish);
 
     }
+   
     return image;
+  }
+
+  @Override
+  public void release() {
+    // TODO Auto-generated method stub
+    super.release();
+    converter.close();
   }
 
   private Tracker createTracker(String trackerType) {

@@ -109,6 +109,14 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   private boolean face = false;
   private String lastRecognizedName = null;
   public String faceModelFilename = "faceModel.bin";
+  transient private CloseableFrameConverter converter = new CloseableFrameConverter();
+  
+  @Override
+  public void release() {
+    // TODO Auto-generated method stub
+    super.release();
+    converter.close();
+  }
 
   public OpenCVFilterFaceRecognizer(String name) {
     super(name);
@@ -380,7 +388,9 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   public IplImage process(IplImage image) throws InterruptedException {
     // convert to grayscale
     // Frame grayFrame =
-    Mat bwImgMat = makeGrayScaleMat(image);
+    
+    IplImage imageBW = makeGrayScale(image);
+    Mat bwImgMat = converter.toMat(imageBW);
     ArrayList<DetectedFace> dFaces = extractDetectedFaces(bwImgMat);
     // Ok, for each of these detected faces we should try to classify them.
     for (DetectedFace dF : dFaces) {
@@ -499,19 +509,17 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     UUID randValue = UUID.randomUUID();
     String filename = trainingDir + File.separator + label + File.separator + randValue + ".png";
     // TODO: we need to be able to write a unicode filename with a path here..
-    BufferedImage buffImg = OpenCV.toBufferedImage(dFaceMat);
+    CloseableFrameConverter converter = new CloseableFrameConverter();
+    BufferedImage buffImg = converter.toBufferedImage(dFaceMat);
     ImageIO.write(buffImg, "png", new File(filename));
+    converter.close();
     log.info("Saved Training image {} ", filename);
   }
 
-  private Frame makeGrayScale(IplImage image) {
+  private IplImage makeGrayScale(IplImage image) {
     IplImage imageBW = IplImage.create(image.width(), image.height(), 8, 1);
     cvCvtColor(image, imageBW, CV_BGR2GRAY);
-    return OpenCV.toFrame(imageBW);
-  }
-
-  private Mat makeGrayScaleMat(IplImage image) {
-    return OpenCV.toMat(makeGrayScale(image));
+    return imageBW;
   }
 
   private ArrayList<DetectedFace> extractDetectedFaces(Mat bwImgMat) {

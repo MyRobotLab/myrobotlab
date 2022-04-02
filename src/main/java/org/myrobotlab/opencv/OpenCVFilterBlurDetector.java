@@ -45,7 +45,8 @@ public class OpenCVFilterBlurDetector extends OpenCVFilter {
   public static double varianceOfLaplacian(IplImage image) {
     // compute the Laplacian of the image and then return the focus
     // measure, which is simply the variance of the Laplacian
-    Mat input = OpenCV.toMat(image);
+    CloseableFrameConverter converter = new CloseableFrameConverter();
+    Mat input = converter.toMat(image);
     Mat output = new Mat();
     Laplacian(input, output, CV_64F);
     Mat mean = new Mat();
@@ -55,6 +56,7 @@ public class OpenCVFilterBlurDetector extends OpenCVFilter {
     DoubleRawIndexer indexer = stdDev.createIndexer();
     double f = indexer.get(0, 0);
     indexer.close();
+    converter.close();
     // stddev squared is the variance.
     return f * f;
   }
