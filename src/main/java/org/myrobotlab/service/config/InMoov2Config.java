@@ -450,7 +450,7 @@ public class InMoov2Config extends ServiceConfig {
   public boolean enableOpencv = false;
   public boolean enableRightArm = false;
   public boolean enableRightHand = false;
-  public boolean enableRightHandSensors = false;
+  public boolean enableRightHandSensor = false;
   public boolean enableServoMixer = false;
   public boolean enableTorso = false;
   public boolean enableSimulator = false;
@@ -487,7 +487,6 @@ public class InMoov2Config extends ServiceConfig {
   public String eyeTracking;
   public String imageDisplay;
   public String chatBot;
-  public String chatBotSearch;
   public String ear;
   public String fsm;
   public String htmlFilter;
