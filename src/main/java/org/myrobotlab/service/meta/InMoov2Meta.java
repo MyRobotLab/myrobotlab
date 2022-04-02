@@ -63,7 +63,7 @@ public class InMoov2Meta extends MetaData {
     addPeer("mouth", "MarySpeech");
     addPeer("ear", "WebkitSpeechRecognition");
     addPeer("chatBot", "ProgramAB");
-    addPeer("chatBotSearch", "GoogleSearch");
+    // addPeer("chatBotSearch", "GoogleSearch");
 
     addPeer("imageDisplay", "ImageDisplay");
 
