@@ -271,6 +271,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   boolean autoStartBrowser = false;
 
   transient ProgramAB chatBot;
+  
+  transient GoogleSearch chatBotSearch;
 
   String currentConfigurationName = "default";
   transient SpeechRecognizer ear;
@@ -307,6 +309,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
    */
 
   boolean isChatBotActivated = false;
+  
+  boolean isChatBotSearchActivated = false;
 
   boolean isEarActivated = false;
 
@@ -342,8 +346,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   boolean isUltrasonicLeftActivated = false;
 
   boolean isServoMixerActivated = false;
-
-  boolean isController3Activated = false;
 
   // TODO - refactor into a Simulator interface when more simulators are borgd
   transient JMonkeyEngine simulator;
@@ -395,6 +397,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   transient WebGui webgui;
 
   protected List<String> configList;
+  
+  private boolean isController3Activated;
 
   private boolean isController4Activated;
 
@@ -1611,7 +1615,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   public InMoov2Arm startLeftArm(String port) {
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
-    // speakBlocking(get("STARTINGHEAD") + " " + port);
+    // speakBlocking(get("STARTINGLEFTARM") + " " + port);
     // ??? SHOULD THERE BE REFERENCES AT ALL ??? ... probably not
 
     speakBlocking(get("STARTINGLEFTARM"));
@@ -2385,9 +2389,11 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     config.enableLeftHand = isLeftHandActivated;
     config.enableLeftHandSensor = isLeftHandSensorActivated;
     // config.isLeftPortActivated = isLeftPortActivated;
-    config.enableNeoPixel = isNeopixelActivated;
-    config.enableOpenCV = isOpenCvActivated;
+    config.enableNeopixel = isNeopixelActivated;
+    config.enableOpencv = isOpencvActivated;
     config.enablePir = isPirActivated;
+    config.enableChatBot = isChatBotActivated;
+    config.enableChatBotSearch = isChatBotSearchActivated;
     config.enableUltrasonicRight = isUltrasonicRightActivated;
     config.enableUltrasonicLeft = isUltrasonicLeftActivated;
     config.enableRightArm = isRightArmActivated;
@@ -2475,7 +2481,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
        * stopNeopixelAnimation(); }
        */
 
-      if (config.enableOpenCV) {
+      if (config.enableOpencv) {
         startOpenCV();
       } else {
         stopOpenCV();
@@ -2536,10 +2542,22 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
         stopPir();
       }
 
-      if (config.enableNeoPixel) {
+      if (config.enableNeopixel) {
         startNeopixel();
       } else {
         stopNeopixelAnimation();
+      }
+      
+      if (config.enableChatBot) {
+        startChatBot();
+      } else {
+        stopChatBot();
+      }
+      
+      if (config.enableChatBotSearch) {
+        startChatBotSearch();
+      } else {
+        stopChatBotSearch();
       }
 
       if (config.loadGestures) {
