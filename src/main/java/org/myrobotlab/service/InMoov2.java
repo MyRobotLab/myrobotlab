@@ -2389,7 +2389,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     config.enableOpencv = isOpenCvActivated;
     config.enablePir = isPirActivated;
     config.enableChatBot = isChatBotActivated;
-    config.enableChatBotSearch = isChatBotSearchActivated;
     config.enableUltrasonicRight = isUltrasonicRightActivated;
     config.enableUltrasonicLeft = isUltrasonicLeftActivated;
     config.enableRightArm = isRightArmActivated;
