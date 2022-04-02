@@ -2498,7 +2498,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
         stopRightHand();
       }
 
-      if (config.enableRightHandSensors) {
+      if (config.enableRightHandSensor) {
         // the hell if I know ?
       }
 
