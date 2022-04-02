@@ -2392,7 +2392,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     config.enableUltrasonicLeft = isUltrasonicLeftActivated;
     config.enableRightArm = isRightArmActivated;
     config.enableRightHand = isRightHandActivated;
-    config.enableRightHandSensors = isRightHandSensorActivated;
+    config.enableRightHandSensor = isRightHandSensorActivated;
     // config.isRightPortActivated = isRightPortActivated;
     // config.enableSimulator = isSimulatorActivated;
 
@@ -2497,7 +2497,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
         stopRightHand();
       }
 
-      if (config.enableRightHandSensors) {
+      if (config.enableRightHandSensor) {
         // the hell if I know ?
       }
 
