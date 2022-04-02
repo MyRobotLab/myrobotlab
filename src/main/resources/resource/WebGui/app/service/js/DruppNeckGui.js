@@ -3,16 +3,6 @@ angular.module('mrlapp.service.DruppNeckGui', []).controller('DruppNeckGuiCtrl',
     var _self = this
     var msg = this.msg
 
-    $scope.servoUpIsActive = function() {
-        msg.send('runtime.start("servoUp", "Servo")')
-    }
-    $scope.servoMiddleIsActive = function() {
-        msg.send('runtime.start("servoMiddle", "Servo")')
-    }
-    $scope.servoDownIsActive = function() {
-        msg.send('runtime.start("servoDown", "Servo")')
-    }
-
     // init
 
     // GOOD TEMPLATE TO FOLLOW
