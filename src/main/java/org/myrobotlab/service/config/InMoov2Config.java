@@ -462,7 +462,7 @@ public class InMoov2Config extends ServiceConfig {
   public boolean pirWakeUp = false;
   public boolean pirEnableTracking = false;
   
-  public boolean loadGestures = false;
+  public boolean loadGestures = true;
 
   public boolean virtual = false;
 
