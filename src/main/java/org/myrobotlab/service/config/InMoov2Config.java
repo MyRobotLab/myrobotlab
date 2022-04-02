@@ -447,17 +447,18 @@ public class InMoov2Config extends ServiceConfig {
   public boolean enableLeftArm = false;
   public boolean enableLeftHand = false;
   public boolean enableLeftHandSensor = false;
-  public boolean enableOpenCV = false;
+  public boolean enableOpencv = false;
   public boolean enableRightArm = false;
   public boolean enableRightHand = false;
-  public boolean enableRightHandSensors = false;
+  public boolean enableRightHandSensor = false;
   public boolean enableServoMixer = false;
   public boolean enableTorso = false;
   public boolean enableSimulator = false;
   public boolean enableUltrasonicLeft = false;
   public boolean enableUltrasonicRight = false;
-  public boolean enableNeoPixel = false;
+  public boolean enableNeopixel = false;
   public boolean enablePir = false;
+  public boolean enableChatBot = false;
   public boolean pirWakeUp = false;
   public boolean pirEnableTracking = false;
   
@@ -500,6 +501,7 @@ public class InMoov2Config extends ServiceConfig {
   public String ultrasonicRight;
   public String ultrasonicLeft;
   public String pir;
+  public String neopixel;
   public String servoMixer;
   public String opencv;
   public String audioPlayer;
