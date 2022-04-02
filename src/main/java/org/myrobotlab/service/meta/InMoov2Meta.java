@@ -33,12 +33,7 @@ public class InMoov2Meta extends MetaData {
     addPeer("rightArm", "InMoov2Arm");
     addPeer("rightHand", "InMoov2Hand");
 
-    addPeer("leap", "LeapMotion");
-
     addPeer("opencv", "OpenCV");
-
-    addPeer("left", "Arduino");
-    addPeer("right", "Arduino");
 
     addPeer("mouthControl", "MouthControl");
     addPeer("ultrasonicRight", "UltrasonicSensor");
@@ -61,9 +56,14 @@ public class InMoov2Meta extends MetaData {
     addPeer("ultrasonicRight", "UltrasonicSensor", "measure distance on the right");
     addPeer("ultrasonicLeft", "UltrasonicSensor", "measure distance on the left");
     addPeer("pir", "Pir", "infrared sensor");
+    addPeer("leap", "LeapMotion");
+    addPeer("kinect", "Kinect");
+    // hand sensors??
 
     addPeer("mouth", "MarySpeech");
     addPeer("ear", "WebkitSpeechRecognition");
+    addPeer("chatBot", "ProgramAB");
+    addPeer("chatBotSearch", "GoogleSearch");
 
     addPeer("imageDisplay", "ImageDisplay");
 
@@ -77,12 +77,6 @@ public class InMoov2Meta extends MetaData {
     addPeer("simulator", "JMonkeyEngine");
 
     addDependency("fr.inmoov", "inmoov2", null, "zip");
-
-    // the two legacy controllers .. :(
-    addPeer("left", "Arduino");
-    addPeer("right", "Arduino");
-    addPeer("controller3", "Arduino");
-    addPeer("controller4", "Arduino");
     
     addPeer("fsm", "FiniteStateMachine");
   }
@@ -98,6 +92,7 @@ public class InMoov2Meta extends MetaData {
 
     inmoov.audioPlayer = name + ".audioPlayer";
     inmoov.chatBot = name + ".chatBot";
+    inmoov.chatBotSearch = name + ".chatBotSearch";
     inmoov.ear = name + ".ear";
     inmoov.eyeTracking = name + ".eyeTracking";
     inmoov.fsm = name + ".fsm";
@@ -112,6 +107,7 @@ public class InMoov2Meta extends MetaData {
     inmoov.opencv = name + ".opencv";
     inmoov.pid = name + ".pid";
     inmoov.pir = name + ".pir";
+    inmoov.neopixel = name + ".neopixel";
     inmoov.random = name + ".random";
     inmoov.rightArm = name + ".rightArm";
     inmoov.rightHand = name + ".rightHand";
@@ -146,6 +142,7 @@ public class InMoov2Meta extends MetaData {
     headTracking.pan = name + ".head.rothead";
     headTracking.cv = name + ".opencv";
     headTracking.pid = name + ".pid";
+    headTracking.controller = name + ".left";
 
     // == Peer - eyeTracking =============================
     TrackingConfig eyeTracking = (TrackingConfig) plan.getPeerConfig("eyeTracking");
