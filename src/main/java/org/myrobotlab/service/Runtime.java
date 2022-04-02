@@ -29,7 +29,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -387,10 +386,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         // get actual Name
         String actualPeerName = getPeerName(peer, sc, peers, name);
         if (actualPeerName == null) {
-          // default 
+          // default
           actualPeerName = String.format("%s.%s", name, peer);
         }
-        
+
         if (actualPeerName != null && !isStarted(actualPeerName)) {
           start(actualPeerName);
         }
@@ -453,7 +452,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         }
       }
     }
-    // last ditch attempt at getting the name - will default it if parentName is supplied
+    // last ditch attempt at getting the name - will default it if parentName is
+    // supplied
     if (parentName != null) {
       return String.format("%s.%s", parentName, peerKey);
     }
@@ -1546,7 +1546,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       Plan plan = runtime.getPlan();
       ServiceConfig sc = plan.get(inName);
       if (sc == null) {
-       log.debug("service config not available for {}", inName);
+        log.debug("service config not available for {}", inName);
       } else {
         sc.state = "STOPPED";
       }
@@ -3368,11 +3368,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     Runtime runtime = Runtime.getInstance();
     return runtime.getLocalPlan();
   }
-  
+
   public Plan getLocalPlan() {
     return plan;
   }
-  
 
   static public void clear() {
     Runtime runtime = Runtime.getInstance();
@@ -3772,7 +3771,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       log.info("no new name or type information provided - we will use existing plan");
       ServiceConfig sc = plan.get("runtime");
       if (sc != null) {
-        log.info("found runtime config");        
+        log.info("found runtime config");
       } else {
         log.warn("did not find runtime config");
       }
@@ -3808,7 +3807,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         if (newPlan == null) {
           log.info("here");
         }
-        
+
         for (String scs : newPlan.getConfig().keySet()) {
           newPlan.getConfig().get(scs).state = "LOADED";
         }
@@ -3823,19 +3822,19 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     return plan;
   }
-  
-  public ServiceConfig readServiceConfig(String name) { 
-  // if config name set and yaml file exists - it takes precedence
-  String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
-  File check = new File(filename);
-  ServiceConfig sc = null;
-  if (runtime.getConfigName() != null && check.exists()) {
-    try {
-      sc = CodecUtils.readServiceConfig(filename);
-    } catch (IOException e) {
-      error(e);
+
+  public ServiceConfig readServiceConfig(String name) {
+    // if config name set and yaml file exists - it takes precedence
+    String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + name + ".yml";
+    File check = new File(filename);
+    ServiceConfig sc = null;
+    if (runtime.getConfigName() != null && check.exists()) {
+      try {
+        sc = CodecUtils.readServiceConfig(filename);
+      } catch (IOException e) {
+        error(e);
+      }
     }
-  }
     return sc;
   }
 
@@ -3902,37 +3901,45 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * service in the current "config name", if the config name does not exist
    * will error
    */
-  public boolean save() {
+  public boolean save(String serviceName, String filename) {
     try {
 
-      if (getConfigName() == null || getConfigName().trim().length() == 0) {
-        error("cannot save config - set config name first");
-        return false;
+      // get service
+      if (serviceName == null) {
+        serviceName = "runtime";
+      }
+      ServiceInterface si = getService(serviceName);
+
+      // get filename
+      if (filename == null) {
+        if (getConfigName() == null) {
+          setConfigName("default");
+        }
+        filename = Runtime.getInstance().getConfigDir() + fs + getConfigName() + fs + si.getName() + ".yml";
       }
 
-      String filename = Runtime.getInstance().getConfigDir() + fs + getConfigName() + fs + getName() + ".yml";
-
-      String format = filename.substring(filename.lastIndexOf(".") + 1);
-      ServiceConfig config = getConfig();
-      String data = null;
-
-      if ("json".equals(format.toLowerCase())) {
-        data = CodecUtils.toJson(config);
-      } else {
-        data = CodecUtils.toYaml(config);
-      }
+      // get config and save file
+      ServiceConfig config = si.getConfig();
+      String data = CodecUtils.toYaml(config);
       FileIO.toFile(filename, data.getBytes());
 
-      info("saved %s config to %s", getName(), filename);
+      info("saved %s config to %s", si.getName(), filename);
+
       boolean ret = true;
 
-      for (ServiceInterface si : getLocalServices().values()) {
-        if (si.getName().equals("runtime")) {
-          continue;
+      // runtime is a special case - it saves self and everyone else
+      if ("runtime".equals(serviceName)) {
+
+        for (ServiceInterface s : getLocalServices().values()) {
+          if (s.getName().equals("runtime")) {
+            continue;
+          }
+          ret &= s.save(getConfigDir() + fs + getConfigName() + fs + s.getName() + ".yml");
         }
-        ret &= si.save(getConfigDir() + fs + getConfigName() + fs + si.getName() + ".yml");
       }
+
       invoke("publishConfigList");
+
       return ret;
     } catch (Exception e) {
       error(e);
@@ -3945,9 +3952,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       error("config name cannot be empty");
       return null;
     }
-    
+
     invoke("publishConfigList");
-    
+
     return this.configName = configName.trim();
   }
 
