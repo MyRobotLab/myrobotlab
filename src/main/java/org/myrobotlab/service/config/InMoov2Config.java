@@ -440,14 +440,14 @@ public class InMoov2Config extends ServiceConfig {
    * 'must' keep listening since in this idle state it needs to search for the
    * wake word
    */
-  // public String wakeWord; - needs to be in the speech syntheis config
+  // public String wakeWord; - needs to be in the speech synthesis config
 
   
   public boolean enableHead = false;
   public boolean enableLeftArm = false;
   public boolean enableLeftHand = false;
   public boolean enableLeftHandSensor = false;
-  public boolean enableOpenCV = false;
+  public boolean enableOpencv = false;
   public boolean enableRightArm = false;
   public boolean enableRightHand = false;
   public boolean enableRightHandSensors = false;
@@ -456,8 +456,10 @@ public class InMoov2Config extends ServiceConfig {
   public boolean enableSimulator = false;
   public boolean enableUltrasonicLeft = false;
   public boolean enableUltrasonicRight = false;
-  public boolean enableNeoPixel = false;
+  public boolean enableNeopixel = false;
   public boolean enablePir = false;
+  public boolean enableChatBot = false;
+  public boolean enableChatBotSearch = false;
   public boolean pirWakeUp = false;
   public boolean pirEnableTracking = false;
   
@@ -485,6 +487,7 @@ public class InMoov2Config extends ServiceConfig {
   public String eyeTracking;
   public String imageDisplay;
   public String chatBot;
+  public String chatBotSearch;
   public String ear;
   public String fsm;
   public String htmlFilter;
@@ -500,6 +503,7 @@ public class InMoov2Config extends ServiceConfig {
   public String ultrasonicRight;
   public String ultrasonicLeft;
   public String pir;
+  public String neopixel;
   public String servoMixer;
   public String opencv;
   public String audioPlayer;
