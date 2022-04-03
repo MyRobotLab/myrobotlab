@@ -1,6 +1,8 @@
 package org.myrobotlab.service.meta;
 
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.MarySpeechConfig;
 import org.myrobotlab.service.meta.abstracts.AbstractSpeechSynthesisMeta;
 import org.slf4j.Logger;
 
@@ -50,6 +52,20 @@ public class MarySpeechMeta extends AbstractSpeechSynthesisMeta {
     exclude("org.apache.opennlp", "opennlp-tools");
     exclude("org.slf4j", "slf4j-log4j12");
 
+  }
+  
+  public Plan getDefault(String name) {
+
+    Plan plan = new Plan(name);
+    plan.putPeers(name, peers);
+
+    MarySpeechConfig config = new MarySpeechConfig();
+    config.audioFile = name + ".audioFile";
+
+    // add self last - desired order or construction
+    plan.addConfig(config);
+
+    return plan;
   }
 
 }

@@ -100,12 +100,6 @@ public class IndianTts extends AbstractSpeechSynthesis {
     addVoice("Sri", "female", "hi", null);
   }
 
-  @Override
-  public ServiceConfig getConfig() {
-    IndianTtsConfig config = (IndianTtsConfig) super.getConfig((SpeechSynthesisConfig) new IndianTtsConfig());
-    return config;
-  }
-
   public static void main(String[] args) throws Exception {
 
     LoggingFactory.init(Level.INFO);

@@ -1508,52 +1508,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public boolean save() {
-    return save(null, null, null);
+    Runtime runtime = Runtime.getInstance();
+    return runtime.save(getName(), null);
   }
 
   public boolean save(String filename) {
-    return save(filename, null, null);
-  }
-
-  public boolean save(String filename, Boolean allowNullFields, Boolean saveNonConfigServices) {
-    try {
-
-      if (allowNullFields == null) {
-        allowNullFields = true;
-      }
-
-      if (saveNonConfigServices == null) {
-        saveNonConfigServices = false;
-      }
-
-      if (filename == null) {
-        filename = Runtime.getInstance().getConfigDir() + fs + Runtime.getInstance().getConfigName() + fs + getName() + ".yml";
-      }
-
-      String format = filename.substring(filename.lastIndexOf(".") + 1);
-      ServiceConfig config = getConfig();
-
-      if (config == null) {
-        log.info("{} has null config - not saving", getName());
-        return false;
-      }
-
-      String data = null;
-      if ("json".equals(format.toLowerCase())) {
-        data = CodecUtils.toJson(config);
-      } else {
-        data = CodecUtils.toYaml(config);
-      }
-
-      FileIO.toFile(filename, data.getBytes());
-
-      info("saved %s config to %s", getName(), filename);
-      return true;
-
-    } catch (Exception e) {
-      error(e);
-    }
-    return false;
+    Runtime runtime = Runtime.getInstance();
+    return runtime.save(getName(), filename);
   }
 
   public ServiceInterface getPeer(String peerKey) {

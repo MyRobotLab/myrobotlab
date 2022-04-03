@@ -316,6 +316,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
       transition.begin = t.getSourceState().getId();
       transition.end = t.getTargetState().getId();
       transition.event = t.getId();
+      c.transitions.add(transition);
     }
     return c;
   }
@@ -369,6 +370,8 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
       fsm.fire("ill-event");
       fsm.fire("ill-event");
       fsm.fire("ill-event");
+      
+        fsm.save();
 
       fsm.addScheduledEvent("clear-event", 1000);
 

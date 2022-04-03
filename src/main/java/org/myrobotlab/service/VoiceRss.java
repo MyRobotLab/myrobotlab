@@ -131,12 +131,6 @@ public class VoiceRss extends AbstractSpeechSynthesis {
     addVoice("Elsa", "female", "sv-se", "sv-se"); // Swedish (Sweden)
   }
 
-  @Override
-  public ServiceConfig getConfig() {
-    VoiceRssConfig config = (VoiceRssConfig) super.getConfig((SpeechSynthesisConfig) new VoiceRssConfig());
-    return config;
-  }
-
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
     // Runtime.start("gui", "SwingGui");
