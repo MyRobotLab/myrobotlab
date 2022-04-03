@@ -1055,12 +1055,12 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     Spatial spatial = get(path);
 
     if (spatial == null) {
-      error("geteUserData %s cannot be found", path);
+      log.warn("geteUserData {} cannot be found", path);
       return null;
     }
 
     if (spatial instanceof Geometry) {
-      error("geteUserData %s found but is Geometry not Node", path);
+      log.warn("geteUserData {} found but is Geometry not Node", path);
       return null;
     }
 
@@ -1207,6 +1207,10 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   public void loadModels(String dirPath) {
+    if (modelPaths.contains(dirPath)) {
+      info("already loaded %s", dirPath);
+      return;
+    }
     modelPaths.add(dirPath);
     traverseLoadModels(dirPath);
   }
@@ -1982,7 +1986,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   transient private Thread mainThread;
 
-  protected JMonkeyEngineConfig config;
+  protected JMonkeyEngineConfig newConfig;
 
   public void simpleInitApp() {
 
@@ -2316,9 +2320,10 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
       // if we have config to process
       // process it
-      if (config != null) {
-        loadDelayed(config);
-        config = null;
+      newConfig = (JMonkeyEngineConfig) config;
+      if (newConfig != null) {
+        loadDelayed(newConfig);
+        newConfig = null;
       }
 
     } catch (Exception e) {
@@ -2603,8 +2608,10 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       }
     }
 
-    for (String name : config.multiMapped.keySet()) {
-      multiMap(name, config.multiMapped.get(name));
+    if (config.multiMapped != null) {
+      for (String name : config.multiMapped.keySet()) {
+        multiMap(name, config.multiMapped.get(name));
+      }
     }
 
     if (config.cameraLookAt != null) {
@@ -2614,14 +2621,11 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     return c;
   }
 
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     if (app != null) {
       // if there is an app we can load immediately
       loadDelayed(c);
-    } else {
-      // otherwise we'll need to delay loading
-      config = (JMonkeyEngineConfig) c;
-    }
+    } 
     return c;
   }
 

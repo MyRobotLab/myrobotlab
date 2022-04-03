@@ -8,8 +8,9 @@
                 <td colspan="100%">
                     <h5>{{key}}<h5>
                     <canvas id="line" class="chart chart-line" ng-show="pidData.show" chart-data="pidData.chart.data" chart-labels="pidData.chart.labels" chart-series="pidData.chart.series" chart-options="options" chart-dataset-override="datasetOverride" chart-click="onClick">
-            </canvas </td>
-        </tr>
+                    </canvas>
+                </td>
+            </tr>
             <tr>
                 <th></th>
                 <th>key</th>
@@ -35,7 +36,7 @@
                 <td>{{value.kp}} </td>
                 <td>{{value.ki}} </td>
                 <td>{{value.kd}} </td>
-                <td>{{value.controllerDirection}}</td>
+                <td>{{value.inverted}}</td>
                 <td>{{value.setpoint}}</td>
                 <td>{{value.outMin}}</td>
                 <td>{{value.outMax}}</td>
@@ -70,7 +71,7 @@
                     <input type="text" class="form-control small-text-form" ng-model="option.selected.kd"/>
                 </td>
                 <td>
-                    <input type="text" class="form-control small-text-form" ng-model="option.selected.controllerDirection"/>
+                    <input type="text" class="form-control small-text-form" ng-model="option.selected.inverted"/>
                 </td>
                 <td>
                     <input type="text" class="form-control small-text-form" ng-model="option.selected.setpoint"/>

@@ -66,6 +66,12 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 
   transient Object pinImpl;
 
+  /**
+   * rate in Hz for which the pin will be polled
+   * 0 == no rate imposed 
+   */
+  int pollRateHz = 0;
+
   public PinDefinition(String serviceName, int address, String pin) {
     super(serviceName);
     this.address = address;
@@ -212,6 +218,14 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 
   public void canRead(boolean canRead) {
     this.canRead = canRead;
+  }
+
+  public void setPollRate(int rateHz) {
+    this.pollRateHz  = rateHz;
+  }
+  
+  public int getPollRate() {
+    return pollRateHz;
   }
 
 }

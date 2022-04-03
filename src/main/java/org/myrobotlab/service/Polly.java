@@ -5,12 +5,12 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.config.WebGuiConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
@@ -205,14 +205,34 @@ public class Polly extends AbstractSpeechSynthesis {
 
   public static void main(String[] args) {
     try {
-      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
       LoggingFactory.init("INFO");
+      
+      // Runtime.start("polly", "Polly");
+//      Runtime runtime = Runtime.getInstance();
+//      runtime.save();
 
-      Runtime.start("python", "Python");
+      // Runtime.start("python", "Python");
+      
+      Plan plan = Runtime.load("webgui", "WebGui");
+      // Plan plan = Runtime.load("polly", "Polly");
+      
+      WebGuiConfig webgui = (WebGuiConfig)plan.get("webgui");
+      webgui.autoStartBrowser = false;
+      
+      Runtime.setConfig("default");
+      Runtime.load("polly");
 
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.startService();
+      Runtime.start("webgui");
+      Runtime.start("polly");
+
+//      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+//      webgui.autoStartBrowser(false);
+//      webgui.startService();
+
+      boolean b = true;
+      if (b) {
+        return;
+      }
 
       // iterate through all speech services
       // all will "load" voices and adhere to the AbtractSpeechSynthesis
@@ -227,13 +247,10 @@ public class Polly extends AbstractSpeechSynthesis {
       // test overriding default
 
       // test setting Runtime.locale
-      Platform.setVirtual(true);
+      // Platform.setVirtual(true);
 
-      LoggingFactory.init(Level.INFO);
+      // LoggingFactory.init(Level.INFO);
 
-      Runtime.getInstance(args); // <-- nice in that you can process command
-                                 // line
-                                 // args this way
       // set language universally
       // Runtime.setLanguage("pt");
       // Runtime.start("gui", "SwingGui");
@@ -246,11 +263,6 @@ public class Polly extends AbstractSpeechSynthesis {
       log.info("polly voice is {}", polly.getVoice());
       // polly.speak(String.format("allo there my name is %s",
       // polly.getVoice().getName()));
-
-      boolean b = true;
-      if (b) {
-        return;
-      }
 
       // Runtime.start("gui", "SwingGui");
       // add your amazon access key & secret
@@ -343,13 +355,12 @@ public class Polly extends AbstractSpeechSynthesis {
       polly.speak("or to take arms against a see of troubles");
 
       log.info("finished");
-
     } catch (Exception e) {
       log.error("main threw", e);
     }
-
   }
-  
+
+  @Override
   public void releaseService() {
     super.stopService();
     if (polly != null) {
@@ -362,5 +373,11 @@ public class Polly extends AbstractSpeechSynthesis {
     setReady(polly != null ? true : false);
     return ready;
   }
+  
+//  @Override
+//  public ServiceConfig getConfig() {
+//    PollyConfig config = (PollyConfig) super.getConfig();
+//    return config;
+//  }
 
 }

@@ -11,14 +11,8 @@ public class ProgramABMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
-  public ProgramABMeta(String name) {
-
-    super(name);
+  public ProgramABMeta() {
 
     addDescription("AIML 2.0 Reference interpreter based on Program AB");
     addCategory("ai");

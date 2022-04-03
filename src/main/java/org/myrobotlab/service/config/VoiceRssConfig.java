@@ -1,5 +1,5 @@
 package org.myrobotlab.service.config;
 
-public class VoiceRssConfig extends AbstractSpeechSynthesisConfig {
+public class VoiceRssConfig extends SpeechSynthesisConfig {
 
 }

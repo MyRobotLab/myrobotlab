@@ -1,6 +1,6 @@
 package org.myrobotlab.service.config;
 
-public class MotorPortConfig extends AbstractMotorConfig {
+public class MotorPortConfig extends GeneralMotorConfig {
 
   public String port;
 

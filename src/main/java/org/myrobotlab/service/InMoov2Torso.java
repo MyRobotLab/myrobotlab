@@ -2,13 +2,18 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.InMoov2TorsoConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
@@ -33,13 +38,22 @@ public class InMoov2Torso extends Service {
 
   public void startService() {
     super.startService();
-    startPeers();
+    topStom = (ServoControl) startPeer("topStom");
+    midStom = (ServoControl) startPeer("midStom");
+    lowStom = (ServoControl) startPeer("lowStom");
   }
 
   public void releaseService() {
     try {
       disable();
-      releasePeers();
+      
+      // releasePeer("topStom");
+      // releasePeer("midStom");
+      // releasePeer("lowStom");
+      topStom = null;
+      midStom = null;
+      lowStom = null;
+
       super.releaseService();
     } catch (Exception e) {
       error(e);
@@ -280,5 +294,5 @@ public class InMoov2Torso extends Service {
     if (lowStom != null)
       lowStom.stop();
   }
-
+  
 }

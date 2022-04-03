@@ -13,6 +13,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
@@ -21,7 +22,10 @@ import org.myrobotlab.io.FindFile;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.PythonConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Script;
+import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.python.core.Py;
 import org.python.core.PyException;
@@ -45,7 +49,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class Python extends Service {
+public class Python extends Service implements ServiceLifeCycleListener {
 
   /**
    * this thread handles all callbacks to Python process all input and sets msg
@@ -200,6 +204,10 @@ public class Python extends Service {
 
   protected int newScriptCnt = 0;
 
+  final List<String> startScripts = new ArrayList<>();
+
+  final List<String> stopScripts = new ArrayList<>();
+
   /**
    * Any script executed is put in a openedScripts map... Helpful in IDE
    * displays
@@ -341,11 +349,6 @@ public class Python extends Service {
     }
 
     localPythonFiles = getFileListing();
-
-    log.info("creating module directory pythonModules");
-    new File("pythonModules").mkdir();
-
-    //////// was in startService
 
     createPythonInterpreter();
     attachPythonConsole();
@@ -705,6 +708,7 @@ public class Python extends Service {
     openScript(filename, data);
   }
 
+  @Override
   public void onStarted(String serviceName) {
     ServiceInterface s = Runtime.getService(serviceName);
     if (s == null) {
@@ -722,6 +726,12 @@ public class Python extends Service {
     }
 
     registerScript += String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(s.getName()), s.getName());
+    exec(registerScript, false);
+  }
+
+  @Override
+  public void onReleased(String serviceName) {
+    String registerScript = String.format("%s = None\n", CodecUtils.getSafeReferenceName(serviceName));
     exec(registerScript, false);
   }
 
@@ -777,9 +787,9 @@ public class Python extends Service {
     save();
     broadcastState();
   }
-  
+
   // @Override /* FIXME - make interface for it */
-  public void defaultInvokeMethod (String method, Object... params) {
+  public void defaultInvokeMethod(String method, Object... params) {
     if (interp == null) {
       createPythonInterpreter();
     }
@@ -799,7 +809,17 @@ public class Python extends Service {
       onStarted(s.getName());
     }
     // register runtime life cycle events for other services
-    Runtime.getInstance().subscribeToLifeCycleEvents(getName());
+    Runtime.getInstance().attachServiceLifeCycleListener(getName());
+
+    // run start scripts if there are any
+    for (String script : startScripts) {
+      // i think in this context its safer to block
+      try {
+        execFile(script, true);
+      } catch (IOException e) {
+        log.error("starting scripts threw",e);
+      }
+    }
   }
 
   @Override
@@ -839,8 +859,19 @@ public class Python extends Service {
    */
   @Override
   public void stopService() {
+    // run any stop scripts 
+    for (String script : stopScripts) {
+      // i think in this context its safer to block
+      try {
+        execFile(script, true);
+      } catch (IOException e) {
+        log.error("stopping scripts threw", e);
+      }
+    }
+    // shutdown inbox/outbox
     super.stopService();
-    stop();// release the interpeter
+    // release the interpeter
+    stop();
   }
 
   public boolean isOpenOnExecute() {
@@ -870,6 +901,55 @@ public class Python extends Service {
       log.error("main threw", e);
     }
 
+  }
+
+  @Override
+  public void onCreated(String name) {
+
+  }
+
+  @Override
+  public void onRegistered(Registration registration) {
+
+  }
+
+  @Override
+  public void onStopped(String fullname) {
+
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    PythonConfig config = new PythonConfig();
+    config.startScripts = startScripts;
+    return config;
+  }
+
+  public ServiceConfig apply(ServiceConfig c) {
+    PythonConfig config = (PythonConfig) c;
+    if (config.startScripts != null && config.startScripts.size() > 0) {
+      startScripts.clear();
+      startScripts.addAll(config.startScripts);
+      // if were already running and told to load
+      // we run the scripts - if this service has only been created
+      // the startService method will run the start scripts
+      if (isRunning()) {
+        for (String script : startScripts) {
+          try {
+            execFile(script);
+          } catch(Exception e) {
+            error(e);
+          }
+        }
+      }
+    }
+    
+    if (config.stopScripts != null && config.stopScripts.size() > 0) {
+      stopScripts.clear();
+      stopScripts.addAll(config.stopScripts);
+    }
+        
+    return c;
   }
 
 }

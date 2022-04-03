@@ -13,7 +13,7 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
     $scope.types = ['RGB', 'RGBW']
     $scope.animations = ['No animation', 'Stop', 'Color Wipe', 'Larson Scanner', 'Theater Chase', 'Theater Chase Rainbow', 'Rainbow', 'Rainbow Cycle', 'Flash Random', 'Ironman', 'equalizer']
     $scope.pixelCount = null
-    
+
     // set pixel position
     $scope.pos = 0
 
@@ -56,7 +56,6 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
         preserveInputFormat: true
     }
 
-
     // api event handlers
     $scope.eventApi = {
         onChange: function(api, color, $event) {
@@ -88,7 +87,7 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
-        $scope.pickedColor = 'rgb('+ service.red +', '+ service.green +', '+ service.blue +')'
+        $scope.pickedColor = 'rgb(' + service.red + ', ' + service.green + ', ' + service.blue + ')'
         $scope.rgb = [service.red, service.green, service.blue]
         $scope.color = $scope.pickedColor
 
@@ -96,13 +95,13 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
             $scope.drawPixels()
         }
 
-        if (firstTime){
+        if (firstTime) {
             $scope.pixelCount = service.pixelCount
             firstTime = false
         }
 
-        if (!$scope.state.controller){
-            $scope.state.controller = $scope.service.controller 
+        if (!$scope.state.controller) {
+            $scope.state.controller = $scope.service.controller
         }
     }
 
@@ -133,7 +132,7 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
         msg.send('broadcastState')
     }
 
-    $scope.fill =  function(){
+    $scope.fill = function() {
         msg.send('fill', $scope.rgb[0], $scope.rgb[1], $scope.rgb[2])
     }
 
@@ -143,7 +142,7 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
 
     $scope.attach = function() {
         msg.send('setPin', $scope.service.pin)
-        msg.send('setPixelCount', $scope.pixelCount)
+        msg.send('setPixelCount', $scope.service.pixelCount)
         msg.send('attach', $scope.state.controller)
     }
 
@@ -153,9 +152,18 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
         }
     }
 
-    $scope.setController = function(controller){
+    $scope.setController = function(controller) {
         $scope.state.controller = controller
     }
+
+        $scope.controllerOptions = {
+        interface: 'NeoPixelController',
+        attach: $scope.setController,
+        // callback: function...
+        attachName: $scope.state.controller,
+        controllerTitle: 'controller'
+    }
+
 
     $scope.drawPixels()
     msg.subscribe('setCount')

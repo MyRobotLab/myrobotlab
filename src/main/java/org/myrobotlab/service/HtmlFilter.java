@@ -174,7 +174,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
     return config;
   }
 
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     HtmlFilterConfig config = (HtmlFilterConfig) c;
     
     stripHtml = config.stripHtml;

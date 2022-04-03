@@ -1,6 +1,6 @@
 package org.myrobotlab.service.config;
 
-public class AbstractMotorConfig extends ServiceConfig {
+public class GeneralMotorConfig extends ServiceConfig {
 
   public boolean locked;
 

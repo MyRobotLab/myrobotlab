@@ -11,13 +11,14 @@ import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
+
 import org.slf4j.Logger;
 
-public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker,
+public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker,
     StatePublisher, StatusPublisher, ServiceStatus, TaskManager, Attachable, Comparable<ServiceInterface> {
 
   // does this work ?
@@ -78,12 +79,6 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
   public boolean hasPeers();
 
   /**
-   * recursive release - releases all peers and their peers etc. then releases
-   * this service
-   */
-  public void releasePeers();
-
-  /**
    * Service life-cycle method: releaseService will call stopService, release
    * its peers, do any derived business logic to release resources, then
    * un-register itself
@@ -116,6 +111,12 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
    *
    */
   public ServiceConfig getConfig();
+  
+  /**
+   * sets config - just before apply
+   * @param config
+   */
+  public void setConfig(ServiceConfig config);
 
   /**
    * Configure a service by merging in configuration
@@ -124,7 +125,7 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
    *          the config to load
    * @return the loaded config.
    */
-  public ServiceConfig load(ServiceConfig config);
+  public ServiceConfig apply(ServiceConfig config);
 
   /**
    * loads json config and starts the service
@@ -172,63 +173,5 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
 
   public int getCreationOrder();
 
-  static public LinkedHashMap<String, ServiceConfig> getDefault(String name, String type) {
-    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
-    
-    String simpleTypeName = null;
-    if (type.contains(".")) {
-      simpleTypeName = type.substring(type.lastIndexOf(".")+1);
-    } else {
-      simpleTypeName = type;
-    }
-    
-    try {
-
-      String configClass = "org.myrobotlab.service." + simpleTypeName;
-
-      Class<?> clazz = Class.forName(configClass);
-      Method method = clazz.getMethod("getDefault", String.class);
-
-      // create new instance
-      // Constructor<?> ctor = clazz.getConstructor();
-      // Object configObject = ctor.newInstance();
-
-      // I chose "non"-static method for getDefault - because Java has
-      // an irritating rule of not allowing static overloads and abstracts
-      config = (LinkedHashMap<String, ServiceConfig>) method.invoke(null, name);
-
-      if (config == null || config.keySet().size() == 0) {
-        log.warn("{} does not currently have any default configurations", configClass);
-      }
-    } catch (NoSuchMethodException em) {
-
-      try {
-
-        log.info("{} of type {} does not have a getDefault", name, type);
-
-        String configClass = "org.myrobotlab.service.config." + simpleTypeName + "Config";
-
-        Class<?> clazz = Class.forName(configClass);
-
-        // create new instance
-        Constructor<?> ctor = clazz.getConstructor();
-        ServiceConfig configObject = (ServiceConfig) ctor.newInstance();
-
-        // I chose "non"-static method for getDefault - because Java has
-        // an irritating rule of not allowing static overloads and abstracts
-        config.put(name, configObject);
-
-      } catch (Exception e) {
-        log.warn("{} of type {} does not have a Config object - creating default service config", name, type);
-        ServiceConfig serviceConfig = new ServiceConfig();
-        serviceConfig.type = type;
-        config.put(name, serviceConfig);
-      }
-
-    } catch (Exception e) {
-      log.error("ServiceConfig.getDefault({},{}) threw", name, type, e);
-    }
-    return config;
-  }
-
+  
 }

@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.Plan;
 // import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
@@ -116,24 +115,16 @@ public class Intro extends Service {
       System.setProperty("java.version", "11.0");
       LoggingFactory.init("info");
 
+      // Runtime.main(new String[]{"--config", "i01-9"});
+      // Runtime.start("runtime", "Runtime"); i
+      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
       
       Runtime.start("intro", "Intro");
-      Runtime.start("python", "Python");
-      Runtime.start("i01", "InMoov2");
+      //Runtime.start("python", "Python");
       // Runtime.start("mega", "Arduino");
-      // Runtime.start("track", "Tracking");
       // Runtime.start("ada", "Adafruit16CServoDriver");
-      
-   
-      
-      Runtime.start("i01", "InMoov2");
-      
-
-      Plan plan = Runtime.load("webgui","WebGui");
-      WebGuiConfig config = (WebGuiConfig) plan.get("webgui");
-      config.autoStartBrowser = false;
-      Runtime.start("webgui", "WebGui");
-
       
       boolean done = true;
       if (done) {
@@ -160,6 +151,10 @@ public class Intro extends Service {
 
 
 
+      
+      Runtime.start("i01", "InMoov2");
+
+
       DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
       brain.setCurrentBotName("Alice");
@@ -173,7 +168,7 @@ public class Intro extends Service {
       // ProgramAB brain = (ProgramAB)Runtime.start("brain");
       Runtime.start("brain", "ProgramAB");
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
-      Runtime.start("webgui", "WebGui");
+      Runtime.create("webgui", "WebGui");
       Runtime.setConfig("InMoov2_FingerStarter");
 
       Runtime.create("i01.chatBot");

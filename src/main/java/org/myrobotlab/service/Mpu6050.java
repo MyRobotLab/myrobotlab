@@ -4601,12 +4601,11 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     config.sampleRate = sampleRateHz;
     config.bus = deviceBus;
     config.address = deviceAddress;
+    config.controller = controllerName;
     return config;
   }
 
-  @Override
-  public ServiceConfig load(ServiceConfig c) {
-    super.load(c);
+  public ServiceConfig apply(ServiceConfig c) {
     Mpu6050Config config = (Mpu6050Config) c;
     if (config.start) {
       publisher.start();
@@ -4619,6 +4618,14 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     }
     if (config.address != null) {
       setDeviceAddress(config.address);
+    }
+
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch (Exception e) {
+        log.error("attach threw", e);
+      }
     }
     return c;
   }

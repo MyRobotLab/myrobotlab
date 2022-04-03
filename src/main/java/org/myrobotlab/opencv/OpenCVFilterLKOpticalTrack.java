@@ -55,6 +55,7 @@ import org.bytedeco.opencv.opencv_core.TermCriteria;
 import org.myrobotlab.cv.TrackingPoint;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Point;
+import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 /**
@@ -81,62 +82,45 @@ import org.slf4j.Logger;
 public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterLKOpticalTrack.class);
-
   private static final long serialVersionUID = 1L;
-
   public boolean addRemovePoint2dfPoint = false;
-
   protected boolean getSubPixels = false;
-
   public boolean clearPoints = false;
-
   protected int maxPointCnt = 50;
-
   // protected double quality = 0.05;
   protected double quality = 5; // percent quality
-  //
   protected int blockSize = 3;
-
   protected double minDistance = 5.0;
-
   public boolean needTrackingPoints = false;
-
   protected List<Point> pointsToPublish = new ArrayList<>();
-
   protected boolean printCount = true;
-
   protected Point samplePoint = null;
-
   protected Map<Integer, TrackingPoint> trackingPoints = new HashMap<>();
-
   /**
    * name or id of the point to track in current index of points
    */
   protected Map<String, Integer> nameToIndex = new HashMap<>();
-
   protected int winSize = 15;
-
   protected long currentPntCnt;
-
-  transient Mat zeroPoints = toMat(IplImage.create(new CvSize().width(0).height(0), 32, 2));
-
+  // TODO: can i just create a new Mat instead of having to convert an IplImage to a mat first?!
+  transient Mat zeroPoints = null;
   transient Mat cornersA = null;
   transient Mat cornersB = null;
-
   transient Mat featureErrors = null;
   transient Mat featuresFound = null;
-
   transient IplImage grayImgA = null;
   transient IplImage grayImgB = null;
-
   transient Mat matA = null;
   transient Mat matB = null;
-
   // 0-based maximal pyramid level number; if set to 0, pyramids are not used
   // (single level), if set to 1, two levels are used, and so on; if pyramids
   // are passed to input then algorithm will use as many levels as pyramids have
   // but no more than maxLevel.
   protected int maxLevel = 5;
+  transient private CloseableFrameConverter converter1 = new CloseableFrameConverter();
+  transient private CloseableFrameConverter converter2 = new CloseableFrameConverter();
+  transient private CloseableFrameConverter converter3 = new CloseableFrameConverter();
+  transient private CloseableFrameConverter converter4 = new CloseableFrameConverter();
 
   public OpenCVFilterLKOpticalTrack() {
     this(null);
@@ -144,6 +128,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
   public OpenCVFilterLKOpticalTrack(String name) {
     super(name);
+    
+    zeroPoints = converter1.toMat(IplImage.create(new CvSize().width(0).height(0), 32, 2));
     cornersA = zeroPoints;
   }
 
@@ -163,8 +149,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
     FloatIndexer idx = cornersA.createIndexer();
 
-    idx.put(idx.size(0) - 1, 0, x);
-    idx.put(idx.size(0) - 1, 1, y);
+    idx.put(0,idx.size(0) - 1, 0, x);
+    idx.put(0,idx.size(0) - 1, 1, y);
     idx.release();
 
     return id;
@@ -175,12 +161,12 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     FloatIndexer idx = toResize.createIndexer();
     CvSize sz = new CvSize();
     sz.width(1).height((int) idx.size(0) + amount);
-    Mat tmp = toMat(IplImage.create(sz, 32, 2));
+    Mat tmp = converter2.toMat(IplImage.create(sz, 32, 2));
     FloatIndexer newIdx = tmp.createIndexer();
     // copy contents
     for (int i = 0; i < idx.size(0); i++) {
-      newIdx.put(i, 0, idx.get(i, 0));
-      newIdx.put(i, 1, idx.get(i, 1));
+      newIdx.put(0, i, 0, idx.get(0, i, 0));
+      newIdx.put(0, i, 1, idx.get(0, i, 1));
       log.info("here");
     }
     toResize.release();
@@ -208,7 +194,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
     // copy contents
     for (int i = 0; i < idx.size(0); i++) {
-      sb.append(String.format("(%d,%d)", (int) idx.get(i), (int) idx.get(i + 1)));
+      sb.append(String.format("(%d,%d)", (int) idx.get(0,i,0), (int) idx.get(0,i,1)));
     }
     idx.release();
     log.info(sb.toString());
@@ -233,12 +219,12 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
     // load 1st prev image - must have at least 2 images
     if (matA == null) {
-      matA = toMat(grayImgA);
+      matA = converter3.toMat(grayImgA);
       return image;
     }
 
     // current image
-    matB = toMat(grayImgB);
+    matB = converter4.toMat(grayImgB);
 
     if (samplePoint != null) {
       addPoint(samplePoint.x, samplePoint.y);
@@ -264,6 +250,11 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
       pointsToPublish.clear();
     }
 
+    if (cornersA.address() == 0) {
+      // No corners!  null matrix!!
+      return image;
+    }
+    
     FloatIndexer cornersAidx = cornersA.createIndexer();
     if (cornersAidx.size(0) == 0) {
       // no requested tracking points
@@ -306,8 +297,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
         // continue;
 
       }
-      TrackingPoint direction = new TrackingPoint(i, Math.round(cornersAidx.get(i, 0)), Math.round(cornersAidx.get(i, 1)), Math.round(cornersBidx.get(i, 0)),
-          Math.round(cornersBidx.get(i, 1)));
+      TrackingPoint direction = new TrackingPoint(i, Math.round(cornersAidx.get(0,i, 0)), Math.round(cornersAidx.get(0,i, 1)), Math.round(cornersBidx.get(0,i, 0)),
+          Math.round(cornersBidx.get(0,i, 1)));
 
       direction.found = featuresFoundIdx.get(i);
       direction.error = featureErrorsIdx.get(i);
@@ -316,6 +307,10 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
       trackingPoints.put(i, direction);
     }
 
+    // Set the tracking points in the cv data output
+    if (!trackingPoints.isEmpty()) {
+      data.put("points", trackingPoints);
+    }
     // FIXME !!! - close all resources
     // releasing previous frame
     matA.release();
@@ -339,6 +334,15 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     matB.release();
 
     return image;
+  }
+
+  @Override
+  public void release() {
+    super.release();
+    converter1.close();
+    converter2.close();
+    converter3.close();
+    converter4.close();
   }
 
   @Override

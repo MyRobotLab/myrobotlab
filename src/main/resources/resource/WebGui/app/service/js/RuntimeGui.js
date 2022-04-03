@@ -113,7 +113,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         }
 
         if (typeof $scope.newType == 'object') {
-            $scope.newType = $scope.newType.name
+            $scope.newType = $scope.newType.simpleName
         }
         msg.send('start', $scope.newName, $scope.newType)
 
@@ -174,7 +174,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             }
             break
 
-        case 'onInterfaceToPossibleServices':
+        case 'onInterfaceToNames':
             $scope.interfaceToPossibleServices = data
             mrl.interfaceToPossibleServices = data
             break
@@ -277,13 +277,30 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         console.info(locale)
     }
 
-    $scope.startConfig = function() {
-        console.info('startConfig')
+    $scope.loadConfig = function() {
+        console.info('loadConfig')
         if ($scope.selectedConfig.length) {
             for (let i = 0; i < $scope.selectedConfig.length; ++i) {
                 // msg.sendTo('runtime', 'load', 'data/config/' + $scope.selectedConfig[i] + '/runtime.yml')
                 msg.sendTo('runtime', 'setConfigName', $scope.selectedConfig[i])
                 msg.sendTo('runtime', 'load', 'runtime')
+            }
+        }
+    }
+
+
+    $scope.unsetConfigName = function() {
+        console.info('unsetConfigName')
+        msg.sendTo('runtime', 'unsetConfigName')
+    }
+
+    
+    $scope.startConfig = function() {
+        console.info('startConfig')
+        if ($scope.selectedConfig.length) {
+            for (let i = 0; i < $scope.selectedConfig.length; ++i) {
+                // msg.sendTo('runtime', 'load', 'data/config/' + $scope.selectedConfig[i] + '/runtime.yml')
+                msg.sendTo('runtime', 'startConfigSet', $scope.selectedConfig[i])
             }
         }
     }
@@ -305,7 +322,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
         let onOK = function() {
             msg.sendTo('runtime', 'setConfigName', $scope.service.configName)
-            msg.sendTo('runtime', 'save', $scope.service.configDir + '/' + $scope.service.configName + "/runtime.yml")
+            msg.sendTo('runtime', 'save')
         }
 
         let onCancel = function() {
@@ -313,6 +330,22 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         }
 
         let ret = modalService.openOkCancel('widget/modal-dialog.view.html', 'Save Configuration', 'Save your current configuration in a directory named', onOK, onCancel, $scope);
+        console.info('ret ' + ret);
+    }
+
+    $scope.savePlan = function() {
+        console.info('saveConfig')
+
+        let onOK = function() {
+            msg.sendTo('runtime', 'savePlan', $scope.service.configName)
+            // msg.sendTo('runtime', 'save')
+        }
+
+        let onCancel = function() {
+            console.info('save config cancelled')
+        }
+
+        let ret = modalService.openOkCancel('widget/modal-dialog.view.html', 'Save Plan Configuration', 'Save your current configuration in a directory named', onOK, onCancel, $scope);
         console.info('ret ' + ret);
     }
 
@@ -332,14 +365,14 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.subscribe("getHosts")
     msg.subscribe("publishStatus")
     msg.subscribe('publishConfigList')
-    msg.subscribe('publishInterfaceToPossibleServices')
+    msg.subscribe('publishInterfaceToNames')
 
     //msg.send("getLocalServices")
     msg.send("getConnections")
     msg.send("getServiceTypes")
     msg.send("getLocale")
     msg.send("getLocales")
-    msg.send("publishInterfaceToPossibleServices")
+    msg.send("publishInterfaceToNames")
 
     // msg.send("getHosts")
     msg.subscribe(this)

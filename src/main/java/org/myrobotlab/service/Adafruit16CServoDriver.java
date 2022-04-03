@@ -298,23 +298,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   public Adafruit16CServoDriver(String n, String id) {
     super(n, id);
-    createPinList();
-    refreshControllers();
-    subscribeToRuntime("registered");
-    // map(-1, 1, -1, 1); - currently Adafruit16CServoDriver is not a "real"
-    // motor controller because
-    // it doesn't inherit from AbstractMotorController & Servo's aren't merged
-    // with Motors
-    // it will need to wait for the grand unification of Servos & Motors
-  }
-
-  /**
-   * event handler for new started service, it might be an i2c controller so we
-   * refresh controllers
-   */
-  public void onStarted(String name) {
-    refreshControllers();
-    broadcastState();
+    createPinList();    
+    registerForInterfaceChange(I2CController.class);
   }
 
   /**
@@ -1016,7 +1001,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     return config;
   }
 
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     Adafruit16CServoDriverConfig config = (Adafruit16CServoDriverConfig) c;
     if (config.deviceBus != null) {
       deviceBus = config.deviceBus;

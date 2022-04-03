@@ -36,8 +36,21 @@ public class InMoov2Head extends Service {
 
   public InMoov2Head(String n, String id) {
     super(n, id);
-    startPeers();
   }
+  
+  /*autoStartPeers true - this is not needed
+  public void startService() {
+    super.startService();
+    
+    startPeer("jaw");
+    startPeer("eyeX");
+    startPeer("eyeY");
+    startPeer("rothead");
+    startPeer("neck");
+    startPeer("rollNeck");
+    
+  }
+  */
 
   public void blink() {
 
@@ -50,7 +63,6 @@ public class InMoov2Head extends Service {
     moveToBlocking(180, 180);
     moveToBlocking(0, 0);
   }
-
 
   public void enable() {
     if (eyeX != null)
@@ -218,23 +230,24 @@ public class InMoov2Head extends Service {
     if (log.isDebugEnabled()) {
       log.debug("head.moveTo {} {} {} {} {} {}", neckPos, rotheadPos, eyeXPos, eyeYPos, jawPos, rollNeckPos);
     }
-    if (rothead != null && rotheadPos != null) {
-      rothead.moveTo(rotheadPos);
+    if (Runtime.getService(getName() + ".rothead") != null && rotheadPos != null) {
+      ((ServoControl)Runtime.getService(getName() + ".rothead")).moveTo(rotheadPos);
     }
-    if (neck != null && neckPos != null) {
-      neck.moveTo(neckPos);
+    if (Runtime.getService(getName() + ".neck") != null && neckPos != null) {
+      ((ServoControl)Runtime.getService(getName() + ".neck")).moveTo(neckPos);
     }
-    if (eyeX != null && eyeXPos != null) {
-      eyeX.moveTo(eyeXPos);
+    if (Runtime.getService(getName() + ".eyeX") != null && eyeXPos != null) {
+      ((ServoControl)Runtime.getService(getName() + ".eyeX")).moveTo(eyeXPos);
     }
-    if (eyeY != null && eyeYPos != null) {
-      eyeY.moveTo(eyeYPos);
+    if (Runtime.getService(getName() + ".eyeY") != null && eyeYPos != null) {
+      ((ServoControl)Runtime.getService(getName() + ".eyeY")).moveTo(eyeYPos);
     }
-    if (jaw != null && jawPos != null) {
-      jaw.moveTo(jawPos);
+    if (Runtime.getService(getName() + ".jaw") != null &&  jawPos != null) {
+      ((ServoControl)Runtime.getService(getName() + ".jaw")).moveTo(jawPos);
     }
-    if (rollNeck != null && rollNeckPos != null) {
-      rollNeck.moveTo(rollNeckPos);
+    
+    if (Runtime.getService(getName() + ".rollNeck") != null &&  rollNeckPos != null) {
+      ((ServoControl)Runtime.getService(getName() + ".rollNeck")).moveTo(rollNeckPos);
     }
   }
 
@@ -297,6 +310,14 @@ public class InMoov2Head extends Service {
 
   public void releaseService() {
     disable();
+    /* not needed now with autoStartPeer and auto release
+    releasePeer("jaw");
+    releasePeer("eyeX");
+    releasePeer("eyeY");
+    releasePeer("rothead");
+    releasePeer("neck");
+    releasePeer("rollNeck");    
+    */
     super.releaseService();
   }
 
@@ -479,6 +500,7 @@ public class InMoov2Head extends Service {
 
   /**
    * FIXME - implement
+   * 
    * @param b
    */
   public void autoBlink(boolean b) {
@@ -517,13 +539,13 @@ public class InMoov2Head extends Service {
 
       String leftPort = "COM3";
 
-      VirtualArduino vleft = (VirtualArduino) Runtime.start("vleft", "VirtualArduino");
-      vleft.connect("COM3");
-      Runtime.start("gui", "SwingGui");
+//      VirtualArduino vleft = (VirtualArduino) Runtime.start("vleft", "VirtualArduino");
+//      vleft.connect("COM3");
+//      Runtime.start("gui", "SwingGui");
 
-      InMoov2Head head = (InMoov2Head) Runtime.start("head", "InMoovHead");
+      InMoov2Head head = (InMoov2Head) Runtime.start("head", "InMoov2Head");
 
-      log.info(head.getScript("i01"));
+      //log.info(head.getScript("i01"));
 
     } catch (Exception e) {
       log.error("main threw", e);
@@ -544,5 +566,7 @@ public class InMoov2Head extends Service {
     if (rollNeck != null)
       rollNeck.setPin(rollNeckPin);
   }
+
+
 
 }

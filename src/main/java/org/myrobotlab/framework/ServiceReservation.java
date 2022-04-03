@@ -24,7 +24,7 @@ public class ServiceReservation implements Serializable {
   public String actualName;
   public String type;
   public String comment;
-  public Boolean autoStart;
+
   /**
    * service life-cycle state inactive | created | registered | running |
    * stopped | released a challenge will be keeping it sync'd with actual
@@ -77,8 +77,7 @@ public class ServiceReservation implements Serializable {
     this.key = key;
     this.actualName = actualName;
     this.type = typeName;
-    this.comment = comment;
-    this.autoStart = (autoStart == null) ? true : autoStart;
+    this.comment = comment;    
   }
 
   @Override

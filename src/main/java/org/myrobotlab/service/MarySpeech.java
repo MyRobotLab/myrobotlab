@@ -15,6 +15,9 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.config.SpeechSynthesisConfig;
+import org.myrobotlab.service.config.MarySpeechConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 import org.xml.sax.SAXException;
@@ -51,13 +54,14 @@ public class MarySpeech extends AbstractSpeechSynthesis {
   }
 
   synchronized MaryInterface getMaryTts() {
-    // If the javaVersion is just 2 numbers, like 11, 12,13... we need to add a .0 to it, so that
-    // mary tts will recognize it as being newer than java8..  (lame I know.)
+    // If the javaVersion is just 2 numbers, like 11, 12,13... we need to add a
+    // .0 to it, so that
+    // mary tts will recognize it as being newer than java8.. (lame I know.)
     String javaVersion = System.getProperty("java.version");
     if (javaVersion.matches("[1-9][0-9]")) {
-      System.setProperty("java.version",javaVersion + ".0");
+      System.setProperty("java.version", javaVersion + ".0");
     }
-    
+
     if (marytts != null) {
       return marytts;
     }

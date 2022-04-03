@@ -27,11 +27,13 @@ package org.myrobotlab.service;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.data.ServoMove;
+import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
@@ -58,7 +60,7 @@ import org.slf4j.Logger;
  * 
  */
 
-public class Servo extends AbstractServo implements ServoControl {
+public class Servo extends AbstractServo implements ServoControl, ServiceLifeCycleListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -129,10 +131,9 @@ public class Servo extends AbstractServo implements ServoControl {
       log.info("{} is currently blocking - ignoring request to moveTo({})", getName(), newPos);
       return false;
     }
-    
-    
+
     broadcast("publishServoMoveTo", new ServoMove(getName(), newPos, mapper.calcOutput(newPos)));
-    
+
     // TODO: this block isn't tested by ServoTest
     if (isBlocking && blocking) {
       // if isBlocking already, and incoming request is a blocking one - we
@@ -170,7 +171,6 @@ public class Servo extends AbstractServo implements ServoControl {
       // calculate trajectory calculates and processes this move
       blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentOutputPos(), getTargetOutput(), getSpeed());
     }
-    
 
     if (isBlocking) {
       // our thread did a blocking call - we will wait until encoder notifies us
@@ -195,7 +195,7 @@ public class Servo extends AbstractServo implements ServoControl {
   public ServiceConfig getConfig() {
 
     ServoConfig config = new ServoConfig();
-    
+
     config.autoDisable = autoDisable;
     config.enabled = enabled;
 
@@ -216,18 +216,17 @@ public class Servo extends AbstractServo implements ServoControl {
     config.speed = speed;
     config.sweepMax = sweepMax;
     config.sweepMin = sweepMin;
-    
+
     config.controller = this.controller;
 
     return config;
   }
 
-  @Override
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     ServoConfig config = (ServoConfig) c;
 
     autoDisable = config.autoDisable;
-    
+
     // important - if starting up
     // and autoDisable - then the assumption at this point
     // is it is currently disabled, otherwise it will take
@@ -245,15 +244,23 @@ public class Servo extends AbstractServo implements ServoControl {
       idleTimeout = config.idleTimeout;
     }
     pin = config.pin;
-    rest = config.rest;
+
     speed = config.speed;
     sweepMax = config.sweepMax;
     sweepMin = config.sweepMin;
+
+    // rest = config.rest;
+    if (config.rest != null) {
+      rest = config.rest;
+      targetPos = config.rest;
+      currentOutputPos = mapper.calcOutput(config.rest);
+      broadcast("publishEncoderData", new EncoderData(getName(), pin, config.rest, config.rest));
+    }
     
     if (config.controller != null) {
       try {
         attach(config.controller);
-      } catch(Exception e) {
+      } catch (Exception e) {
         error(e);
       }
     }
@@ -373,6 +380,18 @@ public class Servo extends AbstractServo implements ServoControl {
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  @Override
+  public void onCreated(String name) {
+  }
+
+  @Override
+  public void onStopped(String name) {
+  }
+
+  @Override
+  public void onReleased(String name) {
   }
 
 }

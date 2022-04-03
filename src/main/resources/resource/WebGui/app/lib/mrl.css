@@ -21,7 +21,6 @@
     border-bottom: 1px solid #afe1ec;
 }
 
-
 .popover {
     width: auto!important;
     max-width: none
@@ -500,8 +499,6 @@ table, th, td {
     position: absolute;
 }
 
-
-
 .lockInputOutputButton {
     position: relative;
     top: -180px;
@@ -511,7 +508,6 @@ table, th, td {
     cursor: pointer;
 }
 
-
 .sliderLimits {
     display: block;
 }
@@ -519,7 +515,6 @@ table, th, td {
 .sliderPosition {
     display: block;
 }
-
 
 /* custom slider end */
 .servoReferences {
@@ -557,7 +552,6 @@ table, th, td {
     height: 25px;
     top: 17px;
 }
-
 
 .rzMixer {
     width: 100%;
@@ -827,8 +821,6 @@ table, th, td {
     width: 300px;
 }
 
-
-
 /* -- ServoGui -- */
 .smallbuttons {
     padding: 2px 6px;
@@ -1068,8 +1060,6 @@ table, th, td {
     border-bottom: 10px solid blue!important;
     border-top: 10px solid blue;
 }
-
-
 
 .servoPositionArea {
     position: absolute;
@@ -2500,7 +2490,6 @@ background-color: #337ab7!important;
     display: contents;
 }
 
-
 /*
 .rzMixer .servoBasicContainer {
     position: relative;
@@ -3038,12 +3027,15 @@ background-color: #337ab7!important;
 }
 
 /* ==================== UltrasonicSensor end ====================== */
-
 /* =============== arduino pins ===================================== */
-
 .small-text-form {
-    width: 50px;
+    width: 65px;
 }
+
+.medium-text-form {
+    width: 165px;
+}
+
 
 table.padded-table td {
     padding: 2px;
@@ -3052,7 +3044,6 @@ table.padded-table td {
 table.padded-table th {
     padding: 2px;
 }
-
 
 toggle.toggle-text .btn-sm {
     height: 28px!important;
@@ -3064,10 +3055,14 @@ toggle.toggle-text .toggle-handle {
 }
 
 .columns {
-  columns: 4;
+    columns: 4;
 }
 
 .width100pct {
     width: 100%;
     max-width: none;
+}
+
+.table-method td {
+    padding: 5px;
 }

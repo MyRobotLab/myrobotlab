@@ -10,14 +10,19 @@ import org.slf4j.Logger;
  */
 public class ServiceConfig {
   
-  transient public final static Logger log = LoggerFactory.getLogger(ServiceConfig.class);
-
   /**
-   * type of service defined for this config
+   * simple type name of service defined for this config
    */
   public String type;
+  
+  // FIXME - change to enum !
+  // heh non transient makes it easy to debug !
+  transient public String state = "INIT"; // INIT | LOADED | CREATED | STARTED | STOPPED | RELEASED
 
-  // public String name; I DO NOT WANT TO PUT THIS IN
+  /**
+   * if this service has peers - auto start them / and autoRelease them
+   */
+  public boolean autoStartPeers = true;
 
   public ServiceConfig() {
     String configTypeName = this.getClass().getSimpleName();

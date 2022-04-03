@@ -38,22 +38,20 @@ import org.slf4j.Logger;
 public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
 
   private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterMiniXception.class.getCanonicalName());
-
+  public transient final static Logger log = LoggerFactory.getLogger(OpenCVFilterMiniXception.class.getCanonicalName());
   private transient Deeplearning4j dl4j;
-  private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
+  private transient CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
   protected Boolean running;
-
   public Map<String, Double> lastResult = null;
   private volatile IplImage lastImage = null;
-  transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
-
   // the additional border around the face detection to include in the emotion
   // classification. (in pixels)
   private int boxSlop = 10;
   // a confidence threshold typically from 0.0 to 1.0 on how confident the
   // classification is.
   private double confidence = 0.25;
+  transient private CloseableFrameConverter converter1 = new CloseableFrameConverter();
+  transient private CloseableFrameConverter converter2 = new CloseableFrameConverter();
 
   public OpenCVFilterMiniXception(String name) {
     super(name);
@@ -91,7 +89,6 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
       return image;
     }
     // here we want to update the lastImage as the one with the bounding box.
-
     List<Rectangle> boxes = data.getBoundingBoxArray();
     // we should grab the center of the first box..
     // crop a square around that center.. and set that as the last image to pass
@@ -107,7 +104,7 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
         // int miniExceptionWidth = 64;
         Rect miniBox = new Rect(x - miniExceptionWidth / 2, y - miniExceptionWidth / 2, miniExceptionWidth, miniExceptionWidth);
         // now.. we need to crap the image for this bounding box..
-        lastImage = extractSubImage(OpenCV.toMat(image), miniBox);
+        lastImage = extractSubImage(converter1.toMat(image), miniBox);
         // Here
       }
     }
@@ -117,7 +114,8 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
 
   private IplImage extractSubImage(Mat inputMat, Rect boundingBox) {
     Mat cropped = new Mat(inputMat, boundingBox);
-    IplImage image = converterToIpl.convertToIplImage(converterToIpl.convert(cropped));
+    IplImage image = converter2.toImage(cropped);
+    show(image, "sub image from miniXception.");
     return image;
   }
 
@@ -153,12 +151,14 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
 
   @Override
   public void imageChanged(IplImage image) {
-    // TODO Auto-generated method stub
+    // NoOp
   }
 
   @Override
   public void release() {
     running = false;
+    converter1.close();
+    converter2.close();
   }
 
   @Override

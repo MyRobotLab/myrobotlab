@@ -99,7 +99,6 @@ angular.module('mrlapp.service.UltrasonicSensorGui', []).controller('UltrasonicS
 
     // FIXME - which i could get rid of this
     // makes attach directive worky on first load
-    msg.sendTo("runtime","publishInterfaceToPossibleServices")    
 
     msg.subscribe('publishRange')
     msg.subscribe(this)

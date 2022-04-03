@@ -15,6 +15,7 @@ import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TesseractOcr;
 import org.slf4j.Logger;
@@ -98,13 +99,15 @@ public class OpenCVFilterTesseract extends OpenCVFilter implements Runnable {
       // main thread will
       // be updating it while it's being classified maybe?!
       if (lastImage != null) {
-        BufferedImage buffImg = toBufferedImage(lastImage);
+        CloseableFrameConverter converter = new CloseableFrameConverter();
+        BufferedImage buffImg = converter.toBufferedImage(lastImage);
         try {
           lastResult = tesseract.ocr(buffImg);
         } catch (IOException e) {
           log.error("filter threw", e);
         }
         log.info(lastResult);
+        converter.close();
       } else {
         // log.info("No Image to classify...");
       }

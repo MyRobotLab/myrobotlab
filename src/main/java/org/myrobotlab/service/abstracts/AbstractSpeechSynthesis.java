@@ -19,8 +19,8 @@ import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.AudioFile;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Security;
-import org.myrobotlab.service.config.AbstractSpeechSynthesisConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AudioListener;
@@ -36,11 +36,11 @@ import org.slf4j.Logger;
 public abstract class AbstractSpeechSynthesis extends Service implements SpeechSynthesis, TextListener, KeyConsumer, AudioListener {
 
   private static final long serialVersionUID = 1L;
-  
+
   public final static Logger log = LoggerFactory.getLogger(AbstractSpeechSynthesis.class);
 
   static String globalFileCacheDir = "audioFile";
-  
+
   public static final String journalFilename = "journal.txt";
 
   /**
@@ -365,6 +365,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    */
   @Override
   public void attach(Attachable attachable) {
+    if (attachable == null) {
+      return;
+    }
     if (attachable instanceof SpeechRecognizer) {
       attachSpeechRecognizer((SpeechRecognizer) attachable);
     } else if (attachable instanceof TextPublisher) {
@@ -1093,25 +1096,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    AbstractSpeechSynthesisConfig config = new AbstractSpeechSynthesisConfig();
-    config.mute = mute;
-    config.blocking = blocking;
-    if (substitutions != null && substitutions.size() > 0) {
-      config.substitutions = new HashMap<>();
-      config.substitutions.putAll(substitutions);
-    }
-    if (voice != null) {
-      config.voice = voice.name;
-    }    
-    Set<String> listeners = getAttached("publishStartSpeaking");
-    config.speechRecognizers = listeners.toArray(new String[listeners.size()]);
-    
-    return config;
-  }
-
-  public ServiceConfig load(ServiceConfig c) {
-    AbstractSpeechSynthesisConfig config = (AbstractSpeechSynthesisConfig) c;
+  public ServiceConfig apply(ServiceConfig c) {
+    SpeechSynthesisConfig config = (SpeechSynthesisConfig) c;
 
     setMute(config.mute);
 
@@ -1126,12 +1112,12 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     if (config.voice != null) {
       setVoice(config.voice);
     }
-    
+
     if (config.speechRecognizers != null) {
       for (String name : config.speechRecognizers) {
         try {
           attach(name);
-        } catch(Exception e) {
+        } catch (Exception e) {
           error(e);
         }
       }
@@ -1147,6 +1133,25 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     addListener(control.getName(), "publishSetVolume");
     addListener(control.getName(), "publishSetMute");
     addListener(control.getName(), "publishReplaceWord");
+  }
+  
+  
+  @Override
+  public ServiceConfig getConfig() {
+    SpeechSynthesisConfig c = (SpeechSynthesisConfig)config;
+    c.mute = mute;
+    c.blocking = blocking;
+    if (substitutions != null && substitutions.size() > 0) {
+      c.substitutions = new HashMap<>();
+      c.substitutions.putAll(substitutions);
+    }
+    if (voice != null) {
+      c.voice = voice.name;
+    }
+    Set<String> listeners = getAttached("publishStartSpeaking");
+    c.speechRecognizers = listeners.toArray(new String[listeners.size()]);
+
+    return c;
   }
 
 }

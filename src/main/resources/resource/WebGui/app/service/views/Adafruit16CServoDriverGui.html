@@ -1,22 +1,17 @@
 <div class="col-md-3">
     <div class="row">
-        Controller {{service.controllerName}}
-  
-        <select ng-model="selectedControllerName" class="form-control" ng-disabled="service.isAttached" title="controller">
-            <option ng-repeat="x in service.controllers" ng-value="x">{{x}}</option>
-        </select>
+        <br/>
+        <attach options='controllerOptions'/>
     </div>
     <div class="row">
-        Bus {{service.deviceBus}}
-  
-        <select ng-model="selectedDeviceBus" class="form-control" ng-disabled="service.isAttached" title="bus address">
+        Bus {{service.deviceBus}}        
+        <select ng-model="service.deviceBus" class="form-control" ng-disabled="service.isAttached" title="bus address">
             <option ng-repeat="x in service.deviceBusList" ng-value="x">{{x}}</option>
         </select>
     </div>
     <div class="row">
-        Address {{service.deviceAddress}}
-  
-        <select ng-model="selectedDeviceAddress" class="form-control" ng-disabled="service.isAttached" title="device address">
+        Address {{service.deviceAddress}}        
+        <select ng-model="service.deviceAddress" class="form-control" ng-disabled="service.isAttached" title="device address">
             <option ng-repeat="x in service.deviceAddressList" ng-value="x">{{x}}</option>
         </select>
     </div>

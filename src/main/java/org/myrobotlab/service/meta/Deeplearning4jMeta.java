@@ -11,14 +11,9 @@ public class Deeplearning4jMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
-  public Deeplearning4jMeta(String name) {
+  public Deeplearning4jMeta() {
 
-    super(name);
     String dl4jVersion = "1.0.0-M1.1";
 
     boolean cudaEnabled = Boolean.valueOf(System.getProperty("gpu.enabled", "false"));

@@ -12,6 +12,9 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.config.SpeechSynthesisConfig;
+import org.myrobotlab.service.config.LocalSpeechConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
 import org.slf4j.Logger;
@@ -333,17 +336,19 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       // https://www.lifewire.com/mac-say-command-with-talking-terminal-2260772
       voicesText = Runtime.execute("bash", "-c", "say -v ?");
 
-      // "say -v ?" outputs a list of available TTS voices under MacOS, oner per line. 
-      //  eg: "Agnes               en_US    # Isn't it nice to have a computer that will talk to you?"
+      // "say -v ?" outputs a list of available TTS voices under MacOS, oner per
+      // line.
+      // eg: "Agnes en_US # Isn't it nice to have a computer that will talk to
+      // you?"
 
       Pattern pattern = Pattern.compile("^(\\w+)\\s+(\\w+)\\s+(.+)$");
       String lines[] = voicesText.split("\\r?\\n");
 
       for (int i = 0; i <= lines.length - 1; i++) {
-          Matcher matcher = pattern.matcher(lines[i]);
-          if (matcher.find()) {
-              addVoice(matcher.group(1).toLowerCase(), "male", matcher.group(2), matcher.group(1).toLowerCase());
-          }
+        Matcher matcher = pattern.matcher(lines[i]);
+        if (matcher.find()) {
+          addVoice(matcher.group(1).toLowerCase(), "male", matcher.group(2), matcher.group(1).toLowerCase());
+        }
       }
     } else if (platform.isLinux()) {
       addVoice("Linus", "male", "en-US", "festival");
@@ -375,7 +380,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
       Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
       // LoggingFactory.init("WARN");
-      
+
       LocalSpeech mouth = (LocalSpeech) Runtime.start("mouth", "LocalSpeech");
       mouth.setSay();
       mouth.speakBlocking("test 1 2 3");
@@ -396,9 +401,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       webgui.autoStartBrowser(false);
       webgui.startService();
 
-  
       // mouth.setMimic();
-      
 
       boolean done = true;
       if (done) {

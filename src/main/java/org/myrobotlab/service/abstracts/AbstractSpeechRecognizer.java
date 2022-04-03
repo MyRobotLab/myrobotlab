@@ -9,7 +9,7 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.config.AbstractSpeechRecognizerConfig;
+import org.myrobotlab.service.config.SpeechRecognizerConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
@@ -564,9 +564,9 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    * String[listeners.size()]); return config; }
    */
 
-  public ServiceConfig load(ServiceConfig c) {
-    if (c instanceof AbstractSpeechRecognizerConfig) {
-      AbstractSpeechRecognizerConfig config = (AbstractSpeechRecognizerConfig) c;
+  public ServiceConfig apply(ServiceConfig c) {
+    if (c instanceof SpeechRecognizerConfig) {
+      SpeechRecognizerConfig config = (SpeechRecognizerConfig) c;
       setWakeWord(config.wakeWord);
       if (config.listening) {
         startListening();

@@ -1,5 +1,5 @@
 package org.myrobotlab.service.config;
 
-public class MarySpeechConfig extends AbstractSpeechSynthesisConfig {
+public class MarySpeechConfig extends SpeechSynthesisConfig {
 
 }

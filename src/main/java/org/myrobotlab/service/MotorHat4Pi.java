@@ -98,8 +98,8 @@ public class MotorHat4Pi extends AbstractMotor {
     return config;
   }
 
-  public ServiceConfig load(ServiceConfig c) {
-    super.load(c);
+  public ServiceConfig apply(ServiceConfig c) {
+    super.apply(c);
     MotorHat4PiConfig config = (MotorHat4PiConfig) c;
     setMotor(config.motorId);
     return c;

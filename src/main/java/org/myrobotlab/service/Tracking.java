@@ -1,8 +1,6 @@
 package org.myrobotlab.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,14 +11,8 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.geometry.Rectangle;
-import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.Pid.PidOutput;
-import org.myrobotlab.service.config.ArduinoConfig;
-import org.myrobotlab.service.config.OpenCVConfig;
-import org.myrobotlab.service.config.PidConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.config.TrackingConfig;
 import org.myrobotlab.service.interfaces.ComputerVision;
 import org.myrobotlab.service.interfaces.PidControl;
@@ -198,19 +190,6 @@ public class Tracking extends Service {
     return null;
   }
 
-  /**
-   * FIXME - should be simple (non opencv) data here as a parameter FIXME -
-   * rename onClassification to onTracked - not classification specific
-   * publishDetected boundingbox + label
-   * 
-   * publishClassifications
-   * 
-   * @param data
-   */
-  // public void onOpenCVData(OpenCVData data) {
-  //
-  // }
-
   public void onClassification(Map<String, List<Classification>> data) {
     stats.inputCnt++;
 
@@ -228,13 +207,15 @@ public class Tracking extends Service {
         // log.info("found {}", classification);
         // get center of bounding box
         stats.latency = System.currentTimeMillis() - classification.getTs();
-        Rectangle bb = classification.getBoundingBox();
-        double x = bb.x + bb.width / 2;
-        double y = bb.y + bb.height / 2;
+
+        double x = classification.getCenterX();
+        double y = classification.getCenterY();
+
+        log.info("input {} {}", x, y);
 
         // PV - measured value
-        send(pid, "compute", pan, 320 - x);
-        send(pid, "compute", tilt, 240 - y);
+        send(pid, "compute", pan, x);
+        send(pid, "compute", tilt, y);
 
         // if largestFaceOnly
 
@@ -305,8 +286,7 @@ public class Tracking extends Service {
     return config;
   }
 
-  @Override
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     TrackingConfig config = (TrackingConfig) c;
 
     config.lostTrackingDelayMs = lostTrackingDelayMs;
@@ -336,73 +316,9 @@ public class Tracking extends Service {
     return state == TrackingState.IDLE;
   }
 
-  static public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
-
-    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
-
-    TrackingConfig trackingConfig = new TrackingConfig();
-
-    // RuntimeConfig runtime = new RuntimeConfig();
-    // runtime.registry = new String[] { controllerName, cvName, tiltName,
-    // panName, pidName, trackingName };
-
-    // set local names and config
-    String controller = name + ".controller";
-    trackingConfig.cv = name + ".cv";
-    trackingConfig.pan = name + ".pan";
-    trackingConfig.tilt = name + ".tilt";
-    trackingConfig.pid = name + ".pid";
-    trackingConfig.enabled = false;
-
-    // build a config with all peer defaults
-    config.putAll(ServiceInterface.getDefault(controller, "Arduino"));
-    config.putAll(ServiceInterface.getDefault(trackingConfig.cv, "OpenCV"));
-    config.putAll(ServiceInterface.getDefault(trackingConfig.pan, "Servo"));
-    config.putAll(ServiceInterface.getDefault(trackingConfig.tilt, "Servo"));
-    config.putAll(ServiceInterface.getDefault(trackingConfig.pid, "Pid"));
-
-    // pull out config this service default wants to modify
-    ArduinoConfig controllerConfig = (ArduinoConfig) config.get(controller);
-    controllerConfig.connect = true;
-    controllerConfig.port = "/dev/ttyACM0";
-
-    OpenCVConfig cvConfig = (OpenCVConfig) config.get(trackingConfig.cv);
-    cvConfig.cameraIndex = 0;
-    cvConfig.capturing = true;
-    cvConfig.inputSource = "camera";
-    cvConfig.grabberType = "OpenCV";
-
-    ServoConfig panConfig = (ServoConfig) config.get(trackingConfig.pan);
-    panConfig.pin = "7";
-    panConfig.autoDisable = true;
-    panConfig.idleTimeout = 3000; // AHAHAH - I did 3 originally
-    panConfig.controller = controller;
-
-    ServoConfig tiltConfig = (ServoConfig) config.get(trackingConfig.tilt);
-    tiltConfig.pin = "5";
-    tiltConfig.autoDisable = true;
-    tiltConfig.idleTimeout = 3000;
-    tiltConfig.controller = controller;
-
-    PidConfig pidConfig = (PidConfig) config.get(trackingConfig.pid);
-    PidData panData = new PidData();
-    panData.kp = 0.015;
-    panData.ki = 0.001;
-    panData.kd = 0.0;
-
-    pidConfig.data.put(trackingConfig.pan, panData);
-
-    PidData tiltData = new PidData();
-    tiltData.kp = 0.035;
-    tiltData.ki = 0.001;
-    tiltData.kd = 0.0;
-
-    pidConfig.data.put(trackingConfig.tilt, tiltData);
-
-    // put self in
-    config.put(name, trackingConfig);
-
-    return config;
+  public void rest() {
+    send(pan, "rest");
+    send(tilt, "rest");
   }
 
   public static void main(String[] args) {
@@ -410,10 +326,14 @@ public class Tracking extends Service {
 
       LoggingFactory.init(Level.INFO);
 
-      Runtime.saveDefault("Tracking");
+      // Runtime.saveDefault("Tracking");
 
-      // Tracking track = (Tracking) Runtime.start("track", "Tracking");
-      Runtime.start("webgui", "WebGui");
+      Runtime.start("intro", "Intro");
+      Runtime.start("track", "Tracking");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+
       boolean done = true;
       if (done) {
         return;

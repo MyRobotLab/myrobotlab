@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -60,7 +59,6 @@ import org.myrobotlab.framework.interfaces.Broadcaster;
 import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
@@ -133,6 +131,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   transient protected Thread thisThread = null;
 
   transient protected Inbox inbox = null;
+
   transient protected Outbox outbox = null;
 
   protected String serviceVersion = null;
@@ -141,6 +140,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * default en.properties - if there is one
    */
   protected Properties defaultLocalization = null;
+
+  /**
+   * the last config applied to this service
+   */
+  protected ServiceConfig config;
 
   /**
    * map of keys to localizations -
@@ -159,12 +163,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * for promoting portability and good pathing
    */
-  transient protected static String fs = File.separator;
+  final transient protected static String fs = File.separator;
 
   /**
    * for promoting portability and good pathing
    */
-  transient protected String ps = File.pathSeparator;
+  final transient protected String ps = File.pathSeparator;
 
   /**
    * a more capable task handler
@@ -184,6 +188,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * it a member variable
    */
   protected Map<String, String> interfaceSet;
+
+  /**
+   * plan which was used to build this service
+   */
+  protected Plan buildPlanx = null;
 
   /**
    * order which this service was created
@@ -216,22 +225,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * explicitly set
    */
   protected Locale locale;
-
-  /**
-   * starting all peers on start of service
-   */
-  @Deprecated /* peers are dead use config */
-  protected boolean autoStartPeers = true;
-
-  @Deprecated /* peers are dead use config */
-  public boolean isAutoStartPeers() {
-    return autoStartPeers;
-  }
-
-  @Deprecated /* peers are dead use config */
-  public void setAutoStartPeers(boolean autoStartPeers) {
-    this.autoStartPeers = autoStartPeers;
-  }
 
   /**
    * copyShallowFrom is used to help maintain state information with
@@ -649,10 +642,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     MethodCache cache = MethodCache.getInstance();
     cache.cacheMethodEntries(this.getClass());
 
-    // soft set (not forced) of meta data and overrides in planStore
-    ServiceData.setMetaData(name, getClass().getSimpleName());
     // pull back the overrides
-    serviceType = ServiceData.getMetaData(name, getClass().getSimpleName());
+    serviceType = MetaData.get(getClass().getSimpleName());// ServiceData.getMetaData(name,
+                                                           // getClass().getSimpleName());
 
     // FIXME - this is 'sort-of' static :P
     if (methodSet == null) {
@@ -938,56 +930,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         // don't really care
       }
     }
-  }
-
-  /**
-   * method for getting actual name from a service of its peer based on a 'key'
-   * - the return value would change depending on if the service is local or
-   * not.
-   * 
-   * FIXME - if not local - it needs to be prefixed by the gateway e.g.
-   * {remote}.arduino.serial
-   * 
-   * @param peerKey
-   *          r
-   * @return service interface
-   */
-
-  public synchronized ServiceInterface createPeer(String peerKey) {
-    try {
-
-      ServiceReservation sr = serviceType.getPeer(peerKey);
-
-      if (sr == null) {
-        error("can not create peer from reservedkey %s - no type definition !", peerKey);
-        return null;
-      }
-
-      if (Runtime.getService(sr.actualName) != null) {
-        // peer already created
-        return Runtime.getService(sr.actualName);
-      }
-
-      ServiceInterface si = null;
-
-      Runtime runtime = Runtime.getInstance();
-      // String filename = runtime.getConfigDir() + fs + runtime.getConfigName()
-      // + fs + name + ".yml";
-      String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + sr.actualName + ".yml";
-      File check = new File(filename);
-      if (check.exists()) {
-        si = Runtime.create(sr.actualName);
-      } else {
-        si = Runtime.create(sr.actualName, sr.type);
-      }
-
-      sr.state = "created";
-
-      return si;
-    } catch (Exception e) {
-      error(e);
-    }
-    return null;
   }
 
   @Override
@@ -1382,7 +1324,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * service specific configuration in the service yaml files.
    * 
    */
-  public ServiceConfig load(ServiceConfig config) {
+  public ServiceConfig apply(ServiceConfig config) {
     log.info("Default service config loading for service: {} type: {}", getName(), getType());
     // setVirtual(config.isVirtual); "overconfigured" - user Runtimes virtual
     // setLocale(config.locale);
@@ -1398,15 +1340,21 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   public ServiceConfig getConfig() {
     // FIXME !!! - this should be null for services that do not have it !
-    log.info("{} of type {} does not currently define its own config", getName(), getSimpleName());
-    ServiceConfig config = new ServiceConfig();
-    config.type = getClass().getSimpleName();
+    // log.info("{} of type {} does not currently define its own config",
+    // getName(), getSimpleName());
+    // ServiceConfig config = new ServiceConfig();
+    // config.type = getClass().getSimpleName();
     return config;
   }
 
+  @Override
+  public void setConfig(ServiceConfig config) {
+    this.config = config;
+  }
+
   public ServiceConfig load() throws IOException {
-    ServiceConfig config = Runtime.load(getName());
-    return config;
+    Plan plan = Runtime.load(getName(), getClass().getSimpleName());
+    return plan.get(getName());
   }
 
   public void out(Message msg) {
@@ -1467,81 +1415,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
-   * FIXME - implement This SHOULD NOT be called by the framework - since - the
-   * framework does not know about dna mutation - or customizations which have
-   * been applied such that Arduinos are shared between services or peers of
-   * services
-   * 
-   * It SHOULD shutdown all the peers of a service - but it SHOULD NOT be
-   * automatically called by the framework. If the 'user' wants to release all
-   * peers - it should fufill the request
-   */
-  @Override
-  @Deprecated
-  public void releasePeers() {
-    // releasePeers(null);
-  }
-
-  // FIXME - startPeers sets fields - this method should "unset" fields !!!
-  @Deprecated
-  synchronized private void releasePeers(String peerKey) {
-    log.info("{}.releasePeers ({})", getName(), peerKey);
-    try {
-      // get sub peers climbing tree
-      Map<String, ServiceReservation> peers = serviceType.getPeers();
-      for (String s : peers.keySet()) {
-        ServiceInterface si = getPeer(s);
-        if (si == null) {
-          // peer does not exist
-          continue;
-        }
-        if (peerKey == null) {
-          Runtime.release(si.getName());
-        } else if (peerKey != null && peerKey.equals(s))
-          Runtime.release(si.getName());
-      }
-
-    } catch (Exception e) {
-      log.debug("{} does not have a getPeers", serviceClass);
-    }
-  }
-
-  public void releasePeer(String peerName) {
-    releasePeers(peerName);
-    ServiceReservation sr2 = serviceType.getPeer(peerName);
-    sr2.state = "inactive";
-    broadcastState();
-  }
-
-  /**
    * Releases resources, and unregisters service from the runtime
    */
   @Override
   synchronized public void releaseService() {
-
-    purgeTasks();
-
-    // recently added - preference over detach(Runtime.getService(getName()));
-    // since this service is releasing - it should be detached from all existing
-    // services
-    detach();
-
-    // note - if stopService is overwritten with extra
-    // threads - releaseService will need to be overwritten too
-    stopService();
-
-    // TODO ? detach all other services currently attached
-    // detach();
-    // @grog is it ok for now ?
-
-    // GroG says, I don't think so - this is releasing itself from itself
-    // detach(Runtime.getService(getName()));
-
-    releasePeers();
-
-    // Runtime.release(getName()); infinite loop with peers ! :(
-
-    Runtime.unregister(getName());
+    Runtime.release(getName());
   }
 
   /**
@@ -1630,58 +1508,18 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public boolean save() {
-    return save(null, null, null);
+    Runtime runtime = Runtime.getInstance();
+    return runtime.save(getName(), null);
   }
 
   public boolean save(String filename) {
-    return save(filename, null, null);
+    Runtime runtime = Runtime.getInstance();
+    return runtime.save(getName(), filename);
   }
 
-  public boolean save(String filename, Boolean allowNullFields, Boolean saveNonConfigServices) {
-    try {
-
-      if (allowNullFields == null) {
-        allowNullFields = true;
-      }
-
-      if (saveNonConfigServices == null) {
-        saveNonConfigServices = false;
-      }
-
-      if (filename == null) {
-        filename = Runtime.getInstance().getConfigDir() + fs + Runtime.getInstance().getConfigName() + fs + getName() + ".yml";
-      }
-
-      String format = filename.substring(filename.lastIndexOf(".") + 1);
-      ServiceConfig config = getConfig();
-
-      if (config == null) {
-        log.info("{} has null config - not saving", getName());
-        return false;
-      }
-
-      String data = null;
-      if ("json".equals(format.toLowerCase())) {
-        data = CodecUtils.toJson(config);
-      } else {
-        data = CodecUtils.toYaml(config);
-      }
-
-      FileIO.toFile(filename, data.getBytes());
-
-      info("saved %s config to %s", getName(), filename);
-      return true;
-
-    } catch (Exception e) {
-      error(e);
-    }
-    return false;
-  }
-
-  @Deprecated /* peers are dead */
   public ServiceInterface getPeer(String peerKey) {
-    String peerName = serviceType.getPeerActualName(peerKey);
-    return Runtime.getService(peerName);
+    String actualName = getPeerName(peerKey);
+    return Runtime.getService(actualName);
   }
 
   public void send(String name, String method) {
@@ -1708,6 +1546,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public void send(String name, String method, Object... data) {
+    if (name == null) {
+      log.debug("{}.send null, {} address", getName(), method);
+      return;
+    }
     // if you know the service is local - use same thread
     // to call directly
     ServiceInterface si = Runtime.getService(name);
@@ -1892,71 +1734,18 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     this.thisThread = thisThread;
   }
 
-  /**
-   * loadPeer attempts to create then load a peer with current configuration. If
-   * no configuration is found it is not an error, since it was a peer there is
-   * enough information to correctly create a peer service from this services
-   * meta data.
-   * 
-   * @param reservedKey
-   *          - key name of peer
-   * @return
-   */
-  public ServiceInterface loadPeer(String reservedKey) {
-    try {
-      ServiceInterface si = null;
-      ServiceReservation sr = serviceType.getPeer(reservedKey);
-
-      if (sr == null) {
-        error("can not create peer from reservedkey %s - no type definition !", reservedKey);
-        return null;
-      }
-
-      si = createPeer(reservedKey);
-
-      Runtime runtime = Runtime.getInstance();
-      String filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + sr.actualName + ".yml";
-      File check = new File(filename);
-      if (!check.exists()) {
-        log.info("no config for {} {} {}", getName(), sr.actualName, filename);
-        return si;
-      }
-
-      Runtime.load(sr.actualName);
-      return si;
-    } catch (Exception e) {
-      error(e);
-    }
-    return null;
+  public ServiceInterface startPeer(String reservedKey) {
+    String actualName = getPeerName(reservedKey);
+    return Runtime.start(actualName);
   }
 
-  public ServiceInterface startPeer(String reservedKey) {
-    ServiceInterface si = null;
-    try {
-      si = createPeer(reservedKey);
-      if (si == null) {
-        error("could not create service from key %s", reservedKey);
-        return null;
-      }
-
-      loadPeer(reservedKey);
-
-      ServiceReservation sr2 = serviceType.getPeer(reservedKey);
-      si.startService();
-
-      if (sr2 != null) {
-        sr2.state = "started";
-      }
-
-    } catch (Exception e) {
-      error(e.getMessage());
-      log.error("startPeer threw", e);
-    }
-    broadcastState();
-    return si;
+  public void releasePeer(String reservedKey) {
+    String actualName = getPeerName(reservedKey);
+    Runtime.release(actualName);
   }
 
   @Override
+  @Deprecated /* use Runtime.start() */
   public void loadAndStart() {
     try {
       load();
@@ -1968,17 +1757,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   synchronized public void startService() {
-    // register locally
-    /*
-     * had to register here for synchronization issues before ... Registration
-     * registration = new Registration(this); Runtime.register(registration);
-     */
-
-    // startPeers(); FIXME - TOO BIG A CHANGE .. what should happen is services
-    // should be created
-    // currently they are started by the UI vs created - and there is no desire
-    // or current capability of starting it
-    // afterwards
 
     if (!isRunning()) {
       outbox.start();
@@ -1989,93 +1767,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       isRunning = true;
       Runtime runtime = Runtime.getInstance();
       if (runtime != null) {
-        runtime.broadcast("started", getFullName());
+        runtime.invoke("started", getName()); // getFullName()); - removed
+                                              // fullname
       }
 
     } else {
       log.debug("startService request: service {} is already running", name);
-    }
-
-    if (autoStartPeers) {
-      // startPeers();
-    }
-
-  }
-
-  @Deprecated /* peers are dead - use config */
-  public void startPeers() {
-    log.info("starting peers");
-    Map<String, ServiceReservation> peers = serviceType.getPeers();
-
-    if (peers != null) {
-      for (ServiceReservation sr : peers.values()) {
-        startPeer(sr.key);
-      }
-    }
-
-    Set<Class<?>> ancestry = new HashSet<Class<?>>();
-    Class<?> targetClass = this.getClass();
-
-    // if we are a org.myrobotlab object climb up the ancestry to
-    // copy all super-type fields ...
-    // GroG says: I wasn't comfortable copying of "Service" - because its never
-    // been tested before - so we copy all definitions from
-    // other superclasses e.g. - org.myrobotlab.service.abstracts
-    // it might be safe in the future to copy all the way up without stopping...
-    while (targetClass.getCanonicalName().startsWith("org.myrobotlab") && !targetClass.getCanonicalName().startsWith("org.myrobotlab.framework")) {
-      ancestry.add(targetClass);
-      targetClass = targetClass.getSuperclass();
-    }
-
-    // AUTO ASSIGNMENT - a good idea ? or not ?
-    for (Class<?> sourceClass : ancestry) {
-
-      Field fields[] = sourceClass.getDeclaredFields();
-      for (int j = 0, m = fields.length; j < m; j++) {
-        try {
-          Field f = fields[j];
-
-          /**
-           * <pre>
-           * int modifiers = f.getModifiers();
-           * String fname = f.getName();
-           * if (Modifier.isPrivate(modifiers) || fname.equals("log") || Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
-           *   log.debug("skipping {}", f.getName());
-           *   continue;
-           * } else {
-           *   log.debug("copying {}", f.getName());
-           * }
-           * 
-           * Type t = f.getType();
-           * </pre>
-           */
-
-          f.setAccessible(true);
-          Field targetField = sourceClass.getDeclaredField(f.getName());
-          targetField.setAccessible(true);
-
-          if (peers.containsKey(f.getName())) {
-            ServiceReservation sr = peers.get(f.getName());
-
-            if (sr.autoStart == null || sr.autoStart == false) {
-              log.info("peer defined - but configured to not autoStart");
-              continue;
-            }
-
-            if (f.get(this) != null) {
-              log.info("peer {} already assigned", f.getName());
-              continue;
-            }
-            log.info("assinging {}.{} = startPeer({})", sourceClass.getSimpleName(), f.getName(), f.getName());
-            Object o = startPeer(f.getName());
-
-            targetField.set(this, o);
-          }
-
-        } catch (Exception e) {
-          log.error("copy failed", e);
-        }
-      } // for each field in class
     }
   }
 
@@ -2092,7 +1789,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     thisThread = null;
 
     Runtime runtime = Runtime.getInstance();
-    runtime.broadcast("stopped", getFullName());
+    runtime.invoke("stopped", getFullName());
   }
 
   // -------------- Messaging Begins -----------------------
@@ -2405,7 +2102,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public boolean setVirtual(boolean b) {
     this.isVirtual = b;
-    broadcastState();
     return isVirtual;
   }
 
@@ -2755,39 +2451,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   @Override
-  public void onRegistered(Registration registration) {
-    // service life-cycle callback - override if interested in these events
-  }
-
-  @Override
-  public void onCreated(String fullname) {
-    // service life-cycle callback - override if interested in these events
-  }
-
-  @Override
-  public void onStarted(String fullname) {
-    // service life-cycle callback - override if interested in these events
-  }
-
-  @Override
-  public void onStopped(String fullname) {
-    // service life-cycle callback - override if interested in these events
-  }
-
-  @Override
-  public void onReleased(String fullname) {
-    // service life-cycle callback - override if interested in these events
-  }
-
-  public boolean isStarted(String peerKey) {
-    ServiceInterface si = getPeer(peerKey);
-    if (si == null || !si.isRunning()) {
-      return false;
-    }
-    return true;
-  }
-
-  @Override
   public int compareTo(ServiceInterface o) {
     if (this.creationOrder == o.getCreationOrder()) {
       return 0;
@@ -2802,23 +2465,20 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return creationOrder;
   }
 
+  public String getPeerName(String peerKey) {
+    return Runtime.getPeerName(peerKey, config, serviceType.peers, getName());
+  }
+
   public boolean isPeerStarted(String peerKey) {
-    if (serviceType.peers != null) {
-      if (!serviceType.peers.containsKey(peerKey)) {
-        return false;
-      }
-      ServiceReservation sr = serviceType.peers.get(peerKey);
-      return "started".equals(sr.state);
-    }
-    return false;
+    return Runtime.isStarted(getPeerName(peerKey));
   }
 
   protected void registerForInterfaceChange(Class<?> clazz) {
     Runtime.getInstance().registerForInterfaceChange(getClass().getCanonicalName(), clazz);
   }
 
-  final public LinkedHashMap<String, ServiceConfig> getDefault() {
-    return ServiceInterface.getDefault(getName(), this.getClass().getSimpleName());
+  final public Plan getDefault() {
+    return MetaData.getDefault(getName(), this.getClass().getSimpleName());
   }
 
 }

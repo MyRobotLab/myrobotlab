@@ -47,20 +47,17 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
             scope.pinIndex = service.pinIndex;
             // scope.addressIndex = service.addressIndex;
             var x = 0;
-            var gradient = tinygradient([
-            {
+            var gradient = tinygradient([{
                 h: 0,
                 s: 0.4,
                 v: 1,
                 a: 1
-            }, 
-            {
+            }, {
                 h: 240,
                 s: 0.4,
                 v: 1,
                 a: 1
-            }
-            ]);
+            }]);
             scope.oscope = {};
             scope.oscope.traces = {};
             scope.oscope.writeStates = {};
@@ -71,37 +68,39 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
                     return;
                 }
                 var size = Object.keys(pinIndex).length
-                scope.pinIndex = pinIndex;
-                var colorsHsv = gradient.hsv(size);
-                // pass over pinIndex add display data
-                for (var key in pinIndex) {
-                    if (!pinIndex.hasOwnProperty(key)) {
-                        continue;
-                    }
-                    scope.oscope.traces[key] = {};
-                    var trace = scope.oscope.traces[key];
-                    var pinDef = pinIndex[key];
+                if (size && size > 0) {
+                    scope.pinIndex = pinIndex;
+                    var colorsHsv = gradient.hsv(size);
+                    // pass over pinIndex add display data
+                    for (var key in pinIndex) {
+                        if (!pinIndex.hasOwnProperty(key)) {
+                            continue;
+                        }
+                        scope.oscope.traces[key] = {};
+                        var trace = scope.oscope.traces[key];
+                        var pinDef = pinIndex[key];
 
-                    // adding style
-                    var color = colorsHsv[pinDef.address];
-                    trace.readStyle = {
-                        'background-color': color.toHexString()
-                    };
-                    trace.writeStyle = {
-                        'background-color': '#eee'
-                    };
-                    trace.color = color;
-                    trace.state = false;
-                    // off
-                    trace.posX = 0;
-                    trace.posY = 0;
-                    trace.count = 0;
-                    trace.colorHexString = color.toHexString();
-                    trace.stats = {
-                        min: 0,
-                        max: 1,
-                        totalValue: 0,
-                        totalSample: 1
+                        // adding style
+                        var color = colorsHsv[pinDef.address];
+                        trace.readStyle = {
+                            'background-color': color.toHexString()
+                        };
+                        trace.writeStyle = {
+                            'background-color': '#eee'
+                        };
+                        trace.color = color;
+                        trace.state = false;
+                        // off
+                        trace.posX = 0;
+                        trace.posY = 0;
+                        trace.count = 0;
+                        trace.colorHexString = color.toHexString();
+                        trace.stats = {
+                            min: 0,
+                            max: 1,
+                            totalValue: 0,
+                            totalSample: 1
+                        }
                     }
                 }
             }
@@ -213,7 +212,8 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
                 scaleY += 1;
                 _self.ctx.scale(scaleX, scaleY);
             }
-            ;// RENAME eanbleTrace - FIXME read values vs write values | ALL values from service not from ui !! - ui only sends commands
+            ;
+            // RENAME eanbleTrace - FIXME read values vs write values | ALL values from service not from ui !! - ui only sends commands
             scope.activateTrace = function(pinDef) {
                 var trace = scope.oscope.traces[pinDef.pin];
                 if (trace.state) {
@@ -301,7 +301,8 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
                         'background-color': newColor.toHexString()
                     };
                 }
-            };
+            }
+            ;
             // FIXME FIXME FIXME ->> THIS SHOULD WORK subscribeToServiceMethod  <- but doesnt
             mrl.subscribeToService(_self.onMsg, name);
             // this siphons off a single subscribe to the webgui
@@ -309,7 +310,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
             mrl.subscribe(name, 'publishPinArray');
             mrl.subscribeToServiceMethod(_self.onMsg, name, 'publishPinArray');
             // initializing display data     
-           
+
             setTraceButtons(service.pinIndex);
         }
     };

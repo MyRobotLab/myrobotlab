@@ -3,12 +3,16 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.MethodCache;
+import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -155,6 +159,13 @@ public class Random extends Service {
     return ranges.toArray(r);
 
   }
+  
+  /**
+   * remove all random events
+   */
+  public void removeAll() {
+    purge();
+  }
 
   public void addRandom(long minIntervalMs, long maxIntervalMs, String name, String method, Range... ranges) {
 
@@ -180,7 +191,7 @@ public class Random extends Service {
     }
 
     RandomMessage msg = randomData.get(key);
-    if (!msg.enabled) {
+    if (msg == null || !msg.enabled) {
       return;
     }
 
@@ -234,20 +245,19 @@ public class Random extends Service {
       m.maxIntervalMs = msg.maxIntervalMs;
       m.minIntervalMs = msg.minIntervalMs;
       m.data = msg.data;
-      config.addRandom.put(key, m);
+      config.randomMessages.put(key, m);
     }
 
     return config;
   }
 
-  @Override
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     RandomConfig config = (RandomConfig) c;
     enabled = config.enabled;
 
     try {
-      for (String key : config.addRandom.keySet()) {
-        RandomMessageConfig msgc = config.addRandom.get(key);
+      for (String key : config.randomMessages.keySet()) {
+        RandomMessageConfig msgc = config.randomMessages.get(key);
         addRandom(msgc.minIntervalMs, msgc.maxIntervalMs, key.substring(0, key.lastIndexOf(".")), key.substring(key.lastIndexOf(".") + 1), msgc.data);
       }
     } catch (Exception e) {
@@ -257,8 +267,13 @@ public class Random extends Service {
     return c;
   }
 
-  public void removeRandom(String name, String method) {
-    randomData.remove(String.format("%s.%s", name, method));
+  public RandomMessage remove(String name, String method) {
+    return remove(String.format("%s.%s", name, method));
+  }
+  
+  public RandomMessage remove(String key) {
+    purgeTask(key);
+    return randomData.remove(key);
   }
 
   public Set<String> getKeySet() {
@@ -329,6 +344,33 @@ public class Random extends Service {
     randomData.clear();
     purgeTasks();
   }
+  
+  public Set<String> getMethodsFromName(String serviceName){
+    ServiceInterface si = Runtime.getService(serviceName);    
+    if (si == null) {
+      return new HashSet<String>();
+    }
+    
+    // FIXME FIXME FIXME - add filtering capability at the MethodCache
+
+    return MethodCache.getInstance().getMethodNames(si.getClass().getCanonicalName());
+  }
+  
+  public List<String> getServiceList(){
+    List<String> ret = new ArrayList<String>();
+    for (String name: Runtime.getServiceNames()) {
+      ret.add(name);
+    }
+    return ret;
+  }
+  
+  public List<MethodEntry> methodQuery(String serviceName, String methodName){
+    ServiceInterface si = Runtime.getService(serviceName);    
+    if (si == null) {
+      return new ArrayList<MethodEntry>();
+    }
+    return MethodCache.getInstance().query(si.getClass().getCanonicalName(), methodName);
+  }
 
   public static void main(String[] args) {
     try {
@@ -337,16 +379,21 @@ public class Random extends Service {
 
       Runtime.start("c1", "Clock");
 
-      Python python = (Python) Runtime.start("python", "Python");
       Random random = (Random) Runtime.start("random", "Random");
-
+      
+      List<String> ret = random.getServiceList();
+      Set<String> mi = random.getMethodsFromName("c1");
+      List<MethodEntry> mes = MethodCache.getInstance().query("Clock", "setInterval");
+      
       random.addRandom(200, 1000, "i01", "setHeadSpeed", 8, 20, 8, 20, 8, 20);
       random.addRandom(200, 1000, "i01", "moveHead", 65, 115, 65, 115, 65, 115);
 
-      random.addRandom(3000, 8000, "i01", "setLeftHandSpeed", 8, 25, 8, 25, 8, 25, 8, 25, 8, 25, 8, 25);
-      random.addRandom(3000, 8000, "i01", "setRightHandSpeed", 8, 25, 8, 25, 8, 25, 8, 25, 8, 25, 8, 25);
+      // Python python = (Python) Runtime.start("python", "Python");
 
-      random.addRandom(200, 1000, "i01", "moveHead", 65, 115, 65, 115, 65, 115);
+      // random.addRandom(3000, 8000, "i01", "setLeftHandSpeed", 8, 25, 8, 25, 8, 25, 8, 25, 8, 25, 8, 25);
+      // random.addRandom(3000, 8000, "i01", "setRightHandSpeed", 8, 25, 8, 25, 8, 25, 8, 25, 8, 25, 8, 25);
+
+      // random.addRandom(200, 1000, "i01", "moveHead", 65, 115, 65, 115, 65, 115);
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);

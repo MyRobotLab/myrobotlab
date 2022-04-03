@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -12,15 +11,9 @@ public class TarsosDspMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
-  public TarsosDspMeta(String name) {
+  public TarsosDspMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription("digital signal processing - used for audio effects, although it could have many other uses");
     setAvailable(true); // false if you do not want it viewable in a gui
     // add dependency if necessary

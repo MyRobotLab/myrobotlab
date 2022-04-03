@@ -114,9 +114,12 @@ angular.module('mrlapp.service.TrackingGui', []).controller('TrackingGuiCtrl', [
         }
     }
 
+    $scope.rest = function() {
+        msg.send('rest')
+    }
+    
     // FIXME - which i could get rid of this
     // makes attach directive worky on first load
-    msg.sendTo("runtime", "publishInterfaceToPossibleServices")
     msg.subscribe('publishTrackingState')
     msg.subscribe('publishStats')
     msg.subscribe(this)

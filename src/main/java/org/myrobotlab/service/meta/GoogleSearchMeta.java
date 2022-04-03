@@ -11,14 +11,8 @@ public class GoogleSearchMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
-  public GoogleSearchMeta(String name) {
-
-    super(name);
+  public GoogleSearchMeta() {
     addDescription("used as a general google search");
     addDependency("org.jsoup", "jsoup", "1.14.2");
     addCategory("search");
