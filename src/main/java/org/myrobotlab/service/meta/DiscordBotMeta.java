@@ -12,9 +12,6 @@ public class DiscordBotMeta extends MetaData {
    * DiscordBot metadata. Uses JDA library JNA versions are excluded to avoid
    * version conflicts with other services. ProgramAB is a peer.
    * 
-   * @param name
-   *          name of the service
-   * 
    */
   public DiscordBotMeta() {
     addDescription("Discord Bot Proxy for chatbot backend.");

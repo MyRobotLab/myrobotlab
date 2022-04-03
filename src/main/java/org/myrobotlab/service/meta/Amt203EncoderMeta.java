@@ -12,9 +12,6 @@ public class Amt203EncoderMeta extends MetaData {
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
    * definitions.
-   * 
-   * @param name
-   *          n
    */
   public Amt203EncoderMeta() {
     addDescription("AMT203 Encoder - Absolute position encoder");
