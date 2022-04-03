@@ -6,12 +6,15 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Plan;
+// import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.WebGuiConfig;
 import org.slf4j.Logger;
 
 public class Intro extends Service {
@@ -113,15 +116,49 @@ public class Intro extends Service {
       System.setProperty("java.version", "11.0");
       LoggingFactory.init("info");
 
-      // Runtime.start("runtime", "Runtime"); i
-      Runtime.start("webgui", "WebGui");
+      
       Runtime.start("intro", "Intro");
       Runtime.start("python", "Python");
+      Runtime.start("i01", "InMoov2");
+      // Runtime.start("mega", "Arduino");
+      // Runtime.start("track", "Tracking");
+      // Runtime.start("ada", "Adafruit16CServoDriver");
+      
+   
+      
+      Runtime.start("i01", "InMoov2");
+      
 
+      Plan plan = Runtime.load("webgui","WebGui");
+      WebGuiConfig config = (WebGuiConfig) plan.get("webgui");
+      config.autoStartBrowser = false;
+      Runtime.start("webgui", "WebGui");
+
+      
       boolean done = true;
       if (done) {
         return;
       }
+      
+      
+      Runtime.start("python","Python");
+      
+      Servo s1 = (Servo)Runtime.start("s1","Servo");
+      s1.setRest(0);
+      s1.moveToBlocking(0);
+      s1.setSpeed(12.311);
+      Service.sleep(1000);
+      log.info("starting servo move");
+      s1.moveToBlocking(9.5);
+      log.info("finished servo move");
+
+
+      
+
+      // Runtime.main(new String[]{"--config", "i01-9"});
+      // Runtime.start("runtime", "Runtime"); i
+
+
 
       DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
