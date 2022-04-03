@@ -15,9 +15,6 @@ public class ArduinoMeta extends MetaData {
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
    * definitions.
-   * 
-   * @param type
-   *          n
    */
   public ArduinoMeta() {
     addDescription("controls an Arduino microcontroller as a slave, which allows control of all the devices the Arduino is attached to, such as servos, motors and sensors");

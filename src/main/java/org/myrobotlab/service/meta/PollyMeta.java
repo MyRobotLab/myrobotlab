@@ -16,8 +16,6 @@ public class PollyMeta extends AbstractSpeechSynthesisMeta {
    * 
    */
   public PollyMeta() {
-    // super();
-
     addDescription("Amazon speech synthesis - requires keys");
     setAvailable(true); // false if you do not want it viewable in a
     // gui
