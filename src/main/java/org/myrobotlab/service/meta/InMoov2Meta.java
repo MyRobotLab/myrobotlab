@@ -162,13 +162,13 @@ public class InMoov2Meta extends MetaData {
     PidConfig pid = (PidConfig) plan.getPeerConfig("pid");
 
     PidData tiltPid = new PidData();
-    tiltPid.ki = 0.001;
-    tiltPid.kp = 0.035;
+    tiltPid.ki = 1.0;
+    tiltPid.kp = 30.0;
     pid.data.put(headTracking.tilt, tiltPid);
 
     PidData panPid = new PidData();
-    panPid.ki = 0.001;
-    panPid.kp = 0.015;
+    panPid.ki = 1.0;
+    panPid.kp = 15.0;
     pid.data.put(headTracking.pan, panPid);
 
     PidData eyeTiltPid = new PidData();
