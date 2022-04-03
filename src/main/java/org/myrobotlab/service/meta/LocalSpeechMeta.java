@@ -1,6 +1,8 @@
 package org.myrobotlab.service.meta;
 
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.LocalSpeechConfig;
 import org.myrobotlab.service.meta.abstracts.AbstractSpeechSynthesisMeta;
 import org.slf4j.Logger;
 
@@ -22,5 +24,20 @@ public class LocalSpeechMeta extends AbstractSpeechSynthesisMeta {
     setAvailable(true);
     addCategory("speech");
   }
+  
+  public Plan getDefault(String name) {
+
+    Plan plan = new Plan(name);
+    plan.putPeers(name, peers);
+
+    LocalSpeechConfig config = new LocalSpeechConfig();
+    config.audioFile = name + ".audioFile";
+
+    // add self last - desired order or construction
+    plan.addConfig(config);
+
+    return plan;
+  }
+
 
 }

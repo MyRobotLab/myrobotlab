@@ -1,6 +1,8 @@
 package org.myrobotlab.service.meta;
 
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.IndianTtsConfig;
 import org.myrobotlab.service.meta.abstracts.AbstractSpeechSynthesisMeta;
 import org.slf4j.Logger;
 
@@ -17,7 +19,7 @@ public class IndianTtsMeta extends AbstractSpeechSynthesisMeta {
    * 
    */
   public IndianTtsMeta() {
-
+    
     addDescription("Hindi text to speech support - requires keys");
     setCloudService(true);
     addCategory("speech", "cloud");
@@ -27,6 +29,21 @@ public class IndianTtsMeta extends AbstractSpeechSynthesisMeta {
 
     setRequiresKeys(true);
 
+  }
+
+    
+  public Plan getDefault(String name) {
+
+    Plan plan = new Plan(name);
+    plan.putPeers(name, peers);
+
+    IndianTtsConfig config = new IndianTtsConfig();
+    config.audioFile = name + ".audioFile";
+
+    // add self last - desired order or construction
+    plan.addConfig(config);
+
+    return plan;
   }
 
 }

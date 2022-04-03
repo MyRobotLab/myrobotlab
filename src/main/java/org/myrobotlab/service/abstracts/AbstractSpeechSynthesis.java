@@ -19,8 +19,8 @@ import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.AudioFile;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Security;
-import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AudioListener;
@@ -1095,12 +1095,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     return mute;
   }
 
-//  @Override
-//  public ServiceConfig getConfig() {
-//    AbstractSpeechSynthesisConfig config = new AbstractSpeechSynthesisConfig();
-//    return getConfig(config);
-//  }
-
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     SpeechSynthesisConfig config = (SpeechSynthesisConfig) c;
 
@@ -1139,22 +1134,24 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     addListener(control.getName(), "publishSetMute");
     addListener(control.getName(), "publishReplaceWord");
   }
-
-  // Hacky way to get normalized code to work - inheritance not so helpful here
-  public SpeechSynthesisConfig getConfig(SpeechSynthesisConfig config) {
-    config.mute = mute;
-    config.blocking = blocking;
+  
+  
+  @Override
+  public ServiceConfig getConfig() {
+    SpeechSynthesisConfig c = (SpeechSynthesisConfig)config;
+    c.mute = mute;
+    c.blocking = blocking;
     if (substitutions != null && substitutions.size() > 0) {
-      config.substitutions = new HashMap<>();
-      config.substitutions.putAll(substitutions);
+      c.substitutions = new HashMap<>();
+      c.substitutions.putAll(substitutions);
     }
     if (voice != null) {
-      config.voice = voice.name;
+      c.voice = voice.name;
     }
     Set<String> listeners = getAttached("publishStartSpeaking");
-    config.speechRecognizers = listeners.toArray(new String[listeners.size()]);
+    c.speechRecognizers = listeners.toArray(new String[listeners.size()]);
 
-    return config;
+    return c;
   }
 
 }

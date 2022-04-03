@@ -114,12 +114,6 @@ public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis {
 
   }
 
-  @Override
-  public ServiceConfig getConfig() {
-    WebkitSpeechSynthesisConfig config = (WebkitSpeechSynthesisConfig) super.getConfig((SpeechSynthesisConfig) new WebkitSpeechSynthesisConfig());
-    return config;
-  }
-
   public static void main(String[] args) {
     try {
 

@@ -1,6 +1,8 @@
 package org.myrobotlab.service.meta;
 
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.PollyConfig;
 import org.myrobotlab.service.meta.abstracts.AbstractSpeechSynthesisMeta;
 import org.slf4j.Logger;
 
@@ -12,11 +14,9 @@ public class PollyMeta extends AbstractSpeechSynthesisMeta {
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
    * 
-   * @param name
-   *          n
-   * 
    */
   public PollyMeta() {
+    // super();
 
     addDescription("Amazon speech synthesis - requires keys");
     setAvailable(true); // false if you do not want it viewable in a
@@ -37,6 +37,20 @@ public class PollyMeta extends AbstractSpeechSynthesisMeta {
     setCloudService(true);
     setRequiresKeys(true);
 
+  }
+
+  public Plan getDefault(String name) {
+
+    Plan plan = new Plan(name);
+    plan.putPeers(name, peers);
+
+    PollyConfig config = new PollyConfig();
+    config.audioFile = name + ".audioFile";
+
+    // add self last - desired order or construction
+    plan.addConfig(config);
+
+    return plan;
   }
 
 }

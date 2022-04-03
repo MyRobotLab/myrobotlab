@@ -228,12 +228,6 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     return audioEffects;
   }
 
-  @Override
-  public ServiceConfig getConfig() {
-    MarySpeechConfig config = (MarySpeechConfig) super.getConfig((SpeechSynthesisConfig) new MarySpeechConfig());
-    return config;
-  }
-
   public static void main(String[] args) throws IOException {
     System.setProperty("java.version", "11.0");
     LoggingFactory.init(Level.INFO);
