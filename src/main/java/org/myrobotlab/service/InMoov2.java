@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -877,10 +878,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       script.append(torso.getScript(getName()));
     }
 
-    if (eyelids != null) {
-      script.append(indentSpace);
-      script.append(eyelids.getScript(getName()));
-    }
+//    if (eyelids != null) {
+//      script.append(indentSpace);
+//      script.append(eyelids.getScript(getName()));
+//    }
 
     send("python", "appendScript", script.toString());
 

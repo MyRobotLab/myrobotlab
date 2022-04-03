@@ -13,6 +13,7 @@ import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.WebGuiConfig;
 import org.slf4j.Logger;
 
 public class Intro extends Service {
@@ -129,6 +130,26 @@ public class Intro extends Service {
       if (done) {
         return;
       }
+      
+      
+      Runtime.start("python","Python");
+      
+      Servo s1 = (Servo)Runtime.start("s1","Servo");
+      s1.setRest(0);
+      s1.moveToBlocking(0);
+      s1.setSpeed(12.311);
+      Service.sleep(1000);
+      log.info("starting servo move");
+      s1.moveToBlocking(9.5);
+      log.info("finished servo move");
+
+
+      
+
+      // Runtime.main(new String[]{"--config", "i01-9"});
+      // Runtime.start("runtime", "Runtime"); i
+
+
 
       
       Runtime.start("i01", "InMoov2");
