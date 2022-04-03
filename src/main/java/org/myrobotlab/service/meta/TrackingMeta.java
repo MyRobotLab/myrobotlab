@@ -89,15 +89,15 @@ public class TrackingMeta extends MetaData {
 
     PidConfig pid = (PidConfig) plan.getPeerConfig("pid");
     PidData panData = new PidData();
-    panData.kp = 0.015;
-    panData.ki = 0.001;
+    panData.kp = 30;
+    panData.ki = 1;
     panData.kd = 0.0;
 
     pid.data.put(tracking.pan, panData);
 
     PidData tiltData = new PidData();
-    tiltData.kp = 0.035;
-    tiltData.ki = 0.001;
+    tiltData.kp = 30;
+    tiltData.ki = 1;
     tiltData.kd = 0.0;
 
     pid.data.put(tracking.tilt, tiltData);

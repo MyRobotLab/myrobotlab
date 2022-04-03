@@ -13,10 +13,6 @@ public class ClockMeta extends MetaData {
    * to be constructed. It has description, categories, dependencies, and peer
    * definitions.
    * 
-   * @param name
-   *          n
-   * 
-   * 
    * 
    */
   public ClockMeta() {

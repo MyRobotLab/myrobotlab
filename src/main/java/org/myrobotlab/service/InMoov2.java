@@ -273,8 +273,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   boolean isServoMixerActivated = false;
 
-  boolean isController3Activated = false;
-
   // TODO - refactor into a Simulator interface when more simulators are borgd
   transient JMonkeyEngine simulator;
 
@@ -325,6 +323,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   transient WebGui webgui;
 
   protected List<String> configList;
+  
+  private boolean isController3Activated;
 
   private boolean isController4Activated;
 
@@ -2189,6 +2189,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     // config.isController3Activated = isController3Activated;
     // config.isController4Activated = isController4Activated;
     // config.enableEyelids = isEyeLidsActivated;
+    config.enableChatBot = isChatBotActivated;
     config.enableHead = isHeadActivated;
     config.enableLeftArm = isLeftArmActivated;
     config.enableLeftHand = isLeftHandActivated;
@@ -2201,7 +2202,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     config.enableUltrasonicLeft = isUltrasonicLeftActivated;
     config.enableRightArm = isRightArmActivated;
     config.enableRightHand = isRightHandActivated;
-    config.enableRightHandSensors = isRightHandSensorActivated;
+    config.enableRightHandSensor = isRightHandSensorActivated;
     // config.isRightPortActivated = isRightPortActivated;
     // config.enableSimulator = isSimulatorActivated;
     config.autoStartPeers = false;
@@ -2306,7 +2307,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
         stopRightHand();
       }
 
-      if (config.enableRightHandSensors) {
+      if (config.enableRightHandSensor) {
         // the hell if I know ?
       }
 

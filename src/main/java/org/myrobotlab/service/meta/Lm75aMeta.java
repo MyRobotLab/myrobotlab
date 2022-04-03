@@ -11,10 +11,6 @@ public class Lm75aMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
   public Lm75aMeta() {
     addDescription("LM75A Digital temperature sensor");
