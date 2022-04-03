@@ -93,8 +93,12 @@ public class Pid extends Service implements PidControl {
     /**
      * The key identifier of this control loop. This is how to support multiple
      * pid loops with different tuning.
+     * 
+     * FIXME - this is not normalized ... but the PidData by itself, is not self contained :(
+     * currently the lesser of two evils is to denormalize it
      */
-    transient public String key;
+    // transient public String key;
+    public String key;
 
     /**
      * (P)roportional Tuning Parameter
