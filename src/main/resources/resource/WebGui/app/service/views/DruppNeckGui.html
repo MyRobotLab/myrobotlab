@@ -1,23 +1,17 @@
 <table class="form-group">
     <tr>
         <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
-            <label>Servo up</label>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<toggle class="miniBTN" ng-model="service.servoUpIsActive" title="To access settings, the servo must be activated" ng-change="!service.servoUpIsActive?msg.servoUpIsActive(false):msg.servoUpIsActiveservoUpIsActive(true)" on="" off="" size="btn-lg"/>
-            &nbsp;&nbsp;<button class="btn btn-default" ng-show="service.servoUpIsActive" ng-click="mrl.changeTab(service.name + '.servoUp')">Settings</button>
+            <div class="tab-content" service-body panel="mrl.getPanel(service.name + '.up')">
         </td>
     </tr>
     <tr>    
         <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
-            <label>Servo middle</label>
-            <toggle class="miniBTN" ng-model="service.servoMiddleIsActive" title="To access settings, the servo must be activated" ng-change="!service.servoMiddleIsActive?msg.servoMiddleIsActive(false):msg.servoMiddleIsActive(true)" on="" off="" size="btn-lg"/>
-            &nbsp;&nbsp;<button class="btn btn-default" ng-show="service.servoMiddleIsActive" ng-click="mrl.changeTab(service.name + '.servoMiddle')">Settings</button>
+            <div class="tab-content" service-body panel="mrl.getPanel(service.name + '.middle')">
         </td>
     </tr>
     <tr>    
         <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
-            <label>Servo down</label>
-            &nbsp;&nbsp;<toggle class="miniBTN" ng-model="service.servoDownIsActive" title="To access settings, the servo must be activated" ng-change="!service.servoDownIsActive?msg.servoDownIsActive(false):msg.servoDownIsActive(true)" on="" off="" size="btn-lg"/>
-            &nbsp;&nbsp;<button class="btn btn-default" ng-show="service.servoDownIsActive" ng-click="mrl.changeTab(service.name + '.servoDown')">Settings</button>
+            <div class="tab-content" service-body panel="mrl.getPanel(service.name + '.down')">
         </td>
     </tr>
-</table>    
+</table>   
