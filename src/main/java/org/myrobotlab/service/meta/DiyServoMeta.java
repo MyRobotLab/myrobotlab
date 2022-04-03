@@ -11,10 +11,6 @@ public class DiyServoMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
   public DiyServoMeta() {
     addDescription("Controls a motor so that it can be used as a Servo");

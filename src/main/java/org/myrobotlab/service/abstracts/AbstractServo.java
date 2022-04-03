@@ -783,11 +783,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   public void releaseService() {
 
-    disable();
-
     if (encoder != null) {
       encoder.disable();
     }
+    
+    disable();
+
     detach();
     super.releaseService();
   }

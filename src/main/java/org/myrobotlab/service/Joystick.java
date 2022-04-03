@@ -150,6 +150,9 @@ public class Joystick extends Service implements AnalogPublisher {
     }
 
     public synchronized void stop() {
+      if (myThread != null) {
+        myThread.interrupt();
+      }
       isPolling = false;
     }
   }
@@ -162,8 +165,8 @@ public class Joystick extends Service implements AnalogPublisher {
     Controller pollingController = null;
     Component[] hwComponents = null;
     isPolling = true;
-    while (isPolling) {
-      try {
+    try {
+      while (isPolling) {
 
         if (pollingController != hardwareController) {
           // the controller was switched !
@@ -241,10 +244,12 @@ public class Joystick extends Service implements AnalogPublisher {
         }
 
         Thread.sleep(20);
-      } catch (Exception e) {
-        log.info("leaving {} polling thread leaving", getName());
-      }
-    } // while
+      } // while
+
+    } catch (Exception e) {
+      log.info("leaving {} polling thread leaving", getName());
+    }
+
     isPolling = false;
   }
 
@@ -487,7 +492,7 @@ public class Joystick extends Service implements AnalogPublisher {
 
   public void releaseService() {
     super.releaseService();
-    stopPolling();    
+    stopPolling();
   }
 
   public Component getAxis(String name) {

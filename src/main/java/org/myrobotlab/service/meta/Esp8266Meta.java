@@ -11,10 +11,6 @@ public class Esp8266Meta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
   public Esp8266Meta() {
     addDescription("This connector will scan all the files in a directory and production documents");

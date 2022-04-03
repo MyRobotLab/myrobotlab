@@ -11,10 +11,6 @@ public class IntegratedMovementMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
   public IntegratedMovementMeta() {
     addDescription("a 3D kinematics service supporting D-H parameters");
