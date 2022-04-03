@@ -11,10 +11,6 @@ public class DatabaseConnectorMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
   public DatabaseConnectorMeta() {
     addDescription("This service will run a select statement against a database and return the rows as documents to be published");

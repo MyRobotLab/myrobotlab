@@ -11,10 +11,6 @@ public class GpsMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
   public GpsMeta() {
     addDescription("parses NMEA sentences coming in over a Serial service");

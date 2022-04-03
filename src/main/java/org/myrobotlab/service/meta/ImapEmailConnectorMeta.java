@@ -11,10 +11,6 @@ public class ImapEmailConnectorMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
   public ImapEmailConnectorMeta() {
     addDescription("This connector will connect to an IMAP based email server and crawl the emails");

@@ -11,10 +11,6 @@ public class MotorMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
   public MotorMeta() {
     addDescription("Motor service which supports 1 pwr pwm pin and 1 direction pin");
