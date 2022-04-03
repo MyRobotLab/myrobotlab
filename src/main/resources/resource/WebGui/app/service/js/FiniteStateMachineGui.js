@@ -1,7 +1,17 @@
-angular.module('mrlapp.service.DruppNeckGui', []).controller('DruppNeckGuiCtrl', ['$scope', 'mrl', function($scope, mrl) {
-    console.info('DruppNeckGuiCtrl')
+angular.module('mrlapp.service.FiniteStateMachineGui', []).controller('FiniteStateMachineGuiCtrl', ['$scope', 'mrl', function($scope, mrl) {
+    console.info('FiniteStateMachineGuiCtrl')
     var _self = this
     var msg = this.msg
+
+    $scope.servoUpIsActive = function() {
+        msg.send('runtime.start("servoUp", "Servo")')
+    }
+    $scope.servoMiddleIsActive = function() {
+        msg.send('runtime.start("servoMiddle", "Servo")')
+    }
+    $scope.servoDownIsActive = function() {
+        msg.send('runtime.start("servoDown", "Servo")')
+    }
 
     // init
 
