@@ -157,8 +157,12 @@ public class InMoov2Head extends Service {
 
   @Deprecated /* use LangUtils */
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH, "%s.moveHead(%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, neck.getCurrentInputPos(), rothead.getCurrentInputPos(),
-        eyeX.getCurrentInputPos(), eyeY.getCurrentInputPos(), jaw.getCurrentInputPos(), rollNeck.getCurrentInputPos());
+    StringBuilder head = new StringBuilder(String.format(Locale.ENGLISH, "%s.moveHead(%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, neck.getCurrentInputPos(), rothead.getCurrentInputPos(),
+        eyeX.getCurrentInputPos(), eyeY.getCurrentInputPos(), jaw.getCurrentInputPos(), rollNeck.getCurrentInputPos()));
+    if (eyelidLeft != null && eyelidRight != null) {
+      head.append(String.format(Locale.ENGLISH, "%s.moveEyelids(%.2f,%.2f)\n", inMoovServiceName, eyelidLeft.getCurrentInputPos(), eyelidRight.getCurrentInputPos()));
+    }
+    return head.toString();
   }
 
   public boolean isValid() {
