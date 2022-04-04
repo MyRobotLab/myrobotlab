@@ -518,7 +518,9 @@ public class AudioFile extends Service {
     setTrack(config.currentTrack);
     setVolume(config.volume);
     setPlaylist(config.currentPlaylist);
-    playlists = config.playlists;
+    if (config.playlists != null) {
+      playlists = config.playlists;
+    }
     return c;
   }
 
