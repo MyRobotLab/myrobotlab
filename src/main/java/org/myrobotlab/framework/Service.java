@@ -1509,12 +1509,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public boolean save() {
     Runtime runtime = Runtime.getInstance();
-    return runtime.save(getName(), null);
-  }
-
-  public boolean save(String filename) {
-    Runtime runtime = Runtime.getInstance();
-    return runtime.save(getName(), filename);
+    return runtime.save(null, getName(), null);
   }
 
   public ServiceInterface getPeer(String peerKey) {
@@ -1736,7 +1731,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public ServiceInterface startPeer(String reservedKey) {
     String actualName = getPeerName(reservedKey);
-    return Runtime.start(actualName);
+    return Runtime.start(null, actualName, null);
   }
 
   public void releasePeer(String reservedKey) {
