@@ -2061,8 +2061,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static public ServiceInterface start(String configName, String name, String type) {
     // hand back immediately if a service with that name exists
     // and is running
+    
+    Runtime runtime = Runtime.getInstance();
 
-    if (configName == null) {
+    if (configName == null) {      
       configName = runtime.getConfigName();
     }
 
