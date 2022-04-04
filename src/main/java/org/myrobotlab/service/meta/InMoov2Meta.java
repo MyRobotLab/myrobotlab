@@ -165,13 +165,13 @@ public class InMoov2Meta extends MetaData {
     pid.data.put(headTracking.pan, panPid);
 
     PidData eyeTiltPid = new PidData();
-    eyeTiltPid.ki = 0.001;
-    eyeTiltPid.kp = 0.035;
+    eyeTiltPid.ki = 1.0;
+    eyeTiltPid.kp = 30.0;
     pid.data.put(eyeTracking.tilt, eyeTiltPid);
 
     PidData eyePanPid = new PidData();
-    eyePanPid.ki = 0.001;
-    eyePanPid.kp = 0.015;
+    eyePanPid.ki = 1.0;
+    eyePanPid.kp = 15.0;
     pid.data.put(eyeTracking.pan, eyePanPid);
     
     NeoPixelConfig neopixel = (NeoPixelConfig) plan.getPeerConfig("neopixel");
