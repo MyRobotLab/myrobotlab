@@ -306,12 +306,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
     return null;
   }
-  
-  
+
   static public ServiceInterface create(String name, String type) {
     return create(null, name, type);
   }
-
 
   static public ServiceInterface create(String configName) {
     return create(configName, null, null);
@@ -341,12 +339,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       return si;
     }
 
-    Runtime.loadService(configName, name, type); 
+    Runtime.loadService(configName, name, type);
     Runtime.check(name, type);
     // at this point - the plan should be loaded, now its time to create the
     // children peers
     // and parent service
-    return createServicesFromPlan(configName, name, type); // FIXME - get create back - this should be createServiceFromPlan
+    return createServicesFromPlan(configName, name, type);
   }
 
   /**
@@ -370,7 +368,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       return null;
     }
 
-
     if (sc.autoStartPeers) {
       // get peers from meta data
       MetaData md = MetaData.get(sc.type);
@@ -387,7 +384,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         }
 
         if (actualPeerName != null && !isStarted(actualPeerName)) {
-          start(configName, actualPeerName, null); // type unknown at the moment
+          startInternal(configName, actualPeerName, null); // type unknown at
+                                                           // the moment
         }
       }
     }
@@ -402,12 +400,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     si.setConfig(sc);
     si.apply(sc);
 
-//    if (!si.isRunning()) {
-//      si.startService(); // FIXME - although this is createServices() and
-//      if (sc != null) {
-//        sc.state = "STARTED";
-//      }
-//    }
+    // if (!si.isRunning()) {
+    // si.startService(); // FIXME - although this is createServices() and
+    // if (sc != null) {
+    // sc.state = "STARTED";
+    // }
+    // }
     return si;
   }
 
@@ -1502,7 +1500,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     return registration;
   }
-  
 
   /**
    * releases a service - stops the service, its threads, releases its
@@ -2047,24 +2044,24 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   static public ServiceInterface start() {
-    return start(null, null, null);
+    return startInternal(null, null, null);
   }
 
   static public ServiceInterface start(String configName) {
-    return start(configName, null, null);
+    return startInternal(configName, null, null);
   }
 
   static public ServiceInterface start(String name, String type) {
-    return start(null, name, type);
+    return startInternal(null, name, type);
   }
 
-  static public ServiceInterface start(String configName, String name, String type) {
+  static private ServiceInterface startInternal(String configName, String name, String type) {
     // hand back immediately if a service with that name exists
     // and is running
-    
+
     Runtime runtime = Runtime.getInstance();
 
-    if (configName == null) {      
+    if (configName == null) {
       configName = runtime.getConfigName();
     }
 
@@ -2078,7 +2075,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         if ("runtime".equals(rname)) {
           continue;
         }
-        start(configName, rname, null);
+        startInternal(configName, rname, null);
       }
       return runtime;
     }
@@ -3932,11 +3929,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       error("could not release %s", configName);
     }
   }
-  
+
   static public boolean save(String configName) {
     return Runtime.getInstance().save(configName, null, null);
   }
-
 
   /**
    * Saves the current runtime, all services and all configuration for each
@@ -3945,14 +3941,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   public boolean save(String configName, String serviceName, String filename) {
     try {
-      
+
       if (configName == null) {
         configName = getConfigName();
         if (configName == null) {
           configName = "default";
         }
       }
-      
+
       setConfig(configName);
 
       // get service
