@@ -1710,7 +1710,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       log.info("releasing service {}", sw.getName());
 
       try {
-        Runtime.release(sw.getName());
+        // Runtime.release(sw.getName());
+        sw.releaseService();
       } catch (Exception e) {
         runtime.error("%s threw while releasing", e);
       }
