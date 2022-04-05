@@ -381,7 +381,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     } catch (Exception e2) {
       return "bad stackToString";
     }
-    return "------\r\n" + sw.toString() + "------\r\n";
+    return sw.toString();
   }
 
   public String getRootDataDir() {
@@ -910,7 +910,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   public String clearLastError() {
-    String le = lastError.toString();
+    String le = null;
+    if (lastError != null) {
+      le = lastError.toString();
+    }
+    
     lastError = null;
     return le;
   }
@@ -1731,7 +1735,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public ServiceInterface startPeer(String reservedKey) {
     String actualName = getPeerName(reservedKey);
-    return Runtime.start(null, actualName, null);
+    return Runtime.start(actualName, null);
   }
 
   public void releasePeer(String reservedKey) {
@@ -1873,6 +1877,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     ret.name = getName();
     log.error(ret.toString());
+    lastError = ret;
     invoke("publishStatus", ret);
     return ret;
   }
