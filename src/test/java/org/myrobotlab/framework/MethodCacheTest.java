@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -41,7 +42,7 @@ public class MethodCacheTest extends AbstractTest {
     // non-service entry
     cache.cacheMethodEntries(TestCatcher.class);
     cache.cacheMethodEntries(TestCatcher.class);
-    assertEquals("cached 3 object's methods", 3, cache.getObjectSize());
+    assertEquals(String.format("cached 3 object's methods %s", Arrays.toString(cache.getCachedObjectNames().toArray())), 3, cache.getObjectSize());
 
     tester = (TestCatcher) Runtime.start("tester", "TestCatcher");
   }
