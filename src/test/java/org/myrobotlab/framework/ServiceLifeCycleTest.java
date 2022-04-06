@@ -61,7 +61,7 @@ public class ServiceLifeCycleTest extends AbstractTest {
     assertEquals(2, plan.size());
     assertEquals(ac, plan.get("controller"));
 
-    Arduino arduino = (Arduino) Runtime.start("controller");
+    Arduino arduino = (Arduino) Runtime.start("controller", "Arduino");
     assertNotNull(arduino);
     arduino = null;
     Serial serial = (Serial) Runtime.getService("controller.serial");
@@ -89,7 +89,7 @@ public class ServiceLifeCycleTest extends AbstractTest {
     // add an adafruit controller
     Runtime.load("track.controller", "Adafruit16CServoDriver");
 
-    Tracking track = (Tracking) Runtime.start("track"); // FIXME - you can't run
+    Tracking track = (Tracking) Runtime.start("track", "Tracking"); // FIXME - you can't run
                                                         // Runtime.start() ...
                                                         // CAN YOU BAN IT ?
     assertNotNull(track);
@@ -110,7 +110,7 @@ public class ServiceLifeCycleTest extends AbstractTest {
     List<ServiceInterface> sis = Runtime.getServices();
     assertTrue(sis.size() < plan.size());
 
-    InMoov2 i02 = (InMoov2) Runtime.start("i02");
+    InMoov2 i02 = (InMoov2) Runtime.start("i02", "InMoov2");
     assertNotNull(i02);
     assertNull(Runtime.getService("i02.headTracking"));
     i02.startPeer("left");

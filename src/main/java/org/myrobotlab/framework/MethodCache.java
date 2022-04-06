@@ -252,6 +252,10 @@ public class MethodCache {
     }
     return size;
   }
+  
+  public Set<String> getCachedObjectNames(){
+    return objectCache.keySet();
+  }
 
   public Method getDefaultInvokeMethod(String fullType) {
     try {

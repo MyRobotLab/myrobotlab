@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -33,7 +34,7 @@ public class MethodCacheTest extends AbstractTest {
     cache = MethodCache.getInstance();
     cache.cacheMethodEntries(TestCatcher.class);
     cache.clear();
-    assertEquals(0, cache.getObjectSize());
+    assertEquals("all clear should be 0", 0, cache.getObjectSize());
 
     cache.cacheMethodEntries(Runtime.class);
     cache.cacheMethodEntries(TestCatcher.class);
@@ -41,7 +42,7 @@ public class MethodCacheTest extends AbstractTest {
     // non-service entry
     cache.cacheMethodEntries(TestCatcher.class);
     cache.cacheMethodEntries(TestCatcher.class);
-    assertEquals(3, cache.getObjectSize());
+    assertEquals(String.format("cached 3 object's methods %s", Arrays.toString(cache.getCachedObjectNames().toArray())), 3, cache.getObjectSize());
 
     tester = (TestCatcher) Runtime.start("tester", "TestCatcher");
   }
@@ -74,40 +75,40 @@ public class MethodCacheTest extends AbstractTest {
     // typed situations to resolve
     method = cache.getMethod(TestCatcher.class, "invokeTest", (HttpDataListener) tester);
     ret = method.invoke(tester, tester);
-    assertEquals(tester, ret);
+    assertEquals("sent self as paraemeter", tester, ret);
 
     method = cache.getMethod(TestCatcher.class, "invokeTest", "echo");
     ret = method.invoke(tester, "echo");
-    assertEquals("echo", ret);
+    assertEquals("string param", "echo", ret);
     Registration registration = new Registration(tester);
     // interface test - method with a interface parameter
     method = cache.getMethod(Runtime.class, "register", registration);
     ret = method.invoke(Runtime.getInstance(), registration);
-    assertEquals(registration, ret);
+    assertEquals("registering", registration, ret);
 
     // primitive parameter only test
     method = cache.getMethod(TestCatcher.class, "primitiveOnlyMethod", 3);
     ret = method.invoke(tester, 5);
-    assertEquals(5, ret);
+    assertEquals("getting a primitive param", 5, ret);
 
     // super overloaded test
     Integer[] testArray = new Integer[] { 3, 5, 10 };
     method = cache.getMethod(TestCatcher.class, "getPin", new Object[] { testArray });
     ret = method.invoke(tester, new Object[] { testArray });
-    assertEquals(testArray, ret);
+    assertEquals("verifying array as param", testArray, ret);
 
     // a null value in a mutli-type call
     Object[] jsonParams = new Object[] { "\"hello world\"", "null", "3" };
     Object[] paramTypes = cache.getDecodedJsonParameters(TestCatcher.class, "testMultipleParamTypes", jsonParams);
-    assertTrue(paramTypes[0].getClass().equals(String.class));
-    assertTrue(paramTypes[1] == null);
-    assertTrue(paramTypes[2].getClass().equals(Integer.class));
+    assertTrue("string as 1st param", paramTypes[0].getClass().equals(String.class));
+    assertTrue("null as second", paramTypes[1] == null);
+    assertTrue("Integer as third", paramTypes[2].getClass().equals(Integer.class));
 
     // method = cache.getMethod(TestCatcher.class, "testMultipleParamTypes", new
     // Object[] {"\"hello world\"", "null", "3" });
     method = cache.getMethod(TestCatcher.class, "testMultipleParamTypes", new Object[] { "\"hello world\"", "null", "3" });
     ret = method.invoke(tester, new Object[] { "hello world", null, 3 });
-    assertEquals(ret, "hello world");
+    assertEquals("multi parameter check on string", ret, "hello world");
 
   }
 
@@ -119,16 +120,16 @@ public class MethodCacheTest extends AbstractTest {
 
     method = cache.getMethod(TestCatcher.class, "getPin", 3);
     ret = method.invoke(tester, 3);
-    assertEquals(3, ret);
+    assertEquals("strong type test pin as int",3, ret);
 
     method = cache.getMethod(TestCatcher.class, "primitiveOnlyMethod", 3);
     ret = method.invoke(tester, 5);
-    assertEquals(5, ret);
+    assertEquals("primitive test int", 5, ret);
 
     Integer[] testArray = new Integer[] { 3, 5, 10 };
     method = cache.getMethod(TestCatcher.class, "getPin", new Object[] { testArray });
     ret = method.invoke(tester, new Object[] { testArray });
-    assertEquals(testArray, ret);
+    assertEquals("array as param", testArray, ret);
 
   }
 
@@ -141,24 +142,24 @@ public class MethodCacheTest extends AbstractTest {
     // service super type test
     method = cache.getMethod(TestCatcher.class, "stopService");
     ret = method.invoke(tester);
-    assertEquals(null, ret);
+    assertEquals("inherited stopService method test", null, ret);
 
     method = cache.getMethod(TestCatcher.class, "isRunning");
     ret = method.invoke(tester);
-    assertEquals(false, ret);
+    assertEquals("inherited isRunning method test",false, ret);
 
     method = cache.getMethod(TestCatcher.class, "startService");
     ret = method.invoke(tester);
-    assertEquals(null, ret);
+    assertEquals("inherited startService method test", null, ret);
 
     method = cache.getMethod(TestCatcher.class, "isRunning");
     ret = method.invoke(tester);
-    assertEquals(true, ret);
+    assertEquals("inherited startService method test", true, ret);
 
     Integer[] testArray = new Integer[] { 3, 5, 10 };
     method = cache.getMethod(TestCatcher.class, "getPin", new Object[] { testArray });
     ret = method.invoke(tester, new Object[] { testArray });
-    assertEquals(testArray, ret);
+    assertEquals("array param in ancestor", testArray, ret);
 
   }
 
@@ -192,21 +193,21 @@ public class MethodCacheTest extends AbstractTest {
     Object ret = method.invoke(tester, params);
     log.info("ret is {}", ret);
     log.info("ret returned {} of type {}", ret, ret.getClass().getSimpleName());
-    assertNotNull(ret); // arbitrary that i resolves to string
+    assertNotNull("we should find our invokeTest method",ret); // arbitrary that i resolves to string
 
     encodedParams = new String[] { CodecUtils.toJson(5.0) };
     params = cache.getDecodedJsonParameters(TestCatcher.class, "onDouble", encodedParams);
     method = cache.getMethod(TestCatcher.class, "onDouble", params);
     ret = method.invoke(tester, params);
     log.info("ret returned {} of type {}", ret, ret.getClass().getSimpleName());
-    assertEquals(5.0, ret); // arbitrary float vs int/double
+    assertEquals("looking for a double", 5.0, ret); // arbitrary float vs int/double
 
     encodedParams = new String[] { CodecUtils.toJson(5) };
     params = cache.getDecodedJsonParameters(TestCatcher.class, "onInt", encodedParams);
     method = cache.getMethod(TestCatcher.class, "onInt", params);
     ret = method.invoke(tester, params);
     log.info("ret returned {} of type {}", ret, ret.getClass().getSimpleName());
-    assertEquals(5, ret); // arbitrary float vs int/double
+    assertEquals("looking for an int", 5, ret); // arbitrary float vs int/double
 
     // complex object throw
     Ball ball = new Ball();
@@ -219,7 +220,7 @@ public class MethodCacheTest extends AbstractTest {
     ret = method.invoke(tester, params);
     log.info("ret returned {} of type {}", ret, ret.getClass().getSimpleName());
     assertEquals("my ball", ball.name);
-    assertTrue(5 == ball.rating);
+    assertTrue("verifying an object as parameter", 5 == ball.rating);
   }
 
   public static class TestClass {
@@ -233,7 +234,7 @@ public class MethodCacheTest extends AbstractTest {
     MethodCache cache = MethodCache.getInstance();
     TestClass test = new TestClass();
     Integer r = (Integer) cache.invokeOn(test, "getInt", 7);
-    assertTrue(7 == r);
+    assertTrue("verifying getInt is 7", 7 == r);
   }
 
   public static void main(String[] args) {

@@ -381,7 +381,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     } catch (Exception e2) {
       return "bad stackToString";
     }
-    return "------\r\n" + sw.toString() + "------\r\n";
+    return sw.toString();
   }
 
   public String getRootDataDir() {
@@ -910,7 +910,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   public String clearLastError() {
-    String le = lastError.toString();
+    String le = null;
+    if (lastError != null) {
+      le = lastError.toString();
+    }
+    
     lastError = null;
     return le;
   }
@@ -1352,6 +1356,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     this.config = config;
   }
 
+  @Deprecated /* this is being used wrongly - Runtime knows how to load services don't - what is desired here is apply()*/
   public ServiceConfig load() throws IOException {
     Plan plan = Runtime.load(getName(), getClass().getSimpleName());
     return plan.get(getName());
@@ -1419,7 +1424,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   synchronized public void releaseService() {
-    Runtime.release(getName());
+    // auto release children and unregister
+    Runtime.releaseService(getName());
   }
 
   /**
@@ -1509,12 +1515,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public boolean save() {
     Runtime runtime = Runtime.getInstance();
-    return runtime.save(getName(), null);
-  }
-
-  public boolean save(String filename) {
-    Runtime runtime = Runtime.getInstance();
-    return runtime.save(getName(), filename);
+    return runtime.save(null, getName(), null);
   }
 
   public ServiceInterface getPeer(String peerKey) {
@@ -1736,7 +1737,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public ServiceInterface startPeer(String reservedKey) {
     String actualName = getPeerName(reservedKey);
-    return Runtime.start(actualName);
+    return Runtime.start(actualName, null);
   }
 
   public void releasePeer(String reservedKey) {
@@ -1878,6 +1879,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     ret.name = getName();
     log.error(ret.toString());
+    lastError = ret;
     invoke("publishStatus", ret);
     return ret;
   }

@@ -152,7 +152,9 @@ public class AbstractTest {
     log.warn("end of test - id {} remaining services {}", Platform.getLocalInstance().getId(), Arrays.toString(Runtime.getServiceNames()));
     
     // release all including runtime - be careful of default runtime.yml
-    Runtime.releaseAll(true, true);
+    // Runtime.releaseAll(true, true);
+    Runtime.releaseAll();
+    sleep(100);
 
     // check threads - kill stragglers
     // Set<Thread> stragglers = new HashSet<Thread>();

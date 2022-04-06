@@ -26,7 +26,6 @@ public class OpenCVTest extends AbstractTest {
   static OpenCV cv = null;
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVTest.class);
-  static SwingGui swing = null;
 
   static final String TEST_DIR = "src/test/resources/OpenCV/";
   static final String TEST_LOCAL_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg";
@@ -91,11 +90,10 @@ public class OpenCVTest extends AbstractTest {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    log.warn("========= OpenCVTest - setupbefore class - begin loading libraries =========");
-    log.warn("========= OpenCVTest - setupbefore class - starting cv =========");
+    log.info("========= OpenCVTest - setupbefore class - begin loading libraries =========");
+    log.info("========= OpenCVTest - setupbefore class - starting cv =========");
     long ts = System.currentTimeMillis();
     cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    swing = (SwingGui) Runtime.start("gui", "SwingGui");
 
     /*
      * 

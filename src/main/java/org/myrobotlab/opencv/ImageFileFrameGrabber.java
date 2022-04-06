@@ -73,7 +73,7 @@ public class ImageFileFrameGrabber extends FrameGrabber {
       image = cvLoadImage(path);
     } catch (Throwable e) {
       // log.error("cvLoadImage threw - could not load {}", e);
-      log.error("ImageFileFrameGrabber cvLoadImage threw - could not load {}", path);
+      log.error("ImageFileFrameGrabber cvLoadImage threw - could not load {}", path, e);
       return null;
     }
     /*
