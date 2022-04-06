@@ -1,5 +1,7 @@
 package org.myrobotlab.opencv;
 
+import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_UNCHANGED;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.imread;
 import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 
 import java.io.File;
@@ -9,6 +11,7 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -21,14 +24,15 @@ public class ImageFileFrameGrabber extends FrameGrabber {
   private ArrayList<File> imageFiles = new ArrayList<File>();
   private int grabCount = 0;
 
-  protected transient IplImage image;
-  transient private IplImage lastImage;
+  protected transient Mat image;
+  transient private Mat lastImage;
 
   // transient private HashMap<String, IplImage> cache = new HashMap<String,
   // IplImage>();
   private int frameCounter = 0;
   public String path;
-  transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
+  // transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
+  OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
 
   public ImageFileFrameGrabber(String path) {
     this.path = path;
@@ -70,7 +74,8 @@ public class ImageFileFrameGrabber extends FrameGrabber {
     log.debug("Grabbing file {} - {}", grabCount, path);
     // grab it.
     try {
-      image = cvLoadImage(path);
+      // image = cvLoadImage(path);
+      image = imread(path, IMREAD_UNCHANGED);
     } catch (Throwable e) {
       // log.error("cvLoadImage threw - could not load {}", e);
       log.error("ImageFileFrameGrabber cvLoadImage threw - could not load {}", path, e);
