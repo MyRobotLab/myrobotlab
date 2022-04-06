@@ -1719,6 +1719,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     if (runtime != null && releaseRuntime) {
       runtime.releaseService();
+      runtime = null;
     }
 
   }

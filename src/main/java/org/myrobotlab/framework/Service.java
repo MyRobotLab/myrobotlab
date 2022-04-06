@@ -1356,6 +1356,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     this.config = config;
   }
 
+  @Deprecated /* this is being used wrongly - Runtime knows how to load services don't - what is desired here is apply()*/
   public ServiceConfig load() throws IOException {
     Plan plan = Runtime.load(getName(), getClass().getSimpleName());
     return plan.get(getName());

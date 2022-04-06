@@ -81,7 +81,8 @@ public class ServiceInterfaceTest extends AbstractTest {
 
     foo.startService();
     foo.save();
-    foo.load();
+    // foo.load(); SHOULD NOT BE USED !
+    // foo.apply(); <-  THIS SHOULD BE IMPLEMENTED
     foo.stopService();
 
     foo.releaseService();
