@@ -362,8 +362,8 @@ public class Polly extends AbstractSpeechSynthesis {
 
   @Override
   public void releaseService() {
-    super.stopService();
-    if (polly != null) {
+    super.releaseService();
+       if (polly != null) {
       polly.shutdown();
     }
   }

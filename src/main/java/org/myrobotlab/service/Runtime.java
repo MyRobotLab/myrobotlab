@@ -1512,7 +1512,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @return true/false
    * 
    */
-  public synchronized static boolean release(String inName) {
+  public synchronized static boolean releaseService(String inName) {
     if (inName == null) {
       log.debug("release (null)");
       return false;
@@ -1540,7 +1540,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     if (si.isLocal()) {
       si.purgeTasks();
       si.stopService();
-      Plan plan = runtime.getPlan();
+      Plan plan = Runtime.getPlan();
       ServiceConfig sc = plan.get(inName);
       if (sc == null) {
         log.debug("service config not available for {}", inName);
@@ -1555,7 +1555,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // FOR remote this isn't correct - it should wait for
     // a message from the other runtime to say that its released
     unregister(name);
-    Plan plan = runtime.getPlan();
+    Plan plan = Runtime.getPlan();
     ServiceConfig sc = plan.get(inName);
     if (sc != null) {
       sc.state = "RELEASED";
@@ -1829,8 +1829,22 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @param name
    *          shutdown and remove a service from the registry
    */
-  static public void releaseService(String name) {
-    Runtime.release(name);
+  static public void release(String name) {
+    if (name == null) {
+      log.error("release(null)");
+      return;
+    }
+    
+    ServiceInterface si = Runtime.getService(name);
+    if (si == null) {
+      log.info("%s already released", name);
+      return;
+    }
+    
+    // important to call service.releaseService because
+    // many are derived that take care of additional thread
+    // cleanup
+    si.releaseService();
   }
 
   public void connect() throws IOException {

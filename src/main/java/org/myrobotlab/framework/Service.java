@@ -1424,7 +1424,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   synchronized public void releaseService() {
-    Runtime.release(getName());
+    // auto release children and unregister
+    Runtime.releaseService(getName());
   }
 
   /**
