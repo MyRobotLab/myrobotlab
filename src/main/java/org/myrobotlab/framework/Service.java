@@ -1515,7 +1515,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public boolean save() {
     Runtime runtime = Runtime.getInstance();
-    return runtime.save(null, getName(), null);
+    return runtime.saveService(null, getName(), null);
   }
 
   public ServiceInterface getPeer(String peerKey) {
