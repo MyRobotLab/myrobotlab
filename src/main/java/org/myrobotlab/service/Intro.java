@@ -13,7 +13,6 @@ import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.WebGuiConfig;
 import org.slf4j.Logger;
 
 public class Intro extends Service {
@@ -114,14 +113,22 @@ public class Intro extends Service {
       // for mary tts on java11...
       System.setProperty("java.version", "11.0");
       LoggingFactory.init("info");
+      
 
-      // Runtime.main(new String[]{"--config", "i01-9"});
-      // Runtime.start("runtime", "Runtime"); i
       WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
       
+      Runtime.start("python","Python");
+      Runtime.start("polly","Polly");
       Runtime.start("intro", "Intro");
+      
+      
+      //Runtime.release("python");
+      
+      
+      
+      // Runtime.releaseAll();
       //Runtime.start("python", "Python");
       // Runtime.start("mega", "Arduino");
       // Runtime.start("ada", "Adafruit16CServoDriver");
@@ -131,8 +138,24 @@ public class Intro extends Service {
         return;
       }
       
+      // this will not continue to work :(
+      // Runtime.loadService("python", "Python");
+      // Runtime.start("python");
       
-      Runtime.start("python","Python");
+      Runtime.startConfig("track-worky-3");
+      
+      Runtime.saveConfig("track-worky-4");
+      
+      Runtime.start("python", "Python");
+      
+      
+      // Runtime.startConfigSet(fs);
+
+      // Runtime.main(new String[]{"--config", "i01-9"});
+      // Runtime.start("runtime", "Runtime"); i
+      
+      
+      
       
       Servo s1 = (Servo)Runtime.start("s1","Servo");
       s1.setRest(0);
@@ -173,7 +196,7 @@ public class Intro extends Service {
 
       Runtime.create("i01.chatBot");
       Runtime.load("i01.chatBot");
-      Runtime.start("i01.chatBot");
+      Runtime.startConfig("i01.chatBot");
 
       Runtime.start("intro", "Intro");
       Runtime.start("python", "Python");
