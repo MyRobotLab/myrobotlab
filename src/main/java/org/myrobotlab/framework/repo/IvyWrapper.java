@@ -416,7 +416,9 @@ public class IvyWrapper extends Repo implements Serializable {
       // String[] cmd = new String[] { "-settings", location +
       // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
       // location + "/jar" + "/[originalname].[ext]", "-noterminate" };
-      String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname].[ext]" };
+      // FIXME - javacpp deps throw because they have 2 jars colliding when native classifier exist
+      // String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname]-[classifier].[ext]" };
+      String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname].[ext]" };      
 
       StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-4.jar");
       for (String s : cmd) {

@@ -23,6 +23,8 @@ public interface EncoderControl extends Attachable {
    * @return encoder data
    */
   public EncoderData publishEncoderData(EncoderData data);
+  
+  public void attachEncoderController(EncoderController controller) throws Exception;
 
   /**
    * @return the state of streaming encoder data

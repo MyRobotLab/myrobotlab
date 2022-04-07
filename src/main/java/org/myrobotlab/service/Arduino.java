@@ -171,8 +171,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   Integer nextDeviceId = 0;
 
   /**
-   * Serial service - the Arduino's serial connection
-   * FIXME - remove this - its not pub/sub !
+   * Serial service - the Arduino's serial connection FIXME - remove this - its
+   * not pub/sub !
    */
   transient Serial serial;
 
@@ -323,9 +323,16 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    */
   @Override
   public void attachEncoderControl(EncoderControl encoder) throws Exception {
-    // need to get a new device id! wtf is this !
-    // let's get the max current id
-    // send data to micro-controller
+
+    if (encoder == null) {
+      error("%s.attachEncoderControl(null)", getName());
+      return;
+    }
+
+    if (deviceList.containsKey(encoder.getName())) {
+      log.info("already attached");
+      return;
+    }
 
     // TODO: update this with some enum of various encoder types..
     // for now it's just AMT203 ...
@@ -345,7 +352,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     // send the attach method with our device id.
     msg.encoderAttach(m.getId(), type, address);
 
-    encoder.attach(this);
+    encoder.attachEncoderController(this);
 
   }
 
@@ -472,7 +479,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
         msg.servoAttachPin(dm.getId(), pin);
       }
     } else if (attachable instanceof UltrasonicSensorControl) {
-        log.warn("UltrasonicSensorControl not implemented");
+      log.warn("UltrasonicSensorControl not implemented");
       // reattach logic
       // } else if (attachable instanceof Pir) { Pir is a PinListener
       // reattach logic - FIXME Pir has no Control interface :(
@@ -515,13 +522,13 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   public void connect(String port, int rate, int databits, int stopbits, int parity) {
 
-	ArduinoConfig c = (ArduinoConfig)config;
-	  
+    ArduinoConfig c = (ArduinoConfig) config;
+
     if (port == null) {
       warn("%s attempted to connect with a null port", getName());
       return;
     }
-    
+
     if (serial == null) {
       serial = (Serial) startPeer(c.serial);
       msg = new Msg(this, serial);
@@ -2240,18 +2247,18 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   public ServiceConfig getConfig() {
     ArduinoConfig config = new ArduinoConfig();
-    
+
     // FIXME - shouldn't need the this copying to local fields
     // config is already set by the framework as part of an apply
-    // so the super.getConfig should be sufficient if 
+    // so the super.getConfig should be sufficient if
     // the state of the config is updated during runtime
-    
+
     config.port = port;
     config.connect = isConnected();
     if (serial != null) {
       config.serial = serial.getName();
     }
-    
+
     return config;
   }
 
@@ -2262,14 +2269,14 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     if (isRunning() && arduinoConfig.connect) {
       connect(arduinoConfig.port);
     }
-    
+
     return c;
   }
-  
-    @Override
+
+  @Override
   public void startService() {
     super.startService();
-    
+
     if (msg == null) {
       serial = (Serial) startPeer("serial");
       msg = new Msg(this, serial);
@@ -2277,15 +2284,15 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     } else {
       // TODO: figure out why this gets called so often.
       log.info("Init serial we already have a msg class.");
-    }    
-    
-    ArduinoConfig c = (ArduinoConfig)config;
-    
+    }
+
+    ArduinoConfig c = (ArduinoConfig) config;
+
     if (c.connect && c.port != null) {
       connect(c.port);
     }
-    
-  }  
+
+  }
 
   /**
    * DO NOT FORGET INSTALL AND VMARGS !!!
