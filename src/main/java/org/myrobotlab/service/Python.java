@@ -1,8 +1,10 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -166,27 +168,7 @@ public class Python extends Service implements ServiceLifeCycleListener {
       } catch (Exception e) {
         log.error("python exec threw", e);
         String error = Logging.stackToString(e);
-        if (error.contains("KeyboardInterrupt")) {
-          warn("Python process killed !");
-        } else {
-          error(e);
-          String filtered = error;
-          filtered = filtered.replace("'", "");
-          filtered = filtered.replace("\"", "");
-          filtered = filtered.replace("\n", "");
-          filtered = filtered.replace("\r", "");
-          filtered = filtered.replace("<", "");
-          filtered = filtered.replace(">", "");
-          if (interp != null) {
-            interp.exec(String.format("print '%s'", filtered));
-          }
-          log.error("following script errored \n{}", code);
-          log.error("interp.exec threw", e);
-          if (filtered.length() > 40) {
-            filtered = filtered.substring(0, 40);
-          }
-        }
-
+        error(error);
       } finally {
         executing = false;
         log.info("script completed");
@@ -337,8 +319,6 @@ public class Python extends Service implements ServiceLifeCycleListener {
 
     // I love ServiceData !
     ServiceData sd = ServiceData.getLocalInstance();
-    // I love Platform !
-    Platform p = Platform.getLocalInstance();
     List<MetaData> sdt = sd.getAvailableServiceTypes();
     for (int i = 0; i < sdt.size(); ++i) {
       MetaData st = sdt.get(i);
@@ -639,14 +619,13 @@ public class Python extends Service implements ServiceLifeCycleListener {
    * @return list of python examples
    */
   public List<File> getExampleListing() {
-    List<File> r = null;
-    try {
-      // expensive method - searches through entire jar
-      r = FileIO.listResourceContents("Python/examples");
-    } catch (Exception e) {
-      Logging.logError(e);
+    List<File> files = new ArrayList<>();
+
+    for (String f : exampleFiles.values()) {
+      String filename = getResourceRoot() + fs + f;
+      files.add(new File(filename));
     }
-    return r;
+    return files;
   }
 
   /**
@@ -817,7 +796,7 @@ public class Python extends Service implements ServiceLifeCycleListener {
       try {
         execFile(script, true);
       } catch (IOException e) {
-        log.error("starting scripts threw",e);
+        log.error("starting scripts threw", e);
       }
     }
   }
@@ -859,7 +838,7 @@ public class Python extends Service implements ServiceLifeCycleListener {
    */
   @Override
   public void stopService() {
-    // run any stop scripts 
+    // run any stop scripts
     for (String script : stopScripts) {
       // i think in this context its safer to block
       try {
@@ -937,18 +916,18 @@ public class Python extends Service implements ServiceLifeCycleListener {
         for (String script : startScripts) {
           try {
             execFile(script);
-          } catch(Exception e) {
+          } catch (Exception e) {
             error(e);
           }
         }
       }
     }
-    
+
     if (config.stopScripts != null && config.stopScripts.size() > 0) {
       stopScripts.clear();
       stopScripts.addAll(config.stopScripts);
     }
-        
+
     return c;
   }
 
