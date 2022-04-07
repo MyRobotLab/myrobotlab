@@ -764,6 +764,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     public void stop() {
       synchronized (lock) {
+        isRunning = false;
         if (worker == null) {
           worker.interrupt();
         }

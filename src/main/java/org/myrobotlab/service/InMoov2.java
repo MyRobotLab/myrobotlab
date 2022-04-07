@@ -2435,7 +2435,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       Plan plan = Runtime.load("webgui", "WebGui");
       WebGuiConfig webgui = (WebGuiConfig) plan.get("webgui");
       webgui.autoStartBrowser = false;
-      Runtime.start("webgui");
+      Runtime.startConfig("webgui");
 
       boolean done = true;
       if (done) {
