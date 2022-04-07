@@ -54,6 +54,10 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
             break
         case 'onStatus':
             $scope.lastStatus = data
+            if (data.level == 'error'){
+                $scope.log = data.detail + '\n' + $scope.log    
+            }
+            console.info("onStatus ", data)
             $scope.$apply()
             break
         default:
