@@ -222,8 +222,8 @@ public class Polly extends AbstractSpeechSynthesis {
       Runtime.setConfig("default");
       Runtime.load("polly");
 
-      Runtime.start("webgui");
-      Runtime.start("polly");
+      Runtime.startConfig("webgui");
+      Runtime.startConfig("polly");
 
 //      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
 //      webgui.autoStartBrowser(false);
