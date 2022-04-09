@@ -7,6 +7,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Broadcaster;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.interfaces.EncoderControl;
+import org.myrobotlab.service.interfaces.EncoderController;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
@@ -364,5 +365,10 @@ public class TimeEncoder implements Runnable, EncoderControl {
   
   public void stopMove() {
     stopMove = true;
+  }
+
+  @Override
+  public void attachEncoderController(EncoderController controller) {
+    // NoOp, the TimeEncoder doesn't need a controller.    
   }
 }
