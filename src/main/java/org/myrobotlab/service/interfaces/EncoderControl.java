@@ -28,7 +28,6 @@ public interface EncoderControl extends Attachable {
    * Attach a controller to an encoder control.  
    * 
    * @param controller
-   * @throws Exception
    */
   public void attachEncoderController(EncoderController controller);
 

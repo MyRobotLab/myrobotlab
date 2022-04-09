@@ -10,8 +10,6 @@ public interface EncoderController extends Attachable {
    * 
    * @param control
    *          the encoder to attach
-   * @throws Exception
-   *           boom
    * 
    */
   public void attachEncoderControl(EncoderControl control);
