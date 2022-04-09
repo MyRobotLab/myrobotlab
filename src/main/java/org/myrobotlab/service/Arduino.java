@@ -322,7 +322,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    *           if an error occurred trying to attach the encoder
    */
   @Override
-  public void attachEncoderControl(EncoderControl encoder) throws Exception {
+  public void attachEncoderControl(EncoderControl encoder) {
 
     if (encoder == null) {
       error("%s.attachEncoderControl(null)", getName());

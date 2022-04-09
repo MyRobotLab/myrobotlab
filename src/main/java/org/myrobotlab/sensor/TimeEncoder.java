@@ -368,8 +368,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
   }
 
   @Override
-  public void attachEncoderController(EncoderController controller) throws Exception {
-    // TODO Auto-generated method stub
-    
+  public void attachEncoderController(EncoderController controller) {
+    // NoOp, the TimeEncoder doesn't need a controller.    
   }
 }

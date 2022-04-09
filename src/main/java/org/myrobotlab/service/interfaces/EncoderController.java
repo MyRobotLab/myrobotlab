@@ -14,7 +14,7 @@ public interface EncoderController extends Attachable {
    *           boom
    * 
    */
-  public void attachEncoderControl(EncoderControl control) throws Exception;
+  public void attachEncoderControl(EncoderControl control);
 
   // possibly ? for ones which support it ?
   // > setZeroPoint/deviceId
