@@ -34,7 +34,7 @@ else
     exit
 fi
 
-JAVA_VER=$(java -version 2>&1 | sed -n ';s/.* version "\(.*\)\.\(.*\)\..*".*/\1\2/p;')
+JAVA_VER=$(java -version 2>&1 | head -1 | cut -d'"' -f2 | sed '/^1\./s///' | cut -d'.' -f1)
 
 if [ "$JAVA_VER" -ge 11 ]; then
     echo "found java version equal or greater to 11"

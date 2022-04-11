@@ -90,11 +90,31 @@ public class Hd44780 extends Service {
   public final byte Rw = (byte) 0b00000010; // Read/Write bit
 
   protected Map<Integer, String> screenContent = new HashMap<Integer, String>();
+  
+  int lcdWriteDelayMs = 0;
 
   public Hd44780(String n, String id) {
     super(n, id);
     // I think "only" PCF is supported not all I2CControls
     registerForInterfaceChange(I2CControl.class);
+  }
+  
+  /**
+   * sets the delay between character writes
+   * @param delay
+   * @return
+   */
+  public int setDelay(int delay) {
+    lcdWriteDelayMs = delay;
+    return delay;
+  }
+  
+  /**
+   * current delay between in millis between character writes
+   * @return
+   */
+  public int getDelay() {
+    return lcdWriteDelayMs;
   }
 
   @Override
@@ -230,11 +250,11 @@ public class Hd44780 extends Service {
   private void lcdWrite(byte cmd) {
     lcdWrite(cmd, (byte) 0);
   }
-
+  
   synchronized private void lcdWrite(byte cmd, byte mode) {
     lcdWriteFourBits((byte) (mode | (cmd & 0xF0)));
     lcdWriteFourBits((byte) (mode | ((cmd << 4) & 0xF0)));
-    sleep(30); //  heh fun typing effect
+    sleep(lcdWriteDelayMs); //  heh fun typing effect
   }
 
   private void lcdWriteFourBits(byte data) {
@@ -330,8 +350,7 @@ public class Hd44780 extends Service {
     return config;
   }
 
-  @Override
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     Hd44780Config config = (Hd44780Config) c;
     
     if (config.controller != null) {
@@ -340,6 +359,10 @@ public class Hd44780 extends Service {
       } catch(Exception e) {
         error(e);
       }
+    }
+    
+    if (config.delay != null) {
+      setDelay(config.delay);
     }
     
     if (pcf != null && config.backlight != null && config.backlight) {

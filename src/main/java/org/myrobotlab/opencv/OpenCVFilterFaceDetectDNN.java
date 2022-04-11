@@ -49,6 +49,7 @@ import org.bytedeco.opencv.opencv_dnn.Net;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
+import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
@@ -73,11 +74,9 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
 
   double threshold = .2;
 
-  transient private final OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
-
-  transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
-
   boolean netError = false;
+  transient private CloseableFrameConverter converter1 = new CloseableFrameConverter();
+  transient private CloseableFrameConverter converter2 = new CloseableFrameConverter();
 
   public OpenCVFilterFaceDetectDNN() {
     this(null);
@@ -121,7 +120,7 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
     int h = image.height();
     int w = image.width();
     // TODO: cv2.resize(image, (300, 300))
-    Mat srcMat = grabberConverter.convertToMat(grabberConverter.convert(image));
+    Mat srcMat = converter1.toMat(image);
     Mat inputMat = new Mat();
     resize(srcMat, inputMat, new Size(300, 300));// resize the image to match
     // the input size of the model
@@ -177,7 +176,13 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
         float by = f4 * h;// bottom right point's y
         Rectangle rect = new Rectangle(tx, ty, bx - tx, by - ty);
         List<Classification> cl = null;
-        Classification classification = new Classification(FACE_LABEL, confidence, rect);
+        
+        // coordinate system is typical 4 quadrant
+        // x -1.0 to 1.0 y -1.0 to 1.0 with 0,0 middle
+        double centerX = ((rect.x + rect.width/2)- w/2)/w;
+        // many displays are in the inverted y
+        double centerY = -1 * ((rect.y + rect.height/2)-h/2)/h;
+        Classification classification = new Classification(FACE_LABEL, confidence, rect, centerX, centerY);
         classification.setTs(getOpenCV().getFrameStartTs());
         if (classifications.containsKey(FACE_LABEL)) {
           classifications.get(FACE_LABEL).add(classification);
@@ -192,9 +197,17 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
     }
 
     publishClassification(classifications);
-    IplImage result = grabberConverter.convert(converterToIpl.convert(srcMat));
+    IplImage result = converter2.toImage(srcMat);
     ne.close();
     return result;
+  }
+
+  @Override
+  public void release() {
+    // TODO Auto-generated method stub
+    super.release();
+    converter1.close();
+    converter2.close();
   }
 
   @Override

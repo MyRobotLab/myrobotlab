@@ -4,16 +4,25 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import java.util.List;
+
 import org.junit.Test;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Adafruit16CServoDriver;
+import org.myrobotlab.service.Arduino;
+import org.myrobotlab.service.InMoov2;
+import org.myrobotlab.service.LocalSpeech;
+import org.myrobotlab.service.Pid;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.TestCatcher;
-import org.myrobotlab.service.TestThrower;
+import org.myrobotlab.service.Serial;
+import org.myrobotlab.service.Tracking;
+import org.myrobotlab.service.config.ArduinoConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.WebGuiConfig;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
@@ -22,219 +31,118 @@ public class ServiceLifeCycleTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(ServiceLifeCycleTest.class);
 
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-    // make sure the testing services do not exist
-    Runtime.release("catcher01");
-    Runtime.release("catcher02");
-    Runtime.release("thower01");
-    Runtime.release("thower02");
-  }
-
-  @AfterClass
-  public static void setUpAfterClass() throws Exception {
-    // make sure the testing services do not exist
-    Runtime.release("catcher01");
-    Runtime.release("catcher02");
-    Runtime.release("thower01");
-    Runtime.release("thower02");
-  }
-
   @Test
   public void serviceLifeCycleTest() throws Exception {
 
-    // push the meta data into the planStore - this will persist
-    // overrides if the meta data definition has them
-    ServiceData.setMetaData("i01", "InMoov2");
+    // clear plan
+    Runtime.clear();
 
-    // pull it back out
-    MetaData data = ServiceData.getMetaData("i01", "InMoov2");
-    log.info("static meta data {}", data);
-    
-    // assertEquals("i01.head", data.getPeer("head").actualName);
+    // load a simple plan
+    Runtime.load("c1", "Clock");
+    Plan plan = Runtime.getPlan();
+    assertEquals(1, plan.size());
+    for (String s : plan.keySet()) {
+      assertEquals("c1", s);
+      ServiceConfig cc = plan.get("c1");
+      assertNotNull(cc);
+      assertEquals("Clock", cc.type);
+    }
 
-    Plan plan = ServiceData.getPlan("i01", "InMoov2");
-    log.info("static plan {}", plan);
-    assertNotNull(plan);
+    // clear plan
+    Runtime.clear();
 
-    ServiceInterface si = null;
+    plan = Runtime.getPlan();
+    assertEquals(0, plan.size());
 
-    // static template info
-    MetaData metaData = ServiceData.getMetaData("TestCatcher");
-    log.info("static meta data {}", metaData);
+    plan = Runtime.load("controller", "Arduino");
+    ArduinoConfig ac = (ArduinoConfig) plan.get("controller");
+    assertFalse(ac.connect);
+    // 1 arduino 1 serial
+    assertEquals(2, plan.size());
+    assertEquals(ac, plan.get("controller"));
 
-    // instance info
-    metaData = ServiceData.getMetaData("catcher01", "TestCatcher");
-    log.info("instance meta data (with servie name) {}", metaData);
+    Arduino arduino = (Arduino) Runtime.start("controller", "Arduino");
+    assertNotNull(arduino);
+    arduino = null;
+    Serial serial = (Serial) Runtime.getService("controller.serial");
+    assertNotNull(serial);
+    serial = null;
+    Runtime.release("controller");
 
-    // show plan
-    plan = Runtime.getPlan("catcher01", "TestCatcher");
-    log.info("the plan {}", plan);
+    assertNull(Runtime.getService("controller"));
+    assertNull(Runtime.getService("controller.serial"));
 
-    // verify subkey
-//    ServiceReservation sr = metaData.getPeer("subpeer");
-//    assertNotNull(sr);
-//    assertEquals("subpeer", sr.key);
-//    assertEquals("TestThrower", sr.type);
-//    assertEquals("catcher01.subpeer", sr.actualName);
-
-    // change plan type - plan changes must occur BEFORE - services are created
-    // !!!!
-    Runtime.setPeer("catcher01.subpeer", "catcher01.subpeer", "Servo");
-    metaData = ServiceData.getMetaData("catcher01", "TestCatcher");
-    log.info("current plan {}", metaData);
-
-    TestCatcher catcher01 = (TestCatcher) Runtime.start("catcher01", "TestCatcher");
-    assertNotNull(catcher01);
-
-    ServiceInterface globalPeer = null;
-    ServiceInterface subpeer = null;
-
-    // test global peer is global
-    globalPeer = catcher01.startPeer("globalPeer");
-    assertNotNull(globalPeer);
-    assertEquals("thrower01", globalPeer.getName());
-
-    // verify
-    subpeer = catcher01.startPeer("subpeer");
-    assertEquals("Servo", subpeer.getSimpleName());
-
-    ServiceInterface get = catcher01.getPeer("subpeer");
-    assertEquals(subpeer, get);
-
-    // release
-    catcher01.releasePeers();
-
-    // verify
-//    si = Runtime.getService("catcher01.subpeer");
-//    assertNull(si);
-
-    // clear
-    ServiceData.clearOverrides();
-
-    // should be back to default
-//    sr = ServiceData.getMetaData("catcher01", "TestCatcher").getPeer("subpeer");
-//    assertEquals("subpeer", sr.key);
-//    assertEquals("catcher01.subpeer", sr.actualName);
-//    assertEquals("TestThrower", sr.type);
-
-    // show current plan
-    Plan masterPlan = ServiceData.getPlan("catcher01", "TestCatcher");
-    log.info("current plan {}", masterPlan);
-    // change plan name
-    Runtime.setPeer("catcher01.subpeer", "rootTracking", "Tracking");
-    // show modified plan
-    masterPlan = Runtime.getPlan("catcher01", "TestCatcher");
-    log.info("current plan {}", masterPlan);
-
-    metaData = ServiceData.getMetaData("catcher01", "TestCatcher");
-
-    // release
-    Runtime.release("catcher01");
-
-    // verify
-    catcher01 = (TestCatcher) Runtime.start("catcher01", "TestCatcher");
-    si = catcher01.startPeer("subpeer");
-    assertNotNull(si);
-    assertEquals("rootTracking", si.getName());
-    assertEquals("Tracking", si.getSimpleName());
-
-    // release
-    Runtime.release("catcher01");
-
-    // verify a plan exists with a subpeer
-    MetaData i01MetaData = Runtime.getMetaData("i01", "InMoov2");
-    log.info("i01 meta data {}", i01MetaData);
-
-    // release
-    Runtime.release("catcher01");
-
-    // modifying master plan ????
-    // FIXME FIXME FIXME - will this work ???
-    Runtime.clearPlan(); // <--- FIXME verify
-    Runtime.setPeer("catcher01", "catcher02", "TestCatcher");
-    masterPlan = Runtime.getPlan("catcher01", "TestCatcher");
-    log.info("current plan {}", masterPlan);
-    catcher01 = (TestCatcher) Runtime.start("catcher01", "TestCatcher");
-    assertNull(Runtime.getService("catcher02"));
-
-    // checking master plan
-    // MetaData masterPlan =
-    // ServiceData.buildMetaData("catcher01","TestCatcher");
-    log.info("masterPlan {}", masterPlan);
-
-    // verifying override
-    String t = masterPlan.get("catcher01");
-    assertEquals("TestCatcher", t);
-
-    // modifying master plan ????
-    Runtime.setPeer("i01.left", "i01.left", "Sabertooth");
-    log.info("masterPlan {}", masterPlan);
-
-    // retrieving i01 plan
-    i01MetaData = ServiceData.getMetaData("i01", "InMoov2");
-    log.info("i01Plan {}", i01MetaData);
-
-    // clean up
-    Runtime.clearPlan();
-    catcher01 = (TestCatcher) Runtime.create("catcher01", "TestCatcher");
-
-//    TestThrower subPeer = (TestThrower) catcher01.startPeer("subpeer");
-//    assertNotNull(subPeer);
-    // runtime was created before - is responsibility of service to
-    // iterate through services for previously created services they
-    // are interested in
-    assertFalse(catcher01.onCreated.contains("runtime"));
-
-    TestCatcher catcher02 = (TestCatcher) Runtime.create("catcher02", "TestCatcher");
-    assertFalse(catcher02.onCreated.contains("runtime"));
-
-    String catcher01FullName = catcher01.getFullName();
-    String catcher02FullName = catcher02.getFullName();
+    Runtime.clear();
 
     /**
-     * <pre>
-      * perhaps all these subscriptions is a bad idea
-     
-     // verify registered cross-pollination
-     assertNotNull(catcher01.onRegistered.get(catcher02FullName)); 
-     // catcher01 was created before catcher02
-     assertNull(catcher02.onRegistered.get(catcher01FullName)); 
-    
-     // no created cross-pollination
-     assertTrue(catcher01.onCreated.contains(catcher02FullName)); 
-     assertFalse(catcher02.onCreated.contains(catcher01FullName)); 
-     
-     // verify not started
-     assertFalse(catcher01.onStarted.contains(catcher02FullName)); 
-     assertFalse(catcher02.onStarted.contains(catcher01FullName));
-     
-     WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
-     webgui.autoStartBrowser(false);
-     webgui.startService();
-     
-     catcher02.startService();
-     assertTrue(catcher01.onStarted.contains(catcher02FullName)); 
-     assertTrue(catcher02.onStarted.contains(catcher02FullName)); 
-     
-     
-       // stopped
-     assertFalse(catcher01.onStopped.contains(catcher02FullName));
-     catcher02.stopService();
-     assertTrue(catcher01.onStopped.contains(catcher02FullName));
-     
-     // released
-     
-     assertFalse(catcher01.onReleased.contains(catcher02FullName));
-     catcher02.releaseService();
-     assertTrue(catcher01.onStopped.contains(catcher02FullName));
-     * 
-     * </pre>
+     * use case - load a default config - modify it substantially then start the
+     * service, with worky peers
      */
 
-    // release peer
-    log.info("plan {}", metaData);
-    log.info("plan {}", i01MetaData);
+    // load the default track config
+    plan = Runtime.load("track", "Tracking");
+    assertEquals(7, plan.size());
+
+    // remove the default controller
+    assertNotNull(plan.remove("track.controller"));
+
+    // add an adafruit controller
+    Runtime.load("track.controller", "Adafruit16CServoDriver");
+
+    Tracking track = (Tracking) Runtime.start("track", "Tracking"); // FIXME - you can't run
+                                                        // Runtime.start() ...
+                                                        // CAN YOU BAN IT ?
+    assertNotNull(track);
+    // better get an adafruit back
+    Adafruit16CServoDriver ada = (Adafruit16CServoDriver) Runtime.getService("track.controller");
+    assertNotNull(ada);
+
+    track.releaseService();
+    assertNull(Runtime.getService("track.controller"));
+
+    Runtime.clear();
+    plan = Runtime.load("i02", "InMoov2");
+
+    log.info("plan has {} services", plan.size());
+    MetaData md = MetaData.get("InMoov2");
+    assertTrue(md.getPeers().size() < plan.size());
+
+    List<ServiceInterface> sis = Runtime.getServices();
+    assertTrue(sis.size() < plan.size());
+
+    InMoov2 i02 = (InMoov2) Runtime.start("i02", "InMoov2");
+    assertNotNull(i02);
+    assertNull(Runtime.getService("i02.headTracking"));
+    i02.startPeer("left");
+    i02.startPeer("headTracking");
+    assertNotNull(Runtime.getService("i02.headTracking"));
+    
+    Pid pid = (Pid)Runtime.getService("i02.pid");
+    assertNotNull(pid);
+    
+    i02.startPeer("eyeTracking");
+    assertEquals("i02.eyeTracking", i02.getPeerName("eyeTracking"));
+    
+    Runtime.load("webgui", "WebGui");
+    WebGuiConfig webgui = (WebGuiConfig)plan.get("webgui");
+    webgui.autoStartBrowser = false;
+    // start it up
+    Runtime.start("webgui");
+    
+    Tracking eye = (Tracking)i02.getPeer("eyeTracking");
+    ServoControl tilt = (ServoControl)eye.getPeer("tilt");
+    assertEquals("i02.head.eyeY", tilt.getName());
+    
+    i02.setSpeechType("LocalSpeech");
+    i02.startPeer("mouth");
+
+    // better be local speech
+    LocalSpeech mouth = (LocalSpeech)i02.getPeer("mouth");
+    assertNotNull(mouth);
+    
+    // FIXME i02.releasePeers()
+    
+    log.info("done");
 
   }
 

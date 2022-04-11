@@ -26,6 +26,9 @@ public class OpenCVFilterFaceRecognizerTest extends AbstractOpenCVFilterTest {
   String baseDirectory = "src/test/resources/OpenCV/FaceRecognizer/";
   String[] names = new String[] { "Tony Stark", "Natasha Romanoff", "Steve Rogers" };
 
+  private CloseableFrameConverter converter1 = new CloseableFrameConverter();
+  private CloseableFrameConverter converter2 = new CloseableFrameConverter();
+      
   @Before
   public void before() {
     debug = false;
@@ -89,7 +92,7 @@ public class OpenCVFilterFaceRecognizerTest extends AbstractOpenCVFilterTest {
 
       // filter.setData(new OpenCVData("testimg", 0 ,0 ,
       // OpenCV.toFrame(image)));
-      filter.setData(new OpenCVData("testimg", 0, 0, OpenCV.toFrame(image)));
+      filter.setData(new OpenCVData("testimg", 0, 0, converter1.toFrame(image)));
       filter.process(image);
       filter.enabled = true;
       filter.displayEnabled = true;
@@ -97,7 +100,7 @@ public class OpenCVFilterFaceRecognizerTest extends AbstractOpenCVFilterTest {
       BufferedImage bi = filter.processDisplay();
 
       if (debug) {
-        IplImage displayVal = OpenCV.toImage(bi);
+        IplImage displayVal = converter2.toImage(bi);
         filter.show(displayVal, "Output Image");
       }
 

@@ -1,12 +1,9 @@
 package org.myrobotlab.service.meta;
 
-import java.util.LinkedHashMap;
-
-import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.InMoov2ArmConfig;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.SerialConfig;
 import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -18,15 +15,8 @@ public class InMoov2ArmMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
-  public InMoov2ArmMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public InMoov2ArmMeta() {
     addDescription("the InMoov Arm Service");
     addCategory("robot");
 
@@ -38,35 +28,33 @@ public class InMoov2ArmMeta extends MetaData {
 
   }
 
-  static public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+  @Override
+  public Plan getDefault(String name) {
+    
+    Plan plan = new Plan(name);
+    // load default peers from meta here
+    plan.putPeers(name, peers);
 
-    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
 
-    InMoov2ArmConfig armConfig = new InMoov2ArmConfig();
+    InMoov2ArmConfig arm = new InMoov2ArmConfig();
 
     // RuntimeConfig runtime = new RuntimeConfig();
     // runtime.registry = new String[] { controllerName, cvName, tiltName,
     // panName, pidName, trackingName };
     String cname = null;
     if (name.endsWith("leftArm")) {
-      cname = "i01.left"; // FIXME - still terrible to have a i01 here :( 
+      cname = "i01.left"; // FIXME - still terrible to have a i01 here :(
     } else if (name.endsWith("rightArm")) {
-      cname = "i01.right"; // FIXME - still terrible to have a i01 here :( 
+      cname = "i01.right"; // FIXME - still terrible to have a i01 here :(
     }
-    
+
     // set local names and config
-    armConfig.omoplate = name + ".omoplate";
-    armConfig.shoulder = name + ".shoulder";
-    armConfig.rotate = name + ".rotate";
-    armConfig.bicep = name + ".bicep";
+    arm.omoplate = name + ".omoplate";
+    arm.shoulder = name + ".shoulder";
+    arm.rotate = name + ".rotate";
+    arm.bicep = name + ".bicep";
 
-    // build a config with all peer defaults
-    config.putAll(ServiceInterface.getDefault(armConfig.omoplate, "Servo"));
-    config.putAll(ServiceInterface.getDefault(armConfig.shoulder, "Servo"));
-    config.putAll(ServiceInterface.getDefault(armConfig.rotate, "Servo"));
-    config.putAll(ServiceInterface.getDefault(armConfig.bicep, "Servo"));
-
-    ServoConfig omoplate = (ServoConfig) config.get(armConfig.omoplate);
+    ServoConfig omoplate = (ServoConfig) plan.addPeerConfig("omoplate");
     omoplate.autoDisable = true;
     omoplate.controller = cname;
     omoplate.clip = true;
@@ -82,7 +70,7 @@ public class InMoov2ArmMeta extends MetaData {
     omoplate.sweepMax = null;
     omoplate.sweepMin = null;
 
-    ServoConfig shoulder = (ServoConfig) config.get(armConfig.shoulder);
+    ServoConfig shoulder = (ServoConfig) plan.addPeerConfig("shoulder");
     shoulder.autoDisable = true;
     shoulder.controller = cname;
     shoulder.clip = true;
@@ -98,7 +86,7 @@ public class InMoov2ArmMeta extends MetaData {
     shoulder.sweepMax = null;
     shoulder.sweepMin = null;
 
-    ServoConfig rotate = (ServoConfig) config.get(armConfig.rotate);
+    ServoConfig rotate = (ServoConfig) plan.addPeerConfig("rotate");
     rotate.autoDisable = true;
     rotate.controller = cname;
     rotate.clip = true;
@@ -114,7 +102,7 @@ public class InMoov2ArmMeta extends MetaData {
     rotate.sweepMax = null;
     rotate.sweepMin = null;
 
-    ServoConfig bicep = (ServoConfig) config.get(armConfig.bicep);
+    ServoConfig bicep = (ServoConfig) plan.addPeerConfig("bicep");
     bicep.autoDisable = true;
     bicep.controller = cname;
     bicep.clip = true;
@@ -130,7 +118,9 @@ public class InMoov2ArmMeta extends MetaData {
     bicep.sweepMax = null;
     bicep.sweepMin = null;
 
-    return config;
+    plan.addConfig(arm);
+
+    return plan;
 
   }
 }

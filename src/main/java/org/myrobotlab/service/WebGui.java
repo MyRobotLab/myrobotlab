@@ -730,7 +730,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       try {
         while (isRunning) {
           InvokeData data = inMsgQueue.poll(1, TimeUnit.SECONDS);
+
           if (data != null) {
+            if (data.method == null) {
+              log.error("method null %s", data);
+              continue;
+            }            
             Object ret = data.method.invoke(data.si, data.params);
             data.si.out(data.method.getName(), ret);
           }
@@ -1225,7 +1230,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return config;
   }
 
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     WebGuiConfig config = (WebGuiConfig) c;
 
     if (config.port != null && (port != null && config.port.intValue() != port.intValue())) {

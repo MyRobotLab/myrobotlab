@@ -2,19 +2,14 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.InMoov2HeadConfig;
-import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
@@ -42,6 +37,20 @@ public class InMoov2Head extends Service {
   public InMoov2Head(String n, String id) {
     super(n, id);
   }
+  
+  /*autoStartPeers true - this is not needed
+  public void startService() {
+    super.startService();
+    
+    startPeer("jaw");
+    startPeer("eyeX");
+    startPeer("eyeY");
+    startPeer("rothead");
+    startPeer("neck");
+    startPeer("rollNeck");
+    
+  }
+  */
 
   public void blink() {
 
@@ -148,8 +157,12 @@ public class InMoov2Head extends Service {
 
   @Deprecated /* use LangUtils */
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH, "%s.moveHead(%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, neck.getCurrentInputPos(), rothead.getCurrentInputPos(),
-        eyeX.getCurrentInputPos(), eyeY.getCurrentInputPos(), jaw.getCurrentInputPos(), rollNeck.getCurrentInputPos());
+    StringBuilder head = new StringBuilder(String.format(Locale.ENGLISH, "%s.moveHead(%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, neck.getCurrentInputPos(), rothead.getCurrentInputPos(),
+        eyeX.getCurrentInputPos(), eyeY.getCurrentInputPos(), jaw.getCurrentInputPos(), rollNeck.getCurrentInputPos()));
+    if (eyelidLeft != null && eyelidRight != null) {
+      head.append(String.format(Locale.ENGLISH, "%s.moveEyelids(%.2f,%.2f)\n", inMoovServiceName, eyelidLeft.getCurrentInputPos(), eyelidRight.getCurrentInputPos()));
+    }
+    return head.toString();
   }
 
   public boolean isValid() {
@@ -297,6 +310,14 @@ public class InMoov2Head extends Service {
 
   public void releaseService() {
     disable();
+    /* not needed now with autoStartPeer and auto release
+    releasePeer("jaw");
+    releasePeer("eyeX");
+    releasePeer("eyeY");
+    releasePeer("rothead");
+    releasePeer("neck");
+    releasePeer("rollNeck");    
+    */
     super.releaseService();
   }
 

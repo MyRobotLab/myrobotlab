@@ -32,7 +32,6 @@ public class RuntimeProcessTest extends AbstractTest {
 
     // from ,to null=runtime, data
     String cwd = null;
-    String to = null;
     Message msg = CodecUtils.cliToMsg(cwd, getName(), null, "ls");
     assertEquals("runtime", msg.getName());
     assertEquals("ls", msg.method);
@@ -82,7 +81,8 @@ public class RuntimeProcessTest extends AbstractTest {
     assertTrue("testing re-entrant - expecting runtime service", Arrays.toString(Runtime.getServiceNames()).contains("runtime"));
     
     // removing all 
-    Runtime.releaseAll(true, true);
+    Runtime.releaseAll();
+    sleep(100);
 
     // better be 0
     services = Runtime.getServiceNames();

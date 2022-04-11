@@ -35,7 +35,8 @@ public class OpenCVFilterImageSegmenter extends OpenCVFilter {
   float sigma = 0.8f;
   // purely for display purposes, only consider the first N regions?
   int numToDisplay = 50;
-
+  transient private CloseableFrameConverter converter = new CloseableFrameConverter();
+  
   public OpenCVFilterImageSegmenter() {
     super();
     initModel();
@@ -49,6 +50,12 @@ public class OpenCVFilterImageSegmenter extends OpenCVFilter {
   public OpenCVFilterImageSegmenter(String name) {
     super(name);
     initModel();
+  }
+
+  @Override
+  public void release() {
+    super.release();
+    converter.close();
   }
 
   private void initModel() {
@@ -67,7 +74,7 @@ public class OpenCVFilterImageSegmenter extends OpenCVFilter {
   public IplImage process(IplImage image) throws InterruptedException {
     // set the image and segment it.
     SelectiveSearchSegmentation ss = createSelectiveSearchSegmentation();
-    ss.setBaseImage(OpenCV.toMat(image));
+    ss.setBaseImage(converter.toMat(image));
     if ("fast".equalsIgnoreCase(method)) {
       ss.switchToSelectiveSearchFast(baseK, incrK, sigma);
     } else {

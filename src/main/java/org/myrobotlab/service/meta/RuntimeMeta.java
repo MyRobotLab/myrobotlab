@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -12,17 +11,9 @@ public class RuntimeMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
-  public RuntimeMeta(String name) {
+  public RuntimeMeta() {
 
-    super(name);
-    // TODO: can we remove this line? it's not used locally, but it does
-    // initialize Platform...
-    Platform platform = Platform.getLocalInstance();
     addDescription("is a singleton service responsible for the creation, starting, stopping, releasing and registration of all other services");
     addCategory("framework");
     includeServiceInOneJar(true);

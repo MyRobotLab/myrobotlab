@@ -1,0 +1,38 @@
+<tr>
+    <td>THIS UI IS A WORK IN PROGRESS</td>
+</tr>
+<div class="row">
+    <div class="col-md-9">
+        &nbsp;
+        <table border="1" class="tableController table-condensed table-striped table-bordered">
+            <tr>
+                <td>
+                    <input class="form-control ng-pristine ng-untouched ng-valid ng-empty" type="text" ng-model="service.beginStateName" placeholder="Begin state name" style="width:200px">
+                    <input class="form-control ng-pristine ng-untouched ng-valid ng-empty" type="text" ng-model="service.eventStateName" placeholder="Event name" style="width:200px">
+                    <input class="form-control ng-pristine ng-untouched ng-valid ng-empty" type="text" ng-model="service.endStateName" placeholder="End state name" style="width:200px">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button class="btn btn-default" ng-model="service.addBeginState" ng-click="msg.addState(service.beginStateName)">Add begin state</button>
+                    &nbsp;&nbsp;<button class="btn btn-default" ng-show="service.addBeginState" ng-click="mrl(removeState)">remove beginState</button>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button class="btn btn-default" ng-model="service.addEventName" ng-click="msg.addState(service.eventStateName)">Add event name</button>
+                    &nbsp;&nbsp;<button class="btn btn-default" ng-show="service.addEventName" ng-click="mrl(removeState)">remove event</button>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button class="btn btn-default" ng-model="service.addEndState" ng-click="msg.addState(service.endStateName)">Add end state</button>
+                    &nbsp;&nbsp;<button class="btn btn-default" ng-show="service.addEndState" ng-click="mrl(removeState)">remove endState</button>
+                </td>
+            </tr>
+            <div class="col-md-6">
+                <tr>
+                    <td>Current state: {{service.getCurrentState}}</td>
+                </tr>
+                <tr>
+                    <td>Finite state map:</td>
+                </tr>
+                <tr>
+                    <td>{{service.getFsmMap}}</td>
+                </tr>
+            </div>
+        </table>    
+    </div>
+</div>    

@@ -1,12 +1,8 @@
 package org.myrobotlab.service.meta;
 
-import java.util.LinkedHashMap;
-
-import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.InMoov2HeadConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -18,15 +14,8 @@ public class InMoov2HeadMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
-  public InMoov2HeadMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public InMoov2HeadMeta() {
     addDescription("The inmoov2 head");
     addPeer("jaw", "Servo", "Jaw servo");
     addPeer("eyeX", "Servo", "Eyes pan servo");
@@ -34,44 +23,36 @@ public class InMoov2HeadMeta extends MetaData {
     addPeer("rothead", "Servo", "Head pan servo");
     addPeer("neck", "Servo", "Head tilt servo");
     addPeer("rollNeck", "Servo", "rollNeck Mod servo");
-    // addPeer("arduino", "Arduino", "Arduino controller for this arm");
-
     addPeer("eyelidLeft", "Servo", "eyelidLeft or both servo");
     addPeer("eyelidRight", "Servo", "Eyelid right servo");
-
   }
 
-  static public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+  @Override
+  public Plan getDefault(String name) {
 
-    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
+    InMoov2HeadConfig head = new InMoov2HeadConfig();
+    
+    Plan plan = new Plan(name);
+    // load default peers from meta here
+    plan.putPeers(name, peers);
 
-    InMoov2HeadConfig headConfig = new InMoov2HeadConfig();
 
     // RuntimeConfig runtime = new RuntimeConfig();
     // runtime.registry = new String[] { controllerName, cvName, tiltName,
     // panName, pidName, trackingName };
 
-    // set local names and config
-    headConfig.jaw = name + ".jaw";
-    headConfig.eyeX = name + ".eyeX";
-    headConfig.eyeY = name + ".eyeY";
-    headConfig.rothead = name + ".rothead";
-    headConfig.neck = name + ".neck";
-    headConfig.rollNeck = name + ".rollNeck";
-    headConfig.eyelidLeft = name + ".eyelidLeft";
-    headConfig.eyelidRight = name + ".eyelidRight";
-
-    // build a config with all peer defaults
-    config.putAll(ServiceInterface.getDefault(headConfig.jaw, "Servo"));
-    config.putAll(ServiceInterface.getDefault(headConfig.eyeX, "Servo"));
-    config.putAll(ServiceInterface.getDefault(headConfig.eyeY, "Servo"));
-    config.putAll(ServiceInterface.getDefault(headConfig.rothead, "Servo"));
-    config.putAll(ServiceInterface.getDefault(headConfig.neck, "Servo"));
-    config.putAll(ServiceInterface.getDefault(headConfig.rollNeck, "Servo"));
-    config.putAll(ServiceInterface.getDefault(headConfig.eyelidLeft, "Servo"));
-    config.putAll(ServiceInterface.getDefault(headConfig.eyelidRight, "Servo"));
-
-    ServoConfig jaw = (ServoConfig) config.get(headConfig.jaw);
+    // set local names and config 
+    // PEERS ???? I think so ....
+    head.jaw = name + ".jaw";
+    head.eyeX = name + ".eyeX";
+    head.eyeY = name + ".eyeY";
+    head.rothead = name + ".rothead";
+    head.neck = name + ".neck";
+    head.rollNeck = name + ".rollNeck";
+    head.eyelidLeft = name + ".eyelidLeft";
+    head.eyelidRight = name + ".eyelidRight";
+        
+    ServoConfig jaw = (ServoConfig) plan.getPeerConfig("jaw");    
     jaw.autoDisable = true;
     jaw.clip = true;
     jaw.controller = "i01.left";
@@ -87,7 +68,7 @@ public class InMoov2HeadMeta extends MetaData {
     jaw.sweepMax = null;
     jaw.sweepMin = null;
 
-    ServoConfig eyeX = (ServoConfig) config.get(headConfig.eyeX);
+    ServoConfig eyeX = (ServoConfig) plan.getPeerConfig("eyeX");    
     eyeX.autoDisable = true;
     eyeX.clip = true;
     eyeX.controller = "i01.left";
@@ -103,7 +84,7 @@ public class InMoov2HeadMeta extends MetaData {
     eyeX.sweepMax = null;
     eyeX.sweepMin = null;
 
-    ServoConfig eyeY = (ServoConfig) config.get(headConfig.eyeY);
+    ServoConfig eyeY = (ServoConfig) plan.getPeerConfig("eyeY");    
     eyeY.autoDisable = true;
     eyeY.clip = true;
     eyeY.controller = "i01.left";
@@ -119,7 +100,7 @@ public class InMoov2HeadMeta extends MetaData {
     eyeY.sweepMax = null;
     eyeY.sweepMin = null;
 
-    ServoConfig rothead = (ServoConfig) config.get(headConfig.rothead);
+    ServoConfig rothead = (ServoConfig) plan.getPeerConfig("rothead");        
     rothead.autoDisable = true;
     rothead.clip = true;
     rothead.controller = "i01.left";
@@ -135,8 +116,8 @@ public class InMoov2HeadMeta extends MetaData {
     rothead.speed = 45.0;
     rothead.sweepMax = null;
     rothead.sweepMin = null;
-    
-    ServoConfig neck = (ServoConfig) config.get(headConfig.neck);
+
+    ServoConfig neck = (ServoConfig) plan.getPeerConfig("neck");        
     neck.autoDisable = true;
     neck.clip = true;
     neck.controller = "i01.left";
@@ -153,7 +134,7 @@ public class InMoov2HeadMeta extends MetaData {
     neck.sweepMax = null;
     neck.sweepMin = null;
 
-    ServoConfig rollNeck = (ServoConfig) config.get(headConfig.rollNeck);
+    ServoConfig rollNeck = (ServoConfig) plan.getPeerConfig("rollNeck");            
     rollNeck.autoDisable = true;
     rollNeck.clip = true;
     rollNeck.controller = "i01.right";
@@ -170,7 +151,7 @@ public class InMoov2HeadMeta extends MetaData {
     rollNeck.sweepMax = null;
     rollNeck.sweepMin = null;
 
-    ServoConfig eyelidLeft = (ServoConfig) config.get(headConfig.eyelidLeft);
+    ServoConfig eyelidLeft = (ServoConfig) plan.getPeerConfig("eyelidLeft");                
     eyelidLeft.autoDisable = true;
     eyelidLeft.clip = true;
     eyelidLeft.controller = "i01.right";
@@ -186,8 +167,8 @@ public class InMoov2HeadMeta extends MetaData {
     eyelidLeft.speed = 50.0;
     eyelidLeft.sweepMax = null;
     eyelidLeft.sweepMin = null;
-    
-    ServoConfig eyelidRight = (ServoConfig) config.get(headConfig.eyelidRight);
+
+    ServoConfig eyelidRight = (ServoConfig) plan.getPeerConfig("eyelidRight");                    
     eyelidRight.autoDisable = true;
     eyelidRight.clip = true;
     eyelidRight.controller = "i01.right";
@@ -203,9 +184,11 @@ public class InMoov2HeadMeta extends MetaData {
     eyelidRight.speed = 50.0;
     eyelidRight.sweepMax = null;
     eyelidRight.sweepMin = null;
+    
+    plan.addConfig(head);
 
-    return config;
+    return plan;
 
-  }  
-  
+  }
+
 }

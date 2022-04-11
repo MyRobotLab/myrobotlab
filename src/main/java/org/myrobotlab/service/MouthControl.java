@@ -242,8 +242,7 @@ public class MouthControl extends Service implements SpeechListener {
     return config;
   }
 
-  @Override
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     MouthControlConfig config = (MouthControlConfig) c;
 
     mouthClosedPos = config.mouthClosedPos;

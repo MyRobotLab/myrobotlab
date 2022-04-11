@@ -1,15 +1,11 @@
 package org.myrobotlab.service.meta;
 
-import java.util.LinkedHashMap;
-
-import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.config.ArduinoConfig;
 import org.myrobotlab.service.config.OpenCVConfig;
 import org.myrobotlab.service.config.PidConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.config.TrackingConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
@@ -22,84 +18,93 @@ public class TrackingMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
-  public TrackingMeta(String name) {
+  public TrackingMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+    // FIXME - could be debatable if base should 
+    // have a peer servo controller definition
+    // maybe it should use only 
+    addPeer("controller", "Arduino");
+    
+    addPeer("cv", "OpenCV");
+    addPeer("pan", "Servo");
+    addPeer("tilt", "Servo");
+    addPeer("pid", "Pid");
+    // TODO - controller ? naw probably not
 
     addDescription("tracks objects through video stream given a simple pan, tilt servo camera rig");
-    addCategory("sensors","tracking", "vision");
-    // addPeer
+    addCategory("sensors", "tracking", "vision");
+
   }
 
-  static public LinkedHashMap<String, ServiceConfig> getDefault(String name) {
+  /**
+   * Default config of a service that has peers and the config for those peers
+   * 
+   * @param name
+   *          - name of our service
+   * @return map of peer names to their appropriate config
+   */
+  @Override
+  public Plan getDefault(String name) {
 
-    LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
+    Plan plan = new Plan(name);
+    // load default peers from meta here
+    plan.putPeers(name, peers);
+    // NOTE: you want to do any aliasing at the beginning
+    // plan.setPeerName("tilt", name + ".head.neck");
 
-    TrackingConfig trackingConfig = new TrackingConfig();
+    
+    TrackingConfig tracking = new TrackingConfig();
 
-    // set local names and config
-    String controller = name + ".controller";
-    trackingConfig.cv = name + ".cv";
-    trackingConfig.pan = name + ".pan";
-    trackingConfig.tilt = name + ".tilt";
-    trackingConfig.pid = name + ".pid";
-    trackingConfig.enabled = false;
-
-    // build a config with all peer defaults
-    config.putAll(ServiceInterface.getDefault(controller, "Arduino"));
-    config.putAll(ServiceInterface.getDefault(trackingConfig.cv, "OpenCV"));
-    config.putAll(ServiceInterface.getDefault(trackingConfig.pan, "Servo"));
-    config.putAll(ServiceInterface.getDefault(trackingConfig.tilt, "Servo"));
-    config.putAll(ServiceInterface.getDefault(trackingConfig.pid, "Pid"));
+    tracking.controller = name + ".controller";
+    tracking.cv = name + ".cv";
+    tracking.pan = name + ".pan";
+    tracking.tilt = name + ".tilt";
+    tracking.pid = name + ".pid";
+    tracking.enabled = false;
 
     // pull out config this service default wants to modify
-    ArduinoConfig controllerConfig = (ArduinoConfig) config.get(controller);
-    controllerConfig.connect = true;
-    controllerConfig.port = "/dev/ttyACM0";
+    ArduinoConfig controller = (ArduinoConfig) plan.getPeerConfig("controller");
+    controller.connect = true; // FIXME - you can't connect to null port
+    // controllerConfig.port = "/dev/ttyACM0"; wtf are you doing?
+    controller.port = null;
 
-    OpenCVConfig cvConfig = (OpenCVConfig) config.get(trackingConfig.cv);
-    cvConfig.cameraIndex = 0;
-    cvConfig.capturing = true;
-    cvConfig.inputSource = "camera";
-    cvConfig.grabberType = "OpenCV";
+    OpenCVConfig cv = (OpenCVConfig) plan.getPeerConfig("cv");
+    cv.cameraIndex = 0;
+    cv.capturing = false;
+    cv.inputSource = "camera";
+    cv.grabberType = "OpenCV";
 
-    ServoConfig panConfig = (ServoConfig) config.get(trackingConfig.pan);
-    panConfig.pin = "7";
-    panConfig.autoDisable = true;
-    panConfig.idleTimeout = 3000; // AHAHAH - I did 3 originally
-    panConfig.controller = controller;
+    ServoConfig pan = (ServoConfig) plan.getPeerConfig("pan");
+    pan.pin = "7";
+    pan.autoDisable = true;
+    pan.idleTimeout = 3000;
+    pan.controller = tracking.controller;
 
-    ServoConfig tiltConfig = (ServoConfig) config.get(trackingConfig.tilt);
-    tiltConfig.pin = "5";
-    tiltConfig.autoDisable = true;
-    tiltConfig.idleTimeout = 3000;
-    tiltConfig.controller = controller;
+    ServoConfig tilt = (ServoConfig) plan.getPeerConfig("tilt");
+    tilt.pin = "5";
+    tilt.autoDisable = true;
+    tilt.idleTimeout = 3000;
+    tilt.controller = tracking.controller;
 
-    PidConfig pidConfig = (PidConfig) config.get(trackingConfig.pid);
+    PidConfig pid = (PidConfig) plan.getPeerConfig("pid");
     PidData panData = new PidData();
-    panData.kp = 0.015;
-    panData.ki = 0.001;
+    panData.kp = 30;
+    panData.ki = 1;
     panData.kd = 0.0;
 
-    pidConfig.data.put(trackingConfig.pan, panData);
+    pid.data.put(tracking.pan, panData);
 
     PidData tiltData = new PidData();
-    tiltData.kp = 0.035;
-    tiltData.ki = 0.001;
+    tiltData.kp = 30;
+    tiltData.ki = 1;
     tiltData.kd = 0.0;
 
-    pidConfig.data.put(trackingConfig.tilt, tiltData);
+    pid.data.put(tracking.tilt, tiltData);
+    
+    plan.addConfig(tracking);
 
-    // put self in
-    config.put(name, trackingConfig);
+    return plan;
+  }
 
-    return config;
-  }  
-  
 }

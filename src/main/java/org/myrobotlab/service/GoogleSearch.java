@@ -19,6 +19,8 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.GoogleSearchConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.SearchResults;
 import org.myrobotlab.service.interfaces.LocaleProvider;
@@ -37,17 +39,11 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   // 403 - Forbidden
   public static final String USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.75 Safari/537.36";
 
-  boolean saveSearchToFile = true;
-
   transient private static Pattern patternDomainName;
 
   transient private Matcher matcher;
-
-  Integer maxImageWidth = null;
-
-  int maxImages = 3;
-
-  Boolean lowerCase = null;
+  
+  GoogleSearchConfig c;
 
   private static final String DOMAIN_NAME_PATTERN = "([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}";
 
@@ -66,19 +62,27 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
     Runtime runtime = Runtime.getInstance();
     runtime.getLanguage();
     excludeTextFilter.add("Wikipedia");
-    setLowerCase();
+    // setLowerCase();
+  }
+  
+  @Override
+  public ServiceConfig apply(ServiceConfig config) {
+    c = (GoogleSearchConfig) config;
+    return c;
+  }
+  
+  @Override
+  public ServiceConfig getConfig() {
+    return config;
   }
 
+
   public void setLowerCase() {
-    lowerCase = true;
+    c.lowerCase = true;
   }
 
   public void setUpperCase() {
-    lowerCase = false;
-  }
-
-  public void clearCase() {
-    lowerCase = null;
+    c.lowerCase = false;
   }
 
   public void addFilter(String filter) {
@@ -112,7 +116,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
        * "src", "http", "https", "data"));
        */
 
-      if (saveSearchToFile) {
+      if (c.saveSearchToFile) {
         FileOutputStream fos = new FileOutputStream(getDataDir() + fs + encodedSearch + ".html");
         fos.write(doc.toString().getBytes());
         fos.close();
@@ -132,9 +136,9 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
             // String url = header.attr("href");
 
             String text = null;
-            if (lowerCase != null && lowerCase) {
+            if (c.lowerCase != null && c.lowerCase) {
               text = span.text().toLowerCase();
-            } else if (lowerCase != null && !lowerCase) {
+            } else if (c.lowerCase != null && !c.lowerCase) {
               text = span.text().toUpperCase();
             }
             for (String filter : excludeTextFilter) {
@@ -272,7 +276,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
 
   @Override
   public int setMaxImages(int cnt) {
-    maxImages = cnt;
+    c.maxImages = cnt;
     return cnt;
   }
 
@@ -344,7 +348,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
         if (pos1 > 0) {
           String ref = data.substring(pos1 + 1, pos0 + 3);
           ret.add(ref);
-          if (ret.size() == maxImages) {
+          if (ret.size() == c.maxImages) {
             return ret;
           }
         }

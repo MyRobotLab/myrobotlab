@@ -21,7 +21,6 @@ public class GoPro extends Service {
 
   public GoPro(String n, String id) {
     super(n, id);
-    http = (HttpClient) createPeer("http");
   }
 
   public void startService() {

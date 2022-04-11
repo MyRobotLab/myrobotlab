@@ -1,6 +1,8 @@
 package org.myrobotlab.service.meta;
 
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.LocalSpeechConfig;
 import org.myrobotlab.service.meta.abstracts.AbstractSpeechSynthesisMeta;
 import org.slf4j.Logger;
 
@@ -11,21 +13,27 @@ public class LocalSpeechMeta extends AbstractSpeechSynthesisMeta {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
-  public LocalSpeechMeta(String name) {
-
-    super(name);
+  public LocalSpeechMeta() {
     addCategory("speech", "sound");
     addDescription("Local OS text to speech ( tts.exe / say etc ... )");
     setAvailable(true);
     addCategory("speech");
-    // addDependency("com.microsoft", "tts", "1.1", "zip");
-    // addDependency("mycroftai.mimic", "mimic_win64", "1.0", "zip");
-
   }
+  
+  public Plan getDefault(String name) {
+
+    Plan plan = new Plan(name);
+    plan.putPeers(name, peers);
+
+    LocalSpeechConfig config = new LocalSpeechConfig();
+    config.audioFile = name + ".audioFile";
+
+    // add self last - desired order or construction
+    plan.addConfig(config);
+
+    return plan;
+  }
+
 
 }

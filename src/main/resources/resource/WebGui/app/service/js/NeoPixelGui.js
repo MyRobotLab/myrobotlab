@@ -142,7 +142,7 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
 
     $scope.attach = function() {
         msg.send('setPin', $scope.service.pin)
-        msg.send('setPixelCount', $scope.pixelCount)
+        msg.send('setPixelCount', $scope.service.pixelCount)
         msg.send('attach', $scope.state.controller)
     }
 

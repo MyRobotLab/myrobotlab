@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -12,20 +11,15 @@ public class OpenCVMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
-   * @param name
-   *          n
-   * 
    */
-  public OpenCVMeta(String name) {
+  public OpenCVMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
     addCategory("video", "vision", "sensors");
     String javaCvVersion = "1.5.6";
     // addDependency("org.bytedeco", "javacv", javaCvVersion);
     addDependency("org.bytedeco", "javacv-platform", javaCvVersion);
+    addDependency("org.bytedeco", "javacpp", javaCvVersion);
     // FIXME - finish with cmdLine flag -gpu vs cudaEnabled for DL4J ?
     boolean gpu = false;
     if (gpu) {

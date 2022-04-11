@@ -512,13 +512,15 @@ public class AudioFile extends Service {
     return config;
   }
 
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     AudioFileConfig config = (AudioFileConfig) c;
     setMute(config.mute);
     setTrack(config.currentTrack);
     setVolume(config.volume);
     setPlaylist(config.currentPlaylist);
-    playlists = config.playlists;
+    if (config.playlists != null) {
+      playlists = config.playlists;
+    }
     return c;
   }
 

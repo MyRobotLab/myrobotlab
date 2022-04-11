@@ -32,6 +32,8 @@ import java.util.List;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.ClockConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.ClockEvent;
 import org.slf4j.Logger;
 
@@ -47,14 +49,13 @@ public class Clock extends Service {
     private transient Thread thread = null;
 
     public ClockThread() {
-      thread = new Thread(this, getName() + "_ticking_thread");
-      thread.start();
     }
 
     @Override
     public void run() {
 
       try {
+        boolean firstTime = true;
         running = true;
         while (running) {
           Date now = new Date();
@@ -69,18 +70,40 @@ public class Clock extends Service {
             }
           }
 
-          if (!NoExecutionAtFirstClockStarted) {
-            invoke("pulse", now);
-            invoke("publishTime", now);
-            invoke("publishEpoch", now);
+          if (firstTime && skipFirst) {
+            firstTime = false;
+            continue;
           }
+          invoke("pulse", now);
+          invoke("publishTime", now);
+          invoke("publishEpoch", now);
+
           Thread.sleep(interval);
-          NoExecutionAtFirstClockStarted = false;
+          firstTime = false;
         }
       } catch (InterruptedException e) {
         log.info("ClockThread interrupt");
       }
       running = false;
+      thread = null;
+    }
+
+    synchronized public void start() {
+      if (thread == null) {
+        thread = new Thread(this, getName() + "_ticking_thread");
+        thread.start();
+      } else {
+        log.info("{} already started", getName());
+      }
+    }
+
+    public void stop() {
+      if (thread != null) {
+        thread.interrupt();
+        thread = null;
+      } else {
+        log.info("{} already stopped");
+      }
     }
   }
 
@@ -88,17 +111,15 @@ public class Clock extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(Clock.class);
 
-  public volatile boolean running;
+  protected volatile boolean running;
 
-  public int interval = 1000;
-
-  protected transient ClockThread myClock = null;
+  final protected transient ClockThread myClock = new ClockThread();
+  
+  protected int interval = 1000;
 
   protected List<ClockEvent> events = new ArrayList<ClockEvent>();
 
-  private boolean NoExecutionAtFirstClockStarted = false;
-
-  private boolean restartMe;
+  private boolean skipFirst = false;
 
   public Clock(String n, String id) {
     super(n, id);
@@ -123,10 +144,6 @@ public class Clock extends Service {
   public void publishClockStopped() {
     running = false;
     broadcastState();
-    if (restartMe) {
-      sleep(10);
-      startClock(NoExecutionAtFirstClockStarted);
-    }
   }
 
   /**
@@ -153,58 +170,22 @@ public class Clock extends Service {
     broadcastState();
   }
 
-  public void startClock(boolean NoExecutionAtFirstClockStarted) {
-    if (myClock == null) {
-      this.NoExecutionAtFirstClockStarted = NoExecutionAtFirstClockStarted;
-      // info("starting clock");
-      myClock = new ClockThread();
-      invoke("publishClockStarted");
-    } else {
-      log.info("clock already started");
-    }
-  }
-
-  public void restartClock(boolean NoExecutionAtFirstClockStarted) {
-    this.NoExecutionAtFirstClockStarted = NoExecutionAtFirstClockStarted;
-    if (!running) {
-      startClock(NoExecutionAtFirstClockStarted);
-    } else {
-      stopClock(true);
-    }
-
+  public void startClock(boolean skipFirst) {
+    this.skipFirst = skipFirst;
+    myClock.start();
+    invoke("publishClockStarted");
   }
 
   public void startClock() {
     startClock(false);
   }
 
-  public void restartClock() {
-    restartClock(false);
-  }
-
-  public void stopClock() {
-    stopClock(false);
-  }
-
   public boolean isClockRunning() {
     return running;
   }
 
-  public void stopClock(boolean restartMe) {
-    this.restartMe = restartMe;
-    if (myClock != null) {
-      // info("stopping clock");
-      log.info("stopping " + getName() + " myClock");
-      myClock.thread.interrupt();
-      myClock.thread = null;
-      myClock = null;
-      // have requestors broadcast state !
-      // broadcastState();
-      invoke("publishClockStopped");
-    } else {
-      log.info("clock already stopped");
-    }
-    running = false;
+  public void stopClock() {
+    myClock.stop();
     broadcastState();
   }
 
@@ -218,10 +199,43 @@ public class Clock extends Service {
     return interval;
   }
 
+  @Override
+  public ServiceConfig getConfig() {
+    ClockConfig c = (ClockConfig) config;
+    c.interval = interval;
+    c.skipFirst = skipFirst;
+    c.running = running;
+    return c;
+  }
+
+  public ServiceConfig apply(ServiceConfig c) {
+    ClockConfig config = (ClockConfig) c;
+    if (config.running != null) {
+      if (config.running) {
+        startClock();
+      } else {
+        stopClock();
+      }
+    }
+    interval = config.interval;
+    skipFirst = config.skipFirst;
+    return config;
+  }
+
   public static void main(String[] args) throws Exception {
     try {
       // LoggingFactory.init(Level.WARN);
-      Runtime.main(new String[] { "--id", "c3", "--from-launcher", "--log-level", "WARN" });
+
+      Runtime runtime = Runtime.getInstance();
+
+      Clock c1 = (Clock) Runtime.start("c1", "Clock");
+      c1.startClock(true);
+      c1.stopClock();
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
 
       // connections
       boolean mqtt = true;
@@ -247,8 +261,8 @@ public class Clock extends Service {
       }
 
       if (rconnect) {
-        Runtime runtime = Runtime.getInstance();
-        runtime.connect("http://localhost:8888");
+        // Runtime runtime = Runtime.getInstance();
+        // runtime.connect("http://localhost:8888");
 
       }
 

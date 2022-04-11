@@ -513,10 +513,11 @@ public class Updater extends Service {
               FileIO.copy(currentJar, String.format("target/myrobotlab-%s-%s.jar", branch, currentVersion));
             }
 
+            // FIXME - re-implement
             // export current state
-            if (Runtime.exists()) {
-              Runtime.getInstance().save("last-restart/runtime.yml");
-            }
+//            if (Runtime.exists()) {
+//              Runtime.getInstance().save("last-restart/runtime.yml");
+//            }
 
             // replace our current jar (classes ? build?)
             log.info("writing {} to myrobotlab.jar", latestFile);

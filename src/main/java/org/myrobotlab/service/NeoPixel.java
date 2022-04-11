@@ -789,7 +789,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     return config;
   }
 
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     NeoPixelConfig config = (NeoPixelConfig) c;
     setPixelDepth(config.pixelDepth);
 

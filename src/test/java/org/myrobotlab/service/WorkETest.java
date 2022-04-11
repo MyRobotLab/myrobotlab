@@ -55,7 +55,7 @@ public class WorkETest extends AbstractTest {
   public final void integrationTest() throws Exception {
 
     worke = (WorkE) Runtime.start("worke", "WorkE");
-    worke.startPeer("joystick");
+    // worke.startPeer("joystick");
 
     // Joystick joystick = (Joystick)Runtime.start("worke", "Joystick");
 

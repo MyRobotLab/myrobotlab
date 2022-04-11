@@ -1986,7 +1986,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   transient private Thread mainThread;
 
-  protected JMonkeyEngineConfig config;
+  protected JMonkeyEngineConfig newConfig;
 
   public void simpleInitApp() {
 
@@ -2320,9 +2320,10 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
       // if we have config to process
       // process it
-      if (config != null) {
-        loadDelayed(config);
-        config = null;
+      newConfig = (JMonkeyEngineConfig) config;
+      if (newConfig != null) {
+        loadDelayed(newConfig);
+        newConfig = null;
       }
 
     } catch (Exception e) {
@@ -2620,14 +2621,11 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     return c;
   }
 
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig apply(ServiceConfig c) {
     if (app != null) {
       // if there is an app we can load immediately
       loadDelayed(c);
-    } else {
-      // otherwise we'll need to delay loading
-      config = (JMonkeyEngineConfig) c;
-    }
+    } 
     return c;
   }
 

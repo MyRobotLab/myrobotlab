@@ -9,6 +9,7 @@ import java.util.Date;
 
 import org.bytedeco.opencv.opencv_core.CvRect;
 import org.bytedeco.opencv.opencv_core.IplImage;
+import org.myrobotlab.opencv.CloseableFrameConverter;
 import org.myrobotlab.service.OpenCV;
 
 public class KinectImageNode implements Serializable {
@@ -32,10 +33,12 @@ public class KinectImageNode implements Serializable {
   public String imageFilePath = null;
 
   public int lastGoodFitIndex = 0;
+  transient private CloseableFrameConverter converter1 = new CloseableFrameConverter();
+  transient private CloseableFrameConverter converter2 = new CloseableFrameConverter();
 
   public void convertToSerializableTypes() {
-    cameraFrame = new SerializableImage(OpenCV.toBufferedImage(cvCameraFrame), "camera");
-    mask = new SerializableImage(OpenCV.toBufferedImage(cvMask), "frame");
+    cameraFrame = new SerializableImage(converter1.toBufferedImage(cvCameraFrame), "camera");
+    mask = new SerializableImage(converter2.toBufferedImage(cvMask), "frame");
   }
 
   public IplImage getTemplate() {

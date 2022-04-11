@@ -15,7 +15,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
-import org.myrobotlab.service.config.AbstractSpeechSynthesisConfig;
+import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.config.MarySpeechConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
@@ -226,12 +226,6 @@ public class MarySpeech extends AbstractSpeechSynthesis {
   public String setAudioEffects(String audioEffects) {
     marytts.setAudioEffects(audioEffects);
     return audioEffects;
-  }
-
-  @Override
-  public ServiceConfig getConfig() {
-    MarySpeechConfig config = (MarySpeechConfig) super.getConfig((AbstractSpeechSynthesisConfig) new MarySpeechConfig());
-    return config;
   }
 
   public static void main(String[] args) throws IOException {

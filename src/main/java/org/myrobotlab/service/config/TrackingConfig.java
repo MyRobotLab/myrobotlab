@@ -8,5 +8,6 @@ public class TrackingConfig extends ServiceConfig {
   public String pid;
   public boolean enabled;
   public long lostTrackingDelayMs = 1000;
+  public String controller;
 
 }

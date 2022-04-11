@@ -306,8 +306,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     return config;
   }
 
-  public ServiceConfig load(ServiceConfig c) {
-    super.load(c);
+  public ServiceConfig apply(ServiceConfig c) {
     SabertoothConfig config = (SabertoothConfig) c;
     if (config.connect) {
       try {
@@ -315,7 +314,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       } catch (Exception e) {
         error(e);
       }
-    }
+    }	
     return c;
   }
 
