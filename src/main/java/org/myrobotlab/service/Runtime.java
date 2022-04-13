@@ -368,6 +368,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       return null;
     }
 
+    Set<String> autoStartedPeers = new HashSet<>();
     if (sc.autoStartPeers) {
       // get peers from meta data
       MetaData md = MetaData.get(sc.type);
@@ -386,12 +387,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         if (actualPeerName != null && !isStarted(actualPeerName)) {
           startInternal(configName, actualPeerName, null); // type unknown at
                                                            // the moment
+          autoStartedPeers.add(actualPeerName);
+
         }
       }
     }
 
     sc.state = "CREATING";
     si = createService(name, sc.type, null);
+    for (String peerName : autoStartedPeers) {
+      si.addAutoStartedPeer(peerName);
+    }
     sc.state = "CREATED";
     // FYI - there is a createService(name, null, null) but it requires a yml
     // file
@@ -1572,7 +1578,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         for (String peer : peers.keySet()) {
           // get actual Name
           String actualPeerName = getPeerName(peer, sc, peers, inName);
-          if (actualPeerName != null && isStarted(actualPeerName)) {
+          if (actualPeerName != null && isStarted(actualPeerName) && si.autoStartedPeersContains(actualPeerName)) {
             release(actualPeerName);
           }
         }
@@ -1834,13 +1840,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       log.error("release(null)");
       return;
     }
-    
+
     ServiceInterface si = Runtime.getService(name);
     if (si == null) {
       log.info("%s already released", name);
       return;
     }
-    
+
     // important to call service.releaseService because
     // many are derived that take care of additional thread
     // cleanup
@@ -2979,6 +2985,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     DescribeResults results = new DescribeResults();
     results.setStatus(Status.success("Ahoy!"));
+    
+    String fullname = null;
 
     try {
 
@@ -2994,7 +3002,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // TODO - filtering on what is broadcasted or re-broadcasted
       for (int i = 0; i < list.length; ++i) {
-        String fullname = list[i];
+        fullname = list[i];
         ServiceInterface si = registry.get(fullname);
 
         Registration registration = new Registration(si);
@@ -3003,7 +3011,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
     } catch (Exception e) {
-      log.error("describe threw", e);
+      log.error("describe threw on {}", fullname, e);
     }
 
     return results;
@@ -3955,9 +3963,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * service in the current "config name", if the config name does not exist
    * will error
    * 
-   * @param configName - config set name if null defaults to default
-   * @param serviceName - service name if null defaults to runtime
-   * @param filename - if not explicitly set - will be standard yml filename
+   * @param configName
+   *          - config set name if null defaults to default
+   * @param serviceName
+   *          - service name if null defaults to runtime
+   * @param filename
+   *          - if not explicitly set - will be standard yml filename
    * @return - true if all goes well
    */
   public boolean saveService(String configName, String serviceName, String filename) {
@@ -3983,7 +3994,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
         filename = Runtime.getInstance().getConfigDir() + fs + configName + fs + serviceName + ".yml";
       }
-      
+
       if (si == null) {
         error("service %s does not exist", serviceName);
         return false;

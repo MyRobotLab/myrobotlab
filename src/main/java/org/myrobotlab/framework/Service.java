@@ -125,6 +125,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * full class name used in serialization
    */
   protected String serviceClass;
+  
+  Set<String> autoStartedPeers = new HashSet<>();
 
   private boolean isRunning = false;
 
@@ -2483,4 +2485,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return MetaData.getDefault(getName(), this.getClass().getSimpleName());
   }
 
+  public void addAutoStartedPeer(String actualPeerName) {
+    autoStartedPeers.add(actualPeerName);
+  }
+
+  public boolean autoStartedPeersContains(String actualPeerName) {
+    return autoStartedPeers.contains(actualPeerName);
+  }
 }
