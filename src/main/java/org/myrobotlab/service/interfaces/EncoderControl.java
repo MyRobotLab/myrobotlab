@@ -24,7 +24,12 @@ public interface EncoderControl extends Attachable {
    */
   public EncoderData publishEncoderData(EncoderData data);
   
-  public void attachEncoderController(EncoderController controller) throws Exception;
+  /**
+   * Attach a controller to an encoder control.  
+   * 
+   * @param controller
+   */
+  public void attachEncoderController(EncoderController controller);
 
   /**
    * @return the state of streaming encoder data

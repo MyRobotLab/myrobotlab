@@ -2,37 +2,38 @@ package org.myrobotlab.opencv;
 
 import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_UNCHANGED;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.imread;
-import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 
+import org.apache.commons.io.FilenameUtils;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.OpenCVFrameConverter;
-import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
+/**
+ * This is the ImageFileFrameGrabber.  It can be used as a source of images to the OpenCV service.
+ * This grabber will load all of the image files from a specified directory and iterate thought them.
+ * The resulting images are converted in to JavaCV Frames.  
+ * 
+ */
 public class ImageFileFrameGrabber extends FrameGrabber {
   public final static Logger log = LoggerFactory.getLogger(ImageFileFrameGrabber.class.getCanonicalName());
 
-  // delay in ms between grabs.
-  // public int delay = 31; // 32 fps is 31.5 ms per frame
-  public int delay = 16;
   private ArrayList<File> imageFiles = new ArrayList<File>();
   private int grabCount = 0;
-
-  protected transient Mat image;
-  transient private Mat lastImage;
-
-  // transient private HashMap<String, IplImage> cache = new HashMap<String,
-  // IplImage>();
-  private int frameCounter = 0;
+  private transient Mat image;
   public String path;
-  // transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
-  OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
+  CloseableFrameConverter converter = new CloseableFrameConverter();
+  
+  // supported formats for imread
+  // https://docs.opencv.org/4.5.3/d4/da8/group__imgcodecs.html#ga288b8b3da0892bd651fce07b3bbd3a56
+  private transient HashSet<String> validFormats = new HashSet<String>(
+      Arrays.asList("bmp","jpg", "jpeg", "jpe", "jp2" ,"png", "tiff", "tif", "hdr", "pic"));
 
   public ImageFileFrameGrabber(String path) {
     this.path = path;
@@ -51,10 +52,10 @@ public class ImageFileFrameGrabber extends FrameGrabber {
       File[] listOfFiles = target.listFiles();
       for (File file : listOfFiles) {
         if (file.isFile()) {
-          // TODO: check what formats opencv's cvLoadImage supports and add that
-          // here.
-          if (file.getName().toLowerCase().endsWith("png") || file.getName().toLowerCase().endsWith("jpg")) {
-            // It's an image file! ish...
+          // if the file extension is one of the supported ones, let's assume it's actually an image.
+          String ext = FilenameUtils.getExtension(file.getName()).toLowerCase();
+          if (validFormats.contains(ext)) {
+            // It's an image file! (in theory)
             imageFiles.add(file);
           }
         }
@@ -64,56 +65,20 @@ public class ImageFileFrameGrabber extends FrameGrabber {
 
   @Override
   public Frame grab() {
-    /*
-     * not needed as opencv can self regulat - or adjust fps try { // pause for
-     * the specified delay before loading the image. Thread.sleep(delay); }
-     * catch (InterruptedException e) {} // set the file path
-     * 
-     */
+    // Grab the file to load based on the grabCount
     path = imageFiles.get(grabCount).getAbsolutePath();
     log.debug("Grabbing file {} - {}", grabCount, path);
     // grab it.
     try {
-      // image = cvLoadImage(path);
       image = imread(path, IMREAD_UNCHANGED);
     } catch (Throwable e) {
-      // log.error("cvLoadImage threw - could not load {}", e);
       log.error("ImageFileFrameGrabber cvLoadImage threw - could not load {}", path, e);
       return null;
     }
-    /*
-     * if (!cache.containsKey(path)) { image = cvLoadImage(path,
-     * CV_LOAD_IMAGE_UNCHANGED); cache.put(path, image); } else { IplImage
-     * cachedImage = cache.get(path); if (image != null) { image =
-     * cachedImage.clone(); } else { log.error("could not get cached image {}",
-     * path); }
-     * 
-     * }
-     */
-
-    ++frameCounter;
-
-    if (frameCounter > 1) {
-      if (lastImage != null) {
-        lastImage.release();
-      }
-    }
-
-    lastImage = image;
-
-    // increment out count.
+    // increment our count.
     grabCount++;
     grabCount = grabCount % imageFiles.size();
-
-    return converter.convert(image);
-  }
-
-  public int getDelay() {
-    return delay;
-  }
-
-  public void setDelay(int delay) {
-    this.delay = delay;
+    return converter.toFrame(image);
   }
 
   public String getDirectory() {
@@ -126,26 +91,23 @@ public class ImageFileFrameGrabber extends FrameGrabber {
 
   @Override
   public void start() throws Exception {
-    // TODO Auto-generated method stub
-
+    // Nothing done on start
   }
 
   @Override
   public void stop() throws Exception {
-    // TODO Auto-generated method stub
-
+    // Nothing done on stop
   }
 
   @Override
   public void trigger() throws Exception {
-    // TODO Auto-generated method stub
-
+    // nothing done on trigger
   }
 
   @Override
   public void release() throws Exception {
-    // TODO Auto-generated method stub
-
+    // Close up the frame converter.
+    converter.close();
   }
 
 }
