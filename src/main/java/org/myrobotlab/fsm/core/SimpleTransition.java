@@ -107,11 +107,11 @@ public class SimpleTransition implements Transition {
   @Override
   public String toString() {
     final StringBuilder sb = new StringBuilder();
-    sb.append(sourceState.getId());
+    sb.append(sourceState.getName());
     sb.append("-(");
     sb.append(getId());
     sb.append(")->");
-    sb.append(targetState.getId());
+    sb.append(targetState.getName());
     /*
      * sb.append("Transition"); sb.append("{name='").append(id).append('\'');
      * sb.append(", sourceState=").append(sourceState.getId());

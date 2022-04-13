@@ -57,7 +57,7 @@ public final class Utils {
   public static String dumpFSMStates(final Set<State> states) {
     StringBuilder result = new StringBuilder();
     for (State state : states) {
-      result.append(state.getId()).append(";");
+      result.append(state.getName()).append(";");
     }
     return result.toString();
   }

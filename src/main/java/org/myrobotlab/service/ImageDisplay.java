@@ -1,17 +1,10 @@
 package org.myrobotlab.service;
 
 import java.awt.AWTException;
-import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.Image;
-import java.awt.RenderingHints;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
@@ -20,445 +13,434 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.WritableRaster;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.framework.Service;
-// import org.myrobotlab.image.DisplayedImage;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.SearchPublisher;
+import org.myrobotlab.net.Http;
+import org.myrobotlab.service.config.ImageDisplayConfig;
+import org.myrobotlab.service.config.ImageDisplayConfig.Display;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
+import org.myrobotlab.service.data.ImageData;
+import org.myrobotlab.service.interfaces.ImageListener;
 import org.slf4j.Logger;
 
-/**
- * A service used to display images
- * 
- * @author GroG
- *
- */
-public class ImageDisplay extends Service implements MouseListener, ActionListener, MouseMotionListener {
+public class ImageDisplay extends Service implements ImageListener, MouseListener, ActionListener, MouseMotionListener {
 
-  transient private static GraphicsDevice gd;
-
-  public final static Logger log = LoggerFactory.getLogger(ImageDisplay.class);
   private static final long serialVersionUID = 1L;
 
-  // FIXME - incorporate small neat return (default broken image) can handle
-  // file/resource/https
-  protected static Image createImage(String path, String description) throws MalformedURLException {
-    // URL imageURL = TrayIconDemo.class.getResource(path); FIXME use
-    // getResourceDir
-    return new ImageIcon(new URL(path), description).getImage();
+  final static Logger log = LoggerFactory.getLogger(ImageDisplay.class);
+
+  String currentFrame = null;
+
+  private transient Map<String, JFrame> displays = new HashMap<>();
+
+  Integer offsetX = null;
+  Integer offsetY = null;
+  Integer absMouseX = null;
+  Integer absMouseY = null;
+  Integer absLastMouseX = null;
+  Integer absLastMouseY = null;
+
+  String cacheDir = getDataDir() + fs + "cache";
+
+  transient GraphicsEnvironment ge = null;
+
+  transient GraphicsDevice[] gs = null;
+
+  public ImageDisplay(String name, String inId) {
+    super(name, inId);
+    File file = new File(cacheDir);
+    file.mkdirs();
   }
 
-  public class Fader extends Thread {
-    public float alpha = 0.5f;
-    public boolean fadeIn;
-    public String name;
-    public int sleepTime = 300;
-    public float fadeIncrement = 0.05f;
+  public void setAlwaysOnTop(boolean b) {
+    ImageDisplayConfig c = (ImageDisplayConfig) config;
+    c.alwaysOnTop = b;
+  }
 
-    public Fader(String name) {
-      this.name = name;
+  public void setColor(String color) {
+    ImageDisplayConfig c = (ImageDisplayConfig) config;
+    c.bgColor = color;
+  }
+
+  public void setTransparent() {
+    ImageDisplayConfig c = (ImageDisplayConfig) config;
+    c.bgColor = null;
+  }
+
+  public void setFullScreen(boolean b) {
+    ImageDisplayConfig c = (ImageDisplayConfig) config;
+    c.fullscreen = b;
+  }
+
+  public void enable() {
+    ImageDisplayConfig c = (ImageDisplayConfig) config;
+    c.enabled = true;
+  }
+
+  public void disable() {
+    ImageDisplayConfig c = (ImageDisplayConfig) config;
+    c.enabled = false;
+  }
+
+  @Deprecated /* opacity not supported this way */
+  public void exitFS() throws MalformedURLException, AWTException {
+    exitFullScreen(null);
+  }
+
+  public void exitFullScreen() {
+    exitFullScreen(null);
+  }
+
+  public void exitFullScreen(String src) {
+    if (src == null) {
+      src = currentFrame;
     }
-
-    public void run() {
-      try {
-        JFrame frame = frames.get(name);
-        ImageIcon icon = getIcon(name);
-        JLabel label = getLabel(name);
-
-        // get current BufferedImage
-        BufferedImage bi = (BufferedImage) icon.getImage();
-        Graphics g = bi.createGraphics();
-        Graphics2D g2 = (Graphics2D) g.create();
-
-        AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
-        g2.setComposite(composite);
-        AffineTransform xform = AffineTransform.getTranslateInstance(bi.getWidth(), bi.getHeight());
-        g2.drawRenderedImage(bi, xform);
-        label.setIcon(new ImageIcon(bi));
-
-        for (int i = 0; i < 100; ++i) {
-
-          /*
-           * 
-           * 
-           * icon.setImage();
-           * g2d.setComposite(AlphaComposite.SrcOver.derive(alpha));
-           * frame.repaint();
-           * 
-           * g2d.drawImage(bi, bi.getWidth(), bi.getHeight(), icon); // make new
-           * Buffered Image with reduced alpha
-           * 
-           * 
-           * // set Label with new Icon
-           * 
-           * 
-           * BufferedImage bi = new BufferedImage(icon.getIconWidth(),
-           * icon.getIconHeight(), BufferedImage.TYPE_INT_RGB); Graphics g =
-           * bi.createGraphics(); Graphics2D g2d = (Graphics2D) g.create();
-           * 
-           * // paint the Icon to the BufferedImage. icon.paintIcon(null, g, 0,
-           * 0); g.dispose();
-           * 
-           * Graphics2D g2d = (Graphics2D) g.create();
-           * g2d.setComposite(AlphaComposite.SrcOver.derive(alpha)); int x =
-           * (getWidth() - inImage.getWidth()) / 2; int y = (getHeight() -
-           * inImage.getHeight()) / 2; g2d.drawImage(inImage, x, y, this);
-           * 
-           * g2d.setComposite(AlphaComposite.SrcOver.derive(1f - alpha)); x =
-           * (getWidth() - outImage.getWidth()) / 2; y = (getHeight() -
-           * outImage.getHeight()) / 2; g2d.drawImage(outImage, x, y, this);
-           * g2d.dispose();
-           */ frame.setVisible(true);
-          sleep(sleepTime);
-        }
-        g.dispose();
-        g2.dispose();
-      } catch (Exception e) {
-      }
-      log.info("fader done");
-    }
-  }
-
-  static BufferedImage deepCopy(BufferedImage bi) {
-    ColorModel cm = bi.getColorModel();
-    boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
-    WritableRaster raster = bi.copyData(null);
-    return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
-  }
-
-  // Returns the Height-factor of the DisplayResolution.
-  public static int getResolutionOfH() {
-    return gd.getDisplayMode().getHeight();
-  }
-
-  // Returns the Width-factor of the DisplayResolution.
-  public static int getResolutionOfW() {
-    return gd.getDisplayMode().getWidth();
-  }
-
-  private static BufferedImage resizeImage(BufferedImage originalImage, int width, int height, Integer type) {
-    if (type == null) {
-      type = originalImage.getType();
-    }
-    BufferedImage resizedImage = new BufferedImage(width, height, type);
-    Graphics2D g = resizedImage.createGraphics();
-    g.drawImage(originalImage, 0, 0, width, height, null);
-    g.dispose();
-
-    return resizedImage;
-  }
-
-  private static BufferedImage resizeImageWithHint(BufferedImage originalImage, int width, int height, int type) {
-
-    BufferedImage resizedImage = new BufferedImage(width, height, type);
-    Graphics2D g = resizedImage.createGraphics();
-    g.drawImage(originalImage, 0, 0, width, height, null);
-    g.dispose();
-    g.setComposite(AlphaComposite.Src);
-
-    g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-    g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-    return resizedImage;
-  }
-
-  float currentAlpha = 0.0f;
-
-  transient private JFrame currentFrame;
-
-  boolean defaultAlwaysOnTop = false;
-
-  transient Color defaultColor = Color.LIGHT_GRAY;
-
-  boolean defaultFadeIn = false;
-
-  boolean defaultFullScreen = false;
-
-  boolean defaultMultiFrame = true;
-
-  boolean defaultSystemTray = false;
-
-  boolean defaultTransparentBackground = true;
-
-  transient Map<String, JFrame> frames = new HashMap<String, JFrame>();
-
-  transient JLabel fullscreenImageLabel = null;
-
-  int hOffset = 0;
-
-  transient Cursor lastCursor = null;
-
-  transient Timer timer = null;
-
-  int wOffset = 0;
-
-  boolean autoNumber = false;
-
-  public ImageDisplay(String n, String id) {
-    super(n, id);
-  }
-
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    currentAlpha += 0.05f;
-    if (currentAlpha > 1) {
-      currentAlpha = 1;
-      // timer.stop();
-      timer.cancel();
-    }
-    // repaint();
-  }
-
-  public void closeAll() {
-    for (JFrame frame : frames.values()) {
+    JFrame frame = displays.get(src);
+    if (frame != null) {
       frame.dispose();
     }
-    frames.clear();
+
+    displays.remove(src);
+    display(src);
   }
 
-  public void display(String src) throws MalformedURLException, AWTException {
-    display(null, src, null, null, null, null, null, null, null);
+  @Deprecated /* opacity not supported this way */
+  public void displayFullScreen(String src, float opacity) throws MalformedURLException, AWTException {
+    displayFullScreen(src);
   }
 
-  // FIXME - setIcon
-  // FIXME - fullscreen
-  // FIXME - width=200 ? and scale proportionately
-  // FIXME - scale %
-  // FIXME - transparency/alpha
-  // FIXME - alignment
-  // FIXME - fade in ?
-  // FIXME - gif animation
-  // FIXME - from http/https/localfile OR Resource !!! use getResourceDir
-  // FIXME - cache locally /data/DisplayImage/ -> boolean cacheFiles = true;
-  public void display(String inName, String src, Boolean fullscreen, String bgColorStr, Integer width, Integer height, Double scaling, Float alpha, Boolean fadeIn)
-      throws MalformedURLException, AWTException {
-    Color bgColor = defaultColor;
-    if (bgColorStr != null) {
-      try {
-        bgColor = Color.decode(bgColorStr);
-      } catch (Exception e) {
-      }
-    }
-
-    // FYI - need buffered image to do lower level manipulations like sizing,
-    // scaling, and alpha changes
-    // BUT animated gifs do not successfully convert to BufferedImages
-    BufferedImage image = loadImage(src);
-    if (image == null)
-
-      // FIXME - this will explode if image comes back null (which it will for
-      // animated gifs)
-      // FIXME - vs explicit width height vs explicit proportional width !
-      if (scaling != null && scaling != 1.0f) {
-        int scaledWidth = Math.round(image.getWidth() * scaling.floatValue());
-        int scaledHeight = Math.round(image.getHeight() * scaling.floatValue());
-        image = resizeImage(image, scaledWidth, scaledHeight);
-      }
-
-    boolean fade = defaultFadeIn;
-    if (fadeIn != null) {
-      fade = fadeIn;
-    }
-
-    ImageIcon icon = null;
-    if (image == null) // animated gif
-    {
-      icon = new ImageIcon(new URL(src));
-    } else {
-      icon = new ImageIcon(image);
-    }
-
-    JLabel label = new JLabel(icon);
-    label.setBackground(bgColor);
-
-    if (defaultMultiFrame || currentFrame == null) {
-      currentFrame = new JFrame();
-      // FIXME - make variable - also must put "default" of window handling ..
-      currentFrame.setUndecorated(true);
-      // f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      currentFrame.add(label, BorderLayout.CENTER);
-    }
-
-    currentFrame.addMouseListener(this);
-    currentFrame.addMouseMotionListener(this);
-
-    currentFrame.getContentPane().setBackground(bgColor);// <-- THIS ONE MAKES A
-                                                         // DIFFERENCE !!!
-    currentFrame.setBackground(bgColor);
-    currentFrame.setSize(image.getWidth() + wOffset, image.getHeight() + hOffset);
-
-    currentFrame.setLocation(getDisplayWidth() / 2 - image.getWidth() / 2, getDisplayHeight() / 2 - (image.getHeight() + hOffset) / 2);
-
-    // FIXME - do i have to check the size ???
-    currentFrame.setIconImage(image);
-
-    JLabel currentLabel = (JLabel) currentFrame.getContentPane().getComponent(0);
-    ImageIcon currentIcon = (ImageIcon) currentLabel.getIcon();
-    currentLabel.setIcon(icon);
-
-    currentFrame.toFront();
-
-    if (defaultTransparentBackground) {
-      currentFrame.setBackground(new Color(0, 0, 0, 0));
-    }
-
-    if (defaultAlwaysOnTop) {
-      currentFrame.setAlwaysOnTop(true);
-    }
-
-    // TODO - make better / don't use setImageAutoSize (very bad algorithm)
-    if (defaultSystemTray && SystemTray.isSupported()) {
-      log.info("SystemTray is supported");
-      SystemTray tray = SystemTray.getSystemTray();
-      Dimension trayIconSize = tray.getTrayIconSize();
-
-      TrayIcon trayIcon = new TrayIcon(createImage(src, "tray icon"));
-      trayIcon.setImageAutoSize(true);
-
-      tray.add(trayIcon);
-    }
-
-    // fullscreen ... begin
-    Boolean fs = fullscreen;
-    if (fs == null) {
-      fs = defaultFullScreen;
-    }
-
-    if (fs) {
-      gd.setFullScreenWindow(currentFrame);
-    }
-
-    String name = null;
-    if (inName != null) {
-      name = inName;
-    } else if (autoNumber) {
-      name = String.format("%d", frames.size() + 1);
-    } else {
-      name = src;
-    }
-
-    if (defaultMultiFrame) {
-      frames.put(name, currentFrame);
-    }
-
-    if (fade) {
-      Fader fader = new Fader(name);
-      // reset the icon with a different alpha depending if fading in or fading
-      // out
-
-      // TODO - make seperate fadeIn/fadeOut parameters - currently only support
-      // fadeIn
-      fader.alpha = 0f;
-      fader.fadeIn = fade;
-      fader.start();
-    } else {
-
-      // make it visible
-      currentFrame.setVisible(true);
-    }
-
+  @Deprecated /* opacity not supported this way */
+  public void display(String src, float opacity) throws MalformedURLException, AWTException {
+    display(src);
   }
 
-  // Displays a faded image.
-  // @param source = path.
-  // @param alpha = Value how much the image is faded float from 0.0 to 1.0.
-  public void displayAlpha(String src, float alpha) throws MalformedURLException, AWTException {
-    display(null, src, null, null, null, null, null, alpha, null);
+  @Deprecated /* opacity not supported this way */
+  public void displayScaled(String src, float opacity, float scale) throws MalformedURLException, AWTException {
+    displayScaled(src, scale);
   }
 
-  /**
-   * Display an image by fading its alpha
-   * 
-   * @param src
-   *          src to display
-   * @throws MalformedURLException
-   *           if a bogus url
-   * @throws AWTException
-   *           if an error rendering
-   * 
-   */
+  @Deprecated /* no longer supported */
   public void displayFadeIn(String src) throws MalformedURLException, AWTException {
-    display(null, src, null, null, null, null, null, null, true);
-  }
-
-  public void displayFullScreen(String src) throws MalformedURLException, AWTException {
-    display(null, src, true, null, null, null, null, null, null);
-  }
-
-  public void displayScaled(String src, double scaling) throws MalformedURLException, AWTException {
-    display(null, src, null, null, null, null, scaling, null, null);
-  }
-
-  // Exits the Fullscreen mode.
-  public void exitFS() {
-    gd.setFullScreenWindow(null);
-  }
-
-  public int getDisplayHeight() {
-    return gd.getDisplayMode().getHeight();
-  }
-
-  // necessary ?
-  public int getDisplayWidth() {
-    return gd.getDisplayMode().getWidth();
-  }
-
-  private BufferedImage loadImage(String src) {
-    BufferedImage image = null;
-    try {
-      // get the image from web if its an Url
-      log.info("Loading image: ");
-      if (src.startsWith("http://") || (src.startsWith("https://"))) {
-        log.info("from url...");
-        URL url = new URL(src);
-        image = ImageIO.read(url);
-      } else {
-        log.info("from file...");
-        image = ImageIO.read(new File(src));
-      }
-
-    } catch (Exception exp) {
-      exp.printStackTrace();
-    }
-    return image;
+    display(src);
   }
 
   @Override
-  public void mouseClicked(MouseEvent e) {
-    // gd.setFullScreenWindow(null);
-    // fullscreen.dispose();
-    log.info("mouseClicked {}", e);
-    if (SwingUtilities.isRightMouseButton(e)) {
-      JFrame frame = (JFrame) e.getSource();
-      // TODO options on hiding or disposing or
-      // creating a popup menu etc..
-      frame.setVisible(false);
-      frame.dispose();
+  public void startService() {
+    super.startService();
+    if (GraphicsEnvironment.isHeadless()) {
+      log.warn("in headless mode - %s will not display images", getName());
+      return;
+    } else {
+
+      // ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+      // gs = ge.getScreenDevices();
+      // gd =
+      // GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
     }
+  }
+
+  private JFrame addFrame(String name, GraphicsDevice gd) {
+
+    if (displays.containsKey(name)) {
+      return displays.get(name);
+    }
+
+    JFrame frame = new JFrame(gd.getDefaultConfiguration());
+    frame.setName(name);
+    frame.setLayout(new BorderLayout());
+    JPanel panel = new JPanel(new BorderLayout());
+    panel.setName("panel");
+    JLabel label = new JLabel();
+    label.setName("label");
+
+    panel.add(label, BorderLayout.CENTER);
+    frame.getContentPane().setLayout(new BorderLayout());
+    frame.getContentPane().add(panel, BorderLayout.CENTER);
+    frame.setUndecorated(true);
+
+    displays.put(name, frame);
+    currentFrame = name;
+
+    return frame;
+  }
+
+  public String display(String name, String src) {
+    return display(name, src, null, null, null, null, null, null, null, null, null, null);
+  }
+
+  public String display(String src) {
+    return display(null, src, null, null, null, null, null, null, null, null, null, null);
+  }
+
+  public String display(String inName, String inSrc, Boolean inFullscreen, Boolean inAlwaysOnTop, String inBgColor, Float inOpacity, Integer inScreen, Float inScale, Integer x,
+      Integer y, Integer width, Integer height) {
+
+    ImageDisplayConfig c = (ImageDisplayConfig) config;
+
+    final ImageDisplay imageDisplay = this;
+
+    
+
+    if (!c.enabled) {
+      log.info("not currently enabled");
+      return null;
+    }
+
+    if (GraphicsEnvironment.isHeadless()) {
+      log.warn("in headless mode - %s will not display images", getName());
+      return null;
+    }
+
+    // use parameters or set from config defaults
+
+    // if (src == null) {
+    // error("cannot display null");
+    // return null;
+    // }
+
+    final String name = (inName != null) ? inName : inSrc;
+    final Boolean fullscreen = (inFullscreen != null) ? inFullscreen : c.fullscreen;
+    final Boolean alwaysOnTop = (inAlwaysOnTop != null) ? inAlwaysOnTop : c.alwaysOnTop;
+
+    final String src = (inSrc != null) ? inSrc : getResourceDir() + fs + "mrl_logo.jpg";
+
+    String bgTemp = (inBgColor != null) ? inBgColor : c.bgColor;
+
+    if (bgTemp != null && !bgTemp.startsWith("#")) {
+      bgTemp = "#" + bgTemp;
+    }
+
+    final String bgColor = bgTemp;
+    final Float opacity = (inOpacity != null) ? inOpacity : c.opacity;
+    final Integer screen = (inScreen != null) ? inScreen : c.screen;
+    final Float scale = (inScale != null) ? inScale : c.scale;
+
+
+
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+
+        try {
+          
+          
+          Display disp = new Display();
+          disp.x = x;
+          disp.y = y;
+          disp.width = width;
+          disp.height = height;
+          disp.scale = scale;
+          disp.opacity = opacity;
+          disp.screen = screen;
+          disp.bgColor = bgColor;
+          disp.alwaysOnTop = alwaysOnTop;
+          disp.fullscreen = fullscreen;
+          disp.src = src;
+          
+
+          if (gs == null) {
+            ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            gs = ge.getScreenDevices();
+          }
+
+          GraphicsDevice gd = null;
+          if (screen != null && screen <= gs.length) {
+            gd = gs[screen];
+          } else {
+            gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+          }
+
+          log.info("going to display on %s screen device", gd.getIDstring());
+
+          // label & title
+          JFrame frame = null;
+          JPanel panel = null;
+          JLabel label = null;
+
+          // dynamic display creation ... "or" not
+          if (displays.containsKey(name)) {
+            log.info("found pre existing display %s", name);
+            frame = displays.get(name);
+            panel = (JPanel) frame.getContentPane().getComponent(0);
+            label = (JLabel) panel.getComponent(0);
+            label.setIcon(new ImageIcon(ImageIO.read(new File(src))));
+            return;
+          } else {
+            frame = addFrame(name, gd);
+            panel = (JPanel) frame.getContentPane().getComponent(0);
+            label = (JLabel) panel.getComponent(0);
+          }
+
+          log.info("Loading image: ");
+          BufferedImage image = null;
+          if (src.startsWith("http://") || (src.startsWith("https://"))) {
+            String cacheFile = cacheDir + fs + src.replace("/", "_");
+            File check = new File(cacheFile);
+            if (check.exists()) {
+              image = ImageIO.read(new File(cacheFile));
+            } else {
+              log.info("from url...");
+              byte[] bytes = Http.get(src);
+              if (bytes != null) {
+                ByteArrayInputStream bios = new ByteArrayInputStream(bytes);
+                image = ImageIO.read(bios);
+                // save cache
+                FileIO.toFile(cacheFile, bytes);
+              }
+            }
+          } else {
+            log.info("from file...");
+            // DO I NEED THIS will new URL("data/blah.jpg") work ?
+            image = ImageIO.read(new File(src));
+            // image = ImageIO.read(new URL("file://src)); won't work requires
+            // absolute path :(
+          }
+
+          // TODO - make better / don't use setImageAutoSize (very bad
+          // algorithm)
+          if (SystemTray.isSupported()) {
+            log.info("SystemTray is supported");
+            SystemTray tray = SystemTray.getSystemTray();
+            // Dimension trayIconSize = tray.getTrayIconSize();
+
+            TrayIcon trayIcon = new TrayIcon(image);
+            trayIcon.setImageAutoSize(true);
+
+            tray.add(trayIcon);
+          }
+
+          label.setIcon(new ImageIcon(image));
+
+          if (bgColor != null) {
+            Color color = Color.decode(bgColor);
+            label.setOpaque(true);
+            label.setBackground(color);
+            frame.getContentPane().setBackground(color);
+          }
+
+          // frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+          if (alwaysOnTop != null && alwaysOnTop) {
+            frame.setAlwaysOnTop(true);
+          }
+
+          if (fullscreen != null && fullscreen) {
+
+            // auto scale image
+            int displayWidth = gd.getDisplayMode().getWidth();
+            int displayHeight = gd.getDisplayMode().getHeight();
+
+            float wRatio = (float) displayWidth / image.getWidth();
+            float hRatio = (float) displayHeight / image.getHeight();
+            float ratio = (wRatio > hRatio) ? hRatio : wRatio;
+
+            // if (wDelta) // autoscaling min no crop - autoscale max would crop
+            BufferedImage resized = resize(image, (int) (ratio * image.getWidth()), (int) (ratio * image.getHeight()));
+
+            label.setSize(resized.getWidth(), resized.getHeight());
+            label.setIcon(new ImageIcon(resized));
+
+            frame.setLocation(displayWidth / 2 - resized.getWidth() / 2, displayHeight / 2 - resized.getHeight() / 2);
+            // makes a difference on fullscreen
+            frame.pack();
+
+            // gd.setFullScreenWindow(frame);
+            // vs
+            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            // frame.setLocationRelativeTo(null);
+
+          } else {
+
+            int displayWidth = gd.getDisplayMode().getWidth();
+            int displayHeight = gd.getDisplayMode().getHeight();
+
+            if (scale != null) {
+              // FIXME - check this
+              image = resize(image, (int) (scale * image.getWidth()), (int) (scale * image.getHeight()));
+            } else if (width != null && height != null) {
+              image = resize(image, width, height);
+            }
+            
+            int imgWidth = (width != null) ? width : image.getWidth();
+            int imgHeight = (height != null) ? height : image.getHeight();
+
+            label.setSize(imgWidth, imgHeight);
+            label.setIcon(new ImageIcon(image));
+
+            int imgX = (x != null) ? x : displayWidth / 2 - image.getWidth() / 2;
+            int imgY = (y != null) ? y : displayHeight / 2 - image.getHeight() / 2;
+
+            frame.setLocation(imgX, imgY);
+
+            // makes a difference on fullscreen
+            frame.pack();
+
+            // If the component is null, or the
+            // GraphicsConfiguration associated with
+            // this component is null, the window is placed in the center of the
+            // screen.
+            // frame.setLocationRelativeTo(null);
+          }
+
+          if (opacity != null) {
+            label.setOpaque(false);
+            panel.setOpaque(false);
+            frame.setBackground(new Color(0, 0, 0, opacity));
+          }
+
+          frame.addMouseListener(imageDisplay);
+          frame.addMouseMotionListener(imageDisplay);
+          frame.setVisible(true);
+        } catch (Exception e) {
+          log.error("display threw", e);
+        }
+
+      }
+    });
+    return name;
+  }
+
+  BufferedImage resize(BufferedImage before, int width, int height) {
+
+    // Graphics2D g2d = bImage.createGraphics();
+    // g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION,
+    // RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY );
+
+    int w = before.getWidth();
+    int h = before.getHeight();
+    BufferedImage after = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    AffineTransform at = new AffineTransform();
+    at.scale((float) width / w, (float) height / h);
+    AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
+    after = scaleOp.filter(before, after);
+
+    return after;
   }
 
   @Override
   public void mouseDragged(MouseEvent e) {
-    log.debug("mouseDragged {}", e);
+    JFrame frame = (JFrame) e.getSource();
+    // log.debug("mouseDragged {}", frame.getName());
     if (absMouseX == null) {
       absMouseX = e.getXOnScreen();
       offsetX = e.getX();
@@ -473,120 +455,80 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
     absLastMouseY = absMouseY;
     absMouseX = e.getXOnScreen();
     absMouseY = e.getYOnScreen();
-    // log.info("current x,y ({},{}) - offsets ({},{}) abs last/new X {}, {} ",
-    // currentFrame.getX(), currentFrame.getY(), offsetX, offsetY,
-    // absLastMouseX, absMouseX);
-    // log.info("new pos X {}", currentFrame.getX() - offsetX - (absLastMouseX -
-    // absMouseX));
-    // currentFrame.setLocation(currentFrame.getX() - offsetX - (absLastMouseX -
-    // absMouseX), currentFrame.getY() - offsetY - (absLastMouseY - absMouseY));
-    currentFrame.setLocation(absMouseX - offsetX, absMouseY - offsetY);
-    currentFrame.repaint();
+    frame.setLocation(absMouseX - offsetX, absMouseY - offsetY);
+    frame.repaint();
   }
 
   @Override
-  public void mouseEntered(MouseEvent e) {
-    log.debug("mouseEntered {}", e);
+  public void mouseMoved(MouseEvent arg0) {
   }
 
   @Override
-  public void mouseExited(MouseEvent e) {
-    log.debug("mouseExited {}", e);
+  public void actionPerformed(ActionEvent arg0) {
   }
 
   @Override
-  public void mouseMoved(MouseEvent e) {
-    log.debug("mouseMoved {}", e);
-  }
-
-  Integer offsetX = null;
-  Integer offsetY = null;
-  Integer absMouseX = null;
-  Integer absMouseY = null;
-  Integer absLastMouseX = null;
-  Integer absLastMouseY = null;
-
-  @Override
-  public void mousePressed(MouseEvent e) {
-    log.debug("mousePressed {}", e);
-    currentFrame = (JFrame) e.getSource();
-    // relative to jframe
-    absMouseX = e.getXOnScreen();
-    offsetX = e.getX();
-    absMouseY = e.getYOnScreen();
-    offsetY = e.getY();
-
-    lastCursor = currentFrame.getCursor();
-    currentFrame.setCursor(new Cursor(Cursor.MOVE_CURSOR));
-
-  }
-
-  @Override
-  public void mouseReleased(MouseEvent e) {
-    if (lastCursor != null) {
-      currentFrame.setCursor(lastCursor);
+  public void mouseClicked(MouseEvent e) {
+    // log.info("mouseClicked {}", e);
+    if (SwingUtilities.isRightMouseButton(e)) {
+      JFrame frame = (JFrame) e.getSource();
+      // TODO options on hiding or disposing or
+      // creating a popup menu etc..
+      frame.setVisible(false);
+      frame.dispose();
     }
   }
 
-  private BufferedImage resizeImage(BufferedImage image, int scaledWidth, int scaledHeight) {
-    return resizeImage(image, scaledWidth, scaledHeight, null);
-  }
-
-  public void setAlwaysOnTop(boolean b) {
-    defaultAlwaysOnTop = b;
-  }
-
-  // FIXME - connect !!!
-  public void setColor(String string) {
-    // TODO Auto-generated method stub
-
-  }
-
-  public void setFullScreen(boolean b) {
-    defaultFullScreen = b;
-  }
-
-  public void setMultiFrame(boolean b) {
-    defaultMultiFrame = b;
-  }
-
-  public JLabel getLabel(String name) {
-    JFrame frame = frames.get(name);
-    JLabel label = (JLabel) frame.getContentPane().getComponent(0);
-    return label;
-  }
-
-  public ImageIcon getIcon(String name) {
-    JLabel label = getLabel(name);
-    ImageIcon icon = (ImageIcon) label.getIcon();
-    return icon;
+  @Override
+  public void mouseEntered(MouseEvent arg0) {
   }
 
   @Override
-  public void startService() {
-    super.startService();
-    if (GraphicsEnvironment.isHeadless()) {
-      log.warn("in headless mode - can not start awt components");
-      return;
-    } else {
-      gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+  public void mouseExited(MouseEvent arg0) {
+  }
+
+  @Override
+  public void mousePressed(MouseEvent arg0) {
+  }
+
+  @Override
+  public void mouseReleased(MouseEvent arg0) {
+  }
+
+  public void closeAll() {
+    for (JFrame frame : displays.values()) {
+      if (frame != null) {
+        frame.dispose();
+      }
     }
+    currentFrame = null;
+    displays.clear();
   }
 
-  public void stopService() {
-    super.stopService();
-    closeAll();
+  public String close() {
+    return close(currentFrame);
   }
 
-  public void attachSearchPublisher(SearchPublisher search) {
-    subscribe(search.getName(), "publishImage");
+  public String close(String src) {
+    JFrame frame = displays.get(src);
+    if (frame != null) {
+      frame.dispose();
+      displays.remove(src);
+      return src;
+    }
+    return null;
   }
 
-  public String onImage(String urlRef) throws MalformedURLException, AWTException {
-    // display(urlRef);
-    setAlwaysOnTop(true);
-    displayFadeIn(urlRef);
-    return urlRef;
+  public String displayFullScreen(String name, String src) {
+    return display(name, src, true, null, null, null, null, null, null, null, null, null);
+  }
+
+  public String displayFullScreen(String src) {
+    return display(null, src, true, null, null, null, null, null, null, null, null, null);
+  }
+
+  public String displayScaled(String src, float scale) {
+    return display(null, src, true, null, null, null, null, scale, null, null, null, null);
   }
 
   public static void main(String[] args) {
@@ -595,35 +537,70 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
     try {
 
       ImageDisplay display = (ImageDisplay) Runtime.start("display", "ImageDisplay");
-      // FIXME - get gifs working
-      display.setAlwaysOnTop(true);
-      // display.displayFadeIn("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/256px-Noto_Emoji_Pie_1f62c.svg.png");
+      // display.setFullScreen(true);
+      // display.setColor("FF0000");
 
-      display.displayFadeIn("https://www.ntchosting.com/images/png-compression-example.png");
+      display.displayFullScreen("data/Emoji/512px/U+1F47D.png");
+      display.display("data/Emoji/512px/U+1F47D.png");
 
       GoogleSearch search = (GoogleSearch) Runtime.start("google", "GoogleSearch");
-      List<String> images = search.imageSearch("dogs");
+      List<String> images = search.imageSearch("tiger");
       for (String img : images) {
-        display.displayFadeIn(img);
+        display.displayFullScreen(img);
+        display.display(img);
+        log.info("here");
       }
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
+      display.displayFullScreen("data/Emoji/512px/U+1F47D.png");
 
-      // display.display("https://media.giphy.com/media/snA2OVsg9sMRW/giphy.gif");
-      // display.display("http://www.pngmart.com/files/7/SSL-Download-PNG-Image.png");
+      display.display("data/Emoji/512px/U+1F47D.png");
+
+      display.display("data/Emoji/512px/U+1F47D.png");
+
       display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/256px-Noto_Emoji_Pie_1f62c.svg.png");
       display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/32px-Noto_Emoji_Pie_1f62c.svg.png");
-      // display.displayScaled("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/1024px-Noto_Emoji_Pie_1f62c.svg.png",
-      // 0.0278f);
-      // display.displayFullScreen("http://r.ddmcdn.com/w_830/s_f/o_1/cx_0/cy_220/cw_1255/ch_1255/APL/uploads/2014/11/dog-breed-selector-australian-shepherd.jpg");
-      // display.display2("C:\\Users\\grperry\\Desktop\\tenor.gif");
       display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/300px-Rotating_earth_%28large%29.gif");
       display.display("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRl_1J1bmqyQCzmm5rJxQIManVbQJ1xu1emnJHbRmEqOFlv2OteTA");
+
+      log.info("done");
     } catch (Exception e) {
       log.error("main threw", e);
     }
   }
+
+  @Override
+  public ServiceConfig apply(ServiceConfig c) {
+    ImageDisplayConfig config = (ImageDisplayConfig) c;
+    for (String displayName : config.displays.keySet()) {
+      close(displayName);
+      Display disp = config.displays.get(displayName);
+      display(displayName, null, null, null, null, null, null, null, disp.x, disp.y, disp.width, disp.height);
+    }
+    return config;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+
+    ImageDisplayConfig c = (ImageDisplayConfig) config;
+    c.displays.clear();
+
+    for (String d : displays.keySet()) {
+      Display display = new Display();
+      JFrame frame = displays.get(d);
+      display.x = frame.getX();
+      display.y = frame.getY();
+      display.width = frame.getWidth();
+      display.height = frame.getHeight();
+      c.displays.put(d, display);
+    }
+
+    return c;
+  }
+
+  @Override
+  public void onImage(ImageData img) {
+    display(img.name, img.src);
+  }
+
 }

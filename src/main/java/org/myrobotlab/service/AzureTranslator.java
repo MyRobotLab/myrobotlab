@@ -12,80 +12,108 @@ package org.myrobotlab.service;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-import io.github.firemaples.detect.Detect;
-import io.github.firemaples.language.Language;
-import io.github.firemaples.translate.Translate;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class AzureTranslator extends Service implements TextListener, TextPublisher {
 
   private static final long serialVersionUID = 1L;
 
-  String toLanguage = "it";
-  String fromLanguage = null;
+  /**
+   * key field name for security service
+   */
+  public final static String AZURE_TRANSLATOR_KEY = "azure.translator.key";
+
+  /**
+   * language to translate to
+   */
+  String to = "fr";
+
+  /**
+   * language to translate from
+   */
+  String from = "en";
+
+  /**
+   * location
+   */
+  String location = "eastus";
+
+  transient OkHttpClient client = new OkHttpClient();
+
   public final static Logger log = LoggerFactory.getLogger(AzureTranslator.class);
 
-  public static void main(String[] args) throws Exception {
-    LoggingFactory.init(Level.INFO);
-    try {
+  public String setTo(String to) {
+    this.to = to;
+    return to;
+  }
 
-      AzureTranslator translator = (AzureTranslator) Runtime.start("translator", "AzureTranslator");
-      Runtime.start("gui", "SwingGui");
-      log.info("Translator service instance: {}", translator);
+  public String setFrom(String from) {
+    this.from = from;
+    return from;
+  }
 
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
+  public String setLocation(String location) {
+    this.location = location;
+    return location;
   }
 
   public AzureTranslator(String n, String id) {
     super(n, id);
   }
 
-  public String translate(String toTranslate) throws Exception {
-    String translatedText = null;
-    if (fromLanguage == null) {
-      translatedText = Translate.execute(toTranslate, Language.AUTO_DETECT, Language.fromString(toLanguage));
-    } else {
-      translatedText = Translate.execute(toTranslate, Language.fromString(fromLanguage), Language.fromString(toLanguage));
+  public String translate(String toTranslate) {
+    return translate(toTranslate, from, to);
+  }
+
+  // This function performs a POST request.
+  public String translate(String toTranslate, String from, String to) {
+    try {
+      HttpUrl url = new HttpUrl.Builder().scheme("https").host("api.cognitive.microsofttranslator.com").addPathSegment("/translate").addQueryParameter("api-version", "3.0")
+          .addQueryParameter("from", from).addQueryParameter("to", to).build();
+
+      toTranslate = toTranslate.replace("\"", "");
+      MediaType mediaType = MediaType.parse("application/json");
+      RequestBody body = RequestBody.create(mediaType, "[{\"Text\": \" " + toTranslate + " \"}]");
+      Request request = new Request.Builder().url(url).post(body).addHeader("Ocp-Apim-Subscription-Key", getKey()).addHeader("Ocp-Apim-Subscription-Region", location)
+          .addHeader("Content-type", "application/json").build();
+      Response response = client.newCall(request).execute();
+      String ret = response.body().string();
+      
+      invoke("publishText", ret);
+
+      return ret;
+    } catch (Exception e) {
+      error(e);
     }
-    return translatedText;
+    return null;
   }
 
-  public Language detectLanguage(String toDetect) throws Exception {
-    Language detectedLanguage = Detect.execute(toDetect);
-    return detectedLanguage;
-  }
-
-  public void setCredentials(String clientSecret) {
-
-    // Translate.setKey(clientID);
-    Translate.setSubscriptionKey(clientSecret);
-    // Detect.setKey(clientID);
-    Detect.setSubscriptionKey(clientSecret);
-  }
-
-  public void fromLanguage(String from) {
-    fromLanguage = from;
-  }
-
-  public void toLanguage(String to) {
-    toLanguage = to;
+  // This function prettifies the json response.
+  public static String prettify(String json_text) {
+    JsonParser parser = new JsonParser();
+    JsonElement json = parser.parse(json_text);
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    return gson.toJson(json);
   }
 
   @Override
   public String publishText(String text) {
     return text;
-  }
-
-  @Override
-  public void addTextListener(TextListener service) {
-    addListener("publishText", service.getName(), "onText");
   }
 
   @Override
@@ -95,13 +123,7 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
 
   @Override
   public void onText(String text) {
-    String cleanText;
-    try {
-      cleanText = translate(text);
-      invoke("publishText", cleanText);
-    } catch (Exception e) {
-      log.error("Unable to translate text! {} {}", text, e);
-    }
+    translate(text);
   }
 
   @Override
@@ -118,4 +140,31 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
     addListener("publishText", name);
   }
 
+  public void setKey(String keyValue) {
+    Security security = Security.getInstance();
+    security.setKey(AZURE_TRANSLATOR_KEY, keyValue);
+    broadcastState();
+  }
+
+  public String getKey() {
+    Security security = Runtime.getSecurity();
+    return security.getKey(AZURE_TRANSLATOR_KEY);
+  }
+
+  public static void main(String[] args) throws Exception {
+    LoggingFactory.init(Level.INFO);
+    try {
+
+      AzureTranslator translator = (AzureTranslator) Runtime.start("translator", "AzureTranslator");
+      // translator.setKey("xxxxxxxxxxxxxxxxxxxxxxxx");
+      translator.setLocation("eastus");
+      translator.setFrom("en");
+      translator.setTo("fr");
+      String translated = translator.translate("Hey, I think I got it to work !!!");
+      log.info("translated {}", translated);
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
 }

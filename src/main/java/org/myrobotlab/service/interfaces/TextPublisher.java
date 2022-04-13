@@ -1,22 +1,48 @@
 package org.myrobotlab.service.interfaces;
 
-public interface TextPublisher {
+import org.myrobotlab.framework.interfaces.NameProvider;
 
-  public String getName();
-
-  public String publishText(String text);
-
-  @Deprecated /* use standard attachTextListener */
-  public void addTextListener(TextListener service);
-
-  public void attachTextListener(TextListener service);
+public interface TextPublisher extends NameProvider {
 
   /**
-   * the root for any other attachTextListener type
+   * These are all the methods that the utterance publisher should produce.
+   */
+  public static String[] publishMethods = new String[] { "publishText" };
+
+  /**
+   * Define the methods that an utterance publisher should have
+   * 
+   * @param text
+   * @return
+   */
+  public String publishText(String text);
+
+  /**
+   * Attach a text listener
+   * 
+   * @param service
+   */
+  default public void attachTextListener(TextListener service) {
+    attachTextListener(service.getName());
+  }
+
+  /**
+   * Default way to attach an utterance listener so implementing classes need
+   * not worry about these details.
    * 
    * @param name
-   *          - the name of the text listener
    */
-  public void attachTextListener(String name);
+  default public void attachTextListener(String name) {
+    for (String publishMethod : TextPublisher.publishMethods) {
+      addListener(publishMethod, name);
+    }
+  }
+
+  /**
+   * Add the addListener method to the interface all services implement this.
+   * @param topicMethod
+   * @param callbackName
+   */
+  public void addListener(String topicMethod, String callbackName);
 
 }

@@ -62,7 +62,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
   public void addState(String state) {
     State s = new State(state);
     if (states.size() == 0) {
-      currentStates.add(s.getId());
+      currentStates.add(s.getName());
     }
     states.add(s);
   }
@@ -117,7 +117,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
       for (Transition transition : transitions) { // FIXME - shouldn't have to
                                                   // iterate - just use a Map
                                                   // !!!
-        if (currentState.equals(transition.getSourceState().getId()) && // fsm
+        if (currentState.equals(transition.getSourceState().getName()) && // fsm
                                                                         // is in
                                                                         // the
         // right state as
@@ -148,7 +148,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
 
             // transition to target state
             State newState = transition.getTargetState();
-            currentStates.set(i, newState.getId());
+            currentStates.set(i, newState.getName());
             /*
              * currentState.setId(newState.getId());
              * currentState.setLastTransition(transition);
@@ -261,7 +261,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
     // log.info("state {}-({})-> {}",
     // state.getLastTransition().getSourceState(), state.getId(),
     // state.getLastTransition().getId(), state.getId());
-    log.info("handleState {} from {}", state.getId(), state.getLastTransition());
+    log.info("handleState {} from {}", state.getName(), state.getLastTransition());
     invoke("publishState", state);
   }
 
@@ -298,7 +298,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
     }
 
     this.states = states;
-    currentStates.add(initialState.getId());
+    currentStates.add(initialState.getName());
   }
   
   
@@ -309,12 +309,12 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
     FiniteStateMachineConfig c = (FiniteStateMachineConfig)config;
     c.states.clear();
     for (State s : states) {
-      c.states.add(s.getId());
+      c.states.add(s.getName());
     }
     for (Transition t : transitions) {
       FiniteStateMachineConfig.Transition transition = new FiniteStateMachineConfig.Transition();
-      transition.begin = t.getSourceState().getId();
-      transition.end = t.getTargetState().getId();
+      transition.begin = t.getSourceState().getName();
+      transition.end = t.getTargetState().getName();
       transition.event = t.getId();
       c.transitions.add(transition);
     }
