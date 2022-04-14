@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -16,6 +17,7 @@ import org.myrobotlab.net.Http;
 import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.SearchResults;
+import org.myrobotlab.service.interfaces.ImageListener;
 import org.myrobotlab.service.interfaces.ImagePublisher;
 import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.TextPublisher;
@@ -175,6 +177,11 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
   @Override
   public int setMaxImages(int cnt) {
     return cnt;
+  }
+  
+  @Override
+  public void attach(String serviceName) throws Exception {
+    attachImageListener(serviceName);
   }
 
 

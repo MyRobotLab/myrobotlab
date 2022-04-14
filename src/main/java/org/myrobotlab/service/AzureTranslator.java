@@ -9,6 +9,9 @@
 
 package org.myrobotlab.service;
 
+import java.util.List;
+
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -21,6 +24,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.google.gson.internal.LinkedTreeMap;
 
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
@@ -82,6 +86,7 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
 
   // This function performs a POST request.
   public String translate(String toTranslate, String from, String to) {
+    StringBuilder sb = new StringBuilder();
     try {
       HttpUrl url = new HttpUrl.Builder().scheme("https").host("api.cognitive.microsofttranslator.com").addPathSegment("/translate").addQueryParameter("api-version", "3.0")
           .addQueryParameter("from", from).addQueryParameter("to", to).build();
@@ -92,15 +97,20 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
       Request request = new Request.Builder().url(url).post(body).addHeader("Ocp-Apim-Subscription-Key", getKey()).addHeader("Ocp-Apim-Subscription-Region", location)
           .addHeader("Content-type", "application/json").build();
       Response response = client.newCall(request).execute();
-      String ret = response.body().string();
-      
-      invoke("publishText", ret);
-
-      return ret;
+      String resp = response.body().string();
+      // if ()
+      List<LinkedTreeMap> list = CodecUtils.fromJson(resp, List.class);
+      for (LinkedTreeMap t: list) {
+        List<LinkedTreeMap> translations = (List<LinkedTreeMap>)t.get("translations");
+        for (LinkedTreeMap trans : translations) {
+          sb.append(trans.get("text"));          
+        }
+      }
     } catch (Exception e) {
       error(e);
     }
-    return null;
+    invoke("publishText", sb.toString());
+    return sb.toString();
   }
 
   // This function prettifies the json response.
@@ -161,7 +171,14 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
       translator.setFrom("en");
       translator.setTo("fr");
       String translated = translator.translate("Hey, I think I got it to work !!!");
+      
+      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+
       log.info("translated {}", translated);
+      
+      
 
     } catch (Exception e) {
       log.error("main threw", e);
