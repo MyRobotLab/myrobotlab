@@ -1,141 +1,123 @@
-# AZURE TRANSLATOR DEMO
-# this demo is minimal
-# here you can see cooked things with voice change based on language 
-# https://github.com/MyRobotLab/inmoov/blob/develop/InMoov/services/G_Translator.py
+#########################################
+# AzureTranslator.py
+# description: language translation service
+# more info @: http://myrobotlab.org/service/AzureTranslator
+#########################################
+# you will need a azure translator setup 
+# this will guid you through the process
+# https://docs.microsoft.com/en-us/azure/cognitive-services/translator/quickstart-translator?tabs=csharp
 
+# we will connect the following services together
+python = runtime.start("python", "Python")
+brain = runtime.start("brain", "ProgramAB")
+out_translator = runtime.start("out_translator", "AzureTranslator")
+mouth = runtime.start("mouth", "MarySpeech")
 
-
-#voice service
-mouth=Runtime.createAndStart("mouth", "MarySpeech")
-#azure service
-AzureTranslator=Runtime.createAndStart("AzureTranslator", "AzureTranslator")
-
-AzureTranslator.setCredentials("YOUR_KEY_HERE_7da9defb-7d86-etc...")
-
-
-
-#voice output
-mouth.setVoice("cmu-bdl-hsmm")
+# lets set blocking on the speech
+mouth.setBlocking(False)
 mouth.setLanguage("en")
 
-supported_languages = { # as defined here: http://msdn.microsoft.com/en-us/library/hh456380.aspx
-  'da' : 'Danish',
-  'nl' : 'Dutch',
-  'en' : 'English',
-  'fr' : 'French',
-  'de' : 'German',
-  'it' : 'Italian',
-  'is' : 'Iceland',
-  'no' : 'Norwegian',
-  'pt' : 'Portuguese',
-  'ru' : 'Russian',
-  'es' : 'Spanish',
-  'sv' : 'Swedish',
-  'tr' : 'Turkish',
-  'ro' : 'Romanian',
-  'ja' : 'Japanese',
-  'pl' : 'Polish',
-}
-
-#Mary tts voice name map 
-male_languagesMary = { 
-  'da' : 'cmu-bdl-hsmm',#'dfki-pavoque-neutral-hsmm',
-  'nl' : 'cmu-bdl-hsmm',#'dfki-pavoque-neutral-hsmm',
-  'en' : 'cmu-bdl-hsmm',
-  'fr' : 'cmu-bdl-hsmm',
-  'de' : 'cmu-bdl-hsmm',#'dfki-pavoque-neutral-hsmm',
-  'it' : 'cmu-bdl-hsmm',#'istc-lucia-hsmm',
-  'is' : 'cmu-bdl-hsmm',#'dfki-pavoque-neutral-hsmm',
-  'no' : 'cmu-bdl-hsmm',#'dfki-pavoque-neutral-hsmm',
-  'pt' : 'cmu-bdl-hsmm',#'istc-lucia-hsmm',
-  'ru' : 'cmu-bdl-hsmm',
-  'es' : 'cmu-bdl-hsmm',#'istc-lucia-hsmm',
-  'sv' : 'cmu-bdl-hsmm',
-  'tr' : 'cmu-bdl-hsmm',#'dfki-ot-hsmm',
-  'ro' : 'cmu-bdl-hsmm',
-  'ja' : 'cmu-bdl-hsmm',
-  'pl' : 'cmu-bdl-hsmm',
-}
-
-#Translate to :
-#TODO ADD TRANSLATED KEYWORDS
-en_languages = {
-  'danish' : 'da',
-  'danois' : 'da',
-  'dutch' : 'nl',
-  'hollandais' : 'nl',
-  'english' : 'en',
-  'anglais' : 'en',
-  'french' : 'fr',
-  'français' : 'fr',
-  'german' : 'de',
-  'allemand' : 'de',
-  'italian' : 'it',
-  'italien' : 'it',
-  'norwegian' : 'no',
-  'norvegien' : 'no',
-  'Icelandic' : 'is',
-  'islandais' : 'is',
-  'spanish' : 'es',
-  'espagnol' : 'es',
-  'swedish' : 'sv',
-  'suédois' : 'sv',
-  'japonese' : 'ja',
-  'japonais' : 'ja',
-  'portuguese' : 'pt',
-  'portuguais' : 'pt',
-  'turkish' : 'tr',
-  'turk' : 'tr',
-  'russian' : 'ru',
-  'russe' : 'ru',
-  'romanian' : 'ro',
-  'roumain' : 'ro',  
-}
+# load your key here - only need to do it once
+# then remove this line completely to keep it secure
+# out_translator.setKey("xxxxxxxxxxxxxxxxxxxxxxxx")
+out_translator.setLocation("eastus")
+out_translator.setFrom("en")
+out_translator.setTo("en")
 
 
-#main function
-def translateText(text,language):
+# attach the mouth to the out_translator
+mouth.attach(out_translator)
 
-	#AzureTranslator.fromLanguage('en')
-	RealLang="0"
-	try:
-		RealLang=en_languages[language]
-	except: 
-		mouth.speakBlocking("I dont know this language, i am so sorry, or you made a mistake dude")
-	print RealLang
-	
-	try:
-		AzureTranslator.detectLanguage(text)
-	except:
-		mouth.speakBlocking("Check your azure credentials please ! I can't do all the work for you, i am just a robot")
-		RealLang="0"
-	
-	
-	if RealLang!="0":
-		AzureTranslator.toLanguage(RealLang)
-		sleep(0.5)
-		t_text=AzureTranslator.translate(text)   
-		
-		#small trick to prevent old api connection problems
-		i=0
-		while 'Cannot find an active Azure Market Place' in t_text and i<50: 
-			print(i,t_text)
-			i += 1 
-			sleep(0.2)
-			AzureTranslator.detectLanguage(text)
-			t_text=AzureTranslator.translate(text+" ")
+# set the mouth to an appropriate language or voice
+# mouth.setVoice('Pierre')
+
+def simple_translate(lang, text):
+    print('simple_translate ' + lang + ' ' + text)    
+    out_translator.setTo(lang)
+    # switching voice for mary speech can take a very long time :(
+    mouth.setLanguage(lang) 
+    voice_name = mouth.getVoice().name
+    translated = out_translator.translate('now in ' + mouth.getVoice().getLocale().getDisplayLanguage() + ', my name is ' + voice_name + ', ' + text)
+    print(voice_name + ' translated to ' + translated)
+    sleep(1)
+
+text = "Hello ! let's  make  some robots today !"
+# mouth.speak('i will translate ' + text)
+simple_translate('en', text)
+simple_translate('fr', text)
+simple_translate('it', text)
+simple_translate('de', text)
+
+# lets connect the out_translator to the brain
+# the brain will listen to keyboard input and when
+# it publishes a response, the response will be sent to the
+# out_translator
+brain.attachTextListener(out_translator)
+brain.startSession('GroG','Alice')
+
+# we'll set our mouth and out_translator to french
+out_translator.setTo("fr")
+mouth.setLanguage("fr")
+
+# setup a callback that gets the translated response
+def on_translated(text):
+    print('translated response is ' + text)
+    
+python.subscribe('out_translator', 'publishText', 'python', 'on_translated')   
+
+# now we can talk to the brain in english and it will respond in french
+english_response = brain.getResponse("hello, how are you?")
+print('non translated response is ' + str(english_response))
+
+english_response = brain.getResponse("what can you do?")
+print('non translated response is ' + str(english_response))
+
+english_response = brain.getResponse("what time is it?")
+print('non translated response is ' + str(english_response))
 
 
-		if 'Cannot find an active Azure Market Place' in t_text:
-			mouth.speakBlocking("There is a problem with azure, i am so sorry. Or maybe I am tired")
-		else:
-			# change voice to map language
-			mouth.setVoice(male_languagesMary[RealLang])  
-			mouth.speakBlocking(t_text)
-			# Go back original voice
-			mouth.setVoice("cmu-bdl-hsmm")
+# create a new translator for incoming text
+# we will detect language and translate to english
+in_translator = runtime.start("in_translator", "AzureTranslator")
+in_translator.setDetect(True)
+in_translator.setTo("en")
 
-# translateText(THE TEXT,TO LANGUAGE ( from #Translate to : )			
-translateText(u"Hola buenos dias","french")
-sleep(2)
-translateText(u"Hello ! and I can translate so many languages ! ","italian")
+# attach the incoming translator to the brain
+brain.attachTextPublisher(in_translator)
+
+# subscribe to language detection
+python.subscribe('in_translator', 'publishDetectedLanguage')
+
+# Dynamically switching languages based on detected input
+# when a language is detected we automatically
+# switch our voice and translate "to" setting
+# so if the bot is asked in french a question - it
+# should reply in french, if asked in italian it
+# will reply in italian, but all languages are
+# using the same english aiml
+def onDetectedLanguage(lang):
+    # detect incoming language and
+    # set appropriate response voice
+    print('setting mouth voice to ' + lang)
+    mouth.setLanguage(lang)
+    print('setting out_translator to ' + lang)
+    out_translator.setTo(lang)
+
+# now that we have an incoming translator detecting
+english_response = in_translator.translate("Où habitez-vous?")
+print('in translated response is ' + str(english_response))
+
+sleep(5)
+
+# now that we have an incoming translator detecting
+english_response = in_translator.translate("cosa sai fare?")
+print('in translated response is ' + str(english_response))
+
+sleep(5)
+
+# now that we have an incoming translator detecting
+english_response = in_translator.translate("what can you do?")
+print('in translated response is ' + str(english_response))
+
+
+
