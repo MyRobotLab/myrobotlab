@@ -38,11 +38,24 @@ public interface TextPublisher extends NameProvider {
     }
   }
 
+  default public void detachTextListener(TextListener service) {
+    attachTextListener(service.getName());
+  }
+
+  default public void detachTextListener(String name) {
+    for (String publishMethod : TextPublisher.publishMethods) {
+      removeListener(publishMethod, name);
+    }
+  }
+
   /**
    * Add the addListener method to the interface all services implement this.
+   * 
    * @param topicMethod
    * @param callbackName
    */
   public void addListener(String topicMethod, String callbackName);
+
+  public void removeListener(String topicMethod, String callbackName);
 
 }
