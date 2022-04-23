@@ -51,7 +51,7 @@ public class State {
    * 
    * @return state name
    */
-  public String getId() {
+  public String getName() {
     return id;
   }
 

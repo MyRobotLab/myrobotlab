@@ -162,7 +162,7 @@ public class Locale {
 
     for (int i = 0; i < ls.length; ++i) {
       java.util.Locale l = ls[i];
-      if (l.getCountry() == null) {
+      if (l.getLanguage() != null) {
         locales.put(l.getLanguage(), new Locale(l));
       }
     }

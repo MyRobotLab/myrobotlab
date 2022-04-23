@@ -166,9 +166,9 @@
 
 <!-- AzureTranslator begin -->
   <dependency>
-    <groupId>io.github.firemaples</groupId>
-    <artifactId>microsoft-translator-java-api</artifactId>
-    <version>0.8.3</version>
+    <groupId>com.squareup.okhttp3</groupId>
+    <artifactId>okhttp</artifactId>
+    <version>3.9.0</version>
     <scope>provided</scope>
   </dependency>
 <!-- AzureTranslator end -->
@@ -211,21 +211,6 @@
     <scope>provided</scope>
   </dependency>
 <!-- ChessGame end -->
-
-<!-- CleverBot begin -->
-  <dependency>
-    <groupId>ca.pjer</groupId>
-    <artifactId>chatter-bot-api</artifactId>
-    <version>2.0.1</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.squareup.okhttp3</groupId>
-    <artifactId>okhttp</artifactId>
-    <version>3.9.0</version>
-    <scope>provided</scope>
-  </dependency>
-<!-- CleverBot end -->
 
 <!-- Cron begin -->
   <dependency>
@@ -975,6 +960,7 @@
     <version>1.5.6</version>
     <scope>provided</scope>
   </dependency>
+<!-- Duplicate entry for org.bytedeco-javacpp-1.5.6 skipping -->
   <dependency>
     <groupId>com.github.sarxos</groupId>
     <artifactId>webcam-capture-driver-v4l4j</artifactId>

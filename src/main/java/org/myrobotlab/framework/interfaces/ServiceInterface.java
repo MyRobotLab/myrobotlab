@@ -15,11 +15,11 @@ import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.ServiceConfig;
-
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker,
-    StatePublisher, StatusPublisher, ServiceStatus, TaskManager, Attachable, Comparable<ServiceInterface> {
+public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher,
+    ServiceStatus, TaskManager, Attachable, Comparable<ServiceInterface> {
 
   // does this work ?
   public final static Logger log = LoggerFactory.getLogger(Service.class);
@@ -111,9 +111,10 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    *
    */
   public ServiceConfig getConfig();
-  
+
   /**
    * sets config - just before apply
+   * 
    * @param config
    */
   public void setConfig(ServiceConfig config);
@@ -173,5 +174,24 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
 
   public int getCreationOrder();
 
-  
+  /***
+   * When this service is started and has peers auto started peers are added on
+   * starting. Shared peers will be already started and not added to this set.
+   * When the service is released, peers are automatically released, except for
+   * the ones not started by this service.
+   * 
+   * @param actualPeerName
+   */
+  public void addAutoStartedPeer(String actualPeerName);
+
+  /**
+   * When this service is releasing it will only remove the peers it started
+   * this method allows that check.
+   * @param actualPeerName
+   * @return
+   */
+  public boolean autoStartedPeersContains(String actualPeerName);
+
+  public MetaData getMetaData();
+
 }

@@ -21,15 +21,17 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.GoogleSearchConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.SearchResults;
+import org.myrobotlab.service.interfaces.ImagePublisher;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class GoogleSearch extends Service implements TextPublisher, SearchPublisher, LocaleProvider {
+public class GoogleSearch extends Service implements ImagePublisher, TextPublisher, SearchPublisher, LocaleProvider {
 
   private static final long serialVersionUID = 1L;
 
@@ -224,7 +226,12 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
 
       for (String imageUrl : resultUrls) {
 
-        invoke("publishImage", imageUrl);
+        ImageData img = new ImageData();
+        img.name = searchText;
+        img.src = imageUrl;
+        img.source = getName();
+        
+        invoke("publishImage", img);
         // System.out.println(imageUrl);
       }
 
@@ -259,7 +266,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   }
 
   @Override
-  public String publishImage(String image) {
+  public ImageData publishImage(ImageData image) {
     return image;
   }
 
@@ -268,7 +275,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
     return images;
   }
 
-  @Override
+
   @Deprecated /* use standard attachTextListener */
   public void addTextListener(TextListener service) {
     attachTextListener(service.getName());

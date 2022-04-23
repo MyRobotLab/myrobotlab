@@ -49,6 +49,12 @@ public class WikiDataFetcher extends Service {
       query = "empire state building";
       desc = wdf.getDescription(query);
       log.info(query + " is " + desc);
+      
+      query = "Joe Biden";
+      desc = wdf.getDescription(query);
+      log.info(query + " is " + desc);
+      
+      
 
       query = "the pyramids";
       desc = wdf.getDescription(query);
@@ -67,6 +73,9 @@ public class WikiDataFetcher extends Service {
       log.info(getData("eiffel tower", "P2048"));
 
       log.info(getData("nothing to test", "P2048"));
+
+      Runtime.start("python", "Python");
+      Runtime.start("webgui", "WebGui");
 
     } catch (Exception e) {
       log.error("main threw", e);
