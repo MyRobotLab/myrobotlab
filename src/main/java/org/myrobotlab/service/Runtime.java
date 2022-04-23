@@ -445,6 +445,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
               o = f.get(config);
 
               if (o == null) {
+                // config "has" the field, just set to null at the moment
+                // peer actual name then will be default notation
+                if (parentName != null) {
+                  return String.format("%s.%s", parentName, peerKey);
+                }
                 log.warn("config has field named {} but it's null", peerKey);
                 return null;
               }
