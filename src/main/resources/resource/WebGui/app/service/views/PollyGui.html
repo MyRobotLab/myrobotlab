@@ -1,3 +1,4 @@
+<br/>
 <div class="row">
     <div class="col-md-6">
         <table>
@@ -18,6 +19,15 @@
                             </li>
                         </ul>
                     </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    ssml <toggle width="70" height="30" ng-model="service.config.ssml" ng-change="msg.setSsml(service.config.ssml)" on="ON" off="OFF"/>
+                </td>
+                <td>&nbsp;</td>
+                <td>
+                    auto detect ssml <toggle width="70" height="30" ng-model="service.config.autoDetectSsml" ng-change="msg.setSsml(service.config.autoDetectSsml)" on="ON" off="OFF"/>
                 </td>
             </tr>
             <tr>
