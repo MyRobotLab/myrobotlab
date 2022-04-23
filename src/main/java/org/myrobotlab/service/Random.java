@@ -39,7 +39,7 @@ public class Random extends Service {
    * which random messages will be sent
    *
    */
-  public class RandomMessage {
+  static public class RandomMessage {
     public String name;
     public String method;
     public Range[] data;
@@ -48,6 +48,9 @@ public class Random extends Service {
     public long maxIntervalMs;
     public long interval;
     public boolean oneShot = false;
+
+    public RandomMessage() {      
+    }
   }
 
   static public class Range {
@@ -159,7 +162,7 @@ public class Random extends Service {
     return ranges.toArray(r);
 
   }
-  
+
   /**
    * remove all random events
    */
@@ -270,7 +273,7 @@ public class Random extends Service {
   public RandomMessage remove(String name, String method) {
     return remove(String.format("%s.%s", name, method));
   }
-  
+
   public RandomMessage remove(String key) {
     purgeTask(key);
     return randomData.remove(key);
@@ -344,28 +347,28 @@ public class Random extends Service {
     randomData.clear();
     purgeTasks();
   }
-  
-  public Set<String> getMethodsFromName(String serviceName){
-    ServiceInterface si = Runtime.getService(serviceName);    
+
+  public Set<String> getMethodsFromName(String serviceName) {
+    ServiceInterface si = Runtime.getService(serviceName);
     if (si == null) {
       return new HashSet<String>();
     }
-    
+
     // FIXME FIXME FIXME - add filtering capability at the MethodCache
 
     return MethodCache.getInstance().getMethodNames(si.getClass().getCanonicalName());
   }
-  
-  public List<String> getServiceList(){
+
+  public List<String> getServiceList() {
     List<String> ret = new ArrayList<String>();
-    for (String name: Runtime.getServiceNames()) {
+    for (String name : Runtime.getServiceNames()) {
       ret.add(name);
     }
     return ret;
   }
-  
-  public List<MethodEntry> methodQuery(String serviceName, String methodName){
-    ServiceInterface si = Runtime.getService(serviceName);    
+
+  public List<MethodEntry> methodQuery(String serviceName, String methodName) {
+    ServiceInterface si = Runtime.getService(serviceName);
     if (si == null) {
       return new ArrayList<MethodEntry>();
     }
@@ -380,20 +383,23 @@ public class Random extends Service {
       Runtime.start("c1", "Clock");
 
       Random random = (Random) Runtime.start("random", "Random");
-      
+
       List<String> ret = random.getServiceList();
       Set<String> mi = random.getMethodsFromName("c1");
       List<MethodEntry> mes = MethodCache.getInstance().query("Clock", "setInterval");
-      
+
       random.addRandom(200, 1000, "i01", "setHeadSpeed", 8, 20, 8, 20, 8, 20);
       random.addRandom(200, 1000, "i01", "moveHead", 65, 115, 65, 115, 65, 115);
 
       // Python python = (Python) Runtime.start("python", "Python");
 
-      // random.addRandom(3000, 8000, "i01", "setLeftHandSpeed", 8, 25, 8, 25, 8, 25, 8, 25, 8, 25, 8, 25);
-      // random.addRandom(3000, 8000, "i01", "setRightHandSpeed", 8, 25, 8, 25, 8, 25, 8, 25, 8, 25, 8, 25);
+      // random.addRandom(3000, 8000, "i01", "setLeftHandSpeed", 8, 25, 8, 25,
+      // 8, 25, 8, 25, 8, 25, 8, 25);
+      // random.addRandom(3000, 8000, "i01", "setRightHandSpeed", 8, 25, 8, 25,
+      // 8, 25, 8, 25, 8, 25, 8, 25);
 
-      // random.addRandom(200, 1000, "i01", "moveHead", 65, 115, 65, 115, 65, 115);
+      // random.addRandom(200, 1000, "i01", "moveHead", 65, 115, 65, 115, 65,
+      // 115);
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
