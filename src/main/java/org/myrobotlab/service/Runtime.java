@@ -385,10 +385,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         }
 
         if (actualPeerName != null && !isStarted(actualPeerName)) {
-          startInternal(configName, actualPeerName, null); // type unknown at
-                                                           // the moment
+          // type unknown at
+          startInternal(configName, actualPeerName, null);
           autoStartedPeers.add(actualPeerName);
-
         }
       }
     }
@@ -398,6 +397,18 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     for (String peerName : autoStartedPeers) {
       si.addAutoStartedPeer(peerName);
     }
+    
+    // check set all peer state info here
+    MetaData metadata = si.getMetaData();
+    Map<String, ServiceReservation> srs = metadata.getPeers();
+    for (String peerKey : srs.keySet()) {
+      String actualName = getPeerName(peerKey, sc, srs, name);
+      if (Runtime.getService(actualName) != null) {
+        ServiceReservation sr = srs.get(peerKey);
+        sr.state = "STARTED";
+      }
+    }
+    
     sc.state = "CREATED";
     // FYI - there is a createService(name, null, null) but it requires a yml
     // file
@@ -1816,7 +1827,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return configList;
   }
 
-  @Deprecated /* use releaseAll(b,b) */
   public static void releaseAllServicesExcept(HashSet<String> saveMe) {
     log.info("releaseAllServicesExcept");
     List<ServiceInterface> list = Runtime.getServices();
@@ -1843,7 +1853,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     ServiceInterface si = Runtime.getService(name);
     if (si == null) {
-      log.info("%s already released", name);
+      log.info("{} already released", name);
       return;
     }
 
@@ -2985,7 +2995,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     DescribeResults results = new DescribeResults();
     results.setStatus(Status.success("Ahoy!"));
-    
+
     String fullname = null;
 
     try {
