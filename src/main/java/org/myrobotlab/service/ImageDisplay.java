@@ -1,28 +1,22 @@
 package org.myrobotlab.service;
 
-import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.SystemTray;
-import java.awt.TrayIcon;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.net.MalformedURLException;
-import java.util.HashMap;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
+//import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -30,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -38,9 +33,9 @@ import org.myrobotlab.net.Http;
 import org.myrobotlab.service.config.ImageDisplayConfig;
 import org.myrobotlab.service.config.ImageDisplayConfig.Display;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.interfaces.ImageListener;
+import org.myrobotlab.service.interfaces.ImagePublisher;
 import org.slf4j.Logger;
 
 public class ImageDisplay extends Service implements ImageListener, MouseListener, ActionListener, MouseMotionListener {
@@ -49,9 +44,9 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
 
   final static Logger log = LoggerFactory.getLogger(ImageDisplay.class);
 
-  String currentFrame = null;
+  String currentDisplay = null;
 
-  private transient Map<String, JFrame> displays = new HashMap<>();
+  // Map<String, ImageDisplayConfig.Display> displays = new HashMap<>();
 
   Integer offsetX = null;
   Integer offsetY = null;
@@ -102,8 +97,8 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
     c.enabled = false;
   }
 
-  @Deprecated /* opacity not supported this way */
-  public void exitFS() throws MalformedURLException, AWTException {
+  @Deprecated
+  public void exitFS() {
     exitFullScreen(null);
   }
 
@@ -111,36 +106,46 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
     exitFullScreen(null);
   }
 
-  public void exitFullScreen(String src) {
-    if (src == null) {
-      src = currentFrame;
+  public void exitFullScreen(String name) {
+    Map<String, ImageDisplayConfig.Display> displays = ((ImageDisplayConfig) config).displays;
+    if (name == null) {
+      name = currentDisplay;
     }
-    JFrame frame = displays.get(src);
-    if (frame != null) {
-      frame.dispose();
+    Display display = displays.get(name);
+    if (display != null) {
+      display.frame.dispose();
     }
 
-    displays.remove(src);
-    display(src);
+    displays.remove(name);
+    display(name);
   }
 
-  @Deprecated /* opacity not supported this way */
-  public void displayFullScreen(String src, float opacity) throws MalformedURLException, AWTException {
-    displayFullScreen(src);
+  public void displayFullScreen(String src, float opacity) {
+    Display display = getDisplay(null);
+    display.src = src;
+    display.fullscreen = true;
+    display.opacity = opacity;
+    displayInternal(display.name);
   }
 
-  @Deprecated /* opacity not supported this way */
-  public void display(String src, float opacity) throws MalformedURLException, AWTException {
-    display(src);
+  public void display(String src, float opacity) {
+    Display display = getDisplay(null);
+    display.src = src;
+    display.fullscreen = false;
+    display.opacity = opacity;
+    displayInternal(display.name);
   }
 
-  @Deprecated /* opacity not supported this way */
-  public void displayScaled(String src, float opacity, float scale) throws MalformedURLException, AWTException {
-    displayScaled(src, scale);
+  public void displayScaled(String src, float opacity, float scale) {
+    Display display = getDisplay(null);
+    display.src = src;
+    display.opacity = opacity;
+    display.scale = scale;
+    displayInternal(display.name);
   }
 
   @Deprecated /* no longer supported */
-  public void displayFadeIn(String src) throws MalformedURLException, AWTException {
+  public void displayFadeIn(String src) {
     display(src);
   }
 
@@ -150,250 +155,265 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
     if (GraphicsEnvironment.isHeadless()) {
       log.warn("in headless mode - %s will not display images", getName());
       return;
-    } else {
-
-      // ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-      // gs = ge.getScreenDevices();
-      // gd =
-      // GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
     }
   }
 
-  private JFrame addFrame(String name, GraphicsDevice gd) {
+  /**
+   * if the display currently get it, if it doesn't create one with default
+   * values specified in config
+   * 
+   * @return
+   */
+  private Display getDisplay(String name) {
 
-    if (displays.containsKey(name)) {
-      return displays.get(name);
+    if (name == null) {
+      name = "default";
     }
 
-    JFrame frame = new JFrame(gd.getDefaultConfiguration());
-    frame.setName(name);
-    frame.setLayout(new BorderLayout());
-    JPanel panel = new JPanel(new BorderLayout());
-    panel.setName("panel");
-    JLabel label = new JLabel();
-    label.setName("label");
+    ImageDisplayConfig c = (ImageDisplayConfig) config;
 
-    panel.add(label, BorderLayout.CENTER);
-    frame.getContentPane().setLayout(new BorderLayout());
-    frame.getContentPane().add(panel, BorderLayout.CENTER);
-    frame.setUndecorated(true);
+    if (c.displays.containsKey(name)) {
+      return c.displays.get(name);
+    }
 
-    displays.put(name, frame);
-    currentFrame = name;
+    // create a default display from config
+    Display display = new Display();
 
-    return frame;
+    display.name = name;
+    display.src = c.src;
+    display.x = c.x;
+    display.y = c.y;
+    display.width = c.width;
+    display.height = c.height;
+    
+
+    display.fullscreen = c.fullscreen;
+    display.alwaysOnTop = c.alwaysOnTop;
+    display.autoscaleExtendsMax = c.autoscaleExtendsMax;
+    display.bgColor = c.bgColor;
+    display.screen = c.screen;
+    display.opacity = c.opacity;
+    display.scale = c.scale;
+    display.visible = c.visible;
+
+    c.displays.put(display.name, display);
+
+    return display;
   }
 
   public String display(String name, String src) {
-    return display(name, src, null, null, null, null, null, null, null, null, null, null);
+    Display display = getDisplay(name);
+    display.src = src;
+    displayInternal(display.name);
+    return name;
   }
 
-  public String display(String src) {
-    return display(null, src, null, null, null, null, null, null, null, null, null, null);
+  public Display display(String src) {
+    Display display = getDisplay(null);
+    displayInternal(display.name);
+    return display;
   }
 
-  public String display(String inName, String inSrc, Boolean inFullscreen, Boolean inAlwaysOnTop, String inBgColor, Float inOpacity, Integer inScreen, Float inScale, Integer x,
-      Integer y, Integer width, Integer height) {
+  private String displayInternal(final String name) {
 
     ImageDisplayConfig c = (ImageDisplayConfig) config;
 
     final ImageDisplay imageDisplay = this;
 
-    
+    if (!c.displays.containsKey(name)) {
+      error("could not fine %s display", name);
+      return name;
+    }
 
     if (!c.enabled) {
       log.info("not currently enabled");
-      return null;
+      return name;
     }
 
     if (GraphicsEnvironment.isHeadless()) {
       log.warn("in headless mode - %s will not display images", getName());
-      return null;
+      return name;
     }
-
-    // use parameters or set from config defaults
-
-    // if (src == null) {
-    // error("cannot display null");
-    // return null;
-    // }
-
-    final String name = (inName != null) ? inName : inSrc;
-    final Boolean fullscreen = (inFullscreen != null) ? inFullscreen : c.fullscreen;
-    final Boolean alwaysOnTop = (inAlwaysOnTop != null) ? inAlwaysOnTop : c.alwaysOnTop;
-
-    final String src = (inSrc != null) ? inSrc : getResourceDir() + fs + "mrl_logo.jpg";
-
-    String bgTemp = (inBgColor != null) ? inBgColor : c.bgColor;
-
-    if (bgTemp != null && !bgTemp.startsWith("#")) {
-      bgTemp = "#" + bgTemp;
-    }
-
-    final String bgColor = bgTemp;
-    final Float opacity = (inOpacity != null) ? inOpacity : c.opacity;
-    final Integer screen = (inScreen != null) ? inScreen : c.screen;
-    final Float scale = (inScale != null) ? inScale : c.scale;
-
-
 
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
 
         try {
-          
-          
-          Display disp = new Display();
-          disp.x = x;
-          disp.y = y;
-          disp.width = width;
-          disp.height = height;
-          disp.scale = scale;
-          disp.opacity = opacity;
-          disp.screen = screen;
-          disp.bgColor = bgColor;
-          disp.alwaysOnTop = alwaysOnTop;
-          disp.fullscreen = fullscreen;
-          disp.src = src;
-          
 
           if (gs == null) {
             ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             gs = ge.getScreenDevices();
           }
 
+          Display display = c.displays.get(name);
+
           GraphicsDevice gd = null;
-          if (screen != null && screen <= gs.length) {
-            gd = gs[screen];
+          if (display.screen != null && display.screen <= gs.length) {
+            gd = gs[display.screen];
           } else {
             gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
           }
 
-          log.info("going to display on %s screen device", gd.getIDstring());
+          // creating the swing components if necessary
+          if (display.frame == null) {
+            display.frame = new JFrame(gd.getDefaultConfiguration());
+            display.frame.setName(name);
+            display.frame.setLayout(new BorderLayout());
+            display.panel = new JPanel(new BorderLayout());
+            display.panel.setName("panel");
+            display.label = new JLabel();
+            display.label.setName("label");
 
-          // label & title
-          JFrame frame = null;
-          JPanel panel = null;
-          JLabel label = null;
+            display.panel.add(display.label, BorderLayout.CENTER);
+            display.frame.getContentPane().setLayout(new BorderLayout());
+            display.frame.getContentPane().add(display.panel, BorderLayout.CENTER);
+            display.frame.setUndecorated(true);
 
-          // dynamic display creation ... "or" not
-          if (displays.containsKey(name)) {
-            log.info("found pre existing display %s", name);
-            frame = displays.get(name);
-            panel = (JPanel) frame.getContentPane().getComponent(0);
-            label = (JLabel) panel.getComponent(0);
-            label.setIcon(new ImageIcon(ImageIO.read(new File(src))));
-            return;
-          } else {
-            frame = addFrame(name, gd);
-            panel = (JPanel) frame.getContentPane().getComponent(0);
-            label = (JLabel) panel.getComponent(0);
           }
+
+          log.info("display screen {} displaying {}", gd.getIDstring(), display.name);
+
+          // FIXME - problematic for cache !!!
+          // display.label.setIcon(new ImageIcon(ImageIO.read(new File(display.src))));
 
           log.info("Loading image: ");
-          BufferedImage image = null;
-          if (src.startsWith("http://") || (src.startsWith("https://"))) {
-            String cacheFile = cacheDir + fs + src.replace("/", "_");
+//          BufferedImage image = null;
+//          if (display.src.startsWith("http://") || (display.src.startsWith("https://"))) {
+//            String cacheFile = cacheDir + fs + display.src.replace("/", "_");
+//            File check = new File(cacheFile);
+//            if (check.exists()) {
+//              image = ImageIO.read(new File(cacheFile));
+//            } else {
+//              log.info("from url...");
+//              byte[] bytes = Http.get(display.src);
+//              if (bytes != null) {
+//                ByteArrayInputStream bios = new ByteArrayInputStream(bytes);
+//                image = ImageIO.read(bios);
+//                // save cache
+//                FileIO.toFile(cacheFile, bytes);
+//              }
+//            }
+//          } else {
+//            log.info("from file...");
+//            image = ImageIO.read(new File(display.src));
+//          }
+          
+          // get final uri/url for file 
+          URL imageUrl = null;
+
+          if (display.src.startsWith("http://") || (display.src.startsWith("https://"))) {
+            String cacheFile = cacheDir + fs + display.src.replace("/", "_");
             File check = new File(cacheFile);
-            if (check.exists()) {
-              image = ImageIO.read(new File(cacheFile));
-            } else {
-              log.info("from url...");
-              byte[] bytes = Http.get(src);
+            if (!check.exists()) {
+              byte[] bytes = Http.get(display.src);
               if (bytes != null) {
-                ByteArrayInputStream bios = new ByteArrayInputStream(bytes);
-                image = ImageIO.read(bios);
                 // save cache
                 FileIO.toFile(cacheFile, bytes);
+              } else {
+                error("could not download %s", display.src);
+                return;
               }
             }
+            imageUrl = check.toURI().toURL();
           } else {
-            log.info("from file...");
-            // DO I NEED THIS will new URL("data/blah.jpg") work ?
-            image = ImageIO.read(new File(src));
-            // image = ImageIO.read(new URL("file://src)); won't work requires
-            // absolute path :(
+            File check = new File(display.src);
+            if (!check.exists()) {
+              error("%s does not exist", display.src);
+            }
+            imageUrl = new File(display.src).toURI().toURL();
           }
+
+
+          // Image icon = new ImageIcon(new URL("http://i.stack.imgur.com/KSnus.gif")).getImage();
+          // File file = new File("http://i.stack.imgur.com/KSnus.gif");
+//          ImageIcon replacement = new ImageIcon(file.toURI().toURL());
+          
+          
+//          display.img = image;
+//          
+//          if (image == null) {
+//            error("could not read image %s", display.src);
+//            return;
+//          }
+          
+          display.imageIcon = new ImageIcon(imageUrl);
+          display.label.setIcon(display.imageIcon);
+          // display.label.setIcon(new ImageIcon(image));
+
 
           // TODO - make better / don't use setImageAutoSize (very bad
           // algorithm)
-          if (SystemTray.isSupported()) {
-            log.info("SystemTray is supported");
-            SystemTray tray = SystemTray.getSystemTray();
-            // Dimension trayIconSize = tray.getTrayIconSize();
+//          if (SystemTray.isSupported()) {
+//            log.info("SystemTray is supported");
+//            SystemTray tray = SystemTray.getSystemTray();
+//            // Dimension trayIconSize = tray.getTrayIconSize();
+//
+//            TrayIcon trayIcon = new TrayIcon(image);
+//            trayIcon.setImageAutoSize(true);
+//
+//            tray.add(trayIcon);
+//          }
 
-            TrayIcon trayIcon = new TrayIcon(image);
-            trayIcon.setImageAutoSize(true);
-
-            tray.add(trayIcon);
+          if (display.bgColor != null) {
+            Color color = Color.decode(display.bgColor);
+            display.label.setOpaque(true);
+            display.label.setBackground(color);
+            display.frame.getContentPane().setBackground(Color.decode("#440000"));
           }
 
-          label.setIcon(new ImageIcon(image));
-
-          if (bgColor != null) {
-            Color color = Color.decode(bgColor);
-            label.setOpaque(true);
-            label.setBackground(color);
-            frame.getContentPane().setBackground(color);
+          if (display.alwaysOnTop != null && display.alwaysOnTop) {
+            display.frame.setAlwaysOnTop(true);
           }
 
-          // frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-          if (alwaysOnTop != null && alwaysOnTop) {
-            frame.setAlwaysOnTop(true);
-          }
-
-          if (fullscreen != null && fullscreen) {
+          if (display.fullscreen != null && display.fullscreen) {
 
             // auto scale image
             int displayWidth = gd.getDisplayMode().getWidth();
             int displayHeight = gd.getDisplayMode().getHeight();
 
-            float wRatio = (float) displayWidth / image.getWidth();
-            float hRatio = (float) displayHeight / image.getHeight();
-            float ratio = (wRatio > hRatio) ? hRatio : wRatio;
+            float wRatio = (float) displayWidth / display.imageIcon.getIconWidth();
+            float hRatio = (float) displayHeight / display.imageIcon.getIconHeight();
+            float ratio = (c.autoscaleExtendsMax) ? (wRatio < hRatio) ? hRatio : wRatio : (wRatio > hRatio) ? hRatio : wRatio;
+            
+            int resizedWidth = (int)(ratio * display.imageIcon.getIconWidth());
+            int resizedHeight = (int)(ratio * display.imageIcon.getIconHeight());
+            
+            Image image = display.imageIcon.getImage().getScaledInstance(resizedWidth, resizedHeight, Image.SCALE_DEFAULT);
+            display.imageIcon.setImage(image);
 
-            // if (wDelta) // autoscaling min no crop - autoscale max would crop
-            BufferedImage resized = resize(image, (int) (ratio * image.getWidth()), (int) (ratio * image.getHeight()));
-
-            label.setSize(resized.getWidth(), resized.getHeight());
-            label.setIcon(new ImageIcon(resized));
-
-            frame.setLocation(displayWidth / 2 - resized.getWidth() / 2, displayHeight / 2 - resized.getHeight() / 2);
+            // center it
+            display.frame.setLocation(displayWidth / 2 - resizedWidth / 2, displayHeight / 2 - resizedHeight / 2);
             // makes a difference on fullscreen
-            frame.pack();
+            display.frame.pack();
 
             // gd.setFullScreenWindow(frame);
             // vs
-            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            display.frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
             // frame.setLocationRelativeTo(null);
 
-          } else {
+          } else if ((display.width != null && display.width != null) || display.scale != null){
+            
+            // FIXME - "IF" SCALED THEN SETICON(ICON) !!!
 
-            int displayWidth = gd.getDisplayMode().getWidth();
-            int displayHeight = gd.getDisplayMode().getHeight();
+            Integer resizedWidth = null;
+            Integer resizedHeight = null;
 
-            if (scale != null) {
+            if (display.scale != null) {
               // FIXME - check this
-              image = resize(image, (int) (scale * image.getWidth()), (int) (scale * image.getHeight()));
-            } else if (width != null && height != null) {
-              image = resize(image, width, height);
+              resizedWidth = (int)(display.scale * display.imageIcon.getIconWidth());
+              resizedHeight = (int)(display.scale * display.imageIcon.getIconHeight());
+
+            } else if (display.width != null && display.height != null) {
+              resizedWidth = display.width;
+              resizedHeight = display.height;
             }
             
-            int imgWidth = (width != null) ? width : image.getWidth();
-            int imgHeight = (height != null) ? height : image.getHeight();
+            display.imageIcon.getImage().getScaledInstance(resizedWidth, resizedHeight, Image.SCALE_DEFAULT);
 
-            label.setSize(imgWidth, imgHeight);
-            label.setIcon(new ImageIcon(image));
+            // display.label.setSize(imgWidth, imgHeight);
+//             display.label.setIcon(new display.imageIcon(image));
 
-            int imgX = (x != null) ? x : displayWidth / 2 - image.getWidth() / 2;
-            int imgY = (y != null) ? y : displayHeight / 2 - image.getHeight() / 2;
-
-            frame.setLocation(imgX, imgY);
-
-            // makes a difference on fullscreen
-            frame.pack();
 
             // If the component is null, or the
             // GraphicsConfiguration associated with
@@ -401,16 +421,28 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
             // screen.
             // frame.setLocationRelativeTo(null);
           }
+          
+          int displayWidth = gd.getDisplayMode().getWidth();
+          int displayHeight = gd.getDisplayMode().getHeight();
 
-          if (opacity != null) {
-            label.setOpaque(false);
-            panel.setOpaque(false);
-            frame.setBackground(new Color(0, 0, 0, opacity));
+          int imgX = (display.x != null) ? display.x : displayWidth / 2 - display.imageIcon.getIconWidth() / 2;
+          int imgY = (display.y != null) ? display.y : displayHeight / 2 - display.imageIcon.getIconHeight() / 2;
+
+          display.frame.setLocation(imgX, imgY);
+
+          // makes a difference on fullscreen
+          display.frame.pack();
+          
+
+          if (display.opacity != null) {
+            display.label.setOpaque(false);
+            display.panel.setOpaque(false);
+            display.frame.setBackground(new Color(0, 0, 0, display.opacity));
           }
 
-          frame.addMouseListener(imageDisplay);
-          frame.addMouseMotionListener(imageDisplay);
-          frame.setVisible(true);
+          display.frame.addMouseListener(imageDisplay);
+          display.frame.addMouseMotionListener(imageDisplay);
+          display.frame.setVisible(true);
         } catch (Exception e) {
           log.error("display threw", e);
         }
@@ -420,22 +452,18 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
     return name;
   }
 
-  BufferedImage resize(BufferedImage before, int width, int height) {
-
-    // Graphics2D g2d = bImage.createGraphics();
-    // g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION,
-    // RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY );
-
-    int w = before.getWidth();
-    int h = before.getHeight();
-    BufferedImage after = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-    AffineTransform at = new AffineTransform();
-    at.scale((float) width / w, (float) height / h);
-    AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
-    after = scaleOp.filter(before, after);
-
-    return after;
-  }
+//  private BufferedImage resize(BufferedImage before, int width, int height) {
+//
+//    int w = before.getWidth();
+//    int h = before.getHeight();
+//    BufferedImage after = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+//    AffineTransform at = new AffineTransform();
+//    at.scale((float) width / w, (float) height / h);
+//    AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
+//    after = scaleOp.filter(before, after);
+//
+//    return after;
+//  }
 
   @Override
   public void mouseDragged(MouseEvent e) {
@@ -496,76 +524,59 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
   }
 
   public void closeAll() {
-    for (JFrame frame : displays.values()) {
-      if (frame != null) {
-        frame.dispose();
+    Map<String, ImageDisplayConfig.Display> displays = ((ImageDisplayConfig) config).displays;
+
+    for (Display display : displays.values()) {
+      if (display != null) {
+        display.frame.dispose();
       }
     }
-    currentFrame = null;
+    currentDisplay = null;
     displays.clear();
   }
 
   public String close() {
-    return close(currentFrame);
+    return close(currentDisplay);
   }
 
-  public String close(String src) {
-    JFrame frame = displays.get(src);
-    if (frame != null) {
-      frame.dispose();
-      displays.remove(src);
-      return src;
+  public String close(String name) {
+    Map<String, ImageDisplayConfig.Display> displays = ((ImageDisplayConfig) config).displays;
+
+    Display display = displays.get(name);
+    if (display != null) {
+      if (display.frame != null) {
+        display.frame.dispose();
+        display.frame = null;
+      }
+      // displays.remove(src);
+      return name;
     }
     return null;
   }
 
   public String displayFullScreen(String name, String src) {
-    return display(name, src, true, null, null, null, null, null, null, null, null, null);
+    Display display = getDisplay(name);
+    display.name = name;
+    display.src = src;
+    display.fullscreen = true;
+    displayInternal(display.name);
+    return display.name;
   }
 
   public String displayFullScreen(String src) {
-    return display(null, src, true, null, null, null, null, null, null, null, null, null);
+    Display display = getDisplay(null);
+    display.src = src;
+    display.fullscreen = true;
+    displayInternal(display.name);
+    return display.name;
   }
 
   public String displayScaled(String src, float scale) {
-    return display(null, src, true, null, null, null, null, scale, null, null, null, null);
-  }
-
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-
-    try {
-
-      ImageDisplay display = (ImageDisplay) Runtime.start("display", "ImageDisplay");
-      // display.setFullScreen(true);
-      // display.setColor("FF0000");
-
-      display.displayFullScreen("data/Emoji/512px/U+1F47D.png");
-      display.display("data/Emoji/512px/U+1F47D.png");
-
-      GoogleSearch search = (GoogleSearch) Runtime.start("google", "GoogleSearch");
-      List<String> images = search.imageSearch("tiger");
-      for (String img : images) {
-        display.displayFullScreen(img);
-        display.display(img);
-        log.info("here");
-      }
-
-      display.displayFullScreen("data/Emoji/512px/U+1F47D.png");
-
-      display.display("data/Emoji/512px/U+1F47D.png");
-
-      display.display("data/Emoji/512px/U+1F47D.png");
-
-      display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/256px-Noto_Emoji_Pie_1f62c.svg.png");
-      display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/32px-Noto_Emoji_Pie_1f62c.svg.png");
-      display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/300px-Rotating_earth_%28large%29.gif");
-      display.display("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRl_1J1bmqyQCzmm5rJxQIManVbQJ1xu1emnJHbRmEqOFlv2OteTA");
-
-      log.info("done");
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
+    Display display = getDisplay(null);
+    display.src = src;
+    display.scale = scale;
+    displayInternal(display.name);
+    return display.name;
   }
 
   @Override
@@ -573,34 +584,189 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
     ImageDisplayConfig config = (ImageDisplayConfig) c;
     for (String displayName : config.displays.keySet()) {
       close(displayName);
-      Display disp = config.displays.get(displayName);
-      display(displayName, null, null, null, null, null, null, null, disp.x, disp.y, disp.width, disp.height);
+      displayInternal(displayName);
     }
     return config;
   }
 
   @Override
   public ServiceConfig getConfig() {
-
     ImageDisplayConfig c = (ImageDisplayConfig) config;
-    c.displays.clear();
-
-    for (String d : displays.keySet()) {
-      Display display = new Display();
-      JFrame frame = displays.get(d);
-      display.x = frame.getX();
-      display.y = frame.getY();
-      display.width = frame.getWidth();
-      display.height = frame.getHeight();
-      c.displays.put(d, display);
-    }
-
+    // don't need to do anything
     return c;
   }
 
   @Override
   public void onImage(ImageData img) {
     display(img.name, img.src);
+  }
+
+  public void resize(String name, int width, int height) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        Map<String, ImageDisplayConfig.Display> displays = ((ImageDisplayConfig) config).displays;
+
+        if (displays.containsKey(name)) {
+          Display display = displays.get(name);          
+          Image image = display.imageIcon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT);
+          display.imageIcon.setImage(image);
+          display.panel.remove(display.label);
+          display.label = new JLabel();
+          display.label.setIcon(display.imageIcon);
+          display.panel.setPreferredSize(new Dimension(width, height));
+          display.panel.add(display.label, BorderLayout.CENTER);
+          display.frame.setPreferredSize(new Dimension(width, height));
+          display.frame.setSize(new Dimension(width, height));
+          display.frame.setExtendedState(JFrame.NORMAL);
+          display.frame.pack();
+          display.width = width;
+          display.height = height;
+        }
+      }
+    });
+  }
+
+  public void move(String name, int x, int y) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        Map<String, ImageDisplayConfig.Display> displays = ((ImageDisplayConfig) config).displays;
+
+        if (displays.containsKey(name)) {
+          Display display = displays.get(name);
+          display.frame.setLocation(x, y);
+          display.x = x;
+          display.y = y;
+        }
+      }
+    });
+  }
+
+  public void setVisible(String name, boolean b) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        Map<String, ImageDisplayConfig.Display> displays = ((ImageDisplayConfig) config).displays;
+
+        if (displays.containsKey(name)) {
+          Display display = displays.get(name);
+          display.frame.setVisible(b);
+        }
+      }
+    });
+  }
+
+  public void attach(Attachable attachable) {
+    if (attachable instanceof ImagePublisher) {
+      attachImagePublisher(attachable.getName());
+    } else {
+      error("don't know how to attach a %s", attachable.getName());
+    }
+  }
+
+  public static void main(String[] args) {
+    LoggingFactory.init(Level.INFO);
+
+    try {
+
+      // Runtime.setConfig("default");
+      ImageDisplay display = (ImageDisplay) Runtime.start("display", "ImageDisplay");
+
+//       boolean done = true;
+//       if (done) {
+//       return;
+//       }
+      
+      
+      display.displayFullScreen("earth", "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/300px-Rotating_earth_%28large%29.gif");
+      display.resize("earth", 300, 300);
+      display.displayFullScreen("robot", "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/FANUC_6-axis_welding_robots.jpg/1280px-FANUC_6-axis_welding_robots.jpg");
+      Service.sleep(1000);
+
+
+//      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+//      webgui.autoStartBrowser(false);
+//      webgui.startService();
+      // display.setFullScreen(true);
+      // display.setColor("FF0000");
+      display.display("monkeys", "https://upload.wikimedia.org/wikipedia/commons/e/e8/Gabriel_Cornelius_von_Max%2C_1840-1915%2C_Monkeys_as_Judges_of_Art%2C_1889.jpg");
+
+
+      display.displayFullScreen("robot", "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/FANUC_6-axis_welding_robots.jpg/1280px-FANUC_6-axis_welding_robots.jpg");
+      display.display("inmoov", "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/InMoov_Wheel_1.jpg/220px-InMoov_Wheel_1.jpg");
+      display.display("mrl", "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/VirtualInMoov.jpg/220px-VirtualInMoov.jpg");
+
+      for (int i = 0; i < 100; ++i) {
+        display.move("monkeys", 20 + i, 20 + i);
+        Service.sleep(50);
+      }
+
+      display.resize("monkeys", 200, 200);
+      Service.sleep(1000);
+      display.move("monkeys", 20, 20);
+      Service.sleep(1000);
+      display.close("monkeys");
+      Service.sleep(1000);
+      display.close("monkeys");
+      display.close("robot");
+
+      int x0 = 500, y0 = 500;
+      int r = 300;
+      double x, y = 0;
+
+      for (double t = 0; t < 4 * Math.PI; t += 1) {
+        x = r * Math.cos(t) + x0;
+        y = r * Math.sin(t) + y0;
+        display.move("inmoov", (int) x, (int) y);
+        Service.sleep(100);
+      }
+
+      // get images - display
+      GoogleSearch google = (GoogleSearch) Runtime.start("google", "GoogleSearch");
+      List<String> images = google.imageSearch("monkey");
+      for (String img : images) {
+        display.displayFullScreen(img);
+        // display.display(img);
+        Service.sleep(1000);
+      }
+
+      // attach pub/sub display style
+      display.setFullScreen(true);
+      display.setAutoscaleExtendsMax(true);
+      Wikipedia wikipedia = (Wikipedia) Runtime.start("wikipedia", "Wikipedia");
+      // wikipedia.attach(display);
+      display.attach(wikipedia);
+      images = wikipedia.imageSearch("bear");
+
+      display.setAutoscaleExtendsMax(false);
+
+      display.displayFullScreen("https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Noto_Emoji_Pie_1f4e2.svg/512px-Noto_Emoji_Pie_1f4e2.svg.png?20190227024729");
+
+      display.display("data/Emoji/512px/U+1F47D.png");
+
+      display.display("data/Emoji/512px/U+1F47D.png");
+
+      display.display("https://raw.githubusercontent.com/googlefonts/noto-emoji/main/png/512/emoji_u1f62c.png");
+      display.setAutoscaleExtendsMax(true);
+      Service.sleep(1000);
+      display.displayFullScreen("https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Noto_Emoji_Pie_1f4e2.svg/512px-Noto_Emoji_Pie_1f4e2.svg.png?20190227024729");
+      Service.sleep(1000);
+      display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Noto_Emoji_Pie_1f995.svg/512px-Noto_Emoji_Pie_1f995.svg.png?20190227143252");
+      Service.sleep(1000);
+
+      display.save();
+
+      log.info("done");
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
+  public boolean setAutoscaleExtendsMax(boolean b) {
+    ImageDisplayConfig c = (ImageDisplayConfig) config;
+    c.autoscaleExtendsMax = b;
+    return b;
   }
 
 }

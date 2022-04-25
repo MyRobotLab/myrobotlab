@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -16,9 +17,11 @@ import org.myrobotlab.net.Http;
 import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.SearchResults;
+import org.myrobotlab.service.interfaces.ImageListener;
 import org.myrobotlab.service.interfaces.ImagePublisher;
 import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.TextPublisher;
+import org.myrobotlab.service.interfaces.UtteranceListener;
 import org.slf4j.Logger;
 
 import com.google.gson.internal.LinkedHashTreeMap;
@@ -57,6 +60,14 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
 
   public Wikipedia(String n, String id) {
     super(n, id);
+  }
+  
+  public void attach(Attachable attachable) {
+    if (attachable instanceof ImageListener) {
+      attachImageListener(attachable.getName());
+    } else {
+      error("don't know how to attach a %s", attachable.getName());
+    }
   }
 
 
