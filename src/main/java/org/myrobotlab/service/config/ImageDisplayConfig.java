@@ -1,5 +1,6 @@
 package org.myrobotlab.service.config;
 
+import java.awt.GraphicsDevice;
 import java.util.HashMap;
 
 import javax.swing.ImageIcon;
@@ -16,7 +17,7 @@ public class ImageDisplayConfig extends ServiceConfig {
     transient public JPanel panel;
     transient public JLabel label;
     transient public ImageIcon imageIcon;
-
+    transient public GraphicsDevice gd;
     transient public String name;
 
     public String src = null;
@@ -45,6 +46,7 @@ public class ImageDisplayConfig extends ServiceConfig {
     public Float scale = null;
     
     public Boolean visible = null;
+    
     
   }
 
