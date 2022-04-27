@@ -1,10 +1,12 @@
 package org.myrobotlab.service;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -44,17 +46,17 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
   private static final long serialVersionUID = 1L;
 
   Integer absLastMouseX = null;
-  
+
   Integer absLastMouseY = null;
-  
+
   Integer absMouseX = null;
-  
+
   Integer absMouseY = null;
-  
+
   String cacheDir = getDataDir() + fs + "cache";
-  
+
   String currentDisplay = null;
-  
+
   transient GraphicsEnvironment ge = null;
 
   transient GraphicsDevice[] gs = null;
@@ -104,6 +106,7 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
     Display display = displays.get(name);
     if (display != null) {
       if (display.frame != null) {
+        display.frame.setVisible(false);
         display.frame.dispose();
         display.frame = null;
       }
@@ -117,12 +120,15 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
     Map<String, ImageDisplayConfig.Display> displays = ((ImageDisplayConfig) config).displays;
 
     for (Display display : displays.values()) {
-      if (display != null) {
-        display.frame.dispose();
-      }
+      close(display.name);
     }
     currentDisplay = null;
     displays.clear();
+  }
+
+  public void reset() {
+    closeAll();
+    config = new ImageDisplayConfig();
   }
 
   public void disable() {
@@ -227,6 +233,11 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
 
           // get final uri/url for file
           URL imageUrl = null;
+          
+          if (display.src == null) {
+            error("could not display null image");
+            display.src = getResourceDir() + fs + "mrl_logo.jpg";
+          }
 
           if (display.src.startsWith("http://") || (display.src.startsWith("https://"))) {
             String cacheFile = cacheDir + fs + display.src.replace("/", "_");
@@ -238,7 +249,7 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
                 FileIO.toFile(cacheFile, bytes);
               } else {
                 error("could not download %s", display.src);
-                return;
+                check = new File(getResourceDir() + fs + "mrl_logo.jpg");
               }
             }
             imageUrl = check.toURI().toURL();
@@ -246,21 +257,10 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
             File check = new File(display.src);
             if (!check.exists()) {
               error("%s does not exist", display.src);
+              display.src = getResourceDir() + fs + "mrl_logo.jpg";
             }
             imageUrl = new File(display.src).toURI().toURL();
           }
-
-          // Image icon = new ImageIcon(new
-          // URL("http://i.stack.imgur.com/KSnus.gif")).getImage();
-          // File file = new File("http://i.stack.imgur.com/KSnus.gif");
-          // ImageIcon replacement = new ImageIcon(file.toURI().toURL());
-
-          // display.img = image;
-          //
-          // if (image == null) {
-          // error("could not read image %s", display.src);
-          // return;
-          // }
 
           display.imageIcon = new ImageIcon(imageUrl);
           display.label.setIcon(display.imageIcon);
@@ -268,22 +268,24 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
 
           // TODO - make better / don't use setImageAutoSize (very bad
           // algorithm)
-          // if (SystemTray.isSupported()) {
-          // log.info("SystemTray is supported");
-          // SystemTray tray = SystemTray.getSystemTray();
-          // // Dimension trayIconSize = tray.getTrayIconSize();
-          //
-          // TrayIcon trayIcon = new TrayIcon(image);
-          // trayIcon.setImageAutoSize(true);
-          //
-          // tray.add(trayIcon);
-          // }
+          if (SystemTray.isSupported()) {
+            log.info("SystemTray is supported");
+            SystemTray tray = SystemTray.getSystemTray();
+            // Dimension trayIconSize = tray.getTrayIconSize();
+
+            TrayIcon trayIcon = new TrayIcon(display.imageIcon.getImage());
+            trayIcon.setImageAutoSize(true);
+
+            tray.add(trayIcon);
+          }
 
           if (display.bgColor != null) {
             Color color = Color.decode(display.bgColor);
             display.label.setOpaque(true);
             display.label.setBackground(color);
-            display.frame.getContentPane().setBackground(Color.decode("#440000"));
+            display.panel.setBackground(color); // <- this one is the important
+                                                // one
+            display.frame.getContentPane().setBackground(color);
           }
 
           if (display.alwaysOnTop != null && display.alwaysOnTop) {
@@ -332,15 +334,6 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
             }
 
             display.imageIcon.getImage().getScaledInstance(resizedWidth, resizedHeight, Image.SCALE_DEFAULT);
-
-            // display.label.setSize(imgWidth, imgHeight);
-            // display.label.setIcon(new display.imageIcon(image));
-
-            // If the component is null, or the
-            // GraphicsConfiguration associated with
-            // this component is null, the window is placed in the center of the
-            // screen.
-            // frame.setLocationRelativeTo(null);
           }
 
           int imgX = (display.x != null) ? display.x : displayWidth / 2 - display.imageIcon.getIconWidth() / 2;
@@ -354,11 +347,13 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
           if (display.opacity != null) {
             display.label.setOpaque(false);
             display.panel.setOpaque(false);
+            display.frame.setOpacity(display.opacity);
             display.frame.setBackground(new Color(0, 0, 0, display.opacity));
           }
 
           display.frame.setVisible(true);
         } catch (Exception e) {
+          error("display error %s", e.getMessage());
           log.error("display threw", e);
         }
 
@@ -389,6 +384,7 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
     c.enabled = true;
   }
 
+  // no longer interested in managing BufferedImages :(
   // private BufferedImage resize(BufferedImage before, int width, int height) {
   //
   // int w = before.getWidth();
@@ -490,15 +486,21 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
 
     display.frame = new JFrame(display.gd.getDefaultConfiguration());
     display.frame.setName(display.name);
-    display.frame.setLayout(new BorderLayout());
-    display.panel = new JPanel(new BorderLayout());
+
+    // display.panel = new JPanel(new BorderLayout());
+    display.panel = new JPanel();
+    FlowLayout fl = (FlowLayout) display.panel.getLayout();
+    fl.setVgap(0);
+    fl.setHgap(0);
+
     display.panel.setName("panel");
     display.label = new JLabel();
     display.label.setName("label");
 
-    display.panel.add(display.label, BorderLayout.CENTER);
-    display.frame.getContentPane().setLayout(new BorderLayout());
-    display.frame.getContentPane().add(display.panel, BorderLayout.CENTER);
+    // display.panel.add(display.label, BorderLayout.CENTER);
+    display.panel.add(display.label);
+
+    display.frame.getContentPane().add(display.panel);
     display.frame.setUndecorated(true);
 
     display.frame.addMouseListener(self);
@@ -623,8 +625,8 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
 
   public void setDimension(Integer width, Integer height) {
     ImageDisplayConfig c = (ImageDisplayConfig) config;
-    c.width = width;    
-    c.height = height;    
+    c.width = width;
+    c.height = height;
   }
 
   public void setFullScreen(boolean b) {
@@ -634,10 +636,10 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
 
   public void setLocation(Integer x, Integer y) {
     ImageDisplayConfig c = (ImageDisplayConfig) config;
-    c.x = x;    
-    c.y = y;    
+    c.x = x;
+    c.y = y;
   }
-  
+
   public Integer setScreen(Integer screen) {
     ImageDisplayConfig c = (ImageDisplayConfig) config;
     c.screen = screen;
@@ -671,14 +673,14 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
       return;
     }
   }
-  
+
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
     try {
 
       // Runtime.setConfig("default");
-      
+
       // your all purpose image display service
       ImageDisplay display = (ImageDisplay) Runtime.start("display", "ImageDisplay");
 
@@ -686,20 +688,20 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
       // setting these are setting default values
       // so that any new display is created they will
       // have the following properties automatically set accordingly
-      // 
-      
+      //
+
       // the display will always be on top
       // display.setAlwaysOnTop(true);
-      
+
       // when a picture is told to go fullscreen
       // and is not the same ratio as the screen dimensions
       // this tells whether to scale and extend to the min
-      // or max extension 
+      // or max extension
       // display.setAutoscaleExtendsMax(true);
-      
+
       // if there is a background while fullscreen - set the color rgb
       // display.setColor("#000000");
-      
+
       // if true will resize image (depending on setAutoscaleExtendsMax)
       // display.setFullScreen(false);
 
@@ -707,31 +709,35 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
       // display.setScreen(0);
 
       // set the default location for images to display
-      // null values will mean image will be positioned in the center of the screen
+      // null values will mean image will be positioned in the center of the
+      // screen
       // display.setLocation(null, null);
 
       // set the default dimensions for images to display
       // null values will be the dimensions of the original image
       // display.setDimension(null, null);
-            
-      // most basic display - an image file, can be relative or absolute file path
-      // displays are named - if you don't name them - they're name will be "default"
+
+      // most basic display - an image file, can be relative or absolute file
+      // path
+      // displays are named - if you don't name them - they're name will be
+      // "default"
       // this creates a display named default and display a snake.jpg
       display.display("snake.jpg");
       sleep(1000);
-      
+
       // this creates a new display called "beetle" and loads it with beetle.jpg
       // "default" display is still snake.jpg
-      display.display("beetle","beetle.jpg");
+      display.display("beetle", "beetle.jpg");
       sleep(1000);
-      
+
       // the image display service can also display images from the web
-      // just supply the full url - they can be named as well - this one replaces the snake image
+      // just supply the full url - they can be named as well - this one
+      // replaces the snake image
       // since a name was not specified - its loaded into "default"
       display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/InMoov_Wheel_1.jpg/220px-InMoov_Wheel_1.jpg");
       sleep(1000);
 
-      // animated gifs can be displayed as well - this is the earth 
+      // animated gifs can be displayed as well - this is the earth
       // in fullscreen mode
       display.displayFullScreen("earth", "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/300px-Rotating_earth_%28large%29.gif");
       sleep(1000);
@@ -739,10 +745,10 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
       // we can resize a picture
       display.resize("earth", 600, 600);
       sleep(1000);
-      
+
       // and re-position it
       display.move("earth", 800, 800);
-            
+
       // make another picture go fullscreen
       display.displayFullScreen("robot", "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/FANUC_6-axis_welding_robots.jpg/1280px-FANUC_6-axis_welding_robots.jpg");
       sleep(1000);
@@ -766,14 +772,14 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
 
       display.resize("monkeys", 200, 200);
       sleep(1000);
-      
+
       display.move("monkeys", 20, 20);
       sleep(1000);
-      
+
       // now we can close some of the displays
       display.close("monkeys");
       sleep(1000);
-      
+
       display.close("robot");
 
       int x0 = 500, y0 = 500;
@@ -813,7 +819,7 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
       display.setAutoscaleExtendsMax(false);
       display.displayFullScreen("https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Noto_Emoji_Pie_1f4e2.svg/512px-Noto_Emoji_Pie_1f4e2.svg.png?20190227024729");
       sleep(1000);
-      
+
       display.display("data/Emoji/512px/U+1F47D.png");
       sleep(1000);
 
@@ -831,5 +837,5 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
       log.error("main threw", e);
     }
   }
-  
+
 }
