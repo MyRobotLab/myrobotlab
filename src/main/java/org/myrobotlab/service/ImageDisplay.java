@@ -219,6 +219,10 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
           }
 
           Display display = c.displays.get(name);
+          if (display == null) {
+            error("null display for %s", name);
+            return;
+          }
 
           // creating the swing components if necessary
           if (display.frame == null) {
