@@ -10,6 +10,7 @@
                     <toggle class="miniBTN" ng-model="service.nativeViewer" ng-change="msg.setNativeViewer(service.nativeViewer)" on="" off="" size="btn-lg"/>
                     <label ng-show="service.nativeViewer">&nbsp;&nbsp;&nbsp;&nbsp;Viewer AlwaysOnTop</label>
                     <toggle ng-show="service.nativeViewer" class="miniBTN" title="invert the motor" ng-model="service.alwaysOnTop" ng-change="msg.setAlwaysOnTop(service.alwaysOnTop)" on="" off="" size="btn-lg"/>
+                    <button class="btn btn-default" title="this will close all displays" ng-click="msg.closeAll()">close all</button>                   
                 </td>
             </tr>
         </div>    
