@@ -9,7 +9,7 @@ import org.myrobotlab.service.data.SearchResults;
 public interface SearchPublisher extends TextPublisher, LocaleProvider {
   
   // These are all the methods that the image publisher should produce.
-  public static String[] publishMethods = new String[] {"publishResults", "publishSearch", "publishSearchs"};
+  public static String[] publishMethods = new String[] {"publishResults", "publishImage", "publishImages"};
 
   SearchResults search(String searchText) throws IOException;
 
