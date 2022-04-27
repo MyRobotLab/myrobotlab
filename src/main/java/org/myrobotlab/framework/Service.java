@@ -2483,4 +2483,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return MetaData.getDefault(getName(), this.getClass().getSimpleName());
   }
 
+  public void apply() {
+    ServiceConfig sc = Runtime.getInstance().readServiceConfig(null, name);
+    apply(sc);
+  }
+
+  
 }

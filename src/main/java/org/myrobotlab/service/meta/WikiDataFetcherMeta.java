@@ -22,13 +22,7 @@ public class WikiDataFetcherMeta extends MetaData {
     // force using httpClient service httpcomponents version
     exclude("org.apache.httpcomponents", "httpcore");
     exclude("org.apache.httpcomponents", "httpclient");
-    addPeer("httpClient", "HttpClient", "httpClient");
-    // force using same jackson version as polly
-    /*
-     * exclude("com.fasterxml.jackson.core", "jackson-core");
-     * exclude("com.fasterxml.jackson.core", "jackson-databind");
-     * exclude("com.fasterxml.jackson.core", "jackson-annotations");
-     */
+
     addDependency("com.fasterxml.jackson.core", "jackson-core", "2.10.1");
     addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.10.5.1");
     addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.10.1");
