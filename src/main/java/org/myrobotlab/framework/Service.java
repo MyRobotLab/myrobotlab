@@ -2492,4 +2492,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public boolean autoStartedPeersContains(String actualPeerName) {
     return autoStartedPeers.contains(actualPeerName);
   }
+  public void apply() {
+    ServiceConfig sc = Runtime.getInstance().readServiceConfig(null, name);
+    apply(sc);
+  }
+
+  
 }

@@ -63,8 +63,6 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameGrabber.ImageMode;
 import org.bytedeco.javacv.FrameRecorder;
-import org.bytedeco.javacv.Java2DFrameConverter;
-import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenKinectFrameGrabber;
 /*
 <pre>
@@ -94,7 +92,6 @@ import org.bytedeco.opencv.opencv_core.CvRect;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.CvSize;
 import org.bytedeco.opencv.opencv_core.IplImage;
-import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.codec.CodecUtils;
@@ -104,6 +101,7 @@ import org.myrobotlab.document.Classification;
 import org.myrobotlab.document.Classifications;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.image.ColoredPoint;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.image.WebImage;
@@ -128,6 +126,9 @@ import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
 import org.myrobotlab.service.config.OpenCVConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.data.ImageData;
+import org.myrobotlab.service.interfaces.ImageListener;
+import org.myrobotlab.service.interfaces.ImagePublisher;
 // import org.myrobotlab.swing.VideoWidget2;
 import org.slf4j.Logger;
 
@@ -148,7 +149,7 @@ import com.github.axet.vget.info.VideoInfo;
  * Audet : https://github.com/bytedeco/javacv
  * 
  */
-public class OpenCV extends AbstractComputerVision {
+public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   int vpId = 0;
 
@@ -1671,6 +1672,16 @@ public class OpenCV extends AbstractComputerVision {
     }
     return null;
   }
+  
+  public ImageData saveImage() {
+    String src = recordFrame();
+    ImageData image = new ImageData();
+    image.source = getName();
+    image.name = src;
+    image.src = src;
+    invoke("publishImage", image);
+    return image;
+  }
 
   /**
    * @param name
@@ -2201,5 +2212,19 @@ public class OpenCV extends AbstractComputerVision {
     }
 
   }
+
+  @Override
+  public ImageData publishImage(ImageData image) {
+    return image;
+  }
+  
+  public void attach(Attachable attachable) {
+    if (attachable instanceof ImageListener) {
+      attachImageListener(attachable.getName());
+    } else {
+      error("don't know how to attach a %s", attachable.getName());
+    }
+  }
+
 
 }

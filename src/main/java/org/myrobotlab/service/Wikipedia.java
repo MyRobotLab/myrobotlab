@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -43,7 +43,7 @@ import com.google.gson.internal.LinkedHashTreeMap;
  * 
  * @author GroG
  * 
- * FIXME - make it multi-lingual - there must be a way
+ *         FIXME - make it multi-lingual - there must be a way
  *
  */
 public class Wikipedia extends Service implements SearchPublisher, ImagePublisher, TextPublisher {
@@ -61,6 +61,13 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
     super(n, id);
   }
 
+  public void attach(Attachable attachable) {
+    if (attachable instanceof ImageListener) {
+      attachImageListener(attachable.getName());
+    } else {
+      error("don't know how to attach a %s", attachable.getName());
+    }
+  }
 
   @Override
   public Map<String, Locale> getLocales() {
@@ -116,8 +123,7 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
     SearchResults results = new SearchResults(searchText);
 
     try {
-      
-      
+
       if (publishText == null) {
         publishText = true;
       }
@@ -165,12 +171,12 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
         error("no response for %s", searchText);
       }
       invoke("publishResults", results);
-            
+
     } catch (Exception e) {
       results.errorText = e.getMessage();
       error(e);
     }
-        
+
     return results;
   }
 
@@ -178,12 +184,11 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
   public int setMaxImages(int cnt) {
     return cnt;
   }
-  
+
   @Override
   public void attach(String serviceName) throws Exception {
     attachImageListener(serviceName);
   }
-
 
   public static void main(String[] args) {
     try {
@@ -207,5 +212,5 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
       log.error("main threw", e);
     }
   }
-  
+
 }
