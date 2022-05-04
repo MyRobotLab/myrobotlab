@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.awt.event.TextListener;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -10,6 +11,7 @@ import java.util.Map;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -187,7 +189,15 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
 
   @Override
   public void attach(String serviceName) throws Exception {
-    attachImageListener(serviceName);
+    ServiceInterface si = Runtime.getService(serviceName);
+
+    if (si instanceof TextListener) {
+      attachTextListener(serviceName);
+    } else if (si instanceof ImageListener) {
+      attachImageListener(serviceName);
+    } else {
+      error("%s doesn't know how to attach to %s", getName(), serviceName);
+    }
   }
 
   public static void main(String[] args) {
