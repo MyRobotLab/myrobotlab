@@ -63,13 +63,6 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
     super(n, id);
   }
 
-  public void attach(Attachable attachable) {
-    if (attachable instanceof ImageListener) {
-      attachImageListener(attachable.getName());
-    } else {
-      error("don't know how to attach a %s", attachable.getName());
-    }
-  }
 
   @Override
   public Map<String, Locale> getLocales() {
@@ -209,7 +202,8 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
       Runtime.start("python", "Python");
       Wikipedia wiki = (Wikipedia) Runtime.start("wiki", "Wikipedia");
       ImageDisplay display = (ImageDisplay) Runtime.start("display", "ImageDisplay");
-      wiki.attachImageListener(display);
+      // wiki.attachImageListener(display);
+      wiki.attach("display");
       wiki.search("elon musk");
 
       wiki.search("gorilla");
