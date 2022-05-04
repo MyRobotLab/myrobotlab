@@ -178,7 +178,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       return locale.getLanguage();
     }
 
-    public Locale getLocal() {
+    public Locale getLocale() {
       return locale;
     }
 
@@ -1125,7 +1125,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
     return c;
   }
-
+  
   @Override
   public void attachSpeechControl(SpeechSynthesisControl control) {
     // TODO Auto-generated method stub

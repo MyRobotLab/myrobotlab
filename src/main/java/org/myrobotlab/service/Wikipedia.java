@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.awt.event.TextListener;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -10,6 +11,7 @@ import java.util.Map;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -21,7 +23,6 @@ import org.myrobotlab.service.interfaces.ImageListener;
 import org.myrobotlab.service.interfaces.ImagePublisher;
 import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.TextPublisher;
-import org.myrobotlab.service.interfaces.UtteranceListener;
 import org.slf4j.Logger;
 
 import com.google.gson.internal.LinkedHashTreeMap;
@@ -44,7 +45,7 @@ import com.google.gson.internal.LinkedHashTreeMap;
  * 
  * @author GroG
  * 
- * FIXME - make it multi-lingual - there must be a way
+ *         FIXME - make it multi-lingual - there must be a way
  *
  */
 public class Wikipedia extends Service implements SearchPublisher, ImagePublisher, TextPublisher {
@@ -60,14 +61,6 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
 
   public Wikipedia(String n, String id) {
     super(n, id);
-  }
-  
-  public void attach(Attachable attachable) {
-    if (attachable instanceof ImageListener) {
-      attachImageListener(attachable.getName());
-    } else {
-      error("don't know how to attach a %s", attachable.getName());
-    }
   }
 
 
@@ -125,8 +118,7 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
     SearchResults results = new SearchResults(searchText);
 
     try {
-      
-      
+
       if (publishText == null) {
         publishText = true;
       }
@@ -174,12 +166,12 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
         error("no response for %s", searchText);
       }
       invoke("publishResults", results);
-            
+
     } catch (Exception e) {
       results.errorText = e.getMessage();
       error(e);
     }
-        
+
     return results;
   }
 
@@ -188,6 +180,18 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
     return cnt;
   }
 
+  @Override
+  public void attach(String serviceName) throws Exception {
+    ServiceInterface si = Runtime.getService(serviceName);
+
+    if (si instanceof TextListener) {
+      attachTextListener(serviceName);
+    } else if (si instanceof ImageListener) {
+      attachImageListener(serviceName);
+    } else {
+      error("%s doesn't know how to attach to %s", getName(), serviceName);
+    }
+  }
 
   public static void main(String[] args) {
     try {
@@ -198,7 +202,8 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
       Runtime.start("python", "Python");
       Wikipedia wiki = (Wikipedia) Runtime.start("wiki", "Wikipedia");
       ImageDisplay display = (ImageDisplay) Runtime.start("display", "ImageDisplay");
-      wiki.attachImageListener(display);
+      // wiki.attachImageListener(display);
+      wiki.attach("display");
       wiki.search("elon musk");
 
       wiki.search("gorilla");
@@ -211,5 +216,5 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
       log.error("main threw", e);
     }
   }
-  
+
 }
