@@ -11,11 +11,11 @@ WebGui.startService()
 
 # Then start the browsers and show the WebkitSpeechRecognition service named webkitspeechrecognition
 WebGui.startBrowser("http://localhost:8888/#/service/webkitspeechrecognition")
-webkitspeechrecognition = Runtime.start("webkitspeechrecognition","WebkitSpeechRecognition")
+webkitspeechrecognition = runtime.start("webkitspeechrecognition","WebkitSpeechRecognition")
 webkitspeechrecognition.setcurrentWebkitLanguage("en-US")
 
 # start mouth
-marySpeech = Runtime.start("marySpeech", "MarySpeech")
+marySpeech = runtime.start("marySpeech", "MarySpeech")
 
 # shutdown microphone if robot speaking
 webkitspeechrecognition.addMouth(marySpeech)
