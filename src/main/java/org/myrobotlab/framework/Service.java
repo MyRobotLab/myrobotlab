@@ -125,7 +125,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * full class name used in serialization
    */
   protected String serviceClass;
-  
+
   Set<String> autoStartedPeers = new HashSet<>();
 
   private boolean isRunning = false;
@@ -916,7 +916,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     if (lastError != null) {
       le = lastError.toString();
     }
-    
+
     lastError = null;
     return le;
   }
@@ -1260,7 +1260,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
             if (runtime.isLocal(msg)) {
               ServiceInterface si = Runtime.getService(listener.callbackName);
               if (si == null) {
-                log.info("{} cannot callback to listener {} does not exist for {} ", getName(), listener.callbackName, listener.callbackMethod);
+                log.debug("{} cannot callback to listener {} does not exist for {} ", getName(), listener.callbackName, listener.callbackMethod);
               } else {
                 Method m = cache.getMethod(si.getClass(), listener.callbackMethod, retobj);
                 if (m == null) {
@@ -1358,7 +1358,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     this.config = config;
   }
 
-  @Deprecated /* this is being used wrongly - Runtime knows how to load services don't - what is desired here is apply()*/
+  @Deprecated /*
+               * this is being used wrongly - Runtime knows how to load services
+               * don't - what is desired here is apply()
+               */
   public ServiceConfig load() throws IOException {
     Plan plan = Runtime.load(getName(), getClass().getSimpleName());
     return plan.get(getName());
@@ -1529,12 +1532,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     send(name, method, (Object[]) null);
   }
 
-  @Deprecated /* peers are dead */
   public void sendToPeer(String peerName, String method) {
-    send(String.format("%s.%s", name, peerName), method, (Object[]) null);
+    send(getPeerName(peerName), method);
   }
 
-  @Deprecated /* peers are dead */
   public Object invokePeer(String peerName, String method) {
     return invokeOn(false, getPeer(peerName), method, (Object[]) null);
   }
@@ -1545,7 +1546,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public void sendToPeer(String peerName, String method, Object... data) {
-    send(String.format("%s.%s", name, peerName), method, data);
+    send(getPeerName(peerName), method, data);
   }
 
   public void send(String name, String method, Object... data) {
@@ -1737,14 +1738,35 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     this.thisThread = thisThread;
   }
 
-  public ServiceInterface startPeer(String reservedKey) {
-    String actualName = getPeerName(reservedKey);
-    return Runtime.start(actualName, null);
+  public ServiceInterface startPeer(String peerKey) {
+    String actualName = getPeerName(peerKey);
+    ServiceInterface si = Runtime.start(actualName, null);
+    if (si != null) {
+      ServiceReservation sr = serviceType.getPeer(peerKey);
+      if (sr != null) {
+        sr.state = "STARTED";
+        sr.actualName = actualName;
+        sr.type = si.getSimpleName();
+        if (si != null) {
+          CodecUtils.setField(this, peerKey, si);
+        }
+      }
+      invoke("publishPeerStarted", peerKey);
+      broadcastState();
+    }
+    return si;
   }
 
-  public void releasePeer(String reservedKey) {
-    String actualName = getPeerName(reservedKey);
+  public void releasePeer(String peerKey) {
+    String actualName = getPeerName(peerKey);
     Runtime.release(actualName);
+    ServiceReservation sr = serviceType.getPeer(peerKey);
+    if (sr != null) {
+      sr.actualName = actualName;
+      sr.state = "RELEASED";
+      invoke("publishPeerReleased", peerKey);
+    }
+    broadcastState();
   }
 
   @Override
@@ -2492,6 +2514,19 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public boolean autoStartedPeersContains(String actualPeerName) {
     return autoStartedPeers.contains(actualPeerName);
   }
+
+  public MetaData getMetaData() {
+    return serviceType;
+  }
+
+  public String publishPeerStarted(String peerKey) {
+    return peerKey;
+  }
+
+  public String publishPeerReleased(String peerKey) {
+    return peerKey;
+  }
+
   public void apply() {
     ServiceConfig sc = Runtime.getInstance().readServiceConfig(null, name);
     apply(sc);

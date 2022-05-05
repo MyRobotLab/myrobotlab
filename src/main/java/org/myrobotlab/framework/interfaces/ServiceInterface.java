@@ -15,7 +15,7 @@ import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.ServiceConfig;
-
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher,
@@ -191,5 +191,7 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    * @return
    */
   public boolean autoStartedPeersContains(String actualPeerName);
+
+  public MetaData getMetaData();
 
 }

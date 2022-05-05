@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -750,6 +751,18 @@ public class CodecUtils {
     return (ServiceConfig)yaml.load(data);
   }
 
+  public static void setField(Object o, String field, Object value) {
+    try {
+      // TODO - handle all types :P
+     Field f =  o.getClass().getDeclaredField(field);
+     f.setAccessible(true);
+     f.set(o, value);
+    } catch (Exception e) {
+      /** don't care - if its not there don't set it */
+    }
+  }
+  
+  
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
@@ -770,4 +783,7 @@ public class CodecUtils {
     }
   }
 
+  
+  
+  
 }
