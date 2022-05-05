@@ -190,29 +190,7 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
 
   private String displayInternal(final String name) {
 
-  ) {
     ImageDisplayConfig c = (ImageDisplayConfig) config;
-    Display display = new Display();
-    display.name = (name != null) ? name : src;
-    String stockImg = (c.src != null) ? c.src : getResourceDir() + fs + "mrl_logo.jpg";
-    display.src = (src != null) ? src : stockImg;
-    display.x = (x != null) ? x : c.x;
-    display.y = (y != null) ? y : c.y;
-    display.width = (width != null) ? width : c.width;
-    display.height = (height != null) ? height : c.height;
-    display.fullscreen = (fullscreen != null) ? fullscreen : c.fullscreen;
-    display.alwaysOnTop = (alwaysOnTop != null) ? alwaysOnTop : c.alwaysOnTop;
-    display.autoscaleExtendsMax = (autoscaleExtendsMax != null) ? autoscaleExtendsMax : c.autoscaleExtendsMax;
-    display.bgColor = (bgColor != null) ? bgColor : c.bgColor;
-    display.screen = (screen != null) ? screen : c.screen;
-    display.scale = (scale != null) ? scale : c.scale;
-    display.visible = (visible != null) ? visible : c.visible;
-
-    return display;
-  }
-
-  private String displayInternal(String inName, String inSrc, Boolean inFullscreen, Boolean inAlwaysOnTop, String inBgColor, Float inOpacity, Integer inScreen, Float inScale,
-      Integer x, Integer y, Integer width, Integer height) {
 
     if (!c.displays.containsKey(name)) {
       error("could not find %s display", name);
