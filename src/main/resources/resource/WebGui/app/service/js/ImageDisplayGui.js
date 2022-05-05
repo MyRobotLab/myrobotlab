@@ -13,8 +13,6 @@ angular.module('mrlapp.service.ImageDisplayGui', []).controller('ImageDisplayGui
         msg.send('setAlwaysOnTop')
     }
 
-    // init
-
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
@@ -27,8 +25,11 @@ angular.module('mrlapp.service.ImageDisplayGui', []).controller('ImageDisplayGui
             _self.updateState(data)
             $scope.$apply()
             break
+        case 'onStatus':
+            console.info(data)
+            break
         default:
-            $log.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method)
+            console.error("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method)
             break
         }
 
