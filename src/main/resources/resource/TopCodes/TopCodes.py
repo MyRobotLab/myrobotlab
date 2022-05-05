@@ -2,7 +2,7 @@ from org.myrobotlab.opencv import OpenCVData
 from org.myrobotlab.service import OpenCV
 
 opencv = Runtime.create("opencv","OpenCV")
-topcodes = Runtime.createAndStart("topcodes","TopCodes")
+topcodes = runtime.start("topcodes","TopCodes")
 opencv.startService()
 opencv.addFilter("PyramidDown1", "PyramidDown")
 

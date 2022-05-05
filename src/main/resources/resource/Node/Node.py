@@ -5,4 +5,4 @@
 # possibly more info @: http://myrobotlab.org/service/Node
 #########################################
 # start the service
-node = Runtime.start("node","Node")
+node = runtime.start("node","Node")

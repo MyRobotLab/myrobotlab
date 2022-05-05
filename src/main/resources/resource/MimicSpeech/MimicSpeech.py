@@ -6,7 +6,7 @@
 #########################################
 
 # start the service
-mouth = Runtime.start('mouth','MimicSpeech')
+mouth = runtime.start('mouth','MimicSpeech')
 
 #possible voices ( selected voice is stored inside config until you change it )
 print ("these are the voices I can have", mouth.getVoices())

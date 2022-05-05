@@ -6,15 +6,15 @@
 #########################################
 
 # start the service
-pir = Runtime.start('pir','Pir')
+pir = runtime.start('pir','Pir')
 
 # start optional virtual arduino service, used for test
 if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
+    virtualArduino = runtime.start("virtualArduino", "VirtualArduino")
     virtualArduino.connect("COM4")
 
 # start the controler
-arduino = Runtime.start("arduino","Arduino")
+arduino = runtime.start("arduino","Arduino")
 
 # connect it
 arduino.connect("COM4")

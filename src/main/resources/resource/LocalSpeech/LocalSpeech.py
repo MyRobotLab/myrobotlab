@@ -8,7 +8,7 @@ import os
 import platform
 
 # start the service
-mouth = Runtime.start('mouth','LocalSpeech')
+mouth = runtime.start('mouth','LocalSpeech')
 
 # by default LocalSpeech will select a command template appropriate for the current 
 # operating system

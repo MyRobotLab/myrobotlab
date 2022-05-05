@@ -1,5 +1,5 @@
 # start the services
-clock = Runtime.start("clock","Clock")
+clock = runtime.start("clock","Clock")
 
 # define the on_date event handler
 def on_time(timedata):

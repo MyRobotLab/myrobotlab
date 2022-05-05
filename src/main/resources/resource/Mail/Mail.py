@@ -4,7 +4,7 @@
 #########################################
 
 # start the service
-mail = Runtime.start("mail","Mail")
+mail = runtime.start("mail","Mail")
 
 mail.username="who@domain.com"
 mail.password="yourpassword"

@@ -6,4 +6,4 @@
 #########################################
 
 # start the service
-tarsosdsp = Runtime.start('tarsosdsp','TarsosDsp')
+tarsosdsp = runtime.start('tarsosdsp','TarsosDsp')

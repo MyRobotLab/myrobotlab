@@ -17,38 +17,38 @@ rightPort="COM42"
 # start optional virtual arduino service, used for internal test and virtual inmoov
 #virtual=True
 if ('virtual' in globals() and virtual):
-    virtualArduinoRight = Runtime.start("virtualArduinoRight", "VirtualArduino")
+    virtualArduinoRight = runtime.start("virtualArduinoRight", "VirtualArduino")
     virtualArduinoRight.connect(rightPort)
 # end used for internal test
 
 # start your compatible controller, here it is Arduino
-rightArduino = Runtime.createAndStart("rightArduino", "Arduino")
+rightArduino = runtime.start("rightArduino", "Arduino")
 rightArduino.connect(rightPort)
 
 # start your servos or diyServo for hand
 # 6 servos for hand is standardized sample, you can use 1 or 99...
-rightThumb = Runtime.start("rightHand.thumb", "Servo")
-rightIndex = Runtime.start("rightHand.index", "Servo")
-rightMajeure = Runtime.start("rightHand.majeure", "Servo")
-rightRingFinger = Runtime.start("rightHand.ringFinger", "Servo")
-rightPinky = Runtime.start("rightHand.pinky", "Servo")
-rightWrist = Runtime.start("rightHand.wrist", "Servo")
-#otherServo = Runtime.start(rightHand.otherServo,Servo)
+rightThumb = runtime.start("rightHand.thumb", "Servo")
+rightIndex = runtime.start("rightHand.index", "Servo")
+rightMajeure = runtime.start("rightHand.majeure", "Servo")
+rightRingFinger = runtime.start("rightHand.ringFinger", "Servo")
+rightPinky = runtime.start("rightHand.pinky", "Servo")
+rightWrist = runtime.start("rightHand.wrist", "Servo")
+#otherServo = runtime.start(rightHand.otherServo,Servo)
 
 # start your servos or diyServo for arm
 # 6 servos for hand is standardized sample, you can use 1 or 99...
-rightBicep = Runtime.start("rightArm.bicep", "Servo")
-rightRotate = Runtime.start("rightArm.rotate", "Servo")
-rightShoulder = Runtime.start("rightArm.shoulder", "Servo")
-rightomoplate = Runtime.start("rightArm.omoplate", "Servo")
-#otherServo = Runtime.start(rightArm.otherServo,Servo)
+rightBicep = runtime.start("rightArm.bicep", "Servo")
+rightRotate = runtime.start("rightArm.rotate", "Servo")
+rightShoulder = runtime.start("rightArm.shoulder", "Servo")
+rightomoplate = runtime.start("rightArm.omoplate", "Servo")
+#otherServo = runtime.start(rightArm.otherServo,Servo)
 
 
 
 ##############
 # Start body parts
-rightHand = Runtime.start("rightHand", "BodyPart")
-rightArm = Runtime.start("rightArm", "BodyPart")
+rightHand = runtime.start("rightHand", "BodyPart")
+rightArm = runtime.start("rightArm", "BodyPart")
 
 
 ##############

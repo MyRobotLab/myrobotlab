@@ -5,4 +5,4 @@
 # possibly more info @: http://myrobotlab.org/service/HtmlParser
 #########################################
 # start the service
-htmlparser = Runtime.start("htmlparser","HtmlParser")
+htmlparser = runtime.start("htmlparser","HtmlParser")

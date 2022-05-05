@@ -1,2 +1,2 @@
 # start the service
-eddiecontrolboard = Runtime.start("eddiecontrolboard","EddieControlBoard")
+eddiecontrolboard = runtime.start("eddiecontrolboard","EddieControlBoard")

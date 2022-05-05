@@ -1,5 +1,5 @@
 # start the service
-oculusRift = Runtime.start("oculusRift","OculusRift")
+oculusRift = runtime.start("oculusRift","OculusRift")
 
 leftEyeURL = "http://10.0.0.2:8080/?action=stream"
 rightEyeURL = "http://10.0.0.2:8081/?action=stream"

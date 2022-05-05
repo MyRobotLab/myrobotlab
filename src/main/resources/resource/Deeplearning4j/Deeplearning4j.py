@@ -6,7 +6,7 @@
 ##################################################################################
 
 # start the deeplearning4j service
-deeplearning4j = Runtime.start('deeplearning4j','Deeplearning4j')
+deeplearning4j = runtime.start('deeplearning4j','Deeplearning4j')
 
 # load the VGG16 model from the zoo
 deeplearning4j.loadVGG16()

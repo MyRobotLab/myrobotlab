@@ -8,13 +8,13 @@
 # ProgramAB to a TTS Service like MarySpeech Service.
 
 # Start the service
-htmlfilter = Runtime.start("htmlfilter","HtmlFilter")
+htmlfilter = runtime.start("htmlfilter","HtmlFilter")
 
 # Start one of the Text To Speach Service
-mouth = Runtime.start("mouth", "MarySpeech")
+mouth = runtime.start("mouth", "MarySpeech")
 
 # Start a chatbox service to generate an output
-alice2 = Runtime.createAndStart("alice2", "ProgramAB")
+alice2 = runtime.start("alice2", "ProgramAB")
 
 # Load a session into the chatbox
 alice2.startSession("user", "alice2")

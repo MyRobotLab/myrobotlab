@@ -1,6 +1,6 @@
 # Initiate the Esp8266-01
-esp = Runtime.start("esp","Esp8266_01")
-oled = Runtime.start("oled","OledSsd1306")
+esp = runtime.start("esp","Esp8266_01")
+oled = runtime.start("oled","OledSsd1306")
 oled.attach(esp,"0","0x3C")
 # Demo to show how to write images
 # Images arrays are created using the LCDAssistance as described here:

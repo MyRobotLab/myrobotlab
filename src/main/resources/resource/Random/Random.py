@@ -7,9 +7,9 @@
 #########################################
 
 # start the service
-python = Runtime.start("python","Python")
-random = Runtime.start("random","Random")
-clock = Runtime.start("clock","Clock")
+python = runtime.start("python","Python")
+random = runtime.start("random","Random")
+clock = runtime.start("clock","Clock")
 
 # enable random events
 random.enable()

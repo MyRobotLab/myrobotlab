@@ -4,11 +4,11 @@
 #########################################
  
 # start the services
-audioPlayer = Runtime.start("audioPlayer", "AudioFile")
+audioPlayer = runtime.start("audioPlayer", "AudioFile")
 
 # play an internet accessable file - first time will take a while
 # but it will be cached in data/Audiofile/cache
-audioPlayer.play("https://ia802508.us.archive.org/5/items/testmp3testfile/mpthreetest.mp3")
+audioPlayer.play("https://commons.wikimedia.org/wiki/File:(be-mons)-boite-a-caca.wav")
 
 print('listen for a couple seconds')
 sleep(5)

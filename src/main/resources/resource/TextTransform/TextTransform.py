@@ -1,2 +1,2 @@
 # start the service
-texttransform = Runtime.start("texttransform","TextTransform")
+texttransform = runtime.start("texttransform","TextTransform")
