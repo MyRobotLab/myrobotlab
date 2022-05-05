@@ -1,8 +1,9 @@
 package org.myrobotlab.service.config;
 
-import java.awt.image.BufferedImage;
+import java.awt.GraphicsDevice;
 import java.util.HashMap;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -15,8 +16,8 @@ public class ImageDisplayConfig extends ServiceConfig {
     transient public JFrame frame;
     transient public JPanel panel;
     transient public JLabel label;
-    transient public BufferedImage img;
-
+    transient public ImageIcon imageIcon;
+    transient public GraphicsDevice gd;
     transient public String name;
 
     public String src = null;
@@ -46,7 +47,7 @@ public class ImageDisplayConfig extends ServiceConfig {
     
     public Boolean visible = null;
     
-
+    
   }
 
   // DEFAULT VALUES FOR DISPLAYS !
@@ -86,7 +87,7 @@ public class ImageDisplayConfig extends ServiceConfig {
    * default src of images - if one is not supplied
    * will be resource/ImageDisplay/mrl_logo.jpg 
    */
-  public String src = null;
+  public String src = "/ImageDisplay/mrl_logo.jpg ";
 
 
   public HashMap<String, Display> displays = new HashMap<>();

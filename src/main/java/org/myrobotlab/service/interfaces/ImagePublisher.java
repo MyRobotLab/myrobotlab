@@ -27,7 +27,21 @@ public interface ImagePublisher extends NameProvider {
    }
  }
  
+ default public void detachImageListener(ImageListener display) {
+   detachImageListener(display.getName());
+ }
+ 
+ // Default way to attach an image listener so implementing classes need 
+ // not worry about these details.
+ default public void detachImageListener(String name) {
+   for (String publishMethod : ImagePublisher.publishMethods) {
+     removeListener(publishMethod, name);
+   }
+ }
+
+ 
  // Add the addListener method to the interface all services implement this.
  public void addListener(String topicMethod, String callbackName);
+ public void removeListener(String topicMethod, String callbackName);
  
 }
