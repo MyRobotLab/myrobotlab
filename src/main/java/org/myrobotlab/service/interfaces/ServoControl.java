@@ -342,7 +342,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * synchronizing servos together e.g. leftEye.sync(rightEye)
    * 
    * @param sc
-   *          the servo to sync with.
+   *          the servo that's being synched e.g. master.synch(slave)
    */
   void sync(ServoControl sc);
 
