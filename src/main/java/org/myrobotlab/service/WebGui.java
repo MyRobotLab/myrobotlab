@@ -41,13 +41,10 @@ import org.atmosphere.cpr.BroadcasterFactory;
 import org.atmosphere.nettosphere.Config;
 import org.atmosphere.nettosphere.Handler;
 import org.atmosphere.nettosphere.Nettosphere;
-import org.jboss.netty.handler.ssl.SslContext;
-import org.jboss.netty.handler.ssl.util.SelfSignedCertificate;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -63,6 +60,10 @@ import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.slf4j.Logger;
+
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.SelfSignedCertificate;
 
 /**
  * 
@@ -364,33 +365,44 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   public Config.Builder getNettosphereConfig() {
+    
+    
 
     Config.Builder configBuilder = new Config.Builder();
     try {
       if (isSsl) {
         // String cipherSuite = "TLS_ECDH_anon_WITH_AES_128_CBC_SHA";
         // String cipherSuite = "TLS_RSA_WITH_AES_256_CBC_SHA256";
-        String[] cipherSuite = { "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
-            "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_DHE_DSS_WITH_AES_128_GCM_SHA256", "TLS_DHE_DSS_WITH_AES_256_GCM_SHA384",
-            "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
-            "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
-            "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA", "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256",
-            "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256", "TLS_DHE_DSS_WITH_AES_256_CBC_SHA", "TLS_DHE_RSA_WITH_AES_256_CBC_SHA", "TLS_RSA_WITH_AES_128_GCM_SHA256",
-            "TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_CBC_SHA256", "TLS_RSA_WITH_AES_256_CBC_SHA256", "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA",
-            "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256", "TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA", "TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA", "TLS_SRP_SHA_WITH_AES_128_CBC_SHA",
-            "TLS_DHE_DSS_WITH_AES_128_CBC_SHA", "TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA", "TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA", "TLS_RSA_WITH_CAMELLIA_256_CBC_SHA",
-            "TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA", "TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA", "TLS_RSA_WITH_CAMELLIA_128_CBC_SHA" };
-
-        cipherSuite = new String[] { "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA", "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256" };
-        SelfSignedCertificate ssc = new SelfSignedCertificate();
-        SslContext sslCtx = SslContext.newServerContext(ssc.certificate(), ssc.privateKey());
-        configBuilder.sslContext(createSSLContext2());// .sslContext(sslCtx);
+//        String[] cipherSuite = { "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+//            "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_DHE_DSS_WITH_AES_128_GCM_SHA256", "TLS_DHE_DSS_WITH_AES_256_GCM_SHA384",
+//            "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+//            "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+//            "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA", "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256",
+//            "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256", "TLS_DHE_DSS_WITH_AES_256_CBC_SHA", "TLS_DHE_RSA_WITH_AES_256_CBC_SHA", "TLS_RSA_WITH_AES_128_GCM_SHA256",
+//            "TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_CBC_SHA256", "TLS_RSA_WITH_AES_256_CBC_SHA256", "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA",
+//            "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256", "TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA", "TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA", "TLS_SRP_SHA_WITH_AES_128_CBC_SHA",
+//            "TLS_DHE_DSS_WITH_AES_128_CBC_SHA", "TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA", "TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA", "TLS_RSA_WITH_CAMELLIA_256_CBC_SHA",
+//            "TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA", "TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA", "TLS_RSA_WITH_CAMELLIA_128_CBC_SHA" };
+//
+//        cipherSuite = new String[] { "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA", "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256" };
+//        SelfSignedCertificate ssc = new SelfSignedCertificate();
+//        SslContext sslCtx = SslContext.newServerContext(ssc.certificate(), ssc.privateKey());
+        // configBuilder.sslContext(createSSLContext2());// .sslContext(sslCtx);
+        
+        SelfSignedCertificate ssc = new SelfSignedCertificate("localhost");
+        
+        // SslContext sslCtx = SslContextBuilder.forServer(new File(certPath), new File(keyPath), null).build();
+        SslContext sslCtx = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey(), null).build();
+        
+   
+        
+        configBuilder.sslContext(sslCtx);
         // ssl.setEnabledProtocols(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2",
         // "SSLv3"});
 
         // configBuilder.subProtocols("TLSv1.2");
         // configBuilder.enabledCipherSuites(cipherSuite);
-        configBuilder.enabledCipherSuites(cipherSuite);
+//        configBuilder.enabledCipherSuites(cipherSuite);
       }
     } catch (Exception e) {
       log.error("certificate creation threw", e);
@@ -1244,91 +1256,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return config;
   }
 
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.WARN);
-
-    try {
-
-      // Platform.setVirtual(true);
-
-      Runtime.main(new String[] { "--id", "w1", "--from-launcher", "--log-level", "WARN" });
-      // Runtime.start("python", "Python");
-      // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      // webgui.setSsl(true);
-      webgui.autoStartBrowser(false);
-      webgui.setPort(8888);
-      webgui.startService();
-
-      Runtime.start("python", "Python");
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
-      MqttBroker broker = (MqttBroker) Runtime.start("broker", "MqttBroker");
-      broker.listen();
-
-      Mqtt mqtt01 = (Mqtt) Runtime.start("mqtt01", "Mqtt");
-      /*
-       * mqtt01.setCert("certs/home-client/rootCA.pem",
-       * "certs/home-client/cert.pem.crt", "certs/home-client/private.key");
-       * mqtt01.connect(
-       * "mqtts://a22mowsnlyfeb6-ats.iot.us-west-2.amazonaws.com:8883");
-       */
-      mqtt01.connect("mqtt://localhost:1883");
-
-      Runtime.start("neo", "NeoPixel");
-
-      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-      arduino.connect("/dev/ttyACM0");
-
-      for (int i = 0; i < 1000; ++i) {
-        webgui.display("https://i.kinja-img.com/gawker-media/image/upload/c_scale,f_auto,fl_progressive,q_80,w_800/pytutcxcrfjvuhz2jipa.jpg");
-      }
-
-      // Runtime.setLogLevel("ERROR");
-      // Runtime.start("python", "Python");
-      // Runtime.start("clock01", "Clock");
-      // Runtime.start("arduino", "Arduino");
-      // Runtime.start("servo01", "Servo");
-      // Runtime.start("servo02", "Servo");
-      // Runtime.start("gui", "SwingGui");
-
-      // runtime.setVirtual(true);
-      // Runtime.start("log", "Log");
-      /*
-       * Runtime.start("clock01", "Clock"); Runtime.start("clock02", "Clock");
-       * Runtime.start("clock03", "Clock"); Runtime.start("clock04", "Clock");
-       * Runtime.start("clock05", "Clock");
-       */
-      Platform.setVirtual(true);
-
-      // Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-      Servo pan = (Servo) Runtime.start("pan", "Servo");
-      Servo tilt = (Servo) Runtime.start("tilt", "Servo");
-      pan.setPin(3);
-      pan.setMinMax(30.0, 70.0);
-      tilt.setPin("D4");
-
-      arduino.attach(pan);
-      arduino.attach(tilt);
-
-      // Runtime.start("jme", "JMonkeyEngine");
-
-      // arduino.connect("/dev/ttyACM0");
-
-      // Runtime.start("arduino", "Arduino");
-      // arduino.connect("COMX");
-
-      log.info("leaving main");
-
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
-  }
-
   @Override
   public void onCreated(String name) {
   }
@@ -1348,4 +1275,35 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   @Override
   public void onReleased(String name) {
   }
+  
+  
+  public static void main(String[] args) {
+    LoggingFactory.init(Level.WARN);
+
+    try {
+
+      
+      // Runtime.start("webxr", "WebXr");
+
+      // Runtime.setAllLocales("ru-RU");
+      
+      InMoov2 i01 = (InMoov2)Runtime.start("i01", "InMoov2");
+      
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      // webgui.setSsl(true);
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+//      ProgramAB brain = (ProgramAB)Runtime.start("brain", "ProgramAB");
+//      brain.setBotProperty("botname", "Duey");
+        // Runtime.setConfig("dewey-2");
+//        Runtime.startConfig("dewey-2");
+//        Runtime.start("i01.simulator", "JMonkeyEngine");
+      // InMoov2 i01 = (InMoov2)Runtime.start("i01", "InMoov2");
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
+  
 }

@@ -20,7 +20,7 @@ public class _TemplateService extends Service {
   
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    ServoConfig config = (ServoConfig) c;
+    // _TemplateServiceConfig config = (_TemplateServiceConfig) c;
     return c;
   }
   
@@ -36,7 +36,7 @@ public class _TemplateService extends Service {
 
       Runtime.start("template", "_TemplateService");
       Runtime.start("servo", "Servo");
-      Runtime.start("gui", "SwingGui");
+      Runtime.start("webgui", "WebGui");
 
     } catch (Exception e) {
       log.error("main threw", e);

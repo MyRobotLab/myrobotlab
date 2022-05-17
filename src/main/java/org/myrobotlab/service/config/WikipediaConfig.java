@@ -5,5 +5,7 @@ public class WikipediaConfig extends ServiceConfig {
   // locale ?
   
   public boolean enabled = true;
+  
+  public Integer maxSentencesReturned = 1;
       
 }

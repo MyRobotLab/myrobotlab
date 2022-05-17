@@ -4,22 +4,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FiniteStateMachineConfig extends ServiceConfig {
-  
+
   public static class Transition {
+    
     public Transition() {
-      
     }
-    public Transition(String begin, String event, String end) {
-      this.begin = begin;
-      this.event = event;
-      this.end = end;
+
+    public Transition(String origin, String message, String target) {
+      this.origin = origin;
+      this.message = message;
+      this.target = target;
     }
-    public String begin;
-    public String event;
-    public String end;
+
+    // transient public UUID id;
+
+    public String origin;
+    public String message;
+    public String target;
   }
 
-  public List<String> states = new ArrayList<>();
   public List<Transition> transitions = new ArrayList<>();
+  // public Set<Transition> transitions = new LinkedHashSet<>();
 
 }

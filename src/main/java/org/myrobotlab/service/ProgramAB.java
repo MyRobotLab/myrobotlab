@@ -580,7 +580,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   public void reloadSession(String userName, String botName) throws IOException {
     Session session = getSession(userName, botName);
     session.reload();
-    info("reloaded session %s <-> %s ", userName, botName);
+    info("reloaded session %s <-> %s:%s", userName, botName, session.botInfo.getBot().aiml_path);
   }
 
   /**
@@ -1121,15 +1121,20 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     listeners = getAttached("publishUtterance"); 
     config.utteranceListeners = listeners.toArray(new String[listeners.size()]);
     
-    
-    // TODO: textPublishers?
-
+    for (BotInfo bot : bots.values()) {
+      config.bots.add(bot.path.getPath());
+    }
     
     return config;
   }
 
   public ServiceConfig apply(ServiceConfig c) {
     ProgramABConfig config = (ProgramABConfig) c;
+    
+    bots.clear();
+    for (String botPath : config.bots) {
+      addBotPath(botPath);
+    }
 
     if (config.currentBotName != null) {
       setCurrentBotName(config.currentBotName);
@@ -1138,7 +1143,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     if (config.currentUserName != null) {
       setCurrentUserName(config.currentUserName);
     }
-
+    
     setCurrentSession(currentUserName, currentBotName);
     
     // This is "good" in that its using the normalized data from subscription

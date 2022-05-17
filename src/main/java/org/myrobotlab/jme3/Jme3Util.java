@@ -380,7 +380,7 @@ public class Jme3Util {
   public void addNode(String name) {
     Spatial s = jme.find(name);
     if (s != null) {
-      log.error("addNode({}} already exists", name);
+      log.error("addNode({}) already exists", name);
       return;
     }
     Node n = new Node(name);

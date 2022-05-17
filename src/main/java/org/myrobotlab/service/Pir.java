@@ -215,7 +215,7 @@ public class Pir extends Service implements PinListener {
   @Override
   public void onPin(PinData pindata) {
 
-    log.info("onPin {}", pindata);
+    log.debug("onPin {}", pindata);
 
     boolean sense = (pindata.value != 0);
 

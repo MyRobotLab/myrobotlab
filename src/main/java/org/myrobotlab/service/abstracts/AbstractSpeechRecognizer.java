@@ -3,14 +3,13 @@ package org.myrobotlab.service.abstracts;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.config.SpeechRecognizerConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.SpeechRecognizerConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
@@ -556,16 +555,17 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     setWakeWord(null);
   }
 
-  /*
-   * @Override public ServiceConfig getConfig() { AbstractSpeechRecognizerConfig
-   * config = new AbstractSpeechRecognizerConfig(); config.listening =
-   * isListening(); config.wakeWord = getWakeWord(); Set<String> listeners =
-   * getAttached("publishText"); config.textListeners = listeners.toArray(new
-   * String[listeners.size()]); return config; }
-   */
+  @Override
+  public ServiceConfig getConfig() {
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    c.listening = isListening();
+    c.wakeWord = getWakeWord();
+    Set<String> listeners = getAttached("publishText");
+    c.textListeners = listeners.toArray(new String[listeners.size()]);
+    return c;
+  }
 
-  public ServiceConfig apply(ServiceConfig c) {
-    if (c instanceof SpeechRecognizerConfig) {
+  public ServiceConfig apply(ServiceConfig c) {    
       SpeechRecognizerConfig config = (SpeechRecognizerConfig) c;
       setWakeWord(config.wakeWord);
       if (config.listening) {
@@ -577,7 +577,6 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
           addListener("publishText", listener);
         }
       }
-    }
     return c;
   }
 

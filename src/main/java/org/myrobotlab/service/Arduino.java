@@ -1919,7 +1919,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     if (servoSpeed.speed != null) {
       speed = servoSpeed.speed.intValue();
     }
-    log.info("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo), speed);
+    log.debug("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo), speed);
     Integer id = getDeviceId(servo);
     if (id == null) {
       log.error("{} has null deviceId", servo);

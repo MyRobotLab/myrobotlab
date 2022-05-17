@@ -248,6 +248,7 @@ public class Random extends Service {
       m.maxIntervalMs = msg.maxIntervalMs;
       m.minIntervalMs = msg.minIntervalMs;
       m.data = msg.data;
+      m.enabled = msg.enabled;
       config.randomMessages.put(key, m);
     }
 
@@ -262,6 +263,9 @@ public class Random extends Service {
       for (String key : config.randomMessages.keySet()) {
         RandomMessageConfig msgc = config.randomMessages.get(key);
         addRandom(msgc.minIntervalMs, msgc.maxIntervalMs, key.substring(0, key.lastIndexOf(".")), key.substring(key.lastIndexOf(".") + 1), msgc.data);
+        if (!msgc.enabled) {
+          disable(key);
+        }
       }
     } catch (Exception e) {
       error(e);
@@ -331,6 +335,7 @@ public class Random extends Service {
     // remove all timed attempts of processing random
     // events
     purgeTasks();
+    enabled = false;
   }
 
   public void enable() {
@@ -341,6 +346,7 @@ public class Random extends Service {
         addTask(fullKey, 0, msg.interval, "process", fullKey);
       }
     }
+    enabled = true;
   }
 
   public void purge() {

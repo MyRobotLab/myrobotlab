@@ -196,7 +196,9 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
       }
     }
 
-    publishClassification(classifications);
+    if (classifications.size() > 0) {
+      publishClassification(classifications);
+    }
     IplImage result = converter2.toImage(srcMat);
     ne.close();
     return result;

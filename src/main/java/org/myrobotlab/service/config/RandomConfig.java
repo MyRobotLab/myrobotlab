@@ -11,6 +11,7 @@ public class RandomConfig extends ServiceConfig {
     public Range[] data;
     public long minIntervalMs;
     public long maxIntervalMs;
+    public boolean enabled = true;
     
     public RandomMessageConfig() {      
     }

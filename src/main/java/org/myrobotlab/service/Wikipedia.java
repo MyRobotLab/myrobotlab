@@ -10,12 +10,12 @@ import java.util.Map;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Http;
+import org.myrobotlab.service.config.WikipediaConfig;
 import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.SearchResults;
@@ -29,6 +29,12 @@ import com.google.gson.internal.LinkedHashTreeMap;
 
 /**
  * Wikipedia via the official rest api docs here:
+ * 
+ * Api Sandbox
+ * https://en.wikipedia.org/wiki/Special:ApiSandbox#action=query&format=json&prop=description%7Cimages&titles=London&descprefersource=central
+ * 
+ * e.g. description
+ * https://en.wikipedia.org/w/api.php?action=query&format=json&prop=description&titles=Mark%20Twain
  * 
  * https://en.wikipedia.org/api/rest_v1/#/Page_content/get_page_summary_title
  * https://en.wikipedia.org/api/rest_v1/#/Page%20content/get_page_summary__title_
@@ -58,6 +64,7 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
 
   String baseUrl = "https://en.wikipedia.org/api/rest_v1/page/summary";
   // String baseUrl = "https://de.wikipedia.org/api/rest_v1/page/summary";
+  
 
   public Wikipedia(String n, String id) {
     super(n, id);
@@ -116,7 +123,7 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
    */
   private SearchResults searchWikipedia(String searchText, Boolean publishText, Boolean publishImages) {
     SearchResults results = new SearchResults(searchText);
-
+    WikipediaConfig c = (WikipediaConfig)config;
     try {
 
       if (publishText == null) {
@@ -144,6 +151,16 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
         LinkedHashTreeMap<String, Object> json = CodecUtils.fromJson(response, LinkedHashTreeMap.class);
         String extract = (String) json.get("extract");
         if (extract != null) {
+          
+          if (c.maxSentencesReturned != null) {
+            String[] sentences = extract.split("\\.");
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < c.maxSentencesReturned; ++i) {
+              sb.append(sentences[i] + ". ");
+            }
+            extract = sb.toString().trim();
+          }
+          
           results.text.add(extract);
           invoke("publishText", extract);
         }
