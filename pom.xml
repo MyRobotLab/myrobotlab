@@ -351,6 +351,15 @@
   </dependency>
 <!-- Elasticsearch end -->
 
+<!-- FiniteStateMachine begin -->
+  <dependency>
+    <groupId>com.github.pnavais</groupId>
+    <artifactId>state-machine</artifactId>
+    <version>1.2.0</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- FiniteStateMachine end -->
+
 <!-- Git begin -->
   <dependency>
     <groupId>org.eclipse.jgit</groupId>
