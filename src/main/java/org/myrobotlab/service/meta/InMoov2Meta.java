@@ -82,32 +82,7 @@ public class InMoov2Meta extends MetaData {
     // load default peers from meta here
     plan.putPeers(name, peers);
 
-//    inmoov.audioPlayer = name + ".audioPlayer";
-//    inmoov.chatBot = name + ".chatBot";
-//    inmoov.ear = name + ".ear";
-//    inmoov.eyeTracking = name + ".eyeTracking";
-//    inmoov.fsm = name + ".fsm";
-//    inmoov.head = name + ".head";
-//    inmoov.headTracking = name + ".headTracking";
-//    inmoov.htmlFilter = name + ".htmlFilter";
-//    inmoov.imageDisplay = name + ".imageDisplay";
-//    inmoov.leftArm = name + ".leftArm";
-//    inmoov.leftHand = name + ".leftHand";
-//    inmoov.mouth = name + ".mouth";
-//    inmoov.mouthControl = name + ".mouthControl";
-//    inmoov.opencv = name + ".opencv";
-//    inmoov.pid = name + ".pid";
-//    inmoov.pir = name + ".pir";
-//    inmoov.openWeatherMap = name + ".openWeatherMap";
-//    inmoov.neoPixel = name + ".neoPixel";
-//    inmoov.random = name + ".random";
-//    inmoov.rightArm = name + ".rightArm";
-//    inmoov.rightHand = name + ".rightHand";
-//    inmoov.servoMixer = name + ".servoMixer";
-//    inmoov.simulator = name + ".simulator";
-//    inmoov.torso = name + ".torso";
-//    inmoov.ultrasonicRight = name + ".ultrasonicRight";
-//    inmoov.ultrasonicLeft = name + ".ultrasonicLeft";
+
 
     ProgramABConfig chatBot = (ProgramABConfig) plan.getPeerConfig("chatBot");
     Runtime runtime = Runtime.getInstance();
@@ -124,6 +99,8 @@ public class InMoov2Meta extends MetaData {
       }
     }    
     chatBot.textListeners = new String[] {name + ".htmlFilter"};
+    chatBot.botDir = "data/ProgramAB";
+
     
     HtmlFilterConfig htmlFilter = (HtmlFilterConfig) plan.getPeerConfig("htmlFilter");
     htmlFilter.textPublishers = new String[] {name + ".chatBot"};
@@ -214,18 +191,6 @@ public class InMoov2Meta extends MetaData {
     fsm.transitions.add(new FiniteStateMachineConfig.Transition("init", "first_time", "identify_user"));
     fsm.transitions.add(new FiniteStateMachineConfig.Transition("detected_face", "first_time", "identify_user"));
     
-    // == Peer - simulator =============================
-    JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.getPeerConfig("simulator");
-    if (simulator == null) {
-      log.error("error config");
-    }
-
-    // == Peer - chatBot  =============================
-    ProgramABConfig chatBot = (ProgramABConfig) plan.getPeerConfig("chatBot");
-    if (chatBot == null) {
-      log.error("error config");
-    }
-    chatBot.botDir = "data/ProgramAB";
 
 
     // == Peer - random =============================
