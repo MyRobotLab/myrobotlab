@@ -1,12 +1,17 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Plan;
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.jme3.UserData;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.service.InMoov2;
 import org.myrobotlab.service.Pid.PidData;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.FiniteStateMachineConfig;
+import org.myrobotlab.service.config.HtmlFilterConfig;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.JMonkeyEngineConfig;
-import org.myrobotlab.service.config.MarySpeechConfig;
 import org.myrobotlab.service.config.MouthControlConfig;
 import org.myrobotlab.service.config.NeoPixelConfig;
 import org.myrobotlab.service.config.PidConfig;
@@ -14,7 +19,6 @@ import org.myrobotlab.service.config.ProgramABConfig;
 import org.myrobotlab.service.config.RandomConfig;
 import org.myrobotlab.service.config.RandomConfig.RandomMessageConfig;
 import org.myrobotlab.service.config.TrackingConfig;
-import org.myrobotlab.service.config.WebkitSpeechRecognitionConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
@@ -75,32 +79,7 @@ public class InMoov2Meta extends MetaData {
     // load default peers from meta here
     plan.putPeers(name, peers);
 
-    inmoov.audioPlayer = name + ".audioPlayer";
-    inmoov.chatBot = name + ".chatBot";
-    inmoov.ear = name + ".ear";
-    inmoov.eyeTracking = name + ".eyeTracking";
-    inmoov.fsm = name + ".fsm";
-    inmoov.head = name + ".head";
-    inmoov.headTracking = name + ".headTracking";
-    inmoov.htmlFilter = name + ".htmlFilter";
-    inmoov.imageDisplay = name + ".imageDisplay";
-    inmoov.leftArm = name + ".leftArm";
-    inmoov.leftHand = name + ".leftHand";
-    inmoov.mouth = name + ".mouth";
-    inmoov.mouthControl = name + ".mouthControl";
-    inmoov.opencv = name + ".opencv";
-    inmoov.pid = name + ".pid";
-    inmoov.pir = name + ".pir";
-    inmoov.openWeatherMap = name + ".openWeatherMap";
-    inmoov.neoPixel = name + ".neoPixel";
-    inmoov.random = name + ".random";
-    inmoov.rightArm = name + ".rightArm";
-    inmoov.rightHand = name + ".rightHand";
-    inmoov.servoMixer = name + ".servoMixer";
-    inmoov.simulator = name + ".simulator";
-    inmoov.torso = name + ".torso";
-    inmoov.ultrasonicRight = name + ".ultrasonicRight";
-    inmoov.ultrasonicLeft = name + ".ultrasonicLeft";
+
 
     ProgramABConfig chatBot = (ProgramABConfig) plan.getPeerConfig("chatBot");
     Runtime runtime = Runtime.getInstance();
@@ -279,7 +258,6 @@ public class InMoov2Meta extends MetaData {
     eyeTracking.controller = name + ".left";
 
     // == Peer - pid =============================
-    inmoov.pid = name + ".pid";
     PidConfig pid = (PidConfig) plan.getPeerConfig("pid");
 
     PidData tiltPid = new PidData();
