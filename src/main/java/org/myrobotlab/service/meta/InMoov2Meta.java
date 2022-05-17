@@ -12,6 +12,7 @@ import org.myrobotlab.service.config.FiniteStateMachineConfig;
 import org.myrobotlab.service.config.HtmlFilterConfig;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.JMonkeyEngineConfig;
+import org.myrobotlab.service.config.MarySpeechConfig;
 import org.myrobotlab.service.config.MouthControlConfig;
 import org.myrobotlab.service.config.NeoPixelConfig;
 import org.myrobotlab.service.config.PidConfig;
