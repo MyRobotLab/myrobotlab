@@ -27,6 +27,10 @@ public final class MapperLinear extends MapperBase {
     super(minX, maxX, minY, maxY);
   }
 
+  public MapperLinear(double minX, double maxX, double minY, double maxY, boolean clip, boolean inverted) {
+    super(minX, maxX, minY, maxY, clip, inverted);
+  }
+
   @Override
   public double calcOutput(double input) {
     if (isClip()) {

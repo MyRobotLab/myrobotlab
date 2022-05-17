@@ -1536,6 +1536,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     send(getPeerName(peerName), method);
   }
 
+  public Object sendToPeerBlocking(String peerName, String method) throws InterruptedException, TimeoutException {
+    return sendBlocking(getPeerName(peerName), method);
+  }
+
   public Object invokePeer(String peerName, String method) {
     return invokeOn(false, getPeer(peerName), method, (Object[]) null);
   }
@@ -1547,6 +1551,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public void sendToPeer(String peerName, String method, Object... data) {
     send(getPeerName(peerName), method, data);
+  }
+
+  public Object sendToPeerBlocking(String peerName, String method, Object... data) throws InterruptedException, TimeoutException {
+    return sendBlocking(getPeerName(peerName), method, data);
   }
 
   public void send(String name, String method, Object... data) {
@@ -1759,6 +1767,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       broadcastState();
     }
     return si;
+  }
+  
+  public String getPeerType(String peerKey) {
+    ServiceReservation sr = serviceType.getPeer(peerKey);
+    return sr.type;
   }
 
   public void releasePeer(String peerKey) {
