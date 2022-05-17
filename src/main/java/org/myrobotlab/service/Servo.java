@@ -169,7 +169,8 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
     if (encoder != null && encoder instanceof TimeEncoder) {
       TimeEncoder timeEncoder = (TimeEncoder) encoder;
       // calculate trajectory calculates and processes this move
-      blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentOutputPos(), getTargetOutput(), getSpeed());
+      // blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentOutputPos(), getTargetOutput(), getSpeed());
+      blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentInputPos(), getTargetPos(), getSpeed());
     }
 
     if (isBlocking) {
