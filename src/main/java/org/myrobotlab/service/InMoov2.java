@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.io.FilenameUtils;
-import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
@@ -24,7 +23,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
-import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.WebGuiConfig;
@@ -51,8 +49,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   private static final long serialVersionUID = 1L;
 
   static String speechRecognizer = "WebkitSpeechRecognition";
-
-  protected boolean loadGestures = true;
 
   /**
    * @param someScriptName
@@ -150,9 +146,9 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       error(e);
     }
 
-    if (loadGestures) {
-      loadGestures();
-    }
+    // if (loadGestures) {
+    // loadGestures();
+    // }
 
     runtime.invoke("publishConfigList");
   }
@@ -210,19 +206,9 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   transient Tracking eyesTracking;
 
-  transient NeoPixel neopixel;
-
   transient ServoMixer servoMixer;
 
   transient Python python;
-
-  transient InMoov2Arm rightArm;
-
-  transient InMoov2Hand rightHand;
-
-  transient InMoov2Torso torso;
-
-  transient InMoov2Head head;
 
   transient Tracking headTracking;
 
@@ -236,11 +222,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   transient ImageDisplay imageDisplay;
 
-  transient JMonkeyEngine simulator;
-
-  transient InMoov2Arm leftArm;
-
-  transient InMoov2Hand leftHand;
+  // transient JMonkeyEngine simulator;
 
   String currentConfigurationName = "default";
 
@@ -269,7 +251,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   // FIXME - remove all direct references
   // transient private HashMap<String, InMoov2Arm> arms = new HashMap<>();
 
-//   protected List<Voice> voices = null;
+  // protected List<Voice> voices = null;
 
   protected String voiceSelected;
 
@@ -421,24 +403,12 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public void disable() {
-    if (head != null) {
-      head.disable();
-    }
-    if (rightHand != null) {
-      rightHand.disable();
-    }
-    if (leftHand != null) {
-      leftHand.disable();
-    }
-    if (rightArm != null) {
-      rightArm.disable();
-    }
-    if (leftArm != null) {
-      leftArm.disable();
-    }
-    if (torso != null) {
-      torso.disable();
-    }
+    sendToPeer("head", "disable");
+    sendToPeer("rightHand", "disable");
+    sendToPeer("leftHand", "disable");
+    sendToPeer("rightArm", "disable");
+    sendToPeer("leftArm", "disable");
+    sendToPeer("torso", "disable");
   }
 
   public void displayFullScreen(String src) {
@@ -454,24 +424,12 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public void enable() {
-    if (head != null) {
-      head.enable();
-    }
-    if (rightHand != null) {
-      rightHand.enable();
-    }
-    if (leftHand != null) {
-      leftHand.enable();
-    }
-    if (rightArm != null) {
-      rightArm.enable();
-    }
-    if (leftArm != null) {
-      leftArm.enable();
-    }
-    if (torso != null) {
-      torso.enable();
-    }
+    sendToPeer("head", "enable");
+    sendToPeer("rightHand", "enable");
+    sendToPeer("leftHand", "enable");
+    sendToPeer("rightArm", "enable");
+    sendToPeer("leftArm", "enable");
+    sendToPeer("torso", "enable");
   }
 
   /**
@@ -511,24 +469,12 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public void fullSpeed() {
-    if (head != null) {
-      head.fullSpeed();
-    }
-    if (rightHand != null) {
-      rightHand.fullSpeed();
-    }
-    if (leftHand != null) {
-      leftHand.fullSpeed();
-    }
-    if (rightArm != null) {
-      rightArm.fullSpeed();
-    }
-    if (leftArm != null) {
-      leftArm.fullSpeed();
-    }
-    if (torso != null) {
-      torso.fullSpeed();
-    }
+    sendToPeer("head", "fullSpeed");
+    sendToPeer("rightHand", "fullSpeed");
+    sendToPeer("leftHand", "fullSpeed");
+    sendToPeer("rightArm", "fullSpeed");
+    sendToPeer("leftArm", "fullSpeed");
+    sendToPeer("torso", "fullSpeed");
   }
 
   public String get(String key) {
@@ -540,29 +486,15 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public InMoov2Arm getArm(String side) {
-    if ("left".equals(side)) {
-      return leftArm;
-    } else if ("right".equals(side)) {
-      return rightArm;
-    } else {
-      log.error("can not get arm {}", side);
-    }
-    return null;
+    return (InMoov2Arm) getPeer(side + "Arm");
   }
 
   public InMoov2Hand getHand(String side) {
-    if ("left".equals(side)) {
-      return leftHand;
-    } else if ("right".equals(side)) {
-      return rightHand;
-    } else {
-      log.error("can not get arm {}", side);
-    }
-    return null;
+    return (InMoov2Hand) getPeer(side + "Hand");
   }
 
   public InMoov2Head getHead() {
-    return head;
+    return (InMoov2Head) getPeer("head");
   }
 
   /**
@@ -570,52 +502,39 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
    * 
    * @return the timestamp of the last activity time.
    */
-  public long getLastActivityTime() {
+  public Long getLastActivityTime() {
+    try {
 
-    long lastActivityTime = 0;
+      Long lastActivityTime = 0L;
 
-    if (leftHand != null) {
-      lastActivityTime = Math.max(lastActivityTime, leftHand.getLastActivityTime());
+      Long head = (Long) sendToPeerBlocking("head", "getScript", getName());
+      Long leftArm = (Long) sendToPeerBlocking("leftArm", "getScript", getName());
+      Long rightArm = (Long) sendToPeerBlocking("rightArm", "getScript", getName());
+      Long leftHand = (Long) sendToPeerBlocking("leftHand", "getScript", getName());
+      Long rightHand = (Long) sendToPeerBlocking("rightHand", "getScript", getName());
+      Long torso = (Long) sendToPeerBlocking("torso", "getScript", getName());
+
+      lastActivityTime = Math.max(head, leftArm);
+      lastActivityTime = Math.max(lastActivityTime, rightArm);
+      lastActivityTime = Math.max(lastActivityTime, leftHand);
+      lastActivityTime = Math.max(lastActivityTime, rightHand);
+      lastActivityTime = Math.max(lastActivityTime, torso);
+
+      return lastActivityTime;
+
+    } catch (Exception e) {
+      error(e);
+      return null;
     }
 
-    if (leftArm != null) {
-      lastActivityTime = Math.max(lastActivityTime, leftArm.getLastActivityTime());
-    }
-
-    if (rightHand != null) {
-      lastActivityTime = Math.max(lastActivityTime, rightHand.getLastActivityTime());
-    }
-
-    if (rightArm != null) {
-      lastActivityTime = Math.max(lastActivityTime, rightArm.getLastActivityTime());
-    }
-
-    if (head != null) {
-      lastActivityTime = Math.max(lastActivityTime, head.getLastActivityTime());
-    }
-
-    if (torso != null) {
-      lastActivityTime = Math.max(lastActivityTime, torso.getLastActivityTime());
-    }
-
-    if (lastPirActivityTime != null) {
-      lastActivityTime = Math.max(lastActivityTime, lastPirActivityTime);
-    }
-
-    if (lastActivityTime == 0) {
-      error("invalid activity time - anything connected?");
-      lastActivityTime = System.currentTimeMillis();
-    }
-
-    return lastActivityTime;
   }
 
   public InMoov2Arm getLeftArm() {
-    return leftArm;
+    return (InMoov2Arm) getPeer("leftArm");
   }
 
   public InMoov2Hand getLeftHand() {
-    return leftHand;
+    return (InMoov2Hand) getPeer("leftHand");
   }
 
   @Override
@@ -624,42 +543,28 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public InMoov2Arm getRightArm() {
-    return rightArm;
+    return (InMoov2Arm) getPeer("rightArm");
   }
 
   public InMoov2Hand getRightHand() {
-    return rightHand;
+    return (InMoov2Hand) getPeer("rightHand");
   }
 
   public Simulator getSimulator() {
-    return simulator;
+    return (Simulator) getPeer("simulator");
   }
 
   public InMoov2Torso getTorso() {
-    return torso;
+    return (InMoov2Torso) getPeer("torso");
   }
 
   public void halfSpeed() {
-    if (head != null) {
-      head.setSpeed(25.0, 25.0, 25.0, 25.0, 100.0, 25.0);
-    }
-
-    if (rightHand != null) {
-      rightHand.setSpeed(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
-    }
-    if (leftHand != null) {
-      leftHand.setSpeed(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
-    }
-    if (rightArm != null) {
-      rightArm.setSpeed(25.0, 25.0, 25.0, 25.0);
-    }
-    if (leftArm != null) {
-      leftArm.setSpeed(25.0, 25.0, 25.0, 25.0);
-    }
-    if (torso != null) {
-      torso.setSpeed(20.0, 20.0, 20.0);
-    }
-
+    sendToPeer("head", "setSpeed", 25.0, 25.0, 25.0, 25.0, 100.0, 25.0);
+    sendToPeer("rightHand", "setSpeed", 30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
+    sendToPeer("leftHand", "setSpeed", 30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
+    sendToPeer("rightArm", "setSpeed", 25.0, 25.0, 25.0, 25.0);
+    sendToPeer("leftArm", "setSpeed", 25.0, 25.0, 25.0, 25.0);
+    sendToPeer("torso", "setSpeed", 20.0, 20.0, 20.0);
   }
 
   public boolean isCameraOn() {
@@ -733,46 +638,23 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     StringBuffer script = new StringBuffer();
     Date date = new Date();
 
-    String indentSpace = "";
     script.append("# - " + date + " - Captured gesture :\n");
 
     if (gestureName != null) {
-      indentSpace = "  ";
       script.append(String.format("def %s():\n", gestureName));
     }
 
-    if (head != null) {
-      script.append(indentSpace);
-      script.append(head.getScript(getName()));
-    }
+    try {
+      script.append(sendToPeerBlocking("head", "getScript", getName()));
+      script.append(sendToPeerBlocking("leftArm", "getScript", getName()));
+      script.append(sendToPeerBlocking("rightArm", "getScript", getName()));
+      script.append(sendToPeerBlocking("leftHand", "getScript", getName()));
+      script.append(sendToPeerBlocking("rightHand", "getScript", getName()));
+      script.append(sendToPeerBlocking("torso", "getScript", getName()));
 
-    if (leftArm != null) {
-      script.append(indentSpace);
-      script.append(leftArm.getScript(getName()));
+    } catch (Exception e) {
+      error(e);
     }
-    if (rightArm != null) {
-      script.append(indentSpace);
-      script.append(rightArm.getScript(getName()));
-    }
-
-    if (leftHand != null) {
-      script.append(indentSpace);
-      script.append(leftHand.getScript(getName()));
-    }
-    if (rightHand != null) {
-      script.append(indentSpace);
-      script.append(rightHand.getScript(getName()));
-    }
-
-    if (torso != null) {
-      script.append(indentSpace);
-      script.append(torso.getScript(getName()));
-    }
-
-    // if (eyelids != null) {
-    // script.append(indentSpace);
-    // script.append(eyelids.getScript(getName()));
-    // }
 
     send("python", "appendScript", script.toString());
 
@@ -815,19 +697,11 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public void moveEyelids(Double eyelidleftPos, Double eyelidrightPos) {
-    if (head != null) {
-      head.moveEyelidsTo(eyelidleftPos, eyelidrightPos);
-    } else {
-      log.warn("moveEyelids - I have a null head");
-    }
+    sendToPeer("head", "moveEyelids", eyelidleftPos, eyelidrightPos);
   }
 
   public void moveEyes(Double eyeX, Double eyeY) {
-    if (head != null) {
-      head.moveTo(null, null, eyeX, eyeY, null, null);
-    } else {
-      log.warn("moveEyes - I have a null head");
-    }
+    moveHead(null, null, eyeX, eyeY, null, null);
   }
 
   public void moveRightHand(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
@@ -851,12 +725,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public void moveHand(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
-    InMoov2Hand hand = getHand(which);
-    if (hand == null) {
-      log.warn("{} hand does not exist", hand);
-      return;
-    }
-    hand.moveTo(thumb, index, majeure, ringFinger, pinky, wrist);
+    // the "right" way
+    sendToPeer(which + "Hand", "moveHand", thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
   public void moveHead(Double neck, Double rothead) {
@@ -876,12 +746,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public void moveHead(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
-    // sendToPeer("head","moveTo", neck, rothead, eyeX, eyeY, jaw, rollNeck);
-    if (head != null) {
-      head.moveTo(neck, rothead, eyeX, eyeY, jaw, rollNeck);
-    } else {
-      log.error("I have a null head");
-    }
+    // the "right" way
+    sendToPeer("head", "moveTo", neck, rothead, eyeX, eyeY, jaw, rollNeck);
   }
 
   public void moveHeadBlocking(Double neck, Double rothead) {
@@ -897,27 +763,18 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public void moveHeadBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
-    if (head != null) {
-      head.moveToBlocking(neck, rothead, eyeX, eyeY, jaw, rollNeck);
-    } else {
-      log.error("I have a null head");
-    }
+    // the "right" way
+    sendToPeer("head", "moveToBlocking", neck, rothead, eyeX, eyeY, jaw, rollNeck);
   }
 
   public void moveTorso(Double topStom, Double midStom, Double lowStom) {
-    if (torso != null) {
-      torso.moveTo(topStom, midStom, lowStom);
-    } else {
-      log.error("moveTorso - I have a null torso");
-    }
+    // the "right" way
+    sendToPeer("torso", "moveTorso", topStom, midStom, lowStom);
   }
 
   public void moveTorsoBlocking(Double topStom, Double midStom, Double lowStom) {
-    if (torso != null) {
-      torso.moveToBlocking(topStom, midStom, lowStom);
-    } else {
-      log.error("moveTorsoBlocking - I have a null torso");
-    }
+    // the "right" way
+    sendToPeer("torso", "moveTorsoBlocking", topStom, midStom, lowStom);
   }
 
   public void onGestureStatus(Status status) {
@@ -995,25 +852,12 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   // FIXME NO DIRECT REFERENCES - publishRest --> (onRest) --> rest
   public void rest() {
-    log.info("InMoov2.rest()");
-    if (head != null) {
-      head.rest();
-    }
-    if (rightHand != null) {
-      rightHand.rest();
-    }
-    if (leftHand != null) {
-      leftHand.rest();
-    }
-    if (rightArm != null) {
-      rightArm.rest();
-    }
-    if (leftArm != null) {
-      leftArm.rest();
-    }
-    if (torso != null) {
-      torso.rest();
-    }
+    sendToPeer("head", "rest");
+    sendToPeer("rightHand", "rest");
+    sendToPeer("leftHand", "rest");
+    sendToPeer("rightArm", "rest");
+    sendToPeer("leftArm", "rest");
+    sendToPeer("torso", "rest");
   }
 
   public void setLeftArmSpeed(Double bicep, Double rotate, Double shoulder, Double omoplate) {
@@ -1047,27 +891,13 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public void setAutoDisable(Boolean param) {
-    if (head != null) {
-      head.setAutoDisable(param);
-    }
-    if (rightArm != null) {
-      rightArm.setAutoDisable(param);
-    }
-    if (leftArm != null) {
-      leftArm.setAutoDisable(param);
-    }
-    if (leftHand != null) {
-      leftHand.setAutoDisable(param);
-    }
-    if (rightHand != null) {
-      leftHand.setAutoDisable(param);
-    }
-    if (torso != null) {
-      torso.setAutoDisable(param);
-    }
-    /*
-     * if (eyelids != null) { eyelids.setAutoDisable(param); }
-     */
+
+    sendToPeer("head", "setAutoDisable", param);
+    sendToPeer("rightHand", "setAutoDisable", param);
+    sendToPeer("leftHand", "setAutoDisable", param);
+    sendToPeer("rightArm", "setAutoDisable", param);
+    sendToPeer("leftArm", "setAutoDisable", param);
+    sendToPeer("torso", "setAutoDisable", param);
   }
 
   public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky) {
@@ -1126,11 +956,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
-    if (head == null) {
-      warn("setHeadSpeed - head not started");
-      return;
-    }
-    head.setSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
+    sendToPeer("head", "setSpeed", neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
   }
 
   @Deprecated
@@ -1185,11 +1011,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public void setNeopixelAnimation(String animation, Integer red, Integer green, Integer blue, Integer speed) {
-    if (neopixel != null) {
-      neopixel.setAnimation(animation, red, green, blue, speed);
-    } else {
-      warn("No Neopixel attached");
-    }
+    sendToPeer("neopixel", "animation", red, green, blue, speed);
   }
 
   public String setSpeechType(String speechType) {
@@ -1202,11 +1024,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public void setTorsoSpeed(Double topStom, Double midStom, Double lowStom) {
-    if (torso != null) {
-      torso.setSpeed(topStom, midStom, lowStom);
-    } else {
-      log.warn("setTorsoSpeed - I have no torso");
-    }
+    sendToPeer("torso", "setSpeed", topStom, midStom, lowStom);
   }
 
   public void setTorsoSpeed(Integer topStom, Integer midStom, Integer lowStom) {
@@ -1215,11 +1033,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   @Deprecated
   public void setTorsoVelocity(Double topStom, Double midStom, Double lowStom) {
-    if (torso != null) {
-      torso.setVelocity(topStom, midStom, lowStom);
-    } else {
-      log.warn("setTorsoVelocity - I have no torso");
-    }
+    setTorsoSpeed(topStom, midStom, lowStom);
   }
 
   public boolean setAllVirtual(boolean virtual) {
@@ -1266,7 +1080,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
     if (!mute && isPeerStarted("mouth")) {
       // sendToPeer("mouth", "speakBlocking", toSpeak);
-      invokePeer("mouth", "speakBlocking", toSpeak);
+      // invokePeer("mouth", "speakBlocking", toSpeak);
+      sendToPeer("mouth", "speakBlocking", toSpeak);
     }
   }
 
@@ -1402,15 +1217,19 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   // and the only thing needed is pubs/subs that are not handled in abstracts
   public SpeechSynthesis startMouth() {
 
+    // FIXME - set type ??? - maybe a good product of InMoov
+    // if "new" type cannot necessarily grab yml file
+    // setMouthType
+
     // FIXME - bad to have a reference, should only need the "name" of the
     // service !!!
     mouth = (SpeechSynthesis) startPeer("mouth");
 
-//    voices = mouth.getVoices();
-//    Voice voice = mouth.getVoice();
-//    if (voice != null) {
-//      voiceSelected = voice.getName();
-//    }
+    // voices = mouth.getVoices();
+    // Voice voice = mouth.getVoice();
+    // if (voice != null) {
+    // voiceSelected = voice.getName();
+    // }
 
     if (mute) {
       mouth.setMute(true);
@@ -1432,7 +1251,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
     return mouth;
   }
-  
+
   public void startServos() {
     startPeer("head");
     startPeer("leftArm");
@@ -1444,223 +1263,17 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   // FIXME .. externalize in a json file included in InMoov2
   public Simulator startSimulator() throws Exception {
-
-    speakBlocking(get("STARTINGVIRTUAL"));
-
-    if (simulator != null) {
-      log.info("start called twice - starting simulator is reentrant");
-      return simulator;
-    }
-
-    // FIXME - put all the following in default configuration
-    simulator = (JMonkeyEngine) startPeer("simulator");
-
-    // adding InMoov2 asset path to the jmonkey simulator
-    String assetPath = getResourceDir() + fs + JMonkeyEngine.class.getSimpleName();
-
-    File check = new File(assetPath);
-    log.info("loading assets from {}", assetPath);
-    if (!check.exists()) {
-      log.warn("%s does not exist");
-    }
-
-    // disable the frustrating servo events ...
-    // Servo.eventsEnabledDefault(false);
-    // jme.loadModels(assetPath); not needed - as InMoov2 unzips the model into
-    // /resource/JMonkeyEngine/assets
-    simulator.loadModels(assetPath);
-
-    // ========== gael's calibrations begin ======================
-    simulator.setRotation(getName() + ".head.jaw", "x");
-    simulator.setRotation(getName() + ".head.neck", "x");
-    simulator.setRotation(getName() + ".head.rothead", "y");
-    simulator.setRotation(getName() + ".head.rollNeck", "z");
-    simulator.setRotation(getName() + ".head.eyeY", "x");
-    simulator.setRotation(getName() + ".head.eyeX", "y");
-    // simulator.setRotation(getName() + ".head.eyelidLeft", "x");FIXME we need
-    // to modelize them in Blender
-    // simulator.setRotation(getName() + ".head.eyelidRight", "x");FIXME we need
-    // to modelize them in Blender
-    simulator.setRotation(getName() + ".torso.topStom", "z");
-    simulator.setRotation(getName() + ".torso.midStom", "y");
-    simulator.setRotation(getName() + ".torso.lowStom", "x");
-    simulator.setRotation(getName() + ".rightArm.bicep", "x");
-    simulator.setRotation(getName() + ".leftArm.bicep", "x");
-    simulator.setRotation(getName() + ".rightArm.shoulder", "x");
-    simulator.setRotation(getName() + ".leftArm.shoulder", "x");
-    simulator.setRotation(getName() + ".rightArm.rotate", "y");
-    simulator.setRotation(getName() + ".leftArm.rotate", "y");
-    simulator.setRotation(getName() + ".rightArm.omoplate", "z");
-    simulator.setRotation(getName() + ".leftArm.omoplate", "z");
-    simulator.setRotation(getName() + ".rightHand.wrist", "y");
-    simulator.setRotation(getName() + ".leftHand.wrist", "y");
-
-    simulator.setMapper(getName() + ".head.jaw", 0, 180, -5, 80);
-    simulator.setMapper(getName() + ".head.neck", 0, 180, 20, -20);
-    simulator.setMapper(getName() + ".head.rollNeck", 0, 180, 30, -30);
-    simulator.setMapper(getName() + ".head.eyeY", 0, 180, 40, 140);
-    simulator.setMapper(getName() + ".head.eyeX", 0, 180, -10, 70); // HERE
-                                                                    // there
-                                                                    // need
-    // to be
-    // two eyeX (left and
-    // right?)
-    // simulator.setMapper(getName() + ".head.eyelidLeft", 0, 180, 40,
-    // 140);FIXME we need to modelize them in Blender
-    // simulator.setMapper(getName() + ".head.eyelidRight", 0, 180, 40,
-    // 140);FIXME we need to modelize them in Blender
-    simulator.setMapper(getName() + ".rightArm.bicep", 0, 180, 0, -150);
-    simulator.setMapper(getName() + ".leftArm.bicep", 0, 180, 0, -150);
-
-    simulator.setMapper(getName() + ".rightArm.shoulder", 0, 180, 30, -150);
-    simulator.setMapper(getName() + ".leftArm.shoulder", 0, 180, 30, -150);
-    simulator.setMapper(getName() + ".rightArm.rotate", 0, 180, 80, -80);
-    simulator.setMapper(getName() + ".leftArm.rotate", 0, 180, -80, 80);
-    simulator.setMapper(getName() + ".rightArm.omoplate", 0, 180, 10, -180);
-    simulator.setMapper(getName() + ".leftArm.omoplate", 0, 180, -10, 180);
-
-    simulator.setMapper(getName() + ".rightHand.wrist", 0, 180, -20, 60);
-    simulator.setMapper(getName() + ".leftHand.wrist", 0, 180, 20, -60);
-
-    simulator.setMapper(getName() + ".torso.topStom", 0, 180, -30, 30);
-    simulator.setMapper(getName() + ".torso.midStom", 0, 180, 50, 130);
-    simulator.setMapper(getName() + ".torso.lowStom", 0, 180, -30, 30);
-
-    // ========== gael's calibrations end ======================
-
-    // ========== 3 joint finger mapping and attaching begin ===
-
-    // ========== Requires VinMoov5.j3o ========================
-
-    simulator.multiMap(getName() + ".leftHand.thumb", getName() + ".leftHand.thumb1", getName() + ".leftHand.thumb2", getName() + ".leftHand.thumb3");
-    simulator.setRotation(getName() + ".leftHand.thumb1", "y");
-    simulator.setRotation(getName() + ".leftHand.thumb2", "x");
-    simulator.setRotation(getName() + ".leftHand.thumb3", "x");
-
-    simulator.multiMap(getName() + ".leftHand.index", getName() + ".leftHand.index", getName() + ".leftHand.index2", getName() + ".leftHand.index3");
-    simulator.setRotation(getName() + ".leftHand.index", "x");
-    simulator.setRotation(getName() + ".leftHand.index2", "x");
-    simulator.setRotation(getName() + ".leftHand.index3", "x");
-
-    simulator.multiMap(getName() + ".leftHand.majeure", getName() + ".leftHand.majeure", getName() + ".leftHand.majeure2", getName() + ".leftHand.majeure3");
-    simulator.setRotation(getName() + ".leftHand.majeure", "x");
-    simulator.setRotation(getName() + ".leftHand.majeure2", "x");
-    simulator.setRotation(getName() + ".leftHand.majeure3", "x");
-
-    simulator.multiMap(getName() + ".leftHand.ringFinger", getName() + ".leftHand.ringFinger", getName() + ".leftHand.ringFinger2", getName() + ".leftHand.ringFinger3");
-    simulator.setRotation(getName() + ".leftHand.ringFinger", "x");
-    simulator.setRotation(getName() + ".leftHand.ringFinger2", "x");
-    simulator.setRotation(getName() + ".leftHand.ringFinger3", "x");
-
-    simulator.multiMap(getName() + ".leftHand.pinky", getName() + ".leftHand.pinky", getName() + ".leftHand.pinky2", getName() + ".leftHand.pinky3");
-    simulator.setRotation(getName() + ".leftHand.pinky", "x");
-    simulator.setRotation(getName() + ".leftHand.pinky2", "x");
-    simulator.setRotation(getName() + ".leftHand.pinky3", "x");
-
-    // left hand mapping complexities of the fingers
-    simulator.setMapper(getName() + ".leftHand.index", 0, 180, -110, -179);
-    simulator.setMapper(getName() + ".leftHand.index2", 0, 180, -110, -179);
-    simulator.setMapper(getName() + ".leftHand.index3", 0, 180, -110, -179);
-
-    simulator.setMapper(getName() + ".leftHand.majeure", 0, 180, -110, -179);
-    simulator.setMapper(getName() + ".leftHand.majeure2", 0, 180, -110, -179);
-    simulator.setMapper(getName() + ".leftHand.majeure3", 0, 180, -110, -179);
-
-    simulator.setMapper(getName() + ".leftHand.ringFinger", 0, 180, -110, -179);
-    simulator.setMapper(getName() + ".leftHand.ringFinger2", 0, 180, -110, -179);
-    simulator.setMapper(getName() + ".leftHand.ringFinger3", 0, 180, -110, -179);
-
-    simulator.setMapper(getName() + ".leftHand.pinky", 0, 180, -110, -179);
-    simulator.setMapper(getName() + ".leftHand.pinky2", 0, 180, -110, -179);
-    simulator.setMapper(getName() + ".leftHand.pinky3", 0, 180, -110, -179);
-
-    simulator.setMapper(getName() + ".leftHand.thumb1", 0, 180, -30, -100);
-    simulator.setMapper(getName() + ".leftHand.thumb2", 0, 180, 80, 20);
-    simulator.setMapper(getName() + ".leftHand.thumb3", 0, 180, 80, 20);
-
-    // right hand
-
-    simulator.multiMap(getName() + ".rightHand.thumb", getName() + ".rightHand.thumb1", getName() + ".rightHand.thumb2", getName() + ".rightHand.thumb3");
-    simulator.setRotation(getName() + ".rightHand.thumb1", "y");
-    simulator.setRotation(getName() + ".rightHand.thumb2", "x");
-    simulator.setRotation(getName() + ".rightHand.thumb3", "x");
-
-    simulator.multiMap(getName() + ".rightHand.index", getName() + ".rightHand.index", getName() + ".rightHand.index2", getName() + ".rightHand.index3");
-    simulator.setRotation(getName() + ".rightHand.index", "x");
-    simulator.setRotation(getName() + ".rightHand.index2", "x");
-    simulator.setRotation(getName() + ".rightHand.index3", "x");
-
-    simulator.multiMap(getName() + ".rightHand.majeure", getName() + ".rightHand.majeure", getName() + ".rightHand.majeure2", getName() + ".rightHand.majeure3");
-    simulator.setRotation(getName() + ".rightHand.majeure", "x");
-    simulator.setRotation(getName() + ".rightHand.majeure2", "x");
-    simulator.setRotation(getName() + ".rightHand.majeure3", "x");
-
-    simulator.multiMap(getName() + ".rightHand.ringFinger", getName() + ".rightHand.ringFinger", getName() + ".rightHand.ringFinger2", getName() + ".rightHand.ringFinger3");
-    simulator.setRotation(getName() + ".rightHand.ringFinger", "x");
-    simulator.setRotation(getName() + ".rightHand.ringFinger2", "x");
-    simulator.setRotation(getName() + ".rightHand.ringFinger3", "x");
-
-    simulator.multiMap(getName() + ".rightHand.pinky", getName() + ".rightHand.pinky", getName() + ".rightHand.pinky2", getName() + ".rightHand.pinky3");
-    simulator.setRotation(getName() + ".rightHand.pinky", "x");
-    simulator.setRotation(getName() + ".rightHand.pinky2", "x");
-    simulator.setRotation(getName() + ".rightHand.pinky3", "x");
-
-    simulator.setMapper(getName() + ".rightHand.index", 0, 180, 65, -10);
-    simulator.setMapper(getName() + ".rightHand.index2", 0, 180, 70, -10);
-    simulator.setMapper(getName() + ".rightHand.index3", 0, 180, 70, -10);
-
-    simulator.setMapper(getName() + ".rightHand.majeure", 0, 180, 65, -10);
-    simulator.setMapper(getName() + ".rightHand.majeure2", 0, 180, 70, -10);
-    simulator.setMapper(getName() + ".rightHand.majeure3", 0, 180, 70, -10);
-
-    simulator.setMapper(getName() + ".rightHand.ringFinger", 0, 180, 65, -10);
-    simulator.setMapper(getName() + ".rightHand.ringFinger2", 0, 180, 70, -10);
-    simulator.setMapper(getName() + ".rightHand.ringFinger3", 0, 180, 70, -10);
-
-    simulator.setMapper(getName() + ".rightHand.pinky", 0, 180, 65, -10);
-    simulator.setMapper(getName() + ".rightHand.pinky2", 0, 180, 70, -10);
-    simulator.setMapper(getName() + ".rightHand.pinky3", 0, 180, 60, -10);
-
-    simulator.setMapper(getName() + ".rightHand.thumb1", 0, 180, 30, 110);
-    simulator.setMapper(getName() + ".rightHand.thumb2", 0, 180, -100, -150);
-    simulator.setMapper(getName() + ".rightHand.thumb3", 0, 180, -100, -160);
-
-    // We set the correct location view
-    simulator.cameraLookAt(getName() + ".torso.lowStom");
-
-    // additional experimental mappings
-    /*
-     * simulator.attach(getName() + ".leftHand.pinky", getName() +
-     * ".leftHand.index2"); simulator.attach(getName() + ".leftHand.thumb",
-     * getName() + ".leftHand.index3"); simulator.setRotation(getName() +
-     * ".leftHand.index2", "x"); simulator.setRotation(getName() +
-     * ".leftHand.index3", "x"); simulator.setMapper(getName() +
-     * ".leftHand.index", 0, 180, -90, -270); simulator.setMapper(getName() +
-     * ".leftHand.index2", 0, 180, -90, -270); simulator.setMapper(getName() +
-     * ".leftHand.index3", 0, 180, -90, -270);
-     */
-    return simulator;
+    Simulator si = (Simulator) startPeer("simulator");
+    return si;
   }
 
   public void stop() {
-    if (head != null) {
-      head.stop();
-    }
-    if (rightHand != null) {
-      rightHand.stop();
-    }
-    if (leftHand != null) {
-      leftHand.stop();
-    }
-    if (rightArm != null) {
-      rightArm.stop();
-    }
-    if (leftArm != null) {
-      leftArm.stop();
-    }
-    if (torso != null) {
-      torso.stop();
-    }
+    sendToPeer("head", "stop");
+    sendToPeer("rightHand", "stop");
+    sendToPeer("leftHand", "stop");
+    sendToPeer("rightArm", "stop");
+    sendToPeer("leftArm", "stop");
+    sendToPeer("torso", "stop");
   }
 
   public void stopGesture() {
@@ -1669,48 +1282,33 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public ServiceInterface startPeer(String peer) {
-    speakBlocking("START" + peer.toUpperCase());
-    
+    speakBlocking(get("STARTING" + peer.toUpperCase()));
+
     // FIXME - do reflective look for local vars named the same thing
     // to set the field
-    
+
     ServiceInterface si = super.startPeer(peer);
-    
+
     return si;
   }
 
   public void releasePeer(String peer) {
-    speakBlocking("STOP" + peer.toUpperCase());
+    speakBlocking("STOPPING" + peer.toUpperCase());
     super.releasePeer(peer);
   }
 
   public void stopNeopixelAnimation() {
-    if (neopixel != null) {
-      neopixel.clear();
-    } else {
-      warn("No Neopixel attached");
-    }
+    sendToPeer("neopixel", "clear");
   }
 
   public void waitTargetPos() {
-    if (head != null) {
-      head.waitTargetPos();
-    }
-    if (leftArm != null) {
-      leftArm.waitTargetPos();
-    }
-    if (rightArm != null) {
-      rightArm.waitTargetPos();
-    }
-    if (leftHand != null) {
-      leftHand.waitTargetPos();
-    }
-    if (rightHand != null) {
-      rightHand.waitTargetPos();
-    }
-    if (torso != null) {
-      torso.waitTargetPos();
-    }
+
+    sendToPeer("head", "waitTargetPos");
+    sendToPeer("rightHand", "waitTargetPos");
+    sendToPeer("leftHand", "waitTargetPos");
+    sendToPeer("rightArm", "waitTargetPos");
+    sendToPeer("leftArm", "waitTargetPos");
+    sendToPeer("torso", "waitTargetPos");
   }
 
   @Override
@@ -1733,7 +1331,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   public void startMouthControl() {
     speakBlocking(get("STARTINGMOUTHCONTROL"));
     mouthControl = (MouthControl) startPeer("mouthControl");
-    mouthControl.attach(head.jaw);
+    InMoov2Head head = getHead();
+    if (head != null) {
+      mouthControl.attach(head.getPeer("jaw"));
+    }
     mouthControl.attach((Attachable) getPeer("mouth"));
   }
 
@@ -1758,37 +1359,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   @Override
   public ServiceConfig getConfig() {
     InMoov2Config config = new InMoov2Config();
-
-    config.enableAudioPlayer = isPeerStarted("audioPlayer;");
-    config.enableChatBot = isPeerStarted("chatBot;");
-    config.enableEar = isPeerStarted("ear;");
-    config.enableEyeTracking = isPeerStarted("eyeTracking;");
-    config.enableFsm = isPeerStarted("fsm;");
-    config.enableHeadTracking = isPeerStarted("headTracking;");
-    config.enableHtmlFilter = isPeerStarted("htmlFilter;");
-    config.enableHead = isPeerStarted("head;");
-    config.enableImageDisplay = isPeerStarted("imageDisplay;");
-    config.enableLeftArm = isPeerStarted("leftArm;");
-    config.enableLeftHand = isPeerStarted("leftHand;");
-    config.enableMouth = isPeerStarted("mouth;");
-    config.enableMouthControl = isPeerStarted("mouthControl;");
-    config.enableNeoPixel = isPeerStarted("neoPixel;");
-    config.enableOpenCV = isPeerStarted("opencv;");
-    config.enablePid = isPeerStarted("pid;");
-    config.enablePir = isPeerStarted("pir;");
-    config.enableRandom = isPeerStarted("random;");
-    config.enableRightHand = isPeerStarted("rightHand;");
-    config.enableRightArm = isPeerStarted("rightArm;");
-    config.enableServoMixer = isPeerStarted("servoMixer;");
-    config.enableSimulator = isPeerStarted("simulator;");
-    config.enableTorso = isPeerStarted("torso;");
-    config.enableUltrasonicLeft = isPeerStarted("ultrasonicLeft;");
-    config.enableUltrasonicRight = isPeerStarted("ultrasonicRight;");
-    
-    config.autoStartPeers = false;
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     InMoov2Config config = (InMoov2Config) c;
     try {
@@ -1797,144 +1371,14 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
         setLocale(config.locale);
       }
 
-      if (config.enableAudioPlayer) {
-        startPeer("audioPlayer");
-      } else {
-        releasePeer("audioPlayer");
+      if (config.loadGestures) {
+        loadGestures();
       }
 
-      // FIXME - framework should look for enable{peer} automagically
-      if (config.enableAudioPlayer) {
-        startPeer("audioPlayer");
+      if (config.heartbeat) {
+        startHeartbeat();
       } else {
-        releasePeer("audioPlayer");
-      }
-      if (config.enableChatBot) {
-        startPeer("chatBot");
-      } else {
-        releasePeer("chatBot");
-      }
-      if (config.enableEar) {
-        startPeer("ear");
-      } else {
-        releasePeer("ear");
-      }
-      if (config.enableEyeTracking) {
-        startPeer("eyeTracking");
-      } else {
-        releasePeer("eyeTracking");
-      }
-      if (config.enableFsm) {
-        startPeer("fsm");
-      } else {
-        releasePeer("fsm");
-      }
-      if (config.enableHeadTracking) {
-        startPeer("headTracking");
-      } else {
-        releasePeer("headTracking");
-      }
-      if (config.enableHtmlFilter) {
-        startPeer("htmlFilter");
-      } else {
-        releasePeer("htmlFilter");
-      }
-      if (config.enableHead) {
-        startPeer("head");
-      } else {
-        releasePeer("head");
-      }
-      if (config.enableImageDisplay) {
-        startPeer("imageDisplay");
-      } else {
-        releasePeer("imageDisplay");
-      }
-      if (config.enableLeftArm) {
-        startPeer("leftArm");
-      } else {
-        releasePeer("leftArm");
-      }
-      if (config.enableLeftHand) {
-        startPeer("leftHand");
-      } else {
-        releasePeer("leftHand");
-      }
-      if (config.enableMouth) {
-        startPeer("mouth");
-      } else {
-        releasePeer("mouth");
-      }
-      if (config.enableMouthControl) {
-        startPeer("mouthControl");
-      } else {
-        releasePeer("mouthControl");
-      }
-      if (config.enableNeoPixel) {
-        startPeer("neoPixel");
-      } else {
-        releasePeer("neoPixel");
-      }
-      if (config.enableOpenCV) {
-        startPeer("opencv");
-      } else {
-        releasePeer("opencv");
-      }
-      if (config.enablePid) {
-        startPeer("pid");
-      } else {
-        releasePeer("pid");
-      }
-      if (config.enablePir) {
-        startPeer("pir");
-      } else {
-        releasePeer("pir");
-      }
-      if (config.enableRandom) {
-        startPeer("random");
-      } else {
-        releasePeer("random");
-      }
-      if (config.enableRightHand) {
-        startPeer("rightHand");
-      } else {
-        releasePeer("rightHand");
-      }
-      if (config.enableRightArm) {
-        startPeer("rightArm");
-      } else {
-        releasePeer("rightArm");
-      }
-      if (config.enableServoMixer) {
-        startPeer("servoMixer");
-      } else {
-        releasePeer("servoMixer");
-      }
-      if (config.enableSimulator) {
-        startSimulator();
-        startPeer("simulator");
-      } else {
-        releasePeer("simulator");
-      }
-      if (config.enableTorso) {
-        startPeer("torso");
-      } else {
-        releasePeer("torso");
-      }
-      if (config.enableUltrasonicLeft) {
-        startPeer("ultrasonicLeft");
-      } else {
-        releasePeer("ultrasonicLeft");
-      }
-      if (config.enableUltrasonicRight) {
-        startPeer("ultrasonicRight");
-      } else {
-        releasePeer("ultrasonicRight");
-      }
-
-      loadGestures = config.loadGestures;
-
-      if (config.enableSimulator) {
-        startSimulator();
+        stopHeartbeat();
       }
 
     } catch (Exception e) {
@@ -1944,24 +1388,46 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return c;
   }
 
+  public void startHeartbeat() {
+    addTask(1000, "publishHeartbeat");
+  }
+
+  public void stopHeartbeat() {
+    purgeTask("publishHeartbeat");
+  }
+
+  public String publishHeartbeat() {
+    return getName();
+  }
+
+  // ???? - seems like a good pattern dunno what to do
+  // Overriding and polymorphism is a nice way to reduce code
+  // public void onHeartbeat(String name) {
+  //
+  // }
+
   public static void main(String[] args) {
     try {
 
       LoggingFactory.init(Level.INFO);
       // Platform.setVirtual(true);
       // Runtime.start("s01", "Servo");
-      Runtime.start("intro", "Intro");
+      // Runtime.start("intro", "Intro");
+
+      Runtime.startConfig("dewey-2");
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
       InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+      i01.startSimulator();
       Plan plan = Runtime.load("webgui", "WebGui");
       WebGuiConfig webgui = (WebGuiConfig) plan.get("webgui");
       webgui.autoStartBrowser = false;
       Runtime.startConfig("webgui");
       Runtime.start("webgui", "WebGui");
-      
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       Random random = (Random) Runtime.start("random", "Random");
 
@@ -1982,8 +1448,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
       random.addRandom(200, 1000, "i01", "setTorsoSpeed", 2.0, 5.0, 2.0, 5.0, 2.0, 5.0);
       random.addRandom(200, 1000, "i01", "moveTorso", 85.0, 95.0, 88.0, 93.0, 70.0, 110.0);
-      
-
 
       random.save();
 
@@ -2014,19 +1478,18 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     // TODO Auto-generated method stub
 
   }
-  
-  public  String publishPeerStarted(String peerKey) {
-//    if ("mouth".equals(peerKey)) {
-//      SpeechSynthesis mouth = (SpeechSynthesis)getPeer(peerKey);
-//      voices = mouth.getVoices();
-//      Voice voice = mouth.getVoice();
-//      if (voice != null) {
-//        voiceSelected = voice.getName();
-//      }
-//      broadcastState();
-//    }
+
+  public String publishPeerStarted(String peerKey) {
+    // if ("mouth".equals(peerKey)) {
+    // SpeechSynthesis mouth = (SpeechSynthesis)getPeer(peerKey);
+    // voices = mouth.getVoices();
+    // Voice voice = mouth.getVoice();
+    // if (voice != null) {
+    // voiceSelected = voice.getName();
+    // }
+    // broadcastState();
+    // }
     return peerKey;
   }
-  
-    
+
 }

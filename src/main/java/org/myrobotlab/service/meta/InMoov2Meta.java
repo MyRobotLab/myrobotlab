@@ -11,9 +11,11 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.FiniteStateMachineConfig;
 import org.myrobotlab.service.config.HtmlFilterConfig;
 import org.myrobotlab.service.config.InMoov2Config;
+import org.myrobotlab.service.config.JMonkeyEngineConfig;
 import org.myrobotlab.service.config.MouthControlConfig;
 import org.myrobotlab.service.config.NeoPixelConfig;
 import org.myrobotlab.service.config.PidConfig;
+import org.myrobotlab.service.config.ProgramABConfig;
 import org.myrobotlab.service.config.RandomConfig;
 import org.myrobotlab.service.config.RandomConfig.RandomMessageConfig;
 import org.myrobotlab.service.config.TrackingConfig;
@@ -211,6 +213,20 @@ public class InMoov2Meta extends MetaData {
     fsm.transitions.add(new FiniteStateMachineConfig.Transition("start", "first_time", "init"));
     fsm.transitions.add(new FiniteStateMachineConfig.Transition("init", "first_time", "identify_user"));
     fsm.transitions.add(new FiniteStateMachineConfig.Transition("detected_face", "first_time", "identify_user"));
+    
+    // == Peer - simulator =============================
+    JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.getPeerConfig("simulator");
+    if (simulator == null) {
+      log.error("error config");
+    }
+
+    // == Peer - chatBot  =============================
+    ProgramABConfig chatBot = (ProgramABConfig) plan.getPeerConfig("chatBot");
+    if (chatBot == null) {
+      log.error("error config");
+    }
+    chatBot.botDir = "data/ProgramAB";
+
 
     // == Peer - random =============================
     RandomConfig random = (RandomConfig) plan.getPeerConfig("random");
