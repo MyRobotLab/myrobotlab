@@ -1,10 +1,8 @@
 package org.myrobotlab.service;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +12,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -765,6 +762,23 @@ public class Python extends Service implements ServiceLifeCycleListener {
     getFileListing();
     save();
     broadcastState();
+  }
+
+  /**
+   * Save a script
+   * @param scriptName - path and name of script
+   * @param code - content
+   * @return true if successful
+   */
+  public boolean saveScript(String scriptName, String code) {
+    try {
+      FileIO.toFile(scriptName, code.getBytes());
+      info("saved script %s", scriptName);
+      return true;
+    } catch(Exception e) {
+      error("%s could not save script %s", getName(), scriptName);
+    }
+    return false;
   }
 
   // @Override /* FIXME - make interface for it */

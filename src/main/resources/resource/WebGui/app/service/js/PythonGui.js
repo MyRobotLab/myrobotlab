@@ -1,5 +1,5 @@
-angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$log', '$scope', 'mrl', '$uibModal', '$timeout', function($log, $scope, mrl, $uibModal, $timeout) {
-    $log.info('PythonGuiCtrl')
+angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$scope', 'mrl', '$uibModal', '$timeout', function($scope, mrl, $uibModal, $timeout) {
+    console.info('PythonGuiCtrl')
     var _self = this
     var msg = this.msg
     var name = $scope.name
@@ -61,7 +61,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
             $scope.$apply()
             break
         default:
-            $log.error("ERROR - unhandled method " + msg.method)
+            console.error("ERROR - unhandled method " + msg.method)
             break
         }
     }
@@ -91,12 +91,12 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
 
     //----- ace editors related callbacks begin -----//
     $scope.aceLoaded = function(e) {
-        $log.info("ace loaded")
+        console.info("ace loaded")
         $scope.activeTabIndex = $scope.scriptCount
     }
 
     $scope.aceChanged = function(e) {
-        $log.info("ace changed")
+        console.info("ace changed")
     }
     //----- ace editors related callbacks end -----//
     $scope.addScript = function() {
@@ -122,7 +122,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
         msg.send('exec', $scope.activeScript.code, false)
     }
     $scope.tabSelected = function(script) {
-        $log.info('here')
+        console.info('here')
         $scope.activeScript = script
         // need to get a handle on hte tab's ui / text
         // $scope.editors.setValue(script.code)
@@ -133,7 +133,11 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
         //return key.substr(key.lastIndexOf('/') + 1)
     }
 
-    $scope.saveTextAsFile = function() {
+    $scope.saveScript = function() {
+        msg.send('saveScript', $scope.activeScript.file.path, $scope.activeScript.code)
+    }
+
+    $scope.downloadScript = function() {
         var textFileAsBlob = new Blob([$scope.activeScript.code],{
             type: 'text/plain'
         })
@@ -161,9 +165,6 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
         return ret
     }
 
-    $scope.export = function() {
-        msg.send('exportAll')
-    }
 
     $scope.uploadFile = function() {
 
