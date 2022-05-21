@@ -38,6 +38,7 @@ public class MarySpeechMeta extends AbstractSpeechSynthesisMeta {
 
       if ("voice-bits1-hsmm".equals(voice) || "voice-cmu-slt-hsmm".equals(voice)) {
         exclude("org.slf4j", "slf4j-log4j12");
+        exclude("log4j", "log4j");
       }
     }
     exclude("org.slf4j", "slf4j-api");
