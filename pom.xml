@@ -238,12 +238,6 @@
     <scope>provided</scope>
   </dependency>
   <dependency>
-    <groupId>org.bytedeco</groupId>
-    <artifactId>openblas</artifactId>
-    <version>0.3.17-1.5.6</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-core</artifactId>
     <version>1.0.0-M1.1</version>
@@ -581,6 +575,10 @@
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
       </exclusions>
   </dependency>
   <dependency>
@@ -664,6 +662,10 @@
         <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
         </exclusion>
       </exclusions>
   </dependency>
@@ -871,6 +873,12 @@
         </exclusion>
       </exclusions>
   </dependency>
+  <dependency>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-1.2-api</artifactId>
+    <version>2.12.1</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- MarySpeech end -->
 
 <!-- Mqtt begin -->
@@ -979,6 +987,14 @@
           <artifactId>servlet-api</artifactId>
         </exclusion>
         <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>commons-lang</groupId>
           <artifactId>commons-lang</artifactId>
         </exclusion>
@@ -1010,12 +1026,6 @@
     <version>0.0.1</version>
     <scope>provided</scope>
     <type>zip</type>
-  </dependency>
-  <dependency>
-    <groupId>com.github.axet</groupId>
-    <artifactId>vget</artifactId>
-    <version>1.1.34</version>
-    <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>yolo</groupId>
@@ -1080,12 +1090,6 @@
 
 <!-- Polly begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-  <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-core</artifactId>
-    <version>2.12.6</version>
-    <scope>provided</scope>
-  </dependency>
   <dependency>
     <groupId>com.fasterxml.jackson.core</groupId>
     <artifactId>jackson-databind</artifactId>
@@ -1254,6 +1258,26 @@
     <scope>provided</scope>
       <exclusions>
         <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-web</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-1.2-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-api</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>org.apache.logging.log4j</groupId>
           <artifactId>log4j-slf4j-impl</artifactId>
         </exclusion>
@@ -1265,6 +1289,30 @@
     <version>8.8.2</version>
     <scope>provided</scope>
       <exclusions>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-web</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-1.2-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-api</artifactId>
+        </exclusion>
         <exclusion>
           <groupId>org.apache.logging.log4j</groupId>
           <artifactId>log4j-slf4j-impl</artifactId>
@@ -1455,7 +1503,6 @@
         </exclusion>
       </exclusions>
   </dependency>
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.12.6 skipping -->
 <!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.12.6.1 skipping -->
 <!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.12.0 skipping -->
 <!-- WikiDataFetcher end -->

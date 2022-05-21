@@ -19,9 +19,22 @@ public class SolrMeta extends MetaData {
     String solrVersion = "8.8.2";
     String luceneVersion = solrVersion;
     addDependency("org.apache.lucene", "lucene-core", luceneVersion);
-    addDependency("org.apache.solr", "solr-core", solrVersion);
+    addDependency("org.apache.solr", "solr-core", solrVersion);    
+    exclude("log4j", "log4j");
+    exclude("org.apache.logging.log4j", "log4j-core");
+    exclude("org.apache.logging.log4j", "log4j-web");
+    exclude("org.apache.logging.log4j", "log4j-1.2-api");
+    exclude("org.apache.logging.log4j", "log4j-api");
     exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
+    
+    
     addDependency("org.apache.solr", "solr-test-framework", solrVersion);
+    exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
+    exclude("log4j", "log4j");
+    exclude("org.apache.logging.log4j", "log4j-core");
+    exclude("org.apache.logging.log4j", "log4j-web");
+    exclude("org.apache.logging.log4j", "log4j-1.2-api");
+    exclude("org.apache.logging.log4j", "log4j-api");
     exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
     addDependency("org.apache.solr", "solr-solrj", solrVersion);
     addDependency("commons-io", "commons-io", "2.7");

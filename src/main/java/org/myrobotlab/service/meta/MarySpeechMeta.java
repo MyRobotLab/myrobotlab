@@ -38,6 +38,7 @@ public class MarySpeechMeta extends AbstractSpeechSynthesisMeta {
 
       if ("voice-bits1-hsmm".equals(voice) || "voice-cmu-slt-hsmm".equals(voice)) {
         exclude("org.slf4j", "slf4j-log4j12");
+        exclude("log4j", "log4j");
       }
     }
     exclude("org.slf4j", "slf4j-api");
@@ -47,6 +48,8 @@ public class MarySpeechMeta extends AbstractSpeechSynthesisMeta {
     exclude("com.google.guava", "guava");
     exclude("org.apache.opennlp", "opennlp-tools");
     exclude("org.slf4j", "slf4j-log4j12");
+    
+    addDependency("org.apache.logging.log4j", "log4j-1.2-api", "2.12.1");
 
   }
   
