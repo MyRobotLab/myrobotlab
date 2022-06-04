@@ -23,6 +23,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.mqtt.MqttMsg;
 import org.myrobotlab.net.Connection;
+import org.myrobotlab.service.config.MqttBrokerConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.KeyConsumer;
 import org.slf4j.Logger;
@@ -654,5 +656,25 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
     security.setKey(keyName, keyValue);
     broadcastState();
   }
+  
+  @Override
+  public ServiceConfig getConfig() {
+    MqttBrokerConfig c = new MqttBrokerConfig();
+    c.address = address;
+    c.mqttPort = mqttPort;
+    c.wsPort = wsPort;
+    c.username = username;
+    c.password = password;
+    return c; 
+  }
 
+  
+  @Override
+  public ServiceConfig apply(ServiceConfig c) {
+    MqttBrokerConfig config = (MqttBrokerConfig) c;
+    
+    return config;
+  }
+
+  
 }
