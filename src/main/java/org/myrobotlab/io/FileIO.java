@@ -650,9 +650,9 @@ public class FileIO {
         boolean isSubDir = (src.split("/").length + 1 < jarEntry.getName().split("/").length);
 
         if (jarEntry.isDirectory() || (isSubDir && !recurse) || jarEntry.getName().contains("$")) {
-          log.info("filtering out {}", urlStr);
+          log.debug("filtering out {}", urlStr);
         } else {
-          log.info("adding url {}", urlStr);
+          log.debug("adding url {}", urlStr);
           URL url = new URL(urlStr);
           classes.add(url);
         }
