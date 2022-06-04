@@ -57,7 +57,7 @@ import org.slf4j.Logger;
 public class ProgramAB extends Service implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener, UtterancePublisher, UtteranceListener {
 
   /**
-   * default file name that aiml categories comfing from matching a learnf tag 
+   * default file name that aiml categories comfing from matching a learnf tag
    * will be written to.
    */
   private static final String LEARNF_AIML_FILE = "learnf.aiml";
@@ -462,6 +462,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     }
     return s.getPredicate(predicateName);
   }
+
   /**
    * Only respond if the last response was longer than delay ms ago
    * 
@@ -1114,17 +1115,17 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
     config.currentBotName = currentBotName;
     config.currentUserName = currentUserName;
-    
-    Set<String> listeners = getAttached("publishText"); 
+
+    Set<String> listeners = getAttached("publishText");
     config.textListeners = listeners.toArray(new String[listeners.size()]);
-    
-    listeners = getAttached("publishUtterance"); 
+
+    listeners = getAttached("publishUtterance");
     config.utteranceListeners = listeners.toArray(new String[listeners.size()]);
-    
+
     for (BotInfo bot : bots.values()) {
       config.bots.add(bot.path.getPath());
     }
-    
+
     return config;
   }
 
@@ -1136,6 +1137,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       addBotPath(botPath);
     }
 
+    if (config.bots != null && config.bots.size() > 0) {
+      bots.clear();
+      for (String botPath : config.bots) {
+        addBotPath(botPath);
+      }
+    }
+
     if (config.currentBotName != null) {
       setCurrentBotName(config.currentBotName);
     }
@@ -1145,7 +1153,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     }
     
     setCurrentSession(currentUserName, currentBotName);
-    
+
     // This is "good" in that its using the normalized data from subscription
     // vs creating a bunch of cluttery local vars to hold state with error
     if (config.textListeners != null) {
@@ -1300,23 +1308,23 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     log.info("Utterance Received " + utterance);
 
     boolean talkToBots = false;
-    // TODO: reconcile having different name between the discord bot username 
-    // and the programab bot name.  Mr. Turing is not actually Alice.. and vice versa.
+    // TODO: reconcile having different name between the discord bot username
+    // and the programab bot name. Mr. Turing is not actually Alice.. and vice
+    // versa.
     String botName = utterance.channelBotName;
 
-    
     // prevent bots going off the rails
     if (utterance.isBot && talkToBots) {
       log.info("Not responding to bots.");
       return;
     }
-    
+
     // Don't talk to myself, though I should be a bot..
     if (utterance.username.contentEquals(botName)) {
       log.info("Don't talk to myself.");
       return;
     }
-    
+
     boolean shouldIRespond = false;
     // always respond to direct messages.
     if ("PRIVATE".equals(utterance.channelType)) {
@@ -1329,7 +1337,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
         if (utterance.text.contains(botName)) {
           shouldIRespond = true;
         }
-      } 
+      }
     }
 
     // TODO: is there a better way to test for this?
@@ -1341,7 +1349,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       // Strip the botname from the utterance passed to programab.
       utteranceDisp = utteranceDisp.replace("@" + botName, "");
       Response resp = getResponse(utterance.username, utteranceDisp);
-      if (!StringUtils.isEmpty(resp.msg) ) {
+      if (!StringUtils.isEmpty(resp.msg)) {
         // Ok.. now what? respond to the user ...
         Utterance response = new Utterance();
         response.username = resp.botName;
