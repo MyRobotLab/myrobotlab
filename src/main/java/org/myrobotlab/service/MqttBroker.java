@@ -672,7 +672,11 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
   @Override
   public ServiceConfig apply(ServiceConfig c) {
     MqttBrokerConfig config = (MqttBrokerConfig) c;
-    
+    address = config.address;
+    mqttPort = config.mqttPort;
+    wsPort = config.wsPort;
+    username = config.username;
+    password = config.password;
     return config;
   }
 
