@@ -1,7 +1,6 @@
 <!-- ServoGui.html -->
 <div class="col-md-12">
     <uib-tabset active="activeTabIndex">
-        <!------------- CONTROL BEGIN ------------------->
         <uib-tab heading="Control" index="0" class="servoController">
             <div class="row">
                 <div class="col-md-12">
@@ -74,8 +73,6 @@
                 <!-- /.col-md-12 -->
             </div>
         </uib-tab>
-        <!------------- CONTROL END ------------------->
-        <!------------- BASIC BEGIN ------------------->
         <uib-tab heading="Basic" index="1">
             <div id="servo-basic" class="row">
                 <div class="col-md-12">
@@ -142,8 +139,8 @@
                                         <div class="servoCursor"></div>
                                     </div>
                                     <div class="servo-position prevent-drag-select"
-                                        style="left: calc(100% - (({{100 -(service.currentOutputPos*100/180)}}%) + 1px));">
-                                        <span class="prevent-drag-select">{{service.currentOutputPos.toFixed(0)}}º</span>
+                                        style="left: calc(100% - (({{100 -(service.currentInputPos*100/180)}}%) + 1px));">
+                                        <span class="prevent-drag-select">{{service.currentInputPos.toFixed(0)}}º</span>
                                         <div class="servoOutputCursor"></div>
                                     </div>
                                     <div class="rest-position"

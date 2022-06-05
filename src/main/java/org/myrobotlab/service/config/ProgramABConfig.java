@@ -1,14 +1,19 @@
 package org.myrobotlab.service.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ProgramABConfig extends ServiceConfig {
 
-  public String currentBotName;
+  public String currentBotName = "Alice";
   public String currentUserName;
   public String[] textListeners;
   public String[] utteranceListeners;
   public String botDir;
+  public List<String> bots = new ArrayList<>();
   
-  // search engine - currently google search is default peer
+  // search engine - currently wikipedia
+  // search for sraix
   public String search;
 
 }
