@@ -247,13 +247,17 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
         currentInputPos = targetPos = savedPos;
       }
     }
-    // currentInputP = mapper.calcOutput(targetPos); FIXME - FIXED - encoder now publishing input not output
+    // currentInputP = mapper.calcOutput(targetPos); FIXME - FIXED - encoder now
+    // publishing input not output
   }
 
   /**
    * if a new service is added to the system refresh the controllers
    */
-  @Deprecated /* lifecycle events not necessary for ui, probably should be pulled out */
+  @Deprecated /*
+               * lifecycle events not necessary for ui, probably should be
+               * pulled out
+               */
   public void onStarted(String name) {
     invoke("refreshControllers");
   }
@@ -306,7 +310,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     attachServoController(sc.getName(), pin, pos, null);
   }
 
-  @Deprecated /*setPin setPos setSpeed then attach(String)*/
+  @Deprecated /* setPin setPos setSpeed then attach(String) */
   public void attach(ServoController sc, Integer pin, Double pos, Double speed) {
     attachServoController(sc.getName(), pin, pos, speed);
   }
@@ -315,18 +319,21 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     attachServoController(sc, null, null, null);
   }
 
-  @Deprecated /*setPin then attach(String)*/
+  @Deprecated /* setPin then attach(String) */
   public void attach(String controllerName, Integer pin) {
     attach(controllerName, pin, null);
   }
 
-  @Deprecated /*setPin setPos then attach(String)*/
+  @Deprecated /* setPin setPos then attach(String) */
   public void attach(String controllerName, Integer pin, Double pos) {
     attach(controllerName, pin, pos, null);
   }
 
   @Deprecated
-  @Override   /* Servos Do Not publish Joint Angles - they only publish their position ! */
+  @Override /*
+             * Servos Do Not publish Joint Angles - they only publish their
+             * position !
+             */
   public AngleData publishJointAngle(AngleData angle) {
     log.debug("{}.publishJointAngle({})", getName(), angle);
     return angle;
@@ -376,7 +383,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     addListener("publishServoDisable", sc);
     controller = sc;
 
-    ServoController servoController = (ServoController)Runtime.getService(sc);
+    ServoController servoController = (ServoController) Runtime.getService(sc);
     if (servoController != null) {
       servoController.attachServoControl(this);
     }
@@ -384,11 +391,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // FIXME change to broadcast ?
     // TODO: there is a race condition here.. we need to know that
     // the servo control ackowledged this.
-//    try {
-//      sendBlocking(sc, "attachServoControl", this); // <-- change to broadcast ?
-//    } catch (Exception e) {
-//      log.error("sendBlocking attachServoControl threw", e);
-//    }
+    // try {
+    // sendBlocking(sc, "attachServoControl", this); // <-- change to broadcast
+    // ?
+    // } catch (Exception e) {
+    // log.error("sendBlocking attachServoControl threw", e);
+    // }
     // TOOD: we need to wait here for the servo controller to acknowledge that
     // it was attached.
 
@@ -437,7 +445,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // junit ServoTest will fail without this :P
     // sleep(500);
     firstMove = true;
-    
+
     send(controllerName, "detach", getName());
     broadcastState();
   }
@@ -467,9 +475,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Deprecated /* use setMaxSpeed */
   public void fullSpeed() {
-    setSpeed((Double)null);
+    setSpeed((Double) null);
   }
-  
+
   @Override
   public boolean isAutoDisable() {
     return autoDisable;
@@ -613,15 +621,17 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
       log.info("will not move to null position - not moving");
       return newPos;
     }
-    
+
     processMove(newPos, false, null);
     return newPos;
   }
-  
+
   /**
-   * incrementally move - takes the servo's current position (could be in the middle of a move)
-   * adds the increment and tells the servo to go to the new location. Returns the new location
-   * if the moveTo was successfully started - otherwise returns null
+   * incrementally move - takes the servo's current position (could be in the
+   * middle of a move) adds the increment and tells the servo to go to the new
+   * location. Returns the new location if the moveTo was successfully started -
+   * otherwise returns null
+   * 
    * @param increment
    * @return
    */
@@ -656,20 +666,15 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public Double moveToBlocking(Integer newPos, Long timeoutMs) {
-    try {
-      processMove((double) newPos, true, timeoutMs);
-      return mapper.calcInput(currentInputPos);
-    } catch (Exception e) {
-      log.error("moveToBlocking threw", e);
-    }
-    return null;
+    if (newPos != null) {
+      return moveToBlocking(newPos.doubleValue(), timeoutMs);
+    } else
+      return null;
   }
 
   @Override
   public Double moveToBlocking(Double newPos, Long timeoutMs) {
     processMove(newPos, true, timeoutMs);
-    // return mapper.calcInput(currentInputP); // should be requested pos -
-                                               // unless timeout occured
     return currentInputPos;
   }
 
@@ -790,7 +795,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     if (encoder != null) {
       encoder.disable();
     }
-    
+
     disable();
 
     detach();
@@ -892,7 +897,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // currentPos = targetPos = pos;
     // i think this is desired
     targetPos = pos;
-    currentInputPos = pos; //mapper.calcInput(pos);
+    currentInputPos = pos; // mapper.calcInput(pos);
     if (encoder != null) {
       if (encoder instanceof TimeEncoder)
         ((TimeEncoder) encoder).setPos(pos);
@@ -909,7 +914,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   @Override
   public void setSpeed(Integer degreesPerSecond) {
     try {
-      setSpeed((double)degreesPerSecond);
+      setSpeed((double) degreesPerSecond);
     } catch (Exception e) {
       log.error("setSpeed threw", e);
     }
@@ -946,7 +951,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   public void stop() {
     isSweeping = false;
     if (encoder.getClass() == TimeEncoder.class) {
-      ((TimeEncoder)encoder).stopMove();
+      ((TimeEncoder) encoder).stopMove();
     }
     targetPos = getCurrentInputPos();
     broadcast("publishServoStop", this);
@@ -1063,7 +1068,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     isMoving = false;
 
     if (isSweeping) {
-      double inputPos =  currentInputPos; // mapper.calcInput(currentInputP);
+      double inputPos = currentInputPos; // mapper.calcInput(currentInputP);
 
       // We got a stop event from the servo - which "should" be
       // the end of a sweep. "Should" be.
@@ -1104,8 +1109,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     }
     return null;
   }
-  
-  
 
   @Override
   public void attachServoControlListener(String name) {
