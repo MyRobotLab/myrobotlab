@@ -35,13 +35,13 @@ import com.google.gson.internal.LinkedHashTreeMap;
  * 
  * vs
  * 
- * https://github.com/mudroljub/wikipedia-api-docs
+ * @see <a href="https://github.com/mudroljub/wikipedia-api-docs">wikipedia api docs</a>
  * 
- * https://en.wikipedia.org/wiki/Special:ApiSandbox
+ * @see <a href="https://en.wikipedia.org/wiki/Special:ApiSandbox">sandbox</a>
  * 
- * https://www.mediawiki.org/wiki/API:Main_page/lv#Quick_Start
+ * @see <a href="https://www.mediawiki.org/wiki/API:Main_page/lv#Quick_Start">quick start</a>
  * 
- * http://en.wikipedia.org/w/api.php?action=query&prop=info&format=json&titles=Stanford%20University
+ * @see <a href="http://en.wikipedia.org/w/api.php?action=query&prop=info&format=json&titles=Stanford%20University">Standford University example</a>
  * 
  * @author GroG
  * 
