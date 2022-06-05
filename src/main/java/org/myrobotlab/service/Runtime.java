@@ -445,6 +445,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
               o = f.get(config);
 
               if (o == null) {
+                // config "has" the field, just set to null at the moment
+                // peer actual name then will be default notation
+                if (parentName != null) {
+                  return String.format("%s.%s", parentName, peerKey);
+                }
                 log.warn("config has field named {} but it's null", peerKey);
                 return null;
               }
@@ -452,8 +457,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
               if (o instanceof String) {
                 String actualName = (String) o;
                 return actualName;
+              } else if (o == null){
+                // could be valid - just not specified in config
+                break;
               } else {
                 log.error("config has field named {} but it is not a string", peerKey);
+                break;
               }
             } catch (Exception e) {
               log.error("getting access to field threw", e);
@@ -2080,6 +2089,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   static public ServiceInterface startConfig(String configName) {
+    setConfig(configName);
     return startInternal(configName, null, null);
   }
 
