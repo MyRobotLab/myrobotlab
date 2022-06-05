@@ -80,11 +80,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   protected boolean firstMove = true;
 
   /**
-   * the "current" OUTPUT position of the servo - this never gets updated from
+   * the "current" INPUT position of the servo - this never gets updated from
    * "command" methods such as moveTo - its always status information, and its
    * typically updated from an encoder of some form
    */
-  protected double currentOutputPos;
+  protected double currentInputPos;
 
   /**
    * if enabled then a pwm pulse is keeping the servo at the current position,
@@ -244,10 +244,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
       if (savedPos != null && loadSavedPositions) {
         log.info("found previous values for {} setting initial position to {}", getName(), savedPos);
         // TODO: kw: output position shouldn't be set to the targetPos..
-        currentOutputPos = targetPos = savedPos;
+        currentInputPos = targetPos = savedPos;
       }
     }
-    currentOutputPos = mapper.calcOutput(targetPos);
+    // currentInputP = mapper.calcOutput(targetPos); FIXME - FIXED - encoder now publishing input not output
   }
 
   /**
@@ -516,12 +516,13 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public double getCurrentInputPos() {
-    return mapper.calcInput(currentOutputPos);
+    // return mapper.calcInput(currentInputP);
+    return currentInputPos;
   }
 
   @Override
   public double getCurrentOutputPos() {
-    return currentOutputPos;
+    return mapper.calcOutput(currentInputPos);
   }
 
   @Override
@@ -657,7 +658,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   public Double moveToBlocking(Integer newPos, Long timeoutMs) {
     try {
       processMove((double) newPos, true, timeoutMs);
-      return mapper.calcInput(currentOutputPos);
+      return mapper.calcInput(currentInputPos);
     } catch (Exception e) {
       log.error("moveToBlocking threw", e);
     }
@@ -667,15 +668,18 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   @Override
   public Double moveToBlocking(Double newPos, Long timeoutMs) {
     processMove(newPos, true, timeoutMs);
-    return mapper.calcInput(currentOutputPos); // should be requested pos -
+    // return mapper.calcInput(currentInputP); // should be requested pos -
                                                // unless timeout occured
+    return currentInputPos;
   }
 
   @Override
   public void onEncoderData(EncoderData data) {
+    log.error("data {}", data);
     // log.info("onEncoderData - {}", data.value); - helpful to debug
-    currentOutputPos = data.angle;
-    double currentInputPos = mapper.calcInput(currentOutputPos);
+    // currentInputP = data.angle;
+    currentInputPos = data.angle; // mapper.calcInput(currentInputP);
+    data.mappedValue = mapper.calcOutput(data.angle);
 
     // assuming this came from TimeEncoder - we re-calculate input and then
     // publish it
@@ -888,7 +892,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // currentPos = targetPos = pos;
     // i think this is desired
     targetPos = pos;
-    currentOutputPos = mapper.calcInput(pos);
+    currentInputPos = pos; //mapper.calcInput(pos);
     if (encoder != null) {
       if (encoder instanceof TimeEncoder)
         ((TimeEncoder) encoder).setPos(pos);
@@ -1059,7 +1063,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     isMoving = false;
 
     if (isSweeping) {
-      double inputPos = mapper.calcInput(currentOutputPos);
+      double inputPos =  currentInputPos; // mapper.calcInput(currentInputP);
 
       // We got a stop event from the servo - which "should" be
       // the end of a sweep. "Should" be.
