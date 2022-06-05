@@ -54,6 +54,9 @@ public class OpenCVMeta extends MetaData {
     // for the mjpeg streamer frame grabber
     addDependency("net.sf.jipcam", "jipcam", "0.9.1");
     exclude("javax.servlet", "servlet-api");
+    exclude("log4j", "log4j");
+    exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
+
     // jipcam use commons-lang-1.0 it break marySpeech
     exclude("commons-lang", "commons-lang");
     addDependency("commons-lang", "commons-lang", "2.6");
@@ -64,7 +67,7 @@ public class OpenCVMeta extends MetaData {
     // text detection using EAST classifier
     addDependency("opencv", "opencv_east_text_detection", "0.0.1", "zip");
     // youtube downloader
-    addDependency("com.github.axet", "vget", "1.1.34");
+    // addDependency("com.github.axet", "vget", "1.1.34"); NO LONGER WORKS
     // yolo models
     addDependency("yolo", "yolov2", "0.0.2", "zip");
 
