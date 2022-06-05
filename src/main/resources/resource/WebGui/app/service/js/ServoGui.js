@@ -126,7 +126,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
             // initialization
             $scope.state.rest = service.rest
 
-            // $scope.pos.value = service.currentOutputPos
+            // $scope.pos.value = service.currentInputPos
             $scope.sliderEnabled = true
 
             // $scope.activeTabIndex = service.controller == null ? 0 : 1
@@ -163,7 +163,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
             $scope.$apply()
             break
         case 'onEncoderData':
-            $scope.service.currentOutputPos = Math.floor(data.angle)
+            $scope.service.currentInputPos = Math.floor(data.mappedValue)
             $scope.$apply()
             break
         case 'onServoMoveTo':
@@ -185,11 +185,11 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
             $scope.$apply()
             break
         case 'onServoStopped':
-            $scope.service.currentOutputPos = data.pos
+            //$scope.service.currentInputPos = data.pos
             $scope.$apply()
             break
         case 'onServoStarted':
-            // $scope.service.currentOutputPos = data.pos
+            // $scope.service.currentInputPos = data.pos
             // $scope.$apply()
             break
         case 'onStatus':
