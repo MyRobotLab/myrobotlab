@@ -283,7 +283,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
       moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
     }
     deltaVelocity = 1;
-    double lastPosInput = mapper.calcInput(currentInputPos);
+    double lastPosInput = currentInputPos;
 
     if (motorControl == null) {
       error(String.format("%s's controller is not set", getName()));
@@ -479,7 +479,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     // useful to "learn" gestures ( later ... ) or simply start a moveTo() at
     // real lastPos & sync with UI
     if (!isEnabled() && MathUtils.round(currentInputPos, roundPos) != MathUtils.round(currentPosInput, roundPos)) {
-      targetPos = mapper.calcInput(currentInputPos);
+      targetPos = currentInputPos;
       broadcastState();
     }
     // TODO: kw: this seems wrong. the input position should be the invsere
