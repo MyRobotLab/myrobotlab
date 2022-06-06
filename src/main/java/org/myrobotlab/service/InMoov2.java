@@ -486,10 +486,18 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public InMoov2Arm getArm(String side) {
+    if (!"left".equals(side) && !"right".equals(side)) {
+      error("side must be left or right - instead of %s", side);
+      return null;
+    }
     return (InMoov2Arm) getPeer(side + "Arm");
   }
 
   public InMoov2Hand getHand(String side) {
+    if (!"left".equals(side) && !"right".equals(side)) {
+      error("side must be left or right - instead of %s", side);
+      return null;
+    }
     return (InMoov2Hand) getPeer(side + "Hand");
   }
 
@@ -507,12 +515,12 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
       Long lastActivityTime = 0L;
 
-      Long head = (Long) sendToPeerBlocking("head", "getScript", getName());
-      Long leftArm = (Long) sendToPeerBlocking("leftArm", "getScript", getName());
-      Long rightArm = (Long) sendToPeerBlocking("rightArm", "getScript", getName());
-      Long leftHand = (Long) sendToPeerBlocking("leftHand", "getScript", getName());
-      Long rightHand = (Long) sendToPeerBlocking("rightHand", "getScript", getName());
-      Long torso = (Long) sendToPeerBlocking("torso", "getScript", getName());
+      Long head = (Long) sendToPeerBlocking("head", "getLastActivityTime", getName());
+      Long leftArm = (Long) sendToPeerBlocking("leftArm", "getLastActivityTime", getName());
+      Long rightArm = (Long) sendToPeerBlocking("rightArm", "getLastActivityTime", getName());
+      Long leftHand = (Long) sendToPeerBlocking("leftHand", "getLastActivityTime", getName());
+      Long rightHand = (Long) sendToPeerBlocking("rightHand", "getLastActivityTime", getName());
+      Long torso = (Long) sendToPeerBlocking("torso", "getLastActivityTime", getName());
 
       lastActivityTime = Math.max(head, leftArm);
       lastActivityTime = Math.max(lastActivityTime, rightArm);
