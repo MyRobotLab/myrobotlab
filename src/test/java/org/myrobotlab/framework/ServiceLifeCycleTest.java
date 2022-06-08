@@ -127,7 +127,7 @@ public class ServiceLifeCycleTest extends AbstractTest {
     WebGuiConfig webgui = (WebGuiConfig)plan.get("webgui");
     webgui.autoStartBrowser = false;
     // start it up
-    Runtime.start("webgui");
+    Runtime.startConfig("webgui");
     
     Tracking eye = (Tracking)i02.getPeer("eyeTracking");
     ServoControl tilt = (ServoControl)eye.getPeer("tilt");

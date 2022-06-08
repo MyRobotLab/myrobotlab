@@ -10,6 +10,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.config.PollyConfig;
 import org.myrobotlab.service.config.WebGuiConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ import com.amazonaws.services.polly.model.DescribeVoicesRequest;
 import com.amazonaws.services.polly.model.DescribeVoicesResult;
 import com.amazonaws.services.polly.model.SynthesizeSpeechRequest;
 import com.amazonaws.services.polly.model.SynthesizeSpeechResult;
+import com.amazonaws.services.polly.model.TextType;
 
 /**
  * Amazon's cloud speech service
@@ -37,6 +39,9 @@ import com.amazonaws.services.polly.model.SynthesizeSpeechResult;
  * 
  * Polly Pricing Pay-as-you-go $4.00 per 1 million characters (when outside the
  * free tier).
+ * 
+ * Ssml - https://docs.aws.amazon.com/polly/latest/dg/supportedtags.html
+ * https://docs.amazonaws.cn/en_us/polly/latest/dg/polly-dg.pdf
  *
  * @author GroG
  *
@@ -185,6 +190,7 @@ public class Polly extends AbstractSpeechSynthesis {
    */
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
+    PollyConfig c = (PollyConfig) config;
     getPolly();
     Voice voice = getVoice();
     if (voice == null) {
@@ -194,6 +200,16 @@ public class Polly extends AbstractSpeechSynthesis {
     // com.amazonaws.services.polly.model.Voice awsVoice =
     // ((com.amazonaws.services.polly.model.Voice) voice.getVoiceProvider());
     SynthesizeSpeechRequest synthReq = new SynthesizeSpeechRequest().withText(toSpeak).withVoiceId(voice.getName()).withOutputFormat("mp3");
+
+    if (toSpeak.contains("<speak") && c.autoDetectSsml) {
+      c.ssml = true;
+    } else if (!toSpeak.contains("<speak") && c.autoDetectSsml) {
+      c.ssml = false;
+    }
+
+    if (c.ssml) {
+      synthReq.setTextType(TextType.Ssml);
+    }
     SynthesizeSpeechResult synthRes = polly.synthesizeSpeech(synthReq);
     InputStream data = synthRes.getAudioStream();
     byte[] d = FileIO.toByteArray(data);
@@ -203,31 +219,43 @@ public class Polly extends AbstractSpeechSynthesis {
     return audioData;
   }
 
+  public boolean setSsml(boolean ssml) {
+    PollyConfig c = (PollyConfig) config;
+    c.ssml = ssml;
+    return ssml;
+  }
+
+  public boolean setAutoDetectSsml(boolean ssml) {
+    PollyConfig c = (PollyConfig) config;
+    c.ssml = ssml;
+    return ssml;
+  }
+
   public static void main(String[] args) {
     try {
       LoggingFactory.init("INFO");
-      
-      // Runtime.start("polly", "Polly");
-//      Runtime runtime = Runtime.getInstance();
-//      runtime.save();
+
+      Runtime.start("polly", "Polly");
+      // Runtime runtime = Runtime.getInstance();
+      // runtime.save();
 
       // Runtime.start("python", "Python");
-      
-      Plan plan = Runtime.load("webgui", "WebGui");
-      // Plan plan = Runtime.load("polly", "Polly");
-      
-      WebGuiConfig webgui = (WebGuiConfig)plan.get("webgui");
-      webgui.autoStartBrowser = false;
-      
-      Runtime.setConfig("default");
-      Runtime.load("polly");
 
-      Runtime.start("webgui");
-      Runtime.start("polly");
+      // Plan plan = Runtime.load("webgui", "WebGui");
+      // // Plan plan = Runtime.load("polly", "Polly");
+      //
+      // WebGuiConfig webgui = (WebGuiConfig)plan.get("webgui");
+      // webgui.autoStartBrowser = false;
+      //
+      // Runtime.setConfig("default");
+      // Runtime.load("polly");
+      //
+      // Runtime.startConfig("webgui");
+      // Runtime.startConfig("polly");
 
-//      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-//      webgui.autoStartBrowser(false);
-//      webgui.startService();
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
 
       boolean b = true;
       if (b) {
@@ -363,7 +391,7 @@ public class Polly extends AbstractSpeechSynthesis {
   @Override
   public void releaseService() {
     super.releaseService();
-       if (polly != null) {
+    if (polly != null) {
       polly.shutdown();
     }
   }
@@ -373,11 +401,11 @@ public class Polly extends AbstractSpeechSynthesis {
     setReady(polly != null ? true : false);
     return ready;
   }
-  
-//  @Override
-//  public ServiceConfig getConfig() {
-//    PollyConfig config = (PollyConfig) super.getConfig();
-//    return config;
-//  }
+
+  // @Override
+  // public ServiceConfig getConfig() {
+  // PollyConfig config = (PollyConfig) super.getConfig();
+  // return config;
+  // }
 
 }

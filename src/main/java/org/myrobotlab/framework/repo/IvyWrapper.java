@@ -299,7 +299,11 @@ public class IvyWrapper extends Repo implements Serializable {
       // String[] cmd = new String[] { "-settings", location +
       // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
       // location + "/jar" + "/[originalname].[ext]", "-noterminate" };
+      // [artifact]-[revision].[ext]
       String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname].[ext]" };
+      // String[] cmd = new String[] { "-settings", location +
+      // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
+      // location + "/jar" + "/[artifact]-[revision].[ext]" };
 
       StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-4.jar");
       for (String s : cmd) {
@@ -313,7 +317,7 @@ public class IvyWrapper extends Repo implements Serializable {
       // Ivy ivy = Ivy.newInstance(); <-- for future 2.5.x release
       // ivy.getLoggerEngine().pushLogger(new
       // IvyWrapperLogger(Message.MSG_INFO)); <-- for future 2.5.x release
-      Main.setLogger(new IvyWrapperLogger(Message.MSG_INFO));
+      // Main.setLogger(new IvyWrapperLogger(Message.MSG_INFO));
       ResolveReport report = Main.run(cmd);
 
       // if no errors -h
@@ -416,7 +420,15 @@ public class IvyWrapper extends Repo implements Serializable {
       // String[] cmd = new String[] { "-settings", location +
       // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
       // location + "/jar" + "/[originalname].[ext]", "-noterminate" };
+      // FIXME - javacpp deps throw because they have 2 jars colliding when
+      // native classifier exist
+      // String[] cmd = new String[] { "-settings", location +
+      // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
+      // location + "/jar" + "/[originalname]-[classifier].[ext]" };
       String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname].[ext]" };
+      // String[] cmd = new String[] { "-settings", location +
+      // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
+      // location + "/jar" + "/[artifact]-[revision].[ext]" };
 
       StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-4.jar");
       for (String s : cmd) {
@@ -452,17 +464,17 @@ public class IvyWrapper extends Repo implements Serializable {
 
       if (error) {
         log.error("had errors - repo will not be updated");
-        return;
-      }
+      } else {
 
-      // TODO - promote to Repo.setInstalled
-      for (ServiceDependency library : targetLibraries) {
-        // set as installed & save state
-        library.setInstalled(true);
-        installedLibraries.put(library.toString(), library);
-        info("installed %s platform %s", library, platform.getPlatformId());
+        // TODO - promote to Repo.setInstalled
+        for (ServiceDependency library : targetLibraries) {
+          // set as installed & save state
+          library.setInstalled(true);
+          installedLibraries.put(library.toString(), library);
+          info("installed %s platform %s", library, platform.getPlatformId());
+        }
+        save();
       }
-      save();
 
       ArtifactDownloadReport[] artifacts = report.getAllArtifactsReports();
       for (int i = 0; i < artifacts.length; ++i) {

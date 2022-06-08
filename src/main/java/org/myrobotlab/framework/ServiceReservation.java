@@ -30,7 +30,7 @@ public class ServiceReservation implements Serializable {
    * stopped | released a challenge will be keeping it sync'd with actual
    * service state :P
    */
-  public String state = "inactive";
+  public String state = "INACTIVE";
 
   /**
    * key type and comment are all that is needed to define a peer

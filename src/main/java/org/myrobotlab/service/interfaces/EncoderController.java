@@ -10,11 +10,9 @@ public interface EncoderController extends Attachable {
    * 
    * @param control
    *          the encoder to attach
-   * @throws Exception
-   *           boom
    * 
    */
-  public void attachEncoderControl(EncoderControl control) throws Exception;
+  public void attachEncoderControl(EncoderControl control);
 
   // possibly ? for ones which support it ?
   // > setZeroPoint/deviceId

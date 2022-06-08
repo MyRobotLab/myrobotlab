@@ -255,6 +255,9 @@ public class Tracking extends Service {
 
   public void disable() {
     state = TrackingState.IDLE;
+    for (String filter : trackingFilters) {
+      send(cv, "disableFilter", filter);
+    }
     invoke("publishTrackingState");
   }
 

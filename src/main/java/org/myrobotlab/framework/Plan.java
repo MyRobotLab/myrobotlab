@@ -7,9 +7,6 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.config.ArduinoConfig;
-import org.myrobotlab.service.config.OpenCVConfig;
-import org.myrobotlab.service.config.SerialConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;

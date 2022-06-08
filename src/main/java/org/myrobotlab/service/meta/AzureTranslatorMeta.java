@@ -16,7 +16,7 @@ public class AzureTranslatorMeta extends MetaData {
   public AzureTranslatorMeta() {
     addDescription("interface to Azure translation services");
     addCategory("translation", "cloud", "ai");
-    addDependency("io.github.firemaples", "microsoft-translator-java-api", "0.8.3");
+    addDependency("com.squareup.okhttp3", "okhttp", "3.9.0");
     setCloudService(true);
     setRequiresKeys(true);
   }

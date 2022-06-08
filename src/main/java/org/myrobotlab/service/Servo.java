@@ -132,6 +132,8 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
       return false;
     }
 
+    // broadcast("publishServoMoveTo", new ServoMove(getName(), newPos, mapper.calcOutput(newPos))); apparently we want input here
+    // THIS IS CONSUMED BY ARDUINO CONTROLLER - IT USES ServoMove.outputPos !!!!
     broadcast("publishServoMoveTo", new ServoMove(getName(), newPos, mapper.calcOutput(newPos)));
 
     // TODO: this block isn't tested by ServoTest
@@ -169,7 +171,8 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
     if (encoder != null && encoder instanceof TimeEncoder) {
       TimeEncoder timeEncoder = (TimeEncoder) encoder;
       // calculate trajectory calculates and processes this move
-      blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentOutputPos(), getTargetOutput(), getSpeed());
+      // blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentOutputPos(), getTargetOutput(), getSpeed());
+      blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentInputPos(), getTargetPos(), getSpeed());
     }
 
     if (isBlocking) {
@@ -253,7 +256,8 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
     if (config.rest != null) {
       rest = config.rest;
       targetPos = config.rest;
-      currentOutputPos = mapper.calcOutput(config.rest);
+      // currentInputP = mapper.calcOutput(config.rest);
+      currentInputPos = config.rest;
       broadcast("publishEncoderData", new EncoderData(getName(), pin, config.rest, config.rest));
     }
     
@@ -273,26 +277,27 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
 
       // log.info("{}","blah$Blah".contains("$"));
 
-      Runtime.main(new String[] { "--from-launcher", "--id", "servo" });
       // LoggingFactory.init(Level.INFO);
       // Platform.setVirtual(true);
 
       // Runtime.start("python", "Python");
-      Runtime runtime = Runtime.getInstance();
-      runtime.load();
+      // Runtime runtime = Runtime.getInstance();
+      
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+      
+      Servo tilt = (Servo) Runtime.start("tilt", "Servo");
+      Servo pan = (Servo) Runtime.start("pan", "Servo");
+
 
       boolean done = true;
       if (done) {
         return;
       }
 
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.startService();
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-      Servo tilt = (Servo) Runtime.start("tilt", "Servo");
-      Servo pan = (Servo) Runtime.start("pan", "Servo");
-
+      
       tilt.setPin(4);
       pan.setPin(5);
       tilt.setMinMax(10, 100);
@@ -304,7 +309,7 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
       mega.attach(tilt);
       mega.attach(pan);
 
-      runtime.save();
+      //runtime.save();
 
       /*
        * mega.save(); tilt.save(); pan.save();

@@ -324,7 +324,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   transient WebGui webgui;
 
   protected List<String> configList;
-  
+
   private boolean isController3Activated;
 
   private boolean isController4Activated;
@@ -379,7 +379,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     // imageDisplay = (ImageDisplay) startPeer("imageDisplay");
   }
 
-  @Override /* local strong type - is to be avoided - use name string */
   public void addTextListener(TextListener service) {
     // CORRECT WAY ! - no direct reference - just use the name in a subscription
     addListener("publishText", service.getName());
@@ -553,10 +552,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   public void finishedGesture() {
     finishedGesture("unknown");
   }
-    
-//  public State publishState(State state) {
-//    return state;
-//  }
+
+  // public State publishState(State state) {
+  // return state;
+  // }
 
   public void finishedGesture(String nameOfGesture) {
     if (gestureAlreadyStarted) {
@@ -833,7 +832,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     }
     return true;
   }
-  
+
   public String captureGesture() {
     return captureGesture(null);
   }
@@ -878,10 +877,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       script.append(torso.getScript(getName()));
     }
 
-//    if (eyelids != null) {
-//      script.append(indentSpace);
-//      script.append(eyelids.getScript(getName()));
-//    }
+    // if (eyelids != null) {
+    // script.append(indentSpace);
+    // script.append(eyelids.getScript(getName()));
+    // }
 
     send("python", "appendScript", script.toString());
 
@@ -1491,7 +1490,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   // FIXME - universal (good) way of handling all exceptions - ie - reporting
   // back to the user the problem in a short concise way but have
   // expandable detail in appropriate places
-  public OpenCV startOpenCV(){
+  public OpenCV startOpenCV() {
     speakBlocking(get("STARTINGOPENCV"));
     opencv = (OpenCV) startPeer("opencv");
     subscribeTo(opencv.getName(), "publishOpenCVData");
@@ -2435,7 +2434,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       Plan plan = Runtime.load("webgui", "WebGui");
       WebGuiConfig webgui = (WebGuiConfig) plan.get("webgui");
       webgui.autoStartBrowser = false;
-      Runtime.start("webgui");
+      Runtime.startConfig("webgui");
 
       boolean done = true;
       if (done) {
