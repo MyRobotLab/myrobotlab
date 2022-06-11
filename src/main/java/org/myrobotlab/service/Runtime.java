@@ -3698,6 +3698,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   public static void initLog() {
     if (options != null) {
+      LoggingFactory.setLogFile(options.logFile);
       LoggingFactory.init(options.logLevel);
     } else {
       LoggingFactory.init("info");
