@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.ivy.Ivy;
 import org.apache.ivy.Main;
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
@@ -430,19 +431,18 @@ public class IvyWrapper extends Repo implements Serializable {
       // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
       // location + "/jar" + "/[artifact]-[revision].[ext]" };
 
-      StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-4.jar");
+      // StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-4.jar");
+      StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.5.0.jar");
       for (String s : cmd) {
         sb.append(" ");
         sb.append(s);
       }
+
       log.info("cmd {}", sb);
 
-      // TODO: this breaks for me! please review why this needed to be commented
-      // out.
-      // Ivy ivy = Ivy.newInstance(); <-- for future 2.5.x release
-      // ivy.getLoggerEngine().pushLogger(new
-      // IvyWrapperLogger(Message.MSG_INFO)); <-- for future 2.5.x release
-      Main.setLogger(new IvyWrapperLogger(Message.MSG_INFO));
+      Ivy ivy = Ivy.newInstance(); // <-- for future 2.5.x release
+      ivy.getLoggerEngine().pushLogger(new IvyWrapperLogger(Message.MSG_INFO));
+
       ResolveReport report = Main.run(cmd);
 
       // if no errors -h
