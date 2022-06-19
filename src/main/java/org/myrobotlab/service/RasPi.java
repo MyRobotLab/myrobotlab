@@ -326,8 +326,13 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
 
   @Override
   public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
-
     String key = String.format("%d.%d", busAddress, deviceAddress);
+    
+    if (buffer == null || buffer.length == 0) {
+      log.warn("buffer 0 not writing to i2c bus");
+      return;
+    }
+    
     I2CDeviceMap devicedata = i2cDevices.get(key);
     if (devicedata == null) {
       createI2cDevice(busAddress, deviceAddress, control.getName());
@@ -338,7 +343,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       int reg = buffer[0] & 0xFF;
       for (int i = 1; i < size; i++) {
         int value = buffer[i] & 0xFF;
-        log.debug(String.format("Writing to register {} value {}", reg, value));
+        log.debug(String.format("writing to register {} value {}", reg, value));
         I2C.wiringPiI2CWriteReg8(devicedata.deviceHandle, reg, value);
         reg++;
       }
@@ -346,7 +351,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       try {
         devicedata.device.write(buffer, 0, size);
       } catch (IOException e) {
-        Logging.logError(e);
+        log.error("i2cWrite threw input {} {} {} {}", busAddress, deviceAddress, buffer, size, e);
       }
     }
   }
