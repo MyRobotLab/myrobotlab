@@ -544,7 +544,7 @@ public class IvyWrapper extends Repo implements Serializable {
 
       String serviceType = "all";
       long ts = System.currentTimeMillis();
-      String dir = String.format("install.ivy.%s.%d", serviceType, ts);
+      String dir = String.format("install.ivy.%s.update", serviceType);
 
       String[] types = null;
       

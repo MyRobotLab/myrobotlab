@@ -40,6 +40,9 @@ public class RuntimeMeta extends MetaData {
     // for config file support.
     addDependency("org.yaml", "snakeyaml", "1.29");
 
+    // ws client sockets 
+    addDependency("org.asynchttpclient", "async-http-client", "2.12.3");
+
   }
 
 }
