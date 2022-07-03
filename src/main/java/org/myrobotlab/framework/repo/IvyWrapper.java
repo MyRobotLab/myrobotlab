@@ -188,6 +188,13 @@ public class IvyWrapper extends Repo implements Serializable {
 
     StringBuilder ret = new StringBuilder();
     ServiceData sd = ServiceData.getLocalInstance();
+    if (serviceTypes == null) {
+      List<MetaData> ats = sd.getAvailableServiceTypes();
+      serviceTypes = new String[ats.size()];
+      for (int i = 0; i < ats.size(); ++i) {
+        serviceTypes[i] = ats.get(i).getType();
+      }
+    }
 
     ret.append("  <dependencies>\n\n");
 
@@ -432,13 +439,18 @@ public class IvyWrapper extends Repo implements Serializable {
       // location + "/jar" + "/[artifact]-[revision].[ext]" };
 
       // StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-4.jar");
-      StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.5.0.jar");
+      StringBuilder sb = new StringBuilder();
+      sb.append("wget https://repo1.maven.org/maven2/org/apache/ivy/ivy/2.5.0/ivy-2.5.0.jar\n");
+      sb.append("java -jar ivy-2.5.0.jar");
       for (String s : cmd) {
         sb.append(" ");
         sb.append(s);
       }
+      
+      sb.append("\n");
 
       log.info("cmd {}", sb);
+      FileIO.toFile("libraries/install.sh", sb.toString().getBytes());
 
       Ivy ivy = Ivy.newInstance(); // <-- for future 2.5.x release
       ivy.getLoggerEngine().pushLogger(new IvyWrapperLogger(Message.MSG_INFO));
@@ -532,9 +544,12 @@ public class IvyWrapper extends Repo implements Serializable {
 
       String serviceType = "all";
       long ts = System.currentTimeMillis();
-      String dir = String.format("install.ivy.%s.%d", serviceType, ts);
+      String dir = String.format("install.ivy.%s.update", serviceType);
 
-      repo.createBuildFiles(dir, "Python");
+      String[] types = null;
+      
+      types = ServiceData.getLocalInstance().getServiceTypeNames();      
+      repo.createBuildFiles(dir, types);
       // repo.installTo("install.ivy");
       // repo.install(dir, serviceType);
 

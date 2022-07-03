@@ -54,6 +54,8 @@ then
   exit
 fi
 
+# IS THIS VALID 2>&1 IF ALREADY GOING TO A LOG FILE - CYBER SAID SOME LOGGING WAS MISSING
+
 if test -f "$REPO_FILE"; then
     echo "$REPO_FILE exists."
 else 

@@ -18,7 +18,7 @@ public class MqttBrokerMeta extends MetaData {
         "This is an Mqtt client based on the Paho Mqtt client library. Mqtt is a machine-to-machine (M2M)/'Internet of Things' connectivity protocol. See http://mqtt.org");
     addCategory("cloud", "network");
 
-    addDependency("io.moquette", "moquette-broker", "0.12.1");
+    addDependency("io.moquette", "moquette-broker", "0.15");
     exclude("org.slf4j", "slf4j-log4j12");
 
     setCloudService(true);

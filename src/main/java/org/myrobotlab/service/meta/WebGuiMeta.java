@@ -20,21 +20,8 @@ public class WebGuiMeta extends MetaData {
     includeServiceInOneJar(true);
 
     addDependency("org.jmdns", "jmdns", "3.5.5");
-    addDependency("org.atmosphere", "nettosphere", "3.2.1");
+    addDependency("org.atmosphere", "nettosphere", "3.2.2");
     addDependency("javax.annotation", "javax.annotation-api", "1.3.2");
-
-    // MAKE NOTE !!! - we currently distribute myrobotlab.jar with a webgui
-    // hence these following dependencies are zipped with myrobotlab.jar !
-    // and are NOT listed as dependencies, because they are already included
-
-    // Its now part of myrobotlab.jar - unzipped in
-    // build.xml (part of myrobotlab.jar now)
-
-    // addDependency("io.netty", "3.10.0"); // netty-3.10.0.Final.jar
-    // addDependency("org.atmosphere.nettosphere", "2.3.0"); //
-    // nettosphere-assembly-2.3.0.jar
-    // addDependency("org.atmosphere.nettosphere", "2.3.0");//
-    // geronimo-servlet_3.0_spec-1.0.jar
 
   }
 

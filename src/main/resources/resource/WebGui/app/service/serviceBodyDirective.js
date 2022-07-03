@@ -7,12 +7,6 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
         link: function(scope, elem, attr) {
 
             console.info('serviceBodyDirective - link')
-            /*
-            elem.css({
-                'overflow-x': 'auto',
-                'overflow-y': 'auto'
-            })
-            */
 
             if (!scope.panel) {
                 // Intro is trying to access panels probably in ng-show="false" state
