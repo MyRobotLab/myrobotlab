@@ -23,7 +23,7 @@ public class WikipediaIndexer {
     // TODO: why do I need this to index wikipedia from the xml dump?! I know ,
     // it's like a 50GB xml file.. gah..
     System.setProperty("jdk.xml.totalEntitySizeLimit", String.valueOf(Integer.MAX_VALUE));
-    org.apache.log4j.BasicConfigurator.configure();
+    // org.apache.log4j.BasicConfigurator.configure();
     // LoggingFactory.getInstance().setLevel(Level.INFO);
     // wikipedia xml file. ( freely available via wiki-dumps )
 

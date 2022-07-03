@@ -25,7 +25,7 @@ IF NOT "%*"=="" (
         echo "libraries/repo.json exists."
     ) ELSE (
         echo "libraries/repo.json does not exist."
-        "%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime --from-launcher --install
+        "%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime --from-launcher --install --log-file myrobotlab-install.log
     )
 
     "%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime --from-launcher --log-level info -s webgui WebGui intro Intro python Python

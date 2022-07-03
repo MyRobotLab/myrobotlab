@@ -283,7 +283,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
       moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
     }
     deltaVelocity = 1;
-    double lastPosInput = mapper.calcInput(currentOutputPos);
+    double lastPosInput = currentInputPos;
 
     if (motorControl == null) {
       error(String.format("%s's controller is not set", getName()));
@@ -467,7 +467,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
 
     // TODO: kw: is this computing the "mapped" velocity? or the calibrated
     // "output" speed of the servo?
-    currentVelocity = MathUtils.round(Math.abs(((currentPosInput - currentOutputPos) * (500 / sampleTime))), roundPos);
+    currentVelocity = MathUtils.round(Math.abs(((currentPosInput - currentInputPos) * (500 / sampleTime))), roundPos);
 
     // log.info("currentPosInput : " + currentPosInput);
 
@@ -478,13 +478,13 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     // offline feedback ! if diy servo is disabled
     // useful to "learn" gestures ( later ... ) or simply start a moveTo() at
     // real lastPos & sync with UI
-    if (!isEnabled() && MathUtils.round(currentOutputPos, roundPos) != MathUtils.round(currentPosInput, roundPos)) {
-      targetPos = mapper.calcInput(currentOutputPos);
+    if (!isEnabled() && MathUtils.round(currentInputPos, roundPos) != MathUtils.round(currentPosInput, roundPos)) {
+      targetPos = currentInputPos;
       broadcastState();
     }
     // TODO: kw: this seems wrong. the input position should be the invsere
     // mapped input position.
-    currentOutputPos = currentPosInput;
+    currentInputPos = currentPosInput;
 
     ///////////////////////////////////////////////
 
