@@ -15,7 +15,7 @@ public class GoogleCloudMeta extends MetaData {
   public GoogleCloudMeta() {
     addDescription("google api client service");
     setAvailable(true);
-    addDependency("com.google.cloud", "google-cloud-vision", "1.14.0");
+    addDependency("com.google.cloud", "google-cloud-vision", "2.1.3");
     addCategory("cloud", "vision");
     setCloudService(true);
     setRequiresKeys(true);

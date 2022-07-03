@@ -23,8 +23,8 @@ public class PollyMeta extends AbstractSpeechSynthesisMeta {
     addCategory("speech", "sound");
 
     // addDependency("com.fasterxml.jackson.core", "jackson-core", "2.12.6");
-    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.12.6.1");
-    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.12.0");
+    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.13.3");
+    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.13.3");
     addDependency("com.amazonaws", "aws-java-sdk-polly", "1.12.13");
     addDependency("org.apache.commons", "commons-lang3", "3.3.2");
     // force using Runtimes httpclient version exclude here

@@ -18,7 +18,7 @@ public class ProgramABMeta extends MetaData {
     addCategory("ai");
 
     // FIXME - add Wikipedia local search !!
-    addPeer("search", "GoogleSearch", "replacement for handling pannous sriax requests");
+    addPeer("search", "Wikipedia", "replacement for handling pannous sriax requests");
 
     // TODO: renamed the bots in the program-ab-data folder to prefix them so we
     // know they are different than the inmoov bots.
