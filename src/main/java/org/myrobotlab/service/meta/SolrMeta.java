@@ -26,6 +26,9 @@ public class SolrMeta extends MetaData {
     exclude("org.apache.logging.log4j", "log4j-1.2-api");
     exclude("org.apache.logging.log4j", "log4j-api");
     exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
+    exclude("com.fasterxml.jackson.core", "jackson-core");
+    exclude("com.fasterxml.jackson.core", "jackson-databind");
+    exclude("com.fasterxml.jackson.core", "jackson-annotations");
     
     
     addDependency("org.apache.solr", "solr-test-framework", solrVersion);
@@ -36,8 +39,27 @@ public class SolrMeta extends MetaData {
     exclude("org.apache.logging.log4j", "log4j-1.2-api");
     exclude("org.apache.logging.log4j", "log4j-api");
     exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
+
+    exclude("com.fasterxml.jackson.core", "jackson-core");
+    exclude("com.fasterxml.jackson.core", "jackson-databind");
+    exclude("com.fasterxml.jackson.core", "jackson-annotations");
+
+
+    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.13.3");
+    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.13.3");
+    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.13.3");
+
+
     addDependency("org.apache.solr", "solr-solrj", solrVersion);
+
+    exclude("com.fasterxml.jackson.core", "jackson-core");
+    exclude("com.fasterxml.jackson.core", "jackson-databind");
+    exclude("com.fasterxml.jackson.core", "jackson-annotations");
+
+
     addDependency("commons-io", "commons-io", "2.7");
+
+
     // TODO: update this with the latest schema!
     // addDependency("mrl-solr", "mrl-solr-data", "1.0", "zip");
     // log4j-slf4j conflicts with logback in solr 7.4.0+ (maybe earlier)

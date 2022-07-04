@@ -1,5 +1,6 @@
 package org.myrobotlab.service.meta;
 
+import org.myrobotlab.framework.repo.IvyWrapper;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -26,7 +27,7 @@ public class RuntimeMeta extends MetaData {
     addDependency("com.google.code.gson", "gson", "2.8.5");
     // apache 2.0 license
     // addDependency("org.apache.ivy", "ivy", "2.4.0-5");
-    addDependency("org.apache.ivy", "ivy", "2.5.0");
+    addDependency("org.apache.ivy", "ivy", IvyWrapper.IVY_VERSION);
     
     // apache 2.0 license
     addDependency("org.apache.httpcomponents", "httpclient", "4.5.13");

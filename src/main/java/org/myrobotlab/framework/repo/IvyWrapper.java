@@ -32,6 +32,8 @@ import org.myrobotlab.service.meta.abstracts.MetaData;
 public class IvyWrapper extends Repo implements Serializable {
 
   private static final long serialVersionUID = 1L;
+  
+  public static final String IVY_VERSION = "2.5.0";
 
   class IvyWrapperLogger extends AbstractMessageLogger {
 
@@ -292,6 +294,29 @@ public class IvyWrapper extends Repo implements Serializable {
 
     createFilteredFile(snr, location, "ivysettings", "xml");
   }
+  
+  public String[] buidCmdLine(String location) {
+    
+    // TODO - noterminate :P
+    // String[] cmd = new String[] { "-settings", location +
+    // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
+    // location + "/jar" + "/[originalname].[ext]", "-noterminate" };
+    // [artifact]-[revision].[ext]
+    String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname].[ext]" };
+    // String[] cmd = new String[] { "-settings", location +
+    // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
+    // location + "/jar" + "/[artifact]-[revision].[ext]" };
+
+    StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-"+IVY_VERSION+".jar");
+    for (String s : cmd) {
+      sb.append(" ");
+      sb.append(s);
+    }
+    log.info("cmd {}", sb);
+    
+    return cmd;
+
+  }
 
   @Override
   public void installDependency(String location, ServiceDependency library) {
@@ -303,22 +328,7 @@ public class IvyWrapper extends Repo implements Serializable {
 
       Platform platform = Platform.getLocalInstance();
 
-      // TODO - noterminate :P
-      // String[] cmd = new String[] { "-settings", location +
-      // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
-      // location + "/jar" + "/[originalname].[ext]", "-noterminate" };
-      // [artifact]-[revision].[ext]
-      String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname].[ext]" };
-      // String[] cmd = new String[] { "-settings", location +
-      // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
-      // location + "/jar" + "/[artifact]-[revision].[ext]" };
-
-      StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-4.jar");
-      for (String s : cmd) {
-        sb.append(" ");
-        sb.append(s);
-      }
-      log.info("cmd {}", sb);
+      String[] cmd = buidCmdLine(location);
 
       // TODO: this breaks for me! please review why this needed to be commented
       // out.
@@ -440,8 +450,8 @@ public class IvyWrapper extends Repo implements Serializable {
 
       // StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-4.jar");
       StringBuilder sb = new StringBuilder();
-      sb.append("wget https://repo1.maven.org/maven2/org/apache/ivy/ivy/2.5.0/ivy-2.5.0.jar\n");
-      sb.append("java -jar ivy-2.5.0.jar");
+      sb.append("wget https://repo1.maven.org/maven2/org/apache/ivy/ivy/"+IVY_VERSION+"/ivy-"+IVY_VERSION+".jar\n");
+      sb.append("java -jar ivy-"+IVY_VERSION+".jar");
       for (String s : cmd) {
         sb.append(" ");
         sb.append(s);
@@ -540,7 +550,7 @@ public class IvyWrapper extends Repo implements Serializable {
 
       LoggingFactory.init(Level.INFO);
 
-      Repo repo = Repo.getInstance("IvyWrapper");
+      IvyWrapper repo = (IvyWrapper)Repo.getInstance("IvyWrapper");
 
       String serviceType = "all";
       long ts = System.currentTimeMillis();
@@ -550,6 +560,22 @@ public class IvyWrapper extends Repo implements Serializable {
       
       types = ServiceData.getLocalInstance().getServiceTypeNames();      
       repo.createBuildFiles(dir, types);
+      
+      String[] cmd = repo.buidCmdLine(".");
+      
+      StringBuilder sb = new StringBuilder();
+      sb.append("wget https://repo1.maven.org/maven2/org/apache/ivy/ivy/"+IVY_VERSION+"/ivy-"+IVY_VERSION+".jar\n");
+      sb.append("java -jar ivy-"+IVY_VERSION+".jar");
+      
+      for (String s : cmd) {
+        sb.append(" ");
+        sb.append(s);
+      }
+      
+      FileIO.toFile(dir + "/test.sh", sb.toString().getBytes());
+      
+      
+      
       // repo.installTo("install.ivy");
       // repo.install(dir, serviceType);
 
