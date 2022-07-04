@@ -363,7 +363,6 @@
   </dependency>
 <!-- Git end -->
 
-
 <!-- GoogleCloud begin -->
   <dependency>
     <groupId>com.google.cloud</groupId>
@@ -655,15 +654,6 @@
         </exclusion>
       </exclusions>
   </dependency>
-  
-  
-  <dependency>
-    <groupId>org.asynchttpclient</groupId>
-    <artifactId>async-http-client</artifactId>
-    <version>2.12.3</version>
-</dependency>
-  
-  
   <dependency>
     <groupId>de.dfki.mary</groupId>
     <artifactId>voice-cmu-slt-hsmm</artifactId>
@@ -1251,6 +1241,11 @@
     <groupId>org.yaml</groupId>
     <artifactId>snakeyaml</artifactId>
     <version>1.29</version>
+  </dependency>
+  <dependency>
+    <groupId>org.asynchttpclient</groupId>
+    <artifactId>async-http-client</artifactId>
+    <version>2.12.3</version>
   </dependency>
 <!-- Runtime end -->
 
