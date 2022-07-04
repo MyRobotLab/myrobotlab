@@ -2,11 +2,11 @@
 # FIXME - re-running the script makes multiple timers & multiple corrective actions
 
 # start services
-Runtime.start("joy", "Joystick")
-Runtime.start("gui","SwingGui")
-Runtime.start("watchdog", "WatchDogTimer")
-Runtime.start("python", "Python")
-Runtime.start("m1", "Motor")
+runtime.start("joy", "Joystick")
+runtime.start("gui","SwingGui")
+runtime.start("watchdog", "WatchDogTimer")
+runtime.start("python", "Python")
+runtime.start("m1", "Motor")
 
 # adding and activating a checkpoint
 watchdog.addTimer("joystickCheck")

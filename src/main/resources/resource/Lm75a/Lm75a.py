@@ -4,19 +4,19 @@
 port="COM3"
 
 if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
+    virtualArduino = runtime.start("virtualArduino", "VirtualArduino")
     virtualArduino.connect(port)
     
 
-lm75a = Runtime.start("lm75a","Lm75a")
+lm75a = runtime.start("lm75a","Lm75a")
 
 # esp8266 use
-# esp = Runtime.start("esp","Esp8266_01")
+# esp = runtime.start("esp","Esp8266_01")
 # esp.setHost("esp8266-02.local")
 # lm75a.attach("esp","0","0x48")
 
 # arduino use
-arduino = Runtime.start("arduino","Arduino")
+arduino = runtime.start("arduino","Arduino")
 arduino.connect(port)
 lm75a.attach(arduino,"0","0x48")
 

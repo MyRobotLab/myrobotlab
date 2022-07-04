@@ -6,7 +6,7 @@
 ##################################################################################
 
 # Start the connector
-rssconnector = Runtime.start("rssconnector","RSSConnector")
+rssconnector = runtime.start("rssconnector","RSSConnector")
 
 # set the url for the rss feed
 rssconnector.setRssUrl("http://www.myrobotlab.org/rss.xml")

@@ -1,2 +1,2 @@
 # start the service
-arm = Runtime.start("arm","Arm")
+arm = runtime.start("arm","Arm")

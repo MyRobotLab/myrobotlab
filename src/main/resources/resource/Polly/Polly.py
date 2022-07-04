@@ -5,7 +5,7 @@
 #########################################
 
 # start the service
-mouth = Runtime.start('mouth','Polly')
+mouth = runtime.start('mouth','Polly')
 voices = mouth.getVoices()
 
 def sayHello():

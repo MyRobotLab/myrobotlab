@@ -1,2 +1,2 @@
 # start the service
-ipcamera = Runtime.start("ipcamera","IpCamera")
+ipcamera = runtime.start("ipcamera","IpCamera")

@@ -7,7 +7,7 @@
 comPort = "COM12"
 # start optional virtual arduino service, used for internal test
 if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
+    virtualArduino = runtime.start("virtualArduino", "VirtualArduino")
     virtualArduino.connect(comPort)
 # end used for internal test 
 

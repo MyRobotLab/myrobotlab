@@ -1,2 +1,2 @@
 # start the service
-xmlconnector = Runtime.start("xmlconnector","XMLConnector")
+xmlconnector = runtime.start("xmlconnector","XMLConnector")

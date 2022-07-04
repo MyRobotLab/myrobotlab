@@ -28,11 +28,11 @@ pin = 5
 pixelCount = 8
 
 # starting arduino
-arduino = Runtime.start("arduino","Arduino")
+arduino = runtime.start("arduino","Arduino")
 arduino.connect(port)
 
 # starting neopixle
-neopixel = Runtime.start("neopixel","NeoPixel")
+neopixel = runtime.start("neopixel","NeoPixel")
 neopixel.setPin(pin)
 neopixel.setPixelCount(pixelCount)
 

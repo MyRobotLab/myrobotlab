@@ -1,2 +1,2 @@
 # start the service
-cleverbot = Runtime.start("cleverbot","CleverBot")
+cleverbot = runtime.start("cleverbot","CleverBot")

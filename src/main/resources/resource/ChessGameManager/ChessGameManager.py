@@ -1,2 +1,2 @@
 # start the service
-chessgamemanager = Runtime.start("chessgamemanager","ChessGameManager")
+chessgamemanager = runtime.start("chessgamemanager","ChessGameManager")

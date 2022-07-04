@@ -7,18 +7,18 @@
 #################################################################
 # If your using the Arduino Nano, comment out this line and
 # uncomment the ArDuino Nano lines
-raspi = Runtime.start("raspi","RasPi")
+raspi = runtime.start("raspi","RasPi")
 #################################################################
 # Start the Arduino Nano connected using /dev/ttyUSB0           #
 #################################################################
-#arduinoNano = Runtime.start("arduinoNano","Arduino")
+#arduinoNano = runtime.start("arduinoNano","Arduino")
 #arduinoNano.setBoardNano()
 #arduinoNano.connect("/dev/ttyUSB0")
  
 #################################################################
 # Next start the PCF8574 service                                #
 #################################################################
-pcf = Runtime.start("pcf","Pcf8574")
+pcf = runtime.start("pcf","Pcf8574")
 # Then attach it to the I2C Bus Master
 # When attaching, we specify the Bus Master Device,
 # the I2C Bus Number
@@ -32,7 +32,7 @@ pcf.attach(raspi)
 #################################################################
 # Next start the Hd44780 service                                #
 #################################################################
-lcd = Runtime.start("lcd","Hd44780")
+lcd = runtime.start("lcd","Hd44780")
  
 # Once the service has been started, we need to attach it to
 # the PCF service

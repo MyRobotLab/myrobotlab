@@ -3,7 +3,7 @@
 # more info @: http://myrobotlab.org/service/DatabaseConnector
 #########################################
 
-database = Runtime.start("database","DatabaseConnector")
+database = runtime.start("database","DatabaseConnector")
 database.setDriver("com.mysql.jdbc.Driver")
 database.connectionString="jdbc:mysql://localhost/sakila"
 database.jdbcUser="user"

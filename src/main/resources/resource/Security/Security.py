@@ -7,7 +7,7 @@
 
 
 # start the service
-security = Runtime.start("security","Security")
+security = runtime.start("security","Security")
 
 # store & crypt secret infomations
 # these lines are added only one time the program is run.. then they are deleted

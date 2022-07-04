@@ -4,4 +4,4 @@
 # categories: [programming]
 #########################################
 # start the service
-javascript = Runtime.start("javascript","JavaScript")
+javascript = runtime.start("javascript","JavaScript")

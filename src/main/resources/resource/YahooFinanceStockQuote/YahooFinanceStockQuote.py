@@ -6,4 +6,4 @@
 #########################################
 
 # start the service
-yahoofinancestockquote = Runtime.start('yahoofinancestockquote','YahooFinanceStockQuote')
+yahoofinancestockquote = runtime.start('yahoofinancestockquote','YahooFinanceStockQuote')

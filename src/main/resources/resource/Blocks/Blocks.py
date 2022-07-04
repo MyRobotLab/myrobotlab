@@ -6,4 +6,4 @@
 #########################################
 
 # start the service
-blocks = Runtime.start('blocks','Blocks')
+blocks = runtime.start('blocks','Blocks')

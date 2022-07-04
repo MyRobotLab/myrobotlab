@@ -1,2 +1,2 @@
 # start the service
-maestro = Runtime.start("maestro","Maestro")
+maestro = runtime.start("maestro","Maestro")

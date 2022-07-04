@@ -1,2 +1,2 @@
 # start the service
-beagleboardblack = Runtime.start("beagleboardblack","BeagleBoardBlack")
+beagleboardblack = runtime.start("beagleboardblack","BeagleBoardBlack")

@@ -16,9 +16,9 @@ servoPin02 = 5
 port = "COM15"
 
 # create a servo controller and a servo
-arduino = Runtime.start("arduino","Arduino")
-servo01 = Runtime.start("servo01","Servo")
-servo02 = Runtime.start("servo02","Servo")
+arduino = runtime.start("arduino","Arduino")
+servo01 = runtime.start("servo01","Servo")
+servo02 = runtime.start("servo02","Servo")
 
 
 # initialize arduino

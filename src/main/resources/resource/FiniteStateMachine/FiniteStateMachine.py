@@ -1,5 +1,5 @@
 # TODO: Implement this script fpr
-fsm = Runtime.start("fsm","FiniteStateMachine")
+fsm = runtime.start("fsm","FiniteStateMachine")
 
 # add 4 states
 fsm.addState("neutral")

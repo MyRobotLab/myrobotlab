@@ -5,8 +5,8 @@ from time import sleep
 from org.myrobotlab.net import BareBonesBrowserLaunch
 
 # create a video source (opencv) & a video streamer
-opencv = Runtime.createAndStart("opencv","OpenCV")
-streamer = Runtime.createAndStart("streamer","VideoStreamer")
+opencv = runtime.start("opencv","OpenCV")
+streamer = runtime.start("streamer","VideoStreamer")
 
 # attache them
 streamer.attach(opencv)

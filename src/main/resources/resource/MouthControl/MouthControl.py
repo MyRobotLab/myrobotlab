@@ -1,2 +1,2 @@
 # start the service
-mouthcontrol = Runtime.start("mouthcontrol","MouthControl")
+mouthcontrol = runtime.start("mouthcontrol","MouthControl")

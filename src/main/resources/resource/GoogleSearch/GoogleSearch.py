@@ -1,4 +1,4 @@
-google = Runtime.start('google','GoogleSearch')
+google = runtime.start('google','GoogleSearch')
 python.subscribe('google', 'publishResults')
 
 def onResults(data):

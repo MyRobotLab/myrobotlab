@@ -1,13 +1,13 @@
 from org.myrobotlab.image import Util
 # start a opencv service
 
-opencv = Runtime.start("opencv","OpenCV")
+opencv = runtime.start("opencv","OpenCV")
 #gui.setActiveTab("opencv")
 
 # add python as a listener to OpenCV data
 # this tells the framework - whenever opencv.publishOpenCVData is invoked
 # python.onOpenCVData will get called
-python = Runtime.start("python","Python")
+python = runtime.start("python","Python")
 python.subscribe("opencv", "publishOpenCVData")
 
 

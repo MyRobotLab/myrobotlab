@@ -3,12 +3,12 @@ port = "COM11"
 # Code to be able to use this script with virtalArduino
 #virtual=1
 if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
+    virtualArduino = runtime.start("virtualArduino", "VirtualArduino")
     virtualArduino.connect(port)
-arduino = Runtime.start("arduino","Arduino")
+arduino = runtime.start("arduino","Arduino")
 arduino.connect(port)
 
-bno = Runtime.start("bno","Bno055")
+bno = runtime.start("bno","Bno055")
 
 # From version 1.0.2316 use attach instead of setController
 # bno.setController(arduino)
