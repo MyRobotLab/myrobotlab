@@ -271,6 +271,13 @@ public class ProgramABTest extends AbstractServiceTest {
     sraixOOBTest();
     // sraixTest(); sraix doesnt appear to work - wikipedia interface is borked
     // on pannous bots
+    testUppercase();
+  }
+
+  public void testUppercase() {
+    // test a category where the aiml tag is uppercased.
+    Response resp = testService.getResponse(username, "UPPERCASE");
+    assertEquals("Passed", resp.msg);
   }
 
   public void testSets() throws IOException {

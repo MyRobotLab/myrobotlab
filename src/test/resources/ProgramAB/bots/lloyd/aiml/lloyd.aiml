@@ -158,4 +158,10 @@
       </mrl>
     </oob></sraix></template>
 </category>
+
+<category><PATTERN>UPPERCASE</pattern>
+<template>Passed</template>
+</category>
+
+
 </aiml>
