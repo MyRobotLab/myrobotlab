@@ -116,12 +116,11 @@ public class ProgramABTest extends AbstractServiceTest {
 
   public void sraixTest() throws IOException {
     if (Runtime.hasInternet()) {
-      // Response resp = testService.getResponse(username, "MRLSRAIX");
-
-      Response resp = testService.getResponse(username, "Why is the sky blue?");
-      System.out.println(resp);
+      Response resp = testService.getResponse(username, "MRLSRAIX");
+      //Response resp = testService.getResponse(username, "Why is the sky blue?");
       // System.out.println(resp);
-      boolean contains = resp.msg.contains("atmosphere");
+      // System.out.println(resp);
+      boolean contains = resp.msg.contains("information");
       assertTrue(contains);
     }
   }
@@ -269,7 +268,7 @@ public class ProgramABTest extends AbstractServiceTest {
     // pannousTest();
     addCategoryTest();
     sraixOOBTest();
-    // sraixTest(); sraix doesnt appear to work - wikipedia interface is borked
+    sraixTest(); // this should call out to wikipedia for info about Claude Shannon.
     // on pannous bots
     testUppercase();
   }
