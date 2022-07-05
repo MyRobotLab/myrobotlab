@@ -17,7 +17,7 @@ public class ProgramABMeta extends MetaData {
     addDescription("AIML 2.0 Reference interpreter based on Program AB");
     addCategory("ai");
 
-    // FIXME - add Wikipedia local search !!
+    // add Wikipedia local search !!
     addPeer("search", "Wikipedia", "replacement for handling pannous sriax requests");
 
     // TODO: renamed the bots in the program-ab-data folder to prefix them so we
@@ -29,7 +29,7 @@ public class ProgramABMeta extends MetaData {
     // addDependency("program-ab", "program-ab-kw", "0.0.8.5");
 
     addDependency("program-ab", "program-ab-data", null, "zip");
-    addDependency("program-ab", "program-ab-kw", "0.0.8.7");
+    addDependency("program-ab", "program-ab-kw", "0.0.8.9");
     exclude("ch.qos.logback", "logback-classic");
     exclude("ch.qos.logback", "logback-core");
 
