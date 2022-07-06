@@ -734,7 +734,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   public void moveHand(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     // the "right" way
-    sendToPeer(which + "Hand", "moveHand", thumb, index, majeure, ringFinger, pinky, wrist);
+    sendToPeer(which + "Hand", "moveTo", thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
   public void moveHead(Double neck, Double rothead) {
