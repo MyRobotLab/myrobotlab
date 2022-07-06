@@ -1001,6 +1001,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       return;
     }
 
+    super.setLocale(code);
+
     locale = new Locale(code);
 
     // super.setLocale(code);
@@ -1301,7 +1303,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public void releasePeer(String peer) {
-    speakBlocking("STOPPING" + peer.toUpperCase());
+    speakBlocking(get("STOP" + peer.toUpperCase()));
     super.releasePeer(peer);
   }
 
