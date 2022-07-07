@@ -11,6 +11,8 @@ angular.module('mrlapp.service.MouthControlGui', []).controller('MouthControlGui
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
+        $scope.speechOptions.attachName = $scope.service.mouth
+        $scope.servoOptions.attachName = $scope.service.jaw
     }
 
     this.onMsg = function(inMsg) {
