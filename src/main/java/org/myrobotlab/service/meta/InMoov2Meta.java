@@ -53,7 +53,6 @@ public class InMoov2Meta extends MetaData {
     addPeer("leftArm", "InMoov2Arm");
     addPeer("leftHand", "InMoov2Hand");
     addPeer("mouth", "MarySpeech");
-    addPeer("mouthControl", "MouthControl");
     addPeer("neoPixel", "NeoPixel");
     addPeer("opencv", "OpenCV");
     addPeer("openWeatherMap", "OpenWeatherMap");
@@ -231,13 +230,6 @@ public class InMoov2Meta extends MetaData {
 
     rm = new RandomMessageConfig(3000, 8000, 85.0, 95.0, 88.0, 93.0, 70.0, 110.0);
     random.randomMessages.put(name + ".moveTorso", rm);
-
-    // == Peer - mouthControl =============================
-    MouthControlConfig mouthControl = (MouthControlConfig) plan.getPeerConfig("mouthControl");
-
-    // setup name references to different services
-    mouthControl.jaw = name + ".head.jaw";
-    mouthControl.mouth = name + ".mouth";
 
     // == Peer - headTracking =============================
     TrackingConfig headTracking = (TrackingConfig) plan.getPeerConfig("headTracking");
