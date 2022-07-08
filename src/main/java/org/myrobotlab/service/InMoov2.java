@@ -777,12 +777,12 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   public void moveTorso(Double topStom, Double midStom, Double lowStom) {
     // the "right" way
-    sendToPeer("torso", "moveTorso", topStom, midStom, lowStom);
+    sendToPeer("torso", "moveTo", topStom, midStom, lowStom);
   }
 
   public void moveTorsoBlocking(Double topStom, Double midStom, Double lowStom) {
     // the "right" way
-    sendToPeer("torso", "moveTorsoBlocking", topStom, midStom, lowStom);
+    sendToPeer("torso", "moveToBlocking", topStom, midStom, lowStom);
   }
 
   public void onGestureStatus(Status status) {

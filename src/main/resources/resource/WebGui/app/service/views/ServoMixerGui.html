@@ -19,7 +19,7 @@ selectedPose {{state.selectedPose}}<br/>
                             <input class="form-control ng-pristine ng-untouched ng-valid ng-empty directoryName" type="text" ng-model="service.servoMixerDirectory" name="directoryName" id="directoryName" ng-init="" placeholder="Pose directory" style="width:200px">
                             <button class="btn btn-default" ng-click="msg.setPosesDirectory(service.servoMixerDirectory)">Set</button>
                         </div>
-                        <select ng-model="state.selectedPose" ng-change="msg.getPose(state.selectedPose);servo-mixer-pose=state.selectedPose" class="form-control vertical-menu poseList" size="6" title="Select a pose to load">
+                        <select ng-model="state.selectedPose" ng-change="msg.getPose(state.selectedPose)" class="form-control vertical-menu poseList" size="6" title="Select a pose to load">
                             <option ng-repeat="x in poseFiles" ng-value="{{x}}">{{x}}</option>
                         </select>
                         <div class="buttonsRow">
@@ -56,9 +56,9 @@ selectedPose {{state.selectedPose}}<br/>
                             </div>
                             <div>
                                 <div class="input-group">
-                                    <input class="form-control ng-pristine ng-untouched ng-valid ng-empty fieldSave" type="text" name="servo-mixer-pose" id="servo-mixer-pose" ng-init="" placeholder="name" style="">
+                                    <input class="form-control ng-pristine ng-untouched ng-valid ng-empty fieldSave" ng-model=state.selectedPose type="text" name="servo-mixer-pose" id="servo-mixer-pose" ng-init="" placeholder="name" style="">
                                     <span class="input-group-btn">
-                                        <button class="btn btn-default" ng-click="msg.savePose(servo-mixer-pose)">Save</button>
+                                        <button class="btn btn-default" ng-click="msg.savePose(state.selectedPose)">Save</button>
                                     </span>
                                 </div>
                                 <div>
