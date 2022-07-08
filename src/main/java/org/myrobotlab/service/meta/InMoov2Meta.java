@@ -12,15 +12,12 @@ import org.myrobotlab.service.config.FiniteStateMachineConfig;
 import org.myrobotlab.service.config.HtmlFilterConfig;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.JMonkeyEngineConfig;
-import org.myrobotlab.service.config.MarySpeechConfig;
-import org.myrobotlab.service.config.MouthControlConfig;
 import org.myrobotlab.service.config.NeoPixelConfig;
 import org.myrobotlab.service.config.PidConfig;
 import org.myrobotlab.service.config.ProgramABConfig;
 import org.myrobotlab.service.config.RandomConfig;
 import org.myrobotlab.service.config.RandomConfig.RandomMessageConfig;
 import org.myrobotlab.service.config.TrackingConfig;
-import org.myrobotlab.service.config.WebkitSpeechRecognitionConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
@@ -113,13 +110,13 @@ public class InMoov2Meta extends MetaData {
     simulator.multiMapped.put(name + ".leftHand.majeure", new String[] {name + ".leftHand.majeure", name + ".leftHand.majeure2", name + ".leftHand.majeure3"});
     simulator.multiMapped.put(name + ".leftHand.pinky", new String[] {name + ".leftHand.pinky", name + ".leftHand.pinky2", name + ".leftHand.pinky3"});
     simulator.multiMapped.put(name + ".leftHand.index", new String[] {name + ".leftHand.ringFinger", name + ".leftHand.ringFinger2", name + ".leftHand.ringFinger3"});
-    simulator.multiMapped.put(name + ".leftHand.thumb", new String[] {name + ".leftHand.thumb", name + ".leftHand.thumb2", name + ".leftHand.thumb3"});
+    simulator.multiMapped.put(name + ".leftHand.thumb", new String[] {name + ".leftHand.thumb1", name + ".leftHand.thumb2", name + ".leftHand.thumb3"});
 
     simulator.multiMapped.put(name + ".rightHand.index", new String[] {name + ".rightHand.index", name + ".rightHand.index2", name + ".rightHand.index3"});
     simulator.multiMapped.put(name + ".rightHand.majeure", new String[] {name + ".rightHand.majeure", name + ".rightHand.majeure2", name + ".rightHand.majeure3"});
     simulator.multiMapped.put(name + ".rightHand.pinky", new String[] {name + ".rightHand.pinky", name + ".rightHand.pinky2", name + ".rightHand.pinky3"});
     simulator.multiMapped.put(name + ".rightHand.index", new String[] {name + ".rightHand.ringFinger", name + ".rightHand.ringFinger2", name + ".rightHand.ringFinger3"});
-    simulator.multiMapped.put(name + ".rightHand.thumb", new String[] {name + ".rightHand.thumb", name + ".rightHand.thumb2", name + ".rightHand.thumb3"});
+    simulator.multiMapped.put(name + ".rightHand.thumb", new String[] {name + ".rightHand.thumb1", name + ".rightHand.thumb2", name + ".rightHand.thumb3"});
 
     // simulator.nodes.put("camera", new UserData());
     simulator.nodes.put(name + ".head.jaw", new UserData( new MapperLinear(0.0, 180.0, -5.0, 80.0, true, false) ,"x"));

@@ -680,7 +680,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public void onEncoderData(EncoderData data) {
-    log.error("data {}", data);
+    // log.debug("data {}", data);
     // log.info("onEncoderData - {}", data.value); - helpful to debug
     // currentInputP = data.angle;
     currentInputPos = data.angle; // mapper.calcInput(currentInputP);
