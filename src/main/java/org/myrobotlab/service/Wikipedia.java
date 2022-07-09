@@ -56,8 +56,7 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
 
   String acceptLanguage = null;
 
-  String baseUrl = "https://en.wikipedia.org/api/rest_v1/page/summary";
-  // String baseUrl = "https://de.wikipedia.org/api/rest_v1/page/summary";
+  String baseUrl = ".wikipedia.org/api/rest_v1/page/summary";
 
   public Wikipedia(String n, String id) {
     super(n, id);
@@ -133,7 +132,8 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
       String encoded = URLEncoder.encode(searchText, StandardCharsets.UTF_8.toString()).replace("+", "%20");
 
       // use locale to set wikipedia endpoint
-      String url = baseUrl + "/" + encoded;
+      String language = getLanguage() == null ? "en" : getLanguage();
+      String url = "https://" + language + baseUrl + "/" + encoded;
 
       // search
       // FIXME - have exception throwing get
@@ -198,17 +198,39 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
 
       LoggingFactory.init(Level.INFO);
 
-      Runtime.start("webgui", "WebGui");
-      Runtime.start("python", "Python");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      // webgui.setSsl(true);
+      webgui.autoStartBrowser(false);
+      webgui.setPort(8888);
+      webgui.startService();
+
+      // Runtime.start("python", "Python");
       Wikipedia wiki = (Wikipedia) Runtime.start("wiki", "Wikipedia");
       ImageDisplay display = (ImageDisplay) Runtime.start("display", "ImageDisplay");
+      
+      Map<String,Locale> locales = wiki.getLocales();
+      Locale locale = wiki.getLocale();
+      String language = wiki.getLanguage();
+      
+      Runtime runtime = Runtime.getInstance();
+      // runtime.setLocales("ga"); - this is selection
+      runtime.setAllLocales("ga"); // this is all
+      runtime.getLocale();
+      
+      language = wiki.getLanguage();
+      
       // wiki.attachImageListener(display);
       wiki.attach("display");
-      wiki.search("elon musk");
-
-      wiki.search("gorilla");
-      wiki.search("monkey");
-      wiki.search("zebra");
+      
+      SearchResults sr = wiki.search("James_Joyce");
+      
+//      wiki.search("elon musk");
+//
+//      wiki.search("gorilla");
+//      wiki.search("monkey");
+//      wiki.search("zebra");
+//      
+//      wiki.search("Claude Shannon");
 
       log.info("hello");
 
