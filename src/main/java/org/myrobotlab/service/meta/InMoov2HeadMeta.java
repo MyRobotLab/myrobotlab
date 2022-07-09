@@ -194,7 +194,12 @@ public class InMoov2HeadMeta extends MetaData {
 
     // setup name references to different services
     mouthControl.jaw = name + ".jaw";
-    String i01Name = name.substring(0, name.indexOf(".")); 
+    String i01Name = name;
+    int index = name.indexOf(".");
+    if (index > 0) {
+      i01Name = name.substring(0, name.indexOf("."));
+    }
+     
     mouthControl.mouth = i01Name + ".mouth";
     
     
