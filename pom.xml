@@ -297,6 +297,15 @@
   </dependency>
 <!-- DiscordBot end -->
 
+<!-- Docker begin -->
+  <dependency>
+    <groupId>com.github.docker-java</groupId>
+    <artifactId>docker-java</artifactId>
+    <version>3.2.13</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Docker end -->
+
 <!-- DocumentPipeline begin -->
   <dependency>
     <groupId>org.apache.tika</groupId>
@@ -497,6 +506,12 @@
     <groupId>de.jarnbjo</groupId>
     <artifactId>j-ogg-all</artifactId>
     <version>1.0.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.lwjgl</groupId>
+    <artifactId>lwjgl-opengl</artifactId>
+    <version>3.2.3</version>
     <scope>provided</scope>
   </dependency>
 <!-- JMonkeyEngine end -->
@@ -999,10 +1014,6 @@
         <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.lwjgl.lwjgl</groupId>
-          <artifactId>lwjgl</artifactId>
         </exclusion>
         <exclusion>
           <groupId>com.google.guava</groupId>
