@@ -514,6 +514,12 @@
     <version>3.2.3</version>
     <scope>provided</scope>
   </dependency>
+  <dependency>
+    <groupId>org.lwjgl</groupId>
+    <artifactId>lwjgl-glfw</artifactId>
+    <version>3.2.3</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- JMonkeyEngine end -->
 
 <!-- Joystick begin -->
