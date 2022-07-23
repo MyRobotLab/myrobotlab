@@ -527,6 +527,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    * 
    * messages api attempts to promote the connection to websocket and suspends
    * the connection for a 2 way channel
+   *
+   * services api first attempts to decode the request URL into a message,
+   * and if the body is not empty it will treat it as a JSON-formatted
+   * list of parameters for the message.
    * 
    * id and session_id authentication should be required
    * 
@@ -623,6 +627,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       } else if (apiKey.equals(CodecUtils.API_SERVICE)) {
 
         Message msg = CodecUtils.cliToMsg(null, getName(), null, r.getRequest().getPathInfo());
+        if (!r.getRequest().body().isEmpty())
+          msg.data = CodecUtils.fromJson(new String(r.getRequest().body().asBytes()), Object[].class);
 
         if (isLocal(msg)) {
           String serviceName = msg.getFullName();// getName();
