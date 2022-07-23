@@ -589,20 +589,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     else
       fullName = String.format("%s@%s", name, inId);
 
-    ServiceInterface si = Runtime.getService(fullName);
-    if (si != null) {
-      if (!si.getType().equals(type))
-        throw new RuntimeException("Service with name " + name + " already exists but is of type " + si.getType() +
-                " while requested type is " + type);
-      return si;
-    }
-
-
-
-    // XXXXXXXXXXXXXXXXXX
-    // DO NOT LOAD HERE !!! - doing so would violate the service life cycle !
-    // only try to resolve type by the plan - if not then error out
-
     if (type == null) {
       ServiceConfig sc = runtime.plan.get(name);
       if (sc != null) {
@@ -619,12 +605,27 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       return null;
     }
 
-    String fullTypeName = null;
+    String fullTypeName;
     if (type.contains(".")) {
       fullTypeName = type;
     } else {
       fullTypeName = String.format("org.myrobotlab.service.%s", type);
     }
+
+    ServiceInterface si = Runtime.getService(fullName);
+    if (si != null) {
+      if (!si.getType().equals(fullTypeName))
+        throw new RuntimeException("Service with name " + name + " already exists but is of type " + si.getType() +
+                " while requested type is " + type);
+      return si;
+    }
+
+
+
+    // XXXXXXXXXXXXXXXXXX
+    // DO NOT LOAD HERE !!! - doing so would violate the service life cycle !
+    // only try to resolve type by the plan - if not then error out
+
 
     String id = (inId == null) ? Platform.getLocalInstance().getId() : inId;
     if (name == null || name.length() == 0 || fullTypeName == null || fullTypeName.length() == 0) {
