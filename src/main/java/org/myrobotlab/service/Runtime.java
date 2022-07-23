@@ -560,30 +560,44 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * Framework owned method - core of creating a new service
    * 
-   * @param name
-   * @param type
-   * @param inId
-   * @return
+   * @param name May not contain '/' or '@', i.e. cannot be a full name
+   * @param type The type of the new service
+   * @param inId The ID of the runtime the service is linked to.
+   * @return An existing service if the requested name and type match, otherwise a newly created service
+   * @throws IllegalArgumentException if name is null or name contains '@' or '/'
+   * @throws RuntimeException if a service with the requested name exists but its type does not match the requested type
    */
   static private synchronized ServiceInterface createService(String name, String type, String inId) {
     log.info("Runtime.createService {}", name);
 
     if (name == null) {
       log.error("service name cannot be null");
+      throw new IllegalArgumentException("service name cannot be null");
     }
 
-    ServiceInterface si = Runtime.getService(name);
-    if (si != null) {
-      return si;
+    if (name.contains("@")) {
+      throw new IllegalArgumentException(String.format("can not have @ in name %s", name));
     }
 
     if (name.contains("/")) {
       throw new IllegalArgumentException(String.format("can not have forward slash / in name %s", name));
     }
 
-    if (name.contains("@")) {
-      throw new IllegalArgumentException(String.format("can not have @ in name %s", name));
+    String fullName;
+    if (inId == null || inId.equals(""))
+      fullName = getFullName(name);
+    else
+      fullName = String.format("%s@%s", name, inId);
+
+    ServiceInterface si = Runtime.getService(fullName);
+    if (si != null) {
+      if (!si.getType().equals(type))
+        throw new RuntimeException("Service with name " + name + " already exists but is of type " + si.getType() +
+                " while requested type is " + type);
+      return si;
     }
+
+
 
     // XXXXXXXXXXXXXXXXXX
     // DO NOT LOAD HERE !!! - doing so would violate the service life cycle !
