@@ -567,8 +567,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       AtmosphereRequest request = r.getRequest();
 
-      String bodyData = request.body().asString();
-      // request.c
+      String bodyData = null; 
+      
+      if (request.body() != null && !request.body().isEmpty()) {
+        bodyData = new String(request.body().asBytes());
+      }
+            
       request.destroy();
       String logData = null;
 
@@ -623,6 +627,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       } else if (apiKey.equals(CodecUtils.API_SERVICE)) {
 
         Message msg = CodecUtils.cliToMsg(null, getName(), null, r.getRequest().getPathInfo());
+        if (bodyData != null) {
+          msg.data = CodecUtils.fromJson(bodyData, Object[].class);
+        }
 
         if (isLocal(msg)) {
           String serviceName = msg.getFullName();// getName();
