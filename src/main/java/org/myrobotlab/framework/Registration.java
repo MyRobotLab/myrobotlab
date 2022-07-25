@@ -5,6 +5,8 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
+import java.util.List;
+
 /**
  * 
  * @author GroG
@@ -24,6 +26,8 @@ public class Registration {
   protected String id;
   protected String name;
   protected String typeKey;
+
+  public List<String> interfaces = List.of();
 
   /**
    * current serialized state of the service - default encoding is json for all
