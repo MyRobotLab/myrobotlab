@@ -11,6 +11,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -36,24 +37,12 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.myrobotlab.codec.ClassUtil;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.CodecUtils.ApiDescription;
-import org.myrobotlab.framework.CmdOptions;
-import org.myrobotlab.framework.DescribeQuery;
-import org.myrobotlab.framework.DescribeResults;
-import org.myrobotlab.framework.Instantiator;
-import org.myrobotlab.framework.MRLListener;
-import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.MethodCache;
-import org.myrobotlab.framework.MethodEntry;
-import org.myrobotlab.framework.Plan;
-import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.Registration;
-import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceReservation;
-import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.*;
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.IvyWrapper;
@@ -1449,9 +1438,41 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       log.info("{}@{} registering at {} of type {}", registration.getName(), registration.getId(), Platform.getLocalInstance().getId(), registration.getTypeKey());
 
       if (!registration.isLocal(Platform.getLocalInstance().getId())) {
-        // de-serialize
-        registration.service = Runtime.createService(registration.getName(), registration.getTypeKey(), registration.getId());
-        copyShallowFrom(registration.service, CodecUtils.fromJson(registration.getState(), Class.forName(registration.getTypeKey())));
+
+        String fullTypeName;
+        if (registration.getTypeKey().contains(".")) {
+          fullTypeName = registration.getTypeKey();
+        } else {
+          fullTypeName = String.format("org.myrobotlab.service.%s", registration.getTypeKey());
+        }
+
+        try {
+          //Check if class exists, do not initialize yet if it does
+          Class.forName(fullTypeName, false, ClassLoader.getSystemClassLoader());
+
+          // de-serialize, class exists
+          registration.service = Runtime.createService(registration.getName(), registration.getTypeKey(), registration.getId());
+          copyShallowFrom(registration.service, CodecUtils.fromJson(registration.getState(), Class.forName(registration.getTypeKey())));
+
+        } catch (ClassNotFoundException cnfe) {
+          //Class does not exist, check if registration has empty interfaces
+          //Interfaces should always include ServiceInterface if coming from remote client
+          if (registration.interfaces == null || registration.interfaces.isEmpty())
+            throw new RuntimeException("Unknown service type being registered, registration does not contain any " +
+                    "interfaces for proxy generation: " + registration.getTypeKey(), cnfe);
+
+          Class<?>[] interfaces = registration.interfaces.stream().map(i -> {
+            try {
+              return Class.forName(i);
+            } catch (ClassNotFoundException e) {
+              throw new RuntimeException("Unable to load interface " + i + " defined in remote registration " + registration, e);
+            }
+          }).toArray(Class<?>[]::new);
+
+          registration.service = (ServiceInterface) Proxy.newProxyInstance(Runtime.class.getClassLoader(), interfaces,
+                  new ProxyServiceInvocationHandler(registration.getName(), registration.getId()));
+          System.out.println("Created proxy: " + registration.service);
+        }
       }
 
       registry.put(fullname, registration.service);
@@ -1482,7 +1503,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         if (!runtime.serviceTypes.contains(type)) {
           // CHECK IF "CAN FULFILL"
           // add the interfaces of the new service type
-          Set<String> interfaces = ClassUtil.getInterfaces(registration.getTypeKey(), FILTERED_INTERFACES);
+          Set<String> interfaces = ClassUtil.getInterfaces(registration.service.getClass(), FILTERED_INTERFACES);
           for (String interfaze : interfaces) {
             Set<String> types = runtime.interfaceToType.get(interfaze);
             if (types == null) {
