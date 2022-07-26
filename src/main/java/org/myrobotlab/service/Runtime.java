@@ -3047,14 +3047,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   public void onDescribe(DescribeResults results) {
     List<Registration> reservations = results.getReservations();
-    if (getId().equals("c1")) {
-      log.info("here");
-    }
     if (reservations != null) {
-      for (int i = 0; i < reservations.size(); ++i) {
-        register(reservations.get(i));
+      for (Registration reservation : reservations) {
+        if ("runtime".equals(reservation.getName()) && !getId().equals(reservation.getId())) {
+          //If there's a reservation for a remote runtime, subscribe to its registered
+          //Maybe this should be done in register()?
+          subscribe(reservation.getFullName(), "registered");
+        }
+        register(reservation);
       }
     }
+
   }
 
   /**
