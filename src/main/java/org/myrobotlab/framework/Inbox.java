@@ -73,30 +73,55 @@ public class Inbox implements Serializable {
      * msg.historyList.add(name);
      */
 
-    synchronized (msgBox) {
-      while (blocking && (msgBox.size() >= maxQueue)) // queue "full"
-      {
-        try {
-          msgBox.wait();
-        } catch (InterruptedException ex) {
-          log.debug("inbox enque msg INTERRUPTED " + name);
-        }
+
+    // --- sendBlocking support begin --------------------
+    // TODO - possible safety check msg.status == Message.RETURN
+    // &&
+    String blockingKey = String.format("%s.%s", msg.getFullName(), msg.getMethod());
+    if (blockingList.containsKey(blockingKey)) {
+      Object[] returnContainer = blockingList.get(blockingKey);
+      if (msg.data == null) {
+        returnContainer[0] = null;
+      } else {
+        // transferring data
+        returnContainer[0] = msg.data[0];
       }
 
-      if (msgBox.size() > maxQueue) {
-        bufferOverrun = true;
-        log.warn("inbox size {} BUFFER OVERRUN dumping msg from {} To {}.{}", msgBox.size(), msg.sender, msg.name, msg.method);
-      } else {
-        msgBox.addFirst(msg);
-        // Logging.logTime(String.format("inbox - %s size %d", name,
-        // msgBox.size()));
-        if (log.isDebugEnabled()) {
-          log.debug("{}.msgBox + 1 = {}", name, msgBox.size());
+      synchronized (returnContainer) {
+        blockingList.remove(blockingKey);
+        returnContainer.notifyAll(); // addListener sender
+      }
+      // do not invoke this msg - sendBlocking has
+      // been notified and data returned
+      // --- sendBlocking support end --------------------
+    } else {
+      //We do want to invoke this message
+      synchronized (msgBox) {
+        while (blocking && (msgBox.size() >= maxQueue)) // queue "full"
+        {
+          try {
+            msgBox.wait();
+          } catch (InterruptedException ex) {
+            log.debug("inbox enque msg INTERRUPTED " + name);
+          }
         }
-        msgBox.notifyAll(); // must own the lock
+
+        if (msgBox.size() > maxQueue) {
+          bufferOverrun = true;
+          log.warn("inbox size {} BUFFER OVERRUN dumping msg from {} To {}.{}", msgBox.size(), msg.sender, msg.name, msg.method);
+        } else {
+          msgBox.addFirst(msg);
+          // Logging.logTime(String.format("inbox - %s size %d", name,
+          // msgBox.size()));
+          if (log.isDebugEnabled()) {
+            log.debug("{}.msgBox + 1 = {}", name, msgBox.size());
+          }
+          msgBox.notifyAll(); // must own the lock
+        }
       }
     }
 
+    //Even if message is a blocking return, we still want to notify (right?)
     // TODO: move this to a base class Inbox/Outbox are very similar.
     // now that it's actually in the queue. let's notify the listeners
     for (MessageListener ml : listeners) {
@@ -154,29 +179,6 @@ public class Inbox implements Serializable {
         } else {
           msg = msgBox.removeLast();
           log.debug("{}.msgBox -1 {}", name, msgBox.size());
-
-          // --- sendBlocking support begin --------------------
-          // TODO - possible safety check msg.status == Message.RETURN
-          // &&
-          String blockingKey = String.format("%s.%s", msg.getFullName(), msg.getMethod());
-          if (blockingList.containsKey(blockingKey)) {
-            Object[] returnContainer = blockingList.get(blockingKey);
-            if (msg.data == null) {
-              returnContainer[0] = null;
-            } else {
-              // transferring data
-              returnContainer[0] = msg.data[0];
-            }
-
-            synchronized (returnContainer) {
-              blockingList.remove(blockingKey);
-              returnContainer.notifyAll(); // addListener sender
-            }
-            msg = null; // do not invoke this msg - sendBlocking has
-            // been notified data returned
-          }
-          // --- sendBlocking support end --------------------
-
         }
       }
       msgBox.notifyAll();
