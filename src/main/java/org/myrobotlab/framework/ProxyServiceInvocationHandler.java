@@ -1,25 +1,26 @@
 package org.myrobotlab.framework;
 
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.AuthorizationProvider;
+import org.slf4j.Logger;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.Arrays;
 
 public class ProxyServiceInvocationHandler implements InvocationHandler {
 
-    private String name;
-    private String inId;
+    protected static Logger log = LoggerFactory.getLogger(ProxyServiceInvocationHandler.class);
+
+    private final String name;
+    private final String inId;
 
     public ProxyServiceInvocationHandler(String name, String inId) {
-        service = new Service(name, inId) {
-        };
         this.name = name;
         this.inId = inId;
     }
 
-    private Service service;
 
     /**
      * Processes a method invocation on a proxy instance and returns
@@ -68,8 +69,7 @@ public class ProxyServiceInvocationHandler implements InvocationHandler {
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        System.out.println("Executing method " + method);
-        //return method.invoke(service, args);
+        log.debug(String.format("Executing method %s@%s.%s(%s)", name, inId, method.getName(), ((args == null) ? "" : Arrays.toString(args))));
         return Runtime.getInstance().sendBlocking(name + "@" + inId, method.getName(),
                 (args != null) ? args : new Object[0]);
     }
