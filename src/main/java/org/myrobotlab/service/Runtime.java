@@ -613,7 +613,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
 
     String id = (inId == null) ? Platform.getLocalInstance().getId() : inId;
-    if (name == null || name.length() == 0 || fullTypeName == null || fullTypeName.length() == 0) {
+    if (name.length() == 0 || fullTypeName == null || fullTypeName.length() == 0) {
       log.error("{} not a type or {} not defined ", fullTypeName, name);
       return null;
     }

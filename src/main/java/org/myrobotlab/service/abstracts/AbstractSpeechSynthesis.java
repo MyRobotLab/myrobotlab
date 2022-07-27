@@ -703,7 +703,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   private String filterText(String toSpeak) {
 
-    if (toSpeak.isEmpty() || toSpeak == " " || toSpeak == null) {
+    if (toSpeak == null || toSpeak.isEmpty() || toSpeak == " ") {
       return " , ";
     }
     toSpeak = toSpeak.trim();

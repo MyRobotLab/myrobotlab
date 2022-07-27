@@ -129,13 +129,12 @@ public class Webcam extends Service implements WebcamListener {
 
     // webcam = com.github.sarxos.webcam.Webcam.getWebcamByName(name);
     webcam = cams.get(index);
-    selectedCamera = webcam.getName();
 
     if (webcam == null) {
       webcam = com.github.sarxos.webcam.Webcam.getDefault();
-      selectedCamera = webcam.getName();
       info("starting webcam on port %d", port);
     }
+    selectedCamera = webcam.getName();
 
     webcam.setViewSize(new Dimension(this.width, this.height));
 
@@ -195,7 +194,7 @@ public class Webcam extends Service implements WebcamListener {
 
     long now = System.currentTimeMillis();
     if (now - startSampleTs > 1000) {
-      fps = Math.round(frameIndex - lastFrameIndex / now - startSampleTs);
+      fps = Math.round((frameIndex - lastFrameIndex) / (now - startSampleTs));
       log.info("process {} frames in {} ms", frameIndex - lastFrameIndex, now - startSampleTs);
       lastFrameIndex = frameIndex;
       startSampleTs = System.currentTimeMillis();
