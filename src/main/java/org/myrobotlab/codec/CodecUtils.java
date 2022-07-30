@@ -8,8 +8,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.noctordeser.NoCtorDeserModule;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
-import org.myrobotlab.codec.json.GsonPolymorphicBuilderFactory;
+import org.myrobotlab.codec.json.GsonPolymorphicTypeAdapterFactory;
 import org.myrobotlab.codec.json.JacksonPolymorphicModule;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
@@ -157,13 +158,13 @@ public class CodecUtils {
    *
    * @see #USING_GSON
    */
-  private static final Gson gson = GsonPolymorphicBuilderFactory.createPolymorphicGsonBuilder()
+  private static final Gson gson = new GsonBuilder().registerTypeAdapterFactory(new GsonPolymorphicTypeAdapterFactory())
           .setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
 
   /**
    * The {@link Gson} object used to pretty-print JSON.
    */
-  private static final Gson prettyGson = GsonPolymorphicBuilderFactory.createPolymorphicGsonBuilder()
+  private static final Gson prettyGson = new GsonBuilder().registerTypeAdapterFactory(new GsonPolymorphicTypeAdapterFactory())
           .setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
 
   /**
