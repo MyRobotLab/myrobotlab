@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.noctordeser.NoCtorDeserModule;
-import org.myrobotlab.codec.json.GsonPolymorphicSerDeser;
+import org.myrobotlab.codec.json.GsonPolymorphicBuilderFactory;
 import org.myrobotlab.codec.json.JacksonPolymorphicModule;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
@@ -39,7 +39,6 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
 
 /**
@@ -85,10 +84,10 @@ public class CodecUtils {
   private static final Class<?> JACKSON_DEFAULT_OBJECT_TYPE = LinkedHashMap.class;
   public static final Class<?> JSON_DEFAULT_OBJECT_TYPE = (USING_GSON) ? GSON_DEFAULT_OBJECT_TYPE : JACKSON_DEFAULT_OBJECT_TYPE;
 
-  private static final Gson gson = GsonPolymorphicSerDeser.createPolymorphicGsonBuilder()
+  private static final Gson gson = GsonPolymorphicBuilderFactory.createPolymorphicGsonBuilder()
           .setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
 
-  private static final Gson prettyGson = GsonPolymorphicSerDeser.createPolymorphicGsonBuilder()
+  private static final Gson prettyGson = GsonPolymorphicBuilderFactory.createPolymorphicGsonBuilder()
           .setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
 
   private static final ObjectMapper mapper = new ObjectMapper();

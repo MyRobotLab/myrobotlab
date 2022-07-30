@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.noctordeser.NoCtorDeserModule;
 import com.google.gson.Gson;
-import org.myrobotlab.codec.json.GsonPolymorphicSerDeser;
+import org.myrobotlab.codec.json.GsonPolymorphicBuilderFactory;
 import org.myrobotlab.codec.json.JacksonPolymorphicModule;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Registration;
@@ -18,7 +18,7 @@ public class PolymorphicSerializer {
 
     public static void main(String[] args) throws JsonProcessingException {
         //GSON support still works but is kinda wonky
-        Gson gson = GsonPolymorphicSerDeser.createPolymorphicGson();
+        Gson gson = GsonPolymorphicBuilderFactory.createPolymorphicGson();
         String msgString = gson.toJson(
                 Message.createMessage("runtime", "runtime", "getId",
                         new Registration("obsidian", "runtime", "Runtime")
