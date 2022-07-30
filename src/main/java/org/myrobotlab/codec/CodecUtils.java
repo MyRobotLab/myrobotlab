@@ -283,11 +283,12 @@ public class CodecUtils {
    * @throws JsonDeserializationException if an error during deserialization occurs.
    */
   public static <T extends Object> T fromJson(String json, Class<T> clazz) {
-    if (USING_GSON)
-      return gson.fromJson(json, clazz);
     try {
+      if (USING_GSON)
+        return gson.fromJson(json, clazz);
+
       return mapper.readValue(json, clazz);
-    } catch (JsonProcessingException e) {
+    } catch (Exception e) {
       throw new JsonDeserializationException(e);
     }
   }
@@ -309,11 +310,12 @@ public class CodecUtils {
    * @throws JsonDeserializationException if an error during deserialization occurs.
    */
   public static <T extends Object> T fromJson(String json, Class<?> genericClass, Class<?>... parameterized) {
-    if(USING_GSON)
-      return gson.fromJson(json, getType(genericClass, parameterized));
     try {
+      if(USING_GSON)
+        return gson.fromJson(json, getType(genericClass, parameterized));
+
       return mapper.readValue(json, typeFactory.constructParametricType(genericClass, parameterized));
-    } catch (JsonProcessingException e) {
+    } catch (Exception e) {
       throw new JsonDeserializationException(e);
     }
   }
@@ -333,11 +335,11 @@ public class CodecUtils {
    * @throws JsonDeserializationException if an error during deserialization occurs.
    */
   public static <T extends Object> T fromJson(String json, Type type) {
-    if(USING_GSON)
-      return gson.fromJson(json, type);
     try {
+      if(USING_GSON)
+        return gson.fromJson(json, type);
       return mapper.readValue(json, typeFactory.constructType(type));
-    } catch (JsonProcessingException e) {
+    } catch (Exception e) {
       throw new JsonDeserializationException(e);
     }
   }
@@ -352,11 +354,11 @@ public class CodecUtils {
    */
   @SuppressWarnings("unchecked")
   public static LinkedTreeMap<String, Object> toTree(String json) {
-    if(USING_GSON)
-      return gson.fromJson(json, LinkedTreeMap.class);
     try {
+      if(USING_GSON)
+        return gson.fromJson(json, LinkedTreeMap.class);
       return (LinkedTreeMap<String, Object>) mapper.readValue(json, LinkedTreeMap.class);
-    } catch (JsonProcessingException e) {
+    } catch (Exception e) {
       throw new JsonDeserializationException(e);
     }
   }
@@ -413,11 +415,11 @@ public class CodecUtils {
 
   /**
    * Gets the instance id from a service name
-   * 
+   *
    * @param name
    *          the name of the instance
    * @return the name of the instance
-   * 
+   *
    */
   static public String getId(String name) {
     if (name == null) {
@@ -530,7 +532,7 @@ public class CodecUtils {
    * most lossy protocols need conversion of parameters into correctly typed
    * elements this method is used to query a candidate method to see if a simple
    * conversion is possible
-   * 
+   *
    * @param clazz
    *          the class
    * @return true/false
@@ -583,11 +585,12 @@ public class CodecUtils {
    * @throws JsonSerializationException if serialization fails
    */
   public static String toJson(Object o) {
-    if(USING_GSON)
-      return gson.toJson(o);
     try {
+      if(USING_GSON)
+        return gson.toJson(o);
+
       return mapper.writeValueAsString(o);
-    } catch (JsonProcessingException e) {
+    } catch (Exception e) {
       throw new JsonSerializationException(e);
     }
   }
@@ -605,14 +608,13 @@ public class CodecUtils {
    */
   static public void toJson(OutputStream out, Object obj) throws IOException {
     String json;
-    if(USING_GSON)
-      json = gson.toJson(obj);
-    else {
-      try {
+    try {
+      if(USING_GSON)
+        json = gson.toJson(obj);
+      else
         json = mapper.writeValueAsString(obj);
-      } catch (JsonProcessingException jsonProcessingException) {
-        throw new JsonSerializationException(jsonProcessingException);
-      }
+    } catch (Exception jsonProcessingException) {
+      throw new JsonSerializationException(jsonProcessingException);
     }
     if (json != null)
       out.write(json.getBytes());
@@ -629,11 +631,12 @@ public class CodecUtils {
    * @throws JsonSerializationException if an exception occurs during serialization
    */
   public static String toJson(Object o, Class<?> clazz) {
-    if(USING_GSON)
-      return gson.toJson(o, clazz);
     try {
+      if(USING_GSON)
+        return gson.toJson(o, clazz);
+
       return mapper.writerFor(clazz).writeValueAsString(o);
-    } catch (JsonProcessingException e) {
+    } catch (Exception e) {
       throw new JsonSerializationException(e);
     }
   }
@@ -649,17 +652,19 @@ public class CodecUtils {
    * @throws JsonSerializationException if serialization throws an exception
    */
   public static void toJsonFile(Object o, String filename) throws IOException {
+    byte[] json;
+    try {
+      if(USING_GSON)
+        json = gson.toJson(o).getBytes();
+      else
+        json = mapper.writeValueAsBytes(o);
+    } catch (Exception e) {
+      throw new JsonSerializationException(e);
+    }
+
     //try-wth-resources, ensures a file is closed even if an exception is thrown
     try (FileOutputStream fos = new FileOutputStream(filename)){
-      if (USING_GSON)
-        fos.write(gson.toJson(o).getBytes());
-      else {
-        try {
-          fos.write(mapper.writeValueAsBytes(o));
-        } catch (JsonProcessingException jsonProcessingException) {
-          throw new JsonSerializationException(jsonProcessingException);
-        }
-      }
+      fos.write(json);
     }
   }
 
@@ -805,42 +810,42 @@ public class CodecUtils {
    * This is the Cli encoder - it takes a line of text and generates the
    * appropriate msg from it to either invoke (locally) or sendBlockingRemote
    * (remotely)
-   * 
+   *
    * <pre>
-   * 
+   *
    * The expectation of this encoding is:
    *    if "/api/service/" is found - the end of that string is the starting point
    *    if "/api/service/" is not found - then the starting point of the string should be the service
    *      e.g "runtime/getUptime"
-   * 
+   *
    * Important to remember getRequestURI is NOT decoded and getPathInfo is.
-   * 
-   * 
-            
-            Method              URL-Decoded Result           
-            ----------------------------------------------------
-            getContextPath()        no      /app
-            getLocalAddr()                  127.0.0.1
-            getLocalName()                  30thh.loc
-            getLocalPort()                  8480
-            getMethod()                     GET
-            getPathInfo()           yes     /a?+b
-            getProtocol()                   HTTP/1.1
-            getQueryString()        no      p+1=c+dp+2=e+f
-            getRequestedSessionId() no      S%3F+ID
-            getRequestURI()         no      /app/test%3F/a%3F+b;jsessionid=S+ID
-            getRequestURL()         no      http://30thh.loc:8480/app/test%3F/a%3F+b;jsessionid=S+ID
-            getScheme()                     http
-            getServerName()                 30thh.loc
-            getServerPort()                 8480
-            getServletPath()        yes     /test?
-            getParameterNames()     yes     [p 2, p 1]
-            getParameter("p 1")     yes     c d
+   *
+   *
+
+   Method              URL-Decoded Result           
+   ----------------------------------------------------
+   getContextPath()        no      /app
+   getLocalAddr()                  127.0.0.1
+   getLocalName()                  30thh.loc
+   getLocalPort()                  8480
+   getMethod()                     GET
+   getPathInfo()           yes     /a?+b
+   getProtocol()                   HTTP/1.1
+   getQueryString()        no      p+1=c+dp+2=e+f
+   getRequestedSessionId() no      S%3F+ID
+   getRequestURI()         no      /app/test%3F/a%3F+b;jsessionid=S+ID
+   getRequestURL()         no      http://30thh.loc:8480/app/test%3F/a%3F+b;jsessionid=S+ID
+   getScheme()                     http
+   getServerName()                 30thh.loc
+   getServerPort()                 8480
+   getServletPath()        yes     /test?
+   getParameterNames()     yes     [p 2, p 1]
+   getParameter("p 1")     yes     c d
    * </pre>
-   * 
+   *
    * @param contextPath
    *          - prefix to be added if supplied
-   * 
+   *
    * @param from
    *          - sender
    * @param to
@@ -854,24 +859,24 @@ public class CodecUtils {
 
     /**
      * <pre>
-     
+
      The key to this interface is leading "/" ...
      "/" is absolute path - dir or execute
      without "/" means runtime method - spaces and quotes can be delimiters
-    
-    "/"  -  list services
-    "/{serviceName}" - list data of service
-    "/{serviceName}/" - list methods of service
-    "/{serviceName}/{method}" - invoke method
-    "/{serviceName}/{method}/" - list parameters of method
-    "/{serviceName}/{method}/p0/p1/p2" - invoke method with parameters
-    
+
+     "/"  -  list services
+     "/{serviceName}" - list data of service
+     "/{serviceName}/" - list methods of service
+     "/{serviceName}/{method}" - invoke method
+     "/{serviceName}/{method}/" - list parameters of method
+     "/{serviceName}/{method}/p0/p1/p2" - invoke method with parameters
+
      or runtime
      {method}
      {method}/
      {method}/p01
-     * 
-     * 
+     *
+     *
      * </pre>
      */
 
@@ -1059,9 +1064,9 @@ public class CodecUtils {
   static public List<ApiDescription> getApis() {
     List<ApiDescription> ret = new ArrayList<>();
     ret.add(new ApiDescription("message", "{scheme}://{host}:{port}/api/messages", "ws://localhost:8888/api/messages",
-        "An asynchronous api useful for bi-directional websocket communication, primary messages api for the webgui.  URI is /api/messages data contains a json encoded Message structure"));
+            "An asynchronous api useful for bi-directional websocket communication, primary messages api for the webgui.  URI is /api/messages data contains a json encoded Message structure"));
     ret.add(new ApiDescription("service", "{scheme}://{host}:{port}/api/service", "http://localhost:8888/api/service/runtime/getUptime",
-        "An synchronous api useful for simple REST responses"));
+            "An synchronous api useful for simple REST responses"));
     return ret;
   }
 
@@ -1072,7 +1077,7 @@ public class CodecUtils {
    * will send it to a another process or it will go to the MethodCache of some
    * service. The MethodCache will decode a 2nd time based on a method signature
    * key match (key based on parameter types).
-   * 
+   *
    * @param sender
    *          the sender of the message
    * @param sendingMethod
@@ -1084,7 +1089,7 @@ public class CodecUtils {
    * @param params
    *          params to pass
    * @return the string representation of the json message
-   * 
+   *
    */
   public static String createJsonMsg(String sender, String sendingMethod, String name, String method, Object... params) {
     Message msg = Message.createMessage(sender, name, method, null);
@@ -1159,15 +1164,15 @@ public class CodecUtils {
      * <pre>
      *  How to suppress null fields if desired
      Representer representer = new Representer() {
-       &#64;Override
-       protected NodeTuple representJavaBeanProperty(Object javaBean, Property property, Object propertyValue, Tag customTag) {
-         // if value of property is null, ignore it.
-         if (propertyValue == null) {
-           return null;
-         } else {
-           return super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);
-         }
-       }
+     &#64;Override
+     protected NodeTuple representJavaBeanProperty(Object javaBean, Property property, Object propertyValue, Tag customTag) {
+     // if value of property is null, ignore it.
+     if (propertyValue == null) {
+     return null;
+     } else {
+     return super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);
+     }
+     }
      };
      * </pre>
      */
@@ -1256,22 +1261,22 @@ public class CodecUtils {
   public static void setField(Object o, String field, Object value) {
     try {
       // TODO - handle all types :P
-     Field f =  o.getClass().getDeclaredField(field);
-     f.setAccessible(true);
-     f.set(o, value);
+      Field f =  o.getClass().getDeclaredField(field);
+      f.setAccessible(true);
+      f.set(o, value);
     } catch (Exception e) {
       /** don't care - if its not there don't set it */
     }
   }
-  
-  
+
+
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
     try {
-      
+
       Object o = readServiceConfig("data/config/InMoov2_FingerStarter/i01.chatBot.yml");
-      
+
       String json = CodecUtils.fromJson("test", String.class);
       log.info("json {}", json);
       json = CodecUtils.fromJson("a test", String.class);
@@ -1285,7 +1290,7 @@ public class CodecUtils {
     }
   }
 
-  
-  
-  
+
+
+
 }
