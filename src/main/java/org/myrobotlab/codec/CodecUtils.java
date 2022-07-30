@@ -1022,8 +1022,14 @@ public class CodecUtils {
    * @param data The string to be checked
    * @return true if the data can be parsed as a boolean, false otherwise
    */
+  @SuppressWarnings("ResultOfMethodCallIgnored")
   static public Boolean isBoolean(String data) {
-    return Boolean.parseBoolean(data);
+    try {
+      Boolean.parseBoolean(data);
+      return true;
+    } catch (Exception ignored) {
+      return false;
+    }
   }
 
   /**
