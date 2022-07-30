@@ -12,6 +12,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
 import org.myrobotlab.codec.json.GsonPolymorphicTypeAdapterFactory;
 import org.myrobotlab.codec.json.JacksonPolymorphicModule;
+import org.myrobotlab.codec.json.JsonDeserializationException;
+import org.myrobotlab.codec.json.JsonSerializationException;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.logging.Level;
@@ -278,7 +280,7 @@ public class CodecUtils {
    * given by the json.
    * @param <T> The type of the target class.
    * @see #USING_GSON
-   * @throws RuntimeException if an error during deserialization occurs.
+   * @throws JsonDeserializationException if an error during deserialization occurs.
    */
   public static <T extends Object> T fromJson(String json, Class<T> clazz) {
     if (USING_GSON)
@@ -286,7 +288,7 @@ public class CodecUtils {
     try {
       return mapper.readValue(json, clazz);
     } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
+      throw new JsonDeserializationException(e);
     }
   }
 
@@ -304,7 +306,7 @@ public class CodecUtils {
    * given by the json.
    * @param <T> The type of the target class.
    * @see #USING_GSON
-   * @throws RuntimeException if an error during deserialization occurs.
+   * @throws JsonDeserializationException if an error during deserialization occurs.
    */
   public static <T extends Object> T fromJson(String json, Class<?> genericClass, Class<?>... parameterized) {
     if(USING_GSON)
@@ -312,7 +314,7 @@ public class CodecUtils {
     try {
       return mapper.readValue(json, typeFactory.constructParametricType(genericClass, parameterized));
     } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
+      throw new JsonDeserializationException(e);
     }
   }
 
@@ -328,7 +330,7 @@ public class CodecUtils {
    * given by the json.
    * @param <T> The type of the target class.
    * @see #USING_GSON
-   * @throws RuntimeException if an error during deserialization occurs.
+   * @throws JsonDeserializationException if an error during deserialization occurs.
    */
   public static <T extends Object> T fromJson(String json, Type type) {
     if(USING_GSON)
@@ -336,7 +338,7 @@ public class CodecUtils {
     try {
       return mapper.readValue(json, typeFactory.constructType(type));
     } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
+      throw new JsonDeserializationException(e);
     }
   }
 
@@ -346,6 +348,7 @@ public class CodecUtils {
    *
    * @param json The json to be converted
    * @return The json in a tree map form
+   * @throws JsonDeserializationException if deserialization fails
    */
   @SuppressWarnings("unchecked")
   public static LinkedTreeMap<String, Object> toTree(String json) {
@@ -354,7 +357,7 @@ public class CodecUtils {
     try {
       return (LinkedTreeMap<String, Object>) mapper.readValue(json, LinkedTreeMap.class);
     } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
+      throw new JsonDeserializationException(e);
     }
   }
 
@@ -577,6 +580,7 @@ public class CodecUtils {
    * @param o The object to be converted
    * @return The object in String JSON form
    * @see #USING_GSON
+   * @throws JsonSerializationException if serialization fails
    */
   public static String toJson(Object o) {
     if(USING_GSON)
@@ -584,7 +588,7 @@ public class CodecUtils {
     try {
       return mapper.writeValueAsString(o);
     } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
+      throw new JsonSerializationException(e);
     }
   }
 
@@ -597,7 +601,7 @@ public class CodecUtils {
    *            written to.
    * @param obj The object that will be converted to JSON.
    * @throws IOException if writing to the output stream fails
-   * @throws RuntimeException if an exception occurs during serialization.
+   * @throws JsonSerializationException if an exception occurs during serialization.
    */
   static public void toJson(OutputStream out, Object obj) throws IOException {
     String json;
@@ -607,7 +611,7 @@ public class CodecUtils {
       try {
         json = mapper.writeValueAsString(obj);
       } catch (JsonProcessingException jsonProcessingException) {
-        throw new RuntimeException(jsonProcessingException);
+        throw new JsonSerializationException(jsonProcessingException);
       }
     }
     if (json != null)
@@ -622,7 +626,7 @@ public class CodecUtils {
    * @param o The object to be serialized
    * @param clazz The class to treat the object as
    * @return The resultant JSON string
-   * @throws RuntimeException if an exception occurs during serialization
+   * @throws JsonSerializationException if an exception occurs during serialization
    */
   public static String toJson(Object o, Class<?> clazz) {
     if(USING_GSON)
@@ -630,7 +634,7 @@ public class CodecUtils {
     try {
       return mapper.writerFor(clazz).writeValueAsString(o);
     } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
+      throw new JsonSerializationException(e);
     }
   }
 
@@ -642,7 +646,7 @@ public class CodecUtils {
    * @param o The object to be serialized
    * @param filename The name of the file to write the JSON to
    * @throws IOException if writing to the file fails
-   * @throws RuntimeException if serialization throws an exception
+   * @throws JsonSerializationException if serialization throws an exception
    */
   public static void toJsonFile(Object o, String filename) throws IOException {
     //try-wth-resources, ensures a file is closed even if an exception is thrown
@@ -653,7 +657,7 @@ public class CodecUtils {
         try {
           fos.write(mapper.writeValueAsBytes(o));
         } catch (JsonProcessingException jsonProcessingException) {
-          throw new RuntimeException(jsonProcessingException);
+          throw new JsonSerializationException(jsonProcessingException);
         }
       }
     }
