@@ -10,12 +10,25 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * A {@link TypeAdapterFactory} that enables polymorphic operation.
+ * The serialization adapter adds a field with the name taken from
+ * {@link CodecUtils#CLASS_META_KEY} and a value equal
+ * to the object's fully qualified class name.
+ *
+ * The deserialization adapter checks if the JSON has
+ * {@link CodecUtils#CLASS_META_KEY}, and if so it will use
+ * the value as the target type.
+ *
+ * @author AutonomicPerfectionist
+ */
 public class GsonPolymorphicTypeAdapterFactory implements TypeAdapterFactory {
 
-    Gson gson;
-
-    TypeAdapter<JsonElement> elementAdapter;
-    TypeAdapterFactory taf;
+    /**
+     * The TypeAdapter used to create JsonElements
+     */
+    protected TypeAdapter<JsonElement> elementAdapter;
+    protected TypeAdapterFactory taf;
 
     @SuppressWarnings("unchecked")
     public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
@@ -23,23 +36,31 @@ public class GsonPolymorphicTypeAdapterFactory implements TypeAdapterFactory {
                 || CodecUtils.WRAPPER_TYPES.contains(type.getRawType()) || Object[].class.isAssignableFrom(type.getRawType())
                 || Collection.class.isAssignableFrom(type.getRawType()) || Map.class.isAssignableFrom(type.getRawType()))
             return null;
-        this.gson=gson;
         this.taf=this;
         TypeAdapter<Object> delegate = (TypeAdapter<Object>) gson.getDelegateAdapter(this, type);
         elementAdapter = gson.getAdapter(JsonElement.class);
-        TypeAdapter<T> result = (TypeAdapter<T>) new PolymorphicTypeAdapter(type, delegate);
+        TypeAdapter<T> result = (TypeAdapter<T>) new PolymorphicTypeAdapter(type, delegate, gson);
         return result.nullSafe();
 
     }
 
-    class PolymorphicTypeAdapter extends TypeAdapter<Object> {
+    /**
+     * A type adapter to perform polymorphic deserialization
+     * and serialization operations. Should only be created with
+     * {@link GsonPolymorphicTypeAdapterFactory#create(Gson, TypeToken)}.
+     *
+     * @author AutonomicPerfectionist
+     */
+    protected class PolymorphicTypeAdapter extends TypeAdapter<Object> {
 
-        TypeToken<?> type;
-        TypeAdapter<Object> delegate;
+        protected Gson gson;
+        protected TypeToken<?> type;
+        protected TypeAdapter<Object> delegate;
 
-        public PolymorphicTypeAdapter(TypeToken<?> type, TypeAdapter<Object> delegate) {
+        public PolymorphicTypeAdapter(TypeToken<?> type, TypeAdapter<Object> delegate, Gson gson) {
             this.type = type;
             this.delegate = delegate;
+            this.gson = gson;
         }
 
         @Override
