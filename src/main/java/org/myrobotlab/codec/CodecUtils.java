@@ -426,7 +426,8 @@ public class CodecUtils {
         Class<?> c = data[i].getClass(); // not all data types are safe
         // toString() e.g.
         // SerializableImage
-        if (c == String.class || c == Integer.class || c == Boolean.class || c == Float.class || c == MRLListener.class) {
+        //if (c == String.class || c == Integer.class || c == Boolean.class || c == Float.class || c == MRLListener.class) {
+        if(WRAPPER_TYPES.stream().anyMatch(n->n.equals(c)) || MRLListener.class.equals(c)) {
           ret.append(data[i].toString());
         } else {
           String type = data[i].getClass().getCanonicalName();
