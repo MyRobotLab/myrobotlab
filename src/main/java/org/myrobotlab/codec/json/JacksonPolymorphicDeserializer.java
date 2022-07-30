@@ -76,9 +76,10 @@ public class JacksonPolymorphicDeserializer<T> extends StdDeserializer<T> implem
 
 
 
-
-
-        if (type.equals(clazz)) {
+        //If we are deser to correct target type
+        //or if requested type is not a superclass of embedded type,
+        //delegate to default deserialization
+        if (type.equals(clazz) || clazz.isAssignableFrom(type)) {
             deserializeNoPolymorphic(jsonParser, deserializationContext, node);
         }
 

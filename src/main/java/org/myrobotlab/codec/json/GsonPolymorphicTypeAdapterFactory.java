@@ -87,26 +87,26 @@ public class GsonPolymorphicTypeAdapterFactory implements TypeAdapterFactory {
         @Override
         public Object read(JsonReader in) throws IOException {
             JsonElement element = elementAdapter.read(in);
-
             if (element.isJsonObject()) {
-
-
                 JsonObject object = element.getAsJsonObject();
                 if (object.has(CodecUtils.CLASS_META_KEY)) {
                     String className=object.get(CodecUtils.CLASS_META_KEY).getAsString();
                     try {
                         Class<?> clz = Class.forName(className);
-                        TypeAdapter<?> adapter = gson.getDelegateAdapter(taf, TypeToken.get(clz));
-                        return adapter.fromJsonTree(element);
+                        if(type.getRawType().isAssignableFrom(clz)) {
+                            TypeAdapter<?> adapter = gson.getDelegateAdapter(taf, TypeToken.get(clz));
+                            return adapter.fromJsonTree(element);
+                        }
                     }
-                    catch (Exception e) {
-                        return delegate.fromJsonTree(element);
+                    catch (Exception ignored) {
                     }
                 }
-                else
-                    return delegate.fromJsonTree(element);
-            } else
-                return delegate.fromJsonTree(element);
+            }
+
+            //If element is not a json object, doesn't have the key,
+            //an exception occurs, or requested class is not a superclass
+            //of embedded class, will fallthrough to here
+            return delegate.fromJsonTree(element);
         }
     }
 }
