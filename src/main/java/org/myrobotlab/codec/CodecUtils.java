@@ -15,14 +15,18 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.module.noctordeser.NoCtorDeserModule;
+import org.myrobotlab.codec.json.GsonPolymorphicSerDeser;
+import org.myrobotlab.codec.json.JacksonPolymorphicModule;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.logging.Level;
@@ -42,14 +46,15 @@ import com.google.gson.internal.LinkedTreeMap;
  * handles all encoding and decoding of MRL messages or api(s) assumed context -
  * services can add an assumed context as a prefix
  * /api/returnEncoding/inputEncoding/service/method/param1/param2/ ...
- * 
+ *
  * xmpp for example assumes (/api/string/gson)/service/method/param1/param2/ ...
- * 
+ *
  * scheme = alpha *( alpha | digit | "+" | "-" | "." ) Components of all URIs: [
  * &lt;scheme&gt;:]&lt;scheme-specific-part&gt;[#&lt;fragment&gt;]
- * http://stackoverflow.com/questions/3641722/valid-characters-for-uri-schemes
- * 
+ *
  * branch API test 5
+ *
+ * @see <a href="http://stackoverflow.com/questions/3641722/valid-characters-for-uri-schemes">Valid characters for URI schemes</a>
  */
 public class CodecUtils {
 
@@ -74,11 +79,39 @@ public class CodecUtils {
 
   // mime-types
   public final static String MIME_TYPE_JSON = "application/json";
+  public static final boolean USING_GSON = true;
 
-  private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
-  private transient static Gson prettyGson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
+  private static final Class<?> GSON_DEFAULT_OBJECT_TYPE = LinkedTreeMap.class;
+  private static final Class<?> JACKSON_DEFAULT_OBJECT_TYPE = LinkedHashMap.class;
+  public static final Class<?> JSON_DEFAULT_OBJECT_TYPE = (USING_GSON) ? GSON_DEFAULT_OBJECT_TYPE : JACKSON_DEFAULT_OBJECT_TYPE;
 
-  public final static String makeFullTypeName(String type) {
+  private static final Gson gson = GsonPolymorphicSerDeser.createPolymorphicGsonBuilder()
+          .setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
+
+  private static final Gson prettyGson = GsonPolymorphicSerDeser.createPolymorphicGsonBuilder()
+          .setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
+
+  private static final ObjectMapper mapper = new ObjectMapper();
+
+  private static final TypeFactory typeFactory = TypeFactory.defaultInstance();
+
+  static {
+    //This allows Jackson to work just like GSON when no default constructor is available
+    mapper.registerModule(new NoCtorDeserModule());
+
+    //Actually add our polymorphic support
+    mapper.registerModule(JacksonPolymorphicModule.getPolymorphicModule());
+
+    //Disables Jackson's automatic property detection
+    mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+    mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+    mapper.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.ANY);
+
+    //Make jackson behave like gson in that unknown properties are ignored
+    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+  }
+
+  public static String makeFullTypeName(String type) {
     if (type == null) {
       return null;
     }
@@ -88,12 +121,12 @@ public class CodecUtils {
     return type;
   }
 
-  public static final Set<Class<?>> WRAPPER_TYPES = new HashSet<Class<?>>(
-      Arrays.asList(Boolean.class, Character.class, Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class, Void.class));
+  public static final Set<Class<?>> WRAPPER_TYPES = new HashSet<>(
+          Arrays.asList(Boolean.class, Character.class, Byte.class, Short.class, Integer.class, Long.class,
+                  Float.class, Double.class, Void.class));
 
-  public static final Set<String> WRAPPER_TYPES_CANONICAL = new HashSet<String>(
-      Arrays.asList(Boolean.class.getCanonicalName(), Character.class.getCanonicalName(), Byte.class.getCanonicalName(), Short.class.getCanonicalName(),
-          Integer.class.getCanonicalName(), Long.class.getCanonicalName(), Float.class.getCanonicalName(), Double.class.getCanonicalName(), Void.class.getCanonicalName()));
+  public static final Set<String> WRAPPER_TYPES_CANONICAL =
+          WRAPPER_TYPES.stream().map(Object::getClass).map(Class::getCanonicalName).collect(Collectors.toSet());
 
   @Deprecated /* use MethodCache */
   final static HashMap<String, Method> methodCache = new HashMap<String, Method>();
@@ -114,19 +147,44 @@ public class CodecUtils {
   }
 
   public final static <T extends Object> T fromJson(String json, Class<T> clazz) {
-    return gson.fromJson(json, clazz);
+    if (USING_GSON)
+      return gson.fromJson(json, clazz);
+    try {
+      return mapper.readValue(json, clazz);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public final static <T extends Object> T fromJson(String json, Class<?> generic, Class<?>... parameterized) {
-    return gson.fromJson(json, getType(generic, parameterized));
+    if(USING_GSON)
+      return gson.fromJson(json, getType(generic, parameterized));
+    try {
+      return mapper.readValue(json, typeFactory.constructParametricType(generic, parameterized));
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public final static <T extends Object> T fromJson(String json, Type type) {
-    return gson.fromJson(json, type);
+    if(USING_GSON)
+      return gson.fromJson(json, type);
+    try {
+      return mapper.readValue(json, typeFactory.constructType(type));
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
+  @SuppressWarnings("unchecked")
   public final static LinkedTreeMap<String, Object> toTree(String json) {
-    return gson.fromJson(json, LinkedTreeMap.class);
+    if(USING_GSON)
+      return gson.fromJson(json, LinkedTreeMap.class);
+    try {
+      return (LinkedTreeMap<String, Object>) mapper.readValue(json, LinkedTreeMap.class);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public static Type getType(final Class<?> rawClass, final Class<?>... parameterClasses) {
@@ -292,23 +350,41 @@ public class CodecUtils {
   }
 
   public final static String toJson(Object o) {
-    return gson.toJson(o);
+    if(USING_GSON)
+      return gson.toJson(o);
+    try {
+      return mapper.writeValueAsString(o);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   static public void toJson(OutputStream out, Object obj) throws IOException {
-    String json = null;
-    json = gson.toJson(obj);
+    String json;
+    if(USING_GSON)
+      json = gson.toJson(obj);
+    else
+      json = mapper.writeValueAsString(obj);
     if (json != null)
       out.write(json.getBytes());
   }
 
   public final static String toJson(Object o, Class<?> clazz) {
-    return gson.toJson(o, clazz);
+    if(USING_GSON)
+      return gson.toJson(o, clazz);
+    try {
+      return mapper.writerFor(clazz).writeValueAsString(o);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public static void toJsonFile(Object o, String filename) throws IOException {
     FileOutputStream fos = new FileOutputStream(new File(filename));
-    fos.write(gson.toJson(o).getBytes());
+    if(USING_GSON)
+      fos.write(gson.toJson(o).getBytes());
+    else
+      fos.write(mapper.writeValueAsBytes(o));
     fos.close();
   }
 
@@ -390,7 +466,8 @@ public class CodecUtils {
     // array of Strings ? - don't want to double encode !
     Object[] ret = null;
     synchronized (data) {
-      ret = gson.fromJson(instr, Object[].class);
+      //ret = gson.fromJson(instr, Object[].class);
+      ret = mapper.readValue(instr, Object[].class);
     }
     return ret;
   }
