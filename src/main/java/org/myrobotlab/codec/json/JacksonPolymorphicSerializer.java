@@ -5,11 +5,25 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.impl.ObjectIdWriter;
 import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase;
+import org.myrobotlab.codec.CodecUtils;
 
 import java.io.IOException;
 import java.util.Set;
 
+
+/**
+ * A Jackson serializer that injects {@link CodecUtils#CLASS_META_KEY}
+ * into the generated JSON. The value of this key is the object's
+ * fully qualified class name. The class name enables other deserializers to
+ * choose the correct type to deserialize the json into.
+ *
+ * @author AutonomicPerfectionist
+ */
 public class JacksonPolymorphicSerializer extends BeanSerializerBase {
+
+    //Have to override a bunch of creation methods from the abstract class, which
+    //we delegate to our constructors which delegate to the superclass constructors.
+    //Basically, a lot of boilerplate.
 
     public JacksonPolymorphicSerializer(BeanSerializerBase source) {
         super(source);
@@ -33,10 +47,12 @@ public class JacksonPolymorphicSerializer extends BeanSerializerBase {
         super(jacksonPolymorphicSerializer, objectIdWriter, o);
     }
 
+
     public JacksonPolymorphicSerializer(JacksonPolymorphicSerializer jacksonPolymorphicSerializer, BeanPropertyWriter[] beanPropertyWriters, BeanPropertyWriter[] beanPropertyWriters1) {
         super(jacksonPolymorphicSerializer, beanPropertyWriters, beanPropertyWriters1);
     }
 
+    @Override
 
     public BeanSerializerBase withObjectIdWriter(
             ObjectIdWriter objectIdWriter) {
@@ -48,6 +64,7 @@ public class JacksonPolymorphicSerializer extends BeanSerializerBase {
         return new JacksonPolymorphicSerializer(this, set, set1);
     }
 
+    @Override
     protected BeanSerializerBase withIgnorals(String[] toIgnore) {
         return new JacksonPolymorphicSerializer(this, toIgnore);
     }
@@ -81,11 +98,13 @@ public class JacksonPolymorphicSerializer extends BeanSerializerBase {
         return new JacksonPolymorphicSerializer(this, beanPropertyWriters, beanPropertyWriters1);
     }
 
+
+    //This is the meat of the class
     @Override
     public void serialize(Object o, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeStartObject();
         serializeFields(o, jsonGenerator, serializerProvider);
-        jsonGenerator.writeStringField("class", o.getClass().getCanonicalName());
+        jsonGenerator.writeStringField(CodecUtils.CLASS_META_KEY, o.getClass().getCanonicalName());
         jsonGenerator.writeEndObject();
 
     }

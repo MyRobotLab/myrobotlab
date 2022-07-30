@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.ResolvableDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import org.myrobotlab.codec.CodecUtils;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -36,7 +37,7 @@ public class JacksonPolymorphicDeserializer<T> extends StdDeserializer<T> implem
     private T deserializeNoPolymorphic(JsonParser jsonParser, DeserializationContext deserializationContext, JsonNode node) throws IOException {
         for (Iterator<Map.Entry<String, JsonNode>> it = node.fields(); it.hasNext(); ) {
             Map.Entry<String, JsonNode> field = it.next();
-            if (field.getKey().equals("class"))
+            if (field.getKey().equals(CodecUtils.CLASS_META_KEY))
                 it.remove();
         }
 
@@ -62,10 +63,10 @@ public class JacksonPolymorphicDeserializer<T> extends StdDeserializer<T> implem
         //part of it will be consumed
         //by getting the type
         String json = node.toString();
-        if(!node.has("class"))
+        if(!node.has(CodecUtils.CLASS_META_KEY))
             return deserializeNoPolymorphic(jsonParser, deserializationContext, node);
 
-        String typeAsString = node.get("class").asText();
+        String typeAsString = node.get(CodecUtils.CLASS_META_KEY).asText();
         Class<?> type;
         try {
             type = Class.forName(typeAsString);

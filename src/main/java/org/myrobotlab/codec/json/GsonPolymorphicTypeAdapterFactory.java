@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.Map;
 
 public class GsonPolymorphicTypeAdapterFactory implements TypeAdapterFactory {
-    private static final String CLASS_META_KEY="class";
 
     Gson gson;
 
@@ -50,7 +49,7 @@ public class GsonPolymorphicTypeAdapterFactory implements TypeAdapterFactory {
                     JsonElement element = delegate.toJsonTree(value);
                     if(element.isJsonObject()) {
                         JsonObject object = delegate.toJsonTree(value).getAsJsonObject();
-                        object.addProperty(CLASS_META_KEY, value.getClass().getCanonicalName());
+                        object.addProperty(CodecUtils.CLASS_META_KEY, value.getClass().getCanonicalName());
                         elementAdapter.write(out, object);
                     } else
                         delegate.write(out, value);
@@ -72,8 +71,8 @@ public class GsonPolymorphicTypeAdapterFactory implements TypeAdapterFactory {
 
 
                 JsonObject object = element.getAsJsonObject();
-                if (object.has(CLASS_META_KEY)) {
-                    String className=object.get(CLASS_META_KEY).getAsString();
+                if (object.has(CodecUtils.CLASS_META_KEY)) {
+                    String className=object.get(CodecUtils.CLASS_META_KEY).getAsString();
                     try {
                         Class<?> clz = Class.forName(className);
                         TypeAdapter<?> adapter = gson.getDelegateAdapter(taf, TypeToken.get(clz));

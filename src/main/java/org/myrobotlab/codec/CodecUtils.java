@@ -77,23 +77,89 @@ public class CodecUtils {
   public final static String PREFIX_API = "api";
 
   // mime-types
+  /**
+   * The MIME type used to specify JSON data.
+   *
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types">MIME types</a>
+   */
   public final static String MIME_TYPE_JSON = "application/json";
+
+  /**
+   * Whether we are using the GSON JSON backend or not. If false,
+   * use Jackson.
+   * TODO Replace with enum to allow extension for multiple backends
+   */
   public static final boolean USING_GSON = true;
 
+
+  /**
+   * The key used to locate type information
+   * in a JSON dictionary. This is used to serialize
+   * type information into the JSON and to deserialize
+   * JSON into the correct type.
+   */
+  public static final String CLASS_META_KEY = "class";
+
+
+  /**
+   * The type that GSON uses when it attempts to deserialize
+   * without knowing the target type, e.g. if the target
+   * is {@link Object}.
+   */
   private static final Class<?> GSON_DEFAULT_OBJECT_TYPE = LinkedTreeMap.class;
+
+  /**
+   * The type that Jackson uses when it attempts to deserialize
+   * without knowing the target type, e.g. if the target
+   * is {@link Object} and no field matching {@link #CLASS_META_KEY}
+   * is found.
+   */
   private static final Class<?> JACKSON_DEFAULT_OBJECT_TYPE = LinkedHashMap.class;
+
+  /**
+   * The type that the chosen JSON backend uses when it attempts to deserialize
+   * without knowing the target type, e.g. if the target
+   * is {@link Object} and no field matching {@link #CLASS_META_KEY}
+   * is found.
+   */
   public static final Class<?> JSON_DEFAULT_OBJECT_TYPE = (USING_GSON) ? GSON_DEFAULT_OBJECT_TYPE : JACKSON_DEFAULT_OBJECT_TYPE;
 
+  /**
+   * The {@link Gson} object used for JSON operations when the selected backend is
+   * Gson.
+   *
+   * @see #USING_GSON
+   */
   private static final Gson gson = GsonPolymorphicBuilderFactory.createPolymorphicGsonBuilder()
           .setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
 
+  /**
+   * The {@link Gson} object used to pretty-print JSON.
+   */
   private static final Gson prettyGson = GsonPolymorphicBuilderFactory.createPolymorphicGsonBuilder()
           .setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
 
+  /**
+   * The Jackson {@link ObjectMapper} used for JSON operations when
+   * the selected backend is Jackson.
+   *
+   * @see #USING_GSON
+   */
   private static final ObjectMapper mapper = new ObjectMapper();
 
+  /**
+   * The {@link TypeFactory} used to generate type information for
+   * {@link #mapper} when the selected backend is Jackson.
+   *
+   * No analogue exists for Gson, as it uses a different mechanism
+   * to represent types.
+   *
+   * @see #USING_GSON
+   */
   private static final TypeFactory typeFactory = TypeFactory.defaultInstance();
 
+
+  //Class initializer to setup mapper when the class is loaded
   static {
     //This allows Jackson to work just like GSON when no default constructor is available
     mapper.registerModule(new NoCtorDeserModule());
@@ -110,6 +176,15 @@ public class CodecUtils {
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   }
 
+  /**
+   * Ensures a service type name is fully qualified.
+   * If the type name is short, it will assume the type
+   * exists in the {@code org.myrobotlab.service} package.
+   *
+   * @param type The service type name, either shortened or
+   *             fully qualified.
+   * @return Null if type is null, otherwise fully qualified name.
+   */
   public static String makeFullTypeName(String type) {
     if (type == null) {
       return null;
@@ -120,10 +195,22 @@ public class CodecUtils {
     return type;
   }
 
+
+  /**
+   * Set of all known wrapper types, which are classes that correspond to
+   * Java primitives (plus {@link Void}).
+   *
+   * @see <a href="https://www.w3schools.com/java/java_wrapper_classes.asp">Java Wrapper Classes</a>
+   */
   public static final Set<Class<?>> WRAPPER_TYPES = new HashSet<>(
           Arrays.asList(Boolean.class, Character.class, Byte.class, Short.class, Integer.class, Long.class,
                   Float.class, Double.class, Void.class));
 
+  /**
+   * Set of the fully-qualified (AKA canonical) names of {@link #WRAPPER_TYPES}.
+   *
+   * @see <a href="https://www.w3schools.com/java/java_wrapper_classes.asp">Java Wrapper Classes</a>
+   */
   public static final Set<String> WRAPPER_TYPES_CANONICAL =
           WRAPPER_TYPES.stream().map(Object::getClass).map(Class::getCanonicalName).collect(Collectors.toSet());
 
@@ -141,11 +228,24 @@ public class CodecUtils {
 
   final static HashSet<String> objectsCached = new HashSet<String>();
 
-  public static final String capitalize(final String line) {
+  public static String capitalize(final String line) {
     return Character.toUpperCase(line.charAt(0)) + line.substring(1);
   }
 
-  public final static <T extends Object> T fromJson(String json, Class<T> clazz) {
+  /**
+   * Deserializes a JSON string into the target object
+   * (or subclass of if {@link #CLASS_META_KEY} exists)
+   * using the selected JSON backend.
+   *
+   * @param json The JSON to be deserialized in String form
+   * @param clazz The target class.
+   * @return An object of the specified class (or a subclass of) with the state
+   * given by the json.
+   * @param <T> The type of the target class.
+   * @see #USING_GSON
+   * @throws RuntimeException if an error during deserialization occurs.
+   */
+  public static <T extends Object> T fromJson(String json, Class<T> clazz) {
     if (USING_GSON)
       return gson.fromJson(json, clazz);
     try {
@@ -155,17 +255,47 @@ public class CodecUtils {
     }
   }
 
-  public final static <T extends Object> T fromJson(String json, Class<?> generic, Class<?>... parameterized) {
+
+  /**
+   * Deserializes a JSON string into the target object
+   * (or subclass of if {@link #CLASS_META_KEY} exists)
+   * using the selected JSON backend.
+   *
+   * @param json The JSON to be deserialized in String form
+   * @param genericClass The target class.
+   * @param parameterized The list of types used as the genericClass type parameters
+   *                      of genericClass.
+   * @return An object of the specified class (or a subclass of) with the state
+   * given by the json.
+   * @param <T> The type of the target class.
+   * @see #USING_GSON
+   * @throws RuntimeException if an error during deserialization occurs.
+   */
+  public static <T extends Object> T fromJson(String json, Class<?> genericClass, Class<?>... parameterized) {
     if(USING_GSON)
-      return gson.fromJson(json, getType(generic, parameterized));
+      return gson.fromJson(json, getType(genericClass, parameterized));
     try {
-      return mapper.readValue(json, typeFactory.constructParametricType(generic, parameterized));
+      return mapper.readValue(json, typeFactory.constructParametricType(genericClass, parameterized));
     } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }
   }
 
-  public final static <T extends Object> T fromJson(String json, Type type) {
+
+  /**
+   * Deserializes a JSON string into the target object
+   * (or subclass of if {@link #CLASS_META_KEY} exists)
+   * using the selected JSON backend.
+   *
+   * @param json The JSON to be deserialized in String form
+   * @param type The target type.
+   * @return An object of the specified class (or a subclass of) with the state
+   * given by the json.
+   * @param <T> The type of the target class.
+   * @see #USING_GSON
+   * @throws RuntimeException if an error during deserialization occurs.
+   */
+  public static <T extends Object> T fromJson(String json, Type type) {
     if(USING_GSON)
       return gson.fromJson(json, type);
     try {
@@ -176,7 +306,7 @@ public class CodecUtils {
   }
 
   @SuppressWarnings("unchecked")
-  public final static LinkedTreeMap<String, Object> toTree(String json) {
+  public static LinkedTreeMap<String, Object> toTree(String json) {
     if(USING_GSON)
       return gson.fromJson(json, LinkedTreeMap.class);
     try {
@@ -206,7 +336,7 @@ public class CodecUtils {
     };
   }
 
-  static public final byte[] getBytes(Object o) throws IOException {
+  static public byte[] getBytes(Object o) throws IOException {
     ByteArrayOutputStream byteStream = new ByteArrayOutputStream(5000);
     ObjectOutputStream os = new ObjectOutputStream(new BufferedOutputStream(byteStream));
     os.flush();
@@ -215,7 +345,7 @@ public class CodecUtils {
     return byteStream.toByteArray();
   }
 
-  static public final String shortName(String name) {
+  static public String shortName(String name) {
     if (name == null) {
       return null;
     }
@@ -234,7 +364,7 @@ public class CodecUtils {
    * @return the name of the instance
    * 
    */
-  static public final String getId(String name) {
+  static public String getId(String name) {
     if (name == null) {
       return null;
     }
@@ -245,7 +375,17 @@ public class CodecUtils {
     }
   }
 
-  static public final String getCallbackTopicName(String topicMethod) {
+
+  /**
+   * Converts a topic method name to the name of the method that is
+   * used for callbacks. Usually this involves prepending the string
+   * "on", removing any "get" or "publish" prefix, and converting
+   * it all to proper camelCase.
+   *
+   * @param topicMethod The topic method name, such as "publishState"
+   * @return The name for the callback method, such as "onState"
+   */
+  static public String getCallbackTopicName(String topicMethod) {
     // replacements
     if (topicMethod.startsWith("publish")) {
       return String.format("on%s", capitalize(topicMethod.substring("publish".length())));
@@ -260,8 +400,14 @@ public class CodecUtils {
 
   // TODO
   // public static Object encode(Object, encoding) - dispatches appropriately
+  //should be simple using an enum and map to a new Encoder functional interface
 
-  static final public String getMsgKey(Message msg) {
+  /**
+   * Gets a String representation of a Message
+   * @param msg The message
+   * @return The String representation of the message
+   */
+  static public String getMsgKey(Message msg) {
     if (msg.sendingMethod != null) {
       return String.format("%s.%s --> %s.%s(%s) - %d", msg.sender, msg.sendingMethod, msg.name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId);
     } else {
@@ -269,7 +415,7 @@ public class CodecUtils {
     }
   }
 
-  static final public String getParameterSignature(final Object[] data) {
+  static public String getParameterSignature(final Object[] data) {
     if (data == null) {
       return "";
     }
@@ -348,7 +494,7 @@ public class CodecUtils {
     return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
   }
 
-  public final static String toJson(Object o) {
+  public static String toJson(Object o) {
     if(USING_GSON)
       return gson.toJson(o);
     try {
@@ -368,7 +514,7 @@ public class CodecUtils {
       out.write(json.getBytes());
   }
 
-  public final static String toJson(Object o, Class<?> clazz) {
+  public static String toJson(Object o, Class<?> clazz) {
     if(USING_GSON)
       return gson.toJson(o, clazz);
     try {
@@ -451,7 +597,7 @@ public class CodecUtils {
     return serviceType;
   }
 
-  public static final String getSafeReferenceName(String name) {
+  public static String getSafeReferenceName(String name) {
     return name.replaceAll("[@/ .-]", "_");
   }
 
@@ -708,7 +854,7 @@ public class CodecUtils {
    * @return the string representation of the json message
    * 
    */
-  final public static String createJsonMsg(String sender, String sendingMethod, String name, String method, Object... params) {
+  public static String createJsonMsg(String sender, String sendingMethod, String name, String method, Object... params) {
     Message msg = Message.createMessage(sender, name, method, null);
     msg.sendingMethod = sendingMethod;
     Object[] d = null;
@@ -722,7 +868,7 @@ public class CodecUtils {
     return CodecUtils.toJson(msg);
   }
 
-  final public static String toJsonMsg(Message inMsg) {
+  public static String toJsonMsg(Message inMsg) {
     if ("json".equals(inMsg.encoding)) {
       // msg already has json encoded data parameters
       // just encode the msg envelope
@@ -755,7 +901,7 @@ public class CodecUtils {
     return msg;
   }
 
-  final public static String toYaml(Object o) {
+  public static String toYaml(Object o) {
     // not thread safe - so we new here
     DumperOptions options = new DumperOptions();
     options.setIndent(2);
@@ -785,7 +931,7 @@ public class CodecUtils {
     return c;
   }
 
-  final public static String allToYaml(Iterator<? extends Object> o) {
+  public static String allToYaml(Iterator<? extends Object> o) {
     // not thread safe - so we new here
     DumperOptions options = new DumperOptions();
     options.setIndent(2);
@@ -798,14 +944,14 @@ public class CodecUtils {
     return c;
   }
 
-  public final static Iterable<Object> allFromYaml(InputStream is) {
+  public static Iterable<Object> allFromYaml(InputStream is) {
     // Yaml yaml = new Yaml(new Constructor(clazz));
     Yaml yaml = new Yaml();
     // yaml.setBeanAccess(BeanAccess.FIELD);
     return yaml.loadAll(is);
   }
 
-  public final static <T extends Object> T fromYaml(String data, Class<T> clazz) {
+  public static <T extends Object> T fromYaml(String data, Class<T> clazz) {
     Yaml yaml = new Yaml(new Constructor(clazz));
     // yaml.setBeanAccess(BeanAccess.FIELD);
     return (T) yaml.load(data);
