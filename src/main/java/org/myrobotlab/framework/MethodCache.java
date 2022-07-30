@@ -561,7 +561,7 @@ public class MethodCache {
         return params;
       } catch (Exception e) {
 
-        log.info("getDecodedParameters threw clazz {} method {} params {} ", clazz, methodName, encodedParams.length, e.getMessage());
+        log.info("getDecodedParameters threw clazz {} method {} params {} Message: {}", clazz, methodName, encodedParams.length, e.getMessage());
       }
     }
     // if successful return new msg
