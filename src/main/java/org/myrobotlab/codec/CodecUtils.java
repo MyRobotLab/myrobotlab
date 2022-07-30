@@ -1,23 +1,5 @@
 package org.myrobotlab.codec;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -25,6 +7,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.noctordeser.NoCtorDeserModule;
+import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 import org.myrobotlab.codec.json.GsonPolymorphicBuilderFactory;
 import org.myrobotlab.codec.json.JacksonPolymorphicModule;
 import org.myrobotlab.framework.MRLListener;
@@ -38,8 +22,16 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
-import com.google.gson.Gson;
-import com.google.gson.internal.LinkedTreeMap;
+import java.io.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * handles all encoding and decoding of MRL messages or api(s) assumed context -
@@ -59,12 +51,39 @@ public class CodecUtils {
 
   public final static Logger log = LoggerFactory.getLogger(CodecUtils.class);
 
+  /**
+   * A description of an API type
+   */
   public static class ApiDescription {
+    /**
+     * The string to use after {@link #PARAMETER_API}
+     * in URIs to select this API.
+     */
     String key;
+
+    /**
+     * The path to reach this API
+     */
     String path; // {scheme}://{host}:{port}/api/messages
+
+    /**
+     * An example URI to reach this API
+     */
     String exampleUri;
+
+    /**
+     * The description of this API
+     */
     String description;
 
+    /**
+     * Construct a new API description.
+     *
+     * @param key {@link #key}
+     * @param uriDescription {@link #path}
+     * @param exampleUri {@link #exampleUri}
+     * @param description {@link #description}
+     */
     public ApiDescription(String key, String uriDescription, String exampleUri, String description) {
       this.key = key;
       this.path = uriDescription;
@@ -73,7 +92,15 @@ public class CodecUtils {
     }
   }
 
+  /**
+   * The string to be used to specify the API in URIs,
+   * with leading and trailing slash.
+   */
   public final static String PARAMETER_API = "/api/";
+
+  /**
+   * The string to be used in URIs to specify the API
+   */
   public final static String PREFIX_API = "api";
 
   // mime-types
@@ -214,7 +241,8 @@ public class CodecUtils {
   public static final Set<String> WRAPPER_TYPES_CANONICAL =
           WRAPPER_TYPES.stream().map(Object::getClass).map(Class::getCanonicalName).collect(Collectors.toSet());
 
-  @Deprecated /* use MethodCache */
+  /** use {@link MethodCache} */
+  @Deprecated
   final static HashMap<String, Method> methodCache = new HashMap<String, Method>();
 
   /**
@@ -228,6 +256,12 @@ public class CodecUtils {
 
   final static HashSet<String> objectsCached = new HashSet<String>();
 
+  /**
+   * Capitalize the first character of the given string
+   *
+   * @param line The string to be capitalized
+   * @return The capitalized version of line.
+   */
   public static String capitalize(final String line) {
     return Character.toUpperCase(line.charAt(0)) + line.substring(1);
   }
@@ -305,6 +339,13 @@ public class CodecUtils {
     }
   }
 
+  /**
+   * Convert the given JSON string
+   * into an equivalent tree map.
+   *
+   * @param json The json to be converted
+   * @return The json in a tree map form
+   */
   @SuppressWarnings("unchecked")
   public static LinkedTreeMap<String, Object> toTree(String json) {
     if(USING_GSON)
@@ -345,6 +386,16 @@ public class CodecUtils {
     return byteStream.toByteArray();
   }
 
+  /**
+   * Gets the short name of a service. A
+   * short name is the name of the service without
+   * any runtime IDs, meaning no '@' signs.
+   *
+   * @param name The service name to be converted
+   * @return The simple name of the service. If null,
+   * will return null, and if already a simple name
+   * then will return name
+   */
   static public String shortName(String name) {
     if (name == null) {
       return null;
@@ -415,6 +466,16 @@ public class CodecUtils {
     }
   }
 
+  /**
+   * Get a String representing the data in method parameter form,
+   * i.e. each element is separated by a comma. Only {@link #WRAPPER_TYPES}
+   * and {@link MRLListener} will be directly converted to string form using
+   * {@link Object#toString()}, all other types will be represented as their class's
+   * simple name.
+   *
+   * @param data The list of objects to be represented as a parameter list string.
+   * @return The string representing the data array
+   */
   static public String getParameterSignature(final Object[] data) {
     if (data == null) {
       return "";
@@ -482,6 +543,12 @@ public class CodecUtils {
     return WRAPPER_TYPES_CANONICAL.contains(className);
   }
 
+  /**
+   * Converts a snake_case String to a camelCase variant.
+   *
+   * @param s A String written in snake_case
+   * @return The same String but converted to camelCase
+   */
   static public String toCamelCase(String s) {
     String[] parts = s.split("_");
     String camelCaseString = "";
@@ -491,10 +558,25 @@ public class CodecUtils {
     return String.format("%s%s", camelCaseString.substring(0, 1).toLowerCase(), camelCaseString.substring(1));
   }
 
+  /**
+   * Capitalizes the first character of the string while the rest is
+   * set to lower case.
+   *
+   * @param s The string
+   * @return A String that is all lower case except for the first character
+   */
   static public String toCCase(String s) {
     return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
   }
 
+  /**
+   * Convert an Object to its JSON string form using the chosen
+   * JSON backend.
+   *
+   * @param o The object to be converted
+   * @return The object in String JSON form
+   * @see #USING_GSON
+   */
   public static String toJson(Object o) {
     if(USING_GSON)
       return gson.toJson(o);
@@ -505,16 +587,42 @@ public class CodecUtils {
     }
   }
 
+  /**
+   * Convert an object to JSON using the chosen backend
+   * and write the result to the specified output stream.
+   *
+   * @see #USING_GSON
+   * @param out The OutputStream that the resultant JSON will be
+   *            written to.
+   * @param obj The object that will be converted to JSON.
+   * @throws IOException if writing to the output stream fails
+   * @throws RuntimeException if an exception occurs during serialization.
+   */
   static public void toJson(OutputStream out, Object obj) throws IOException {
     String json;
     if(USING_GSON)
       json = gson.toJson(obj);
-    else
-      json = mapper.writeValueAsString(obj);
+    else {
+      try {
+        json = mapper.writeValueAsString(obj);
+      } catch (JsonProcessingException jsonProcessingException) {
+        throw new RuntimeException(jsonProcessingException);
+      }
+    }
     if (json != null)
       out.write(json.getBytes());
   }
 
+  /**
+   * Convert the given object to JSON, as if the object were
+   * an instance of the given class.
+   *
+   * @see #USING_GSON
+   * @param o The object to be serialized
+   * @param clazz The class to treat the object as
+   * @return The resultant JSON string
+   * @throws RuntimeException if an exception occurs during serialization
+   */
   public static String toJson(Object o, Class<?> clazz) {
     if(USING_GSON)
       return gson.toJson(o, clazz);
@@ -525,21 +633,55 @@ public class CodecUtils {
     }
   }
 
+  /**
+   * Serialize the given object to JSON using the selected
+   * JSON backend and write the result to a file with the
+   * given filename.
+   *
+   * @param o The object to be serialized
+   * @param filename The name of the file to write the JSON to
+   * @throws IOException if writing to the file fails
+   * @throws RuntimeException if serialization throws an exception
+   */
   public static void toJsonFile(Object o, String filename) throws IOException {
-    FileOutputStream fos = new FileOutputStream(new File(filename));
-    if(USING_GSON)
-      fos.write(gson.toJson(o).getBytes());
-    else
-      fos.write(mapper.writeValueAsBytes(o));
-    fos.close();
+    //try-wth-resources, ensures a file is closed even if an exception is thrown
+    try (FileOutputStream fos = new FileOutputStream(filename)){
+      if (USING_GSON)
+        fos.write(gson.toJson(o).getBytes());
+      else {
+        try {
+          fos.write(mapper.writeValueAsBytes(o));
+        } catch (JsonProcessingException jsonProcessingException) {
+          throw new RuntimeException(jsonProcessingException);
+        }
+      }
+    }
   }
 
   // === method signatures begin ===
 
+  /**
+   * Converts a given String from camelCase to snake_case,
+   * setting the entire string to be lowercase.
+   *
+   * @param camelCase The camelCase string to be converted
+   * @return The string in snake_case form
+   */
   static public String toUnderScore(String camelCase) {
     return toUnderScore(camelCase, false);
   }
 
+  /**
+   * Converts a given String from camelCase to snake_case,
+   * If toLowerCase is true, the entire string will be set to
+   * lower case. If false, it will be set to uppercase, and if
+   * null the casing will not be changed.
+   *
+   * @param camelCase The camelCase string to be converted
+   * @param toLowerCase Whether the entire string should be lowercase, uppercase,
+   *                    or not changed (null)
+   * @return The string in snake_case form
+   */
   static public String toUnderScore(String camelCase, Boolean toLowerCase) {
 
     byte[] a = camelCase.getBytes();
@@ -567,6 +709,12 @@ public class CodecUtils {
 
   }
 
+  /**
+   * Equivalent to {@link #isInteger(String)}
+   * @param string The String to be checked
+   * @return Whether the String can be parsed as an Integer
+   */
+  @Deprecated
   public static boolean tryParseInt(String string) {
     try {
       Integer.parseInt(string);
@@ -585,11 +733,23 @@ public class CodecUtils {
     return String.format("org.myrobotlab.service.%s", type);
   }
 
+  /**
+   * Equivalent to {@link #MIME_TYPE_JSON}
+   */
+  @Deprecated
   static final String JSON = "application/javascript";
 
   public static final String API_MESSAGES = "messages";
   public static final String API_SERVICE = "service";
 
+  /**
+   * Get the simple name of a service type name.
+   * A simple name is the name of the service type
+   * without any package specifier.
+   *
+   * @param serviceType The service type in String form
+   * @return The simple name of the servide type
+   */
   public static String getSimpleName(String serviceType) {
     int pos = serviceType.lastIndexOf(".");
     if (pos > -1) {
@@ -602,18 +762,36 @@ public class CodecUtils {
     return name.replaceAll("[@/ .-]", "_");
   }
 
+  /**
+   * Serializes the specified object to JSON, using
+   * {@link #prettyGson} to pretty-ify the result.
+   *
+   * TODO add Jackson support for pretty JSON
+   * @param ret The object to be serialized
+   * @return The object in pretty JSON form
+   */
   public static String toPrettyJson(Object ret) {
     return prettyGson.toJson(ret);
   }
 
+  /**
+   * Deserialize a given String into an array of Objects,
+   * treating the String as JSON and using the selected JSON backend.
+   *
+   * @param data A String containing a JSON array
+   * @return An array of Objects created by deserializing the JSON array
+   * @throws Exception If deserialization fails
+   */
   static public Object[] decodeArray(Object data) throws Exception {
     // ITS GOT TO BE STRING - it just has to be !!! :)
     String instr = (String) data;
     // array of Strings ? - don't want to double encode !
     Object[] ret = null;
     synchronized (data) {
-      //ret = gson.fromJson(instr, Object[].class);
-      ret = mapper.readValue(instr, Object[].class);
+      if(USING_GSON)
+        ret = gson.fromJson(instr, Object[].class);
+      else
+        ret = mapper.readValue(instr, Object[].class);
     }
     return ret;
   }
@@ -779,6 +957,12 @@ public class CodecUtils {
     }
   }
 
+  /**
+   * Parse the specified data as an Integer. If parsing
+   * fails, returns null
+   * @param data The String to be coerced into an Integer
+   * @return the data as an Integer, if parsing fails then null instead
+   */
   static public Integer makeInteger(String data) {
     try {
       return Integer.parseInt(data);
@@ -787,6 +971,13 @@ public class CodecUtils {
     return null;
   }
 
+
+  /**
+   * Checks whether the given String can be parsed as
+   * an Integer
+   * @param data The string to be checked
+   * @return true if the data can be parsed as an Integer, false otherwise
+   */
   static public boolean isInteger(String data) {
     try {
       Integer.parseInt(data);
@@ -796,6 +987,12 @@ public class CodecUtils {
     return false;
   }
 
+  /**
+   * Checks whether the given String can be parsed as
+   * a Double
+   * @param data The string to be checked
+   * @return true if the data can be parsed as a Double, false otherwise
+   */
   static public boolean isDouble(String data) {
     try {
       Double.parseDouble(data);
@@ -805,6 +1002,12 @@ public class CodecUtils {
     return false;
   }
 
+  /**
+   * Parse the specified data as a Double. If parsing
+   * fails, returns null
+   * @param data The String to be coerced into a Doubled=
+   * @return the data as a Double, if parsing fails then null instead
+   */
   static public Double makeDouble(String data) {
     try {
       return Double.parseDouble(data);
@@ -813,10 +1016,22 @@ public class CodecUtils {
     return null;
   }
 
+  /**
+   * Checks whether the given String can be parsed as
+   * a Boolean
+   * @param data The string to be checked
+   * @return true if the data can be parsed as a boolean, false otherwise
+   */
   static public Boolean isBoolean(String data) {
     return Boolean.parseBoolean(data);
   }
 
+  /**
+   * Parse the specified data as a Boolean. If parsing
+   * fails, returns null
+   * @param data The String to be coerced into a Boolean
+   * @return the data as a boolean, if parsing fails then null instead
+   */
   static public Boolean makeBoolean(String data) {
     try {
       return Boolean.parseBoolean(data);
@@ -825,6 +1040,11 @@ public class CodecUtils {
     return null;
   }
 
+  /**
+   * Get a description for each of the supported APIs
+   *
+   * @return A list containing a description for each supported API
+   */
   static public List<ApiDescription> getApis() {
     List<ApiDescription> ret = new ArrayList<>();
     ret.add(new ApiDescription("message", "{scheme}://{host}:{port}/api/messages", "ws://localhost:8888/api/messages",
@@ -869,6 +1089,16 @@ public class CodecUtils {
     return CodecUtils.toJson(msg);
   }
 
+  /**
+   * Encodes a Message as JSON, double-encoding the
+   * {@link Message#data} if not already double-encoded.
+   * The selected JSON backend will be used.
+   *
+   * @see #USING_GSON
+   * @param inMsg The message to be encoded
+   * @return A String representation of the message and all of its
+   * members in JSON format.
+   */
   public static String toJsonMsg(Message inMsg) {
     if ("json".equals(inMsg.encoding)) {
       // msg already has json encoded data parameters
@@ -902,6 +1132,11 @@ public class CodecUtils {
     return msg;
   }
 
+  /**
+   * Serialize the given object to YAML.
+   * @param o The object to be serialized
+   * @return A String formatted as YAML representing the object
+   */
   public static String toYaml(Object o) {
     // not thread safe - so we new here
     DumperOptions options = new DumperOptions();
@@ -952,28 +1187,61 @@ public class CodecUtils {
     return yaml.loadAll(is);
   }
 
+  /**
+   * Deserialize the given string into the specified class,
+   * treating the string as YAML.
+   *
+   * @param data The YAML to be deserialized
+   * @param clazz The target class
+   * @return An instance of the target class with the state given by the YAML string
+   * @param <T> The type of the target class
+   */
   public static <T extends Object> T fromYaml(String data, Class<T> clazz) {
     Yaml yaml = new Yaml(new Constructor(clazz));
     // yaml.setBeanAccess(BeanAccess.FIELD);
     return (T) yaml.load(data);
   }
 
+  /**
+   * Checks if the service name given by name is local,
+   * i.e. it has no remote ID (has no '@' symbol), or
+   * if it has a remote ID it matches the ID given.
+   *
+   * @param name The service name to be checked
+   * @param id The runtime ID of the local instance
+   * @return Whether the service name is local to the given ID
+   */
   public static boolean isLocal(String name, String id) {
     if (!name.contains("@")) {
       return true;
     }
-    if (name.substring(name.indexOf("@") + 1).equals(id)) {
-      return true;
-    }
-    return false;
+    return name.substring(name.indexOf("@") + 1).equals(id);
   }
-  
+
+  /**
+   * Read a YAML file given by the filename and convert it into
+   * a ServiceConfig object by deserialization.
+   *
+   * @param filename The name of the YAML file
+   * @return The equivalent ServiceConfig object
+   * @throws IOException if reading the file fails
+   */
   public static ServiceConfig readServiceConfig(String filename) throws IOException {
     String data = new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8);
     Yaml yaml = new Yaml();
     return (ServiceConfig)yaml.load(data);
   }
 
+  /**
+   * Set a field of the given object identified by the
+   * given field name to the given value. If the field
+   * does not exist or the value is of the wrong type,
+   * this method is a no-op.
+   *
+   * @param o The object whose field will be modified
+   * @param field The name of the field to be modified
+   * @param value The new value to set the field to
+   */
   public static void setField(Object o, String field, Object value) {
     try {
       // TODO - handle all types :P
