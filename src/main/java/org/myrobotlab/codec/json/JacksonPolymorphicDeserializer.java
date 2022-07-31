@@ -15,13 +15,43 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * A Jackson deserializer that handles polymorphic operations.
+ * This class will look at JSON objects and check if they have a field
+ * called {@link CodecUtils#CLASS_META_KEY}, if they do it will
+ * use the value of that field as the target type to deserialize into,
+ * unless the requested type is not a superclass of the embedded type.
+ * The requested type may be outside the embedded type's set of superclasses
+ * when the user wishes to interpret the value in a different form, such as
+ * a {@link Map}.
+ *
+ * @param <T> Specifies which type (and its subclasses) this deserializer will operate on.
+ */
 public class JacksonPolymorphicDeserializer<T> extends StdDeserializer<T> implements ResolvableDeserializer {
 
-    public JsonDeserializer<T> originalDeserializer;
-    Class<?> clazz;
+    /**
+     * The original deserializer to dispatch to in
+     * order to avoid infinite loops.
+     */
+    protected JsonDeserializer<T> originalDeserializer;
 
+    /**
+     * The class that was requested to deserialize into.
+     */
+    protected Class<?> clazz;
+
+    /**
+     * Create a new deserializer with the delegate deserializer
+     * and the requested type.
+     *
+     * @param deserializer {@link #originalDeserializer}, must also be a {@link ResolvableDeserializer}
+     * @param clazz {@link #clazz}
+     * @throws IllegalArgumentException if deserializer is not also a {@link ResolvableDeserializer}
+     */
     public JacksonPolymorphicDeserializer(JsonDeserializer<T> deserializer, Class<?> clazz) {
         super(clazz);
+        if(!(deserializer instanceof ResolvableDeserializer))
+            throw new IllegalArgumentException("Deserializer must also be a ResolvableDeserializer, got " + deserializer);
         this.clazz = clazz;
         originalDeserializer = deserializer;
     }
@@ -34,7 +64,17 @@ public class JacksonPolymorphicDeserializer<T> extends StdDeserializer<T> implem
     }
 
 
-    private T deserializeNoPolymorphic(JsonParser jsonParser, DeserializationContext deserializationContext, JsonNode node) throws IOException {
+    /**
+     * Deserialize the given node without attempting
+     * polymorphic operations.
+     *
+     * @param jsonParser The parser to use to deserialize
+     * @param deserializationContext The context used to deserialize
+     * @param node The node to deserialize
+     * @return The fully deserialized object, using the original deserializer
+     * @throws IOException if deserialization fails
+     */
+    protected T deserializeNoPolymorphic(JsonParser jsonParser, DeserializationContext deserializationContext, JsonNode node) throws IOException {
         for (Iterator<Map.Entry<String, JsonNode>> it = node.fields(); it.hasNext(); ) {
             Map.Entry<String, JsonNode> field = it.next();
             if (field.getKey().equals(CodecUtils.CLASS_META_KEY))
@@ -45,6 +85,15 @@ public class JacksonPolymorphicDeserializer<T> extends StdDeserializer<T> implem
         return originalDeserializer.deserialize(parser, deserializationContext);
     }
 
+    /**
+     * Reset the node to the beginning of the token stream,
+     * using the specified codec.
+     *
+     * @param node The node to be reset
+     * @param codec The codec to use
+     * @return A new JsonParser that is reset to the beginning of the node's token stream
+     * @throws IOException If a new parser cannot be created
+     */
     private JsonParser resetNode(JsonNode node, ObjectCodec codec) throws IOException {
         JsonParser parser = new JsonFactory().createParser(node.toString());
         parser.setCodec(codec);
