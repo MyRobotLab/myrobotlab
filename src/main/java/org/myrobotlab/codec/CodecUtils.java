@@ -61,22 +61,22 @@ public class CodecUtils {
      * The string to use after {@link #PARAMETER_API}
      * in URIs to select this API.
      */
-    String key;
+    public final String key;
 
     /**
      * The path to reach this API
      */
-    String path; // {scheme}://{host}:{port}/api/messages
+    public final String path; // {scheme}://{host}:{port}/api/messages
 
     /**
      * An example URI to reach this API
      */
-    String exampleUri;
+    public final String exampleUri;
 
     /**
      * The description of this API
      */
-    String description;
+    public final String description;
 
     /**
      * Construct a new API description.

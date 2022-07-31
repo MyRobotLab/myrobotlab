@@ -5,6 +5,8 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
+import java.util.Objects;
+
 /**
  * 
  * @author GroG
@@ -86,5 +88,18 @@ public class Registration {
   public boolean hasInterface(Class<?> interfaze) {
     // TODO Auto-generated method stub
     return false;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Registration that = (Registration) o;
+    return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(typeKey, that.typeKey) && Objects.equals(state, that.state) && Objects.equals(service, that.service);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, name, typeKey, state, service);
   }
 }
