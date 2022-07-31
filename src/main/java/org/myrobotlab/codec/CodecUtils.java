@@ -92,6 +92,19 @@ public class CodecUtils {
       this.exampleUri = exampleUri;
       this.description = description;
     }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      ApiDescription that = (ApiDescription) o;
+      return Objects.equals(key, that.key) && Objects.equals(path, that.path) && Objects.equals(exampleUri, that.exampleUri) && Objects.equals(description, that.description);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(key, path, exampleUri, description);
+    }
   }
 
   /**
