@@ -12,9 +12,13 @@ import org.myrobotlab.service.interfaces.UtteranceListener;
 import org.myrobotlab.service.interfaces.UtterancePublisher;
 import org.slf4j.Logger;
 
+import com.slack.api.Slack;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
 import com.slack.api.bolt.socket_mode.SocketModeApp;
+import com.slack.api.methods.MethodsClient;
+import com.slack.api.methods.SlackApiException;
+import com.slack.api.methods.response.chat.ChatPostMessageResponse;
 import com.slack.api.model.event.AppMentionEvent;
 import com.slack.api.model.event.MessageEvent;
 
@@ -61,10 +65,8 @@ public class SlackBot extends Service implements UtteranceListener, UtterancePub
     App app = new App(appConfig);
     // some callbacks..??
     app.event(MessageEvent.class, (req, ctx) -> {
-      log.info("Ok... here we go!");
-      log.info("REQ: {}", req);
-      log.info("CTX: {}", ctx);
-      // TODO: publish the utterance
+      log.info("Message Event Req: {}  and Ctx: {}", req, ctx);
+      // turn this message event into an utterance so we can publish it.
       Utterance utterance = new Utterance();
       utterance.text = req.getEvent().getText();
       utterance.id = req.getEventId();
@@ -74,16 +76,19 @@ public class SlackBot extends Service implements UtteranceListener, UtterancePub
       utterance.channelBotName = ctx.getBotUserId();
       utterance.username = req.getEvent().getUser();
       log.info("Utterance: {}",utterance);
+      // publish it.
       invoke("publishUtterance", utterance);
       return ctx.ack();
     });
 
     app.event(AppMentionEvent.class, (req, ctx) -> {
-      log.info("MENTION EVENT?");
-      ctx.say("Hi there!");
+      // We probably don't actually need to register this handler
+      // for this event, the ProgramAB instance currently decides 
+      // if the utterance is intended for the bot...
+      log.info("The bot was mentioned in a message.");
       return ctx.ack();
     });
-
+    
     SocketModeApp socketModeApp = new SocketModeApp(appToken, app);
     // This does not block the current thread
     socketModeApp.startAsync();
@@ -99,18 +104,45 @@ public class SlackBot extends Service implements UtteranceListener, UtterancePub
   public void onUtterance(Utterance utterance) throws Exception {
     // TODO: if ProgramAB or other utterance publisher sends us an utterance 
     // we need to relay the message to the proper slack channel
+    log.info("On Utterance: {}", utterance);
+    // send the message to the slack channel in the utterance.
+    publishMessage(utterance.channel, utterance.text, botToken);
+  }
+  
+  // helper method to publish a message to a slack channel.
+  static void publishMessage(String id, String text, String botToken) {
+    // you can get this instance via ctx.client() in a Bolt app
+    MethodsClient client = Slack.getInstance().methods();
+    try {
+        // Call the chat.postMessage method using the built-in WebClient
+        ChatPostMessageResponse result = client.chatPostMessage(r -> r
+            // The token you used to initialize your app
+            .token(botToken)
+            .channel(id)
+            .text(text)
+            // You could also use a blocks[] array to send richer content
+        );
+        // Print result, which includes information about the message (like TS)
+        log.info("result {}", result);
+    } catch (IOException | SlackApiException e) {
+        log.error("error: {}", e.getMessage(), e);
+    }
   }
 
   public static void main(String[] args) throws IOException, Exception {
     LoggingFactory.getInstance().setLevel("INFO");
-    //  
     SlackBot slackBot = (SlackBot)Runtime.start("slackBot", "SlackBot");
-    // TODO add your app / bot tokens here to authenticate as your bot user.
-    slackBot.appToken = "XXXX";
-    slackBot.botToken = "YYYY";
+    // add your app / bot tokens here to authenticate as your bot user.
+    String botToken = "xoxb-XXXXXXXX-XXXXXXXXX-XXXXXXXXXXXXXXXXXXXX";
+    String appToken = "xapp-X-XXXXXXX-XXXXXXX-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+    slackBot.appToken = appToken;
+    slackBot.botToken = botToken;
+    // Let's see about getting a programAB instance setup and attached to the slack bot
+    ProgramAB chatBot = (ProgramAB)Runtime.start("chatBot", "ProgramAB");
+    chatBot.setCurrentBotName("Mr. Turing");
+    slackBot.attachUtteranceListener(chatBot.getName());
+    chatBot.attachUtteranceListener(slackBot.getName());
+    // Tell the slack bot to connect 
     slackBot.connect();
-    // TODO: now what?
-
   }
-
 }

@@ -1677,24 +1677,24 @@
 
   <!-- Slack stuff -->
   <dependency>
-           <groupId>com.slack.api</groupId>
-           <artifactId>bolt</artifactId>
-           <version>1.12.1</version>
-         </dependency>
+    <groupId>com.slack.api</groupId>
+    <artifactId>bolt</artifactId>
+    <version>1.24.0</version>
+    </dependency>
   <dependency>
-           <groupId>com.slack.api</groupId>
-           <artifactId>bolt-socket-mode</artifactId>
-           <version>1.12.1</version>
-         </dependency>
+    <groupId>com.slack.api</groupId>
+    <artifactId>bolt-socket-mode</artifactId>
+    <version>1.24.0</version>
+    </dependency>
   <dependency>
-           <groupId>javax.websocket</groupId>
-           <artifactId>javax.websocket-api</artifactId>
-           <version>1.1</version>
-         </dependency>
+    <groupId>javax.websocket</groupId>
+    <artifactId>javax.websocket-api</artifactId>
+    <version>1.1</version>
+  </dependency>
   <dependency>
-           <groupId>org.glassfish.tyrus.bundles</groupId>
-           <artifactId>tyrus-standalone-client</artifactId>
-           <version>1.17</version>
+    <groupId>org.glassfish.tyrus.bundles</groupId>
+    <artifactId>tyrus-standalone-client</artifactId>
+    <version>1.19</version>
   </dependency>
 
   </dependencies>
