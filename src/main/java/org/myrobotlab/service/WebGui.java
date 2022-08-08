@@ -65,7 +65,6 @@ import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.slf4j.Logger;
 
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 
 /**

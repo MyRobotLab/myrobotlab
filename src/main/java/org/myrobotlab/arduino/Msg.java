@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.myrobotlab.logging.Level;
 
-import org.myrobotlab.arduino.virtual.MrlComm;
 import org.myrobotlab.string.StringUtil;
 
 /**
@@ -45,7 +44,6 @@ import org.myrobotlab.string.StringUtil;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.VirtualArduino;
 
 import java.io.FileOutputStream;
 import java.util.Arrays;
