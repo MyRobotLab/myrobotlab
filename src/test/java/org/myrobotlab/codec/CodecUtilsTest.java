@@ -1,7 +1,6 @@
-package org.myrobotlab.codec.json;
+package org.myrobotlab.codec;
 
 import org.junit.Test;
-import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.test.AbstractTest;
 
