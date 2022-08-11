@@ -1,13 +1,11 @@
 package org.myrobotlab.service.data;
 
-import java.util.HashMap;
-
-import org.junit.Test;
-import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.test.AbstractTest;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.junit.Test;
+import org.myrobotlab.test.AbstractTest;
+
+import java.util.HashMap;
 
 import static org.junit.Assert.*;
 
@@ -20,7 +18,6 @@ public class LocaleTest extends AbstractTest {
 
     // String code construction
     String code = null;
-    String json = null;
 
     java.util.Locale check = new java.util.Locale("zh-cmn-Hans-CN");
     // java.util.Locale check = new java.util.Locale("cmn-Hans-CN");
