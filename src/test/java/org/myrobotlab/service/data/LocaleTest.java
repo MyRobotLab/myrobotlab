@@ -1,8 +1,5 @@
 package org.myrobotlab.service.data;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.HashMap;
 
 import org.junit.Test;
@@ -11,6 +8,8 @@ import org.myrobotlab.test.AbstractTest;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import static org.junit.Assert.*;
 
 public class LocaleTest extends AbstractTest {
 
@@ -66,37 +65,26 @@ public class LocaleTest extends AbstractTest {
 
     code = "-";
     mrlLocale = new Locale(code);
-    json = CodecUtils.toJson(mrlLocale);
-    assertEquals("{}", json);
-    assertEquals(null, mrlLocale.getLanguage());
+    assertNull(mrlLocale.getLanguage());
 
     code = " - ";
     mrlLocale = new Locale(code);
-    json = CodecUtils.toJson(mrlLocale);
-    assertEquals("{}", json);
-    assertEquals(null, mrlLocale.getLanguage());
+    assertNull(mrlLocale.getLanguage());
 
     code = "  ";
     mrlLocale = new Locale(code);
-    json = CodecUtils.toJson(mrlLocale);
-    assertEquals("{}", json);
-    assertEquals(null, mrlLocale.getLanguage());
+    assertNull(mrlLocale.getLanguage());
 
     code = "";
     mrlLocale = new Locale(code);
-    json = CodecUtils.toJson(mrlLocale);
-    assertEquals("{}", json);
-    assertEquals(null, mrlLocale.getLanguage());
+    assertNull(mrlLocale.getLanguage());
 
     code = "-uS";
     mrlLocale = new Locale(code);
-    json = CodecUtils.toJson(mrlLocale);
-    assertEquals("{\"language\":\"\",\"displayLanguage\":\"\",\"country\":\"US\",\"displayCountry\":\"United States\",\"tag\":\"-US\"}", json);
     assertEquals("US", mrlLocale.getCountry());
 
     code = "EN_us";
     mrlLocale = new Locale(code);
-    json = CodecUtils.toJson(mrlLocale);
     assertEquals("US", mrlLocale.getCountry());
     assertEquals("en", mrlLocale.getLanguage());
     assertEquals("en-US", mrlLocale.getTag());
@@ -105,10 +93,9 @@ public class LocaleTest extends AbstractTest {
 
     code = "en-";
     mrlLocale = new Locale(code);
-    json = CodecUtils.toJson(mrlLocale);
     assertEquals("en", mrlLocale.getLanguage());
     assertEquals("en", mrlLocale.getTag());
-    assertEquals(null, mrlLocale.getCountry());
+    assertNull(mrlLocale.getCountry());
 
     mrlLocale = new Locale("en-us");
     assertEquals("US", mrlLocale.getCountry());
