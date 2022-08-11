@@ -40,15 +40,15 @@ public class JacksonPolymorphicModuleTest extends AbstractTest {
         polymorphicMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         regularMapper = new ObjectMapper();
-        polymorphicMapper.registerModule(new NoCtorDeserModule());
+        regularMapper.registerModule(new NoCtorDeserModule());
 
         //Disables Jackson's automatic property detection
-        polymorphicMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-        polymorphicMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        polymorphicMapper.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.ANY);
+        regularMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+        regularMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        regularMapper.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.ANY);
 
         //Make jackson behave like gson in that unknown properties are ignored
-        polymorphicMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        regularMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     @Test
