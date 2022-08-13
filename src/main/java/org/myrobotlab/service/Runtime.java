@@ -67,6 +67,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Connection;
 import org.myrobotlab.net.Host;
+import org.myrobotlab.net.Http;
 import org.myrobotlab.net.HttpRequest;
 import org.myrobotlab.net.Pinger;
 import org.myrobotlab.net.RouteTable;
@@ -1266,6 +1267,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   public static String getVersion() {
     return Platform.getLocalInstance().getVersion();
+  }
+  
+  
+  public static String getLatestVersion() {
+    String latest = "http://build.myrobotlab.org:8080/job/myrobotlab/job/develop/lastSuccessfulBuild/buildNumber";
+    byte[] b = Http.get(latest);
+    String version = (b == null)?"unknown":"1.1." + new String(b);
+    return version;
   }
 
   // FIXME - shouldn't this be in platform ???
