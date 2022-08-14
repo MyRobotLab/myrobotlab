@@ -575,6 +575,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       throw new IllegalArgumentException("service name cannot be null");
     }
 
+
     if (name.contains("@")) {
       throw new IllegalArgumentException(String.format("can not have @ in name %s", name));
     }
