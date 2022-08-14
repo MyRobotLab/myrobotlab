@@ -108,7 +108,6 @@ public class GsonPolymorphicTest extends AbstractTest {
         boolean testBoolean = false;
         String jsonString = regularGson.toJson(testBoolean);
         log.debug("Encoded test string: " + jsonString);
-        
         boolean decodedBoolean = polymorphicGson.fromJson(jsonString, Boolean.class);
         log.debug("Decoded test string: " + decodedBoolean);
         Assert.assertEquals("Boolean decoding not correct", testBoolean, decodedBoolean);
