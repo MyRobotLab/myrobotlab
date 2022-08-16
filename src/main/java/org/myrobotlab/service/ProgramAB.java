@@ -580,8 +580,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    */
   public void reloadSession(String userName, String botName) throws IOException {
     Session session = getSession(userName, botName);
-    session.reload();
-    info("reloaded session %s <-> %s ", userName, botName);
+    if (session != null) {
+      session.reload();
+      info("reloaded session %s <-> %s ", userName, botName);
+    }
   }
 
   /**
@@ -1296,6 +1298,16 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       error(e);
     }
   }
+  
+  boolean sleep = false;
+  
+  public void wake() {
+    sleep = false;
+  }
+  
+  public void sleep() {
+    sleep = true;
+  }
 
   @Override
   public void onUtterance(Utterance utterance) throws Exception {
@@ -1319,6 +1331,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       log.info("Don't talk to myself.");
       return;
     }
+    
 
     boolean shouldIRespond = false;
     // always respond to direct messages.
@@ -1329,7 +1342,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
         // TODO: don't talk to bots.. it won't go well..
         // TODO: the discord api can provide use the list of mentioned users.
         // for now.. we'll just see if we see Mr. Turing as a substring.
-        if (utterance.text.contains(botName)) {
+        sleep = (sleep || utterance.text.contains("@")) && !utterance.text.contains(botName);
+        if (!sleep) {
           shouldIRespond = true;
         }
       }
