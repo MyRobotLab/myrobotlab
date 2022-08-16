@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -12,7 +13,10 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.DiscordBotConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.data.Utterance;
+import org.myrobotlab.service.interfaces.ImageListener;
+import org.myrobotlab.service.interfaces.ImagePublisher;
 import org.myrobotlab.service.interfaces.UtteranceListener;
 import org.myrobotlab.service.interfaces.UtterancePublisher;
 import org.slf4j.Logger;
@@ -28,7 +32,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
  * channels. The bot user also needs a token that is used to authenticate and
  * identify the bot.
  */
-public class DiscordBot extends Service implements UtterancePublisher, UtteranceListener {
+public class DiscordBot extends Service implements UtterancePublisher, UtteranceListener, ImageListener {
 
   transient public final static Logger log = LoggerFactory.getLogger(DiscordBot.class);
 
@@ -86,7 +90,13 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
   public void attach(Attachable attachable) {
     if (attachable instanceof UtteranceListener) {
       attachUtteranceListener(attachable.getName());
-    } else {
+    }
+
+    if (attachable instanceof ImagePublisher) {
+      attachImagePublisher(attachable.getName());
+    }
+
+    if (!(attachable instanceof UtteranceListener) && !(attachable instanceof ImagePublisher)) {
       error("don't know how to attach a %s", attachable.getName());
     }
   }
@@ -153,21 +163,29 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     this.token = token;
   }
 
-  public static void main(String[] args) throws Exception {
-    // Brief example of starting a programab chatbot and connecting it to
-    // discord
+  public void runMrT() throws LoginException, IOException {
+
+    // Ok.. so what do we need minimally? I guess I want to run MRT from a
+    // python script eventually.
+    // but for now.. we do 2 things. 1 start alice.. 2 start the discord service
     LoggingFactory.getInstance().setLevel("INFO");
+    // Runtime.start("webgui", "WebGui");
     // Let's create a programab instance.
     ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
-    brain.setCurrentBotName("Alice");
+    brain.setCurrentBotName("Mr. Turing");
     DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
-
     bot.attachUtteranceListener(brain.getName());
     brain.attachUtteranceListener(bot.getName());
-    bot.token = "YOUR_TOKEN_HERE";
+    bot.setToken("ODg4Nzk4NTAwNzk4NzQyNTI5.YUX8Gw.RF23zrQfkYTHO6ImZTPDqTXn1U0");
     bot.connect();
-    // System.err.println("done.. press any key.");
-    // System.in.read();
+
+    brain.getResponse("Who is Earth?");
+
+    while (true) {
+      System.out.println("Press the any key.");
+      System.in.read();
+      brain.reload();
+    }
   }
 
   @Override
@@ -228,9 +246,9 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
    * @param channelName
    */
   public void sendReaction(String code, String id, String channelName) {
-    
+
     code = code.trim();
-    
+
     if (channelName == null) {
       channelName = "general";
     }
@@ -259,6 +277,70 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
 
   public void setBotName(String name) {
     this.botName = name;
+  }
+
+  @Override
+  public void onImage(ImageData img) {
+    sendImage(img, null, null);
+  }
+
+  public void sendImage(ImageData img, String id, String channelName) {
+    if (channelName == null) {
+      channelName = "general";
+    }
+
+    if (id == null && lastUtterance != null) {
+      id = lastUtterance.id;
+    }
+
+    if (img.src != null && img.src.startsWith("http")) {
+      sendUtterance(img.src, channelName);
+    } else {
+      // TODO - implement binary message
+      log.error("implement binary message");
+    }
+
+  }
+
+  public static void main(String[] args) throws Exception {
+    try {
+
+      // Brief example of starting a programab chatbot and connecting it to
+      // discord
+      LoggingFactory.getInstance().setLevel("INFO");
+
+      Runtime.startConfig("mrturing");
+      // Runtime.start("webgui", "WebGui");
+
+      // DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
+      // bot.attach("brain.search");
+
+      // Runtime.setConfig("mrturing");
+
+      // // Let's create a programab instance.
+      // ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
+      // brain.setCurrentBotName("Alice");
+      // DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
+      //
+      // bot.runMrT();
+
+      // Runtime.load("mrturing");
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      // bot.attachUtteranceListener(brain.getName());
+      // brain.attachUtteranceListener(bot.getName());
+      // bot.id =
+      // bot.token = "YOUR_TOKEN_HERE";
+      // bot.connect();
+      // System.err.println("done.. press any key.");
+      // System.in.read();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
 }
