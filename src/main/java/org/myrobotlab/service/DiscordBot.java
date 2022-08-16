@@ -176,7 +176,7 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
     bot.attachUtteranceListener(brain.getName());
     brain.attachUtteranceListener(bot.getName());
-    bot.setToken("ODg4Nzk4NTAwNzk4NzQyNTI5.YUX8Gw.RF23zrQfkYTHO6ImZTPDqTXn1U0");
+    bot.setToken("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
     bot.connect();
 
     brain.getResponse("Who is Earth?");
