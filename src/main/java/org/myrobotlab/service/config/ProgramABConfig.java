@@ -15,5 +15,15 @@ public class ProgramABConfig extends ServiceConfig {
   // search engine - currently wikipedia
   // search for sraix
   public String search;
+  
+  /**
+   * enables global session and sleep/wake functionality
+   */
+  public boolean useGlobalSession;
+  
+  /**
+   * current sleep/wake value
+   */
+  public boolean sleep;  
 
 }
