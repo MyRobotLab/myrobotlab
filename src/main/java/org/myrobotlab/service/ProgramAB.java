@@ -63,6 +63,20 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   private static final String LEARNF_AIML_FILE = "learnf.aiml";
 
   private static final long serialVersionUID = 1L;
+  
+  /**
+   * useGlobalSession true will allow the sleep member to 
+   *  control session focus
+   */
+  protected boolean useGlobalSession = false;
+  
+  /**
+   * sleep 
+   * current state of the sleep if globalSession is used
+   *  true : ProgramAB is sleeping and wont respond
+   *  false : ProgramAB is not sleeping and any response requested will be processed
+   */
+  protected boolean sleep = false;
 
   transient public final static Logger log = LoggerFactory.getLogger(ProgramAB.class);
 
@@ -1117,6 +1131,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
     config.currentBotName = currentBotName;
     config.currentUserName = currentUserName;
+    config.useGlobalSession = useGlobalSession;
+    config.sleep = sleep;
 
     Set<String> listeners = getAttached("publishText");
     config.textListeners = listeners.toArray(new String[listeners.size()]);
@@ -1153,6 +1169,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     if (config.currentUserName != null) {
       setCurrentUserName(config.currentUserName);
     }
+    
+    useGlobalSession = config.useGlobalSession;
+
+    sleep = config.sleep;
     
     setCurrentSession(currentUserName, currentBotName);
 
@@ -1304,12 +1324,16 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     }
   }
   
-  boolean sleep = false;
-  
+  /**
+   * wakes the global session up
+   */
   public void wake() {
     sleep = false;
   }
   
+  /**
+   * sleeps the global session
+   */
   public void sleep() {
     sleep = true;
   }
