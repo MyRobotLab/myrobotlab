@@ -2,13 +2,7 @@ package org.myrobotlab.framework;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.codec.CodecUtils;
@@ -553,7 +547,7 @@ public class MethodCache {
       Class<?>[] paramTypes = possible.get(p).getParameterTypes();
       try {
         for (int i = 0; i < encodedParams.length; ++i) {
-          if (encodedParams[i].getClass() == LinkedTreeMap.class) {
+          if (CodecUtils.JSON_DEFAULT_OBJECT_TYPE.equals(encodedParams[i].getClass())) {
             // specific gson implementation
             // rather than double encode everything - i have chosen
             // to re-encode objects back to string since gson will decode them
@@ -567,7 +561,7 @@ public class MethodCache {
         return params;
       } catch (Exception e) {
 
-        log.info("getDecodedParameters threw clazz {} method {} params {} ", clazz, methodName, encodedParams.length, e.getMessage());
+        log.info("getDecodedParameters threw clazz {} method {} params {} Message: {}", clazz, methodName, encodedParams.length, e.getMessage());
       }
     }
     // if successful return new msg
