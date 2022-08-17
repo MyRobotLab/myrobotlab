@@ -31,7 +31,6 @@ import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
-import org.myrobotlab.service.OpenCV;
 
 /**
  * OpenCV Fitler for motion detection based on

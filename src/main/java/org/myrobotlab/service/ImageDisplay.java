@@ -322,7 +322,7 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
             display.frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
             // frame.setLocationRelativeTo(null);
 
-          } else if ((display.width != null && display.width != null) || display.scale != null) {
+          } else if ((display.width != null && display.height != null) || display.scale != null) {
 
             // FIXME - "IF" SCALED THEN SETICON(ICON) !!!
 

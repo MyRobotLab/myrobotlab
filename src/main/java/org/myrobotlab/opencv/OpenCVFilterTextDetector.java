@@ -31,7 +31,6 @@ import org.bytedeco.opencv.opencv_core.Size2f;
 import org.bytedeco.opencv.opencv_core.StringVector;
 import org.bytedeco.opencv.opencv_dnn.Net;
 import org.myrobotlab.image.Util;
-import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TesseractOcr;
 import org.opencv.imgproc.Imgproc;

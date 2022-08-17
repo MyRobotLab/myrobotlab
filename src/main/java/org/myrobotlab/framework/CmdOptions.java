@@ -87,8 +87,11 @@ public class CmdOptions {
   @Option(names = { "-j", "--jvm" }, arity = "0..*", description = "jvm parameters for the instance of mrl")
   public String jvm;
 
-  @Option(names = { "-l", "--log-level" }, description = "log level - helpful for troubleshooting " + " [debug info warn error]")
+  @Option(names = { "-l", "--log-level" }, description = "log level - helpful for troubleshooting [debug info warn error]")
   public String logLevel = "info";
+
+  @Option(names = { "--log-file" }, description = "log file name [myrobotlab.log]")
+  public String logFile = "myrobotlab.log";
 
   // FIXME - highlight or italics for examples !!
   // launcher

@@ -365,7 +365,7 @@ public class MethodCache {
       List<MethodEntry> possibleMatches = mi.methodOrdinalIndex.get(ordinalKey);
       if (possibleMatches == null) {
 
-        log.error("Method Cache look up Failed! {}.{}.({})", fullType, methodName, StringUtils.join(paramTypeNames, ","));
+        log.error("Method Cache look up Failed! {}.{}({})", fullType, methodName, StringUtils.join(paramTypeNames, ","));
 
         // if a service provides a methodCacheDefaultMethod - it means whenever
         // no match is found

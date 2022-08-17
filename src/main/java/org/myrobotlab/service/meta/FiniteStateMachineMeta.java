@@ -17,7 +17,8 @@ public class FiniteStateMachineMeta extends MetaData {
     addDependency("com.github.pnavais", "state-machine", "1.2.0");
     
     addCategory("general", "ai");
-
+    
+    addDependency("com.github.pnavais", "state-machine", "1.2.0");
   }
 
 }

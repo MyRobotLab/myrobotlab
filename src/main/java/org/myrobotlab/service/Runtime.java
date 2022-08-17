@@ -67,6 +67,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Connection;
 import org.myrobotlab.net.Host;
+import org.myrobotlab.net.Http;
 import org.myrobotlab.net.HttpRequest;
 import org.myrobotlab.net.Pinger;
 import org.myrobotlab.net.RouteTable;
@@ -425,6 +426,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // }
     return si;
   }
+  
+  public String getServiceExample(String serviceType) {
+    String url = "https://raw.githubusercontent.com/MyRobotLab/myrobotlab/develop/src/main/resources/resource/"+serviceType+"/"+serviceType+".py";
+    byte[] bytes = Http.get(url);
+    if (bytes != null) {
+      return new String(bytes);
+    }
+    return "";
+  }
 
   public static String getPeerName(String peerKey, ServiceConfig config, Map<String, ServiceReservation> peers, String parentName) {
 
@@ -613,7 +623,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
 
     String id = (inId == null) ? Platform.getLocalInstance().getId() : inId;
-    if (name == null || name.length() == 0 || fullTypeName == null || fullTypeName.length() == 0) {
+    if (name.length() == 0 || fullTypeName == null || fullTypeName.length() == 0) {
       log.error("{} not a type or {} not defined ", fullTypeName, name);
       return null;
     }
@@ -1242,6 +1252,26 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     log.info("up for {}", uptime);
     return uptime;
   }
+  
+  public static String getPlatformInfo() {
+    Platform platform = Platform.getLocalInstance();    
+    StringBuilder sb = new StringBuilder();
+    sb.append(platform.getHostname());
+    sb.append(" ");
+    sb.append(platform.getOS());
+    sb.append(" ");
+    sb.append(platform.getArch());
+    sb.append(".");
+    sb.append(platform.getOsBitness());
+
+    sb.append(" Java ");
+    sb.append(platform.getVmVersion());
+    sb.append(" ");
+    sb.append(platform.getVMName());
+
+    return sb.toString();
+  }
+
 
   public static String getDiffTime(long diff) {
 
@@ -1266,6 +1296,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   public static String getVersion() {
     return Platform.getLocalInstance().getVersion();
+  }
+  
+  
+  public static String getLatestVersion() {
+    String latest = "http://build.myrobotlab.org:8080/job/myrobotlab/job/develop/lastSuccessfulBuild/buildNumber";
+    byte[] b = Http.get(latest);
+    String version = (b == null)?"unknown":"1.1." + new String(b);
+    return version;
   }
 
   // FIXME - shouldn't this be in platform ???
@@ -3698,6 +3736,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   public static void initLog() {
     if (options != null) {
+      LoggingFactory.setLogFile(options.logFile);
       LoggingFactory.init(options.logLevel);
     } else {
       LoggingFactory.init("info");

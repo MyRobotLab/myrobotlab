@@ -493,7 +493,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     // for now.. cheating, and just pulling everything up to the first period.
     if (!StringUtils.isEmpty(res)) {
       // TODO: better sentence boundary detection
-      String fragment = res.split(".")[0];
+      String fragment = res.split("\\.")[0];
       return fragment;
     } else {
       // TODO: log a warning or something.

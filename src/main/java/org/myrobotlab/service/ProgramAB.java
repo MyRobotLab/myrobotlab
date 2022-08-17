@@ -1056,8 +1056,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     try {
 
       botInfo = getBotInfo(botName);
-      path = FileIO.gluePaths(botInfo.path.getAbsolutePath(), "bot.png");
       if (botInfo != null) {
+        path = FileIO.gluePaths(botInfo.path.getAbsolutePath(), "bot.png");
         File check = new File(path);
         if (check.exists()) {
           return Util.getImageAsBase64(path);

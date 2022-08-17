@@ -1550,7 +1550,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public void sendToPeer(String peerName, String method, Object... data) {
-    send(getPeerName(peerName), method, data);
+    String name = getPeerName(peerName);
+    Message msg = Message.createMessage(getName(), name, method, data);
+    send(msg);
   }
 
   public Object sendToPeerBlocking(String peerName, String method, Object... data) throws InterruptedException, TimeoutException {

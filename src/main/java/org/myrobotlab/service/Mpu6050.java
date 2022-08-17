@@ -1513,7 +1513,7 @@ public boolean getSlaveReadWriteTransitionEnabled() {
   /**
    * Set I2C master clock speed.
    * 
-   * @reparam speed Current I2C master clock speed
+   *  speed Current I2C master clock speed
    *  MPU6050_RA_I2C_MST_CTRL
    */
   public void setMasterClockSpeed(int speed) {
@@ -2191,7 +2191,7 @@ public boolean getFSyncInterruptLevel() {
   /**
    * Set FSYNC interrupt logic level mode.
    * 
-   * @param mode
+   * @param level
    *          New FSYNC interrupt mode (0=active-high, 1=active-low) see
    *          getFSyncInterruptMode()
    *  MPU6050_RA_INT_PIN_CFG
@@ -2780,7 +2780,7 @@ public boolean getIntDataReadyStatus() {
    *
    * Data is placed in these external sensor data registers according to
    * I2C_SLV0_CTRL, I2C_SLV1_CTRL, I2C_SLV2_CTRL, and I2C_SLV3_CTRL (Registers
-   * 39, 42, 45, and 48). When more than zero bytes are read (I2C_SLVx_LEN > 0)
+   * 39, 42, 45, and 48). When more than zero bytes are read (I2C_SLVx_LEN &gt; 0)
    * from an enabled slave (I2C_SLVx_EN = 1), the slave is read at the Sample
    * Rate (as defined in Register 25) or delayed rate (if specified in Register
    * 52 and 103). During each Sample cycle, slave reads are performed in order
@@ -3499,7 +3499,7 @@ public boolean getStandbyXAccelEnabled() {
   /**
    * Set X-axis accelerometer standby enabled status.
    * 
-   * @param New
+   * @param enabled
    *          X-axis standby enabled status see getStandbyXAccelEnabled()
    *  MPU6050_RA_PWR_MGMT_2
    *  MPU6050_PWR2_STBY_XA_BIT
@@ -3523,7 +3523,7 @@ public boolean getStandbyYAccelEnabled() {
   /**
    * Set Y-axis accelerometer standby enabled status.
    * 
-   * @param New
+   * @param enabled
    *          Y-axis standby enabled status see getStandbyYAccelEnabled()
    *  MPU6050_RA_PWR_MGMT_2
    *  MPU6050_PWR2_STBY_YA_BIT
@@ -3547,7 +3547,7 @@ public boolean getStandbyZAccelEnabled() {
   /**
    * Set Z-axis accelerometer standby enabled status.
    * 
-   * @param New
+   * @param enabled
    *          Z-axis standby enabled status see getStandbyZAccelEnabled()
    *  MPU6050_RA_PWR_MGMT_2
    *  MPU6050_PWR2_STBY_ZA_BIT
@@ -3571,7 +3571,7 @@ public boolean getStandbyXGyroEnabled() {
   /**
    * Set X-axis gyroscope standby enabled status.
    * 
-   * @param New
+   * @param enabled
    *          X-axis standby enabled status see getStandbyXGyroEnabled()
    *  MPU6050_RA_PWR_MGMT_2
    *  MPU6050_PWR2_STBY_XG_BIT
@@ -3595,7 +3595,7 @@ public boolean getStandbyYGyroEnabled() {
   /**
    * Set Y-axis gyroscope standby enabled status.
    * 
-   * @param New
+   * @param enabled
    *          Y-axis standby enabled status see getStandbyYGyroEnabled()
    *  MPU6050_RA_PWR_MGMT_2
    *  MPU6050_PWR2_STBY_YG_BIT
@@ -3619,7 +3619,7 @@ public boolean getStandbyZGyroEnabled() {
   /**
    * Set Z-axis gyroscope standby enabled status.
    * 
-   * @param New
+   * @param enabled
    *          Z-axis standby enabled status see getStandbyZGyroEnabled()
    *  MPU6050_RA_PWR_MGMT_2
    *  MPU6050_PWR2_STBY_ZG_BIT
@@ -4375,7 +4375,7 @@ public boolean I2CdevWriteBitsW(int devAddr, int regAddr, int bitStart, int leng
    *          Register regAddr to write to
    * @param bitNum
    *          Bit position to write (0-7)
-   * @param value
+   * @param data
    *          New bit value to write
    * @return Status of operation (true = success)
    */

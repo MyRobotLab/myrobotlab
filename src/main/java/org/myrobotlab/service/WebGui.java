@@ -41,6 +41,8 @@ import org.atmosphere.cpr.BroadcasterFactory;
 import org.atmosphere.nettosphere.Config;
 import org.atmosphere.nettosphere.Handler;
 import org.atmosphere.nettosphere.Nettosphere;
+//import org.jboss.netty.handler.ssl.SslContext;
+//import org.jboss.netty.handler.ssl.util.SelfSignedCertificate;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
@@ -61,26 +63,9 @@ import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.slf4j.Logger;
 
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.util.SelfSignedCertificate;
-
-/**
- * 
- * WebGui - This service is the AngularJS based GUI TODO - messages &amp;
- * services are already APIs - perhaps a data API - same as service without the
- * message wrapper
- */
-public class WebGui extends Service implements AuthorizationProvider, Gateway, Handler, ServiceLifeCycleListener {
-
   public static class LiveVideoStreamHandler implements Handler {
-
-    @Override
     public void handle(AtmosphereResource r) {
-      // TODO Auto-generated method stub
-      try {
 
-        AtmosphereResponse response = r.getResponse();
         // response.setContentType("video/mp4");
         // response.setContentType("video/x-flv");
         response.setContentType("video/avi");
@@ -777,7 +762,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     public void stop() {
       synchronized (lock) {
         isRunning = false;
-        if (worker == null) {
+        if (worker != null) {
           worker.interrupt();
         }
       }

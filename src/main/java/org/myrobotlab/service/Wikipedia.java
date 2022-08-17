@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
@@ -49,10 +50,16 @@ import com.google.gson.internal.LinkedHashTreeMap;
  * 
  * @see <a href="http://en.wikipedia.org/w/api.php?action=query&prop=info&format=json&titles=Stanford%20University">Standford University example</a>
  * 
+ * 
+ * TODO - control the number of sentences to return
+ *  @see - https://en.wikipedia.org/w/api.php?action=help&modules=query%2Bextracts
+ *  exsentences
+ *     How many sentences to return.  The value must be between 1 and 10.
+ *     (and lots of other goodies !)
+ * 
+ * 
  * @author GroG
  * 
- *         FIXME - make it multi-lingual - there must be a way
- *
  */
 public class Wikipedia extends Service implements SearchPublisher, ImagePublisher, TextPublisher {
 
@@ -140,7 +147,8 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
       String encoded = URLEncoder.encode(searchText, StandardCharsets.UTF_8.toString()).replace("+", "%20");
 
       // use locale to set wikipedia endpoint
-      String url = baseUrl + "/" + encoded;
+      String language = getLanguage() == null ? "en" : getLanguage();
+      String url = "https://" + language + baseUrl + "/" + encoded;
 
       // search
       // FIXME - have exception throwing get
@@ -196,6 +204,35 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
   public int setMaxImages(int cnt) {
     return cnt;
   }
+  
+  @Override
+  public ServiceConfig getConfig() {
+    WikipediaConfig config = (WikipediaConfig) this.config;
+    
+    Set<String> imagePublishers = getOutbox().getAttached("publishImage");
+    if (imagePublishers != null) {
+      config.imagePublishers = new String[imagePublishers.size()];
+      int i = 0;
+      for (String publisher: imagePublishers) {
+        config.imagePublishers[i] = publisher;  
+        ++i;
+      }
+    }
+    
+    return config;
+  }
+  
+  public ServiceConfig apply(ServiceConfig c) {
+    WikipediaConfig config = (WikipediaConfig) c;
+
+    if (config.imagePublishers != null) {
+      for (String publisher: config.imagePublishers) {
+        attachImageListener(publisher);
+      }
+    }
+
+    return config;
+  }
 
   @Override
   public void attach(String serviceName) throws Exception {
@@ -215,17 +252,39 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
 
       LoggingFactory.init(Level.INFO);
 
-      Runtime.start("webgui", "WebGui");
-      Runtime.start("python", "Python");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      // webgui.setSsl(true);
+      webgui.autoStartBrowser(false);
+      webgui.setPort(8888);
+      webgui.startService();
+
+      // Runtime.start("python", "Python");
       Wikipedia wiki = (Wikipedia) Runtime.start("wiki", "Wikipedia");
       ImageDisplay display = (ImageDisplay) Runtime.start("display", "ImageDisplay");
+      
+      Map<String,Locale> locales = wiki.getLocales();
+      Locale locale = wiki.getLocale();
+      String language = wiki.getLanguage();
+      
+      Runtime runtime = Runtime.getInstance();
+      // runtime.setLocales("ga"); - this is selection
+      runtime.setAllLocales("ga"); // this is all
+      runtime.getLocale();
+      
+      language = wiki.getLanguage();
+      
       // wiki.attachImageListener(display);
       wiki.attach("display");
-      wiki.search("elon musk");
-
-      wiki.search("gorilla");
-      wiki.search("monkey");
-      wiki.search("zebra");
+      
+      SearchResults sr = wiki.search("James_Joyce");
+      
+//      wiki.search("elon musk");
+//
+//      wiki.search("gorilla");
+//      wiki.search("monkey");
+//      wiki.search("zebra");
+//      
+//      wiki.search("Claude Shannon");
 
       log.info("hello");
 
