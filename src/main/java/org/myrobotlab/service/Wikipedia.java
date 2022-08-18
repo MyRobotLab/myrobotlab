@@ -17,7 +17,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Http;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.config.WikipediaConfig;
 import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.data.Locale;
