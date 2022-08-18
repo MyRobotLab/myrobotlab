@@ -338,22 +338,10 @@
 
 <!-- Elasticsearch begin -->
   <dependency>
-    <groupId>com.fasterxml.jackson.dataformat</groupId>
-    <artifactId>jackson-dataformat-yaml</artifactId>
-    <version>2.13.3</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
     <groupId>pl.allegro.tech</groupId>
     <artifactId>embedded-elasticsearch</artifactId>
     <version>2.7.0</version>
     <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.dataformat</groupId>
-          <artifactId>jackson-dataformat-yaml</artifactId>
-        </exclusion>
-      </exclusions>
   </dependency>
 <!-- Elasticsearch end -->
 
@@ -364,6 +352,7 @@
     <version>1.2.0</version>
     <scope>provided</scope>
   </dependency>
+<!-- Duplicate entry for com.github.pnavais-state-machine-1.2.0 skipping -->
 <!-- FiniteStateMachine end -->
 
 <!-- Git begin -->
@@ -1333,6 +1322,33 @@
   </dependency>
 <!-- Serial end -->
 
+<!-- SlackBot begin -->
+  <dependency>
+    <groupId>com.slack.api</groupId>
+    <artifactId>bolt</artifactId>
+    <version>1.24.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.slack.api</groupId>
+    <artifactId>bolt-socket-mode</artifactId>
+    <version>1.24.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>javax.websocket</groupId>
+    <artifactId>javax.websocket-api</artifactId>
+    <version>1.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.glassfish.tyrus.bundles</groupId>
+    <artifactId>tyrus-standalone-client</artifactId>
+    <version>1.19</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- SlackBot end -->
+
 <!-- Solr begin -->
   <dependency>
     <groupId>org.apache.lucene</groupId>
@@ -1583,12 +1599,7 @@
 <!-- WebGui end -->
 
 <!-- WebSocketConnector begin -->
-  <dependency>
-    <groupId>javax.websocket</groupId>
-    <artifactId>javax.websocket-api</artifactId>
-    <version>1.1</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for javax.websocket-javax.websocket-api-1.1 skipping -->
 <!-- WebSocketConnector end -->
 
 <!-- Webcam begin -->
@@ -1677,28 +1688,6 @@
     <scope>provided</scope>
   </dependency>
 <!-- Xmpp end -->
-
-  <!-- Slack stuff -->
-  <dependency>
-    <groupId>com.slack.api</groupId>
-    <artifactId>bolt</artifactId>
-    <version>1.24.0</version>
-    </dependency>
-  <dependency>
-    <groupId>com.slack.api</groupId>
-    <artifactId>bolt-socket-mode</artifactId>
-    <version>1.24.0</version>
-    </dependency>
-  <dependency>
-    <groupId>javax.websocket</groupId>
-    <artifactId>javax.websocket-api</artifactId>
-    <version>1.1</version>
-  </dependency>
-  <dependency>
-    <groupId>org.glassfish.tyrus.bundles</groupId>
-    <artifactId>tyrus-standalone-client</artifactId>
-    <version>1.19</version>
-  </dependency>
 
   </dependencies>
 
@@ -1894,8 +1883,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.3.2</version>
         <configuration>
-          <source>9</source>
-          <target>9</target>
+          <source>11</source>
+          <target>11</target>
           <optimize>true</optimize>
           <debug>true</debug>
           <compilerArgument>-parameters</compilerArgument>          
