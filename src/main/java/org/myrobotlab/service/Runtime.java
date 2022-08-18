@@ -426,6 +426,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // }
     return si;
   }
+  
+  public String getServiceExample(String serviceType) {
+    String url = "https://raw.githubusercontent.com/MyRobotLab/myrobotlab/develop/src/main/resources/resource/"+serviceType+"/"+serviceType+".py";
+    byte[] bytes = Http.get(url);
+    if (bytes != null) {
+      return new String(bytes);
+    }
+    return "";
+  }
 
   public static String getPeerName(String peerKey, ServiceConfig config, Map<String, ServiceReservation> peers, String parentName) {
 
@@ -1243,6 +1252,26 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     log.info("up for {}", uptime);
     return uptime;
   }
+  
+  public static String getPlatformInfo() {
+    Platform platform = Platform.getLocalInstance();    
+    StringBuilder sb = new StringBuilder();
+    sb.append(platform.getHostname());
+    sb.append(" ");
+    sb.append(platform.getOS());
+    sb.append(" ");
+    sb.append(platform.getArch());
+    sb.append(".");
+    sb.append(platform.getOsBitness());
+
+    sb.append(" Java ");
+    sb.append(platform.getVmVersion());
+    sb.append(" ");
+    sb.append(platform.getVMName());
+
+    return sb.toString();
+  }
+
 
   public static String getDiffTime(long diff) {
 
