@@ -572,7 +572,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     if (name == null) {
       log.error("service name cannot be null");
-      
       throw new IllegalArgumentException("service name cannot be null");
     }
 
