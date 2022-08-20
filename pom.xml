@@ -297,6 +297,15 @@
   </dependency>
 <!-- DiscordBot end -->
 
+<!-- Docker begin -->
+  <dependency>
+    <groupId>com.github.docker-java</groupId>
+    <artifactId>docker-java</artifactId>
+    <version>3.2.13</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Docker end -->
+
 <!-- DocumentPipeline begin -->
   <dependency>
     <groupId>org.apache.tika</groupId>
