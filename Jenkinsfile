@@ -165,7 +165,7 @@ pipeline {
       }
 
       stage('publish-github') {
-         when {expression { env.BRANCH_NAME != 'master' && env.BRANCH_NAME != 'develop' }}
+         when {expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }}
           steps {
                 script {
                      withCredentials([string(credentialsId: 'github-token-2', variable: 'token')]) {
