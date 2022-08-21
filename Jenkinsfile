@@ -165,15 +165,13 @@ pipeline {
       }
 
       stage('publish-github') {
-         steps {
-            when {expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }}          
-                script {
-                     withCredentials([string(credentialsId: 'github-token-2', variable: 'token')]) {
-                        steps {
-                        sh "publish-github.sh -b 1.1.${BUILD_NUMBER} -t $token"
-                        }
-                     }
-                }
+         when {expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }}          
+         steps {            
+            withCredentials([string(credentialsId: 'github-token-2', variable: 'token')]) {
+               steps {
+               sh "publish-github.sh -b 1.1.${BUILD_NUMBER} -t $token"
+               }
+            }
           }
       }
    } // stages
