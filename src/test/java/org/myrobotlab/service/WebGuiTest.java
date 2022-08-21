@@ -16,15 +16,16 @@ public class WebGuiTest extends AbstractTest {
 
   @Before
   public void setUp() {
-    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-    webgui.autoStartBrowser(false);
-    webgui.startService();
+    WebGui webgui2 = (WebGui) Runtime.create("webgui2", "WebGui");
+    webgui2.autoStartBrowser(false);
+    webgui2.setPort(8889);
+    webgui2.startService();
   }
 
   @Test
   public void getTest() {
 
-    byte[] bytes = Http.get("http://localhost:8888/api/service/runtime/getUptime");
+    byte[] bytes = Http.get("http://localhost:8889/api/service/runtime/getUptime");
     assertNotNull(bytes);
     String ret = new String(bytes);
     assertTrue(ret.contains("days"));
@@ -33,7 +34,7 @@ public class WebGuiTest extends AbstractTest {
   @Test
   public void postTest() {
     String postBody = "[\"runtime\"]";
-    byte[] bytes = Http.post("http://localhost:8888/api/service/runtime/getFullName", postBody);
+    byte[] bytes = Http.post("http://localhost:8889/api/service/runtime/getFullName", postBody);
     assertNotNull(bytes);
     String ret = new String(bytes);
     assertTrue(ret.contains("@"));

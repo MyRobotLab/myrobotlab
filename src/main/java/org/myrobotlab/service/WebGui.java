@@ -755,6 +755,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
             data.si.out(data.method.getName(), ret);
           }
         }
+      } catch (InterruptedException interrupt) {
+        log.info("interrupted");
       } catch (Exception e) {
         log.error("IncomingMessageQueue threw", e);
       }
