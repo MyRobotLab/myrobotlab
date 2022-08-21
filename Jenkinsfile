@@ -168,9 +168,9 @@ pipeline {
          when {expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }}          
          steps {            
             withCredentials([string(credentialsId: 'github-token-2', variable: 'token')]) {
-               steps {
+               
                sh "publish-github.sh -b 1.1.${BUILD_NUMBER} -t $token"
-               }
+               
             }
           }
       }
