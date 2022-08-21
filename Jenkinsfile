@@ -16,6 +16,7 @@ pipeline {
       // agentParameter name:'agent-name'
       choice(name: 'verify', choices: ['true', 'false'], description: 'verify')
       choice(name: 'javadoc', choices: ['true', 'false'], description: 'build javadocs')
+      choice(name: 'githubPublish', choices: ['true', 'false'], description: 'publish to github')
       // choice(choices: ['plan', 'apply -auto-approve', 'destroy -auto-approve'], description: 'terraform command for master branch', name: 'terraform_cmd')
     }
 
@@ -162,6 +163,16 @@ pipeline {
             jacoco()
          }
       }
-      
-   } // stages 
+
+      stage('publish-github') {
+         when {
+                 expression { env.BRANCH_NAME != 'master' && env.BRANCH_NAME != 'develop' }
+         }
+         withCredentials([string(credentialsId: 'github-token-2', variable: 'token')]) {
+            steps {
+               sh "publish-github.sh -b 1.1.${BUILD_NUMBER} -t $token"
+            }
+         }
+      }
+   } // stages
 }
