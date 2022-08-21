@@ -2,6 +2,8 @@
 # purpose of this script is to publish releases to github
 # parameters 
 
+echo "running publish-github.sh";
+
 while getopts b:t: flag
 do
     case "${flag}" in

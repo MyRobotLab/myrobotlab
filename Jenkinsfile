@@ -169,7 +169,7 @@ pipeline {
          steps {            
             withCredentials([string(credentialsId: 'github-token-2', variable: 'token')]) {
                
-               sh "publish-github.sh -b 1.1.${BUILD_NUMBER} -t $token"
+               sh "./publish-github.sh -b 1.1.${BUILD_NUMBER} -t $token"
                
             }
           }
