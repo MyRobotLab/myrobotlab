@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.net.Http;
 import org.myrobotlab.test.AbstractTest;
@@ -20,6 +21,8 @@ public class WebGuiTest extends AbstractTest {
     webgui2.autoStartBrowser(false);
     webgui2.setPort(8889);
     webgui2.startService();
+    // need to wait for the OS to open the port
+    Service.sleep(3);
   }
 
   @Test
