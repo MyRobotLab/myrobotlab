@@ -40,7 +40,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.bytedeco.javacpp.indexer.FloatIndexer;
-import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
@@ -49,7 +48,6 @@ import org.bytedeco.opencv.opencv_dnn.Net;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
-import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {

@@ -17,7 +17,6 @@ import org.apache.solr.common.params.FacetParams;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.datavec.image.loader.NativeImageLoader;
 import org.myrobotlab.opencv.CloseableFrameConverter;
-import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Solr;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;

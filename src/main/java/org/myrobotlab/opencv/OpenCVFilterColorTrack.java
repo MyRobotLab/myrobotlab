@@ -38,7 +38,6 @@ import java.awt.image.BufferedImage;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 public class OpenCVFilterColorTrack extends OpenCVFilter {

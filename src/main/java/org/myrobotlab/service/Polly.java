@@ -5,13 +5,11 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.myrobotlab.framework.Plan;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.PollyConfig;
-import org.myrobotlab.service.config.WebGuiConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 

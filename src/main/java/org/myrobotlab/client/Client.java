@@ -11,7 +11,6 @@ import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 
 import org.asynchttpclient.AsyncHttpClient;
-import org.asynchttpclient.AsyncHttpClientConfig;
 import org.asynchttpclient.DefaultAsyncHttpClientConfig;
 import org.asynchttpclient.Dsl;
 import org.atmosphere.wasync.ClientFactory;

@@ -13,7 +13,6 @@ import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 
-import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -24,7 +23,6 @@ import org.deeplearning4j.nn.modelimport.keras.exceptions.UnsupportedKerasConfig
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.service.Deeplearning4j;
-import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 

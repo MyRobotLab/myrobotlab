@@ -3,7 +3,6 @@ package org.myrobotlab.arduino;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -45,11 +44,9 @@ import org.myrobotlab.string.StringUtil;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.VirtualArduino;
 
 import java.io.FileOutputStream;
 import java.util.Arrays;
-import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.SerialDevice;

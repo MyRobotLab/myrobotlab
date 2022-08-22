@@ -803,9 +803,11 @@ public class IMEngine extends Thread implements Genetic {
       case RIGHT_SIDE: {
         point = service.collisionItems.getClosestPoint(moveInfo.targetItem, lastLinkItem, new Double[] { 0.5, 0.5 }, vector);
         addRadius = true;
+        break;
       }
       case CENTER: {
         point = service.collisionItems.getClosestPoint(moveInfo.targetItem, lastLinkItem, new Double[] { 0.5, 0.5 }, vector);
+        break;
       }
     }
     if (addRadius) {

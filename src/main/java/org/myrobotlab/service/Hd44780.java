@@ -11,7 +11,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.Hd44780Config;
-import org.myrobotlab.service.config.Pcf8574Config;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.slf4j.Logger;
