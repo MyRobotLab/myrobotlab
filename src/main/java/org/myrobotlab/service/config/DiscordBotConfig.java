@@ -11,6 +11,5 @@ public class DiscordBotConfig extends ServiceConfig {
   public boolean connect = true;
   public String token;
   public String[] utteranceListeners;
-  public String[] imagePublishers;
 
 }

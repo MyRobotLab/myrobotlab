@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -59,7 +58,9 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
   public ServiceConfig apply(ServiceConfig c) {
     DiscordBotConfig config = (DiscordBotConfig) c;
 
-    setToken(config.token);
+    if (config.token != null) {
+      setToken(config.token);
+    }
 
     if (config.utteranceListeners != null) {
       for (String name : config.utteranceListeners) {
@@ -161,31 +162,6 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
    */
   public void setToken(String token) {
     this.token = token;
-  }
-
-  public void runMrT() throws LoginException, IOException {
-
-    // Ok.. so what do we need minimally? I guess I want to run MRT from a
-    // python script eventually.
-    // but for now.. we do 2 things. 1 start alice.. 2 start the discord service
-    LoggingFactory.getInstance().setLevel("INFO");
-    // Runtime.start("webgui", "WebGui");
-    // Let's create a programab instance.
-    ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
-    brain.setCurrentBotName("Mr. Turing");
-    DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
-    bot.attachUtteranceListener(brain.getName());
-    brain.attachUtteranceListener(bot.getName());
-    bot.setToken("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-    bot.connect();
-
-    brain.getResponse("Who is Earth?");
-
-    while (true) {
-      System.out.println("Press the any key.");
-      System.in.read();
-      brain.reload();
-    }
   }
 
   @Override
@@ -309,10 +285,14 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
       // discord
       LoggingFactory.getInstance().setLevel("INFO");
 
-      Runtime.startConfig("mrturing");
-      // Runtime.start("webgui", "WebGui");
-
-      // DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
+      // Runtime.startConfig("mrturing");
+      Runtime.start("webgui", "WebGui");
+      Runtime.start("brain", "ProgramAB");
+      DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
+      bot.setToken("ODg4Nzk4NTAwNzk4NzQyNTI5.GQfvY5.dFCh2DD4MqcpfQdkPXyHSz7NGeVTFW2D5inTiM");
+      bot.attach("brain.search");
+      bot.attach("brain");
+      bot.connect();
       // bot.attach("brain.search");
 
       // Runtime.setConfig("mrturing");
