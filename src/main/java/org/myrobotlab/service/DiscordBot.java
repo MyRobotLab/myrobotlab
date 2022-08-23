@@ -9,7 +9,6 @@ import org.myrobotlab.discord.MrlDiscordBotListener;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.DiscordBotConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.ImageData;
@@ -68,12 +67,14 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
       }
     }
 
-    if (config.connect) {
+    if (config.connect && config.token != null) {
       try {
         connect();
       } catch (Exception e) {
         error("could not connect %s", e.getMessage());
       }
+    } else if (config.token == null) {
+      error("cannot connect token is null");
     }
 
     return config;
@@ -283,16 +284,25 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
 
       // Brief example of starting a programab chatbot and connecting it to
       // discord
-      LoggingFactory.getInstance().setLevel("INFO");
+      // LoggingFactory.getInstance().setLevel("INFO");
+      
+      Runtime.startConfig("mrturing");
 
-      // Runtime.startConfig("mrturing");
-      Runtime.start("webgui", "WebGui");
-      Runtime.start("brain", "ProgramAB");
+      
       DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
-      bot.setToken("ODg4Nzk4NTAwNzk4NzQyNTI5.GQfvY5.dFCh2DD4MqcpfQdkPXyHSz7NGeVTFW2D5inTiM");
       bot.attach("brain.search");
       bot.attach("brain");
-      bot.connect();
+
+      
+//      Runtime.start("webgui", "WebGui");
+//      Runtime.start("brain", "ProgramAB");
+//      DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
+//      bot.setToken("XXXXXXXXXXXXXXXXXXXXXX");
+//      bot.attach("brain.search");
+//      bot.attach("brain");
+//      bot.connect();
+//      Runtime.saveConfig("mrturing");
+      
       // bot.attach("brain.search");
 
       // Runtime.setConfig("mrturing");

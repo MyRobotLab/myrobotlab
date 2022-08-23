@@ -63,6 +63,20 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   private static final String LEARNF_AIML_FILE = "learnf.aiml";
 
   private static final long serialVersionUID = 1L;
+  
+  /**
+   * useGlobalSession true will allow the sleep member to 
+   *  control session focus
+   */
+  protected boolean useGlobalSession = false;
+  
+  /**
+   * sleep 
+   * current state of the sleep if globalSession is used
+   *  true : ProgramAB is sleeping and wont respond
+   *  false : ProgramAB is not sleeping and any response requested will be processed
+   */
+  protected boolean sleep = false;
 
   transient public final static Logger log = LoggerFactory.getLogger(ProgramAB.class);
 
@@ -580,8 +594,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    */
   public void reloadSession(String userName, String botName) throws IOException {
     Session session = getSession(userName, botName);
-    session.reload();
-    info("reloaded session %s <-> %s ", userName, botName);
+    if (session != null) {
+      session.reload();
+      info("reloaded session %s <-> %s ", userName, botName);
+    }
   }
 
   /**
@@ -1115,6 +1131,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
     config.currentBotName = currentBotName;
     config.currentUserName = currentUserName;
+    // config.useGlobalSession = useGlobalSession;
+    config.sleep = sleep;
 
     Set<String> listeners = getAttached("publishText");
     config.textListeners = listeners.toArray(new String[listeners.size()]);
@@ -1146,7 +1164,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     if (config.currentUserName != null) {
       setCurrentUserName(config.currentUserName);
     }
+    
+    // useGlobalSession = config.useGlobalSession;
 
+    sleep = config.sleep;
+    
     setCurrentSession(currentUserName, currentBotName);
 
     // This is "good" in that its using the normalized data from subscription
@@ -1296,6 +1318,20 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       error(e);
     }
   }
+  
+  /**
+   * wakes the global session up
+   */
+  public void wake() {
+    sleep = false;
+  }
+  
+  /**
+   * sleeps the global session
+   */
+  public void sleep() {
+    sleep = true;
+  }
 
   @Override
   public void onUtterance(Utterance utterance) throws Exception {
@@ -1319,6 +1355,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       log.info("Don't talk to myself.");
       return;
     }
+    
 
     boolean shouldIRespond = false;
     // always respond to direct messages.
@@ -1329,7 +1366,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
         // TODO: don't talk to bots.. it won't go well..
         // TODO: the discord api can provide use the list of mentioned users.
         // for now.. we'll just see if we see Mr. Turing as a substring.
-        if (utterance.text.contains(botName)) {
+        sleep = (sleep || utterance.text.contains("@")) && !utterance.text.contains(botName);
+        if (!sleep) {
           shouldIRespond = true;
         }
       }
