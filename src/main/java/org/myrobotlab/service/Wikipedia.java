@@ -65,7 +65,10 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
 
   String acceptLanguage = null;
 
-  String baseUrl = ".wikipedia.org/api/rest_v1/page/summary";
+  /**
+   * language will be prefixed to baseURL e.g. https://en.wikipedia.org
+   */
+  String baseUrl = ".wikipedia.org/api/rest_v1/page/summary";  
 
   public Wikipedia(String n, String id) {
     super(n, id);
@@ -123,8 +126,17 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
    * @return
    */
   private SearchResults searchWikipedia(String searchText, Boolean publishText, Boolean publishImages) {
+    
+    if (searchText == null || searchText.equals("")) {
+      log.warn("searchText is null or empty");
+      return null;
+    }
+    
+    searchText = searchText.trim();
+    
     SearchResults results = new SearchResults(searchText);
 
+    WikipediaConfig c = (WikipediaConfig)config;
     try {
 
       if (publishText == null) {
