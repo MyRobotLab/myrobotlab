@@ -19,6 +19,6 @@ public class ProgramABConfig extends ServiceConfig {
   /**
    * current sleep/wake value
    */
-  public boolean sleep;  
+  public boolean sleep = false;  
 
 }

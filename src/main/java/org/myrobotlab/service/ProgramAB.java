@@ -1131,7 +1131,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
     config.currentBotName = currentBotName;
     config.currentUserName = currentUserName;
-    config.useGlobalSession = useGlobalSession;
+    // config.useGlobalSession = useGlobalSession;
     config.sleep = sleep;
 
     Set<String> listeners = getAttached("publishText");
@@ -1165,7 +1165,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       setCurrentUserName(config.currentUserName);
     }
     
-    useGlobalSession = config.useGlobalSession;
+    // useGlobalSession = config.useGlobalSession;
 
     sleep = config.sleep;
     
