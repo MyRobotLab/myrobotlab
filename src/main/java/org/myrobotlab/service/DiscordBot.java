@@ -13,6 +13,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.DiscordBotConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Utterance;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.UtteranceListener;
 import org.myrobotlab.service.interfaces.UtterancePublisher;
 import org.slf4j.Logger;
@@ -153,23 +154,6 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     this.token = token;
   }
 
-  public static void main(String[] args) throws Exception {
-    // Brief example of starting a programab chatbot and connecting it to
-    // discord
-    LoggingFactory.getInstance().setLevel("INFO");
-    // Let's create a programab instance.
-    ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
-    brain.setCurrentBotName("Alice");
-    DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
-
-    bot.attachUtteranceListener(brain.getName());
-    brain.attachUtteranceListener(bot.getName());
-    bot.token = "YOUR_TOKEN_HERE";
-    bot.connect();
-    // System.err.println("done.. press any key.");
-    // System.in.read();
-  }
-
   @Override
   public void onUtterance(Utterance utterance) throws Exception {
     // We probably also care about which service produced the utterance?
@@ -228,9 +212,9 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
    * @param channelName
    */
   public void sendReaction(String code, String id, String channelName) {
-    
+
     code = code.trim();
-    
+
     if (channelName == null) {
       channelName = "general";
     }
@@ -259,6 +243,35 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
 
   public void setBotName(String name) {
     this.botName = name;
+  }
+
+  public static void main(String[] args) {
+    try {
+      // Brief example of starting a programab chatbot and connecting it to
+      // discord
+      // LoggingFactory.getInstance().setLevel("INFO");
+      // Let's create a programab instance.
+      
+      Runtime.startConfig("mrturing");
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+      
+      ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
+      brain.setCurrentBotName("Alice");
+      DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
+
+      bot.attachUtteranceListener(brain.getName());
+      brain.attachUtteranceListener(bot.getName());
+      bot.token = "YOUR_TOKEN_HERE";
+      bot.connect();
+      // System.err.println("done.. press any key.");
+      // System.in.read();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
 }
