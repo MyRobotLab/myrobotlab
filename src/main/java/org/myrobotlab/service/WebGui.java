@@ -567,13 +567,19 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       AtmosphereRequest request = r.getRequest();
 
       String bodyData = null; 
+
+// FIXME - REVERTED THIS BREAKS SERVICE LIST AND UI
+//      if (request.body() != null && !request.body().isEmpty()) {
+//        byte[] bytes = request.body().asBytes();
+//        if (bytes != null) {
+//          bodyData = new String(bytes);
+//        }
+//      }
       
       if (request.body() != null && !request.body().isEmpty()) {
-        byte[] bytes = request.body().asBytes();
-        if (bytes != null) {
-          bodyData = new String(bytes);
-        }
-      }
+        // body returns null after destroy
+        bodyData = new String(request.body().asString());
+      }      
             
       request.destroy();
       String logData = null;
