@@ -300,6 +300,15 @@
   </dependency>
 <!-- DiscordBot end -->
 
+<!-- Docker begin -->
+  <dependency>
+    <groupId>com.github.docker-java</groupId>
+    <artifactId>docker-java</artifactId>
+    <version>3.2.13</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Docker end -->
+
 <!-- DocumentPipeline begin -->
   <dependency>
     <groupId>org.apache.tika</groupId>
@@ -367,6 +376,7 @@
     <version>1.2.0</version>
     <scope>provided</scope>
   </dependency>
+<!-- Duplicate entry for com.github.pnavais-state-machine-1.2.0 skipping -->
 <!-- FiniteStateMachine end -->
 
 <!-- Git begin -->
@@ -1282,6 +1292,14 @@
     <artifactId>gson</artifactId>
     <version>2.8.5</version>
   </dependency>
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.13.3 skipping -->
+  <dependency>
+    <groupId>com.fasterxml.jackson.module</groupId>
+    <artifactId>jackson-module-no-ctor-deser</artifactId>
+    <version>2.13.3</version>
+  </dependency>
   <dependency>
     <groupId>org.apache.ivy</groupId>
     <artifactId>ivy</artifactId>
@@ -1327,6 +1345,33 @@
     <scope>provided</scope>
   </dependency>
 <!-- Serial end -->
+
+<!-- SlackBot begin -->
+  <dependency>
+    <groupId>com.slack.api</groupId>
+    <artifactId>bolt</artifactId>
+    <version>1.24.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.slack.api</groupId>
+    <artifactId>bolt-socket-mode</artifactId>
+    <version>1.24.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>javax.websocket</groupId>
+    <artifactId>javax.websocket-api</artifactId>
+    <version>1.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.glassfish.tyrus.bundles</groupId>
+    <artifactId>tyrus-standalone-client</artifactId>
+    <version>1.19</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- SlackBot end -->
 
 <!-- Solr begin -->
   <dependency>
@@ -1578,12 +1623,7 @@
 <!-- WebGui end -->
 
 <!-- WebSocketConnector begin -->
-  <dependency>
-    <groupId>javax.websocket</groupId>
-    <artifactId>javax.websocket-api</artifactId>
-    <version>1.1</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for javax.websocket-javax.websocket-api-1.1 skipping -->
 <!-- WebSocketConnector end -->
 
 <!-- Webcam begin -->
@@ -1867,8 +1907,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.3.2</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <source>11</source>
+          <target>11</target>
           <optimize>true</optimize>
           <debug>true</debug>
           <compilerArgument>-parameters</compilerArgument>          
