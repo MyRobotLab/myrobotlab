@@ -7,10 +7,10 @@ import java.util.regex.Pattern;
 /**
  * This class contains many utility methods related to foreign
  * processes that are written in other programming languages.
- *
+ * <p>
  * This class defines a format for describing "classes"
  * or types that originate from unknown programming languages.
- *
+ * <p>
  * The format consists of two simple parts: the language ID, that
  * describes what language the process is using, and the
  * language-specific type key. It is expected that each
@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  * generate a new type key for every change in the procedure list.
  * This is because the set of known procedures is cached and is not regenerated
  * to improve performance.
- *
+ * <p>
  * Currently, this information is only used to determine when
  * to generate a {@link java.lang.reflect.Proxy}, but it would
  * enable foreign processes in the future to instantiate the
@@ -44,14 +44,14 @@ public class ForeignProcessUtils {
     /**
      * A pattern that both tests whether a string is a valid foreign
      * type key and splits the key on the language id separator.
-     *
+     * <p>
      * For example, if the separator is a single colon ({@code ':'}),
      * then "py:exampleService" would match and the two capture groups would be
      * "py" and "exampleService."
-     *
+     * <p>
      * This pattern does not allow the separator in the language ID at all,
      * but does allow it in the language-specific type key (the second capture group).
-     *
+     * <p>
      * This enables languages that use double-colons for package or module definition
      * to work seamlessly.
      */
@@ -152,6 +152,7 @@ public class ForeignProcessUtils {
     public static void main(String[] args) {
         String foreignTypeKey = "py:exampleService";
         System.out.println("isValid: " + isValidTypeKey(foreignTypeKey));
+        System.out.println("isValidJava: " + isValidJavaClassName(foreignTypeKey));
         System.out.println("isForeign: " + isForeignTypeKey(foreignTypeKey));
         System.out.println("languageId: " + getLanguageId(foreignTypeKey));
         System.out.println("languageSpecificTypeKey: " + getLanguageSpecificTypeKey(foreignTypeKey));
