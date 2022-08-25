@@ -141,7 +141,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
 
     if (connected) {
       // log in the global ports hash if the port is in use now or not
-      ports.put(portname, new Boolean(connected));
+      ports.put(portname, Boolean.valueOf(connected));
       sensorsValid = false;
     } else {
       disconnect();
@@ -160,7 +160,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
     connected = false;
 
     // log in the global ports hash if the port is in use now or not
-    ports.put(portname, new Boolean(connected));
+    ports.put(portname, Boolean.valueOf(connected));
 
     /*
      * try { // do io streams need to be closed first? if (input != null)

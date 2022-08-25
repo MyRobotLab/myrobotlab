@@ -15,7 +15,6 @@ import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TesseractOcr;
 import org.slf4j.Logger;

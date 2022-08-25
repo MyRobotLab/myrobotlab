@@ -5,9 +5,6 @@ import java.util.Random;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.myrobotlab.service.Arduino;
-import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.Servo;
 
 // TODO: delete this class.. it's just here to help demonstrate some unstable arduino -> mrlcomm behavior.
 // author: kwatters

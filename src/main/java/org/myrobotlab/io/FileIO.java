@@ -787,7 +787,7 @@ public class FileIO {
       }
 
     } catch (Exception e) {
-      new IOException("interrupted while waiting for file to arrive");
+      throw new IOException("interrupted while waiting for file to arrive");
     }
     return null;
   }
