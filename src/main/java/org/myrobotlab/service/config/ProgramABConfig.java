@@ -15,5 +15,10 @@ public class ProgramABConfig extends ServiceConfig {
   // search engine - currently wikipedia
   // search for sraix
   public String search;
+  
+  /**
+   * current sleep/wake value
+   */
+  public boolean sleep = false;  
 
 }
