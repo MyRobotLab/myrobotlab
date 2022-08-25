@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -10,7 +9,6 @@ import org.myrobotlab.discord.MrlDiscordBotListener;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.DiscordBotConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.ImageData;
@@ -59,7 +57,9 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
   public ServiceConfig apply(ServiceConfig c) {
     DiscordBotConfig config = (DiscordBotConfig) c;
 
-    setToken(config.token);
+    if (config.token != null) {
+      setToken(config.token);
+    }
 
     if (config.utteranceListeners != null) {
       for (String name : config.utteranceListeners) {
@@ -67,12 +67,14 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
       }
     }
 
-    if (config.connect) {
+    if (config.connect && config.token != null) {
       try {
         connect();
       } catch (Exception e) {
         error("could not connect %s", e.getMessage());
       }
+    } else if (config.token == null) {
+      error("cannot connect token is null");
     }
 
     return config;
@@ -161,31 +163,6 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
    */
   public void setToken(String token) {
     this.token = token;
-  }
-
-  public void runMrT() throws LoginException, IOException {
-
-    // Ok.. so what do we need minimally? I guess I want to run MRT from a
-    // python script eventually.
-    // but for now.. we do 2 things. 1 start alice.. 2 start the discord service
-    LoggingFactory.getInstance().setLevel("INFO");
-    // Runtime.start("webgui", "WebGui");
-    // Let's create a programab instance.
-    ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
-    brain.setCurrentBotName("Mr. Turing");
-    DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
-    bot.attachUtteranceListener(brain.getName());
-    brain.attachUtteranceListener(bot.getName());
-    bot.setToken("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-    bot.connect();
-
-    brain.getResponse("Who is Earth?");
-
-    while (true) {
-      System.out.println("Press the any key.");
-      System.in.read();
-      brain.reload();
-    }
   }
 
   @Override
@@ -307,13 +284,25 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
 
       // Brief example of starting a programab chatbot and connecting it to
       // discord
-      LoggingFactory.getInstance().setLevel("INFO");
-      Runtime.start("webgui","WebGui");
+      // LoggingFactory.getInstance().setLevel("INFO");
+      
+      Runtime.startConfig("mrturing");
 
-//      Runtime.startConfig("mrturing");
-      // Runtime.start("webgui", "WebGui");
+      
+      DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
+      bot.attach("brain.search");
+      bot.attach("brain");
 
-      // DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
+      
+//      Runtime.start("webgui", "WebGui");
+//      Runtime.start("brain", "ProgramAB");
+//      DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
+//      bot.setToken("XXXXXXXXXXXXXXXXXXXXXX");
+//      bot.attach("brain.search");
+//      bot.attach("brain");
+//      bot.connect();
+//      Runtime.saveConfig("mrturing");
+      
       // bot.attach("brain.search");
 
       // Runtime.setConfig("mrturing");

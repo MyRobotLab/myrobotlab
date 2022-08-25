@@ -143,8 +143,9 @@ public abstract class Repo {
       // "the big kahuna"));
       // remotes.add(new RemoteRepo("bintray2", "https://dl.bintray.com", "more
       // big kahuna"));
+      // FIXME - needs to be https not http
       remotes.add(new RemoteRepo("myrobotlab", "http://repo.myrobotlab.org/artifactory/myrobotlab", "all other mrl deps"));
-      remotes.add(new RemoteRepo("sarxos", "http://oss.sonatype.org/content/repositories/snapshots", "for sarxos webcam"));
+      remotes.add(new RemoteRepo("sarxos", "https://oss.sonatype.org/content/repositories/snapshots", "for sarxos webcam"));
 
       // DO NOT INCLUDE - messed up repo !
       // remotes.add(new RemoteRepo("dcm4che", "http://www.dcm4che.org/maven2",
