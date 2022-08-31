@@ -2,7 +2,6 @@ package org.myrobotlab.service.interfaces;
 
 import java.util.List;
 
-import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;

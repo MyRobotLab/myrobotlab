@@ -13,6 +13,9 @@
     # fast build
     mvn -DskipTests package -o 
 
+    # specific test
+    mvn test -Dtest="org.myrobotlab.service.WebGuiTest#postTest"  
+
     # compile only sync with raspi
     rsync -zarvh target/classes pi@192.168.0.104:/opt/mrl/myrobotlab/target
     rsync -zarvh src pi@192.168.0.104:/opt/mrl/myrobotlab
@@ -88,8 +91,8 @@
       <!-- end env vars -->
       <!-- echoproperties / -->
       
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
   </properties>
@@ -290,8 +293,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.3.2</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <source>11</source>
+          <target>11</target>
           <optimize>true</optimize>
           <debug>true</debug>
           <compilerArgument>-parameters</compilerArgument>          
