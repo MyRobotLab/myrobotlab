@@ -558,31 +558,43 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * Framework owned method - core of creating a new service
+   * Framework owned method - core of creating a new service. This
+   * method will create a service with the given name and of the given type.
+   * If the type does not contain any dots, it will be assumed to be in
+   * the {@code org.myrobotlab.service} package. This method
+   * can currently only instantiate Java services, but in the future it
+   * could be enhanced to call native service runtimes.
+   * <p>
+   * The name parameter must not contain '/' or '@'. Thus, a full name
+   * must be split into its first and second part, passing the first in as the
+   * name and the second as the inId. This method will log an error and return null
+   * if name contains either of those two characters.
+   * <p>
+   * The {@code inId} is used to determine whether the service is a local one or a remote proxy.
+   * It should equal the Runtime ID of the MyRobotLab instance the service
+   * was originally instantiated under.
    * 
    * @param name May not contain '/' or '@', i.e. cannot be a full name
    * @param type The type of the new service
    * @param inId The ID of the runtime the service is linked to.
-   * @return An existing service if the requested name and type match, otherwise a newly created service
-   * @throws IllegalArgumentException if name is null or name contains '@' or '/'
-   * @throws RuntimeException if a service with the requested name exists but its type does not match the requested type
+   * @return An existing service if the requested name and type match, otherwise a newly created service.
+   * If the name is null, or it contains '@' or '/', or a service with the same name exists
+   * but has a different type, will return null instead.
    */
   static private synchronized ServiceInterface createService(String name, String type, String inId) {
     log.info("Runtime.createService {}", name);
 
     if (name == null) {
-      log.error("service name cannot be null");
+      runtime.error("service name cannot be null");
       
-      throw new IllegalArgumentException("service name cannot be null");
+      return null;
     }
 
 
-    if (name.contains("@")) {
-      throw new IllegalArgumentException(String.format("can not have @ in name %s", name));
-    }
+    if (name.contains("@") || name.contains("/")) {
+      runtime.error("service name cannot contain '@' or '/': {}", name);
 
-    if (name.contains("/")) {
-      throw new IllegalArgumentException(String.format("can not have forward slash / in name %s", name));
+      return null;
     }
 
     String fullName;
@@ -597,7 +609,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         log.info("found type for {} in plan", name);
         type = sc.type;
       } else {
-        runtime.error("createService type not specified and could not get type for {} from plane", name);
+        runtime.error("createService type not specified and could not get type for {} from plan", name);
         return null;
       }
     }
@@ -616,9 +628,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     ServiceInterface si = Runtime.getService(fullName);
     if (si != null) {
-      if (!si.getType().equals(fullTypeName))
-        throw new RuntimeException("Service with name " + name + " already exists but is of type " + si.getType() +
-                " while requested type is " + type);
+      if (!si.getType().equals(fullTypeName)) {
+        runtime.error("Service with name {} already exists but is of type {} while requested type is ",
+                name, si.getType(), type);
+        return null;
+      }
       return si;
     }
 
