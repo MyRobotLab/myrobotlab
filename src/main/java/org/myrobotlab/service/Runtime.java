@@ -90,27 +90,27 @@ import org.slf4j.Logger;
 import picocli.CommandLine;
 
 /**
- * FIXME - AVOID STATIC FIELDS - THE ONLY STATIC FIELD SHOULD BE THE INSTANCE
- * VAR OF RUNTIME !
- * 
  * Runtime is responsible for the creation and removal of all Services and the
- * associated static registries It maintains state information regarding
- * possible &amp; running local Services It maintains state information
- * regarding foreign Runtimes It is a singleton and should be the only service
- * of Runtime running in a process The host and registry maps are used in
+ * associated static registries. It maintains state information regarding
+ * possible &amp; running local Services; it also maintains state information
+ * regarding foreign Runtimes. It is a singleton and should be the only service
+ * of Runtime running in a process. The host and registry maps are used in
  * routing communication to the appropriate service (be it local or remote) It
- * will be the first Service created It also wraps the real JVM Runtime object.
- *
+ * will be the first Service created. It also wraps the real JVM Runtime object.
+ * <p>
  *
  * RuntimeMXBean - scares me - but the stackTrace is clever RuntimeMXBean
  * runtimeMxBean = ManagementFactory.getRuntimeMXBean(); List&lt;String&gt;
  * arguments = runtimeMxBean.getInputArguments()
- *
+ * <p>
  * final StackTraceElement[] stackTrace =
  * Thread.currentThread().getStackTrace(); final String mainClassName =
  * stackTrace[stackTrace.length - 1].getClassName();
- *
+ * <p>
  * check for 64 bit OS and 32 bit JVM is is64bit()
+ * <p>
+ * FIXME - AVOID STATIC FIELDS - THE ONLY STATIC FIELD SHOULD BE THE INSTANCE
+ *  * VAR OF RUNTIME !
  *
  */
 public class Runtime extends Service implements MessageListener, ServiceLifeCyclePublisher, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider {
@@ -256,6 +256,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   static Set<String> networkPeers = null;
 
+  /**
+   * The name of the folder used to store native library
+   * dependencies during installation and runtime.
+   */
   private static final String LIBRARIES = "libraries";
 
   String stdCliUuid = null;
@@ -276,8 +280,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   protected Set<String> startingServices = new HashSet<>();
 
   /**
+   * Wraps {@link java.lang.Runtime#availableProcessors()}.
+   *
    * @return the number of processors available to the Java virtual machine.
-   * 
+   * @see java.lang.Runtime#availableProcessors()
    * 
    */
   public static final int availableProcessors() {
@@ -285,9 +291,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * @return function to test if internet connectivity is available
+   * Function to test if internet connectivity is available.
+   * If it is, will return the public gateway address of this computer
+   * by sending a request to an external server. If there is no internet,
+   * returns null.
    * 
-   * 
+   * @return The public IP address or null if no internet available
    */
   static public String getPublicGateway() {
     try {
@@ -497,6 +506,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // iterate through plan - check dependencies and licensing
   }
 
+  /**
+   * Use {@link #start(String, String)} instead.
+   *
+   * @param name Name of service
+   * @param type Type of service
+   * @return Created service
+   */
   @Deprecated /* use start */
   static public ServiceInterface createAndStart(String name, String type) {
     return start(name, type);
@@ -555,6 +571,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return b;
   }
 
+
+  /**
+   * Sets all services' virtual state to {@code b}. This allows
+   * a single call to enable or disable virtualization across
+   * all services.
+   *
+   * @param b Whether all services should be virtual or not
+   * @return b
+   */
   static public boolean setAllVirtual(boolean b) {
     Platform.setVirtual(b);
     for (ServiceInterface si : getServices()) {
@@ -715,6 +740,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return ret;
   }
 
+  /**
+   * Dumps {@link #registry} to a file called {@code registry.json}
+   * in JSON form.
+   *
+   * @return The registry in JSON form or null if an error occurred.
+   */
   public static String dump() {
     try {
       FileOutputStream dump = new FileOutputStream("registry.json");
@@ -729,6 +760,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
+   * Wraps {@link java.lang.Runtime#gc()}.
+   *
    * Runs the garbage collector.
    */
   public static final void gc() {
@@ -736,7 +769,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * although "fragile" since it relies on a external source - its useful to
+   * Although "fragile" since it relies on a external source - its useful to
    * find the external ip address of NAT'd systems
    *
    * @return external or routers ip
@@ -762,6 +795,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
+   * Wraps {@link java.lang.Runtime#freeMemory()}.
+   *
    * @return the amount of free memory in the Java Virtual Machine. Calling the
    *         gc method may result in increasing the value returned by
    *         freeMemory.
@@ -869,6 +904,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return ret;
   }
 
+  //What's the purpose of this? It doesn't return anything
   static public void getNetInfo() {
     try {
       List<String> local = getIpAddresses();
@@ -960,6 +996,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return ret;
   }
 
+
+  /**
+   * Gets a Map between service names and the service object
+   * of all services local to this MRL instance.
+   * @return A Map between service names and service objects
+   */
   public static Map<String, ServiceInterface> getLocalServices() {
     Map<String, ServiceInterface> local = new HashMap<>();
     for (String serviceName : registry.keySet()) {
@@ -1004,10 +1046,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * getServiceList returns the most important identifiers for a service which
    * are it's process id, it's name, and it's type.
-   * 
+   * <p>
    * This will be part of the getHelloRequest - and the first listing from a
    * process of what services are available.
-   * 
+   * <p>
    * TODO - future work would be to supply a query to the getServiceList(query)
    * such that interfaces, types, or processes ids, can selectively be queried
    * out of it
@@ -1030,6 +1072,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return registry;// FIXME should return copy
   }
 
+  /**
+   * Gets a running service with the specified name. If the name
+   * is null or there's no such service with the specified name,
+   * returns null instead.
+   *
+   * @param inName The name of the service
+   * @return The service if it exists, or null
+   */
   public static ServiceInterface getService(String inName) {
     if (inName == null) {
       return null;
@@ -1045,7 +1095,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * @return all service names in a list form
+   * @return all service names in an array form
    * 
    * 
    */
@@ -1066,6 +1116,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return ret;
   }
 
+  //Is it a good idea to modify all regex inputs? For example, if the pattern
+  //already contains ".?" then the replacement will result in "..?"
+  //If POSIX-style globs are desired there are different
+  //pattern matching engines designed for that
   public static boolean match(String text, String pattern) {
     return text.matches(pattern.replace("?", ".?").replace("*", ".*?"));
   }
@@ -1087,8 +1141,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * @param interfaze
    *          the interface
-   * @return a list of service names that have the interface
-   * @throws ClassNotFoundException
+   * @return a list of service names that implement the interface
+   * @throws ClassNotFoundException if the class for the requested interface is not found.
    * 
    */
   public static List<String> getServiceNamesFromInterface(String interfaze) throws ClassNotFoundException {
@@ -1114,10 +1168,20 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return ret;
   }
 
+  /**
+   * Get all currently-running services
+   *
+   * @return A list of all currently-running services
+   */
   public static List<ServiceInterface> getServices() {
     return getServices(null);
   }
 
+  /**
+   * Get all services that belong to an MRL instance with the given ID.
+   * @param id The ID of the MRL instance
+   * @return A list of the services that belong to the given MRL instance
+   */
   public static List<ServiceInterface> getServices(String id) {
     if (id == null) {
       return new ArrayList<ServiceInterface>(registry.values());
@@ -1221,12 +1285,20 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return ret;
   }
 
+  /**
+   * Gets the set of all threads currently running.
+   * @return A set containing thread objects representing all
+   * running threads
+   */
   static public Set<Thread> getThreads() {
     return Thread.getAllStackTraces().keySet();
   }
 
-  /*
-   * dorky pass-throughs to the real JVM Runtime
+  /**
+   * Wraps {@link java.lang.Runtime#totalMemory()}.
+   *
+   * @return The amount of memory available to the JVM
+   * in bytes.
    */
   public static final long getTotalMemory() {
 
@@ -1245,6 +1317,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return uniqueID;
   }
 
+  /**
+   * Get how long this MRL instance has been running
+   * in human-readable String form.
+   *
+   * @return The uptime of this instance.
+   */
   public static String getUptime() {
     Date now = new Date();
     Platform platform = Platform.getLocalInstance();
@@ -1273,6 +1351,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
 
+  /**
+   * Get a human-readable String form of a difference
+   * in time in milliseconds.
+   *
+   * @param diff The difference of time in milliseconds
+   * @return The human-readable string form of the difference in time
+   */
   public static String getDiffTime(long diff) {
 
     long diffSeconds = diff / 1000 % 60;
@@ -1297,8 +1382,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public static String getVersion() {
     return Platform.getLocalInstance().getVersion();
   }
-  
-  
+
+
+  /**
+   * Get the latest version number of MRL in String form
+   * by querying the public build server. If it cannot
+   * be contacted, this method returns the String {@code "unknown"}.
+   * @return The latest build version in String form
+   */
   public static String getLatestVersion() {
     String latest = "http://build.myrobotlab.org:8080/job/myrobotlab/job/develop/lastSuccessfulBuild/buildNumber";
     byte[] b = Http.get(latest);
@@ -1307,14 +1398,34 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   // FIXME - shouldn't this be in platform ???
+
+  /**
+   * Get the branch that this installation was built from.
+   *
+   * @return The branch
+   * @see Platform#getBranch()
+   */
   public static String getBranch() {
     return Platform.getLocalInstance().getBranch();
   }
 
+
+  /**
+   * Install all services
+   *
+   * @throws ParseException Unknown
+   * @throws IOException Unknown
+   */
+  //TODO: Check throws list to see if these are still thrown
   static public void install() throws ParseException, IOException {
     install(null, null);
   }
 
+  /**
+   * Install specified service.
+   *
+   * @param serviceType Service to install
+   */
   static public void install(String serviceType) {
     install(serviceType, null);
   }
@@ -1367,6 +1478,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   }
 
+  /**
+   * Invoke a service method. The parameter must not be null and must
+   * have at least 2 elements. The first is the service name and the
+   * second is the service method. The rest of the elements are parameters
+   * to the specified method.
+   *
+   * @param invoke The array of service name, method, and parameters
+   */
   static public void invokeCommands(String[] invoke) {
 
     if (invoke.length < 2) {
