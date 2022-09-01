@@ -1506,6 +1506,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     getInstance().send(name, method, data);
   }
 
+  /**
+   * Checks if a service is local to this MRL instance. The service
+   * must exist.
+   *
+   * @param serviceName The name of the service to check
+   * @return Whether the specified service is local or not
+   */
   public static boolean isLocal(String serviceName) {
     ServiceInterface sw = getService(serviceName);
     return sw.isLocal();
@@ -1520,10 +1527,25 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return newService.getClass().equals(Runtime.class);
   }
 
+  /**
+   * Start interactive mode on {@link System#in} and
+   * {@link System#out}.
+   *
+   * @see #startInteractiveMode(InputStream, OutputStream)
+   */
   public void startInteractiveMode() {
     startInteractiveMode(System.in, System.out);
   }
 
+  /**
+   * Starts an interactive CLI on the specified input and output
+   * streams. The CLI command processor runs in its own thread and takes
+   * commands according to the CLI API.
+   *
+   * @param in The input stream to take commands from
+   * @param out The output stream to print command output to
+   * @return The constructed CLI processor
+   */
   public InProcessCli startInteractiveMode(InputStream in, OutputStream out) {
     if (cli != null) {
       log.info("already in interactive mode");
@@ -1540,6 +1562,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return cli;
   }
 
+  /**
+   * Stops interactive mode if it's running.
+   */
   public void stopInteractiveMode() {
     if (cli != null) {
       cli.stop();
@@ -1558,12 +1583,22 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     new CommandLine(new CmdOptions()).usage(System.out);
   }
 
+  /**
+   * Logs a string message and publishes the message.
+   *
+   * @param msg The message to log and publish
+   * @return msg
+   */
   public static String message(String msg) {
     getInstance().invoke("publishMessage", msg);
     log.info(msg);
     return msg;
   }
 
+  /**
+   * Listener for state publishing, updates registry
+   * @param updatedService Updated service to put in the registry
+   */
   public void onState(ServiceInterface updatedService) {
     log.info("runtime updating registry info for remote service {}", updatedService.getName());
     registry.put(String.format("%s@%s", updatedService.getName(), updatedService.getId()), updatedService);
@@ -1765,6 +1800,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return true;
   }
 
+  /**
+   * Removes registration for a service. Removes the service from
+   * {@link #typeToInterface} and {@link #interfaceToNames}.
+   * @param inName Name of the service to unregister
+   */
   synchronized public static void unregister(String inName) {
     String name = getFullName(inName);
     log.info("unregister {}", name);
@@ -1809,10 +1849,20 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     log.info("released {}", name);
   }
 
+  /**
+   * Get all remote services.
+   * @return List of remote services as proxies
+   */
   public List<ServiceInterface> getRemoteServices() {
     return getRemoteServices(null);
   }
 
+  /**
+   * Get remote services associated with the MRL instance
+   * that has the given ID.
+   * @param id The id of the target MRL instance
+   * @return A list of services running on the target instance
+   */
   public List<ServiceInterface> getRemoteServices(String id) {
     List<ServiceInterface> list = new ArrayList<>();
     for (String serviceName : registry.keySet()) {
@@ -1827,7 +1877,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * default - release all
+   * Releases all local services including Runtime asynchronously.
+   *
+   * @see #releaseAll(boolean, boolean)
    */
   public static void releaseAll() {
     releaseAll(true, false);
@@ -1850,7 +1902,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * 
    * local only? YES !!! LOCAL ONLY !!
    * 
-   * @param releaseRuntime
+   * @param releaseRuntime Whether the Runtime should also be released
    */
   public static void releaseAll(boolean releaseRuntime, boolean block) {
     // a command thread is issuing this command is most likely
@@ -1873,6 +1925,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
   }
 
+  /**
+   * Releases all threads and can be executed in a separate thread.
+   *
+   * @param releaseRuntime Whether the Runtime should also be released
+   */
   static private void processRelease(boolean releaseRuntime) {
 
     // reverse release to order of creation
@@ -1908,9 +1965,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
+   * Shuts down this instance after the given number of seconds.
+   *
    * @param seconds
    *          sets task to shutdown in (n) seconds
    */
+  //Why is this using the wrapper type? Null can be passed in and cause NPE
   public static void shutdown(Integer seconds) {
     log.info("shutting down in {} seconds", seconds);
     if (seconds > 0) {
@@ -1993,6 +2053,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return configList;
   }
 
+  /**
+   * Releases all local services except the services whose names
+   * are in the given set
+   * @param saveMe The set of services that should not be released
+   */
   public static void releaseAllServicesExcept(HashSet<String> saveMe) {
     log.info("releaseAllServicesExcept");
     List<ServiceInterface> list = Runtime.getServices();
@@ -2008,8 +2073,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * @param name
-   *          shutdown and remove a service from the registry
+   * Release a specific service. Releasing shuts down the service
+   * and removes it from registries.
+   *
+   * @param name The service to be released
+   *
    */
   static public void release(String name) {
     if (name == null) {
@@ -2029,10 +2097,21 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     si.releaseService();
   }
 
+  /**
+   * Connect to the MRL instance at {@link CmdOptions#connect} in {@link #options}.
+   * 
+   * @see #connect(String)
+   * @throws IOException
+   */
   public void connect() throws IOException {
     connect(options.connect); // FIXME - 0 to many
   }
 
+  /**
+   * Disconnect from remote process.
+   * FIXME - not implemented
+   * @throws IOException Unknown
+   */
   // FIXME - implement ! also implement the callback events .. onDisconnect
   public void disconnect() throws IOException {
     // connect("admin", "ws://localhost:8887/api/messages");
@@ -2061,6 +2140,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return id;
   }
 
+  /**
+   * Reconnects {@link #cli} to this process.
+   * @return The id of this instance
+   */
   // FIXME - remove ?!?!!?
   public String exit() {
     Connection c = getConnection(stdCliUuid);
@@ -2070,6 +2153,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return getId();
   }
 
+  /**
+   * Send a command to the {@link InProcessCli}.
+   *
+   * @param srcFullName Unknown
+   * @param cmd The command to execute
+   */
   public void sendToCli(String srcFullName, String cmd) {
     Connection c = getConnection(stdCliUuid);
     if (c == null || c.get("cli") == null) {
@@ -2085,6 +2174,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
   }
 
+  /**
+   * Connect to the MRL instance at the given URL,
+   * auto-reconnecting if specified and the connection drops.
+   *
+   * FIXME implement autoReconnect
+   *
+   * @param url The URL to connect to
+   * @param autoReconnect Whether the connection should be re-established
+   *                      if it is dropped
+   */
   // FIXME - implement
   public void connect(String url, boolean autoReconnect) {
     if (!autoReconnect) {
@@ -2115,6 +2214,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   // FIXME - RETRIES TIMEOUTS OTHER COMPLEXITIES
   // blocking connect - consider a non-blocking thread connect ... e.g.
   // autoConnect
+
+  /**
+   * Connect to the MRL instance at the given URL
+   * @param url Where the MRL instance being connected to is located
+   */
   @Override
   public void connect(String url) {
     try {
@@ -2152,15 +2256,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * FIXME - this is a gateway callback - probably should be in the gateway
    * interface - this is a "specific" gateway that supports typeless json or
    * websockets
-   * 
+   * <p>
    * FIXME - decoding should be done at the Connection ! - this should be
    * onRemoteMessage(msg) !
-   * 
+   * <p>
    * callback - from clientRemote - all client connections will recieve here
    * TODO - get clients directional api - an api per direction incoming and
    * outgoing
-   * 
-   * uuid - connection for incoming data
+   *
+   * @param uuid - connection for incoming data
+   * @param data Incoming message in JSON String form
    */
   @Override // uuid
   public void onRemoteMessage(String uuid, String data) {
@@ -2237,19 +2342,45 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
   }
 
+  /**
+   * Add a route to the route table
+   *
+   * @param remoteId Id of the remote instance
+   * @param uuid Unknown
+   * @param metric Unknown
+   * @see RouteTable#addRoute(String, String, int)
+   */
   public void addRoute(String remoteId, String uuid, int metric) {
     routeTable.addRoute(remoteId, uuid, metric);
   }
 
+  /**
+   * Start Runtime
+   *
+   * @return The Runtime singleton
+   */
   static public ServiceInterface start() {
     return startInternal(null, null, null);
   }
 
+  /**
+   * Start Runtime with the specified config
+   *
+   * @param configName The name of the config file
+   * @return The Runtime singleton
+   */
   static public ServiceInterface startConfig(String configName) {
     setConfig(configName);
     return startInternal(configName, null, null);
   }
 
+  /**
+   * Start a service of the specified type as the specified name.
+   *
+   * @param name The name of the new service
+   * @param type The type of the new service
+   * @return The started service
+   */
   static public ServiceInterface start(String name, String type) {
     return startInternal(null, name, type);
   }
