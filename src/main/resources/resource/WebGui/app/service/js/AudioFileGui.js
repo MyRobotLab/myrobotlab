@@ -2,16 +2,43 @@ angular.module('mrlapp.service.AudioFileGui', []).controller('AudioFileGuiCtrl',
     console.info('AudioFileGuiCtrl')
     var _self = this
     var msg = this.msg
+    $scope.peak = 0
 
-    $scope.playFile = function() {
-        msg.send('playFile', $scope.selectedFile)
+    // playing paused stopped
+    $scope.activity = null
+
+    // $scope.playFile = function() {        
+    //     msg.send('playFile', $scope.selectedFile)
+    // }
+
+    $scope.play = function(){
+        // if (blah){
+        // $scope.selectedFile = selectedFiles[0]    
+        // } else {
+        //     $scope.selectedFile = selectedFiles[0]    
+        // }
+        msg.send('play', $scope.selectedFile)
+        
     }
 
-    // init
+
+    $scope.setSelectedFileFromTrack = function(selected){
+        $scope.selectedFile = selected
+    }
+
+    $scope.startPlaylist = function() {
+        if ($scope.selectedPlaylist){
+            msg.send('startPlaylist', $scope.selectedPlaylist[0])    
+        } else {
+            msg.send('startPlaylist')
+        }
+    }
+    
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
+        $scope.service.loudness = 20
     }
 
     this.onMsg = function(inMsg) {
@@ -21,13 +48,31 @@ angular.module('mrlapp.service.AudioFileGui', []).controller('AudioFileGuiCtrl',
             _self.updateState(data)
             $scope.$apply()
             break
+        case 'onAudioStart':
+            $scope.playing = data
+            $scope.activity = 'playing'
+            $scope.$apply()
+            break
+        case 'onAudioEnd':
+            $scope.playing = data
+            $scope.activity = 'stopped'
+            $scope.$apply()
+            break
+        case 'onPeak':
+            $scope.peak =  data/0.5
+            $scope.$apply()
+            break
+                
         default:
-            $log.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method)
+            console.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method)
             break
         }
 
     }
 
+    msg.subscribe('publishAudioStart')
+    msg.subscribe('publishAudioEnd')
+    msg.subscribe('publishPeak')
     msg.subscribe(this)
 }
 ])
