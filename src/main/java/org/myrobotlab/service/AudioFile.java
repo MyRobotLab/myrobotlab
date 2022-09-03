@@ -56,6 +56,8 @@ import org.slf4j.Logger;
 /**
  * 
  * AudioFile - This service can be used to play an audio file such as an mp3.
+ * 
+ * TODO - publishPeak interface
  *
  */
 public class AudioFile extends Service {
@@ -123,6 +125,18 @@ public class AudioFile extends Service {
   protected Map<String, List<String>> playlists = new HashMap<>();
 
   final private transient PlaylistPlayer playlistPlayer = new PlaylistPlayer(this);
+  
+  protected double peakMultiplier = 1.0;
+  
+  protected int peakSampleInterval = 1;
+
+  public double getPeakMultiplier() {
+    return peakMultiplier;
+  }
+
+  public void setPeakMultiplier(double peakMultiplier) {
+    this.peakMultiplier = peakMultiplier;
+  }
 
   public AudioFile(String n, String id) {
     super(n, id);
@@ -164,6 +178,10 @@ public class AudioFile extends Service {
 
   public AudioData play(String filename, boolean blocking, Integer repeat, String track) {
 
+    if (track == null || track.isEmpty()) {
+      track = currentTrack;
+    }
+    
     if (filename == null || filename.isEmpty()) {
       error("asked to play a null filename!  error");
       return null;
@@ -421,6 +439,10 @@ public class AudioFile extends Service {
   }
 
   public void addPlaylist(String name, String path) {
+    
+    
+    
+    
     List<String> list = null;
     if (!playlists.containsKey(name)) {
       list = new ArrayList<String>();
@@ -508,6 +530,7 @@ public class AudioFile extends Service {
     config.currentPlaylist = currentPlaylist;
     config.volume = volume;
     config.playlists = playlists;
+    config.peakMultiplier = peakMultiplier ;
 
     return config;
   }
@@ -523,17 +546,37 @@ public class AudioFile extends Service {
     }
     return c;
   }
+  
+  public double publishPeak(float peak) {
+    peak = peak * 200;
+    return peak;
+  }
 
   public static void main(String[] args) {
 
     try {
       LoggingFactory.init("INFO");
-      AudioFile audioPlayer = (AudioFile) Runtime.start("AudioPlayer", "AudioFile");
+      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+      
+      Runtime.start("python", "Python");
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+
+      AudioFile player = (AudioFile) Runtime.start("player", "AudioFile");
       // audioPlayer.play("https://upload.wikimedia.org/wikipedia/commons/1/1f/Bach_-_Brandenburg_Concerto.No.1_in_F_Major-_II._Adagio.ogg");
-      audioPlayer.addPlaylist("acoustic", "/home/greg/Music/acoustic");
-      audioPlayer.addPlaylist("electronica", "/home/greg/Music/electronica");
-      audioPlayer.setPlaylist("electronica");
-      audioPlayer.startPlaylist("electronica");
+      player.addListener("publishPeak", "servo", "moveTo");
+      
+      
+      player.addPlaylist("acoustic", "/home/greg/Music/acoustic");
+      player.addPlaylist("electronica", "/home/greg/Music/electronica");
+      player.setPlaylist("electronica");
+      player.startPlaylist("electronica");
       // audioPlayer.addPlaylist("my list", "Z:\\Music");
 
       // audioPlayer.playlist("my list" , true, false, "my list");
