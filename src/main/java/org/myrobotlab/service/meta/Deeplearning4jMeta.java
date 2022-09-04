@@ -14,7 +14,7 @@ public class Deeplearning4jMeta extends MetaData {
    */
   public Deeplearning4jMeta() {
 
-    String dl4jVersion = "1.0.0-M1.1";
+    String dl4jVersion = "1.0.0-M2.1";
 
     boolean cudaEnabled = Boolean.valueOf(System.getProperty("gpu.enabled", "false"));
     boolean supportRasPi = false;
