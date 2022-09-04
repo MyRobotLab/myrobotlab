@@ -39,7 +39,8 @@ public class OpenCVFilterTextDetectorTest extends AbstractOpenCVFilterTest {
     // System.out.println("TEXT: >>>" + fullString + "<<");
     // waitOnAnyKey();
 
-    assertEquals("WERE \" STILL . HIRING IUMANS Carnegie e Robotics. iz el g", fullString);
+    String expected = "WERE STILL . HIRING IUMANS Carnegie 2 Robotics. AMAR)";
+    assertEquals(expected, fullString);
   }
 
   private String stitchText(OpenCVFilter filter) {
