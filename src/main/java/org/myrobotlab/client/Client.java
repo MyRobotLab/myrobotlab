@@ -10,6 +10,9 @@ import java.util.Scanner;
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClientConfig;
+import org.asynchttpclient.Dsl;
 import org.atmosphere.wasync.ClientFactory;
 import org.atmosphere.wasync.Decoder;
 import org.atmosphere.wasync.Encoder;
@@ -27,9 +30,6 @@ import org.myrobotlab.logging.LoggingFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClientConfig;
-import com.ning.http.client.providers.netty.NettyAsyncHttpProviderConfig;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -125,24 +125,28 @@ public class Client implements Runnable, Decoder<String, Reader>, Encoder<String
 
       if (client == null) {
         client = ClientFactory.getDefault().newClient(AtmosphereClient.class);
+        
+        DefaultAsyncHttpClientConfig.Builder clientBuilder = Dsl.config();
+        // clientBuilder.blahblah configure everything
 
         // Netty Config ..
-        NettyAsyncHttpProviderConfig nettyConfig = new NettyAsyncHttpProviderConfig();
-        nettyConfig.addProperty("tcpNoDelay", "true");
-        nettyConfig.addProperty("keepAlive", "true");
-        nettyConfig.addProperty("reuseAddress", true);
-        // nettyConfig.addProperty("connectTimeoutMillis",
-        // nettyConnectionTimeout);
-        nettyConfig.setWebSocketMaxFrameSize(262144);
-        nettyConfig.addProperty("child.tcpNoDelay", "true");
-        nettyConfig.addProperty("child.keepAlive", "true");
-        // nettyConfig.setWebSocketMaxFrameSize(65536);
-
-        // AsyncHttpClientConfig Config
-        AsyncHttpClientConfig.Builder b = new AsyncHttpClientConfig.Builder();
-        b.setFollowRedirect(true).setMaxRequestRetry(-1).setConnectTimeout(-1).setReadTimeout(30000);
-        AsyncHttpClientConfig config = b.setAsyncHttpClientProviderConfig(nettyConfig).build();
-        asc = new AsyncHttpClient(config);
+//        NettyAsyncHttpProviderConfig nettyConfig = new NettyAsyncHttpProviderConfig();
+//        nettyConfig.addProperty("tcpNoDelay", "true");
+//        nettyConfig.addProperty("keepAlive", "true");
+//        nettyConfig.addProperty("reuseAddress", true);
+//        // nettyConfig.addProperty("connectTimeoutMillis",
+//        // nettyConnectionTimeout);
+//        nettyConfig.setWebSocketMaxFrameSize(262144);
+//        nettyConfig.addProperty("child.tcpNoDelay", "true");
+//        nettyConfig.addProperty("child.keepAlive", "true");
+//        // nettyConfig.setWebSocketMaxFrameSize(65536);
+//
+//        // AsyncHttpClientConfig Config
+//        AsyncHttpClientConfig.Builder b = new AsyncHttpClientConfig.Builder();
+//        b.setFollowRedirect(true).setMaxRequestRetry(-1).setConnectTimeout(-1).setReadTimeout(30000);
+//        AsyncHttpClientConfig config = b.setAsyncHttpClientProviderConfig(nettyConfig).build();
+//        asc = new AsyncHttpClient(config);
+          
       }
 
       // socket =
@@ -156,7 +160,7 @@ public class Client implements Runnable, Decoder<String, Reader>, Encoder<String
         // LONG_POLLING
         request.transport(Request.TRANSPORT.WEBSOCKET);
 
-        socket = (AtmosphereSocket) client.create(client.newOptionsBuilder().runtime(asc).build());
+        socket = (AtmosphereSocket) client.create(client.newOptionsBuilder()/*.runtime(asc)*/.build());
         socket.on(Event.CLOSE.name(), new Function<String>() {
           @Override
           public void on(String t) {
@@ -425,7 +429,7 @@ public class Client implements Runnable, Decoder<String, Reader>, Encoder<String
 
     if (clientId.equals(promptId)) {
       if (asc != null) {
-        asc.close();
+        // asc.close();
       }
 
       System.out.println("exiting " + clientId);

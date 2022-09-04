@@ -1,2 +1,2 @@
 # start the service
-sprinkler = Runtime.start("sprinkler","Sprinkler")
+sprinkler = runtime.start("sprinkler","Sprinkler")

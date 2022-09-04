@@ -204,8 +204,12 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   }
 
   public void stop() {
-    if (runner != null)
+    if (runner != null) {
       runner.stop();
+    }
+    if (uart != null) {
+      uart.disconnect();
+    }
   }
 
   /*
@@ -237,10 +241,15 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   }
 
   public void releaseService() {
+    super.releaseService();
     if (runner != null) {
       runner.stop();
     }
-    releasePeers();
+    if (uart != null) {
+      uart.releaseService();
+    }
+    // sleep(300);
+    disconnect();
     super.releaseService();
   }
 

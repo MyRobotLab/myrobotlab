@@ -8,10 +8,13 @@
     export PATH=$JAVA_HOME/bin:$PATH
 
     # shows system vars and env vars
-    mvn -DskipTests -DBUILD_NUMBER=71 help:system
+    mvn -DskipTests help:system
     
     # fast build
-    mvn -DskipTests -DBUILD_NUMBER=180 compile package -o 
+    mvn -DskipTests package -o 
+
+    # specific test
+    mvn test -Dtest="org.myrobotlab.service.WebGuiTest#postTest"  
 
     # compile only sync with raspi
     rsync -zarvh target/classes pi@192.168.0.104:/opt/mrl/myrobotlab/target
@@ -23,14 +26,15 @@
     mvn -q javadoc:javadoc -o
     
     # specific test
-    mvn test -Dtest=OpenCVTest#testGetClassifications    
+    mvn test -Dtest=OpenCVTest#testGetClassifications
 
+    # installing in a local repo
     mvn install:install-file  -Dfile=target/myrobotlab.jar \
-                          -DgroupId=myrobotlab.org \
-                          -DartifactId=myrobotlab \
-                          -Dversion=1.1.401 \
-                          -Dpackaging=jar \
-                          -DlocalRepositoryPath=test-repo
+                      -DgroupId=myrobotlab.org \
+                      -DartifactId=myrobotlab \
+                      -Dversion=1.1.401 \
+                      -Dpackaging=jar \
+                      -DlocalRepositoryPath=test-repo
 
     # proxy
     -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
@@ -41,6 +45,11 @@
 
     # doclets
     javadoc -classpath target/myrobotlab.jar:libraries/jar/* -docletpath target/myrobotlab.jar -doclet org.myrobotlab.doclet.ScannerDoclet  src/main/java/org/myrobotlab/service/Clock.java minus-show-comments/show-elements
+    # specific test
+    mvn -Dtest=org.myrobotlab.opencv.OpenCVFilterFaceDetectTest test
+
+    # doclets
+    javadoc -classpath target/myrobotlab.jar:libraries/jar/* -docletpath target/myrobotlab.jar -doclet org.myrobotlab.doclet.ScannerDoclet  src/main/java/org/myrobotlab/service/Clock.java minus-show-comments/show-elements
   
     # how to mount sshfs from a raspi and maintain a single build
     usermod -a -G i2c xxxxx
@@ -48,6 +57,9 @@
     sshfs xxxxx@yyyyy.myrobotlab.org:/home/xxxxx /home/xxxxx/sshfs/blade2
     java -classpath target/classes:libraries/jar/* org.myrobotlab.service.Runtime &#45;&#45;from-launcher -s webgui WebGui python Python
 
+    # jpackage
+    jpackage &#45;&#45;verbose &#45;&#45;name myrobotlab &#45;&#45;input target &#45;&#45;main-jar myrobotlab.jar &#45;&#45;main-class org.myrobotlab.service.Runtime &#45;&#45;java-options '-Xmx512m -Xms512m -Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8' &#45;&#45;arguments "&#45;&#45;from-launcher &#45;&#45;id historical-gates &#45;&#45;log-level info -s webgui WebGui intro Intro python Python" &#45;&#45;type app-image
+  
    -->  
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.myrobotlab</groupId>
@@ -67,7 +79,12 @@
         
        -->
       <!-- from jenkins env vars -->
-      <build.number>${BUILD_NUMBER}</build.number>
+      <version.prefix>1.1.</version.prefix>
+      <!-- force overriding property at command line, use ${maven.build.timestamp}-->
+      <timestamp>${maven.build.timestamp}</timestamp>
+      <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>      
+      <build.number>${timestamp}</build.number>
+      <version>${version.prefix}${build.number}</version>   
       <GitBranch>${git.branch}</GitBranch>
       <username>${NODE_NAME}</username>      
       <platform>${NODE_LABELS}</platform>      
@@ -97,7 +114,7 @@
         <repository>
           <id>sarxos</id>
           <name>sarxos</name>
-          <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
         <!-- null  -->
         <repository>
@@ -111,29 +128,17 @@
           <name>oss-snapshots-repo</name>
           <url>https://oss.sonatype.org/content/groups/public</url>
         </repository>
-        <!-- for j3d core, utils and vector  -->
-        <repository>
-          <id>tudelft</id>
-          <name>tudelft</name>
-          <url>http://simulation.tudelft.nl/maven</url>
-        </repository>
-        <!-- swinggui mxgraph  -->
-        <repository>
-          <id>alfresco</id>
-          <name>alfresco</name>
-          <url>https://artifacts.alfresco.com/nexus/content/repositories/public</url>
-        </repository>
         <!-- some marytts voices  -->
         <repository>
           <id>marytts</id>
           <name>marytts</name>
           <url>http://mary.dfki.de/repo</url>
         </repository>
-        <!-- Public online Restlet repository  -->
+        <!-- Discord Bot - m2-dv8tion  -->
         <repository>
-          <id>maven-restlet</id>
-          <name>maven-restlet</name>
-          <url>https://maven.restlet.talend.com</url>
+          <id>dv8tion</id>
+          <name>dv8tion</name>
+          <url>https://m2.dv8tion.net/releases</url>
         </repository>
      </repositories>
   
@@ -164,9 +169,9 @@
 
 <!-- AzureTranslator begin -->
   <dependency>
-    <groupId>io.github.firemaples</groupId>
-    <artifactId>microsoft-translator-java-api</artifactId>
-    <version>0.8.3</version>
+    <groupId>com.squareup.okhttp3</groupId>
+    <artifactId>okhttp</artifactId>
+    <version>3.9.0</version>
     <scope>provided</scope>
   </dependency>
 <!-- AzureTranslator end -->
@@ -210,21 +215,6 @@
   </dependency>
 <!-- ChessGame end -->
 
-<!-- CleverBot begin -->
-  <dependency>
-    <groupId>ca.pjer</groupId>
-    <artifactId>chatter-bot-api</artifactId>
-    <version>2.0.1</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.squareup.okhttp3</groupId>
-    <artifactId>okhttp</artifactId>
-    <version>3.9.0</version>
-    <scope>provided</scope>
-  </dependency>
-<!-- CleverBot end -->
-
 <!-- Cron begin -->
   <dependency>
     <groupId>it.sauronsoftware.cron4j</groupId>
@@ -247,37 +237,31 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacpp</artifactId>
-    <version>1.5.5</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.bytedeco</groupId>
-    <artifactId>openblas</artifactId>
-    <version>0.3.10-1.5.4</version>
+    <version>1.5.6</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-core</artifactId>
-    <version>1.0.0-beta7</version>
+    <version>1.0.0-M1.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-zoo</artifactId>
-    <version>1.0.0-beta7</version>
+    <version>1.0.0-M1.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-nn</artifactId>
-    <version>1.0.0-beta7</version>
+    <version>1.0.0-M1.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-modelimport</artifactId>
-    <version>1.0.0-beta7</version>
+    <version>1.0.0-M1.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -290,7 +274,7 @@
   <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-platform</artifactId>
-    <version>1.0.0-beta7</version>
+    <version>1.0.0-M1.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -300,6 +284,30 @@
     <scope>provided</scope>
   </dependency>
 <!-- Deeplearning4j end -->
+
+<!-- DiscordBot begin -->
+  <dependency>
+    <groupId>net.dv8tion</groupId>
+    <artifactId>JDA</artifactId>
+    <version>4.3.0_277</version>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>net.java.dev.jna</groupId>
+          <artifactId>jna</artifactId>
+        </exclusion>
+      </exclusions>
+  </dependency>
+<!-- DiscordBot end -->
+
+<!-- Docker begin -->
+  <dependency>
+    <groupId>com.github.docker-java</groupId>
+    <artifactId>docker-java</artifactId>
+    <version>3.2.13</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Docker end -->
 
 <!-- DocumentPipeline begin -->
   <dependency>
@@ -335,19 +343,40 @@
   <dependency>
     <groupId>com.thoughtworks.xstream</groupId>
     <artifactId>xstream</artifactId>
-    <version>1.4.16</version>
+    <version>1.4.19</version>
     <scope>provided</scope>
   </dependency>
 <!-- DocumentPipeline end -->
 
 <!-- Elasticsearch begin -->
   <dependency>
+    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <artifactId>jackson-dataformat-yaml</artifactId>
+    <version>2.13.3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
     <groupId>pl.allegro.tech</groupId>
     <artifactId>embedded-elasticsearch</artifactId>
     <version>2.7.0</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.dataformat</groupId>
+          <artifactId>jackson-dataformat-yaml</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
 <!-- Elasticsearch end -->
+
+<!-- FiniteStateMachine begin -->
+  <dependency>
+    <groupId>com.github.pnavais</groupId>
+    <artifactId>state-machine</artifactId>
+    <version>1.2.0</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- FiniteStateMachine end -->
 
 <!-- Git begin -->
   <dependency>
@@ -362,7 +391,7 @@
   <dependency>
     <groupId>com.google.cloud</groupId>
     <artifactId>google-cloud-vision</artifactId>
-    <version>1.14.0</version>
+    <version>2.1.3</version>
     <scope>provided</scope>
   </dependency>
 <!-- GoogleCloud end -->
@@ -371,18 +400,18 @@
   <dependency>
     <groupId>org.jsoup</groupId>
     <artifactId>jsoup</artifactId>
-    <version>1.8.3</version>
+    <version>1.14.2</version>
     <scope>provided</scope>
   </dependency>
 <!-- GoogleSearch end -->
 
 <!-- HtmlFilter begin -->
-<!-- Duplicate entry for org.jsoup-jsoup-1.8.3 skipping -->
+<!-- Duplicate entry for org.jsoup-jsoup-1.14.2 skipping -->
 <!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
 <!-- HtmlFilter end -->
 
 <!-- HtmlParser begin -->
-<!-- Duplicate entry for org.jsoup-jsoup-1.8.3 skipping -->
+<!-- Duplicate entry for org.jsoup-jsoup-1.14.2 skipping -->
 <!-- HtmlParser end -->
 
 <!-- ImapEmailConnector begin -->
@@ -393,17 +422,6 @@
     <scope>provided</scope>
   </dependency>
 <!-- ImapEmailConnector end -->
-
-<!-- InMoov begin -->
-<!-- skipping inmoov.fr inmoov inmoov.fr-inmoov-null null version/latest -->
-  <dependency>
-    <groupId>inmoov.fr</groupId>
-    <artifactId>jm3-model</artifactId>
-    <version>1.0.0</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
-<!-- InMoov end -->
 
 <!-- InMoov2 begin -->
 <!-- skipping fr.inmoov inmoov2 fr.inmoov-inmoov2-null null version/latest -->
@@ -420,8 +438,7 @@
 <!-- IndianTts end -->
 
 <!-- IntegratedMovement begin -->
-<!-- skipping inmoov.fr inmoov inmoov.fr-inmoov-null null version/latest -->
-<!-- Duplicate entry for inmoov.fr-jm3-model-1.0.0 skipping -->
+<!-- skipping fr.inmoov inmoov2 fr.inmoov-inmoov2-null null version/latest -->
 <!-- IntegratedMovement end -->
 
 <!-- JFugue begin -->
@@ -494,13 +511,25 @@
     <version>1.0.0</version>
     <scope>provided</scope>
   </dependency>
+  <dependency>
+    <groupId>org.lwjgl</groupId>
+    <artifactId>lwjgl-opengl</artifactId>
+    <version>3.2.3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.lwjgl</groupId>
+    <artifactId>lwjgl-glfw</artifactId>
+    <version>3.2.3</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- JMonkeyEngine end -->
 
 <!-- Joystick begin -->
   <dependency>
     <groupId>net.java.jinput</groupId>
     <artifactId>jinput</artifactId>
-    <version>2.0.7</version>
+    <version>2.0.9</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -562,13 +591,6 @@
 
 <!-- LocalSpeech begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-  <dependency>
-    <groupId>com.microsoft</groupId>
-    <artifactId>tts</artifactId>
-    <version>1.1</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
 <!-- LocalSpeech end -->
 
 <!-- MarySpeech begin -->
@@ -597,6 +619,10 @@
         <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
         </exclusion>
       </exclusions>
   </dependency>
@@ -681,6 +707,10 @@
         <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
         </exclusion>
       </exclusions>
   </dependency>
@@ -888,18 +918,13 @@
         </exclusion>
       </exclusions>
   </dependency>
-<!-- MarySpeech end -->
-
-<!-- MimicSpeech begin -->
-<!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
   <dependency>
-    <groupId>mycroftai.mimic</groupId>
-    <artifactId>mimic_win64</artifactId>
-    <version>1.0</version>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-1.2-api</artifactId>
+    <version>2.12.1</version>
     <scope>provided</scope>
-    <type>zip</type>
   </dependency>
-<!-- MimicSpeech end -->
+<!-- MarySpeech end -->
 
 <!-- Mqtt begin -->
   <dependency>
@@ -912,11 +937,41 @@
 
 <!-- MqttBroker begin -->
   <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-core</artifactId>
+    <version>2.13.3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.13.3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-annotations</artifactId>
+    <version>2.13.3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
     <groupId>io.moquette</groupId>
     <artifactId>moquette-broker</artifactId>
-    <version>0.12.1</version>
+    <version>0.15</version>
     <scope>provided</scope>
       <exclusions>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-annotations</artifactId>
+        </exclusion>
         <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
@@ -970,10 +1025,6 @@
           <artifactId>slf4j-api</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>org.lwjgl.lwjgl</groupId>
-          <artifactId>lwjgl</artifactId>
-        </exclusion>
-        <exclusion>
           <groupId>com.google.guava</groupId>
           <artifactId>guava</artifactId>
         </exclusion>
@@ -985,9 +1036,10 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv-platform</artifactId>
-    <version>1.5.5</version>
+    <version>1.5.6</version>
     <scope>provided</scope>
   </dependency>
+<!-- Duplicate entry for org.bytedeco-javacpp-1.5.6 skipping -->
   <dependency>
     <groupId>com.github.sarxos</groupId>
     <artifactId>webcam-capture-driver-v4l4j</artifactId>
@@ -1004,6 +1056,14 @@
         <exclusion>
           <groupId>javax.servlet</groupId>
           <artifactId>servlet-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
         </exclusion>
         <exclusion>
           <groupId>commons-lang</groupId>
@@ -1037,12 +1097,6 @@
     <version>0.0.1</version>
     <scope>provided</scope>
     <type>zip</type>
-  </dependency>
-  <dependency>
-    <groupId>com.github.axet</groupId>
-    <artifactId>vget</artifactId>
-    <version>1.1.34</version>
-    <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>yolo</groupId>
@@ -1107,29 +1161,36 @@
 
 <!-- Polly begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-  <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-core</artifactId>
-    <version>2.10.1</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-databind</artifactId>
-    <version>2.10.5.1</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-annotations</artifactId>
-    <version>2.10.1</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.13.3 skipping -->
   <dependency>
     <groupId>com.amazonaws</groupId>
     <artifactId>aws-java-sdk-polly</artifactId>
-    <version>1.11.512</version>
+    <version>1.12.253</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-annotations</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
 <!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
 <!-- Polly end -->
@@ -1139,8 +1200,18 @@
   <dependency>
     <groupId>program-ab</groupId>
     <artifactId>program-ab-kw</artifactId>
-    <version>0.0.8.6</version>
+    <version>0.0.8.9</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-core</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
 <!-- Duplicate entry for org.json-json-20090211 skipping -->
   <dependency>
@@ -1152,13 +1223,13 @@
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-analyzers-common</artifactId>
-    <version>8.8.2</version>
+    <version>8.11.2</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-analyzers-kuromoji</artifactId>
-    <version>8.8.2</version>
+    <version>8.11.2</version>
     <scope>provided</scope>
   </dependency>
 <!-- ProgramAB end -->
@@ -1184,13 +1255,13 @@
   <dependency>
     <groupId>com.pi4j</groupId>
     <artifactId>pi4j-core</artifactId>
-    <version>1.2</version>
+    <version>1.4</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>com.pi4j</groupId>
     <artifactId>pi4j-native</artifactId>
-    <version>1.2</version>
+    <version>1.4</version>
     <scope>provided</scope>
     <type>pom</type>
   </dependency>
@@ -1207,6 +1278,11 @@
 
 <!-- Runtime begin -->
   <dependency>
+    <groupId>ch.qos.logback</groupId>
+    <artifactId>logback-classic</artifactId>
+    <version>1.2.3</version>
+  </dependency>
+  <dependency>
     <groupId>com.google.code.gson</groupId>
     <artifactId>gson</artifactId>
     <version>2.8.5</version>
@@ -1214,12 +1290,12 @@
   <dependency>
     <groupId>org.apache.ivy</groupId>
     <artifactId>ivy</artifactId>
-    <version>2.4.0-5</version>
+    <version>2.5.0</version>
   </dependency>
   <dependency>
     <groupId>org.apache.httpcomponents</groupId>
     <artifactId>httpclient</artifactId>
-    <version>4.5.2</version>
+    <version>4.5.13</version>
   </dependency>
   <dependency>
     <groupId>org.atmosphere</groupId>
@@ -1237,9 +1313,14 @@
     <version>1.7.21</version>
   </dependency>
   <dependency>
-    <groupId>ch.qos.logback</groupId>
-    <artifactId>logback-classic</artifactId>
-    <version>1.0.13</version>
+    <groupId>org.yaml</groupId>
+    <artifactId>snakeyaml</artifactId>
+    <version>1.29</version>
+  </dependency>
+  <dependency>
+    <groupId>org.asynchttpclient</groupId>
+    <artifactId>async-http-client</artifactId>
+    <version>2.12.3</version>
   </dependency>
 <!-- Runtime end -->
 
@@ -1247,7 +1328,7 @@
   <dependency>
     <groupId>io.github.java-native</groupId>
     <artifactId>jssc</artifactId>
-    <version>2.9.2</version>
+    <version>2.9.4</version>
     <scope>provided</scope>
   </dependency>
 <!-- Serial end -->
@@ -1256,40 +1337,125 @@
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-core</artifactId>
-    <version>8.8.2</version>
+    <version>8.11.2</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-core</artifactId>
-    <version>8.8.2</version>
+    <version>8.11.2</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-web</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-1.2-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-api</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>org.apache.logging.log4j</groupId>
           <artifactId>log4j-slf4j-impl</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-annotations</artifactId>
         </exclusion>
       </exclusions>
   </dependency>
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-test-framework</artifactId>
-    <version>8.8.2</version>
+    <version>8.11.2</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
           <groupId>org.apache.logging.log4j</groupId>
           <artifactId>log4j-slf4j-impl</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-web</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-1.2-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-annotations</artifactId>
+        </exclusion>
       </exclusions>
   </dependency>
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.13.3 skipping -->
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-solrj</artifactId>
-    <version>8.8.2</version>
+    <version>8.11.2</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-annotations</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
-<!-- Duplicate entry for commons-io-commons-io-2.5 skipping -->
+<!-- Duplicate entry for commons-io-commons-io-2.7 skipping -->
 <!-- Solr end -->
 
 <!-- Sphinx begin -->
@@ -1326,7 +1492,7 @@
   <dependency>
     <groupId>com.mxgraph</groupId>
     <artifactId>jgraphx</artifactId>
-    <version>1.10.4.2</version>
+    <version>1.12.0.2</version>
   </dependency>
 <!-- SwingGui end -->
 
@@ -1343,13 +1509,13 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract</artifactId>
-    <version>4.1.1-1.5.5</version>
+    <version>4.1.1-1.5.6</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract-platform</artifactId>
-    <version>4.1.1-1.5.5</version>
+    <version>4.1.1-1.5.6</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -1407,7 +1573,7 @@
   <dependency>
     <groupId>org.atmosphere</groupId>
     <artifactId>nettosphere</artifactId>
-    <version>3.2.1</version>
+    <version>3.2.2</version>
   </dependency>
   <dependency>
     <groupId>javax.annotation</groupId>
@@ -1467,9 +1633,9 @@
         </exclusion>
       </exclusions>
   </dependency>
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.10.1 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.10.5.1 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.10.1 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.13.3 skipping -->
 <!-- WikiDataFetcher end -->
 
 <!-- WolframAlpha begin -->
@@ -1511,6 +1677,28 @@
     <scope>provided</scope>
   </dependency>
 <!-- Xmpp end -->
+
+  <!-- Slack stuff -->
+  <dependency>
+    <groupId>com.slack.api</groupId>
+    <artifactId>bolt</artifactId>
+    <version>1.24.0</version>
+    </dependency>
+  <dependency>
+    <groupId>com.slack.api</groupId>
+    <artifactId>bolt-socket-mode</artifactId>
+    <version>1.24.0</version>
+    </dependency>
+  <dependency>
+    <groupId>javax.websocket</groupId>
+    <artifactId>javax.websocket-api</artifactId>
+    <version>1.1</version>
+  </dependency>
+  <dependency>
+    <groupId>org.glassfish.tyrus.bundles</groupId>
+    <artifactId>tyrus-standalone-client</artifactId>
+    <version>1.19</version>
+  </dependency>
 
   </dependencies>
 
@@ -1615,7 +1803,7 @@
                         </goals>
                         <configuration>
                             <finalName>myrobotlab</finalName>
-                            <!-- finalName>myrobotlab-${git.branch}-1.1.${build.number}</finalName -->
+                            <!-- finalName>myrobotlab-${git.branch}-${version}</finalName -->
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>myrobotlab-full</shadedClassifierName>
                             <minimizeJar>false</minimizeJar>
@@ -1629,8 +1817,8 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                         <manifestEntries>
                                           <Main-Class>org.myrobotlab.service.Runtime</Main-Class>
-                                          <Major-Version>1.1.${build.number}</Major-Version>
-                                          <Implementation-Version>1.1.${build.number}</Implementation-Version>                               
+                                          <Major-Version>${version}</Major-Version>
+                                          <Implementation-Version>${version}</Implementation-Version>                               
               
                         <Build-Version>${build.number}</Build-Version>
                         <Build-Time>${maven.build.timestamp}</Build-Time>
@@ -1678,7 +1866,28 @@
                     </execution>
                 </executions>
             </plugin>
-    
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>assembly.xml</descriptor>
+          </descriptors>
+          <finalName>myrobotlab</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
+        </configuration>
+        <executions>
+          <execution>
+            <id>trigger-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+         </execution>
+       </executions>
+      </plugin>
+      
       <plugin>
         <inherited>true</inherited>
         <groupId>org.apache.maven.plugins</groupId>

@@ -1,18 +1,13 @@
 package org.myrobotlab.sensor;
 
-import java.io.File;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
-import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Broadcaster;
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.EncoderControl;
+import org.myrobotlab.service.interfaces.EncoderController;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
@@ -88,108 +83,11 @@ public class TimeEncoder implements Runnable, EncoderControl {
 
   boolean enabled = true;
 
-  static class Positions implements Runnable {
-
-    static Positions instance = null;
-    Map<String, Double> positions = null;
-    transient private Thread worker;
-    transient boolean running = false;
-    String filename = null;
-    // reference counter - when 0 shuts thread down
-    int refCount;
-
-    public Positions() {
-      // load previous positions
-      String positionsDir = Service.getDataDir(Servo.class.getSimpleName());
-      filename = positionsDir + File.separator + "positions.json";
-
-      if (positions == null) {
-        Map<String, Double> savedPositions = null;
-        try {
-          String json = FileIO.toString(filename);
-          if (json != null) {
-            savedPositions = CodecUtils.fromJson(json, ConcurrentHashMap.class);
-          }
-        } catch (Exception e) {
-        }
-        if (savedPositions != null) {
-          positions = savedPositions;
-        } else {
-          positions = new ConcurrentHashMap<>();
-        }
-      }
-    }
-
-    @Override
-    public void run() {
-
-      running = true;
-
-      while (running) {
-        try {
-          Thread.sleep(2000);
-          log.debug("saving {} positions of {} servos", filename, positions.size());
-          FileIO.toFile(filename, CodecUtils.toJson(positions).getBytes());
-        } catch (Exception e) {
-          log.error("could not save servo positions", e);
-        }
-      } // while (running)
-
-      worker = null;
-    }
-
-    synchronized public void release() {
-      --refCount;
-      if (refCount == 0) {
-        // no one is using time encoders....
-        // shutting down
-        running = false;
-      }
-    }
-
-    synchronized public void start() {
-      ++refCount;
-      if (worker == null) {
-        worker = new Thread(this, "TimeEncoder.Positions");
-        worker.start();
-      }
-    }
-
-    public void setPosition(String name, double pos) {
-      positions.put(name, pos);
-    }
-
-    public static Positions getInstance() {
-      if (instance == null) {
-        instance = new Positions();
-      }
-      return instance;
-    }
-
-    public Double getPosition(String name) {
-      if (positions.containsKey(name)) {
-        return positions.get(name);
-      }
-      return null;
-    }
-  }
-
-  /**
-   * Static position saver for all servos which use a time encoder. the
-   * positions are read back in on starting the Servo
-   */
-  Positions positions = null;
-
-  protected boolean enableServoEvents = true;
+  protected boolean stopMove = false;
 
   public TimeEncoder(ServoControl servo) {
     this.servo = servo;
     this.name = servo.getName();
-    positions = Positions.getInstance();
-    Double p = positions.getPosition(servo.getName());
-    if (p != null) {
-      beginPos = targetPos = estimatedPos = p;
-    }
     enable();
   }
 
@@ -240,9 +138,13 @@ public class TimeEncoder implements Runnable, EncoderControl {
 
       isRunning = true;
       while (isRunning) {
+        
+        
         // wait for next move ...
         synchronized (this) {
+          stopMove  = false;
           this.wait();
+          stopMove  = false;
         }
 
         if (speedDegreesPerMs == 0) {
@@ -255,6 +157,11 @@ public class TimeEncoder implements Runnable, EncoderControl {
         boolean started = true;
 
         while (now < endMoveTs && isRunning) {
+          
+          if (stopMove) {
+            endMoveTs = now;
+            break;
+          }
 
           now = System.currentTimeMillis();
           // speed has +/- direction
@@ -272,11 +179,10 @@ public class TimeEncoder implements Runnable, EncoderControl {
           // targetPos, estimatedPos) !!!
           EncoderData d = new EncoderData(name, null, estimatedPos, estimatedPos);
 
-          positions.setPosition(name, estimatedPos);
-          if (enableServoEvents && started) {
+          if (started) {
             // ((Broadcaster)servo).broadcast("publishedServoStopped",
             // ServoStatus.SERVO_STOPPED, estimatedPos);
-            ((Broadcaster) servo).broadcast("publishServoStarted", servo.getName());
+            ((Broadcaster) servo).broadcast("publishServoStarted", servo.getName(), estimatedPos);
             started = false;
           }
           servo.onEncoderData(d);// FIXME !! - broadcast this
@@ -287,12 +193,10 @@ public class TimeEncoder implements Runnable, EncoderControl {
         // log.info("finished moved");
         EncoderData d = new EncoderData(name, null, estimatedPos, estimatedPos);
         servo.onEncoderData(d);
-        if (enableServoEvents) {
-          // ((Broadcaster)servo).broadcast("publishedServoStopped",
-          // ServoStatus.SERVO_STOPPED, estimatedPos);
-          ((Broadcaster) servo).broadcast("publishServoStopped", servo.getName());
-        }
-        positions.setPosition(name, estimatedPos);
+        // ((Broadcaster)servo).broadcast("publishedServoStopped",
+        // ServoStatus.SERVO_STOPPED, estimatedPos);
+        // FYI - broadcast by-passes queues, but can publish based on notify entries
+        ((Broadcaster) servo).broadcast("publishServoStopped", servo.getName(), estimatedPos);
       }
     } catch (InterruptedException e) {
       log.info("stopping TimeEncoder Timer ...");
@@ -369,12 +273,10 @@ public class TimeEncoder implements Runnable, EncoderControl {
     if (myThread != null) {
       myThread.interrupt();
     }
-    positions.release();
   }
 
   @Override
   public void enable() {
-    positions.start();
     if (myThread == null) {
       myThread = new Thread(this, String.format("%s.%s.time-encoder", servo.getName(), getName()));
       myThread.start();
@@ -400,7 +302,6 @@ public class TimeEncoder implements Runnable, EncoderControl {
 
   public void setPos(Double pos) {
     beginPos = targetPos = estimatedPos = pos;
-    positions.setPosition(name, estimatedPos);
   }
 
   @Override
@@ -454,5 +355,20 @@ public class TimeEncoder implements Runnable, EncoderControl {
   public void removeListener(String localTopic, String otherService) {
     // TODO Auto-generated method stub
 
+  }
+
+  @Override
+  public Set<String> getAttached(String publishingPoint) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+  
+  public void stopMove() {
+    stopMove = true;
+  }
+
+  @Override
+  public void attachEncoderController(EncoderController controller) {
+    // NoOp, the TimeEncoder doesn't need a controller.    
   }
 }

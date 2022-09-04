@@ -15,6 +15,10 @@ public class Utils {
 
   /**
    * This method will load a python file into the python interpreter.
+   * 
+   * @param file
+   *          the python file to load
+   * @return true/false
    */
   public static boolean loadFile(String file) {
     File f = new File(file);

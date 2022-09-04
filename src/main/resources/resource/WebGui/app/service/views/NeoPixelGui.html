@@ -1,93 +1,104 @@
 <div class="row">
-  <div class="col-lg-12">
-    <!-- simple dropdown -->
-    <div class="input-group">
-      <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
-        <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">controller<span class="caret"></span></a>
-        <ul uib-dropdown-menu>
-          <li ng-repeat="possibleController in controllers" ng-click="setControllerName(possibleController)"><a href>{{possibleController}}</a></li>
-        </ul>
-      </span>
-  
-      <input type="text" class="form-control" ng-model="controllerName" ng-disabled="isAttached"><!-- FIXME - type-ahead -->  
-
-      <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
-        <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">pin<span class="caret"></span></a>
-        <ul uib-dropdown-menu>
-          <li ng-repeat="newPin in pins" ><a href ng-click="setPin(newPin)">{{newPin}}</a></li>
-        </ul>
-      </span>
-
-      <input type="text" class="form-control" ng-model="pin" ng-disabled="isAttached"><!-- FIXME - type-ahead -->  
-     
-      <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)" >
-        <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">Pixels<span class="caret"></span></a>
-        <ul uib-dropdown-menu>
-          <li ng-repeat="newPixel in numPixels" ><a href ng-click="setPixel(newPixel)">{{newPixel}}</a></li>
-        </ul>
-      </span>
-
-      <input type="text" class="form-control" ng-model="numPixel" ng-disabled="isAttached"><!-- FIXME - type-ahead -->  
-
-      <span class="input-group-btn">
-         <button class="btn btn-default" ng-show="isAttached"  ng-click="msg.detach()">detach</button>
-         <button class="btn btn-default" ng-show="!isAttached"  ng-click="msg.attach(controllerName, pin, numPixel)">attach</button>
-      </span>
+    <div class="col-md-6">
+        <h1>{{address}} {{color}}</h1>
+        <!-- matrix {{service.currentMatrix}} -->
+        
+        <table>
+            <tr>
+                <td><attach options='controllerOptions'/></td>
+                <td>pixel count </td>
+                <td>&nbsp;</td>
+                <td>
+                    <input type="text" class="form-control" ng-readonly="service.controller" id="pixelCount" ng-model="service.pixelCount"/>
+                </td>
+            </tr>
+        </table>
+        <div class="btn-group" uib-dropdown>
+            <button type="button" class="btn btn-default">pin {{service.pin}}</button>
+            <button id="single-button" ng-disabled="service.controller != null" type="button" class="btn btn-default" uib-dropdown-toggle>
+                <span class="caret"></span>
+            </button>
+            <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                <li ng-repeat="c in pins">
+                    <a href="" ng-click="msg.setPin(c)">{{c}}</a>
+                </li>
+            </ul>
+        </div>
+        <div class="btn-group" uib-dropdown ng-disabled="service.controller">
+            <button type="button" class="btn btn-default">type {{service.type}}</button>
+            <button type="button" class="btn btn-default" uib-dropdown-toggle>
+                <span class="caret"></span>
+            </button>
+            <ul uib-dropdown-menu>
+                <li ng-repeat="t in types">
+                    <a href="" ng-click="msg.setType(t)">{{t}}</a>
+                </li>
+            </ul>
+        </div>
+        <button type="button" class="btn btn-default" ng-click='attach()' ng-show='!service.controller'>attach</button>
+        <button type="button" class="btn btn-default" ng-click='detach()' ng-show='service.controller'>detach</button>
+        <div class="btn-group" uib-dropdown ng-hide="service.controller == null">
+            <button type="button" class="btn btn-default">play animation {{service.currentAnimation}}</button>
+            <button type="button" class="btn btn-default" uib-dropdown-toggle>
+                <span class="caret"></span>
+            </button>
+            <ul uib-dropdown-menu>
+                <li ng-repeat="animation in animations">
+                    <a href="" ng-click="msg.playAnimation(animation)">{{animation}}</a>
+                </li>
+            </ul>
+        </div>
+        <button type="button" class="btn btn-default" ng-click='msg.stopAnimation()' ng-show='service.controller != null'>stop</button>
+        <div class="btn-group" uib-dropdown ng-hide="service.controller == null">
+            <button type="button" class="btn btn-default">speed {{service.speedFps}} fps</button>
+            <button type="button" class="btn btn-default" uib-dropdown-toggle>
+                <span class="caret"></span>
+            </button>
+            <ul uib-dropdown-menu>
+                <li ng-repeat="speed in speeds">
+                    <a href="" ng-click="msg.setSpeed(speed);msg.broadcastState()">{{speed}}</a>
+                </li>
+            </ul>
+        </div>
+        <div class="btn-group" uib-dropdown ng-hide="service.controller == null">
+            <button type="button" class="btn btn-default">brightness {{service.brightness}}</button>
+            <button type="button" class="btn btn-default" uib-dropdown-toggle>
+                <span class="caret"></span>
+            </button>
+            <ul uib-dropdown-menu>
+                <li ng-repeat="b in brightnesses">
+                    <a href="" ng-click="msg.setBrightness(b);msg.broadcastState()">{{b}}</a>
+                </li>
+            </ul>
+        </div>
+        <button type="button" class="btn btn-default" ng-click='fill()' ng-show='service.controller != null'>fill</button>
     </div>
-  </div>
+    <div class="col-md-1"></div>
 </div>
 <div class="row">
-  <div class="col-lg-12">
-    <div class="input-group">
-     <span class="input-group-addon" ng-disabled="true">{{animation}}</span>
-     <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
-        <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="!isAttached">Animation<span class="caret"></span></a>
-        <ul uib-dropdown-menu>
-          <li ng-repeat="possibleAnimation in animations" ng-click="setAnimationSetting(possibleAnimation)"><a href>{{possibleAnimation}}</a></li>
-        </ul>
-      </span>
-     <input type="text" class="form-control" ng-model="animationData.animation" ng-disabled="true"><!-- FIXME - type-ahead -->  
-     <span class="input-group-addon" ng-show="animationSettingColor">Red</span>
-     <input type="text" class="form-control" ng-model="animationData.red" ng-show="animationSettingColor"><!-- FIXME - type-ahead -->  
-     <span class="input-group-addon" ng-show="animationSettingColor">Green</span>
-     <input type="text" class="form-control" ng-model="animationData.green" ng-show="animationSettingColor"><!-- FIXME - type-ahead -->  
-     <span class="input-group-addon" ng-show="animationSettingColor">Blue</span>
-     <input type="text" class="form-control" ng-model="animationData.blue" ng-show="animationSettingColor"><!-- FIXME - type-ahead -->  
-     <span class="input-group-addon" ng-show="animationSettingColor">Speed</span>
-     <input type="text" class="form-control" ng-model="animationData.speed" ng-show="animationSettingSpeed"><!-- FIXME - type-ahead -->  
-     <span class="input-group-btn">
-       <button class="btn btn-default" ng-disabled="!isAttached"  ng-click="msg.setAnimation(animationData.animation,animationData.red,animationData.green,animationData.blue,animationData.speed)">Run Animation</button>
-     </span>
+    <div class="col-md-3">
+        <table width="100%">
+            <tr>
+                <td>
+                    color<color-picker id="fill" ng-model="pickedColor" options="colorPickerOptions" event-api="eventApi"></color-picker>
+                </td>
+                <td>
+                    <button type="button" ng-style="led.style" class="btn btn-default" ng-click='clear();' tooltip="clear pixels">clear</button>
+                </td>
+            </tr>
+        </table>
     </div>
-  </div>
+    <div class="col-md-9">&nbsp;</div>
 </div>
-<div class="row" ng-repeat="eachpixel in pixels track by $index">
-  <div class="col-lg-12">
-    <div class="input-group">
-    	<span class="input-group-addon">Pixel #</span>
-    	<input type="text" class="form-control" ng-model="eachpixel.address" ng-disabled="true">
-    	<span class="input-group-addon">Red</span>
-    	<input type="text" class="form-control" ng-model="eachpixel.red" ng-disabled="!isAttached">
-    	<span class="input-group-addon">Green</span>
-    	<input type="text" class="form-control" ng-model="eachpixel.green" ng-disabled="!isAttached">
-    	<span class="input-group-addon">Blue</span>
-    	<input type="text" class="form-control" ng-model="eachpixel.blue" ng-disabled="!isAttached">
-    	<span class="input-group-btn">
-    		<button class="btn btn-default" ng-disabled="!isAttached" ng-click="msg.setPixel(eachpixel.address, eachpixel.red, eachpixel.green,eachpixel.blue)">Set Pixel</button>
-    		<button class="btn btn-default" ng-disabled="!isAttached" ng-click="msg.sendPixel(eachpixel.address, eachpixel.red, eachpixel.green,eachpixel.blue)">Show Pixel</button>
-    	</span>
-    </div>
-  </div>
-</div>
-<div class="row">
-  <div class="col-lg-12">
-    <div class="input-group">
-    	<span class="input-group-btn">
-    		<button class="btn btn-default" ng-disabled="!isAttached" ng-click="msg.writeMatrix()">Write Matrix</button>
-    		<button class="btn btn-default" ng-disabled="!isAttached" ng-show="off" ng-click="msg.turnOn()">Turn On</button>
-    		<button class="btn btn-default" ng-disabled="!isAttached" ng-show="!off" ng-click="msg.turnOff()">Turn Off</button>
-    	</span>
-	</div>
-  </div>
-</div>
-	
+<table>
+    <tr>
+        <td>set pixel </td>
+        <td>&nbsp;</td>
+        <td>
+            <input type="text" class="form-control" id="set-pixel" ng-model="pos"/>            
+        </td>
+        <td>
+        <button type="button" ng-style="led.style" class="btn btn-default" ng-click='setPixel();' tooltip="set pixel">set pixel</button>
+        </td>
+    </tr>
+</table>

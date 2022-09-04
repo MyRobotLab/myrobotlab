@@ -1,31 +1,56 @@
-<div class="row">
-    <div class="input-group col-lg-12">
-    <!--
-
-<div
-    data-angular-treeview="true"
-	data-tree-id="abc"
-	data-tree-model="treedata"
-	data-node-id="id"
-	data-node-label="label"
-	data-node-children="children" >
+<div class="col-md-6">
+    <table border="1" class="table table-hover table-condensed table-striped table-bordered">
+        <tr>
+            <td>
+                <button class="btn btn-default" ng-click="msg.play(service.currentPlaylist)"><span class="glyphicon glyphicon-play" title="play list"/></button>
+                <button class="btn btn-default" ng-click="msg.play(service.currentTrack)"><span class="glyphicon glyphicon-play" title="play track"/></button>
+                <button class="btn btn-default" ng-click="msg.pause()"><span class="glyphicon glyphicon-pause" title="pause"/></button>
+                <button class="btn btn-default" ng-click="msg.resume()"><span class="glyphicon glyphicon-step-forward" title="resume"/></button>
+                <!--button class="btn btn-default" ng-click="msg.random()"><span class="glyphicon glyphicon-random" title="random"/></button-->
+                <button class="btn btn-default" ng-click="msg.stop()"><span class="glyphicon glyphicon-stop" title="stop"/></button>
+                <button class="btn btn-default" ng-click="msg.mute(true)"><span class="glyphicon glyphicon-volume-off" title="mute"/></button>
+                <button class="btn btn-default" ng-click="msg.volume(2.0)"><span class="glyphicon glyphicon-volume-up" title="pump up the volume"/></button>
+            </td>
+        </tr>
+        </table>
+        <table border="1" class="table table-hover table-condensed table-striped table-bordered">
+        <tr>
+            <td>playing</td>
+            <td>{{playing}}</td>
+        </tr>
+        <tr>
+            <td>track</td>
+            <td>{{service.currentTrack}}</td>
+        </tr>
+        <tr>
+            <td>volume</td>
+            <td>{{service.volume}}</td>
+        </tr>
+    </table>
 </div>
-
-
-        <div class="custom-file">
-            <input type="file" class="custom-file-input" id="customFile" ng-model="selectedFile" />
-        </div>
-        <button class="btn btn-default" ng-click="playFile(selectedFile)">play</button>
-    </div>
-</div>
-
-<br>
-here
-<br>
-<label class="import-file">
-    <input type="file" onchange="angular.element(this).scope().fileNameChanged(this)">
-    <div>Import file...</div>
-</label>
--->
-    </div>
+<div class="col-md-6">
+    <!--Selected playlist: {{service.currentPlaylist}}<br/>-->
+    <table border="1" class="table table-hover table-condensed table-striped table-bordered">
+        <!--tr ng-repeat="(name, fileset) in service.playlists">
+            <td>{{name}}{{fileset}}</td>
+        </tr-->
+        <tr>
+            <td>
+                <input class="form-control ng-pristine ng-untouched ng-valid ng-empty directoryName" type="text" ng-model="service.currentPlaylist" name="directoryName" id="directoryName" ng-init="" placeholder="Playlist directory" style="width:200px">
+                <button class="btn btn-default" ng-click="msg.addPlaylist(service.currentPlaylist)">Add playlist</button>
+                <div class="form-group">
+                    <label>Select playlist:</label>
+                <select multiple class="form-control vertical-menu" ng-change="setPlaylist(name)" ng-model="service.playlists" id="service.playlists" title="select your playlist">
+                    <option ng-repeat="(name, fileset) in service.playlists" ng-value="{{name}}">{{name}}</option>
+                </select>
+            </div>
+                <div ng-show="service.playlists" class="form-group">
+                    <label>Select track:</label>
+                    <select multiple class="form-control vertical-menu" ng-model="service.currentTrack" ng-change="setTrack(fileset)" title="select your track">
+                        <option ng-repeat="(name, fileset) in service.playlists" ng-value="{{fileset}}">{{fileset}}</option>
+                    </select>
+                </div>
+            </td>
+        </tr>
+    </table>
 </div>

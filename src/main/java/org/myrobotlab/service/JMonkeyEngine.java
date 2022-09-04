@@ -8,10 +8,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -48,9 +52,13 @@ import org.myrobotlab.net.Connection;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
+import org.myrobotlab.service.config.JMonkeyEngineConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.interfaces.ServoControlListener;
+import org.myrobotlab.service.interfaces.ServoStatusListener;
 import org.myrobotlab.service.interfaces.Simulator;
 import org.myrobotlab.swing.ServiceGui;
 import org.slf4j.Logger;
@@ -116,7 +124,7 @@ import com.simsilica.lemur.style.BaseStyles;
  * @author GroG, calamity, kwatters, moz4r and many others ...
  *
  */
-public class JMonkeyEngine extends Service implements Gateway, ActionListener, Simulator, EncoderListener, IKJointAngleListener {
+public class JMonkeyEngine extends Service implements Gateway, ActionListener, Simulator, EncoderListener, IKJointAngleListener, ServoStatusListener, ServoControlListener {
 
   final static String CAMERA = "camera";
 
@@ -170,7 +178,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   int height = 768;
 
-  List<Jme3Msg> history = new ArrayList<Jme3Msg>();
+  transient List<Jme3Msg> history = new ArrayList<Jme3Msg>();
 
   transient AtomicInteger id = new AtomicInteger();
 
@@ -178,7 +186,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   transient Interpolator interpolator;
 
-  protected Queue<Jme3Msg> jme3MsgQueue = new ConcurrentLinkedQueue<Jme3Msg>();
+  transient protected Queue<Jme3Msg> jme3MsgQueue = new ConcurrentLinkedQueue<Jme3Msg>();
 
   final public String KEY_SEPERATOR = "/";
 
@@ -194,12 +202,10 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   Map<String, String[]> multiMapped = new TreeMap<String, String[]>();
 
-  final Map<String, String> nameMappings = new TreeMap<String, String>();
-
   transient Map<String, List<ServiceGui>> nameMethodCallbackMap = new HashMap<String, List<ServiceGui>>();
 
   // https://stackoverflow.com/questions/16861727/jmonkey-engine-3-0-drawing-points
-  FloatBuffer pointCloudBuffer = null;
+  transient FloatBuffer pointCloudBuffer = null;
 
   transient Material pointCloudMat = null;
 
@@ -216,7 +222,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   int selectIndex = 0;
 
   @Deprecated /* came from jme3ServoController... */
-  Map<String, ServoControl> servos = new TreeMap<String, ServoControl>();
+  transient Map<String, ServoControl> servos = new TreeMap<String, ServoControl>();
 
   transient AppSettings settings;
 
@@ -233,6 +239,12 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   transient ViewPort viewPort;
 
   int width = 1024;
+
+  protected Set<String> modelPaths = new LinkedHashSet<>();
+
+  protected Map<String, UserData> nodes = new LinkedHashMap<>();
+
+  protected String cameraLookAt;
 
   public JMonkeyEngine(String n, String id) {
     super(n, id);
@@ -368,26 +380,14 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     addMsg("addNode", name);
   }
 
-  public void attach(Attachable service) throws Exception {
-    attach(service, (String[]) null);
-  }
-
-  public void attach(Attachable service, String... nodeNames) throws Exception {
-    attach(service.getName(), nodeNames);
-  }
-
   // Routing Attach - should be based on string type info and name (ie a
   // Registration)
-  public void attach(String name, String... nodeNames) throws Exception {
-
+  public void attach(Attachable attachable) throws Exception {
+    String name = attachable.getName();
     ServiceInterface service = Runtime.getService(name);
     if (service == null) {
       log.error("{} not found in registry", name);
       return;
-    }
-
-    if (nodeNames != null) {
-      multiMapped.put(name, nodeNames);
     }
 
     // We do type evaluation and routing based on string values vs instance
@@ -416,7 +416,10 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * binds two objects together ...
    * 
    * @param child
+   *          child
    * @param parent
+   *          parent
+   * 
    */
   public void bind(String child, String parent) {
     addMsg("bind", child, parent);
@@ -436,10 +439,17 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * need to change, but has a higher likelyhood of collisions.
    * 
    * @param tree
+   *          t
    * @param path
+   *          p
    * @param spatial
+   *          s
+   * @param includeGeometries
+   *          include
    * @param useDepthKeys
-   * @return
+   *          depth
+   * @return map of user data
+   * 
    */
   public Map<String, UserData> buildTree(Map<String, UserData> tree, String path, Spatial spatial, boolean includeGeometries, boolean useDepthKeys) {
     if (useDepthKeys) {
@@ -489,6 +499,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       log.error("cameraLookAt - cannot find {}", name);
       return;
     }
+    cameraLookAt = name;
     cameraLookAt(s);
   }
 
@@ -534,7 +545,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   @Override
   public void connect(String uri) throws Exception {
-    
+
     String uuid = java.util.UUID.randomUUID().toString();
     String id = getName() + "-" + Runtime.getInstance().getId() + "-jme";
     Connection attributes = new Connection(uuid, id, getName());
@@ -748,7 +759,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    *          - name of node
    * @param startNode
    *          - the node to start search
-   * @return
+   * @return spatial object
    */
   public Spatial find(String name, Node startNode) {
     if (name.equals(ROOT)) {
@@ -756,11 +767,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     }
     if (startNode == null) {
       startNode = rootNode;
-    }
-
-    // FIXME - is this needed ?
-    if (nameMappings.containsKey(name)) {
-      name = nameMappings.get(name);
     }
 
     Spatial child = startNode.getChild(name);
@@ -789,8 +795,11 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * wrapper of "find" which "expects" a spatial back otherwise its an error
    * 
    * @param name
+   *          name
    * @param startNode
-   * @return
+   *          starting node
+   * @return spatial object.
+   * 
    */
   public Spatial get(String name, Node startNode) {
     Spatial ret = find(name, startNode);
@@ -804,7 +813,9 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * get default axis local rotation in degrees
    * 
    * @param name
-   * @return
+   *          name of joint
+   * @return angle in degrees
+   * 
    */
   public Float getAngle(String name) {
     return getAngle(name, null);
@@ -825,7 +836,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     if (axis != null) {
       rotMask = util.getUnitVector(axis); // Vector3f.UNIT_Y;
     } else {
-      rotMask = data.rotationMask;
+      rotMask = util.getUnitVector(data.rotationMask);
     }
 
     int axisIndex = Jme3Util.getIndexFromUnitVector(rotMask);
@@ -1016,7 +1027,13 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   public UserData getUserData(Node node) {
     UserData data = node.getUserData("data");
     if (data == null) {
+      // not sure if this is right - using the nodeName as "path"
       data = new UserData(this, node);
+      String nodeName = node.getName();
+      if (nodes.containsKey(nodeName)) {
+        error("collision on node name %s", nodeName);
+      }
+      nodes.put(nodeName, data);
       // FIXME - add map/index
       // getAncestorKey(x) + rootKey if its not root = key
     }
@@ -1025,31 +1042,36 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   /**
    * The workhorse - where everyone "searches" for the user data they need. It
-   * works agains a flat or depth key'd tree. If the node is found but the user
+   * works against a flat or depth key'd tree. If the node is found but the user
    * data has not been created, it creates it and assigns the references... if
    * the node cannot be found, it returns null
    * 
    * @param path
    *          - full path for a depth tree, name for a flat map
-   * @return
+   * @return userdata
    */
   public UserData getUserData(String path /* , boolean useDepth */) {
 
     Spatial spatial = get(path);
 
     if (spatial == null) {
-      error("geteUserData %s cannot be found", path);
+      log.warn("geteUserData {} cannot be found", path);
       return null;
     }
 
     if (spatial instanceof Geometry) {
-      error("geteUserData %s found but is Geometry not Node", path);
+      log.warn("geteUserData {} found but is Geometry not Node", path);
       return null;
     }
 
     UserData userData = spatial.getUserData("data");
     if (userData == null) {
       userData = new UserData(this, spatial);
+
+      if (this.nodes.containsKey(path)) {
+        error("collision on node name %s", path);
+      }
+      this.nodes.put(path, userData);
     }
     return userData;
   }
@@ -1108,8 +1130,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   // translate
   // TODO - must be re-entrant - perhaps even on a schedule ?
   // TODO - removeNode
-  public void load(String inFileName) {
-    log.info("load({})", inFileName);
+  public void loadResource(String inFileName) {
+    log.info("loadResource({})", inFileName);
 
     try {
 
@@ -1130,10 +1152,10 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       String simpleName = getNameNoExt(filename);
 
       if (!ext.equals("json")) {
-
         Spatial spatial = assetManager.loadModel(filename);
         spatial.setName(simpleName);
-
+        // hmmm - absolute paths ? this is fragile
+        // FIXME - somehow make relative work
         Node node = null;
 
         if (spatial instanceof Node) {
@@ -1147,6 +1169,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
       } else {
 
+        // FIXME - put msgs into yml form
         String json = FileIO.toString(filename);
         Jme3Msg[] msgs = CodecUtils.fromJson(json, Jme3Msg[].class);
         log.info("adding {} msgs", msgs.length);
@@ -1154,6 +1177,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
           jme3MsgQueue.add(msg);
         }
       }
+
     } catch (Exception e) {
       error(e);
     }
@@ -1163,6 +1187,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * load a known file type
    * 
    * @param inFileName
+   *          input file name
    */
   public void loadFile(String inFileName) {
     File file = getFile(inFileName);
@@ -1182,6 +1207,16 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   public void loadModels(String dirPath) {
+    if (modelPaths.contains(dirPath)) {
+      info("already loaded %s", dirPath);
+      return;
+    }
+    modelPaths.add(dirPath);
+    traverseLoadModels(dirPath);
+  }
+
+  public void traverseLoadModels(String dirPath) {
+    dirPath = FileIO.normalize(dirPath);
     log.info("loading models from {}", dirPath);
     File dir = new File(dirPath);
     if (!dir.exists()) {
@@ -1199,7 +1234,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // initially set them invisible ...
     for (File f : files) {
       if (!f.isDirectory()) { // && !"json".equals(getExt(f.getName()))) {
-        load(f.getAbsolutePath());
+        loadResource(f.getAbsolutePath());
       }
     }
 
@@ -1208,7 +1243,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // breadth first search ...
     for (File f : files) {
       if (f.isDirectory()) {
-        loadModels(f.getAbsolutePath());
+        traverseLoadModels(f.getAbsolutePath());
       }
     }
   }
@@ -1217,6 +1252,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * load a node with all potential children
    * 
    * @param parentDirPath
+   *          p
    */
   public void loadNode(String parentDirPath) {
     File parentFile = new File(parentDirPath);
@@ -1268,6 +1304,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * will be bound to root
    * 
    * @param dirPath
+   *          dir
+   *
    */
   public void loadNodes(String dirPath) {
     File dir = new File(dirPath);
@@ -1343,8 +1381,12 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * onAnalog
    * 
    * @param name
+   *          name
    * @param keyPressed
+   *          key pressed
    * @param tpf
+   *          tfp
+   *
    */
   public void onAnalog(String name, float keyPressed, float tpf) {
     // log.info("onAnalog [{} {} {}]", name, keyPressed, tpf);
@@ -1419,6 +1461,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * appropriately delegate it out to more specific methods
    * 
    * @param data
+   *          cv data
    */
   public void onCvData(CvData data) {
     // onPointCloud(data.getPointCloud()); FIXME - brittle and not correct
@@ -1584,8 +1627,16 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * in OpenCV overlay !
    * 
    * @param text
+   *          t
    * @param x
+   *          coordinate
    * @param y
+   *          coordinate
+   * @param color
+   *          c
+   * @param size
+   *          s
+   * 
    */
   public void putText(String text, int x, int y, String color, Integer size) {
     HudText hud = null;
@@ -1623,8 +1674,12 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * instant rotation on an particular axis
    * 
    * @param name
+   *          reference name
    * @param axis
+   *          axis
    * @param degrees
+   *          degree
+   * 
    */
   public void rotateOnAxis(String name, String axis, double degrees) {
     addMsg("rotateTo", name, axis, degrees);
@@ -1634,8 +1689,14 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * incremental movement on an axis with a speed
    * 
    * @param name
+   *          name
    * @param axis
+   *          a
    * @param degrees
+   *          d
+   * @param speed
+   *          s
+   * 
    */
   public void rotateOnAxis(String name, String axis, double degrees, double speed) {
     interpolator.addAnimation("rotateTo", name, axis, degrees, speed);
@@ -1645,7 +1706,10 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * rotate on the "default" axis to a location without using speed
    * 
    * @param name
+   *          name to rotate
    * @param degrees
+   *          amount to rotate
+   * 
    */
   public void rotateTo(String name, double degrees) {
     addMsg("rotateTo", name, null, degrees);
@@ -1655,8 +1719,12 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * rotate on the "default" axis using speed
    * 
    * @param name
+   *          name of joint
    * @param degrees
+   *          amount to move
    * @param speed
+   *          speed
+   * 
    */
   public void rotateTo(String name, double degrees, double speed) {
     interpolator.addAnimation("rotateTo", name, null, degrees, speed);
@@ -1812,6 +1880,10 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   public Mapper setMapper(String name, int minx, int maxx, int miny, int maxy) {
+    return setMapper(name, (double) minx, (double) maxx, (double) miny, (double) maxy);
+  }
+
+  public Mapper setMapper(String name, double minx, double maxx, double miny, double maxy) {
     UserData node = getUserData(name);
     if (node == null) {
       error("setMapper %s does not exist", name);
@@ -1825,7 +1897,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     addMsg("setRotation", name, xRot, yRot, zRot);
   }
 
-  public void setRotation(String name, String rotation) {
+  public void setRotation(String name, String axis) {
     UserData o = getUserData(name);
     if (o == null) {
       error("setRotation %s could not be found", name);
@@ -1833,7 +1905,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     }
     // WRONG !!!! - getLocalUnitVector
     // o.rotationMask = util.getUnitVector(rotation);
-    o.rotationMask = util.getLocalUnitVector(o.getSpatial(), rotation);
+    // o.rotationMask = util.getLocalUnitVector(o.getSpatial(), rotation);
+    o.rotationMask = axis;
   }
 
   public void setSelected(Spatial newSelected) {
@@ -1907,11 +1980,13 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // TODO - implement !!!
   }
 
-  BulletAppState bulletAppState;
+  transient BulletAppState bulletAppState;
 
   private boolean usePhysics;
 
-  private Thread mainThread;
+  transient private Thread mainThread;
+
+  protected JMonkeyEngineConfig newConfig;
 
   public void simpleInitApp() {
 
@@ -2093,7 +2168,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // rootNode.setLocalTranslation(0, -200, 0);
     rootNode.setLocalTranslation(0, 0, 0);
 
-    
     menu = app.getMainMenu();// new MainMenuState(this);
     // menu.setEnabled(false);
     // menu.loadGui();
@@ -2179,10 +2253,9 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       settings.setAudioRenderer(null);
       settings.setResizable(true);
       app.setSettings(settings);
-      
+
       app.setShowSettings(false); // resolution bps etc dialog
       app.setPauseOnLostFocus(false);
-      
 
       // the all important "start" - anyone goofing around with the engine
       // before this is done will
@@ -2192,9 +2265,9 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
           app.start();
         }
       };
-      
+
       mainThread.start();
-      
+
       Callable<String> callable = new Callable<String>() {
         public String call() throws Exception {
           System.out.println("Asynchronous Callable");
@@ -2244,6 +2317,15 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
           }
         }
       }
+
+      // if we have config to process
+      // process it
+      newConfig = (JMonkeyEngineConfig) config;
+      if (newConfig != null) {
+        loadDelayed(newConfig);
+        newConfig = null;
+      }
+
     } catch (Exception e) {
       log.error("{} startService exploded", getName(), e);
     }
@@ -2462,8 +2544,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * 
    * FIXME REMOVE !!!
    * 
-   * @param servo
    */
+  @Override
   public void onServoMoveTo(ServoControl servo) {
     String name = servo.getName();
     /*
@@ -2486,6 +2568,115 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     } else {
       rotateOnAxis(name, null, servo.getTargetPos(), velocity);
     }
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    JMonkeyEngineConfig config = new JMonkeyEngineConfig();
+    config.cameraLookAt = cameraLookAt;
+    config.modelPaths = new ArrayList<>();
+    for (String path : this.modelPaths) {
+      config.modelPaths.add(path);
+    }
+    Collections.sort(config.modelPaths);
+    config.nodes = nodes;
+    config.multiMapped = multiMapped;
+    return config;
+  }
+
+  public ServiceConfig loadDelayed(ServiceConfig c) {
+    JMonkeyEngineConfig config = (JMonkeyEngineConfig) c;
+
+    if (config.modelPaths != null) {
+      for (String modelPath : config.modelPaths) {
+        loadModels(modelPath);
+      }
+    }
+
+    if (config.nodes != null) {
+      for (String path : config.nodes.keySet()) {
+        UserData ud = config.nodes.get(path);
+        if (ud.mapper != null) {
+          MapperLinear m = ud.mapper;
+          setMapper(path, m.minX, m.maxX, m.minY, m.maxY);
+        }
+        if (ud.rotationMask != null) {
+          setRotation(path, ud.rotationMask);
+          // setRotation(path, ud.rotationMask.x, ud.rotationMask.y,
+          // ud.rotationMask.z);
+        }
+      }
+    }
+
+    if (config.multiMapped != null) {
+      for (String name : config.multiMapped.keySet()) {
+        multiMap(name, config.multiMapped.get(name));
+      }
+    }
+
+    if (config.cameraLookAt != null) {
+      cameraLookAt(config.cameraLookAt);
+    }
+
+    return c;
+  }
+
+  public ServiceConfig apply(ServiceConfig c) {
+    if (app != null) {
+      // if there is an app we can load immediately
+      loadDelayed(c);
+    } 
+    return c;
+  }
+
+  public void multiMap(String name, String... nodeNames) {
+    if (nodeNames != null) {
+      multiMapped.put(name, nodeNames);
+    }
+  }
+
+  @Override
+  public void onServoStarted(String name) {
+    log.info("Jme On Servo Started {}", name);
+  }
+
+  @Override
+  public void onServoStopped(String name) {
+    log.info("Jme On Servo Stopped {}", name);
+  }
+
+  @Override
+  public void onServoStop(ServoControl sc) {
+    // TODO Auto-generated method stub
+    log.info("Jme On Servo Stop with the servo control {}", sc);
+  }
+
+  @Override
+  public void onServoDisable(ServoControl sc) {
+    // TODO Auto-generated method stub
+    log.info("Jme onServoDisable with the servo control {}", sc);
+  }
+
+  @Override
+  public void onServoEnable(ServoControl sc) {
+    log.info("Jme onServoEnable SC {}", sc);
+  }
+
+  @Override
+  public void onServoEnable(String name) {
+    log.info("Jme onServoEnable {}", name);
+  }
+
+  @Override
+  public void onMoveTo(ServoControl sc) {
+    // TODO Auto-generated method stub
+    log.info("Jme onMoveTo SC {}", sc);
+  }
+
+  @Override
+  public void onServoSetSpeed(ServoControl sc) {
+    // TODO Auto-generated method stub
+    log.info("Jme onServoSetSpeed SC {}", sc);
   }
 
 }

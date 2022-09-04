@@ -131,7 +131,7 @@ public class Lm75a extends Service implements I2CControl {
     return temperature;
   }
 
-  public int getConfig() {
+  public int getI2cConfig() {
     byte[] writebuffer = { LM75A_CONF };
     byte[] readbuffer = { 0x0 };
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
@@ -300,7 +300,27 @@ public class Lm75a extends Service implements I2CControl {
     if (controller != null && controller.getName().equals(instance.getName())) {
       return isAttached;
     }
-    ;
     return false;
   }
+
+  @Override
+  public void setBus(String bus) {
+    setDeviceBus(bus);
+  }
+
+  @Override
+  public void setAddress(String address) {
+    setDeviceAddress(address);
+  }
+
+  @Override
+  public String getBus() {
+    return deviceBus;
+  }
+
+  @Override
+  public String getAddress() {
+    return deviceAddress;
+  }
+
 }

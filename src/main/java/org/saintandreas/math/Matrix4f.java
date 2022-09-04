@@ -57,8 +57,7 @@ public final class Matrix4f implements java.io.Serializable {
   public final float m10, m11, m12, m13;
   public final float m20, m21, m22, m23;
   public final float m30, m31, m32, m33;
-  public static final Matrix4f ZERO = new Matrix4f(0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0);
+  public static final Matrix4f ZERO = new Matrix4f(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
   public static final Matrix4f IDENTITY = new Matrix4f();
 
   /**
@@ -78,21 +77,38 @@ public final class Matrix4f implements java.io.Serializable {
    * constructs a matrix with the given values.
    * 
    * @param m00
+   *          a
    * @param m01
+   *          a
    * @param m02
+   *          a
    * @param m03
+   *          a
    * @param m10
+   *          a
    * @param m11
+   *          a
    * @param m12
+   *          a
    * @param m13
+   *          a
    * @param m20
+   *          a
    * @param m21
+   *          a
    * @param m22
+   *          a
    * @param m23
+   *          a
    * @param m30
+   *          a
    * @param m31
+   *          a
    * @param m32
+   *          a
    * @param m33
+   *          a
+   * 
    */
   public Matrix4f( //
       float m00, float m01, float m02, float m03, //
@@ -244,50 +260,50 @@ public final class Matrix4f implements java.io.Serializable {
   @SuppressWarnings("fallthrough")
   public float get(int i, int j) {
     switch (i) {
-    case 0:
-      switch (j) {
       case 0:
-        return m00;
+        switch (j) {
+          case 0:
+            return m00;
+          case 1:
+            return m01;
+          case 2:
+            return m02;
+          case 3:
+            return m03;
+        }
       case 1:
-        return m01;
+        switch (j) {
+          case 0:
+            return m10;
+          case 1:
+            return m11;
+          case 2:
+            return m12;
+          case 3:
+            return m13;
+        }
       case 2:
-        return m02;
+        switch (j) {
+          case 0:
+            return m20;
+          case 1:
+            return m21;
+          case 2:
+            return m22;
+          case 3:
+            return m23;
+        }
       case 3:
-        return m03;
-      }
-    case 1:
-      switch (j) {
-      case 0:
-        return m10;
-      case 1:
-        return m11;
-      case 2:
-        return m12;
-      case 3:
-        return m13;
-      }
-    case 2:
-      switch (j) {
-      case 0:
-        return m20;
-      case 1:
-        return m21;
-      case 2:
-        return m22;
-      case 3:
-        return m23;
-      }
-    case 3:
-      switch (j) {
-      case 0:
-        return m30;
-      case 1:
-        return m31;
-      case 2:
-        return m32;
-      case 3:
-        return m33;
-      }
+        switch (j) {
+          case 0:
+            return m30;
+          case 1:
+            return m31;
+          case 2:
+            return m32;
+          case 3:
+            return m33;
+        }
     }
     throw new IllegalArgumentException("Invalid indices into matrix.");
   }
@@ -320,32 +336,32 @@ public final class Matrix4f implements java.io.Serializable {
       store = new float[4];
     }
     switch (i) {
-    case 0:
-      store[0] = m00;
-      store[1] = m10;
-      store[2] = m20;
-      store[3] = m30;
-      break;
-    case 1:
-      store[0] = m01;
-      store[1] = m11;
-      store[2] = m21;
-      store[3] = m31;
-      break;
-    case 2:
-      store[0] = m02;
-      store[1] = m12;
-      store[2] = m22;
-      store[3] = m32;
-      break;
-    case 3:
-      store[0] = m03;
-      store[1] = m13;
-      store[2] = m23;
-      store[3] = m33;
-      break;
-    default:
-      throw new IllegalArgumentException("Invalid column index. " + i);
+      case 0:
+        store[0] = m00;
+        store[1] = m10;
+        store[2] = m20;
+        store[3] = m30;
+        break;
+      case 1:
+        store[0] = m01;
+        store[1] = m11;
+        store[2] = m21;
+        store[3] = m31;
+        break;
+      case 2:
+        store[0] = m02;
+        store[1] = m12;
+        store[2] = m22;
+        store[3] = m32;
+        break;
+      case 3:
+        store[0] = m03;
+        store[1] = m13;
+        store[2] = m23;
+        store[3] = m33;
+        break;
+      default:
+        throw new IllegalArgumentException("Invalid column index. " + i);
     }
     return store;
   }
@@ -593,8 +609,7 @@ public final class Matrix4f implements java.io.Serializable {
     m33 = m.m33;
   }
 
-  public static Matrix4f fromFrustum(float near, float far, float left,
-      float right, float top, float bottom, boolean parallel) {
+  public static Matrix4f fromFrustum(float near, float far, float left, float right, float top, float bottom, boolean parallel) {
     Matrix4fTemp m = new Matrix4fTemp();
     if (parallel) {
       // scale
@@ -639,6 +654,7 @@ public final class Matrix4f implements java.io.Serializable {
    *          the angle to rotate (in radians).
    * @param axis
    *          the axis of rotation.
+   * @return m
    */
   public static Matrix4f fromAngleAxis(float angle, Vector3f axis) {
     Vector3f normAxis = axis.normalize();
@@ -653,6 +669,7 @@ public final class Matrix4f implements java.io.Serializable {
    *          the angle to rotate (in radians).
    * @param axis
    *          the axis of rotation (already normalized).
+   * @return m
    */
   public static Matrix4f fromAngleNormalAxis(float angle, Vector3f axis) {
     Matrix4fTemp m = new Matrix4fTemp();
@@ -692,10 +709,8 @@ public final class Matrix4f implements java.io.Serializable {
   }
 
   public Matrix4f mult(float scalar) {
-    return new Matrix4f(m00 * scalar, m01 * scalar, m02 * scalar, m03 * scalar,
-        m10 * scalar, m11 * scalar, m12 * scalar, m13 * scalar, m20 * scalar,
-        m21 * scalar, m22 * scalar, m23 * scalar, m30 * scalar, m31 * scalar,
-        m32 * scalar, m33 * scalar);
+    return new Matrix4f(m00 * scalar, m01 * scalar, m02 * scalar, m03 * scalar, m10 * scalar, m11 * scalar, m12 * scalar, m13 * scalar, m20 * scalar, m21 * scalar, m22 * scalar,
+        m23 * scalar, m30 * scalar, m31 * scalar, m32 * scalar, m33 * scalar);
   }
 
   /**
@@ -769,23 +784,22 @@ public final class Matrix4f implements java.io.Serializable {
    * @return the rotated vector.
    */
   public Vector4f mult(Vector4f v) {
-    return new Vector4f(m00 * v.x + m01 * v.y + m02 * v.z + m03 * v.w, m10
-        * v.x + m11 * v.y + m12 * v.z + m13 * v.w, m20 * v.x + m21 * v.y + m22
-        * v.z + m23 * v.w, m30 * v.x + m31 * v.y + m32 * v.z + m33 * v.w);
+    return new Vector4f(m00 * v.x + m01 * v.y + m02 * v.z + m03 * v.w, m10 * v.x + m11 * v.y + m12 * v.z + m13 * v.w, m20 * v.x + m21 * v.y + m22 * v.z + m23 * v.w,
+        m30 * v.x + m31 * v.y + m32 * v.z + m33 * v.w);
   }
 
   /**
    * <code>mult</code> multiplies a vector about a rotation matrix. The
    * resulting vector is returned.
    * 
-   * @param vec to multiply against
+   * @param vec
+   *          to multiply against
    * @return - the rotated vector.
    */
   public Vector4f multAcross(Vector4f vec) {
     float vx = vec.x, vy = vec.y, vz = vec.z, vw = vec.w;
-    return new Vector4f(m00 * vx + m10 * vy + m20 * vz + m30 * vw, m01 * vx
-        + m11 * vy + m21 * vz + m31 * vw, m02 * vx + m12 * vy + m22 * vz + m32
-        * vw, m03 * vx + m13 * vy + m23 * vz + m33 * vw);
+    return new Vector4f(m00 * vx + m10 * vy + m20 * vz + m30 * vw, m01 * vx + m11 * vy + m21 * vz + m31 * vw, m02 * vx + m12 * vy + m22 * vz + m32 * vw,
+        m03 * vx + m13 * vy + m23 * vz + m33 * vw);
   }
 
   /**
@@ -794,12 +808,11 @@ public final class Matrix4f implements java.io.Serializable {
    * 
    * @param vec
    *          vec to multiply against.
-   * @return
+   * @return v
    */
   public Vector3f multNormal(Vector3f vec) {
     float vx = vec.x, vy = vec.y, vz = vec.z;
-    return new Vector3f(m00 * vx + m01 * vy + m02 * vz, m10 * vx + m11 * vy
-        + m12 * vz, m20 * vx + m21 * vy + m22 * vz);
+    return new Vector3f(m00 * vx + m01 * vy + m02 * vz, m10 * vx + m11 * vy + m12 * vz, m20 * vx + m21 * vy + m22 * vz);
   }
 
   /**
@@ -813,11 +826,9 @@ public final class Matrix4f implements java.io.Serializable {
   public Vector3f multNormalAcross(Vector3f vec) {
 
     float vx = vec.x, vy = vec.y, vz = vec.z;
-    return new Vector3f(m00 * vx + m10 * vy + m20 * vz, m01 * vx + m11 * vy
-        + m21 * vz, m02 * vx + m12 * vy + m22 * vz);
+    return new Vector3f(m00 * vx + m10 * vy + m20 * vz, m01 * vx + m11 * vy + m21 * vz, m02 * vx + m12 * vy + m22 * vz);
   }
 
- 
   /**
    * Inverts this matrix as a new Matrix4f.
    * 
@@ -837,8 +848,7 @@ public final class Matrix4f implements java.io.Serializable {
     float fB3 = m21 * m32 - m22 * m31;
     float fB4 = m21 * m33 - m23 * m31;
     float fB5 = m22 * m33 - m23 * m32;
-    float fDet = fA0 * fB5 - fA1 * fB4 + fA2 * fB3 + fA3 * fB2 - fA4 * fB1
-        + fA5 * fB0;
+    float fDet = fA0 * fB5 - fA1 * fB4 + fA2 * fB3 + fA3 * fB2 - fA4 * fB1 + fA5 * fB0;
 
     if (FastMath.abs(fDet) <= 0f) {
       throw new ArithmeticException("This matrix cannot be inverted");
@@ -922,8 +932,7 @@ public final class Matrix4f implements java.io.Serializable {
     float fB3 = m21 * m32 - m22 * m31;
     float fB4 = m21 * m33 - m23 * m31;
     float fB5 = m22 * m33 - m23 * m32;
-    float fDet = fA0 * fB5 - fA1 * fB4 + fA2 * fB3 + fA3 * fB2 - fA4 * fB1
-        + fA5 * fB0;
+    float fDet = fA0 * fB5 - fA1 * fB4 + fA2 * fB3 + fA3 * fB2 - fA4 * fB1 + fA5 * fB0;
     return fDet;
   }
 
@@ -1073,9 +1082,7 @@ public final class Matrix4f implements java.io.Serializable {
    * @return true if this matrix is identity
    */
   public boolean isIdentity() {
-    return (m00 == 1 && m01 == 0 && m02 == 0 && m03 == 0)
-        && (m10 == 0 && m11 == 1 && m12 == 0 && m13 == 0)
-        && (m20 == 0 && m21 == 0 && m22 == 1 && m23 == 0)
+    return (m00 == 1 && m01 == 0 && m02 == 0 && m03 == 0) && (m10 == 0 && m11 == 1 && m12 == 0 && m13 == 0) && (m20 == 0 && m21 == 0 && m22 == 1 && m23 == 0)
         && (m30 == 0 && m31 == 0 && m32 == 0 && m33 == 1);
   }
 
@@ -1200,8 +1207,7 @@ public final class Matrix4f implements java.io.Serializable {
     return mult(scaled(v));
   }
 
-  public static Matrix4f orthographic(float left, float right, float bottom,
-      float top, float near, float far) {
+  public static Matrix4f orthographic(float left, float right, float bottom, float top, float near, float far) {
     float x_orth = 2 / (right - left);
     float y_orth = 2 / (top - bottom);
     float z_orth = -2 / (far - near);
@@ -1230,35 +1236,33 @@ public final class Matrix4f implements java.io.Serializable {
     return new Matrix4f(m);
   }
 
-
-//  template <typename T, precision P>
-//  GLM_FUNC_QUALIFIER detail::tmat4x4<T, P> lookAt
-//  (
-//         detail::tvec3<T, P> const & eye,
-//         detail::tvec3<T, P> const & center,
-//         detail::tvec3<T, P> const & up
-//  )
-//  {
-//         detail::tvec3<T, P> f(normalize(center - eye));
-//         detail::tvec3<T, P> s(normalize(cross(f, up)));
-//         detail::tvec3<T, P> u(cross(s, f));
-//
-//         detail::tmat4x4<T, P> Result(1);
-//         Result[0][0] = s.x;
-//         Result[1][0] = s.y;
-//         Result[2][0] = s.z;
-//         Result[0][1] = u.x;
-//         Result[1][1] = u.y;
-//         Result[2][1] = u.z;
-//         Result[0][2] =-f.x;
-//         Result[1][2] =-f.y;
-//         Result[2][2] =-f.z;
-//         Result[3][0] =-dot(s, eye);
-//         Result[3][1] =-dot(u, eye);
-//         Result[3][2] = dot(f, eye);
-//         return Result;
-//  }
-
+  // template <typename T, precision P>
+  // GLM_FUNC_QUALIFIER detail::tmat4x4<T, P> lookAt
+  // (
+  // detail::tvec3<T, P> const & eye,
+  // detail::tvec3<T, P> const & center,
+  // detail::tvec3<T, P> const & up
+  // )
+  // {
+  // detail::tvec3<T, P> f(normalize(center - eye));
+  // detail::tvec3<T, P> s(normalize(cross(f, up)));
+  // detail::tvec3<T, P> u(cross(s, f));
+  //
+  // detail::tmat4x4<T, P> Result(1);
+  // Result[0][0] = s.x;
+  // Result[1][0] = s.y;
+  // Result[2][0] = s.z;
+  // Result[0][1] = u.x;
+  // Result[1][1] = u.y;
+  // Result[2][1] = u.z;
+  // Result[0][2] =-f.x;
+  // Result[1][2] =-f.y;
+  // Result[2][2] =-f.z;
+  // Result[3][0] =-dot(s, eye);
+  // Result[3][1] =-dot(u, eye);
+  // Result[3][2] = dot(f, eye);
+  // return Result;
+  // }
 
   public static Matrix4f lookat(Vector3f eye, Vector3f center, Vector3f up) {
     Vector3f f = center.subtract(eye).normalize();
@@ -1281,8 +1285,7 @@ public final class Matrix4f implements java.io.Serializable {
     return new Matrix4f(m);
   }
 
-  public static Matrix4f perspective(float fovy, float aspect, float zNear,
-      float zFar) {
+  public static Matrix4f perspective(float fovy, float aspect, float zNear, float zFar) {
     float xmin, xmax, ymin, ymax;
     ymax = (float) (zNear * Math.tan(fovy * Math.PI / 360.0));
     ymin = -ymax;

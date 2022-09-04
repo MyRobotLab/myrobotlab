@@ -3,13 +3,13 @@
     <ul class="nav navbar-nav navbar-left">
         <li>
             <!--TODO - green png if connected - if not re-connect button-->
-            <span class="pull-left" ng-if="connected" style="padding-top: 8px;">
+            <span class="pull-left" ng-if="state.connected" style="padding-top: 8px;">
                 <img src="../../connected.png" alt="">
             </span>
-            <span class="pull-left" ng-if="!connected" style="padding-top: 8px;">
+            <span class="pull-left" ng-if="!state.connected" style="padding-top: 8px;">
                 <img src="../../disconnected.png" alt="">
             </span>
-            <a class="navbar-brand" href="/">MyRobotLab</a>
+            <span class="nav-color">MyRobotLab</span>
         </li>
     </ul>
 
@@ -92,7 +92,16 @@
     </div>
 </div>
 <!--
-
+<div class="alert alert-info alert-dismissable mb-0" ng-hide="infoStatus == null" align="center">
+    <span class="label label-info">info</span>
+    {{infoStatus.name}} : {{infoStatus.key}} : {{infoStatus.detail}}  
+            <span ng-hide="infoCount < 2" class="badge">{{infoCount}}</span>
+    <button type="button" class="close" data-ng-click="infoStatus = null;infoCount = 0" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+-->
+<!--
 <button ng-click="displayImage()">display image</button>
 
 -->

@@ -10,20 +10,18 @@
 // http://odetocode.com/blogs/scott/archive/2014/05/20/using-resolve-in-angularjs-routes.aspx
 angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'ui.router', //Angular UI Router - Yeah!
-'ct.ui.router.extras.previous', //Angular UI Router Extras _ PreviousState - Yeah!Yeah!
 'ui.bootstrap', //BootstrapUI (in Angular style)
 'oc.lazyLoad', //lazyload
 'sticky', //sticky elements
 'checklist-model', // checklists
-'angular-intro', // intro
+'peer', 'color.picker', 'angular-intro', // intro
 'angularScreenfull', // screenfull
-'angular-clipboard', 'rzModule', 'ngFlash', //'charts',
-'nvd3ChartDirectives', 'ui.ace', //funky editor
+'angular-clipboard', 'ngFlash', 'ui.ace', //funky editor
 'timer', 'luegg.directives', // scrollglue
 'mrlapp.mrl', //mrl.js (/mrl.js) - core communication and service registry
 //'mrlapp.main.mainCtrl', 
 'mrlapp.main.statusSvc', //very basic service for storing "statuses"
-'mrlapp.main.noWorkySvc', //send a noWorky !
+'ModalController', 'modalService', 'chart.js', 'mrlapp.main.noWorkySvc', //send a noWorky !
 'mrlapp.widget.startCtrl', 'mrlapp.nav', //Navbar & Co. (/nav)
 'mrlapp.service', //Service & Co. (/service)
 'angularTreeview', // any server filesystem browsing
@@ -31,8 +29,12 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'ui.select', // select option with images
 'mrlapp.utils'//general, helful tools, directives, services, ...
 ]).config(['$provide', '$stateProvider', '$urlRouterProvider', 'mrlProvider', function($provide, $stateProvider, $urlRouterProvider, mrlProvider) {
-    console.info('app.js - starting');
-    $urlRouterProvider.otherwise("/service/runtime");
+    console.info('app.js - starting')
+    console.info('app.js - config defining routes')
+
+    $urlRouterProvider.otherwise("/service/intro");
+    // default redirect
+
     $stateProvider.state('tabs2', {
         url: "/service/:servicename",
         views: {

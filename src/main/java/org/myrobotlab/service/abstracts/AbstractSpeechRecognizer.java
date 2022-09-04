@@ -3,12 +3,13 @@ package org.myrobotlab.service.abstracts;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.config.SpeechRecognizerConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
@@ -47,11 +48,6 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   protected Map<String, Locale> locales = new HashMap<>();
 
   private static final long serialVersionUID = 1L;
-
-  /**
-   * all currently attached services
-   */
-  protected Set<String> attached = new TreeSet<>();
 
   protected HashMap<String, Message> commands = new HashMap<>();
 
@@ -155,9 +151,12 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   public void attach(Attachable attachable) {
     if (attachable instanceof SpeechSynthesis) {
       attachSpeechSynthesis((SpeechSynthesis) attachable);
-    } else {
-      error("do not know how to attach %s", attachable.getName());
+      return;
+    } else if (attachable instanceof TextListener) {
+      attachTextListener((TextListener) attachable);
+      return;
     }
+    error("do not know how to attach %s", attachable.getName());
   }
 
   /**
@@ -165,27 +164,18 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    * recognitions we spoke and fall into the infinite loop of internal dialog
    * talkig to ourselves ...
    * 
-   * @param mouth
    */
   public void attachSpeechSynthesis(SpeechSynthesis mouth) {
     if (mouth == null) {
       log.warn("{}.attachSpeechSynthesis(null)", getName());
       return;
     }
-
-    if (isAttached(mouth.getName())) {
-      log.info("{} already attached", mouth.getName());
-    }
-    subscribe(mouth.getName(), "publishStartSpeaking");
-    subscribe(mouth.getName(), "publishEndSpeaking");
-
-    // mouth.attachSpeechRecognizer(ear);
-    attached.add(mouth.getName());
+    mouth.attachSpeechListener(this.getName());
   }
 
   public void attachTextListener(TextListener service) {
     if (service == null) {
-      log.warn("{}.attachTextListener(null)");
+      log.warn("{}.attachTextListener(null)", getName());
       return;
     }
     addListener("publishText", service.getName());
@@ -199,20 +189,10 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   /**
-   * Get the current wake word
-   * 
-   * @return
+   * @return Get the current wake word
    */
   public String getWakeWord() {
     return wakeWord;
-  }
-
-  public boolean isAttached(Attachable attachable) {
-    return isAttached(attachable.getName());
-  }
-
-  public boolean isAttached(String attachable) {
-    return attached.contains(attachable);
   }
 
   /**
@@ -294,14 +274,14 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   @Override
-  public String onStartSpeaking(String utterance) {
+  public void onStartSpeaking(String utterance) {
     log.info("onStartSpeaking - isSpeaking {} utterance - {}", isSpeaking, utterance);
     // remove any currently pending "no longer listening" delay tasks, because
     // we started a new isSpeaking = true, so the pause window after has moved
     purgeTask("setSpeaking");
     // isSpeaking = true;
     setSpeaking(true, utterance);
-    return utterance;
+    return;
   }
 
   @Override
@@ -470,7 +450,6 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    * setting the wake word - wake word behaves as a switch to turn on "active
    * listening" similar to "hey google"
    * 
-   * @param word
    */
   public void setWakeWord(String word) {
     if (word == null || word.trim().length() == 0) {
@@ -491,6 +470,8 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    * again
    * 
    * @param wakeWordTimeoutSeconds
+   *          seconds
+   * 
    */
   public void setWakeWordTimeout(Integer wakeWordTimeoutSeconds) {
     wakeWordIdleTimeoutSeconds = wakeWordTimeoutSeconds;
@@ -572,6 +553,31 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    */
   public void unsetWakeWord() {
     setWakeWord(null);
+  }
+
+  /*
+   * @Override public ServiceConfig getConfig() { AbstractSpeechRecognizerConfig
+   * config = new AbstractSpeechRecognizerConfig(); config.listening =
+   * isListening(); config.wakeWord = getWakeWord(); Set<String> listeners =
+   * getAttached("publishText"); config.textListeners = listeners.toArray(new
+   * String[listeners.size()]); return config; }
+   */
+
+  public ServiceConfig apply(ServiceConfig c) {
+    if (c instanceof SpeechRecognizerConfig) {
+      SpeechRecognizerConfig config = (SpeechRecognizerConfig) c;
+      setWakeWord(config.wakeWord);
+      if (config.listening) {
+        startListening();
+      }
+
+      if (config.textListeners != null) {
+        for (String listener : config.textListeners) {
+          addListener("publishText", listener);
+        }
+      }
+    }
+    return c;
   }
 
 }

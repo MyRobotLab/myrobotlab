@@ -36,27 +36,27 @@ def heard(data):
 ######################################################################
 
 # launch the swing gui?
-# gui = Runtime.createAndStart("gui", "SwingGui");
+# gui = runtime.start("gui", "SwingGui");
 
 ######################################################################
 # Create ProgramAB chat bot ( This is the inmoov "brain" )
 ######################################################################
-harry = Runtime.createAndStart("harry", "ProgramAB")
+harry = runtime.start("harry", "ProgramAB")
 harry.setPath(aimlPath)
 harry.startSession(aimlUserName, aimlBotName)
 
 ######################################################################
 # Html filter to clean the output from programab.  (just in case)
-htmlfilter = Runtime.createAndStart("htmlfilter", "HtmlFilter")
+htmlfilter = runtime.start("htmlfilter", "HtmlFilter")
 
 ######################################################################
 # mouth service, speech synthesis
-mouth = Runtime.createAndStart("i01.mouth", "AcapelaSpeech")
+mouth = runtime.start("i01.mouth", "AcapelaSpeech")
 mouth.setVoice(botVoice)
 
 ######################################################################
 # the "ear" of the inmoov TODO: replace this with just base inmoov ear?
-ear = Runtime.createAndStart("i01.ear", "WebkitSpeechRecognition")
+ear = runtime.start("i01.ear", "WebkitSpeechRecognition")
 ear.addListener("publishText", python.name, "heard");
 ear.addMouth(mouth)
 
@@ -70,7 +70,7 @@ htmlfilter.addTextListener(mouth)
 ######################################################################
 # Start up the inmoov and attach stuff.
 ######################################################################
-i01 = Runtime.createAndStart("i01", "InMoov")
+i01 = runtime.start("i01", "InMoov2")
 i01.setMute(True)
 if startInMoov:
   i01.startAll(leftPort, rightPort)
@@ -79,13 +79,13 @@ else:
     
 # Harry doesn't have a forward servo, but i'm adding it here as a 
 # place holder
-forwardServo = Runtime.start("forwardServo","Servo")
+forwardServo = runtime.start("forwardServo","Servo")
 
 ######################################################################
 # Launch the web gui and create the webkit speech recognition gui
 # This service works in Google Chrome only with the WebGui
 #################################################################
-webgui = Runtime.createAndStart("webgui","WebGui")
+webgui = runtime.start("webgui","WebGui")
 
 ######################################################################
 # END MAIN SERVICE SETUP SECTION

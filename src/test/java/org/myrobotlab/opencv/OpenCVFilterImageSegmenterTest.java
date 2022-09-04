@@ -2,16 +2,15 @@ package org.myrobotlab.opencv;
 
 import static org.junit.Assert.assertNotNull;
 
-import org.bytedeco.javacpp.Loader;
-import org.bytedeco.opencv.global.opencv_video;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Before;
 
-public class OpenCVFilterImageSegmenterTest  extends AbstractOpenCVFilterTest {
+public class OpenCVFilterImageSegmenterTest extends AbstractOpenCVFilterTest {
 
   @Before
   public void setup() {
     debug = false;
+    //LoggingFactory.init("info");
   }
 
   @Override
@@ -35,9 +34,11 @@ public class OpenCVFilterImageSegmenterTest  extends AbstractOpenCVFilterTest {
     // Make sure we found 5 faces.
     log.info("CVData: {}", filter.data);
     assertNotNull(output);
-    Object regions = filter.data.getObject("testimg.filter.regions");
+    Object regions = filter.data.getObject("opencv.filter.regions");
     assertNotNull(regions);
-    // waitOnAnyKey();
+    if (debug) {
+      waitOnAnyKey();
+    }
   }
 
 }

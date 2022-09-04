@@ -23,6 +23,10 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.interfaces.Mapper;
+import org.myrobotlab.service.config.Adafruit16CServoDriverConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.data.ServoMove;
+import org.myrobotlab.service.data.ServoSpeed;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -30,7 +34,6 @@ import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.ServoStatusPublisher;
 import org.slf4j.Logger;
 
 /**
@@ -42,7 +45,7 @@ import org.slf4j.Logger;
  *         https://learn.adafruit.com/16-channel-pwm-servo-driver
  */
 @Ignore
-public class Adafruit16CServoDriver extends Service implements I2CControl, ServoController, MotorController, ServoStatusPublisher {
+public class Adafruit16CServoDriver extends Service implements I2CControl, ServoController, MotorController /*, ServoStatusPublisher*/ {
 
   /**
    * SpeedControl, calculates the next position at regular intervals to make the
@@ -228,7 +231,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
    * i2c controller
    */
   public List<String> controllers;
-  
+
   /**
    * current i2c controllers name
    */
@@ -238,6 +241,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   // It will be set when the first successful communication has been done with
   // the
   // i2c device ( bus and address have been verified )
+  @Deprecated /*
+               * need to be explicit - isAttached in this context means
+               * controller - servos or other devices could be attached as well
+               */
   public boolean isAttached = false;
 
   /**
@@ -291,27 +298,13 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   public Adafruit16CServoDriver(String n, String id) {
     super(n, id);
-    createPinList();
-    refreshControllers();
-    subscribeToRuntime("registered");
-    // map(-1, 1, -1, 1); - currently Adafruit16CServoDriver is not a "real"
-    // motor controller because
-    // it doesn't inherit from AbstractMotorController & Servo's aren't merged
-    // with Motors
-    // it will need to wait for the grand unification of Servos & Motors
+    createPinList();    
+    registerForInterfaceChange(I2CController.class);
   }
 
   /**
-   * event handler for new started service,
-   * it might be an i2c controller so we refresh controllers
-   */
-  public void onStarted(String name) {
-    refreshControllers();
-    broadcastState();
-  }
-
-  /**
-   * Refresh the list of running services that can be selected in the GUI
+   * @return Refresh the list of running services that can be selected in the
+   *         GUI
    */
   public List<String> refreshControllers() {
     controllers = Runtime.getServiceNamesFromInterface(I2CController.class);
@@ -323,7 +316,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
    * be D5, D6, ... on an Arduino or some other string value
    * 
    * @param pin
-   * @return
+   *          the string representation of the pin
+   * @return the integer representation of the pin address
    */
   public int getAddress(String pin) {
     try {
@@ -336,9 +330,14 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   /**
    * type conversion for setting the pwm
+   * 
    * @param pinAddress
+   *          the pin address
    * @param pulseWidthOn
+   *          the on width
    * @param pulseWidthOff
+   *          the off width
+   * 
    */
   public void setPWM(Integer pinAddress, Integer pulseWidthOn, Integer pulseWidthOff) {
     setPWM(pinAddress + "", pulseWidthOn, pulseWidthOff);
@@ -348,8 +347,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
    * Set the pwm pulsewidth
    * 
    * @param pinLabel
+   *          a label for the pin
    * @param pulseWidthOn
+   *          the on pulse width
    * @param pulseWidthOff
+   *          the off pulse width
    */
   public void setPWM(String pinLabel, Integer pulseWidthOn, Integer pulseWidthOff) {
     // TODO - handle pin label mappings if necessary
@@ -363,8 +365,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   /**
    * type conversion to set the pwm frequency
+   * 
    * @param pin
+   *          the pin
    * @param hz
+   *          the frequency
+   * 
    */
   public void setPWMFreq(Integer pin, Integer hz) {
     setPWMFreq(pin + "", hz);
@@ -372,8 +378,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   /**
    * Set the PWM frequency i.e. the frequency between positive pulses.
+   * 
    * @param pin
+   *          the pin
    * @param hz
+   *          the frequency in hz
+   * 
    */
   public void setPWMFreq(String pin, Integer hz) { // Analog servos run at ~60
                                                    // Hz
@@ -428,7 +438,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     if (controller == null) {
       return;
     }
-    
+
     byte[] buffer = { (byte) (PCA9685_ALL_LED_OFF_H), (byte) PCA9685_TURN_ALL_LED_OFF };
     log.info("Writing shutdown command to {}", this.getName());
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
@@ -440,12 +450,13 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   void setServo(String pin, Integer pulseWidthOff) {
     // since pulseWidthOff can be larger than > 256 it needs to be
-    // sent as 2 bytes  
+    // sent as 2 bytes
     setPWM(pin, 0, pulseWidthOff);
   }
 
   @Override
-  public void onServoMoveTo(ServoControl servo) {
+  public void onServoMoveTo(ServoMove move) {
+    ServoControl servo = (ServoControl)Runtime.getService(move.name);
     ServoEvent ServoEvent = servoMap.get(servo.getName());
     if (!pwmFreqSet) {
       setPWMFreq(ServoEvent.pin, defaultPwmFreq);
@@ -657,9 +668,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   @Override
-  public void onServoSetSpeed(ServoControl servo) {
-    ServoEvent ServoEvent = servoMap.get(servo.getName());
-    ServoEvent.velocity = servo.getSpeed();
+  public void onServoSetSpeed(ServoSpeed servoSpeed) {
+    ServoEvent ServoEvent = servoMap.get(servoSpeed.name);
+    ServoEvent.velocity = servoSpeed.speed;
   }
 
   public List<PinDefinition> getPinList() {
@@ -687,10 +698,18 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   @Override
   public boolean isAttached(Attachable instance) {
+    // FIXME - this is messy !
+    if (controller == null) {
+      return false;
+    }
+
+    // attached controller
     if (controller != null && controller == instance) {
       return isAttached;
     }
-    return false;
+
+    // attached servo
+    return servoMap.containsKey(instance.getName());
   }
 
   @Override
@@ -721,6 +740,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     broadcastState();
   }
 
+  @Deprecated /* use attach */
   public void setController(String controllerName, String deviceBus, String deviceAddress) {
     attach(controllerName, deviceBus, deviceAddress);
   }
@@ -736,18 +756,13 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   @Deprecated // use attach(I2CController controller)
   public void setController(I2CController controller, String deviceBus, String deviceAddress) {
-    attach(controller, deviceBus, deviceAddress);
-
+    this.deviceBus = deviceBus;
+    this.deviceAddress = deviceAddress;
+    attach(controller);
   }
 
-  // This section contains all the new attach logic
-  @Override
-  public void attach(String service) throws Exception {
-    attach((Attachable) Runtime.getService(service));
-  }
-
-  @Override
-  public void attach(Attachable service) throws Exception {
+  @Override /* route depending on interface */
+  public void attach(Attachable service) {
 
     if (I2CController.class.isAssignableFrom(service.getClass())) {
       attachI2CController((I2CController) service);
@@ -765,6 +780,21 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
+    this.deviceBus = deviceBus;
+    this.deviceAddress = deviceAddress;
+    attachI2CController(controller);
+  }
+
+  public void attachI2CController(I2CController controller) {
+
+    // FIXME - way way too complex - clean up
+    if (isAttached(controller))
+      return;
+
+    if (this.controllerName != null && this.controllerName != controller.getName()) {
+      log.info("Trying to attached to {}, but already attached to ({})", controller.getName(), this.controllerName);
+      return;
+    }
 
     if (isAttached && this.controller != controller) {
       log.error("Already attached to {}, use detach({}) first", this.controllerName, controller.getName());
@@ -772,24 +802,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
     controllerName = controller.getName();
     log.info("{} attach {}", getName(), controllerName);
-
-    this.deviceBus = deviceBus;
-    this.deviceAddress = deviceAddress;
-
-    attachI2CController(controller);
-    isAttached = true;
-    broadcastState();
-  }
-
-  public void attachI2CController(I2CController controller) {
-
-    if (isAttached(controller))
-      return;
-
-    if (this.controllerName != controller.getName()) {
-      log.error("Trying to attached to {}, but already attached to ({})", controller.getName(), this.controllerName);
-      return;
-    }
 
     this.controller = controller;
     isAttached = true;
@@ -827,7 +839,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     }
     broadcastState();
   }
-  
+
   // This section contains all the new detach logic
   // TODO: This default code could be in Attachable
   @Override
@@ -863,13 +875,13 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   @Override
   public void detachI2CController(I2CController controller) {
     log.info("stopping pwm");
-    stopPwm(); 
+    stopPwm();
     log.info("isAttached = false");
     isAttached = false;
     if (controllerName == null) {
       log.info("already detached");
       return;
-    }    
+    }
     // should be by name - not by 'this' reference
     log.info("removing controller name");
     controllerName = null;
@@ -916,28 +928,28 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   @Override
-  public void onServoEnable(ServoControl servo) {
-    ServoEvent ServoEvent = servoMap.get(servo.getName());
+  public void onServoEnable(String servoName) {
+    ServoEvent ServoEvent = servoMap.get(servoName);
     if (ServoEvent == null) {
-      log.error("servo data {} could not get servo from map", servo.getName());
+      log.error("servo data {} could not get servo from map", servoName);
       return;
     }
 	int pulseWidthOff = SERVOMIN + (int) (servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
     setPWM(ServoEvent.pin, 0, pulseWidthOff);
     ServoEvent.isEnergized = true;
-    log.info("pin " + ServoEvent.pin + " enabled from " + servo.getName());
+    log.info("pin " + ServoEvent.pin + " enabled from " + servoName);
   }
 
   @Override
-  public void onServoDisable(ServoControl servo) {
-    ServoEvent ServoEvent = servoMap.get(servo.getName());
+  public void onServoDisable(String servoName) {
+    ServoEvent ServoEvent = servoMap.get(servoName);
     if (ServoEvent == null) {
-      log.error("servo data {} could not get servo from map", servo.getName());
+      log.error("servo data {} could not get servo from map", servoName);
       return;
     }
     setPWM(ServoEvent.pin, 0, 0);
     ServoEvent.isEnergized = false;
-    log.info("pin " + ServoEvent.pin + " disabled from " + servo.getName());
+    log.info("pin " + ServoEvent.pin + " disabled from " + servoName);
   }
 
   // currently not a "real" motor control - it has to wait for merging of Servo
@@ -975,14 +987,64 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   }
 
-  @Override
+  @Deprecated /* controllers shouldn't publish "servo events" - they should broacast encoder data back to a ServoControl */
+  // @Override
   public String publishServoStarted(String name) {
     return name;
   }
 
-  @Override
+  @Deprecated /* controllers shouldn't publish "servo events" - they should broacast encoder data back to a ServoControl */
+  // @Override
   public String publishServoStopped(String name) {
     return name;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+
+    Adafruit16CServoDriverConfig config = new Adafruit16CServoDriverConfig();
+    config.controller = controllerName;
+    config.deviceBus = deviceBus;
+    config.deviceAddress = deviceAddress;
+    return config;
+  }
+
+  public ServiceConfig apply(ServiceConfig c) {
+    Adafruit16CServoDriverConfig config = (Adafruit16CServoDriverConfig) c;
+    if (config.deviceBus != null) {
+      deviceBus = config.deviceBus;
+    }
+    if (config.deviceAddress != null) {
+      deviceAddress = config.deviceAddress;
+    }
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch (Exception e) {
+        log.error("attaching controller failed", e);
+      }
+    }
+    return c;
+  }
+
+  @Override
+  public void setBus(String bus) {
+    setDeviceBus(bus);
+  }
+
+  @Override
+  public void setAddress(String address) {
+    setDeviceAddress(address);
+  }
+
+  @Override
+  public String getBus() {
+    return deviceBus;
+  }
+
+  @Override
+  public String getAddress() {
+    return deviceAddress;
   }
 
 }

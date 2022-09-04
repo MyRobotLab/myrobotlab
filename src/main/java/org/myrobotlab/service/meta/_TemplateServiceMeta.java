@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -14,12 +13,7 @@ public class _TemplateServiceMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public _TemplateServiceMeta(String name) {
-
-    super(name);
-    // use a platform - to do logic on dependency depending on platform
-    Platform platform = Platform.getLocalInstance();
-    // if (platform.isArm()) { ....
+  public _TemplateServiceMeta() {
 
     // add a cool description
     addDescription("used as a general template");

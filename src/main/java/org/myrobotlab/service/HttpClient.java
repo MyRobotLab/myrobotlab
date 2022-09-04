@@ -116,9 +116,13 @@ public class HttpClient extends Service {
    * Simplest GET return string type of the endpoint
    * 
    * @param url
-   * @return
+   *          the url to get
+   * @return the data as a string
    * @throws ClientProtocolException
+   *           boom
    * @throws IOException
+   *           boom
+   * 
    */
   public String get(String url) throws ClientProtocolException, IOException {
     HttpData response = processResponse(new HttpGet(url));
@@ -132,9 +136,13 @@ public class HttpClient extends Service {
    * GET bytes from endpoint
    * 
    * @param url
-   * @return
+   *          the url
+   * @return the bytes returned
    * @throws ClientProtocolException
+   *           boom
    * @throws IOException
+   *           boom
+   * 
    */
   public byte[] getBytes(String url) throws ClientProtocolException, IOException {
     return processResponse(new HttpGet(url)).data;
@@ -145,8 +153,10 @@ public class HttpClient extends Service {
    * response code and headers
    * 
    * @param url
-   * @return
+   *          the url
+   * @return the http data returned
    * @throws IOException
+   *           boom
    */
   public HttpData getResponse(String url) throws IOException {
     HttpData response = processResponse(new HttpGet(url));
@@ -157,9 +167,13 @@ public class HttpClient extends Service {
    * Post without body
    * 
    * @param url
-   * @return
+   *          the url to post to
+   * @return the string returned
    * @throws ClientProtocolException
+   *           boom
    * @throws IOException
+   *           boom
+   * 
    */
   public String post(String url) throws ClientProtocolException, IOException {
     byte[] bytes = postBytes(url, null, null);
@@ -174,9 +188,13 @@ public class HttpClient extends Service {
    * contentype and return a string of data
    * 
    * @param url
+   *          the url
    * @param json
-   * @return
+   *          the json to post
+   * @return the returned string
    * @throws IOException
+   *           boom
+   * 
    */
   public String postJson(String url, String json) throws IOException {
     HttpPost request = new HttpPost(url);
@@ -194,9 +212,13 @@ public class HttpClient extends Service {
    * post and object to a json endpoint
    * 
    * @param url
+   *          the url
    * @param object
-   * @return
+   *          the object to post as json
+   * @return the returned string
    * @throws IOException
+   *           boom
+   * 
    */
   public String postJson(String url, Object object) throws IOException {
     return postJson(url, CodecUtils.toJson(object));
@@ -206,9 +228,13 @@ public class HttpClient extends Service {
    * post json to an endpoint where you want bytes from
    * 
    * @param url
+   *          the url
    * @param json
-   * @return
+   *          the json
+   * @return the bytes returned
    * @throws IOException
+   *           boom
+   * 
    */
   public byte[] postJsonToBytes(String url, String json) throws IOException {
     Map<String, String> headers = new HashMap<>();
@@ -220,10 +246,15 @@ public class HttpClient extends Service {
    * html form post
    * 
    * @param url
+   *          the url
    * @param fields
-   * @return
+   *          the key/value params to post
+   * @return the returned string
    * @throws ClientProtocolException
+   *           boom
    * @throws IOException
+   *           boom
+   * 
    */
   public String postForm(String url, Map<String, String> fields) throws ClientProtocolException, IOException {
     HttpPost request = new HttpPost(url);
@@ -264,8 +295,11 @@ public class HttpClient extends Service {
    * future maintenance to a minimum
    * 
    * @param request
-   * @return
+   *          the http req
+   * @return the httpdata
    * @throws IOException
+   *           boom
+   * 
    */
   public HttpData processResponse(HttpUriRequest request) throws IOException {
     HttpData data = new HttpData(request.getURI().toString());

@@ -62,8 +62,8 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    * 
    */
   // joystick to motor axis defaults
-  String axisLeft = "y";
-  String axisRight = "rz";
+  protected String axisLeft = "y";
+  protected String axisRight = "rz";
   protected String brain;
   private String brainPath = "../github";
   protected String controller;
@@ -71,20 +71,21 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
   protected String eye;
   protected String joystick;
 
-  String joystickControllerName = "Rumble";
+  protected String joystickControllerName = "Rumble";
 
-  final List<Status> lastErrors = new ArrayList<Status>();
-  Double maxX = 1.0;
-  Double maxY = 20.0;
+  protected final List<Status> lastErrors = new ArrayList<Status>();
+  protected Double maxX = 1.0;
+  protected Double maxY = 20.0;
 
   // FIXME - get/use defaults from controller ????
-  Double minX = -1.0;
-  Double minY = -20.0;
+  protected Double minX = -1.0;
+  protected Double minY = -20.0;
 
   protected String motorLeft;
-  String motorPortLeft = "m2";
 
-  String motorPortRight = "m1";
+  protected String motorPortLeft = "m2";
+
+  protected String motorPortRight = "m1";
 
   protected String motorRight;
 
@@ -94,11 +95,10 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
   // the broadcast'ing ability to broadcast to many
   protected String mouth;
 
-  String serialPort = "/dev/ttyUSB0";
+  protected String serialPort = "/dev/ttyUSB0";
 
   public WorkE(String n, String id) {
     super(n, id);
-
     // "sticky" auto-attach services attempt to attach to everything
     // they need to run through all currently registered services
     // then they need to attempt to attach to all services registered "after" we
@@ -230,6 +230,8 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    * TODO - make a brain interface ??
    * 
    * @param service
+   *          the programab for the brain
+   * 
    */
   public void attachBrain(ProgramAB service) {
     brain = service.getName();
@@ -410,7 +412,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
   @Override
   public void attachTextListener(TextListener service) {
     if (service == null) {
-      log.warn("{}.attachTextListener(null)");
+      log.warn("{}.attachTextListener(null)", getName());
       return;
     }
     addListener("publishText", service.getName());
@@ -555,7 +557,9 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    * ChassiControl interface
    * 
    * @param pwr
-   * @return
+   *          power
+   * @return the power
+   * 
    */
   public double publishMotorLeftMove(double pwr) {
     log.info("publish left -> {}", pwr);
@@ -567,7 +571,9 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    * ChassiControl interface
    * 
    * @param pwr
-   * @return
+   *          power
+   * @return the power
+   * 
    */
   public double publishMotorRightMove(double pwr) {
     log.info("publish right -> {}", pwr);
@@ -699,7 +705,9 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    * must NOT end in bots - is its parent folder
    * 
    * @param path
-   * @return
+   *          path
+   * @return the brainPath
+   * 
    */
   public String setBrainPath(String path) {
     brainPath = path;
@@ -757,7 +765,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
 
     // if mouth has not started
     // no point in speaking
-    if (!isStarted("mouth")) {
+    if (!Runtime.isStarted(getName() + ".mouth")) {
       return text;
     }
 
@@ -787,8 +795,8 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
       // FIXME - test create & substitution
       // FIXME - setters & getters for peers
 
-      WorkE worke = (WorkE) Runtime.start("worke", "WorkE");
-      worke.startPeer("eye");
+      // WorkE worke = (WorkE) Runtime.start("worke", "WorkE");
+      // worke.startPeer("eye");
       /*
        * worke.startPeer("joystick"); worke.startPeer("motorLeft");
        * worke.startPeer("motorRight"); worke.startPeer("controller");
@@ -801,7 +809,8 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
       // polly.setKeys("XXXX", "XXXXXXX");
       // polly.speak("hello, i can talk !");
 
-      worke.exportAll("worke.py");
+      // worke.save("worke.yml");
+      Runtime.getInstance().save();
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
@@ -811,8 +820,10 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
       log.error("worke no worky !", e);
     }
   }
-  /**
-   * </pre>
-   */
+
+  @Override
+  public void attachTextListener(String name) {
+    addListener("publishText", name);
+  }
 
 }

@@ -395,30 +395,28 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
     }
     return false;
   }
-  
-  public void start() {
-	    try {
-	        if (serial == null) {
-	          serial = (Serial) startPeer("serial");
-	        }
-	        serial.addByteListener(this);
-	        serial.setTimeout(500);
-	        if (keyboard == null) {
-	          keyboard = (Keyboard) startPeer("keyboard");
-	        }
-	        if (keyboard != null) {
-	          keyboard.attach(getName());
-	        }
-	        python = (Python) Runtime.start("python", "Python");
-	        if (mouth == null) {
-	          mouth = (SpeechSynthesis) Runtime.start("mouth", "WebkitSpeechSynthesis");
-	        }
-	    } catch(Exception e) {
-	    	log.error("start threw", e);
-	    }
-  }
 
- 
+  public void start() {
+    try {
+      if (serial == null) {
+        serial = (Serial) startPeer("serial");
+      }
+      serial.addByteListener(this);
+      serial.setTimeout(500);
+      if (keyboard == null) {
+        keyboard = (Keyboard) startPeer("keyboard");
+      }
+      if (keyboard != null) {
+        keyboard.attach(getName());
+      }
+      python = (Python) Runtime.start("python", "Python");
+      if (mouth == null) {
+        mouth = (SpeechSynthesis) Runtime.start("mouth", "WebkitSpeechSynthesis");
+      }
+    } catch (Exception e) {
+      log.error("start threw", e);
+    }
+  }
 
   public void startWebGUI() throws Exception {
     webgui = (WebGui) startPeer("webgui");

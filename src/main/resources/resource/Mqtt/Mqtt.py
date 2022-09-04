@@ -8,8 +8,8 @@ qos = 1 # At most once (0), At least once (1), Exactly once (2).
 broker = "tcp://broker.mqttdashboard.com:1883"
 
 clientID = "MrlMqttPython1"
-mqtt = Runtime.start("mqtt", "Mqtt")
-python = Runtime.start("python", "Mqtt")
+mqtt = runtime.start("mqtt", "Mqtt")
+python = runtime.start("python", "Mqtt")
 
 print(mqtt.getDescription())
 

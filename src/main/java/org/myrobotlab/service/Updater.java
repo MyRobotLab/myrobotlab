@@ -124,8 +124,11 @@ public class Updater extends Service {
    * Checks in the branches directory for the latest version of desired "branch"
    * 
    * @param branch
-   * @return
+   *          the branch to check
+   * @return the latest version
    * @throws MrlException
+   *           boom
+   * 
    */
   public String getLatestLocalVersion(String branch) throws MrlException {
     Set<String> allLocal = getLocalVersions(branch);
@@ -159,8 +162,11 @@ public class Updater extends Service {
    * access it will ask the build server what successful builds exist
    * 
    * @param branch
+   *          the branch
    * @param allowRemote
-   * @return
+   *          true/false
+   * @return a set
+   * 
    */
   synchronized public Set<String> getVersions(String branch, Boolean allowRemote) {
     Set<String> versions = new TreeSet<String>();
@@ -179,7 +185,9 @@ public class Updater extends Service {
    * Get the local versions available for the selected branch.
    * 
    * @param branch
-   * @return
+   *          the branch
+   * @return the set of local versions
+   * 
    */
   public Set<String> getLocalVersions(String branch) {
     Set<String> versions = new TreeSet<>();
@@ -203,7 +211,9 @@ public class Updater extends Service {
    * Get remote versions from jenkins
    * 
    * @param branch
-   * @return
+   *          the branch name
+   * @return the set of remote versions
+   * 
    */
   public Set<String> getRemoteVersions(String branch) {
     Set<String> versions = new TreeSet<String>();
@@ -424,7 +434,7 @@ public class Updater extends Service {
               // FIXME check for null etc.. singleton
               // FIXME - merge original
               CmdOptions options = new CmdOptions();
-              new CommandLine(options).parseArgs(new String[] {"-I", "python", "execFile", "export.py"});
+              new CommandLine(options).parseArgs(new String[] { "-I", "python", "execFile", "export.py" });
               ProcessBuilder builder = Launcher.createBuilder(options);
               updated = builder.start();
 
@@ -436,7 +446,7 @@ public class Updater extends Service {
               updated.destroy();
               // FIXME - merge original
               CmdOptions options = new CmdOptions();
-              new CommandLine(options).parseArgs(new String[] {"-I", "python", "execFile", "export.py"});
+              new CommandLine(options).parseArgs(new String[] { "-I", "python", "execFile", "export.py" });
               ProcessBuilder builder = Launcher.createBuilder(options);
               updated = builder.start();
             }
@@ -503,10 +513,11 @@ public class Updater extends Service {
               FileIO.copy(currentJar, String.format("target/myrobotlab-%s-%s.jar", branch, currentVersion));
             }
 
+            // FIXME - re-implement
             // export current state
-            if (Runtime.exists()) {
-              Runtime.getInstance().exportAll("export.py");
-            }
+//            if (Runtime.exists()) {
+//              Runtime.getInstance().save("last-restart/runtime.yml");
+//            }
 
             // replace our current jar (classes ? build?)
             log.info("writing {} to myrobotlab.jar", latestFile);
@@ -521,7 +532,7 @@ public class Updater extends Service {
               // FIXME check for null etc.. singleton
               // FIXME - ability to merge more commands !!!
               CmdOptions options = new CmdOptions();
-              new CommandLine(options).parseArgs(new String[] {"-I", "python", "execFile", "export.py"});
+              new CommandLine(options).parseArgs(new String[] { "-I", "python", "execFile", "export.py" });
               ProcessBuilder builder = Launcher.createBuilder(options);
               updated = builder.start();
 
@@ -618,7 +629,7 @@ public class Updater extends Service {
       Updater updater = (Updater) Runtime.start("updater", "Updater");
 
       CmdOptions options = new CmdOptions();
-      new CommandLine(options).parseArgs(new String[] {"-I", "python", "execFile", "export.py"});
+      new CommandLine(options).parseArgs(new String[] { "-I", "python", "execFile", "export.py" });
       ProcessBuilder builder = Launcher.createBuilder(options);
       updater.updated = builder.start();
 

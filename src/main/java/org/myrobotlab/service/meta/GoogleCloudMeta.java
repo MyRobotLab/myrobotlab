@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -12,18 +11,11 @@ public class GoogleCloudMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
    */
-  public GoogleCloudMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public GoogleCloudMeta() {
     addDescription("google api client service");
     setAvailable(true);
-    // add dependency if necessary
-    // addDependency("com.google.api-client", "google-api-client",
-    // "1.23.0");
-    addDependency("com.google.cloud", "google-cloud-vision", "1.14.0");
+    addDependency("com.google.cloud", "google-cloud-vision", "2.1.3");
     addCategory("cloud", "vision");
     setCloudService(true);
     setRequiresKeys(true);

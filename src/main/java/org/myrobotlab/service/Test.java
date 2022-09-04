@@ -246,7 +246,7 @@ public class Test extends Service implements StatusListener {
       Test test = (Test) Runtime.start("test", "Test");
       test.pythonServiceScriptDir = "../pyrobotlab/service/";
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser = false;
+      webgui.autoStartBrowser(false);
       webgui.startService();
       // Runtime.start("gui", "SwingGui");
       Runtime.start("python", "Python");

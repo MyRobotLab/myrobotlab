@@ -6,9 +6,9 @@
 topic = "myrobotlab/test"
 qos = 1 # At most once (0), At least once (1), Exactly once (2).
 
-broker = Runtime.start("broker", "MqttBroker")
-mqtt01 = Runtime.start("mqtt01", "Mqtt")
-python = Runtime.start("python", "Python")
+broker = runtime.start("broker", "MqttBroker")
+mqtt01 = runtime.start("mqtt01", "Mqtt")
+python = runtime.start("python", "Python")
 
 broker.listen()
 broker.publish('')

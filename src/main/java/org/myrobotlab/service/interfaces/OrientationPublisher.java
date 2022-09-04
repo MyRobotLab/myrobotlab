@@ -15,10 +15,16 @@ public interface OrientationPublisher {
   /**
    * start publishing orientation
    */
-  public void startOrientationTracking();
+  public void start();
 
   /**
    * stop publishing orientation
    */
+  public void stop();
+
+  @Deprecated /* use start */
+  public void startOrientationTracking();
+
+  @Deprecated /* use stop */
   public void stopOrientationTracking();
 }

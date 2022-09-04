@@ -1,6 +1,5 @@
 package org.myrobotlab.framework;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -67,7 +66,8 @@ public class CmdOptions {
 
   // if --from-launcher knows to createAndStart service on -s
   @Option(names = { "--from-launcher" }, description = "prevents starting in interactive mode - reading from stdin")
-  public boolean fromLauncher = false;
+  @Deprecated /* no more java launcher - we use scripts now */
+  public boolean fromLauncher = true; // from launcher meaningless now
 
   @Option(names = { "-h", "-?", "--help" }, description = "shows help")
   public boolean help = false;
@@ -87,8 +87,11 @@ public class CmdOptions {
   @Option(names = { "-j", "--jvm" }, arity = "0..*", description = "jvm parameters for the instance of mrl")
   public String jvm;
 
-  @Option(names = { "-l", "--log-level" }, description = "log level - helpful for troubleshooting " + " [debug info warn error]")
+  @Option(names = { "-l", "--log-level" }, description = "log level - helpful for troubleshooting [debug info warn error]")
   public String logLevel = "info";
+
+  @Option(names = { "--log-file" }, description = "log file name [myrobotlab.log]")
+  public String logFile = "myrobotlab.log";
 
   // FIXME - highlight or italics for examples !!
   // launcher
@@ -136,11 +139,13 @@ public class CmdOptions {
   }
 
   /**
-   * Command options data object will return the options in List form
-   * to be appended to the ProcessBuilder(List)
+   * Command options data object will return the options in List form to be
+   * appended to the ProcessBuilder(List)
    * 
-   * @return
+   * @return the list of output command
    * @throws IOException
+   *           boom
+   * 
    */
   public List<String> getOutputCmd() throws IOException {
 
@@ -178,9 +183,6 @@ public class CmdOptions {
       }
     }
 
-    if (fromLauncher) {
-      cmd.add("--from-launcher");
-    }
 
     if (help) {
       cmd.add("-h");
@@ -218,7 +220,7 @@ public class CmdOptions {
       services.add("python");
       services.add("Python");
     }
-    
+
     if (services.size() % 2 != 0) {
       throw new IOException("invalid choice - services must be -s {name} {type} ...");
     }

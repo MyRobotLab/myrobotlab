@@ -30,6 +30,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -148,8 +149,9 @@ public class MotorHat4PiGui extends ServiceGui implements ActionListener, Change
     } else if (source == attachButton) {
       if (attachButton.getText().equals(attach)) {
         try {
-        swingGui.sendBlocking(boundServiceName, setMotor, motorList.getSelectedItem().toString());
-        } catch(Exception ex) {}
+          swingGui.sendBlocking(boundServiceName, setMotor, motorList.getSelectedItem().toString());
+        } catch (Exception ex) {
+        }
         swingGui.send(boundServiceName, attach, controllerList.getSelectedItem());
         /*
          * myMotor.setLeftPwmPin((int)Integer.decode(leftPwmPinList.
@@ -233,10 +235,10 @@ public class MotorHat4PiGui extends ServiceGui implements ActionListener, Change
 
   public void refreshControllers() {
     if (myMotor != null) {
-      List<String> v = myMotor.refreshControllers();
+      Set<String> v = myMotor.refreshControllers();
       controllerList.removeAllItems();
-      for (int i = 0; i < v.size(); ++i) {
-        controllerList.addItem(v.get(i));
+      for (String s : v) {
+        controllerList.addItem(s);
       }
       if (myMotor.getController() != null) {
         controllerList.setSelectedItem(myMotor.getController().getName());

@@ -37,23 +37,19 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
-import org.bytedeco.opencv.opencv_core.Rect2d;
-import org.bytedeco.opencv.opencv_tracking.Track;
-import org.bytedeco.opencv.opencv_tracking.*;
-import org.bytedeco.opencv.opencv_video.*;
-
+import org.bytedeco.opencv.opencv_tracking.TrackerCSRT;
+import org.bytedeco.opencv.opencv_tracking.TrackerKCF;
+import org.bytedeco.opencv.opencv_video.Tracker;
+import org.bytedeco.opencv.opencv_video.TrackerGOTURN;
+import org.bytedeco.opencv.opencv_video.TrackerMIL;
 /*
 import org.bytedeco.opencv.opencv_tracking.Tracker;
 import org.bytedeco.opencv.opencv_tracking.TrackerBoosting;
-import org.bytedeco.opencv.opencv_tracking.TrackerCSRT;
 import org.bytedeco.opencv.opencv_tracking.TrackerGOTURN;
-import org.bytedeco.opencv.opencv_tracking.TrackerKCF;
 import org.bytedeco.opencv.opencv_tracking.TrackerMIL;
 import org.bytedeco.opencv.opencv_tracking.TrackerMOSSE;
 import org.bytedeco.opencv.opencv_tracking.TrackerMedianFlow;
@@ -73,8 +69,6 @@ public class OpenCVFilterTracker extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
   private final static Logger log = LoggerFactory.getLogger(OpenCVFilterTracker.class);
-  transient private static final OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
-  transient private static final OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 
   // The current tracker and it's associated boundingBox
   private Tracker tracker;
@@ -92,7 +86,7 @@ public class OpenCVFilterTracker extends OpenCVFilter {
 
   // TODO: i'm not sure there is really a performance difference here..
   public boolean blackAndWhite = false;
-  //  CSRT,GOTURN,KCF,MIL
+  // CSRT,GOTURN,KCF,MIL
   public String trackerType = "CSRT";
 
   // The current mat that is being processed.
@@ -100,6 +94,8 @@ public class OpenCVFilterTracker extends OpenCVFilter {
 
   // To hold x,y,w,h
   int[] points = new int[4];
+  
+  transient private CloseableFrameConverter converter = new CloseableFrameConverter();
 
   public OpenCVFilterTracker() {
     super();
@@ -109,29 +105,32 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     super(name);
   }
 
-  private Frame makeGrayScale(IplImage image) {
+  private IplImage makeGrayScale(IplImage image) {
     IplImage imageBW = IplImage.create(image.width(), image.height(), 8, 1);
     cvCvtColor(image, imageBW, CV_BGR2GRAY);
-    return converterToMat.convert(imageBW);
+    return imageBW;
   }
 
   @Override
   public IplImage process(IplImage image) {
-
     // TODO: I suspect this would be faster if we cut color first.
     // cvCutColor()
-    Frame frame = null;
+    
     if (blackAndWhite) {
-      frame = makeGrayScale(image);
+      IplImage imageBw = makeGrayScale(image); 
+      // frame = converter.toFrame(imageBw);
+      mat = converter.toMat(imageBw);
     } else {
-      frame = converterToIpl.convert(image);
+      // frame = converter.toFrame(image);
+      mat = converter.toMat(image);
     }
-    mat = converterToMat.convert(frame);
     if (boundingBox != null && tracker != null) {
       // log.info("Yes ! Bounding box : {} {} {} {} " , boundingBox.x(),
       // boundingBox.y(), boundingBox.width()
       // ,boundingBox.height());
-      tracker.update(mat, boundingBox);
+      synchronized(tracker) {
+        tracker.update(mat, boundingBox);
+      }
       // boundingBox.x()
       int x0 = (int) (boundingBox.x());
       int y0 = (int) (boundingBox.y());
@@ -148,35 +147,49 @@ public class OpenCVFilterTracker extends OpenCVFilter {
       data.put("TrackingPoints", pointsToPublish);
 
     }
+   
     return image;
+  }
+
+  @Override
+  public void release() {
+    // TODO Auto-generated method stub
+    super.release();
+    converter.close();
   }
 
   private Tracker createTracker(String trackerType) {
     // TODO: add a switch for all the other types of trackers!
-    /*
-    if (trackerType.equalsIgnoreCase("Boosting")) {
-      return TrackerBoosting.create();
-    } else 
-      */
-      if (trackerType.equalsIgnoreCase("CSRT")) {
-      return TrackerCSRT.create();
+    // if (trackerType.equalsIgnoreCase("Boosting")) { 
+    //  return TrackerBoosting.create(); 
+    // } else 
+    if (trackerType.equalsIgnoreCase("CSRT")) {
+      TrackerCSRT tracker =TrackerCSRT.create();
+      return tracker;
     } else if (trackerType.equalsIgnoreCase("GOTURN")) {
       return TrackerGOTURN.create();
     } else if (trackerType.equalsIgnoreCase("KCF")) {
       return TrackerKCF.create();
-    } /*else if (trackerType.equalsIgnoreCase("MedianFlow")) {
-      return TrackerMedianFlow.create(); 
-    } */ else if (trackerType.equalsIgnoreCase("MIL")) {
+    } else 
+      
+    //if (trackerType.equalsIgnoreCase("MedianFlow")) { 
+    //  return TrackerMedianFlow.create(); 
+    //} else 
+      if (trackerType.equalsIgnoreCase("MIL")) {
       return TrackerMIL.create();
-    } /*else if (trackerType.equalsIgnoreCase("MOSSE")) {
-      return TrackerMOSSE.create();
-    } else if (trackerType.equalsIgnoreCase("TLD")) {
-      return TrackerTLD.create();
-    } */ else {   
-
+    } else
+    //if (trackerType.equalsIgnoreCase("MOSSE")) { 
+    //  return TrackerMOSSE.create(); 
+    //} else 
+    //if (trackerType.equalsIgnoreCase("TLD")) {
+    //  return TrackerTLD.create(); 
+    //} else 
+    {
+      // TODO: why?
       log.warn("Unknown Tracker Algorithm {} defaulting to CSRT", trackerType);
       // default to TLD..
-      return TrackerCSRT.create();
+      TrackerCSRT tracker = TrackerCSRT.create(); 
+      return tracker;
     }
 
   }
@@ -195,13 +208,17 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     // the tracker will initialize on the next frame.. (I know , I know. it'd be
     // better to have the current frame and do the
     // initialization here.)
-    tracker = createTracker(trackerType);
-    // log.info("Init tracker");
+    if (tracker == null) {
+        tracker = createTracker(trackerType);
+    }
+    log.info("Created tracker");
     // TODO: I'm worried about thread safety with the "mat" object.
     if (mat != null) {
-      synchronized (mat) {
+      // TODO: what happens if we're already initalized?
+      synchronized(tracker) {
         tracker.init(mat, boundingBox);
       }
+      log.info("Initialized tracker");
     } else {
       log.warn("Sample point called on a null mat.");
     }

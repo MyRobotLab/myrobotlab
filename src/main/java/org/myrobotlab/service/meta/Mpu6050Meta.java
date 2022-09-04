@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -12,12 +11,8 @@ public class Mpu6050Meta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
    */
-  public Mpu6050Meta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public Mpu6050Meta() {
     addDescription("General MPU-6050 acclerometer and gyro");
     addCategory("microcontroller", "sensors");
     setSponsor("Mats");

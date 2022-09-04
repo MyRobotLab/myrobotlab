@@ -53,13 +53,12 @@ public class OpenCVFilterSURF extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSURF.class);
-  public Settings settings = new Settings();
-  public ObjectFinder objectFinder = null;
+  transient public Settings settings = new Settings();
+  transient public ObjectFinder objectFinder = null;
   transient private IplImage object = null;
 
   public OpenCVFilterSURF() {
     super();
-
   }
 
   public OpenCVFilterSURF(String name) {

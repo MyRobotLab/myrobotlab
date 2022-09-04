@@ -16,7 +16,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.params.FacetParams;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.datavec.image.loader.NativeImageLoader;
-import org.myrobotlab.service.OpenCV;
+import org.myrobotlab.opencv.CloseableFrameConverter;
 import org.myrobotlab.service.Solr;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
@@ -59,6 +59,7 @@ public class SolrDataSetIterator implements DataSetIterator {
   protected DataSetPreProcessor preProcessor;
   int seed = 42;
   private DataSet[] cache;
+  private CloseableFrameConverter converter = new CloseableFrameConverter();
 
   public SolrDataSetIterator(int batch, String queryString, Solr solr, int height, int width, int channels, String labelField) {
     log.info("Solr Dataset Iterator");
@@ -178,7 +179,8 @@ public class SolrDataSetIterator implements DataSetIterator {
       IplImage iplImage = solr.bytesToImage(bytes);
       // solr.show(iplImage, label + " " + trainingDoc.getFirstValue("id"));
       // TODO: just get the buffered image directly.
-      BufferedImage buffImg = OpenCV.toBufferedImage(iplImage);
+      
+      BufferedImage buffImg = converter.toBufferedImage(iplImage);
       // I think i'm supposed to get an array of these images and lump them
       // together.
       INDArray image = loader.asMatrix(buffImg);

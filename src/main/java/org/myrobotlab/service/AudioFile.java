@@ -26,18 +26,30 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.audio.AudioProcessor;
+import org.myrobotlab.audio.PlaylistPlayer;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.net.Http;
+import org.myrobotlab.service.config.AudioFileConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
@@ -50,7 +62,19 @@ public class AudioFile extends Service {
   static final long serialVersionUID = 1L;
   static final Logger log = LoggerFactory.getLogger(AudioFile.class);
 
-  static public final String DEFAULT_TRACK = "default";
+  public static final String DEFAULT_TRACK = "default";
+
+  // statically initialize the supported files list.
+  protected static Set<String> supportedFiles;
+  static {
+    supportedFiles = new HashSet<>();
+    supportedFiles.add("mp3");
+    supportedFiles.add("wav");
+    supportedFiles.add("ogg");
+    supportedFiles.add("flac");
+    supportedFiles.add("aiff");
+    supportedFiles.add("raw");
+  }
 
   // FIXME
   // skip(track)
@@ -87,16 +111,29 @@ public class AudioFile extends Service {
   //
 
   String currentTrack = DEFAULT_TRACK;
+
   transient Map<String, AudioProcessor> processors = new HashMap<String, AudioProcessor>();
+
   double volume = 1.0f;
   // if set to true, playback will become a no-op
   private boolean mute = false;
+
+  protected String currentPlaylist = "default";
+
+  protected Map<String, List<String>> playlists = new HashMap<>();
+
+  final private transient PlaylistPlayer playlistPlayer = new PlaylistPlayer(this);
 
   public AudioFile(String n, String id) {
     super(n, id);
   }
 
+  @Deprecated /* use setTrack */
   public void track(String trackName) {
+    setTrack(trackName);
+  }
+
+  public void setTrack(String trackName) {
     currentTrack = trackName;
     if (!processors.containsKey(trackName) || !processors.get(trackName).isRunning()) {
       log.info("starting new track {}", trackName);
@@ -117,27 +154,60 @@ public class AudioFile extends Service {
     }
   }
 
-  // TODO test with jar://resource/AudioFile/tick.mp3 & https://host/mp3 :
-  // localfile
-  //
   public AudioData play(String filename) {
+    return play(filename, false);
+  }
+
+  public AudioData play(String filename, boolean blocking) {
+    return play(filename, blocking, null, null);
+  }
+
+  public AudioData play(String filename, boolean blocking, Integer repeat, String track) {
 
     if (filename == null || filename.isEmpty()) {
       error("asked to play a null filename!  error");
       return null;
     }
+
+    if (filename.toLowerCase().startsWith("http:") || filename.toLowerCase().startsWith("https:")) {
+      // make cache directory if it doesn't exist
+      File check = new File(getDataDir() + fs + "cache");
+      if (!check.exists()) {
+        check.mkdirs();
+      }
+
+      // check if cache file already exists - if so play it
+      File cacheFile = new File(getDataDir() + fs + "cache" + fs + FileIO.cleanFileName(filename));
+      if (cacheFile.exists()) {
+        filename = cacheFile.getAbsolutePath();
+      } else {
+        // cache file doesn't exists - download it and save it to cache if valid
+        byte[] data = Http.get(filename);
+        if (data == null || data.length == 0) {
+          error("could not fetch %s", filename);
+          return null;
+        }
+        try {
+          FileIO.toFile(cacheFile, data);
+          filename = cacheFile.getAbsolutePath();
+        } catch (Exception e) {
+          error(e);
+        }
+      }
+    } // end of http
+
     File f = new File(filename);
     if (!f.exists()) {
       log.warn("Tried to play file " + f.getAbsolutePath() + " but it was not found.");
       return null;
     }
-    // use File interface such that filename is preserved
-    // but regardless of location (e.g. url, local, resource)
-    // or type (mp3 wav) a stream is opened and the
-    // pair is put on a queue to be played
 
-    // playFile("audioFile/" + filename + ".mp3", false);
-    return play(new AudioData(filename));
+    AudioData data = new AudioData(filename);
+    data.mode = blocking ? AudioData.MODE_BLOCKING : AudioData.MODE_QUEUED;
+    data.track = track;
+    data.repeat = repeat;
+
+    return play(data);
   }
 
   public AudioData play(AudioData data) {
@@ -157,7 +227,7 @@ public class AudioFile extends Service {
     if (data.track == null) {
       data.track = currentTrack;
     }
-    track(data.track);
+    setTrack(data.track);
     processors.get(data.track).setVolume(volume);
     if (AudioData.MODE_QUEUED.equals(data.mode)) {
       // stick it on top of queue and let our default player play it
@@ -171,7 +241,7 @@ public class AudioFile extends Service {
   }
 
   public AudioData playBlocking(String filename) {
-    return playFile(filename, true);
+    return play(filename, true);
   }
 
   public void pause() {
@@ -182,36 +252,19 @@ public class AudioFile extends Service {
     processors.get(currentTrack).pause(false);// .resume();
   }
 
+  @Deprecated /* use play */
   public void playFile(String filename) {
-    playFile(filename, false);
+    play(filename);
   }
 
+  @Deprecated /* use play */
   public AudioData playFile(String filename, Boolean isBlocking) {
-
-    if (filename == null) {
-      log.warn("Asked to play a null file, sorry can't do that");
-      return null;
-    }
-
-    File f = new File(filename);
-    if (!f.exists()) {
-      error("File not found to play back " + f.getAbsolutePath());
-      log.warn("File not found to play back " + f.getAbsolutePath());
-      return null;
-    }
-
-    AudioData data = new AudioData(filename);
-    if (isBlocking) {
-      data.mode = AudioData.MODE_BLOCKING;
-    } else {
-      data.mode = AudioData.MODE_QUEUED;
-    }
-    play(data);
-    return data;
+    return play(filename, isBlocking);
   }
 
+  @Deprecated /* use playBlocking */
   public void playFileBlocking(String filename) {
-    playFile(filename, true);
+    play(filename, true);
   }
 
   public void playResource(String filename) {
@@ -226,9 +279,10 @@ public class AudioFile extends Service {
    * @param filename
    *          - name of file relative to the resource dir
    * @param isBlocking
+   *          if the playback should block
    */
   public void playResource(String filename, Boolean isBlocking) {
-    playFile(getResourceDir() + File.separator + filename, isBlocking);
+    play(getResourceDir() + File.separator + filename, isBlocking);
   }
 
   public void silence() {
@@ -240,6 +294,7 @@ public class AudioFile extends Service {
       // do what you have to do here
       // In your case, an other loop.
     }
+    playlistPlayer.stop();
   }
 
   /*
@@ -264,7 +319,7 @@ public class AudioFile extends Service {
   }
 
   public void setVolume(float volume, String track) {
-    track(track);
+    setTrack(track);
     setVolume(volume);
   }
 
@@ -303,168 +358,6 @@ public class AudioFile extends Service {
     return new ArrayList<File>();
   }
 
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-
-    try {
-
-      // FIXME
-      // TO - TEST
-      // file types mp3 wav
-      // file locations http resource jar! file cache !!!
-      // basic controls - playMulti, playQueue, playBlocking
-
-      // FIXME - setting volume on a non-played track null pointer
-      // FIXME - DNA make single AudioFile
-      // AudioFile audio = (AudioFile) Runtime.createAndStart("audio",
-      // "AudioFile");
-      // MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
-
-      AudioFile audio = (AudioFile) Runtime.start("audio", "AudioFile");// robot1.getAudioFile();
-      audio.play(new AudioData("https://ia802508.us.archive.org/5/items/testmp3testfile/mpthreetest.mp3"));
-
-      MarySpeech robot1 = (MarySpeech) Runtime.start("robot1", "MarySpeech");
-
-      AudioData data = new AudioData("whatHowCanYouSitThere.mp3");
-      data.repeat = 4;
-      data.track = "new track";
-      // FIXME - need to compared scaled with range !!!! - inform others
-      data.volume = 0.5;
-      audio.play(data);
-
-      audio.play("whatHowCanYouSitThere.mp3");
-      audio.pause();
-      audio.resume();
-
-      // FIXME - audio.step() ??? .f() .ff() .b .bb() rewind(10)
-      // .fastForward(10)
-
-      log.info(audio.getTrack());
-
-      audio.track("sound effects");
-      log.info(audio.getTrack());
-      audio.play("explosion.mp3");
-
-      // audio.repeat("alert.mp3");
-
-      audio.track();
-      audio.play("sir.mp3");
-      audio.play("bigdeal.mp3");
-      audio.play("whatHowCanYouSitThere.mp3");
-
-      audio.play("calmDown.mp3");
-      audio.play("fightOff.mp3");
-      audio.play("startTheAlarm.mp3");
-
-      // audio.fadeOut("sound effects");
-
-      // audio.waitForAll("alert");
-      // audio.waitFor("alert", "default", waitToFinish);
-      // audio.waitFor(waitingTrack, waitToFinish);
-      // audio.repeat("alert.mp3");
-
-      audio.track();
-      // FIXME - implement audio.pause(1000); - also implement a "queued"
-      // pause(1000);
-
-      robot1.speakBlocking("ah no, you didn't really need to do that did you. you know how the klaxons hurt my ears");
-      robot1.speakBlocking("get off your butt and doooo something");
-      robot1.speakBlocking("i am going aft get a battle axe in the weapons locker");
-      robot1.speakBlocking("by the time i get back, you had better be ready");
-      robot1.speakBlocking("first thing i'm going to do is turn this thing down");
-      audio.setVolume(0.20f, "sound effects"); // <-- name the robot's audio
-      // file
-      audio.track();
-      robot1.speakBlocking("ahhh.. that's better - how can anyone think with that thing");
-
-      audio.playBlocking("walking.mp3");
-      robot1.speakBlocking("i mean it. Klaus");
-      audio.playBlocking("door.mp3");
-
-      robot1.speakBlocking("hello honey, what is your name");
-      // mary.speak("hello my name is mary");
-      robot1.speakBlocking("hi i'm Klaus - i think you sound a little like a robot");
-      // mary.speak("yes, but i am open source");
-      robot1.speakBlocking("can you dance like a robot too?");
-      // mary.speak("i will try");
-
-      // audio.setVolume(0.50f);
-      robot1.speakBlocking("all right now she's gone its time to get funky");
-      audio.playBlocking("scruff.mp3");
-      robot1.speakBlocking("i need some snacks - i wonder if there is any left over chinese in the fridge");
-
-      // turn the klaxons down - turn the music up
-
-      // another woman
-
-      // establishing a priority queue
-      audio.track("priority");
-      audio.play("alert.mp3");
-
-      audio.setVolume(0.50f);
-      audio.setVolume(0.20f);
-
-      audio.play("nature.wav");
-      audio.pause();
-
-      audio.resume();
-      audio.pause();
-      audio.resume();
-      audio.silence();
-      // audio.fadeOut() // fadeOut is fadeOutAll
-      // audio.fadeOutAll() fadeOut(track) - time option too
-      // audio.fadeIn() //
-      // audio.fadeInAll()
-
-      // audio.setAllVolume();
-      // af.playFile("C:\\dev\\workspace.kmw\\myrobotlab\\test.mp3",
-      // false, false);
-
-      audio.stop();
-      audio.resume();
-
-      boolean test = false;
-      if (test) {
-        audio.silence();
-
-        Joystick joystick = (Joystick) Runtime.createAndStart("joy", "Joystick");
-        Runtime.createAndStart("python", "Python");
-        AudioFile player = (AudioFile) Runtime.start("player", "AudioFile"); // new
-                                                                             // AudioFile("player");
-        // player.playFile(filename, true);
-        player.startService();
-        Runtime.createAndStart("gui", "SwingGui");
-
-        joystick.setController(2);
-        joystick.broadcastState();
-
-        // BasicController control = (BasicController) player;
-
-        player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
-        player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
-        player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\thump.mp3");
-        player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\start.mp3");
-        player.playFile("C:\\Users\\grperry\\Downloads\\soapBox\\radio.chatter.4.mp3");
-
-        player.silence();
-
-        // player.playResource("Clock/tick.mp3");
-        player.playResource(player.getResourceDir() + "/Clock/tick.mp3");
-        player.playResource(player.getResourceDir() + "/Clock/tick.mp3");
-        player.playResource(player.getResourceDir() + "/Clock/tick.mp3");
-        player.playResource(player.getResourceDir() + "/Clock/tick.mp3");
-        player.playResource(player.getResourceDir() + "/Clock/tick.mp3");
-        player.playResource(player.getResourceDir() + "/Clock/tick.mp3");
-        player.playResource(player.getResourceDir() + "/Clock/tick.mp3");
-      }
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-    // player.playBlockingWavFile("I am ready.wav");
-    // player.play("hello my name is audery");
-    // player.playWAV("hello my name is momo");
-  }
-
   public AudioData repeat(String filename) {
     return repeat(filename, -1);
   }
@@ -476,8 +369,13 @@ public class AudioFile extends Service {
     return play(data);
   }
 
+  @Deprecated /* use setTrack() */
   public void track() {
-    track(DEFAULT_TRACK);
+    setTrack(DEFAULT_TRACK);
+  }
+
+  public void setTrack() {
+    setTrack(DEFAULT_TRACK);
   }
 
   public AudioData publishAudioStart(AudioData data) {
@@ -512,6 +410,138 @@ public class AudioFile extends Service {
 
   public void setMute(boolean mute) {
     this.mute = mute;
+  }
+
+  public void setPlaylist(String name) {
+    currentPlaylist = name;
+  }
+
+  public void addPlaylist(String folderPath) {
+    addPlaylist(currentPlaylist, folderPath);
+  }
+
+  public void addPlaylist(String name, String path) {
+    List<String> list = null;
+    if (!playlists.containsKey(name)) {
+      list = new ArrayList<String>();
+    } else {
+      list = playlists.get(name);
+    }
+    File check = new File(path);
+    if (!check.exists()) {
+      error("%s playlist folder or file %s does not exist", name, path);
+      return;
+    }
+    if (check.isDirectory()) {
+      list.addAll(scanForMusicFiles(path));
+    }
+    int filecount = list.size();
+    playlists.put(name, list);
+    log.info("{} playlist added {} files", name, filecount);
+  }
+
+  private List<String> scanForMusicFiles(String path) {
+    // scan directory or add file
+    Stream<Path> walk;
+    try {
+      walk = Files.walk(Paths.get(path));
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      log.warn("Unable to walk file path {}", path, e);
+      return null;
+    }
+
+    // make sure it's a file and that we can read it
+    List<File> result = walk.map(f -> f.toFile()).filter(f -> f.isFile()).filter(f -> f.canRead())
+        .filter(f -> supportedFiles.contains(StringUtils.lowerCase(FilenameUtils.getExtension(f.getName()))))
+        // .filter(f -> f.getTotalSpace() > 0)
+        .collect(Collectors.toList());
+    List<String> playlist = new ArrayList<String>();
+    for (File file : result) {
+      String absFilePath = file.getAbsolutePath();
+      log.info("Adding file : {}", absFilePath);
+      playlist.add(file.getAbsolutePath());
+    }
+    log.info("Playlist added  {} songs.", playlist.size());
+    walk.close();
+    return playlist;
+  }
+
+  public List<String> getPlaylist(String name) {
+    return playlists.get(name);
+  }
+
+  public Map<String, List<String>> getPlaylists() {
+    return playlists;
+  }
+
+  public void startPlaylist() {
+    startPlaylist(currentPlaylist, false, false, currentPlaylist);
+  }
+
+  public void startPlaylist(String playlist) {
+    startPlaylist(playlist, false, false, playlist);
+  }
+
+  public void startPlaylist(String playlist, boolean shuffle, boolean repeat) {
+    startPlaylist(playlist, shuffle, repeat, playlist);
+  }
+
+  public void startPlaylist(String playlist, boolean shuffle, boolean repeat, String track) {
+    if (!playlists.containsKey(playlist)) {
+      error("cannot play playlist %s does not exists", playlist);
+      return;
+    }
+    playlistPlayer.start(playlists.get(playlist), shuffle, repeat, track);
+  }
+
+  public void stopPlaylist() {
+    playlistPlayer.stop();
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+
+    AudioFileConfig config = new AudioFileConfig();
+    config.mute = mute;
+    config.currentTrack = currentTrack;
+    config.currentPlaylist = currentPlaylist;
+    config.volume = volume;
+    config.playlists = playlists;
+
+    return config;
+  }
+
+  public ServiceConfig apply(ServiceConfig c) {
+    AudioFileConfig config = (AudioFileConfig) c;
+    setMute(config.mute);
+    setTrack(config.currentTrack);
+    setVolume(config.volume);
+    setPlaylist(config.currentPlaylist);
+    if (config.playlists != null) {
+      playlists = config.playlists;
+    }
+    return c;
+  }
+
+  public static void main(String[] args) {
+
+    try {
+      LoggingFactory.init("INFO");
+      AudioFile audioPlayer = (AudioFile) Runtime.start("AudioPlayer", "AudioFile");
+      // audioPlayer.play("https://upload.wikimedia.org/wikipedia/commons/1/1f/Bach_-_Brandenburg_Concerto.No.1_in_F_Major-_II._Adagio.ogg");
+      audioPlayer.addPlaylist("acoustic", "/home/greg/Music/acoustic");
+      audioPlayer.addPlaylist("electronica", "/home/greg/Music/electronica");
+      audioPlayer.setPlaylist("electronica");
+      audioPlayer.startPlaylist("electronica");
+      // audioPlayer.addPlaylist("my list", "Z:\\Music");
+
+      // audioPlayer.playlist("my list" , true, false, "my list");
+      Runtime.start("webgui", "WebGui");
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
   }
 
 }

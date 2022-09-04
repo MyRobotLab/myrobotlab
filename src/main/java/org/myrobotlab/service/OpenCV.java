@@ -25,6 +25,10 @@
 
 package org.myrobotlab.service;
 
+import static org.bytedeco.opencv.global.opencv_core.cvCopy;
+import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
+import static org.bytedeco.opencv.global.opencv_core.cvSetImageROI;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -35,7 +39,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -54,14 +57,11 @@ import javax.imageio.ImageIO;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 
 import org.bytedeco.javacv.CanvasFrame;
-import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameGrabber.ImageMode;
 import org.bytedeco.javacv.FrameRecorder;
-import org.bytedeco.javacv.Java2DFrameConverter;
-import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenKinectFrameGrabber;
 /*
 <pre>
@@ -87,17 +87,20 @@ import static org.bytedeco.opencv.global.opencv_videostab.*;
 */
 import org.bytedeco.opencv.opencv_core.CvPoint;
 import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
+import org.bytedeco.opencv.opencv_core.CvRect;
 import org.bytedeco.opencv.opencv_core.CvScalar;
+import org.bytedeco.opencv.opencv_core.CvSize;
 import org.bytedeco.opencv.opencv_core.IplImage;
-import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.cv.CvData;
+import org.myrobotlab.cv.CvFilter;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.document.Classifications;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.image.ColoredPoint;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.image.WebImage;
@@ -107,24 +110,26 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point2df;
 import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.net.Http;
+import org.myrobotlab.opencv.CloseableFrameConverter;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.FrameFileRecorder;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetectDNN;
+import org.myrobotlab.opencv.OpenCVFilterFaceRecognizer;
 import org.myrobotlab.opencv.OpenCVFilterKinectDepth;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
+import org.myrobotlab.service.config.OpenCVConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.data.ImageData;
+import org.myrobotlab.service.interfaces.ImageListener;
+import org.myrobotlab.service.interfaces.ImagePublisher;
 // import org.myrobotlab.swing.VideoWidget2;
 import org.slf4j.Logger;
-
-import com.github.axet.vget.VGet;
-import com.github.axet.vget.info.VGetParser;
-import com.github.axet.vget.info.VideoFileInfo;
-import com.github.axet.vget.info.VideoInfo;
 
 /**
  * 
@@ -138,7 +143,7 @@ import com.github.axet.vget.info.VideoInfo;
  * Audet : https://github.com/bytedeco/javacv
  * 
  */
-public class OpenCV extends AbstractComputerVision {
+public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   int vpId = 0;
 
@@ -148,6 +153,9 @@ public class OpenCV extends AbstractComputerVision {
 
     @Override
     synchronized public void run() {
+      // create a closeable frame converter
+      CloseableFrameConverter converter = new CloseableFrameConverter();
+
       try {
         log.info("run - capturing");
 
@@ -195,7 +203,7 @@ public class OpenCV extends AbstractComputerVision {
             // here we need ot add the video
 
             IplImage video = ((OpenKinectFrameGrabber) grabber).grabVideo();
-            data.putKinect(toImage(newFrame), video);
+            data.putKinect(converter.toImage(newFrame), video);
           }
 
           processVideo(data);
@@ -224,7 +232,7 @@ public class OpenCV extends AbstractComputerVision {
         }
       }
       grabber = null;
-
+      converter.close();
       // end of stopping
 
       // stopCapture();
@@ -270,10 +278,10 @@ public class OpenCV extends AbstractComputerVision {
 
   public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BlurDetector", "BoundingBoxToFile", "Canny", "ColorTrack", "Copy",
       "CreateHistogram", "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetectDNN", "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip",
-      "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "ImageSegmenter", "Input", "InRange", "Invert", "KinectDepth", "KinectDepthMask",
-      "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "MiniXception", "MotionDetect", "Mouse", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize",
-      "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "TextDetector", "Threshold", "Tracker", "Transpose",
-      "Undistort", "Yolo" };
+      "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "ImageSegmenter", "Input", "InRange", "Invert", "KinectDepth",
+      "KinectDepthMask", "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "MiniXception", "MotionDetect", "Mouse", "Output", "Overlay", "PyramidDown",
+      "PyramidUp", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "TextDetector",
+      "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
 
   static final long serialVersionUID = 1L;
 
@@ -386,93 +394,10 @@ public class OpenCV extends AbstractComputerVision {
   }
 
   /**
-   * get the current list of possible filter types
-   * 
-   * @return
+   * @return get the current list of possible filter types
    */
   static public String[] getPossibleFilters() {
     return POSSIBLE_FILTERS;
-  }
-
-  public static void main(String[] args) throws Exception {
-
-    // TODO - Avoidance / Navigation Service
-    // ground plane
-    // http://stackoverflow.com/questions/6641055/obstacle-avoidance-with-stereo-vision
-    // radio lab - map cells location cells yatta yatta
-    // lkoptical disparity motion Time To Contact
-    // https://www.google.com/search?aq=0&oq=opencv+obst&gcx=c&sourceid=chrome&ie=UTF-8&q=opencv+obstacle+avoidance
-    //
-    LoggingFactory.init("info");
-
-    // Runtime.start("python", "Python");
-    OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    // OpenCVFilterTextDetector td = new OpenCVFilterTextDetector("td");
-    // cv.addFilter(td);
-
-    // OpenCVFilterMotionDetect md = new OpenCVFilterMotionDetect("md");
-    // cv.addFilter(md);
-
-//     cv.capture(4);
-    FFmpegFrameGrabber grabber = new FFmpegFrameGrabber("tcp://worke-pi:2222");
-    grabber.start();
-    cv.capture(grabber);;
-
-    // Runtime.start("gui", "SwingGui");
-
-    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-    webgui.autoStartBrowser(false);
-    webgui.startService();
-
-    // FFmpegFrameRecorder test = new
-
-    // FFmpegFrameRecorder recorder = new
-    // FFmpegFrameRecorder("tcp://localhost:9090?listen", 640, 480);
-    // recorder.setFormat("webm");
-    // recorder.start();
-
-    /**
-     * <pre>
-     * 
-     * https://stackoverflow.com/questions/43008150/android-javacv-ffmpeg-webstream-to-local-static-website
-     *
-     * private void initLiveStream() throws FrameRecorder.Exception {
-     * 
-     * frameRecorder = new FFmpegFrameRecorder("http://localhost:9090",
-     * imageWidth, imageHeight, 0); frameRecorder.setVideoOption("preset",
-     * "ultrafast"); frameRecorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
-     * frameRecorder.setAudioCodec(0);
-     * frameRecorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
-     * frameRecorder.setFormat("webm"); frameRecorder.setGopSize(10);
-     * frameRecorder.setFrameRate(frameRate);
-     * frameRecorder.setVideoBitrate(5000);
-     * frameRecorder.setOption("content_type","video/webm");
-     * frameRecorder.setOption("listen", "1"); frameRecorder.start(); }
-     *
-     *
-     * FrameRecorder recorder = new FFmpegFrameRecorder("out.mp4",
-     * grabber.getImageWidth(), grabber.getImageHeight());
-     * recorder.setFormat(grabber.getFormat());
-     * recorder.setPixelFormat(AV_PIX_FMT_YUV420P);
-     * recorder.setFrameRate(grabber.getFrameRate());
-     * recorder.setVideoBitrate(grabber.getVideoBitrate());
-     * recorder.setVideoCodec(grabber.getVideoCodec());
-     * recorder.setVideoOption("preset", "ultrafast");
-     * recorder.setVideoCodecName("libx264");
-     * recorder.setVideoCodec(AV_CODEC_ID_H264); recorder.start();
-     * 
-     */
-
-    boolean done = true;
-    if (done) {
-      return;
-    }
-
-    OpenCVFilterKinectDepth depth = new OpenCVFilterKinectDepth("depth");
-    cv.addFilter(depth);
-    cv.capture();
-    cv.addFilter("Yolo");
-
   }
 
   public void stopStreamer() {
@@ -501,59 +426,14 @@ public class OpenCV extends AbstractComputerVision {
     blockingData.clear();
   }
 
-  /**
-   * converting IplImages to BufferedImages
-   */
-  static public BufferedImage toBufferedImage(IplImage src) {
-    OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
-    Java2DFrameConverter converter = new Java2DFrameConverter();
-    Frame frame = grabberConverter.convert(src);
-    return converter.getBufferedImage(frame, 1);
-  }
-
-  public static BufferedImage toBufferedImage(Frame inputFrame) {
-    Java2DFrameConverter converter = new Java2DFrameConverter();
-    return converter.getBufferedImage(inputFrame);
-  }
-
-  static public Frame toFrame(IplImage image) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    return converterToImage.convert(image);
-  }
-
-  static public Frame toFrame(Mat image) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    return converterToImage.convert(image);
-  }
-
-  /**
-   * convert BufferedImages to IplImages
-   */
-  static public IplImage toImage(BufferedImage src) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    Java2DFrameConverter jconverter = new Java2DFrameConverter();
-    return converterToImage.convert(jconverter.convert(src));
-  }
-
-  static public IplImage toImage(Frame image) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    return converterToImage.convertToIplImage(image);
-  }
-
-  static public IplImage toImage(Mat image) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
-    return converterToImage.convert(converterToMat.convert(image));
-  }
-
-  static public Mat toMat(Frame image) {
-    OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-    return converterToImage.convertToMat(image);
-  }
-
-  static public Mat toMat(IplImage image) {
-    OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
-    return converterToMat.convert(converterToMat.convert(image));
+  public static IplImage cropImage(IplImage img, CvRect rect) {
+    CvSize sz = new CvSize();
+    sz.width(rect.width()).height(rect.height());
+    cvSetImageROI(img, rect);
+    IplImage cropped = cvCreateImage(sz, img.depth(), img.nChannels());
+    // Copy original image (only ROI) to the cropped image
+    cvCopy(img, cropped);
+    return cropped;
   }
 
   transient BlockingQueue<Map<String, List<Classification>>> blockingClassification = new LinkedBlockingQueue<>();
@@ -736,22 +616,16 @@ public class OpenCV extends AbstractComputerVision {
    *          - name of filter
    * @return the filter
    */
-  public OpenCVFilter addFilter(String filterName) {
+  public CvFilter addFilter(String filterName) {
     String filterType = filterName.substring(0, 1).toUpperCase() + filterName.substring(1);
     return addFilter(filterName, filterType);
   }
 
-  /**
-   * add filter by name and type e.g. addFilter("c1","Canny")
-   * 
-   * @param name
-   * @param filterType
-   * @return
-   */
-  public OpenCVFilter addFilter(String name, String filterType) {
+  public CvFilter addFilter(String name, String filterType) {
     String type = String.format("org.myrobotlab.opencv.OpenCVFilter%s", filterType);
     OpenCVFilter filter = (OpenCVFilter) Instantiator.getNewInstance(type, name);
-    return addFilter(filter);
+    addFilter(filter);
+    return (CvFilter) filter;
   }
 
   /**
@@ -792,6 +666,7 @@ public class OpenCV extends AbstractComputerVision {
    * capture from a camera
    * 
    * @param cameraIndex
+   *          the camera index to capture from
    */
   public void capture(Integer cameraIndex) {
     if (cameraIndex == null) {
@@ -812,6 +687,8 @@ public class OpenCV extends AbstractComputerVision {
    * its the most capable of decoding different filetypes.
    * 
    * @param filename
+   *          the file to use as the input filename.
+   * 
    */
   public void capture(String filename) {
     stopCapture();
@@ -831,7 +708,8 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * default 5 second wait
    * 
-   * @return
+   * @return map of classifications
+   * 
    */
   public Map<String, List<Classification>> getClassifications() {
     return getClassifications(5000);
@@ -909,7 +787,9 @@ public class OpenCV extends AbstractComputerVision {
    * get a filter by name
    * 
    * @param name
-   * @return
+   *          filter name to lookup
+   * @return the filter by name o/w null
+   * 
    */
   public OpenCVFilter getFilter(String name) {
     return filters.get(name);
@@ -958,14 +838,7 @@ public class OpenCV extends AbstractComputerVision {
     // certain files are "not" supported out of the box by certain grabbers
     // ffmpeg is increadibly capable, however it won't do a youtube stream
     // so we have to download/cache it and change the filename
-    if (inputFile != null && inputFile.startsWith("http") && inputFile.contains("youtube")) {
-      try { // FIXME - put in own Service - along with Google Image Downloader..
-        // get and cache youtube video
-        inputFile = getYouTube(inputFile);
-      } catch (Exception e) {
-        error(e);
-      }
-    } else if (inputFile != null && (inputFile.startsWith("http"))) {
+    if (inputFile != null && inputFile.startsWith("http")) {
       // get and cache image file
       // FIXME - perhaps "test" stream to try to determine what "type" it is -
       // mjpeg/jpg/gif/ octet-stream :( ???
@@ -1167,71 +1040,16 @@ public class OpenCV extends AbstractComputerVision {
     return newData;
   }
 
-  public String getYouTube(String url) throws IOException {
-
-    File cacheDir = new File(getDataDir());
-    cacheDir.mkdirs();
-
-    // get video key
-    int pos0 = url.indexOf("v=");
-    int pos1 = url.indexOf("&", pos0);
-    if (pos0 < 0) {
-      throw new IOException(String.format("could not find youtube v= in url %s", url));
-    }
-
-    String key = null;
-    if (pos1 > 0) {
-      key = url.substring(pos0, pos1 - pos0);
-    } else {
-      key = url.substring(pos0 + "v=".length());
-    }
-
-    String[] files = cacheDir.list();
-    for (String cacheFile : files) {
-      if (cacheFile.startsWith(key)) {
-        File f = new File(String.format("%s/%s", cacheDir.getAbsolutePath(), cacheFile));
-        return f.getAbsolutePath();
-      }
-    }
-
-    URL web = new URL(url);
-    VGetParser parser = null;
-    parser = VGet.parser(web);
-    VideoInfo videoinfo = parser.info(web);
-
-    VGet v = new VGet(videoinfo, cacheDir);
-    v.extract();
-
-    log.info("Title: " + videoinfo.getTitle());
-    List<VideoFileInfo> list = videoinfo.getInfo();
-    String filename = null;
-
-    if (list != null) {
-      for (VideoFileInfo d : list) {
-        if (d.getContentType().startsWith("video")) {
-          String type = d.getContentType();
-          String ext = type.substring(type.indexOf("/") + 1);
-          filename = String.format("%s/%s_%s.%s", cacheDir, key, videoinfo.getTitle(), ext);
-          d.targetFile = new File(filename);
-
-          // [OPTIONAL] setTarget file for each download source video/audio
-          // use d.getContentType() to determine which or use
-          // v.targetFile(dinfo, ext, conflict) to set name dynamically or
-          // d.targetFile = new File("/Downloads/CustomName.mp3");
-          // to set file name manually.
-          log.info("Download URL: " + d.getSource());
-          break;
-        }
-      }
-    }
-
-    v.download();
-    return filename;
-  }
-
   /**
    * Callback from the SwingGui (e.g. clicking on the display) routes to the
    * appropriate filter through this method.
+   * 
+   * @param filterName
+   *          the name of the fitler
+   * @param method
+   *          the method to invoke
+   * @param params
+   *          the params to pass
    */
   public void invokeFilterMethod(String filterName, String method, Object... params) {
     OpenCVFilter filter = getFilter(filterName);
@@ -1265,7 +1083,8 @@ public class OpenCV extends AbstractComputerVision {
    * conversion from buffered image to base64 encoded jpg
    * 
    * @param img
-   * @return
+   *          the image to convert
+   * @return base64jpeg version of buffered image
    */
   public String toBase64Jpg(BufferedImage img) {
     try {
@@ -1359,12 +1178,12 @@ public class OpenCV extends AbstractComputerVision {
            * canvasFrame.setSize(600, 480); canvasFrame.pack(); }
            * canvasFrame.showImage(b);
            */
-          
+
           if (canvasFrame == null) {
-            canvasFrame = new CanvasFrame(String.format("%s - %s",  getName(), displayFilter));
+            canvasFrame = new CanvasFrame(String.format("%s - %s", getName(), displayFilter));
             // canvasFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
           }
-          
+
           if (b != null) {
             canvasFrame.showImage(b);
           } else {
@@ -1374,13 +1193,11 @@ public class OpenCV extends AbstractComputerVision {
             }
           }
           /*
-          if (videoWidget == null) {
-            videoWidget = new VideoWidget2(getName());
-          }
-          
-          videoWidget.setVisible(true);
-          videoWidget.displayFrame(si);
-          */
+           * if (videoWidget == null) { videoWidget = new
+           * VideoWidget2(getName()); }
+           * 
+           * videoWidget.setVisible(true); videoWidget.displayFrame(si);
+           */
 
         } else if (canvasFrame != null && !nativeViewer) {
           canvasFrame.dispose();
@@ -1461,7 +1278,8 @@ public class OpenCV extends AbstractComputerVision {
    * base 64 jpg frame image
    * 
    * @param data
-   * @return
+   *          webimage data
+   * @return the web image data
    */
   public WebImage publishWebDisplay(WebImage data) {
     return data;
@@ -1507,7 +1325,7 @@ public class OpenCV extends AbstractComputerVision {
   public ArrayList<Rect> publishMotionDetected(ArrayList<Rect> rects) {
     return rects;
   }
-  
+
   public Map<String, List<Classification>> publishClassification(Map<String, List<Classification>> data) {
     // log.info("Publish Classification in opencv!");
     // aggregate locally for fun - "better" is to send it to a search engine
@@ -1539,6 +1357,8 @@ public class OpenCV extends AbstractComputerVision {
    * Publishing method for filters - used internally
    * 
    * @param filterWrapper
+   *          wraps a filter
+   * 
    * @return FilterWrapper solves the problem of multiple types being resolved
    *         in the setFilterState(FilterWrapper data) method
    */
@@ -1550,6 +1370,8 @@ public class OpenCV extends AbstractComputerVision {
    * Publishing method for filters - uses string parameter for remote invocation
    * 
    * @param name
+   *          name of filter to publish state for
+   * 
    * @return FilterWrapper solves the problem of multiple types being resolved
    *         in the setFilterState(FilterWrapper data) method
    */
@@ -1583,6 +1405,10 @@ public class OpenCV extends AbstractComputerVision {
    * the publishing point of all OpenCV goodies ! type conversion is held off
    * until asked for - then its cached SMART ! :)
    * 
+   * @param data
+   *          the opencv data
+   * @return cvdata
+   * 
    */
   public final OpenCVData publishOpenCVData(OpenCVData data) {
     return data;
@@ -1612,10 +1438,15 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * creates a new overlay of text
    * 
-   * @param format
    * @param x
+   *          coordinate
    * @param y
+   *          coordinate
+   * @param format
+   *          format string
    * @param color
+   *          color
+   * 
    */
   public void putText(int x, int y, String format, String color) {
     Overlay overlay = new Overlay(x, y, format, color);
@@ -1626,7 +1457,10 @@ public class OpenCV extends AbstractComputerVision {
    * the "light weight" put - it does not create any new cv objects
    * 
    * @param format
+   *          format for the text
    * @param args
+   *          args to format into the text
+   * 
    */
   public void putText(String format, Object... args) {
     if (overlays.containsKey(format)) {
@@ -1684,6 +1518,9 @@ public class OpenCV extends AbstractComputerVision {
    * non-lossy pngs from OpenCVData.
    * 
    * key- input, filter, or display
+   * 
+   * @param data
+   *          data
    */
   public void record(OpenCVData data) {
     try {
@@ -1745,7 +1582,7 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * records a single frame to the filesystem from our data
    * 
-   * @return
+   * @return the filename
    */
   public String recordFrame() {
     try {
@@ -1759,10 +1596,19 @@ public class OpenCV extends AbstractComputerVision {
     return null;
   }
 
+  public ImageData saveImage() {
+    String src = recordFrame();
+    ImageData image = new ImageData();
+    image.source = getName();
+    image.name = src;
+    image.src = src;
+    invoke("publishImage", image);
+    return image;
+  }
+
   /**
-   * remove a filter by name
-   * 
    * @param name
+   *          remove a filter by name
    */
   synchronized public void removeFilter(String name) {
     if (filters.containsKey(name)) {
@@ -1810,19 +1656,21 @@ public class OpenCV extends AbstractComputerVision {
   }
 
   static public void saveToFile(String filename, IplImage image) {
+    CloseableFrameConverter converter = new CloseableFrameConverter();
     try {
       int i = filename.lastIndexOf(".");
       String ext = "png";
       if (i > 0) {
         ext = filename.substring(i + 1).toLowerCase();
       }
-      BufferedImage bi = toBufferedImage(image);
+      BufferedImage bi = converter.toBufferedImage(image);
       FileOutputStream fos = new FileOutputStream(filename);
       ImageIO.write(bi, ext, new MemoryCacheImageOutputStream(fos));
       fos.close();
     } catch (IOException e) {
       log.error("saveToFile threw", e);
     }
+    converter.close();
   }
 
   public Integer setCameraIndex(Integer index) {
@@ -1836,6 +1684,9 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * enable() and setDisplayFilter() needed filter
+   * 
+   * @param name
+   *          name of the filter to set active
    *
    */
   public void setActiveFilter(String name) {
@@ -1896,7 +1747,9 @@ public class OpenCV extends AbstractComputerVision {
    * filter
    * 
    * @param name
+   *          name of the filter
    * @param data
+   *          state date to set.
    */
   public void setFilterState(String name, String data) {
     OpenCVFilter filter = getFilter(name);
@@ -1988,6 +1841,10 @@ public class OpenCV extends AbstractComputerVision {
   public void stopService() {
     super.stopService();
     stopCapture();
+    if (canvasFrame != null) {
+      canvasFrame.dispose();
+      canvasFrame = null;
+    }
   }
 
   public void setFormat(String format) {
@@ -2117,7 +1974,6 @@ public class OpenCV extends AbstractComputerVision {
   }
 
   public void saveFile(String filename, String data) {
-    log.info("here !");
     FileOutputStream fos = null;
     try {
       String path = FileIO.gluePaths(getDataDir(), filename);
@@ -2135,6 +1991,162 @@ public class OpenCV extends AbstractComputerVision {
       broadcastState();
     } catch (Exception e) {
       error(e.getMessage());
+    }
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    OpenCVConfig config = new OpenCVConfig();
+    config.capturing = capturing;
+    config.cameraIndex = cameraIndex;
+    // TODO: make the grabber config a nested object to clean this up..
+    config.grabberType = grabberType;
+    config.inputFile = inputFile;
+    config.inputSource = inputSource;
+    config.nativeViewer = nativeViewer;
+    config.webViewer = webViewer;
+    config.filters = new LinkedHashMap<>();
+    config.filters.putAll(filters);
+
+    return config;
+  }
+
+  public ServiceConfig apply(ServiceConfig c) {
+    OpenCVConfig config = (OpenCVConfig) c;
+    setCameraIndex(config.cameraIndex);
+    setGrabberType(config.grabberType);
+    setInputFileName(config.inputFile);
+    setInputSource(config.inputSource);
+
+    setNativeViewer(config.nativeViewer);
+
+    setWebViewer(config.webViewer);
+
+    filters.clear();
+    if (config.filters != null) {
+      for (OpenCVFilter f : config.filters.values()) {
+        addFilter(f);
+        // TODO: better configuration of the filter when it's added.
+      }
+    }
+
+    if (config.capturing) {
+      capture();
+    }
+
+    return c;
+  }
+
+  public long getFrameStartTs() {
+    return frameStartTs;
+  }
+
+  public static void main(String[] args) throws Exception {
+
+    try {
+      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
+      LoggingFactory.init("INFO");
+
+      // Runtime.getInstance().load();
+
+      // Runtime.start("python", "Python");
+      OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+
+      OpenCVFilter fr = new OpenCVFilterFaceRecognizer("fr");
+      cv.addFilter(fr);
+      // OpenCVFilterTracker tracker = new OpenCVFilterTracker("tracker");
+      // cv.addFilter(tracker);
+      // OpenCVFilterLKOpticalTrack lk = new OpenCVFilterLKOpticalTrack("lk");
+      // cv.addFilter(lk);
+      // OpenCVFilterFaceDetectDNN faceDnn = new
+      // OpenCVFilterFaceDetectDNN("face");
+      // cv.addFilter(faceDnn);
+      // OpenCVFilterMiniXception mini = new OpenCVFilterMiniXception("mini");
+      // cv.addFilter(mini);
+
+      // OpenCVFilterTextDetector td = new OpenCVFilterTextDetector("td");
+      // cv.addFilter(td);
+
+      // OpenCVFilterMotionDetect md = new OpenCVFilterMotionDetect("md");
+      // cv.addFilter(md);
+
+      // cv.capture(4);
+      // FFmpegFrameGrabber grabber = new
+      // FFmpegFrameGrabber("tcp://worke-pi:2222");
+      // grabber.start();
+      // cv.capture(grabber);;
+
+      // Runtime.start("gui", "SwingGui");
+
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(true);
+      webgui.startService();
+
+      // FFmpegFrameRecorder test = new
+
+      // FFmpegFrameRecorder recorder = new
+      // FFmpegFrameRecorder("tcp://localhost:9090?listen", 640, 480);
+      // recorder.setFormat("webm");
+      // recorder.start();
+
+      /**
+       * <pre>
+       * 
+       * https://stackoverflow.com/questions/43008150/android-javacv-ffmpeg-webstream-to-local-static-website
+       *
+       * private void initLiveStream() throws FrameRecorder.Exception {
+       * 
+       * frameRecorder = new FFmpegFrameRecorder("http://localhost:9090",
+       * imageWidth, imageHeight, 0); frameRecorder.setVideoOption("preset",
+       * "ultrafast"); frameRecorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+       * frameRecorder.setAudioCodec(0);
+       * frameRecorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
+       * frameRecorder.setFormat("webm"); frameRecorder.setGopSize(10);
+       * frameRecorder.setFrameRate(frameRate);
+       * frameRecorder.setVideoBitrate(5000);
+       * frameRecorder.setOption("content_type","video/webm");
+       * frameRecorder.setOption("listen", "1"); frameRecorder.start(); }
+       *
+       *
+       * FrameRecorder recorder = new FFmpegFrameRecorder("out.mp4",
+       * grabber.getImageWidth(), grabber.getImageHeight());
+       * recorder.setFormat(grabber.getFormat());
+       * recorder.setPixelFormat(AV_PIX_FMT_YUV420P);
+       * recorder.setFrameRate(grabber.getFrameRate());
+       * recorder.setVideoBitrate(grabber.getVideoBitrate());
+       * recorder.setVideoCodec(grabber.getVideoCodec());
+       * recorder.setVideoOption("preset", "ultrafast");
+       * recorder.setVideoCodecName("libx264");
+       * recorder.setVideoCodec(AV_CODEC_ID_H264); recorder.start();
+       * 
+       */
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      OpenCVFilterKinectDepth depth = new OpenCVFilterKinectDepth("depth");
+      cv.addFilter(depth);
+      cv.capture();
+      cv.addFilter("Yolo");
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+
+  }
+
+  @Override
+  public ImageData publishImage(ImageData image) {
+    return image;
+  }
+
+  public void attach(Attachable attachable) {
+    if (attachable instanceof ImageListener) {
+      attachImageListener(attachable.getName());
+    } else {
+      error("don't know how to attach a %s", attachable.getName());
     }
   }
 

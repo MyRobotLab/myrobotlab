@@ -5,7 +5,7 @@ import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.EncoderController;
 
-public class AbstractPinEncoder extends Service implements EncoderControl {
+public abstract class AbstractPinEncoder extends Service implements EncoderControl {
 
   private static final long serialVersionUID = 1L;
   public String pin;
@@ -23,12 +23,12 @@ public class AbstractPinEncoder extends Service implements EncoderControl {
     super(n, id);
   }
 
-  public void attach(EncoderController controller) throws Exception {
+  public void attachEncoderController(EncoderController controller) {
     if (this.controller == controller) {
       log.info("{} already attached to controller {}", getName(), controller.getName());
     }
     this.controller = controller;
-    controller.attach(this);
+    controller.attachEncoderControl(this);
     lastUpdate = System.currentTimeMillis();
   }
 

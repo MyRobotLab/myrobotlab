@@ -39,6 +39,7 @@ public class Locale {
    * correct conversion form java.util.Locale to mrl Locale
    * 
    * @param locale
+   *          the java locale
    */
   public Locale(java.util.Locale locale) {
     this(locale.toString());
@@ -46,7 +47,7 @@ public class Locale {
 
   public Locale(String code) {
     if (code == null) {
-      return;
+      code = java.util.Locale.getDefault().toString();
     }
 
     // trim
@@ -161,7 +162,7 @@ public class Locale {
 
     for (int i = 0; i < ls.length; ++i) {
       java.util.Locale l = ls[i];
-      if (l.getCountry() == null) {
+      if (l.getLanguage() != null) {
         locales.put(l.getLanguage(), new Locale(l));
       }
     }

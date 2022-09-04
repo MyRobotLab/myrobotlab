@@ -108,12 +108,18 @@ public:
   void i2cWrite( byte deviceId,  byte deviceAddress,  byte dataSize, const byte*data);
   // > i2cWriteRead/deviceId/deviceAddress/readSize/writeValue
   void i2cWriteRead( byte deviceId,  byte deviceAddress,  byte readSize,  byte writeValue);
-  // > neoPixelAttach/deviceId/pin/b32 numPixels/depth
-  void neoPixelAttach( byte deviceId,  byte pin,  long numPixels,  byte depth);
-  // > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
-  void neoPixelSetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  int speed);
+  // > neoPixelAttach/deviceId/pin/b16 numPixels/depth
+  void neoPixelAttach( byte deviceId,  byte pin,  int numPixels,  byte depth);
+  // > neoPixelSetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
+  void neoPixelSetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  byte white,  long wait_ms);
   // > neoPixelWriteMatrix/deviceId/[] buffer
   void neoPixelWriteMatrix( byte deviceId,  byte bufferSize, const byte*buffer);
+  // > neoPixelFill/deviceId/b16 address/b16 count/red/green/blue/white
+  void neoPixelFill( byte deviceId,  int address,  int count,  byte red,  byte green,  byte blue,  byte white);
+  // > neoPixelSetBrightness/deviceId/brightness
+  void neoPixelSetBrightness( byte deviceId,  byte brightness);
+  // > neoPixelClear/deviceId
+  void neoPixelClear( byte deviceId);
   // > disablePin/pin
   void disablePin( byte pin);
   // > disablePins

@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import picocli.CommandLine;
 
 public class CmdOptionsTest {
-  
+
   public final static Logger log = LoggerFactory.getLogger(CmdOptionsTest.class);
 
   static boolean contains(List<String> l, String flag) {
@@ -30,35 +30,33 @@ public class CmdOptionsTest {
   public void testGetOutputCmd() throws IOException {
 
     CmdOptions options = new CmdOptions();
-    new CommandLine(options).parseArgs(new String[]{});
-    // validate defaults 
+    new CommandLine(options).parseArgs(new String[] {});
+    // validate defaults
     assertNull(options.addKeys);
     assertEquals(false, options.autoUpdate);
-    assertEquals(false, options.fromLauncher);
     assertNull(options.config);
     assertNull(options.connect);
     assertEquals(0, options.services.size());
-    
-    new CommandLine(options).parseArgs(new String[]{"--id","raspi", "-s", "webgui", "WebGui", "clock01", "Clock"});
-    
+
+    new CommandLine(options).parseArgs(new String[] { "--id", "raspi", "-s", "webgui", "WebGui", "clock01", "Clock" });
+
     assertEquals("raspi", options.id);
     assertEquals(4, options.services.size());
-    assertEquals(false, options.fromLauncher);
-    
+
     List<String> cmd = options.getOutputCmd();
     assertTrue(contains(cmd, "webgui"));
     assertTrue(contains(cmd, "raspi"));
-    
+
     log.info(CmdOptions.toString(cmd));
 
     options = new CmdOptions();
-    new CommandLine(options).parseArgs(new String[]{"-a"});    
+    new CommandLine(options).parseArgs(new String[] { "-a" });
     assertEquals(true, options.autoUpdate);
-    
+
     // test help
-    
+
     // test unmatched option
-    
+
   }
 
 }

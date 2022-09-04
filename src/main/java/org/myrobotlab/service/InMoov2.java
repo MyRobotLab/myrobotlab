@@ -2,7 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +10,9 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.io.FilenameUtils;
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -21,11 +23,15 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
-import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
+import org.myrobotlab.service.config.InMoov2Config;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.WebGuiConfig;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Locale;
+import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.LocaleProvider;
+import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.Simulator;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
@@ -34,23 +40,20 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class InMoov2 extends Service implements TextListener, TextPublisher, JoystickListener, LocaleProvider {
+public class InMoov2 extends Service implements ServiceLifeCycleListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
   public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
 
   public static LinkedHashMap<String, String> lpVars = new LinkedHashMap<String, String>();
 
-  // FIXME - why
-  @Deprecated
-  static boolean RobotCanMoveRandom = true;
   private static final long serialVersionUID = 1L;
 
   static String speechRecognizer = "WebkitSpeechRecognition";
 
   /**
-   * execute a resource script
-   * 
    * @param someScriptName
+   *          execute a resource script
+   * @return success or failure
    */
   public boolean execScript(String someScriptName) {
     try {
@@ -64,10 +67,27 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   /**
+   * Single place for InMoov2 service to execute arbitrary code - needed
+   * initially to set "global" vars in python
+   * 
+   * @param pythonCode
+   * @return
+   */
+  public boolean exec(String pythonCode) {
+    try {
+      Python p = (Python) Runtime.start("python", "Python");
+      return p.exec(pythonCode, true);
+    } catch (Exception e) {
+      error("unable to execute script %s", pythonCode);
+      return false;
+    }
+  }
+
+  /**
    * Part of service life cycle - a new servo has been started
    */
   public void onStarted(String fullname) {
-    log.info("{} started");
+    log.info("{} started", fullname);
     try {
       ServiceInterface si = Runtime.getService(fullname);
       if ("Servo".equals(si.getSimpleName())) {
@@ -80,12 +100,69 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
+  public void startService() {
+    super.startService();
+    Runtime runtime = Runtime.getInstance();
+    // FIXME - shouldn't need this anymore
+    Runtime.getInstance().attachServiceLifeCycleListener(getName());
+
+    try {
+      // copy config if it doesn't already exist
+      String resourceBotDir = FileIO.gluePaths(getResourceDir(), "config");
+      List<File> files = FileIO.getFileList(resourceBotDir);
+      for (File f : files) {
+        String botDir = "data/config/" + f.getName();
+        File bDir = new File(botDir);
+        if (bDir.exists() || !f.isDirectory()) {
+          log.info("skipping data/config/{}", botDir);
+        } else {
+          log.info("will copy new data/config/{}", botDir);
+          try {
+            FileIO.copy(f.getAbsolutePath(), botDir);
+          } catch (Exception e) {
+            error(e);
+          }
+        }
+      }
+
+      // copy (if they don't already exist) the chatbots which came with InMoov2
+      resourceBotDir = FileIO.gluePaths(getResourceDir(), "chatbot/bots");
+      files = FileIO.getFileList(resourceBotDir);
+      for (File f : files) {
+        String botDir = "data/ProgramAB/" + f.getName();
+        if (new File(botDir).exists()) {
+          log.info("found data/ProgramAB/{} not copying", botDir);
+        } else {
+          log.info("will copy new data/ProgramAB/{}", botDir);
+          try {
+            FileIO.copy(f.getAbsolutePath(), botDir);
+          } catch (Exception e) {
+            error(e);
+          }
+        }
+      }
+
+    } catch (Exception e) {
+      error(e);
+    }
+
+    // if (loadGestures) {
+    // loadGestures();
+    // }
+
+    runtime.invoke("publishConfigList");
+  }
+
   public void onCreated(String fullname) {
     log.info("{} created", fullname);
   }
 
   /**
    * This method will load a python file into the python interpreter.
+   * 
+   * @param file
+   *          file to load
+   * @return success/failure
    */
   @Deprecated /* use execScript - this doesn't handle resources correctly */
   public static boolean loadFile(String file) {
@@ -119,129 +196,35 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return true;
   }
 
-  public static void main(String[] args) {
-    try {
-
-      LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(true);
-      Runtime.main(new String[] { "--from-launcher", "--id", "inmoov" });
-      Runtime.start("s01", "Servo");
-      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
-      Runtime.start("s02", "Servo");
-
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.startService();
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
-      i01.startChatBot();
-
-      i01.startAll("COM3", "COM4");
-      Runtime.start("python", "Python");
-      // Runtime.start("log", "Log");
-
-      /*
-       * OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
-       * cv.setCameraIndex(2);
-       */
-      // i01.startSimulator();
-      /*
-       * Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-       * mega.connect("/dev/ttyACM0");
-       */
-
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
-  }
-
   boolean autoStartBrowser = false;
 
   transient ProgramAB chatBot;
 
-  Set<String> configs = null;
-
-  String currentConfigurationName = "default";
   transient SpeechRecognizer ear;
 
   transient OpenCV opencv;
 
   transient Tracking eyesTracking;
-  // waiting controable threaded gestures we warn user
-  boolean gestureAlreadyStarted = false;
-  // FIXME - what the hell is this for ?
-  Set<String> gestures = new TreeSet<String>();
-  transient InMoov2Head head;
+
+  transient ServoMixer servoMixer;
+
+  transient Python python;
 
   transient Tracking headTracking;
 
   transient HtmlFilter htmlFilter;
 
-  transient UltrasonicSensor ultraSonicRight;
+  transient UltrasonicSensor ultrasonicRight;
 
-  transient UltrasonicSensor ultraSonicLeft;
+  transient UltrasonicSensor ultrasonicLeft;
 
   transient Pir pir;
 
-  // transient ImageDisplay imageDisplay;
+  transient ImageDisplay imageDisplay;
 
-  /**
-   * simple booleans to determine peer state of existence FIXME - should be an
-   * auto-peer variable
-   */
+  // transient JMonkeyEngine simulator;
 
-  boolean isChatBotActivated = false;
-
-  boolean isEarActivated = false;
-
-  boolean isOpenCvActivated = false;
-
-  boolean isEyeLidsActivated = false;
-
-  boolean isHeadActivated = false;
-
-  boolean isLeftArmActivated = false;
-
-  boolean isLeftHandActivated = false;
-
-  boolean isMouthActivated = false;
-
-  boolean isRightArmActivated = false;
-
-  boolean isRightHandActivated = false;
-
-  boolean isSimulatorActivated = false;
-
-  boolean isTorsoActivated = false;
-
-  boolean isNeopixelActivated = false;
-
-  boolean isPirActivated = false;
-
-  boolean isUltraSonicRightActivated = false;
-
-  boolean isUltraSonicLeftActivated = false;
-
-  boolean isServoMixerActivated = false;
-
-  // TODO - refactor into a Simulator interface when more simulators are borgd
-  transient JMonkeyEngine jme;
-
-  String lastGestureExecuted;
-
-  Long lastPirActivityTime;
-
-  transient InMoov2Arm leftArm;
-
-  // transient LanguagePack languagePack = new LanguagePack();
-
-  // transient InMoovEyelids eyelids; eyelids are in the head
-
-  transient InMoov2Hand leftHand;
+  String currentConfigurationName = "default";
 
   /**
    * supported locales
@@ -257,17 +240,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   boolean mute = false;
 
-  transient NeoPixel neopixel;
-
-  transient ServoMixer servomixer;
-
-  transient Python python;
-
-  transient InMoov2Arm rightArm;
-
-  transient InMoov2Hand rightHand;
-
-  transient InMoov2Torso torso;
+  // waiting controable threaded gestures we warn user
+  boolean gestureAlreadyStarted = false;
+  // FIXME - what the hell is this for ?
+  Set<String> gestures = new TreeSet<String>();
 
   @Deprecated
   public Vision vision;
@@ -275,14 +251,22 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   // FIXME - remove all direct references
   // transient private HashMap<String, InMoov2Arm> arms = new HashMap<>();
 
-  protected List<Voice> voices = null;
+  // protected List<Voice> voices = null;
 
   protected String voiceSelected;
 
   transient WebGui webgui;
 
+  protected List<String> configList;
+
+  String lastGestureExecuted;
+
+  Long lastPirActivityTime;
+
   public InMoov2(String n, String id) {
     super(n, id);
+
+    // InMoov2 has a huge amount of peers
 
     // by default all servos will auto-disable
     // Servo.setAutoDisableDefault(true); //until peer servo services for
@@ -299,6 +283,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       }
     }
 
+    // dynamically gotten from filesystem/bots ?
     locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
     locale = Runtime.getInstance().getLocale();
 
@@ -307,13 +292,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // python = (Python) startPeer("python");
     python = (Python) Runtime.start("python", "Python"); // this crud should
                                                          // stop
-    load(locale.getTag());
+    // load(locale.getTag()); WTH ?
 
     // get events of new services and shutdown
     Runtime r = Runtime.getInstance();
     subscribe(r.getName(), "shutdown");
-
-    listConfigFiles();
+    subscribe(r.getName(), "publishConfigList");
 
     // FIXME - Framework should auto-magically auto-start peers AFTER
     // construction - unless explicitly told not to
@@ -321,7 +305,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // imageDisplay = (ImageDisplay) startPeer("imageDisplay");
   }
 
-  @Override /* local strong type - is to be avoided - use name string */
   public void addTextListener(TextListener service) {
     // CORRECT WAY ! - no direct reference - just use the name in a subscription
     addListener("publishText", service.getName());
@@ -329,7 +312,28 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   @Override
   public void attachTextListener(TextListener service) {
-    addListener("publishText", service.getName());
+    attachTextListener(service.getName());
+  }
+
+  /**
+   * comes in from runtime which owns the config list
+   * 
+   * @param configList
+   *          list of configs
+   */
+  public void onConfigList(List<String> configList) {
+    this.configList = configList;
+    invoke("publishConfigList");
+  }
+
+  /**
+   * "re"-publishing runtime config list, because I don't want to fix the js
+   * subscribeTo :P
+   * 
+   * @return list of config names
+   */
+  public List<String> publishConfigList() {
+    return configList;
   }
 
   public void attachTextPublisher(String name) {
@@ -399,29 +403,20 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void disable() {
-    if (head != null) {
-      head.disable();
-    }
-    if (rightHand != null) {
-      rightHand.disable();
-    }
-    if (leftHand != null) {
-      leftHand.disable();
-    }
-    if (rightArm != null) {
-      rightArm.disable();
-    }
-    if (leftArm != null) {
-      leftArm.disable();
-    }
-    if (torso != null) {
-      torso.disable();
-    }
+    sendToPeer("head", "disable");
+    sendToPeer("rightHand", "disable");
+    sendToPeer("leftHand", "disable");
+    sendToPeer("rightArm", "disable");
+    sendToPeer("leftArm", "disable");
+    sendToPeer("torso", "disable");
   }
 
   public void displayFullScreen(String src) {
     try {
-      // imageDisplay.displayFullScreen(src);
+      if (imageDisplay == null) {
+        imageDisplay = (ImageDisplay) startPeer("imageDisplay");
+      }
+      imageDisplay.displayFullScreen(src);
       log.error("implement webgui.displayFullScreen");
     } catch (Exception e) {
       error("could not display picture %s", src);
@@ -429,28 +424,20 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void enable() {
-    if (head != null) {
-      head.enable();
-    }
-    if (rightHand != null) {
-      rightHand.enable();
-    }
-    if (leftHand != null) {
-      leftHand.enable();
-    }
-    if (rightArm != null) {
-      rightArm.enable();
-    }
-    if (leftArm != null) {
-      leftArm.enable();
-    }
-    if (torso != null) {
-      torso.enable();
-    }
+    sendToPeer("head", "enable");
+    sendToPeer("rightHand", "enable");
+    sendToPeer("leftHand", "enable");
+    sendToPeer("rightArm", "enable");
+    sendToPeer("leftArm", "enable");
+    sendToPeer("torso", "enable");
   }
 
   /**
    * This method will try to launch a python command with error handling
+   * 
+   * @param gesture
+   *          the gesture
+   * @return gesture result
    */
   public String execGesture(String gesture) {
 
@@ -468,34 +455,26 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     finishedGesture("unknown");
   }
 
+  // public State publishState(State state) {
+  // return state;
+  // }
+
   public void finishedGesture(String nameOfGesture) {
     if (gestureAlreadyStarted) {
       waitTargetPos();
-      RobotCanMoveRandom = true;
+      // RobotCanMoveRandom = true;
       gestureAlreadyStarted = false;
       log.info("gesture : {} finished...", nameOfGesture);
     }
   }
 
   public void fullSpeed() {
-    if (head != null) {
-      head.fullSpeed();
-    }
-    if (rightHand != null) {
-      rightHand.fullSpeed();
-    }
-    if (leftHand != null) {
-      leftHand.fullSpeed();
-    }
-    if (rightArm != null) {
-      rightArm.fullSpeed();
-    }
-    if (leftArm != null) {
-      leftArm.fullSpeed();
-    }
-    if (torso != null) {
-      torso.fullSpeed();
-    }
+    sendToPeer("head", "fullSpeed");
+    sendToPeer("rightHand", "fullSpeed");
+    sendToPeer("leftHand", "fullSpeed");
+    sendToPeer("rightArm", "fullSpeed");
+    sendToPeer("leftArm", "fullSpeed");
+    sendToPeer("torso", "fullSpeed");
   }
 
   public String get(String key) {
@@ -507,29 +486,23 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public InMoov2Arm getArm(String side) {
-    if ("left".equals(side)) {
-      return leftArm;
-    } else if ("right".equals(side)) {
-      return rightArm;
-    } else {
-      log.error("can not get arm {}", side);
+    if (!"left".equals(side) && !"right".equals(side)) {
+      error("side must be left or right - instead of %s", side);
+      return null;
     }
-    return null;
+    return (InMoov2Arm) getPeer(side + "Arm");
   }
 
   public InMoov2Hand getHand(String side) {
-    if ("left".equals(side)) {
-      return leftHand;
-    } else if ("right".equals(side)) {
-      return rightHand;
-    } else {
-      log.error("can not get arm {}", side);
+    if (!"left".equals(side) && !"right".equals(side)) {
+      error("side must be left or right - instead of %s", side);
+      return null;
     }
-    return null;
+    return (InMoov2Hand) getPeer(side + "Hand");
   }
 
   public InMoov2Head getHead() {
-    return head;
+    return (InMoov2Head) getPeer("head");
   }
 
   /**
@@ -537,52 +510,39 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
    * 
    * @return the timestamp of the last activity time.
    */
-  public long getLastActivityTime() {
+  public Long getLastActivityTime() {
+    try {
 
-    long lastActivityTime = 0;
+      Long lastActivityTime = 0L;
 
-    if (leftHand != null) {
-      lastActivityTime = Math.max(lastActivityTime, leftHand.getLastActivityTime());
+      Long head = (Long) sendToPeerBlocking("head", "getLastActivityTime", getName());
+      Long leftArm = (Long) sendToPeerBlocking("leftArm", "getLastActivityTime", getName());
+      Long rightArm = (Long) sendToPeerBlocking("rightArm", "getLastActivityTime", getName());
+      Long leftHand = (Long) sendToPeerBlocking("leftHand", "getLastActivityTime", getName());
+      Long rightHand = (Long) sendToPeerBlocking("rightHand", "getLastActivityTime", getName());
+      Long torso = (Long) sendToPeerBlocking("torso", "getLastActivityTime", getName());
+
+      lastActivityTime = Math.max(head, leftArm);
+      lastActivityTime = Math.max(lastActivityTime, rightArm);
+      lastActivityTime = Math.max(lastActivityTime, leftHand);
+      lastActivityTime = Math.max(lastActivityTime, rightHand);
+      lastActivityTime = Math.max(lastActivityTime, torso);
+
+      return lastActivityTime;
+
+    } catch (Exception e) {
+      error(e);
+      return null;
     }
 
-    if (leftArm != null) {
-      lastActivityTime = Math.max(lastActivityTime, leftArm.getLastActivityTime());
-    }
-
-    if (rightHand != null) {
-      lastActivityTime = Math.max(lastActivityTime, rightHand.getLastActivityTime());
-    }
-
-    if (rightArm != null) {
-      lastActivityTime = Math.max(lastActivityTime, rightArm.getLastActivityTime());
-    }
-
-    if (head != null) {
-      lastActivityTime = Math.max(lastActivityTime, head.getLastActivityTime());
-    }
-
-    if (torso != null) {
-      lastActivityTime = Math.max(lastActivityTime, torso.getLastActivityTime());
-    }
-
-    if (lastPirActivityTime != null) {
-      lastActivityTime = Math.max(lastActivityTime, lastPirActivityTime);
-    }
-
-    if (lastActivityTime == 0) {
-      error("invalid activity time - anything connected?");
-      lastActivityTime = System.currentTimeMillis();
-    }
-
-    return lastActivityTime;
   }
 
   public InMoov2Arm getLeftArm() {
-    return leftArm;
+    return (InMoov2Arm) getPeer("leftArm");
   }
 
   public InMoov2Hand getLeftHand() {
-    return leftHand;
+    return (InMoov2Hand) getPeer("leftHand");
   }
 
   @Override
@@ -591,42 +551,28 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public InMoov2Arm getRightArm() {
-    return rightArm;
+    return (InMoov2Arm) getPeer("rightArm");
   }
 
   public InMoov2Hand getRightHand() {
-    return rightHand;
+    return (InMoov2Hand) getPeer("rightHand");
   }
 
   public Simulator getSimulator() {
-    return jme;
+    return (Simulator) getPeer("simulator");
   }
 
   public InMoov2Torso getTorso() {
-    return torso;
+    return (InMoov2Torso) getPeer("torso");
   }
 
   public void halfSpeed() {
-    if (head != null) {
-      head.setSpeed(25.0, 25.0, 25.0, 25.0, 100.0, 25.0);
-    }
-
-    if (rightHand != null) {
-      rightHand.setSpeed(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
-    }
-    if (leftHand != null) {
-      leftHand.setSpeed(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
-    }
-    if (rightArm != null) {
-      rightArm.setSpeed(25.0, 25.0, 25.0, 25.0);
-    }
-    if (leftArm != null) {
-      leftArm.setSpeed(25.0, 25.0, 25.0, 25.0);
-    }
-    if (torso != null) {
-      torso.setSpeed(20.0, 20.0, 20.0);
-    }
-
+    sendToPeer("head", "setSpeed", 25.0, 25.0, 25.0, 25.0, 100.0, 25.0);
+    sendToPeer("rightHand", "setSpeed", 30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
+    sendToPeer("leftHand", "setSpeed", 30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
+    sendToPeer("rightArm", "setSpeed", 25.0, 25.0, 25.0, 25.0);
+    sendToPeer("leftArm", "setSpeed", 25.0, 25.0, 25.0, 25.0);
+    sendToPeer("torso", "setSpeed", 20.0, 20.0, 20.0);
   }
 
   public boolean isCameraOn() {
@@ -638,96 +584,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return false;
   }
 
-  public boolean isEyeLidsActivated() {
-    return isEyeLidsActivated;
-  }
-
-  public boolean isHeadActivated() {
-    return isHeadActivated;
-  }
-
-  public boolean isLeftArmActivated() {
-    return isLeftArmActivated;
-  }
-
-  public boolean isLeftHandActivated() {
-    return isLeftHandActivated;
-  }
-
   public boolean isMute() {
     return mute;
-  }
-
-  public boolean isNeopixelActivated() {
-    return isNeopixelActivated;
-  }
-
-  public boolean isRightArmActivated() {
-    return isRightArmActivated;
-  }
-
-  public boolean isRightHandActivated() {
-    return isRightHandActivated;
-  }
-
-  public boolean isTorsoActivated() {
-    return isTorsoActivated;
-  }
-
-  public boolean isPirActivated() {
-    return isPirActivated;
-  }
-
-  public boolean isUltraSonicRightActivated() {
-    return isUltraSonicRightActivated;
-  }
-
-  public boolean isUltraSonicLeftActivated() {
-    return isUltraSonicLeftActivated;
-  }
-  // by default all servos will auto-disable
-  // TODO: KW : make peer servo services for InMoov2 have the auto disable
-  // behavior.
-  // Servo.setAutoDisableDefault(true);
-
-  public boolean isServoMixerActivated() {
-    return isServoMixerActivated;
-  }
-
-  public Set<String> listConfigFiles() {
-
-    configs = new HashSet<>();
-
-    // data list
-    String configDir = getResourceDir() + fs + "config";
-    File f = new File(configDir);
-    if (!f.exists()) {
-      f.mkdirs();
-    }
-    String[] files = f.list();
-    for (String config : files) {
-      configs.add(config);
-    }
-
-    // data list
-    configDir = getDataDir() + fs + "config";
-    f = new File(configDir);
-    if (!f.exists()) {
-      f.mkdirs();
-    }
-    files = f.list();
-    for (String config : files) {
-      configs.add(config);
-    }
-
-    return configs;
-  }
-
-  /*
-   * iterate over each txt files in the directory
-   */
-  public void load(String locale) {
-    setLocale(locale);
   }
 
   public void loadGestures() {
@@ -741,6 +599,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
    * 
    * @param directory
    *          - the directory that contains the gesture python files.
+   * @return true/false
    */
   public boolean loadGestures(String directory) {
     speakBlocking(get("STARTINGGESTURES"));
@@ -779,7 +638,64 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return true;
   }
 
-  public void moveArm(String which, double bicep, double rotate, double shoulder, double omoplate) {
+  public String captureGesture() {
+    return captureGesture(null);
+  }
+
+  public String captureGesture(String gestureName) {
+    StringBuffer script = new StringBuffer();
+    Date date = new Date();
+
+    script.append("# - " + date + " - Captured gesture :\n");
+
+    if (gestureName != null) {
+      script.append(String.format("def %s():\n", gestureName));
+    }
+
+    try {
+      script.append(sendToPeerBlocking("head", "getScript", getName()));
+      script.append(sendToPeerBlocking("leftArm", "getScript", getName()));
+      script.append(sendToPeerBlocking("rightArm", "getScript", getName()));
+      script.append(sendToPeerBlocking("leftHand", "getScript", getName()));
+      script.append(sendToPeerBlocking("rightHand", "getScript", getName()));
+      script.append(sendToPeerBlocking("torso", "getScript", getName()));
+
+    } catch (Exception e) {
+      error(e);
+    }
+
+    send("python", "appendScript", script.toString());
+
+    return script.toString();
+  }
+
+  public void cameraOff() {
+    if (opencv != null) {
+      opencv.stopCapture();
+      opencv.disableAll();
+    }
+  }
+
+  public void cameraOn() {
+    try {
+      if (opencv == null) {
+        startOpenCV();
+      }
+      opencv.capture();
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
+  public void moveLeftArm(Double bicep, Double rotate, Double shoulder, Double omoplate) {
+    moveArm("left", bicep, rotate, shoulder, omoplate);
+  }
+
+  public void moveRightArm(Double bicep, Double rotate, Double shoulder, Double omoplate) {
+    moveArm("right", bicep, rotate, shoulder, omoplate);
+  }
+
+  public void moveArm(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
     InMoov2Arm arm = getArm(which);
     if (arm == null) {
       info("%s arm not started", which);
@@ -788,40 +704,44 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     arm.moveTo(bicep, rotate, shoulder, omoplate);
   }
 
-  public void moveEyelids(double eyelidleftPos, double eyelidrightPos) {
-    if (head != null) {
-      head.moveEyelidsTo(eyelidleftPos, eyelidrightPos);
-    } else {
-      log.warn("moveEyelids - I have a null head");
-    }
+  public void moveEyelids(Double eyelidleftPos, Double eyelidrightPos) {
+    sendToPeer("head", "moveEyelids", eyelidleftPos, eyelidrightPos);
   }
 
-  public void moveEyes(double eyeX, double eyeY) {
-    if (head != null) {
-      head.moveTo(null, null, eyeX, eyeY, null, null);
-    } else {
-      log.warn("moveEyes - I have a null head");
-    }
+  public void moveEyes(Double eyeX, Double eyeY) {
+    moveHead(null, null, eyeX, eyeY, null, null);
   }
 
-  public void moveHand(String which, double thumb, double index, double majeure, double ringFinger, double pinky) {
+  public void moveRightHand(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
+    moveHand("right", thumb, index, majeure, ringFinger, pinky, wrist);
+  }
+
+  public void moveRightHand(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    moveHand("right", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
+  }
+
+  public void moveLeftHand(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
+    moveHand("left", thumb, index, majeure, ringFinger, pinky, wrist);
+  }
+
+  public void moveLeftHand(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    moveHand("left", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
+  }
+
+  public void moveHand(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky) {
     moveHand(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
   public void moveHand(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
-    InMoov2Hand hand = getHand(which);
-    if (hand == null) {
-      log.warn("{} hand does not exist");
-      return;
-    }
-    hand.moveTo(thumb, index, majeure, ringFinger, pinky, wrist);
+    // the "right" way
+    sendToPeer(which + "Hand", "moveTo", thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
-  public void moveHead(double neck, double rothead) {
+  public void moveHead(Double neck, Double rothead) {
     moveHead(neck, rothead, null, null, null, null);
   }
 
-  public void moveHead(double neck, double rothead, double eyeX, double eyeY, double jaw) {
+  public void moveHead(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw) {
     moveHead(neck, rothead, eyeX, eyeY, jaw, null);
   }
 
@@ -829,48 +749,40 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     moveHead(rollNeck, rothead, null, null, null, rollNeck);
   }
 
-  public void moveHead(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
-    if (head != null) {
-      head.moveTo(neck, rothead, eyeX, eyeY, jaw, rollNeck);
-    } else {
-      log.error("I have a null head");
-    }
+  public void moveHead(Integer neck, Integer rothead, Integer rollNeck) {
+    moveHead((double) rollNeck, (double) rothead, null, null, null, (double) rollNeck);
   }
 
-  public void moveHeadBlocking(double neck, double rothead) {
+  public void moveHead(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
+    // the "right" way
+    sendToPeer("head", "moveTo", neck, rothead, eyeX, eyeY, jaw, rollNeck);
+  }
+
+  public void moveHeadBlocking(Double neck, Double rothead) {
     moveHeadBlocking(neck, rothead, null);
   }
 
-  public void moveHeadBlocking(double neck, double rothead, Double rollNeck) {
+  public void moveHeadBlocking(Double neck, Double rothead, Double rollNeck) {
     moveHeadBlocking(neck, rothead, null, null, null, rollNeck);
   }
 
-  public void moveHeadBlocking(double neck, double rothead, Double eyeX, Double eyeY, Double jaw) {
+  public void moveHeadBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw) {
     moveHeadBlocking(neck, rothead, eyeX, eyeY, jaw, null);
   }
 
   public void moveHeadBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
-    if (head != null) {
-      head.moveToBlocking(neck, rothead, eyeX, eyeY, jaw, rollNeck);
-    } else {
-      log.error("I have a null head");
-    }
+    // the "right" way
+    sendToPeer("head", "moveToBlocking", neck, rothead, eyeX, eyeY, jaw, rollNeck);
   }
 
-  public void moveTorso(double topStom, double midStom, double lowStom) {
-    if (torso != null) {
-      torso.moveTo(topStom, midStom, lowStom);
-    } else {
-      log.error("moveTorso - I have a null torso");
-    }
+  public void moveTorso(Double topStom, Double midStom, Double lowStom) {
+    // the "right" way
+    sendToPeer("torso", "moveTo", topStom, midStom, lowStom);
   }
 
-  public void moveTorsoBlocking(double topStom, double midStom, double lowStom) {
-    if (torso != null) {
-      torso.moveToBlocking(topStom, midStom, lowStom);
-    } else {
-      log.error("moveTorsoBlocking - I have a null torso");
-    }
+  public void moveTorsoBlocking(Double topStom, Double midStom, Double lowStom) {
+    // the "right" way
+    sendToPeer("torso", "moveToBlocking", topStom, midStom, lowStom);
   }
 
   public void onGestureStatus(Status status) {
@@ -940,7 +852,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public void releaseService() {
     try {
       disable();
-      releasePeers();
       super.releaseService();
     } catch (Exception e) {
       error(e);
@@ -949,25 +860,28 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   // FIXME NO DIRECT REFERENCES - publishRest --> (onRest) --> rest
   public void rest() {
-    log.info("InMoov2.rest()");
-    if (head != null) {
-      head.rest();
-    }
-    if (rightHand != null) {
-      rightHand.rest();
-    }
-    if (leftHand != null) {
-      leftHand.rest();
-    }
-    if (rightArm != null) {
-      rightArm.rest();
-    }
-    if (leftArm != null) {
-      leftArm.rest();
-    }
-    if (torso != null) {
-      torso.rest();
-    }
+    sendToPeer("head", "rest");
+    sendToPeer("rightHand", "rest");
+    sendToPeer("leftHand", "rest");
+    sendToPeer("rightArm", "rest");
+    sendToPeer("leftArm", "rest");
+    sendToPeer("torso", "rest");
+  }
+
+  public void setLeftArmSpeed(Double bicep, Double rotate, Double shoulder, Double omoplate) {
+    setArmSpeed("left", bicep, rotate, shoulder, omoplate);
+  }
+
+  public void setLeftArmSpeed(Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
+    setArmSpeed("left", (double) bicep, (double) rotate, (double) shoulder, (double) omoplate);
+  }
+
+  public void setRightArmSpeed(Double bicep, Double rotate, Double shoulder, Double omoplate) {
+    setArmSpeed("right", bicep, rotate, shoulder, omoplate);
+  }
+
+  public void setRightArmSpeed(Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
+    setArmSpeed("right", (double) bicep, (double) rotate, (double) shoulder, (double) omoplate);
   }
 
   public void setArmSpeed(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
@@ -985,31 +899,33 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void setAutoDisable(Boolean param) {
-    if (head != null) {
-      head.setAutoDisable(param);
-    }
-    if (rightArm != null) {
-      rightArm.setAutoDisable(param);
-    }
-    if (leftArm != null) {
-      leftArm.setAutoDisable(param);
-    }
-    if (leftHand != null) {
-      leftHand.setAutoDisable(param);
-    }
-    if (rightHand != null) {
-      leftHand.setAutoDisable(param);
-    }
-    if (torso != null) {
-      torso.setAutoDisable(param);
-    }
-    /*
-     * if (eyelids != null) { eyelids.setAutoDisable(param); }
-     */
+
+    sendToPeer("head", "setAutoDisable", param);
+    sendToPeer("rightHand", "setAutoDisable", param);
+    sendToPeer("leftHand", "setAutoDisable", param);
+    sendToPeer("rightArm", "setAutoDisable", param);
+    sendToPeer("leftArm", "setAutoDisable", param);
+    sendToPeer("torso", "setAutoDisable", param);
   }
 
   public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky) {
     setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, null);
+  }
+
+  public void setLeftHandSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
+    setHandSpeed("left", thumb, index, majeure, ringFinger, pinky, wrist);
+  }
+
+  public void setLeftHandSpeed(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    setHandSpeed("left", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
+  }
+
+  public void setRightHandSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
+    setHandSpeed("right", thumb, index, majeure, ringFinger, pinky, wrist);
+  }
+
+  public void setRightHandSpeed(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    setHandSpeed("right", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
   }
 
   public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
@@ -1039,16 +955,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     setHeadSpeed(rothead, neck, null, null, null, rollNeck);
   }
 
+  public void setHeadSpeed(Integer rothead, Integer neck, Integer rollNeck) {
+    setHeadSpeed((double) rothead, (double) neck, null, null, null, (double) rollNeck);
+  }
+
   public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
     setHeadSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, null);
   }
 
   public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
-    if (head == null) {
-      warn("setHeadSpeed - head not started");
-      return;
-    }
-    head.setSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
+    sendToPeer("head", "setSpeed", neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
   }
 
   @Deprecated
@@ -1086,8 +1002,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
 
     super.setLocale(code);
+
+    locale = new Locale(code);
+
+    // super.setLocale(code);
     for (ServiceInterface si : Runtime.getLocalServices().values()) {
-      if (!si.equals(this)) {
+      if (!si.equals(this) && !si.isRuntime()) {
         si.setLocale(code);
       }
     }
@@ -1101,43 +1021,33 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void setNeopixelAnimation(String animation, Integer red, Integer green, Integer blue, Integer speed) {
-    if (neopixel != null) {
-      neopixel.setAnimation(animation, red, green, blue, speed);
-    } else {
-      warn("No Neopixel attached");
-    }
+    sendToPeer("neopixel", "animation", red, green, blue, speed);
   }
 
   public String setSpeechType(String speechType) {
-    // speechService = speechType;
-    serviceType.setPeer("mouth", speechType);
-    broadcastState();
+    // changing runtime plan
+    Plan plan = Runtime.getPlan();
+    plan.remove(getPeerName("mouth"));
+    Runtime.load(getPeerName("mouth"), speechType);
+    // broadcastState();
     return speechType;
   }
 
   public void setTorsoSpeed(Double topStom, Double midStom, Double lowStom) {
-    if (torso != null) {
-      torso.setSpeed(topStom, midStom, lowStom);
-    } else {
-      log.warn("setTorsoSpeed - I have no torso");
-    }
+    sendToPeer("torso", "setSpeed", topStom, midStom, lowStom);
+  }
+
+  public void setTorsoSpeed(Integer topStom, Integer midStom, Integer lowStom) {
+    setTorsoSpeed((double) topStom, (double) midStom, (double) lowStom);
   }
 
   @Deprecated
   public void setTorsoVelocity(Double topStom, Double midStom, Double lowStom) {
-    if (torso != null) {
-      torso.setVelocity(topStom, midStom, lowStom);
-    } else {
-      log.warn("setTorsoVelocity - I have no torso");
-    }
+    setTorsoSpeed(topStom, midStom, lowStom);
   }
 
-  /**
-   * overridden setVirtual for InMoov sets "all" services to virtual
-   */
-  public boolean setVirtual(boolean virtual) {
-    super.setVirtual(virtual);
-    Platform.setVirtual(virtual);
+  public boolean setAllVirtual(boolean virtual) {
+    Runtime.setAllVirtual(virtual);
     speakBlocking(get("STARTINGVIRTUALHARD"));
     return virtual;
   }
@@ -1178,9 +1088,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // FIXME - publish onText when listening
     invoke("publishText", toSpeak);
 
-    if (!mute) {
+    if (!mute && isPeerStarted("mouth")) {
       // sendToPeer("mouth", "speakBlocking", toSpeak);
-      invokePeer("mouth", "speakBlocking", toSpeak);
+      // invokePeer("mouth", "speakBlocking", toSpeak);
+      sendToPeer("mouth", "speakBlocking", toSpeak);
     }
   }
 
@@ -1197,37 +1108,22 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // startOpenCV();
     startEar();
 
-    startServos(leftPort, rightPort);
+    startServos();
     // startMouthControl(head.jaw, mouth);
 
     speakBlocking(get("STARTINGSEQUENCE"));
   }
 
-  /**
-   * start servos - no controllers
-   * 
-   * @throws Exception
-   */
-  public void startServos() throws Exception {
-    startServos(null, null);
-  }
-
   public ProgramAB startChatBot() {
 
     try {
-
       chatBot = (ProgramAB) startPeer("chatBot");
-      isChatBotActivated = true;
+
+      if (locale != null) {
+        chatBot.setCurrentBotName(locale.getTag());
+      }
 
       speakBlocking(get("CHATBOTACTIVATED"));
-
-      // GOOD EXAMPLE ! - no type, uses name - does a set of subscriptions !
-      // attachTextPublisher(chatBot.getName());
-
-      /*
-       * not necessary - ear needs to be attached to mouth not chatBot if (ear
-       * != null) { ear.attachTextListener(chatBot); }
-       */
 
       chatBot.attachTextPublisher(ear);
 
@@ -1236,7 +1132,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       // FIXME - deal with language
       // speakBlocking(get("CHATBOTACTIVATED"));
       chatBot.repetitionCount(10);
-      chatBot.setPath(getResourceDir() + fs + "chatbot");
+      // chatBot.setPath(getResourceDir() + fs + "chatbot");
+      chatBot.setPath(getDataDir() + fs + "chatbot");
       chatBot.startSession("default", locale.getTag());
       // reset some parameters to default...
       chatBot.setPredicate("topic", "default");
@@ -1245,7 +1142,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       chatBot.setPredicate("null", "");
       // load last user session
       if (!chatBot.getPredicate("name").isEmpty()) {
-        if (chatBot.getPredicate("lastUsername").isEmpty() || chatBot.getPredicate("lastUsername").equals("unknown")) {
+        if (chatBot.getPredicate("lastUsername").isEmpty() || chatBot.getPredicate("lastUsername").equals("unknown") || chatBot.getPredicate("lastUsername").equals("default")) {
           chatBot.setPredicate("lastUsername", chatBot.getPredicate("name"));
         }
       }
@@ -1255,16 +1152,24 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       } catch (IOException e) {
         log.error("saving predicates threw", e);
       }
-      // start session based on last recognized person
-      if (!chatBot.getPredicate("default", "lastUsername").isEmpty() && !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
-        chatBot.startSession(chatBot.getPredicate("lastUsername"));
-      }
-
       htmlFilter = (HtmlFilter) startPeer("htmlFilter");// Runtime.start("htmlFilter",
       // "HtmlFilter");
       chatBot.attachTextListener(htmlFilter);
       htmlFilter.attachTextListener((TextListener) getPeer("mouth"));
       chatBot.attachTextListener(this);
+      // start session based on last recognized person
+      // if (!chatBot.getPredicate("default", "lastUsername").isEmpty() &&
+      // !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
+      // chatBot.startSession(chatBot.getPredicate("lastUsername"));
+      // }
+      if (chatBot.getPredicate("default", "firstinit").isEmpty() || chatBot.getPredicate("default", "firstinit").equals("unknown")
+          || chatBot.getPredicate("default", "firstinit").equals("started")) {
+        chatBot.startSession(chatBot.getPredicate("default", "lastUsername"));
+        chatBot.getResponse("FIRST_INIT");
+      } else {
+        chatBot.startSession(chatBot.getPredicate("default", "lastUsername"));
+        chatBot.getResponse("WAKE_UP");
+      }
     } catch (Exception e) {
       speak("could not load chatBot");
       error(e.getMessage());
@@ -1277,8 +1182,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public SpeechRecognizer startEar() {
 
     ear = (SpeechRecognizer) startPeer("ear");
-    isEarActivated = true;
-
     ear.attachSpeechSynthesis((SpeechSynthesis) getPeer("mouth"));
     ear.attachTextListener(chatBot);
 
@@ -1297,178 +1200,26 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     } else {
       log.info("Starting gesture : {}", nameOfGesture);
       gestureAlreadyStarted = true;
-      RobotCanMoveRandom = false;
+      // RobotCanMoveRandom = false;
     }
   }
 
   // FIXME - universal (good) way of handling all exceptions - ie - reporting
   // back to the user the problem in a short concise way but have
   // expandable detail in appropriate places
-  public OpenCV startOpenCV() throws Exception {
+  public OpenCV startOpenCV() {
     speakBlocking(get("STARTINGOPENCV"));
     opencv = (OpenCV) startPeer("opencv");
     subscribeTo(opencv.getName(), "publishOpenCVData");
-    isOpenCvActivated = true;
     return opencv;
   }
 
-  public Tracking startEyesTracking() throws Exception {
-    if (head == null) {
-      startHead();
-    }
-    return startHeadTracking(head.eyeX, head.eyeY);
+  public OpenCV getOpenCV() {
+    return opencv;
   }
 
-  public Tracking startEyesTracking(ServoControl eyeX, ServoControl eyeY) throws Exception {
-    if (opencv == null) {
-      startOpenCV();
-    }
-    speakBlocking(get("TRACKINGSTARTED"));
-    eyesTracking = (Tracking) this.startPeer("eyesTracking");
-    eyesTracking.connect(opencv, head.eyeX, head.eyeY);
-    return eyesTracking;
-  }
-
-  public InMoov2Head startHead() throws Exception {
-    return startHead(null, null, null, null, null, null, null, null);
-  }
-
-  public InMoov2Head startHead(String port) throws Exception {
-    return startHead(port, null, null, null, null, null, null, null);
-  }
-
-  // legacy inmoov head exposed pins
-  public InMoov2Head startHead(String port, String type, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin) {
-
-    speakBlocking(get("STARTINGHEAD"));
-
-    head = (InMoov2Head) startPeer("head");
-    isHeadActivated = true;
-
-    if (headYPin != null) {
-      head.setPins(headYPin, headXPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
-    }
-
-    // lame assumption - port is specified - it must be an Arduino :(
-    if (port != null) {
-      try {
-        speakBlocking(get(port));
-        Arduino arduino = (Arduino) startPeer("left");
-        arduino.connect(port);
-
-        arduino.attach(head.neck);
-        arduino.attach(head.rothead);
-        arduino.attach(head.eyeX);
-        arduino.attach(head.eyeY);
-        arduino.attach(head.jaw);
-        // FIXME rollNeck and eyelids must be connected to right controller
-        // arduino.attach(head.rollNeck);
-        // arduino.attach(head.eyelidLeft);
-        // arduino.attach(head.eyelidRight);
-
-      } catch (Exception e) {
-        error(e);
-      }
-    }
-
-    speakBlocking(get("STARTINGMOUTHCONTROL"));
-    mouthControl = (MouthControl) startPeer("mouthControl");
-    mouthControl.attach(head.jaw);
-    mouthControl.attach((Attachable) getPeer("mouth"));
-    mouthControl.setmouth(10, 50);// <-- FIXME - not the right place for
-    // config !!!
-
-    return head;
-  }
-
-  public void startHeadTracking() throws Exception {
-    if (opencv == null) {
-      startOpenCV();
-    }
-
-    if (head == null) {
-      startHead();
-    }
-
-    if (headTracking == null) {
-      speakBlocking(get("TRACKINGSTARTED"));
-      headTracking = (Tracking) this.startPeer("headTracking");
-      headTracking.connect(this.opencv, head.rothead, head.neck);
-    }
-  }
-
-  public Tracking startHeadTracking(ServoControl rothead, ServoControl neck) throws Exception {
-    if (opencv == null) {
-      startOpenCV();
-    }
-
-    if (headTracking == null) {
-      speakBlocking(get("TRACKINGSTARTED"));
-      headTracking = (Tracking) this.startPeer("headTracking");
-      headTracking.connect(this.opencv, rothead, neck);
-    }
-    return headTracking;
-  }
-
-  public InMoov2Arm startLeftArm() {
-    return startLeftArm(null);
-  }
-
-  public InMoov2Arm startLeftArm(String port) {
-    // log.warn(InMoov.buildDNA(myKey, serviceClass))
-    // speakBlocking(get("STARTINGHEAD") + " " + port);
-    // ??? SHOULD THERE BE REFERENCES AT ALL ??? ... probably not
-
-    speakBlocking(get("STARTINGLEFTARM"));
-    leftArm = (InMoov2Arm) startPeer("leftArm");
-    isLeftArmActivated = true;
-
-    if (port != null) {
-      try {
-        speakBlocking(port);
-        Arduino arduino = (Arduino) startPeer("left");
-        arduino.connect(port);
-
-        arduino.attach(leftArm.bicep);
-        arduino.attach(leftArm.omoplate);
-        arduino.attach(leftArm.rotate);
-        arduino.attach(leftArm.shoulder);
-      } catch (Exception e) {
-        error(e);
-      }
-    }
-    return leftArm;
-  }
-
-  public InMoov2Hand startLeftHand() {
-    return startLeftHand(null);
-  }
-
-  public InMoov2Hand startLeftHand(String port) {
-
-    speakBlocking(get("STARTINGLEFTHAND"));
-    leftHand = (InMoov2Hand) startPeer("leftHand");
-    isLeftHandActivated = true;
-
-    if (port != null) {
-      try {
-        speakBlocking(port);
-        Arduino arduino = (Arduino) startPeer("left");
-        arduino.connect(port);
-
-        arduino.attach(leftHand.thumb);
-        arduino.attach(leftHand.index);
-        arduino.attach(leftHand.majeure);
-        arduino.attach(leftHand.ringFinger);
-        arduino.attach(leftHand.pinky);
-        arduino.attach(leftHand.wrist);
-
-      } catch (Exception e) {
-        error(e);
-      }
-    }
-
-    return leftHand;
+  public void setOpenCV(OpenCV opencv) {
+    this.opencv = opencv;
   }
 
   // TODO - general objective "might" be to reduce peers down to something
@@ -1476,17 +1227,19 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   // and the only thing needed is pubs/subs that are not handled in abstracts
   public SpeechSynthesis startMouth() {
 
-    // FIXME - bad to have a reference, shuld only need the "name" of the
+    // FIXME - set type ??? - maybe a good product of InMoov
+    // if "new" type cannot necessarily grab yml file
+    // setMouthType
+
+    // FIXME - bad to have a reference, should only need the "name" of the
     // service !!!
     mouth = (SpeechSynthesis) startPeer("mouth");
 
-    voices = mouth.getVoices();
-    Voice voice = mouth.getVoice();
-    if (voice != null) {
-      voiceSelected = voice.getName();
-    }
-
-    isMouthActivated = true;
+    // voices = mouth.getVoices();
+    // Voice voice = mouth.getVoice();
+    // if (voice != null) {
+    // voiceSelected = voice.getName();
+    // }
 
     if (mute) {
       mouth.setMute(true);
@@ -1509,473 +1262,28 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return mouth;
   }
 
-  public InMoov2Arm startRightArm() {
-    return startRightArm(null);
-  }
-
-  public InMoov2Arm startRightArm(String port) {
-
-    speakBlocking(get("STARTINGRIGHTARM"));
-
-    rightArm = (InMoov2Arm) startPeer("rightArm");
-    isRightArmActivated = true;
-
-    if (port != null) {
-      try {
-        speakBlocking(port);
-        Arduino arduino = (Arduino) startPeer("right");
-        arduino.connect(port);
-
-        arduino.attach(rightArm.bicep);
-        arduino.attach(rightArm.omoplate);
-        arduino.attach(rightArm.rotate);
-        arduino.attach(rightArm.shoulder);
-      } catch (Exception e) {
-        error(e);
-      }
-    }
-
-    return rightArm;
-  }
-
-  public InMoov2Hand startRightHand() {
-    return startRightHand(null);
-  }
-
-  public InMoov2Hand startRightHand(String port) {
-
-    speakBlocking(get("STARTINGRIGHTHAND"));
-    rightHand = (InMoov2Hand) startPeer("rightHand");
-    isRightHandActivated = true;
-
-    if (port != null) {
-      try {
-        speakBlocking(port);
-        Arduino arduino = (Arduino) startPeer("right");
-        arduino.connect(port);
-
-        arduino.attach(rightHand.thumb);
-        arduino.attach(rightHand.index);
-        arduino.attach(rightHand.majeure);
-        arduino.attach(rightHand.ringFinger);
-        arduino.attach(rightHand.pinky);
-        arduino.attach(rightHand.wrist);
-
-      } catch (Exception e) {
-        error(e);
-      }
-    }
-    return rightHand;
-  }
-
-  public Double getUltraSonicRightDistance() {
-    if (ultraSonicRight != null) {
-      return ultraSonicRight.range();
-    } else {
-      warn("No UltraSonicRight attached");
-      return 0.0;
-    }
-  }
-
-  public Double getUltraSonicLeftDistance() {
-    if (ultraSonicLeft != null) {
-      return ultraSonicLeft.range();
-    } else {
-      warn("No UltraSonicLeft attached");
-      return 0.0;
-    }
-  }
-
-  // public void publishPin(Pin pin) {
-  // log.info("{} - {}", pin.pin, pin.value);
-  // if (pin.value == 1) {
-  // lastPIRActivityTime = System.currentTimeMillis();
-  // }
-  /// if its PIR & PIR is active & was sleeping - then wake up !
-  // if (pin == pin.pin && startSleep != null && pin.value == 1) {
-  // powerUp();
-  // }
-  // }
-
-  public void startServos(String leftPort, String rightPort) throws Exception {
-    startHead(leftPort);
-    startLeftArm(leftPort);
-    startLeftHand(leftPort);
-    startRightArm(rightPort);
-    startRightHand(rightPort);
-    startTorso(leftPort);
+  public void startServos() {
+    startPeer("head");
+    startPeer("leftArm");
+    startPeer("leftHand");
+    startPeer("rightArm");
+    startPeer("rightHand");
+    startPeer("torso");
   }
 
   // FIXME .. externalize in a json file included in InMoov2
   public Simulator startSimulator() throws Exception {
-
-    speakBlocking(get("STARTINGVIRTUAL"));
-
-    if (jme != null) {
-      log.info("start called twice - starting simulator is reentrant");
-      return jme;
-    }
-
-    // jme = (JMonkeyEngine) startPeer("simulator");
-    jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
-
-    isSimulatorActivated = true;
-
-    // adding InMoov2 asset path to the jmonkey simulator
-    String assetPath = getResourceDir() + fs + JMonkeyEngine.class.getSimpleName();
-
-    File check = new File(assetPath);
-    log.info("loading assets from {}", assetPath);
-    if (!check.exists()) {
-      log.warn("%s does not exist");
-    }
-
-    // disable the frustrating servo events ...
-    // Servo.eventsEnabledDefault(false);
-    // jme.loadModels(assetPath); not needed - as InMoov2 unzips the model into
-    // /resource/JMonkeyEngine/assets
-    jme.loadModels(assetPath);
-
-    // ========== gael's calibrations begin ======================
-    jme.setRotation(getName() + ".head.jaw", "x");
-    jme.setRotation(getName() + ".head.neck", "x");
-    jme.setRotation(getName() + ".head.rothead", "y");
-    jme.setRotation(getName() + ".head.rollNeck", "z");
-    jme.setRotation(getName() + ".head.eyeY", "x");
-    jme.setRotation(getName() + ".head.eyeX", "y");
-    jme.setRotation(getName() + ".head.eyelidLeft", "x");
-    jme.setRotation(getName() + ".head.eyelidRight", "x");
-    jme.setRotation(getName() + ".torso.topStom", "z");
-    jme.setRotation(getName() + ".torso.midStom", "y");
-    jme.setRotation(getName() + ".torso.lowStom", "x");
-    jme.setRotation(getName() + ".rightArm.bicep", "x");
-    jme.setRotation(getName() + ".leftArm.bicep", "x");
-    jme.setRotation(getName() + ".rightArm.shoulder", "x");
-    jme.setRotation(getName() + ".leftArm.shoulder", "x");
-    jme.setRotation(getName() + ".rightArm.rotate", "y");
-    jme.setRotation(getName() + ".leftArm.rotate", "y");
-    jme.setRotation(getName() + ".rightArm.omoplate", "z");
-    jme.setRotation(getName() + ".leftArm.omoplate", "z");
-    jme.setRotation(getName() + ".rightHand.wrist", "y");
-    jme.setRotation(getName() + ".leftHand.wrist", "y");
-
-    jme.setMapper(getName() + ".head.jaw", 0, 180, -5, 80);
-    jme.setMapper(getName() + ".head.neck", 0, 180, 20, -20);
-    jme.setMapper(getName() + ".head.rollNeck", 0, 180, 30, -30);
-    jme.setMapper(getName() + ".head.eyeY", 0, 180, 40, 140);
-    jme.setMapper(getName() + ".head.eyeX", 0, 180, -10, 70); // HERE there need
-    // to be
-    // two eyeX (left and
-    // right?)
-    jme.setMapper(getName() + ".head.eyelidLeft", 0, 180, 40, 140);
-    jme.setMapper(getName() + ".head.eyelidRight", 0, 180, 40, 140);
-    jme.setMapper(getName() + ".rightArm.bicep", 0, 180, 0, -150);
-    jme.setMapper(getName() + ".leftArm.bicep", 0, 180, 0, -150);
-
-    jme.setMapper(getName() + ".rightArm.shoulder", 0, 180, 30, -150);
-    jme.setMapper(getName() + ".leftArm.shoulder", 0, 180, 30, -150);
-    jme.setMapper(getName() + ".rightArm.rotate", 0, 180, 80, -80);
-    jme.setMapper(getName() + ".leftArm.rotate", 0, 180, -80, 80);
-    jme.setMapper(getName() + ".rightArm.omoplate", 0, 180, 10, -180);
-    jme.setMapper(getName() + ".leftArm.omoplate", 0, 180, -10, 180);
-
-    jme.setMapper(getName() + ".rightHand.wrist", 0, 180, -20, 60);
-    jme.setMapper(getName() + ".leftHand.wrist", 0, 180, 20, -60);
-
-    jme.setMapper(getName() + ".torso.topStom", 0, 180, -30, 30);
-    jme.setMapper(getName() + ".torso.midStom", 0, 180, 50, 130);
-    jme.setMapper(getName() + ".torso.lowStom", 0, 180, -30, 30);
-
-    // ========== gael's calibrations end ======================
-
-    // ========== 3 joint finger mapping and attaching begin ===
-
-    // ========== Requires VinMoov5.j3o ========================
-
-    jme.attach(getName() + ".leftHand.thumb", getName() + ".leftHand.thumb1", getName() + ".leftHand.thumb2", getName() + ".leftHand.thumb3");
-    jme.setRotation(getName() + ".leftHand.thumb1", "y");
-    jme.setRotation(getName() + ".leftHand.thumb2", "x");
-    jme.setRotation(getName() + ".leftHand.thumb3", "x");
-
-    jme.attach(getName() + ".leftHand.index", getName() + ".leftHand.index", getName() + ".leftHand.index2", getName() + ".leftHand.index3");
-    jme.setRotation(getName() + ".leftHand.index", "x");
-    jme.setRotation(getName() + ".leftHand.index2", "x");
-    jme.setRotation(getName() + ".leftHand.index3", "x");
-
-    jme.attach(getName() + ".leftHand.majeure", getName() + ".leftHand.majeure", getName() + ".leftHand.majeure2", getName() + ".leftHand.majeure3");
-    jme.setRotation(getName() + ".leftHand.majeure", "x");
-    jme.setRotation(getName() + ".leftHand.majeure2", "x");
-    jme.setRotation(getName() + ".leftHand.majeure3", "x");
-
-    jme.attach(getName() + ".leftHand.ringFinger", getName() + ".leftHand.ringFinger", getName() + ".leftHand.ringFinger2", getName() + ".leftHand.ringFinger3");
-    jme.setRotation(getName() + ".leftHand.ringFinger", "x");
-    jme.setRotation(getName() + ".leftHand.ringFinger2", "x");
-    jme.setRotation(getName() + ".leftHand.ringFinger3", "x");
-
-    jme.attach(getName() + ".leftHand.pinky", getName() + ".leftHand.pinky", getName() + ".leftHand.pinky2", getName() + ".leftHand.pinky3");
-    jme.setRotation(getName() + ".leftHand.pinky", "x");
-    jme.setRotation(getName() + ".leftHand.pinky2", "x");
-    jme.setRotation(getName() + ".leftHand.pinky3", "x");
-
-    // left hand mapping complexities of the fingers
-    jme.setMapper(getName() + ".leftHand.index", 0, 180, -110, -179);
-    jme.setMapper(getName() + ".leftHand.index2", 0, 180, -110, -179);
-    jme.setMapper(getName() + ".leftHand.index3", 0, 180, -110, -179);
-
-    jme.setMapper(getName() + ".leftHand.majeure", 0, 180, -110, -179);
-    jme.setMapper(getName() + ".leftHand.majeure2", 0, 180, -110, -179);
-    jme.setMapper(getName() + ".leftHand.majeure3", 0, 180, -110, -179);
-
-    jme.setMapper(getName() + ".leftHand.ringFinger", 0, 180, -110, -179);
-    jme.setMapper(getName() + ".leftHand.ringFinger2", 0, 180, -110, -179);
-    jme.setMapper(getName() + ".leftHand.ringFinger3", 0, 180, -110, -179);
-
-    jme.setMapper(getName() + ".leftHand.pinky", 0, 180, -110, -179);
-    jme.setMapper(getName() + ".leftHand.pinky2", 0, 180, -110, -179);
-    jme.setMapper(getName() + ".leftHand.pinky3", 0, 180, -110, -179);
-
-    jme.setMapper(getName() + ".leftHand.thumb1", 0, 180, -30, -100);
-    jme.setMapper(getName() + ".leftHand.thumb2", 0, 180, 80, 20);
-    jme.setMapper(getName() + ".leftHand.thumb3", 0, 180, 80, 20);
-
-    // right hand
-
-    jme.attach(getName() + ".rightHand.thumb", getName() + ".rightHand.thumb1", getName() + ".rightHand.thumb2", getName() + ".rightHand.thumb3");
-    jme.setRotation(getName() + ".rightHand.thumb1", "y");
-    jme.setRotation(getName() + ".rightHand.thumb2", "x");
-    jme.setRotation(getName() + ".rightHand.thumb3", "x");
-
-    jme.attach(getName() + ".rightHand.index", getName() + ".rightHand.index", getName() + ".rightHand.index2", getName() + ".rightHand.index3");
-    jme.setRotation(getName() + ".rightHand.index", "x");
-    jme.setRotation(getName() + ".rightHand.index2", "x");
-    jme.setRotation(getName() + ".rightHand.index3", "x");
-
-    jme.attach(getName() + ".rightHand.majeure", getName() + ".rightHand.majeure", getName() + ".rightHand.majeure2", getName() + ".rightHand.majeure3");
-    jme.setRotation(getName() + ".rightHand.majeure", "x");
-    jme.setRotation(getName() + ".rightHand.majeure2", "x");
-    jme.setRotation(getName() + ".rightHand.majeure3", "x");
-
-    jme.attach(getName() + ".rightHand.ringFinger", getName() + ".rightHand.ringFinger", getName() + ".rightHand.ringFinger2", getName() + ".rightHand.ringFinger3");
-    jme.setRotation(getName() + ".rightHand.ringFinger", "x");
-    jme.setRotation(getName() + ".rightHand.ringFinger2", "x");
-    jme.setRotation(getName() + ".rightHand.ringFinger3", "x");
-
-    jme.attach(getName() + ".rightHand.pinky", getName() + ".rightHand.pinky", getName() + ".rightHand.pinky2", getName() + ".rightHand.pinky3");
-    jme.setRotation(getName() + ".rightHand.pinky", "x");
-    jme.setRotation(getName() + ".rightHand.pinky2", "x");
-    jme.setRotation(getName() + ".rightHand.pinky3", "x");
-
-    jme.setMapper(getName() + ".rightHand.index", 0, 180, 65, -10);
-    jme.setMapper(getName() + ".rightHand.index2", 0, 180, 70, -10);
-    jme.setMapper(getName() + ".rightHand.index3", 0, 180, 70, -10);
-
-    jme.setMapper(getName() + ".rightHand.majeure", 0, 180, 65, -10);
-    jme.setMapper(getName() + ".rightHand.majeure2", 0, 180, 70, -10);
-    jme.setMapper(getName() + ".rightHand.majeure3", 0, 180, 70, -10);
-
-    jme.setMapper(getName() + ".rightHand.ringFinger", 0, 180, 65, -10);
-    jme.setMapper(getName() + ".rightHand.ringFinger2", 0, 180, 70, -10);
-    jme.setMapper(getName() + ".rightHand.ringFinger3", 0, 180, 70, -10);
-
-    jme.setMapper(getName() + ".rightHand.pinky", 0, 180, 65, -10);
-    jme.setMapper(getName() + ".rightHand.pinky2", 0, 180, 70, -10);
-    jme.setMapper(getName() + ".rightHand.pinky3", 0, 180, 60, -10);
-
-    jme.setMapper(getName() + ".rightHand.thumb1", 0, 180, 30, 110);
-    jme.setMapper(getName() + ".rightHand.thumb2", 0, 180, -100, -150);
-    jme.setMapper(getName() + ".rightHand.thumb3", 0, 180, -100, -160);
-
-    // We set the correct location view
-    jme.cameraLookAt(getName() + ".torso.lowStom");
-
-    // additional experimental mappings
-    /*
-     * simulator.attach(getName() + ".leftHand.pinky", getName() +
-     * ".leftHand.index2"); simulator.attach(getName() + ".leftHand.thumb",
-     * getName() + ".leftHand.index3"); simulator.setRotation(getName() +
-     * ".leftHand.index2", "x"); simulator.setRotation(getName() +
-     * ".leftHand.index3", "x"); simulator.setMapper(getName() +
-     * ".leftHand.index", 0, 180, -90, -270); simulator.setMapper(getName() +
-     * ".leftHand.index2", 0, 180, -90, -270); simulator.setMapper(getName() +
-     * ".leftHand.index3", 0, 180, -90, -270);
-     */
-    return jme;
-  }
-
-  public InMoov2Torso startTorso() {
-    return startTorso(null);
-  }
-
-  public InMoov2Torso startTorso(String port) {
-    if (torso == null) {
-      speakBlocking(get("STARTINGTORSO"));
-      isTorsoActivated = true;
-
-      torso = (InMoov2Torso) startPeer("torso");
-
-      if (port != null) {
-        try {
-          speakBlocking(port);
-          Arduino left = (Arduino) startPeer("left");
-          left.connect(port);
-          left.attach(torso.lowStom);
-          left.attach(torso.midStom);
-          left.attach(torso.topStom);
-        } catch (Exception e) {
-          error(e);
-        }
-      }
-    }
-    return torso;
-  }
-
-  /**
-   * called with only port - will default with defaulted pins
-   * 
-   * @param port
-   * @return
-   */
-  public UltrasonicSensor startUltraSonicRight(String port) {
-    return startUltraSonicRight(port, 64, 63);
-  }
-
-  /**
-   * called explicitly with pin values
-   * 
-   * @param port
-   * @param trigPin
-   * @param echoPin
-   * @return
-   */
-  public UltrasonicSensor startUltraSonicRight(String port, int trigPin, int echoPin) {
-
-    if (ultraSonicRight == null) {
-      speakBlocking(get("STARTINGULTRASONIC"));
-      isUltraSonicRightActivated = true;
-
-      ultraSonicRight = (UltrasonicSensor) startPeer("ultraSonicRight");
-
-      if (port != null) {
-        try {
-          speakBlocking(port);
-          Arduino right = (Arduino) startPeer("right");
-          right.connect(port);
-          right.attach(ultraSonicRight, trigPin, echoPin);
-        } catch (Exception e) {
-          error(e);
-        }
-      }
-    }
-    return ultraSonicRight;
-  }
-
-  public UltrasonicSensor startUltraSonicLeft(String port) {
-    return startUltraSonicLeft(port, 64, 63);
-  }
-
-  public UltrasonicSensor startUltraSonicLeft(String port, int trigPin, int echoPin) {
-
-    if (ultraSonicLeft == null) {
-      speakBlocking(get("STARTINGULTRASONIC"));
-      isUltraSonicLeftActivated = true;
-
-      ultraSonicLeft = (UltrasonicSensor) startPeer("ultraSonicLeft");
-
-      if (port != null) {
-        try {
-          speakBlocking(port);
-          Arduino left = (Arduino) startPeer("left");
-          left.connect(port);
-          left.attach(ultraSonicLeft, trigPin, echoPin);
-        } catch (Exception e) {
-          error(e);
-        }
-      }
-    }
-    return ultraSonicLeft;
-  }
-
-  public Pir startPir(String port) {
-    return startPir(port, 23);
-  }
-
-  public Pir startPir(String port, int pin) {
-
-    if (pir == null) {
-      speakBlocking(get("STARTINGPIR"));
-      isPirActivated = true;
-
-      pir = (Pir) startPeer("pir");
-
-      if (port != null) {
-        try {
-          speakBlocking(port);
-          Arduino right = (Arduino) startPeer("right");
-          right.connect(port);
-          right.attach(pir, pin);
-        } catch (Exception e) {
-          error(e);
-        }
-      }
-    }
-    return pir;
-  }
-
-  public ServoMixer startServoMixer() {
-
-    servomixer = (ServoMixer) startPeer("servomixer");
-    isServoMixerActivated = true;
-
-    speakBlocking(get("STARTINGSERVOMIXER"));
-    broadcastState();
-    return servomixer;
+    Simulator si = (Simulator) startPeer("simulator");
+    return si;
   }
 
   public void stop() {
-    if (head != null) {
-      head.stop();
-    }
-    if (rightHand != null) {
-      rightHand.stop();
-    }
-    if (leftHand != null) {
-      leftHand.stop();
-    }
-    if (rightArm != null) {
-      rightArm.stop();
-    }
-    if (leftArm != null) {
-      leftArm.stop();
-    }
-    if (torso != null) {
-      torso.stop();
-    }
-  }
-
-  public void stopChatBot() {
-    speakBlocking(get("STOPCHATBOT"));
-    releasePeer("chatBot");
-    isChatBotActivated = false;
-  }
-
-  public void stopHead() {
-    speakBlocking(get("STOPHEAD"));
-    releasePeer("head");
-    releasePeer("mouthControl");
-    isHeadActivated = false;
-  }
-
-  public void stopEar() {
-    speakBlocking(get("STOPEAR"));
-    releasePeer("ear");
-    isEarActivated = false;
-    broadcastState();
-  }
-
-  public void stopOpenCV() {
-    speakBlocking(get("STOPOPENCV"));
-    isOpenCvActivated = false;
-    releasePeer("opencv");
+    sendToPeer("head", "stop");
+    sendToPeer("rightHand", "stop");
+    sendToPeer("leftHand", "stop");
+    sendToPeer("rightArm", "stop");
+    sendToPeer("leftArm", "stop");
+    sendToPeer("torso", "stop");
   }
 
   public void stopGesture() {
@@ -1983,125 +1291,215 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     p.stop();
   }
 
-  public void stopLeftArm() {
-    speakBlocking(get("STOPLEFTARM"));
-    releasePeer("leftArm");
-    isLeftArmActivated = false;
+  public ServiceInterface startPeer(String peer) {
+    speakBlocking(get("STARTING" + peer.toUpperCase()));
+
+    // FIXME - do reflective look for local vars named the same thing
+    // to set the field
+
+    ServiceInterface si = super.startPeer(peer);
+
+    return si;
   }
 
-  public void stopLeftHand() {
-    speakBlocking(get("STOPLEFTHAND"));
-    releasePeer("leftHand");
-    isLeftHandActivated = false;
-  }
-
-  public void stopMouth() {
-    speakBlocking(get("STOPMOUTH"));
-    releasePeer("mouth");
-    // TODO - potentially you could set the field to null in releasePeer
-    mouth = null;
-    isMouthActivated = false;
-  }
-
-  public void stopRightArm() {
-    speakBlocking(get("STOPRIGHTARM"));
-    releasePeer("rightArm");
-    isRightArmActivated = false;
-  }
-
-  public void stopRightHand() {
-    speakBlocking(get("STOPRIGHTHAND"));
-    releasePeer("rightHand");
-    isRightHandActivated = false;
-  }
-
-  public void stopTorso() {
-    speakBlocking(get("STOPTORSO"));
-    releasePeer("torso");
-    isTorsoActivated = false;
-  }
-
-  public void stopSimulator() {
-    speakBlocking(get("STOPVIRTUAL"));
-    releasePeer("simulator");
-    jme = null;
-    isSimulatorActivated = false;
-  }
-
-  public void stopUltraSonicRight() {
-    speakBlocking(get("STOPULTRASONIC"));
-    releasePeer("ultraSonicRight");
-    isUltraSonicRightActivated = false;
-  }
-
-  public void stopUltraSonicLeft() {
-    speakBlocking(get("STOPULTRASONIC"));
-    releasePeer("ultraSonicLeft");
-    isUltraSonicLeftActivated = false;
-  }
-
-  public void stopPir() {
-    speakBlocking(get("STOPPIR"));
-    releasePeer("pir");
-    isPirActivated = false;
+  public void releasePeer(String peer) {
+    speakBlocking(get("STOP" + peer.toUpperCase()));
+    super.releasePeer(peer);
   }
 
   public void stopNeopixelAnimation() {
-    if (neopixel != null) {
-      neopixel.animationStop();
-    } else {
-      warn("No Neopixel attached");
-    }
-  }
-
-  public void stopServoMixer() {
-    speakBlocking(get("STOPSERVOMIXER"));
-    releasePeer("servomixer");
-    isServoMixerActivated = false;
+    sendToPeer("neopixel", "clear");
   }
 
   public void waitTargetPos() {
+
+    sendToPeer("head", "waitTargetPos");
+    sendToPeer("rightHand", "waitTargetPos");
+    sendToPeer("leftHand", "waitTargetPos");
+    sendToPeer("rightArm", "waitTargetPos");
+    sendToPeer("leftArm", "waitTargetPos");
+    sendToPeer("torso", "waitTargetPos");
+  }
+
+  @Override
+  public void attachTextListener(String name) {
+    addListener("publishText", name);
+  }
+
+  public Tracking getEyesTracking() {
+    return eyesTracking;
+  }
+
+  public Tracking getHeadTracking() {
+    return headTracking;
+  }
+
+  public void startBrain() {
+    startChatBot();
+  }
+
+  public void startMouthControl() {
+    speakBlocking(get("STARTINGMOUTHCONTROL"));
+    mouthControl = (MouthControl) startPeer("mouthControl");
+    InMoov2Head head = getHead();
     if (head != null) {
-      head.waitTargetPos();
+      mouthControl.attach(head.getPeer("jaw"));
     }
-    if (leftArm != null) {
-      leftArm.waitTargetPos();
-    }
-    if (rightArm != null) {
-      rightArm.waitTargetPos();
-    }
-    if (leftHand != null) {
-      leftHand.waitTargetPos();
-    }
-    if (rightHand != null) {
-      rightHand.waitTargetPos();
-    }
-    if (torso != null) {
-      torso.waitTargetPos();
-    }
+    mouthControl.attach((Attachable) getPeer("mouth"));
   }
 
-  public NeoPixel startNeopixel() {
-    return startNeopixel(getName() + ".right", 2, 16);
-  }
+  // -----------------------------------------------------------------------------
+  // These are methods added that were in InMoov1 that we no longer had in
+  // InMoov2.
+  // From original InMoov1 so we don't loose the
 
-  public NeoPixel startNeopixel(String controllerName) {
-    return startNeopixel(controllerName, 2, 16);
-  }
-
-  public NeoPixel startNeopixel(String controllerName, int pin, int numPixel) {
-
-    if (neopixel == null) {
-      try {
-        neopixel = (NeoPixel) startPeer("neopixel");
-        speakBlocking(get("STARTINGNEOPIXEL"));
-        // FIXME - lame use peers
-        isNeopixelActivated = true;
-        neopixel.attach(Runtime.getService(controllerName));
-      } catch (Exception e) {
-        error(e);
+  @Override
+  public void onJointAngles(Map<String, Double> angleMap) {
+    log.info("onJointAngles {}", angleMap);
+    // here we can make decisions on what ik sets we want to use and
+    // what body parts are to move
+    for (String name : angleMap.keySet()) {
+      ServiceInterface si = Runtime.getService(name);
+      if (si != null && si instanceof ServoControl) {
+        ((Servo) si).moveTo(angleMap.get(name));
       }
     }
-    return neopixel;
   }
+
+  @Override
+  public ServiceConfig getConfig() {
+    InMoov2Config config = new InMoov2Config();
+    return config;
+  }
+
+  @Override
+  public ServiceConfig apply(ServiceConfig c) {
+    InMoov2Config config = (InMoov2Config) c;
+    try {
+
+      if (config.locale != null) {
+        setLocale(config.locale);
+      }
+
+      if (config.loadGestures) {
+        loadGestures();
+      }
+
+      if (config.heartbeat) {
+        startHeartbeat();
+      } else {
+        stopHeartbeat();
+      }
+
+    } catch (Exception e) {
+      error(e);
+    }
+
+    return c;
+  }
+
+  public void startHeartbeat() {
+    addTask(1000, "publishHeartbeat");
+  }
+
+  public void stopHeartbeat() {
+    purgeTask("publishHeartbeat");
+  }
+
+  public String publishHeartbeat() {
+    return getName();
+  }
+
+  // ???? - seems like a good pattern dunno what to do
+  // Overriding and polymorphism is a nice way to reduce code
+  // public void onHeartbeat(String name) {
+  //
+  // }
+
+  public static void main(String[] args) {
+    try {
+
+      LoggingFactory.init(Level.INFO);
+      // Platform.setVirtual(true);
+      // Runtime.start("s01", "Servo");
+      // Runtime.start("intro", "Intro");
+
+      Runtime.startConfig("dewey-2");
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+      i01.startSimulator();
+      Plan plan = Runtime.load("webgui", "WebGui");
+      WebGuiConfig webgui = (WebGuiConfig) plan.get("webgui");
+      webgui.autoStartBrowser = false;
+      Runtime.startConfig("webgui");
+      Runtime.start("webgui", "WebGui");
+
+      Random random = (Random) Runtime.start("random", "Random");
+
+      random.addRandom(3000, 8000, "i01", "setLeftArmSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+      random.addRandom(3000, 8000, "i01", "setRightArmSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+
+      random.addRandom(3000, 8000, "i01", "moveLeftArm", 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
+      random.addRandom(3000, 8000, "i01", "moveRightArm", 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
+
+      random.addRandom(3000, 8000, "i01", "setLeftHandSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+      random.addRandom(3000, 8000, "i01", "setRightHandSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+
+      random.addRandom(3000, 8000, "i01", "moveRightHand", 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 130.0, 175.0);
+      random.addRandom(3000, 8000, "i01", "moveLeftHand", 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 5.0, 40.0);
+
+      random.addRandom(200, 1000, "i01", "setHeadSpeed", 8.0, 20.0, 8.0, 20.0, 8.0, 20.0);
+      random.addRandom(200, 1000, "i01", "moveHead", 70.0, 110.0, 65.0, 115.0, 70.0, 110.0);
+
+      random.addRandom(200, 1000, "i01", "setTorsoSpeed", 2.0, 5.0, 2.0, 5.0, 2.0, 5.0);
+      random.addRandom(200, 1000, "i01", "moveTorso", 85.0, 95.0, 88.0, 93.0, 70.0, 110.0);
+
+      random.save();
+
+      i01.startChatBot();
+
+      i01.startAll("COM3", "COM4");
+      Runtime.start("python", "Python");
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
+  @Override
+  public void onRegistered(Registration registration) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void onStopped(String name) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void onReleased(String name) {
+    // TODO Auto-generated method stub
+
+  }
+
+  public String publishPeerStarted(String peerKey) {
+    // if ("mouth".equals(peerKey)) {
+    // SpeechSynthesis mouth = (SpeechSynthesis)getPeer(peerKey);
+    // voices = mouth.getVoices();
+    // Voice voice = mouth.getVoice();
+    // if (voice != null) {
+    // voiceSelected = voice.getName();
+    // }
+    // broadcastState();
+    // }
+    return peerKey;
+  }
+
 }

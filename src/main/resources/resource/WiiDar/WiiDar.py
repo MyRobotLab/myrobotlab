@@ -1,2 +1,2 @@
 # start the service
-wiidar = Runtime.start("wiidar","WiiDar")
+wiidar = runtime.start("wiidar","WiiDar")

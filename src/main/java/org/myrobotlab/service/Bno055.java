@@ -140,6 +140,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
                         "Accelerometer No Motion Setting"), GYR_INT_SETTING((byte) 0x17, (byte) 1, ""), GYR_HR_X_SET((byte) 0x18, (byte) 1, ""), GYR_DUR_X((byte) 0x19, (byte) 1,
                             ""), GYR_HR_Y_SET((byte) 0x1A, (byte) 1, ""), GYR_DUR_Y((byte) 0x1B, (byte) 1, ""), GYR_HR_Z_SET((byte) 0x1C, (byte) 1,
                                 ""), GYR_DUR_Z((byte) 0x1D, (byte) 1, ""), GYR_AM_THRES((byte) 0x1E, (byte) 1, ""), GYR_AM_SET((byte) 0x1F, (byte) 1, "");
+
     public byte value;
     public byte pageId;
     public String description;
@@ -153,6 +154,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
 
   public enum Device {
     ACCELEROMETER((byte) 0x00, "Accelerometer"), MAGNETOMETER((byte) 0x01, "Magnetometer"), GYROSCOPE((byte) 0x02, "Gyroscope");
+
     public byte value;
     public String description;
 
@@ -164,6 +166,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
 
   public enum PowerMode {
     NORMAL((byte) 0x00, "Normal"), LOW((byte) 0x01, "Low"), SUSPEND((byte) 0x02, "Suspend");
+
     public byte value;
     public String description;
 
@@ -182,6 +185,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     GYROONLY((byte) 0x03, "Gyroscope Only"), ACCMAG((byte) 0x04, "Accelerometer and Magnetometer"), ACCGYRO((byte) 0x05, "Accelerometer and Gyroscope"), MAGGYRO((byte) 0x06,
         "Magnetometer and Gyroscope"), AMG((byte) 0x07, "Accelerometer, Magnetometer, Gyroscope"), IMU((byte) 0x08, "IMU"), COMPASS((byte) 0x09,
             "Compass"), M4G((byte) 0x0A, "Magnet for Gyroscope"), NDOF_FMC_OFF((byte) 0x0B, "NDOF Fast Magnetometer Calibration Off"), NDOF((byte) 0x0C, "NDOF");
+
     public byte value;
     public String description;
 
@@ -201,6 +205,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
                             "Operation Mode Suspend"), OPR_MODE_LOW_POWER_1((byte) 0x02, (byte) 0b11100000, 5, "Operation Mode Low Power 1"), OPR_MODE_STANBY((byte) 0x03,
                                 (byte) 0b11100000, 5, "Operation Mode Stanby"), OPR_MODE_LOW_POWER_2((byte) 0x04, (byte) 0b11100000, 5,
                                     "Operation Mode Low Power 2"), OPR_MODE_DEEP_SUSPEND((byte) 0x05, (byte) 0b11100000, 5, "Operation Mode Deep Suspend");
+
     public byte value;
     public byte mask;
     public int shift;
@@ -225,6 +230,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
                                 (byte) 1, "Operation Mode Fast Power Up"), OPR_MODE_DEEP_SUSPEND((byte) 0x02, (byte) 0b111, 0, (byte) 1,
                                     "Operation Mode Deep Suspend"), OPR_MODE_SUSPEND((byte) 0x03, (byte) 0b111, 0, (byte) 1,
                                         "Operation Mode Suspend"), OPR_MODE_ADVANCE_POWERSAVE((byte) 0x04, (byte) 0b111, 0, (byte) 1, "Operation Mode Advance Powersave");
+
     public byte value;
     public byte mask;
     public int shift;
@@ -250,6 +256,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
                         3, "Operation Mode Enhanced Regular"), OPR_MODE_HIGH_ACCURACY((byte) 0x03, (byte) 0b11000, 3, "Operation Mode High Accuracy"), PWR_MODE_NORMAL((byte) 0x00,
                             (byte) 0b1100000, 5, "Power Mode Normal"), PWR_MODE_SLEEP((byte) 0x01, (byte) 0b1100000, 5, "Power Mode Sleep"), PWR_MODE_SUSPEND((byte) 0x02,
                                 (byte) 0b1100000, 5, "Power Mode Suspend"), PWR_MODE_FORCE_MODE((byte) 0x03, (byte) 0b1100000, 5, "Power Mode Force Mode");
+
     public byte value;
     public byte mask;
     public int shift;
@@ -265,6 +272,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
 
   public enum AxisMapConfig {
     X_AXIS((byte) 0x00, (byte) 0b11, 0, "Axis X"), Y_AXIS((byte) 0x01, (byte) 0b1100, 2, "Axis Y"), Z_AXIS((byte) 0x02, (byte) 0b110000, 4, "Axis Z");
+
     public byte value;
     public byte mask;
     public int shift;
@@ -284,6 +292,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
             (byte) 0b10000, 4,
             "C"), TEMP_F((byte) 0x01, (byte) 0b10000, 4, "F"), OUTPUT_FORMAT_WINDOWS((byte) 0x00, (byte) 0b10000000, 7, "Output Format Window"), OUTPUT_FORMAT_ANDROID((byte) 0x01,
                 (byte) 0b10000000, 7, "Output Format Android"), MAG((byte) 0x00, (byte) 0b0, 0, "Micro Tesla"), QUAT((byte) 0x00, (byte) 0b0, 0, "");
+
     public byte value;
     public byte mask;
     public int shift;
@@ -300,6 +309,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   public enum CalibStat {
     MAG((byte) 0x00, (byte) 0b11, 0, "Magnetometer Calibration Status"), ACC((byte) 0x01, (byte) 0b1100, 2, "Accelerometer Calibration Status"), GYR((byte) 0x02, (byte) 0b110000,
         4, "Gyroscope Calibration Status"), SYS((byte) 0x03, (byte) 0b11000000, 6, "System Calibration Status");
+
     public byte value;
     public byte mask;
     public int shift;
@@ -316,6 +326,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   public enum InterruptType {
     ACC_NM((byte) 0x00, (byte) 0b10000000), ACC_SM((byte) 0x01, (byte) 0b10000000), ACC_AM((byte) 0x02, (byte) 0b1000000), ACC_HG((byte) 0x03, (byte) 0b100000), GYR_HR((byte) 0x04,
         (byte) 0b1000), GYR_AM((byte) 0x05, (byte) 0b100);
+
     public byte value;
     public byte mask;
 
@@ -329,11 +340,11 @@ public class Bno055 extends Service implements I2CControl, PinListener {
 
   private PinArrayControl pinControl = null;
 
-  private Integer pin = null;
+  private String pin = null;
 
-  private boolean isEnabled = false;
+  protected boolean isEnabled = false;
 
-  public boolean isActive = false;
+  protected boolean isActive = false;
 
   public class Bno055Data {
     public double w;
@@ -1484,8 +1495,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
 
   public void attachInterruptPin(PinArrayControl control, int pin) {
     pinControl = control;
-    this.pin = pin;
-    control.attach(this, pin);
+    this.pin = String.format("%d", pin);
+    control.attachPinListener(this, pin);
   }
 
   @Override
@@ -1661,7 +1672,37 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     if (controller != null && controller.getName().equals(instance.getName())) {
       return isAttached;
     }
-    ;
     return false;
   }
+
+  @Override
+  public void setBus(String bus) {
+    setDeviceBus(bus);
+  }
+
+  @Override
+  public void setAddress(String address) {
+    setDeviceAddress(address);
+  }
+
+  @Override
+  public String getBus() {
+    return deviceBus;
+  }
+
+  @Override
+  public String getAddress() {
+    return deviceAddress;
+  }
+
+  @Override
+  public void setPin(String pin) {
+    this.pin = pin;
+  }
+
+  @Override
+  public String getPin() {
+    return pin;
+  }
+
 }

@@ -59,6 +59,8 @@ public class OpenCVFilterCreateHistogram extends OpenCVFilter {
    * TODO -
    * 
    * @param name
+   *          n
+   * 
    */
   public OpenCVFilterCreateHistogram(String name) {
     super(name);

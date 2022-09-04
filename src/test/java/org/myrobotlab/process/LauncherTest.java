@@ -69,7 +69,7 @@ public class LauncherTest extends AbstractTest {
     p = pb.start();
     assertTrue(p.isAlive());
     p.destroy();
-    
+
     // FIXME validate default
     try {
       CmdOptions options = new CmdOptions();

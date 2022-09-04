@@ -1,10 +1,8 @@
 package org.myrobotlab.service.abstracts;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,6 +43,7 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
   /**
    * other services subscribed to pins
    */
+  @Deprecated /* use pub/sub  :(  */
   transient protected Map<String, PinArrayListener> pinArrayListeners = new ConcurrentHashMap<String, PinArrayListener>();
 
   /**
@@ -52,17 +51,13 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
    * whatever its documented to people e.g. "A5" or "D7", it comes down to a
    * unique address
    */
-  protected Map<Integer, PinDefinition> pinIndex = new TreeMap<>();
+  protected Map<Integer, PinDefinition> addressIndex = new TreeMap<>();
 
   /**
-   * map of pin listeners
+   * name index of pins to pin definitions
    */
-  transient protected Map<Integer, Set<PinListener>> pinListeners = new ConcurrentHashMap<>();
-
-  /**
-   * name index of pinList
-   */
-  protected Map<String, PinDefinition> pinMap = new TreeMap<>();
+  protected Map<String, PinDefinition> pinIndex = new TreeMap<>();
+  
 
   /**
    * possible types of boards
@@ -88,53 +83,34 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
    * attach a pin listener which listens for an array of all active pins
    */
   @Override
-  public void attach(PinArrayListener listener) {
+  public void attachPinArrayListener(PinArrayListener listener) {
     pinArrayListeners.put(listener.getName(), listener);
-    // TODO: re-implement this.. it seemed unstable when i was testing before.
-    // attaching a pin listener should enable the pins (if they're not already
-    // enabled.)
-    // if the pin array listener is listening for a specific set of pins, we
-    // should enable those.
-    // if (listener.getActivePins()!= null && listener.getActivePins().length
-    // >0) {
-    // for (String pin : listener.getActivePins()) {
-    // // TODO: what rate?
-    // // TODO: maybe expose rate as a parameter for the listener to supply
-    // log.info("Enable pin {}", pin);
-    // int rate = 0;
-    // this.enablePin(pin, rate);
-    //
-    // }
-    // }
 
+  }
+
+  @Override
+  @Deprecated /*
+               * use attachPinListener(PinListener listener) GET RID OF THIS !
+               */
+  public void attachPinListener(PinListener listener, int address) {
+    PinDefinition pin = getPin(address);
+    listener.setPin(pin.getPinName());
+    attachPinListener(listener);
   }
 
   /**
    * attach a pin listener who listens to a specific pin
    */
-  @Override
-  public void attach(PinListener listener, int address) {
+  public void attachPinListener(PinListener listener) {
     String name = listener.getName();
-
-    if (listener.isLocal()) {
-      Set<PinListener> list = null;
-      if (pinListeners.containsKey(address)) {
-        list = pinListeners.get(address);
-      } else {
-        list = new HashSet<PinListener>();
-      }
-      list.add(listener);
-      pinListeners.put(address, list);
-
-    } else {
-      addListener("publishPin", name, "onPin");
-    }
+    addListener("publishPin", name);
   }
 
   @Override
+  @Deprecated /* set pin then call attach(listener) */
   public void attach(PinListener listener, String pin) {
     PinDefinition pinDef = getPin(pin);
-    attach(listener, pinDef.getAddress());
+    attachPinListener(listener, pinDef.getAddress());
   }
 
   @Override
@@ -147,7 +123,7 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
 
   @Override
   public void disablePins() {
-    for (PinDefinition pinDef : pinIndex.values()) {
+    for (PinDefinition pinDef : addressIndex.values()) {
       disablePin(pinDef.getAddress());
     }
   }
@@ -170,17 +146,25 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
 
   @Override
   public PinDefinition getPin(String pinName) {
-    if (pinMap.containsKey(pinName)) {
-      return pinMap.get(pinName);
+    if (pinIndex.containsKey(pinName)) {
+      return pinIndex.get(pinName);
     }
+    
+    // another attempt - if user used address instead of pin
+    try {
+     int address = Integer.parseInt(pinName);
+     return addressIndex.get(address);
+    } catch(Exception e) {
+    }
+    
     // log.error("pinMap does not contain pin {}", pinName);
     return null;
   }
 
   @Override
   public PinDefinition getPin(int address) {
-    if (pinIndex.containsKey(address)) {
-      return pinIndex.get(address);
+    if (addressIndex.containsKey(address)) {
+      return addressIndex.get(address);
     }
     log.error("pinIndex does not contain address {}", address);
     return null;
@@ -200,7 +184,7 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
   @Override
   public PinData publishPin(PinData pinData) {
     // cache the value
-    pinMap.get(pinData.pin).setValue(pinData.value);
+    pinIndex.get(pinData.pin).setValue(pinData.value);
     return pinData;
   }
 
@@ -221,7 +205,7 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
   @Override
   public int read(int address) {
     // FIXME - this would be "last" read
-    return pinIndex.get(address).getValue();
+    return addressIndex.get(address).getValue();
   }
 
   @Override

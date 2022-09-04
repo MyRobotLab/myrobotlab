@@ -45,7 +45,7 @@ public class OpenCVFilterAnd extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterAnd.class.getCanonicalName());
-
+  transient private CloseableFrameConverter converter = new CloseableFrameConverter(); 
   transient IplImage and = null;
 
   public OpenCVFilterAnd() {
@@ -63,7 +63,13 @@ public class OpenCVFilterAnd extends OpenCVFilter {
   }
 
   public void loadMask(BufferedImage mask) {
-    this.and = toImage(mask);// IplImage.createFrom(mask);
+    this.and = converter.toImage(mask);// IplImage.createFrom(mask);
+  }
+
+  @Override
+  public void release() {
+    super.release();
+    converter.close();
   }
 
   public void loadMask(IplImage mask) {

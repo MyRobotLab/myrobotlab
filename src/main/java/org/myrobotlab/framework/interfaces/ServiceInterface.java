@@ -9,38 +9,35 @@ import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
-import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.meta.abstracts.MetaData;
+import org.slf4j.Logger;
 
-public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker,
-    StatePublisher, StatusPublisher, ServiceStatus, Attachable {
+public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher,
+    ServiceStatus, TaskManager, Attachable, Comparable<ServiceInterface> {
 
-  /**
-   * this is a local method which adds a request from some foreign service with
-   * address information (otherService/callback) for a topic callback Adds an
-   * entry on the notify list
-   * 
-   * @param localTopic
-   *          l
-   * @param otherService
-   *          o
-   * @param callback
-   *          c
-   * 
-   */
+  // does this work ?
+  public final static Logger log = LoggerFactory.getLogger(Service.class);
 
   /**
-   * virtualize the service, in this mode the service should not use any "real"
-   * hardware
+   * When set service will attempt to provide services with no hardware
+   * dependencies. Some services have the capablity to mock hardware such as the
+   * Serial and Arduino services.
    * 
    * @param b
-   * @return
+   *          true to set the virtual mode
+   * @return the value
+   * 
    */
   public boolean setVirtual(boolean b);
 
   /**
    * check to see if the service is running in a virtual mode
    * 
-   * @return
+   * @return true if in virtual mode.
+   * 
    */
   public boolean isVirtual();
 
@@ -64,19 +61,25 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
 
   public String getSimpleName();
 
-  // important to maintain a method to return canonical type
-  // important in the future when other services are expressed differently
-  // e.g.(node js services)
+  /**
+   * equivalent to getClass().getCanonicalName()
+   * 
+   * @return
+   */
   public String getType();
 
+  /**
+   * Does the meta data of this service define peers
+   * 
+   * @return
+   */
   public boolean hasPeers();
 
   /**
-   * recursive release - releases all peers and their peers etc. then releases
-   * this service
+   * Service life-cycle method: releaseService will call stopService, release
+   * its peers, do any derived business logic to release resources, then
+   * un-register itself
    */
-  public void releasePeers();
-
   public void releaseService();
 
   /**
@@ -94,15 +97,45 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
 
   public void setInstanceId(URI uri);
 
-  public void setName(String prefix);
-
+  /**
+   * Service life cycle method - calls create, and starts any necessary
+   * resources to function
+   */
   public void startService();
+
+  /**
+   * @return get a services current config
+   *
+   */
+  public ServiceConfig getConfig();
+
+  /**
+   * sets config - just before apply
+   * 
+   * @param config
+   */
+  public void setConfig(ServiceConfig config);
+
+  /**
+   * Configure a service by merging in configuration
+   * 
+   * @param config
+   *          the config to load
+   * @return the loaded config.
+   */
+  public ServiceConfig apply(ServiceConfig config);
 
   /**
    * loads json config and starts the service
    */
   public void loadAndStart();
 
+  /**
+   * Service life-cycle method, stops the inbox and outbox threads - typically
+   * does not release "custom" resources. It's purpose primarily is to stop
+   * messaging from flowing in or out of this service - which is handled in the
+   * base Service class. Most times this method will not need to be overriden
+   */
   public void stopService();
 
   public String clearLastError();
@@ -113,7 +146,6 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
 
   public boolean isRuntime();
 
-  // FIXME - meta data needs to be infused into instance
   public String getDescription();
 
   public Map<String, MethodEntry> getMethodMap();
@@ -123,9 +155,9 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
   public boolean isRunning();
 
   /**
-   * the order this service was created in relation to the other service
-   * 
    * @param creationCount
+   *          the order this service was created in relation to the other
+   *          service
    */
   public void setOrder(int creationCount);
 
@@ -136,5 +168,27 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
   public void loadLocalizations();
 
   public void setLocale(String code);
+
+  public int getCreationOrder();
+
+  /***
+   * When this service is started and has peers auto started peers are added on
+   * starting. Shared peers will be already started and not added to this set.
+   * When the service is released, peers are automatically released, except for
+   * the ones not started by this service.
+   * 
+   * @param actualPeerName
+   */
+  public void addAutoStartedPeer(String actualPeerName);
+
+  /**
+   * When this service is releasing it will only remove the peers it started
+   * this method allows that check.
+   * @param actualPeerName
+   * @return
+   */
+  public boolean autoStartedPeersContains(String actualPeerName);
+
+  public MetaData getMetaData();
 
 }

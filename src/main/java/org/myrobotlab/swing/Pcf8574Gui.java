@@ -27,7 +27,6 @@ package org.myrobotlab.swing;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -78,8 +77,8 @@ public class Pcf8574Gui extends ServiceGui implements ActionListener {
 
     // display.add(north, BorderLayout.NORTH);
 
-    getDeviceBusList();
-    getDeviceAddressList();
+    // getDeviceBusList();
+    // getDeviceAddressList();
 
   }
 
@@ -106,6 +105,8 @@ public class Pcf8574Gui extends ServiceGui implements ActionListener {
   @Override
   public void unsubscribeGui() {
   }
+  
+  /*
 
   public void onState(Pcf8574 service) {
 
@@ -155,6 +156,7 @@ public class Pcf8574Gui extends ServiceGui implements ActionListener {
       controllerList.setSelectedItem(boundService.controller.getName());
     }
   }
+  */
 
   public void removeListeners() {
     attachButton.removeActionListener(this);

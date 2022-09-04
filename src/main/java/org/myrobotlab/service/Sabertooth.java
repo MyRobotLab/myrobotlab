@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotorController;
+import org.myrobotlab.service.config.SabertoothConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PortConnector;
@@ -23,6 +25,9 @@ import org.slf4j.Logger;
  * 
  * Packet PseudoCode Putc(address); Putc(0); Putc(speed); Putc((address + 0 +
  * speed) &amp; 0b01111111);
+ * 
+ * Motor controllers should not impose constraints they should expose
+ * capabilities
  * 
  * @author GroG
  * 
@@ -39,18 +44,35 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
   public final static Logger log = LoggerFactory.getLogger(Sabertooth.class);
 
-  transient SerialDevice serial;
+  /**
+   * saber tooth works on a serial line
+   */
+  protected transient SerialDevice serial;
 
-  private Integer address = 128;
+  /**
+   * default address when doing packet based communication
+   */
+  protected int address = 128;
 
   public static final int INPUT = 0x0;
 
   public static final int OUTPUT = 0x1;
 
-  boolean setSaberToothBaud = false;
+  /**
+   * potentially sabertooth can operate at different serial rates - but at the
+   * moment we choose not to
+   */
+  protected boolean setSaberToothBaud = false;
 
   // promote ?
-  List<String> motorPorts = new ArrayList<String>();
+  protected List<String> motorPorts = new ArrayList<String>();
+
+  protected boolean isConnected = false;
+
+  /**
+   * last serial port this sabertooth
+   */
+  protected String port = null;
 
   public final static int MOTOR1_FORWARD = 0;
 
@@ -69,6 +91,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     // setup config
     motorPorts.add("m1");
     motorPorts.add("m2");
+    // default mapping for this motor controller
     map(-1.0, 1.0, -127, 127);
   }
 
@@ -80,6 +103,8 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     if (serial != null) {
       serial.close();
     }
+    isConnected = false;
+    broadcastState();
   }
 
   public void driveBackwardsMotor1(int speed) {
@@ -126,16 +151,12 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     this.address = address;
   }
 
-  // FIXME - promote ?
   public void setMaxVoltage(int maxVolts) {
     int actualValue = (int) Math.round(maxVolts / 5.12);
     info("setting max voltage to %d volts - actual value %f", actualValue);
     sendPacket(SET_MAX_VOLTAGE, actualValue);
   }
 
-  // ----------MotorController Interface End --------------
-
-  // FIXME - promote ?
   public void setMinVoltage(int min) {
     int actualValue = (min - 6) * 5;
     info("setting max voltage to %d volts - actual value %d", actualValue);
@@ -188,17 +209,17 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
   @Override
   public void motorMove(MotorControl mc) {
 
-    if (!motors.containsKey(mc.getName())) {
+    if (!motors.contains(mc.getName())) {
       error("%s not attached to %s", mc.getName(), getName());
       return;
     }
 
-    MotorPort motor = (MotorPort) motors.get(mc.getName());
+    MotorPort motor = (MotorPort) Runtime.getService(mc.getName());
     String port = motor.getPort();
 
     int power = (int) motorCalcOutput(mc);
 
-    log.error("motor {} power {}", mc.getName(), power);
+    log.debug("motor {} power {}", mc.getName(), power);
 
     // FIXME required "getMotorPortNames !!!"
     if (port.equals("m1")) {
@@ -220,8 +241,10 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
   @Override
   public boolean isConnected() {
-    // TODO Auto-generated method stub
-    return false;
+    if (serial == null) {
+      return false;
+    }
+    return serial.isConnected();
   }
 
   /**
@@ -239,11 +262,19 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     // an asynchronous process - since we have no way to verify the port is open
     // we sadly must
     sleep(3000);
+    isConnected = serial.isConnected();
+    this.port = port;
+
+    broadcastState();
   }
 
   // FIXME - become interface for motor port shields & controllers
   public List<String> getPorts() {
     return motorPorts;
+  }
+
+  public String getSerialPort() {
+    return port;
   }
 
   @Override
@@ -260,16 +291,45 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
   @Override
   public void detach() {
     super.detach();
-
     if (serial != null) {
+      // sure you want to do this ?
       serial.detach(this);
     }
+    broadcastState();
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    SabertoothConfig config = new SabertoothConfig();
+    config.port = getSerialPort();
+    config.connect = isConnected;
+    return config;
+  }
+
+  public ServiceConfig apply(ServiceConfig c) {
+    SabertoothConfig config = (SabertoothConfig) c;
+    if (config.connect) {
+      try {
+        connect(config.port);
+      } catch (Exception e) {
+        error(e);
+      }
+    }	
+    return c;
   }
 
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init("INFO");
+      Runtime.main(new String[] { "--from-launcher" });
+      Runtime.start("intro", "Intro");
+      Runtime.start("python", "Python");
+      Platform.setVirtual(true);
+
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      // webgui.setSsl(true);
+      webgui.autoStartBrowser(false);
+      webgui.startService();
 
       boolean virtual = true;
       //////////////////////////////////////////////////////////////////////////////////
@@ -282,17 +342,14 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
       String port = "COM14";
       // String port = "/dev/ttyUSB0";
-
-      // start optional virtual serial service, used for test
-      if (virtual) {
-        // use static method Serial.connectVirtualUart to create
-        // a virtual hardware uart for the serial service to
-        // connect to
-        Serial uart = Serial.connectVirtualUart(port);
-        uart.logRecv(true); // dump bytes sent from sabertooth
-      }
+      /*
+       * // start optional virtual serial service, used for test if (virtual) {
+       * // use static method Serial.connectVirtualUart to create // a virtual
+       * hardware uart for the serial service to // connect to Serial uart =
+       * Serial.connectVirtualUart(port); uart.logRecv(true); // dump bytes sent
+       * from sabertooth }
+       */
       // start the services
-      Runtime.start("gui", "SwingGui");
       Sabertooth sabertooth = (Sabertooth) Runtime.start("sabertooth", "Sabertooth");
       MotorPort m1 = (MotorPort) Runtime.start("m1", "MotorPort");
       MotorPort m2 = (MotorPort) Runtime.start("m2", "MotorPort");
@@ -303,13 +360,20 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       m1.setPort("m1");
       m2.setPort("m2");
 
-      joy.setController(5); // 0 on Linux
+      joy.setController(0); // 0 on Linux
 
       // attach services
       sabertooth.attach(m1);
       sabertooth.attach(m2);
-      m1.attach(joy.getAxis("y"));
-      m2.attach(joy.getAxis("rz"));
+
+      m1.setAnalogId("y");
+      m2.setAnalogId("rz");
+
+      // m1.attach(joy.getAxis("y"));
+      // m2.attach(joy.getAxis("rz"));
+
+      joy.attach(m1);
+      joy.attach(m2);
 
       m1.setInverted(true);
       m2.setInverted(true);
@@ -330,7 +394,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       // speed up the motor
       for (int i = 0; i < 100; ++i) {
         double pwr = i * .01;
-        log.info("power {}", pwr);
+        log.debug("power {}", pwr);
         m1.move(pwr);
         sleep(100);
       }
@@ -340,7 +404,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       // slow down the motor
       for (int i = 100; i > 0; --i) {
         double pwr = i * .01;
-        log.info("power {}", pwr);
+        log.debug("power {}", pwr);
         m1.move(pwr);
         sleep(100);
       }

@@ -379,7 +379,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   /**
    * Initiate the MPR121 to use all inputs for sensing
    * 
-   * @return
+   * @return true if it began
    */
   public boolean begin() {
 
@@ -475,6 +475,9 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
    * This method starts the MPR121 measuring pins = Number of pins to use for
    * measuring starting with ELE0 as number 1 Setting pins = 0 will stop
    * measuring
+   * 
+   * @param pins
+   *          pins
    */
   public void setRunMode(int pins) {
     writeRegister(ELECTRODE_CONFIGURAION_REGISTER, pins + 1);
@@ -578,11 +581,11 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   public void attach(String listener, int pinAddress) {
-    attach((PinListener) Runtime.getService(listener), pinAddress);
+    attachPinListener((PinListener) Runtime.getService(listener), pinAddress);
   }
 
   @Override
-  public void attach(PinListener listener, int pinAddress) {
+  public void attachPinListener(PinListener listener, int pinAddress) {
     String name = listener.getName();
 
     if (listener.isLocal()) {
@@ -607,7 +610,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   @Override
-  public void attach(PinArrayListener listener) {
+  public void attachPinArrayListener(PinArrayListener listener) {
     pinArrayListeners.put(listener.getName(), listener);
 
   }
@@ -846,7 +849,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
 
   @Override
   public void attach(PinListener listener, String pin) {
-    attach(listener, getPin(pin).getAddress());
+    attachPinListener(listener, getPin(pin).getAddress());
   }
 
   @Override
@@ -884,4 +887,25 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     // TODO Auto-generated method stub
     return null;
   }
+
+  @Override
+  public void setBus(String bus) {
+    setDeviceBus(bus);
+  }
+
+  @Override
+  public void setAddress(String address) {
+    setDeviceAddress(address);
+  }
+
+  @Override
+  public String getBus() {
+    return deviceBus;
+  }
+
+  @Override
+  public String getAddress() {
+    return deviceAddress;
+  }
+
 }

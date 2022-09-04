@@ -24,20 +24,24 @@ public class ServiceReservation implements Serializable {
   public String actualName;
   public String type;
   public String comment;
-  public Boolean autoStart;
+
   /**
    * service life-cycle state inactive | created | registered | running |
    * stopped | released a challenge will be keeping it sync'd with actual
    * service state :P
    */
-  public String state = "inactive";
+  public String state = "INACTIVE";
 
   /**
    * key type and comment are all that is needed to define a peer
    * 
    * @param key
+   *          key
    * @param typeName
+   *          type
    * @param comment
+   *          a comment about it...
+   * 
    */
   public ServiceReservation(String key, String typeName, String comment) {
     this(key, null, typeName, comment, null);
@@ -48,9 +52,14 @@ public class ServiceReservation implements Serializable {
    * name
    * 
    * @param key
+   *          the key
    * @param actualName
+   *          the actual name
    * @param typeName
+   *          the type
    * @param comment
+   *          a comment
+   * 
    */
   public ServiceReservation(String key, String actualName, String typeName, String comment) {
     this(key, actualName, typeName, comment, null);
@@ -68,8 +77,7 @@ public class ServiceReservation implements Serializable {
     this.key = key;
     this.actualName = actualName;
     this.type = typeName;
-    this.comment = comment;
-    this.autoStart = (autoStart == null) ? true : autoStart;
+    this.comment = comment;    
   }
 
   @Override

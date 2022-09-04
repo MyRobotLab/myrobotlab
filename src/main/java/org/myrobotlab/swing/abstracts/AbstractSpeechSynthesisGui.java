@@ -55,6 +55,7 @@ import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
 import org.myrobotlab.service.data.AudioData;
+import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.swing.ServiceGui;
 import org.slf4j.Logger;
 
@@ -153,8 +154,9 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     subscribe("publishSpeechRequested");
     subscribe("publishGenerationTime");
 
-    subscribe("publishStartSpeaking");
-    subscribe("publishEndSpeaking");
+    for (String method : SpeechSynthesis.publishSpeechListenerMethods) {
+      subscribe(method);
+    }
 
     subscribe("publishAudioStart");
     subscribe("publishAudioEnd");
@@ -170,8 +172,9 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     unsubscribe("publishSpeechRequested");
     unsubscribe("publishGenerationTime");
 
-    unsubscribe("publishStartSpeaking");
-    unsubscribe("publishEndSpeaking");
+    for (String method : SpeechSynthesis.publishSpeechListenerMethods) {
+      unsubscribe(method);
+    }
 
     unsubscribe("publishAudioStart");
     unsubscribe("publishAudioEnd");

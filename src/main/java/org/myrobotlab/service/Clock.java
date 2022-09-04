@@ -28,9 +28,12 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.ClockConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.ClockEvent;
 import org.slf4j.Logger;
 
@@ -46,14 +49,13 @@ public class Clock extends Service {
     private transient Thread thread = null;
 
     public ClockThread() {
-      thread = new Thread(this, getName() + "_ticking_thread");
-      thread.start();
     }
 
     @Override
     public void run() {
 
       try {
+        boolean firstTime = true;
         running = true;
         while (running) {
           Date now = new Date();
@@ -68,17 +70,40 @@ public class Clock extends Service {
             }
           }
 
-          if (!NoExecutionAtFirstClockStarted) {
-            invoke("pulse", new Date());
-            invoke("publishTime", new Date());
+          if (firstTime && skipFirst) {
+            firstTime = false;
+            continue;
           }
+          invoke("pulse", now);
+          invoke("publishTime", now);
+          invoke("publishEpoch", now);
+
           Thread.sleep(interval);
-          NoExecutionAtFirstClockStarted = false;
+          firstTime = false;
         }
       } catch (InterruptedException e) {
         log.info("ClockThread interrupt");
       }
       running = false;
+      thread = null;
+    }
+
+    synchronized public void start() {
+      if (thread == null) {
+        thread = new Thread(this, getName() + "_ticking_thread");
+        thread.start();
+      } else {
+        log.info("{} already started", getName());
+      }
+    }
+
+    public void stop() {
+      if (thread != null) {
+        thread.interrupt();
+        thread = null;
+      } else {
+        log.info("{} already stopped");
+      }
     }
   }
 
@@ -86,18 +111,15 @@ public class Clock extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(Clock.class);
 
-  public volatile boolean running;
+  protected volatile boolean running;
 
-  public int interval = 1000;
+  final protected transient ClockThread myClock = new ClockThread();
+  
+  protected int interval = 1000;
 
-  protected transient ClockThread myClock = null;
+  protected List<ClockEvent> events = new ArrayList<ClockEvent>();
 
-  // FIXME
-  protected ArrayList<ClockEvent> events = new ArrayList<ClockEvent>();
-
-  private boolean NoExecutionAtFirstClockStarted = false;
-
-  private boolean restartMe;
+  private boolean skipFirst = false;
 
   public Clock(String n, String id) {
     super(n, id);
@@ -116,15 +138,21 @@ public class Clock extends Service {
     broadcastState();
   }
 
+  /**
+   * The clock was stopped event
+   */
   public void publishClockStopped() {
     running = false;
     broadcastState();
-    if (restartMe) {
-      sleep(10);
-      startClock(NoExecutionAtFirstClockStarted);
-    }
   }
 
+  /**
+   * Date is published at an interval here
+   * 
+   * @param time
+   *          t
+   * @return t
+   */
   public Date pulse(Date time) {
     return time;
   }
@@ -133,63 +161,31 @@ public class Clock extends Service {
     return time;
   }
 
+  public long publishEpoch(Date time) {
+    return time.getTime();
+  }
+
   public void setInterval(Integer milliseconds) {
     interval = milliseconds;
     broadcastState();
   }
 
-  public void startClock(boolean NoExecutionAtFirstClockStarted) {
-    if (myClock == null) {
-      this.NoExecutionAtFirstClockStarted = NoExecutionAtFirstClockStarted;
-      // info("starting clock");
-      myClock = new ClockThread();
-      invoke("publishClockStarted");
-    } else {
-      log.info("clock already started");
-    }
-  }
-
-  public void restartClock(boolean NoExecutionAtFirstClockStarted) {
-    this.NoExecutionAtFirstClockStarted = NoExecutionAtFirstClockStarted;
-    if (!running) {
-      startClock(NoExecutionAtFirstClockStarted);
-    } else {
-      stopClock(true);
-    }
-
+  public void startClock(boolean skipFirst) {
+    this.skipFirst = skipFirst;
+    myClock.start();
+    invoke("publishClockStarted");
   }
 
   public void startClock() {
     startClock(false);
   }
 
-  public void restartClock() {
-    restartClock(false);
-  }
-
-  public void stopClock() {
-    stopClock(false);
-  }
-  
   public boolean isClockRunning() {
     return running;
   }
 
-  public void stopClock(boolean restartMe) {
-    this.restartMe = restartMe;
-    if (myClock != null) {
-      // info("stopping clock");
-      log.info("stopping " + getName() + " myClock");
-      myClock.thread.interrupt();
-      myClock.thread = null;
-      myClock = null;
-      // have requestors broadcast state !
-      // broadcastState();
-      invoke("publishClockStopped");
-    } else {
-      log.info("clock already stopped");
-    }
-    running = false;
+  public void stopClock() {
+    myClock.stop();
     broadcastState();
   }
 
@@ -199,35 +195,79 @@ public class Clock extends Service {
     stopClock();
   }
 
-  public static void main(String[] args) throws Exception {
-    // LoggingFactory.init(Level.WARN);
-    Runtime.main(new String[] { "--id", "c3", "--from-launcher", "--log-level", "WARN" });
+  public Integer getInterval() {
+    return interval;
+  }
 
-    // connections
-    boolean mqtt = true;
-    boolean rconnect = false;
+  @Override
+  public ServiceConfig getConfig() {
+    ClockConfig c = (ClockConfig) config;
+    c.interval = interval;
+    c.skipFirst = skipFirst;
+    c.running = running;
+    return c;
+  }
 
-    /*
-     * 
-     * WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui"); //
-     * webgui.setSsl(true); webgui.autoStartBrowser(false);
-     * webgui.setPort(8887); webgui.startService();
-     */
-    if (mqtt) {
-      // Mqtt mqtt02 = (Mqtt)Runtime.create("broker", "MqttBroker");
-      Mqtt mqtt02 = (Mqtt) Runtime.start("mqtt02", "Mqtt");
-      /*
-      mqtt02.setCert("certs/home-client/rootCA.pem", "certs/home-client/cert.pem.crt", "certs/home-client/private.key");
-      mqtt02.connect("mqtts://a22mowsnlyfeb6-ats.iot.us-west-2.amazonaws.com:8883");
-      */
-      // mqtt02.connect("mqtt://broker.emqx.io:1883");
-      mqtt02.connect("mqtt://localhost:1883");
+  public ServiceConfig apply(ServiceConfig c) {
+    ClockConfig config = (ClockConfig) c;
+    if (config.running != null) {
+      if (config.running) {
+        startClock();
+      } else {
+        stopClock();
+      }
     }
+    interval = config.interval;
+    skipFirst = config.skipFirst;
+    return config;
+  }
 
-    if (rconnect) {
+  public static void main(String[] args) throws Exception {
+    try {
+      // LoggingFactory.init(Level.WARN);
+
       Runtime runtime = Runtime.getInstance();
-      runtime.connect("http://localhost:8888");
 
+      Clock c1 = (Clock) Runtime.start("c1", "Clock");
+      c1.startClock(true);
+      c1.stopClock();
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      // connections
+      boolean mqtt = true;
+      boolean rconnect = false;
+
+      /*
+       * 
+       * WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui"); //
+       * webgui.setSsl(true); webgui.autoStartBrowser(false);
+       * webgui.setPort(8887); webgui.startService();
+       */
+      if (mqtt) {
+        // Mqtt mqtt02 = (Mqtt)Runtime.create("broker", "MqttBroker");
+        Mqtt mqtt02 = (Mqtt) Runtime.start("mqtt02", "Mqtt");
+        /*
+         * mqtt02.setCert("certs/home-client/rootCA.pem",
+         * "certs/home-client/cert.pem.crt", "certs/home-client/private.key");
+         * mqtt02.connect(
+         * "mqtts://a22mowsnlyfeb6-ats.iot.us-west-2.amazonaws.com:8883");
+         */
+        // mqtt02.connect("mqtt://broker.emqx.io:1883");
+        mqtt02.connect("mqtt://localhost:1883");
+      }
+
+      if (rconnect) {
+        // Runtime runtime = Runtime.getInstance();
+        // runtime.connect("http://localhost:8888");
+
+      }
+
+    } catch (Exception e) {
+      log.error("main threw", e);
     }
   }
 

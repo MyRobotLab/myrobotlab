@@ -1,148 +1,197 @@
+<!-- link rel="stylesheet" href="service/views/ServoMixer.css" -->
 <!-- ServoMixerGui html-->
+<!--
 selectedSequence {{state.selectedSequence}}<br/>
 selectedPose {{state.selectedPose}}<br/>
+-->
 <div class="container rzMixer">
-    <div class="MixerTop">
-        <div class="row">
-            <h2>&nbsp;{{state.currentRunningPose}}</h2>
-            <div class="MixerDirectory">
-                <div class="labelRow">
-                    Pose <span class="currentPose">{{state.selectedPose}}&nbsp;</span>
-                </div>
-                <div class="buttonsRow">
-                    <span class="glyphicon glyphicon-folder-open"></span>
-                    <input class="form-control ng-pristine ng-untouched ng-valid ng-empty directoryName" type="text" ng-model="service.servoMixerDirectory" name="directoryName" id="directoryName" ng-init="" placeholder="Pose directory" style="width:200px">
-                    <button class="btn btn-default" ng-click="msg.setPosesDirectory(service.servoMixerDirectory)">Set</button>
-                </div>
-                <select ng-model="state.selectedPose" ng-change="msg.getPose(state.selectedPose);poseName=state.selectedPose" class="form-control vertical-menu poseList" size="6" title="Select a pose to load">
-                    <option ng-repeat="x in poseFiles" ng-value="{{x}}">{{x}}</option>
-                </select>
-                <div class="buttonsRow">
-                    <div>
-                        <button class="btn btn-default" ng-click="msg.moveToPose(state.selectedPose)">
-                            <span class="glyphicon glyphicon-play"></span>
-                            Move
-                        </button>
-                        <button class="btn btn-default" ng-click="msg.getPose(state.selectedPoseFile);poseName = state.selectedPoseFile">
-                            <span class="glyphicon glyphicon-open"></span>
-                            Load
-                        </button>
-                    </div>
-                    <div>
-                        <button class="btn btn-default" ng-click="msg.removePose(state.selectedPose)">
-                            <span class="glyphicon glyphicon-remove red"></span>
-                            Delete 
-                        
-                        </button>
-                    </div>
-                    <div>
-                        <div class="input-group">
-                            <input class="form-control ng-pristine ng-untouched ng-valid ng-empty fieldSave" type="text" ng-model="poseName" name="poseName" id="poseName" ng-init="" placeholder="name" style="">
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" ng-click="msg.savePose(poseName)">Save</button>
-                            </span>
+<div class="row">
+    <div class="col-md-12">
+        <table class="tableController table-striped table-bordered">
+            <tr valign="top">
+                <td>
+                    <div class="servo-mixer-directory">
+                        <div class="labelRow">
+                            Pose <span class="currentPose">{{state.selectedPose}}&nbsp;</span>
+                        </div>
+                        <div class="buttonsRow">
+                            <span class="glyphicon glyphicon-folder-open"></span>
+                            <input class="form-control ng-pristine ng-untouched ng-valid ng-empty directoryName" type="text" ng-model="service.servoMixerDirectory" name="directoryName" id="directoryName" ng-init="" placeholder="Pose directory" style="width:200px">
+                            <button class="btn btn-default" ng-click="msg.setPosesDirectory(service.servoMixerDirectory)">Set</button>
+                        </div>
+                        <select ng-model="state.selectedPose" ng-change="msg.getPose(state.selectedPose)" class="form-control vertical-menu poseList" size="6" title="Select a pose to load">
+                            <option ng-repeat="x in poseFiles" ng-value="{{x}}">{{x}}</option>
+                        </select>
+                        <div class="buttonsRow">
+                            <div>
+                                <button class="btn btn-default" ng-click="msg.moveToPose(state.selectedPose)">
+                                    <span class="glyphicon glyphicon-play"></span>
+                                    Move
+                                
+                                
+                                
+                                
+                                
+                                </button>
+                                <button class="btn btn-default">
+                                    <span class="glyphicon glyphicon-open"></span>
+                                    Load
+                                
+                                
+                                
+                                
+                                
+                                </button>
+                            </div>
+                            <div>
+                                <button class="btn btn-default" ng-click="msg.removePose(state.selectedPose)">
+                                    <span class="glyphicon glyphicon-remove red"></span>
+                                    Delete 
+                                
+                                
+                                
+                                
+                                
+                                </button>
+                            </div>
+                            <div>
+                                <div class="input-group">
+                                    <input class="form-control ng-pristine ng-untouched ng-valid ng-empty fieldSave" ng-model=state.selectedPose type="text" name="servo-mixer-pose" id="servo-mixer-pose" ng-init="" placeholder="name" style="">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" ng-click="msg.savePose(state.selectedPose)">Save</button>
+                                    </span>
+                                </div>
+                                <div>
+                                    Blocking
+                                    <toggle ng-model="toggleBlocking" class="miniBTN" title="Servo will block until the current moveTo is finished" ng-change="!service.isBlocking?msg.isBlocking(false):msg.isBlocking(true)" on="" off="" size="btn-lg"/>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                </td>
+                <td>
+                    <div class="container rzMixer">
+                        <div class="servo-mixer-top">
+                            <div class="row">
+                                <!--            <h2>&nbsp;{{state.currentRunningPose}}</h2> -->
+                                <div class="servo-mixer-directory">
+                                    <div class="labelRow">Sequence {{state.selectedSequenceFile}}</div>
+                                    <select ng-model="state.selectedSequenceFile" ng-change="msg.loadSequence(state.selectedSequenceFile)" class="form-control vertical-menu poseList" size="6" title="Select a sequence to load">
+                                        <option ng-repeat="x in sequenceFiles" ng-value="{{x}}">{{x}}</option>
+                                    </select>
+                                    <div class="buttonsRow">
+                                        <div>
+                                            <button class="btn btn-default" ng-click="msg.getSequence(state.selectedSequenceFile);sequenceName = state.selectedSequenceFile">
+                                                <span class="glyphicon glyphicon-open"></span>
+                                                Load                         
+                                            
+                                            
+                                            
+                                            
+                                            </button>
+                                            <button class="btn btn-default" ng-click="msg.playSequence(state.selectedSequenceFile)">
+                                                <span class="glyphicon glyphicon-play"></span>
+                                                Play
+                                            
+                                            
+                                            
+                                            
+                                            </button>
+                                            <button class="btn btn-default" ng-click="msg.playSequence(state.selectedSequenceFile)">
+                                                <img src="stop.png"/>Stop
+                                            
+                                            
+                                            
+                                            </button>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-default" ng-click="msg.removeSequence(state.selectedSequenceFile)">
+                                                <span class="glyphicon glyphicon-remove red"></span>
+                                                Delete                                        
+                                            
+                                            
+                                            </button>
+                                        </div>
+                                    </div>
+                </td>
+                <td>
+                    <div class="servo-mixer-directory">
+                        <div class="labelRow">Sequence content
                 </div>
-            </div>
-            <div class="MixerDirectory">
-                <div class="labelRow">Sequence {{state.selectedSequenceFile}}
-                </div>
-                <select ng-model="state.selectedSequenceFile" ng-change="msg.loadSequence(state.selectedSequenceFile)" class="form-control vertical-menu poseList" size="6" title="Select a sequence to load">
-                    <option ng-repeat="x in sequenceFiles" ng-value="{{x}}">{{x}}</option>
-                </select>
-                <div class="buttonsRow">
-                    <div>
-                        <button class="btn btn-default" ng-click="msg.getSequence(state.selectedSequenceFile);sequenceName = state.selectedSequenceFile">
-                            <span class="glyphicon glyphicon-open"></span>
-                            Load                        
-                        </button>
-                        <button class="btn btn-default" ng-click="msg.playSequence(state.selectedSequenceFile)">
-                            <span class="glyphicon glyphicon-play"></span>
-                            Play
-                        </button>
-                        <button class="btn btn-default" ng-click="msg.playSequence(state.selectedSequenceFile)">
-                            <img src="stop.png" />
-                            </span>
-                            Stop
-                        </button>
-                    </div>
-                    <div>
-                        <button class="btn btn-default" ng-click="msg.removeSequence(state.selectedSequenceFile)">
-                            <span class="glyphicon glyphicon-remove red"></span>
-                            Delete
-                        
-                        
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="MixerDirectory">
-                <div class="labelRow">Sequence content
-                </div>
-                <div class="buttonsRow">
-                    <div class="input-group">
-                        <span class="input-group-btn">
-                            <button class="btn btn-default" title="Add speech to sequence">
-                                <span class="glyphicon glyphicon-plus"></span>
-                                Speak </button>
-                        </span>
-                        <input class="form-control ng-pristine ng-untouched ng-valid ng-empty poseName" type="text" ng-model="addSequenceSpeak" name="addSequenceSpeak" id="addSequenceSpeak" ng-init="" placeholder="type">
-                    </div>
-                    <div>
-                        Blocking <toggle class="miniBTN" title="Speak Blocking" ng-model="blocking" ng-change="" on="" off="" size="btn-lg"/>
-                    </div>
-                </div>
-                <div class="buttonsRow">
-                    <button class="btn btn-default addPoseButton" title="Add current pose to sequence" ng-click="msg.addSequencePose(state.selectedPose)">{{state.selectedPose}}
+                        <div class="buttonsRow">
+                            <div class="input-group">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" title="Add speech to sequence">
+                                        <span class="glyphicon glyphicon-plus"></span>
+                                        Speak
+                                    </button>
+                                </span>
+                                <input class="form-control ng-pristine ng-untouched ng-valid ng-empty servo-mixer-pose" type="text" ng-model="addSequenceSpeak" name="addSequenceSpeak" id="addSequenceSpeak" ng-init="" placeholder="type">
+                            </div>
+                            <div>
+                                Blocking <toggle class="miniBTN" title="Speak Blocking" ng-model="blocking" ng-change="" on="" off="" size="btn-lg"/>
+                            </div>
+                        </div>
+                        <div class="buttonsRow">
+                            <button class="btn btn-default addPoseButton" title="Add current pose to sequence" ng-click="msg.addSequencePose(state.selectedPose)">{{state.selectedPose}}
                     </button>
-                    <div class="input-group">
-                        <span class="input-group-btn">
-                            <button class="btn btn-default" ng-click="addSequenceDelay(delay)" title="Add Delay in seconds to sequence">
-                                <span class="glyphicon glyphicon-plus"></span>
-                                Delay</button>
-                        </span>
-                        <input class="form-control ng-pristine ng-untouched ng-valid ng-empty fieldDelay" type="text" ng-model="delay" ng-init="3" placeholder="sec">
+                            <div class="input-group">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" ng-click="addSequenceDelay(delay)" title="Add Delay in seconds to sequence">
+                                        <span class="glyphicon glyphicon-plus"></span>
+                                        Delay                                    
+                                    </button>
+                                </span>
+                                <input class="form-control ng-pristine ng-untouched ng-valid ng-empty fieldDelay" type="text" ng-model="delay" ng-init="3" placeholder="sec">
+                            </div>
+                        </div>
+                        <select ng-model="state.selectedSequence" ng-change="setSequence()" class="form-control vertical-menu poseList" size="6" title="Select a pose to load">
+                            <option ng-repeat="pose in state.currentSequence.poses" value="{{pose}}">{{pose.name}} {{(pose.waitTimeMs/1000)}}</option>
+                        </select>
+                        <div class="buttonsRow">
+                            <span class="btn-group">
+                                <button class="btn btn-default btn-group updownButton" title="Move Up" ng-click="moveUpPoseInSequence()">
+                                    <span class="glyphicon glyphicon-triangle-top"></span>
+                                </button>
+                                <button class="btn btn-default btn-group updownButton" title="Move Down" ng-click="moveDownPoseInSequence()">
+                                    <span class="glyphicon glyphicon-triangle-bottom"></span>
+                                </button>
+                                <button class="btn btn-default btn-group updownButton" title="Play" ng-click="moveSequenceContent(state.selectedSequence)">
+                                    <span class="glyphicon glyphicon-triangle-right"></span>
+                                </button>
+                                <button class="btn btn-default">
+                                    <span class="glyphicon glyphicon-plus" ng-click="addPoseToSequence()"></span>
+                                </button>
+                                <button class="btn btn-default btn-group updownButton" title="Remove Pose" ng-click="removePoseFromSequence()">
+                                    <span class="glyphicon glyphicon-remove red"></span>
+                                </button>
+                            </span>
+                            <div class="input-group">
+                                <input class="form-control ng-pristine ng-untouched ng-valid ng-empty fieldSave" type="text" ng-model="sequenceName" name="sequenceName" id="sequenceName" ng-init="" placeholder="name" style="">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" ng-click="saveSequence(sequenceName)">Save</button>
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <select ng-model="state.selectedSequence" ng-change="setSequence()" class="form-control vertical-menu poseList" size="6" title="Select a pose to load">
-                    <option ng-repeat="pose in state.currentSequence.poses" value="{{pose}}">{{pose.name}} {{(pose.waitTimeMs/1000)}}</option>
-                </select>
-                <div class="buttonsRow">
-                    <span class="btn-group">
-                        <button class="btn btn-default btn-group updownButton" title="Move Up" ng-click="moveUpPoseInSequence()">
-                            <span class="glyphicon glyphicon-triangle-top"></span>
-                        </button>
-                        <button class="btn btn-default btn-group updownButton" title="Move Down" ng-click="moveDownPoseInSequence()">
-                            <span class="glyphicon glyphicon-triangle-bottom"></span>
-                        </button>
-                        <button class="btn btn-default btn-group updownButton" title="Play" ng-click="moveSequenceContent(state.selectedSequence)">
-                            <span class="glyphicon glyphicon-triangle-right"></span>
-                        </button>                        
-                        <button class="btn btn-default">
-                            <span class="glyphicon glyphicon-plus" ng-click="addPoseToSequence()"></span>
-                        </button>
-                        <button class="btn btn-default btn-group updownButton" title="Remove Pose" ng-click="removePoseFromSequence()">
-                            <span class="glyphicon glyphicon-remove red"></span>
-                        </button>
-                    </span>
-                    <div class="input-group">
-                        <input class="form-control ng-pristine ng-untouched ng-valid ng-empty fieldSave" type="text" ng-model="sequenceName" name="sequenceName" id="sequenceName" ng-init="" placeholder="name" style="">
-                        <span class="input-group-btn">
-                            <button class="btn btn-default" ng-click="saveSequence(sequenceName)">Save</button>
-                        </span>
-                    </div>
-                </div>
-            </div>
+                </td>
+            </tr>
+            <tr>
+            <td colspan="100%">
+            <input id="servo-mixer-filter" class="form-control ng-pristine ng-untouched ng-valid ng-empty" ng-change="searchServos(searchServo.displayName)" type="text" ng-model="searchServo.displayName" ng-init="" placeholder="servo name">
+            </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div ng-model="dummy" ng-repeat="(key, value) in searchServos(searchServo.displayName)">
+    <div class="sliderMixer">
+        <!-- input type="checkbox" class="form-check-input" id="servo-checkbox-{{key}}"/ -->
+        <div class="MixerServoName">{{mrl.getShortName(key)}}</div>
+        <div class="servomixer-hidden">
+        <div service-body panel="mrl.getPanel(key)"/></div>
         </div>
     </div>
-    <div class="row servoFilter">
-        Filter <input id="servoFilter" class="form-control ng-pristine ng-untouched ng-valid ng-empty" ng-change="searchServos(searchServo.displayName)" type="text" ng-model="searchServo.displayName" ng-init="" placeholder="servo name">
-    </div>
-    <div ng-model="dummy" ng-repeat="(key, value) in searchServos(searchServo.displayName)">
-        <div class="sliderMixer"><!-- input type="checkbox" class="form-check-input" id="servo-checkbox-{{key}}"/ -->
-            <div class="MixerServoName">{{mrl.getShortName(key)}}</div>
-            <div service-body panel="mrl.getPanel(key)"/></div>
-        </div>
-    </div>
+</div>
 </div>

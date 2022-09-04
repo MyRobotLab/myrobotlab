@@ -388,15 +388,19 @@ public class MrlComm implements SerialDataListener {
    * only amt203A is supported... but soon type =1 will mean as5048a ...
    * 
    * @param deviceId
+   *          the mrlcomm device id
    * @param type
+   *          type of this encoder
    * @param pin
+   *          the pin the encoder is attached to.
+   * 
    */
   public void encoderAttach(Integer deviceId, Integer type, Integer pin) {
     if (type == 0) {
       MrlAmt203Encoder encoder = (MrlAmt203Encoder) getDevice(deviceId);
-      encoder.attach(pin);
-    } else {
-      MrlAs5048AEncoder encoder = (MrlAs5048AEncoder) getDevice(deviceId);
+      if (encoder != null) {
+        encoder.attach(pin);
+      }
     }
   }
 
@@ -486,17 +490,32 @@ public class MrlComm implements SerialDataListener {
 
   // > i2cRead/deviceId/deviceAddress/size
   public void i2cRead(int deviceId, int deviceAddress, int size) {
-    ((MrlI2CBus) getDevice(deviceId)).i2cRead(deviceAddress, size);
+    MrlI2CBus i2c = (MrlI2CBus) getDevice(deviceId);
+    if (i2c != null) {
+      i2c.i2cRead(deviceAddress, size);
+    } else {
+      log.warn("i2c device {} not found", deviceId);
+    }
   }
 
   // > i2cWrite/deviceId/deviceAddress/[] data
   public void i2cWrite(int deviceId, int deviceAddress, int[] data) {
-    ((MrlI2CBus) getDevice(deviceId)).i2cWrite(deviceAddress, data.length, data);
+    MrlI2CBus i2c = (MrlI2CBus) getDevice(deviceId);
+    if (i2c != null) {
+      i2c.i2cWrite(deviceAddress, data.length, data);
+    } else {
+      log.warn("i2c device {} not found", deviceId);
+    }
   }
 
   // > i2cWriteRead/deviceId/deviceAddress/readSize/writeValue
   public void i2cWriteRead(int deviceId, int deviceAddress, int readSize, int writeValue) {
-    ((MrlI2CBus) getDevice(deviceId)).i2cWriteRead(deviceAddress, readSize, writeValue);
+    MrlI2CBus i2c = (MrlI2CBus) getDevice(deviceId);
+    if (i2c != null) {
+      i2c.i2cWriteRead(deviceAddress, readSize, writeValue);
+    } else {
+      log.warn("i2c device {} not found", deviceId);
+    }
   }
 
   public Object invoke(String method, Object... params) {
@@ -521,34 +540,58 @@ public class MrlComm implements SerialDataListener {
 
   // > motorMove/deviceId/pwr
   public void motorMove(Integer deviceId, Integer pwr) {
+    
     MrlMotor motor = (MrlMotor) getDevice(deviceId);
-    motor.move(pwr);
+    if (motor != null) {
+      motor.move(pwr);
+    } else {
+      log.warn("motor device {} not found", deviceId);
+    }
+    
   }
 
   // > motorMoveTo/deviceId/pos
   public void motorMoveTo(Integer deviceId, Integer pos) {
+    
     MrlMotor motor = (MrlMotor) getDevice(deviceId);
-    motor.moveTo(pos);
+    if (motor != null) {
+      motor.moveTo(pos);
+    } else {
+      log.warn("motor device {} not found", deviceId);
+    }
+
   }
 
   // > neoPixelAttach/pin/b16 numPixels
   public void neoPixelAttach(int deviceId, int pin, long numPixels, int depth) {
     // msg.publishDebug("MrlNeopixel.deviceAttach!");
 
-    MrlNeopixel neo = (MrlNeopixel) addDevice(new MrlNeopixel(deviceId, virtual));
+    MrlNeopixel neopixel = (MrlNeopixel) addDevice(new MrlNeopixel(deviceId, virtual));
     virtualMsg.publishDebug("id" + String(deviceId));
-    neo.attach(pin, numPixels, depth);
+    if (neopixel != null) {
+      neopixel.attach(pin, numPixels, depth);
+    }
   }
 
   // > neoPixelAttach/pin/b16 numPixels
   public void neoPixelSetAnimation(int deviceId, int animation, int red, int green, int blue, int speed) {
     virtualMsg.publishDebug("MrlNeopixel.setAnimation!");
-    ((MrlNeopixel) getDevice(deviceId)).setAnimation(animation, red, green, blue, speed);
+    MrlNeopixel neopixel = (MrlNeopixel)getDevice(deviceId);
+    if (neopixel != null) {
+      neopixel.setAnimation(animation, red, green, blue, speed);
+    } else {
+      log.warn("no neopixel device at device id {}", deviceId);
+    }
   }
 
   // > neoPixelWriteMatrix/deviceId/[] buffer
   public void neoPixelWriteMatrix(int deviceId, int[] buffer) {
-    ((MrlNeopixel) getDevice(deviceId)).neopixelWriteMatrix(buffer.length, buffer);
+    MrlNeopixel neopixel = (MrlNeopixel)getDevice(deviceId);
+    if (neopixel != null) {
+      neopixel.neopixelWriteMatrix(buffer.length, buffer);
+    } else {
+      log.warn("no neopixel device at device id {}", deviceId);
+    }    
   }
 
   void onDisconnect() {
@@ -592,7 +635,11 @@ public class MrlComm implements SerialDataListener {
     MrlSerialRelay relay = (MrlSerialRelay) getDevice(deviceId);
     // msg.publishDebug("serialRelay (" + String(dataSize) + "," +
     // String(deviceId));
-    relay.write(data, data.length);
+    if (relay != null) {
+      relay.write(data, data.length);
+    } else {
+      log.warn("serial relay device not found for {}", deviceId);
+    }
   }
 
   // > servoAttach/deviceId/pin/targetOutput/b16 velocity
@@ -606,13 +653,21 @@ public class MrlComm implements SerialDataListener {
   // > servoEnablePwm/deviceId/pin
   public void servoAttachPin(int deviceId, int pin) {
     MrlServo servo = (MrlServo) getDevice(deviceId);
-    servo.attachPin(pin);
+    if (servo != null) {
+      servo.attachPin(pin);
+    } else {
+      log.warn("servo not found for {}", deviceId);
+    }
   }
 
   // > servoDisablePwm/deviceId
   public void servoDetachPin(int deviceId) {
     MrlServo servo = (MrlServo) getDevice(deviceId);
-    servo.detachPin();
+    if (servo != null) {
+      servo.detachPin();
+    } else {
+      log.warn("servo not found for {}", deviceId);      
+    }
   }
 
   public void servoMoveToMicroseconds(int deviceId, int target) {
@@ -628,23 +683,40 @@ public class MrlComm implements SerialDataListener {
 
   public void servoSetAcceleration(int deviceId, int acceleration) {
     MrlServo servo = (MrlServo) getDevice(deviceId);
-    servo.setAcceleration(acceleration);
+    if (servo != null) {
+      servo.setAcceleration(acceleration);
+    } else {
+      log.warn("servo not found for {}", deviceId);      
+    }
+
   }
 
   // > servoSetVelocity/deviceId/b16 velocity
   public void servoSetVelocity(int deviceId, int velocity) {
-    MrlServo servo = (MrlServo) getDevice(deviceId);
-    servo.setVelocity(velocity);
+    MrlServo servo = (MrlServo) getDevice(deviceId);    
+    if (servo != null) {
+      servo.setVelocity(velocity);
+    } else {
+      log.warn("servo not found for {}", deviceId);      
+    }
   }
 
   public void servoSweepStart(int deviceId, int min, int max, int step) {
     MrlServo servo = (MrlServo) getDevice(deviceId);
-    servo.startSweep(min, max, step);
+    if (servo != null) {
+      servo.startSweep(min, max, step);
+    } else {
+      log.warn("servo not found for {}", deviceId);      
+    }
   }
 
   public void servoSweepStop(int deviceId) {
     MrlServo servo = (MrlServo) getDevice(deviceId);
-    servo.stopSweep();
+    if (servo != null) {
+      servo.stopSweep();
+    } else {
+      log.warn("servo not found for {}", deviceId);      
+    }
   }
 
   // > enablePin/address/type/b16 rate
@@ -676,8 +748,11 @@ public class MrlComm implements SerialDataListener {
   public void setZeroPoint(Integer deviceId) {
     // TODO Auto-generated method stub
     MrlAmt203Encoder encoder = (MrlAmt203Encoder) getDevice(deviceId);
-    encoder.setZeroPoint();
-
+    if (encoder != null) {
+      encoder.setZeroPoint();
+    } else {
+      log.warn("encoder 203 not found for {}", deviceId);
+    }
   }
 
   // > softReset
@@ -722,19 +797,32 @@ public class MrlComm implements SerialDataListener {
   // > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
   public void ultrasonicSensorAttach(int deviceId, int triggerPin, int echoPin) {
     MrlUltrasonicSensor sensor = (MrlUltrasonicSensor) addDevice(new MrlUltrasonicSensor(deviceId, virtual));
-    sensor.attach(triggerPin, echoPin);
+    if (sensor != null) {
+      sensor.attach(triggerPin, echoPin);
+    } else {
+      log.warn("ultrasonic sensor found for {}", deviceId);
+    }
   }
 
   // > ultrasonicSensorStartRanging/deviceId
   public void ultrasonicSensorStartRanging(int deviceId) {
     MrlUltrasonicSensor sensor = (MrlUltrasonicSensor) getDevice(deviceId);
-    sensor.startRanging();
+    if (sensor != null) {
+      sensor.startRanging();
+    } else {
+      log.warn("ultrasonic sensor found for {}", deviceId);
+    }
+    
   }
 
   // > ultrasonicSensorStopRanging/deviceId
   public void ultrasonicSensorStopRanging(int deviceId) {
     MrlUltrasonicSensor sensor = (MrlUltrasonicSensor) getDevice(deviceId);
-    sensor.stopRanging();
+    if (sensor != null) {
+      sensor.stopRanging();
+    } else {
+      log.warn("ultrasonic sensor found for {}", deviceId);
+    }
   }
 
   /***********************************************************************
@@ -896,6 +984,36 @@ public class MrlComm implements SerialDataListener {
     // in reality, the uart/DCE side doesn't do anything with this. We only care
     // about this on the real Msg side of the interface.
     log.warn("Ack timeout seen, this shouldn't happen in virtual device land.");
+  }
+
+  public void neoPixelAttach(Integer deviceId, Integer pin, Integer numPixels, Integer depth) {
+    MrlNeopixel neo = new MrlNeopixel(deviceId, pin, numPixels, depth);
+    addDevice(neo);
+  }
+
+  public void neoPixelWriteMatrix(Integer deviceId, int[] buffer) {
+    // TODO Auto-generated method stub
+
+  }
+
+  public void neoPixelSetAnimation(Integer deviceId, Integer animation, Integer red, Integer green, Integer blue, Integer white, Integer speed) {
+    // TODO Auto-generated method stub
+
+  }
+
+  public void neoPixelClear(Integer deviceId) {
+    // TODO Auto-generated method stub
+
+  }
+
+  public void neoPixelFill(Integer deviceId, Integer address, Integer count, Integer red, Integer green, Integer blue, Integer white) {
+    // TODO Auto-generated method stub
+
+  }
+
+  public void neoPixelSetBrightness(Integer deviceId, Integer brightness) {
+    // TODO Auto-generated method stub
+
   }
 
 }

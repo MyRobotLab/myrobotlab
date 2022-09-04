@@ -1,4 +1,4 @@
-arduino = Runtime.createAndStart("arduino","Arduino")
+arduino = runtime.start("arduino","Arduino")
 arduino.connect("COM3")
 # arduino.setSampleRate(30000)
 
@@ -8,7 +8,7 @@ arduino.arduino.enablePin(readAnalogPin)
 arduino.addListener("publishPin", "python", "input")
 
 
-pid = Runtime.createAndStart("pid","Pid")
+pid = runtime.start("pid","Pid")
 pid.setMode(1)
 #set the range of the "correction"
 pid.setOutputRange(-5, 5)

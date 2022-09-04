@@ -403,7 +403,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
     simplexml = simplexml.replaceAll("name=\"grammarName\" value=\"simple\"", "name=\"grammarName\" value=\"" + grammarFileName + "\"");
     try {
       FileIO.toFile(String.format("%s%s%s.%s", FileIO.getCfgDir(), File.separator, grammarFileName, "xml"), simplexml);
-      save("xml", simplexml);
+      // save("xml", simplexml);
 
       String gramdef = "#JSGF V1.0;\n" + "grammar " + grammarFileName + ";\n" + "public <greet> = (" + grammar + ");";
       FileIO.toFile(String.format("%s%s%s.%s", FileIO.getCfgDir(), File.separator, grammarFileName, "gram"), gramdef);
@@ -629,6 +629,11 @@ public class Sphinx extends AbstractSpeechRecognizer {
   @Override
   public Map<String, Locale> getLocales() {
     return Locale.getLocaleMap("en-US");
+  }
+
+  @Override
+  public void attachTextListener(String name) {
+    addListener("publishText", name);
   }
 
 }

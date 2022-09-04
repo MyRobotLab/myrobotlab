@@ -17,7 +17,7 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
 
   private static final long serialVersionUID = 1L;
 
-  private WorkflowConfiguration config;
+  private WorkflowConfiguration workFlowConfig;
   private transient WorkflowServer workflowServer;
   private String workflowName = "default";
 
@@ -31,7 +31,7 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
   }
 
   public void setConfig(WorkflowConfiguration workflowConfig) {
-    this.config = workflowConfig;
+    this.workFlowConfig = workflowConfig;
   }
 
   @Override
@@ -146,8 +146,8 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     if (workflowServer == null) {
       workflowServer = WorkflowServer.getInstance();
     }
-    workflowServer.addWorkflow(config);
-    workflowName = config.getName();
+    workflowServer.addWorkflow(workFlowConfig);
+    workflowName = workFlowConfig.getName();
 
     // We can't drop messages! apply back pressure if the inbox is full!
     this.inbox.setBlocking(true);

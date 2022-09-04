@@ -23,7 +23,7 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
 
   public final static Logger log = LoggerFactory.getLogger(RepoTest.class);
   ArrayList<Status> status = new ArrayList<Status>();
-  
+
   @AfterClass
   public static void lastCleanup() {
     Repo repo = Repo.getInstance();
@@ -51,7 +51,6 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
 
   @Test
   public void testAddStatusListener() throws ParseException, IOException {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     Repo repo = Repo.getInstance();
     repo.addStatusPublisher(this);
     repo.install("Arduino");
@@ -59,7 +58,6 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
 
   @Test
   public void testClear() {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     Repo repo = Repo.getInstance();
     repo.clear();
     File check = new File("libraries");
@@ -68,14 +66,12 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
 
   @Test
   public void testGetLocalInstance() {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     Repo repo = Repo.getInstance();
     assertTrue(repo != null);
   }
 
   @Test
   public void testGetUnfulfilledDependencies() {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     Repo repo = Repo.getInstance();
     repo.clear();
     Set<ServiceDependency> deps = repo.getUnfulfilledDependencies("Serial");
@@ -86,7 +82,6 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
 
   @Test
   public void testIsInstalled() throws ParseException, IOException {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     Repo repo = Repo.getInstance();
     repo.clear();
     repo.install("Arduino");
@@ -95,7 +90,6 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
 
   @Test
   public void testSave() {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     Repo repo = Repo.getInstance();
     FileIO.rm(repo.getRepoPath());
     assertFalse(new File(repo.getRepoPath()).exists());

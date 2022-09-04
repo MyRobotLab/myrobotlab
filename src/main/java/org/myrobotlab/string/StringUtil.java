@@ -222,7 +222,9 @@ public class StringUtil {
    * not (-128 to 127)
    * 
    * @param bytes
-   * @return
+   *          input array to convert
+   * @return string representing the bytes as integers
+   * 
    */
   public static String byteArrayToIntString(byte[] bytes) {
     if (bytes.length == 0) {

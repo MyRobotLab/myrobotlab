@@ -1,0 +1,36 @@
+<div class="row">
+    <div class="col-md-6">
+        &nbsp;&nbsp;&nbsp;
+        <table class="tableController table-striped">
+            <tr>
+                <td>
+                    <h2>{{service.state}}</h2>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    input {{service.stats.inputCnt}} latency {{service.stats.latency}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <attach options='cvOptions'/>
+                    <attach options='panOptions'/>
+                    <attach options='tiltOptions'/>
+                    <attach options='pidOptions'/>
+                    <button ng-show="!service.isAttached" type="button" class="btn btn-default" ng-click="attach()">attach</button>
+                    <button ng-show="service.isAttached" type="button" class="btn btn-default" ng-click="detach()">detach</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button type="button" class="btn btn-default" ng-show="service.state == 'IDLE'" ng-click="msg.enable()">enable</button>
+                    <button type="button" class="btn btn-default" ng-show="service.state != 'IDLE'" ng-click="msg.disable()">disable</button>
+                    <button type="button" class="btn btn-default" ng-click="msg.ping()">load filter set</button>
+                    <button type="button" class="btn btn-default" ng-click="msg.startWithDefaults()">start with defaults</button>
+                    <button type="button" class="btn btn-default" ng-click="rest()">rest</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

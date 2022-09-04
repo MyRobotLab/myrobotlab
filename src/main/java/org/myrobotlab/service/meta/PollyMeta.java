@@ -1,6 +1,8 @@
 package org.myrobotlab.service.meta;
 
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.PollyConfig;
 import org.myrobotlab.service.meta.abstracts.AbstractSpeechSynthesisMeta;
 import org.slf4j.Logger;
 
@@ -13,34 +15,48 @@ public class PollyMeta extends AbstractSpeechSynthesisMeta {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public PollyMeta(String name) {
-
-    super(name);
+  public PollyMeta() {
     addDescription("Amazon speech synthesis - requires keys");
     setAvailable(true); // false if you do not want it viewable in a
     // gui
     // add dependency if necessary
     addCategory("speech", "sound");
 
-    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.10.1");
-    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.10.5.1");
-    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.10.1");
-    addDependency("com.amazonaws", "aws-java-sdk-polly", "1.11.512");
-    addDependency("org.apache.commons", "commons-lang3", "3.3.2");
-    // force using httpClient service httpcomponents version
+    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.13.3");
+    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.13.3");
+    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.13.3");
+    
+    addDependency("com.amazonaws", "aws-java-sdk-polly", "1.12.253");
+
+    exclude("com.fasterxml.jackson.core", "jackson-core");
+    exclude("com.fasterxml.jackson.core", "jackson-databind");
+    exclude("com.fasterxml.jackson.core", "jackson-annotations");
+
     exclude("org.apache.httpcomponents", "httpcore");
     exclude("org.apache.httpcomponents", "httpclient");
-    addPeer("httpClient", "HttpClient", "httpClient");
 
-    // <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-polly
-    // -->
-    // <dependency org="com.amazonaws" name="aws-java-sdk-polly"
-    // rev="1.11.118"/>
+
+    addDependency("org.apache.commons", "commons-lang3", "3.3.2");
+    // force using Runtimes httpclient version exclude here
 
     addCategory("speech", "cloud");
     setCloudService(true);
     setRequiresKeys(true);
 
+  }
+
+  public Plan getDefault(String name) {
+
+    Plan plan = new Plan(name);
+    plan.putPeers(name, peers);
+
+    PollyConfig config = new PollyConfig();
+    config.audioFile = name + ".audioFile";
+
+    // add self last - desired order or construction
+    plan.addConfig(config);
+
+    return plan;
   }
 
 }

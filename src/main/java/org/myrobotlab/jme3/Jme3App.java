@@ -32,7 +32,7 @@ public class Jme3App extends SimpleApplication {
         new ScreenshotAppState("", System.currentTimeMillis()));
     menu = new MainMenuState(jme);
     // REMOVED THE MENU ! GroG 20210424
-//    stateManager.attach(menu);
+    // stateManager.attach(menu);
     this.jme = jme;
     // setShowSettings(true);
   }

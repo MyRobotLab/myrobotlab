@@ -6,6 +6,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.OpenWeatherMapConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 /**
@@ -55,6 +57,9 @@ public class OpenWeatherMap extends HttpClient {
       log.info("apiUrl: {}", apiUrl);
       log.info("Response: {}", response);
       obj = new JSONObject(response);
+      if (obj.getInt("cod") != 200) {
+        error(obj.getString("message"));
+      }
     } catch (Exception e) {
       error("Cannot get json from OWM : %s", e);
       e.printStackTrace();
@@ -65,6 +70,8 @@ public class OpenWeatherMap extends HttpClient {
   /**
    * retrieve a string list of weather for the period indicated by hourPeriod 1
    * greater or equal hourPeriod is 3 hours per index is 24 hours is 8.
+   * 
+   * @return forcast info
    */
   public String[] fetchForecast() {
     String[] result = new String[11];
@@ -161,7 +168,7 @@ public class OpenWeatherMap extends HttpClient {
    */
   public void setLocation(String location) {
     this.location = location;
-    if (!location.contains(",")) {
+    if (location != null && !location.contains(",")) {
       warn("Recommended location for OWM is TOWN,COUNTRY CODE, exemple : paris,FR");
     }
   }
@@ -238,6 +245,26 @@ public class OpenWeatherMap extends HttpClient {
 
   public String getLocalUnits() {
     return localUnits;
+  }
+  
+  public String getApiKey() {
+    return  Runtime.getSecurity().getKey("OPENWEATHERMAP");
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+
+    OpenWeatherMapConfig config = new OpenWeatherMapConfig();
+    config.currentUnits = units;
+    config.currentTown = location;
+    return config;
+  }
+
+  public ServiceConfig apply(ServiceConfig c) {
+    OpenWeatherMapConfig config = (OpenWeatherMapConfig) c;
+    setUnits(config.currentUnits);
+    setLocation(config.currentTown);
+    return c;
   }
 
   public static void main(String[] args) {

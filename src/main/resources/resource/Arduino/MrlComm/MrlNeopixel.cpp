@@ -3,855 +3,273 @@
 #include "Device.h"
 #include "MrlNeopixel.h"
 
-Pixel::Pixel() {
-	clearPixel();
+MrlNeopixel::MrlNeopixel(int deviceId) : Device(deviceId, DEVICE_TYPE_NEOPIXEL)
+{
 }
 
-void Pixel::clearPixel() {
-	red = 0;
-	blue = 0;
-	green = 0;
-  white = 0;
-}
-
-void Pixel::setPixel(unsigned char red, unsigned char green,
-		unsigned char blue) {
-	this->red = red;
-	this->green = green;
-	this->blue = blue;
-}
-
-MrlNeopixel::MrlNeopixel(int deviceId) :
-		Device(deviceId, DEVICE_TYPE_NEOPIXEL) {
-	_baseColorRed = 0;
-	_baseColorGreen = 0;
-	_baseColorBlue = 0;
-	_animation = 0;
-}
-
-MrlNeopixel::~MrlNeopixel() {
-	animationStop();
-	show();
-	delete pixels;
-}
-
-bool MrlNeopixel::attach(byte pin, long numPixels, byte depth) {
-  // msg->publishDebug("MrlNeopixel.deviceAttach !" + String(pin));
-	pixels = new Pixel[numPixels + 1];
-	//if (BOARD == BOARD_TYPE_ID_UNKNOWN) { // REALLY ? WHY ?
-	//	msg->publishError(F("Board not supported"));
-	//	return false;
-	//}
- this->pin = pin;
- this->numPixel = numPixels;
- this->depth = depth;
-	state = 1;
-	bitmask = digitalPinToBitMask(pin);
-	pinMode(pin, OUTPUT);
-	lastShow = 0;
-	Pixel pixel = Pixel();
-	for (long i = 1; i <= numPixels; i++) {
-		pixels[i] = pixel;
-	}
-	newData = true;
-  //msg->publishDebug("Neopixel attached");
-	return true;
-}
-#ifndef ESP8266
-inline void MrlNeopixel::sendBitB(bool bitVal) {
-#ifndef VIRTUAL_ARDUINO_H
-	uint8_t bit = bitmask;
-	if (bitVal) {        // 0 bit
-		PORTB |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t" // Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T1H) - 2)// 1-bit width less overhead  for the actual bit setting, note that this delay could be longer and everything would still work
-		);
-		PORTB &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t" // Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T1L) - 2)// Minimum interbit delay. Note that we probably don't need this at all since the loop overhead will be enough, but here for correctness
-		);
-	} else {          // 1 bit
-		// **************************************************************************
-		// This line is really the only tight goldilocks timing in the whole program!
-		// **************************************************************************
-		cli();
-		//desactivate interrupts
-		PORTB |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t" // Now timing actually matters. The 0-bit must be long enough to be detected but not too long or it will be a 1-bit
-				"nop \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T0H) - 2)
-		);
-		PORTB &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t" // Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T0L) - 2)
-		);
-		sei();
-		//activate interrupts
-	}
-		#endif
-}
-
-inline void MrlNeopixel::sendBitC(bool bitVal) {
-#ifndef VIRTUAL_ARDUINO_H
-	uint8_t bit = bitmask;
-	if (bitVal) {        // 0 bit
-		PORTC |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t" // Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T1H) - 2)// 1-bit width less overhead  for the actual bit setting, note that this delay could be longer and everything would still work
-		);
-		PORTC &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t" // Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T1L) - 2)// Minimum interbit delay. Note that we probably don't need this at all since the loop overhead will be enough, but here for correctness
-		);
-	} else {          // 1 bit
-		// **************************************************************************
-		// This line is really the only tight goldilocks timing in the whole program!
-		// **************************************************************************
-		cli();
-		//desactivate interrupts
-		PORTC |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t" // Now timing actually matters. The 0-bit must be long enough to be detected but not too long or it will be a 1-bit
-				"nop \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T0H) - 2)
-		);
-		PORTC &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t" // Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T0L) - 2)
-		);
-		sei();
-		//activate interrupts
-	}
-	// Note that the inter-bit gap can be as long as you want as long as it doesn't exceed the 5us reset timeout (which is A long time)
-	// Here I have been generous and not tried to squeeze the gap tight but instead erred on the side of lots of extra time.
-	// This has thenice side effect of avoid glitches on very long strings becuase
-		#endif
-}
-#if defined(ARDUINO_AVR_MEGA2560) || defined(ARDUINO_AVR_ADK)
-
-inline void MrlNeopixel::sendBitL(bool bitVal) {
-	uint8_t bit=bitmask;
-	if (bitVal) {        // 0 bit
-		PORTL |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T1H) - 2)// 1-bit width less overhead  for the actual bit setting, note that this delay could be longer and everything would still work
-		);
-		PORTL &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T1L) - 2)// Minimum interbit delay. Note that we probably don't need this at all since the loop overhead will be enough, but here for correctness
-		);
-	} else {          // 1 bit
-		// **************************************************************************
-		// This line is really the only tight goldilocks timing in the whole program!
-		// **************************************************************************
-		cli();//desactivate interrupts
-		PORTL |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t"// Now timing actually matters. The 0-bit must be long enough to be detected but not too long or it will be a 1-bit
-				"nop \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T0H) - 2)
-		);
-		PORTL &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T0L) - 2)
-		);
-		sei();//activate interrupts
-	}
-}
-
-inline void MrlNeopixel::sendBitK(bool bitVal) {
-	uint8_t bit=bitmask;
-	if (bitVal) {        // 0 bit
-		PORTK |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T1H) - 2)// 1-bit width less overhead  for the actual bit setting, note that this delay could be longer and everything would still work
-		);
-		PORTK &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T1L) - 2)// Minimum interbit delay. Note that we probably don't need this at all since the loop overhead will be enough, but here for correctness
-		);
-	} else {          // 1 bit
-		// **************************************************************************
-		// This line is really the only tight goldilocks timing in the whole program!
-		// **************************************************************************
-		cli();//desactivate interrupts
-		PORTK |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t"// Now timing actually matters. The 0-bit must be long enough to be detected but not too long or it will be a 1-bit
-				"nop \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T0H) - 2)
-		);
-		PORTK &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T0L) - 2)
-		);
-		sei();//activate interrupts
-	}
-}
-
-inline void MrlNeopixel::sendBitJ(bool bitVal) {
-	uint8_t bit=bitmask;
-	if (bitVal) {        // 0 bit
-		PORTJ |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T1H) - 2)// 1-bit width less overhead  for the actual bit setting, note that this delay could be longer and everything would still work
-		);
-		PORTJ &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T1L) - 2)// Minimum interbit delay. Note that we probably don't need this at all since the loop overhead will be enough, but here for correctness
-		);
-	} else {          // 1 bit
-		// **************************************************************************
-		// This line is really the only tight goldilocks timing in the whole program!
-		// **************************************************************************
-		cli();//desactivate interrupts
-		PORTJ |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t"// Now timing actually matters. The 0-bit must be long enough to be detected but not too long or it will be a 1-bit
-				"nop \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T0H) - 2)
-		);
-		PORTJ &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T0L) - 2)
-		);
-		sei();//activate interrupts
-	}
-}
-
-inline void MrlNeopixel::sendBitH(bool bitVal) {
-	uint8_t bit=bitmask;
-	if (bitVal) {        // 0 bit
-		PORTH |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T1H) - 2)// 1-bit width less overhead  for the actual bit setting, note that this delay could be longer and everything would still work
-		);
-		PORTH &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T1L) - 2)// Minimum interbit delay. Note that we probably don't need this at all since the loop overhead will be enough, but here for correctness
-		);
-	} else {          // 1 bit
-		// **************************************************************************
-		// This line is really the only tight goldilocks timing in the whole program!
-		// **************************************************************************
-		cli();//desactivate interrupts
-		PORTH |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t"// Now timing actually matters. The 0-bit must be long enough to be detected but not too long or it will be a 1-bit
-				"nop \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T0H) - 2)
-		);
-		PORTH &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T0L) - 2)
-		);
-		sei();//activate interrupts
-	}
-}
-
-inline void MrlNeopixel::sendBitG(bool bitVal) {
-	uint8_t bit=bitmask;
-	if (bitVal) {        // 0 bit
-		PORTG |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T1H) - 2)// 1-bit width less overhead  for the actual bit setting, note that this delay could be longer and everything would still work
-		);
-		PORTG &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T1L) - 2)// Minimum interbit delay. Note that we probably don't need this at all since the loop overhead will be enough, but here for correctness
-		);
-	} else {          // 1 bit
-		// **************************************************************************
-		// This line is really the only tight goldilocks timing in the whole program!
-		// **************************************************************************
-		cli();//desactivate interrupts
-		PORTG |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t"// Now timing actually matters. The 0-bit must be long enough to be detected but not too long or it will be a 1-bit
-				"nop \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T0H) - 2)
-		);
-		PORTG &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T0L) - 2)
-		);
-		sei();//activate interrupts
-	}
-}
-
-inline void MrlNeopixel::sendBitF(bool bitVal) {
-	uint8_t bit=bitmask;
-	if (bitVal) {        // 0 bit
-		PORTF |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T1H) - 2)// 1-bit width less overhead  for the actual bit setting, note that this delay could be longer and everything would still work
-		);
-		PORTF &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T1L) - 2)// Minimum interbit delay. Note that we probably don't need this at all since the loop overhead will be enough, but here for correctness
-		);
-	} else {          // 1 bit
-		// **************************************************************************
-		// This line is really the only tight goldilocks timing in the whole program!
-		// **************************************************************************
-		cli();//desactivate interrupts
-		PORTF |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t"// Now timing actually matters. The 0-bit must be long enough to be detected but not too long or it will be a 1-bit
-				"nop \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T0H) - 2)
-		);
-		PORTF &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T0L) - 2)
-		);
-		sei();//activate interrupts
-	}
-}
-
-inline void MrlNeopixel::sendBitE(bool bitVal) {
-	uint8_t bit=bitmask;
-	if (bitVal) {        // 0 bit
-		PORTE |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T1H) - 2)// 1-bit width less overhead  for the actual bit setting, note that this delay could be longer and everything would still work
-		);
-		PORTE &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T1L) - 2)// Minimum interbit delay. Note that we probably don't need this at all since the loop overhead will be enough, but here for correctness
-		);
-	} else {          // 1 bit
-		// **************************************************************************
-		// This line is really the only tight goldilocks timing in the whole program!
-		// **************************************************************************
-		cli();//desactivate interrupts
-		PORTE |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t"// Now timing actually matters. The 0-bit must be long enough to be detected but not too long or it will be a 1-bit
-				"nop \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T0H) - 2)
-		);
-		PORTE &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T0L) - 2)
-		);
-		sei();//activate interrupts
-	}
-}
-
-inline void MrlNeopixel::sendBitA(bool bitVal) {
-  //msg->publishDebug("MrlNeopixel.deviceAttach !");
-	//Serial.println(bitmask);
-	uint8_t bit=bitmask;
-	if (bitVal) {        // 0 bit
-		PORTA |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T1H) - 2)// 1-bit width less overhead  for the actual bit setting, note that this delay could be longer and everything would still work
-		);
-		PORTA &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T1L) - 2)// Minimum interbit delay. Note that we probably don't need this at all since the loop overhead will be enough, but here for correctness
-		);
-	} else {          // 1 bit
-		// **************************************************************************
-		// This line is really the only tight goldilocks timing in the whole program!
-		// **************************************************************************
-		cli();//desactivate interrupts
-		PORTA |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t"// Now timing actually matters. The 0-bit must be long enough to be detected but not too long or it will be a 1-bit
-				"nop \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T0H) - 2)
-		);
-		PORTA &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T0L) - 2)
-		);
-		sei();//activate interrupts
-	}
-	// Note that the inter-bit gap can be as long as you want as long as it doesn't exceed the 5us reset timeout (which is A long time)
-	// Here I have been generous and not tried to squeeze the gap tight but instead erred on the side of lots of extra time.
-	// This has thenice side effect of avoid glitches on very long strings becuase
-}
-
-#endif
-
-inline void MrlNeopixel::sendBitD(bool bitVal) {
-#ifndef VIRTUAL_ARDUINO_H	
-	uint8_t bit = bitmask;
-	if (bitVal) {        // 0 bit
-		PORTD |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t" // Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T1H) - 2)// 1-bit width less overhead  for the actual bit setting, note that this delay could be longer and everything would still work
-		);
-		PORTD &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t" // Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T1L) - 2)// Minimum interbit delay. Note that we probably don't need this at all since the loop overhead will be enough, but here for correctness
-		);
-	} else {          // 1 bit
-		// **************************************************************************
-		// This line is really the only tight goldilocks timing in the whole program!
-		// **************************************************************************
-		cli();
-		//desactivate interrupts
-		PORTD |= bit;
-		asm volatile (
-				".rept %[onCycles] \n\t" // Now timing actually matters. The 0-bit must be long enough to be detected but not too long or it will be a 1-bit
-				"nop \n\t"// Execute NOPs to delay exactly the specified number of cycles
-				".endr \n\t"
-				::
-				[onCycles] "I" (NS_TO_CYCLES(T0H) - 2)
-		);
-		PORTD &= ~bit;
-		asm volatile (
-				".rept %[offCycles] \n\t" // Execute NOPs to delay exactly the specified number of cycles
-				"nop \n\t"
-				".endr \n\t"
-				::
-				[offCycles] "I" (NS_TO_CYCLES(T0L) - 2)
-		);
-		sei();
-		//activate interrupts
-	}
-  #endif
-}
-#endif
-inline void MrlNeopixel::sendByte(unsigned char byte) {
-  //msg->publishDebug("MrlNeopixel.sendByte !");
-	for (unsigned char bit = 0; bit < 8; bit++) {
-		bool val = bitRead(byte, 7);
-		digitalPinToSendBit(pin, val);
-		// sendBit( bitRead( byte , 7 ) );                // Neopixel wants bit in highest-to-lowest order
-		// so send highest bit (bit #7 in an 8-bit byte since they start at 0)
-		byte <<= 1; // and then shift left so bit 6 moves into 7, 5 moves into 6, etc
-	}
-}
-
-inline void MrlNeopixel::sendPixel(Pixel p) {
- // msg->publishDebug("MrlNeopixel.sendPixel !");
-	sendByte(p.green); // Neopixel wants colors in green then red then blue order
-	sendByte(p.red);
-	sendByte(p.blue);
-  if (depth == 4) {
-    sendByte(p.white);
+MrlNeopixel::~MrlNeopixel()
+{
+  runAnimation = false;
+  if (strip)
+  {
+    strip->clear();
+    delete strip;
   }
 }
 
-void MrlNeopixel::show() {
-	if (!state)
-		return;
-	//be sure we wait at least 6ms before sending new data
-	if ((lastShow + (RES / 1000UL)) > millis())
-//  if ((lastShow + RES) > millis())
-		return;
-	for (int p = 1; p <= numPixel; p++) {
-		sendPixel(pixels[p]);
-	}
-	lastShow = millis();
-	newData = false;
-
+bool MrlNeopixel::attach(byte pin, int count, byte depth)
+{
+  // FIXME - support "types/depth"
+  //  Pixel type flags, add together as needed:
+  //   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
+  //   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
+  //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
+  //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
+  //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
+  // initialization
+  previousWaitMs = millis();
+  numPixels = count;
+  strip = new Adafruit_NeoPixel(count, pin, NEO_GRB + NEO_KHZ800);
+  strip->begin();
+  color = Adafruit_NeoPixel::Color(0, 110, 0, 0);
+  wait = 1000;
+  return true;
 }
 
-void MrlNeopixel::neopixelWriteMatrix(byte bufferSize, const byte*buffer) {
-  // byte _bufferSize = buffer[1];
-  //msg->publishDebug(String(_bufferSize)+"-"+String(buffer[2])+"-"+String(buffer[3]));
-	for (int i = 0; i < bufferSize; i += 4) {
-		pixels[buffer[i]].red = buffer[i + 1];
-		pixels[buffer[i]].green = buffer[i + 2];
-		pixels[buffer[i]].blue = buffer[i + 3];
-	}
-	newData = true;
+bool MrlNeopixel::doneWaiting()
+{
+  // current time - previous wait timestamp > wait interval
+  return millis() - previousWaitMs > wait;
 }
 
-void MrlNeopixel::update() {
-	if ((lastShow + 33) > millis()) {
-		return; //update 30 times/sec if there is new data to show
-	}
-	switch (_animation) {
-	case NEOPIXEL_ANIMATION_NO_ANIMATION:
-		break;
-	case NEOPIXEL_ANIMATION_STOP:
-		animationStop();
-		break;
-	case NEOPIXEL_ANIMATION_COLOR_WIPE:
-		animationColorWipe();
-		break;
-	case NEOPIXEL_ANIMATION_LARSON_SCANNER:
-		animationLarsonScanner();
-		break;
-	case NEOPIXEL_ANIMATION_THEATER_CHASE:
-		animationTheaterChase();
-		break;
-	case NEOPIXEL_ANIMATION_THEATER_CHASE_RAINBOW:
-		animationTheaterChaseRainbow();
-		break;
-	case NEOPIXEL_ANIMATION_RAINBOW:
-		animationRainbow();
-		break;
-	case NEOPIXEL_ANIMATION_RAINBOW_CYCLE:
-		animationRainbowCycle();
-		break;
-	case NEOPIXEL_ANIMATION_FLASH_RANDOM:
-		animationFlashRandom();
-		break;
-	case NEOPIXEL_ANIMATION_IRONMAN:
-		animationIronman();
-		break;
-	default:
-		msg->publishError(F("Neopixel animation do not exist"));
-		break;
-	}
-	if (newData) {
-		show();
-	}
+// Some functions of our own for creating animated effects -----------------
+// Fill strip pixels one after another with a color. Strip is NOT cleared
+// first; anything there will be covered pixel by pixel. Pass in color
+// (as a single 'packed' 32-bit value, which you can get by calling
+// strip->Color(red, green, blue) as shown in the loop() function above),
+// and a delay time (in milliseconds) between pixels.
+void MrlNeopixel::colorWipe()
+{
+  strip->setPixelColor(x % numPixels, color);
 }
 
-void MrlNeopixel::setAnimation ( byte animation,  byte red,  byte green,  byte blue,  int speed) {
+void MrlNeopixel::scanner()
+{
+  if (y == strip->numPixels() - 1)
+  {
+    z = 0;
+  }
 
-	_animation = animation;
-	_baseColorRed = red;
-	_baseColorGreen = green;
-	_baseColorBlue = blue;
-	_speed = speed;
-	_pos = 1;
-	_count = 0;
-	_off = false;
-	_dir = 1;
-	_step = 1;
-	_alpha = 50;
-	newData = true;
+  if (y == 0)
+  {
+    z = 1;
+  }
+
+  if (z)
+  {
+    y++;
+  }
+  else
+  {
+    y--;
+  }
+  strip->clear(); // Clear all pixels
+  strip->setPixelColor(y, color); // Set pixel 'y' to value 'color'
 }
 
-void MrlNeopixel::animationStop() {
-	for (int i = 1; i <= numPixel; i++) {
-		pixels[i].clearPixel();
-	}
-	_animation = NEOPIXEL_ANIMATION_NO_ANIMATION;
-	newData = true;
+// Theater-marquee-style chasing lights. Pass in a color (32-bit value,
+// a la strip->Color(r,g,b) as mentioned above), and a delay time (in ms)
+// between frames.
+void MrlNeopixel::theaterChase()
+{
+  y = x % 3;
+  strip->clear(); //   Set all pixels in RAM to 0 (off)
+  // 'c' counts up from 'b' to end of strip in steps of 3...
+  for (int c = y; c < strip->numPixels(); c += 3)
+  {
+    strip->setPixelColor(c, color); // Set pixel 'c' to value 'color'
+  }
 }
 
-void MrlNeopixel::animationColorWipe() {
-	if (!((_count++) % _speed)) {
-		if (_off) {
-			pixels[_pos++].setPixel(0, 0, 0);
-		} else {
-			pixels[_pos++].setPixel(_baseColorRed, _baseColorGreen,
-					_baseColorBlue);
-		}
-		if (_pos > numPixel) {
-			_pos = 1;
-			_off = !_off;
-		}
-	} else
-		lastShow = millis();
-	newData = true;
+// Displays a rainbow..  no animation i guess?
+void MrlNeopixel::rainbow()
+{
+  for (int i = 0; i < strip->numPixels(); i++)
+  {
+    int pixelHue = (i * 65536L / strip->numPixels());
+    strip->setPixelColor(i, strip->gamma32(strip->ColorHSV(pixelHue)));
+  }
 }
 
-void MrlNeopixel::animationLarsonScanner() {
-	if (!((_count++) % _speed)) {
-		for (int i = 1; i <= numPixel; i++) {
-			pixels[i].clearPixel();
-		}
-		int pos = _pos;
-		for (int i = -2; i <= 2; i++) {
-			pos = _pos + i;
-			if (pos < 1)
-				pos += numPixel;
-			if (pos > numPixel)
-				pos -= numPixel;
-			int j = (abs(i) * 10) + 1;
-			pixels[pos].setPixel(_baseColorRed / j, _baseColorGreen / j,
-					_baseColorBlue / j);
-		}
-		_pos += _dir;
-		if (_pos < 1) {
-			pos = 2;
-			_dir = -_dir;
-		} else if (_pos > numPixel) {
-			_pos = numPixel - 1;
-			_dir = -_dir;
-		}
-	} else
-		lastShow = millis();
-	newData = true;
+// Displays a rotating rainbow
+void MrlNeopixel::rainbowCycle()
+{
+  for (int i = 0; i < strip->numPixels(); i++)
+  {
+    int pixelHue = (x * 256) + (i * 65536L / strip->numPixels());
+    strip->setPixelColor(i, strip->gamma32(strip->ColorHSV(pixelHue)));
+  }
 }
 
-void MrlNeopixel::animationTheaterChase() {
-	if (!((_count++) % _speed)) {
-		for (int i = 0; i <= numPixel; i += 3) {
-			if (i + _pos <= numPixel) {
-				pixels[i + _pos].clearPixel();
-			}
-		}
-		_pos++;
-		if (_pos >= 4)
-			_pos = 1;
-		for (int i = 0; i <= numPixel; i += 3) {
-			if (i + _pos <= numPixel) {
-				pixels[i + _pos].setPixel(_baseColorRed, _baseColorGreen,
-						_baseColorBlue);
-			}
-		}
-	} else
-		lastShow = millis();
-	newData = true;
+// He was turned to steel in a great magnetic field.
+void MrlNeopixel::ironman()
+{
+  if (x == 0) {
+    // initial brightness
+    brightness = 127;
+
+
+  }
+  // initialize the color
+  strip->fill(color, 0, numPixels);
+  int change = random(-16,16);
+  // add the incremental random change in the brightness
+  brightness = brightness + change;
+  // validate limits  min / max brightness
+  if (brightness < 32) {
+    brightness = 32;
+  } else if (brightness > 224) {
+    brightness = 224;
+  }
+  strip->setBrightness(brightness);
+
+  // pluck a random pixel
+  int pixelToFlicker = random(0,numPixels);
+  strip->setPixelColor(pixelToFlicker, random(0,255), random(0,255), random(0,255));
 }
 
-void MrlNeopixel::animationWheel(unsigned char WheelPos, Pixel& pixel) {
-	WheelPos = 255 - WheelPos;
-	if (WheelPos < 85) {
-		pixel.setPixel(255 - WheelPos * 3, 0, WheelPos * 3);
-	} else if (WheelPos < 170) {
-		WheelPos -= 85;
-		pixel.setPixel(0, WheelPos * 3, 255 - WheelPos * 3);
-	} else {
-		WheelPos -= 170;
-		pixel.setPixel(WheelPos * 3, 255 - WheelPos * 3, 0);
-	}
+// Rainbow-enhanced theater marquee. Pass delay time (in ms) between frames.
+void MrlNeopixel::theaterChaseRainbow()
+{
+  y = x % 3;
+  strip->clear(); //   Set all pixels in RAM to 0 (off)
+  // 'c' counts up from 'b' to end of strip in steps of 3...
+  for (int c = y; c < strip->numPixels(); c += 3)
+  {
+    int pixelHue = (x * 256) + (c * 65536L / strip->numPixels());
+    strip->setPixelColor(c, strip->gamma32(strip->ColorHSV(pixelHue)));
+  }
 }
 
-void MrlNeopixel::animationTheaterChaseRainbow() {
-	if (!((_count++) % _speed)) {
-		for (int i = 0; i <= numPixel; i += 3) {
-			if (i + _pos <= numPixel) {
-				pixels[i + _pos].clearPixel();
-			}
-		}
-		_pos++;
-		if (_pos >= 4)
-			_pos = 1;
-		for (int i = 0; i <= numPixel; i += 3) {
-			if (i + _pos <= numPixel) {
-				animationWheel((_baseColorRed + i), pixels[i + _pos]);
-			}
-		}
-		_baseColorRed++;
-	} else
-		lastShow = millis();
-	newData = true;
+void MrlNeopixel::writeMatrix(byte bufferSize, const byte *buffer)
+{
+  if (!strip)
+  {
+    return;
+  }
+
+  for (int i = 0; i < bufferSize; i += 5)
+  {
+    color = Adafruit_NeoPixel::Color(buffer[i + 1], buffer[i + 2], buffer[i + 3], buffer[i + 4]);
+    strip->setPixelColor(buffer[i], color);
+  }
+
+  strip->show();
 }
 
-void MrlNeopixel::animationRainbow() {
-	if (!((_count++) % _speed)) {
-		for (int i = 0; i <= numPixel; i++) {
-			animationWheel((_baseColorRed + i), pixels[i]);
-		}
-		_baseColorRed++;
-	} else
-		lastShow = millis();
-	newData = true;
+void MrlNeopixel::setAnimation(byte animation, byte red, byte green, byte blue, byte white, long wait_ms)
+{
+  animationIndex = animation;
+  x = 0;
+  color = Adafruit_NeoPixel::Color(red, green, blue, white);
+  wait = wait_ms;
+  if (animation == 0)
+  {
+    runAnimation = false;
+  }
+  else
+  {
+    runAnimation = true;
+  }
 }
 
-void MrlNeopixel::animationRainbowCycle() {
-	if (!((_count++) % _speed)) {
-		for (int i = 0; i <= numPixel; i++) {
-			animationWheel((i * 256 / numPixel) + _baseColorRed, pixels[i]);
-		}
-		_baseColorRed++;
-	} else
-		lastShow = millis();
-	newData = true;
+void MrlNeopixel::fill(int firstAddress, int count, byte red, byte green, byte blue, byte white)
+{
+  if (strip)
+  {
+    // TRIPLE EXCLAMATION POINTS ARE DEADLY msg->publishError(F("fill!!!!"));
+    uint32_t color = ((uint32_t)white << 24) | ((uint32_t)red << 16) | ((uint32_t)green << 8) | (uint32_t)blue;
+    strip->fill(color, firstAddress, count);
+    strip->show();
+  }
+}
+
+void MrlNeopixel::setBrightness(byte brightness)
+{
+  if (strip)
+  {
+    strip->setBrightness(brightness);
+    strip->show();
+  }
+}
+
+void MrlNeopixel::clear()
+{
+  runAnimation = false;
+  if (strip)
+  {
+    strip->clear();
+    strip->show();
+  }
 }
 
 void MrlNeopixel::animationFlashRandom() {
-	if (!((_count++) % _speed)) {
-		if (_step == 1) {
-			_pos = random(numPixel) + 1;
-		}
-		if (_step < 6) {
-			int r = (_baseColorRed * _step) / 5;
-			int g = (_baseColorGreen * _step) / 5;
-			int b = (_baseColorBlue * _step) / 5;
-			pixels[_pos].setPixel(r, g, b);
-		} else {
-			int r = (_baseColorRed * (11 - _step)) / 5;
-			int g = (_baseColorGreen * (11 - _step)) / 5;
-			int b = (_baseColorBlue * (11 - _step)) / 5;
-			pixels[_pos].setPixel(r, g, b);
-		}
-		_step++;
-		if (_step > 11)
-			_step = 1;
-	} else
-		lastShow = millis();
-	newData = true;
+  for (int i = 0; i < strip->numPixels(); i++)
+  {
+    strip->setPixelColor(i, random(0,255), random(0,255), random(0,255));
+  }
 }
 
-void MrlNeopixel::animationIronman() {
-  //msg->publishDebug("MrlNeopixel.animation Ironman !");
-	if (!((_count++) % _speed)) {
-		int flip = random(32);
-		if (flip > 22)
-			_dir = -_dir;
-		_alpha += 5 * _dir;
-		if (_alpha < 5) {
-			_alpha = 5;
-			_dir = 1;
-		}
-		if (_alpha > 100) {
-			_alpha = 100;
-			_dir = -1;
-		}
-		for (int i = 1; i <= numPixel; i++) {
-			pixels[i].setPixel((_baseColorRed * _alpha) / 100,
-					(_baseColorGreen * _alpha) / 100,
-					(_baseColorBlue * _alpha) / 100);
-		}
-	} else
-		lastShow = millis();
-	newData = true;
-}
-
-void MrlNeopixel::onDisconnect() {
-  setAnimation(NEOPIXEL_ANIMATION_THEATER_CHASE, 255, 0, 0, 1);
-  
+void MrlNeopixel::update()
+{
+  if (doneWaiting() || x == 0)
+  {
+    if (runAnimation)
+    {
+      if (!strip)
+      {
+        return;
+      }
+      // Animation only updates after we are done waiting
+      switch (animationIndex)
+      {
+        case NEOPIXEL_ANIMATION_NO_ANIMATION:
+        case NEOPIXEL_ANIMATION_STOP:
+          runAnimation = false;
+          break;
+        case NEOPIXEL_ANIMATION_COLOR_WIPE:
+          colorWipe();
+          break;
+        case NEOPIXEL_ANIMATION_LARSON_SCANNER:
+          scanner();
+          break;
+        case NEOPIXEL_ANIMATION_THEATER_CHASE:
+          theaterChase();
+          break;
+        case NEOPIXEL_ANIMATION_THEATER_CHASE_RAINBOW:
+          theaterChaseRainbow();
+          break;
+        case NEOPIXEL_ANIMATION_RAINBOW:
+          rainbow();
+          break;
+        case NEOPIXEL_ANIMATION_RAINBOW_CYCLE:
+          rainbowCycle();
+          break;
+        case NEOPIXEL_ANIMATION_FLASH_RANDOM:
+          animationFlashRandom();
+          break;
+        case NEOPIXEL_ANIMATION_IRONMAN:
+          ironman();
+          break;
+        default:
+          msg->publishError(F("neopixel animation do not exist"));
+          break;
+      }
+      // we've updated our animation.. let's show the result.
+      strip->show();
+      x++;
+      previousWaitMs = millis();
+    }
+  }
+  // current frame index for the animation.
 }

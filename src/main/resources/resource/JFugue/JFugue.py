@@ -1,8 +1,8 @@
 import time
  
 #create a Serial service named serial
-jf = Runtime.createAndStart("jf","JFugue")
-serial = Runtime.createAndStart("serial","Serial")
+jf = runtime.start("jf","JFugue")
+serial = runtime.start("serial","Serial")
 count = 0
  
 if not serial.isConnected():

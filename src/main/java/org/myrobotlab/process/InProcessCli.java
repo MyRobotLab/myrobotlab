@@ -91,9 +91,14 @@ public class InProcessCli implements Runnable {
    * websockets, mqtt or xmpp it should behave the same
    * 
    * @param s
+   *          service
    * @param senderName
+   *          sender name
    * @param in
+   *          input stream
    * @param out
+   *          output stream
+   * 
    */
   public InProcessCli(ServiceInterface s, String senderName, InputStream in, OutputStream out) {
     this.service = s;
@@ -112,10 +117,10 @@ public class InProcessCli implements Runnable {
   /**
    * Start InputStream consumer thread
    */
-  public void start() {
+  public synchronized void start() {
     if (worker == null) {
       log.info("starting {} worker", name);
-      worker = new Thread(this, name);
+      worker = new Thread(this, String.format("%s-cli", name));
       worker.start();
     } else {
       log.info("stdin already running");
@@ -136,8 +141,20 @@ public class InProcessCli implements Runnable {
       String readLine = "";
 
       writePrompt();
-      while (running
-          && (c = in.read()) != 0x04 /* ctrl-d 0x04 ctrl-c 0x03 '\n' */) {
+      while (running) {
+
+        if (in.available() > 0) {
+          c = in.read();
+        } else {
+          try {
+            Thread.sleep(50);
+          } catch (InterruptedException e) {
+          }
+          continue;
+        }
+
+        log.info("c = {}", c);
+        // != 0x04 /* ctrl-d 0x04 ctrl-c 0x03 '\n' */
 
         readLine += (char) c;
         if (c == '\n') {
@@ -326,7 +343,8 @@ public class InProcessCli implements Runnable {
    * (remotely)
    * 
    * @param data
-   * @return
+   *          data
+   * @return message
    */
   public Message cliToMsg(String data) {
     return CodecUtils.cliToMsg(contextPath, "runtime@" + id, "runtime@" + remoteId, data);
@@ -348,16 +366,39 @@ public class InProcessCli implements Runnable {
    * get context specific path
    * 
    * @param uuid
-   * @return
+   *          uuid
+   * @return string representing cli prompt
+   * 
    */
   public String getPrompt(String uuid) {
     return String.format("[%s@%s %s]%s", name, remoteId, cwd, "#");
   }
 
-  // FIXME - interrupt does not work on a infinite blocked read
-  public void stop() {
+  /**
+   * stop the thread - close the stream
+   */
+  public synchronized void stop() {
+    running = false;
+
     if (worker != null) {
+      // interrupt will not work
+      // on an infinite blocked read
       worker.interrupt();
+    }
+
+    if (in != null && !System.in.equals(in)) {
+      try {
+        in.close();
+      } catch (Exception e) {
+        log.info("sdin error");
+      }
+    }
+
+    if (out != null  && !System.out.equals(out)) {
+      try {
+        out.close();
+      } catch (Exception e) {
+      }
     }
   }
 
@@ -389,9 +430,8 @@ public class InProcessCli implements Runnable {
   }
 
   /**
-   * Incoming Message - likely from local/remote runtime
-   * 
    * @param msg
+   *          Incoming Message - likely from local/remote runtime
    */
   public void onMsg(Message msg) {
 
@@ -448,7 +488,7 @@ public class InProcessCli implements Runnable {
               log.error("write threw", e);
             }
           } else {
-              writeToJson(o);
+            writeToJson(o);
           }
         }
       }

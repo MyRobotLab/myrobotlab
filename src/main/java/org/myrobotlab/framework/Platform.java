@@ -125,6 +125,8 @@ public class Platform implements Serializable {
       if ("i386".equals(arch) || "i486".equals(arch) || "i586".equals(arch) || "i686".equals(arch) || "amd64".equals(arch) || arch.startsWith("x86")) {
         platform.arch = "x86"; // don't care at the moment
       }
+      
+      platform.osBitness = ("amd64".equals(arch))?64:32;
 
       if ("arm".equals(arch)) {
 
@@ -151,6 +153,7 @@ public class Platform implements Serializable {
       }
 
       // === BITNESS ===
+            
       if (platform.isWindows()) {
         // https://blogs.msdn.microsoft.com/david.wang/2006/03/27/howto-detect-process-bitness/
         // this will attempt to guess the bitness of the underlying OS, Java
@@ -288,14 +291,25 @@ public class Platform implements Serializable {
   public Platform() {
   }
 
+  /**
+   * @return The process id of the currently running Java process
+   * 
+   */
   public String getPid() {
     return pid;
   }
 
+  /**
+   * @return The message of the day. "resistance is futile, we have cookies and
+   *         robots ..."
+   */
   public String getMotd() {
     return motd;
   }
 
+  /**
+   * @return The branch this software was built from.
+   */
   public String getBranch() {
     return branch;
   }
@@ -304,34 +318,65 @@ public class Platform implements Serializable {
     return build;
   }
 
+  /**
+   * @return This is the full commit of the source.
+   */
   public String getCommit() {
     return commit;
   }
+
+  /**
+   * @return CPU Architecture x86, armv6, armv7, armv8
+   */
 
   public String getArch() {
     return arch;
   }
 
+  /**
+   * @return Os bitness - should be 64 or 32
+   */
   public int getOsBitness() {
     return osBitness;
   }
 
+  /**
+   * @return Java virtual machine bitness either 64 or 32 bit
+   * 
+   */
   public int getJvmBitness() {
     return jvmBitness;
   }
 
+  /**
+   * @return Operating system type linux, windows, mac
+   * 
+   */
   public String getOS() {
     return os;
   }
 
+  /**
+   * @return arc bitness and os together x86.64.linux, armv7.32.linux,
+   *         x86.32.windows etc..
+   * 
+   */
   public String getPlatformId() {
     return String.format("%s.%s.%s", getArch(), getJvmBitness(), getOS());
   }
 
+  /**
+   * @return version or myrobotlab
+   * 
+   */
   public String getVersion() {
     return mrlVersion;
   }
 
+  /**
+   * @return Name of the Jvm Hotspot or OpenJDK typically
+   *
+   */
   public String getVMName() {
     return vmName;
   }
@@ -379,7 +424,8 @@ public class Platform implements Serializable {
         // zf.close(); explodes on closing :(
       } else {
         // IDE - version ...
-        // in = new FileInputStream("target/classes/META-INF/MANIFEST.MF");// Platform.class.getResource("target/classes/META-INF/MANIFEST.MF").openStream();
+        // in = new FileInputStream("target/classes/META-INF/MANIFEST.MF");//
+        // Platform.class.getResource("target/classes/META-INF/MANIFEST.MF").openStream();
         in = new FileInputStream("target/classes/git.properties");// Platform.class.getResource("target/classes/META-INF/MANIFEST.MF").openStream();
       }
       // String manifest = FileIO.toString(in);
@@ -415,6 +461,11 @@ public class Platform implements Serializable {
     return String.format("%s.%d.%s", arch, jvmBitness, os);
   }
 
+  /**
+   * @return The instance identifier of the current running myrobotlab. Used for
+   *         connecting multiple myrobotlabs together
+   * 
+   */
   public String getId() {
     // null ids are not allowed
     if (id == null) {
@@ -423,18 +474,34 @@ public class Platform implements Serializable {
     return id;
   }
 
+  /**
+   * @return The Computer's hostname
+   */
   public String getHostname() {
     return hostname;
   }
 
+  /**
+   * @param newId
+   *          Set your own instance identifier
+   * 
+   */
   public void setId(String newId) {
     id = newId;
   }
 
+  /**
+   * @return the time when this instance was started
+   * 
+   */
   public Date getStartTime() {
     return startTime;
   }
 
+  /**
+   * @return true if running in virtual mode
+   * 
+   */
   public static boolean isVirtual() {
     Platform p = getLocalInstance();
     return p.isVirtual;
@@ -460,8 +527,7 @@ public class Platform implements Serializable {
     }
   }
 
-  public boolean getVmVersion() {
-    // TODO Auto-generated method stub
-    return false;
+  public String getVmVersion() {    
+    return vmVersion;
   }
 }

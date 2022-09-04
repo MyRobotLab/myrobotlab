@@ -67,8 +67,10 @@ public class Chassis extends Service {
       // attach services
       sabertooth.attach(m1);
       sabertooth.attach(m2);
-      m1.attach(joy.getAxis("y"));
-      m2.attach(joy.getAxis("rz"));
+      m1.setAnalogId("y");
+      m2.setAnalogId("rz");
+      // m1.attach(joy.getAxis("y"));
+      // m2.attach(joy.getAxis("rz"));
 
       m1.setInverted(true);
       m2.setInverted(true);

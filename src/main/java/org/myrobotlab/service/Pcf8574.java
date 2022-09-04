@@ -12,9 +12,11 @@ import java.util.TreeMap;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.Pcf8574Config;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -34,9 +36,12 @@ import org.slf4j.Logger;
  *         http://www.digikey.com/product-detail/en/nxp-semiconductors
  *         /PCF8574T-3,518/568-1077-1-ND/735791
  * 
+ *         FIXME - this is a i2c controller as well as an i2c device
+ * 
  */
 
-public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
+public class Pcf8574 extends Service
+    implements I2CControl, /* FIXME - add I2CController */ PinArrayControl {
   /**
    * Publisher - Publishes pin data at a regular interval
    * 
@@ -47,6 +52,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
       super(String.format("%s.publisher", name));
     }
 
+    // FIXME - have a read "rate" in Hz
     void publishPinData() {
       // Read a single byte containing all 8 pins
       read8();
@@ -74,6 +80,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
       invoke("publishPinArray", new Object[] { pinArray });
     }
 
+    // FIXME - have a read "rate" in Hz
     @Override
     public void run() {
 
@@ -98,71 +105,69 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
   }
 
   public static final int INPUT = 0x0;
+  
   public final static Logger log = LoggerFactory.getLogger(Pcf8574.class);
+
   public static final int OUTPUT = 0x1;
 
   private static final long serialVersionUID = 1L;
 
-  public transient I2CController controller;
+  protected transient I2CController controller;
 
-  public String controllerName;
+  protected String controllerName;
+  
+  protected List<String> controllers;
 
-  public List<String> controllers;
-  public String deviceAddress = "0x38";
-
+  protected String deviceAddress = "0x38";
+  
   /*
    * 0x20 - 0x27 for PCF8574 0c38 - 0x3F for PCF8574A Only difference between to
    * two IC circuits is the address range
    */
-  public List<String> deviceAddressList = Arrays.asList("0x20", "0x21", "0x22", "0x23", "0x24", "0x25", "0x26", "0x27", "0x38", "0x39", "0x3A", "0x3B", "0x3C", "0x3D", "0x3E",
+  protected List<String> deviceAddressList = Arrays.asList("0x20", "0x21", "0x22", "0x23", "0x24", "0x25", "0x26", "0x27", "0x38", "0x39", "0x3A", "0x3B", "0x3C", "0x3D", "0x3E",
       "0x3F", "0x49", "0x4A", "0x4B"); // Max9744
-  // Addresses
-  public String deviceBus = "1";
-  public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7");
 
-  int directionRegister = 0xff; // byte
-  public boolean isAttached = false;
+  protected String deviceBus = "1";
 
+  protected List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7");
+
+  protected int directionRegister = 0xff; // byte
+
+  protected boolean isAttached = false;
+  
   // Publisher
-  boolean isPublishing = false;
-  transient Map<String, PinArrayListener> pinArrayListeners = new HashMap<String, PinArrayListener>();
+  protected boolean isPublishing = false;
 
-  int pinDataCnt = 8;
+  protected transient Map<String, PinArrayListener> pinArrayListeners = new HashMap<String, PinArrayListener>();
+
+  protected int pinDataCnt = 8;
 
   /**
    * the definitive sequence of pins - "true address"
    */
-  Map<Integer, PinDefinition> pinIndex = new HashMap<>();
+  protected Map<Integer, PinDefinition> pinIndex = new HashMap<>();
 
   /**
    * map of pin listeners
    */
-  transient Map<String, List<PinListener>> pinListeners = new HashMap<String, List<PinListener>>();
+  protected transient Map<String, List<PinListener>> pinListeners = new HashMap<String, List<PinListener>>();
 
   /**
    * pin named map of all the pins on the board
    */
-  Map<String, PinDefinition> pinMap = new TreeMap<>();
-
+  protected Map<String, PinDefinition> pinMap = new TreeMap<>();
   /**
    * the map of pins which the pin listeners are listening too - if the set is
    * null they are listening to "any" published pin
    */
-  Map<String, Set<Integer>> pinSets = new HashMap<String, Set<Integer>>();
-  transient Thread publisher = null;
+  protected Map<String, Set<Integer>> pinSets = new HashMap<String, Set<Integer>>();
 
-  double sampleFreq = 1; // Set
-  // default
-  // sample
-  // rate
-  // to
-  // 1
-  // Hz
-  // //
-  // Sample
-  // rate
-  // in
-  // hZ.
+  protected transient Thread publisher = null;
+
+  /**
+   * default sample rate 1 Hz
+   */
+  protected double sampleFreq = 1; // Set
 
   // track
   // of
@@ -170,7 +175,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
   // for
   // each
   // pin
-  int writeRegister = 0; // byte
+  protected int writeRegister = 0; // byte
   // to
   // write
   // after
@@ -183,45 +188,43 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 
   public Pcf8574(String n, String id) {
     super(n, id);
+    registerForInterfaceChange(I2CController.class);
     createPinList();
     refreshControllers();
     subscribeToRuntime("registered");
   }
 
   @Override
-  public void attach(Attachable service) throws Exception {
+  public void attach(Attachable attachable) throws Exception {
 
-    if (I2CController.class.isAssignableFrom(service.getClass())) {
-      attachI2CController((I2CController) service);
+    if (I2CController.class.isAssignableFrom(attachable.getClass())) {
+      attachI2CController((I2CController) attachable);
       return;
     }
   }
 
+  @Deprecated /* use attach(controller) */
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
 
-    if (isAttached && this.controller != controller) {
-      log.error("Already attached to {}, use detach({}) first", this.controllerName);
+    if (deviceBus != null) {
+      setBus(deviceBus);
     }
 
-    controllerName = controller.getName();
-    log.info("{} attach {}", getName(), controllerName);
-
-    this.deviceBus = deviceBus;
-    this.deviceAddress = deviceAddress;
+    if (deviceAddress != null) {
+      setAddress(deviceAddress);
+    }
 
     attachI2CController(controller);
-    isAttached = true;
-    broadcastState();
   }
 
   @Override
-  public void attach(PinArrayListener listener) {
+  public void attachPinArrayListener(PinArrayListener listener) {
     pinArrayListeners.put(listener.getName(), listener);
 
   }
 
   @Override
-  public void attach(PinListener listener, int address) {
+  public void attachPinListener(PinListener listener, int address) {
     attach(listener, String.format("%d", address));
   }
 
@@ -251,32 +254,38 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 
   // This section contains all the new attach logic
   @Override
-  public void attach(String service) throws Exception {
-    attach((Attachable) Runtime.getService(service));
+  public void attach(String name) throws Exception {
+    ServiceInterface si = Runtime.getService(name);
+    if (si instanceof I2CController) {
+      attachI2CController((I2CController)si);
+      return;
+    } else {
+      log.error("%s does not know how to attach to %s of type %s", getName(), si.getName(), si.getSimpleName());
+    }
   }
 
+  @Deprecated /* use attach(String) */
   public void attach(String listener, int pinAddress) {
-    attach((PinListener) Runtime.getService(listener), pinAddress);
+    attachPinListener((PinListener) Runtime.getService(listener), pinAddress);
   }
 
+  @Deprecated /* use attach(String) */
   public void attach(String controllerName, String deviceBus, String deviceAddress) {
     attach((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
   }
 
   public void attachI2CController(I2CController controller) {
 
-    if (isAttached(controller))
-      return;
-
-    if (this.controllerName != controller.getName()) {
-      log.error("Trying to attached to {}, but already attached to ({})", controller.getName(), this.controllerName);
+    if (this.controllerName == controller.getName()) {
+      log.info("already attached to {}, use detach({}) first", controllerName, controllerName);
       return;
     }
 
     this.controller = controller;
+    controllerName = controller.getName();
     isAttached = true;
     controller.attachI2CControl(this);
-    log.info("Attached {} device on bus: {} address {}", controllerName, deviceBus, deviceAddress);
+    log.info("attached {} device on bus: {} address {}", controllerName, deviceBus, deviceAddress);
     broadcastState();
   }
 
@@ -300,6 +309,12 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
     }
 
     return pinMap;
+  }
+  
+  public void detach() {
+    if (controller != null) {
+      detachI2CController(controller);
+    }
   }
 
   @Override
@@ -325,6 +340,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
       return;
 
     controller.detachI2CControl(this);
+    controllerName = null;
     isAttached = false;
     broadcastState();
   }
@@ -390,6 +406,17 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
     enablePin(getPin(pin).getAddress(), rate);
   }
 
+  @Override
+  public String getAddress() {
+    return deviceAddress;
+  }
+
+  @Override
+  public Integer getAddress(String pin) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
   // This section contains all the methods used to query / show all attached
   // methods
   /**
@@ -402,6 +429,11 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
       ret.add(controller.getName());
     }
     return ret;
+  }
+
+  @Override
+  public String getBus() {
+    return deviceBus;
   }
 
   @Override
@@ -446,14 +478,17 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
     if (controller != null && controller.getName().equals(instance.getName())) {
       return isAttached;
     }
-    ;
     return false;
   }
 
   @Override
   public boolean isAttached(String name) {
-    // TODO Auto-generated method stub
-    return false;
+    boolean ret = false;
+    try {
+      ret = isAttached(Runtime.getService(name));
+    } catch (Exception e) {
+    }
+    return ret;
   }
 
   public void onRegistered(Registration s) {
@@ -546,21 +581,23 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
   }
 
   @Override
+  public void setAddress(String address) {
+    setDeviceAddress(address);
+  }
+
+  @Override
+  public void setBus(String bus) {
+    setDeviceBus(bus);
+  }
+
+  @Override
   public void setDeviceAddress(String deviceAddress) {
-    if (isAttached) {
-      log.error("Already attached to {}, use detach({}) first", this.controllerName);
-      return;
-    }
     this.deviceAddress = deviceAddress;
     broadcastState();
   }
 
   @Override
   public void setDeviceBus(String deviceBus) {
-    if (isAttached) {
-      log.error("Already attached to {}, use detach({}) first", this.controllerName);
-      return;
-    }
     this.deviceBus = deviceBus;
     broadcastState();
   }
@@ -605,23 +642,71 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
     byte[] writebuffer = { (byte) data };
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
   }
-
-  @Override
-  public Integer getAddress(String pin) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
+  
   public static void main(String[] args) {
     LoggingFactory.init("info");
 
     try {
-      Pcf8574 pcf8574t = (Pcf8574) Runtime.start("Pcf8574t", "Pcf8574t");
-      Runtime.start("gui", "SwingGui");
+
+      Runtime.start("mega", "Arduino");
+      Runtime.start("webgui", "WebGui");
+      
+      Runtime.start("lcd", "Hd44780");
+      // arduino = Runtime.start("arduino","Arduino")
+      // arduino.setBoardMega()
+      // arduino.connect("COM3")
+      
+      int KeyColumn = 0;
+      int LastKeyPress = 0;
+      Pcf8574 KeyPad = (Pcf8574) Runtime.start("pcf", "Pcf8574");
+      // Before we can use this,
+      // we need to configure the I2C Bus
+      // KeyPad.setBus("1")
+      // and address then connect it.
+      // KeyPad.setAddress("0x20")
+      // KeyPad.attachI2CController(raspi)
+      // KeyPad.attach(raspi, "1", "0x20");
+      // KeyPad.attach(raspi, "1", "0x20");
+//      KeyPad.attach(raspi);
+//      KeyPad.setBus("1");
+//      KeyPad.setAddress("0x20");
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
   }
+  
+  @Override
+  public ServiceConfig getConfig() {
+
+    Pcf8574Config config = new Pcf8574Config();
+    config.address = deviceAddress;
+    config.bus = deviceBus;
+    if (controller != null) {      
+      config.controller = controllerName;
+    }
+
+    return config;
+  }
+
+  public ServiceConfig apply(ServiceConfig c) {
+    Pcf8574Config config = (Pcf8574Config) c;
+    if (config.address != null) {
+      setAddress(config.address);
+    }
+    if (config.bus != null) {
+      setBus(config.bus);
+    }
+    
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch(Exception e) {
+        error(e);
+      }
+    }
+    return c;
+  }
+  
 
 }

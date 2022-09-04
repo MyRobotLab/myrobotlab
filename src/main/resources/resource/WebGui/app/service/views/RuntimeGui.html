@@ -1,55 +1,47 @@
+<h3>
+    &nbsp;&nbsp;&nbsp;{{platform.arch}}.{{platform.jvmBitness}}.{{platform.os}} {{platform.mrlVersion}} &nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-repeat" ng-click="shutdown('restart')"></span>
+    <span class="glyphicon glyphicon-off" ng-click="shutdown('shutdown')"></span>
+</h3>
+locale
+{{service.locale.displayLanguage}} {{service.locale.displayCountry}}
+    <br/>
+<!-- {{locale}} -->
+<ui-select ng-model="localeTag.selected" ng-change="msg.setAllLocales($select.selected.tag)" theme="bootstrap" style="width: 25em">
+    <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;locale&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{$select.selected.tag}}</ui-select-match>
+    <ui-select-choices repeat="(tag, localeData) in locales | filter: $select.search">&nbsp;&nbsp;&nbsp;&nbsp;{{localeData.tag}} {{localeData.value.displayLanguage}} {{localeData.value.displayCountry}} &nbsp;&nbsp;&nbsp;&nbsp;</ui-select-choices>
+</ui-select>
+<br/>
+create a new service
+<br/>
+<div class="form-inline">
+    <input class="form-control" type="text" ng-model="newName" placeholder="name" title="name of new service to be created" press-enter="start(newName, newType)">
+    <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" press-enter="start(newName, newType)" title="service type of the new instance to be created" uib-typeahead="service as service.simpleName for service in possibleServices | filter:{simpleName:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html"/>
+    <button class="btn btn-default" title="press to create a new service, you must give the new service a name and type" ng-click="start(newName, newType)">start service</button>
+    <button class="btn btn-default" ng-click="saveDefaults()">save defaults</button>
+    <button class="btn btn-default" ng-click="msg.install()">install all services</button>
+    <br/>{{defaultsSaved}}
+</div>
+<br/>
 <div class="row">
-    <div class="form-inline col-md-6">
-        <h3>
-            &nbsp;&nbsp;&nbsp;{{platform.arch}}.{{platform.jvmBitness}}.{{platform.os}} {{platform.mrlVersion}} &nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-repeat" ng-click="shutdown('restart')"></span>
-            <span class="glyphicon glyphicon-off" ng-click="shutdown('shutdown')"></span>
-        </h3>
+    <div class="form-group col-md-6">
+        <div>
+            configurations <span class="glyphicon glyphicon-refresh" ng-click="msg.publishConfigList()"></span> <b>{{service.configName}}</b>
+            <br/>
+            <select multiple class="form-control width100pct" ng-change="setConfigName()" ng-model="selectedConfig" id="selectedConfig-id" title="configurations">
+                <option ng-repeat="config in service.configList">{{config}}</option>
+            </select>
+        </div>
     </div>
 </div>
-Locale
-
-
-<div class="row">
-    <div class="form-inline col-md-6">
-        <!-- {{locale}} -->
-        <ui-select ng-model="localeTag.selected" ng-change="msg.setAllLocales($select.selected.tag)" theme="bootstrap" style="width: 25em">
-            <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;locale&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{$select.selected.tag}}</ui-select-match>
-            <ui-select-choices repeat="(tag, localeData) in locales | filter: $select.search">&nbsp;&nbsp;&nbsp;&nbsp;{{localeData.tag}} {{localeData.value.displayLanguage}} {{localeData.value.displayCountry}} &nbsp;&nbsp;&nbsp;&nbsp;</ui-select-choices>
-        </ui-select>
-    </div>
-</div>
-<div class="row">
-    <div class="form-inline col-md-6">Language {{service.locale.displayLanguage}} {{service.locale.displayCountry}}
-</div>
-</div>
-Create a new service
-
-
-<div class="row">
-    <div class="form-inline col-md-6">
-        <!-- category begin -->
-        <!--
-        <ui-select ng-model="category.selected" theme="bootstrap" style="width: 3.5em">
-            <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;category&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="true">
-                <span>
-                    <img ng-src="{{'/core/category/' + $select.selected.key + '.png'}}" width="18"/>&nbsp;&nbsp;&nbsp;&nbsp;{{$select.selected.key}}&nbsp;&nbsp;&nbsp;&nbsp;
-                </span>
-            </ui-select-match>
-            <ui-select-choices repeat="category.key as (key, category) in service.serviceData.categoryTypes | filter: $select.search">
-                <span>
-                    <img ng-src="{{'/core/category/' + category.key + '.png'}}" width="18"/>&nbsp;&nbsp;&nbsp;&nbsp;{{category.value.name}}
-                
-                
-                </span>
-            </ui-select-choices>
-        </ui-select>
-        -->
-        <!-- category end -->
-        <input class="form-control" type="text" ng-model="newName" placeholder="name" title="name of new service to be created" press-enter="start(newName, newType)">
-        <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" press-enter="start(newName, newType)" title="service type of the new instance to be created" uib-typeahead="service as service.name.substring(23) for service in possibleServices | filter:{name:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html"/>
-        <button class="btn btn-default" title="press to create a new service, you must give the new service a name and type" ng-click="start(newName, newType)">start service</button>
-        <button class="btn btn-default" ng-click="msg.install()">install all services</button>
-    </div>
+<br/>
+<div class="form-inline">
+    <button class="btn btn-default" title="This will save a config module to data/config" ng-click="saveConfig()">save config</button>
+    <button class="btn btn-default" title="This will load a config module" ng-click="loadConfig()">load</button>
+    <button class="btn btn-default" title="This will unset current config set" ng-click="savePlan()">save plan</button>
+    <button class="btn btn-default" title="This will start a config set" ng-click="startConfig()">start</button>
+    <button class="btn btn-default" title="This will release a config module" ng-click="releaseConfig()">release</button>
+    <button class="btn btn-default" title="This will unset current config set" ng-click="unsetConfigName()">unset</button>
+    <button class="btn btn-default" title="This will clear current config set" ng-click="msg.clear();msg.releaseAllServicesExcept(['runtime', 'python', 'security', 'webgui'])">clear</button>
 </div>
 <div class="row">&nbsp;</div>
 <div class="row">
@@ -73,7 +65,9 @@ Create a new service
 </div>
 <div class="row">
     <div class="form-group col-md-6">
-        <b>route table default</b> {{service.routeTable.defaultRoute.destination}}</br>
+        route table default
+        {{service.routeTable.defaultRoute.destination}}
+<br/>
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -93,10 +87,10 @@ Create a new service
         </table>
     </div>
 </div>
-
 <div class="row">
     <div class="form-group col-md-6">
-    <b>channels</b></br>
+        channels
+        <br/>
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -112,6 +106,7 @@ Create a new service
                     <td>{{entry.serializable.id}}</td>
                     <td>
                         <img ng-src="{{'/' + entry.serializable['c-type'] + '.png'}}" width="18"/>{{entry.serializable['c-type']}}
+                    
                     </td>
                     <td>{{entry.serializable.gateway}}</td>
                     <td>

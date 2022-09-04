@@ -7,7 +7,7 @@ import org.junit.Before;
 
 // This test takes a long time..  TODO: consider a smaller / lighterweight version of this test
 //@Ignore
-public class OpenCVFilterDL4JTest  extends AbstractOpenCVFilterTest {
+public class OpenCVFilterDL4JTest extends AbstractOpenCVFilterTest {
 
   @Before
   public void setup() {

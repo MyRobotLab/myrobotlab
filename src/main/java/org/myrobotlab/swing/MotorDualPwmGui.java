@@ -30,6 +30,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -152,9 +153,10 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
     } else if (source == attachButton) {
       if (attachButton.getText().equals(attach)) {
         try {
-        swingGui.sendBlocking(boundServiceName, setLeftPwmPin, Integer.decode(leftPwmPinList.getSelectedItem().toString()));
-        swingGui.sendBlocking(boundServiceName, setRightPwmPin, Integer.decode(rightPwmPinList.getSelectedItem().toString()));
-        } catch(Exception ex) {}
+          swingGui.sendBlocking(boundServiceName, setLeftPwmPin, Integer.decode(leftPwmPinList.getSelectedItem().toString()));
+          swingGui.sendBlocking(boundServiceName, setRightPwmPin, Integer.decode(rightPwmPinList.getSelectedItem().toString()));
+        } catch (Exception ex) {
+        }
         swingGui.send(boundServiceName, attach, controllerList.getSelectedItem());
         /*
          * myMotor.setLeftPwmPin((int)Integer.decode(leftPwmPinList.
@@ -203,8 +205,8 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
 
     setEnabled(motor.isAttached());
 
-    leftPwmPinList.setSelectedItem(motor.leftPwmPin);
-    rightPwmPinList.setSelectedItem(motor.rightPwmPin);
+    leftPwmPinList.setSelectedItem(motor.getLeftPwmPin());
+    rightPwmPinList.setSelectedItem(motor.getRightPwmPin());
 
     if (motor.isAttached()) {
       MotorController mc = (MotorController) motor.getController();
@@ -245,10 +247,10 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
 
   public void refreshControllers() {
     if (myMotor != null) {
-      List<String> v = myMotor.refreshControllers();
+      Set<String> v = myMotor.refreshControllers();
       controllerList.removeAllItems();
-      for (int i = 0; i < v.size(); ++i) {
-        controllerList.addItem(v.get(i));
+      for (String s : v) {
+        controllerList.addItem(s);
       }
       if (myMotor.getController() != null) {
         controllerList.setSelectedItem(myMotor.getController().getName());

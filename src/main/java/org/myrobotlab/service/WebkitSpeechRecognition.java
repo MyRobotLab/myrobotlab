@@ -69,6 +69,9 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
   /**
    * If setContinuous is False, this speedup recognition processing If
    * setContinuous is True, you have some time to speak again, in case of error
+   * 
+   * @param continuous
+   *          true if continious mode
    */
   @Deprecated /* artifact of webkit */
   public void setContinuous(boolean continuous) {
@@ -89,6 +92,11 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
         "pt-PT", "ro-RO", "sl-SI", "sk-SK", "fi-FI", "sv-SE", "vi-VN", "tr-TR", "el-GR", "bg-BG", "ru-RU", "sr-RS", "uk-UA", "ko-KR", "ja-JP", "th-TH", "zh-cmn-Hans-HK",
         "zh-cmn-Hant-TW", "zh-yue-Hant-HK", "zh-cmn-Hans-CN");
     return ret;
+  }
+
+  @Override
+  public void attachTextListener(String name) {
+    addListener("publishText", name);
   }
 
 }

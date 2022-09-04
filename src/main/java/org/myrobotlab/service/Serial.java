@@ -32,6 +32,8 @@ import org.myrobotlab.serial.Port;
 import org.myrobotlab.serial.PortQueue;
 import org.myrobotlab.serial.PortStream;
 import org.myrobotlab.serial.SerialControl;
+import org.myrobotlab.service.config.SerialConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.PortPublisher;
 import org.myrobotlab.service.interfaces.QueueSource;
@@ -204,7 +206,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    *          - offset into bytes
    * @param length
    *          - length of data to convert
-   * @return
+   * @return the integer that represents the bytes
    */
   public static int bytesToInt(int[] bytes, int offset, int length) {
     return (int) bytesToLong(bytes, offset, length);
@@ -214,9 +216,13 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * conversion utility TODO - support endianess
    * 
    * @param bytes
+   *          the input array
    * @param offset
+   *          where to start
    * @param length
-   * @return
+   *          how many bytes
+   * @return the decoded long
+   * 
    */
   public static long bytesToLong(int[] bytes, int offset, int length) {
 
@@ -235,6 +241,11 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   /**
    * Static list of third party dependencies for this service. The list will be
    * consumed by Ivy to download and manage the appropriate resources
+   * 
+   * @param n
+   *          name
+   * @param id
+   *          instance ide
    */
 
   public Serial(String n, String id) {
@@ -267,6 +278,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * definitely NOT get a direct reference to the service
    * 
    * @param name
+   *          the name of the listener
+   * 
    */
   public void addByteListener(String name) {
     log.info("Add Byte Listener for Name {}", name);
@@ -377,8 +390,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     this.stopBits = stopBits;
     this.parity = parity;
 
-    lastPortName = portName;
-
     // two possible logics to see if we are connected - look at the
     // state of the port
     // on the static resource - or just check to see if its on the
@@ -400,7 +411,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     if (ports.containsKey(inPortName)) {
       info("#2 connect to a pre-existing port");
       connectPort(ports.get(inPortName), null);
-      lastPortName = portName;
       return;
     }
 
@@ -419,7 +429,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
     // #2.5 - Platform is in virtual mode - create a virtual uart
 
-    if (Platform.isVirtual()) {
+    if (isVirtual()) {
       connectVirtualUart(inPortName);
       connect(inPortName);
       return;
@@ -476,6 +486,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
     // we have a portName and we are connected
     portName = port.getName();
+    lastPortName = portName;
 
     // save(); why?
     broadcastState();
@@ -823,7 +834,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * publish a byte array of data that was read from the serial port.
    * 
    * @param bytes
-   * @return
+   *          in
+   * @return out
+   * 
    */
   public byte[] publishBytes(byte[] bytes) {
     // log.info("Serial Port {} Publish Bytes: {}", getPortName() , bytes);
@@ -834,7 +847,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * Publishing receive data to and end point
    * 
    * @param data
-   * @return
+   *          in
+   * @return out
+   * 
    */
   public int publishRX(Integer data) {
     return data;
@@ -844,7 +859,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * Publishing transmit data to a publishing point
    * 
    * @param data
-   * @return
+   *          in
+   * @return out
+   * 
    */
   public Integer publishTX(Integer data) {
     return data;
@@ -873,9 +890,12 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * return a byte array represending all the input pending data at the time
    * it's called. If there is no input data, null is returned.
    * 
-   * @return
+   * @return byte array
    * @throws IOException
+   *           boom
    * @throws InterruptedException
+   *           boom
+   * 
    */
   synchronized public byte[] readBytes() throws IOException, InterruptedException {
     int size = blockingRX.size();
@@ -1252,6 +1272,28 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
   public void stopTcpServer() throws IOException {
     tcpSerialHub.stop();
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    SerialConfig config = new SerialConfig();
+    config.port = lastPortName;
+    return config;
+  }
+
+  public ServiceConfig apply(ServiceConfig c) {
+    SerialConfig config = (SerialConfig) c;
+
+    if (config.port != null) {
+      try {
+        if (isConnected()) {
+          connect(config.port);
+        }
+      } catch (Exception e) {
+        log.error("load connecting threw", e);
+      }
+    }
+    return c;
   }
 
   public static void main(String[] args) {

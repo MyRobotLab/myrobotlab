@@ -121,8 +121,8 @@ public class LoggingSLF4J extends Logging {
   public void removeAppender(String name) {
     if (LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) instanceof Logger) {
 
-    Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-    logger.detachAppender(name); // does this stop it too ?
+      Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+      logger.detachAppender(name); // does this stop it too ?
     }
   }
 

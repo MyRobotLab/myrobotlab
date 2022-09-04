@@ -3,12 +3,15 @@ package org.myrobotlab.service.interfaces;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer.ListeningEvent;
 
-public interface SpeechRecognizer extends NameProvider, TextPublisher, LocaleProvider {
+public interface SpeechRecognizer extends NameProvider, TextPublisher, LocaleProvider, SpeechListener {
 
   /**
    * This method should listen for Mouth events
    * 
    * FIXME - should be deprecated - use Attach Pattern !
+   * 
+   * @param mouth
+   *          m
    */
   @Deprecated /* use attachSpeechSynthesis(SpeechSynthesis mouth) */
   public void addMouth(SpeechSynthesis mouth);
@@ -21,6 +24,7 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
    * endless self dialog :P
    * 
    * @param mouth
+   *          the speech synthesis to attach
    */
   public void attachSpeechSynthesis(SpeechSynthesis mouth);
 
@@ -28,7 +32,6 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
    * Set up subscriptions/listeners to publish recognized text too this text
    * listener
    * 
-   * @param listener
    */
   public void attachTextListener(TextListener listener);
 
@@ -40,29 +43,18 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
 
   /**
    * track the state of listening process
+   * 
+   * @return true if listening
    */
   public boolean isListening();
 
   /**
-   * Event is sent when the listening Service is actually listening or not.
+   * @param event
+   *          Event is sent when the listening Service is actually listening or
+   *          not.
    */
   @Deprecated /* use publishListening(boolean event) */
   public void listeningEvent(Boolean event);
-
-  /**
-   * speech synthesis interface - to not listen while speaking
-   * 
-   * @param utterance
-   */
-  public void onEndSpeaking(String utterance);
-
-  /**
-   * speech synthesis interface - to not listen while speaking
-   * 
-   * @param utterance
-   * @return TODO
-   */
-  public String onStartSpeaking(String utterance);
 
   /**
    * method to suppress recognition listening events This is important when a
@@ -78,7 +70,9 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
    * Publish event when listening or not listening ...
    * 
    * @param event
-   * @return
+   *          e
+   * @return the event
+   * 
    */
   public boolean publishListening(boolean event);
 
@@ -86,7 +80,9 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
    * the recognized text
    * 
    * @param text
-   * @return
+   *          text to be published
+   * @return the text
+   * 
    */
   public String publishRecognized(String text);
 
@@ -94,7 +90,9 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
    * the text in addition to any meta data like confidence rating
    * 
    * @param result
-   * @return
+   *          r
+   * @return listening event
+   * 
    */
   public ListeningEvent publishListeningEvent(ListeningEvent result);
 
@@ -134,13 +132,14 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
    * listening" similar to "hey google"
    * 
    * @param word
+   *          wake word to set
+   * 
    */
   public void setWakeWord(String word);
 
   /**
-   * Get the current wake word
+   * @return Get the current wake word
    * 
-   * @return
    */
   public String getWakeWord();
 

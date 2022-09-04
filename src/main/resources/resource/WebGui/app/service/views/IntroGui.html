@@ -71,7 +71,7 @@
             <table ng-show="showPanel('arduino')" class="table table-striped">
                 <tr>
                     <td>
-                        <img src="../arduino.png"/>
+                        <img src="../Arduino.png"/>
                         <label>Arduino</label>
                         &nbsp;&nbsp;&nbsp;&nbsp;
                         <p>
@@ -95,7 +95,7 @@
             <table ng-show="showPanel('serial')" class="table table-striped">
                 <tr>
                     <td>
-                        <img src="../serial.png"/>
+                        <img src="../Serial.png"/>
                         <label>Serial:</label>
                         <P>Serial service is a way to send and receive serial data into and out of MRL</P>
                         <a class="row col-md-3" href="http://myrobotlab.org/service/Serial" target="_blank">MORE INFO</a>
@@ -192,7 +192,7 @@
                     <td>
                         <p>
                             The Servo needs a virtual controller in order to operate.<br>
-                            In this tutorial MRL has already setup a controller called arduino.<br>Just click Start
+                            In this tutorial MRL has already setup a controller called arduino.<br>Select a port or add COM3 and click connect.
                         
                         </p>
                     </td>
@@ -218,8 +218,8 @@
                 <tr ng-show="!service.isVirtual">
                     <td>
                         <p>
-                            Now select the controller in the dropdown menu, by selecting it will get "attached".<br>Select the correct signal pin the servo is attached to.  Then click "Enable" and the servo should be controllable with the slider bar in Basic Tab.
-                            Note in this demo, it sets back to "disable" automatically to prevent burning servo. But it automatically Enables if you move the slider or send a python "moveTo()" code.
+In the Control Tab, select the arduino controller in the dropdown menu.<br>Select the correct signal pin the servo is connected to and click "attach". Clicking "Enable" will energize the servo. Invert button allows you to invert the direction of the servo. Clicking "AutoDisable" automatically stops energizing the servo after a given amount of seconds.<br> Now, you should be able to control the servo with the slider bar in Basic Tab.
+                            In this demo, "AutoDisable" is set by default to prevent burning the servo. But it automatically Enables the servo if you move the slider or send a Python "moveTo()" in a script.
                         
                         </p>
                     </td>
@@ -228,8 +228,8 @@
                 <tr ng-show="service.isVirtual">
                     <td>
                         <p>
-                            Now select the varduino controller in the dropdown menu, by selecting it will get "attached".<br>Select the correct signal pin the servo is attached to.  Then click "Enable" and the servo should be controllable with the slider bar in Basic Tab.
-                        
+In the Control Tab, select the arduino controller in the dropdown menu.<br>Select the correct signal pin the servo is connected to and click "attach". Clicking "Enable" will energize the servo. Invert button allows you to invert the direction of the servo. Clicking "AutoDisable" automatically stops energizing the servo after a given amount of seconds.<br> Now, you should be able to control the servo with the slider bar in Basic Tab.
+                            In this demo, "AutoDisable" is set by default to prevent burning the servo. But it automatically Enables the servo if you move the slider or send a Python "moveTo()" in a script.                        
                         </p>
                     </td>
                 </tr>
@@ -254,12 +254,12 @@
                 <tr>
                     <td>
                         <p>
-                            By selecting the Limits tab, you can set the limits of your servo.<br>
+                            By clicking the Limits button, you can set the limits of your servo.<br>
                             There is two types of limits, the input and the output.<br>
                             Input limits are the max and min values you expect to measure, after any scaling. Output limits are the min and max angle that the microcontroller will tell the servo to move to.<br>
-                            Moving the slider to a position and clicking on MIN or MAX will set the limits. <br>The REST position is where the servo will be set when initialized.
-                            In the Advanced tab you can set your servo to autoDisable, this prevents your servo from burning out and magic smoke.
-                            In this demo, it is set by default.
+                            Moving the slider to a position and clicking on MIN or MAX will set the limits.<br>Generally we modify only the Output mapping. <br>The REST position is where the servo will be set when initialized.<br>
+                            You can save your configuration by selecting Servo drop down menu<br>
+                            and click "save service config".<br>
                         </p>
                     </td>
                 </tr>
@@ -299,7 +299,7 @@
                         <strong>servo.moveTo</strong>
                         (pos): ask the servo to move to a position<br>
                         <strong>servo.moveToBlocking</strong>
-                        (pos): ask the servo to move to a position and wait the position reached<br>
+                        (pos): ask the servo to move to a position and wait the position to be reached<br>
                         <strong>servo.sync</strong>
                         (servo02): will sync servo02 with servo01, if you create a second servo<br>
                         <strong>servo.map</strong>
@@ -372,7 +372,7 @@
 <table ng-show="showPanel('runtime')" class="inmoov-sub-panel table table-striped">
     <tr>
         <td>
-            <img src="../runtime.png"/>
+            <img src="../Runtime.png"/>
             &nbsp;&nbsp;
             <p>
                 The Runtime is the first Service to start when MyRobotLab begins.<br>
@@ -456,5 +456,3 @@
 <!-- panels end -->
 </td></tr></table>
 <!------------------------------INTRO-PAGE END---------------------------->
-
-

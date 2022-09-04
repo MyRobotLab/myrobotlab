@@ -83,6 +83,9 @@ public class MainMenuState extends BaseAppState {
 
   /**
    * FYI - this is all initialized JMEMain thread ..
+   * 
+   * @param jme
+   *          the jme engine
    */
   public MainMenuState(JMonkeyEngine jme) {
     this.jme = jme;
@@ -367,6 +370,11 @@ public class MainMenuState extends BaseAppState {
 
     if (spatial == null) {
       log.error("putText spatial is null");
+      return;
+    }
+
+    if (parentButton == null) {
+      log.info("parentButton null - menu not visible?");
       return;
     }
 

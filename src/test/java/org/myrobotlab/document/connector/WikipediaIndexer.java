@@ -23,7 +23,7 @@ public class WikipediaIndexer {
     // TODO: why do I need this to index wikipedia from the xml dump?! I know ,
     // it's like a 50GB xml file.. gah..
     System.setProperty("jdk.xml.totalEntitySizeLimit", String.valueOf(Integer.MAX_VALUE));
-    org.apache.log4j.BasicConfigurator.configure();
+    // org.apache.log4j.BasicConfigurator.configure();
     // LoggingFactory.getInstance().setLevel(Level.INFO);
     // wikipedia xml file. ( freely available via wiki-dumps )
 
@@ -55,7 +55,7 @@ public class WikipediaIndexer {
     solrStageConfig.setStringParam("solrUrl", solrUrl);
     solrStageConfig.setIntegerParam("batchSize", 500);
     solrStageConfig.setBoolParam("issueCommit", false);
-    DocumentPipeline docproc = (DocumentPipeline)Runtime.start("docproc", "DocumentPipeline");
+    DocumentPipeline docproc = (DocumentPipeline) Runtime.start("docproc", "DocumentPipeline");
     // build the pipeline.. assemble the stages.
     // create our document processing pipeline workflow.
     WorkflowConfiguration workflowConfig = new WorkflowConfiguration("default");

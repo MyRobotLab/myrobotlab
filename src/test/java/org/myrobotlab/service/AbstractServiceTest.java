@@ -19,10 +19,9 @@ import org.myrobotlab.test.AbstractTest;
 @Ignore
 public abstract class AbstractServiceTest extends AbstractTest {
 
-  
   // The service object that is created for testing
   public Service service;
-  
+
   // a temporary folder for service tests to use
   @ClassRule
   public static TemporaryFolder testFolder = new TemporaryFolder();
@@ -48,7 +47,6 @@ public abstract class AbstractServiceTest extends AbstractTest {
   // finally release the service after the unit test has completed.
   public void releaseService() {
     // TODO: what's the normal way to destroy a service?
-    service.releasePeers();
     service.releaseService();
     // we could potentially do some post checks to make sure the service
     // actually shutdown

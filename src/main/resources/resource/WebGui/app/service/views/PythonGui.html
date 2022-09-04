@@ -2,7 +2,7 @@
 <div class="row">
     <div class="form-inline col-md-12">
         <button ng-click="newFile = !newFile" class="btn btn-default">
-            <span class="glyphicon glyphicon-file">new        
+            <span class="glyphicon glyphicon-file"/>new
         </button>
         <div class="btn-group" uib-dropdown is-open="status.isopen">
             <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">examples</button>
@@ -11,8 +11,8 @@
                     <form class="navbar-form">
                         <div class="input-group">
                             <div class="input-group-btn">
-                                <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" title="service type of the new instance to be created" uib-typeahead="service as service.name.substring(23) for service in getPossibleServices() | filter:{name:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html">
-                                <button class="btn btn-default" ng-click="msg.loadPyRobotLabServiceScript(newType.name.substring(23))">load</button>
+                                <input class="form-control" type="text" ng-model="newType" press-enter="msg.loadPyRobotLabServiceScript(newType.simpleName);newType=''" placeholder="Service Type" title="service type example" uib-typeahead="service as service.simpleName for service in getPossibleServices() | filter:{simpleName:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html">
+                                <!-- button class="btn btn-default" ng-click="msg.loadPyRobotLabServiceScript(newType.name.substring(23))">load</button -->
                             </div>
                         </div>
                     </form>
@@ -31,13 +31,11 @@
             <span class="glyphicon glyphicon-open-file"></span>
             open
         </button>
-        <button class="btn btn-default" ng-click="export()">
-            <span class="glyphicon glyphicon-export">export
-        
+        <button class="btn btn-default" ng-click="saveScript()">
+            <span class="glyphicon glyphicon-save-file">save        
         </button>
-        <button class="btn btn-default" ng-click="saveTextAsFile()">
-            <span class="glyphicon glyphicon-save-file">save
-        
+        <button class="btn btn-default" ng-click="downloadScript()">
+            <span class="glyphicon glyphicon-download-alt">download
         </button>
     </div>
 </div>
@@ -76,7 +74,9 @@
     </uib-tabset>
 </div>
 <div class="row">
- <uib-tabset active="activePill">
-    <uib-tab index="0" heading="console"><pre>{{log}}</pre></uib-tab>
-  </uib-tabset>
+	<span>console <button ng-click="log = '';$apply()" class="btn btn-default">
+            <span class="glyphicon glyphicon-remove"/>
+        </button></span><br/>
+    <pre>{{log}}</pre>
+
 </div>

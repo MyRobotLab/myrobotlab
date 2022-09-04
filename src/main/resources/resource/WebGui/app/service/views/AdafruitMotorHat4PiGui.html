@@ -1,0 +1,22 @@
+<div class="row">
+    <div class="col-md-6">
+        <table>
+            <tr>
+                <td>
+                    <div class="btn-group" uib-dropdown>
+                        <button type="button" class="btn btn-default">controller {{service.controller}}</button>
+                        <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
+                            <span class="caret"></span>
+                        </button>
+                        <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                            <li ng-repeat="c in controllers">
+                                <a href="" ng-click="attach(c)">{{mrl.getShortName(c)}}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+          <td></td>
+            </tr>
+  </table>
+    </div>
+</div>

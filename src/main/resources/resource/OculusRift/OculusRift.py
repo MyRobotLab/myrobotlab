@@ -1,20 +1,20 @@
 # start the service
-oculusrift = Runtime.start("oculusrift","OculusRift")
+oculusRift = runtime.start("oculusRift","OculusRift")
 
 leftEyeURL = "http://10.0.0.2:8080/?action=stream"
 rightEyeURL = "http://10.0.0.2:8081/?action=stream"
     
-rift.setLeftEyeURL(leftEyeURL)
-rift.setRightEyeURL(rightEyeURL)
+oculusRift.setLeftEyeURL(leftEyeURL)
+oculusRift.setRightEyeURL(rightEyeURL)
     
-rift.leftCameraAngle = 0
-rift.leftCameraDy = 5
+oculusRift.leftCameraAngle = 0
+oculusRift.leftCameraDy = 5
 rift.rightCameraDy = -5
 #// call this once you've updated the affine stuff?
-rift.updateAffine()
+oculusRift.updateAffine()
 
-rift.initContext()
+oculusRift.initContext()
 
-rift.logOrientation()
+oculusRift.logOrientation()
 
 # TODO: fix this script up.

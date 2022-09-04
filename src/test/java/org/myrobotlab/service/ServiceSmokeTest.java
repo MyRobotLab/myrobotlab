@@ -1,11 +1,8 @@
 package org.myrobotlab.service;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 
 import org.junit.Test;
@@ -32,71 +29,76 @@ public class ServiceSmokeTest extends AbstractTest {
   @Test
   public void testAllServiceSerialization() {
     try {
-    installAll();
+      installAll();
 
-    // known problematic services?! TODO: fix them and remove from the following
-    // list.
-    ArrayList<String> blacklist = new ArrayList<String>();
-    blacklist.add("org.myrobotlab.service.OpenNi");
-    blacklist.add("org.myrobotlab.service.Blender");
-    blacklist.add("org.myrobotlab.service.WorkE");
-    blacklist.add("org.myrobotlab.service.PythonProxy");
-    blacklist.add("org.myrobotlab.service.Sweety");
-    blacklist.add("org.myrobotlab.service.LeapMotion");
-    blacklist.add("org.myrobotlab.service.Runtime");
-    blacklist.add("org.myrobotlab.service.JMonkeyEngine");
-    blacklist.add("org.myrobotlab.service.Lloyd");
-    blacklist.add("org.myrobotlab.service._TemplateService");
-    
-  
-    // the service data!
-    ServiceData serviceData = ServiceData.getLocalInstance();
+      // known problematic services?! TODO: fix them and remove from the
+      // following
+      // list.
+      ArrayList<String> blacklist = new ArrayList<String>();
+      blacklist.add("org.myrobotlab.service.OpenNi");
+      blacklist.add("org.myrobotlab.service.Blender");
+      blacklist.add("org.myrobotlab.service.WorkE");
+      blacklist.add("org.myrobotlab.service.PythonProxy");
+      blacklist.add("org.myrobotlab.service.Sweety");
+      blacklist.add("org.myrobotlab.service.Sphinx");
+      blacklist.add("org.myrobotlab.service.LeapMotion");
+      blacklist.add("org.myrobotlab.service.Runtime");
+      blacklist.add("org.myrobotlab.service.Proxy"); // interesting idea - but no worky
+      blacklist.add("org.myrobotlab.service.JMonkeyEngine");
+      blacklist.add("org.myrobotlab.service.Lloyd");
+      blacklist.add("org.myrobotlab.service._TemplateService");
 
-    // we need to load a service for each service type we have.
-    String[] serviceTypes = serviceData.getServiceTypeNames();
-    
-    // String[] serviceTypes = new String[] {"org.myrobotlab.service.InMoov"};
+      // FIXME - really ? lame
+      blacklist.add("org.myrobotlab.service.Joystick");
 
-    for (String serviceType : serviceTypes) {
-      log.info("Service Type: {}", serviceType);
-    }
-    log.info("Press any key to continue");
-    // System.in.read();
-    for (String serviceType : serviceTypes) {
-      
-      // serviceType = "org.myrobotlab.service.Sabertooth";
+      // the service data!
+      ServiceData serviceData = ServiceData.getLocalInstance();
 
-      long start = System.currentTimeMillis();
+      // we need to load a service for each service type we have.
+      // String[] serviceTypes = serviceData.getServiceTypeNames();
 
-      if (blacklist.contains(serviceType)) {
-        log.warn("Skipping known problematic service {}", serviceType);
-        continue;
+      String[] serviceTypes = new String[] { "org.myrobotlab.service.Joystick" };
+
+      for (String serviceType : serviceTypes) {
+        log.info("Service Type: {}", serviceType);
       }
-      log.warn("Testing {}", serviceType);
-      String serviceName = serviceType.toLowerCase();
-      ServiceInterface s = Runtime.create(serviceName, serviceType);      
-      if (s == null) {
-        log.error("service type {} could not be created", serviceType);
+      log.info("Press any key to continue");
+      // System.in.read();
+      for (String serviceType : serviceTypes) {
+
+        // serviceType = "org.myrobotlab.service.Sabertooth";
+
+        long start = System.currentTimeMillis();
+
+        if (blacklist.contains(serviceType)) {
+          log.warn("Skipping known problematic service {}", serviceType);
+          continue;
+        }
+        log.warn("Testing {}", serviceType);
+        String serviceName = serviceType.toLowerCase();
+        ServiceInterface s = Runtime.create(serviceName, serviceType);
+        if (s == null) {
+          log.error("service type {} could not be created", serviceType);
+        }
+        assertNotNull(String.format("could not create %s", serviceName), s);
+        s.setVirtual(true);
+        s = Runtime.start(serviceName, serviceType);
+        assertNotNull(String.format("could not start %s", serviceName), s);
+        // log.error("serviceType {}", s.getName());
+        testSerialization(s);
+        // TODO: validate the service is released!
+        s.releaseService();
+
+        long delta = System.currentTimeMillis() - start;
+        log.info("Done testing serialization of {} in {} ms", serviceType, delta);
+
       }
-      assertNotNull(String.format("could not create %s",  serviceName), s);
-      s.setVirtual(true);
-      s = Runtime.start(serviceName, serviceType);
-      assertNotNull(String.format("could not start %s",  serviceName), s);
-      // log.error("serviceType {}", s.getName());
-      testSerialization(s);
-      // TODO: validate the service is released!
-      s.releaseService();
 
-      long delta = System.currentTimeMillis() - start;
-      log.info("Done testing serialization of {} in {} ms", serviceType, delta);
+      Runtime.releaseAll();
 
-    }
+      log.info("Done with tests..");
 
-    Runtime.releaseAll();
-
-    log.info("Done with tests..");
-
-    } catch(Exception e) {
+    } catch (Exception e) {
       log.error("ServiceSmokeTest threw", e);
       fail("ServiceSmokeTest threw");
     }

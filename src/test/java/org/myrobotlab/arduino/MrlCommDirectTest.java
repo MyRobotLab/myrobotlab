@@ -1,12 +1,11 @@
 package org.myrobotlab.arduino;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
 import org.junit.Test;
-import org.myrobotlab.arduino.BoardInfo;
-import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.framework.QueueStats;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.sensor.EncoderData;
@@ -20,12 +19,12 @@ import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
 // @Ignore
-public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher, PortListener {
+public class MrlCommDirectTest implements SerialDataListener, MrlCommPublisher, PortListener {
 
   transient public final static Logger log = LoggerFactory.getLogger(MrlCommDirectTest.class);
   public Msg msg = null;
   private int numAcks = 0;
-  
+
   String portName = "COM4";
   int rate = 115200;
   int dataBits = 8;
@@ -37,16 +36,17 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
     msg = new Msg(this, null);
     msg.setInvoke(false);
     assertFalse(msg.isClearToSend());
-    // now we want to just see how it responds when i send it various byte sequences.
-    //byte[] testBytes = new byte[] {-86,14,1};
-    byte[] testBytes = createTestBytes("170,2,55,63");
+    // now we want to just see how it responds when i send it various byte
+    // sequences.
+    // byte[] testBytes = new byte[] {-86,14,1};
+    byte[] testBytes = createTestBytes("170,2," + Msg.PUBLISH_MRL_COMM_BEGIN + ",63");
     msg.onBytes(testBytes);
     // msg.waitForBegin();
-    // now what? 
+    // now what?
     assertTrue(msg.isClearToSend());
     // Thread.sleep(1000);
   }
-  
+
   // @Test
   public void testRealWorldError() {
     String testMsg1 = "170,9,3,63,1,0,27,25,77,0,0,0,1,0,27,25,77,0,0,170,9,3,63,1,0,27,25,77,0,0,170,9,3,63,1,0,27,25,77,0,0,170,9,3,63,1,0,27,25,77,0,0,170,9,3,63,1,0,27,25,77,0,0,170,9,3,63,1,0,27,25,77,0,0,170,9,3,63,1,0,27,25,77,0,0,170,9,3,63,1,0,27,25,77,0,0,170,9,3,63,1,0,27,25,77,0,0,170,9,3,63,1,0,27,25,77,0,0,170,9,3,63,1,0,27,25,77,0,0,170,9,3,63,1,0,27,25,77,0,0,170,14";
@@ -58,33 +58,31 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
     byte[] testBytes = createTestBytes(testMsg1);
     msg.onBytes(testBytes);
     // and the next batch up..
-    
+
     msg.onBytes(createTestBytes(testMsg2));
     // msg.waitForBegin();
-    // now what? 
+    // now what?
     assertTrue(msg.isClearToSend());
-    
-    
+
   }
-  
-  
+
   @Test
   public void testRealWorldError2() {
     String testMsg1 = "170,14,1,12,101,255";
-    String testMsg2 = "170,2,55,63";
+    String testMsg2 = "170,2," + Msg.PUBLISH_MRL_COMM_BEGIN + ",63";
     msg = new Msg(this, null);
     msg.setInvoke(false);
     assertFalse(msg.isClearToSend());
     msg.onBytes(createTestBytes(testMsg1));
     msg.onBytes(createTestBytes(testMsg2));
-    
-    
+
     msg.onBytes(createTestBytes("0,0,0,0,0,0"));
     assertTrue(msg.isClearToSend());
   }
-  
+
   private static byte[] createTestBytes(String intString) {
-    // we are assuming an input string of integers like "170,2,55,63" for example.. 
+    // we are assuming an input string of integers like "170,2,55,63" for
+    // example..
     // and we'll return the representative byte array
     String[] parts = intString.split(",");
     int i = 0;
@@ -96,8 +94,8 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
     }
     return testBytes;
   }
-  
- // @Test
+
+  // @Test
   public void testMrlCommReconnect2() throws Exception {
     msg = new Msg(this, null);
     msg.setInvoke(false);
@@ -110,8 +108,8 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
       onDisconnect(portName);
     }
   }
-  
- //  @Test
+
+  // @Test
   public void testMrlCommReconnect() throws Exception {
     msg = new Msg(this, null);
     msg.setInvoke(false);
@@ -129,16 +127,16 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
       // TODO: wire in the onConnect as a proper synchronous callback.
       onConnect(portName);
       Thread.sleep(100);
-      for (int j = 0 ; j < 1000; j++) {
-        port.write(msg.digitalWrite(1, j%2));
+      for (int j = 0; j < 1000; j++) {
+        port.write(msg.digitalWrite(1, j % 2));
       }
       Thread.sleep(100);
-      
+
     }
-    
+
   }
-  
- // 
+
+  //
   public void testMrlComm() throws Exception {
     msg = new Msg(this, null);
     msg.setInvoke(false);
@@ -149,65 +147,64 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
     onConnect(portName);
     // msg.waitForBegin();
     System.out.println("################ Done #######################################");
-    Thread.sleep(1000);    
+    Thread.sleep(1000);
     // ok.. now after a second we'll attach a servo.
     Thread.sleep(1000);
-    for (int j = 2; j<12;j++) {
+    for (int j = 2; j < 12; j++) {
       port.write(msg.servoAttach(0, 7, 90, 100, "servo1"));
     }
 
-    for (int j = 2; j<12;j++) {
+    for (int j = 2; j < 12; j++) {
       port.write(msg.servoAttach(0, 7, 90, 100, "servo1"));
-      for (int i = 1000; i < 2000 ; i++) {
+      for (int i = 1000; i < 2000; i++) {
         port.write(msg.servoMoveToMicroseconds(0, i));
       }
     }
     Thread.sleep(1000);
-    
-    
+
     // port.close();
-    
+
     // Thread.sleep(2000);
-    //ort.setDTR(false);
-   // port.setDTR(true);
-    
-//    for (int i = 1; i <= 10; i++) {
-//      System.err.println("\nLoop Test Number:" + i + "\n");
-//      log.info("Closing port {}", i);
-//      port.close();
-//      Thread.sleep(1000);
-//
-//      
-//      log.info("Opening Port");
-//      port.open();
-//      // TODO: wire in the onConnect as a proper synchronous callback.
-//      onConnect(portName);
-//      Thread.sleep(1000);
-//      
-//      // send some commands to the port.
-//      port.write(msg.servoAttach(0, 7, 90, 100, "servo1"));
-//      
-//      
-//      Thread.sleep(1000);
-//      
-//      
-//    }
+    // ort.setDTR(false);
+    // port.setDTR(true);
+
+    // for (int i = 1; i <= 10; i++) {
+    // System.err.println("\nLoop Test Number:" + i + "\n");
+    // log.info("Closing port {}", i);
+    // port.close();
+    // Thread.sleep(1000);
+    //
+    //
+    // log.info("Opening Port");
+    // port.open();
+    // // TODO: wire in the onConnect as a proper synchronous callback.
+    // onConnect(portName);
+    // Thread.sleep(1000);
+    //
+    // // send some commands to the port.
+    // port.write(msg.servoAttach(0, 7, 90, 100, "servo1"));
+    //
+    //
+    // Thread.sleep(1000);
+    //
+    //
+    // }
     // waitForAnyKey();
     // wait for mrl to be sync'd
 
     log.info("MRL Begin.. we can send data now.");
     // How about now we try sending various mrl comm messages.
-//    while (true) {
-//
-//      for (int i = 2; i < 12; i++) {
-//        port.write(msg.servoAttach(i-2, i, 0, 100, "servo"+i));
-//      }
-//
-//      for (int i = 2; i < 12; i++) {
-//        port.write(msg.servoMoveToMicroseconds(0, 1200+i));
-//      }
-//      Thread.sleep(2000);
-//    }
+    // while (true) {
+    //
+    // for (int i = 2; i < 12; i++) {
+    // port.write(msg.servoAttach(i-2, i, 0, 100, "servo"+i));
+    // }
+    //
+    // for (int i = 2; i < 12; i++) {
+    // port.write(msg.servoMoveToMicroseconds(0, 1200+i));
+    // }
+    // Thread.sleep(2000);
+    // }
   }
 
   private void waitForAnyKey() throws IOException {
@@ -230,7 +227,7 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
   @Override
   public void updateStats(QueueStats stats) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -238,7 +235,7 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
     // TODO Auto-generated method stub
     log.info("On connect called for port {}", portName);
     msg.onConnect(portName);
-    
+
   }
 
   @Override
@@ -246,17 +243,18 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
     // TODO Auto-generated method stub
     log.info("On Disconnect called for {}", portName);
     // msg.onDisconnect(portName);
-    
+
   }
 
   @Override
   public void onBytes(byte[] bytes) {
     // TODO Auto-generated method stub
     log.info("OnBytes Called: {}", StringUtil.byteArrayToIntString(bytes));
-    // Here is where we need the msg object to read the bytes and process any callbacks that it can.
+    // Here is where we need the msg object to read the bytes and process any
+    // callbacks that it can.
     msg.onBytes(bytes);
     log.info("Msg processed on bytes.");
-    
+
   }
 
   @Override
@@ -270,11 +268,11 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
   public void publishAck(Integer function) {
     // if we get an ack.. the msg object isn't pending anymore.
     numAcks++;
-//    msg.ackReceived(function);
-//    //msg.pendingMessage = false;
-//    System.err.println("Publish Ack " + numAcks + "function:" + function );
-//    log.info("Publish Ack {}", function);   
-//    System.err.println("Publish Ack: " + function);
+    // msg.ackReceived(function);
+    // //msg.pendingMessage = false;
+    // System.err.println("Publish Ack " + numAcks + "function:" + function );
+    // log.info("Publish Ack {}", function);
+    // System.err.println("Publish Ack: " + function);
   }
 
   @Override
@@ -332,7 +330,7 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
     // because mrlcomm has started.. so .. let's say clear to send.
     log.info("Publish MRL Comm Begin");
     // msg.clearToSend = true;
-    System.err.println("\nPublish MrlBegin: " + version +"\n");
+    System.err.println("\nPublish MrlBegin: " + version + "\n");
   }
 
   @Override
@@ -369,5 +367,3 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
   }
 
 }
-
-

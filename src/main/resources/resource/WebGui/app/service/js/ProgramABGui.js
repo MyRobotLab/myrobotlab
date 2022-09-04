@@ -168,7 +168,10 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     }
 
     $scope.getBotInfo = function() {
-        return $scope.service.bots[$scope.service.currentBotName]
+        if ($scope.service && $scope.service.bots){
+            return $scope.service.bots[$scope.service.currentBotName]
+        }
+        return null
     }
 
     $scope.getCurrentSession = function() {
@@ -229,7 +232,12 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     }
 
     $scope.getProperty = function(propName) {
-        return $scope.getBotInfo()['properties'][propName]
+        try {
+            return $scope.getBotInfo()['properties'][propName]
+        } catch (error){
+            console.warn('getProperty(' + propName + ') not found')
+            return null
+        }
     }
 
     $scope.removeBotProperty = function(propName) {

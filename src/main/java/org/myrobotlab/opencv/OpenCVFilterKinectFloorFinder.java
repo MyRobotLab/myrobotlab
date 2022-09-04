@@ -121,6 +121,10 @@ public class OpenCVFilterKinectFloorFinder extends OpenCVFilter {
    * &#64;param depth
    * 
    * </pre>
+   * 
+   * @param depth
+   *          depth image
+   * @return a new image
    */
   public IplImage learnFloor(IplImage depth) {
 

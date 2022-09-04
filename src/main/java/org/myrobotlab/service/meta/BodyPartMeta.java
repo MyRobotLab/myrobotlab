@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -12,18 +11,12 @@ public class BodyPartMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
    */
-  public BodyPartMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
-
+  public BodyPartMeta() {
     addDescription("An easier way to control a body ...");
     addCategory("robot");
     setAvailable(true);
     addDependency("org.apache.commons", "commons-lang3", "3.3.2");
-
   }
 
 }

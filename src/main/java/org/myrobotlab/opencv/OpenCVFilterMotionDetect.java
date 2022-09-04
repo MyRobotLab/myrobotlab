@@ -1,29 +1,28 @@
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
-import static org.bytedeco.opencv.global.opencv_imgproc.GaussianBlur;
-import static org.bytedeco.opencv.global.opencv_imgproc.accumulateWeighted;
-import static org.bytedeco.opencv.global.opencv_imgproc.threshold;
-import static org.bytedeco.opencv.global.opencv_imgproc.morphologyDefaultBorderValue;
-import static org.bytedeco.opencv.global.opencv_imgproc.dilate;
-import static org.bytedeco.opencv.global.opencv_imgproc.findContours;
-import static org.bytedeco.opencv.global.opencv_imgproc.contourArea;
-import static org.bytedeco.opencv.global.opencv_imgproc.THRESH_BINARY;
-import static org.bytedeco.opencv.global.opencv_imgproc.RETR_EXTERNAL;
-import static org.bytedeco.opencv.global.opencv_imgproc.CHAIN_APPROX_SIMPLE;
-import static org.bytedeco.opencv.global.opencv_imgproc.boundingRect;
+import static org.bytedeco.opencv.global.opencv_core.BORDER_CONSTANT;
 import static org.bytedeco.opencv.global.opencv_core.CV_32F;
 import static org.bytedeco.opencv.global.opencv_core.absdiff;
 import static org.bytedeco.opencv.global.opencv_core.convertScaleAbs;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
-import static org.bytedeco.opencv.global.opencv_core.BORDER_CONSTANT;
+import static org.bytedeco.opencv.global.opencv_imgproc.CHAIN_APPROX_SIMPLE;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.opencv.global.opencv_imgproc.GaussianBlur;
+import static org.bytedeco.opencv.global.opencv_imgproc.RETR_EXTERNAL;
+import static org.bytedeco.opencv.global.opencv_imgproc.THRESH_BINARY;
+import static org.bytedeco.opencv.global.opencv_imgproc.accumulateWeighted;
+import static org.bytedeco.opencv.global.opencv_imgproc.boundingRect;
+import static org.bytedeco.opencv.global.opencv_imgproc.contourArea;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.opencv.global.opencv_imgproc.dilate;
+import static org.bytedeco.opencv.global.opencv_imgproc.findContours;
+import static org.bytedeco.opencv.global.opencv_imgproc.morphologyDefaultBorderValue;
+import static org.bytedeco.opencv.global.opencv_imgproc.threshold;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Date;
 
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -32,11 +31,9 @@ import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
-import org.myrobotlab.math.geometry.Rectangle;
-import org.myrobotlab.service.OpenCV;
 
 /**
- * OpenCV Fitler for motion detection based on 
+ * OpenCV Fitler for motion detection based on
  * https://www.pyimagesearch.com/2015/06/01/home-surveillance-and-motion-detection-with-the-raspberry-pi-python-and-opencv/
  * 
  * @author kwatters
@@ -55,7 +52,8 @@ public class OpenCVFilterMotionDetect extends OpenCVFilter {
   private ArrayList<Rect> rects = null;
   // how many subsequent frames detect motion
   private int motionCounter = 0;
-  
+  transient private CloseableFrameConverter converter = new CloseableFrameConverter();
+
   public OpenCVFilterMotionDetect() {
     super();
   }
@@ -76,14 +74,15 @@ public class OpenCVFilterMotionDetect extends OpenCVFilter {
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
     // TODO: resize to a fixed width so the area is meaningful ?
-    //        # resize the frame, convert it to grayscale, and blur it
-    //        frame = imutils.resize(frame, width=500)
+    // # resize the frame, convert it to grayscale, and blur it
+    // frame = imutils.resize(frame, width=500)
     // gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     IplImage gray = cvCreateImage(image.cvSize(), 8, 1);
     cvCvtColor(image, gray, CV_BGR2GRAY);
-    Mat grayMat = OpenCV.toMat(gray);
+    
+    Mat grayMat = converter.toMat(gray);
     // gray = cv2.GaussianBlur(gray, (21, 21), 0)
-    GaussianBlur(grayMat, grayMat, new Size(21,21), 0.0);
+    GaussianBlur(grayMat, grayMat, new Size(21, 21), 0.0);
     // # if the average frame is None, initialize it
     // if avg is None:
     if (avgMat == null) {
@@ -97,7 +96,8 @@ public class OpenCVFilterMotionDetect extends OpenCVFilter {
       log.info("init motion detection frame.");
       return image;
       // avgMat = grayMat.clone();
-      // TODO: potentially continue here because we need to initialize the frame?
+      // TODO: potentially continue here because we need to initialize the
+      // frame?
       // maybe not.. maybe just create the avgMat and move on.
     }
     // # accumulate the weighted average between the current frame and
@@ -112,14 +112,16 @@ public class OpenCVFilterMotionDetect extends OpenCVFilter {
     absdiff(grayMat, absScaleMat, frameDelta);
     // # threshold the delta image, dilate the thresholded image to fill
     // # in holes, then find contours on thresholded image
-    // thresh = cv2.threshold(frameDelta, conf["delta_thresh"], 255, cv2.THRESH_BINARY)[1]
+    // thresh = cv2.threshold(frameDelta, conf["delta_thresh"], 255,
+    // cv2.THRESH_BINARY)[1]
     Mat threshMat = new Mat();
     threshold(frameDelta, threshMat, deltaThresh, 255, THRESH_BINARY);
     // thresh = cv2.dilate(thresh, None, iterations=2)
     Mat dilateMat = new Mat();
     Scalar defaultBorder = morphologyDefaultBorderValue();
-    dilate(threshMat, dilateMat, new Mat(), new Point(-1,-1), 2, BORDER_CONSTANT, defaultBorder);
-    // cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    dilate(threshMat, dilateMat, new Mat(), new Point(-1, -1), 2, BORDER_CONSTANT, defaultBorder);
+    // cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
+    // cv2.CHAIN_APPROX_SIMPLE)
     MatVector cntsVec = new MatVector();
     findContours(threshMat, cntsVec, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
     // cnts = imutils.grab_contours(cnts)
@@ -128,12 +130,12 @@ public class OpenCVFilterMotionDetect extends OpenCVFilter {
     for (Mat c : cntsVec.get()) {
       // # loop over the contours
       // for c in cnts:
-      //   # if the contour is too small, ignore it
+      // # if the contour is too small, ignore it
       double contArea = contourArea(c);
       // if cv2.contourArea(c) < conf["min_area"]:
-      //   continue
+      // continue
       if (contArea < minArea) {
-        continue;        
+        continue;
       }
       // # compute the bounding box for the contour, draw it on the frame,
       // # and update the text
@@ -142,7 +144,7 @@ public class OpenCVFilterMotionDetect extends OpenCVFilter {
       Rect rect = boundingRect(c);
       rects.add(rect);
       sawMovement = true;
-    } 
+    }
     if (sawMovement) {
       text = "Occupied";
       motionCounter++;
@@ -153,9 +155,10 @@ public class OpenCVFilterMotionDetect extends OpenCVFilter {
       motionCounter = 0;
     }
     if (motionCounter >= minMotionFrames) {
-      //TODO: add some additional stuff to the motion being detected
+      // TODO: add some additional stuff to the motion being detected
       invoke("publishMotionDetected", rects);
-      // once we've published the detected motion, let's clear our motion counter
+      // once we've published the detected motion, let's clear our motion
+      // counter
       motionCounter = 0;
     }
     // return the original image.
@@ -178,6 +181,12 @@ public class OpenCVFilterMotionDetect extends OpenCVFilter {
     String label = text + " " + motionCounter;
     graphics.drawString(label, 20, 60);
     return image;
+  }
+
+  @Override
+  public void release() {
+    super.release();
+    converter.close();
   }
 
 }

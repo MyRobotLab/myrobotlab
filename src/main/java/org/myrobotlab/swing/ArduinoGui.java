@@ -217,7 +217,6 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
 
   public void onDisconnect(String portName) {
     openMrlComm.setEnabled(true);
-    arduinoPath.setText(myArduino.arduinoPath);
     status.setText("disconnected");
   }
 
@@ -424,6 +423,9 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
   /**
    * updates ui - called from both initialization &amp; onState
    * 
+   * @param arduino
+   *          the arduino
+   * 
    */
   public void update(final Arduino arduino) { // TODO - all onState data
     // should be final
@@ -460,9 +462,6 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
         }
 
         updatePinTab(myArduino);
-
-        arduinoPath.setText(arduino.getArduinoPath());
-        uploadResults.setText(arduino.uploadSketchResult);
 
         addListeners();
       }

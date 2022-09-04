@@ -157,6 +157,8 @@ public class OpenCVData extends CvData {
 
   // for use with text detection / ocr filters.
   protected ArrayList<DetectedText> detectedText;
+  
+  transient private CloseableFrameConverter firstImageConverter = new CloseableFrameConverter();
 
   public OpenCVData() {
   }
@@ -172,7 +174,7 @@ public class OpenCVData extends CvData {
     sources.put(String.format("%s.input.Frame", name), frame);
     sources.put(String.format("%s.output.Frame", name), frame);
 
-    IplImage firstImage = OpenCV.toImage(frame);
+    IplImage firstImage = firstImageConverter.toImage(frame);
     if (firstImage == null) {
       log.error("could not convert frame to image !!!!");
     }
@@ -197,7 +199,7 @@ public class OpenCVData extends CvData {
   public Object getObject(String fullKey) {
     return sources.get(fullKey);
   }
-  
+
   public List<Rectangle> getBoundingBoxArray() {
     return (List) sources.get(String.format("%s.output.BoundingBoxArray", name));
   }
@@ -219,7 +221,10 @@ public class OpenCVData extends CvData {
 
     if (image != null) {
       // 1st selected ? 2nd output ?
-      image = OpenCV.toBufferedImage(getImage(filterKey));
+      // TODO: find a good way to close this converter
+      log.info("Get buffered Image");
+      CloseableFrameConverter sourceConverter = new CloseableFrameConverter();
+      image = sourceConverter.toBufferedImage(getImage(filterKey));
       sources.put(key, image);
     }
     return (BufferedImage) sources.get(key);
@@ -246,16 +251,18 @@ public class OpenCVData extends CvData {
 
       IplImage image = getImage(); // <- should be output or "selected Filter ..
                                    // i guess"
+      CloseableFrameConverter displayConverter = new CloseableFrameConverter();
       if (image != null) {
         // bi = converterToJava.convert(getInputFrame());
-        bi = OpenCV.toBufferedImage(image);
+        bi = displayConverter.toBufferedImage(image);
       } else {
-        bi = OpenCV.toBufferedImage(getInputFrame()); // logic should probably
+        bi = displayConverter.toBufferedImage(getInputFrame()); // logic should probably
                                                       // not be buried down
       }
       // cache result
       sources.put(key, bi);
       // put(String.format("%s.display", name), bi);
+      displayConverter.close();
     }
     return (BufferedImage) sources.get(key);
   }
@@ -293,7 +300,9 @@ public class OpenCVData extends CvData {
    * this method
    * 
    * @param filterKey
-   * @return
+   *          name of filter
+   * @return ipl image from filter
+   * 
    */
   public IplImage getImage(String filterKey) {
 
@@ -305,7 +314,10 @@ public class OpenCVData extends CvData {
 
     IplImage image = null;
     if (!sources.containsKey(key)) {
-      image = OpenCV.toImage(getFrame(filterKey));
+      log.info("Get Image");
+      // TODO: find a good way to close this converter!
+      CloseableFrameConverter sourceConverter = new CloseableFrameConverter();
+      image = sourceConverter.toImage(getFrame(filterKey));
       sources.put(key, image);
     }
     return (IplImage) sources.get(key);
@@ -345,16 +357,6 @@ public class OpenCVData extends CvData {
    */
   public IplImage getKinectVideo() {
     return (IplImage) sources.get(String.format("%s.video", OpenCV.INPUT_KEY));
-  }
-
-  public Mat getMat(String filterKey) {
-    String key = String.format("%s.%s.Mat", filterKey, name);
-    Mat image = null;
-    if (!sources.containsKey(key)) {
-      image = OpenCV.toMat(getFrame(filterKey));
-      sources.put(key, image);
-    }
-    return (Mat) sources.get(key);
   }
 
   public String getName() {
@@ -427,7 +429,7 @@ public class OpenCVData extends CvData {
     sources.put(String.format("%s.%s.%s", name, selectedFilter, keyPart), object);
   }
 
-  public void putBoundingBoxArray(ArrayList<Rectangle> bb) {
+  public void putBoundingBoxArray(List<Rectangle> bb) {
     sources.put(String.format("%s.output.BoundingBoxArray", name), bb);
   }
 
@@ -541,7 +543,7 @@ public class OpenCVData extends CvData {
 
   public PointCloud getPointCloud() {
     List<PointCloud> pcs = getPointCloudList();
-    if (pcs == null && pcs.size() != 0) {
+    if (pcs == null || pcs.size() == 0) {
       return null;
     }
     return pcs.get(0);

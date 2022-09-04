@@ -8,11 +8,11 @@
 # start all speech services ( to test them )
 
 # local :
-marySpeech = Runtime.start("marySpeech", "MarySpeech")
-localSpeech = Runtime.start("localSpeech", "LocalSpeech")
-mimicSpeech = Runtime.start("mimicSpeech", "MimicSpeech")
+marySpeech = runtime.start("marySpeech", "MarySpeech")
+localSpeech = runtime.start("localSpeech", "LocalSpeech")
+mimicSpeech = runtime.start("mimicSpeech", "MimicSpeech")
 
 # api needed
-polly = Runtime.start("polly", "Polly")
-voiceRss = Runtime.start("voiceRss", "VoiceRss")
-indianTts = Runtime.start("indianTts", "IndianTts")
+polly = runtime.start("polly", "Polly")
+voiceRss = runtime.start("voiceRss", "VoiceRss")
+indianTts = runtime.start("indianTts", "IndianTts")

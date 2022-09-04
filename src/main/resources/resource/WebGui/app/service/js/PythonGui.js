@@ -1,6 +1,6 @@
-angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$log', '$scope', 'mrl', '$uibModal', '$timeout', function($log, $scope, mrl, $uibModal, $timeout) {
-    $log.info('PythonGuiCtrl')
-    _self = this
+angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$scope', 'mrl', '$uibModal', '$timeout', function($scope, mrl, $uibModal, $timeout) {
+    console.info('PythonGuiCtrl')
+    var _self = this
     var msg = this.msg
     var name = $scope.name
     // init scope values
@@ -20,7 +20,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     $scope.loadFile = false
     $scope.newFile = false
 
-    this.updateState = function(service) {
+    _self.updateState = function(service) {
         $scope.service = service
         $scope.scriptCount = 0
 
@@ -54,10 +54,14 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
             break
         case 'onStatus':
             $scope.lastStatus = data
+            if (data.level == 'error'){
+                $scope.log = data.detail + '\n' + $scope.log    
+            }
+            console.info("onStatus ", data)
             $scope.$apply()
             break
         default:
-            $log.error("ERROR - unhandled method " + msg.method)
+            console.error("ERROR - unhandled method " + msg.method)
             break
         }
     }
@@ -87,12 +91,12 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
 
     //----- ace editors related callbacks begin -----//
     $scope.aceLoaded = function(e) {
-        $log.info("ace loaded")
+        console.info("ace loaded")
         $scope.activeTabIndex = $scope.scriptCount
     }
 
     $scope.aceChanged = function(e) {
-        $log.info("ace changed")
+        console.info("ace changed")
     }
     //----- ace editors related callbacks end -----//
     $scope.addScript = function() {
@@ -108,16 +112,17 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     $scope.closeScript = function(scriptName) {
         // FIXME - save first ?
         msg.send('closeScript', scriptName)
-        delete $scope.scripts[scriptName]
         $scope.scriptCount--
+        delete $scope.scripts[scriptName]
         console.log("removed " + scriptName)
     }
 
     $scope.exec = function() {
-        msg.send('exec', $scope.activeScript.code)
+        // non-blocking exec
+        msg.send('exec', $scope.activeScript.code, false)
     }
     $scope.tabSelected = function(script) {
-        $log.info('here')
+        console.info('here')
         $scope.activeScript = script
         // need to get a handle on hte tab's ui / text
         // $scope.editors.setValue(script.code)
@@ -128,7 +133,11 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
         //return key.substr(key.lastIndexOf('/') + 1)
     }
 
-    $scope.saveTextAsFile = function() {
+    $scope.saveScript = function() {
+        msg.send('saveScript', $scope.activeScript.file.path, $scope.activeScript.code)
+    }
+
+    $scope.downloadScript = function() {
         var textFileAsBlob = new Blob([$scope.activeScript.code],{
             type: 'text/plain'
         })
@@ -152,12 +161,10 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     }
 
     $scope.getPossibleServices = function(item) {
-        return Object.values(mrl.getPossibleServices())
+        ret = Object.values(mrl.getPossibleServices())
+        return ret
     }
 
-    $scope.export = function() {
-        msg.send('exportAll')
-    }
 
     $scope.uploadFile = function() {
 

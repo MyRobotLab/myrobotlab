@@ -6,4 +6,4 @@
 #########################################
 
 # start the service
-segmentdisplay = Runtime.start('segmentdisplay','SegmentDisplay')
+segmentdisplay = runtime.start('segmentdisplay','SegmentDisplay')

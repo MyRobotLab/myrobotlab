@@ -9,19 +9,19 @@ trigPin = 7
 echoPin = 8
 servoPin = 4
 
-gui = Runtime.start("gui","SwingGui")
+gui = runtime.start("gui","SwingGui")
 
 # start controler
-arduino = Runtime.start("arduino","Arduino")
+arduino = runtime.start("arduino","Arduino")
 # start UltrasonicSensor
-sr04 = Runtime.start("sr04", "UltrasonicSensor")
+sr04 = runtime.start("sr04", "UltrasonicSensor")
 # start a pingdar
-pingdar = Runtime.start("pingdar","Pingdar")
+pingdar = runtime.start("pingdar","Pingdar")
 # start servo
-servo = Runtime.start("servo","Servo")
+servo = runtime.start("servo","Servo")
 
 if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
+    virtualArduino = runtime.start("virtualArduino", "VirtualArduino")
     virtualArduino.connect(port)
     
 # attach all the parts

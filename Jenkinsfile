@@ -15,15 +15,15 @@ pipeline {
     parameters {
       // agentParameter name:'agent-name'
       choice(name: 'verify', choices: ['true', 'false'], description: 'verify')
-      choice(name: 'javadoc', choices: ['false', 'true'], description: 'build javadocs')
+      choice(name: 'javadoc', choices: ['true', 'false'], description: 'build javadocs')
+      choice(name: 'githubPublish', choices: ['true', 'false'], description: 'publish to github')
       // choice(choices: ['plan', 'apply -auto-approve', 'destroy -auto-approve'], description: 'terraform command for master branch', name: 'terraform_cmd')
     }
 
     // echo params.agentName    
-    tools { 
+    tools {
         maven 'M3' // defined in global tools - maven is one of the only installers that works well for global tool
         // jdk 'openjdk-11-linux' // defined in global tools
-        // git 
     }
     
     // JAVA_HOME="${tool 'openjdk-11-linux'}/jdk-11.0.1"
@@ -36,6 +36,14 @@ pipeline {
     }
 
     stages {
+
+         // using CleanBeforeCheckout - in configuration
+         // stage('clean') {
+         //    steps {
+         //       cleanWs()
+         //    }
+         // }
+
         stage ('initialize') {
             steps {
                print params['agent-name']
@@ -68,10 +76,10 @@ pipeline {
             script {
                if (isUnix()) {
                   sh '''
-                     mvn -Dbuild.number=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile
+                     mvn -Dbuild.number=${BUILD_NUMBER} -DskipTests -q clean compile
                   '''
                } else {
-                  bat(/"${MAVEN_HOME}\bin\mvn" -Dbuild.number=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile  /)
+                  bat(/"${MAVEN_HOME}\bin\mvn" -Dbuild.number=${BUILD_NUMBER} -DskipTests -q clean compile  /)
                }
             }
          }
@@ -86,51 +94,85 @@ pipeline {
                // TODO - integration tests !
                if (isUnix()) {
                   sh '''
-                     mvn -Dfile.encoding=UTF-8 verify
+                     mvn -Dfile.encoding=UTF-8 -Dsurefire.skipAfterFailureCount=1 verify --fail-fast 
                   '''
                } else {
                   bat '''
-                     mvn -Dfile.encoding=UTF-8 verify
+                     mvn -Dfile.encoding=UTF-8 -Dsurefire.skipAfterFailureCount=1 verify --fail-fast
                   '''
                }
             }
          }
       } // stage verify
 
-      stage('javadoc') {
-         when {
-                 expression { params.javadoc == 'true' }
-         }
+      stage('package') {
          steps {
             script {
                if (isUnix()) {
                   sh '''
-                     mvn -q javadoc:javadoc -o
+                     mvn -Dbuild.number=${BUILD_NUMBER} -DskipTests -q package
+                  '''
+               } else {
+                  bat(/"${MAVEN_HOME}\bin\mvn" -Dbuild.number=${BUILD_NUMBER} -DskipTests -q package  /)
+               }
+            }
+         }
+      } // stage compile
+      
+      stage('javadoc') {
+         // when {
+         //         // expression { params.javadoc == 'true' }
+         //         expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }
+         // }
+         steps {
+            script {
+               if (isUnix()) {
+                  sh '''
+                     mvn -q javadoc:javadoc
                   '''
                } else {
                   bat '''
-                     mvn -q javadoc:javadoc -o
+                     mvn -q javadoc:javadoc
                   '''
                }
             }
          }
       } // stage javadoc
-      stage('archive') {
+
+      stage('archive-min') {
+         when {
+                 expression { env.BRANCH_NAME != 'master' && env.BRANCH_NAME != 'develop' }
+         }
          steps {
-            archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec, site/*'
+            archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec'
          }
       }
+
+      stage('archive-javadocs') {
+         when {
+                 expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }
+         }
+         steps {
+            archiveArtifacts 'target/myrobotlab.zip, target/surefire-reports/*, target/*.exec, target/site/**'
+         }
+      }
+
       stage('jacoco') {
          steps {
-            // jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
+            jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
             jacoco()
          }
       }
-      // TODO - publish
-      stage('clean') {
-         steps {
-            cleanWs()
-         }
+
+      stage('publish-github') {
+         when {expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }}          
+         steps {            
+            withCredentials([string(credentialsId: 'github-token-2', variable: 'token')]) {
+               
+               sh "./publish-github.sh -b 1.1.${BUILD_NUMBER} -t $token"
+               
+            }
+          }
       }
-   } // stages 
-}
+   } // stages
+} // pipeline

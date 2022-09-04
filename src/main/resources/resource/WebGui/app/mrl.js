@@ -8,7 +8,7 @@
 */
 
 angular.module('mrlapp.mrl', []).provider('mrl', [function() {
-    console.debug('mrl.js - begin')
+    console.info('mrl.js - begin')
 
     // TODO - get 'real' platform info - browser type - node version - etc
     let platform = {
@@ -26,6 +26,10 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // dictionary of images to display and their display properties
     let displayImages = {}
 
+    // set of services that are appropriate to select from to attach 
+    // depends on requested and provided interfaces
+    _self.interfaceToPossibleServices = {}
+
     // list of callback functions to display images
     let displayCallbacks = []
 
@@ -42,7 +46,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // FIXME - let the webgui pass up the id unless configured not to
     function generateId() {
         // one id to rule them all !
-        
+
         // non unique
         return 'webgui-client'
 
@@ -109,7 +113,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         maxRequest: 100,
         maxReconnectOnClose: 100,
         enableProtocol: true,
-        timeout: -1, // infinite idle timeout
+        timeout: -1,
+        // infinite idle timeout
         fallbackTransport: 'long-polling',
         reconnectInterval: 1000,
         maxReconnectOnClose: 50,
@@ -122,9 +127,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // connectivity related end
     var msgCount = 0
 
-    // FIXME - clean up maps and target vs source runtime
-    // msg map of js runtime 
-    var jsRuntimeMethodMap = {}
     // map of 'full' service names to callbacks
     var nameCallbackMap = {}
 
@@ -159,19 +161,16 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         nameMethodCallbackMap[key].push(callback)
     }
 
+    // subscribe to connected java service - addListener of js runtime with callback
     this.subscribeTo = function(toServiceName, method, callbackFunctionRef) {
-        // if not fullname make it so...
-        // local subscription
-        let fullname = _self.getFullName(toServiceName)
-        var key = fullname + "." + getCallBackName(method)
-        if (!(key in nameMethodCallbackMap)) {
-            nameMethodCallbackMap[key] = []
+        var key = 'runtime@' + _self.id + "." + getCallBackName(method)
+        if (!(key in jsRuntimeMethodCallbackMap)) {
+            jsRuntimeMethodCallbackMap[key] = []
         }
-        nameMethodCallbackMap[key].push(callbackFunctionRef)
+        jsRuntimeMethodCallbackMap[key].push(callbackFunctionRef)
 
         // remote subscription - runtime@id handles all callback for this js client
-        _self.sendTo(fullname, "addListener", method, 'runtime@' + _self.id)
-
+        _self.sendTo(toServiceName, "addListener", method, 'runtime@' + _self.id)
     }
 
     this.subscribeToMethod = function(callback, methodName) {
@@ -204,7 +203,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         var name = msg.data[0]
         _self.releasePanel(name)
         // FIXME - unregister from all callbacks
-        // delete registry[_self.getFullName(service)]
+        inName = _self.getFullName(name)
+        delete registry[inName]
+        console.info(registry)
     }
 
     // FIXME - the Runtime.cli uses this
@@ -258,8 +259,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             // js implementation -
             var pos = msg.data.length - 1
             for (let i = pos; i > -1; --i) {
-                if (typeof msg.data[i] == 'undefined') {
-                } else {
+                if (typeof msg.data[i] == 'undefined') {} else {
                     msg.data[i] = JSON.stringify(msg.data[i])
                 }
             }
@@ -388,7 +388,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                     return
                 }
 
-                if (msg.method == 'onDescribe'){
+                if (msg.method == 'onDescribe') {
                     console.info('here')
                 }
 
@@ -398,7 +398,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                         msg.data[x] = jQuery.parseJSON(msg.data[x])
                     }
                 }
-
 
                 // GREAT FOR DEBUGGING INCOMING MSGS
                 // console.warn(msg.sender + '---> ' + msg.name + '.' + msg.method)
@@ -418,13 +417,34 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 key = msg.name + '.' + msg.method
                 if (jsRuntimeMethodCallbackMap.hasOwnProperty(key)) {
                     let cbs = jsRuntimeMethodCallbackMap[key]
-                    cbs(msg)
+                    for (var i = 0; i < cbs.length; i++) {
+                        cbs[i](msg)
+                    }
+                }
+
+                // on all onState msg - from broadcastState update the 
+                // registry
+                let senderFullName = _self.getFullName(msg.sender)
+                if (msg.method == 'onState') {
+                    let s = registry[senderFullName]
+                    if (s) {
+                        let service = msg.data[0]
+                        registry[senderFullName] = service
+                        for ([key,value] of Object.entries(service.serviceType.peers)) {
+                            peerKey = key[0].toUpperCase() + key.substring(1)
+                            if (value.state == 'STARTED') {
+                                service['is' + peerKey + 'Started'] = true
+                            } else {
+                                service['is' + peerKey + 'Started'] = false
+                            }
+                        }
+
+                    }
                 }
 
                 // THE CENTER OF ALL CALLBACKS
                 // process name callbacks - most common
                 // console.log('nameCallbackMap')
-                let senderFullName = _self.getFullName(msg.sender)
                 if (nameCallbackMap.hasOwnProperty(senderFullName) && msg.method != 'onMethodMap') {
                     let cbs = nameCallbackMap[senderFullName]
                     for (var i = 0; i < cbs.length; i++) {
@@ -473,13 +493,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     this.onStatus = function(status) {
         console.log(status)
     }
-    
 
-    this.onReconnect = function(request, response){
+    this.onReconnect = function(request, response) {
         console.info('onReconnect')
     }
 
-    this.onReopen = function(request, response){
+    this.onReopen = function(request, response) {
         console.info('onReopen')
         initialize(response)
     }
@@ -501,6 +520,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
 
     this.getShortName = function(name) {
+        if (!name) {
+            return;
+        }
         if (name.includes('@')) {
             return name.substring(0, name.indexOf("@"))
         } else {
@@ -587,6 +609,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
     this.addService = function(service) {
         registry[_self.getFullName(service)] = service
+        return service
     }
 
     this.removeService = function(name) {
@@ -664,7 +687,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     /**
      * initialization after a successful open or reOpen
      */
-    var initialize = function(response){
+    var initialize = function(response) {
         console.info('initialize')
         // FIXME - does this need to be done later when ids are setup ?
         connected = true
@@ -689,20 +712,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         console.debug('sending describe to host runtime with hello ' + JSON.stringify(hello))
 
+        _self.subscribeTo('runtime', 'describe', _self.onDescribe)
+        _self.subscribeTo('runtime', 'registered', _self.onRegistered)
+        _self.subscribeTo('runtime', 'released', _self.onReleased)
+
         // js runtime callbacks
         let fullname = 'runtime@' + _self.id
-        jsRuntimeMethodCallbackMap[fullname + '.onDescribe'] = _self.onDescribe
-        jsRuntimeMethodCallbackMap[fullname + '.onRegistered'] = _self.onRegistered
-        jsRuntimeMethodCallbackMap[fullname + '.onReleased'] = _self.onReleased
-
-        // sloppy - short name runtime "will" work since the pipe is connected directly
-        // to the instance of interest - it won't work beyond that :(
-        // for mutli instances multiple hops away - you would need complete name,
-        // but of course, multiple hops away would never be in the onOpen method
-        _self.subscribe('runtime', 'describe')
-        _self.subscribe('runtime', 'registered')
-        _self.subscribe('runtime', 'released')
-
         // send us a description
         _self.sendTo('runtime', "describe")
     }
@@ -816,6 +831,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             angular.forEach(panelReleasedSubscribers, function(value, key) {
                 value(panelName)
             })
+            // _self.changeTab('runtime')
         }
 
         var notifyAllOfUpdate = function() {
@@ -932,9 +948,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             let name = _self.getFullName(serviceName)
             if (panels.hasOwnProperty(name)) {
                 return panels[name]
-            } else {
-                // TOO CHATTY - BROWSER KILLER !
-                // console.error('could not find panel ' + name)
+            } else {// TOO CHATTY - BROWSER KILLER !
+            // console.error('could not find panel ' + name)
             }
             return null
         }
@@ -957,10 +972,13 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
                 posX: x,
                 posY: y,
+
                 width: width,
                 height: height,
                 zIndex: zIndex,
                 hide: false,
+
+                showPeerTable: false,
 
                 // FIXME  - remove this use mrl panel methods
                 svc: _self,
@@ -1139,6 +1157,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         }
 
         this.connect = function(url, proxy) {
+            console.info('mrl.connect()')
             if (connected) {
                 console.debug("aleady connected")
                 return this
@@ -1150,6 +1169,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
             connecting = true
             socket = atmosphere.subscribe(this.request)
+
+            // critical subscriptions from the java runtime we are connected to
+            // to the js runtime - these send addListeners to java runtime
 
         }
 
@@ -1306,6 +1328,22 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                             }
                         },
 
+                        isPeerStarted(peerName) {
+                            // IS THIS USED ??? not = function(peerName) format
+                            try {
+                                let service = _self.getService(name)
+
+                                if (service.config) {
+                                    if (_self.getFullName(service.config[peerName])in registry) {
+                                        return true
+                                    }
+                                }
+                            } catch (e) {}
+                            return false
+                        },
+
+                        interfaceToPossibleServices: _self.interfaceToPossibleServices,
+
                         subscribe: function(data) {
                             if ((typeof arguments[0]) == "string") {
                                 // regular subscribe when used - e.g. msg.subscribe('publishData')
@@ -1391,7 +1429,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 _self.addService(service)
             },
             init: function() {
-                console.debug('mrl.init connected ' + connected + ' connecting ' +  connecting)
+                console.debug('mrl.init connected ' + connected + ' connecting ' + connecting)
                 _self.connect()
             },
             isConnected: function() {
@@ -1435,16 +1473,19 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             getStyle: _self.getStyle,
             subscribe: _self.subscribe,
             unsubscribe: _self.unsubscribe,
+            isPeerStarted: _self.isPeerStarted,
             subscribeToService: _self.subscribeToService,
             getFullName: _self.getFullName,
             sendBlockingMessage: _self.sendBlockingMessage,
             subscribeConnected: _self.subscribeConnected,
             subscribeToMethod: _self.subscribeToMethod,
             subscribeToServiceMethod: _self.subscribeToServiceMethod,
-            subscribeTo: _self.subscribeTo, // better name
+            subscribeTo: _self.subscribeTo,
+            // better name
             getProperties: _self.getProperties,
-            sendMessage: _self.sendMessage // setViewType: _self.setViewType,
-            // getViewType: _self.getViewType
+            sendMessage: _self.sendMessage,
+            // setViewType: _self.setViewType,
+            interfaceToPossibleServices: _self.interfaceToPossibleServices
 
         }
 
@@ -1507,7 +1548,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 "maxMemory": 3543
             },
             "jvmArgs": ["-agentlib:jdwp=transport=dt_socket,suspend=y,address=localhost:37551", "-javaagent:/lhome/grperry/Downloads/eclipse-jee-2019-06-R-linux-gtk-x86_64/eclipse/configuration/org.eclipse.osgi/405/0/.cp/lib/javaagent-shaded.jar", "-Dfile.encoding=UTF-8"],
-            "args": ["--interactive", "--id", "local", "-s", "python", "Python", "--invoke", "python", "execFile", "./InMoov/InMoov.py"],
+            "args": ["--interactive", "--id", "local", "-s", "python", "Python", "--invoke", "python", "execFile", "./InMoov2/InMoov2.py"],
             "locale": "en-us",
             "serviceType": {
                 "name": "org.myrobotlab.service.Runtime",
@@ -1546,10 +1587,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     this.request.onMessage = this.onMessage
     this.request.onOpen = this.onOpen
     this.request.onError = this.onError
-
-    // correct way to put in callbacks for js runtime instance
-    jsRuntimeMethodMap["runtime@" + this.id + ".onRegistered"] = _self.onRegistered
-    // jsRuntimeMethodMap["runtime@" + this.id + ".setServiceTypes"] = _self.setServiceTypes
 
     // FIXME - not sure if this callback map/notify entry will have multiple recievers - but
     // it was standardized with the others to do so

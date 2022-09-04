@@ -459,6 +459,8 @@ public abstract class ServiceGui implements WindowListener {
    * services.
    * 
    * @param sw
+   *          service interface registered
+   * 
    */
   public void onRegistered(final ServiceInterface sw) {
 
@@ -469,7 +471,10 @@ public abstract class ServiceGui implements WindowListener {
    * single checkbox or button controls many other sub-configuration elements
    * 
    * @param container
+   *          c
    * @param enabled
+   *          e
+   * 
    */
   static public void setEnabled(Container container, boolean enabled) {
     Component[] children = container.getComponents();

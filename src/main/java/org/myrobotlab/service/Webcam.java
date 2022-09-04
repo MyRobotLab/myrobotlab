@@ -20,7 +20,6 @@ import com.github.sarxos.webcam.WebcamListener;
 import com.github.sarxos.webcam.WebcamStreamer;
 import com.github.sarxos.webcam.ds.v4l4j.V4l4jDriver;
 
-
 public class Webcam extends Service implements WebcamListener {
 
   protected class VideoProcessor implements Runnable {
@@ -55,7 +54,7 @@ public class Webcam extends Service implements WebcamListener {
   transient Dimension dimension = new Dimension(640, 480);
 
   protected int fps = 0;
-  
+
   protected int requestedFps = 30;
 
   protected int frameIndex = 0;
@@ -65,7 +64,7 @@ public class Webcam extends Service implements WebcamListener {
   protected Integer height = 480;
 
   long startSampleTs = 0;
-  
+
   int lastFrameIndex = 0;
 
   protected Integer port = 8080;
@@ -109,7 +108,7 @@ public class Webcam extends Service implements WebcamListener {
     if (width != null) {
       this.width = width;
     }
-    
+
     if (type != null) {
       this.type = type;
     }
@@ -130,13 +129,12 @@ public class Webcam extends Service implements WebcamListener {
 
     // webcam = com.github.sarxos.webcam.Webcam.getWebcamByName(name);
     webcam = cams.get(index);
-    selectedCamera = webcam.getName();
 
     if (webcam == null) {
       webcam = com.github.sarxos.webcam.Webcam.getDefault();
-      selectedCamera = webcam.getName();
       info("starting webcam on port %d", port);
     }
+    selectedCamera = webcam.getName();
 
     webcam.setViewSize(new Dimension(this.width, this.height));
 
@@ -181,9 +179,8 @@ public class Webcam extends Service implements WebcamListener {
     broadcastState();
     return names;
   }
-  
+
   protected void processVideo() {
-    
 
     BufferedImage bi = webcam.getImage();
     ++frameIndex;
@@ -194,10 +191,10 @@ public class Webcam extends Service implements WebcamListener {
     // non queue broadcast - blocking direct call for this thread
     // which is what we want
     broadcast("publishWebDisplay", webImage);
-    
+
     long now = System.currentTimeMillis();
     if (now - startSampleTs > 1000) {
-      fps =  Math.round(frameIndex - lastFrameIndex / now - startSampleTs);
+      fps = Math.round((frameIndex - lastFrameIndex) / (now - startSampleTs));
       log.info("process {} frames in {} ms", frameIndex - lastFrameIndex, now - startSampleTs);
       lastFrameIndex = frameIndex;
       startSampleTs = System.currentTimeMillis();

@@ -1,7 +1,7 @@
 # Start the services needed
-raspi = Runtime.start("raspi","RasPi")
-hat = Runtime.start("hat","AdafruitMotorHat4Pi")
-m1 = Runtime.start("m1","MotorHat4Pi")
+raspi = runtime.start("raspi","RasPi")
+hat = runtime.start("hat","AdafruitMotorHat4Pi")
+m1 = runtime.start("m1","MotorHat4Pi")
 # Attach the HAT to i2c bus 1 and address 0x60
 hat.attach("raspi","1","0x60")
 # Use the M1 motor port and attach the motor to the hat

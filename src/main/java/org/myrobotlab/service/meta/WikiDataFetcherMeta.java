@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -12,12 +11,9 @@ public class WikiDataFetcherMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
    */
-  public WikiDataFetcherMeta(String name) {
+  public WikiDataFetcherMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription("This service grab data from wikidata website");
     addCategory("ai");
     setSponsor("beetlejuice");
@@ -26,22 +22,10 @@ public class WikiDataFetcherMeta extends MetaData {
     // force using httpClient service httpcomponents version
     exclude("org.apache.httpcomponents", "httpcore");
     exclude("org.apache.httpcomponents", "httpclient");
-    addPeer("httpClient", "HttpClient", "httpClient");
-    // force using same jackson version as polly
-    /*
-     * exclude("com.fasterxml.jackson.core", "jackson-core");
-     * exclude("com.fasterxml.jackson.core", "jackson-databind");
-     * exclude("com.fasterxml.jackson.core", "jackson-annotations");
-     */
-    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.10.1");
-    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.10.5.1");
-    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.10.1");
-    /*
-     * addDependency("org.wikidata.wdtk", "0.8.0-SNAPSHOT");
-     * addDependency("org.apache.commons.httpclient", "4.5.2");
-     * addDependency("org.apache.commons.commons-lang3", "3.3.2");
-     * addDependency("com.fasterxml.jackson.core", "2.5.0");
-     */
+
+    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.13.3");
+    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.13.3");
+    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.13.3");
     setCloudService(true);
 
   }

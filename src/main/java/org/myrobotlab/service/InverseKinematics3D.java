@@ -200,7 +200,11 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
    * Compute the inverse kinematics to move the robot hand to the destination
    * first scale the input point, then apply
    * 
+   * @param name
+   *          n
    * @param p
+   *          p
+   * 
    */
   public void moveTo(String name, Point p) {
 
@@ -292,7 +296,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 
     InverseKinematics3D inversekinematics = (InverseKinematics3D) Runtime.start("ik3d", "InverseKinematics3D");
     // InverseKinematics3D inversekinematics = new InverseKinematics3D("iksvc");
-    inversekinematics.setCurrentArm(arm, InMoovArm.getDHRobotArm("i01", "left"));
+    inversekinematics.setCurrentArm(arm, InMoov2Arm.getDHRobotArm("i01", "left"));
     //
     // inversekinematics.getCurrentArm(arm).setIk3D(inversekinematics);
     // Create a new DH Arm.. simpler for initial testing.
@@ -326,8 +330,8 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     boolean attached = true;
     if (attached) {
       // set up the left inmoov arm
-      InMoovArm leftArm = (InMoovArm) Runtime.start("leftArm", "InMoovArm");
-      leftArm.connect("COM21");
+      InMoov2Arm leftArm = (InMoov2Arm) Runtime.start("leftArm", "InMoov2Arm");
+      // leftArm.connect("COM21");
       // leftArm.omoplate.setMinMax(0, 180);
       // attach the publish joint angles to the on JointAngles for the inmoov
       // arm.

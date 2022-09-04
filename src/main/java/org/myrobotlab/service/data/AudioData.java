@@ -22,6 +22,7 @@ public class AudioData implements Serializable {
   // an InputStream
 
   public transient static final String MODE_BLOCKING = "blocking";
+  
   public transient static final String MODE_QUEUED = "queued";
 
   private transient static long subId = 0;
@@ -61,6 +62,7 @@ public class AudioData implements Serializable {
   public String track = null;
 
   public Long startTs = null;
+  
   public Long stopTs = null;
 
   // public String state =
@@ -94,10 +96,8 @@ public class AudioData implements Serializable {
   }
 
   /**
-   * returns the length of the file in milliseconds currently only works "AFTER"
-   * its been played
-   * 
-   * @return
+   * @return the length of the file in milliseconds currently only works "AFTER"
+   *         its been played
    */
   public Long getLength() {
     if (startTs == null || stopTs == null) {

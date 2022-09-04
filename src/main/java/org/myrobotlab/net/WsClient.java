@@ -7,6 +7,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+//import com.ning.http.client.AsyncHttpClient;
+//import com.ning.http.client.AsyncHttpClientConfig;
+//import com.ning.http.client.providers.netty.NettyAsyncHttpProviderConfig;
+
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.Dsl;
 import org.atmosphere.wasync.Client;
 import org.atmosphere.wasync.ClientFactory;
 import org.atmosphere.wasync.Decoder;
@@ -17,13 +23,8 @@ import org.atmosphere.wasync.Request;
 import org.atmosphere.wasync.RequestBuilder;
 import org.atmosphere.wasync.Socket;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.RemoteMessageHandler;
 import org.slf4j.Logger;
-
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClientConfig;
-import com.ning.http.client.providers.netty.NettyAsyncHttpProviderConfig;
 
 /**
  * functional class of a websocket client
@@ -39,24 +40,30 @@ public class WsClient implements Decoder<String, Reader> {
   protected transient Client client = null;
   protected transient Set<RemoteMessageHandler> handlers = new HashSet<>();
 
-  public static AsyncHttpClient getAsyncClient() {
-    // Netty Config ..
-    NettyAsyncHttpProviderConfig nettyConfig = new NettyAsyncHttpProviderConfig();
-    nettyConfig.addProperty("tcpNoDelay", "true");
-    nettyConfig.addProperty("keepAlive", "true");
-    nettyConfig.addProperty("reuseAddress", true);
-    // nettyConfig.addProperty("connectTimeoutMillis",
-    // nettyConnectionTimeout);
-    nettyConfig.setWebSocketMaxFrameSize(262144);
-    nettyConfig.addProperty("child.tcpNoDelay", "true");
-    nettyConfig.addProperty("child.keepAlive", "true");
-    // nettyConfig.setWebSocketMaxFrameSize(65536);
-
-    // AsyncHttpClientConfig Config
-    AsyncHttpClientConfig.Builder b = new AsyncHttpClientConfig.Builder();
-    b.setFollowRedirect(true).setMaxRequestRetry(-1).setConnectTimeout(-1).setReadTimeout(30000);
-    AsyncHttpClientConfig config = b.setAsyncHttpClientProviderConfig(nettyConfig).build();
-    AsyncHttpClient asc = new AsyncHttpClient(config);
+  public AsyncHttpClient getAsyncClient() {
+    
+//    ClientFactory.getDefault().newClient();
+//    
+//    // Netty Config ..
+//    NettyAsyncHttpProviderConfig nettyConfig = new NettyAsyncHttpProviderConfig();
+//    nettyConfig.addProperty("tcpNoDelay", "true");
+//    nettyConfig.addProperty("keepAlive", "true");
+//    nettyConfig.addProperty("reuseAddress", true);
+//    // nettyConfig.addProperty("connectTimeoutMillis",
+//    // nettyConnectionTimeout);
+//    nettyConfig.setWebSocketMaxFrameSize(262144);
+//    nettyConfig.addProperty("child.tcpNoDelay", "true");
+//    nettyConfig.addProperty("child.keepAlive", "true");
+//    // nettyConfig.setWebSocketMaxFrameSize(65536);
+//
+//    // AsyncHttpClientConfig Config
+//    AsyncHttpClientConfig.Builder b = new AsyncHttpClientConfig.Builder();
+//    b.setFollowRedirect(true).setMaxRequestRetry(-1).setConnectTimeout(-1).setReadTimeout(30000);
+//    AsyncHttpClientConfig config = b.setAsyncHttpClientProviderConfig(nettyConfig).build();
+//    AsyncHttpClient asc = new AsyncHttpClient(config);
+    
+    asc = Dsl.asyncHttpClient();
+    
     return asc;
   }
 
@@ -89,14 +96,15 @@ public class WsClient implements Decoder<String, Reader> {
           return new StringReader(s);
         }
       }).decoder(this).transport(Request.TRANSPORT.WEBSOCKET); // Try
-                                                              // WebSocket
-          // .transport(Request.TRANSPORT.LONG_POLLING); // Fallback to
-                                                      // Long-Polling
+                                                               // WebSocket
+      // .transport(Request.TRANSPORT.LONG_POLLING); // Fallback to
+      // Long-Polling
 
       // client.create(client.newOptionsBuilder().reconnect(true).reconnectAttempts(999).runtime(asc).build());
-      // this.socket = client.create(client.newOptionsBuilder().reconnect(false).runtime(getAsyncClient()).build());
+      // this.socket =
+      // client.create(client.newOptionsBuilder().reconnect(false).runtime(getAsyncClient()).build());
       asc = getAsyncClient();
-      this.socket = client.create(client.newOptionsBuilder().runtime(asc).build());
+      this.socket = client.create(client.newOptionsBuilder()./*runtime(asc).*/build());
       socket.on(Event.CLOSE.name(), new Function<String>() {
         @Override
         public void on(String t) {
@@ -218,8 +226,11 @@ public class WsClient implements Decoder<String, Reader> {
     if (socket != null) {
       socket.close();
     }
-    if(asc != null) {
-      asc.close();
+    if (asc != null) {
+      try {
+        asc.close();
+      } catch (IOException e) { /* don't care */
+      }
     }
   }
 

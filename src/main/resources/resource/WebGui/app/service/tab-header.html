@@ -10,14 +10,12 @@
                 <a href="http://myrobotlab.org/service/{{::service.simpleName}}" target="_blank" ng-click="servicemenuDropdownOpen = false">
                     <i class="glyphicon glyphicon-question-sign"></i>
                     &nbsp;&nbsp;help
-                
                 </a>
             </li>
             <li>
                 <a href="" ng-click="servicemenuDropdownOpen = false;msg.releaseService()">
                     <i class="glyphicon glyphicon-remove"></i>
-                    &nbsp;&nbsp;release
-                
+                    &nbsp;&nbsp;release                
                 </a>
             </li>
             <li>
@@ -27,16 +25,29 @@
                 </a>
             </li>
             <li>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="glyphicon glyphicon-chevron-down"></i>
-                &nbsp;&nbsp;virtualize                      
-                <span>
-                    <input type="checkbox" ng-model="service.isVirtual" ng-change="toggleVirtual(service.isVirtual)">
-                </span>
+                <a href="" target="_blank" width="100%">
+                    <i class="glyphicon glyphicon-equalizer"></i>                
+                    <span ng-show="!parentPanel.showPeerTable" ng-click="showPeers(true)">&nbsp;&nbsp;show peers</span>                 
+                    <span ng-show="parentPanel.showPeerTable" ng-click="showPeers(false)">&nbsp;&nbsp;hide peers</span>                 
+                </a>
+            </li>
+            <li>
+                <a href="" target="_blank">
+                    <i class="glyphicon glyphicon-chevron-down"></i>                
+                    <span ng-show="!service.isVirtual" ng-click="toggleVirtual(true)">&nbsp;&nbsp;virtualization on</span>                 
+                    <span ng-show="service.isVirtual" ng-click="toggleVirtual(false)">&nbsp;&nbsp;virtualization off</span>                 
+                </a>
             </li>
             <li>
                 <a href="" target="_blank" ng-click="export()">
                     <i class="glyphicon glyphicon-save-file"></i>
-                    &nbsp;&nbsp;export                
+                    &nbsp;&nbsp;save service
+                </a>
+            </li>
+            <li>
+                <a href="" target="_blank" ng-click="saveDefault()">
+                    <i class="glyphicon glyphicon-save-file"></i>
+                    &nbsp;&nbsp;save default                
                 </a>
             </li>
           
@@ -66,6 +77,65 @@
         </ul>
     </div>
 </div>
+
+<!-- ================= begin peers ================== -->
+<div ng-show="parentPanel.showPeerTable">
+<table class="table table-sm">
+  <thead>
+    <tr>
+      <th scope="col"></th>
+      <th scope="col"></th>
+      <th scope="col">key</th>
+      <th scope="col">name</th>
+      <th scope="col">type</th>
+      <th scope="col"></th>
+      <th scope="col">
+          state
+          <div class="btn-group" uib-dropdown>
+            <button id="split-button" type="button" ng-class="{'btn':true, 'btn-success':value.state == 'started'}">action</button>
+            <button type="button" ng-class="{'btn':true, 'btn-success':value.state == 'started'}" uib-dropdown-toggle>
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" uib-dropdown-menu role="menu">
+                <li role="menuitem">
+                    <a href="#">edit</a>
+                </li>
+                <li role="menuitem">
+                    <a href="#">create</a>
+                </li>
+                <li role="menuitem">
+                    <button type="button" ng-click="msg.startPeer(key)" class="btn btn-success btn-block">start</button>
+                </li>
+                <li role="menuitem">
+                    <a href="#">stop</a>
+                </li>
+                <li role="menuitem">
+                    <button type="button" ng-click="msg.releasePeer(key)" class="btn btn-secondary btn-block">release</button>
+                </li>
+            </ul>
+        </div>
+  </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="(key, value) in service.serviceType.peers">
+    <td>
+        <input type="checkbox" value="" id="flexCheckDefault">    
+    </td>
+      <td><img ng-src="/{{value.type + '.png'}}" width="16"></td>
+      <td>{{value.key}}</td>
+      <!-- <td>{{value.actualName}}</td>
+      <td>{{value.type}}</td>
+      <td></td> -->
+      <td>{{value.state}}</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<!-- ================= end peers ================== -->
+
+
+
 <!--  BAD IDEA - turns out all these vars are attached to the scope - and updates from servo position cause horrendous slowness in updating the gui !!!
 
 <div ng-show="showProperties">

@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Before;
 
-public class OpenCVFilterPyramidUpTest  extends AbstractOpenCVFilterTest {
+public class OpenCVFilterPyramidUpTest extends AbstractOpenCVFilterTest {
 
   @Before
   public void setup() {

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -15,7 +14,6 @@ import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MrlException;
-import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
@@ -97,6 +95,11 @@ public class ServiceData implements Serializable {
       String fullClassName = services.get(i);
       log.debug("querying {}", fullClassName);
       try {
+
+        // filter out the package-info files
+        if (fullClassName.contains("package-info")) {
+          continue;
+        }
 
         MetaData serviceType = (MetaData) getMetaData(fullClassName);
 
@@ -206,7 +209,9 @@ public class ServiceData implements Serializable {
    * This method returns the default meta data of a class.
    * 
    * @param type
-   * @return
+   *          of the service
+   * @return the service metadata
+   * 
    */
   static public MetaData getMetaData(String type) {
     return getMetaData(null, type);
@@ -227,8 +232,13 @@ public class ServiceData implements Serializable {
    * If a name/instance is not supplied the default meta data is supplied
    * 
    * @param serviceName
+   *          the name of the service
    * @param type
-   * @return
+   *          the type of the service
+   * @param cyclicalCheck
+   *          to protect against cycles
+   * @return the service metadata
+   * 
    */
   public static MetaData getMetaData(String serviceName, String type, Set<String> cyclicalCheck) {
     try {
@@ -247,18 +257,18 @@ public class ServiceData implements Serializable {
           type = sr.type;
         }
       }
+      
+//      if (type.equals("org.myrobotlab.service.Cron")) {
+//        log.info("here");
+//      }
 
       type = getFullMetaTypeName(type);
 
-      // RETRO-GRADED for "nice" sized pr :(
-      Class<?> c = Class.forName(type);
-      Constructor<?> mc = c.getConstructor(String.class);
-      MetaData metaData = (MetaData) mc.newInstance(serviceName);
-
-      // if this is an instance description of the meta data
-      // there is the possibility of overrides
-      // if (serviceName != null) {
-      // metaData.setServiceName(serviceName);
+      MetaData metaData = MetaData.get(type);
+      
+      if (metaData == null) {
+        log.info("here");
+      }
 
       Map<String, ServiceReservation> peers = metaData.getPeers();
       for (ServiceReservation sr : peers.values()) {
@@ -446,55 +456,7 @@ public class ServiceData implements Serializable {
     return false;
   }
 
-  /**
-   * Start at root and build all the meta data - add
-   * 
-   * @param serviceName
-   * @param serviceType
-   * @return
-   */
-  public static Plan getPlan(String serviceName, String serviceType) {
-
-    Plan root = new Plan();
-
-    // get the root meta data
-    MetaData temp = getMetaData(serviceName, serviceType);
-    if (temp != null) {
-      root.put(serviceName, serviceType);
-    }
-
-    // recursively process all the children and add them to peers
-    Map<String, ServiceReservation> peers = temp.getPeers();
-    for (ServiceReservation peer : peers.values()) {
-      // just get overrides :P
-      getPlan(root, serviceName, peer);
-    }
-
-    return root;
-  }
-
-  /**
-   * Recursively build the peers until the tree is complete. Useful to get a
-   * full plan regarding some complex description
-   * 
-   * @param root
-   * @param parentName
-   * @param sr
-   */
-  public static void getPlan(Plan root, String parentName, ServiceReservation sr) {
-    // FIXME figure out if overrides can happen here !?!?!?
-
-    MetaData branch = getMetaData(sr.actualName, sr.type);
-    // root.getPeers().putAll(branch.getPeers());
-    root.put(sr.actualName, sr.type);
-    for (ServiceReservation peer : branch.getPeers().values()) {
-      // just get overrides :PT
-      root.put(sr.actualName, sr.type);
-      getPlan(root, getPeerKey(parentName, sr.actualName), peer);
-    }
-
-  }
-
+ 
   public static void main(String[] args) {
     try {
       // LoggingFactory.init(); - don't change logging for mvn
@@ -553,10 +515,17 @@ public class ServiceData implements Serializable {
    * dictate changes on sub-peers, their "mods" must be pushed first
    * 
    * @param name
+   *          the name
    * @param type
+   *          the type
    * @param force
-   * @return
+   *          true/false
+   * @param cyclicalCheck
+   *          cycle checks
+   * @return the metadata
    * @throws MrlException
+   *           boom
+   * 
    */
   public static MetaData setMetaData(String name, String type, boolean force, Set<String> cyclicalCheck) throws MrlException {
     MetaData metaData = getMetaData(name, type);

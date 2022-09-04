@@ -35,7 +35,7 @@ public class As5048AEncoder extends AbstractPinEncoder implements EncoderControl
     ard.setDebug(true);
     As5048AEncoder encoder = (As5048AEncoder) Runtime.start("encoder", "As5048AEncoder");
     encoder.setPin(10);
-    ard.attach(encoder);
+    ard.attachEncoderControl(encoder);
     Thread.sleep(10000);
     encoder.setZeroPoint();
     log.info("Here we are..");

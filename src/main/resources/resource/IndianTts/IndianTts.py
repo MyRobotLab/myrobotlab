@@ -4,7 +4,7 @@
 # more info @: http://myrobotlab.org/service/IndianTts
 #########################################
 
-tts=Runtime.start("tts", "IndianTts")
+tts=runtime.start("tts", "IndianTts")
 
 # You sould't not expose keys here !! inside gui is a good place
 # But you can do it here ( only once is enough )

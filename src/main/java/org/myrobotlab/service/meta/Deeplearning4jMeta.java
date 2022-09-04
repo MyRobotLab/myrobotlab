@@ -11,12 +11,10 @@ public class Deeplearning4jMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
    */
-  public Deeplearning4jMeta(String name) {
+  public Deeplearning4jMeta() {
 
-    super(name);
-    String dl4jVersion = "1.0.0-beta7";
+    String dl4jVersion = "1.0.0-M1.1";
 
     boolean cudaEnabled = Boolean.valueOf(System.getProperty("gpu.enabled", "false"));
     boolean supportRasPi = false;
@@ -25,8 +23,11 @@ public class Deeplearning4jMeta extends MetaData {
     addCategory("ai");
 
     // Force javacpp 1.5.3 to resolve conflict between dl4j and javacv
-    addDependency("org.bytedeco", "javacpp", "1.5.5");
-    addDependency("org.bytedeco", "openblas", "0.3.10-" + "1.5.4");
+    addDependency("org.bytedeco", "javacpp", "1.5.6");
+    
+    // REMOVED FOR COLLISION
+//     addDependency("org.bytedeco", "openblas", "0.3.17-" + "1.5.6"); 
+    
 
     // dl4j deps.
     addDependency("org.deeplearning4j", "deeplearning4j-core", dl4jVersion);

@@ -34,6 +34,7 @@ import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.beans.Transient;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -43,11 +44,9 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 
 import org.bytedeco.javacv.CanvasFrame;
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.Java2DFrameConverter;
-import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.myrobotlab.cv.CvFilter;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
@@ -55,7 +54,7 @@ import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
-public abstract class OpenCVFilter implements Serializable {
+public abstract class OpenCVFilter implements Serializable, CvFilter {
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilter.class.toString());
 
   private static final long serialVersionUID = 1L;
@@ -132,14 +131,14 @@ public abstract class OpenCVFilter implements Serializable {
     File f = new File(tryfile);
     if (f.exists()) {
       return read(tryfile); // load alpha
-    } 
+    }
 
     // service resources - when jar extracts ?
     tryfile = Service.getResourceDir(OpenCV.class, infile);
     f = new File(tryfile);
     if (f.exists()) {
       return read(tryfile);
-    } 
+    }
 
     // source/ide
     // e.g. src\main\resources\resource\OpenCV
@@ -148,14 +147,14 @@ public abstract class OpenCVFilter implements Serializable {
     f = new File(tryfile);
     if (f.exists()) {
       return read(tryfile);
-    } 
+    }
 
     // src\test\resources\OpenCV
     tryfile = "src" + File.separator + "test" + File.separator + "resources" + File.separator + OpenCV.class.getSimpleName() + File.separator + infile;
     f = new File(tryfile);
     if (f.exists()) {
       return read(tryfile);
-    } 
+    }
 
     log.error("could not load Mat {}", infile);
     return null;
@@ -175,20 +174,10 @@ public abstract class OpenCVFilter implements Serializable {
   protected int channels;
 
   /**
-   * converters for the filter
-   */
-  transient protected OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-
-  /**
-   * converter for the filter
-   */
-  transient protected OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
-
-  /**
    * reference to the last OpenCVData processed and the one this filter will
    * modify
    */
-  protected OpenCVData data;
+  transient protected OpenCVData data;
 
   /**
    * color of display if any overlay
@@ -211,13 +200,9 @@ public abstract class OpenCVFilter implements Serializable {
 
   protected int height;
 
-  transient protected Java2DFrameConverter jconverter = new Java2DFrameConverter();
-
   final public String name;
 
   transient protected OpenCV opencv;
-
-  protected Boolean running;
 
   private String sourceKey;
 
@@ -332,6 +317,8 @@ public abstract class OpenCVFilter implements Serializable {
   /**
    * method which determines if this filter to process its display TODO - have
    * it also decide if its cumulative display or not
+   * 
+   * @return the buffered image to display
    */
   public BufferedImage processDisplay() {
 
@@ -387,6 +374,11 @@ public abstract class OpenCVFilter implements Serializable {
     }
   }
    * </pre>
+   * 
+   * @param keyPart
+   *          the key
+   * @param object
+   *          the object
    */
 
   public void put(String keyPart, Object object) {
@@ -426,6 +418,7 @@ public abstract class OpenCVFilter implements Serializable {
     return image;
   }
 
+  @Transient /* annotation to remove from yml dump */
   public void setOpenCV(OpenCV opencv) {
     if (displayColor == null) {
       displayColor = opencv.getColor();
@@ -437,59 +430,23 @@ public abstract class OpenCVFilter implements Serializable {
     return (OpenCVFilter) Service.copyShallowFrom(this, other);
   }
 
-  public CanvasFrame show(final IplImage image, final String title) {
+  public static CanvasFrame show(final IplImage image, final String title) {
     CanvasFrame canvas = new CanvasFrame(title);
     // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    canvas.showImage(toFrame(image));
+    CloseableFrameConverter convert = new CloseableFrameConverter();
+    canvas.showImage(convert.toFrame(image));
+    // TODO: verify that this doesn't blow up
+    convert.close();
     return canvas;
   }
 
-  public void show(final Mat image, final String title) {
+  public static void show(final Mat image, final String title) {
     CanvasFrame canvas = new CanvasFrame(title);
     // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    canvas.showImage(toFrame(image));
-  }
-
-  /**
-   * converting IplImages to BufferedImages
-   */
-  public BufferedImage toBufferedImage(IplImage image) {
-    return jconverter.convert(converterToImage.convert(image));
-  }
-
-  public BufferedImage toBufferedImage(Mat image) {
-    return jconverter.convert(converterToImage.convert(image));
-  }
-
-  public Frame toFrame(IplImage image) {
-    return converterToImage.convert(image);
-  }
-
-  public Frame toFrame(Mat image) {
-    return converterToImage.convert(image);
-  }
-
-  /**
-   * convert BufferedImages to IplImages
-   */
-  public IplImage toImage(BufferedImage src) {
-    return converterToImage.convert(jconverter.convert(src));
-  }
-
-  public IplImage toImage(Frame image) {
-    return converterToImage.convertToIplImage(image);
-  }
-
-  public IplImage toImage(Mat image) {
-    return converterToImage.convert(converterToMat.convert(image));
-  }
-
-  public Mat toMat(Frame image) {
-    return converterToImage.convertToMat(image);
-  }
-
-  public Mat toMat(IplImage image) {
-    return converterToMat.convert(converterToMat.convert(image));
+    CloseableFrameConverter conv = new CloseableFrameConverter();
+    canvas.showImage(conv.toFrame(image));
+    // TODO: does this cause the canvas to blow up?
+    conv.close();
   }
 
   public boolean isEnabled() {

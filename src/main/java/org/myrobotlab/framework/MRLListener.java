@@ -69,6 +69,9 @@ public final class MRLListener implements Serializable {
    */
   public String callbackMethod;
 
+  public MRLListener() {
+  }
+
   public MRLListener(String topicMethod, String callbackName, String callbackMethod) {
     this.topicMethod = topicMethod;
     this.callbackMethod = callbackMethod;

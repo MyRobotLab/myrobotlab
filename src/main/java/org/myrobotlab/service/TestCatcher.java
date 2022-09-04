@@ -43,7 +43,10 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.HttpData;
+import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.HttpDataListener;
+import org.myrobotlab.service.interfaces.PinArrayListener;
+import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -55,7 +58,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class TestCatcher extends Service implements SerialDataListener, HttpDataListener {
+public class TestCatcher extends Service implements SerialDataListener, HttpDataListener, PinArrayListener, PinListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -65,6 +68,8 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    * data to hold the incoming messages
    */
   transient public BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
+
+  transient public Map<String, Object[]> methodsCalled = new HashMap<>();
 
   public static class Ball {
     public String name;
@@ -86,6 +91,14 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   public Set<String> onReleased = new HashSet<>();
 
   public Set<String> onStopped = new HashSet<>();
+
+  public Set<PinData[]> pinSet = new HashSet<>();
+
+  public String[] activePins = null;
+
+  public PinData pinData = null;
+
+  public String pin;
 
   /**
    * awesome override to simulate remote services - e.g. in
@@ -136,8 +149,14 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     }
   }
 
+  /**
+   * put all recv structures here to clear
+   */
   public void clear() {
     msgs.clear();
+    pinData = null;
+    pinSet.clear();
+    methodsCalled.clear();
   }
 
   public Message getMsg(long timeout) throws InterruptedException {
@@ -200,11 +219,13 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   @Override
   public void onConnect(String portName) {
     info("connected to %s", portName);
+    methodsCalled.put(Thread.currentThread().getStackTrace()[1].getMethodName(), new Object[] { portName });
   }
 
   @Override
   public void onDisconnect(String portName) {
     info("disconnect to %s", portName);
+    methodsCalled.put(Thread.currentThread().getStackTrace()[1].getMethodName(), new Object[] { portName });
   }
 
   public void checkMsg(String method) throws InterruptedException, IOException {
@@ -473,6 +494,69 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   public void onReleased(String serviceName) {
     onReleased.add(serviceName);
+  }
+
+  @Override
+  public void onPinArray(PinData[] pindata) {
+    log.info("onPinArray {}", pinData);
+    pinSet.add(pindata);
+  }
+
+  public void setActivePins(String[] activePins) {
+    this.activePins = activePins;
+  }
+
+  @Override
+  public String[] getActivePins() {
+    return activePins;
+  }
+
+  @Override
+  public void onPin(PinData pinData) {
+    log.info("onPin {}", pinData);
+    this.pinData = pinData;
+  }
+
+  @Override
+  public void setPin(String pin) {
+    this.pin = pin;
+  }
+
+  @Override
+  public String getPin() {
+    return pin;
+  }
+
+  public boolean containsPinArrayFromPin(String pin) {
+    for (PinData[] pa : pinSet) {
+      for (PinData pd : pa) {
+        if (pin.equals(pd.pin)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  public void verifyCallback(String method, Object... params) throws IOException {
+    if (!methodsCalled.containsKey(method)) {
+      throw new IOException(String.format("callback %s not found", method));
+    }
+    Object[] recvdParams = methodsCalled.get(method);
+    if (recvdParams.length != params.length) {
+      throw new IOException(String.format("parameter misalignment for method %s - expecting %d got %d", method, params.length, recvdParams.length));
+    }
+    for (int i = 0; i < params.length; ++i) {
+      Object verify = params[i];
+      Object recvd = params[i];
+      if (verify == null && recvd != null) {
+        throw new IOException(String.format("parameter invalid for method %s - expecting null got %s", method, recvd));
+      }
+
+      if (!verify.equals(recvd)) {
+        throw new IOException(String.format("parameter incorrect for method %s - expecting %s got %s", method, verify, recvd));
+      }
+    }
   }
 
 }

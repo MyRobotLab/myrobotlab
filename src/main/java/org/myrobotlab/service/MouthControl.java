@@ -4,9 +4,12 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.MouthControlConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.interfaces.SpeechListener;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
@@ -16,51 +19,125 @@ import org.slf4j.Logger;
  * It's peers are the jaw servo, speech service and an arduino.
  *
  */
-public class MouthControl extends Service {
-
-  // TODO: remove Peer & Make it attachable between generic servoControl &
-  // SpeechSynthesis
+public class MouthControl extends Service implements SpeechListener {
 
   private static final long serialVersionUID = 1L;
+
   public final static Logger log = LoggerFactory.getLogger(MouthControl.class);
-  public int mouthClosedPos = 20;
-  public int mouthOpenedPos = 4;
-  public int delaytime = 75;
-  public int delaytimestop = 150;
-  public int delaytimeletter = 45;
-  transient private ServoControl jaw;
-  transient private SpeechSynthesis mouth;
+
+  int mouthClosedPos;
+
+  int mouthOpenedPos;
+
+  int delaytime;
+
+  int delaytimestop;
+
+  int delaytimeletter;
+
+  /**
+   * name of servo to use for jaw movement
+   */
+  protected String jaw;
+
+  /**
+   * name of neopixel for chappie or equalizer like mouth lights
+   */
+  protected String neoPixel;
+
+  /**
+   * This variable isn't used - its just a place holder to remember what
+   * SpeechSynthesis its attached to
+   */
+  String mouth;
 
   public MouthControl(String n, String id) {
     super(n, id);
+    registerForInterfaceChange(ServoControl.class);
+    registerForInterfaceChange(SpeechSynthesis.class);
+    registerForInterfaceChange(NeoPixelControl.class);
   }
 
   public void attach(Attachable attachable) {
     if (attachable instanceof SpeechSynthesis) {
-      mouth = (SpeechSynthesis) attachable;
-      subscribe(mouth.getName(), "publishStartSpeaking");
-      subscribe(mouth.getName(), "publishEndSpeaking");
+      ((SpeechSynthesis) attachable).attachSpeechListener(getName());
+      mouth = attachable.getName();
     } else if (attachable instanceof ServoControl) {
-      jaw = (ServoControl) attachable;
+      jaw = attachable.getName();
+      broadcastState();
+    } else if (attachable instanceof NeoPixel) {
+      neoPixel = attachable.getName();
+      broadcastState();
     } else {
-      log.error("MouthControl can't attach : {}", attachable);
+      error("MouthControl can't attach : %s", attachable);
     }
   }
 
+  @Override
+  public void detach(Attachable attachable) {
+    if (attachable instanceof SpeechSynthesis) {
+      ((SpeechSynthesis) attachable).detachSpeechListener(getName());
+      if (mouth != null) {
+        send(mouth, "detach", getName());
+      }
+      mouth = null;
+    } else if (attachable instanceof ServoControl) {
+      // jaw = null;
+      jaw = null;
+      broadcastState();
+    } else {
+      error("MouthControl can't detach from : %s", attachable);
+    }
+  }
+
+  @Override
+  public void detach() {
+    jaw = null;
+    neoPixel = null;
+    if (mouth != null) {
+      send(mouth, "detach", getName());
+    }
+    mouth = null;
+  }
+
   public String[] getCategories() {
-    return new String[] { "control" };
+    return new String[] { "control", "mouth" };
   }
 
   @Override
   public String getDescription() {
-    return "mouth movements based on spoken text";
+    return "mouth movements or light flashing based on spoken text";
   }
 
   public synchronized void onStartSpeaking(String text) {
-    log.info("move moving to :" + text);
-    if (jaw == null) {
-      return;
+    if (neoPixel != null) {
+      startMouthAnimation();
     }
+    if (jaw != null) {
+      moveMouthServo(text);
+    }
+  }
+
+  public void startMouthAnimation() {
+    send(neoPixel, "playAnimation", "Equalizer");
+  }
+
+  public void stopMouthAnimation() {
+    send(neoPixel, "clear");
+  }
+
+  private void moveJaw(double pos) {
+    if (jaw != null) {
+      send(jaw, "moveTo", pos);
+    }
+  }
+
+  // FIXME - this will tie up the calling thread which will be coming from
+  // the SpeechSynthesis service (not nice) it should manage its own
+  // loop in its own thread
+  public void moveMouthServo(String text) {
+    log.info("move moving to :" + text);
+
     boolean ison = false;
     String testword;
     String[] a = text.split(" ");
@@ -86,11 +163,14 @@ public class MouthControl extends Service {
         // russian а ... <> a
         if ((s == 'a' || s == 'e' || s == 'i' || s == 'o' || s == 'u' || s == 'y' || s == 'é' || s == 'è' || s == 'û' || s == 'и' || s == 'й' || s == 'У' || s == 'я' || s == 'э'
             || s == 'Ы' || s == 'ё' || s == 'ю' || s == 'е' || s == 'а' || s == 'о') && !ison) {
-          jaw.moveTo((double) mouthOpenedPos); // # move the servo to the
+          // jaw.moveTo((double) mouthOpenedPos); // # move the servo to the
+          moveJaw((double) mouthOpenedPos);
           // open spot
           ison = true;
           sleep(delaytime);
-          jaw.moveTo((double) mouthClosedPos);// #// close the servo
+          // jaw.moveTo((double) mouthClosedPos);// #// close the servo
+          moveJaw((double) mouthClosedPos);
+
         } else if (s == '.') {
           ison = false;
           sleep(delaytimestop);
@@ -103,48 +183,117 @@ public class MouthControl extends Service {
 
       sleep(80);
     }
-
   }
 
   public synchronized void onEndSpeaking(String utterance) {
     log.info("Mouth control recognized end speaking.");
-    // TODO: consider a jaw move to closed position
-    // this will only work if the mouth animation ends before it end playing the
-    // voice.
-    jaw.moveTo((double) mouthClosedPos);
+    if (neoPixel != null) {
+      stopMouthAnimation();
+    }
+
+    if (jaw != null) {
+      // FIXME should just stop
+      moveJaw((double) mouthClosedPos);
+    }
   }
 
+  /**
+   * Set the delays of the jaw servo
+   * 
+   * @param delaytime
+   * @param delaytimestop
+   * @param delaytimeletter
+   */
+  public void setDelays(Integer delaytime, Integer delaytimestop, Integer delaytimeletter) {
+    this.delaytime = delaytime;
+    this.delaytimestop = delaytimestop;
+    this.delaytimeletter = delaytimeletter;
+  }
+
+  @Deprecated /* use setDelays */
   public void setdelays(Integer d1, Integer d2, Integer d3) {
-    delaytime = d1;
-    delaytimestop = d2;
-    delaytimeletter = d3;
+    setDelays(d1, d2, d3);
   }
 
-  public void setmouth(Integer closed, Integer opened) {
-    // jaw.setMinMax(closed, opened);
+  public void setMouth(Integer closed, Integer opened) {
     mouthClosedPos = closed;
     mouthOpenedPos = opened;
+  }
 
-    // jaw.setMinMax(closed, opened);
-    // if (closed < opened) {
-    // jaw.map(closed, opened, closed, opened);
-    // } else {
-    // jaw.map(opened, closed, opened, closed);
-    // }
+  @Deprecated /* use setMouth */
+  public void setmouth(Integer closed, Integer opened) {
+    setMouth(closed, opened);
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+
+    MouthControlConfig config = new MouthControlConfig();
+
+    config.jaw = jaw;
+    config.mouth = mouth;
+    config.mouthClosedPos = mouthClosedPos;
+    config.mouthOpenedPos = mouthOpenedPos;
+    config.delaytime = delaytime;
+    config.delaytimestop = delaytimestop;
+    config.delaytimeletter = delaytimeletter;
+    config.neoPixel = neoPixel;
+
+    return config;
+  }
+
+  public ServiceConfig apply(ServiceConfig c) {
+    MouthControlConfig config = (MouthControlConfig) c;
+
+    mouthClosedPos = config.mouthClosedPos;
+    mouthOpenedPos = config.mouthOpenedPos;
+    delaytime = config.delaytime;
+    delaytimestop = config.delaytimestop;
+    delaytimeletter = config.delaytimeletter;
+    jaw = config.jaw;
+    neoPixel = config.neoPixel;
+
+    // mouth needs to attach to us
+    // it needs to create notify entries
+    // so we fire a message to attach to us
+    mouth = config.mouth;
+    if (config.mouth != null) {
+      mouth = config.mouth;
+      send(mouth, "attach", getName());
+    }
+
+    return c;
   }
 
   public static void main(String[] args) {
-    LoggingFactory.init(Level.DEBUG);
     try {
-      // LoggingFactory.getInstance().setLevel(Level.INFO);
-      MouthControl MouthControl = (MouthControl) Runtime.start("MouthControl", "MouthControl");
-      MouthControl.startService();
+      System.setProperty("java.version", "11.0");
+      LoggingFactory.init(Level.INFO);
 
-      Runtime.createAndStart("gui", "SwingGui");
+      // MouthControl mouthcontrol = (MouthControl) Runtime.start("mc",
+      // "MouthControl");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      // webgui.setSsl(true);
+      webgui.autoStartBrowser(false);
+      webgui.setPort(8889);
+      webgui.startService();
 
-      MouthControl.onStartSpeaking("test on");
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      Runtime.start("s1", "Servo");
+      Runtime.start("mouth1", "LocalSpeech");
+      Runtime.start("mega", "Arduino");
+      Runtime.start("neo", "NeoPixel");
+
+      // Runtime.start("python", "Python");
+
+      // mouthcontrol.onStartSpeaking("test on");
+
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
   }
 }

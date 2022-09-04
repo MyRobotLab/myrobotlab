@@ -3,22 +3,22 @@
 #
 port = "COM3"
 #
-WebGui = Runtime.start("WebGui","WebGui")
-ads1115 = Runtime.start("Ads1115","Ads1115")
+WebGui = runtime.start("WebGui","WebGui")
+ads1115 = runtime.start("Ads1115","Ads1115")
 
 if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
+    virtualArduino = runtime.start("virtualArduino", "VirtualArduino")
     virtualArduino.connect(port)
 
 # This section is to be used if you use the i2c pins of the Arduino
-arduino = Runtime.start("Arduino","Arduino")
+arduino = runtime.start("Arduino","Arduino")
 arduino.connect(port)
 # Sleep so that the Arduino can be initialized
 sleep(4)
 ads1115.attach(arduino,"1","0x48")
 
 # This section is to be used if you use the i2c pins of the Raspberry PI
-# raspi = Runtime.start("Raspi","RasPi")
+# raspi = runtime.start("Raspi","RasPi")
 # ads1115.attach(raspi,"1","0x48")
 
 # This section is common and shows how you can get the raw adc values and the voltages

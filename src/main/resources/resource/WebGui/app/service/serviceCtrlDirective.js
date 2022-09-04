@@ -8,8 +8,10 @@ angular.module('mrlapp.service').directive('serviceCtrlDirective', ['$compile', 
         link: function(scope, elem, attr) {
             scope.service = mrl.getService(scope.panel.name);
             scope.panelconfig = {};
+
+            // ACTUAL SCOPE IS CREATED IN serviceCtrlNext DIRECTIVE !!!!
             //prepare dynamic controller injection
-            var html = '<div service-ctrl-next ' + 'controller-name="' + scope.panel.simpleName + 'GuiCtrl" ' + 'name="panel.name" ' + 'service="service" ' + 'msginterface="msginterface" ' + 'msgmethods="msgmethods" ' + 'panelconfig="panelconfig" ' + 'size="panel.size" cb="cb"' + '></div>';
+            var html = '<div service-ctrl-next ' + 'controller-name="' + scope.panel.simpleName + 'GuiCtrl" ' + 'name="panel.name" ' + 'service="service" ' + 'mrl="mrl" ' + 'msginterface="msginterface" ' + 'msgmethods="msgmethods" ' + 'panelconfig="panelconfig" ' + 'size="panel.size" cb="cb"' + '></div>';
             var watch = scope.$watch(function() {
                 return scope.panel.templatestatus;
             }, function() {
@@ -21,6 +23,7 @@ angular.module('mrlapp.service').directive('serviceCtrlDirective', ['$compile', 
                         scope.panel.msg_ = msg_;
                         scope.msginterface = msg_;
                         scope.msgmethods = msg_.temp.msg;
+                        scope.mrl = mrl
                         elem.html(html).show();
                         console.info("elem.contents")
                         // console.info(elem.contents())
@@ -43,7 +46,8 @@ angular.module('mrlapp.service').directive('serviceCtrlDirective', ['$compile', 
             name: '=',
             service: '=',
             //Does it make sense to give him an instance of itself that may be outdated in just a bit? Or let it fetch it's instance himself`?
-            size: '='
+            size: '=',
+            mrl:'=mrl'
         },
         bindToController: {
             panelconfig: '=',

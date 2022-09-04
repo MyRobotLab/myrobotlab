@@ -127,7 +127,8 @@ public class Security extends Service implements AuthorizationProvider {
    * I think it might be easier concept to use a singleton for this service ...
    * Almost "always" better to have a singleton instance vs static methods !!!
    * 
-   * @return
+   * @return the security service (singleton)
+   * 
    */
   public static Security getInstance() {
     return (Security) Runtime.start("security", "Security");
@@ -343,9 +344,10 @@ public class Security extends Service implements AuthorizationProvider {
   }
 
   /**
-   * remove a key from the keystore
+   * 
    * 
    * @param keyName
+   *          remove a key from the keystore
    */
   public void deleteKey(String keyName) {
     if (store.containsKey(keyName)) {
@@ -399,7 +401,7 @@ public class Security extends Service implements AuthorizationProvider {
    * 
    * @param name
    *          - the name of the security key
-   * @return
+   * @return the property for a given key
    */
   public String getKey(String name) {
     if (store.containsKey(name)) {
@@ -415,9 +417,9 @@ public class Security extends Service implements AuthorizationProvider {
   }
 
   /**
-   * return the set of key names currently stored in the key store
+   * @return the set of key names currently stored in the key store
    * 
-   * @return
+   * 
    */
   public Set<String> getKeyNames() {
     Set<String> ret = new TreeSet<String>();
@@ -713,7 +715,11 @@ public class Security extends Service implements AuthorizationProvider {
    * code which sets the key can be removed
    * 
    * @param keyName
+   *          name
    * @param keyValue
+   *          value
+   * @return the name of the key stored
+   * 
    */
   public String setKey(String keyName, String keyValue) {
     store.put(keyName, keyValue);
@@ -749,7 +755,7 @@ public class Security extends Service implements AuthorizationProvider {
   public void onRegistered(String name) {
     log.info("onRegistered({})", name);
   }
-  
+
   public void onStarted(String name) {
     ServiceInterface si = Runtime.getService(name);
     if (si instanceof KeyConsumer) {

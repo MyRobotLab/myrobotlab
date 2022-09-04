@@ -48,7 +48,7 @@ public class Launcher {
 
     // command line to be returned
     List<String> cmd = new ArrayList<String>();
-    
+
     // prepare exe
     String fs = File.separator;
     String ps = File.pathSeparator;
@@ -60,13 +60,13 @@ public class Launcher {
     if (platform.isWindows()) {
       jvmArgs = jvmArgs.replace("/", "\\");
     }
-    
+
     cmd.add(javaExe);
 
     if (options.memory != null) {
       jvmArgs += String.format(" -Xms%s -Xmx%s ", options.memory, options.memory);
     }
-    
+
     cmd.add(jvmArgs);
 
     if (options.jvm != null) {
@@ -90,9 +90,9 @@ public class Launcher {
 
     // main class
     cmd.add("org.myrobotlab.service.Runtime");
-    
-    options.fromLauncher = true;
-    
+
+    options.fromLauncher = true; // from launcher meaningless now
+
     cmd.addAll(options.getOutputCmd());
 
     // FIXME - daemonize? does that mean handle stream differently?
@@ -103,7 +103,7 @@ public class Launcher {
     System.out.println(toString(cmd));
     ProcessBuilder builder = new ProcessBuilder(cmd);
     builder.redirectErrorStream(true);
-    builder.inheritIO();
+    // builder.inheritIO(); # LAME - JDK BUG FIXED THEN NOT FIXED ...
 
     // one of the nastiest bugs had to do with std out, or std err not
     // being consumed ... now we don't bother with it - instead
@@ -124,7 +124,8 @@ public class Launcher {
     }
 
     builder.directory(spawnDir);
-    log.info("SPAWNING ! -->{}$ \n{}", spawnDir.getAbsolutePath(), toString(cmd));
+    log.info("WORKING DIR {}", spawnDir.getAbsolutePath());
+    log.info("SPAWNING ! -->{}", toString(cmd));
 
     // environment variables setup
     setEnv(builder.environment());
@@ -155,6 +156,8 @@ public class Launcher {
 
   /**
    * prints help to the console
+   * 
+   * @return the help
    */
   static public String mainHelp() {
     String help = new CommandLine(new CmdOptions()).getUsageMessage();
@@ -207,6 +210,7 @@ public class Launcher {
    * an interface to the spawned instance
    * 
    * @param args
+   *          args
    */
   public static void main(String[] args) {
     try {

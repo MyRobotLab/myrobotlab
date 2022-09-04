@@ -16,13 +16,13 @@ from java.lang import Math
 
 leftPort = "COM3"
 rightPort = "COM4"
-vleft = Runtime.createAndStart("vleft","VirtualArduino")
-vright = Runtime.createAndStart("vright","VirtualArduino")
+vleft = runtime.start("vleft","VirtualArduino")
+vright = runtime.start("vright","VirtualArduino")
 vleft.connect(leftPort)
 vright.connect(rightPort)
 
 
-i01 = Runtime.createAndStart("i01","InMoov")
+i01 = runtime.start("i01","InMoov2")
 
 i01.startAll(leftPort,rightPort)
 
@@ -46,7 +46,7 @@ i01.setArmVelocity("right",26,18,14,15)
 
 #startIntegratedMovement Service
 
-im = Runtime.createAndStart("im","IntegratedMovement")
+im = runtime.start("im","IntegratedMovement")
 
 #set the DH parameters for the ik service
 

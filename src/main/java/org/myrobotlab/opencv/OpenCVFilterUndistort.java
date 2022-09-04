@@ -7,7 +7,6 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import org.bytedeco.javacpp.indexer.Indexer;
-import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 
@@ -34,12 +33,12 @@ public class OpenCVFilterUndistort extends OpenCVFilter {
    */
   private static final long serialVersionUID = 1L;
 
-  private Mat camMat = new Mat(3, 3, CV_32FC1);
+  transient private Mat camMat = new Mat(3, 3, CV_32FC1);
   // now what's the distVec?
-  private Mat distVec = new Mat(1, 5, CV_32FC1);
+  transient private Mat distVec = new Mat(1, 5, CV_32FC1);
 
-  private transient OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
-
+  transient private CloseableFrameConverter converter = new CloseableFrameConverter();
+  
   public OpenCVFilterUndistort() {
     super();
     initCameraAndDistortionMatrix();
@@ -114,8 +113,16 @@ public class OpenCVFilterUndistort extends OpenCVFilter {
     undistort(matIn, matOut, camMat, distVec);
     // show(matOut, "output");
     // mat to image now!
-    IplImage unDistImage = converterToIpl.convertToIplImage(converterToIpl.convert(matOut));
+    IplImage unDistImage = converter.toImage(matOut);
     return unDistImage;
+  }
+
+  @Override
+  public void release() {
+    // TODO Auto-generated method stub
+    super.release();
+    converter.close();
+  
   }
 
   @Override

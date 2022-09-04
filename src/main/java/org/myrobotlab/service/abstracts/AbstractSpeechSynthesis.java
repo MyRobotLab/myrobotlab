@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -18,10 +19,13 @@ import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.AudioFile;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Security;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AudioListener;
 import org.myrobotlab.service.interfaces.KeyConsumer;
+import org.myrobotlab.service.interfaces.SpeechListener;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.SpeechSynthesisControl;
@@ -32,9 +36,11 @@ import org.slf4j.Logger;
 public abstract class AbstractSpeechSynthesis extends Service implements SpeechSynthesis, TextListener, KeyConsumer, AudioListener {
 
   private static final long serialVersionUID = 1L;
+
   public final static Logger log = LoggerFactory.getLogger(AbstractSpeechSynthesis.class);
 
   static String globalFileCacheDir = "audioFile";
+
   public static final String journalFilename = "journal.txt";
 
   /**
@@ -172,7 +178,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       return locale.getLanguage();
     }
 
-    public Locale getLocal() {
+    public Locale getLocale() {
       return locale;
     }
 
@@ -246,7 +252,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   private List<Voice> voiceList = new ArrayList<>();
 
-  boolean blocking = false;
+  protected boolean blocking = false;
 
   // FIXME - deprecate - begin using SSML
   // specific effects and effect notation needs to be isolated to the
@@ -257,6 +263,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * ready .. ? Several speech synthesis services require cloud api keys or in
    * some cases, only certain operating systems are supported. We are going to
    * be pessimistic - MarySpeech is "always" ready :)
+   * 
+   * @param n
+   *          the name of the service
+   * @param id
+   *          the id of the instance
    */
 
   public AbstractSpeechSynthesis(String n, String id) {
@@ -276,7 +287,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     if (genderIndex == null) {
       genderIndex = new HashMap<String, List<Voice>>();
     }
-    audioFile = (AudioFile) createPeer("audioFile");
+    // FIXED - below is wrong ...
+    // should hold off creating or starting peers until the service has started
+    // audioFile = (AudioFile) createPeer("audioFile");
 
     getVoices();
 
@@ -327,7 +340,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * also an AudioData publisher.
    * 
    * @param data
-   * @return
+   *          data to be published.
+   * @return AudioData object
    */
   public AudioData publishAudioStart(AudioData data) {
     return data;
@@ -338,7 +352,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * also an AudioData publisher.
    * 
    * @param data
-   * @return
+   *          data to be published
+   * @return the data for the end audio event.
    */
   public AudioData publishAudioEnd(AudioData data) {
     return data;
@@ -350,14 +365,19 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    */
   @Override
   public void attach(Attachable attachable) {
-    if (attachable instanceof TextPublisher) {
-      attachTextPublisher((TextPublisher) attachable);
-    } else if (attachable instanceof TextPublisher) {
+    if (attachable == null) {
+      return;
+    }
+    if (attachable instanceof SpeechRecognizer) {
       attachSpeechRecognizer((SpeechRecognizer) attachable);
+    } else if (attachable instanceof TextPublisher) {
+      attachTextPublisher((TextPublisher) attachable);
     } else if (attachable instanceof AudioFile) {
       audioFile = (AudioFile) attachable;
+    } else if (attachable instanceof SpeechListener) {
+      attachSpeechListener(attachable.getName());
     } else {
-      log.error("don't know how to attach a %s", attachable.getName());
+      error("don't know how to attach a %s", attachable.getName());
     }
   }
 
@@ -426,8 +446,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       log.warn("{}.attachSpeechRecognizer(null)", getName());
       return;
     }
-    addListener("publishStartSpeaking", recognizer.getName(), "onStartSpeaking");
-    addListener("publishEndSpeaking", recognizer.getName(), "onEndSpeaking");
+    attachSpeechListener(recognizer.getName());
   }
 
   /**
@@ -494,6 +513,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   public void startService() {
     super.startService();
+    // FIXME - assigning a Peer to a reference is a no no
     audioFile = (AudioFile) startPeer("audioFile");
     subscribe(audioFile.getName(), "publishAudioStart");
     subscribe(audioFile.getName(), "publishAudioEnd");
@@ -530,7 +550,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * break it up into pieces to handle effects and other details
    * 
    * @param toSpeak
-   * @return
+   *          the string to be spoken.
+   * @return the same string.
    */
   public String publishSpeechRequested(String toSpeak) {
     return toSpeak;
@@ -607,7 +628,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   @Deprecated /* use replaceWord */
   public void addSubstitution(String key, String replacement) {
-    substitutions.put(key.toLowerCase(), replacement.toLowerCase());
+    replaceWord(key, replacement);
   }
 
   /**
@@ -635,6 +656,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    *          - the audoData for parameters
    * @param speak
    *          - the text to speak
+   * @param block
+   *          true/false
    * @return block - to block or not
    */
   public AudioData process(AudioData audioData, String speak, boolean block) {
@@ -680,7 +703,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   private String filterText(String toSpeak) {
 
-    if (toSpeak.isEmpty() || toSpeak == " " || toSpeak == null) {
+    if (toSpeak == null || toSpeak.isEmpty() || toSpeak == " ") {
       return " , ";
     }
     toSpeak = toSpeak.trim();
@@ -724,7 +747,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * @param toSpeak
    *          text
    * 
-   * @return byte[]
+   * @return AudioData with raw data.
+   * @throws Exception
+   *           boom
    */
   abstract public AudioData generateAudioData(AudioData audioData, String toSpeak) throws Exception;
 
@@ -858,9 +883,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * default cache file type
+   * @return default cache file type
    */
-  // @Deprecated
   public String getAudioCacheExtension() {
     return ".mp3";
   }
@@ -888,7 +912,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * param
    * 
    * @param lang
-   * @return
+   *          the language to set
+   * @return true if the language was successfully set.
    */
   public boolean setLanguage(String lang) {
 
@@ -1071,12 +1096,62 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   @Override
+  public ServiceConfig apply(ServiceConfig c) {
+    SpeechSynthesisConfig config = (SpeechSynthesisConfig) c;
+
+    setMute(config.mute);
+
+    setBlocking(config.blocking);
+
+    if (config.substitutions != null) {
+      for (String n : config.substitutions.keySet()) {
+        replaceWord(n, config.substitutions.get(n));
+      }
+    }
+
+    if (config.voice != null) {
+      setVoice(config.voice);
+    }
+
+    if (config.speechRecognizers != null) {
+      for (String name : config.speechRecognizers) {
+        try {
+          attachSpeechListener(name);
+        } catch (Exception e) {
+          error(e);
+        }
+      }
+    }
+
+    return c;
+  }
+  
+  @Override
   public void attachSpeechControl(SpeechSynthesisControl control) {
     // TODO Auto-generated method stub
     addListener(control.getName(), "publishSpeak");
     addListener(control.getName(), "publishSetVolume");
     addListener(control.getName(), "publishSetMute");
     addListener(control.getName(), "publishReplaceWord");
+  }
+  
+  
+  @Override
+  public ServiceConfig getConfig() {
+    SpeechSynthesisConfig c = (SpeechSynthesisConfig)config;
+    c.mute = mute;
+    c.blocking = blocking;
+    if (substitutions != null && substitutions.size() > 0) {
+      c.substitutions = new HashMap<>();
+      c.substitutions.putAll(substitutions);
+    }
+    if (voice != null) {
+      c.voice = voice.name;
+    }
+    Set<String> listeners = getAttached("publishStartSpeaking");
+    c.speechRecognizers = listeners.toArray(new String[listeners.size()]);
+
+    return c;
   }
 
 }

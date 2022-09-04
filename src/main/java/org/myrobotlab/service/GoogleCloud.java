@@ -73,6 +73,11 @@ public class GoogleCloud extends Service {
 
   /**
    * Helper that handles the input passed to the program.
+   * 
+   * @param args
+   *          the passed args
+   * @param out
+   *          the output stream to print to
    *
    * @throws Exception
    *           on errors while closing the client.

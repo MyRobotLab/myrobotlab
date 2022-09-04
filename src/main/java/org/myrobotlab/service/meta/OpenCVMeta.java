@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -12,17 +11,15 @@ public class OpenCVMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
    */
-  public OpenCVMeta(String name) {
+  public OpenCVMeta() {
 
-    super(name);
-    Platform platform = Platform.getLocalInstance();
     addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
     addCategory("video", "vision", "sensors");
-    String javaCvVersion = "1.5.5";
+    String javaCvVersion = "1.5.6";
     // addDependency("org.bytedeco", "javacv", javaCvVersion);
     addDependency("org.bytedeco", "javacv-platform", javaCvVersion);
+    addDependency("org.bytedeco", "javacpp", javaCvVersion);
     // FIXME - finish with cmdLine flag -gpu vs cudaEnabled for DL4J ?
     boolean gpu = false;
     if (gpu) {
@@ -57,6 +54,9 @@ public class OpenCVMeta extends MetaData {
     // for the mjpeg streamer frame grabber
     addDependency("net.sf.jipcam", "jipcam", "0.9.1");
     exclude("javax.servlet", "servlet-api");
+    exclude("log4j", "log4j");
+    exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
+
     // jipcam use commons-lang-1.0 it break marySpeech
     exclude("commons-lang", "commons-lang");
     addDependency("commons-lang", "commons-lang", "2.6");
@@ -67,7 +67,7 @@ public class OpenCVMeta extends MetaData {
     // text detection using EAST classifier
     addDependency("opencv", "opencv_east_text_detection", "0.0.1", "zip");
     // youtube downloader
-    addDependency("com.github.axet", "vget", "1.1.34");
+    // addDependency("com.github.axet", "vget", "1.1.34"); NO LONGER WORKS
     // yolo models
     addDependency("yolo", "yolov2", "0.0.2", "zip");
 

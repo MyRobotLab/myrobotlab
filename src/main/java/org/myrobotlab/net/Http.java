@@ -8,25 +8,118 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Map;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.util.EntityUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class Http {
-  /**
-   * FIXME = there should be no statics - and when a file is downloaded or
-   * errors occur there should be published statuses
-   * 
-   * FIXME - OFFER PROXY !!!! See Below !!! NOT APACHE HTTPCLIENT IN FACT
-   * HTTPCLIENT SHOULD ABEND TO THE ENV SET HERE !!!!
-   * http://stackoverflow.com/questions/15927079/how-to-use-httpsurlconnection-
-   * through-proxy-by-setproperty
-   * 
-   * FIXME - return a Callable !
-   */
+
+  private static volatile CloseableHttpClient httpclient = null;
 
   public final static Logger log = LoggerFactory.getLogger(Http.class);
 
+  public static void init() {
+    if (httpclient != null) {
+      return;
+    }
+    synchronized (CloseableHttpClient.class) {
+
+      // Set the maximum number of connections in the pool
+      PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
+      connManager.setMaxTotal(20);
+
+      // Create a ClientBuilder Object by setting the connection manager
+      HttpClientBuilder clientbuilder = HttpClients.custom().setConnectionManager(connManager);
+
+      // Build the CloseableHttpClient object using the build() method.
+      httpclient = clientbuilder.build();
+
+    }
+  }
+
+  public static byte[] post(String url, String postBody) {
+    return post(url, postBody, null, null);
+  }
+
+  public static byte[] post(String url, String postBody, String contentType) {
+    return post(url, postBody, contentType, null);
+  }
+
+  /**
+   * a super simple post method - TODO implement postResponse to get detailed
+   * meta data around the request otherwise its just null if not successful and
+   * non null when successful
+   * 
+   * @param url
+   * @param postBody
+   * @return
+   */
+  public static byte[] post(String url, String postBody, String contentType, Map<String, String> formValues) {
+
+    byte[] bytes = null;
+
+    try {
+      init();
+
+      if (contentType == null) {
+        contentType = "application/json";
+      }
+
+      // TODO - url encoding
+      // List<NameValuePair> params = new ArrayList<NameValuePair>(2);
+      // params.add(new BasicNameValuePair("param-1", "12345"));
+      // params.add(new BasicNameValuePair("param-2", "Hello!"));
+      // httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+
+      StringEntity jsonEntity = new StringEntity(postBody, "UTF-8");
+      jsonEntity.setContentEncoding(contentType);
+      
+      HttpPost httpPost = new HttpPost(url);
+      httpPost.setEntity(jsonEntity);
+      CloseableHttpResponse response = httpclient.execute(httpPost);
+
+      HttpEntity entity = response.getEntity();
+      // Header encodingHeader = entity.getContentEncoding();
+
+      // you need to know the encoding to parse correctly
+      // Charset encoding = encodingHeader == null ? StandardCharsets.UTF_8 :
+      // Charsets.toCharset(encodingHeader.getValue());
+
+      bytes = EntityUtils.toByteArray(entity);
+      
+//      String ret = new String(bytes);
+//      log.info("string value {}", ret);
+
+    } catch (Exception e) {
+      log.error("Http.post {} {} threw", url, postBody, e);
+    }
+
+    try {
+      httpclient.close();
+    } catch (Exception e) {
+      /* don't care */}
+
+    return bytes;
+  }
+
+  /**
+   * GET the byte return from a url - if it fails return null TODO - getResponse
+   * should be implemented if the desire is to get the meta info of
+   * failure/success e.g. response code
+   * 
+   * @param theUrl
+   * @return
+   */
   public static byte[] get(String theUrl) {
     log.info("get {}", theUrl);
     ByteArrayOutputStream out = null;
@@ -69,7 +162,6 @@ public class Http {
       } catch (Exception e) {
       }
     }
-
   }
 
   public static void main(String[] args) {
@@ -86,7 +178,10 @@ public class Http {
    * threads do not consume a partially downloaded file.
    * 
    * @param theUrl
+   *          url
    * @param outFile
+   *          file to save
+   * 
    */
   public static void getSafePartFile(String theUrl, String outFile) {
     getSafePartFile(theUrl, outFile, true);

@@ -59,6 +59,7 @@ import java.util.zip.ZipException;
 
 import org.apache.commons.io.Charsets;
 import org.myrobotlab.cmdline.CmdLine;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -93,10 +94,15 @@ public class FileIO {
    * testing
    * 
    * @param filename1
+   *          first file
    * @param filename2
-   * @return
+   *          second file
+   * @return true if they're equal
    * @throws FileComparisonException
+   *           boom
    * @throws IOException
+   *           boom
+   * 
    */
   static public final boolean compareFiles(String filename1, String filename2) throws FileComparisonException, IOException {
     File file1 = new File(filename1);
@@ -121,8 +127,12 @@ public class FileIO {
    * Copy the contents of dir into the path destination s
    * 
    * @param dir
+   *          source directories
    * @param path
+   *          dest path
    * @throws IOException
+   *           boom
+   * 
    */
 
   final public static void copy(File[] dir, String path) throws IOException {
@@ -135,8 +145,12 @@ public class FileIO {
    * A simple copy method which works like a 'regular' operating system copy
    * 
    * @param src
+   *          source file
    * @param dst
+   *          dest file
    * @throws IOException
+   *           boom
+   * 
    */
   static public final void copy(File src, File dst) throws IOException {
     log.info("copying from {} to {}", src, dst);
@@ -171,8 +185,12 @@ public class FileIO {
    * copy file or folder from one place to another with string interface
    * 
    * @param src
+   *          source file
    * @param dst
+   *          dest file
    * @throws IOException
+   *           boom
+   * 
    */
   static public final void copy(String src, String dst) throws IOException {
     copy(new File(src), new File(dst));
@@ -211,8 +229,10 @@ public class FileIO {
    * @param dst
    *          - target location
    * @param overwrite
-   * @return true/false
+   *          true/false to override
+   * @return something
    * @throws IOException
+   *           boom
    */
   static public final boolean extract(String root, String src, String dst, boolean overwrite) throws IOException {
     log.info("extract(root={}, src={}, dst={}, overwrite={})", root, src, dst, overwrite);
@@ -350,7 +370,7 @@ public class FileIO {
 
       return found;
     }
-    log.warn("not extracting source is not a jar");
+    log.info("not extracting source is not a jar");
     return false;
   }
 
@@ -457,8 +477,10 @@ public class FileIO {
    * 
    * A better solution might be to maintain a list of services as a text file :(
    * 
-   * @return
+   * @return list of services
    * @throws IOException
+   *           boom
+   * 
    */
   static public final List<String> getServiceList() throws IOException {
 
@@ -497,11 +519,13 @@ public class FileIO {
   }
 
   /**
-   * list the contents of 'self' at directory 'src'
-   * 
+   *
    * @param src
-   * @return list of urls
+   *          the source
+   * @return list the contents of 'self' at directory 'src'
    * @throws IOException
+   *           boom
+   * 
    */
   static public final List<URL> listContents(String src) throws IOException {
     return listContents(getRoot(), src, true, null, null);
@@ -516,12 +540,19 @@ public class FileIO {
    * file directory
    * 
    * @param root
+   *          the root
    * @param src
+   *          source
    * @param recurse
+   *          should it recurse
    * @param include
+   *          include
    * @param exclude
-   * @return
+   *          excludes
+   * @return a list of urls
    * @throws IOException
+   *           boom
+   * 
    */
   static public final List<URL> listContents(String root, String src, boolean recurse, String[] include, String[] exclude) throws IOException {
     List<URL> classes = new ArrayList<URL>();
@@ -619,9 +650,9 @@ public class FileIO {
         boolean isSubDir = (src.split("/").length + 1 < jarEntry.getName().split("/").length);
 
         if (jarEntry.isDirectory() || (isSubDir && !recurse) || jarEntry.getName().contains("$")) {
-          log.info("filtering out {}", urlStr);
+          log.debug("filtering out {}", urlStr);
         } else {
-          log.info("adding url {}", urlStr);
+          log.debug("adding url {}", urlStr);
           URL url = new URL(urlStr);
           classes.add(url);
         }
@@ -756,7 +787,7 @@ public class FileIO {
       }
 
     } catch (Exception e) {
-      new IOException("interrupted while waiting for file to arrive");
+      throw new IOException("interrupted while waiting for file to arrive");
     }
     return null;
   }
@@ -1087,7 +1118,9 @@ public class FileIO {
    * removes a file or recursively removes directory
    * 
    * @param file
-   * @return true/false
+   *          the file to remove
+   * @return true/false if it was removed
+   * 
    */
   static public final boolean rm(File file) {
     if (file.isDirectory())
@@ -1230,8 +1263,12 @@ public class FileIO {
    * Copies bytes from src to dst, src must be a file, dst may or may not exist
    * 
    * @param src
+   *          the source file
    * @param dst
+   *          dest file
    * @throws IOException
+   *           boom
+   * 
    */
   static public void copyBytes(String src, String dst) throws IOException {
     FileInputStream fis = new FileInputStream(src);
@@ -1416,7 +1453,9 @@ public class FileIO {
    * Taken from Commons-io IOUtils
    * 
    * @param input
-   * @return
+   *          the input file
+   * @return the intput stream with default charset encoding.
+   * 
    */
   public static InputStream toInputStream(String input) {
     return toInputStream(input, Charset.defaultCharset());
@@ -1426,8 +1465,11 @@ public class FileIO {
    * Taken from Commons-io IOUtils
    * 
    * @param input
+   *          the input file
    * @param encoding
-   * @return
+   *          the input encoding
+   * @return the input stream with encoding specified.
+   * 
    */
   public static InputStream toInputStream(String input, Charset encoding) {
     return new ByteArrayInputStream(input.getBytes(Charsets.toCharset(encoding)));
@@ -1437,9 +1479,13 @@ public class FileIO {
    * Taken from Commons-io IOUtils
    * 
    * @param input
+   *          the input file
    * @param encoding
-   * @return
+   *          target encoding to decode as
+   * @return an input stream with encoding specified
    * @throws IOException
+   *           boom
+   * 
    */
   public static InputStream toInputStream(String input, String encoding) throws IOException {
     byte[] bytes = input.getBytes(Charsets.toCharset(encoding));
@@ -1465,7 +1511,7 @@ public class FileIO {
    * 
    * @param filename
    *          - name of file
-   * @return
+   * @return a string if successful otherwise null
    */
   public static String toSafeString(String filename) {
     try {
@@ -1485,7 +1531,10 @@ public class FileIO {
    * evil !
    * 
    * @param path1
+   *          the first part of the path
    * @param path2
+   *          the second part of the path
+   * 
    * @return forward slash path
    */
   static public final String gluePathsForwardSlash(String path1, String path2) {
@@ -1514,5 +1563,36 @@ public class FileIO {
     }
     return String.format("%s%s%s", path1, FileIO.fs, path2);
   }
+  
+  public static String getExt(final String filename) {
+    if (filename == null) {
+      return null;
+    }
+    int pos = filename.lastIndexOf(".");
+    if (pos > -1) {
+      return filename.substring(pos + 1);
+    }
+    return null;
+  }
 
+  
+  /**
+   * flips all \ to / or / to \ depending on OS
+   * 
+   * @param dirPath - non normalized path
+   * @return - fixed path
+   */
+  public static String normalize(String dirPath) {
+    if (dirPath == null) {
+      return null;
+    }
+    Platform platform = Platform.getLocalInstance();
+    if (platform.isWindows()) {
+      return dirPath.replace("/", "\\");
+    } else {
+      return dirPath.replace("\\", "/");
+    }    
+  }
+
+  
 }

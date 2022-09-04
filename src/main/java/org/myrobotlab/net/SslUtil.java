@@ -26,18 +26,23 @@ import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
  * A generalized class to help with x509 certificates to support TLS
  */
 public class SslUtil {
-  
+
   /**
-   * Returns a SSLSocketFactory if provided with a x509 cert, and key file.
-   * The caCrtFile is the certificate authority root and inpassword is the protected
-   * password of the cert "if suppied".  If unprotected leave null or empty "".
+   * Returns a SSLSocketFactory if provided with a x509 cert, and key file. The
+   * caCrtFile is the certificate authority root and inpassword is the protected
+   * password of the cert "if suppied". If unprotected leave null or empty "".
    * 
-   * @param caCrtFile - ca root
-   * @param crtFile - certificate file (pem)
-   * @param keyFile - private key
-   * @param inpassword - password if key/cert are protected by a password
-   * @return
+   * @param caCrtFile
+   *          - ca root
+   * @param crtFile
+   *          - certificate file (pem)
+   * @param keyFile
+   *          - private key
+   * @param inpassword
+   *          - password if key/cert are protected by a password
+   * @return the ssl socket factory
    * @throws Exception
+   *           boom
    */
   public static SSLSocketFactory getSocketFactory(final String caCrtFile, final String crtFile, final String keyFile, final String inpassword) throws Exception {
     Security.addProvider(new BouncyCastleProvider());

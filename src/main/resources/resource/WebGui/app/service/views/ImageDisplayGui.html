@@ -1,0 +1,66 @@
+<div class="row">
+    <div class="form-inline">
+        <div class="form-group">
+            <tr>
+                <br/>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <label>Web Viewer</label>
+                    <toggle class="miniBTN" ng-model="service.webViewer" ng-change="msg.setWebViewer(service.webViewer)" on="" off="" size="btn-lg"/>
+                    <label>&nbsp;&nbsp;&nbsp;&nbsp;Native Viewer</label>
+                    <toggle class="miniBTN" ng-model="service.nativeViewer" ng-change="msg.setNativeViewer(service.nativeViewer)" on="" off="" size="btn-lg"/>
+                    <label ng-show="service.nativeViewer">&nbsp;&nbsp;&nbsp;&nbsp;Viewer AlwaysOnTop</label>
+                    <toggle ng-show="service.nativeViewer" class="miniBTN" title="invert the motor" ng-model="service.alwaysOnTop" ng-change="msg.setAlwaysOnTop(service.alwaysOnTop)" on="" off="" size="btn-lg"/>
+                    <button class="btn btn-default" title="this will close all displays" ng-click="msg.closeAll()">close all</button>                   
+                </td>
+            </tr>
+        </div>    
+    </div>
+</div>
+<br/>
+<div class="col-md-9">
+    <table border="1" class="table table-bordered">
+        <tr>
+            <td>
+                <label>Latest image:</label>
+                <br/>
+                <div>
+                    <!--<img data-ng-src="{{service.getDisplayImage()}}"/>-->
+                    <img data-ng-src="{{service.display('https://www.industrie-techno.com/mediatheque/6/5/9/000032956_600x400_c.jpg')}}"/>
+                    <!--<img src="https://www.industrie-techno.com/mediatheque/6/5/9/000032956_600x400_c.jpg"/>-->
+                </div>
+            </td>
+            <td>
+                <label>Image bank:</label>
+                <div id="table-wrapper">
+                    <div id="table-scroll">
+                        <table class="table table-hover table-condensed">
+                            <tbody>
+                                <tr>
+                                    <td><img src="https://inmoov.fr/wp-content/uploads/2017/10/IMG_2331-255x185.jpg"/></td>
+                                </tr>
+                                <tr>
+                                    <td><img data-ng-src="../data/OpenCV/i01.opencv-00179.png"/></td>
+                                </tr>
+                                <tr>
+                                    <td><img data-ng-src="../data/OpenCV/i01.opencv-00179.png"/></td>
+                                </tr>
+                                <tr>
+                                    <td><img data-ng-src="../data/OpenCV/i01.opencv-00179.png"/></td>
+                                </tr>
+                                <tr>
+                                    <td><img data-ng-src="../data/OpenCV/i01.opencv-00179.png"/></td>
+                                </tr>
+                                <tr>
+                                    <td><img data-ng-src="../data/OpenCV/i01.opencv-00179.png"/></td>
+                                </tr>
+                                <tr>
+                                    <td><img data-ng-src="../data/OpenCV/i01.opencv-00179.png"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>

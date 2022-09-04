@@ -1,6 +1,8 @@
 package org.myrobotlab.service.meta;
 
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.MarySpeechConfig;
 import org.myrobotlab.service.meta.abstracts.AbstractSpeechSynthesisMeta;
 import org.slf4j.Logger;
 
@@ -11,11 +13,9 @@ public class MarySpeechMeta extends AbstractSpeechSynthesisMeta {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
    */
-  public MarySpeechMeta(String name) {
+  public MarySpeechMeta() {
 
-    super(name);
     addPeer("audioFile", "AudioFile", "audioFile");
     addCategory("speech", "sound");
     addDescription("Speech synthesis based on MaryTTS");
@@ -32,11 +32,13 @@ public class MarySpeechMeta extends AbstractSpeechSynthesisMeta {
 
     for (String voice : voices) {
       addDependency("de.dfki.mary", voice, "5.2");
+      // force using Runtimes httpclient version - exclude here
       exclude("org.apache.httpcomponents", "httpcore");
       exclude("org.apache.httpcomponents", "httpclient");
 
       if ("voice-bits1-hsmm".equals(voice) || "voice-cmu-slt-hsmm".equals(voice)) {
         exclude("org.slf4j", "slf4j-log4j12");
+        exclude("log4j", "log4j");
       }
     }
     exclude("org.slf4j", "slf4j-api");
@@ -46,7 +48,23 @@ public class MarySpeechMeta extends AbstractSpeechSynthesisMeta {
     exclude("com.google.guava", "guava");
     exclude("org.apache.opennlp", "opennlp-tools");
     exclude("org.slf4j", "slf4j-log4j12");
+    
+    addDependency("org.apache.logging.log4j", "log4j-1.2-api", "2.12.1");
 
+  }
+  
+  public Plan getDefault(String name) {
+
+    Plan plan = new Plan(name);
+    plan.putPeers(name, peers);
+
+    MarySpeechConfig config = new MarySpeechConfig();
+    config.audioFile = name + ".audioFile";
+
+    // add self last - desired order or construction
+    plan.addConfig(config);
+
+    return plan;
   }
 
 }

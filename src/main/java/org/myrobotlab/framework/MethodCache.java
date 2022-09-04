@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -77,6 +78,10 @@ public class MethodCache {
     Map<String, List<MethodEntry>> remoteOrdinalIndex = new TreeMap<>();
     // Map<String, List<MethodEntry>> declaredMethodOrdinalIndex = new
     // TreeMap<>();
+
+    // declared methods of both this real concrete service and its parent
+    // ending at Service
+    Set<String> serviceMethodNameSet = new TreeSet<>();
   }
 
   private static MethodCache instance;
@@ -120,18 +125,6 @@ public class MethodCache {
     }
     return instance;
   }
-  /*
-   * public static void main(String[] args) { try {
-   * 
-   * // LoggingFactory.init(Level.INFO);
-   * 
-   * MethodCache cache = MethodCache.getInstance(); //
-   * cache.cacheMethodEntries(Runtime.class);
-   * cache.cacheMethodEntries(Clock.class);
-   * 
-   * 
-   * } catch(Exception e) { log.error("main threw", e); } }
-   */
 
   Set<String> excludeMethods = new TreeSet<>();
 
@@ -140,16 +133,15 @@ public class MethodCache {
   protected MethodCache() {
   }
 
-  public void cacheMethodEntries(Class<?> object) {
-    Set<Class<?>> exclude = new HashSet<>();
-    exclude.add(Service.class);
-    exclude.add(Object.class);
-    cacheMethodEntries(object, exclude);
-  }
+  /*
+   * public void cacheMethodEntries(Class<?> object) { Set<Class<?>> exclude =
+   * new HashSet<>(); exclude.add(Service.class); exclude.add(Object.class);
+   * cacheMethodEntries(object, exclude); }
+   */
 
   // public void cacheMethodEntries(Class<?> object, Class<?> maxSuperType,
   // Set<String> excludeMethods) {
-  public void cacheMethodEntries(Class<?> object, Set<Class<?>> excludeFromDeclared) {
+  public void cacheMethodEntries(Class<?> object) {
 
     if (objectCache.containsKey(object.getTypeName())) {
       log.info("already cached {} methods", object.getSimpleName());
@@ -160,6 +152,7 @@ public class MethodCache {
     MethodIndex mi = new MethodIndex();
     Method[] methods = object.getMethods();
     Method[] declaredMethods = object.getDeclaredMethods();
+
     log.info("caching {}'s {} methods and {} declared methods", object.getSimpleName(), methods.length, declaredMethods.length);
     for (Method m : methods) {
       // log.debug("processing {}", m.getName());
@@ -194,6 +187,11 @@ public class MethodCache {
       if (!hasInterfaceInParamList) {
         addMethodEntry(mi.remoteOrdinalIndex, ordinalKey, me);
       }
+
+      if (!me.objectName.equals("org.myrobotlab.framework.Service") && !me.objectName.equals("java.lang.Object")) {
+        mi.serviceMethodNameSet.add(me.getName());
+      }
+
       log.debug("processed {}", me);
     }
 
@@ -254,6 +252,22 @@ public class MethodCache {
     }
     return size;
   }
+  
+  public Set<String> getCachedObjectNames(){
+    return objectCache.keySet();
+  }
+
+  public Method getDefaultInvokeMethod(String fullType) {
+    try {
+      // last ditch effort - try default msg handler method
+      Class<?> c = Class.forName(fullType);
+      Method m = c.getMethod("defaultInvokeMethod", String.class, Object[].class);
+      return m;
+    } catch (Exception e) {
+      // no default
+    }
+    return null;
+  }
 
   public Method getMethod(Class<?> object, String methodName, Class<?>... paramTypes) throws ClassNotFoundException {
     String[] paramTypeNames = new String[paramTypes.length];
@@ -278,6 +292,7 @@ public class MethodCache {
    *          - actual parameter
    * @return - the method to invoke
    * @throws ClassNotFoundException
+   *           if the class isn't found
    */
   public Method getMethod(Class<?> objectType, String methodName, Object... params) throws ClassNotFoundException {
     Class<?>[] paramTypes = getParamTypes(params);
@@ -301,16 +316,31 @@ public class MethodCache {
     return paramTypes;
   }
 
+  public Set<String> getMethodNames(String className) {
+    MethodIndex mi = objectCache.get(className);
+
+    // MethodIndex has a superset of keys grouped by class
+    // class hierarchy can be derived several times under service
+    // default we want declared methods
+
+    return mi.serviceMethodNameSet;
+  }
+
   /**
    * A full string interface to get a method - although this is potentially a
    * easy method to use, the most common use case would be used by the framework
    * which will automatically supply fully qualified type names.
    * 
    * @param fullType
+   *          full type
    * @param methodName
+   *          method to lookup
    * @param paramTypeNames
-   * @return
+   *          names of params
+   * @return the looked up method
    * @throws ClassNotFoundException
+   *           if the fullType class isn't found.
+   * 
    */
   public Method getMethod(String fullType, String methodName, String[] paramTypeNames) throws ClassNotFoundException {
 
@@ -334,9 +364,15 @@ public class MethodCache {
       String ordinalKey = getMethodOrdinalKey(fullType, methodName, paramTypeNames.length);
       List<MethodEntry> possibleMatches = mi.methodOrdinalIndex.get(ordinalKey);
       if (possibleMatches == null) {
-        // log.error("there were no possible matches for ordinal key {} - does
-        // the method exist?", ordinalKey);
-        // log.error("{}.{}.{}", fullType, methodName, paramTypeNames);
+
+        log.error("Method Cache look up Failed! {}.{}({})", fullType, methodName, StringUtils.join(paramTypeNames, ","));
+
+        // if a service provides a methodCacheDefaultMethod - it means whenever
+        // no match is found
+        // call "this" method, similar to preProcessHook which intercepts msgs
+        // when they come off a msg queue
+        // but before invoke is called
+
         return null;
       }
       if (possibleMatches.size() == 1) {
@@ -416,8 +452,6 @@ public class MethodCache {
     MethodCache cache = MethodCache.getInstance();
     Method method = cache.getMethod(obj.getClass(), methodName, params);
     retobj = method.invoke(obj, params);
-    out(methodName, retobj); // <-- FIXME clean this up !!!
-
     return retobj;
   }
 
@@ -466,19 +500,6 @@ public class MethodCache {
     return key;
   }
 
-  public void out(String method, Object o) {
-    /*
-     * Message m = Message.createMessage(this, null, method, o); // create a //
-     * un-named // message // as output
-     * 
-     * if (m.sender.length() == 0) { m.sender = this.getName(); } if
-     * (m.sendingMethod.length() == 0) { m.sendingMethod = method; } if (outbox
-     * == null) {
-     * log.info("******************OUTBOX IS NULL*************************");
-     * return; } outbox.add(m);
-     */
-  }
-
   public List<MethodEntry> getOrdinalMethods(Class<?> object, String methodName, int parameterSize) {
     if (object == null) {
       log.error("getOrdinalMethods on a null object ");
@@ -523,7 +544,7 @@ public class MethodCache {
     // encodedParams.length);
     List<MethodEntry> possible = getRemoteOrdinalMethods(clazz, methodName, encodedParams.length);
     if (possible == null) {
-      log.error("getOrdinalMethods -> {}.{} with ordinal {} does not exist", clazz.getSimpleName(), methodName, encodedParams.length);
+      log.error("getOrdinalMethods -> {}.{} with ordinal {} does not exist", clazz, methodName, encodedParams);
       return null;
     }
     Object[] params = new Object[encodedParams.length];
@@ -567,13 +588,25 @@ public class MethodCache {
     return sb.toString();
   }
 
-  public List<MethodEntry> query(String fullClassName, String methodName) {
-    MethodIndex methodIndex = objectCache.get(fullClassName);
-    String keyPart = String.format("%s.%s(", fullClassName, methodName);
+  public List<MethodEntry> query(String className, String methodName) {
+
+    if (!className.contains(".")) {
+      className = "org.myrobotlab.service." + className;
+    }
+
+    MethodIndex methodIndex = objectCache.get(className);
+    String keyPart = String.format("%s.%s(", className, methodName);
     List<MethodEntry> ret = new ArrayList<>();
+
+    Set<String> filter = new HashSet<String>();
+
+    // This method is for the UI or specifically for the GSON/JSON interface
+    // Its to get a list of potential methods to be used by the UI
     for (String key : methodIndex.methodsIndex.keySet()) {
       if (key.startsWith(keyPart)) {
-        ret.add(methodIndex.methodsIndex.get(key));
+        // log.info("[{}]", key);
+        MethodEntry me = methodIndex.methodsIndex.get(key);
+        ret.add(me);
       }
     }
     return ret;

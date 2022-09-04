@@ -35,6 +35,8 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterYolo.class);
 
+  protected Boolean running;
+
   // zero offset to where the confidence level is in the output matrix of the
   // darknet.
   private static final int CONFIDENCE_INDEX = 4;

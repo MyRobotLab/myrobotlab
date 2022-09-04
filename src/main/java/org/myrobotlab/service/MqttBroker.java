@@ -23,6 +23,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.mqtt.MqttMsg;
 import org.myrobotlab.net.Connection;
+import org.myrobotlab.service.config.MqttBrokerConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.KeyConsumer;
 import org.slf4j.Logger;
@@ -132,7 +134,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
 
   /**
    * determines if the broker will attempt to process any messages published on
-   * the api topics .. typically api/service & api/messages
+   * the api topics .. typically api/service and api/messages
    */
   boolean processApiMessages = true;
 
@@ -160,7 +162,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
 
   public MqttBroker(String n, String id) {
     super(n, id);
-    
+
     // restore keys if they exist
     Security security = Security.getInstance();
     username = security.getKey(getName() + ".username");
@@ -235,19 +237,19 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
 
   public void listen(String address, int mqttPort, int wsPort, String username, String password, boolean allow_zero_byte_client_id) {
     try {
-      
-      this.address = (address == null)?"0.0.0.0":address;
+
+      this.address = (address == null) ? "0.0.0.0" : address;
       this.mqttPort = mqttPort;
       this.wsPort = wsPort;
       this.username = username;
       this.password = password;
       this.allow_zero_byte_client_id = allow_zero_byte_client_id;
-            
+
       if (listening) {
         info("broker already started - stop first to start again");
         return;
       }
-      
+
       Properties props = new Properties();
       props.setProperty("port", mqttPort + "");
       props.setProperty("websocket_port", wsPort + "");
@@ -266,7 +268,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
 
       props.setProperty("allow_zero_byte_client_id", String.format("%b", allow_zero_byte_client_id));
       props.setProperty("netty.mqtt.message_size", "1048576");
-      
+
       MemoryConfig mc = new MemoryConfig(props);
       Collections.singletonList(this);
       mqttBroker.startServer(mc, Collections.singletonList(this));
@@ -296,8 +298,8 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
   public void onConnectionLost(InterceptConnectionLostMessage msg) {
     invoke("publishConnectionLost", msg);
     connectedClients.remove(msg.getClientID());
-    
-    // are connections from generic devices to be handled as mrl connections ? 
+
+    // are connections from generic devices to be handled as mrl connections ?
     Runtime runtime = Runtime.getInstance();
     runtime.removeConnection(msg.getClientID());
 
@@ -308,7 +310,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
   public void onDisconnect(InterceptDisconnectMessage msg) {
     invoke("publishDisconnect", msg);
     connectedClients.remove(msg.getClientID());
-    // are connections from generic devices to be handled as mrl connections ? 
+    // are connections from generic devices to be handled as mrl connections ?
     Runtime runtime = Runtime.getInstance();
     runtime.removeConnection(msg.getClientID());
 
@@ -470,10 +472,11 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
     try {
       if (username != null && username.length() > 0) {
         // the "right" way - save it to secure store
-        setKey(getName()+".username", username);
-        setKey(getName()+".password", password);
-        
-        // the "wrong" way - but moquette forces this - no way of setting username/pwd in memory programmatically :(
+        setKey(getName() + ".username", username);
+        setKey(getName() + ".password", password);
+
+        // the "wrong" way - but moquette forces this - no way of setting
+        // username/pwd in memory programmatically :(
         FileOutputStream fos = new FileOutputStream(passwordFilePath);
         MessageDigest digest = MessageDigest.getInstance(HASH_SHA_256);
         byte[] encodedhash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
@@ -547,6 +550,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
 
   @Override
   public void stopService() {
+    super.stopService();
     stopListening();
   }
 
@@ -645,12 +649,35 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
     String password = getName() + ".password";
     return new String[] { username, password };
   }
-  
+
   @Override
   public void setKey(String keyName, String keyValue) {
     Security security = Security.getInstance();
     security.setKey(keyName, keyValue);
     broadcastState();
+  }
+  
+  @Override
+  public ServiceConfig getConfig() {
+    MqttBrokerConfig c = new MqttBrokerConfig();
+    c.address = address;
+    c.mqttPort = mqttPort;
+    c.wsPort = wsPort;
+    c.username = username;
+    c.password = password;
+    return c; 
+  }
+
+  
+  @Override
+  public ServiceConfig apply(ServiceConfig c) {
+    MqttBrokerConfig config = (MqttBrokerConfig) c;
+    address = config.address;
+    mqttPort = config.mqttPort;
+    wsPort = config.wsPort;
+    username = config.username;
+    password = config.password;
+    return config;
   }
 
   

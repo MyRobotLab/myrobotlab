@@ -9,12 +9,12 @@
 port = "COM15"
  
 # start the service
-python = Runtime.start("python","Python")
-sr04 = Runtime.start("sr04", "UltrasonicSensor")
-arduino = Runtime.start("arduino", "Arduino")
+python = runtime.start("python","Python")
+sr04 = runtime.start("sr04", "UltrasonicSensor")
+arduino = runtime.start("arduino", "Arduino")
  
 if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
+    virtualArduino = runtime.start("virtualArduino", "VirtualArduino")
     virtualArduino.connect(port)
  
 # initializing

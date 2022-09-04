@@ -38,13 +38,39 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 
   boolean isTx = false;
 
+  public boolean isSda() {
+    return isSda;
+  }
+
+  public void setSda(boolean isSda) {
+    this.isSda = isSda;
+  }
+
+  public boolean isScl() {
+    return isScl;
+  }
+
+  public void setScl(boolean isScl) {
+    this.isScl = isScl;
+  }
+
+  boolean isSda = false;
+  
+  boolean isScl = false;
+
   boolean canRead = true;
 
   boolean canWrite = true;
 
-  Double value;
+  Integer value;
 
   transient Object pinImpl;
+
+  /**
+   * rate in Hz for which the pin will be polled
+   * 0 == no rate imposed 
+   */
+  int pollRateHz = 0;
 
   public PinDefinition(String serviceName, int address, String pin) {
     super(serviceName);
@@ -60,12 +86,8 @@ public class PinDefinition extends SensorDefinition implements Serializable {
     return value.intValue();
   }
 
-  public void setValue(Double value) {
-    this.value = value;
-  }
-
   public void setValue(int value) {
-    this.value = new Double(value);
+    this.value = value;
   }
 
   public String getPinName() {
@@ -196,6 +218,14 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 
   public void canRead(boolean canRead) {
     this.canRead = canRead;
+  }
+
+  public void setPollRate(int rateHz) {
+    this.pollRateHz  = rateHz;
+  }
+  
+  public int getPollRate() {
+    return pollRateHz;
   }
 
 }

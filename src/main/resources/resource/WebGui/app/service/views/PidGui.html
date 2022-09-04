@@ -1,49 +1,94 @@
-<style>
-table, th , td {
-  border: 1px solid grey;
-  border-collapse: collapse;
-  padding: 5px;
-  width: 100%;
-}
-table tr:nth-child(odd) {
-  background-color: #f1f1f1;
-}
-table tr:nth-child(even) {
-  background-color: #ffffff;
-}
-</style>
-
-<b>PID parameters, inputs and output</b><p>
-
 <div class="row">
-  <div class="col-lg-12">
-  <div style="overflow-x:auto;">
-    <table>
-      <tr>
-        <th>Key</th>
-        <th>sampletime (ms)</th>
-        <th>kp</th>
-        <th>ki</th>
-        <th>kd</th>
-        <th>inverted</th>
-        <th>setpoint</th>
-        <th>input</th>
-        <th>output</th>
-      </tr>
-      <tr ng-repeat='(key, value) in piddata'>
-        <span><td><b>{{key}}</b> 
-              <td>{{value.sampleTime || 0 | number:3}} 
-              <td>{{value.dispKp || 0 | number:3}} 
-              <td>{{value.dispKi || 0 | number:3}} 
-              <td>{{value.dispKd || 0 | number:3}} 
-              <td>{{value.controllerDirection}}
-              <td>{{value.setpoint}}
-              <td>{{value.input || 0 | number:3}}
-              <td>{{value.output || 0 | number:3}}
-         </span>
-        </td>
-      </tr>
-    </table>
+    <div class="col-md-12">&nbsp;</div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <table class="table-striped padded-table table-bordered">
+            <tr ng-repeat='(key, pidData) in service.data'>
+                <td colspan="100%">
+                    <h5>{{key}}<h5>
+                    <canvas id="line" class="chart chart-line" ng-show="pidData.show" chart-data="pidData.chart.data" chart-labels="pidData.chart.labels" chart-series="pidData.chart.series" chart-options="options" chart-dataset-override="datasetOverride" chart-click="onClick">
+                    </canvas>
+                </td>
+            </tr>
+            <tr>
+                <th></th>
+                <th>key</th>
+                <th>sample time (ms)</th>
+                <th>kp</th>
+                <th>ki</th>
+                <th>kd</th>
+                <th>inverted</th>
+                <th>setpoint</th>
+                <th>out min</th>
+                <th>out max</th>
+                <th>deadband</th>
+                <th></th>
+            </tr>
+            <tr ng-repeat='(key, value) in service.data'>
+                <td>
+                    <input type="radio" ng-value="{{value}}" ng-model="option.selected" ng-click="select()"/>
+                </td>
+                <td>
+                    <b>{{key}}</b>
+                </td>
+                <td>{{value.sampleTime}} </td>
+                <td>{{value.kp}} </td>
+                <td>{{value.ki}} </td>
+                <td>{{value.kd}} </td>
+                <td>{{value.inverted}}</td>
+                <td>{{value.setpoint}}</td>
+                <td>{{value.outMin}}</td>
+                <td>{{value.outMax}}</td>
+                <td>{{value.deadband}}</td>
+                <td class="form-inline">
+                    <button type="button" class="btn btn-default btn-xs" ng-click="enable(value)">{{value.enabled?'disable':'enable'}}</button>
+                    <button type="button" class="btn btn-default btn-xs" ng-click="delete(key)">delete</button>
+                    <button type="button" ng-show="!value.hold" class="btn btn-default btn-xs" ng-click="hold(value)">hold</button>
+                    <button type="button" ng-show="value.hold" class="btn btn-default btn-xs" ng-click="release(value)">release</button>
+                    <button type="button" ng-show="!value.show" class="btn btn-default btn-xs" ng-click="show(value)">show</button>
+                    <button type="button" ng-show="value.show" class="btn btn-default btn-xs" ng-click="hide(value)">hide</button>
+                    <button type="button" class="btn btn-default btn-xs" ng-click="reset(value)">reset</button>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <b>
+                        <input type="text" class="form-control small-text-form" ng-model="option.selected.key"/>
+                    </b>
+                </td>
+                <td>
+                    <input type="text" class="form-control small-text-form" ng-model="option.selected.sampleTime"/>
+                </td>
+                <td>
+                    <input type="text" class="form-control small-text-form" ng-model="option.selected.kp"/>
+                </td>
+                <td>
+                    <input type="text" class="form-control small-text-form" ng-model="option.selected.ki"/>
+                </td>
+                <td>
+                    <input type="text" class="form-control small-text-form" ng-model="option.selected.kd"/>
+                </td>
+                <td>
+                    <input type="text" class="form-control small-text-form" ng-model="option.selected.inverted"/>
+                </td>
+                <td>
+                    <input type="text" class="form-control small-text-form" ng-model="option.selected.setpoint"/>
+                </td>
+                <td>
+                    <input type="text" class="form-control small-text-form" ng-model="option.selected.outMin"/>
+                </td>
+                <td>
+                    <input type="text" class="form-control small-text-form" ng-model="option.selected.outMax"/>
+                </td>
+                <td>
+                    <input type="text" class="form-control small-text-form" ng-model="option.selected.deadband"/>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-default" ng-click="update()">update</button>
+                </td>
+            </tr>
+        </table>
     </div>
-   </div>
- </div>
+</div>

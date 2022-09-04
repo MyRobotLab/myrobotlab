@@ -115,6 +115,7 @@ public class Hd44780Gui extends ServiceGui implements ActionListener {
           isReadyIcon.setIcon(readyNOK);
         }
         StringBuilder str = new StringBuilder();
+        /*
         for (int i = 1; i < 5; i++) {
           if (lcd.screenContent.get(i) != null) {
             str.append(lcd.screenContent.get(i)).append("\n");
@@ -122,7 +123,9 @@ public class Hd44780Gui extends ServiceGui implements ActionListener {
             str.append("\n");
           }
         }
+        
         screenContent.setText(str.toString());
+        */
         if (lcd.getBackLight() == true) {
           on.setSelected(true);
         } else {

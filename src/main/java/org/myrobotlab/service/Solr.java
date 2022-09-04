@@ -48,6 +48,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.opencv.CloseableFrameConverter;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.programab.Response;
@@ -104,7 +105,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * NO RECOVERY FROM THIS.
    * 
    * @throws SolrServerException
+   *           boom
    * @throws IOException
+   *           boom
+   * 
    */
   public void deleteEmbeddedIndex() throws SolrServerException, IOException {
     if (embeddedSolrServer != null) {
@@ -123,8 +127,11 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * named "core1"
    * 
    * @param path
+   *          path to start for solr
    * @throws SolrServerException
+   *           boom
    * @throws IOException
+   *           boom
    */
   public void startEmbedded(String path) throws SolrServerException, IOException {
     // let's extract our default configs into the directory/
@@ -157,6 +164,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * Add a single document at a time to the solr server.
    * 
    * @param doc
+   *          the input doc to send to solr
+   * 
    */
   public void addDocument(SolrInputDocument doc) {
     try {
@@ -218,6 +227,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * Delete a single document from the index provided a specific doc id.
    * 
    * @param docId
+   *          id of the solr document to delete
+   * 
    */
   public void deleteDocument(String docId) {
     try {
@@ -316,8 +327,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * first result decoded into an IplImage
    * 
    * @param queryString
-   * @return
+   *          query to find the image
+   * @return an ipl image from the index
    * @throws IOException
+   *           if in error
    */
   public IplImage fetchImage(String queryString) throws IOException {
     String fieldName = "bytes";
@@ -345,8 +358,11 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * on the label field.
    * 
    * @param queryString
+   *          the query string
    * @param labelField
-   * @return
+   *          the field containing the labels
+   * @return a query request
+   * 
    */
   public SolrQuery makeDatasetQuery(String queryString, String labelField) {
     SolrQuery solrQuery = new SolrQuery(queryString);
@@ -399,13 +415,17 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * version of the original image
    * 
    * @param image
-   * @return
+   *          input iage
+   * @return byte array of image
    * @throws IOException
+   *           boom
+   * 
    */
   public byte[] imageToBytes(IplImage image) throws IOException {
 
     // lets make a buffered image
-    BufferedImage buffImage = OpenCV.toBufferedImage(image);
+    CloseableFrameConverter converter = new CloseableFrameConverter();
+    BufferedImage buffImage = converter.toBufferedImage(image);
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
     try {
       ImageIO.write(buffImage, "png", stream);
@@ -414,6 +434,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       // somehow does happen, then we don't want to just ignore it
       throw new RuntimeException(e);
     }
+    converter.close();
     return stream.toByteArray();
   }
 
@@ -421,8 +442,11 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * deserialize from a png byte array to an IplImage
    * 
    * @param bytes
-   * @return
+   *          input bytes
+   * @return an iplimage
    * @throws IOException
+   *           boom
+   * 
    */
   public IplImage bytesToImage(byte[] bytes) throws IOException {
     //
@@ -442,8 +466,11 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * from the first result
    * 
    * @param queryString
+   *          query string
    * @param fieldName
-   * @return
+   *          field name
+   * @return the value from the field
+   * 
    */
   public String fetchFirstResultField(String queryString, String fieldName) {
     QueryResponse qr = search(queryString, 1, 0, false);
@@ -466,7 +493,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     // for now.. cheating, and just pulling everything up to the first period.
     if (!StringUtils.isEmpty(res)) {
       // TODO: better sentence boundary detection
-      String fragment = res.split(".")[0];
+      String fragment = res.split("\\.")[0];
       return fragment;
     } else {
       // TODO: log a warning or something.
@@ -476,6 +503,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   /**
    * Default query to fetch the top 10 documents that match the query request.
+   * 
+   * @param queryString
+   *          the query string
+   * @return a query response
    */
   public QueryResponse search(String queryString) {
     // default to 10 hits returned.
@@ -484,6 +515,16 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   /**
    * Default query to fetch the top 10 documents that match the query request.
+   * 
+   * @param queryString
+   *          query string
+   * @param rows
+   *          number of rows to return
+   * @param start
+   *          offset into the restult
+   * @param mostRecent
+   *          specify index_date sort
+   * @return the response
    */
   public QueryResponse search(String queryString, int rows, int start, boolean mostRecent) {
     log.info("Searching for : {}", queryString);
@@ -515,6 +556,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   /**
    * Set the url for the solr instance to communicate with. This is not used
    * with the embedded solr server
+   * 
+   * @param solrUrl
+   *          the solr url to connect to. (HttpSolrClient)
    */
   public void setSolrUrl(String solrUrl) {
     this.solrUrl = solrUrl;
@@ -991,8 +1035,17 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * This method will issue an atomic update to the solr index for a given
    * document id the value will be set on the document
    * 
-   * @throws IOException
+   * @param docId
+   *          doc id (required)
+   * @param fieldName
+   *          field name to update
+   * @param value
+   *          new value for field
    * @throws SolrServerException
+   *           boom
+   * @throws IOException
+   *           boom
+   * 
    */
   public void updateDocument(String docId, String fieldName, String value) throws SolrServerException, IOException {
     SolrInputDocument sdoc = new SolrInputDocument();

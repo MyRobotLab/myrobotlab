@@ -62,7 +62,7 @@ public class SerialTest extends AbstractTest {
     catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
     Thread.sleep(100);
     serial.connect(vport);
-    uart = (Serial)Runtime.getService(vport + ".UART");
+    uart = (Serial) Runtime.getService(vport + ".UART");
     uart.setTimeout(300);
     Thread.sleep(300);
 
@@ -224,13 +224,17 @@ public class SerialTest extends AbstractTest {
 
     if (serial.isConnected()) {
       serial.disconnect();
-      catcher.checkMsg("onDisconnect", vport);
+      // catcher.checkMsg("onDisconnect", vport); is invalid
+      // the message travels directly - so you must see if the method
+      // was called directly
+      catcher.verifyCallback("onDisconnect", vport);
     }
 
     catcher.isLocal = false;
     catcher.clear();
     serial.open(vport);
-    catcher.checkMsg("onConnect", vport);
+    // catcher.checkMsg("onConnect", vport);
+    catcher.verifyCallback("onConnect", vport);//
 
     testReadAndWrite();
 
@@ -251,7 +255,8 @@ public class SerialTest extends AbstractTest {
 
     assertTrue(expectedFailure);
 
-    catcher.checkMsg("onDisconnect", vport);
+    // catcher.checkMsg("onDisconnect", vport);
+    catcher.verifyCallback("onDisconnect", vport);
     serial.removeByteListener(catcher);
 
     // ========== local pub/sub connect / onByte testing ==========
@@ -260,12 +265,15 @@ public class SerialTest extends AbstractTest {
 
     serial.addByteListener(catcher);
     serial.open(vport);
-    catcher.checkMsg("onConnect", vport);
-
+    // catcher.checkMsg("onConnect", vport);
+    catcher.verifyCallback("onConnect", vport);
+    
     testReadAndWrite();
 
+    catcher.clear();
     serial.disconnect();
-    catcher.checkMsg("onDisconnect", vport);
+    //catcher.checkMsg("onDisconnect", vport);
+    catcher.verifyCallback("onDisconnect", vport);
     serial.removeByteListener(catcher);
     serial.open(vport);
   }

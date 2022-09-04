@@ -42,121 +42,132 @@ package org.saintandreas.math;
  * @author Brad Davis
  */
 public final class Vector4f extends Vector4<Vector4f> implements java.io.Serializable {
-    static final long serialVersionUID = 1;
+  static final long serialVersionUID = 1;
 
-    public final static Vector4f ZERO = new Vector4f(0, 0, 0, 0);
-    public final static Vector4f NAN = new Vector4f(Float.NaN, Float.NaN, Float.NaN, Float.NaN);
-    public final static Vector4f UNIT_X = new Vector4f(1, 0, 0, 0);
-    public final static Vector4f UNIT_Y = new Vector4f(0, 1, 0, 0);
-    public final static Vector4f UNIT_Z = new Vector4f(0, 0, 1, 0);
-    public final static Vector4f UNIT_W = new Vector4f(0, 0, 0, 1);
-    public final static Vector4f UNIT_XYZW = new Vector4f(1, 1, 1, 1);
+  public final static Vector4f ZERO = new Vector4f(0, 0, 0, 0);
+  public final static Vector4f NAN = new Vector4f(Float.NaN, Float.NaN, Float.NaN, Float.NaN);
+  public final static Vector4f UNIT_X = new Vector4f(1, 0, 0, 0);
+  public final static Vector4f UNIT_Y = new Vector4f(0, 1, 0, 0);
+  public final static Vector4f UNIT_Z = new Vector4f(0, 0, 1, 0);
+  public final static Vector4f UNIT_W = new Vector4f(0, 0, 0, 1);
+  public final static Vector4f UNIT_XYZW = new Vector4f(1, 1, 1, 1);
 
-    public final static Vector4f COLOR_RED = new Vector4f(1, 0, 0, 1);
-    public final static Vector4f COLOR_GREEN = new Vector4f(0, 1, 0, 1);
-    public final static Vector4f COLOR_BLUE = new Vector4f(0, 0, 1, 1);
-    public final static Vector4f COLOR_WHITE = new Vector4f(1, 1, 1, 1);
+  public final static Vector4f COLOR_RED = new Vector4f(1, 0, 0, 1);
+  public final static Vector4f COLOR_GREEN = new Vector4f(0, 1, 0, 1);
+  public final static Vector4f COLOR_BLUE = new Vector4f(0, 0, 1, 1);
+  public final static Vector4f COLOR_WHITE = new Vector4f(1, 1, 1, 1);
 
-    public final static Vector4f POSITIVE_INFINITY = new Vector4f(
-            Float.POSITIVE_INFINITY,
-            Float.POSITIVE_INFINITY,
-            Float.POSITIVE_INFINITY,
-            Float.POSITIVE_INFINITY);
-    public final static Vector4f NEGATIVE_INFINITY = new Vector4f(
-            Float.NEGATIVE_INFINITY,
-            Float.NEGATIVE_INFINITY,
-            Float.NEGATIVE_INFINITY,
-            Float.NEGATIVE_INFINITY);
+  public final static Vector4f POSITIVE_INFINITY = new Vector4f(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
+  public final static Vector4f NEGATIVE_INFINITY = new Vector4f(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
 
+  /**
+   * Constructor instantiates a new <code>Vector3f</code> with default values of
+   * (0,0,0).
+   *
+   */
+  public Vector4f() {
+    this(0);
+  }
 
-    /**
-     * Constructor instantiates a new <code>Vector3f</code> with default
-     * values of (0,0,0).
-     *
-     */
-    public Vector4f() {
-      this(0);
-    }
+  /**
+   * Constructor instantiates a new <code>Vector3f</code> with default values of
+   * (0,0,0).
+   * 
+   * @param s
+   *          s
+   *
+   */
+  public Vector4f(float s) {
+    super(s);
+  }
 
-    /**
-     * Constructor instantiates a new <code>Vector3f</code> with default
-     * values of (0,0,0).
-     *
-     */
-    public Vector4f(float s) {
-      super(s);
-    }
+  /**
+   * Constructor instantiates a new <code>Vector4f</code> with provides values.
+   *
+   * @param x
+   *          the x value of the vector.
+   * @param y
+   *          the y value of the vector.
+   * @param z
+   *          the z value of the vector.
+   * @param w
+   *          the w value of the vector.
+   */
+  public Vector4f(float x, float y, float z, float w) {
+    super(x, y, z, w);
+  }
 
-    /**
-     * Constructor instantiates a new <code>Vector4f</code> with provides
-     * values.
-     *
-     * @param x
-     *            the x value of the vector.
-     * @param y
-     *            the y value of the vector.
-     * @param z
-     *            the z value of the vector.
-     * @param w
-     *            the w value of the vector.
-     */
-    public Vector4f(float x, float y, float z, float w) {
-      super(x, y, z, w);
-    }
+  /**
+   * Constructor instantiates a new <code>Vector3f</code> that is a copy of the
+   * provided vector
+   * 
+   * @param v
+   *          The Vector3f to copy
+   * @param z
+   *          z
+   * @param w
+   *          w
+   */
+  public Vector4f(Vector2f v, float z, float w) {
+    super(v.x, v.y, z, w);
+  }
 
-    /**
-     * Constructor instantiates a new <code>Vector3f</code> that is a copy
-     * of the provided vector
-     * @param v The Vector3f to copy
-     */
-    public Vector4f( Vector2f v, float z, float w ) {
-      super(v.x, v.y, z, w);
-    }
+  /**
+   * Constructor instantiates a new <code>Vector3f</code> that is a copy of the
+   * provided vector
+   * 
+   * @param v
+   *          The Vector3f to copy
+   * @param z
+   *          z
+   */
+  public Vector4f(Vector2f v, float z) {
+    super(v.x, v.y, z, 1);
+  }
 
-    /**
-     * Constructor instantiates a new <code>Vector3f</code> that is a copy
-     * of the provided vector
-     * @param v The Vector3f to copy
-     */
-    public Vector4f( Vector2f v, float z) {
-      super(v.x, v.y, z, 1);
-    }
+  /**
+   * Constructor instantiates a new <code>Vector3f</code> that is a copy of the
+   * provided vector
+   * 
+   * @param v
+   *          The Vector3f to copy
+   */
+  public Vector4f(Vector2f v) {
+    super(v.x, v.y, 0, 1);
+  }
 
-    /**
-     * Constructor instantiates a new <code>Vector3f</code> that is a copy
-     * of the provided vector
-     * @param v The Vector3f to copy
-     */
-    public Vector4f( Vector2f v) {
-      super(v.x, v.y, 0, 1);
-    }
+  /**
+   * Constructor instantiates a new <code>Vector3f</code> that is a copy of the
+   * provided vector
+   * 
+   * @param v
+   *          The Vector3f to copy
+   * @param w
+   *          w
+   */
+  public Vector4f(Vector3f v, float w) {
+    super(v.x, v.y, v.z, w);
+  }
 
-    /**
-     * Constructor instantiates a new <code>Vector3f</code> that is a copy
-     * of the provided vector
-     * @param v The Vector3f to copy
-     */
-    public Vector4f( Vector3f v, float w ) {
-      super(v.x, v.y, v.z, w);
-    }
+  /**
+   * Constructor instantiates a new <code>Vector3f</code> that is a copy of the
+   * provided vector
+   * 
+   * @param v
+   *          The Vector3f to copy
+   */
+  public Vector4f(Vector3f v) {
+    super(v.x, v.y, v.z, 1);
+  }
 
-    /**
-     * Constructor instantiates a new <code>Vector3f</code> that is a copy
-     * of the provided vector
-     * @param v The Vector3f to copy
-     */
-    public Vector4f( Vector3f v) {
-      super(v.x, v.y, v.z, 1);
-    }
+  @Override
+  protected Vector4f build(float x, float y, float z, float w) {
+    return new Vector4f(x, y, z, w);
+  }
 
-    @Override
-    protected Vector4f build(float x, float y, float z, float w) {
-      return new Vector4f(x,y,z,w);
-    }
-
-    @Override
-    protected Vector4f build(float s) {
-      return new Vector4f(s);
-    }
+  @Override
+  protected Vector4f build(float s) {
+    return new Vector4f(s);
+  }
 
 }

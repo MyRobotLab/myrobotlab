@@ -1,2 +1,2 @@
 # start the service
-raspi = Runtime.start("raspi","RasPi")
+raspi = runtime.start("raspi","RasPi")

@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.StatusPublisher;
@@ -138,8 +139,10 @@ public abstract class Repo {
       // FIXME reduce down to maven central bintray & repo.myrobotlab.org
       remotes = new ArrayList<RemoteRepo>();
       remotes.add(new RemoteRepo("central", "https://repo.maven.apache.org/maven2", "the mother load"));
-      // remotes.add(new RemoteRepo("bintray", "https://jcenter.bintray.com", "the big kahuna"));
-      // remotes.add(new RemoteRepo("bintray2", "https://dl.bintray.com", "more big kahuna"));
+      // remotes.add(new RemoteRepo("bintray", "https://jcenter.bintray.com",
+      // "the big kahuna"));
+      // remotes.add(new RemoteRepo("bintray2", "https://dl.bintray.com", "more
+      // big kahuna"));
       remotes.add(new RemoteRepo("myrobotlab", "http://repo.myrobotlab.org/artifactory/myrobotlab", "all other mrl deps"));
       remotes.add(new RemoteRepo("sarxos", "http://oss.sonatype.org/content/repositories/snapshots", "for sarxos webcam"));
 
@@ -149,19 +152,24 @@ public abstract class Repo {
       // jai_imageio")); - do not use
       remotes.add(new RemoteRepo("eclipse-release", "https://repo.eclipse.org/content/groups/releases"));
 
-      // remotes.add(new RemoteRepo("jmonkey", "https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine", "jmonkey simulator"));
+      // remotes.add(new RemoteRepo("jmonkey",
+      // "https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine", "jmonkey
+      // simulator"));
 
       remotes.add(new RemoteRepo("oss-snapshots-repo", "https://oss.sonatype.org/content/groups/public", "sphinx"));
-      remotes.add(new RemoteRepo("tudelft", "http://simulation.tudelft.nl/maven", "for j3d core, utils and vector"));
-      // remotes.add(new RemoteRepo("jitpack", "https://jitpack.io", "microsoft
-      // azure
-      // translate"));
-      remotes.add(new RemoteRepo("alfresco", "https://artifacts.alfresco.com/nexus/content/repositories/public", "swinggui mxgraph"));
+      // remotes.add(new RemoteRepo("alfresco",
+      // "https://artifacts.alfresco.com/nexus/content/repositories/public",
+      // "swinggui mxgraph"));
+      // remotes.add(new RemoteRepo("talend", "https://nexus.talanlabs.com/content/repositories/releases/", "swinggui mxgraph"));
 
       remotes.add(new RemoteRepo("marytts", "http://mary.dfki.de/repo", "some marytts voices"));
-      
-      // This one is needed because of a transient dependency of solr org.restlet.jee .. not sure where 
-      remotes.add(new RemoteRepo("maven-restlet", "https://maven.restlet.talend.com", "Public online Restlet repository"));
+
+      // This one is needed because of a transient dependency of solr
+      // org.restlet.jee .. not sure where
+      // remotes.add(new RemoteRepo("maven-restlet", "https://maven.restlet.talend.com", "Public online Restlet repository"));
+
+      // This is the repo for the Java Discord API for the Discord Bot service lives.
+      remotes.add(new RemoteRepo("dv8tion", "https://m2.dv8tion.net/releases", "Discord Bot - m2-dv8tion"));
       
       load();
     } catch (Exception e) {
@@ -322,8 +330,18 @@ public abstract class Repo {
   }
 
   static public void publishStatus(Status status) {
+    log.info(status.toString());
     for (StatusPublisher service : installStatusPublishers) {
-      service.broadcastStatus(status);
+      // service.broadcastStatus(status);
+      // service.publishStatus(status);
+
+      if (service instanceof Service) {
+        Service s = (Service) service;
+        status.name = s.getName();
+        status.source = "repo";
+        s.invoke("publishStatus", status);
+      }
+
     }
   }
 
@@ -417,6 +435,8 @@ public abstract class Repo {
    * returns false
    * 
    * @param fullTypeName
+   *          the full type name of the service.
+   * 
    * @return true/false
    */
   public boolean isServiceTypeInstalled(String fullTypeName) {
@@ -486,6 +506,10 @@ public abstract class Repo {
     } catch (Exception e) {
       log.error("save threw", e);
     }
+  }
+
+  public void removeStatusPublishers() {
+    installStatusPublishers.clear();   
   }
 
 }

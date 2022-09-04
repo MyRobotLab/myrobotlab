@@ -42,9 +42,14 @@ public class DruppNeck extends Service {
    * down servos.
    * 
    * @param roll
+   *          degrees
    * @param pitch
+   *          degrees
    * @param yaw
+   *          degrees
    * @throws Exception
+   *           boom
+   * 
    */
   public void moveTo(double roll, double pitch, double yaw) throws Exception {
     // convert to radians

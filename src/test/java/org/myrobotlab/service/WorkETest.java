@@ -1,9 +1,5 @@
 package org.myrobotlab.service;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -20,9 +16,9 @@ public class WorkETest extends AbstractTest {
   public final static Logger log = LoggerFactory.getLogger(WorkETest.class);
 
   final static byte[] M1_FORWARD_POWER_LEVEL_12 = new byte[] { 6, -128, 0, 12 };
-  
+
   final static byte[] M1_FORWARD_POWER_LEVEL_20 = new byte[] { 12, -128, 0, 20 };
-  
+
   final static byte[] M1_FORWARD_POWER_LEVEL_3 = new byte[] { -86, -128, 0, 3 };
 
   final static byte[] M1_FORWARD_POWER_LEVEL_6 = new byte[] { 3, -128, 0, 6 };
@@ -46,7 +42,7 @@ public class WorkETest extends AbstractTest {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    
+
   }
 
   @AfterClass
@@ -59,14 +55,14 @@ public class WorkETest extends AbstractTest {
   public final void integrationTest() throws Exception {
 
     worke = (WorkE) Runtime.start("worke", "WorkE");
-    worke.startPeer("joystick");
-    
+    // worke.startPeer("joystick");
+
     // Joystick joystick = (Joystick)Runtime.start("worke", "Joystick");
 
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
     webgui.autoStartBrowser(false);
     webgui.startService();
-    
+
     // opportunity to do substitutions - with create
     // e.g. - worke.setAxisLeft("zz");
 
@@ -85,33 +81,29 @@ public class WorkETest extends AbstractTest {
 
     // get virtual joystick
     // and move work-e around
-    
+
     /**
      * <pre>
      *
-    Joystick joystick = worke.getJoystick();
-
-    // joystick and validating appropriate power level
-    joystick.moveTo(lefAxis, 0.16);
-    uart.read(sabertoothMsg);
-    assertTrue(Arrays.equals(M1_FORWARD_POWER_LEVEL_3, sabertoothMsg));
-
-    joystick.moveTo(lefAxis, 0.32);
-    uart.read(sabertoothMsg);
-    assertTrue(Arrays.equals(M1_FORWARD_POWER_LEVEL_6, sabertoothMsg));
-
-    joystick.moveTo(lefAxis, 0.64);
-    uart.read(sabertoothMsg);
-    assertTrue(Arrays.equals(M1_FORWARD_POWER_LEVEL_12, sabertoothMsg));
-
-    joystick.moveTo(lefAxis, 1.0);
-    uart.read(sabertoothMsg);
-    assertTrue(Arrays.equals(M1_FORWARD_POWER_LEVEL_20, sabertoothMsg));
-
-    joystick.pressButton("a");
-
-    Runtime.releaseAll();
-    */
+     * Joystick joystick = worke.getJoystick();
+     * 
+     * // joystick and validating appropriate power level
+     * joystick.moveTo(lefAxis, 0.16); uart.read(sabertoothMsg);
+     * assertTrue(Arrays.equals(M1_FORWARD_POWER_LEVEL_3, sabertoothMsg));
+     * 
+     * joystick.moveTo(lefAxis, 0.32); uart.read(sabertoothMsg);
+     * assertTrue(Arrays.equals(M1_FORWARD_POWER_LEVEL_6, sabertoothMsg));
+     * 
+     * joystick.moveTo(lefAxis, 0.64); uart.read(sabertoothMsg);
+     * assertTrue(Arrays.equals(M1_FORWARD_POWER_LEVEL_12, sabertoothMsg));
+     * 
+     * joystick.moveTo(lefAxis, 1.0); uart.read(sabertoothMsg);
+     * assertTrue(Arrays.equals(M1_FORWARD_POWER_LEVEL_20, sabertoothMsg));
+     * 
+     * joystick.pressButton("a");
+     * 
+     * Runtime.releaseAll();
+     */
   }
 
   @Before

@@ -3,17 +3,9 @@ angular.module('mrlapp.service.Adafruit16CServoDriverGui', []).controller('Adafr
     var _self = this
     var msg = this.msg
 
-    // init
-    $scope.selectedControllerName = null
-    $scope.selectedDeviceBus = null
-    $scope.selectedDeviceAddress = null
-
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
-        $scope.selectedControllerName = service.controllerName
-        $scope.selectedDeviceAddress = service.deviceAddress
-        $scope.selectedDeviceBus = service.deviceBus
     }
 
     this.onMsg = function(inMsg) {
@@ -33,12 +25,24 @@ angular.module('mrlapp.service.Adafruit16CServoDriverGui', []).controller('Adafr
         }
     }
 
+    $scope.setController = function(name) {
+        $scope.service.controllerName = name
+    }
+
     $scope.attach = function() {
-        msg.send('attach', $scope.selectedControllerName, $scope.selectedDeviceBus, $scope.selectedDeviceAddress)
+        msg.send('attach', $scope.service.controllerName, $scope.service.deviceBus, $scope.service.deviceAddress)
     }
 
     $scope.detach = function() {
-        msg.send('detach')        
+        msg.send('detach')
+    }
+
+    $scope.controllerOptions = {
+        interface: 'I2CController',
+        attach: $scope.setController,
+        // callback: function...
+        attachName: $scope.service.controllerName,
+        controllerTitle: 'i2c controller'
     }
 
     msg.subscribe(this)

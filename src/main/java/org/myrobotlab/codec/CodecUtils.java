@@ -5,25 +5,34 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -150,24 +159,30 @@ public class CodecUtils {
   }
 
   static public final String shortName(String name) {
+    if (name == null) {
+      return null;
+    }
     if (name.contains("@")) {
       return name.substring(0, name.indexOf("@"));
     } else {
       return name;
     }
   }
-  
+
   /**
    * Gets the instance id from a service name
+   * 
    * @param name
-   * @return
+   *          the name of the instance
+   * @return the name of the instance
+   * 
    */
   static public final String getId(String name) {
-    if (name == null){
+    if (name == null) {
       return null;
     }
     if (name.contains("@")) {
-      return name.substring(name.lastIndexOf("@")+1);
+      return name.substring(name.lastIndexOf("@") + 1);
     } else {
       return null;
     }
@@ -426,8 +441,7 @@ public class CodecUtils {
    *          - target service
    * @param cmd
    *          - cli encoded msg
-   * @return 
-   *          - a Message derived from cli
+   * @return - a Message derived from cli
    */
   static public Message cliToMsg(String contextPath, String from, String to, String cmd) {
     Message msg = Message.createMessage(from, to, "ls", null);
@@ -487,15 +501,34 @@ public class CodecUtils {
 
       // fix me diff from 2 & 3 "/"
       if (parts.length >= 3) {
+        // prepare to parse the arguments
+
         msg.name = parts[1];
         // prepare the method
         msg.method = parts[2].trim();
 
         // FIXME - to encode or not to encode that is the question ...
+        // This source comes from the cli - which is "all" strings
+        // in theory it needs to be decoded from an all strings interface
+        // json is an all string interface so we will decode from cli strings
+        // (not json)
+        // using a json decoder - cuz it will work :P - and string will decode
+        // to a string
         Object[] payload = new Object[parts.length - 3];
         for (int i = 3; i < parts.length; ++i) {
-          payload[i - 3] = parts[i];
+          if (isInteger(parts[i])) {
+            payload[i - 3] = makeInteger(parts[i]);
+          } else if (isDouble(parts[i])) {
+            payload[i - 3] = makeDouble(parts[i]);
+          } else if (parts[i].equals("true") || parts[i].equals("false")) {
+            payload[i - 3] = makeBoolean(parts[i]);
+          } else { // String
+            // sloppy as the cli does not require quotes \" but json does
+            // humans won't add quotes - but we will
+            payload[i - 3] = parts[i];
+          }
         }
+
         msg.data = payload;
       }
       return msg;
@@ -523,6 +556,52 @@ public class CodecUtils {
     }
   }
 
+  static public Integer makeInteger(String data) {
+    try {
+      return Integer.parseInt(data);
+    } catch (Exception e) {
+    }
+    return null;
+  }
+
+  static public boolean isInteger(String data) {
+    try {
+      Integer.parseInt(data);
+      return true;
+    } catch (Exception e) {
+    }
+    return false;
+  }
+
+  static public boolean isDouble(String data) {
+    try {
+      Double.parseDouble(data);
+      return true;
+    } catch (Exception e) {
+    }
+    return false;
+  }
+
+  static public Double makeDouble(String data) {
+    try {
+      return Double.parseDouble(data);
+    } catch (Exception e) {
+    }
+    return null;
+  }
+
+  static public Boolean isBoolean(String data) {
+    return Boolean.parseBoolean(data);
+  }
+
+  static public Boolean makeBoolean(String data) {
+    try {
+      return Boolean.parseBoolean(data);
+    } catch (Exception e) {
+    }
+    return null;
+  }
+
   static public List<ApiDescription> getApis() {
     List<ApiDescription> ret = new ArrayList<>();
     ret.add(new ApiDescription("message", "{scheme}://{host}:{port}/api/messages", "ws://localhost:8888/api/messages",
@@ -532,34 +611,26 @@ public class CodecUtils {
     return ret;
   }
 
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-
-    try {
-      String json = CodecUtils.fromJson("test", String.class);
-      log.info("json {}", json);
-      json = CodecUtils.fromJson("a test", String.class);
-      log.info("json {}", json);
-      json = CodecUtils.fromJson("\"a/test\"", String.class);
-      log.info("json {}", json);
-      CodecUtils.fromJson("a/test", String.class);
-
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
-  }
-
   /**
-   * Creates a properly double encoded Json msg string.
-   * Why double encode ? - because initial decode should decode router and header information.
-   * The first decode will leave the payload a array of json strings.  The header will send it to a another process
-   * or it will go to the MethodCache of some service.  The MethodCache will decode a 2nd time based on a method
-   * signature key match (key based on parameter types).
+   * Creates a properly double encoded Json msg string. Why double encode ? -
+   * because initial decode should decode router and header information. The
+   * first decode will leave the payload a array of json strings. The header
+   * will send it to a another process or it will go to the MethodCache of some
+   * service. The MethodCache will decode a 2nd time based on a method signature
+   * key match (key based on parameter types).
    * 
-   * @param fullName
-   * @param dest
-   * @param Src
+   * @param sender
+   *          the sender of the message
+   * @param sendingMethod
+   *          the method sending it
+   * @param name
+   *          dest service
+   * @param method
+   *          dest method
    * @param params
+   *          params to pass
+   * @return the string representation of the json message
+   * 
    */
   final public static String createJsonMsg(String sender, String sendingMethod, String name, String method, Object... params) {
     Message msg = Message.createMessage(sender, name, method, null);
@@ -574,7 +645,7 @@ public class CodecUtils {
     }
     return CodecUtils.toJson(msg);
   }
-  
+
   final public static String toJsonMsg(Message inMsg) {
     if ("json".equals(inMsg.encoding)) {
       // msg already has json encoded data parameters
@@ -604,8 +675,115 @@ public class CodecUtils {
         params[i] = toJson(data[i]);
       }
       msg.setData(params);
-    }    
+    }
     return msg;
   }
 
+  final public static String toYaml(Object o) {
+    // not thread safe - so we new here
+    DumperOptions options = new DumperOptions();
+    options.setIndent(2);
+    options.setPrettyFlow(true);
+    // options.setBeanAccess(BeanAccess.FIELD);
+    options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+    /**
+     * <pre>
+     *  How to suppress null fields if desired
+     Representer representer = new Representer() {
+       &#64;Override
+       protected NodeTuple representJavaBeanProperty(Object javaBean, Property property, Object propertyValue, Tag customTag) {
+         // if value of property is null, ignore it.
+         if (propertyValue == null) {
+           return null;
+         } else {
+           return super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);
+         }
+       }
+     };
+     * </pre>
+     */
+
+    Yaml yaml = new Yaml(options);
+    // yaml.setBeanAccess(BeanAccess.FIELD);
+    String c = yaml.dump(o);
+    return c;
+  }
+
+  final public static String allToYaml(Iterator<? extends Object> o) {
+    // not thread safe - so we new here
+    DumperOptions options = new DumperOptions();
+    options.setIndent(2);
+    options.setPrettyFlow(true);
+    options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+
+    Yaml yaml = new Yaml(options);
+    // yaml.setBeanAccess(BeanAccess.FIELD);
+    String c = yaml.dumpAll(o);
+    return c;
+  }
+
+  public final static Iterable<Object> allFromYaml(InputStream is) {
+    // Yaml yaml = new Yaml(new Constructor(clazz));
+    Yaml yaml = new Yaml();
+    // yaml.setBeanAccess(BeanAccess.FIELD);
+    return yaml.loadAll(is);
+  }
+
+  public final static <T extends Object> T fromYaml(String data, Class<T> clazz) {
+    Yaml yaml = new Yaml(new Constructor(clazz));
+    // yaml.setBeanAccess(BeanAccess.FIELD);
+    return (T) yaml.load(data);
+  }
+
+  public static boolean isLocal(String name, String id) {
+    if (!name.contains("@")) {
+      return true;
+    }
+    if (name.substring(name.indexOf("@") + 1).equals(id)) {
+      return true;
+    }
+    return false;
+  }
+  
+  public static ServiceConfig readServiceConfig(String filename) throws IOException {
+    String data = new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8);
+    Yaml yaml = new Yaml();
+    return (ServiceConfig)yaml.load(data);
+  }
+
+  public static void setField(Object o, String field, Object value) {
+    try {
+      // TODO - handle all types :P
+     Field f =  o.getClass().getDeclaredField(field);
+     f.setAccessible(true);
+     f.set(o, value);
+    } catch (Exception e) {
+      /** don't care - if its not there don't set it */
+    }
+  }
+  
+  
+  public static void main(String[] args) {
+    LoggingFactory.init(Level.INFO);
+
+    try {
+      
+      Object o = readServiceConfig("data/config/InMoov2_FingerStarter/i01.chatBot.yml");
+      
+      String json = CodecUtils.fromJson("test", String.class);
+      log.info("json {}", json);
+      json = CodecUtils.fromJson("a test", String.class);
+      log.info("json {}", json);
+      json = CodecUtils.fromJson("\"a/test\"", String.class);
+      log.info("json {}", json);
+      CodecUtils.fromJson("a/test", String.class);
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
+  
+  
+  
 }

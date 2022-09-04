@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 // FIXME - make runnable
 public class AudioProcessor extends Thread {
 
-  static Logger log = LoggerFactory.getLogger(AudioProcessor.class);
+  static transient Logger log = LoggerFactory.getLogger(AudioProcessor.class);
 
   // REFERENCES -
   // http://www.javalobby.org/java/forums/t18465.html
@@ -33,28 +33,29 @@ public class AudioProcessor extends Thread {
   // a audio decoder can be slected from some
   // internal registry ... i think
 
-  int currentTrackCount = 0;
-  int samplesAdded = 0;
+  protected int currentTrackCount = 0;
+  
+  protected int samplesAdded = 0;
 
-  double volume = 1.0f;
+  protected double volume = 1.0f;
 
-  float balance = 0.0f;
+  protected float balance = 0.0f;
 
-  float targetBalance = balance;
+  protected float targetBalance = balance;
 
-  AudioFile audioFile = null;
+  protected AudioFile audioFile = null;
 
-  boolean isPlaying = false;
+  protected boolean isPlaying = false;
 
-  boolean isRunning = false;
+  protected boolean isRunning = false;
 
-  public String track;
+  protected String track;
 
-  BlockingQueue<AudioData> queue = new LinkedBlockingQueue<AudioData>();
+  protected transient BlockingQueue<AudioData> queue = new LinkedBlockingQueue<AudioData>();
 
-  AudioData currentAudioData = null;
+  protected AudioData currentAudioData = null;
 
-  private int repeatCount;
+  protected int repeatCount;
 
   public AudioProcessor(AudioFile audioFile, String track) {
     super(String.format("%s:track", track));
@@ -62,10 +63,19 @@ public class AudioProcessor extends Thread {
     this.track = track;
   }
 
+  /**
+   * Pause the current playing file - if it is paused - it is "still considered" to
+   * be playing so isPlaying needs to remain true (otherwise the file/audio processor
+   * will completely stop)
+   * 
+   * @param b - to pause or not
+   * @return
+   */
   public AudioData pause(boolean b) {
-    if (b) {
-      isPlaying = false;
-    }
+    // isPlaying = b; <- DO NOT DO THIS !
+    // someone put this bug in - when a song is 'paused' its still playing
+    // ie - this needs to remain true otherwise it will not resume when
+    // requested !!      
     if (currentAudioData != null) {
       if (b) {
         currentAudioData.waitForLock = new Object();
@@ -74,6 +84,7 @@ public class AudioProcessor extends Thread {
           synchronized (currentAudioData.waitForLock) {
             currentAudioData.waitForLock.notifyAll();
             currentAudioData.waitForLock = null; // removing reference
+            isPlaying = true;
           }
         }
       }

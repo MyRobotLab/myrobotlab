@@ -11,8 +11,10 @@ import org.myrobotlab.service.data.PinData;
  */
 public interface PinArrayControl extends PinArrayPublisher {
 
-  public void attach(PinListener listener, int address);
+  @Deprecated /* use attach(String) or attachPinListener(PinListener) */
+  public void attachPinListener(PinListener listener, int address);
 
+  @Deprecated /* use attach(String) */
   public void attach(PinListener listener, String pin);
 
   public void disablePin(String pin);
@@ -52,5 +54,9 @@ public interface PinArrayControl extends PinArrayPublisher {
   public void write(int address, int value);
 
   Integer getAddress(String pin);
+  
+  public void attach(String name) throws Exception;
+
+  public void detach(String name) throws Exception;
 
 }

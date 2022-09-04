@@ -3,6 +3,8 @@ package org.myrobotlab.service;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
+import org.myrobotlab.service.config.MotorConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.MotorController;
 
 /**
@@ -44,6 +46,14 @@ public class Motor extends AbstractMotor {
     this.pwrPin = pwrPin + "";
   }
 
+  public void setPwrPin(String pwrPin) {
+    this.pwrPin = pwrPin;
+  }
+
+  public void setDirPin(String dirPin) {
+    this.dirPin = dirPin;
+  }
+
   public String getDirPin() {
     return dirPin;
   }
@@ -58,6 +68,31 @@ public class Motor extends AbstractMotor {
 
   public void setPwmFreq(Integer pwmfreq) {
     this.pwmFreq = pwmfreq;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    // FIXME - may need to do call super.config for config that has parent :(
+    MotorConfig config = new MotorConfig();
+    config.dirPin = getDirPin();
+    config.pwrPin = getPwrPin();
+    config.pwmFreq = getPwmFreq();
+    return config;
+  }
+
+  public ServiceConfig apply(ServiceConfig c) {
+    super.apply(c);
+    MotorConfig config = (MotorConfig) c;
+    if (config.pwrPin != null) {
+      setPwrPin(pwrPin);
+    }
+    if (config.dirPin != null) {
+      setDirPin(dirPin);
+    }
+    if (config.pwmFreq != null) {
+      setPwmFreq(pwmFreq);
+    }
+    return c;
   }
 
   public static void main(String[] args) {

@@ -19,7 +19,7 @@
           *  list dependencies
 
 */
-angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mrl, $log) {
+angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
     return {
         restrict: "E",
         templateUrl: 'widget/oscope.html',
@@ -44,64 +44,63 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
             // button toggle read/write
             // scope.blah = {};
             // scope.blah.display = false;
-            scope.pinMap = {};
             scope.pinIndex = service.pinIndex;
+            // scope.addressIndex = service.addressIndex;
             var x = 0;
-            var gradient = tinygradient([
-            {
+            var gradient = tinygradient([{
                 h: 0,
                 s: 0.4,
                 v: 1,
                 a: 1
-            }, 
-            {
+            }, {
                 h: 240,
                 s: 0.4,
                 v: 1,
                 a: 1
-            }
-            ]);
+            }]);
             scope.oscope = {};
             scope.oscope.traces = {};
             scope.oscope.writeStates = {};
             // display update interfaces
             // defintion stage
-            var setTraceButtons = function(pinMap) {
-                if (pinMap == null) {
+            var setTraceButtons = function(pinIndex) {
+                if (pinIndex == null) {
                     return;
                 }
-                var size = Object.keys(pinMap).length
-                scope.pinMap = pinMap;
-                var colorsHsv = gradient.hsv(size);
-                // pass over pinMap add display data
-                for (var key in pinMap) {
-                    if (!pinMap.hasOwnProperty(key)) {
-                        continue;
-                    }
-                    scope.oscope.traces[key] = {};
-                    var trace = scope.oscope.traces[key];
-                    var pinDef = pinMap[key];
+                var size = Object.keys(pinIndex).length
+                if (size && size > 0) {
+                    scope.pinIndex = pinIndex;
+                    var colorsHsv = gradient.hsv(size);
+                    // pass over pinIndex add display data
+                    for (var key in pinIndex) {
+                        if (!pinIndex.hasOwnProperty(key)) {
+                            continue;
+                        }
+                        scope.oscope.traces[key] = {};
+                        var trace = scope.oscope.traces[key];
+                        var pinDef = pinIndex[key];
 
-                    // adding style
-                    var color = colorsHsv[pinDef.address];
-                    trace.readStyle = {
-                        'background-color': color.toHexString()
-                    };
-                    trace.writeStyle = {
-                        'background-color': '#eee'
-                    };
-                    trace.color = color;
-                    trace.state = false;
-                    // off
-                    trace.posX = 0;
-                    trace.posY = 0;
-                    trace.count = 0;
-                    trace.colorHexString = color.toHexString();
-                    trace.stats = {
-                        min: 0,
-                        max: 1,
-                        totalValue: 0,
-                        totalSample: 1
+                        // adding style
+                        var color = colorsHsv[pinDef.address];
+                        trace.readStyle = {
+                            'background-color': color.toHexString()
+                        };
+                        trace.writeStyle = {
+                            'background-color': '#eee'
+                        };
+                        trace.color = color;
+                        trace.state = false;
+                        // off
+                        trace.posX = 0;
+                        trace.posY = 0;
+                        trace.count = 0;
+                        trace.colorHexString = color.toHexString();
+                        trace.stats = {
+                            min: 0,
+                            max: 1,
+                            totalValue: 0,
+                            totalSample: 1
+                        }
                     }
                 }
             }
@@ -111,7 +110,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
                 switch (inMsg.method) {
                 case 'onState':
                     // backend update 
-                    setTraceButtons(inMsg.data[0].pinMap);
+                    setTraceButtons(inMsg.data[0].pinIndex);
                     scope.$apply();
                     break;
                 case 'onPinArray':
@@ -120,7 +119,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
                     for (i = 0; i < pinArray.length; ++i) {
                         // get pin data & definition
                         pinData = pinArray[i];
-                        pinDef = scope.pinMap[pinData.pin];
+                        pinDef = scope.pinIndex[pinData.pin];
                         // get correct screen and references
                         var screen = document.getElementById('oscope-pin-' + pinData.pin);
                         var ctx = screen.getContext('2d');
@@ -195,7 +194,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
             scope.clearScreen = function(pinArray) {
                 for (i = 0; i < pinArray.length; ++i) {
                     pinData = pinArray[i];
-                    pinDef = scope.pinMap[pinData.pin];
+                    pinDef = scope.pinIndex[pinData.pin];
                     _self.ctx = screen.getContext('2d');
                     // ctx.scale(1, -1); // flip y around for cartesian - bad idea :P
                     // width = screen.width;
@@ -213,7 +212,8 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
                 scaleY += 1;
                 _self.ctx.scale(scaleX, scaleY);
             }
-            ;// RENAME eanbleTrace - FIXME read values vs write values | ALL values from service not from ui !! - ui only sends commands
+            ;
+            // RENAME eanbleTrace - FIXME read values vs write values | ALL values from service not from ui !! - ui only sends commands
             scope.activateTrace = function(pinDef) {
                 var trace = scope.oscope.traces[pinDef.pin];
                 if (trace.state) {
@@ -301,7 +301,8 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
                         'background-color': newColor.toHexString()
                     };
                 }
-            };
+            }
+            ;
             // FIXME FIXME FIXME ->> THIS SHOULD WORK subscribeToServiceMethod  <- but doesnt
             mrl.subscribeToService(_self.onMsg, name);
             // this siphons off a single subscribe to the webgui
@@ -309,7 +310,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
             mrl.subscribe(name, 'publishPinArray');
             mrl.subscribeToServiceMethod(_self.onMsg, name, 'publishPinArray');
             // initializing display data     
-           
+
             setTraceButtons(service.pinIndex);
         }
     };

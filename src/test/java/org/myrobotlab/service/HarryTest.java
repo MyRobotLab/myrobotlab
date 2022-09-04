@@ -222,9 +222,9 @@ public class HarryTest extends AbstractTest {
     String rightPort = "COM100";
     setupVirtualArduinos(leftPort, rightPort);
 
-    InMoov i01 = (InMoov) Runtime.createAndStart("i01", "InMoov");
+    InMoov2 i01 = (InMoov2) Runtime.createAndStart("i01", "InMoov2");
     i01.setMute(true);
-    i01.startAll(leftPort, rightPort);
+    i01.startAll();
     // if startInMoov:
     // i01.startAll(leftPort, rightPort)
     // else:

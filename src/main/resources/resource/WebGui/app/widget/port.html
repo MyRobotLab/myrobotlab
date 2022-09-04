@@ -3,7 +3,7 @@
    <label>port</label>
     <div class="input-group">
    <!-- {{possiblePorts}} -->
-       <input class="form-control" type="text" id="portName" ng-model="portName" ng-readonly="isConnected" uib-typeahead="portName for portName in possiblePorts | filter:$viewValue" typeahead-min-length="0"/>
+       <input class="form-control" type="text" id="{{service.name}}-portName" ng-model="portName" ng-readonly="isConnected" uib-typeahead="portName for portName in possiblePorts | filter:$viewValue" typeahead-min-length="0"/>
        <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="refresh()">refresh</button></span>
        <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="connect(portName, service.rate, service.dataBits, service.stopBits, service.parity)">connect</button></span>
        <span class="input-group-btn"><button class="btn btn-default" ng-show="isConnected" ng-click="disconnect()">disconnect</button></span>

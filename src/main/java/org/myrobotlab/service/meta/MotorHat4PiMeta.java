@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -12,13 +11,8 @@ public class MotorHat4PiMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
    */
-  public MotorHat4PiMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
-
+  public MotorHat4PiMeta() {
     addDescription("Motor service for the Raspi Motor HAT");
     addCategory("motor");
     addPeer("hat", "AdafruitMotorHat4Pi", "Motor HAT");

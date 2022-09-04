@@ -1,28 +1,6 @@
 package org.myrobotlab.service;
 
-import static org.myrobotlab.service.data.Mpu6050Data.dmpAddress1;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpAddress2;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpAddress3;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpAddress4;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpAddress5;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpAddress6;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpAddress7;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpBank1;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpBank2;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpBank3;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpBank4;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpBank5;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpBank6;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpBank7;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpConfig;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpMemory;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpUpdates1;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpUpdates2;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpUpdates3;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpUpdates4;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpUpdates5;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpUpdates6;
-import static org.myrobotlab.service.data.Mpu6050Data.dmpUpdates7;
+import static org.myrobotlab.service.data.Mpu6050Data.*;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -32,9 +10,12 @@ import java.util.Set;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.Mpu6050Config;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Orientation;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -44,32 +25,18 @@ import org.slf4j.Logger;
 
 /**
  * 
- * MPU6050 - MPU-6050 sensor contains a MEMS accelerometer and a MEMS gyro in a single chip. 
- * It is very accurate, as it contains 16-bits analog to digital conversion hardware for each channel. 
- * Therefore it captures the x, y, and z channel at the same time.
- * http://playground.arduino.cc/Main/MPU-6050
+ * MPU6050 - MPU-6050 sensor contains a MEMS accelerometer and a MEMS gyro in a
+ * single chip. It is very accurate, as it contains 16-bits analog to digital
+ * conversion hardware for each channel. Therefore it captures the x, y, and z
+ * channel at the same time. http://playground.arduino.cc/Main/MPU-6050
  *
- * This is a port of the https://github.com/jrowberg/i2cdevlib/blob/master/Arduino/MPU6050/MPU6050.cpp
- * from Arduino C/C++ to Java. 
+ * This is a port of the
+ * https://github.com/jrowberg/i2cdevlib/blob/master/Arduino/MPU6050/MPU6050.cpp
+ * from Arduino C/C++ to Java.
  * 
- */
-/**
- * ============================================ I2Cdev device library code is
- * placed under the MIT license Copyright (c) 2012 Jeff Rowberg Permission is
- * hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the
- * Software without restriction, including without limitation the rights to use,
- * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do
- * so, subject to the following conditions: The above copyright notice and this
- * permission notice shall be included in all copies or substantial portions of
- * the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
- * EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
- * OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE. ===============================================
+ * I2Cdev device library code is placed under the MIT license Copyright (c) 2012
+ * Jeff Rowberg
+ * 
  */
 
 public class Mpu6050 extends Service implements I2CControl, OrientationPublisher {
@@ -78,494 +45,143 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 
   public final static Logger log = LoggerFactory.getLogger(Mpu6050.class);
 
-  StringBuilder debugRX = new StringBuilder();
+  protected StringBuilder debugRX = new StringBuilder();
 
-  transient HashSet<OrientationListener> listeners = new HashSet<OrientationListener>();
+  protected transient HashSet<OrientationListener> listeners = new HashSet<OrientationListener>();
 
-  transient OrientationPublisher publisher;
+  final protected OrientationPublisher publisher = new OrientationPublisher();
 
-  public transient I2CController controller;
+  protected transient I2CController controller;
 
-  public List<String> deviceAddressList = Arrays.asList("0x68", "0x69");
-  public String deviceAddress = "0x68";
+  protected List<String> deviceAddressList = Arrays.asList("0x68", "0x69");
 
-  public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8");
-  public String deviceBus = "1";
+  protected String deviceAddress = "0x68";
 
-  public static final int MPU6050_ADDRESS_AD0_LOW = 0x68; // address pin low
-  // (GND), default
-  // for
-  // InvenSense
-  // evaluation board
-  public static final int MPU6050_ADDRESS_AD0_HIGH = 0x69; // address pin high
-  // (VCC)
-  public static final int MPU6050_DEFAULT_ADDRESS = MPU6050_ADDRESS_AD0_LOW;
+  protected List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8");
 
-  public static final int MPU6050_RA_XG_OFFS_TC = 0x00; // [7] PWR_MODE, [6:1]
-  // XG_OFFS_TC, [0]
-  // OTP_BNK_VLD
-  public static final int MPU6050_RA_YG_OFFS_TC = 0x01; // [7] PWR_MODE, [6:1]
-  // YG_OFFS_TC, [0]
-  // OTP_BNK_VLD
-  public static final int MPU6050_RA_ZG_OFFS_TC = 0x02; // [7] PWR_MODE, [6:1]
-  // ZG_OFFS_TC, [0]
-  // OTP_BNK_VLD
-  public static final int MPU6050_RA_X_FINE_GAIN = 0x03; // [7:0] X_FINE_GAIN
-  public static final int MPU6050_RA_Y_FINE_GAIN = 0x04; // [7:0] Y_FINE_GAIN
-  public static final int MPU6050_RA_Z_FINE_GAIN = 0x05; // [7:0] Z_FINE_GAIN
-  public static final int MPU6050_RA_XA_OFFS_H = 0x06; // [15:0] XA_OFFS
-  public static final int MPU6050_RA_XA_OFFS_L_TC = 0x07;
-  public static final int MPU6050_RA_YA_OFFS_H = 0x08; // [15:0] YA_OFFS
-  public static final int MPU6050_RA_YA_OFFS_L_TC = 0x09;
-  public static final int MPU6050_RA_ZA_OFFS_H = 0x0A; // [15:0] ZA_OFFS
-  public static final int MPU6050_RA_ZA_OFFS_L_TC = 0x0B;
-  public static final int MPU6050_RA_SELF_TEST_X = 0x0D; // [7:5]
-  // XA_TEST[4-2],
-  // [4:0]
-  // XG_TEST[4-0]
-  public static final int MPU6050_RA_SELF_TEST_Y = 0x0E; // [7:5]
-  // YA_TEST[4-2],
-  // [4:0]
-  // YG_TEST[4-0]
-  public static final int MPU6050_RA_SELF_TEST_Z = 0x0F; // [7:5]
-  // ZA_TEST[4-2],
-  // [4:0]
-  // ZG_TEST[4-0]
-  public static final int MPU6050_RA_SELF_TEST_A = 0x10; // [5:4]
-  // XA_TEST[1-0],
-  // [3:2]
-  // YA_TEST[1-0],
-  // [1:0]
-  // ZA_TEST[1-0]
-  public static final int MPU6050_RA_XG_OFFS_USRH = 0x13; // [15:0]
-  // XG_OFFS_USR
-  public static final int MPU6050_RA_XG_OFFS_USRL = 0x14;
-  public static final int MPU6050_RA_YG_OFFS_USRH = 0x15; // [15:0]
-  // YG_OFFS_USR
-  public static final int MPU6050_RA_YG_OFFS_USRL = 0x16;
-  public static final int MPU6050_RA_ZG_OFFS_USRH = 0x17; // [15:0]
-  // ZG_OFFS_USR
-  public static final int MPU6050_RA_ZG_OFFS_USRL = 0x18;
-  public static final int MPU6050_RA_SMPLRT_DIV = 0x19;
-  public static final int MPU6050_RA_CONFIG = 0x1A;
-  public static final int MPU6050_RA_GYRO_CONFIG = 0x1B;
-  public static final int MPU6050_RA_ACCEL_CONFIG = 0x1C;
-  public static final int MPU6050_RA_FF_THR = 0x1D;
-  public static final int MPU6050_RA_FF_DUR = 0x1E;
-  public static final int MPU6050_RA_MOT_THR = 0x1F;
-  public static final int MPU6050_RA_MOT_DUR = 0x20;
-  public static final int MPU6050_RA_ZRMOT_THR = 0x21;
-  public static final int MPU6050_RA_ZRMOT_DUR = 0x22;
-  public static final int MPU6050_RA_FIFO_EN = 0x23;
-  public static final int MPU6050_RA_I2C_MST_CTRL = 0x24;
-  public static final int MPU6050_RA_I2C_SLV0_ADDR = 0x25;
-  public static final int MPU6050_RA_I2C_SLV0_REG = 0x26;
-  public static final int MPU6050_RA_I2C_SLV0_CTRL = 0x27;
-  public static final int MPU6050_RA_I2C_SLV1_ADDR = 0x28;
-  public static final int MPU6050_RA_I2C_SLV1_REG = 0x29;
-  public static final int MPU6050_RA_I2C_SLV1_CTRL = 0x2A;
-  public static final int MPU6050_RA_I2C_SLV2_ADDR = 0x2B;
-  public static final int MPU6050_RA_I2C_SLV2_REG = 0x2C;
-  public static final int MPU6050_RA_I2C_SLV2_CTRL = 0x2D;
-  public static final int MPU6050_RA_I2C_SLV3_ADDR = 0x2E;
-  public static final int MPU6050_RA_I2C_SLV3_REG = 0x2F;
-  public static final int MPU6050_RA_I2C_SLV3_CTRL = 0x30;
-  public static final int MPU6050_RA_I2C_SLV4_ADDR = 0x31;
-  public static final int MPU6050_RA_I2C_SLV4_REG = 0x32;
-  public static final int MPU6050_RA_I2C_SLV4_DO = 0x33;
-  public static final int MPU6050_RA_I2C_SLV4_CTRL = 0x34;
-  public static final int MPU6050_RA_I2C_SLV4_DI = 0x35;
-  public static final int MPU6050_RA_I2C_MST_STATUS = 0x36;
-  public static final int MPU6050_RA_INT_PIN_CFG = 0x37;
-  public static final int MPU6050_RA_INT_ENABLE = 0x38;
-  public static final int MPU6050_RA_DMP_INT_STATUS = 0x39;
-  public static final int MPU6050_RA_INT_STATUS = 0x3A;
-  public static final int MPU6050_RA_ACCEL_XOUT_H = 0x3B;
-  public static final int MPU6050_RA_ACCEL_XOUT_L = 0x3C;
-  public static final int MPU6050_RA_ACCEL_YOUT_H = 0x3D;
-  public static final int MPU6050_RA_ACCEL_YOUT_L = 0x3E;
-  public static final int MPU6050_RA_ACCEL_ZOUT_H = 0x3F;
-  public static final int MPU6050_RA_ACCEL_ZOUT_L = 0x40;
-  public static final int MPU6050_RA_TEMP_OUT_H = 0x41;
-  public static final int MPU6050_RA_TEMP_OUT_L = 0x42;
-  public static final int MPU6050_RA_GYRO_XOUT_H = 0x43;
-  public static final int MPU6050_RA_GYRO_XOUT_L = 0x44;
-  public static final int MPU6050_RA_GYRO_YOUT_H = 0x45;
-  public static final int MPU6050_RA_GYRO_YOUT_L = 0x46;
-  public static final int MPU6050_RA_GYRO_ZOUT_H = 0x47;
-  public static final int MPU6050_RA_GYRO_ZOUT_L = 0x48;
-  public static final int MPU6050_RA_EXT_SENS_DATA_00 = 0x49;
-  public static final int MPU6050_RA_EXT_SENS_DATA_01 = 0x4A;
-  public static final int MPU6050_RA_EXT_SENS_DATA_02 = 0x4B;
-  public static final int MPU6050_RA_EXT_SENS_DATA_03 = 0x4C;
-  public static final int MPU6050_RA_EXT_SENS_DATA_04 = 0x4D;
-  public static final int MPU6050_RA_EXT_SENS_DATA_05 = 0x4E;
-  public static final int MPU6050_RA_EXT_SENS_DATA_06 = 0x4F;
-  public static final int MPU6050_RA_EXT_SENS_DATA_07 = 0x50;
-  public static final int MPU6050_RA_EXT_SENS_DATA_08 = 0x51;
-  public static final int MPU6050_RA_EXT_SENS_DATA_09 = 0x52;
-  public static final int MPU6050_RA_EXT_SENS_DATA_10 = 0x53;
-  public static final int MPU6050_RA_EXT_SENS_DATA_11 = 0x54;
-  public static final int MPU6050_RA_EXT_SENS_DATA_12 = 0x55;
-  public static final int MPU6050_RA_EXT_SENS_DATA_13 = 0x56;
-  public static final int MPU6050_RA_EXT_SENS_DATA_14 = 0x57;
-  public static final int MPU6050_RA_EXT_SENS_DATA_15 = 0x58;
-  public static final int MPU6050_RA_EXT_SENS_DATA_16 = 0x59;
-  public static final int MPU6050_RA_EXT_SENS_DATA_17 = 0x5A;
-  public static final int MPU6050_RA_EXT_SENS_DATA_18 = 0x5B;
-  public static final int MPU6050_RA_EXT_SENS_DATA_19 = 0x5C;
-  public static final int MPU6050_RA_EXT_SENS_DATA_20 = 0x5D;
-  public static final int MPU6050_RA_EXT_SENS_DATA_21 = 0x5E;
-  public static final int MPU6050_RA_EXT_SENS_DATA_22 = 0x5F;
-  public static final int MPU6050_RA_EXT_SENS_DATA_23 = 0x60;
-  public static final int MPU6050_RA_MOT_DETECT_STATUS = 0x61;
-  public static final int MPU6050_RA_I2C_SLV0_DO = 0x63;
-  public static final int MPU6050_RA_I2C_SLV1_DO = 0x64;
-  public static final int MPU6050_RA_I2C_SLV2_DO = 0x65;
-  public static final int MPU6050_RA_I2C_SLV3_DO = 0x66;
-  public static final int MPU6050_RA_I2C_MST_DELAY_CTRL = 0x67;
-  public static final int MPU6050_RA_SIGNAL_PATH_RESET = 0x68;
-  public static final int MPU6050_RA_MOT_DETECT_CTRL = 0x69;
-  public static final int MPU6050_RA_USER_CTRL = 0x6A;
-  public static final int MPU6050_RA_PWR_MGMT_1 = 0x6B;
-  public static final int MPU6050_RA_PWR_MGMT_2 = 0x6C;
-  public static final int MPU6050_RA_BANK_SEL = 0x6D;
-  public static final int MPU6050_RA_MEM_START_ADDR = 0x6E;
-  public static final int MPU6050_RA_MEM_R_W = 0x6F;
-  public static final int MPU6050_RA_DMP_CFG_1 = 0x70;
-  public static final int MPU6050_RA_DMP_CFG_2 = 0x71;
-  public static final int MPU6050_RA_FIFO_COUNTH = 0x72;
-  public static final int MPU6050_RA_FIFO_COUNTL = 0x73;
-  public static final int MPU6050_RA_FIFO_R_W = 0x74;
-  public static final int MPU6050_RA_WHO_AM_I = 0x75;
+  protected String deviceBus = "1";
 
-  public static final int MPU6050_SELF_TEST_XA_1_BIT = 0x07;
-  public static final int MPU6050_SELF_TEST_XA_1_LENGTH = 0x03;
-  public static final int MPU6050_SELF_TEST_XA_2_BIT = 0x05;
-  public static final int MPU6050_SELF_TEST_XA_2_LENGTH = 0x02;
-  public static final int MPU6050_SELF_TEST_YA_1_BIT = 0x07;
-  public static final int MPU6050_SELF_TEST_YA_1_LENGTH = 0x03;
-  public static final int MPU6050_SELF_TEST_YA_2_BIT = 0x03;
-  public static final int MPU6050_SELF_TEST_YA_2_LENGTH = 0x02;
-  public static final int MPU6050_SELF_TEST_ZA_1_BIT = 0x07;
-  public static final int MPU6050_SELF_TEST_ZA_1_LENGTH = 0x03;
-  public static final int MPU6050_SELF_TEST_ZA_2_BIT = 0x01;
-  public static final int MPU6050_SELF_TEST_ZA_2_LENGTH = 0x02;
+  final protected Mpu6050Data data = new Mpu6050Data();
 
-  public static final int MPU6050_SELF_TEST_XG_1_BIT = 0x04;
-  public static final int MPU6050_SELF_TEST_XG_1_LENGTH = 0x05;
-  public static final int MPU6050_SELF_TEST_YG_1_BIT = 0x04;
-  public static final int MPU6050_SELF_TEST_YG_1_LENGTH = 0x05;
-  public static final int MPU6050_SELF_TEST_ZG_1_BIT = 0x04;
-  public static final int MPU6050_SELF_TEST_ZG_1_LENGTH = 0x05;
+  protected List<String> controllers;
 
-  public static final int MPU6050_TC_PWR_MODE_BIT = 7;
-  public static final int MPU6050_TC_OFFSET_BIT = 6;
-  public static final int MPU6050_TC_OFFSET_LENGTH = 6;
-  public static final int MPU6050_TC_OTP_BNK_VLD_BIT = 0;
+  protected String controllerName;
 
-  public static final int MPU6050_VDDIO_LEVEL_VLOGIC = 0;
-  public static final int MPU6050_VDDIO_LEVEL_VDD = 1;
+  /**
+   * frequency
+   */
+  protected Double sampleRateHz = 3.0;
 
-  public static final int MPU6050_CFG_EXT_SYNC_SET_BIT = 5;
-  public static final int MPU6050_CFG_EXT_SYNC_SET_LENGTH = 3;
-  public static final int MPU6050_CFG_DLPF_CFG_BIT = 2;
-  public static final int MPU6050_CFG_DLPF_CFG_LENGTH = 3;
-
-  public static final int MPU6050_EXT_SYNC_DISABLED = 0x0;
-  public static final int MPU6050_EXT_SYNC_TEMP_OUT_L = 0x1;
-  public static final int MPU6050_EXT_SYNC_GYRO_XOUT_L = 0x2;
-  public static final int MPU6050_EXT_SYNC_GYRO_YOUT_L = 0x3;
-  public static final int MPU6050_EXT_SYNC_GYRO_ZOUT_L = 0x4;
-  public static final int MPU6050_EXT_SYNC_ACCEL_XOUT_L = 0x5;
-  public static final int MPU6050_EXT_SYNC_ACCEL_YOUT_L = 0x6;
-  public static final int MPU6050_EXT_SYNC_ACCEL_ZOUT_L = 0x7;
-
-  public static final int MPU6050_DLPF_BW_256 = 0x00;
-  public static final int MPU6050_DLPF_BW_188 = 0x01;
-  public static final int MPU6050_DLPF_BW_98 = 0x02;
-  public static final int MPU6050_DLPF_BW_42 = 0x03;
-  public static final int MPU6050_DLPF_BW_20 = 0x04;
-  public static final int MPU6050_DLPF_BW_10 = 0x05;
-  public static final int MPU6050_DLPF_BW_5 = 0x06;
-
-  public static final int MPU6050_GCONFIG_FS_SEL_BIT = 4;
-  public static final int MPU6050_GCONFIG_FS_SEL_LENGTH = 2;
-
-  public static final int MPU6050_GYRO_FS_250 = 0x00;
-  public static final int MPU6050_GYRO_FS_500 = 0x01;
-  public static final int MPU6050_GYRO_FS_1000 = 0x02;
-  public static final int MPU6050_GYRO_FS_2000 = 0x03;
-
-  public static final int MPU6050_ACONFIG_XA_ST_BIT = 7;
-  public static final int MPU6050_ACONFIG_YA_ST_BIT = 6;
-  public static final int MPU6050_ACONFIG_ZA_ST_BIT = 5;
-  public static final int MPU6050_ACONFIG_AFS_SEL_BIT = 4;
-  public static final int MPU6050_ACONFIG_AFS_SEL_LENGTH = 2;
-  public static final int MPU6050_ACONFIG_ACCEL_HPF_BIT = 2;
-  public static final int MPU6050_ACONFIG_ACCEL_HPF_LENGTH = 3;
-
-  public static final int MPU6050_ACCEL_FS_2 = 0x00;
-  public static final int MPU6050_ACCEL_FS_4 = 0x01;
-  public static final int MPU6050_ACCEL_FS_8 = 0x02;
-  public static final int MPU6050_ACCEL_FS_16 = 0x03;
-
-  public static final int MPU6050_DHPF_RESET = 0x00;
-  public static final int MPU6050_DHPF_5 = 0x01;
-  public static final int MPU6050_DHPF_2P5 = 0x02;
-  public static final int MPU6050_DHPF_1P25 = 0x03;
-  public static final int MPU6050_DHPF_0P63 = 0x04;
-  public static final int MPU6050_DHPF_HOLD = 0x07;
-
-  public static final int MPU6050_TEMP_FIFO_EN_BIT = 7;
-  public static final int MPU6050_XG_FIFO_EN_BIT = 6;
-  public static final int MPU6050_YG_FIFO_EN_BIT = 5;
-  public static final int MPU6050_ZG_FIFO_EN_BIT = 4;
-  public static final int MPU6050_ACCEL_FIFO_EN_BIT = 3;
-  public static final int MPU6050_SLV2_FIFO_EN_BIT = 2;
-  public static final int MPU6050_SLV1_FIFO_EN_BIT = 1;
-  public static final int MPU6050_SLV0_FIFO_EN_BIT = 0;
-
-  public static final int MPU6050_MULT_MST_EN_BIT = 7;
-  public static final int MPU6050_WAIT_FOR_ES_BIT = 6;
-  public static final int MPU6050_SLV_3_FIFO_EN_BIT = 5;
-  public static final int MPU6050_I2C_MST_P_NSR_BIT = 4;
-  public static final int MPU6050_I2C_MST_CLK_BIT = 3;
-  public static final int MPU6050_I2C_MST_CLK_LENGTH = 4;
-
-  public static final int MPU6050_CLOCK_DIV_348 = 0x0;
-  public static final int MPU6050_CLOCK_DIV_333 = 0x1;
-  public static final int MPU6050_CLOCK_DIV_320 = 0x2;
-  public static final int MPU6050_CLOCK_DIV_308 = 0x3;
-  public static final int MPU6050_CLOCK_DIV_296 = 0x4;
-  public static final int MPU6050_CLOCK_DIV_286 = 0x5;
-  public static final int MPU6050_CLOCK_DIV_276 = 0x6;
-  public static final int MPU6050_CLOCK_DIV_267 = 0x7;
-  public static final int MPU6050_CLOCK_DIV_258 = 0x8;
-  public static final int MPU6050_CLOCK_DIV_500 = 0x9;
-  public static final int MPU6050_CLOCK_DIV_471 = 0xA;
-  public static final int MPU6050_CLOCK_DIV_444 = 0xB;
-  public static final int MPU6050_CLOCK_DIV_421 = 0xC;
-  public static final int MPU6050_CLOCK_DIV_400 = 0xD;
-  public static final int MPU6050_CLOCK_DIV_381 = 0xE;
-  public static final int MPU6050_CLOCK_DIV_364 = 0xF;
-
-  public static final int MPU6050_I2C_SLV_RW_BIT = 7;
-  public static final int MPU6050_I2C_SLV_ADDR_BIT = 6;
-  public static final int MPU6050_I2C_SLV_ADDR_LENGTH = 7;
-  public static final int MPU6050_I2C_SLV_EN_BIT = 7;
-  public static final int MPU6050_I2C_SLV_BYTE_SW_BIT = 6;
-  public static final int MPU6050_I2C_SLV_REG_DIS_BIT = 5;
-  public static final int MPU6050_I2C_SLV_GRP_BIT = 4;
-  public static final int MPU6050_I2C_SLV_LEN_BIT = 3;
-  public static final int MPU6050_I2C_SLV_LEN_LENGTH = 4;
-
-  public static final int MPU6050_I2C_SLV4_RW_BIT = 7;
-  public static final int MPU6050_I2C_SLV4_ADDR_BIT = 6;
-  public static final int MPU6050_I2C_SLV4_ADDR_LENGTH = 7;
-  public static final int MPU6050_I2C_SLV4_EN_BIT = 7;
-  public static final int MPU6050_I2C_SLV4_INT_EN_BIT = 6;
-  public static final int MPU6050_I2C_SLV4_REG_DIS_BIT = 5;
-  public static final int MPU6050_I2C_SLV4_MST_DLY_BIT = 4;
-  public static final int MPU6050_I2C_SLV4_MST_DLY_LENGTH = 5;
-
-  public static final int MPU6050_MST_PASS_THROUGH_BIT = 7;
-  public static final int MPU6050_MST_I2C_SLV4_DONE_BIT = 6;
-  public static final int MPU6050_MST_I2C_LOST_ARB_BIT = 5;
-  public static final int MPU6050_MST_I2C_SLV4_NACK_BIT = 4;
-  public static final int MPU6050_MST_I2C_SLV3_NACK_BIT = 3;
-  public static final int MPU6050_MST_I2C_SLV2_NACK_BIT = 2;
-  public static final int MPU6050_MST_I2C_SLV1_NACK_BIT = 1;
-  public static final int MPU6050_MST_I2C_SLV0_NACK_BIT = 0;
-
-  public static final int MPU6050_INTCFG_INT_LEVEL_BIT = 7;
-  public static final int MPU6050_INTCFG_INT_OPEN_BIT = 6;
-  public static final int MPU6050_INTCFG_LATCH_INT_EN_BIT = 5;
-  public static final int MPU6050_INTCFG_INT_RD_CLEAR_BIT = 4;
-  public static final int MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT = 3;
-  public static final int MPU6050_INTCFG_FSYNC_INT_EN_BIT = 2;
-  public static final int MPU6050_INTCFG_I2C_BYPASS_EN_BIT = 1;
-  public static final int MPU6050_INTCFG_CLKOUT_EN_BIT = 0;
-
-  public static final int MPU6050_INTMODE_ACTIVEHIGH = 0x00;
-  public static final int MPU6050_INTMODE_ACTIVELOW = 0x01;
-
-  public static final int MPU6050_INTDRV_PUSHPULL = 0x00;
-  public static final int MPU6050_INTDRV_OPENDRAIN = 0x01;
-
-  public static final int MPU6050_INTLATCH_50USPULSE = 0x00;
-  public static final int MPU6050_INTLATCH_WAITCLEAR = 0x01;
-
-  public static final int MPU6050_INTCLEAR_STATUSREAD = 0x00;
-  public static final int MPU6050_INTCLEAR_ANYREAD = 0x01;
-
-  public static final int MPU6050_INTERRUPT_FF_BIT = 7;
-  public static final int MPU6050_INTERRUPT_MOT_BIT = 6;
-  public static final int MPU6050_INTERRUPT_ZMOT_BIT = 5;
-  public static final int MPU6050_INTERRUPT_FIFO_OFLOW_BIT = 4;
-  public static final int MPU6050_INTERRUPT_I2C_MST_INT_BIT = 3;
-  public static final int MPU6050_INTERRUPT_PLL_RDY_INT_BIT = 2;
-  public static final int MPU6050_INTERRUPT_DMP_INT_BIT = 1;
-  public static final int MPU6050_INTERRUPT_DATA_RDY_BIT = 0;
-
-  // TODO: figure out what these actually do
-  // UMPL source code is not very obivous
-  public static final int MPU6050_DMPINT_5_BIT = 5;
-  public static final int MPU6050_DMPINT_4_BIT = 4;
-  public static final int MPU6050_DMPINT_3_BIT = 3;
-  public static final int MPU6050_DMPINT_2_BIT = 2;
-  public static final int MPU6050_DMPINT_1_BIT = 1;
-  public static final int MPU6050_DMPINT_0_BIT = 0;
-
-  public static final int MPU6050_MOTION_MOT_XNEG_BIT = 7;
-  public static final int MPU6050_MOTION_MOT_XPOS_BIT = 6;
-  public static final int MPU6050_MOTION_MOT_YNEG_BIT = 5;
-  public static final int MPU6050_MOTION_MOT_YPOS_BIT = 4;
-  public static final int MPU6050_MOTION_MOT_ZNEG_BIT = 3;
-  public static final int MPU6050_MOTION_MOT_ZPOS_BIT = 2;
-  public static final int MPU6050_MOTION_MOT_ZRMOT_BIT = 0;
-
-  public static final int MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT = 7;
-  public static final int MPU6050_DELAYCTRL_I2C_SLV4_DLY_EN_BIT = 4;
-  public static final int MPU6050_DELAYCTRL_I2C_SLV3_DLY_EN_BIT = 3;
-  public static final int MPU6050_DELAYCTRL_I2C_SLV2_DLY_EN_BIT = 2;
-  public static final int MPU6050_DELAYCTRL_I2C_SLV1_DLY_EN_BIT = 1;
-  public static final int MPU6050_DELAYCTRL_I2C_SLV0_DLY_EN_BIT = 0;
-
-  public static final int MPU6050_PATHRESET_GYRO_RESET_BIT = 2;
-  public static final int MPU6050_PATHRESET_ACCEL_RESET_BIT = 1;
-  public static final int MPU6050_PATHRESET_TEMP_RESET_BIT = 0;
-
-  public static final int MPU6050_DETECT_ACCEL_ON_DELAY_BIT = 5;
-  public static final int MPU6050_DETECT_ACCEL_ON_DELAY_LENGTH = 2;
-  public static final int MPU6050_DETECT_FF_COUNT_BIT = 3;
-  public static final int MPU6050_DETECT_FF_COUNT_LENGTH = 2;
-  public static final int MPU6050_DETECT_MOT_COUNT_BIT = 1;
-  public static final int MPU6050_DETECT_MOT_COUNT_LENGTH = 2;
-
-  public static final int MPU6050_DETECT_DECREMENT_RESET = 0x0;
-  public static final int MPU6050_DETECT_DECREMENT_1 = 0x1;
-  public static final int MPU6050_DETECT_DECREMENT_2 = 0x2;
-  public static final int MPU6050_DETECT_DECREMENT_4 = 0x3;
-
-  public static final int MPU6050_USERCTRL_DMP_EN_BIT = 7;
-  public static final int MPU6050_USERCTRL_FIFO_EN_BIT = 6;
-  public static final int MPU6050_USERCTRL_I2C_MST_EN_BIT = 5;
-  public static final int MPU6050_USERCTRL_I2C_IF_DIS_BIT = 4;
-  public static final int MPU6050_USERCTRL_DMP_RESET_BIT = 3;
-  public static final int MPU6050_USERCTRL_FIFO_RESET_BIT = 2;
-  public static final int MPU6050_USERCTRL_I2C_MST_RESET_BIT = 1;
-  public static final int MPU6050_USERCTRL_SIG_COND_RESET_BIT = 0;
-
-  public static final int MPU6050_PWR1_DEVICE_RESET_BIT = 7;
-  public static final int MPU6050_PWR1_SLEEP_BIT = 6;
-  public static final int MPU6050_PWR1_CYCLE_BIT = 5;
-  public static final int MPU6050_PWR1_TEMP_DIS_BIT = 3;
-  public static final int MPU6050_PWR1_CLKSEL_BIT = 2;
-  public static final int MPU6050_PWR1_CLKSEL_LENGTH = 3;
-
-  public static final int MPU6050_CLOCK_INTERNAL = 0x00;
-  public static final int MPU6050_CLOCK_PLL_XGYRO = 0x01;
-  public static final int MPU6050_CLOCK_PLL_YGYRO = 0x02;
-  public static final int MPU6050_CLOCK_PLL_ZGYRO = 0x03;
-  public static final int MPU6050_CLOCK_PLL_EXT32K = 0x04;
-  public static final int MPU6050_CLOCK_PLL_EXT19M = 0x05;
-  public static final int MPU6050_CLOCK_KEEP_RESET = 0x07;
-
-  public static final int MPU6050_PWR2_LP_WAKE_CTRL_BIT = 7;
-  public static final int MPU6050_PWR2_LP_WAKE_CTRL_LENGTH = 2;
-  public static final int MPU6050_PWR2_STBY_XA_BIT = 5;
-  public static final int MPU6050_PWR2_STBY_YA_BIT = 4;
-  public static final int MPU6050_PWR2_STBY_ZA_BIT = 3;
-  public static final int MPU6050_PWR2_STBY_XG_BIT = 2;
-  public static final int MPU6050_PWR2_STBY_YG_BIT = 1;
-  public static final int MPU6050_PWR2_STBY_ZG_BIT = 0;
-
-  public static final int MPU6050_WAKE_FREQ_1P25 = 0x0;
-  public static final int MPU6050_WAKE_FREQ_2P5 = 0x1;
-  public static final int MPU6050_WAKE_FREQ_5 = 0x2;
-  public static final int MPU6050_WAKE_FREQ_10 = 0x3;
-
-  public static final int MPU6050_BANKSEL_PRFTCH_EN_BIT = 6;
-  public static final int MPU6050_BANKSEL_CFG_USER_BANK_BIT = 5;
-  public static final int MPU6050_BANKSEL_MEM_SEL_BIT = 4;
-  public static final int MPU6050_BANKSEL_MEM_SEL_LENGTH = 5;
-
-  public static final int MPU6050_WHO_AM_I_BIT = 6;
-  public static final int MPU6050_WHO_AM_I_LENGTH = 6;
-
-  public static final int MPU6050_DMP_MEMORY_BANKS = 8;
-  public static final int MPU6050_DMP_MEMORY_BANK_SIZE = 256;
-  public static final int MPU6050_DMP_MEMORY_CHUNK_SIZE = 16;
-
-  // public static final byte ACCEL_XOUT_H = 0x3B;
-
-  // Raw data values read by getRaw
-  public int accelX;
-  public int accelY;
-  public int accelZ;
-  public int temperature;
-  public int gyroX;
-  public int gyroY;
-  public int gyroZ;
-  // Accel values converted to G
-  // Temperature converted to Celcius
-  // Gyro values converted degrees/s
-  public double accelGX = 0;
-  public double accelGY = 0;
-  public double accelGZ = 0;
-  public double temperatureC = 0;
-  public double gyroDegreeX = 0;
-  public double gyroDegreeY = 0;
-  public double gyroDegreeZ = 0;
-
-  public List<String> controllers;
-  public String controllerName;
-  public boolean isAttached = false;
-
-  // complementaryFiltered angles
-  public double filtered_x_angle;
-  public double filtered_y_angle;
-  public double filtered_z_angle;
-
-  public class OrientationPublisher extends Thread {
-    public boolean isRunning = false;
+  protected class OrientationPublisher implements Runnable {
+    protected boolean isRunning = false;
+    private transient Thread thread = null;
 
     public void run() {
-      isRunning = true;
-      while (isRunning) {
-        refresh();
-        invoke("publishOrientation", new Orientation(filtered_x_angle, filtered_y_angle, filtered_z_angle));
+      try {
+        isRunning = true;
+        dmpInitialize(); // TODO check initialize() switch use dmp?
+        while (isRunning) {
+          refresh();
+          invoke("publishOrientation", data.orientation);
+          invoke("publishMpu6050Data", data);
+
+          sleep((int) (1000 / sampleRateHz));
+        }
+      } catch (Exception e) {
+        log.error("publisher threw", e);
+        error("publisher error %s", e.getMessage());
       }
+      isRunning = false;
+    }
+
+    public synchronized void start() {
+      if (isRunning) {
+        return;
+      }
+      thread = new Thread(this, String.format("%s-publisher", getName()));
+      thread.start();
+      broadcastState();
+    }
+
+    public synchronized void stop() {
+      isRunning = false;
+      broadcastState();
     }
   }
 
-  public static void main(String[] args) {
-    LoggingFactory.init("info");
+  static class Mpu6050Data {
 
-    try {
+    Orientation orientation = new Orientation(0.0, 0.0, 0.0);
 
-      /*
-       * Mpu6050 mpu6050 = (Mpu6050) Runtime.start("mpu6050", "Mpu6050");
-       * Runtime.start("gui", "SwingGui");
-       */
+    /**
+     * raw values
+     */
+    protected int accelX;
+    protected int accelY;
+    protected int accelZ;
+    protected int temperature;
+    protected int gyroX;
+    protected int gyroY;
+    protected int gyroZ;
 
-      /*
-       * Arduino arduino = (Arduino) Runtime.start("Arduino","Arduino");
-       * arduino.connect("COM4"); mpu6050.setController(arduino);
-       */
+    /**
+     * accelerometer converted to G
+     */
+    protected double accelGX = 0;
+    protected double accelGY = 0;
+    protected double accelGZ = 0;
 
-      /*
-       * RasPi raspi = (RasPi) Runtime.start("RasPi","RasPi");
-       * mpu6050.setController(raspi); mpu6050.dmpInitialize();
-       */
-      int[] buffer = new int[] { (int) 0xff, (int) 0xd0 };
-      int a = (byte) buffer[0] << 8 | buffer[1] & 0xff;
-      log.info("0xffd0 should be -48 is = {}", a);
+    /**
+     * temperature converted to Celsius
+     */
+    protected double temperatureC = 0;
 
-    } catch (Exception e) {
-      Logging.logError(e);
+    /**
+     * converted to degrees/second
+     */
+    protected double gyroDegreeX = 0;
+    protected double gyroDegreeY = 0;
+    protected double gyroDegreeZ = 0;
+
+    public String toString() {
+      StringBuilder sb = new StringBuilder();
+      sb.append(orientation.toString());
+      sb.append(" ");
+      sb.append(" accelX ");
+      sb.append(accelX);
+      sb.append(" accelY ");
+      sb.append(accelY);
+      sb.append(" accelZ ");
+      sb.append(accelZ);
+
+      sb.append(" temperature ");
+      sb.append(temperature);
+      sb.append(" gyroX ");
+      sb.append(gyroX);
+      sb.append(" gyroY ");
+      sb.append(gyroY);
+      sb.append(" gyroZ ");
+      sb.append(gyroZ);
+
+      sb.append(" accelGX ");
+      sb.append(accelGX);
+      sb.append(" accelGY ");
+      sb.append(accelGY);
+      sb.append(" accelGZ ");
+      sb.append(accelGZ);
+      sb.append(" temperatureC ");
+      sb.append(temperatureC);
+
+      sb.append(" gyroDegreeX ");
+      sb.append(gyroDegreeX);
+      sb.append(" gyroDegreeY ");
+      sb.append(gyroDegreeY);
+      sb.append(" gyroDegreeZ ");
+      sb.append(gyroDegreeZ);
+
+      return sb.toString();
     }
+
   }
 
   public Mpu6050(String n, String id) {
@@ -577,7 +193,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   public void onRegistered(Registration s) {
     refreshControllers();
     broadcastState();
-
   }
 
   public List<String> refreshControllers() {
@@ -586,22 +201,34 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   @Override
-  public void setDeviceBus(String deviceBus) {
-    if (isAttached) {
-      log.error("Already attached to {}, use detach({}) first", this.controllerName);
-      return;
-    }
-    this.deviceBus = deviceBus;
+  public void setBus(String bus) {
+    this.deviceBus = bus;
     broadcastState();
   }
 
   @Override
+  public String getBus() {
+    return this.deviceBus;
+  }
+
+  @Override
+  public String getAddress() {
+    return this.deviceAddress;
+  }
+
+  @Override
+  public void setDeviceBus(String deviceBus) {
+    setBus(deviceBus);
+  }
+
+  @Override
   public void setDeviceAddress(String deviceAddress) {
-    if (isAttached) {
-      log.error("Already attached to {}, use detach({}) first", this.controllerName);
-      return;
-    }
-    this.deviceAddress = deviceAddress;
+    setAddress(deviceAddress);
+  }
+
+  @Override
+  public void setAddress(String address) {
+    this.deviceAddress = address;
     broadcastState();
   }
 
@@ -616,8 +243,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    */
   public void refresh() {
     getRaw();
-    complementaryFilter(gyroX, gyroY, gyroZ, accelX, accelY, accelZ);
-    broadcastState();
+    complementaryFilter(data.gyroX, data.gyroY, data.gyroZ, data.accelX, data.accelY, data.accelZ);
+    // log.debug("{} {} {} {} {} {}", data.gyroX, data.gyroY, data.gyroZ,
+    // data.accelX, data.accelY, data.accelZ);
   }
 
   public void getRaw() {
@@ -630,24 +258,24 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     byte[] readbuffer = new byte[14];
     controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
     // Fill the variables with the result from the read operation
-    accelX = (byte) readbuffer[0] << 8 | readbuffer[1] & 0xFF;
-    accelY = (byte) readbuffer[2] << 8 | readbuffer[3] & 0xFF;
-    accelZ = (byte) readbuffer[4] << 8 | readbuffer[5] & 0xFF;
-    temperature = (byte) readbuffer[6] << 8 | readbuffer[7] & 0xFF;
-    gyroX = (byte) readbuffer[8] << 8 | readbuffer[9] & 0xFF;
-    gyroY = (byte) readbuffer[10] << 8 | readbuffer[11] & 0xFF;
-    gyroZ = (byte) readbuffer[12] << 8 | readbuffer[13] & 0xFF;
+    data.accelX = (byte) readbuffer[0] << 8 | readbuffer[1] & 0xFF;
+    data.accelY = (byte) readbuffer[2] << 8 | readbuffer[3] & 0xFF;
+    data.accelZ = (byte) readbuffer[4] << 8 | readbuffer[5] & 0xFF;
+    data.temperature = (byte) readbuffer[6] << 8 | readbuffer[7] & 0xFF;
+    data.gyroX = (byte) readbuffer[8] << 8 | readbuffer[9] & 0xFF;
+    data.gyroY = (byte) readbuffer[10] << 8 | readbuffer[11] & 0xFF;
+    data.gyroZ = (byte) readbuffer[12] << 8 | readbuffer[13] & 0xFF;
     // Convert acceleration to G assuming min-max 2G as set in initialize()
-    accelGX = accelX / 16384.0;
-    accelGY = accelY / 16384.0;
-    accelGZ = accelZ / 16384.0;
+    data.accelGX = data.accelX / 16384.0;
+    data.accelGY = data.accelY / 16384.0;
+    data.accelGZ = data.accelZ / 16384.0;
     // Convert temp to degrees Celcius
-    temperatureC = (temperature / 340.0) + 36.53;
+    data.temperatureC = (data.temperature / 340.0) + 36.53;
     // Convert gyro to degrees/s ( assuming max +-250 degrees/s ) as set in
     // initialize()
-    gyroDegreeX = gyroX / 131;
-    gyroDegreeY = gyroY / 131;
-    gyroDegreeZ = gyroZ / 131;
+    data.gyroDegreeX = data.gyroX / 131;
+    data.gyroDegreeY = data.gyroY / 131;
+    data.gyroDegreeZ = data.gyroZ / 131;
     // broadcastState();
   }
 
@@ -659,7 +287,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    */
   double lastnow = 0;
 
-  void complementaryFilter(double gyro_x, double gyro_y, double gyro_z, double acc_x, double acc_y, double acc_z) {
+  public void complementaryFilter(double gyro_x, double gyro_y, double gyro_z, double acc_x, double acc_y, double acc_z) {
 
     // All angles are calculatd in radians
     long now = System.currentTimeMillis();
@@ -677,21 +305,27 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     double acc_z_angle = Math.atan(Math.sqrt((acc_x * acc_x) + (acc_y * acc_y)) / acc_z);
 
     // Calculate the change in direction from the Gyro
-    double gyro_x_angle = filtered_x_angle + (dt * gyro_x / 131) * (Math.PI / 180);
-    double gyro_y_angle = filtered_y_angle + (dt * gyro_y / 131) * (Math.PI / 180);
-    double gyro_z_angle = filtered_z_angle + (dt * gyro_z / 131) * (Math.PI / 180);
+    double gyro_x_angle = data.orientation.roll + (dt * gyro_x / 131) * (Math.PI / 180);
+    double gyro_y_angle = data.orientation.pitch + (dt * gyro_y / 131) * (Math.PI / 180);
+    double gyro_z_angle = data.orientation.yaw + (dt * gyro_z / 131) * (Math.PI / 180);
 
-    filtered_x_angle = gyroPortion * gyro_x_angle + accPortion * acc_x_angle;
-    filtered_y_angle = gyroPortion * gyro_y_angle + accPortion * acc_y_angle;
-    filtered_z_angle = gyroPortion * gyro_z_angle + accPortion * acc_z_angle;
+    data.orientation.roll = gyroPortion * gyro_x_angle + accPortion * acc_x_angle;
+    data.orientation.pitch = gyroPortion * gyro_y_angle + accPortion * acc_y_angle;
+    data.orientation.yaw = gyroPortion * gyro_z_angle + accPortion * acc_z_angle;
 
   }
 
+  /**
+   * This initializes the MPU from sleep mode "in addition" to initializing the
+   * DMP (digital motion processor)
+   * 
+   * @return
+   */
   public int dmpInitialize() {
     // reset device
     log.info("Resetting MPU6050...");
     reset();
-    delay(30); // wait after reset
+    sleep(30); // wait after reset
 
     // disable sleep mode
     log.info("Disabling sleep mode...");
@@ -729,7 +363,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     setSlaveAddress(0, 0x68);
     log.info("Resetting I2C Master control...");
     resetI2CMaster();
-    delay(20);
+    sleep(20);
 
     // load DMP code into memory banks
     log.info("Writing DMP code to MPU memory banks ({}) bytes", dmpMemory.length);
@@ -895,15 +529,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     return 0;
   }
 
-  public void delay(int ms) {
-    try {
-      Thread.sleep(ms);
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      Logging.logError(e);
-    } // wait after reset
-  }
-
   public void initialize() {
     setClockSource(MPU6050_CLOCK_PLL_XGYRO);
     setFullScaleGyroRange(MPU6050_GYRO_FS_250);
@@ -945,7 +570,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param level
    *          I2C supply voltage level (0=VLOGIC, 1=VDD)
    */
-  void setAuxVDDIOLevel(int level) {
+  public void setAuxVDDIOLevel(int level) {
     boolean bitbuffer = (level != 0);
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_YG_OFFS_TC, MPU6050_TC_PWR_MODE_BIT, bitbuffer);
   }
@@ -971,9 +596,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 8 of the MPU-6000/MPU-6050 Product Specification document.
    *
    * @return Current sample rate
-   * @see MPU6050_RA_SMPLRT_DIV
+   *  MPU6050_RA_SMPLRT_DIV
    */
-  int getRate() {
+  public int getRate() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SMPLRT_DIV);
   }
 
@@ -982,9 +607,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param rate
    *          New sample rate divider see getRate()
-   * @see MPU6050_RA_SMPLRT_DIV
+   *  MPU6050_RA_SMPLRT_DIV
    */
-  void setRate(int rate) {
+  public void setRate(int rate) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_SMPLRT_DIV, rate);
   }
 
@@ -1017,7 +642,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *
    * @return FSYNC configuration value
    */
-  int getExternalFrameSync() {
+  public int getExternalFrameSync() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_CONFIG, MPU6050_CFG_EXT_SYNC_SET_BIT, MPU6050_CFG_EXT_SYNC_SET_LENGTH);
   }
 
@@ -1026,11 +651,11 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * see getExternalFrameSync()
    * 
-   * @see MPU6050_RA_CONFIG
+   *  MPU6050_RA_CONFIG
    * @param sync
    *          New FSYNC configuration value
    */
-  void setExternalFrameSync(int sync) {
+  public void setExternalFrameSync(int sync) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_CONFIG, MPU6050_CFG_EXT_SYNC_SET_BIT, MPU6050_CFG_EXT_SYNC_SET_LENGTH, sync);
   }
 
@@ -1058,9 +683,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * </pre>
    *
    * @return DLFP configuration
-   * @see MPU6050_RA_CONFIG
-   * @see MPU6050_CFG_DLPF_CFG_BIT
-   * @see MPU6050_CFG_DLPF_CFG_LENGTH
+   *  MPU6050_RA_CONFIG
+   *  MPU6050_CFG_DLPF_CFG_BIT
+   *  MPU6050_CFG_DLPF_CFG_LENGTH
    */
   int getDLPFMode() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_CONFIG, MPU6050_CFG_DLPF_CFG_BIT, MPU6050_CFG_DLPF_CFG_LENGTH);
@@ -1071,12 +696,12 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param mode
    *          New DLFP configuration setting see getDLPFBandwidth()
-   * @see MPU6050_DLPF_BW_256
-   * @see MPU6050_RA_CONFIG
-   * @see MPU6050_CFG_DLPF_CFG_BIT
-   * @see MPU6050_CFG_DLPF_CFG_LENGTH
+   *  MPU6050_DLPF_BW_256
+   *  MPU6050_RA_CONFIG
+   *  MPU6050_CFG_DLPF_CFG_BIT
+   *  MPU6050_CFG_DLPF_CFG_LENGTH
    */
-  void setDLPFMode(int mode) {
+  public void setDLPFMode(int mode) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_CONFIG, MPU6050_CFG_DLPF_CFG_BIT, MPU6050_CFG_DLPF_CFG_LENGTH, mode);
   }
 
@@ -1094,12 +719,12 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * </pre>
    *
    * @return Current full-scale gyroscope range setting
-   * @see MPU6050_GYRO_FS_250
-   * @see MPU6050_RA_GYRO_CONFIG
-   * @see MPU6050_GCONFIG_FS_SEL_BIT
-   * @see MPU6050_GCONFIG_FS_SEL_LENGTH
+   *  MPU6050_GYRO_FS_250
+   *  MPU6050_RA_GYRO_CONFIG
+   *  MPU6050_GCONFIG_FS_SEL_BIT
+   *  MPU6050_GCONFIG_FS_SEL_LENGTH
    */
-  int getFullScaleGyroRange() {
+  public int getFullScaleGyroRange() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH);
   }
 
@@ -1108,12 +733,12 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param range
    *          New full-scale gyroscope range value see getFullScaleRange()
-   * @see MPU6050_GYRO_FS_250
-   * @see MPU6050_RA_GYRO_CONFIG
-   * @see MPU6050_GCONFIG_FS_SEL_BIT
-   * @see MPU6050_GCONFIG_FS_SEL_LENGTH
+   *  MPU6050_GYRO_FS_250
+   *  MPU6050_RA_GYRO_CONFIG
+   *  MPU6050_GCONFIG_FS_SEL_BIT
+   *  MPU6050_GCONFIG_FS_SEL_LENGTH
    */
-  void setFullScaleGyroRange(int range) {
+  public void setFullScaleGyroRange(int range) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH, range);
   }
 
@@ -1123,9 +748,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get self-test factory trim value for accelerometer X axis.
    * 
    * @return factory trim value
-   * @see MPU6050_RA_SELF_TEST_X
+   *  MPU6050_RA_SELF_TEST_X
    */
-  int getAccelXSelfTestFactoryTrim() {
+  public int getAccelXSelfTestFactoryTrim() {
     int selftestX = I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_X);
     int selftestA = I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_A);
     return (byte) selftestA >> 3 | ((selftestX >> 4) & 0x03);
@@ -1135,9 +760,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get self-test factory trim value for accelerometer Y axis.
    * 
    * @return factory trim value
-   * @see MPU6050_RA_SELF_TEST_Y
+   *  MPU6050_RA_SELF_TEST_Y
    */
-  int getAccelYSelfTestFactoryTrim() {
+  public int getAccelYSelfTestFactoryTrim() {
     int selftestY = I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_Y);
     int selftestA = I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_A);
     return (byte) selftestY >> 3 | ((selftestA >> 2) & 0x03);
@@ -1147,9 +772,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get self-test factory trim value for accelerometer Z axis.
    * 
    * @return factory trim value
-   * @see MPU6050_RA_SELF_TEST_Z
+   *  MPU6050_RA_SELF_TEST_Z
    */
-  int getAccelZSelfTestFactoryTrim() {
+  public int getAccelZSelfTestFactoryTrim() {
     int[] readBuffer = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_Z, 2, readBuffer);
     return (byte) readBuffer[0] >> 3 | (readBuffer[1] & 0x03);
@@ -1159,9 +784,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get self-test factory trim value for gyro X axis.
    * 
    * @return factory trim value
-   * @see MPU6050_RA_SELF_TEST_X
+   *  MPU6050_RA_SELF_TEST_X
    */
-  int getGyroXSelfTestFactoryTrim() {
+  public int getGyroXSelfTestFactoryTrim() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_X) & 0xff;
   }
 
@@ -1169,9 +794,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get self-test factory trim value for gyro Y axis.
    * 
    * @return factory trim value
-   * @see MPU6050_RA_SELF_TEST_Y
+   *  MPU6050_RA_SELF_TEST_Y
    */
-  int getGyroYSelfTestFactoryTrim() {
+  public int getGyroYSelfTestFactoryTrim() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_Y) & 0xff;
   }
 
@@ -1179,9 +804,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get self-test factory trim value for gyro Z axis.
    * 
    * @return factory trim value
-   * @see MPU6050_RA_SELF_TEST_Z
+   *  MPU6050_RA_SELF_TEST_Z
    */
-  int getGyroZSelfTestFactoryTrim() {
+  public int getGyroZSelfTestFactoryTrim() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_Z) & 0x1F;
   }
 
@@ -1191,9 +816,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get self-test enabled setting for accelerometer X axis.
    * 
    * @return Self-test enabled value
-   * @see MPU6050_RA_ACCEL_CONFIG
+   *  MPU6050_RA_ACCEL_CONFIG
    */
-  boolean getAccelXSelfTest() {
+  public boolean getAccelXSelfTest() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_XA_ST_BIT);
   }
 
@@ -1202,9 +827,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          Self-test enabled value
-   * @see MPU6050_RA_ACCEL_CONFIG
+   *  MPU6050_RA_ACCEL_CONFIG
    */
-  void setAccelXSelfTest(boolean enabled) {
+  public void setAccelXSelfTest(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_XA_ST_BIT, enabled);
   }
 
@@ -1212,9 +837,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get self-test enabled value for accelerometer Y axis.
    * 
    * @return Self-test enabled value
-   * @see MPU6050_RA_ACCEL_CONFIG
+   *  MPU6050_RA_ACCEL_CONFIG
    */
-  boolean getAccelYSelfTest() {
+  public boolean getAccelYSelfTest() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_YA_ST_BIT);
   }
 
@@ -1223,9 +848,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          Self-test enabled value
-   * @see MPU6050_RA_ACCEL_CONFIG
+   *  MPU6050_RA_ACCEL_CONFIG
    */
-  void setAccelYSelfTest(boolean enabled) {
+  public void setAccelYSelfTest(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_YA_ST_BIT, enabled);
   }
 
@@ -1233,9 +858,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get self-test enabled value for accelerometer Z axis.
    * 
    * @return Self-test enabled value
-   * @see MPU6050_RA_ACCEL_CONFIG
+   *  MPU6050_RA_ACCEL_CONFIG
    */
-  boolean getAccelZSelfTest() {
+  public boolean getAccelZSelfTest() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_ZA_ST_BIT);
   }
 
@@ -1244,9 +869,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          Self-test enabled value
-   * @see MPU6050_RA_ACCEL_CONFIG
+   *  MPU6050_RA_ACCEL_CONFIG
    */
-  void setAccelZSelfTest(boolean enabled) {
+  public void setAccelZSelfTest(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_ZA_ST_BIT, enabled);
   }
 
@@ -1263,12 +888,12 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * </pre>
    *
    * @return Current full-scale accelerometer range setting
-   * @see MPU6050_ACCEL_FS_2
-   * @see MPU6050_RA_ACCEL_CONFIG
-   * @see MPU6050_ACONFIG_AFS_SEL_BIT
-   * @see MPU6050_ACONFIG_AFS_SEL_LENGTH
+   *  MPU6050_ACCEL_FS_2
+   *  MPU6050_RA_ACCEL_CONFIG
+   *  MPU6050_ACONFIG_AFS_SEL_BIT
+   *  MPU6050_ACONFIG_AFS_SEL_LENGTH
    */
-  int getFullScaleAccelRange() {
+  public int getFullScaleAccelRange() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH);
   }
 
@@ -1279,7 +904,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          New full-scale accelerometer range setting see
    *          getFullScaleAccelRange()
    */
-  void setFullScaleAccelRange(int range) {
+  public void setFullScaleAccelRange(int range) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH, range);
   }
 
@@ -1316,10 +941,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * </pre>
    *
    * @return Current high-pass filter configuration
-   * @see MPU6050_DHPF_RESET
-   * @see MPU6050_RA_ACCEL_CONFIG
+   *  MPU6050_DHPF_RESET
+   *  MPU6050_RA_ACCEL_CONFIG
    */
-  int getDHPFMode() {
+  public int getDHPFMode() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_ACCEL_HPF_BIT, MPU6050_ACONFIG_ACCEL_HPF_LENGTH);
   }
 
@@ -1328,10 +953,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param bandwidth
    *          New high-pass filter configuration see setDHPFMode()
-   * @see MPU6050_DHPF_RESET
-   * @see MPU6050_RA_ACCEL_CONFIG
+   *  MPU6050_DHPF_RESET
+   *  MPU6050_RA_ACCEL_CONFIG
    */
-  void setDHPFMode(int bandwidth) {
+  public void setDHPFMode(int bandwidth) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_ACCEL_HPF_BIT, MPU6050_ACONFIG_ACCEL_HPF_LENGTH, bandwidth);
   }
 
@@ -1351,9 +976,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 56 and 58 of this document.
    *
    * @return Current free-fall acceleration threshold value (LSB = 2mg)
-   * @see MPU6050_RA_FF_THR
+   *  MPU6050_RA_FF_THR
    */
-  int getFreefallDetectionThreshold() {
+  public int getFreefallDetectionThreshold() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_FF_THR);
   }
 
@@ -1363,9 +988,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param threshold
    *          New free-fall acceleration threshold value (LSB = 2mg) see
    *          getFreefallDetectionThreshold()
-   * @see MPU6050_RA_FF_THR
+   *  MPU6050_RA_FF_THR
    */
-  void setFreefallDetectionThreshold(int threshold) {
+  public void setFreefallDetectionThreshold(int threshold) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_FF_THR, threshold);
   }
 
@@ -1386,9 +1011,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 56 and 58 of this document.
    *
    * @return Current free-fall duration threshold value (LSB = 1ms)
-   * @see MPU6050_RA_FF_DUR
+   *  MPU6050_RA_FF_DUR
    */
-  int getFreefallDetectionDuration() {
+  public int getFreefallDetectionDuration() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_FF_DUR);
   }
 
@@ -1398,9 +1023,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param duration
    *          New free-fall duration threshold value (LSB = 1ms) see
    *          getFreefallDetectionDuration()
-   * @see MPU6050_RA_FF_DUR
+   *  MPU6050_RA_FF_DUR
    */
-  void setFreefallDetectionDuration(int duration) {
+  public void setFreefallDetectionDuration(int duration) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_FF_DUR, duration);
   }
 
@@ -1423,9 +1048,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * and 58 of this document.
    *
    * @return Current motion detection acceleration threshold value (LSB = 2mg)
-   * @see MPU6050_RA_MOT_THR
+   *  MPU6050_RA_MOT_THR
    */
-  int getMotionDetectionThreshold() {
+  public int getMotionDetectionThreshold() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_MOT_THR);
   }
 
@@ -1435,9 +1060,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param threshold
    *          New motion detection acceleration threshold value (LSB = 2mg) see
    *          getMotionDetectionThreshold()
-   * @see MPU6050_RA_MOT_THR
+   *  MPU6050_RA_MOT_THR
    */
-  void setMotionDetectionThreshold(int threshold) {
+  public void setMotionDetectionThreshold(int threshold) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_MOT_THR, threshold);
   }
 
@@ -1456,9 +1081,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * MPU-6000/MPU-6050 Product Specification document.
    *
    * @return Current motion detection duration threshold value (LSB = 1ms)
-   * @see MPU6050_RA_MOT_DUR
+   *  MPU6050_RA_MOT_DUR
    */
-  int getMotionDetectionDuration() {
+  public int getMotionDetectionDuration() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_MOT_DUR);
   }
 
@@ -1468,9 +1093,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param duration
    *          New motion detection duration threshold value (LSB = 1ms) see
    *          getMotionDetectionDuration()
-   * @see MPU6050_RA_MOT_DUR
+   *  MPU6050_RA_MOT_DUR
    */
-  void setMotionDetectionDuration(int duration) {
+  public void setMotionDetectionDuration(int duration) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_MOT_DUR, duration);
   }
 
@@ -1502,9 +1127,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *
    * @return Current zero motion detection acceleration threshold value (LSB =
    *         2mg)
-   * @see MPU6050_RA_ZRMOT_THR
+   *  MPU6050_RA_ZRMOT_THR
    */
-  int getZeroMotionDetectionThreshold() {
+  public int getZeroMotionDetectionThreshold() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_ZRMOT_THR);
   }
 
@@ -1514,9 +1139,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param threshold
    *          New zero motion detection acceleration threshold value (LSB = 2mg)
    *          see getZeroMotionDetectionThreshold()
-   * @see MPU6050_RA_ZRMOT_THR
+   *  MPU6050_RA_ZRMOT_THR
    */
-  void setZeroMotionDetectionThreshold(int threshold) {
+  public void setZeroMotionDetectionThreshold(int threshold) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_ZRMOT_THR, threshold);
   }
 
@@ -1537,9 +1162,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 56 and 58 of this document.
    *
    * @return Current zero motion detection duration threshold value (LSB = 64ms)
-   * @see MPU6050_RA_ZRMOT_DUR
+   *  MPU6050_RA_ZRMOT_DUR
    */
-  int getZeroMotionDetectionDuration() {
+  public int getZeroMotionDetectionDuration() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_ZRMOT_DUR);
   }
 
@@ -1549,9 +1174,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param duration
    *          New zero motion detection duration threshold value (LSB = 1ms) see
    *          getZeroMotionDetectionDuration()
-   * @see MPU6050_RA_ZRMOT_DUR
+   *  MPU6050_RA_ZRMOT_DUR
    */
-  void setZeroMotionDetectionDuration(int duration) {
+  public void setZeroMotionDetectionDuration(int duration) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_ZRMOT_DUR, duration);
   }
 
@@ -1563,9 +1188,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * buffer.
    * 
    * @return Current temperature FIFO enabled value
-   * @see MPU6050_RA_FIFO_EN
+   *  MPU6050_RA_FIFO_EN
    */
-  boolean getTempFIFOEnabled() {
+public boolean getTempFIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_TEMP_FIFO_EN_BIT);
   }
 
@@ -1574,9 +1199,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New temperature FIFO enabled value see getTempFIFOEnabled()
-   * @see MPU6050_RA_FIFO_EN
+   *  MPU6050_RA_FIFO_EN
    */
-  void setTempFIFOEnabled(boolean enabled) {
+  public void setTempFIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_TEMP_FIFO_EN_BIT, enabled);
   }
 
@@ -1586,9 +1211,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * FIFO buffer.
    * 
    * @return Current gyroscope X-axis FIFO enabled value
-   * @see MPU6050_RA_FIFO_EN
+   *  MPU6050_RA_FIFO_EN
    */
-  boolean getXGyroFIFOEnabled() {
+public boolean getXGyroFIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_XG_FIFO_EN_BIT);
   }
 
@@ -1597,9 +1222,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New gyroscope X-axis FIFO enabled value see getXGyroFIFOEnabled()
-   * @see MPU6050_RA_FIFO_EN
+   *  MPU6050_RA_FIFO_EN
    */
-  void setXGyroFIFOEnabled(boolean enabled) {
+  public void setXGyroFIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_XG_FIFO_EN_BIT, enabled);
   }
 
@@ -1609,9 +1234,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * FIFO buffer.
    * 
    * @return Current gyroscope Y-axis FIFO enabled value
-   * @see MPU6050_RA_FIFO_EN
+   *  MPU6050_RA_FIFO_EN
    */
-  boolean getYGyroFIFOEnabled() {
+public boolean getYGyroFIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_YG_FIFO_EN_BIT);
   }
 
@@ -1620,9 +1245,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New gyroscope Y-axis FIFO enabled value see getYGyroFIFOEnabled()
-   * @see MPU6050_RA_FIFO_EN
+   *  MPU6050_RA_FIFO_EN
    */
-  void setYGyroFIFOEnabled(boolean enabled) {
+  public void setYGyroFIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_YG_FIFO_EN_BIT, enabled);
   }
 
@@ -1632,9 +1257,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * FIFO buffer.
    * 
    * @return Current gyroscope Z-axis FIFO enabled value
-   * @see MPU6050_RA_FIFO_EN
+   *  MPU6050_RA_FIFO_EN
    */
-  boolean getZGyroFIFOEnabled() {
+public boolean getZGyroFIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_ZG_FIFO_EN_BIT);
   }
 
@@ -1643,9 +1268,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New gyroscope Z-axis FIFO enabled value see getZGyroFIFOEnabled()
-   * @see MPU6050_RA_FIFO_EN
+   *  MPU6050_RA_FIFO_EN
    */
-  void setZGyroFIFOEnabled(boolean enabled) {
+  public void setZGyroFIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_ZG_FIFO_EN_BIT, enabled);
   }
 
@@ -1655,9 +1280,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * ACCEL_ZOUT_L (Registers 59 to 64) to be written into the FIFO buffer.
    * 
    * @return Current accelerometer FIFO enabled value
-   * @see MPU6050_RA_FIFO_EN
+   *  MPU6050_RA_FIFO_EN
    */
-  boolean getAccelFIFOEnabled() {
+public boolean getAccelFIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_ACCEL_FIFO_EN_BIT);
   }
 
@@ -1666,9 +1291,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New accelerometer FIFO enabled value see getAccelFIFOEnabled()
-   * @see MPU6050_RA_FIFO_EN
+   *  MPU6050_RA_FIFO_EN
    */
-  void setAccelFIFOEnabled(boolean enabled) {
+  public void setAccelFIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_ACCEL_FIFO_EN_BIT, enabled);
   }
 
@@ -1678,9 +1303,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * written into the FIFO buffer.
    * 
    * @return Current Slave 2 FIFO enabled value
-   * @see MPU6050_RA_FIFO_EN
+   *  MPU6050_RA_FIFO_EN
    */
-  boolean getSlave2FIFOEnabled() {
+public boolean getSlave2FIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_SLV2_FIFO_EN_BIT);
   }
 
@@ -1689,9 +1314,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New Slave 2 FIFO enabled value see getSlave2FIFOEnabled()
-   * @see MPU6050_RA_FIFO_EN
+   *  MPU6050_RA_FIFO_EN
    */
-  void setSlave2FIFOEnabled(boolean enabled) {
+  public void setSlave2FIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_SLV2_FIFO_EN_BIT, enabled);
   }
 
@@ -1701,9 +1326,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * written into the FIFO buffer.
    * 
    * @return Current Slave 1 FIFO enabled value
-   * @see MPU6050_RA_FIFO_EN
+   *  MPU6050_RA_FIFO_EN
    */
-  boolean getSlave1FIFOEnabled() {
+public boolean getSlave1FIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_SLV1_FIFO_EN_BIT);
   }
 
@@ -1712,9 +1337,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New Slave 1 FIFO enabled value see getSlave1FIFOEnabled()
-   * @see MPU6050_RA_FIFO_EN
+   *  MPU6050_RA_FIFO_EN
    */
-  void setSlave1FIFOEnabled(boolean enabled) {
+  public void setSlave1FIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_SLV1_FIFO_EN_BIT, enabled);
   }
 
@@ -1724,9 +1349,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * written into the FIFO buffer.
    * 
    * @return Current Slave 0 FIFO enabled value
-   * @see MPU6050_RA_FIFO_EN
+   *  MPU6050_RA_FIFO_EN
    */
-  boolean getSlave0FIFOEnabled() {
+public boolean getSlave0FIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_SLV0_FIFO_EN_BIT);
   }
 
@@ -1735,9 +1360,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New Slave 0 FIFO enabled value see getSlave0FIFOEnabled()
-   * @see MPU6050_RA_FIFO_EN
+   *  MPU6050_RA_FIFO_EN
    */
-  void setSlave0FIFOEnabled(boolean enabled) {
+  public void setSlave0FIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_SLV0_FIFO_EN_BIT, enabled);
   }
 
@@ -1757,9 +1382,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * detect when the bus is available.
    *
    * @return Current multi-master enabled value
-   * @see MPU6050_RA_I2C_MST_CTRL
+   *  MPU6050_RA_I2C_MST_CTRL
    */
-  boolean getMultiMasterEnabled() {
+public boolean getMultiMasterEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_MULT_MST_EN_BIT);
   }
 
@@ -1768,9 +1393,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New multi-master enabled value see getMultiMasterEnabled()
-   * @see MPU6050_RA_I2C_MST_CTRL
+   *  MPU6050_RA_I2C_MST_CTRL
    */
-  void setMultiMasterEnabled(boolean enabled) {
+  public void setMultiMasterEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_MULT_MST_EN_BIT, enabled);
   }
 
@@ -1784,9 +1409,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * triggered.
    *
    * @return Current wait-for-external-sensor-data enabled value
-   * @see MPU6050_RA_I2C_MST_CTRL
+   *  MPU6050_RA_I2C_MST_CTRL
    */
-  boolean getWaitForExternalSensorEnabled() {
+public boolean getWaitForExternalSensorEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_WAIT_FOR_ES_BIT);
   }
 
@@ -1796,9 +1421,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param enabled
    *          New wait-for-external-sensor-data enabled value see
    *          getWaitForExternalSensorEnabled()
-   * @see MPU6050_RA_I2C_MST_CTRL
+   *  MPU6050_RA_I2C_MST_CTRL
    */
-  void setWaitForExternalSensorEnabled(boolean enabled) {
+  public void setWaitForExternalSensorEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_WAIT_FOR_ES_BIT, enabled);
   }
 
@@ -1808,9 +1433,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * written into the FIFO buffer.
    * 
    * @return Current Slave 3 FIFO enabled value
-   * @see MPU6050_RA_MST_CTRL
+   *  MPU6050_RA_MST_CTRL
    */
-  boolean getSlave3FIFOEnabled() {
+public boolean getSlave3FIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_SLV_3_FIFO_EN_BIT);
   }
 
@@ -1819,9 +1444,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New Slave 3 FIFO enabled value see getSlave3FIFOEnabled()
-   * @see MPU6050_RA_MST_CTRL
+   *  MPU6050_RA_MST_CTRL
    */
-  void setSlave3FIFOEnabled(boolean enabled) {
+  public void setSlave3FIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_SLV_3_FIFO_EN_BIT, enabled);
   }
 
@@ -1834,9 +1459,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * followed by a start of the successive write will be always used.
    *
    * @return Current slave read/write transition enabled value
-   * @see MPU6050_RA_I2C_MST_CTRL
+   *  MPU6050_RA_I2C_MST_CTRL
    */
-  boolean getSlaveReadWriteTransitionEnabled() {
+public boolean getSlaveReadWriteTransitionEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_I2C_MST_P_NSR_BIT);
   }
 
@@ -1846,9 +1471,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param enabled
    *          New slave read/write transition enabled value see
    *          getSlaveReadWriteTransitionEnabled()
-   * @see MPU6050_RA_I2C_MST_CTRL
+   *  MPU6050_RA_I2C_MST_CTRL
    */
-  void setSlaveReadWriteTransitionEnabled(boolean enabled) {
+  public void setSlaveReadWriteTransitionEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_I2C_MST_P_NSR_BIT, enabled);
   }
 
@@ -1879,19 +1504,19 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * </pre>
    *
    * @return Current I2C master clock speed
-   * @see MPU6050_RA_I2C_MST_CTRL
+   *  MPU6050_RA_I2C_MST_CTRL
    */
-  int getMasterClockSpeed() {
+  public int getMasterClockSpeed() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_I2C_MST_CLK_BIT, MPU6050_I2C_MST_CLK_LENGTH);
   }
 
   /**
    * Set I2C master clock speed.
    * 
-   * @reparam speed Current I2C master clock speed
-   * @see MPU6050_RA_I2C_MST_CTRL
+   *  speed Current I2C master clock speed
+   *  MPU6050_RA_I2C_MST_CTRL
    */
-  void setMasterClockSpeed(int speed) {
+  public void setMasterClockSpeed(int speed) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_I2C_MST_CLK_BIT, MPU6050_I2C_MST_CLK_LENGTH, speed);
   }
 
@@ -1939,9 +1564,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param num
    *          Slave number (0-3)
    * @return Current address for specified slave
-   * @see MPU6050_RA_I2C_SLV0_ADDR
+   *  MPU6050_RA_I2C_SLV0_ADDR
    */
-  int getSlaveAddress(int num) {
+  public int getSlaveAddress(int num) {
     if (num > 3)
       return 0;
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_ADDR + num * 3);
@@ -1954,9 +1579,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          Slave number (0-3)
    * @param address
    *          New address for specified slave see getSlaveAddress()
-   * @see MPU6050_RA_I2C_SLV0_ADDR
+   *  MPU6050_RA_I2C_SLV0_ADDR
    */
-  void setSlaveAddress(int num, int address) {
+  public void setSlaveAddress(int num, int address) {
     if (num > 3)
       return;
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_ADDR + num * 3, address);
@@ -1973,9 +1598,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param num
    *          Slave number (0-3)
    * @return Current active register for specified slave
-   * @see MPU6050_RA_I2C_SLV0_REG
+   *  MPU6050_RA_I2C_SLV0_REG
    */
-  int getSlaveRegister(int num) {
+  public int getSlaveRegister(int num) {
     if (num > 3)
       return 0;
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_REG + num * 3);
@@ -1988,9 +1613,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          Slave number (0-3)
    * @param reg
    *          New active register for specified slave see getSlaveRegister()
-   * @see MPU6050_RA_I2C_SLV0_REG
+   *  MPU6050_RA_I2C_SLV0_REG
    */
-  void setSlaveRegister(int num, int reg) {
+  public void setSlaveRegister(int num, int reg) {
     if (num > 3)
       return;
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_REG + num * 3, reg);
@@ -2004,9 +1629,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param num
    *          Slave number (0-3)
    * @return Current enabled value for specified slave
-   * @see MPU6050_RA_I2C_SLV0_CTRL
+   *  MPU6050_RA_I2C_SLV0_CTRL
    */
-  boolean getSlaveEnabled(int num) {
+public boolean getSlaveEnabled(int num) {
     if (num > 3)
       return false;
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_EN_BIT);
@@ -2019,9 +1644,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          Slave number (0-3)
    * @param enabled
    *          New enabled value for specified slave see getSlaveEnabled()
-   * @see MPU6050_RA_I2C_SLV0_CTRL
+   *  MPU6050_RA_I2C_SLV0_CTRL
    */
-  void setSlaveEnabled(int num, boolean enabled) {
+  public void setSlaveEnabled(int num, boolean enabled) {
     if (num > 3)
       return;
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_EN_BIT, enabled);
@@ -2038,9 +1663,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param num
    *          Slave number (0-3)
    * @return Current word pair byte-swapping enabled value for specified slave
-   * @see MPU6050_RA_I2C_SLV0_CTRL
+   *  MPU6050_RA_I2C_SLV0_CTRL
    */
-  boolean getSlaveWordByteSwap(int num) {
+public boolean getSlaveWordByteSwap(int num) {
     if (num > 3)
       return false;
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_BYTE_SW_BIT);
@@ -2054,9 +1679,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param enabled
    *          New word pair byte-swapping enabled value for specified slave see
    *          getSlaveWordByteSwap()
-   * @see MPU6050_RA_I2C_SLV0_CTRL
+   *  MPU6050_RA_I2C_SLV0_CTRL
    */
-  void setSlaveWordByteSwap(int num, boolean enabled) {
+  public void setSlaveWordByteSwap(int num, boolean enabled) {
     if (num > 3)
       return;
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_BYTE_SW_BIT, enabled);
@@ -2073,9 +1698,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          Slave number (0-3)
    * @return Current write mode for specified slave (0 = register address +
    *         data, 1 = data only)
-   * @see MPU6050_RA_I2C_SLV0_CTRL
+   *  MPU6050_RA_I2C_SLV0_CTRL
    */
-  boolean getSlaveWriteMode(int num) {
+public boolean getSlaveWriteMode(int num) {
     if (num > 3)
       return false;
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_REG_DIS_BIT);
@@ -2089,9 +1714,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param mode
    *          New write mode for specified slave (0 = register address + data, 1
    *          = data only) see getSlaveWriteMode()
-   * @see MPU6050_RA_I2C_SLV0_CTRL
+   *  MPU6050_RA_I2C_SLV0_CTRL
    */
-  void setSlaveWriteMode(int num, boolean mode) {
+  public void setSlaveWriteMode(int num, boolean mode) {
     if (num > 3)
       return;
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_REG_DIS_BIT, mode);
@@ -2108,9 +1733,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param num
    *          Slave number (0-3)
    * @return Current word pair grouping order offset for specified slave
-   * @see MPU6050_RA_I2C_SLV0_CTRL
+   *  MPU6050_RA_I2C_SLV0_CTRL
    */
-  boolean getSlaveWordGroupOffset(int num) {
+public boolean getSlaveWordGroupOffset(int num) {
     if (num > 3)
       return false;
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_GRP_BIT);
@@ -2124,9 +1749,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param enabled
    *          New word pair grouping order offset for specified slave see
    *          getSlaveWordGroupOffset()
-   * @see MPU6050_RA_I2C_SLV0_CTRL
+   *  MPU6050_RA_I2C_SLV0_CTRL
    */
-  void setSlaveWordGroupOffset(int num, boolean enabled) {
+  public void setSlaveWordGroupOffset(int num, boolean enabled) {
     if (num > 3)
       return;
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_GRP_BIT, enabled);
@@ -2140,9 +1765,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param num
    *          Slave number (0-3)
    * @return Number of bytes to read for specified slave
-   * @see MPU6050_RA_I2C_SLV0_CTRL
+   *  MPU6050_RA_I2C_SLV0_CTRL
    */
-  int getSlaveDataLength(int num) {
+  public int getSlaveDataLength(int num) {
     if (num > 3)
       return 0;
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_LEN_BIT, MPU6050_I2C_SLV_LEN_LENGTH);
@@ -2156,9 +1781,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param length
    *          Number of bytes to read for specified slave see
    *          getSlaveDataLength()
-   * @see MPU6050_RA_I2C_SLV0_CTRL
+   *  MPU6050_RA_I2C_SLV0_CTRL
    */
-  void setSlaveDataLength(int num, int length) {
+  public void setSlaveDataLength(int num, int length) {
     if (num > 3)
       return;
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_LEN_BIT, MPU6050_I2C_SLV_LEN_LENGTH, length);
@@ -2173,9 +1798,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * address of the slave device.
    *
    * @return Current address for Slave 4 see getSlaveAddress()
-   * @see MPU6050_RA_I2C_SLV4_ADDR
+   *  MPU6050_RA_I2C_SLV4_ADDR
    */
-  int getSlave4Address() {
+  public int getSlave4Address() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_ADDR);
   }
 
@@ -2184,9 +1809,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param address
    *          New address for Slave 4 see getSlave4Address()
-   * @see MPU6050_RA_I2C_SLV4_ADDR
+   *  MPU6050_RA_I2C_SLV4_ADDR
    */
-  void setSlave4Address(int address) {
+  public void setSlave4Address(int address) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_ADDR, address);
   }
 
@@ -2196,9 +1821,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * this MPU register.
    *
    * @return Current active register for Slave 4
-   * @see MPU6050_RA_I2C_SLV4_REG
+   *  MPU6050_RA_I2C_SLV4_REG
    */
-  int getSlave4Register() {
+  public int getSlave4Register() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_REG);
   }
 
@@ -2207,9 +1832,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param reg
    *          New active register for Slave 4 see getSlave4Register()
-   * @see MPU6050_RA_I2C_SLV4_REG
+   *  MPU6050_RA_I2C_SLV4_REG
    */
-  void setSlave4Register(int reg) {
+  public void setSlave4Register(int reg) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_REG, reg);
   }
 
@@ -2220,9 +1845,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param data
    *          New byte to write to Slave 4
-   * @see MPU6050_RA_I2C_SLV4_DO
+   *  MPU6050_RA_I2C_SLV4_DO
    */
-  void setSlave4OutputByte(int data) {
+  public void setSlave4OutputByte(int data) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_DO, data);
   }
 
@@ -2232,9 +1857,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Slave 4 from data transfer operations.
    * 
    * @return Current enabled value for Slave 4
-   * @see MPU6050_RA_I2C_SLV4_CTRL
+   *  MPU6050_RA_I2C_SLV4_CTRL
    */
-  boolean getSlave4Enabled() {
+public boolean getSlave4Enabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_EN_BIT);
   }
 
@@ -2243,9 +1868,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New enabled value for Slave 4 see getSlave4Enabled()
-   * @see MPU6050_RA_I2C_SLV4_CTRL
+   *  MPU6050_RA_I2C_SLV4_CTRL
    */
-  void setSlave4Enabled(boolean enabled) {
+  public void setSlave4Enabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_EN_BIT, enabled);
   }
 
@@ -2257,9 +1882,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * status can be observed in Register 54.
    *
    * @return Current enabled value for Slave 4 transaction interrupts.
-   * @see MPU6050_RA_I2C_SLV4_CTRL
+   *  MPU6050_RA_I2C_SLV4_CTRL
    */
-  boolean getSlave4InterruptEnabled() {
+public boolean getSlave4InterruptEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_INT_EN_BIT);
   }
 
@@ -2269,9 +1894,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param enabled
    *          New enabled value for Slave 4 transaction interrupts. see
    *          getSlave4InterruptEnabled()
-   * @see MPU6050_RA_I2C_SLV4_CTRL
+   *  MPU6050_RA_I2C_SLV4_CTRL
    */
-  void setSlave4InterruptEnabled(boolean enabled) {
+  public void setSlave4InterruptEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_INT_EN_BIT, enabled);
   }
 
@@ -2284,9 +1909,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *
    * @return Current write mode for Slave 4 (0 = register address + data, 1 =
    *         data only)
-   * @see MPU6050_RA_I2C_SLV4_CTRL
+   *  MPU6050_RA_I2C_SLV4_CTRL
    */
-  boolean getSlave4WriteMode() {
+public boolean getSlave4WriteMode() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_REG_DIS_BIT);
   }
 
@@ -2296,9 +1921,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param mode
    *          New write mode for Slave 4 (0 = register address + data, 1 = data
    *          only) see getSlave4WriteMode()
-   * @see MPU6050_RA_I2C_SLV4_CTRL
+   *  MPU6050_RA_I2C_SLV4_CTRL
    */
-  void setSlave4WriteMode(boolean mode) {
+  public void setSlave4WriteMode(boolean mode) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_REG_DIS_BIT, mode);
   }
 
@@ -2315,9 +1940,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * further information regarding the Sample Rate, please refer to register 25.
    *
    * @return Current Slave 4 master delay value
-   * @see MPU6050_RA_I2C_SLV4_CTRL
+   *  MPU6050_RA_I2C_SLV4_CTRL
    */
-  int getSlave4MasterDelay() {
+  public int getSlave4MasterDelay() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_MST_DLY_BIT, MPU6050_I2C_SLV4_MST_DLY_LENGTH);
   }
 
@@ -2326,9 +1951,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param delay
    *          New Slave 4 master delay value see getSlave4MasterDelay()
-   * @see MPU6050_RA_I2C_SLV4_CTRL
+   *  MPU6050_RA_I2C_SLV4_CTRL
    */
-  void setSlave4MasterDelay(int delay) {
+  public void setSlave4MasterDelay(int delay) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_MST_DLY_BIT, MPU6050_I2C_SLV4_MST_DLY_LENGTH, delay);
   }
 
@@ -2337,9 +1962,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * read from Slave 4. This field is populated after a read transaction.
    * 
    * @return Last available byte read from to Slave 4
-   * @see MPU6050_RA_I2C_SLV4_DI
+   *  MPU6050_RA_I2C_SLV4_DI
    */
-  int getSlate4InputByte() {
+  public int getSlate4InputByte() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_DI);
   }
 
@@ -2353,9 +1978,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * is asserted in INT_PIN_CFG (Register 55).
    * 
    * @return FSYNC interrupt status
-   * @see MPU6050_RA_I2C_MST_STATUS
+   *  MPU6050_RA_I2C_MST_STATUS
    */
-  boolean getPassthroughStatus() {
+public boolean getPassthroughStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_PASS_THROUGH_BIT);
   }
 
@@ -2366,9 +1991,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * SLV_4_DONE_INT bit is asserted in the I2C_SLV4_CTRL register (Register 52).
    * 
    * @return Slave 4 transaction done status
-   * @see MPU6050_RA_I2C_MST_STATUS
+   *  MPU6050_RA_I2C_MST_STATUS
    */
-  boolean getSlave4IsDone() {
+public boolean getSlave4IsDone() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV4_DONE_BIT);
   }
 
@@ -2379,9 +2004,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * INT_ENABLE register (Register 56) is asserted.
    * 
    * @return Master arbitration lost status
-   * @see MPU6050_RA_I2C_MST_STATUS
+   *  MPU6050_RA_I2C_MST_STATUS
    */
-  boolean getLostArbitration() {
+public boolean getLostArbitration() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_LOST_ARB_BIT);
   }
 
@@ -2392,9 +2017,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 56) is asserted.
    * 
    * @return Slave 4 NACK interrupt status
-   * @see MPU6050_RA_I2C_MST_STATUS
+   *  MPU6050_RA_I2C_MST_STATUS
    */
-  boolean getSlave4Nack() {
+public boolean getSlave4Nack() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV4_NACK_BIT);
   }
 
@@ -2405,9 +2030,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 56) is asserted.
    * 
    * @return Slave 3 NACK interrupt status
-   * @see MPU6050_RA_I2C_MST_STATUS
+   *  MPU6050_RA_I2C_MST_STATUS
    */
-  boolean getSlave3Nack() {
+public boolean getSlave3Nack() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV3_NACK_BIT);
   }
 
@@ -2418,9 +2043,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 56) is asserted.
    * 
    * @return Slave 2 NACK interrupt status
-   * @see MPU6050_RA_I2C_MST_STATUS
+   *  MPU6050_RA_I2C_MST_STATUS
    */
-  boolean getSlave2Nack() {
+public boolean getSlave2Nack() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV2_NACK_BIT);
   }
 
@@ -2431,9 +2056,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 56) is asserted.
    * 
    * @return Slave 1 NACK interrupt status
-   * @see MPU6050_RA_I2C_MST_STATUS
+   *  MPU6050_RA_I2C_MST_STATUS
    */
-  boolean getSlave1Nack() {
+public boolean getSlave1Nack() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV1_NACK_BIT);
   }
 
@@ -2444,9 +2069,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 56) is asserted.
    * 
    * @return Slave 0 NACK interrupt status
-   * @see MPU6050_RA_I2C_MST_STATUS
+   *  MPU6050_RA_I2C_MST_STATUS
    */
-  boolean getSlave0Nack() {
+public boolean getSlave0Nack() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV0_NACK_BIT);
   }
 
@@ -2457,10 +2082,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * active-low.
    * 
    * @return Current interrupt mode (0=active-high, 1=active-low)
-   * @see MPU6050_RA_INT_PIN_CFG
-   * @see MPU6050_INTCFG_INT_LEVEL_BIT
+   *  MPU6050_RA_INT_PIN_CFG
+   *  MPU6050_INTCFG_INT_LEVEL_BIT
    */
-  boolean getInterruptMode() {
+public boolean getInterruptMode() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_LEVEL_BIT);
   }
 
@@ -2470,10 +2095,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param mode
    *          New interrupt mode (0=active-high, 1=active-low) see
    *          getInterruptMode()
-   * @see MPU6050_RA_INT_PIN_CFG
-   * @see MPU6050_INTCFG_INT_LEVEL_BIT
+   *  MPU6050_RA_INT_PIN_CFG
+   *  MPU6050_INTCFG_INT_LEVEL_BIT
    */
-  void setInterruptMode(boolean mode) {
+  public void setInterruptMode(boolean mode) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_LEVEL_BIT, mode);
   }
 
@@ -2481,10 +2106,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get interrupt drive mode. Will be set 0 for push-pull, 1 for open-drain.
    * 
    * @return Current interrupt drive mode (0=push-pull, 1=open-drain)
-   * @see MPU6050_RA_INT_PIN_CFG
-   * @see MPU6050_INTCFG_INT_OPEN_BIT
+   *  MPU6050_RA_INT_PIN_CFG
+   *  MPU6050_INTCFG_INT_OPEN_BIT
    */
-  boolean getInterruptDrive() {
+public boolean getInterruptDrive() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_OPEN_BIT);
   }
 
@@ -2494,10 +2119,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param drive
    *          New interrupt drive mode (0=push-pull, 1=open-drain) see
    *          getInterruptDrive()
-   * @see MPU6050_RA_INT_PIN_CFG
-   * @see MPU6050_INTCFG_INT_OPEN_BIT
+   *  MPU6050_RA_INT_PIN_CFG
+   *  MPU6050_INTCFG_INT_OPEN_BIT
    */
-  void setInterruptDrive(boolean drive) {
+  public void setInterruptDrive(boolean drive) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_OPEN_BIT, drive);
   }
 
@@ -2506,10 +2131,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * latch-until-int-cleared.
    * 
    * @return Current latch mode (0=50us-pulse, 1=latch-until-int-cleared)
-   * @see MPU6050_RA_INT_PIN_CFG
-   * @see MPU6050_INTCFG_LATCH_INT_EN_BIT
+   *  MPU6050_RA_INT_PIN_CFG
+   *  MPU6050_INTCFG_LATCH_INT_EN_BIT
    */
-  boolean getInterruptLatch() {
+public boolean getInterruptLatch() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_LATCH_INT_EN_BIT);
   }
 
@@ -2519,10 +2144,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param latch
    *          New latch mode (0=50us-pulse, 1=latch-until-int-cleared) see
    *          getInterruptLatch()
-   * @see MPU6050_RA_INT_PIN_CFG
-   * @see MPU6050_INTCFG_LATCH_INT_EN_BIT
+   *  MPU6050_RA_INT_PIN_CFG
+   *  MPU6050_INTCFG_LATCH_INT_EN_BIT
    */
-  void setInterruptLatch(boolean latch) {
+  public void setInterruptLatch(boolean latch) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_LATCH_INT_EN_BIT, latch);
   }
 
@@ -2531,10 +2156,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * any-register-read.
    * 
    * @return Current latch clear mode (0=status-read-only, 1=any-register-read)
-   * @see MPU6050_RA_INT_PIN_CFG
-   * @see MPU6050_INTCFG_INT_RD_CLEAR_BIT
+   *  MPU6050_RA_INT_PIN_CFG
+   *  MPU6050_INTCFG_INT_RD_CLEAR_BIT
    */
-  boolean getInterruptLatchClear() {
+public boolean getInterruptLatchClear() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_RD_CLEAR_BIT);
   }
 
@@ -2544,10 +2169,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param clear
    *          New latch clear mode (0=status-read-only, 1=any-register-read) see
    *          getInterruptLatchClear()
-   * @see MPU6050_RA_INT_PIN_CFG
-   * @see MPU6050_INTCFG_INT_RD_CLEAR_BIT
+   *  MPU6050_RA_INT_PIN_CFG
+   *  MPU6050_INTCFG_INT_RD_CLEAR_BIT
    */
-  void setInterruptLatchClear(boolean clear) {
+  public void setInterruptLatchClear(boolean clear) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_RD_CLEAR_BIT, clear);
   }
 
@@ -2556,23 +2181,23 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @return Current FSYNC interrupt mode (0=active-high, 1=active-low) see
    *         getFSyncInterruptMode()
-   * @see MPU6050_RA_INT_PIN_CFG
-   * @see MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT
+   *  MPU6050_RA_INT_PIN_CFG
+   *  MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT
    */
-  boolean getFSyncInterruptLevel() {
+public boolean getFSyncInterruptLevel() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT);
   }
 
   /**
    * Set FSYNC interrupt logic level mode.
    * 
-   * @param mode
+   * @param level
    *          New FSYNC interrupt mode (0=active-high, 1=active-low) see
    *          getFSyncInterruptMode()
-   * @see MPU6050_RA_INT_PIN_CFG
-   * @see MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT
+   *  MPU6050_RA_INT_PIN_CFG
+   *  MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT
    */
-  void setFSyncInterruptLevel(boolean level) {
+  public void setFSyncInterruptLevel(boolean level) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT, level);
   }
 
@@ -2581,10 +2206,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * enabled.
    * 
    * @return Current interrupt enabled setting
-   * @see MPU6050_RA_INT_PIN_CFG
-   * @see MPU6050_INTCFG_FSYNC_INT_EN_BIT
+   *  MPU6050_RA_INT_PIN_CFG
+   *  MPU6050_INTCFG_FSYNC_INT_EN_BIT
    */
-  boolean getFSyncInterruptEnabled() {
+public boolean getFSyncInterruptEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_FSYNC_INT_EN_BIT);
   }
 
@@ -2594,10 +2219,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param enabled
    *          New FSYNC pin interrupt enabled setting see
    *          getFSyncInterruptEnabled()
-   * @see MPU6050_RA_INT_PIN_CFG
-   * @see MPU6050_INTCFG_FSYNC_INT_EN_BIT
+   *  MPU6050_RA_INT_PIN_CFG
+   *  MPU6050_INTCFG_FSYNC_INT_EN_BIT
    */
-  void setFSyncInterruptEnabled(boolean enabled) {
+  public void setFSyncInterruptEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_FSYNC_INT_EN_BIT, enabled);
   }
 
@@ -2610,10 +2235,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * state of I2C_MST_EN (Register 106 bit[5]).
    * 
    * @return Current I2C bypass enabled status
-   * @see MPU6050_RA_INT_PIN_CFG
-   * @see MPU6050_INTCFG_I2C_BYPASS_EN_BIT
+   *  MPU6050_RA_INT_PIN_CFG
+   *  MPU6050_INTCFG_I2C_BYPASS_EN_BIT
    */
-  boolean getI2CBypassEnabled() {
+public boolean getI2CBypassEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_I2C_BYPASS_EN_BIT);
   }
 
@@ -2627,10 +2252,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New I2C bypass enabled status
-   * @see MPU6050_RA_INT_PIN_CFG
-   * @see MPU6050_INTCFG_I2C_BYPASS_EN_BIT
+   *  MPU6050_RA_INT_PIN_CFG
+   *  MPU6050_INTCFG_I2C_BYPASS_EN_BIT
    */
-  void setI2CBypassEnabled(boolean enabled) {
+  public void setI2CBypassEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_I2C_BYPASS_EN_BIT, enabled);
   }
 
@@ -2641,10 +2266,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * CLKOUT, please refer to the MPU-60X0 Product Specification document.
    * 
    * @return Current reference clock output enabled status
-   * @see MPU6050_RA_INT_PIN_CFG
-   * @see MPU6050_INTCFG_CLKOUT_EN_BIT
+   *  MPU6050_RA_INT_PIN_CFG
+   *  MPU6050_INTCFG_CLKOUT_EN_BIT
    */
-  boolean getClockOutputEnabled() {
+public boolean getClockOutputEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_CLKOUT_EN_BIT);
   }
 
@@ -2656,10 +2281,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New reference clock output enabled status
-   * @see MPU6050_RA_INT_PIN_CFG
-   * @see MPU6050_INTCFG_CLKOUT_EN_BIT
+   *  MPU6050_RA_INT_PIN_CFG
+   *  MPU6050_INTCFG_CLKOUT_EN_BIT
    */
-  void setClockOutputEnabled(boolean enabled) {
+  public void setClockOutputEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_CLKOUT_EN_BIT, enabled);
   }
 
@@ -2670,10 +2295,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * for quick reading. Each bit will be set 0 for disabled, 1 for enabled.
    * 
    * @return Current interrupt enabled status
-   * @see MPU6050_RA_INT_ENABLE
-   * @see MPU6050_INTERRUPT_FF_BIT
+   *  MPU6050_RA_INT_ENABLE
+   *  MPU6050_INTERRUPT_FF_BIT
    **/
-  int getIntEnabled() {
+  public int getIntEnabled() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE);
   }
 
@@ -2683,10 +2308,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New interrupt enabled status see getIntFreefallEnabled()
-   * @see MPU6050_RA_INT_ENABLE
-   * @see MPU6050_INTERRUPT_FF_BIT
+   *  MPU6050_RA_INT_ENABLE
+   *  MPU6050_INTERRUPT_FF_BIT
    **/
-  void setIntEnabled(int enabled) {
+  public void setIntEnabled(int enabled) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, enabled);
   }
 
@@ -2695,10 +2320,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * enabled.
    * 
    * @return Current interrupt enabled status
-   * @see MPU6050_RA_INT_ENABLE
-   * @see MPU6050_INTERRUPT_FF_BIT
+   *  MPU6050_RA_INT_ENABLE
+   *  MPU6050_INTERRUPT_FF_BIT
    **/
-  boolean getIntFreefallEnabled() {
+public boolean getIntFreefallEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_FF_BIT);
   }
 
@@ -2707,10 +2332,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New interrupt enabled status see getIntFreefallEnabled()
-   * @see MPU6050_RA_INT_ENABLE
-   * @see MPU6050_INTERRUPT_FF_BIT
+   *  MPU6050_RA_INT_ENABLE
+   *  MPU6050_INTERRUPT_FF_BIT
    **/
-  void setIntFreefallEnabled(boolean enabled) {
+  public void setIntFreefallEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_FF_BIT, enabled);
   }
 
@@ -2719,10 +2344,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 1 for enabled.
    * 
    * @return Current interrupt enabled status
-   * @see MPU6050_RA_INT_ENABLE
-   * @see MPU6050_INTERRUPT_MOT_BIT
+   *  MPU6050_RA_INT_ENABLE
+   *  MPU6050_INTERRUPT_MOT_BIT
    **/
-  boolean getIntMotionEnabled() {
+public boolean getIntMotionEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_MOT_BIT);
   }
 
@@ -2731,10 +2356,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New interrupt enabled status see getIntMotionEnabled()
-   * @see MPU6050_RA_INT_ENABLE
-   * @see MPU6050_INTERRUPT_MOT_BIT
+   *  MPU6050_RA_INT_ENABLE
+   *  MPU6050_INTERRUPT_MOT_BIT
    **/
-  void setIntMotionEnabled(boolean enabled) {
+  public void setIntMotionEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_MOT_BIT, enabled);
   }
 
@@ -2743,10 +2368,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * disabled, 1 for enabled.
    * 
    * @return Current interrupt enabled status
-   * @see MPU6050_RA_INT_ENABLE
-   * @see MPU6050_INTERRUPT_ZMOT_BIT
+   *  MPU6050_RA_INT_ENABLE
+   *  MPU6050_INTERRUPT_ZMOT_BIT
    **/
-  boolean getIntZeroMotionEnabled() {
+public boolean getIntZeroMotionEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_ZMOT_BIT);
   }
 
@@ -2755,10 +2380,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New interrupt enabled status see getIntZeroMotionEnabled()
-   * @see MPU6050_RA_INT_ENABLE
-   * @see MPU6050_INTERRUPT_ZMOT_BIT
+   *  MPU6050_RA_INT_ENABLE
+   *  MPU6050_INTERRUPT_ZMOT_BIT
    **/
-  void setIntZeroMotionEnabled(boolean enabled) {
+  public void setIntZeroMotionEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_ZMOT_BIT, enabled);
   }
 
@@ -2767,10 +2392,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * disabled, 1 for enabled.
    * 
    * @return Current interrupt enabled status
-   * @see MPU6050_RA_INT_ENABLE
-   * @see MPU6050_INTERRUPT_FIFO_OFLOW_BIT
+   *  MPU6050_RA_INT_ENABLE
+   *  MPU6050_INTERRUPT_FIFO_OFLOW_BIT
    **/
-  boolean getIntFIFOBufferOverflowEnabled() {
+public boolean getIntFIFOBufferOverflowEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_FIFO_OFLOW_BIT);
   }
 
@@ -2779,10 +2404,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New interrupt enabled status see getIntFIFOBufferOverflowEnabled()
-   * @see MPU6050_RA_INT_ENABLE
-   * @see MPU6050_INTERRUPT_FIFO_OFLOW_BIT
+   *  MPU6050_RA_INT_ENABLE
+   *  MPU6050_INTERRUPT_FIFO_OFLOW_BIT
    **/
-  void setIntFIFOBufferOverflowEnabled(boolean enabled) {
+  public void setIntFIFOBufferOverflowEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_FIFO_OFLOW_BIT, enabled);
   }
 
@@ -2792,10 +2417,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * for enabled.
    * 
    * @return Current interrupt enabled status
-   * @see MPU6050_RA_INT_ENABLE
-   * @see MPU6050_INTERRUPT_I2C_MST_INT_BIT
+   *  MPU6050_RA_INT_ENABLE
+   *  MPU6050_INTERRUPT_I2C_MST_INT_BIT
    **/
-  boolean getIntI2CMasterEnabled() {
+public boolean getIntI2CMasterEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_I2C_MST_INT_BIT);
   }
 
@@ -2804,10 +2429,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New interrupt enabled status see getIntI2CMasterEnabled()
-   * @see MPU6050_RA_INT_ENABLE
-   * @see MPU6050_INTERRUPT_I2C_MST_INT_BIT
+   *  MPU6050_RA_INT_ENABLE
+   *  MPU6050_INTERRUPT_I2C_MST_INT_BIT
    **/
-  void setIntI2CMasterEnabled(boolean enabled) {
+  public void setIntI2CMasterEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_I2C_MST_INT_BIT, enabled);
   }
 
@@ -2817,10 +2442,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * set 0 for disabled, 1 for enabled.
    * 
    * @return Current interrupt enabled status
-   * @see MPU6050_RA_INT_ENABLE
-   * @see MPU6050_INTERRUPT_DATA_RDY_BIT
+   *  MPU6050_RA_INT_ENABLE
+   *  MPU6050_INTERRUPT_DATA_RDY_BIT
    */
-  boolean getIntDataReadyEnabled() {
+public boolean getIntDataReadyEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DATA_RDY_BIT);
   }
 
@@ -2829,10 +2454,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New interrupt enabled status see getIntDataReadyEnabled()
-   * @see MPU6050_RA_INT_CFG
-   * @see MPU6050_INTERRUPT_DATA_RDY_BIT
+   *  MPU6050_RA_INT_CFG
+   *  MPU6050_INTERRUPT_DATA_RDY_BIT
    */
-  void setIntDataReadyEnabled(boolean enabled) {
+  public void setIntDataReadyEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DATA_RDY_BIT, enabled);
   }
 
@@ -2845,9 +2470,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * whole byte.
    * 
    * @return Current interrupt status
-   * @see MPU6050_RA_INT_STATUS
+   *  MPU6050_RA_INT_STATUS
    */
-  int getIntStatus() {
+  public int getIntStatus() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS);
   }
 
@@ -2857,10 +2482,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * register has been read.
    * 
    * @return Current interrupt status
-   * @see MPU6050_RA_INT_STATUS
-   * @see MPU6050_INTERRUPT_FF_BIT
+   *  MPU6050_RA_INT_STATUS
+   *  MPU6050_INTERRUPT_FF_BIT
    */
-  boolean getIntFreefallStatus() {
+public boolean getIntFreefallStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_FF_BIT);
   }
 
@@ -2870,10 +2495,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * after the register has been read.
    * 
    * @return Current interrupt status
-   * @see MPU6050_RA_INT_STATUS
-   * @see MPU6050_INTERRUPT_MOT_BIT
+   *  MPU6050_RA_INT_STATUS
+   *  MPU6050_INTERRUPT_MOT_BIT
    */
-  boolean getIntMotionStatus() {
+public boolean getIntMotionStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_MOT_BIT);
   }
 
@@ -2883,10 +2508,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * to 0 after the register has been read.
    * 
    * @return Current interrupt status
-   * @see MPU6050_RA_INT_STATUS
-   * @see MPU6050_INTERRUPT_ZMOT_BIT
+   *  MPU6050_RA_INT_STATUS
+   *  MPU6050_INTERRUPT_ZMOT_BIT
    */
-  boolean getIntZeroMotionStatus() {
+public boolean getIntZeroMotionStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_ZMOT_BIT);
   }
 
@@ -2896,10 +2521,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * the register has been read.
    * 
    * @return Current interrupt status
-   * @see MPU6050_RA_INT_STATUS
-   * @see MPU6050_INTERRUPT_FIFO_OFLOW_BIT
+   *  MPU6050_RA_INT_STATUS
+   *  MPU6050_INTERRUPT_FIFO_OFLOW_BIT
    */
-  boolean getIntFIFOBufferOverflowStatus() {
+public boolean getIntFIFOBufferOverflowStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_FIFO_OFLOW_BIT);
   }
 
@@ -2910,10 +2535,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * register has been read.
    * 
    * @return Current interrupt status
-   * @see MPU6050_RA_INT_STATUS
-   * @see MPU6050_INTERRUPT_I2C_MST_INT_BIT
+   *  MPU6050_RA_INT_STATUS
+   *  MPU6050_INTERRUPT_I2C_MST_INT_BIT
    */
-  boolean getIntI2CMasterStatus() {
+public boolean getIntI2CMasterStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_I2C_MST_INT_BIT);
   }
 
@@ -2923,10 +2548,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * register has been read.
    * 
    * @return Current interrupt status
-   * @see MPU6050_RA_INT_STATUS
-   * @see MPU6050_INTERRUPT_DATA_RDY_BIT
+   *  MPU6050_RA_INT_STATUS
+   *  MPU6050_INTERRUPT_DATA_RDY_BIT
    */
-  boolean getIntDataReadyStatus() {
+public boolean getIntDataReadyStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_DATA_RDY_BIT);
   }
 
@@ -2968,9 +2593,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          16-bit signed integer container for Y-axis acceleration
    * @param z
    *          16-bit signed integer container for Z-axis acceleration
-   * @see MPU6050_RA_GYRO_XOUT_H
+   *  MPU6050_RA_GYRO_XOUT_H
    */
-  void getAcceleration(int[] x, int[] y, int[] z) {
+  public void getAcceleration(int[] x, int[] y, int[] z) {
     int readBuffer[] = new int[6];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_XOUT_H, 6, readBuffer);
     x[0] = ((byte) readBuffer[0] << 8) | readBuffer[1] & 0xff;
@@ -2983,9 +2608,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @return X-axis acceleration measurement in 16-bit 2's complement format see
    *         getMotion6()
-   * @see MPU6050_RA_ACCEL_XOUT_H
+   *  MPU6050_RA_ACCEL_XOUT_H
    */
-  int getAccelerationX() {
+  public int getAccelerationX() {
     int readBuffer[] = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_XOUT_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
@@ -2996,9 +2621,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @return Y-axis acceleration measurement in 16-bit 2's complement format see
    *         getMotion6()
-   * @see MPU6050_RA_ACCEL_YOUT_H
+   *  MPU6050_RA_ACCEL_YOUT_H
    */
-  int getAccelerationY() {
+  public int getAccelerationY() {
     int readBuffer[] = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_YOUT_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
@@ -3009,9 +2634,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @return Z-axis acceleration measurement in 16-bit 2's complement format see
    *         getMotion6()
-   * @see MPU6050_RA_ACCEL_ZOUT_H
+   *  MPU6050_RA_ACCEL_ZOUT_H
    */
-  int getAccelerationZ() {
+  public int getAccelerationZ() {
     int readBuffer[] = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_ZOUT_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
@@ -3023,7 +2648,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get current internal temperature.
    * 
    * @return Temperature reading in 16-bit 2's complement format
-   * @see MPU6050_RA_TEMP_OUT_H
+   *  MPU6050_RA_TEMP_OUT_H
    */
   double getTemperatureCelcius() {
     double rawTemp = getTemperature();
@@ -3035,9 +2660,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get current internal temperature.
    * 
    * @return Temperature reading in 16-bit 2's complement format
-   * @see MPU6050_RA_TEMP_OUT_H
+   *  MPU6050_RA_TEMP_OUT_H
    */
-  int getTemperature() {
+  public int getTemperature() {
     int readBuffer[] = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_TEMP_OUT_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
@@ -3079,9 +2704,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param z
    *          16-bit signed integer container for Z-axis rotation see
    *          getMotion6()
-   * @see MPU6050_RA_GYRO_XOUT_H
+   *  MPU6050_RA_GYRO_XOUT_H
    */
-  void getRotation(int x[], int y[], int z[]) {
+  public void getRotation(int x[], int y[], int z[]) {
     int readBuffer[] = new int[6];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_GYRO_XOUT_H, 6, readBuffer);
     x[0] = (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
@@ -3094,9 +2719,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @return X-axis rotation measurement in 16-bit 2's complement format see
    *         getMotion6()
-   * @see MPU6050_RA_GYRO_XOUT_H
+   *  MPU6050_RA_GYRO_XOUT_H
    */
-  int getRotationX() {
+  public int getRotationX() {
     int readBuffer[] = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_GYRO_XOUT_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
@@ -3107,9 +2732,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @return Y-axis rotation measurement in 16-bit 2's complement format see
    *         getMotion6()
-   * @see MPU6050_RA_GYRO_YOUT_H
+   *  MPU6050_RA_GYRO_YOUT_H
    */
-  int getRotationY() {
+  public int getRotationY() {
     int readBuffer[] = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_GYRO_YOUT_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
@@ -3120,9 +2745,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @return Z-axis rotation measurement in 16-bit 2's complement format see
    *         getMotion6()
-   * @see MPU6050_RA_GYRO_ZOUT_H
+   *  MPU6050_RA_GYRO_ZOUT_H
    */
-  int getRotationZ() {
+  public int getRotationZ() {
     int readBuffer[] = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_GYRO_ZOUT_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
@@ -3155,7 +2780,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *
    * Data is placed in these external sensor data registers according to
    * I2C_SLV0_CTRL, I2C_SLV1_CTRL, I2C_SLV2_CTRL, and I2C_SLV3_CTRL (Registers
-   * 39, 42, 45, and 48). When more than zero bytes are read (I2C_SLVx_LEN > 0)
+   * 39, 42, 45, and 48). When more than zero bytes are read (I2C_SLVx_LEN &gt; 0)
    * from an enabled slave (I2C_SLVx_EN = 1), the slave is read at the Sample
    * Rate (as defined in Register 25) or delayed rate (if specified in Register
    * 52 and 103). During each Sample cycle, slave reads are performed in order
@@ -3208,7 +2833,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          Starting position (0-23)
    * @return Byte read from register
    */
-  int getExternalSensorByte(int position) {
+  public int getExternalSensorByte(int position) {
     return (byte) I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_EXT_SENS_DATA_00 + position) & 0xff;
   }
 
@@ -3219,7 +2844,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          Starting position (0-21)
    * @return Word read from register see getExternalSensorByte()
    */
-  int getExternalSensorWord(int position) {
+  public int getExternalSensorWord(int position) {
     int readBuffer[] = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_EXT_SENS_DATA_00 + position, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1];
@@ -3232,7 +2857,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          Starting position (0-20)
    * @return Double word read from registers see getExternalSensorByte()
    */
-  int getExternalSensorDWord(int position) {
+  public int getExternalSensorDWord(int position) {
     int readBuffer[] = new int[4];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_EXT_SENS_DATA_00 + position, 4, readBuffer);
     return (((byte) readBuffer[0]) << 24) | (((byte) readBuffer[1]) << 16) | (((byte) readBuffer[2]) << 8) | readBuffer[3] & 0xff;
@@ -3244,9 +2869,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get full motion detection status register content (all bits).
    * 
    * @return Motion detection status byte
-   * @see MPU6050_RA_MOT_DETECT_STATUS
+   *  MPU6050_RA_MOT_DETECT_STATUS
    */
-  int getMotionStatus() {
+  public int getMotionStatus() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS);
   }
 
@@ -3254,10 +2879,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get X-axis negative motion detection interrupt status.
    * 
    * @return Motion detection status
-   * @see MPU6050_RA_MOT_DETECT_STATUS
-   * @see MPU6050_MOTION_MOT_XNEG_BIT
+   *  MPU6050_RA_MOT_DETECT_STATUS
+   *  MPU6050_MOTION_MOT_XNEG_BIT
    */
-  boolean getXNegMotionDetected() {
+public boolean getXNegMotionDetected() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_XNEG_BIT);
   }
 
@@ -3265,10 +2890,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get X-axis positive motion detection interrupt status.
    * 
    * @return Motion detection status
-   * @see MPU6050_RA_MOT_DETECT_STATUS
-   * @see MPU6050_MOTION_MOT_XPOS_BIT
+   *  MPU6050_RA_MOT_DETECT_STATUS
+   *  MPU6050_MOTION_MOT_XPOS_BIT
    */
-  boolean getXPosMotionDetected() {
+public boolean getXPosMotionDetected() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_XPOS_BIT);
   }
 
@@ -3276,10 +2901,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get Y-axis negative motion detection interrupt status.
    * 
    * @return Motion detection status
-   * @see MPU6050_RA_MOT_DETECT_STATUS
-   * @see MPU6050_MOTION_MOT_YNEG_BIT
+   *  MPU6050_RA_MOT_DETECT_STATUS
+   *  MPU6050_MOTION_MOT_YNEG_BIT
    */
-  boolean getYNegMotionDetected() {
+public boolean getYNegMotionDetected() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_YNEG_BIT);
   }
 
@@ -3287,10 +2912,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get Y-axis positive motion detection interrupt status.
    * 
    * @return Motion detection status
-   * @see MPU6050_RA_MOT_DETECT_STATUS
-   * @see MPU6050_MOTION_MOT_YPOS_BIT
+   *  MPU6050_RA_MOT_DETECT_STATUS
+   *  MPU6050_MOTION_MOT_YPOS_BIT
    */
-  boolean getYPosMotionDetected() {
+public boolean getYPosMotionDetected() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_YPOS_BIT);
   }
 
@@ -3298,10 +2923,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get Z-axis negative motion detection interrupt status.
    * 
    * @return Motion detection status
-   * @see MPU6050_RA_MOT_DETECT_STATUS
-   * @see MPU6050_MOTION_MOT_ZNEG_BIT
+   *  MPU6050_RA_MOT_DETECT_STATUS
+   *  MPU6050_MOTION_MOT_ZNEG_BIT
    */
-  boolean getZNegMotionDetected() {
+public boolean getZNegMotionDetected() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_ZNEG_BIT);
   }
 
@@ -3309,10 +2934,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get Z-axis positive motion detection interrupt status.
    * 
    * @return Motion detection status
-   * @see MPU6050_RA_MOT_DETECT_STATUS
-   * @see MPU6050_MOTION_MOT_ZPOS_BIT
+   *  MPU6050_RA_MOT_DETECT_STATUS
+   *  MPU6050_MOTION_MOT_ZPOS_BIT
    */
-  boolean getZPosMotionDetected() {
+public boolean getZPosMotionDetected() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_ZPOS_BIT);
   }
 
@@ -3320,10 +2945,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get zero motion detection interrupt status.
    * 
    * @return Motion detection status
-   * @see MPU6050_RA_MOT_DETECT_STATUS
-   * @see MPU6050_MOTION_MOT_ZRMOT_BIT
+   *  MPU6050_RA_MOT_DETECT_STATUS
+   *  MPU6050_MOTION_MOT_ZRMOT_BIT
    */
-  boolean getZeroMotionDetected() {
+public boolean getZeroMotionDetected() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_ZRMOT_BIT);
   }
 
@@ -3339,9 +2964,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          Slave number (0-3)
    * @param data
    *          Byte to write
-   * @see MPU6050_RA_I2C_SLV0_DO
+   *  MPU6050_RA_I2C_SLV0_DO
    */
-  void setSlaveOutputByte(int num, int data) {
+  public void setSlaveOutputByte(int num, int data) {
     if (num > 3)
       return;
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_DO + num, data);
@@ -3356,10 +2981,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * has been received.
    * 
    * @return Current external data shadow delay enabled status.
-   * @see MPU6050_RA_I2C_MST_DELAY_CTRL
-   * @see MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT
+   *  MPU6050_RA_I2C_MST_DELAY_CTRL
+   *  MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT
    */
-  boolean getExternalShadowDelayEnabled() {
+public boolean getExternalShadowDelayEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_DELAY_CTRL, MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT);
   }
 
@@ -3369,10 +2994,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param enabled
    *          New external data shadow delay enabled status. see
    *          getExternalShadowDelayEnabled()
-   * @see MPU6050_RA_I2C_MST_DELAY_CTRL
-   * @see MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT
+   *  MPU6050_RA_I2C_MST_DELAY_CTRL
+   *  MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT
    */
-  void setExternalShadowDelayEnabled(boolean enabled) {
+  public void setExternalShadowDelayEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_DELAY_CTRL, MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT, enabled);
   }
 
@@ -3394,10 +3019,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param num
    *          Slave number (0-4)
    * @return Current slave delay enabled status.
-   * @see MPU6050_RA_I2C_MST_DELAY_CTRL
-   * @see MPU6050_DELAYCTRL_I2C_SLV0_DLY_EN_BIT
+   *  MPU6050_RA_I2C_MST_DELAY_CTRL
+   *  MPU6050_DELAYCTRL_I2C_SLV0_DLY_EN_BIT
    */
-  boolean getSlaveDelayEnabled(int num) {
+public boolean getSlaveDelayEnabled(int num) {
     // MPU6050_DELAYCTRL_I2C_SLV4_DLY_EN_BIT is 4, SLV3 is 3, etc.
     if (num > 4)
       return false;
@@ -3411,10 +3036,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          Slave number (0-4)
    * @param enabled
    *          New slave delay enabled status.
-   * @see MPU6050_RA_I2C_MST_DELAY_CTRL
-   * @see MPU6050_DELAYCTRL_I2C_SLV0_DLY_EN_BIT
+   *  MPU6050_RA_I2C_MST_DELAY_CTRL
+   *  MPU6050_DELAYCTRL_I2C_SLV0_DLY_EN_BIT
    */
-  void setSlaveDelayEnabled(int num, boolean enabled) {
+  public void setSlaveDelayEnabled(int num, boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_DELAY_CTRL, num, enabled);
   }
 
@@ -3424,10 +3049,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Reset gyroscope signal path. The reset will revert the signal path analog
    * to digital converters and filters to their power up configurations.
    * 
-   * @see MPU6050_RA_SIGNAL_PATH_RESET
-   * @see MPU6050_PATHRESET_GYRO_RESET_BIT
+   *  MPU6050_RA_SIGNAL_PATH_RESET
+   *  MPU6050_PATHRESET_GYRO_RESET_BIT
    */
-  void resetGyroscopePath() {
+  public void resetGyroscopePath() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_SIGNAL_PATH_RESET, MPU6050_PATHRESET_GYRO_RESET_BIT, true);
   }
 
@@ -3435,10 +3060,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Reset accelerometer signal path. The reset will revert the signal path
    * analog to digital converters and filters to their power up configurations.
    * 
-   * @see MPU6050_RA_SIGNAL_PATH_RESET
-   * @see MPU6050_PATHRESET_ACCEL_RESET_BIT
+   *  MPU6050_RA_SIGNAL_PATH_RESET
+   *  MPU6050_PATHRESET_ACCEL_RESET_BIT
    */
-  void resetAccelerometerPath() {
+  public void resetAccelerometerPath() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_SIGNAL_PATH_RESET, MPU6050_PATHRESET_ACCEL_RESET_BIT, true);
   }
 
@@ -3446,14 +3071,12 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Reset temperature sensor signal path. The reset will revert the signal path
    * analog to digital converters and filters to their power up configurations.
    * 
-   * @see MPU6050_RA_SIGNAL_PATH_RESET
-   * @see MPU6050_PATHRESET_TEMP_RESET_BIT
+   *  MPU6050_RA_SIGNAL_PATH_RESET
+   *  MPU6050_PATHRESET_TEMP_RESET_BIT
    */
-  void resetTemperaturePath() {
+  public void resetTemperaturePath() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_SIGNAL_PATH_RESET, MPU6050_PATHRESET_TEMP_RESET_BIT, true);
   }
-
-  // MOT_DETECT_CTRL register
 
   /**
    * Get accelerometer power-on delay. The accelerometer data path provides
@@ -3468,10 +3091,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * detection modules.
    * 
    * @return Current accelerometer power-on delay
-   * @see MPU6050_RA_MOT_DETECT_CTRL
-   * @see MPU6050_DETECT_ACCEL_ON_DELAY_BIT
+   *  MPU6050_RA_MOT_DETECT_CTRL
+   *  MPU6050_DETECT_ACCEL_ON_DELAY_BIT
    */
-  int getAccelerometerPowerOnDelay() {
+  public int getAccelerometerPowerOnDelay() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_ACCEL_ON_DELAY_BIT, MPU6050_DETECT_ACCEL_ON_DELAY_LENGTH);
   }
 
@@ -3481,10 +3104,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param delay
    *          New accelerometer power-on delay (0-3) see
    *          getAccelerometerPowerOnDelay()
-   * @see MPU6050_RA_MOT_DETECT_CTRL
-   * @see MPU6050_DETECT_ACCEL_ON_DELAY_BIT
+   *  MPU6050_RA_MOT_DETECT_CTRL
+   *  MPU6050_DETECT_ACCEL_ON_DELAY_BIT
    */
-  void setAccelerometerPowerOnDelay(int delay) {
+  public void setAccelerometerPowerOnDelay(int delay) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_ACCEL_ON_DELAY_BIT, MPU6050_DETECT_ACCEL_ON_DELAY_LENGTH, delay);
   }
 
@@ -3512,10 +3135,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * please refer to Registers 29 to 32.
    *
    * @return Current decrement configuration
-   * @see MPU6050_RA_MOT_DETECT_CTRL
-   * @see MPU6050_DETECT_FF_COUNT_BIT
+   *  MPU6050_RA_MOT_DETECT_CTRL
+   *  MPU6050_DETECT_FF_COUNT_BIT
    */
-  int getFreefallDetectionCounterDecrement() {
+  public int getFreefallDetectionCounterDecrement() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_FF_COUNT_BIT, MPU6050_DETECT_FF_COUNT_LENGTH);
   }
 
@@ -3525,10 +3148,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param decrement
    *          New decrement configuration value see
    *          getFreefallDetectionCounterDecrement()
-   * @see MPU6050_RA_MOT_DETECT_CTRL
-   * @see MPU6050_DETECT_FF_COUNT_BIT
+   *  MPU6050_RA_MOT_DETECT_CTRL
+   *  MPU6050_DETECT_FF_COUNT_BIT
    */
-  void setFreefallDetectionCounterDecrement(int decrement) {
+  public void setFreefallDetectionCounterDecrement(int decrement) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_FF_COUNT_BIT, MPU6050_DETECT_FF_COUNT_LENGTH, decrement);
   }
 
@@ -3556,7 +3179,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * refer to Registers 29 to 32.
    *
    */
-  int getMotionDetectionCounterDecrement() {
+  public int getMotionDetectionCounterDecrement() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_MOT_COUNT_BIT, MPU6050_DETECT_MOT_COUNT_LENGTH);
   }
 
@@ -3566,10 +3189,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param decrement
    *          New decrement configuration value see
    *          getMotionDetectionCounterDecrement()
-   * @see MPU6050_RA_MOT_DETECT_CTRL
-   * @see MPU6050_DETECT_MOT_COUNT_BIT
+   *  MPU6050_RA_MOT_DETECT_CTRL
+   *  MPU6050_DETECT_MOT_COUNT_BIT
    */
-  void setMotionDetectionCounterDecrement(int decrement) {
+  public void setMotionDetectionCounterDecrement(int decrement) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_MOT_COUNT_BIT, MPU6050_DETECT_MOT_COUNT_LENGTH, decrement);
   }
 
@@ -3582,10 +3205,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * cycled.
    * 
    * @return Current FIFO enabled status
-   * @see MPU6050_RA_USER_CTRL
-   * @see MPU6050_USERCTRL_FIFO_EN_BIT
+   *  MPU6050_RA_USER_CTRL
+   *  MPU6050_USERCTRL_FIFO_EN_BIT
    */
-  boolean getFIFOEnabled() {
+public boolean getFIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_FIFO_EN_BIT);
   }
 
@@ -3594,10 +3217,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New FIFO enabled status see getFIFOEnabled()
-   * @see MPU6050_RA_USER_CTRL
-   * @see MPU6050_USERCTRL_FIFO_EN_BIT
+   *  MPU6050_RA_USER_CTRL
+   *  MPU6050_USERCTRL_FIFO_EN_BIT
    */
-  void setFIFOEnabled(boolean enabled) {
+  public void setFIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_FIFO_EN_BIT, enabled);
   }
 
@@ -3610,10 +3233,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * information regarding Bypass Mode, please refer to Register 55.
    * 
    * @return Current I2C Master Mode enabled status
-   * @see MPU6050_RA_USER_CTRL
-   * @see MPU6050_USERCTRL_I2C_MST_EN_BIT
+   *  MPU6050_RA_USER_CTRL
+   *  MPU6050_USERCTRL_I2C_MST_EN_BIT
    */
-  boolean getI2CMasterModeEnabled() {
+public boolean getI2CMasterModeEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_MST_EN_BIT);
   }
 
@@ -3622,10 +3245,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New I2C Master Mode enabled status see getI2CMasterModeEnabled()
-   * @see MPU6050_RA_USER_CTRL
-   * @see MPU6050_USERCTRL_I2C_MST_EN_BIT
+   *  MPU6050_RA_USER_CTRL
+   *  MPU6050_USERCTRL_I2C_MST_EN_BIT
    */
-  void setI2CMasterModeEnabled(boolean enabled) {
+  public void setI2CMasterModeEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_MST_EN_BIT, enabled);
   }
 
@@ -3633,7 +3256,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Switch from I2C to SPI mode (MPU-6000 only) If this is set, the primary SPI
    * interface will be enabled in place of the disabled primary I2C interface.
    */
-  void switchSPIEnabled(boolean enabled) {
+  public void switchSPIEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_IF_DIS_BIT, enabled);
   }
 
@@ -3642,10 +3265,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * equals 0. This bit automatically clears to 0 after the reset has been
    * triggered.
    * 
-   * @see MPU6050_RA_USER_CTRL
-   * @see MPU6050_USERCTRL_FIFO_RESET_BIT
+   *  MPU6050_RA_USER_CTRL
+   *  MPU6050_USERCTRL_FIFO_RESET_BIT
    */
-  void resetFIFO() {
+  public void resetFIFO() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_FIFO_RESET_BIT, true);
   }
 
@@ -3654,10 +3277,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * I2C_MST_EN equals 0. This bit automatically clears to 0 after the reset has
    * been triggered.
    * 
-   * @see MPU6050_RA_USER_CTRL
-   * @see MPU6050_USERCTRL_I2C_MST_RESET_BIT
+   *  MPU6050_RA_USER_CTRL
+   *  MPU6050_USERCTRL_I2C_MST_RESET_BIT
    */
-  void resetI2CMaster() {
+  public void resetI2CMaster() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_MST_RESET_BIT, true);
   }
 
@@ -3670,10 +3293,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * When resetting only the signal path (and not the sensor registers), please
    * use Register 104, SIGNAL_PATH_RESET.
    *
-   * @see MPU6050_RA_USER_CTRL
-   * @see MPU6050_USERCTRL_SIG_COND_RESET_BIT
+   *  MPU6050_RA_USER_CTRL
+   *  MPU6050_USERCTRL_SIG_COND_RESET_BIT
    */
-  void resetSensors() {
+  public void resetSensors() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_SIG_COND_RESET_BIT, true);
   }
 
@@ -3682,11 +3305,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * Trigger a full device reset. A small delay of ~50ms may be desirable after
    * triggering a reset.
-   * 
-   * @see MPU6050_RA_PWR_MGMT_1
-   * @see MPU6050_PWR1_DEVICE_RESET_BIT
    */
-  void reset() {
+  public void reset() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_DEVICE_RESET_BIT, true);
   }
 
@@ -3699,10 +3319,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * should be used if any gyro axis is not used by the application.
    * 
    * @return Current sleep mode enabled status
-   * @see MPU6050_RA_PWR_MGMT_1
-   * @see MPU6050_PWR1_SLEEP_BIT
+   *  MPU6050_RA_PWR_MGMT_1
+   *  MPU6050_PWR1_SLEEP_BIT
    */
-  boolean getSleepEnabled() {
+public boolean getSleepEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_SLEEP_BIT);
   }
 
@@ -3711,10 +3331,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New sleep mode enabled status see getSleepEnabled()
-   * @see MPU6050_RA_PWR_MGMT_1
-   * @see MPU6050_PWR1_SLEEP_BIT
+   *  MPU6050_RA_PWR_MGMT_1
+   *  MPU6050_PWR1_SLEEP_BIT
    */
-  void setSleepEnabled(boolean enabled) {
+  public void setSleepEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_SLEEP_BIT, enabled);
   }
 
@@ -3725,10 +3345,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * LP_WAKE_CTRL (register 108).
    * 
    * @return Current sleep mode enabled status
-   * @see MPU6050_RA_PWR_MGMT_1
-   * @see MPU6050_PWR1_CYCLE_BIT
+   *  MPU6050_RA_PWR_MGMT_1
+   *  MPU6050_PWR1_CYCLE_BIT
    */
-  boolean getWakeCycleEnabled() {
+public boolean getWakeCycleEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CYCLE_BIT);
   }
 
@@ -3737,10 +3357,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param enabled
    *          New sleep mode enabled status see getWakeCycleEnabled()
-   * @see MPU6050_RA_PWR_MGMT_1
-   * @see MPU6050_PWR1_CYCLE_BIT
+   *  MPU6050_RA_PWR_MGMT_1
+   *  MPU6050_PWR1_CYCLE_BIT
    */
-  void setWakeCycleEnabled(boolean enabled) {
+  public void setWakeCycleEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CYCLE_BIT, enabled);
   }
 
@@ -3754,10 +3374,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * respectively.
    *
    * @return Current temperature sensor enabled status
-   * @see MPU6050_RA_PWR_MGMT_1
-   * @see MPU6050_PWR1_TEMP_DIS_BIT
+   *  MPU6050_RA_PWR_MGMT_1
+   *  MPU6050_PWR1_TEMP_DIS_BIT
    */
-  boolean getTempSensorEnabled() {
+public boolean getTempSensorEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_TEMP_DIS_BIT);
     // 1 is actually disabled here
   }
@@ -3770,10 +3390,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *
    * @param enabled
    *          New temperature sensor enabled status see getTempSensorEnabled()
-   * @see MPU6050_RA_PWR_MGMT_1
-   * @see MPU6050_PWR1_TEMP_DIS_BIT
+   *  MPU6050_RA_PWR_MGMT_1
+   *  MPU6050_PWR1_TEMP_DIS_BIT
    */
-  void setTempSensorEnabled(boolean enabled) {
+  public void setTempSensorEnabled(boolean enabled) {
     // 1 is actually disabled here
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_TEMP_DIS_BIT, !enabled);
   }
@@ -3782,11 +3402,11 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get clock source setting.
    * 
    * @return Current clock source setting
-   * @see MPU6050_RA_PWR_MGMT_1
-   * @see MPU6050_PWR1_CLKSEL_BIT
-   * @see MPU6050_PWR1_CLKSEL_LENGTH
+   *  MPU6050_RA_PWR_MGMT_1
+   *  MPU6050_PWR1_CLKSEL_BIT
+   *  MPU6050_PWR1_CLKSEL_LENGTH
    */
-  int getClockSource() {
+  public int getClockSource() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CLKSEL_BIT, MPU6050_PWR1_CLKSEL_LENGTH);
   }
 
@@ -3818,15 +3438,13 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *
    * @param source
    *          New clock source setting see getClockSource()
-   * @see MPU6050_RA_PWR_MGMT_1
-   * @see MPU6050_PWR1_CLKSEL_BIT
-   * @see MPU6050_PWR1_CLKSEL_LENGTH
+   *  MPU6050_RA_PWR_MGMT_1
+   *  MPU6050_PWR1_CLKSEL_BIT
+   *  MPU6050_PWR1_CLKSEL_LENGTH
    */
-  void setClockSource(int source) {
+  public void setClockSource(int source) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CLKSEL_BIT, MPU6050_PWR1_CLKSEL_LENGTH, source);
   }
-
-  // PWR_MGMT_2 register
 
   /**
    * Get wake frequency in Accel-Only Low Power Mode. The MPU-60X0 can be put
@@ -3849,9 +3467,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * to Register 107.
    *
    * @return Current wake frequency
-   * @see MPU6050_RA_PWR_MGMT_2
+   *  MPU6050_RA_PWR_MGMT_2
    */
-  int getWakeFrequency() {
+  public int getWakeFrequency() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_LP_WAKE_CTRL_BIT, MPU6050_PWR2_LP_WAKE_CTRL_LENGTH);
   }
 
@@ -3860,9 +3478,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param frequency
    *          New wake frequency
-   * @see MPU6050_RA_PWR_MGMT_2
+   *  MPU6050_RA_PWR_MGMT_2
    */
-  void setWakeFrequency(int frequency) {
+  public void setWakeFrequency(int frequency) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_LP_WAKE_CTRL_BIT, MPU6050_PWR2_LP_WAKE_CTRL_LENGTH, frequency);
   }
 
@@ -3871,22 +3489,22 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * will not gather or report data (or use power).
    * 
    * @return Current X-axis standby enabled status
-   * @see MPU6050_RA_PWR_MGMT_2
-   * @see MPU6050_PWR2_STBY_XA_BIT
+   *  MPU6050_RA_PWR_MGMT_2
+   *  MPU6050_PWR2_STBY_XA_BIT
    */
-  boolean getStandbyXAccelEnabled() {
+public boolean getStandbyXAccelEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_XA_BIT);
   }
 
   /**
    * Set X-axis accelerometer standby enabled status.
    * 
-   * @param New
+   * @param enabled
    *          X-axis standby enabled status see getStandbyXAccelEnabled()
-   * @see MPU6050_RA_PWR_MGMT_2
-   * @see MPU6050_PWR2_STBY_XA_BIT
+   *  MPU6050_RA_PWR_MGMT_2
+   *  MPU6050_PWR2_STBY_XA_BIT
    */
-  void setStandbyXAccelEnabled(boolean enabled) {
+  public void setStandbyXAccelEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_XA_BIT, enabled);
   }
 
@@ -3895,22 +3513,22 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * will not gather or report data (or use power).
    * 
    * @return Current Y-axis standby enabled status
-   * @see MPU6050_RA_PWR_MGMT_2
-   * @see MPU6050_PWR2_STBY_YA_BIT
+   *  MPU6050_RA_PWR_MGMT_2
+   *  MPU6050_PWR2_STBY_YA_BIT
    */
-  boolean getStandbyYAccelEnabled() {
+public boolean getStandbyYAccelEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_YA_BIT);
   }
 
   /**
    * Set Y-axis accelerometer standby enabled status.
    * 
-   * @param New
+   * @param enabled
    *          Y-axis standby enabled status see getStandbyYAccelEnabled()
-   * @see MPU6050_RA_PWR_MGMT_2
-   * @see MPU6050_PWR2_STBY_YA_BIT
+   *  MPU6050_RA_PWR_MGMT_2
+   *  MPU6050_PWR2_STBY_YA_BIT
    */
-  void setStandbyYAccelEnabled(boolean enabled) {
+  public void setStandbyYAccelEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_YA_BIT, enabled);
   }
 
@@ -3919,22 +3537,22 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * will not gather or report data (or use power).
    * 
    * @return Current Z-axis standby enabled status
-   * @see MPU6050_RA_PWR_MGMT_2
-   * @see MPU6050_PWR2_STBY_ZA_BIT
+   *  MPU6050_RA_PWR_MGMT_2
+   *  MPU6050_PWR2_STBY_ZA_BIT
    */
-  boolean getStandbyZAccelEnabled() {
+public boolean getStandbyZAccelEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_ZA_BIT);
   }
 
   /**
    * Set Z-axis accelerometer standby enabled status.
    * 
-   * @param New
+   * @param enabled
    *          Z-axis standby enabled status see getStandbyZAccelEnabled()
-   * @see MPU6050_RA_PWR_MGMT_2
-   * @see MPU6050_PWR2_STBY_ZA_BIT
+   *  MPU6050_RA_PWR_MGMT_2
+   *  MPU6050_PWR2_STBY_ZA_BIT
    */
-  void setStandbyZAccelEnabled(boolean enabled) {
+  public void setStandbyZAccelEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_ZA_BIT, enabled);
   }
 
@@ -3943,22 +3561,22 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * not gather or report data (or use power).
    * 
    * @return Current X-axis standby enabled status
-   * @see MPU6050_RA_PWR_MGMT_2
-   * @see MPU6050_PWR2_STBY_XG_BIT
+   *  MPU6050_RA_PWR_MGMT_2
+   *  MPU6050_PWR2_STBY_XG_BIT
    */
-  boolean getStandbyXGyroEnabled() {
+public boolean getStandbyXGyroEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_XG_BIT);
   }
 
   /**
    * Set X-axis gyroscope standby enabled status.
    * 
-   * @param New
+   * @param enabled
    *          X-axis standby enabled status see getStandbyXGyroEnabled()
-   * @see MPU6050_RA_PWR_MGMT_2
-   * @see MPU6050_PWR2_STBY_XG_BIT
+   *  MPU6050_RA_PWR_MGMT_2
+   *  MPU6050_PWR2_STBY_XG_BIT
    */
-  void setStandbyXGyroEnabled(boolean enabled) {
+  public void setStandbyXGyroEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_XG_BIT, enabled);
   }
 
@@ -3967,22 +3585,22 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * not gather or report data (or use power).
    * 
    * @return Current Y-axis standby enabled status
-   * @see MPU6050_RA_PWR_MGMT_2
-   * @see MPU6050_PWR2_STBY_YG_BIT
+   *  MPU6050_RA_PWR_MGMT_2
+   *  MPU6050_PWR2_STBY_YG_BIT
    */
-  boolean getStandbyYGyroEnabled() {
+public boolean getStandbyYGyroEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_YG_BIT);
   }
 
   /**
    * Set Y-axis gyroscope standby enabled status.
    * 
-   * @param New
+   * @param enabled
    *          Y-axis standby enabled status see getStandbyYGyroEnabled()
-   * @see MPU6050_RA_PWR_MGMT_2
-   * @see MPU6050_PWR2_STBY_YG_BIT
+   *  MPU6050_RA_PWR_MGMT_2
+   *  MPU6050_PWR2_STBY_YG_BIT
    */
-  void setStandbyYGyroEnabled(boolean enabled) {
+  public void setStandbyYGyroEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_YG_BIT, enabled);
   }
 
@@ -3991,26 +3609,24 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * not gather or report data (or use power).
    * 
    * @return Current Z-axis standby enabled status
-   * @see MPU6050_RA_PWR_MGMT_2
-   * @see MPU6050_PWR2_STBY_ZG_BIT
+   *  MPU6050_RA_PWR_MGMT_2
+   *  MPU6050_PWR2_STBY_ZG_BIT
    */
-  boolean getStandbyZGyroEnabled() {
+public boolean getStandbyZGyroEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_ZG_BIT);
   }
 
   /**
    * Set Z-axis gyroscope standby enabled status.
    * 
-   * @param New
+   * @param enabled
    *          Z-axis standby enabled status see getStandbyZGyroEnabled()
-   * @see MPU6050_RA_PWR_MGMT_2
-   * @see MPU6050_PWR2_STBY_ZG_BIT
+   *  MPU6050_RA_PWR_MGMT_2
+   *  MPU6050_PWR2_STBY_ZG_BIT
    */
-  void setStandbyZGyroEnabled(boolean enabled) {
+  public void setStandbyZGyroEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_ZG_BIT, enabled);
   }
-
-  // FIFO_COUNT* registers
 
   /**
    * Get current FIFO buffer size. This value indicates the number of bytes
@@ -4021,13 +3637,11 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @return Current FIFO buffer size
    */
-  int getFIFOCount() {
+  public int getFIFOCount() {
     int readBuffer[] = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_FIFO_COUNTH, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
-
-  // FIFO_R_W register
 
   /**
    * Get byte from FIFO buffer. This register is used to read and write data
@@ -4055,11 +3669,11 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *
    * @return Byte from FIFO buffer
    */
-  int getFIFOByte() {
+  public int getFIFOByte() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_FIFO_R_W);
   }
 
-  void getFIFOBytes(int[] data, int length) {
+  public void getFIFOBytes(int[] data, int length) {
     if (length > 0) {
       I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_FIFO_R_W, length, data);
     } else {
@@ -4072,9 +3686,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * see getFIFOByte()
    * 
-   * @see MPU6050_RA_FIFO_R_W
+   *  MPU6050_RA_FIFO_R_W
    */
-  void setFIFOByte(int data) {
+  public void setFIFOByte(int data) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_FIFO_R_W, data);
   }
 
@@ -4085,11 +3699,11 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * (0b110100, 0x34).
    * 
    * @return Device ID (6 bits only! should be 0x34)
-   * @see MPU6050_RA_WHO_AM_I
-   * @see MPU6050_WHO_AM_I_BIT
-   * @see MPU6050_WHO_AM_I_LENGTH
+   *  MPU6050_RA_WHO_AM_I
+   *  MPU6050_WHO_AM_I_BIT
+   *  MPU6050_WHO_AM_I_LENGTH
    */
-  int getDeviceID() {
+  public int getDeviceID() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_WHO_AM_I, MPU6050_WHO_AM_I_BIT, MPU6050_WHO_AM_I_LENGTH);
   }
 
@@ -4099,227 +3713,192 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param id
    *          New device ID to set. see getDeviceID()
-   * @see MPU6050_RA_WHO_AM_I
-   * @see MPU6050_WHO_AM_I_BIT
-   * @see MPU6050_WHO_AM_I_LENGTH
+   *  MPU6050_RA_WHO_AM_I
+   *  MPU6050_WHO_AM_I_BIT
+   *  MPU6050_WHO_AM_I_LENGTH
    */
-  void setDeviceID(int id) {
+  public void setDeviceID(int id) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_WHO_AM_I, MPU6050_WHO_AM_I_BIT, MPU6050_WHO_AM_I_LENGTH, id);
   }
 
   // ======== UNDOCUMENTED/DMP REGISTERS/METHODS ========
-
-  // XG_OFFS_TC register
-
-  boolean getOTPBankValid() {
+public boolean getOTPBankValid() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_XG_OFFS_TC, MPU6050_TC_OTP_BNK_VLD_BIT);
   }
 
-  void setOTPBankValid(boolean enabled) {
+  public void setOTPBankValid(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_XG_OFFS_TC, MPU6050_TC_OTP_BNK_VLD_BIT, enabled);
   }
 
-  int getXGyroOffsetTC() {
+  public int getXGyroOffsetTC() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_XG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH);
   }
 
-  void setXGyroOffsetTC(int offset) {
+  public void setXGyroOffsetTC(int offset) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_XG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH, offset);
   }
 
-  // YG_OFFS_TC register
-
-  int getYGyroOffsetTC() {
+  public int getYGyroOffsetTC() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_YG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH);
   }
 
-  void setYGyroOffsetTC(int offset) {
+  public void setYGyroOffsetTC(int offset) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_YG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH, offset);
   }
 
-  // ZG_OFFS_TC register
-
-  int getZGyroOffsetTC() {
+  public int getZGyroOffsetTC() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_ZG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH);
   }
 
-  void setZGyroOffsetTC(int offset) {
+  public void setZGyroOffsetTC(int offset) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_ZG_OFFS_TC, MPU6050_TC_OFFSET_BIT, MPU6050_TC_OFFSET_LENGTH, offset);
   }
 
-  // X_FINE_GAIN register
-
-  int getXFineGain() {
+  public int getXFineGain() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_X_FINE_GAIN);
   }
 
-  void setXFineGain(int gain) {
+  public void setXFineGain(int gain) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_X_FINE_GAIN, gain);
   }
 
-  // Y_FINE_GAIN register
-
-  int getYFineGain() {
+  public int getYFineGain() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_Y_FINE_GAIN);
   }
 
-  void setYFineGain(int gain) {
+  public void setYFineGain(int gain) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_Y_FINE_GAIN, gain);
   }
 
-  // Z_FINE_GAIN register
-
-  int getZFineGain() {
+  public int getZFineGain() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_Z_FINE_GAIN);
   }
 
-  void setZFineGain(int gain) {
+  public void setZFineGain(int gain) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_Z_FINE_GAIN, gain);
   }
 
-  // XA_OFFS_* registers
-
-  int getXAccelOffset() {
+  public int getXAccelOffset() {
     int readBuffer[] = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_XA_OFFS_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
-  void setXAccelOffset(int offset) {
+  public void setXAccelOffset(int offset) {
     I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_XA_OFFS_H, offset);
   }
 
-  // YA_OFFS_* register
-
-  int getYAccelOffset() {
+  public int getYAccelOffset() {
     int readBuffer[] = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_YA_OFFS_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
-  void setYAccelOffset(int offset) {
+  public void setYAccelOffset(int offset) {
     I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_YA_OFFS_H, offset);
   }
 
-  // ZA_OFFS_* register
-
-  int getZAccelOffset() {
+  public int getZAccelOffset() {
     int readBuffer[] = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_ZA_OFFS_H, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
-  void setZAccelOffset(int offset) {
+  public void setZAccelOffset(int offset) {
     I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_ZA_OFFS_H, offset);
   }
 
-  // XG_OFFS_USR* registers
-
-  int getXGyroOffset() {
+  public int getXGyroOffset() {
     int readBuffer[] = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_XG_OFFS_USRH, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
-  void setXGyroOffset(int offset) {
+  public void setXGyroOffset(int offset) {
     I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_XG_OFFS_USRH, offset);
   }
 
-  // YG_OFFS_USR* register
-
-  int getYGyroOffset() {
+  public int getYGyroOffset() {
     int readBuffer[] = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_YG_OFFS_USRH, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
-  void setYGyroOffset(int offset) {
+  public void setYGyroOffset(int offset) {
     I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_YG_OFFS_USRH, offset);
   }
 
-  // ZG_OFFS_USR* register
-
-  int getZGyroOffset() {
+  public int getZGyroOffset() {
     int readBuffer[] = new int[2];
     I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_ZG_OFFS_USRH, 2, readBuffer);
     return (byte) readBuffer[0] << 8 | readBuffer[1] & 0xff;
   }
 
-  void setZGyroOffset(int offset) {
+  public void setZGyroOffset(int offset) {
     I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_ZG_OFFS_USRH, offset);
   }
 
-  // INT_ENABLE register (DMP functions)
-
-  boolean getIntPLLReadyEnabled() {
+public boolean getIntPLLReadyEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_PLL_RDY_INT_BIT);
   }
 
-  void setIntPLLReadyEnabled(boolean enabled) {
+  public void setIntPLLReadyEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_PLL_RDY_INT_BIT, enabled);
   }
 
-  boolean getIntDMPEnabled() {
+public boolean getIntDMPEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DMP_INT_BIT);
   }
 
-  void setIntDMPEnabled(boolean enabled) {
+  public void setIntDMPEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DMP_INT_BIT, enabled);
   }
 
-  // DMP_INT_STATUS
-
-  boolean getDMPInt5Status() {
+public boolean getDMPInt5Status() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_5_BIT);
   }
 
-  boolean getDMPInt4Status() {
+public boolean getDMPInt4Status() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_4_BIT);
   }
 
-  boolean getDMPInt3Status() {
+public boolean getDMPInt3Status() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_3_BIT);
   }
 
-  boolean getDMPInt2Status() {
+public boolean getDMPInt2Status() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_2_BIT);
   }
 
-  boolean getDMPInt1Status() {
+public boolean getDMPInt1Status() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_1_BIT);
   }
 
-  boolean getDMPInt0Status() {
+public boolean getDMPInt0Status() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_0_BIT);
   }
 
-  // INT_STATUS register (DMP functions)
-
-  boolean getIntPLLReadyStatus() {
+public boolean getIntPLLReadyStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_PLL_RDY_INT_BIT);
   }
 
-  boolean getIntDMPStatus() {
+public boolean getIntDMPStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_DMP_INT_BIT);
   }
 
-  // USER_CTRL register (DMP functions)
-
-  boolean getDMPEnabled() {
+public boolean getDMPEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_DMP_EN_BIT);
   }
 
-  void setDMPEnabled(boolean enabled) {
+  public void setDMPEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_DMP_EN_BIT, enabled);
   }
 
-  void resetDMP() {
+  public void resetDMP() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_DMP_RESET_BIT, true);
   }
 
-  // BANK_SEL register
-
-  void setMemoryBank(int bank, boolean prefetchEnabled, boolean userBank) {
+  public void setMemoryBank(int bank, boolean prefetchEnabled, boolean userBank) {
     bank = bank & 0x1F;
     if (userBank)
       bank |= 0x20;
@@ -4328,27 +3907,23 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_BANK_SEL, bank);
   }
 
-  void setMemoryBank(int bank) {
+  public void setMemoryBank(int bank) {
     setMemoryBank(bank, false, false);
   }
 
-  // MEM_START_ADDR register
-
-  void setMemoryStartAddress(int address) {
+  public void setMemoryStartAddress(int address) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_MEM_START_ADDR, address);
   }
 
-  // MEM_R_W register
-
-  int readMemoryByte() {
+  public int readMemoryByte() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_MEM_R_W);
   }
 
-  void writeMemoryByte(int data) {
+  public void writeMemoryByte(int data) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_MEM_R_W, data);
   }
 
-  void readMemoryBlock(int[] data, int dataSize, int bank, int address) {
+  public void readMemoryBlock(int[] data, int dataSize, int bank, int address) {
     setMemoryBank(bank);
     setMemoryStartAddress(address);
     int chunkSize;
@@ -4385,7 +3960,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     }
   }
 
-  boolean writeMemoryBlock(int[] data, int dataSize, int bank, int address, boolean verify) {
+public boolean writeMemoryBlock(int[] data, int dataSize, int bank, int address, boolean verify) {
     setMemoryBank(bank);
     setMemoryStartAddress(address);
     int chunkSize;
@@ -4470,15 +4045,15 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     return true;
   }
 
-  boolean writeProgMemoryBlock(int[] data, int dataSize, int bank, int address, boolean verify) {
+public boolean writeProgMemoryBlock(int[] data, int dataSize, int bank, int address, boolean verify) {
     return writeMemoryBlock(data, dataSize, bank, address, verify);
   }
 
-  boolean writeProgMemoryBlock(int[] data, int dataSize) {
+public boolean writeProgMemoryBlock(int[] data, int dataSize) {
     return writeMemoryBlock(data, dataSize, 0, 0, true);
   }
 
-  boolean writeDMPConfigurationSet(int[] data, int dataSize) {
+public boolean writeDMPConfigurationSet(int[] data, int dataSize) {
     int[] progBuffer;
     int special;
     boolean success = false;
@@ -4545,33 +4120,38 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     return true;
   }
 
-  boolean writeProgDMPConfigurationSet(int[] data, int dataSize) {
+public boolean writeProgDMPConfigurationSet(int[] data, int dataSize) {
     return writeDMPConfigurationSet(data, dataSize);
   }
 
-  // DMP_CFG_1 register
-
-  int getDMPConfig1() {
+  public int getDMPConfig1() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_DMP_CFG_1);
   }
 
-  void setDMPConfig1(int config) {
+  public void setDMPConfig1(int config) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_DMP_CFG_1, config);
   }
 
   // DMP_CFG_2 register
 
-  int getDMPConfig2() {
+  public int getDMPConfig2() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_DMP_CFG_2);
   }
 
-  void setDMPConfig2(int config) {
+  public void setDMPConfig2(int config) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_DMP_CFG_2, config);
   }
 
-  // * Compare the content of two buffers
-  // Returns 0 if the two buffers have the same content otherwise 1
-  int memcmp(int[] buffer1, int[] buffer2, int length) {
+  /**
+   * Compare the content of two buffers Returns 0 if the two buffers have the
+   * same content otherwise 1
+   * 
+   * @param buffer1
+   * @param buffer2
+   * @param length
+   * @return
+   */
+  public int memcmp(int[] buffer1, int[] buffer2, int length) {
     int result = 0;
     for (int i = 0; i < length; i++) {
       if (buffer1[i] != buffer2[i]) {
@@ -4585,11 +4165,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     return 0;
   }
 
-  /*
-   * Start of I2CDEV section. Most of this code could be moved to and
-   * implemented in the I2CControl interface.
-   */
-
   /**
    * Read a single bit from an 8-bit device register.
    * 
@@ -4601,7 +4176,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          Bit position to read (0-7)
    * @return Status of read operation (true = success)
    */
-  boolean I2CdevReadBit(int devAddr, int regAddr, int bitNum) {
+public boolean I2CdevReadBit(int devAddr, int regAddr, int bitNum) {
     int bitmask = 1;
     int byteValue = I2CdevReadByte(devAddr, regAddr);
     int bitValue = byteValue & (bitmask << bitNum);
@@ -4622,7 +4197,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @return right-aligned value (i.e. '101' read from any bitStart position
    *         will equal 0x05)
    */
-  int I2CdevReadBits(int devAddr, int regAddr, int bitStart, int length) {
+  public int I2CdevReadBits(int devAddr, int regAddr, int bitStart, int length) {
     // 01101001 read byte
     // 76543210 bit numbers
     // xxx args: bitStart=4, length=3
@@ -4646,7 +4221,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          Register regAddr to read from
    * @return content of the read Register
    */
-  int I2CdevReadByte(int devAddr, int regAddr) {
+  public int I2CdevReadByte(int devAddr, int regAddr) {
     int readBuffer[] = new int[1];
     I2CdevReadBytes(devAddr, regAddr, 1, readBuffer);
     return readBuffer[0] & 0xff;
@@ -4663,7 +4238,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          Container for word value read from device
    * @return Status of read operation (true = success)
    */
-  int I2CdevReadWord(int devAddr, int regAddr, int data) {
+  public int I2CdevReadWord(int devAddr, int regAddr, int data) {
     int[] readbuffer = { data };
     int status = I2CdevReadWords(devAddr, regAddr, 1, readbuffer);
     data = readbuffer[0];
@@ -4683,7 +4258,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          Buffer to store read data in
    * @return Number of words read (-1 indicates failure)
    */
-  int I2CdevReadWords(int devAddr, int regAddr, int length, int[] data) {
+  public int I2CdevReadWords(int devAddr, int regAddr, int length, int[] data) {
     byte bytebuffer[] = new byte[length * 2];
     controller.i2cRead(this, Integer.parseInt(deviceBus), devAddr, bytebuffer, bytebuffer.length);
     for (int i = 0; i < bytebuffer.length; i++) {
@@ -4706,7 +4281,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @return Number of bytes read (-1 indicates failure)
    */
   // TODO Return the correct length
-  int I2CdevReadBytes(int devAddr, int regAddr, int length, int[] data) {
+  public int I2CdevReadBytes(int devAddr, int regAddr, int length, int[] data) {
     byte[] writebuffer = new byte[] { (byte) (regAddr & 0xff) };
     byte[] readbuffer = new byte[length];
     controller.i2cWrite(this, Integer.parseInt(deviceBus), devAddr, writebuffer, writebuffer.length);
@@ -4732,7 +4307,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          Right-aligned value to write
    * @return Status of operation (true = success)
    */
-  boolean I2CdevWriteBits(int devAddr, int regAddr, int bitStart, int length, int data) {
+public boolean I2CdevWriteBits(int devAddr, int regAddr, int bitStart, int length, int data) {
     // 010 value to write
     // 76543210 bit numbers
     // xxx args: bitStart=4, length=3
@@ -4769,7 +4344,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          Right-aligned value to write
    * @return Status of operation (true = success)
    */
-  boolean I2CdevWriteBitsW(int devAddr, int regAddr, int bitStart, int length, int data) {
+public boolean I2CdevWriteBitsW(int devAddr, int regAddr, int bitStart, int length, int data) {
     // 010 value to write
     // fedcba9876543210 bit numbers
     // xxx args: bitStart=12, length=3
@@ -4800,11 +4375,11 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          Register regAddr to write to
    * @param bitNum
    *          Bit position to write (0-7)
-   * @param value
+   * @param data
    *          New bit value to write
    * @return Status of operation (true = success)
    */
-  boolean I2CdevWriteBit(int devAddr, int regAddr, int bitNum, boolean data) {
+public boolean I2CdevWriteBit(int devAddr, int regAddr, int bitNum, boolean data) {
     int b = 0;
     int newbyte = 0;
     int bitmask = 1;
@@ -4820,12 +4395,12 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     return I2CdevWriteByte(devAddr, regAddr, newbyte);
   }
 
-  boolean I2CdevWriteByte(int devAddr, int regAddr, int data) {
+public boolean I2CdevWriteByte(int devAddr, int regAddr, int data) {
     int[] writebuffer = { data };
     return I2CdevWriteBytes(devAddr, regAddr, 1, writebuffer);
   }
 
-  boolean I2CdevWriteWord(int devAddr, int regAddr, int data) {
+public boolean I2CdevWriteWord(int devAddr, int regAddr, int data) {
     int[] writebuffer = { data };
     return I2CdevWriteWords(devAddr, regAddr, 1, writebuffer);
   }
@@ -4843,7 +4418,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          Buffer to copy new data from
    * @return Status of operation (true = success)
    */
-  boolean I2CdevWriteBytes(int devAddr, int regAddr, int length, int[] data) {
+public boolean I2CdevWriteBytes(int devAddr, int regAddr, int length, int[] data) {
     byte[] writebuffer = new byte[length + 1];
     writebuffer[0] = (byte) (regAddr & 0xff);
     for (int i = 0; i < length; i++) {
@@ -4854,7 +4429,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   // TODO finish development
-  boolean I2CdevWriteWords(int devAddr, int regAddr, int length, int[] data) {
+  public boolean I2CdevWriteWords(int devAddr, int regAddr, int length, int[] data) {
     byte[] writebuffer = new byte[length * 2 + 1];
     writebuffer[0] = (byte) (regAddr & 0xff);
     for (int i = 0; i < length; i++) {
@@ -4865,30 +4440,40 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     return true;
   }
 
-  /*
-   * End of I2CDEV section.
-   */
-
   @Override
   public Orientation publishOrientation(Orientation data) {
+    // log.debug("pitch {} roll {} yaw {}", data.pitch, data.roll, data.yaw);
     return data;
+  }
+
+  public Mpu6050Data publishMpu6050Data(Mpu6050Data data) {
+    return data;
+  }
+
+  /**
+   * This sensor has one purpose - read orientation data - it should have a
+   * simple method - starts the reading/publishing
+   */
+  public synchronized void start() {
+    publisher.start();
   }
 
   @Override
   public void startOrientationTracking() {
+    start();
+  }
 
-    if (publisher == null) {
-      publisher = new OrientationPublisher();
-      publisher.start();
-    }
+  /**
+   * This sensor has one purpose - read orientation data - it should have a
+   * simple method - stops the reading/publishing
+   */
+  public synchronized void stop() {
+    publisher.stop();
   }
 
   @Override
   public void stopOrientationTracking() {
-    if (publisher != null) {
-      publisher.isRunning = false;
-      publisher = null;
-    }
+    stop();
   }
 
   @Override
@@ -4901,62 +4486,52 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     listeners.remove(listener);
   }
 
-  @Override
-  public boolean isAttached(String name) {
-    return (controller != null && controller.getName().equals(name));
-  }
-
-  // This section contains all the new attach logic
-  @Override
-  public void attach(String service) throws Exception {
-    attach((Attachable) Runtime.getService(service));
-  }
-
-  @Override
+  /**
+   * the simple router attach
+   */
   public void attach(Attachable service) throws Exception {
-
     if (I2CController.class.isAssignableFrom(service.getClass())) {
       attachI2CController((I2CController) service);
       return;
     }
+    warn(String.format("Service.attach does not know how to attach %s to a %s", service.getClass().getSimpleName(), this.getClass().getSimpleName()));
   }
 
-  public void attach(String controllerName, String deviceBus, String deviceAddress) {
-    attach((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
+  public void attach(I2CController controller) {
+    attachI2CController(controller, deviceBus, deviceAddress);
   }
 
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
-
-    if (isAttached && this.controller != controller) {
-      log.error("Already attached to {}, use detach({}) first", this.controllerName);
-    }
-
-    controllerName = controller.getName();
-    log.info("{} attach {}", getName(), controllerName);
-
-    this.deviceBus = deviceBus;
-    this.deviceAddress = deviceAddress;
-
-    attachI2CController(controller);
-    isAttached = true;
-    broadcastState();
+    attachI2CController(controller, deviceBus, deviceAddress);
   }
 
+  public void attachI2CController(I2CController controller, String deviceBus, String deviceAddress) {
+    setDeviceBus(deviceBus);
+    setDeviceAddress(deviceAddress);
+    attachI2CController(controller);
+  }
+
+  @Override
   public void attachI2CController(I2CController controller) {
 
-    if (isAttached(controller))
-      return;
-
-    if (this.controllerName != controller.getName()) {
-      log.error("Trying to attached to {}, but already attached to ({})", controller.getName(), this.controllerName);
+    if (controller.equals(this.controller)) {
+      // already attached
       return;
     }
 
+    this.controllerName = controller.getName();
     this.controller = controller;
-    isAttached = true;
     controller.attachI2CControl(this);
     log.info("Attached {} device on bus: {} address {}", controllerName, deviceBus, deviceAddress);
     broadcastState();
+  }
+
+  public void detach() {
+    log.info("detaching");
+    // super.detach(); BAD NOT DESIRED
+    if (controller != null) {
+      detachI2CController(controller);
+    }
   }
 
   // This section contains all the new detach logic
@@ -4968,7 +4543,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 
   @Override
   public void detach(Attachable service) {
-
+    log.info("detach(Attachable");
+    // FIXME Orientation listener
     if (I2CController.class.isAssignableFrom(service.getClass())) {
       detachI2CController((I2CController) service);
       return;
@@ -4976,46 +4552,128 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   @Override
-  public void detachI2CController(I2CController controller) {
-
-    if (!isAttached(controller))
+  public void detachI2CController(I2CController inController) {
+    log.info("detachI2CController");
+    if (!isAttached(inController))
       return;
-
     controller.detachI2CControl(this);
-    isAttached = false;
+    publisher.stop();
+    controller = null;
+    controllerName = null;
+    log.info("detachI2CController broadcast");
     broadcastState();
   }
 
-  // This section contains all the methods used to query / show all attached
-  // methods
   /**
    * Returns all the currently attached services
    */
   @Override
   public Set<String> getAttached() {
-    HashSet<String> ret = new HashSet<String>();
-    if (controller != null && isAttached) {
+    Set<String> ret = super.getAttached();
+    if (controller != null) {
       ret.add(controller.getName());
     }
     return ret;
   }
 
-  @Override
+  @Deprecated
   public String getDeviceBus() {
     return this.deviceBus;
   }
 
-  @Override
+  @Deprecated
   public String getDeviceAddress() {
     return this.deviceAddress;
   }
 
   @Override
   public boolean isAttached(Attachable instance) {
-    if (controller != null && controller.getName().equals(instance.getName())) {
-      return isAttached;
+    if (instance.getName().equals(controllerName)) {
+      return true;
     }
-    ;
     return false;
   }
+
+  @Override
+  public ServiceConfig getConfig() {
+    Mpu6050Config config = new Mpu6050Config();
+    config.start = publisher.isRunning;
+    config.sampleRate = sampleRateHz;
+    config.bus = deviceBus;
+    config.address = deviceAddress;
+    config.controller = controllerName;
+    return config;
+  }
+
+  public ServiceConfig apply(ServiceConfig c) {
+    Mpu6050Config config = (Mpu6050Config) c;
+    if (config.start) {
+      publisher.start();
+    }
+    if (config.sampleRate != null) {
+      setSampleRate(config.sampleRate);
+    }
+    if (config.bus != null) {
+      setDeviceBus(config.bus);
+    }
+    if (config.address != null) {
+      setDeviceAddress(config.address);
+    }
+
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch (Exception e) {
+        log.error("attach threw", e);
+      }
+    }
+    return c;
+  }
+
+  public void setSampleRate(double rateHz) {
+    if (rateHz < 0.001 && rateHz > 100) {
+      error("rate must be 0.001 < rateHz < 100");
+      return;
+    }
+    sampleRateHz = rateHz;
+    broadcastState();
+  }
+
+  public static void main(String[] args) {
+    try {
+
+      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
+      LoggingFactory.init(Level.INFO);
+
+      // Runtime.setAllVirtual(true);
+      Arduino arduino = (Arduino) Runtime.start("mega", "Arduino");
+      arduino.connect("/dev/ttyACM0");
+      Runtime.start("mpu6050", "Mpu6050");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+
+      /*
+       * Mpu6050 mpu6050 = (Mpu6050) Runtime.start("mpu6050", "Mpu6050");
+       * Runtime.start("gui", "SwingGui");
+       */
+
+      /*
+       * Arduino arduino = (Arduino) Runtime.start("Arduino","Arduino");
+       * arduino.connect("COM4"); mpu6050.setController(arduino);
+       */
+
+      /*
+       * RasPi raspi = (RasPi) Runtime.start("RasPi","RasPi");
+       * mpu6050.setController(raspi); mpu6050.dmpInitialize();
+       */
+      int[] buffer = new int[] { (int) 0xff, (int) 0xd0 };
+      int a = (byte) buffer[0] << 8 | buffer[1] & 0xff;
+      log.info("0xffd0 should be -48 is = {}", a);
+
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
+
 }

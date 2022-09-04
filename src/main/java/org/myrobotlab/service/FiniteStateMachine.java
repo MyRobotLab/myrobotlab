@@ -19,6 +19,8 @@ import org.myrobotlab.fsm.core.SimpleTransition;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.FiniteStateMachineConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 public class FiniteStateMachine extends Service implements EventHandler, StateHandler, org.myrobotlab.fsm.api.FiniteStateMachine {
@@ -27,33 +29,28 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
 
   private static final long serialVersionUID = 1L;
 
-  ArrayList<String> currentStates;
-  Set<State> finalStates;
+  ArrayList<String> currentStates = new ArrayList<>();;
+  Set<State> finalStates = new HashSet<>();
   Set<EventHandler> handlers = new HashSet<>();
   State lastChangedState;
   Event lastEvent;
   Transition lastTransition;
-  Set<State> states;
-  Set<Transition> transitions;
+  Set<State> states = new HashSet<>();
+  Set<Transition> transitions = new HashSet<>();
 
   // FIXME - have "default" state !!!
   // FIXME emotionalState.addTransition("emotional-state", "ill", "ill-event",
   // "ill") EXPLODES !!!
   public FiniteStateMachine(String n, String id) {
     super(n, id);
-    // if conditions for json loads
-    if (currentStates == null) {
-      currentStates = new ArrayList<>();
-    }
-    if (finalStates == null) {
-      finalStates = new HashSet<>();
-    }
-    if (states == null) {
-      states = new HashSet<>();
-    }
-    if (transitions == null) {
-      transitions = new HashSet<>();
-    }
+  }
+  
+  public void clear() {
+    currentStates.clear();
+    finalStates.clear();
+    handlers.clear();
+    states.clear();
+    transitions.clear();
   }
 
   public void addScheduledEvent(String eventId, int millis) {
@@ -63,7 +60,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
   public void addState(String state) {
     State s = new State(state);
     if (states.size() == 0) {
-      currentStates.add(s.getId());
+      currentStates.add(s.getName());
     }
     states.add(s);
   }
@@ -118,7 +115,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
       for (Transition transition : transitions) { // FIXME - shouldn't have to
                                                   // iterate - just use a Map
                                                   // !!!
-        if (currentState.equals(transition.getSourceState().getId()) && // fsm
+        if (currentState.equals(transition.getSourceState().getName()) && // fsm
                                                                         // is in
                                                                         // the
         // right state as
@@ -149,7 +146,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
 
             // transition to target state
             State newState = transition.getTargetState();
-            currentStates.set(i, newState.getId());
+            currentStates.set(i, newState.getName());
             /*
              * currentState.setId(newState.getId());
              * currentState.setLastTransition(transition);
@@ -262,7 +259,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
     // log.info("state {}-({})-> {}",
     // state.getLastTransition().getSourceState(), state.getId(),
     // state.getLastTransition().getId(), state.getId());
-    log.info("handleState {} from {}", state.getId(), state.getLastTransition());
+    log.info("handleState {} from {}", state.getName(), state.getLastTransition());
     invoke("publishState", state);
   }
 
@@ -299,8 +296,42 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
     }
 
     this.states = states;
-    currentStates.add(initialState.getId());
+    currentStates.add(initialState.getName());
   }
+  
+  
+  
+  @Override
+  public ServiceConfig getConfig() {
+
+    FiniteStateMachineConfig c = (FiniteStateMachineConfig)config;
+    c.states.clear();
+    for (State s : states) {
+      c.states.add(s.getName());
+    }
+    for (Transition t : transitions) {
+      FiniteStateMachineConfig.Transition transition = new FiniteStateMachineConfig.Transition();
+      transition.begin = t.getSourceState().getName();
+      transition.end = t.getTargetState().getName();
+      transition.event = t.getId();
+      c.transitions.add(transition);
+    }
+    return c;
+  }
+  
+  public ServiceConfig apply(ServiceConfig c) {
+    FiniteStateMachineConfig config = (FiniteStateMachineConfig) c;
+    states.clear();
+    for (String s : config.states) {
+      states.add(new State(s));
+    }
+    transitions.clear();
+    for (FiniteStateMachineConfig.Transition transition : config.transitions) {
+      addTransition(transition.begin, transition.event, transition.end);
+    }
+    return c;
+  }
+
 
   public SimpleEvent publishEvent(SimpleEvent event) {
     return event;
@@ -337,6 +368,8 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
       fsm.fire("ill-event");
       fsm.fire("ill-event");
       fsm.fire("ill-event");
+      
+        fsm.save();
 
       fsm.addScheduledEvent("clear-event", 1000);
 

@@ -43,7 +43,7 @@ public class Amt203Encoder extends AbstractPinEncoder implements EncoderControl 
     ard.setDebug(true);
     Amt203Encoder encoder = (Amt203Encoder) Runtime.start("encoder", "Amt203Encoder");
     encoder.setPin(3);
-    ard.attach(encoder);
+    ard.attachEncoderControl(encoder);
     Thread.sleep(10000);
     encoder.setZeroPoint();
     log.info("Here we are..");

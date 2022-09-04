@@ -218,8 +218,11 @@ public class Util {
    * resourceName)
    * 
    * @param path
+   *          the path to the image
    * @param defaultImage
-   * @return
+   *          a default image to use
+   * @return an image
+   * 
    */
   @Deprecated
   public static Image getImage(String path, String defaultImage) {

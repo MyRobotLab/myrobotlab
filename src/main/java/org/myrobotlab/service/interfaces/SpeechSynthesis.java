@@ -24,7 +24,9 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
    * set the speaker voice
    * 
    * @param voice
-   * @return
+   *          name of voice to set.
+   * @return success or failure
+   * 
    */
   public boolean setVoice(String voice);
 
@@ -106,6 +108,8 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
    * mute or unmute
    * 
    * @param mute
+   *          true to mute
+   * 
    */
   public void setMute(boolean mute);
 
@@ -118,9 +122,9 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
   public void onRequestConfirmation(String text);
 
   /**
-   * get a list of voices this speech synthesis supports
+   * @return get a list of voices this speech synthesis supports
    * 
-   * @return
+   * 
    */
   public List<Voice> getVoices();
 
@@ -128,7 +132,9 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
    * puts all speaking into blocking mode - default is false
    * 
    * @param b
-   * @return
+   *          true to block
+   * @return blocking value
+   * 
    */
   public Boolean setBlocking(Boolean b);
 
@@ -138,6 +144,7 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
    * silly things can happen when talking to self...
    * 
    * @param ear
+   *          to attach
    */
   public void attachSpeechRecognizer(SpeechRecognizer ear);
 
@@ -145,14 +152,51 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
    * Speech control controls volume, setting the voice, and of course "speak"
    * 
    * @param control
+   *          the speech synth to attach
+   * 
    */
   public void attachSpeechControl(SpeechSynthesisControl control);
 
   /**
+   * These are the methods that a speech listener should subscribe to.
+   */
+  public static String[] publishSpeechListenerMethods = new String[] {"publishStartSpeaking", "publishEndSpeaking"};
+  
+  /**
+   * Attach a speech listener which gets on started/stopped speaking callbacks.
+   * 
+   * @param name
+   */
+  default public void attachSpeechListener(String name) {
+    for (String method : publishSpeechListenerMethods) {
+      addListener(method, name);
+    }
+  }
+
+  /**
+   * Detach a speech listener that will remove the listeners for the speech listener methods.
+   * 
+   * @param name
+   */
+  default public void detachSpeechListener(String name) {
+    for (String method : publishSpeechListenerMethods) {
+      removeListener(method, name);
+    }
+  }
+
+  // All services implement this. 
+  public void addListener(String topicMethod, String callbackName);
+  // All services implement this. 
+  public void removeListener(String topicMethod, String callbackName);
+  
+  /**
    * replace one word with another - instead of "biscuit" say "cookie"
    * 
    * @param key
+   *          lookup word
    * @param replacement
+   *          replacement word.
+   * 
    */
   public void replaceWord(String key, String replacement);
 
@@ -160,6 +204,7 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
    * replace one word with another - instead of "biscuit" say "cookie"
    * 
    * @param filter
+   *          word filter to use
    */
   public void replaceWord(WordFilter filter);
 }

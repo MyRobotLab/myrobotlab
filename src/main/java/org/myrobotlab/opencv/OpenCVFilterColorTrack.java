@@ -59,8 +59,6 @@ public class OpenCVFilterColorTrack extends OpenCVFilter {
   CvScalar hsv_min2 = null;
   CvScalar hsv_max2 = null;
 
-  transient BufferedImage frameBuffer = null;
-
   public OpenCVFilterColorTrack() {
     super();
   }
@@ -72,7 +70,6 @@ public class OpenCVFilterColorTrack extends OpenCVFilter {
   @Override
   public void imageChanged(IplImage image) {
     // TODO Auto-generated method stub
-
   }
 
   /*
@@ -139,10 +136,12 @@ public class OpenCVFilterColorTrack extends OpenCVFilter {
   }
 
   public void samplePoint(Integer x, Integer y) {
-    frameBuffer = toBufferedImage(hsv);
+    CloseableFrameConverter converter = new CloseableFrameConverter();
+    BufferedImage frameBuffer = converter.toBufferedImage(hsv);
     int rgb = frameBuffer.getRGB(x, y);
     Color c = new Color(rgb);
     log.error(x + "," + y + " h " + c.getRed() + " s " + c.getGreen() + " v " + c.getBlue());
+    converter.close();
   }
 
   @Override

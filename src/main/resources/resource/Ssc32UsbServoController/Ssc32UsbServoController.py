@@ -2,7 +2,7 @@ import org.myrobotlab.service.Serial as Serial
 
 port = "COM12"
 
-ssc = Runtime.start("ssc", "Ssc32UsbServoController")
+ssc = runtime.start("ssc", "Ssc32UsbServoController")
 
 # connect to port with "default" 9600
 # ssc.connect(port)
@@ -15,7 +15,7 @@ ssc.connect(port, Serial.BAUD_115200)
 serial = ssc.getSerial()
 
 # make a servo
-servo = Runtime.start("servo", "Servo")
+servo = runtime.start("servo", "Servo")
 
 # set its pin
 servo.setPin(27) 

@@ -1,19 +1,63 @@
+<br/>
 <div class="row">
-    <span class="col-lg-6">
-        <img ng-src="{{(service.ready)?'../green.png':'../red.png'}}"/>
-        <span ng-show="!service.ready">Polly requires AWS Keys</span>
-    </span>
+    <div class="col-md-6"><h3>{{spoken}}</h3>
+    </div>
 </div>
 <div class="row">
-    <ui-select class="col-lg-3 pull-left" ng-model="newVoice.selected" ng-change="msg.setVoice(newVoice.selected.key)" theme="bootstrap" style="width: 15em">
-        <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;voice&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{$select.selected.value.name}} {{$select.selected.value.locale.tag}} {{$select.selected.value.gender}}</ui-select-match>
-        <ui-select-choices repeat="(key, container) in service.voices | filter: $select.search">{{container.value.name}} {{container.value.locale.tag}} {{container.value.gender}}</ui-select-choices>
-    </ui-select>
-    <div class="col-md-4">
-       <form class="form-inline">
-        <input class="form-control" type="text" ng-model="text" ng-enter="speak(text);text=''" placeholder="enter text">
-        <button class="btn btn-default form-control" ng-click="speak(text);text=''">Speak</button>
-        </form>
+    <div class="col-md-6">
+        <table>
+            <tr>
+                <td>
+                    <img ng-src="{{(service.ready)?'../green.png':'../red.png'}}"/>
+                    <span ng-show="!service.ready">Polly requires AWS Keys</span>
+                </td>
+                <td colspan="3">
+                    <div class="btn-group" uib-dropdown>
+                        <button type="button" class="btn btn-default">{{service.voice.name}} - {{service.voice.locale.tag}} - {{service.voice.gender}}</button>
+                        <button type="button" class="btn btn-default" uib-dropdown-toggle>
+                            <span class="caret"></span>
+                        </button>
+                        <ul uib-dropdown-menu>
+                            <li ng-repeat="(key, container) in service.voices">
+                                <a href="" ng-click="msg.setVoice(key);msg.broadcastState()">{{key}} - {{container.locale.tag}} - {{container.gender}}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    ssml <toggle width="70" height="30" ng-model="service.config.ssml" ng-change="msg.setSsml(service.config.ssml)" on="ON" off="OFF"/>
+                </td>
+                <td>&nbsp;</td>
+                <td>
+                    auto detect ssml <toggle width="70" height="30" ng-model="service.config.autoDetectSsml" ng-change="msg.setSsml(service.config.autoDetectSsml)" on="ON" off="OFF"/>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <input class="form-control" ng-keyup="$event.keyCode == 13 && speak(text)" ng-show="!textArea" type="text" ng-model="text" placeholder="enter text">
+                    <textarea type="text" ng-show="textArea" class="form-control" placeholder="type here" ng-model="text"/>
+                </td>
+            </tr>
+            <tr>
+                <td>auto-clear &nbsp;&nbsp;</td>
+                <td>
+                    <input type="checkbox" ng-model="autoClear"/>
+                </td>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;text area</td>
+                <td>
+                    <input type="checkbox" ng-model="textArea"/>
+                </td>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>
+                    <button class="btn btn-default" ng-click="speak(text)">Speak</button>
+                </td>
+            </tr>
+        </table>
     </div>
 </div>
 <div class="row" ng-show="!service.ready">

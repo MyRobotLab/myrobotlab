@@ -80,10 +80,10 @@ public interface MotorController extends Attachable {
   public void motorReset(MotorControl motor);
 
   /**
-   * if the motor controller uses ports - this method will return a list of
-   * ports
+   * @return if the motor controller uses ports - this method will return a list
+   *         of ports
    * 
-   * @return
+   * 
    */
   List<String> getPorts();
 

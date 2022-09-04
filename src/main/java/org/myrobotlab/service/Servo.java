@@ -26,8 +26,14 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
+import org.myrobotlab.service.data.ServoMove;
+import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
@@ -54,7 +60,7 @@ import org.slf4j.Logger;
  * 
  */
 
-public class Servo extends AbstractServo implements ServoControl {
+public class Servo extends AbstractServo implements ServoControl, ServiceLifeCycleListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -75,18 +81,6 @@ public class Servo extends AbstractServo implements ServoControl {
    * @param timeoutMs
    */
   protected boolean processMove(Double newPos, boolean blocking, Long timeoutMs) {
-    // FIXME - implement encoder blocking ...
-    // FIXME - when and what should a servo publish and when ?
-    // FIXME FIXME FIXME !!!! @*@*!!! - currentPos is the reported position of
-    // the servo, targetPos is
-    // the desired position of the servo - currentPos should NEVER be set in
-    // this function
-    // even with no hardware encoder a servo can have a TimeEncoder from which
-    // position would be guessed - but
-    if (newPos == null) {
-      error("cannot move to null position - not moving");
-      return false;
-    }
 
     // This is to allow attaching disabled
     // then delay enabling until the first moveTo command
@@ -96,14 +90,14 @@ public class Servo extends AbstractServo implements ServoControl {
       firstMove = false;
     }
 
-    if (idleDisabled && !enabled) {
+    if (autoDisable && !enabled) {
       // if the servo was disable with a timer - re-enable it
       enable();
     }
     // purge any timers currently in process
     // if currently configured to autoDisable - the timer starts now
     // we cancel any pre-existing timer if it exists
-    purgeTask("idleDisable");
+    purgeTask("disable");
     // blocking move will be idleTime out enabled later.
 
     if (!enabled) {
@@ -111,7 +105,7 @@ public class Servo extends AbstractServo implements ServoControl {
       return false;
     }
     targetPos = newPos;
-    log.info("pos {} output {}", targetPos, getTargetOutput());
+    log.debug("pos {} output {}", targetPos, getTargetOutput());
 
     /**
      * <pre>
@@ -137,6 +131,11 @@ public class Servo extends AbstractServo implements ServoControl {
       log.info("{} is currently blocking - ignoring request to moveTo({})", getName(), newPos);
       return false;
     }
+
+    // broadcast("publishServoMoveTo", new ServoMove(getName(), newPos, mapper.calcOutput(newPos))); apparently we want input here
+    // THIS IS CONSUMED BY ARDUINO CONTROLLER - IT USES ServoMove.outputPos !!!!
+    broadcast("publishServoMoveTo", new ServoMove(getName(), newPos, mapper.calcOutput(newPos)));
+
     // TODO: this block isn't tested by ServoTest
     if (isBlocking && blocking) {
       // if isBlocking already, and incoming request is a blocking one - we
@@ -172,26 +171,10 @@ public class Servo extends AbstractServo implements ServoControl {
     if (encoder != null && encoder instanceof TimeEncoder) {
       TimeEncoder timeEncoder = (TimeEncoder) encoder;
       // calculate trajectory calculates and processes this move
-      blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentOutputPos(), getTargetOutput(), getSpeed());
+      // blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentOutputPos(), getTargetOutput(), getSpeed());
+      blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentInputPos(), getTargetPos(), getSpeed());
     }
-    // grog: I think in the long run this direct call vs using invoke/send is
-    // less preferrable
-    // thinking on a distributed network level you can't do this when the other
-    // thing is in
-    // a different process
-    // This still need adjustment - if we do not mandate jme must be a servo
-    // controller
-    // then this control needs to be able to broadcast "control" angles !!! -
-    // and that
-    // might be without a controller !
-    if (controller == null) { // <-- NOT NEEDED :)
-      log.info("controller is null");
-      // FIXME - need to still go through the default 'move'
-    } else {
-      broadcast("publishServoMoveTo", this);
-    }
-    // invoke("publishServoMoveTo", this);
-//    broadcastState();
+
     if (isBlocking) {
       // our thread did a blocking call - we will wait until encoder notifies us
       // to continue or timeout (if supplied) has been reached
@@ -200,7 +183,7 @@ public class Servo extends AbstractServo implements ServoControl {
       isMoving = false;
       if (autoDisable) {
         // and start our countdown
-        addTaskOneShot(idleTimeout, "idleDisable");
+        addTaskOneShot(idleTimeout, "disable");
       }
     }
     return true;
@@ -211,9 +194,82 @@ public class Servo extends AbstractServo implements ServoControl {
     setAutoDisable(value);
   }
 
-  @Deprecated
-  public void setMaxVelocity(Double velocity) {
-    log.warn("SetMaxVelocity does nothing and is deprecated. please update your python scripts, and use fullSpeed() instead");
+  @Override
+  public ServiceConfig getConfig() {
+
+    ServoConfig config = new ServoConfig();
+
+    config.autoDisable = autoDisable;
+    config.enabled = enabled;
+
+    if (mapper != null) {
+      config.clip = mapper.isClip();
+      config.maxIn = mapper.getMaxX();
+      config.maxOut = mapper.getMaxY();
+      config.minIn = mapper.getMinX();
+      config.minOut = mapper.getMinY();
+      config.inverted = mapper.isInverted();
+    }
+
+    // config.controller = controller;
+
+    config.idleTimeout = idleTimeout;
+    config.pin = pin;
+    config.rest = rest;
+    config.speed = speed;
+    config.sweepMax = sweepMax;
+    config.sweepMin = sweepMin;
+
+    config.controller = this.controller;
+
+    return config;
+  }
+
+  public ServiceConfig apply(ServiceConfig c) {
+    ServoConfig config = (ServoConfig) c;
+
+    autoDisable = config.autoDisable;
+
+    // important - if starting up
+    // and autoDisable - then the assumption at this point
+    // is it is currently disabled, otherwise it will take
+    // a move to disable
+    if (config.autoDisable) {
+      disable();
+    }
+    if (config.minIn != null && config.maxIn != null && config.minOut != null && config.maxOut != null) {
+      mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
+    }
+    mapper.setInverted(config.inverted);
+    mapper.setClip(config.clip);
+    enabled = config.enabled;
+    if (config.idleTimeout != null) {
+      idleTimeout = config.idleTimeout;
+    }
+    pin = config.pin;
+
+    speed = config.speed;
+    sweepMax = config.sweepMax;
+    sweepMin = config.sweepMin;
+
+    // rest = config.rest;
+    if (config.rest != null) {
+      rest = config.rest;
+      targetPos = config.rest;
+      // currentInputP = mapper.calcOutput(config.rest);
+      currentInputPos = config.rest;
+      broadcast("publishEncoderData", new EncoderData(getName(), pin, config.rest, config.rest));
+    }
+    
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+
+    return c;
   }
 
   public static void main(String[] args) throws InterruptedException {
@@ -221,45 +277,67 @@ public class Servo extends AbstractServo implements ServoControl {
 
       // log.info("{}","blah$Blah".contains("$"));
 
-      Runtime.main(new String[] { "--interactive", "--id", "servo" });
       // LoggingFactory.init(Level.INFO);
       // Platform.setVirtual(true);
 
       // Runtime.start("python", "Python");
+      // Runtime runtime = Runtime.getInstance();
+      
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
-
-      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      
       Servo tilt = (Servo) Runtime.start("tilt", "Servo");
-      // Servo pan = (Servo) Runtime.start("pan", "Servo");
+      Servo pan = (Servo) Runtime.start("pan", "Servo");
+
 
       boolean done = true;
       if (done) {
         return;
       }
 
-      mega.connect("/dev/ttyACM1");
-      // mega.setBoardMega();
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      
+      tilt.setPin(4);
+      pan.setPin(5);
+      tilt.setMinMax(10, 100);
+      pan.setMinMax(5, 105);
+      tilt.setInverted(true);
 
-      log.info("servo pos {}", tilt.getCurrentInputPos());
-
-      // double pos = 170;
-      // servo03.setPosition(pos);
-      tilt.setPin(3);
-
-      double min = 3;
-      double max = 170;
-      double speed = 60; // degree/s
+      mega.connect("/dev/ttyACM0");
 
       mega.attach(tilt);
-      // mega.attach(servo03,3);
+      mega.attach(pan);
 
-      for (int i = 0; i < 100; ++i) {
-        tilt.moveTo(20.0);
-      }
+      //runtime.save();
 
-      tilt.sweep(min, max, speed);
+      /*
+       * mega.save(); tilt.save(); pan.save();
+       * 
+       * mega.load(); tilt.load(); pan.load();
+       */
+
+      // TODO - attach before and after connect..
+
+      // mega.setBoardMega();
+
+      // log.info("servo pos {}", tilt.getCurrentInputPos());
+      //
+      // // double pos = 170;
+      // // servo03.setPosition(pos);
+      //
+      // double min = 3;
+      // double max = 170;
+      // double speed = 60; // degree/s
+      //
+      // mega.attach(tilt);
+      // // mega.attach(servo03,3);
+      //
+      // for (int i = 0; i < 100; ++i) {
+      // tilt.moveTo(20.0);
+      // }
+      //
+      // tilt.sweep(min, max, speed);
 
       /*
        * Servo servo04 = (Servo) Runtime.start("servo04", "Servo"); Servo
@@ -307,6 +385,18 @@ public class Servo extends AbstractServo implements ServoControl {
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  @Override
+  public void onCreated(String name) {
+  }
+
+  @Override
+  public void onStopped(String name) {
+  }
+
+  @Override
+  public void onReleased(String name) {
   }
 
 }
