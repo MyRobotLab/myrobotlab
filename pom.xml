@@ -237,7 +237,7 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacpp</artifactId>
-    <version>1.5.6</version>
+    <version>1.5.7</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -1036,7 +1036,7 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv-platform</artifactId>
-    <version>1.5.6</version>
+    <version>1.5.7</version>
     <scope>provided</scope>
   </dependency>
 <!-- Duplicate entry for org.bytedeco-javacpp-1.5.6 skipping -->
@@ -1509,13 +1509,13 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract</artifactId>
-    <version>4.1.1-1.5.6</version>
+    <version>5.0.1-1.5.7</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract-platform</artifactId>
-    <version>4.1.1-1.5.6</version>
+    <version>5.0.1-1.5.7</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
