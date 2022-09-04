@@ -31,6 +31,7 @@ public class Deeplearning4jMeta extends MetaData {
 
     // dl4j deps.
     addDependency("org.deeplearning4j", "deeplearning4j-core", dl4jVersion);
+    exclude("org.slf4j", "slf4j-api");
     addDependency("org.deeplearning4j", "deeplearning4j-zoo", dl4jVersion);
     addDependency("org.deeplearning4j", "deeplearning4j-nn", dl4jVersion);
     addDependency("org.deeplearning4j", "deeplearning4j-modelimport", dl4jVersion);
