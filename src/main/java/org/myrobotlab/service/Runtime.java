@@ -3157,12 +3157,24 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * Get the Runtime singleton instance.
    * @return The singleton instance
-   * @see #getInstance() 
+   * @see #getInstance()
    */
   public static Runtime get() {
     return Runtime.getInstance();
   }
 
+  /**
+   * Execute an external program with arguments if specified.
+   * args must not be null and the length must be greater than zero,
+   * the first element is the program to be executed. If the program
+   * is just a name and not a path to the executable then it
+   * must be on the operating system PATH.
+   *
+   * @see <a href="https://superuser.com/questions/284342/what-are-path-and-other-environment-variables-and-how-can-i-set-or-use-them">
+   *     What are PATH and other environment variables?</a>
+   * @param args The program to be executed as the first element and the args to the program as the rest, if any
+   * @return The program's stdout and stderr output
+   */
   static public String execute(String... args) {
     if (args == null || args.length == 0) {
       log.error("execute invalid number of args");
@@ -3181,6 +3193,19 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return execute(program, list, null, null, null);
   }
 
+  /**
+   * Execute an external program with a list of arguments, a specified working directory, any additional
+   * environment variables, and whether the execution blocks.
+   *
+   * TODO Implement workingDir and block
+   *
+   * @param program The program to be executed
+   * @param args Any arguments to the command
+   * @param workingDir The directory to execute the program in
+   * @param additionalEnv Any additional environment variables
+   * @param block Whether this method blocks for the program to execute
+   * @return The programs stderr and stdout output
+   */
   static public String execute(String program, List<String> args, String workingDir, Map<String, String> additionalEnv, Boolean block) {
 
     log.info("execToString(\"{} {}\")", program, args);
@@ -3241,6 +3266,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       exitValue = handle.exitValue();
       // print the output from the command
+      // TODO replace with logging calls
       System.out.println(outputBuilder.toString());
       System.out.println("Exit Value : " + exitValue);
       outputBuilder.append("Exit Value : " + exitValue);
@@ -3253,6 +3279,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
   }
 
+  /**
+   * Get the current battery level of the computer
+   * this MRL instance is running on.
+   *
+   * @return The battery level as a double from 0.0 to 100.0, expressed
+   * as a percentage.
+   */
   public static Double getBatteryLevel() {
     Platform platform = Platform.getLocalInstance();
     Double r = 100.0;
@@ -3276,6 +3309,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         }
 
       } else if (platform.isLinux()) {
+        //TODO This is incorrect, will not work when unplugged
+        //  and acpitool output is different than expected,
+        //  at least on Ubuntu 22.04
         String ret = Runtime.execute("acpitool");
         int pos0 = ret.indexOf("Charging, ");
         if (pos0 != -1) {
@@ -3313,6 +3349,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return r;
   }
 
+  /**
+   * Get the local service data instance.
+   * @return The local service data
+   * @see ServiceData#getLocalInstance()
+   */
   public ServiceData getServiceData() {
     return serviceData;
   }
@@ -3326,10 +3367,22 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return Locale.getAvailableLanguages();
   }
 
+  /**
+   * Get a map between locale IDs and the associated
+   * {@link Locale} instance.
+   *
+   * @return A map between IDs and instances.
+   */
   public Map<String, Locale> getLocales() {
     return locales;
   }
 
+  /**
+   * Set the locales by passing a list of locale IDs.
+   *
+   * @param codes A list of locale IDs
+   * @return A map between the IDs and the Locale instances.
+   */
   public Map<String, Locale> setLocales(String... codes) {
     locales = Locale.getLocaleMap(codes);
     return locales;
@@ -3344,6 +3397,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return Security.getInstance();
   }
 
+  /**
+   * Execute a program with arguments, if any.
+   * Wraps {@link java.lang.Runtime#exec(String[])}.
+   *
+   * @param cmd A list with the program name as the first element and
+   *            any arguments as the subsequent elements.
+   * @return The Process spawned by the execution
+   * @throws IOException if an I/O error occurs while spawning the process
+   */
   public static Process exec(String... cmd) throws IOException {
     // FIXME - can't return a process - it will explode in serialization
     // but we might want to keep it and put it on a transient map
@@ -3352,15 +3414,33 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return p;
   }
 
+  /**
+   * Re-execute {@link Runtime#main(String[])} with the specified
+   * arguments and then return the Runtime singleton instance.
+   *
+   * @param args2 An array of the arguments to be passed to main()
+   * @return The Runtime singleton
+   */
   public static Runtime getInstance(String[] args2) {
     Runtime.main(args2);
     return Runtime.getInstance();
   }
 
+  /**
+   * Get all the options passed on the command
+   * line when MyRobotLab is executed.
+   *
+   * @return The options that were passed on the command line
+   */
   public static CmdOptions getOptions() {
     return options;
   }
 
+  /**
+   * TODO Unimplemented
+   * @param sd ServiceData to use
+   * @return sd
+   */
   public ServiceData setServiceTypes(ServiceData sd) {
     return sd;
   }
@@ -3391,6 +3471,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return describe(type, query);
   }
 
+  /**
+   * Get a default DescribeResults from this instance.
+   *
+   * @return A default description of this instance
+   */
   public DescribeResults describe() {
     // default query
     return describe("platform", null);
@@ -3400,9 +3485,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * Describe results returns the information of a "describe" which can be
    * detailed information regarding services, theire methods and input or output
    * types.
-   * 
+   * <p>
    * FIXME - describe(String[] filters) where filter can be name, type, local,
    * state, etc
+   * <p>
+   * FIXME uuid and query are unused
    * 
    * @param uuid
    *          u
@@ -3511,14 +3598,31 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
   }
 
+  /**
+   * Listener for authentication.
+   * @param response The results from a foreign instance's {@link Runtime#describe(String, DescribeQuery)}
+   */
   public void onAuthenticate(DescribeResults response) {
     log.info("onAuthenticate {}", response);
   }
 
+  /**
+   * Get a list of metadata about all services
+   * local to this instance.
+   * @return A list of metadata about local services
+   * @see ServiceData#getServiceTypes()
+   */
   public List<MetaData> getServiceTypes() {
     return serviceData.getServiceTypes();
   }
 
+  /**
+   * Register a connection route from one instance to this one.
+   *
+   * @param uuid Unique ID for a connecting client
+   * @param id Name or ID of the connecting client
+   * @param connection Details of the connection
+   */
   public void addConnection(String uuid, String id, Connection connection) {
     Connection attr = null;
     if (!connections.containsKey(uuid)) {
@@ -3546,6 +3650,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return msg;
   }
 
+  /**
+   * Unregister all connections that a specified
+   * client has made.
+   *
+   * @param uuid The ID of the client
+   */
   public void removeConnection(String uuid) {
 
     Connection conn = connections.remove(uuid);
@@ -3562,6 +3672,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
   }
 
+  /**
+   * Unregister all services originating from
+   * the instance with the given ID.
+   *
+   * @param id The ID of the instance that is being unregistered
+   */
   public void unregisterId(String id) {
     Set<String> names = new HashSet<>(registry.keySet());
     for (String name : names) {
@@ -3638,6 +3754,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return getConnectionUuids(null);
   }
 
+  /**
+   * Get whether a connection to the given client exists.
+   *
+   * @param uuid Unique ID of the client to check for
+   * @return Whether a connection between this instance and the given client exists
+   */
   boolean connectionExists(String uuid) {
     return connections.containsKey(uuid);
   }
@@ -3662,6 +3784,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return ret;
   }
 
+  /**
+   * Get the Class instance for a specific service.
+   *
+   * @param inName The name of the service
+   * @return The Class of the service.
+   * @see #getFullName(String)
+   */
   public static Class<?> getClass(String inName) {
     String name = getFullName(inName);
     ServiceInterface si = registry.get(name);
@@ -3706,6 +3835,37 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return (Gateway) getService((String) conn.get("gateway"));
   }
 
+  /**
+   * Get the full name of the service. A full name
+   * is defined as a "short name" plus the ID of the Runtime
+   * instance it is attached to. The two components are separated
+   * by an '@' character. If the given name is already a full
+   * name, it is returned immediately, otherwise a full name
+   * is constructed by assuming the service is local to this instance.
+   * <p>
+   *     Example:
+   *     <pre>
+   * {@code
+   * String shortName = "python";
+   *
+   * //Assume the local name is "bombastic-cherry"
+   * String fullName = getFullName(shortName);
+   * //fullName is now "python@bombastic-cherry"
+   *
+   * fullName = getFullName(fullName);
+   * //fullName is unchanged because it was already a full name
+   *
+   *
+   * }
+   *     </pre>
+   *
+   *
+   * </p>
+   *
+   *
+   * @param shortname The name to convert to a full name
+   * @return shortname if it is already a full name, or a newly constructed full name
+   */
   static public String getFullName(String shortname) {
     if (shortname == null) {
       return null;
@@ -3848,19 +4008,38 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return plan;
   }
 
+  /**
+   * Clear the {@link #plan}.
+   */
   static public void clear() {
     Runtime runtime = Runtime.getInstance();
     runtime.plan = new Plan("runtime");
   }
 
+  /**
+   * Wrapper for {@link ServiceData#getMetaData(String, String)}
+   * @param serviceName The name of the service
+   * @param serviceType The type of the service
+   * @return The metadata of the service.
+   */
   public static MetaData getMetaData(String serviceName, String serviceType) {
     return ServiceData.getMetaData(serviceName, serviceType);
   }
 
+  /**
+   * Wrapper for {@link ServiceData#getMetaData(String)}
+   * @param serviceType The type of the service
+   * @return The metadata of the service.
+   */
   public static MetaData getMetaData(String serviceType) {
     return ServiceData.getMetaData(serviceType);
   }
 
+
+  /**
+   * Whether the singleton has been created
+   * @return Whether the singleton exists
+   */
   public static boolean exists() {
     return runtime != null;
   }
@@ -4225,16 +4404,22 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * load a single service entry into the plan through yml or default
-   * 
-   * @param name
-   * @param type
-   * @return
+   *
+   * @param configName Name of the configuration
+   * @param name Name of the service
+   * @param type Type of the service
+   * @param overwrite Whether to overwrite the plan entry if one already exists
+   * @param overwritePeers Unknown
+   * @return A constructed plan for the service
    * @throws IOException
    */
   private Plan loadService(String configName, String name, String type, Boolean overwrite, Boolean overwritePeers) throws IOException {
     // FIXME - get default if file doesn't exist !
     // FIXME - special handling for runtime
     // ServiceInterface si = create(name);
+
+    //FIXME Why is the Boolean wrapper class being used if null
+    //  means the same as false?
     if (overwrite == null) {
       overwrite = false;
     }
@@ -4705,6 +4890,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * need to "startPeer". You should just have peer name variable in config that
    * is used to send messages to. Granted, reading or callbacks can be a little
    * more tricky.
+   *
+   * DEPRECATED: use pub/sub messaging instead
    * 
    * @param name
    * @param reservedKey
@@ -4752,6 +4939,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   }
 
+  /**
+   * DEPRECATED: Use pub/sub messaging instead
+   *
+   * @param name
+   * @param reservedKey
+   */
   @Deprecated // you should be using pub/sub messaging - not direct references
   public void releasePeer(String name, String reservedKey) {
 
@@ -4797,6 +4990,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     start();
   }
 
+  /**
+   * Load all configuration files from a given directory.
+   *
+   * @param configDirName The directory to load from
+   */
   public static void loadConfigSet(String configDirName) {
 
     Runtime.setConfig(configDirName);
@@ -4821,11 +5019,20 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
   }
 
+  /**
+   * Load a service from a file
+   *
+   * @param absolutePath The file to load from
+   */
   public void loadFile(String absolutePath) {
     loadFile(absolutePath, null);
   }
 
-  // max complexity - overwrite etc..
+  /**
+   * Load a service from a file
+   * @param path The path to the file
+   * @param overwrite Whether loading the file should overwrite any current service in the plan
+   */
   public void loadFile(String path, Boolean overwrite) {
     try {
       if (overwrite == null) {
