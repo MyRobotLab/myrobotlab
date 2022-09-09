@@ -31,30 +31,27 @@ import com.google.gson.internal.LinkedHashTreeMap;
 
 /**
  * Wikipedia via the official rest api docs here:
- * 
- * https://en.wikipedia.org/api/rest_v1/#/Page_content/get_page_summary_title
- * https://en.wikipedia.org/api/rest_v1/#/Page%20content/get_page_summary__title_
- * 
- * vs
- * 
+ * <p>
+ * <a href="https://en.wikipedia.org/api/rest_v1/#/Page_content/get_page_summary_title">Wikimedia REST API</a>
+ * <p>
  * @see <a href="https://github.com/mudroljub/wikipedia-api-docs">wikipedia api docs</a>
- * 
+ *
  * @see <a href="https://en.wikipedia.org/wiki/Special:ApiSandbox">sandbox</a>
- * 
+ *
  * @see <a href="https://www.mediawiki.org/wiki/API:Main_page/lv#Quick_Start">quick start</a>
- * 
+ *
  * @see <a href="http://en.wikipedia.org/w/api.php?action=query&prop=info&format=json&titles=Stanford%20University">Standford University example</a>
- * 
- * 
+ *
+ *
  * TODO - control the number of sentences to return
- *  @see - https://en.wikipedia.org/w/api.php?action=help&modules=query%2Bextracts
+ *  @see <a href="https://en.wikipedia.org/w/api.php?action=help&modules=query%2Bextracts">Mediawiki API help</a>
  *  exsentences
  *     How many sentences to return.  The value must be between 1 and 10.
  *     (and lots of other goodies !)
- * 
- * 
+ *
+ *
  * @author GroG
- * 
+ *
  */
 public class Wikipedia extends Service implements SearchPublisher, ImagePublisher, TextPublisher {
 
