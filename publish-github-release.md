@@ -5,9 +5,9 @@ Open Source Framework for Robotics and Creative Machine Control
 
 * Project Website http://myrobotlab.org 
 * Project Discord https://discord.gg/AfScp5x8r5
-* Latest Build    [Nixie 1.1.(Latest)](http://build.myrobotlab.org:8080/job/myrobotlab/job/develop/lastSuccessfulBuild/artifact/target/myrobotlab.zip)
-* This   Build    [Nixie 1.1.$build](http://build.myrobotlab.org:8080/job/myrobotlab/job/develop/$build/artifact/target/myrobotlab.zip)
-*   Latest Javadocs [Javdocs](http://build.myrobotlab.org:8080/job/myrobotlab/job/develop/$build/artifact/target/site/apidocs/org/myrobotlab/service/package-summary.html)
+* Latest Build    [Nixie 1.1.(Latest)](https://build.myrobotlab.org:8443/job/myrobotlab/job/develop/lastSuccessfulBuild/artifact/target/myrobotlab.zip)
+* This   Build    [Nixie 1.1.$build](https://build.myrobotlab.org:8443/job/myrobotlab/job/develop/$build/artifact/target/myrobotlab.zip)
+*   Latest Javadocs [Javdocs](https://build.myrobotlab.org:8443/job/myrobotlab/job/develop/$build/artifact/target/site/apidocs/org/myrobotlab/service/package-summary.html)
 
 ## Base Requirements
 
