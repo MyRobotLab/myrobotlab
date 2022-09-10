@@ -36,7 +36,7 @@ public class RuntimeMeta extends MetaData {
     // apache 2.0 license
     addDependency("info.picocli", "picocli", "4.4.0");
     // all your logging needs
-    addDependency("org.slf4j", "slf4j-api", "1.7.21");
+    addDependency("org.slf4j", "slf4j-api", "1.7.36");
     
     // for config file support.
     addDependency("org.yaml", "snakeyaml", "1.29");
