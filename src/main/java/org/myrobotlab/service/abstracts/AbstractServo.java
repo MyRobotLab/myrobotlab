@@ -19,7 +19,6 @@ import org.myrobotlab.service.data.AngleData;
 import org.myrobotlab.service.data.ServoMove;
 import org.myrobotlab.service.data.ServoSpeed;
 import org.myrobotlab.service.interfaces.EncoderControl;
-import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoControlPublisher;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -329,12 +328,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     attach(controllerName, pin, pos, null);
   }
 
-
   @Deprecated
-  @Override /*
-             * Servos Do Not publish Joint Angles - they only publish their
-             * position !
-             */
+  /*
+   * Servos Do Not publish Joint Angles - they only publish their position !
+   */
   public AngleData publishJointAngle(AngleData angle) {
     log.debug("{}.publishJointAngle({})", getName(), angle);
     return angle;
