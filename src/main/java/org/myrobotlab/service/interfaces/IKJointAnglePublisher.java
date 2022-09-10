@@ -1,11 +1,11 @@
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.service.data.AngleData;
+import java.util.Map;
 
 public interface IKJointAnglePublisher {
 
   public String getName();
 
-  public AngleData publishJointAngle(AngleData angle);
+  public Map<String, Double> publishJointAngles(Map<String, Double> angleMap);
 
 }
