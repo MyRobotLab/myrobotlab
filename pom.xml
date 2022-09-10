@@ -379,18 +379,18 @@
   <dependency>
     <groupId>org.jsoup</groupId>
     <artifactId>jsoup</artifactId>
-    <version>1.14.2</version>
+    <version>1.15.3</version>
     <scope>provided</scope>
   </dependency>
 <!-- GoogleSearch end -->
 
 <!-- HtmlFilter begin -->
-<!-- Duplicate entry for org.jsoup-jsoup-1.14.2 skipping -->
+<!-- Duplicate entry for org.jsoup-jsoup-1.15.3 skipping -->
 <!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
 <!-- HtmlFilter end -->
 
 <!-- HtmlParser begin -->
-<!-- Duplicate entry for org.jsoup-jsoup-1.14.2 skipping -->
+<!-- Duplicate entry for org.jsoup-jsoup-1.15.3 skipping -->
 <!-- HtmlParser end -->
 
 <!-- ImapEmailConnector begin -->
@@ -2056,3 +2056,4 @@
       <url>https://github.com/MyRobotLab/myrobotlab/issues</url>
   </issueManagement>
 </project>
+ 
