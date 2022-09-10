@@ -9,7 +9,6 @@ import java.util.List;
 import org.bytedeco.opencv.opencv_core.CvRect;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Before;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point2df;
 import org.myrobotlab.service.OpenCV;
 

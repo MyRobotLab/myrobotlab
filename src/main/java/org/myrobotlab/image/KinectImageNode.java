@@ -10,7 +10,6 @@ import java.util.Date;
 import org.bytedeco.opencv.opencv_core.CvRect;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.opencv.CloseableFrameConverter;
-import org.myrobotlab.service.OpenCV;
 
 public class KinectImageNode implements Serializable {
   private static final long serialVersionUID = 1L;

@@ -15,7 +15,6 @@ import java.awt.image.BufferedImage;
 import org.bytedeco.javacpp.indexer.DoubleRawIndexer;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.myrobotlab.service.OpenCV;
 
 public class OpenCVFilterBlurDetector extends OpenCVFilter {
 

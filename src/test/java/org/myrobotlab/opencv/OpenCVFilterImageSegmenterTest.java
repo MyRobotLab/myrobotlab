@@ -4,7 +4,6 @@ import static org.junit.Assert.assertNotNull;
 
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Before;
-import org.myrobotlab.logging.LoggingFactory;
 
 public class OpenCVFilterImageSegmenterTest extends AbstractOpenCVFilterTest {
 

@@ -1528,7 +1528,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   }
 
   public static int bytes2ToInt(byte[] data, int start) {
-    return data[start] << 8 | data[start + 1];
+    return (data[start] & 0xFF) << 8 | (data[start + 1] & 0xFF);
   }
 
   /**

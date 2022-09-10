@@ -78,8 +78,8 @@ public class TestJmeIMModel extends SimpleApplication implements IntegratedMovem
     point.attachChild(geom);
     rootNode.attachChild(point);
     ready = true;
-    synchronized (service) {
-      if (service != null) {
+    if (service != null) {
+      synchronized (service) {
         service.notifyAll();
       }
     }
