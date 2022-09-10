@@ -934,7 +934,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       log.error("servo data {} could not get servo from map", servoName);
       return;
     }
-	int pulseWidthOff = SERVOMIN + (int) (servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
+	int pulseWidthOff = SERVOMIN + (int) (ServoEvent.servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
     setPWM(ServoEvent.pin, 0, pulseWidthOff);
     ServoEvent.isEnergized = true;
     log.info("pin " + ServoEvent.pin + " enabled from " + servoName);
