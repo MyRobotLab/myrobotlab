@@ -143,7 +143,7 @@ public abstract class Repo {
       // "the big kahuna"));
       // remotes.add(new RemoteRepo("bintray2", "https://dl.bintray.com", "more
       // big kahuna"));
-      remotes.add(new RemoteRepo("myrobotlab", "http://repo.myrobotlab.org/artifactory/myrobotlab", "all other mrl deps"));
+      remotes.add(new RemoteRepo("myrobotlab", "https://repo.myrobotlab.org/artifactory/myrobotlab", "all other mrl deps"));
       remotes.add(new RemoteRepo("sarxos", "https://oss.sonatype.org/content/repositories/snapshots", "for sarxos webcam"));
 
       // DO NOT INCLUDE - messed up repo !
@@ -162,7 +162,8 @@ public abstract class Repo {
       // "swinggui mxgraph"));
       // remotes.add(new RemoteRepo("talend", "https://nexus.talanlabs.com/content/repositories/releases/", "swinggui mxgraph"));
 
-      remotes.add(new RemoteRepo("marytts", "http://mary.dfki.de/repo", "some marytts voices"));
+      // probably safe to drop this one - maven central should have it
+      // remotes.add(new RemoteRepo("marytts", "http://mary.dfki.de/repo", "some marytts voices"));
 
       // This one is needed because of a transient dependency of solr
       // org.restlet.jee .. not sure where

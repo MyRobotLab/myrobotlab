@@ -7,15 +7,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Http;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.WikipediaConfig;
 import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.SearchResults;
@@ -29,23 +31,26 @@ import com.google.gson.internal.LinkedHashTreeMap;
 
 /**
  * Wikipedia via the official rest api docs here:
- * 
- * https://en.wikipedia.org/api/rest_v1/#/Page_content/get_page_summary_title
- * https://en.wikipedia.org/api/rest_v1/#/Page%20content/get_page_summary__title_
- * 
- * vs
- * 
+ * <p>
+ * <a href="https://en.wikipedia.org/api/rest_v1/#/Page_content/get_page_summary_title">Wikimedia REST API</a>
+ * <p>
  * @see <a href="https://github.com/mudroljub/wikipedia-api-docs">wikipedia api docs</a>
- * 
+ *
  * @see <a href="https://en.wikipedia.org/wiki/Special:ApiSandbox">sandbox</a>
- * 
+ *
  * @see <a href="https://www.mediawiki.org/wiki/API:Main_page/lv#Quick_Start">quick start</a>
- * 
+ *
  * @see <a href="http://en.wikipedia.org/w/api.php?action=query&prop=info&format=json&titles=Stanford%20University">Standford University example</a>
- * 
+ *
+ *
+ * TODO - control the number of sentences to return
+ *  @see <a href="https://en.wikipedia.org/w/api.php?action=help&modules=query%2Bextracts">Mediawiki API help</a>
+ *  exsentences
+ *     How many sentences to return.  The value must be between 1 and 10.
+ *     (and lots of other goodies !)
+ *
+ *
  * @author GroG
- * 
- *         FIXME - make it multi-lingual - there must be a way
  *
  */
 public class Wikipedia extends Service implements SearchPublisher, ImagePublisher, TextPublisher {
@@ -56,7 +61,10 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
 
   String acceptLanguage = null;
 
-  String baseUrl = ".wikipedia.org/api/rest_v1/page/summary";
+  /**
+   * language will be prefixed to baseURL e.g. https://en.wikipedia.org
+   */
+  String baseUrl = ".wikipedia.org/api/rest_v1/page/summary";  
 
   public Wikipedia(String n, String id) {
     super(n, id);
@@ -114,8 +122,17 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
    * @return
    */
   private SearchResults searchWikipedia(String searchText, Boolean publishText, Boolean publishImages) {
+    
+    if (searchText == null || searchText.equals("")) {
+      log.warn("searchText is null or empty");
+      return null;
+    }
+    
+    searchText = searchText.trim();
+    
     SearchResults results = new SearchResults(searchText);
 
+    WikipediaConfig c = (WikipediaConfig)config;
     try {
 
       if (publishText == null) {
@@ -178,6 +195,35 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
   @Override
   public int setMaxImages(int cnt) {
     return cnt;
+  }
+  
+  @Override
+  public ServiceConfig getConfig() {
+    WikipediaConfig config = (WikipediaConfig) this.config;
+    
+    Set<String> imagePublishers = getOutbox().getAttached("publishImage");
+    if (imagePublishers != null) {
+      config.imagePublishers = new String[imagePublishers.size()];
+      int i = 0;
+      for (String publisher: imagePublishers) {
+        config.imagePublishers[i] = publisher;  
+        ++i;
+      }
+    }
+    
+    return config;
+  }
+  
+  public ServiceConfig apply(ServiceConfig c) {
+    WikipediaConfig config = (WikipediaConfig) c;
+
+    if (config.imagePublishers != null) {
+      for (String publisher: config.imagePublishers) {
+        attachImageListener(publisher);
+      }
+    }
+
+    return config;
   }
 
   @Override

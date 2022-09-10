@@ -1116,7 +1116,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     if (config.speechRecognizers != null) {
       for (String name : config.speechRecognizers) {
         try {
-          attach(name);
+          attachSpeechListener(name);
         } catch (Exception e) {
           error(e);
         }

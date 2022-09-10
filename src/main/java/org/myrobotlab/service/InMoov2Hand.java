@@ -2,7 +2,6 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -10,7 +9,6 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
@@ -21,9 +19,6 @@ import org.myrobotlab.service.data.LeapHand;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.myrobotlab.service.interfaces.PinArrayListener;
-import org.myrobotlab.service.config.InMoov2HandConfig;
-import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
