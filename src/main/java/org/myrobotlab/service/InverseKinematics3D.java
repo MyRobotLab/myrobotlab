@@ -244,9 +244,9 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
       // - 180 to + 180 ?
       double angle = MathUtils.radToDeg(theta) + l.getOffset();
       angleMap.put(jointName, (double) angle % 360.0F);
-      invoke("publishJointAngle", new AngleData(jointName, (double) angle % 360.0F));
       log.info("Servo : {}  Angle : {}", jointName, angleMap.get(jointName));
     }
+    invoke("publishJointAngles", angleMap);
     // we want to publish the joint positions
     // this way we can render on the web gui..
     double[][] jointPositionMap = createJointPositionMap(name);
@@ -367,7 +367,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   }
 
   @Override
-  public AngleData publishJointAngle(AngleData angleData) {
+  public Map<String,Double> publishJointAngles(Map<String,Double> angleData) {
     return angleData;
   }
 
