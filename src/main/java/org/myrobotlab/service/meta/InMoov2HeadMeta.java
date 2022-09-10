@@ -3,6 +3,7 @@ package org.myrobotlab.service.meta;
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.InMoov2HeadConfig;
+import org.myrobotlab.service.config.MouthControlConfig;
 import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -25,6 +26,9 @@ public class InMoov2HeadMeta extends MetaData {
     addPeer("rollNeck", "Servo", "rollNeck Mod servo");
     addPeer("eyelidLeft", "Servo", "eyelidLeft or both servo");
     addPeer("eyelidRight", "Servo", "Eyelid right servo");
+    addPeer("mouthControl", "MouthControl");
+    
+
   }
 
   @Override
@@ -184,6 +188,20 @@ public class InMoov2HeadMeta extends MetaData {
     eyelidRight.speed = 50.0;
     eyelidRight.sweepMax = null;
     eyelidRight.sweepMin = null;
+    
+    // == Peer - mouthControl =============================
+    MouthControlConfig mouthControl = (MouthControlConfig) plan.getPeerConfig("mouthControl");
+
+    // setup name references to different services
+    mouthControl.jaw = name + ".jaw";
+    String i01Name = name;
+    int index = name.indexOf(".");
+    if (index > 0) {
+      i01Name = name.substring(0, name.indexOf("."));
+    }
+     
+    mouthControl.mouth = i01Name + ".mouth";
+    
     
     plan.addConfig(head);
 

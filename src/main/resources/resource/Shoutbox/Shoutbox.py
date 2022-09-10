@@ -1,2 +1,2 @@
 # start the service
-shoutbox = Runtime.start("shoutbox","Shoutbox")
+shoutbox = runtime.start("shoutbox","Shoutbox")

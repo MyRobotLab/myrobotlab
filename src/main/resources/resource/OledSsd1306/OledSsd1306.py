@@ -2,16 +2,16 @@
 port = "COM3"
 # Code to be able to use this script with virtalArduino
 if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
+    virtualArduino = runtime.start("virtualArduino", "VirtualArduino")
     virtualArduino.connect(port)
 #
 # Initiate the Arduino
-arduino = Runtime.start("Arduino","Arduino")
+arduino = runtime.start("Arduino","Arduino")
 arduino.connect(port)
 # Alternativley you can use the RasPi service to connect the OLED to the GPIO pins
-# raspi = Runtime.createAndStart("RasPi","RasPi")
+# raspi = runtime.start("RasPi","RasPi")
 # Select the Arduino as controller for the OLED on bus 1 and i2c address 0x3C
-oled = Runtime.start("OLED","OledSsd1306")
+oled = runtime.start("OLED","OledSsd1306")
 # From version 1.0.2316 use attach instead of setController
 # oled.setController(arduino,"1","0x3C")
 oled.attach(arduino,"1","0x3C")

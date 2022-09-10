@@ -81,9 +81,11 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
   @Override
   public ServiceConfig apply(ServiceConfig c) {
     ImageDisplayConfig config = (ImageDisplayConfig) c;
-    for (String displayName : config.displays.keySet()) {
-      close(displayName);
-      displayInternal(displayName);
+    if (config.displays != null) {
+      for (String displayName : config.displays.keySet()) {
+        close(displayName);
+        displayInternal(displayName);
+      }
     }
     return config;
   }
@@ -237,7 +239,7 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
 
           // get final uri/url for file
           URL imageUrl = null;
-          
+
           if (display.src == null) {
             error("could not display null image");
             display.src = getResourceDir() + fs + "mrl_logo.jpg";
@@ -320,7 +322,7 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
             display.frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
             // frame.setLocationRelativeTo(null);
 
-          } else if ((display.width != null && display.width != null) || display.scale != null) {
+          } else if ((display.width != null && display.height != null) || display.scale != null) {
 
             // FIXME - "IF" SCALED THEN SETICON(ICON) !!!
 

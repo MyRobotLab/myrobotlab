@@ -14,7 +14,7 @@ from org.myrobotlab.service import Intro
 Runtime.setAllVirtual(True)
 
 # start the service
-simulator = Runtime.start('simulator','JMonkeyEngine')
+simulator = runtime.start('simulator','JMonkeyEngine')
 # we load the model from path
 simulator.loadModels(Service.getResourceDir('Intro','JMonkeyEngine/assets'))
 # we set the rotation axe to the defined part

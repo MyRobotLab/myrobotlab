@@ -5,15 +5,15 @@
 port = '/dev/ttyACM0'
 # port = 'COM5'
 
-mpu6050 = Runtime.createAndStart('mpu6050','Mpu6050')
+mpu6050 = runtime.start('mpu6050','Mpu6050')
 mpu6050.setDeviceBus('1')
 mpu6050.setDeviceAddress('0x68')
 mpu6050.setSampleRate(10) # in Hz default is 3Hz
 
 # end test
 # raspi controler :
-# raspi = Runtime.createAndStart('RasPi','RasPi')
-mega = Runtime.start('mega','Arduino')
+# raspi = runtime.start('RasPi','RasPi')
+mega = runtime.start('mega','Arduino')
 mega.connect(port)
 
 sleep(3)

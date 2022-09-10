@@ -1,2 +1,2 @@
 # start the service
-inversekinematics3d = Runtime.start("inversekinematics3d","InverseKinematics3D")
+inversekinematics3d = runtime.start("inversekinematics3d","InverseKinematics3D")

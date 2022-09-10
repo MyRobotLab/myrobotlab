@@ -46,7 +46,7 @@ def work():
 
 codec = ArduinoMsgCodec()
 
-virtual = Runtime.start("virtual", "VirtualDevice")
+virtual = runtime.start("virtual", "VirtualDevice")
 
 logic = virtual.getLogic()
 

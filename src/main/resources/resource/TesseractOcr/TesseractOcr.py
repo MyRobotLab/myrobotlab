@@ -7,7 +7,7 @@
 ##################################################################################
 
 # start the service
-tesseractocr = Runtime.start("tesseractocr","TesseractOcr")
+tesseractocr = runtime.start("tesseractocr","TesseractOcr")
 
 text = tesseractocr.ocr("traffic-sign.jpg");
 

@@ -17,8 +17,8 @@ public class ProgramABMeta extends MetaData {
     addDescription("AIML 2.0 Reference interpreter based on Program AB");
     addCategory("ai");
 
-    // FIXME - add Wikipedia local search !!
-    addPeer("search", "GoogleSearch", "replacement for handling pannous sriax requests");
+    // add Wikipedia local search !!
+    addPeer("search", "Wikipedia", "replacement for handling pannous sriax requests");
 
     // TODO: renamed the bots in the program-ab-data folder to prefix them so we
     // know they are different than the inmoov bots.
@@ -29,7 +29,7 @@ public class ProgramABMeta extends MetaData {
     // addDependency("program-ab", "program-ab-kw", "0.0.8.5");
 
     addDependency("program-ab", "program-ab-data", null, "zip");
-    addDependency("program-ab", "program-ab-kw", "0.0.8.7");
+    addDependency("program-ab", "program-ab-kw", "0.0.8.9");
     exclude("ch.qos.logback", "logback-classic");
     exclude("ch.qos.logback", "logback-core");
 
@@ -38,8 +38,8 @@ public class ProgramABMeta extends MetaData {
     addDependency("commons-io", "commons-io", "2.7");
     // TODO: This is for CJK support in ProgramAB move this into the published
     // POM for ProgramAB so they are pulled in transiently.
-    addDependency("org.apache.lucene", "lucene-analyzers-common", "8.8.2");
-    addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "8.8.2");
+    addDependency("org.apache.lucene", "lucene-analyzers-common", "8.11.2");
+    addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "8.11.2");
     addCategory("ai", "control");
 
   }

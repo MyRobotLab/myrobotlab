@@ -1,2 +1,2 @@
 # start the service
-cli = Runtime.start("cli","Cli")
+cli = runtime.start("cli","Cli")

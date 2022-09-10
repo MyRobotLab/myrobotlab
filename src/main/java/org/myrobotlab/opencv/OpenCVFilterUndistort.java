@@ -7,10 +7,8 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import org.bytedeco.javacpp.indexer.Indexer;
-import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.myrobotlab.service.OpenCV;
 
 public class OpenCVFilterUndistort extends OpenCVFilter {
 

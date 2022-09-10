@@ -1,1 +1,1 @@
-clock = Runtime.start("clock","Clock")
+clock = runtime.start("clock","Clock")

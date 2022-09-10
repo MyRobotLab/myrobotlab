@@ -6,4 +6,4 @@
 #########################################
 
 # start the service
-proxy = Runtime.start('proxy','Proxy')
+proxy = runtime.start('proxy','Proxy')

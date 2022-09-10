@@ -1,21 +1,20 @@
 # The following script will send a quote to a Log and Python every minute
 from datetime import datetime
 
-cron  =  Runtime.createAndStart('cron', 'Cron')
-log   =  Runtime.createAndStart('log', 'Log')
-speech = Runtime.createAndStart("speech","MarySpeech")
+cron  =  runtime.start('cron', 'Cron')
+log   =  runtime.start('log', 'Log')
+speech = runtime.start("speech","MarySpeech")
 
 # add a task which sends text to the log service Log.log(string) every minute
 cron.addTask('* * * * *','log','log', 'hello sir, time for your coffee')
 # add a task to send text to a python function every minute
 cron.addTask('* * * * *','python','doThisEveryMinute', 'hello sir, time for your coffee')
 
-dateObj = datetime
-print dateObj.now()
+print ('now is', datetime.now())
 
 def doThisEveryMinute(text):
-  print dateObj.now()
-  print dateObj.time(dateObj.now()),text
+  print (datetime.now())
+  print (datetime.time(datetime.now()),text)
   speech.speak(text)
 
 listOfTasks = cron.getCronTasks()

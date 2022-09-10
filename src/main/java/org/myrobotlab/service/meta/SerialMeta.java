@@ -16,7 +16,7 @@ public class SerialMeta extends MetaData {
 
     addDescription("reads and writes data to a serial port");
     addCategory("sensors", "control");
-    addDependency("io.github.java-native", "jssc", "2.9.2");
+    addDependency("io.github.java-native", "jssc", "2.9.4");
     setLicenseGplV3(); // via jssc
 
   }

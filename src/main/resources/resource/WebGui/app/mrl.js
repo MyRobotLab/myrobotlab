@@ -203,7 +203,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         var name = msg.data[0]
         _self.releasePanel(name)
         // FIXME - unregister from all callbacks
-        // delete registry[_self.getFullName(service)]
+        inName = _self.getFullName(name)
+        delete registry[inName]
+        console.info(registry)
     }
 
     // FIXME - the Runtime.cli uses this
@@ -314,7 +316,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     _self.register = function(registration) {
 
         let fullname = registration.name + '@' + registration.id
-            console.log("--> onRegistered " + fullname)
+        console.log("--> onRegistered " + fullname)
 
         let simpleTypeName = _self.getSimpleName(registration.typeKey)
 
@@ -423,10 +425,20 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 // on all onState msg - from broadcastState update the 
                 // registry
                 let senderFullName = _self.getFullName(msg.sender)
-                if (msg.method == 'onState'){
+                if (msg.method == 'onState') {
                     let s = registry[senderFullName]
-                    if (s){
-                       registry[senderFullName] = msg.data[0]
+                    if (s) {
+                        let service = msg.data[0]
+                        registry[senderFullName] = service
+                        for ([key,value] of Object.entries(service.serviceType.peers)) {
+                            peerKey = key[0].toUpperCase() + key.substring(1)
+                            if (value.state == 'STARTED') {
+                                service['is' + peerKey + 'Started'] = true
+                            } else {
+                                service['is' + peerKey + 'Started'] = false
+                            }
+                        }
+
                     }
                 }
 
@@ -508,7 +520,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
 
     this.getShortName = function(name) {
-        if (!name){
+        if (!name) {
             return;
         }
         if (name.includes('@')) {
@@ -1316,16 +1328,21 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                             }
                         },
 
-                        isPeerStarted(peerName) { // IS THIS USED ??? not = function(peerName) format
+                        isPeerStarted(peerName) {
+                            // IS THIS USED ??? not = function(peerName) format
                             try {
                                 let service = _self.getService(name)
-                                return service.serviceType.peers[peerName].state == 'started'
-                            } catch (e) {
-                                return false;
-                            }
+
+                                if (service.config) {
+                                    if (_self.getFullName(service.config[peerName])in registry) {
+                                        return true
+                                    }
+                                }
+                            } catch (e) {}
+                            return false
                         },
 
-                        interfaceToPossibleServices:_self.interfaceToPossibleServices,
+                        interfaceToPossibleServices: _self.interfaceToPossibleServices,
 
                         subscribe: function(data) {
                             if ((typeof arguments[0]) == "string") {
@@ -1466,7 +1483,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             subscribeTo: _self.subscribeTo,
             // better name
             getProperties: _self.getProperties,
-            sendMessage: _self.sendMessage, // setViewType: _self.setViewType,
+            sendMessage: _self.sendMessage,
+            // setViewType: _self.setViewType,
             interfaceToPossibleServices: _self.interfaceToPossibleServices
 
         }

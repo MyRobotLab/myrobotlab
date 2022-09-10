@@ -11,11 +11,11 @@ port = "COM15"
 
 # start optional virtual arduino service, used for test
 if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
+    virtualArduino = runtime.start("virtualArduino", "VirtualArduino")
     virtualArduino.connect(port)
 
 #define POLL_PERIOD 20
-serial = Runtime.start("serial","Serial")
+serial = runtime.start("serial","Serial")
 
 BAUDRATE = 9600
 #define MSP_SET_RAW_RC        200

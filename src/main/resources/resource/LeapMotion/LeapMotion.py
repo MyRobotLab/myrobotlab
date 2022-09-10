@@ -14,7 +14,7 @@
 from com.leapmotion.leap.Finger import Type
 # from __future__ import division
 
-leap = Runtime.createAndStart("leap","LeapMotion")
+leap = runtime.start("leap","LeapMotion")
 
 leap.addFrameListener(python)
 

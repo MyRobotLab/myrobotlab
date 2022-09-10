@@ -3,7 +3,7 @@
 # So, you can download webpages, images, and a all sorts of
 # goodies from the internet
 
-http = Runtime.start("http","HttpClient")
+http = runtime.start("http","HttpClient")
 
 # blocking methods
 # GETs

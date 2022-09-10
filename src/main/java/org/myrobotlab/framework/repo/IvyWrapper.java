@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.ivy.Ivy;
 import org.apache.ivy.Main;
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
@@ -31,6 +32,8 @@ import org.myrobotlab.service.meta.abstracts.MetaData;
 public class IvyWrapper extends Repo implements Serializable {
 
   private static final long serialVersionUID = 1L;
+  
+  public static final String IVY_VERSION = "2.5.0";
 
   class IvyWrapperLogger extends AbstractMessageLogger {
 
@@ -187,6 +190,13 @@ public class IvyWrapper extends Repo implements Serializable {
 
     StringBuilder ret = new StringBuilder();
     ServiceData sd = ServiceData.getLocalInstance();
+    if (serviceTypes == null) {
+      List<MetaData> ats = sd.getAvailableServiceTypes();
+      serviceTypes = new String[ats.size()];
+      for (int i = 0; i < ats.size(); ++i) {
+        serviceTypes[i] = ats.get(i).getType();
+      }
+    }
 
     ret.append("  <dependencies>\n\n");
 
@@ -284,6 +294,29 @@ public class IvyWrapper extends Repo implements Serializable {
 
     createFilteredFile(snr, location, "ivysettings", "xml");
   }
+  
+  public String[] buidCmdLine(String location) {
+    
+    // TODO - noterminate :P
+    // String[] cmd = new String[] { "-settings", location +
+    // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
+    // location + "/jar" + "/[originalname].[ext]", "-noterminate" };
+    // [artifact]-[revision].[ext]
+    String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname].[ext]" };
+    // String[] cmd = new String[] { "-settings", location +
+    // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
+    // location + "/jar" + "/[artifact]-[revision].[ext]" };
+
+    StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-"+IVY_VERSION+".jar");
+    for (String s : cmd) {
+      sb.append(" ");
+      sb.append(s);
+    }
+    log.info("cmd {}", sb);
+    
+    return cmd;
+
+  }
 
   @Override
   public void installDependency(String location, ServiceDependency library) {
@@ -295,22 +328,7 @@ public class IvyWrapper extends Repo implements Serializable {
 
       Platform platform = Platform.getLocalInstance();
 
-      // TODO - noterminate :P
-      // String[] cmd = new String[] { "-settings", location +
-      // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
-      // location + "/jar" + "/[originalname].[ext]", "-noterminate" };
-      // [artifact]-[revision].[ext]
-      String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname].[ext]" };
-      // String[] cmd = new String[] { "-settings", location +
-      // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
-      // location + "/jar" + "/[artifact]-[revision].[ext]" };
-
-      StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-4.jar");
-      for (String s : cmd) {
-        sb.append(" ");
-        sb.append(s);
-      }
-      log.info("cmd {}", sb);
+      String[] cmd = buidCmdLine(location);
 
       // TODO: this breaks for me! please review why this needed to be commented
       // out.
@@ -430,19 +448,23 @@ public class IvyWrapper extends Repo implements Serializable {
       // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
       // location + "/jar" + "/[artifact]-[revision].[ext]" };
 
-      StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-4.jar");
+      // StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-4.jar");
+      StringBuilder sb = new StringBuilder();
+      sb.append("wget https://repo1.maven.org/maven2/org/apache/ivy/ivy/"+IVY_VERSION+"/ivy-"+IVY_VERSION+".jar\n");
+      sb.append("java -jar ivy-"+IVY_VERSION+".jar");
       for (String s : cmd) {
         sb.append(" ");
         sb.append(s);
       }
-      log.info("cmd {}", sb);
+      
+      sb.append("\n");
 
-      // TODO: this breaks for me! please review why this needed to be commented
-      // out.
-      // Ivy ivy = Ivy.newInstance(); <-- for future 2.5.x release
-      // ivy.getLoggerEngine().pushLogger(new
-      // IvyWrapperLogger(Message.MSG_INFO)); <-- for future 2.5.x release
-      Main.setLogger(new IvyWrapperLogger(Message.MSG_INFO));
+      log.info("cmd {}", sb);
+      FileIO.toFile("libraries/install.sh", sb.toString().getBytes());
+
+      Ivy ivy = Ivy.newInstance(); // <-- for future 2.5.x release
+      ivy.getLoggerEngine().pushLogger(new IvyWrapperLogger(Message.MSG_INFO));
+
       ResolveReport report = Main.run(cmd);
 
       // if no errors -h
@@ -528,13 +550,32 @@ public class IvyWrapper extends Repo implements Serializable {
 
       LoggingFactory.init(Level.INFO);
 
-      Repo repo = Repo.getInstance("IvyWrapper");
+      IvyWrapper repo = (IvyWrapper)Repo.getInstance("IvyWrapper");
 
       String serviceType = "all";
       long ts = System.currentTimeMillis();
-      String dir = String.format("install.ivy.%s.%d", serviceType, ts);
+      String dir = String.format("install.ivy.%s.update", serviceType);
 
-      repo.createBuildFiles(dir, "Python");
+      String[] types = null;
+      
+      types = ServiceData.getLocalInstance().getServiceTypeNames();      
+      repo.createBuildFiles(dir, types);
+      
+      String[] cmd = repo.buidCmdLine(".");
+      
+      StringBuilder sb = new StringBuilder();
+      sb.append("wget https://repo1.maven.org/maven2/org/apache/ivy/ivy/"+IVY_VERSION+"/ivy-"+IVY_VERSION+".jar\n");
+      sb.append("java -jar ivy-"+IVY_VERSION+".jar");
+      
+      for (String s : cmd) {
+        sb.append(" ");
+        sb.append(s);
+      }
+      
+      FileIO.toFile(dir + "/test.sh", sb.toString().getBytes());
+      
+      
+      
       // repo.installTo("install.ivy");
       // repo.install(dir, serviceType);
 

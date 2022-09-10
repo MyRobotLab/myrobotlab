@@ -13,7 +13,7 @@ public class HtmlParserMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    */
   public HtmlParserMeta() {
-    addDependency("org.jsoup", "jsoup", "1.14.2");
+    addDependency("org.jsoup", "jsoup", "1.15.3");
     addDescription("html parser");
     addCategory("document");
     // Set to false since no JSoup service exists

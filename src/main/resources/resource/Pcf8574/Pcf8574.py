@@ -1,8 +1,8 @@
 # Initiate the Arduino
-arduino = Runtime.start("arduino","Arduino")
+arduino = runtime.start("arduino","Arduino")
 arduino.connect("COM3")
 # Select the Arduino as controller for the IO extender on bus 1 and i2c address 0x38
-pcf = Runtime.createAndStart("pcf","Pcf8574")
+pcf = runtime.start("pcf","Pcf8574")
 # From version 1.0.2316 use attach instead of setController
 # pcf.setController(arduino,"1","0x38")
 pcf.setBus("1")

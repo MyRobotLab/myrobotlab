@@ -41,8 +41,8 @@ import org.atmosphere.cpr.BroadcasterFactory;
 import org.atmosphere.nettosphere.Config;
 import org.atmosphere.nettosphere.Handler;
 import org.atmosphere.nettosphere.Nettosphere;
-import org.jboss.netty.handler.ssl.SslContext;
-import org.jboss.netty.handler.ssl.util.SelfSignedCertificate;
+//import org.jboss.netty.handler.ssl.SslContext;
+//import org.jboss.netty.handler.ssl.util.SelfSignedCertificate;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
@@ -63,6 +63,9 @@ import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.slf4j.Logger;
+
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.SelfSignedCertificate;
 
 /**
  * 
@@ -383,7 +386,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
         cipherSuite = new String[] { "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA", "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256" };
         SelfSignedCertificate ssc = new SelfSignedCertificate();
-        SslContext sslCtx = SslContext.newServerContext(ssc.certificate(), ssc.privateKey());
+        // deprecated -> SslContext sslCtx = SslContext.newServerContext(ssc.certificate(), ssc.privateKey());
+        SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey());
+        // SslContextBuilder.forServer(keyManager).clientAuth(ClientAuth.REQUIRE).trustManager(trustManager).build();
         configBuilder.sslContext(createSSLContext2());// .sslContext(sslCtx);
         // ssl.setEnabledProtocols(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2",
         // "SSLv3"});
@@ -561,8 +566,21 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       AtmosphereRequest request = r.getRequest();
 
-      String bodyData = request.body().asString();
-      // request.c
+      String bodyData = null; 
+
+// FIXME - REVERTED THIS BREAKS SERVICE LIST AND UI
+//      if (request.body() != null && !request.body().isEmpty()) {
+//        byte[] bytes = request.body().asBytes();
+//        if (bytes != null) {
+//          bodyData = new String(bytes);
+//        }
+//      }
+      
+      if (request.body() != null && !request.body().isEmpty()) {
+        // body returns null after destroy
+        bodyData = new String(request.body().asString());
+      }      
+            
       request.destroy();
       String logData = null;
 
@@ -617,6 +635,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       } else if (apiKey.equals(CodecUtils.API_SERVICE)) {
 
         Message msg = CodecUtils.cliToMsg(null, getName(), null, r.getRequest().getPathInfo());
+        if (bodyData != null) {
+          msg.data = CodecUtils.fromJson(bodyData, Object[].class);
+        }
 
         if (isLocal(msg)) {
           String serviceName = msg.getFullName();// getName();
@@ -740,6 +761,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
             data.si.out(data.method.getName(), ret);
           }
         }
+      } catch (InterruptedException interrupt) {
+        log.info("interrupted");
       } catch (Exception e) {
         log.error("IncomingMessageQueue threw", e);
       }
@@ -765,7 +788,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     public void stop() {
       synchronized (lock) {
         isRunning = false;
-        if (worker == null) {
+        if (worker != null) {
           worker.interrupt();
         }
       }

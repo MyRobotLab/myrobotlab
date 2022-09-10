@@ -5,4 +5,4 @@
 #########################################
 # uncomment for virtual hardware
 # Platform.setVirtual(True)
-i01 = Runtime.start('i01', 'InMoov2')
+i01 = runtime.start('i01', 'InMoov2')

@@ -113,23 +113,21 @@ public class Intro extends Service {
       // for mary tts on java11...
       System.setProperty("java.version", "11.0");
       LoggingFactory.init("info");
-      
 
       WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
       
-      Runtime.start("python","Python");
-      Runtime.start("polly","Polly");
-      Runtime.start("intro", "Intro");
+      Runtime.start("i01", "InMoov2");
       
-      
+      // Runtime.start("python","Python");
+      // Runtime.start("polly","Polly");
+//      Runtime.start("s1", "Servo");
+//      Runtime.start("intro", "Intro");
+            
       //Runtime.release("python");
-      
-      
-      
       // Runtime.releaseAll();
-      //Runtime.start("python", "Python");
+      Runtime.start("python", "Python");
       // Runtime.start("mega", "Arduino");
       // Runtime.start("ada", "Adafruit16CServoDriver");
       

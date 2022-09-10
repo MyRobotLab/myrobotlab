@@ -6,4 +6,4 @@
 #########################################
 
 # start the service
-jmonkeyengine = Runtime.start('jmonkeyengine','JMonkeyEngine')
+jmonkeyengine = runtime.start('jmonkeyengine','JMonkeyEngine')

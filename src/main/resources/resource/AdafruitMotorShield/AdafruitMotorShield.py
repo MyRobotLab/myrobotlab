@@ -9,11 +9,11 @@ port = "COM99"
 
 # virtual hardware
 if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
+    virtualArduino = runtime.start("virtualArduino", "VirtualArduino")
     virtualArduino.connect(port)
 
 # The AFMotor API is supported through Jython
-fruity = Runtime.createAndStart("fruity","AdafruitMotorShield")
+fruity = runtime.start("fruity","AdafruitMotorShield")
 
 # connect the arduino to serial com port 3
 fruity.connect(port)
