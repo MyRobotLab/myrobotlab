@@ -19,8 +19,6 @@ import org.myrobotlab.fsm.core.SimpleTransition;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.MapperLinear;
-import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.config.FiniteStateMachineConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;

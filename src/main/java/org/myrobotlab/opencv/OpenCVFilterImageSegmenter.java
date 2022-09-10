@@ -12,7 +12,6 @@ import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_ximgproc.SelectiveSearchSegmentation;
-import org.myrobotlab.service.OpenCV;
 
 /**
  * This stage uses the image segmentation support in OpenCV to extract

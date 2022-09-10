@@ -543,7 +543,7 @@ public class OpenCVData extends CvData {
 
   public PointCloud getPointCloud() {
     List<PointCloud> pcs = getPointCloudList();
-    if (pcs == null && pcs.size() != 0) {
+    if (pcs == null || pcs.size() == 0) {
       return null;
     }
     return pcs.get(0);

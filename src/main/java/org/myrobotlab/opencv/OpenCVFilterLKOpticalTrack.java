@@ -55,7 +55,6 @@ import org.bytedeco.opencv.opencv_core.TermCriteria;
 import org.myrobotlab.cv.TrackingPoint;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Point;
-import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 /**
