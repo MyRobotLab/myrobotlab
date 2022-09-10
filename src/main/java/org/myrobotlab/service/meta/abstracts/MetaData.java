@@ -162,7 +162,7 @@ public class MetaData implements Serializable {
   }
 
   public void addDependency(String groupId, String artifactId, String version, String ext) {
-    ServiceDependency library = new ServiceDependency(groupId, artifactId, version, ext);
+    ServiceDependency library = new ServiceDependency(groupId, artifactId, version, ext, includeServiceInOneJar);
     lastDependency = library;
     dependencies.add(library);
   }
