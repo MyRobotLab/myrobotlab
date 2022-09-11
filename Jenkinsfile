@@ -31,8 +31,8 @@ pipeline {
    // JAVA_HOME="${tool 'openjdk-11-linux'}/jdk-11.0.1"
    // JAVA_HOME="/home/jenkins/agent/tools/hudson.model.JDK/openjdk-11-linux/jdk-11.0.1"
    environment {
-         MOTD = 'you know, for robots !',
-         VERSION_PREFIX = VERSION_PREFIX,
+         MOTD = 'you know, for robots !'
+         VERSION_PREFIX = VERSION_PREFIX
          VERSION = VERSION_PREFIX + ".${BUILD_NUMBER}"
    // JDK_HOME = "${tool 'openjdk-11-linux'}/jdk-11.0.1"
    // JAVA_HOME = "${JDK_HOME}"
