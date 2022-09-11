@@ -6,6 +6,9 @@
  *
  ***********************************************************************************/
 
+ final VERSION_PREFIX = "1.1"
+ 
+
 pipeline {
    // https://plugins.jenkins.io/agent-server-parameter/
    // agent { label params['agent-name'] }
@@ -166,7 +169,7 @@ pipeline {
          when { expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' } }
          steps {
             withCredentials([string(credentialsId: 'github-token-2', variable: 'token')]) {
-               sh "./publish-github.sh -b 1.1.${BUILD_NUMBER} -t $token"
+               sh "./publish-github.sh -v ${VERSION_PREFIX}.${BUILD_NUMBER} -t $token -b ${BUILD_NUMBER}"
             }
          }
       }
