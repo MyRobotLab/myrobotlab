@@ -30,7 +30,7 @@ pipeline {
    // JAVA_HOME="/home/jenkins/agent/tools/hudson.model.JDK/openjdk-11-linux/jdk-11.0.1"
    environment {
          MOTD = 'you know, for robots !'
-         VERSION_PREFIX = getVersionPrefix()
+         VERSION_PREFIX = "1.1"
          VERSION = "${VERSION_PREFIX}" + ".${BUILD_NUMBER}"
    // JDK_HOME = "${tool 'openjdk-11-linux'}/jdk-11.0.1"
    // JAVA_HOME = "${JDK_HOME}"
@@ -175,7 +175,7 @@ pipeline {
          when { expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' } }
          steps {
             withCredentials([string(credentialsId: 'github-token-2', variable: 'TOKEN')]) {
-               echo "publishing ${getVersionPrefix()}.${BUILD_NUMBER}"
+               echo "publishing ${VERSION_PREFIX}.${BUILD_NUMBER}"
                echo "version ${VERSION}"
                // for security - your supposed to make it non-interpretive single quotes and let the OS process the interpolation
                sh './publish-github.sh -v ${VERSION} -b ${BUILD_NUMBER} -t ${TOKEN} '
