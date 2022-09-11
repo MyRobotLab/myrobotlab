@@ -35,7 +35,7 @@ pipeline {
    environment {
          MOTD = 'you know, for robots !'
          VERSION_PREFIX = getVersionPrefix()
-         VERSION = getVersionPrefix() + ".${BUILD_NUMBER}"
+         VERSION = "getVersionPrefix()" + ".${BUILD_NUMBER}"
    // JDK_HOME = "${tool 'openjdk-11-linux'}/jdk-11.0.1"
    // JAVA_HOME = "${JDK_HOME}"
    // PATH="${env.JAVA_HOME}/bin:${env.PATH}"
@@ -51,6 +51,12 @@ pipeline {
 
       stage('initialize') {
             steps {
+               echo "VERSION_PREFIX ${VERSION_PREFIX}"
+               echo "VERSION ${VERSION}"
+               echo "BUILD_NUMBER ${BUILD_NUMBER}"
+
+               
+
                print params['agent-name']
                // print System.properties['os.name'].toLowerCase() - access to java object requires permission changes
                script {
