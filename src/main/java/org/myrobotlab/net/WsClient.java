@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -39,6 +40,8 @@ public class WsClient implements Decoder<String, Reader> {
   protected transient AsyncHttpClient asc = null;
   protected transient Client client = null;
   protected transient Set<RemoteMessageHandler> handlers = new HashSet<>();
+
+  protected final List<String> WEBSOCKET_EVENTS = List.of("OPEN", "CLOSE", "CLOSED", "REOPENED");
 
   public AsyncHttpClient getAsyncClient() {
     
@@ -182,29 +185,24 @@ public class WsClient implements Decoder<String, Reader> {
     // public Reader decode(Event type, String data) {
     // System.out.println("=========== decode <----- ===========");
     // System.out.println("decoding [{} - {}]", type, s);
-    String data = (String) dataIn;
-    if (data != null && "X".equals(data)) {
+    //Null check handled by equals()
+    if ("X".equals(dataIn)) {
       // System.out.println("MESSAGE - X");
       return null;
     }
-    if ("OPEN".equals(data)) {
+    if(WEBSOCKET_EVENTS.contains(dataIn))
       return null;
-    }
-
-    if ("CLOSED".equals(data)) {
-      return null;
-    }
 
     // main response
     // System.out.println(data);
     for (RemoteMessageHandler handler : handlers) {
-      handler.onRemoteMessage(uuid, data);
+      handler.onRemoteMessage(uuid, dataIn);
     }
 
     // response
     // System.out.println("OPENED" + s);
 
-    return new StringReader(data);
+    return new StringReader(dataIn);
     // return null;
   }
 
