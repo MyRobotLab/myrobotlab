@@ -13,7 +13,7 @@ do
     esac
 done
 echo "version: $version";
-echo "build: $number";
+echo "build: $build";
 # echo "token: $token";
 
 # from - https://docs.github.com/en/rest/releases/releases#create-a-release
