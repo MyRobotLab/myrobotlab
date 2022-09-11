@@ -5,10 +5,6 @@
  * Jenkins.instance.getItemByFullName("myrobotlab-multibranch/develop").updateNextBuildNumber(185)
  * Cancel all jobs - Jenkins.instance.queue.clear()
  ***********************************************************************************/
-
- def getVersionPrefix() {
-    return "1.1"
- }
  
 
 pipeline {
@@ -35,7 +31,7 @@ pipeline {
    environment {
          MOTD = 'you know, for robots !'
          VERSION_PREFIX = getVersionPrefix()
-         VERSION = "getVersionPrefix()" + ".${BUILD_NUMBER}"
+         VERSION = "${VERSION_PREFIX}" + ".${BUILD_NUMBER}"
    // JDK_HOME = "${tool 'openjdk-11-linux'}/jdk-11.0.1"
    // JAVA_HOME = "${JDK_HOME}"
    // PATH="${env.JAVA_HOME}/bin:${env.PATH}"
