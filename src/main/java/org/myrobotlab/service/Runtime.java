@@ -3676,7 +3676,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // "runtime@id"
     // TODO - lots of options for a default "describe"
     Message msg = Message.createMessage(String.format("%s@%s", getName(), getId()), "runtime", "describe",
-        new Object[] { "fill-uuid", CodecUtils.toJson(new DescribeQuery(Platform.getLocalInstance().getId(), connId)) });
+        new Object[] { "fill-uuid", new DescribeQuery(Platform.getLocalInstance().getId(), connId) });
 
     return msg;
   }
