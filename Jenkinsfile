@@ -174,11 +174,11 @@ pipeline {
       stage('publish-github') {
          when { expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' } }
          steps {
-            withCredentials([string(credentialsId: 'github-token-2', variable: 'TOKEN')]) {
+            withCredentials([string(credentialsId: 'github-token-2', variable: 'token')]) { // var name "token" is set in cred config and is case senstive
                echo "publishing ${VERSION_PREFIX}.${BUILD_NUMBER}"
                echo "version ${VERSION}"
                // for security - your supposed to make it non-interpretive single quotes and let the OS process the interpolation
-               sh './publish-github.sh -v ${VERSION} -b ${BUILD_NUMBER} -t ${TOKEN} '
+               sh './publish-github.sh -v ${VERSION} -b ${BUILD_NUMBER} -t ${token}'
             }
          }
       }
