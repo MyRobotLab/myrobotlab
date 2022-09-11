@@ -3,10 +3,12 @@
  *
  * for adjusting build number for specific branch build
  * Jenkins.instance.getItemByFullName("myrobotlab-multibranch/develop").updateNextBuildNumber(185)
- *
+ * Cancel all jobs - Jenkins.instance.queue.clear()
  ***********************************************************************************/
 
- final VERSION_PREFIX = "1.1"
+ def getVersionPrefix() {
+    return "1.1"
+ }
  
 
 pipeline {
@@ -32,8 +34,8 @@ pipeline {
    // JAVA_HOME="/home/jenkins/agent/tools/hudson.model.JDK/openjdk-11-linux/jdk-11.0.1"
    environment {
          MOTD = 'you know, for robots !'
-         VERSION_PREFIX = VERSION_PREFIX
-         VERSION = VERSION_PREFIX + ".${BUILD_NUMBER}"
+         VERSION_PREFIX = getVersionPrefix()
+         VERSION = getVersionPrefix() + ".${BUILD_NUMBER}"
    // JDK_HOME = "${tool 'openjdk-11-linux'}/jdk-11.0.1"
    // JAVA_HOME = "${JDK_HOME}"
    // PATH="${env.JAVA_HOME}/bin:${env.PATH}"
@@ -171,7 +173,7 @@ pipeline {
          when { expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' } }
          steps {
             withCredentials([string(credentialsId: 'github-token-2', variable: 'TOKEN')]) {
-               echo "publishing ${VERSION_PREFIX}.${BUILD_NUMBER}"
+               echo "publishing ${getVersionPrefix()}.${BUILD_NUMBER}"
                echo "version ${VERSION}"
                // for security - your supposed to make it non-interpretive single quotes and let the OS process the interpolation
                sh './publish-github.sh -v ${VERSION} -b ${BUILD_NUMBER} -t ${TOKEN} '
