@@ -213,7 +213,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   public static final int PCA9685_LED0_ON_L = 0x06; // First LED address Low
   public static final int PCA9685_LED0_ON_H = 0x07; // First LED address High
   public static final int PCA9685_LED0_OFF_L = 0x08; // First LED address Low
-  public static final int PCA9685_LED0_OFF_H = 0x08; // First LED addressHigh
+  public static final int PCA9685_LED0_OFF_H = 0x09; // First LED addressHigh
 
   public static final int PCA9685_ALL_LED_OFF_H = 0xFD; // All call i2c address
   // ( Used for shutdown
@@ -621,6 +621,13 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   }
 
+    /*
+   * Set Output Power of a pin.
+   * This is a value betweeom 0.0 and 1.0
+   * if you are using this to drive an LED.
+   * Connect the LED between VCC and the output pic, then invert this value where 1.0 is off and 0.0 is full on.
+   * 
+   */
   public void setPinValue(String pinLabel, double powerOutput) {
     int pin = getAddress(pinLabel);
     log.info("Adafruit16C setPinValue, pin = {}, powerOutput = {}", pin, powerOutput);
@@ -636,14 +643,14 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     int powerOff;
     // No phase shift. Simple calculation
     if (powerOutput == 0) {
-      powerOn = 4096;
+      powerOn = 0;
       powerOff = 0;
     } else if (powerOutput == 1) {
       powerOn = 0;
-      powerOff = 1;
-    } else {
-      powerOn = (int) (powerOutput * 4096);
       powerOff = 4095;
+    } else {
+      powerOn = 0;
+      powerOff = (int) (powerOutput * 4096);
     }
     log.info("powerOutput = {}, powerOn = {}, powerOff = {}", powerOutput, powerOn, powerOff);
     setPWM(pin, powerOn, powerOff);
@@ -927,7 +934,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       log.error("servo data {} could not get servo from map", servoName);
       return;
     }
-    setPWM(ServoEvent.pin, 0, 4096);
+	int pulseWidthOff = SERVOMIN + (int) (ServoEvent.servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
+    setPWM(ServoEvent.pin, 0, pulseWidthOff);
     ServoEvent.isEnergized = true;
     log.info("pin " + ServoEvent.pin + " enabled from " + servoName);
   }
@@ -939,7 +947,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       log.error("servo data {} could not get servo from map", servoName);
       return;
     }
-    setPWM(ServoEvent.pin, 4096, 0);
+    setPWM(ServoEvent.pin, 0, 0);
     ServoEvent.isEnergized = false;
     log.info("pin " + ServoEvent.pin + " disabled from " + servoName);
   }

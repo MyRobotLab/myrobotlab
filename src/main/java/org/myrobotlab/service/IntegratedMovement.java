@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.framework.Service;
@@ -511,9 +512,10 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     }
   }
 
+
   @Override
-  public AngleData publishJointAngle(AngleData angle) {
-    return angle;
+  public Map<String,Double> publishJointAngles(Map<String,Double> angleMap) {
+    return angleMap;
   }
 
   public double[][] publishJointPositions(double[][] jointPositionMap) {
