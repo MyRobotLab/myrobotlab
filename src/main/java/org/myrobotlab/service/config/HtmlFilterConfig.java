@@ -15,7 +15,6 @@ public class HtmlFilterConfig extends ServiceConfig {
   // 
   public String preHtmlTag = "<pre>";
   public String postHtmlTag = "</pre>";
-  public String [] textPublishers;
   public String [] textListeners;
 
 }

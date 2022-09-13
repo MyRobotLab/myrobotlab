@@ -167,9 +167,6 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
     
     Set<String> listeners = getAttached("publishText");
     config.textListeners = listeners.toArray(new String[listeners.size()]);
-
-    // Set<String> publishers = getAttached("publishText"); doesnt work :(
-    config.textPublishers = listeners.toArray(new String[publishers.size()]);
     
     return config;
   }
@@ -187,11 +184,6 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
       }
     }
    
-    if (config.textPublishers != null) {
-      for (String serviceName: config.textPublishers) {
-        attachTextPublisher(serviceName);
-      }
-    }
     return c;
   }
 

@@ -12,12 +12,14 @@ import org.myrobotlab.service.config.FiniteStateMachineConfig;
 import org.myrobotlab.service.config.HtmlFilterConfig;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.JMonkeyEngineConfig;
+import org.myrobotlab.service.config.MarySpeechConfig;
 import org.myrobotlab.service.config.NeoPixelConfig;
 import org.myrobotlab.service.config.PidConfig;
 import org.myrobotlab.service.config.ProgramABConfig;
 import org.myrobotlab.service.config.RandomConfig;
 import org.myrobotlab.service.config.RandomConfig.RandomMessageConfig;
 import org.myrobotlab.service.config.TrackingConfig;
+import org.myrobotlab.service.config.WebkitSpeechRecognitionConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
@@ -95,10 +97,15 @@ public class InMoov2Meta extends MetaData {
     }    
     chatBot.textListeners = new String[] {name + ".htmlFilter"};
     chatBot.botDir = "data/ProgramAB";
+    
+    WebkitSpeechRecognitionConfig ear = (WebkitSpeechRecognitionConfig) plan.getPeerConfig("ear");
+    ear.textListeners = new String[]{name + ".chatBot"};
 
+    MarySpeechConfig mouth = (MarySpeechConfig) plan.getPeerConfig("mouth");
+    mouth.speechRecognizers = new String[]{name + ".ear"};
+    
     
     HtmlFilterConfig htmlFilter = (HtmlFilterConfig) plan.getPeerConfig("htmlFilter");
-    htmlFilter.textPublishers = new String[] {name + ".chatBot"};
     htmlFilter.textListeners = new String[] {name + ".mouth"};
         
     JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.getPeerConfig("simulator");

@@ -314,6 +314,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     // attempt to create it
     if (session == null) {
       session = startSession(userName, botName);
+      if (session == null) {
+        error("username or bot name not valid %s %s", userName, botName);        
+        return null;
+      }
     }
 
     // update the current session if we want to change which bot is at
