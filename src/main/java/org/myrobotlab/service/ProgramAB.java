@@ -2,6 +2,8 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -1145,7 +1147,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     config.utteranceListeners = listeners.toArray(new String[listeners.size()]);
 
     for (BotInfo bot : bots.values()) {
-      config.bots.add(bot.path.getPath());
+      
+      Path pathAbsolute = Paths.get(bot.path.getPath());
+      Path pathBase = Paths.get(System.getProperty("user.dir"));
+      Path pathRelative = pathBase.relativize(pathAbsolute);      
+      config.bots.add(pathRelative.toString());      
+      
     }
 
     return config;
