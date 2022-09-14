@@ -60,9 +60,9 @@ public class Http {
    * meta data around the request otherwise its just null if not successful and
    * non null when successful
    * 
-   * @param url
-   * @param postBody
-   * @return
+   * @param url end point url e.g. https://google.com 
+   * @param postBody body for the post
+   * @return byte data from post
    */
   public static byte[] post(String url, String postBody, String contentType, Map<String, String> formValues) {
 
@@ -118,7 +118,7 @@ public class Http {
    * failure/success e.g. response code
    * 
    * @param theUrl
-   * @return
+   * @return byte data from the get
    */
   public static byte[] get(String theUrl) {
     log.info("get {}", theUrl);
