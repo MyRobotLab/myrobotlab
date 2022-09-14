@@ -3873,9 +3873,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * by an '@' character. If the given name is already a full
    * name, it is returned immediately, otherwise a full name
    * is constructed by assuming the service is local to this instance.
-   * <p>
    *     Example:
-   *     <pre>
+   *<pre>
    * {@code
    * String shortName = "python";
    *
@@ -3888,10 +3887,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    *
    *
    * }
-   *     </pre>
-   *
-   *
-   * </p>
+   *</pre>
    *
    *
    * @param shortname The name to convert to a full name
