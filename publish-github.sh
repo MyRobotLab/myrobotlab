@@ -4,7 +4,7 @@
 
 echo "running publish-github.sh";
 
-while getopts v:b:t flag
+while getopts v:b:t: flag
 do
     case "${flag}" in
         v) version=${OPTARG};;
