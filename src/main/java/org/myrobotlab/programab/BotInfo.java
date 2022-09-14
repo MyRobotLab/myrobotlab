@@ -3,6 +3,8 @@ package org.myrobotlab.programab;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
@@ -39,7 +41,8 @@ public class BotInfo {
     this.programab = programab;
     programab.info("found bot %s", name);
     try {
-      properties.load(new FileInputStream(FileIO.gluePaths(path.getAbsolutePath(), "manifest.txt")));
+      FileInputStream fis = new FileInputStream(FileIO.gluePaths(path.getAbsolutePath(), "manifest.txt")); 
+      properties.load(new InputStreamReader(fis, Charset.forName("UTF-8")));
       log.info("loaded properties");
     } catch (FileNotFoundException e) {
       programab.warn("bot %s does not have a manifest.txt", name);
