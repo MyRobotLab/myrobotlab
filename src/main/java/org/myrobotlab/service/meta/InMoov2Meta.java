@@ -9,7 +9,6 @@ import org.myrobotlab.service.InMoov2;
 import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.FiniteStateMachineConfig;
-import org.myrobotlab.service.config.HtmlFilterConfig;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.JMonkeyEngineConfig;
 import org.myrobotlab.service.config.MarySpeechConfig;
@@ -45,7 +44,6 @@ public class InMoov2Meta extends MetaData {
     addPeer("fsm", "FiniteStateMachine");
     addPeer("head", "InMoov2Head");
     addPeer("headTracking", "Tracking");
-    addPeer("htmlFilter", "HtmlFilter");
     addPeer("imageDisplay", "ImageDisplay");
     addPeer("leap", "LeapMotion");
     addPeer("left", "Arduino");
@@ -95,18 +93,14 @@ public class InMoov2Meta extends MetaData {
         }
       }
     }    
-    chatBot.textListeners = new String[] {name + ".htmlFilter"};
     chatBot.botDir = "data/ProgramAB";
+    chatBot.textListeners = new String[] {name + ".mouth"};
     
     WebkitSpeechRecognitionConfig ear = (WebkitSpeechRecognitionConfig) plan.getPeerConfig("ear");
     ear.textListeners = new String[]{name + ".chatBot"};
 
     MarySpeechConfig mouth = (MarySpeechConfig) plan.getPeerConfig("mouth");
     mouth.speechRecognizers = new String[]{name + ".ear"};
-    
-    
-    HtmlFilterConfig htmlFilter = (HtmlFilterConfig) plan.getPeerConfig("htmlFilter");
-    htmlFilter.textListeners = new String[] {name + ".mouth"};
         
     JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.getPeerConfig("simulator");
     // FIXME - SHOULD USE RESOURCE DIR !

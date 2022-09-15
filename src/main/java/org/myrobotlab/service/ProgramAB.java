@@ -37,6 +37,7 @@ import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.LogPublisher;
 import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
+import org.myrobotlab.service.interfaces.TextFilter;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.myrobotlab.service.interfaces.UtteranceListener;
@@ -103,6 +104,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    */
   String currentUserName = "human";
 
+  List<String> filters = new ArrayList<>();
+  
   /**
    * display processing and logging
    */
@@ -335,7 +338,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     // EEK! clean up the API!
     invoke("publishRequest", text); // publisher used by uis
     invoke("publishResponse", response);
-    invoke("publishText", response.msg);
+    
+    String msg = response.msg;
+    for (String filterName: filters) {
+      TextFilter filter = (TextFilter)Runtime.getService(filterName);
+      msg = filter.processText(msg);
+    }
+    
+    invoke("publishText", msg);
 
     return response;
   }
@@ -1193,6 +1203,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     if (config.utteranceListeners != null) {
       for (String local : config.utteranceListeners) {
         attachUtteranceListener(local);
+      }
+    }
+    
+    if (config.textFilters != null) {
+      for (String filter: config.textFilters) {
+        filters.add(filter);
       }
     }
 
