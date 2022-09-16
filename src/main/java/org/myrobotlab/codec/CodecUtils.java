@@ -1278,7 +1278,10 @@ public class CodecUtils {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             ApiDescription that = (ApiDescription) o;
-            return Objects.equals(key, that.key) && Objects.equals(path, that.path) && Objects.equals(exampleUri, that.exampleUri) && Objects.equals(description, that.description);
+            return Objects.equals(key, that.key)
+                    && Objects.equals(path, that.path)
+                    && Objects.equals(exampleUri, that.exampleUri)
+                    && Objects.equals(description, that.description);
         }
 
         @Override

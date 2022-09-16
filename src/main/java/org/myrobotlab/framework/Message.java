@@ -293,7 +293,16 @@ public class Message implements Serializable {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     Message message = (Message) o;
-    return msgId == message.msgId && Objects.equals(name, message.name) && Objects.equals(sender, message.sender) && Objects.equals(sendingMethod, message.sendingMethod) && Objects.equals(historyList, message.historyList) && Objects.equals(properties, message.properties) && Objects.equals(status, message.status) && Objects.equals(encoding, message.encoding) && Objects.equals(method, message.method) && Arrays.equals(data, message.data);
+    return msgId == message.msgId
+            && Objects.equals(name, message.name)
+            && Objects.equals(sender, message.sender)
+            && Objects.equals(sendingMethod, message.sendingMethod)
+            && Objects.equals(historyList, message.historyList)
+            && Objects.equals(properties, message.properties)
+            && Objects.equals(status, message.status)
+            && Objects.equals(encoding, message.encoding)
+            && Objects.equals(method, message.method)
+            && Arrays.equals(data, message.data);
   }
 
   @Override
