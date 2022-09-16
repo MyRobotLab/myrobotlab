@@ -9,6 +9,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.HtmlFilterConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.interfaces.TextFilter;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 
@@ -19,7 +20,7 @@ import org.myrobotlab.service.interfaces.TextPublisher;
  * @author kwatters
  *
  */
-public class HtmlFilter extends Service implements TextListener, TextPublisher {
+public class HtmlFilter extends Service implements TextListener, TextPublisher, TextFilter {
 
   private static final long serialVersionUID = 1L;
 
@@ -62,6 +63,12 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
   @Override
   public void onText(String text) {
     // process the text and then publish the new text.
+    processText(text);
+  }
+  
+  @Override
+  public String processText(String text) {
+
     if (stripHtml) {
       String cleanText = stripHtml(text);
       invoke("publishText", cleanText);
@@ -69,6 +76,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
       String htmlText = addHtml(text);
       invoke("publishText", htmlText);
     }
+    return text;
   }
 
   @Override
@@ -167,9 +175,6 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
     
     Set<String> listeners = getAttached("publishText");
     config.textListeners = listeners.toArray(new String[listeners.size()]);
-
-    // Set<String> publishers = getAttached("publishText"); doesnt work :(
-    config.textPublishers = listeners.toArray(new String[publishers.size()]);
     
     return config;
   }
@@ -187,11 +192,6 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
       }
     }
    
-    if (config.textPublishers != null) {
-      for (String serviceName: config.textPublishers) {
-        attachTextPublisher(serviceName);
-      }
-    }
     return c;
   }
 

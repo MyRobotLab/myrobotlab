@@ -3577,14 +3577,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   public void onDescribe(DescribeResults results) {
     List<Registration> reservations = results.getReservations();
-    if (getId().equals("c1")) {
-      log.info("here");
-    }
     if (reservations != null) {
-      for (int i = 0; i < reservations.size(); ++i) {
-        register(reservations.get(i));
+      for (Registration reservation : reservations) {
+        if ("runtime".equals(reservation.getName()) && !getId().equals(reservation.getId())) {
+          //If there's a reservation for a remote runtime, subscribe to its registered
+          //Maybe this should be done in register()?
+          subscribe(reservation.getFullName(), "registered");
+        }
+        register(reservation);
       }
     }
+
   }
 
   /**
@@ -3873,9 +3876,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * by an '@' character. If the given name is already a full
    * name, it is returned immediately, otherwise a full name
    * is constructed by assuming the service is local to this instance.
-   * <p>
    *     Example:
-   *     <pre>
+   *<pre>
    * {@code
    * String shortName = "python";
    *
@@ -3888,10 +3890,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    *
    *
    * }
-   *     </pre>
-   *
-   *
-   * </p>
+   *</pre>
    *
    *
    * @param shortname The name to convert to a full name

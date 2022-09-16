@@ -1,6 +1,8 @@
 package org.myrobotlab.service.meta;
 
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.ProgramABConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
@@ -17,6 +19,9 @@ public class ProgramABMeta extends MetaData {
     addDescription("AIML 2.0 Reference interpreter based on Program AB");
     addCategory("ai");
     addPeer("search", "Wikipedia", "replacement for handling pannous sriax requests");
+    
+    addPeer("htmlFilter", "HtmlFilter");
+
 
     // TODO: renamed the bots in the program-ab-data folder to prefix them so we
     // know they are different than the inmoov bots.
@@ -41,5 +46,21 @@ public class ProgramABMeta extends MetaData {
     addCategory("ai", "control");
 
   }
+  
+  @Override
+  public Plan getDefault(String name) {
+    
+    ProgramABConfig programAb = new ProgramABConfig();
+
+    Plan plan = new Plan(name);
+    // load default peers from meta here
+    plan.putPeers(name, peers);
+    programAb.textFilters = new String[] {name + ".htmlFilter"};
+    plan.addConfig(programAb);
+
+    return plan;
+
+  }
+
 
 }
