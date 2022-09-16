@@ -181,6 +181,16 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         }
     }
 
+    $scope.setLanguageFromService = function(lang) {
+        // recognizer.lang = $scope.selectedLanguage
+        recognizer.lang = lang
+        // sync'ing runtime platform locale
+        // msg.send("setLocale", $scope.selectedLanguage)
+        if ($scope.isRecording) {
+            recognizer.stop()
+        }
+    }
+
     this.updateState = function(service) {
         // $scope.service is old data
         // service is new data
@@ -188,7 +198,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         if ($scope.isRecording && !service.isRecording) {
             $scope.setState('stop')
         }
-            if (!$scope.isRecording && service.isRecording) {
+        if (!$scope.isRecording && service.isRecording) {
             $scope.setState('start')
         }
 
@@ -199,12 +209,39 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             }
         })
         */
+        let tag = service.locale.tag.substring(0,2)
+        if (tag == 'fr'){
+            tag = 'fr-FR'
+        } else if (tag == 'de'){
+            tag = 'de-DE'
+        } else if (tag == 'en'){
+            tag = 'en-US'
+        } else if (tag == 'es'){
+            tag = 'es-ES'
+        } else if (tag == 'fi'){
+            tag = 'fi-FI'
+        } else if (tag == 'fr'){
+            tag = 'fr-FR'
+        } else if (tag == 'hi'){
+            tag = 'hi-IN'
+        } else if (tag == 'it'){
+            tag = 'it-IT'
+        } else if (tag == 'nl'){
+            tag = 'nl-NL'
+        } else if (tag == 'pt'){
+            tag = 'pt-PT'
+        } else if (tag == 'ru'){
+            tag = 'ru-RU'
+        } else if (tag == 'tr'){
+            tag = 'tr-TR'
+        }
 
-        $scope.selectedLanguage = service.locale.tag
+        $scope.selectedLanguage = tag
+        $scope.setLanguageFromService(tag)
 
         // update en-mass
         $scope.service = service
-        if (service.wakeWord != null && $scope.wakeWord == null){
+        if (service.wakeWord != null && $scope.wakeWord == null) {
             $scope.wakeWord = service.wakeWord
         }
 
@@ -253,6 +290,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     // $scope.setState('start')
 
     msg.subscribe('publishListeningEvent')
+    // msg.subscribe('setLocale')
     // msg.subscribe('onStartSpeaking')
 
     /*
