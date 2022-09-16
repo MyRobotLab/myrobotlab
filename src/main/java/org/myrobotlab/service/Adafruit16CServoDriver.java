@@ -630,7 +630,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   }
 
-   /*
+   /**
    * Set Output Power of a pin.
    * This is a value betweeom 0.0 and 1.0
    * if you are using this to drive an LED.
