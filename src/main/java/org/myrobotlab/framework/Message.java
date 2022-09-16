@@ -26,7 +26,12 @@
 package org.myrobotlab.framework;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 // FIXME - should 'only' have jvm imports - no other dependencies or simple interface references
 import org.myrobotlab.codec.CodecUtils;
