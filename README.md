@@ -1,9 +1,15 @@
 myrobotlab
 ==========
 
-Open Source Framework for Robotics and Creative Machine Control
+## MyRobotLab Nixie Release
 
-Project Website: http://myrobotlab.org 
+Open Source Framework for Robotics and Creative Machine Control
+  *You know, for robots!*
+
+* Project Website http://myrobotlab.org 
+* Project Discord https://discord.gg/AfScp5x8r5
+* Latest Build    [Nixie 1.1.(Latest)](http://build.myrobotlab.org:8080/job/myrobotlab/job/develop/lastSuccessfulBuild/artifact/target/myrobotlab.zip)
+* Latest Javadocs [Javdocs](http://build.myrobotlab.org:8080/job/myrobotlab/job/develop/lastSuccessfulBuild/artifact/target/site/apidocs/org/myrobotlab/service/package-summary.html)
 
 ## Base Requirements
 
@@ -29,8 +35,8 @@ The subsequent starting of myrobotlab will skip the installation stage.  If a br
 can go to http://localhost:8888 to see the web user interface.
 
 ## Building Project
-MyRobotLab core is written in Java.  Its web ui is written in AngularJs and html.  
-And a few services (e.g. InMoov2) are in a different repo.  The can be developed seperately so 3 build instruction sets are described.
+MyRobotLab core is written in Java, it is a maven project - Any IDE which can load maven should work.  Its web ui is written in AngularJs and html.  
+A few services (e.g. InMoov2 & ProgramAB) are in a different repo.  The can be developed seperately so 3 build instruction sets are described.
 
 All development environments require git and cloning the source.
 

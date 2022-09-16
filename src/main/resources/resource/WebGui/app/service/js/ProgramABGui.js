@@ -1,6 +1,6 @@
-angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl', ['$scope', '$compile', '$log', 'mrl', '$uibModal', '$sce', function($scope, $compile, $log, mrl, $uibModal, $sce) {
+angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl', ['$scope', '$compile', 'mrl', '$uibModal', '$sce', function($scope, $compile, mrl, $uibModal, $sce) {
     // $modal ????
-    $log.info('ProgramABGuiCtrl')
+    console.info('ProgramABGuiCtrl')
     // grab the self and message
     var _self = this
     var startDialog = null
@@ -69,7 +69,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     }
 
     this.onMsg = function(inMsg) {
-        $log.info("ProgramABGui.onMsg(" + inMsg.method + ')')
+        // console.info("ProgramABGui.onMsg(" + inMsg.method + ')')
         let data = inMsg.data[0]
 
         switch (inMsg.method) {
@@ -101,17 +101,16 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
                 name: $scope.currentUserName,
                 text: $sce.trustAsHtml(textData)
             })
-            $log.info('onRequest', textData)
+            console.info('onRequest', textData)
             $scope.$apply()
             break
-        case 'onText':
+        case 'onRaw':
             var textData = data
             $scope.chatLog.unshift({
                 type: 'Bot',
                 name: $scope.service.currentBotName,
                 text: $sce.trustAsHtml(textData)
             })
-            $log.info('onText', textData)
             $scope.lastResponse = textData
             $scope.$apply()
             break
@@ -142,11 +141,11 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
                 name: " > oob <",
                 text: $sce.trustAsHtml(textData)
             })
-            $log.info('currResponse', textData)
+            console.info('currResponse', textData)
             $scope.$apply()
             break
         default:
-            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
+            console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
         }
     }
@@ -190,12 +189,12 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     }
 
     $scope.getSessionResponse = function(utterance) {
-        $log.info("SESSION GET RESPONSE (" + $scope.currentUserName + " " + $scope.service.currentBotName + ")")
+        console.info("SESSION GET RESPONSE (" + $scope.currentUserName + " " + $scope.service.currentBotName + ")")
         $scope.getResponse($scope.currentUserName, $scope.service.currentBotName, utterance)
     }
 
     $scope.getResponse = function(username, botname, utterance) {
-        $log.info("USER BOT RESPONSE (" + username + " " + botname + ")")
+        console.info("USER BOT RESPONSE (" + username + " " + botname + ")")
         msg.send("getResponse", username, botname, utterance)
         $scope.utterance = ""
     }
@@ -269,7 +268,8 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
 
     // subscribe to the response from programab.
     msg.subscribe('publishRequest')
-    msg.subscribe('publishText')
+    msg.subscribe('publishRaw')
+    // msg.subscribe('publishText')
     msg.subscribe('publishLog')
     msg.subscribe('publishOOBText')
     msg.subscribe('getAimlFile')

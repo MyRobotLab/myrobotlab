@@ -44,14 +44,10 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.GeneralMotorConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AnalogData;
-import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.AnalogPublisher;
 import org.myrobotlab.service.interfaces.ButtonDefinition;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
-import org.myrobotlab.service.interfaces.PinArrayControl;
-import org.myrobotlab.service.interfaces.PinDefinition;
-import org.myrobotlab.service.interfaces.PinListener;
 import org.slf4j.Logger;
 
 /**

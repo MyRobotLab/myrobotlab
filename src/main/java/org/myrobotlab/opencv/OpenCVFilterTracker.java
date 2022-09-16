@@ -37,8 +37,6 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -59,7 +57,6 @@ import org.bytedeco.opencv.opencv_tracking.TrackerTLD;
 */
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Point2df;
-import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 /**

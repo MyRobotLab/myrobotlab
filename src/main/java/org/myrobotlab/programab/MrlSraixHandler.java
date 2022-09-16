@@ -95,8 +95,18 @@ public class MrlSraixHandler implements SraixHandler {
         String mrlPayload = mrlMatcher.group(0);
         OOBPayload payload = parseOOB(mrlPayload);
         Object result = invokeOOBPayloads(payloads, mrlPayload, payload);
+        if (result != null && result.getClass().isArray()) {
+          Object[] objects = (Object[]) result;
+          for (Object o : objects) {
+            responseBuilder.append(o.toString() + " ");
+          }
+        } else {
+
+          if (result != null) {
+            responseBuilder.append(result);
+          }
+        }
         log.info("OOB PROCESSING RESULT: {}", result);
-        responseBuilder.append(result);
       }
     }
     // append the last part. (assume the start is set to the end of the last

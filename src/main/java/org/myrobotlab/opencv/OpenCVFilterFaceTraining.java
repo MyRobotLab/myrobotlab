@@ -78,7 +78,6 @@ import org.bytedeco.opencv.opencv_face.FaceRecognizer;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
-import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 public class OpenCVFilterFaceTraining extends OpenCVFilter {

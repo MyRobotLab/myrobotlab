@@ -2,9 +2,6 @@ package org.myrobotlab.service;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.myrobotlab.service.Arduino;
-import org.myrobotlab.service.InMoov2Hand;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 
 /**

@@ -2,6 +2,8 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,7 @@ import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.LogPublisher;
 import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
+import org.myrobotlab.service.interfaces.TextFilter;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.myrobotlab.service.interfaces.UtteranceListener;
@@ -64,6 +67,18 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   private static final long serialVersionUID = 1L;
 
+  /**
+   * useGlobalSession true will allow the sleep member to control session focus
+   */
+  protected boolean useGlobalSession = false;
+
+  /**
+   * sleep current state of the sleep if globalSession is used true : ProgramAB
+   * is sleeping and wont respond false : ProgramAB is not sleeping and any
+   * response requested will be processed
+   */
+  protected boolean sleep = false;
+
   transient public final static Logger log = LoggerFactory.getLogger(ProgramAB.class);
 
   /**
@@ -86,6 +101,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * default user name chatting with the bot
    */
   String currentUserName = "human";
+
+  List<String> filters = new ArrayList<>();
 
   /**
    * display processing and logging
@@ -300,6 +317,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     // attempt to create it
     if (session == null) {
       session = startSession(userName, botName);
+      if (session == null) {
+        error("username or bot name not valid %s %s", userName, botName);
+        return null;
+      }
     }
 
     // update the current session if we want to change which bot is at
@@ -315,7 +336,15 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     // EEK! clean up the API!
     invoke("publishRequest", text); // publisher used by uis
     invoke("publishResponse", response);
-    invoke("publishText", response.msg);
+    invoke("publishRaw", response.msg);
+
+    String msg = response.msg;
+    for (String filterName : filters) {
+      TextFilter filter = (TextFilter) Runtime.getService(filterName);
+      msg = filter.processText(msg);
+    }
+
+    invoke("publishText", msg);
 
     return response;
   }
@@ -539,6 +568,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     return response;
   }
 
+  public String publishRaw(String text) {
+    return text;
+  }
+
   @Override
   public String publishText(String text) {
     // TODO: this should not be done here.
@@ -580,8 +613,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    */
   public void reloadSession(String userName, String botName) throws IOException {
     Session session = getSession(userName, botName);
-    session.reload();
-    info("reloaded session %s <-> %s ", userName, botName);
+    if (session != null) {
+      session.reload();
+      info("reloaded session %s <-> %s ", userName, botName);
+    }
   }
 
   /**
@@ -1056,8 +1091,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     try {
 
       botInfo = getBotInfo(botName);
-      path = FileIO.gluePaths(botInfo.path.getAbsolutePath(), "bot.png");
       if (botInfo != null) {
+        path = FileIO.gluePaths(botInfo.path.getAbsolutePath(), "bot.png");
         File check = new File(path);
         if (check.exists()) {
           return Util.getImageAsBase64(path);
@@ -1115,6 +1150,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
     config.currentBotName = currentBotName;
     config.currentUserName = currentUserName;
+    // config.useGlobalSession = useGlobalSession;
+    config.sleep = sleep;
 
     Set<String> listeners = getAttached("publishText");
     config.textListeners = listeners.toArray(new String[listeners.size()]);
@@ -1123,7 +1160,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     config.utteranceListeners = listeners.toArray(new String[listeners.size()]);
 
     for (BotInfo bot : bots.values()) {
-      config.bots.add(bot.path.getPath());
+
+      Path pathAbsolute = Paths.get(bot.path.getPath());
+      Path pathBase = Paths.get(System.getProperty("user.dir"));
+      Path pathRelative = pathBase.relativize(pathAbsolute);
+      config.bots.add(pathRelative.toString());
+
     }
 
     return config;
@@ -1147,6 +1189,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       setCurrentUserName(config.currentUserName);
     }
 
+    // useGlobalSession = config.useGlobalSession;
+
+    sleep = config.sleep;
+
     setCurrentSession(currentUserName, currentBotName);
 
     // This is "good" in that its using the normalized data from subscription
@@ -1160,6 +1206,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     if (config.utteranceListeners != null) {
       for (String local : config.utteranceListeners) {
         attachUtteranceListener(local);
+      }
+    }
+
+    if (config.textFilters != null) {
+      for (String filter : config.textFilters) {
+        filters.add(filter);
       }
     }
 
@@ -1297,6 +1349,20 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     }
   }
 
+  /**
+   * wakes the global session up
+   */
+  public void wake() {
+    sleep = false;
+  }
+
+  /**
+   * sleeps the global session
+   */
+  public void sleep() {
+    sleep = true;
+  }
+
   @Override
   public void onUtterance(Utterance utterance) throws Exception {
 
@@ -1329,7 +1395,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
         // TODO: don't talk to bots.. it won't go well..
         // TODO: the discord api can provide use the list of mentioned users.
         // for now.. we'll just see if we see Mr. Turing as a substring.
-        if (utterance.text.contains(botName)) {
+        sleep = (sleep || utterance.text.contains("@")) && !utterance.text.contains(botName);
+        if (!sleep) {
           shouldIRespond = true;
         }
       }

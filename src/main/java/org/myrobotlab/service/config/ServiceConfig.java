@@ -1,7 +1,5 @@
 package org.myrobotlab.service.config;
 
-import org.myrobotlab.logging.LoggerFactory;
-import org.slf4j.Logger;
 
 /**
  * Base service configuration class. All services must have a type. The name of
