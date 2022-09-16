@@ -377,10 +377,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   /**
-   * Set the PWM frequency i.e. the frequency between positive pulses.
+   * Set the PWM frequency. i.e. the frequency between positive pulses.
    * 
    * @param pin
-   *          the pin
+   *          the pin. This is not really used as the frequency is set for all 16 channels.
    * @param hz
    *          the frequency in hz
    * 
@@ -484,6 +484,15 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     }
   }
 
+  /**
+   * Set the servo to a position using uS
+   *  
+   * @param servo
+   *          Servo service to be moved
+   * @param uS
+   *          A value between 500 and 2500
+   * 
+   */
   @Override
   public void onServoWriteMicroseconds(ServoControl servo, int uS) {
     ServoEvent ServoEvent = servoMap.get(servo.getName());
@@ -621,11 +630,16 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   }
 
-    /*
+   /*
    * Set Output Power of a pin.
    * This is a value betweeom 0.0 and 1.0
    * if you are using this to drive an LED.
    * Connect the LED between VCC and the output pic, then invert this value where 1.0 is off and 0.0 is full on.
+   * 
+   * @param pinLabel
+   *          the pin not really used
+   * @param powerOutput
+   *          A value between 0.0 and 1.0
    * 
    */
   public void setPinValue(String pinLabel, double powerOutput) {
