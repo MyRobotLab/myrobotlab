@@ -307,7 +307,12 @@ public class Message implements Serializable {
 
   @Override
   public int hashCode() {
-    int result = Objects.hash(msgId, name, sender, sendingMethod, historyList, properties, status, encoding, method);
+    int result = Objects.hash(
+                    msgId, name, sender,
+                    sendingMethod, historyList,
+                    properties, status, encoding,
+                    method
+    );
     result = 31 * result + Arrays.hashCode(data);
     return result;
   }
