@@ -14,6 +14,9 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.Ads1115Config;
+import org.myrobotlab.service.config.I2cMuxConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -1156,4 +1159,25 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
     return deviceAddress;
   }
 
+  @Override
+  public ServiceConfig getConfig() {
+    Ads1115Config config = new Ads1115Config();
+    config.bus = deviceBus;
+    config.address = deviceAddress;
+    config.controller = controllerName;
+    return config;
+  }
+
+  @Override
+  public ServiceConfig apply(ServiceConfig c) {
+    Ads1115Config config = (Ads1115Config) c;
+    deviceBus = config.bus;
+    deviceAddress = config.address;
+    if (config.controller != null) {
+      controllerName = config.controller;
+    }
+    return c;
+  }
+
+  
 }
