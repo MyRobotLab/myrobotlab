@@ -245,8 +245,9 @@ public class CodecUtils {
      */
     public static <T extends Object> T fromJson(String json, Class<T> clazz) {
         try {
-            if (USING_GSON)
+            if (USING_GSON) {
                 return gson.fromJson(json, clazz);
+            }
 
             return mapper.readValue(json, clazz);
         } catch (Exception e) {
@@ -271,8 +272,9 @@ public class CodecUtils {
      */
     public static <T extends Object> T fromJson(String json, Class<?> genericClass, Class<?>... parameterized) {
         try {
-            if (USING_GSON)
+            if (USING_GSON) {
                 return gson.fromJson(json, getType(genericClass, parameterized));
+            }
 
             return mapper.readValue(json, typeFactory.constructParametricType(genericClass, parameterized));
         } catch (Exception e) {
@@ -295,8 +297,9 @@ public class CodecUtils {
      */
     public static <T extends Object> T fromJson(String json, Type type) {
         try {
-            if (USING_GSON)
+            if (USING_GSON) {
                 return gson.fromJson(json, type);
+            }
             return mapper.readValue(json, typeFactory.constructType(type));
         } catch (Exception e) {
             throw new JsonDeserializationException(e);
@@ -314,8 +317,9 @@ public class CodecUtils {
     @SuppressWarnings("unchecked")
     public static LinkedTreeMap<String, Object> toTree(String json) {
         try {
-            if (USING_GSON)
+            if (USING_GSON) {
                 return gson.fromJson(json, LinkedTreeMap.class);
+            }
             return (LinkedTreeMap<String, Object>) mapper.readValue(json, LinkedTreeMap.class);
         } catch (Exception e) {
             throw new JsonDeserializationException(e);
@@ -542,8 +546,9 @@ public class CodecUtils {
      */
     public static String toJson(Object o) {
         try {
-            if (USING_GSON)
+            if (USING_GSON) {
                 return gson.toJson(o);
+            }
 
             return mapper.writeValueAsString(o);
         } catch (Exception e) {
@@ -565,10 +570,11 @@ public class CodecUtils {
     static public void toJson(OutputStream out, Object obj) throws IOException {
         String json;
         try {
-            if (USING_GSON)
+            if (USING_GSON) {
                 json = gson.toJson(obj);
-            else
+            } else {
                 json = mapper.writeValueAsString(obj);
+            }
         } catch (Exception jsonProcessingException) {
             throw new JsonSerializationException(jsonProcessingException);
         }
@@ -590,8 +596,9 @@ public class CodecUtils {
      */
     public static String toJson(Object o, Class<?> clazz) {
         try {
-            if (USING_GSON)
+            if (USING_GSON) {
                 return gson.toJson(o, clazz);
+            }
 
             return mapper.writerFor(clazz).writeValueAsString(o);
         } catch (Exception e) {
@@ -612,10 +619,11 @@ public class CodecUtils {
     public static void toJsonFile(Object o, String filename) throws IOException {
         byte[] json;
         try {
-            if (USING_GSON)
+            if (USING_GSON) {
                 json = gson.toJson(o).getBytes();
-            else
+            } else {
                 json = mapper.writeValueAsBytes(o);
+            }
         } catch (Exception e) {
             throw new JsonSerializationException(e);
         }
@@ -747,10 +755,11 @@ public class CodecUtils {
         // array of Strings ? - don't want to double encode !
         Object[] ret = null;
         synchronized (data) {
-            if (USING_GSON)
+            if (USING_GSON) {
                 ret = gson.fromJson(instr, Object[].class);
-            else
+            } else {
                 ret = mapper.readValue(instr, Object[].class);
+            }
         }
         return ret;
     }
