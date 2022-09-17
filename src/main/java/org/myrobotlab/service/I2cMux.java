@@ -11,13 +11,9 @@ import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.MapperLinear;
-import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.config.I2cMuxConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
@@ -337,15 +333,13 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     return deviceAddress;
   }
 
-  
   @Override
   public ServiceConfig getConfig() {
-
     I2cMuxConfig config = new I2cMuxConfig();
     config.bus = deviceBus;
     config.address = deviceAddress;
     config.i2cDevices = i2cDevices;
-    config.controllers = (ArrayList<String>)controllers;
+    config.controller = controllerName;
     return config;
   }
 
@@ -355,8 +349,10 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     deviceBus = config.bus;
     deviceAddress = config.address;
     i2cDevices = config.i2cDevices;
-    controllers = config.controllers;
+    if (config.controller != null) {
+      controllerName = config.controller;
+    }
     return c;
   }
-  
+
 }
