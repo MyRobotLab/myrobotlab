@@ -42,16 +42,11 @@ sleep(5)
 print('resetting to full volume')
 audioPlayer.setVolume(1.0)
 
-# or copied where we want to play them
-audioPlayer.copyResource("R2D2e.wav", "data/R2D2e.wav")
-audioPlayer.copyResource("good_evening.wav", "data/good_evening.wav")
-audioPlayer.copyResource("well.wav", "data/well.wav")
-
 # now we can play them just as we can play 
 # any file on the file system
 # e.g. audiofile.playFile("c:/sounds/beep.mp3")
 print('start playing a new file')
-audioPlayer.play("data/well.wav")
+audioPlayer.play("resource/AudioFile/well.wav")
 sleep(1)
 
 # pause the default track
@@ -67,16 +62,16 @@ sleep(4)
 # create a new track named "priority"
 # and have the short beeps repeat 8 times
 audioPlayer.setTrack("priority")
-audioPlayer.repeat("data/well.wav", 8)
+audioPlayer.repeat("resource/AudioFile/well.wav", 8)
 
 
 # make a new beep track and play r2d2 noises
 audioPlayer.setTrack("beepTrack")
-audioPlayer.repeat("data/R2D2e.wav")
+audioPlayer.repeat("resource/AudioFile/R2D2e.wav")
 
 # go back to the default track
 audioPlayer.setTrack("default")
-audioPlayer.repeat("data/good_evening.wav", 3)
+audioPlayer.repeat("resource/AudioFile/good_evening.wav", 3)
 
 # hold here in the script for 5 seconds
 # everything should be playing simultaneously
@@ -95,7 +90,7 @@ audioPlayer.silence()
 
 # add a named playlist
 # in this case we add a directory or file to our list
-audioPlayer.addPlaylist('my list', 'data')
+audioPlayer.addPlaylist('my list', 'resource/AudioFile')
 
 # then we can play the list - it will default to play on its own track
 # so you can run more sounds or voices in the foreground
@@ -104,7 +99,7 @@ audioPlayer.addPlaylist('my list', 'data')
 audioPlayer.startPlaylist('my list')
 
 # repeat good evening in the foreground 3 times
-audioPlayer.repeat("data/good_evening.wav", 3)
+audioPlayer.repeat("resource/AudioFile/good_evening.wav", 3)
 
 # silence everything
 audioPlayer.silence()

@@ -225,6 +225,7 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     ServoConfig config = (ServoConfig) c;
 
@@ -283,6 +284,18 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
       // Runtime.start("python", "Python");
       // Runtime runtime = Runtime.getInstance();
       
+      Runtime.start("clock", "Servo");
+      Runtime runtime = Runtime.getInstance();
+      runtime.connect("http://localhost:8888");
+      
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      
+      
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
@@ -291,10 +304,6 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
       Servo pan = (Servo) Runtime.start("pan", "Servo");
 
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
       
