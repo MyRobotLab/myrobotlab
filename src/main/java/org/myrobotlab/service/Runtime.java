@@ -2129,16 +2129,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * Connect to the MRL instance at {@link CmdOptions#connect} in {@link #options}.
-   * 
-   * @see #connect(String)
-   * @throws IOException
-   */
-  public void connect() throws IOException {
-    connect(options.connect); // FIXME - 0 to many
-  }
-
-  /**
    * Disconnect from remote process.
    * FIXME - not implemented
    * @throws IOException Unknown
