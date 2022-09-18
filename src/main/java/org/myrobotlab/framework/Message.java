@@ -26,7 +26,12 @@
 package org.myrobotlab.framework;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 // FIXME - should 'only' have jvm imports - no other dependencies or simple interface references
 import org.myrobotlab.codec.CodecUtils;
@@ -288,12 +293,26 @@ public class Message implements Serializable {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     Message message = (Message) o;
-    return msgId == message.msgId && Objects.equals(name, message.name) && Objects.equals(sender, message.sender) && Objects.equals(sendingMethod, message.sendingMethod) && Objects.equals(historyList, message.historyList) && Objects.equals(properties, message.properties) && Objects.equals(status, message.status) && Objects.equals(encoding, message.encoding) && Objects.equals(method, message.method) && Arrays.equals(data, message.data);
+    return msgId == message.msgId
+            && Objects.equals(name, message.name)
+            && Objects.equals(sender, message.sender)
+            && Objects.equals(sendingMethod, message.sendingMethod)
+            && Objects.equals(historyList, message.historyList)
+            && Objects.equals(properties, message.properties)
+            && Objects.equals(status, message.status)
+            && Objects.equals(encoding, message.encoding)
+            && Objects.equals(method, message.method)
+            && Arrays.equals(data, message.data);
   }
 
   @Override
   public int hashCode() {
-    int result = Objects.hash(msgId, name, sender, sendingMethod, historyList, properties, status, encoding, method);
+    int result = Objects.hash(
+                    msgId, name, sender,
+                    sendingMethod, historyList,
+                    properties, status, encoding,
+                    method
+    );
     result = 31 * result + Arrays.hashCode(data);
     return result;
   }
