@@ -140,15 +140,6 @@
   
 <dependencies>
 
-
-<!-- https://mvnrepository.com/artifact/com.github.axet/TarsosDSP -->
-<dependency>
-    <groupId>com.github.axet</groupId>
-    <artifactId>TarsosDSP</artifactId>
-    <version>2.4-1</version>
-</dependency>
-
-
 <!-- AudioFile begin -->
   <dependency>
     <groupId>javazoom</groupId>
@@ -303,6 +294,15 @@
       </exclusions>
   </dependency>
 <!-- DiscordBot end -->
+
+<!-- Docker begin -->
+  <dependency>
+    <groupId>com.github.docker-java</groupId>
+    <artifactId>docker-java</artifactId>
+    <version>3.2.13</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Docker end -->
 
 <!-- DocumentPipeline begin -->
   <dependency>
@@ -1522,6 +1522,15 @@
   </dependency>
 <!-- SwingGui end -->
 
+<!-- TarsosDsp begin -->
+  <dependency>
+    <groupId>com.github.axet</groupId>
+    <artifactId>TarsosDSP</artifactId>
+    <version>2.4-1</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- TarsosDsp end -->
+
 <!-- Tensorflow begin -->
   <dependency>
     <groupId>org.tensorflow</groupId>
@@ -2077,4 +2086,3 @@
       <url>https://github.com/MyRobotLab/myrobotlab/issues</url>
   </issueManagement>
 </project>
- 
