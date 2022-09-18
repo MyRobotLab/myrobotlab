@@ -14,6 +14,7 @@ import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -23,6 +24,8 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
+import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.WebGuiConfig;
@@ -39,6 +42,7 @@ import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
+
 
 public class InMoov2 extends Service implements ServiceLifeCycleListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
@@ -85,10 +89,56 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   /**
    * Part of service life cycle - a new servo has been started
+   * 
+   * need a directed message sent to a callback simlar to this except it should be a 
+   * "key" not a "fullname" !  .. this could be created with minimal structure .. i think
    */
   public void onStarted(String fullname) {
     log.info("{} started", fullname);
     try {
+      
+      // FIXME - problem is fullname is not the peerKey :(
+      // String actualName = getPeerName(fullname);
+      // getPeer(peerKey)
+      
+      // PROS: 
+      // don't expose type
+      // not hardcoded to "i01" !!!
+      
+      // CONS:
+      // incoming is fullname
+      // not using the peerKey
+      // all services flow through here - it would be a cross matrix of processing :(
+      
+      // sortof peer ? ¯\_(ツ)_/¯ - TOTAL KLUDGE !!!
+      if (fullname.endsWith(".mouth")) {
+        AbstractSpeechSynthesis mouth = (AbstractSpeechSynthesis)Runtime.getService(getName() + ".mouth");
+        mouth.attachSpeechListener(getName() + ".ear");
+      }
+      
+      if (fullname.endsWith(".chatBot")) {
+        ProgramAB chatBot = (ProgramAB)Runtime.getService(getName() + ".chatBot");
+        chatBot.attachTextListener(getName() + ".mouth");
+      }
+   
+      if (fullname.endsWith(".ear")) {
+        AbstractSpeechRecognizer ear = (AbstractSpeechRecognizer)Runtime.getService(getName() + ".ear");
+        ear.attachTextListener(getName() + ".chatBot");
+      }
+      
+      // Plan plan = Runtime.getPlan();
+      
+      // THIS IS HOW TO MARK PEER DATA STARTED WHEN ITS NOT STARTED BY 
+      // THE PARENT :( FIXME - THIS SHOULD BE DONE IN RUNTIME !
+//      ServiceReservation sr = serviceType.getPeerFromActualName(getName(), fullname);
+//      if (sr != null) {
+//        sr.state = "STARTED";
+//      }
+      
+//      String peerKey = fullname.replace(getName(), fullname);
+//      getPeer(peerKey)
+//      isPeerStarted(peerKey);
+//      startPeer(peerKey);
       ServiceInterface si = Runtime.getService(fullname);
       if ("Servo".equals(si.getSimpleName())) {
         log.info("sending setAutoDisable true to {}", fullname);
@@ -1424,7 +1474,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       // Runtime.start("s01", "Servo");
       // Runtime.start("intro", "Intro");
 
-      Runtime.startConfig("dewey-2");
+      // Runtime.startConfig("dewey-2");
+      Runtime.start("webgui", "WebGui");
+      Runtime.start("python", "Python");
+      Runtime.start("i01", "InMoov2");
 
       boolean done = true;
       if (done) {
