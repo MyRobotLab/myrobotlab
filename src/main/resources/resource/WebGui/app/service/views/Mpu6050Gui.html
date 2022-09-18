@@ -23,7 +23,7 @@
                 <span class="caret"></span>
             </button>
             <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
-                <li ng-repeat="c in deviceBusList">
+                <li ng-repeat="c in ['0','1','2','3','4','5','6','7']">
                     <a href="" ng-click="msg.setDeviceBus(c)">{{c}}</a>
                 </li>
             </ul>
@@ -34,7 +34,7 @@
                 <span class="caret"></span>
             </button>
             <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
-                <li ng-repeat="c in deviceAddressList">
+                <li ng-repeat="c in ['0x68','0x69','0x70','0x71','0x72','0x73','0x74']">
                     <a href="" ng-click="msg.setDeviceBus(c)">{{c}}</a>
                 </li>
             </ul>
