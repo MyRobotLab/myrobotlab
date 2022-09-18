@@ -11,8 +11,9 @@ import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.I2cMuxConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
@@ -67,7 +68,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
       Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
   }
 
@@ -330,6 +331,28 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   @Override
   public String getAddress() {
     return deviceAddress;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    I2cMuxConfig config = new I2cMuxConfig();
+    config.bus = deviceBus;
+    config.address = deviceAddress;
+    config.i2cDevices = i2cDevices;
+    config.controller = controllerName;
+    return config;
+  }
+
+  @Override
+  public ServiceConfig apply(ServiceConfig c) {
+    I2cMuxConfig config = (I2cMuxConfig) c;
+    deviceBus = config.bus;
+    deviceAddress = config.address;
+    i2cDevices = config.i2cDevices;
+    if (config.controller != null) {
+      controllerName = config.controller;
+    }
+    return c;
   }
 
 }
