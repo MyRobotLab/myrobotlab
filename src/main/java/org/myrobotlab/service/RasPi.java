@@ -112,7 +112,8 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       log.info("Executing on Raspberry PI");
       getPinList();
     } catch (Exception e) {
-      error("raspi service requires arm %s is not arm - %s", getName(), e.getMessage());
+      // an error in the constructor won't get broadcast - so we need Runtime to do it
+      Runtime.getInstance().error("raspi service requires arm %s is not arm - %s", getName(), e.getMessage());
     }
   }
 
@@ -606,7 +607,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
         }
       }
 
-      log.info("scan found: ---");
+      log.info("scanning bus {} found: ---", busNumber);
       for (String a : addresses) {
         log.info("address: " + a);
       }

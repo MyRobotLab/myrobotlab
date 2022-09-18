@@ -49,12 +49,12 @@ public class CmdOptions {
   public boolean autoUpdate = false;
 
   // launcher
-  @Option(names = { "--config" }, description = "Configuration file. If specified all configuration from the file will be used as a \"base\" of configuration. "
+  @Option(names = { "-c", "--config" }, description = "Configuration file. If specified all configuration from the file will be used as a \"base\" of configuration. "
       + "All configuration of last run is saved to {data-dir}/lastjson. This file can be used as a starter config for subsequent --cfg config.json. "
       + "If this value is set, all other configuration flags are ignored.")
   public String config = null;
 
-  @Option(names = { "-c",
+  @Option(names = {
       "--connect" }, arity = "0..*", /*
                                       * defaultValue = DEFAULT_CONNECT,
                                       */ fallbackValue = DEFAULT_CONNECT, description = "connects this mrl instance to another mrl instance - default is " + DEFAULT_CONNECT)
