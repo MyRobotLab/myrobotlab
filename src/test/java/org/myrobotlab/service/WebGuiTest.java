@@ -35,13 +35,13 @@ public class WebGuiTest extends AbstractTest {
   }
 
 // FIXME - ADD WHEN POST API IS WORKY
-//  @Test
-//  public void postTest() {
-//    String postBody = "[\"runtime\"]";
-//    byte[] bytes = Http.post("http://localhost:8889/api/service/runtime/getFullName", postBody);
-//    assertNotNull(bytes);
-//    String ret = new String(bytes);
-//    assertTrue(ret.contains("@"));
-//  }
+  @Test
+  public void postTest() {
+    String postBody = "[\"runtime\"]";
+    byte[] bytes = Http.post("http://localhost:8889/api/service/runtime/getFullName", postBody);
+    assertNotNull(bytes);
+    String ret = new String(bytes);
+    assertTrue(ret.contains("@"));
+  }
 
 }

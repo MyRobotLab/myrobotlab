@@ -571,7 +571,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       if (request.body() != null && !request.body().isEmpty()) {
         // body returns null after destroy
-        bodyData = new String(request.body().asString());
+        bodyData = new String(request.body().asBytes());
       }
 
       request.destroy();
