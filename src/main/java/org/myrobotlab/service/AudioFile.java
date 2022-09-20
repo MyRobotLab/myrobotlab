@@ -548,7 +548,6 @@ public class AudioFile extends Service {
   }
   
   public double publishPeak(float peak) {
-    peak = peak * 200;
     return peak;
   }
 
@@ -560,16 +559,17 @@ public class AudioFile extends Service {
       webgui.autoStartBrowser(false);
       webgui.startService();
       
-      Runtime.start("python", "Python");
-      
+      Runtime.start("python", "Python");      
+
+      AudioFile player = (AudioFile) Runtime.start("player", "AudioFile");
+      player.play("https://upload.wikimedia.org/wikipedia/commons/1/1f/Bach_-_Brandenburg_Concerto.No.1_in_F_Major-_II._Adagio.ogg");
+
       boolean done = true;
       if (done) {
         return;
       }
-
-
-      AudioFile player = (AudioFile) Runtime.start("player", "AudioFile");
-      // audioPlayer.play("https://upload.wikimedia.org/wikipedia/commons/1/1f/Bach_-_Brandenburg_Concerto.No.1_in_F_Major-_II._Adagio.ogg");
+      
+      
       player.addListener("publishPeak", "servo", "moveTo");
       
       
