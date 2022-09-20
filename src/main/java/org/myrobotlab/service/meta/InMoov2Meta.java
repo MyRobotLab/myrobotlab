@@ -237,18 +237,6 @@ public class InMoov2Meta extends MetaData {
     rm = new RandomMessageConfig(3000, 8000, 85.0, 95.0, 88.0, 93.0, 70.0, 110.0);
     random.randomMessages.put(name + ".moveTorso", rm);
 
-    // == Peer - mouth =============================
-    MarySpeechConfig mouth = (MarySpeechConfig) plan.getPeerConfig("mouth");
-
-    // setup name references to different services
-    mouth.speechRecognizers = new String[] {name + ".ear"};
-
-    // == Peer - ear =============================
-    WebkitSpeechRecognitionConfig ear = (WebkitSpeechRecognitionConfig) plan.getPeerConfig("ear");
-
-    // setup name references to different services
-    ear.textListeners = new String[] {name + ".chatBot"};
-
     
     // == Peer - headTracking =============================
     TrackingConfig headTracking = (TrackingConfig) plan.getPeerConfig("headTracking");

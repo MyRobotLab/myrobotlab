@@ -1173,12 +1173,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   public ServiceConfig apply(ServiceConfig c) {
     ProgramABConfig config = (ProgramABConfig) c;
-    
-    bots.clear();
-    for (String botPath : config.bots) {
-      addBotPath(botPath);
-    }
-
     if (config.bots != null && config.bots.size() > 0) {
       bots.clear();
       for (String botPath : config.bots) {

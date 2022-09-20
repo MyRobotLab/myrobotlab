@@ -570,8 +570,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       String bodyData = null;
 
-      if (request.body() != null && !request.body().isEmpty() /* && !apiKey.equals(CodecUtils.API_MESSAGES)*/) {
-        log.info("apiKey {}", apiKey);
+      if (request.body() != null && !request.body().isEmpty()) {
         // body returns null after destroy
         if (CodecUtils.API_MESSAGES.equals(apiKey)) {
           bodyData = request.body().asString();
