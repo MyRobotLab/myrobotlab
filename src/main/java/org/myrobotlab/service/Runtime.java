@@ -348,6 +348,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     if (si != null) {
       return si;
     }
+    
+    /**
+     * a Plan is maintained before creating or starting any services.
+     * If a type is explicitly set, then we want to change our plan and if 
+     * there is a plan entry that already exists, we'll remove it.
+     */
+    if (type != null) {
+      Plan plan = Runtime.getPlan();
+      plan.remove(name);
+    }
 
     Runtime.loadService(configName, name, type);
     Runtime.check(name, type);
