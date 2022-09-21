@@ -14,5 +14,5 @@ public class AudioFileConfig extends ServiceConfig {
   /**
    * sample interval for peak
    */
-  public double peakSampleInterval = 30;
+  public double peakSampleInterval = 15;
 }

@@ -204,43 +204,24 @@ public class AudioProcessor extends Thread {
           } else {
             AudioFileConfig config = (AudioFileConfig)audioFile.getConfig();
             if (cnt % config.peakSampleInterval == 0) {
-              float[] samples = new float[buffer.length / 2];
 
-              float lastPeak = 0f;
+              float peak = 0f;
 
               int b = buffer.length;
               // convert bytes to samples here
-              for (int i = 0, s = 0; i < b;) {
+              for (int i = 0; i < b;) {
                 int sample = 0;
 
                 sample |= buffer[i++] & 0xFF; // (reverse these two lines
                 sample |= buffer[i++] << 8; // if the format is big endian)
-
-                // normalize to range of +/-1.0f
-                samples[s++] = sample / 32768f;
-              }
-
-              // float rms = 0f;
-              float peak = 0f;
-              for (float sample : samples) {
-
-                float abs = Math.abs(sample);
+                
+                float abs = Math.abs(sample / 32768f);
                 if (abs > peak) {
                   peak = abs;
                 }
-                // rms += sample * sample;
               }
-
-              // rms = (float) Math.sqrt(rms / samples.length);
-
-              if (lastPeak > peak) {
-                peak = lastPeak; 
-              }
-
-              lastPeak = peak;
+              
               audioFile.invoke("publishPeak", peak * (float) audioFile.getPeakMultiplier());
-              // audioFile.invoke("publishRms", rms);
-
             }
 
             line.write(buffer, 0, nBytesRead);
@@ -298,7 +279,6 @@ public class AudioProcessor extends Thread {
 
     try {
       AudioData data = null;
-      int lastTrackPlayed = currentTrackCount;
       while (isRunning) {
         // FIXME - timeSinceLastFinishedSample (collect all time)
 
