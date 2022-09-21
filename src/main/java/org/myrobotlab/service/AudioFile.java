@@ -128,8 +128,6 @@ public class AudioFile extends Service {
   
   protected double peakMultiplier = 1.0;
   
-  protected int peakSampleInterval = 1;
-
   public double getPeakMultiplier() {
     return peakMultiplier;
   }
