@@ -16,6 +16,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.AudioFile;
+import org.myrobotlab.service.config.AudioFileConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
@@ -61,11 +62,6 @@ public class AudioProcessor extends Thread {
    * loop counter
    */
   private int cnt = 0;
-
-  /**
-   * down sample the loop
-   */
-  private int sampleInterval = 1;
 
   public AudioProcessor(AudioFile audioFile, String track) {
     super(String.format("%s:track", track));
@@ -206,8 +202,8 @@ public class AudioProcessor extends Thread {
           if (audioFile.isMute()) {
             // NoOp for a mute audioFile.
           } else {
-
-            if (cnt % sampleInterval == 0) {
+            AudioFileConfig config = (AudioFileConfig)audioFile.getConfig();
+            if (cnt % config.peakSampleInterval == 0) {
               float[] samples = new float[buffer.length / 2];
 
               float lastPeak = 0f;
@@ -224,7 +220,7 @@ public class AudioProcessor extends Thread {
                 samples[s++] = sample / 32768f;
               }
 
-              float rms = 0f;
+              // float rms = 0f;
               float peak = 0f;
               for (float sample : samples) {
 
@@ -232,11 +228,10 @@ public class AudioProcessor extends Thread {
                 if (abs > peak) {
                   peak = abs;
                 }
-
-                rms += sample * sample;
+                // rms += sample * sample;
               }
 
-              rms = (float) Math.sqrt(rms / samples.length);
+              // rms = (float) Math.sqrt(rms / samples.length);
 
               if (lastPeak > peak) {
                 peak = lastPeak; 
@@ -244,6 +239,7 @@ public class AudioProcessor extends Thread {
 
               lastPeak = peak;
               audioFile.invoke("publishPeak", peak * (float) audioFile.getPeakMultiplier());
+              // audioFile.invoke("publishRms", rms);
 
             }
 
