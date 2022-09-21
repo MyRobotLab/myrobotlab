@@ -216,7 +216,7 @@ public class AudioFile extends Service {
 
     File f = new File(filename);
     if (!f.exists()) {
-      log.warn("tried to play file " + f.getAbsolutePath() + " but it was not found.");
+      error("tried to play file " + f.getAbsolutePath() + " but it was not found.");
       return null;
     }
 

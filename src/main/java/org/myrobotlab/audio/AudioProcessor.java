@@ -239,11 +239,11 @@ public class AudioProcessor extends Thread {
               rms = (float) Math.sqrt(rms / samples.length);
 
               if (lastPeak > peak) {
-                peak = lastPeak * (float) audioFile.getPeakMultiplier(); 
+                peak = lastPeak; 
               }
 
               lastPeak = peak;
-              audioFile.invoke("publishPeak", peak);
+              audioFile.invoke("publishPeak", peak * (float) audioFile.getPeakMultiplier());
 
             }
 
