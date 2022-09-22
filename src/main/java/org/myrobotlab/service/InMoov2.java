@@ -28,7 +28,6 @@ import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.WebGuiConfig;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
@@ -111,19 +110,24 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       // all services flow through here - it would be a cross matrix of processing :(
       
       // sortof peer ? ¯\_(ツ)_/¯ - TOTAL KLUDGE !!!
-      if (fullname.endsWith(".mouth")) {
+      if (fullname.equals(getName() + ".mouth")) {
         AbstractSpeechSynthesis mouth = (AbstractSpeechSynthesis)Runtime.getService(getName() + ".mouth");
         mouth.attachSpeechListener(getName() + ".ear");
+//        ProgramAB chatBot = (ProgramAB)Runtime.getService(getName() + ".chatBot");
+//        if (chatBot != null) {
+//          chatBot.attachTextListener(getName() + ".mouth");
+//        }
       }
       
-      if (fullname.endsWith(".chatBot")) {
+      if (fullname.equals(getName() + ".chatBot")) {
         ProgramAB chatBot = (ProgramAB)Runtime.getService(getName() + ".chatBot");
         chatBot.attachTextListener(getName() + ".mouth");
       }
    
-      if (fullname.endsWith(".ear")) {
-        AbstractSpeechRecognizer ear = (AbstractSpeechRecognizer)Runtime.getService(getName() + ".ear");
-        ear.attachTextListener(getName() + ".chatBot");
+      if (fullname.equals(getName() + ".ear")) {
+        AbstractSpeechRecognizer ear = (AbstractSpeechRecognizer)Runtime.getService(getName() + ".ear");        
+          ear.attachTextListener(getName() + ".chatBot");
+        
       }
       
       // Plan plan = Runtime.getPlan();
@@ -1141,7 +1145,13 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     if (!mute && isPeerStarted("mouth")) {
       // sendToPeer("mouth", "speakBlocking", toSpeak);
       // invokePeer("mouth", "speakBlocking", toSpeak);
-      sendToPeer("mouth", "speakBlocking", toSpeak);
+      // HEH, CANNOT DO THIS !! ITS NOT BLOCKING - NEED BLOCKING
+      // BECAUSE A GAZILLION GESTURES DEPEND ON BLOCKING SPEECH !!!
+      // sendToPeer("mouth", "speakBlocking", toSpeak);
+      AbstractSpeechSynthesis mouth = (AbstractSpeechSynthesis)getPeer("mouth");
+      if (mouth != null) {
+        mouth.speakBlocking(toSpeak);
+      }
     }
   }
 
@@ -1473,22 +1483,33 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       // Platform.setVirtual(true);
       // Runtime.start("s01", "Servo");
       // Runtime.start("intro", "Intro");
+      
+//       Polly polly = (Polly)Runtime.start("i01.mouth", "Polly");
+      InMoov2 i01 = (InMoov2)Runtime.start("i01", "InMoov2");
+
+//       polly.speakBlocking("Hi, to be or not to be that is the question, wheather to take arms against a see of trouble, and by aposing them end them, to sleep, to die");
+//      i01.startPeer("mouth");
+//       i01.speakBlocking("Hi, to be or not to be that is the question, wheather to take arms against a see of trouble, and by aposing them end them, to sleep, to die");
 
       // Runtime.startConfig("dewey-2");
-      Runtime.start("webgui", "WebGui");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      // webgui.setSsl(true);
+      webgui.autoStartBrowser(false);
+      webgui.setPort(8888);
+      webgui.startService();
+
+      
       Runtime.start("python", "Python");
-      Runtime.start("i01", "InMoov2");
 
       boolean done = true;
       if (done) {
         return;
       }
 
-      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
       i01.startSimulator();
       Plan plan = Runtime.load("webgui", "WebGui");
-      WebGuiConfig webgui = (WebGuiConfig) plan.get("webgui");
-      webgui.autoStartBrowser = false;
+//      WebGuiConfig webgui = (WebGuiConfig) plan.get("webgui");
+//      webgui.autoStartBrowser = false;
       Runtime.startConfig("webgui");
       Runtime.start("webgui", "WebGui");
 

@@ -128,8 +128,6 @@ public class AudioFile extends Service {
   
   protected double peakMultiplier = 1.0;
   
-  protected int peakSampleInterval = 1;
-
   public double getPeakMultiplier() {
     return peakMultiplier;
   }
@@ -216,7 +214,7 @@ public class AudioFile extends Service {
 
     File f = new File(filename);
     if (!f.exists()) {
-      log.warn("tried to play file " + f.getAbsolutePath() + " but it was not found.");
+      error("tried to play file " + f.getAbsolutePath() + " but it was not found.");
       return null;
     }
 
