@@ -493,6 +493,9 @@ public class Pcf8574 extends Service
   public void pinMode(int address, int mode) {
     PinDefinition pinDef = getPin(address);
     // There is no direction register in the PCF8574 it is always BIDRECTIONAL.
+    if (mode != "BIDIRECTIONAL"){
+      log.error("There is no direction register, address {} mode must be BIDIRECTIONAL", address);
+    }
     pinDef.setMode("BIDIRECTIONAL");
     invoke("publishPinDefinition", pinDef);
   }
@@ -501,6 +504,9 @@ public class Pcf8574 extends Service
   public void pinMode(int address, String mode) {
     PinDefinition pinDef = getPin(address);
     // There is no direction register in the PCF8574 it is always BIDRECTIONAL.
+    if (mode != "BIDIRECTIONAL"){
+      log.error("There is no direction register, address {} mode must be BIDIRECTIONAL", address);
+    }
     pinDef.setMode("BIDIRECTIONAL");
     invoke("publishPinDefinition", pinDef);
   }
@@ -571,13 +577,9 @@ public class Pcf8574 extends Service
    * The pin to be looked at
    * @return current state of the output register for the pin
    */
-  public boolean readOutputPin(int address) {
+  public int readOutputPin(int address) {
     int value = (writeRegister >> address) & 1;
-    if (value > 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return value;
   }
 
   /**
@@ -587,7 +589,7 @@ public class Pcf8574 extends Service
    * @param pinName String
    * @return current state of the output register for the pin
    */
-  public boolean readOutputPin(String pinName) {
+  public int readOutputPin(String pinName) {
     return readOutputPin(getPin(pinName).getAddress());
   }
 
@@ -643,7 +645,7 @@ public class Pcf8574 extends Service
   @Override
   public void write(int address, int value) {
 
-    PinDefinition pinDef = getPin(address);
+    //PinDefinition pinDef = getPin(address); // this doesn't get used at all
     if (value == 0) {
       writeRegister = writeRegister &= ~(1 << address);
     } else {
@@ -678,9 +680,9 @@ public class Pcf8574 extends Service
       // arduino.setBoardMega()
       // arduino.connect("COM3")
       
-      int KeyColumn = 0;
-      int LastKeyPress = 0;
-      Pcf8574 KeyPad = (Pcf8574) Runtime.start("pcf", "Pcf8574");
+      //int KeyColumn = 0;
+      //int LastKeyPress = 0;
+      //Pcf8574 KeyPad = (Pcf8574) Runtime.start("pcf", "Pcf8574");
       // Before we can use this,
       // we need to configure the I2C Bus
       // KeyPad.setBus("1")
