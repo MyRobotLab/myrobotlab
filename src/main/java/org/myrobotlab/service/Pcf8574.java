@@ -493,9 +493,6 @@ public class Pcf8574 extends Service
   public void pinMode(int address, int mode) {
     PinDefinition pinDef = getPin(address);
     // There is no direction register in the PCF8574 it is always BIDRECTIONAL.
-    if (mode != "BIDIRECTIONAL"){
-      log.error("There is no direction register, address {} mode must be BIDIRECTIONAL", address);
-    }
     pinDef.setMode("BIDIRECTIONAL");
     invoke("publishPinDefinition", pinDef);
   }
