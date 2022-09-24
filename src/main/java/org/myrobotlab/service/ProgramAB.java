@@ -1161,7 +1161,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
     for (BotInfo bot : bots.values()) {
 
-      Path pathAbsolute = Paths.get(bot.path.getPath());
+      Path pathAbsolute = Paths.get(bot.path.getAbsolutePath());
       Path pathBase = Paths.get(System.getProperty("user.dir"));
       Path pathRelative = pathBase.relativize(pathAbsolute);
       config.bots.add(pathRelative.toString());
