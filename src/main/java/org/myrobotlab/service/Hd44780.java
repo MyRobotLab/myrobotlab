@@ -21,7 +21,7 @@ import org.slf4j.Logger;
  * panel, attached to pcf8574 Driver pasted from Poduzov :
  * https://github.com/Poduzov/PI4J-I2C-LCD
  * 
- * @author Moz4r
+ * @author Moz4r modified by Ray Edgley.
  * 
  */
 public class Hd44780 extends Service {
@@ -193,16 +193,16 @@ public class Hd44780 extends Service {
     broadcastState();
     switch (line) {
       case 0:
-      setDDRAMaddress((byte) 0x00);
+      setDdramAddress((byte) 0x00);
         break;
       case 1:
-      setDDRAMaddress((byte) 0x40);
+      setDdramAddress((byte) 0x40);
         break;
       case 2:
-      setDDRAMaddress((byte) 0x14);
+      setDdramAddress((byte) 0x14);
         break;
       case 3:
-      setDDRAMaddress((byte) 0x3C);
+      setDdramAddress((byte) 0x3C);
         break;
       default:
         error("line %d is invalid, valid line values are 0 - 3");
@@ -383,7 +383,7 @@ public class Hd44780 extends Service {
    * A continous series of writes to the DDRAM will wrap from the end of the first line to the start of the thrid line, then back to the second line and finally the fourth line.
    * @param address
    */
-  public void setDDRAMaddress(int address) {
+  public void setDdramAddress(int address) {
       if (address < 80){ // Make sure the address is in a valid range
         lcdWriteCmd((byte) (address | 0b10000000));
       } else {
@@ -475,25 +475,6 @@ public class Hd44780 extends Service {
       setBackLight(false);
     }
     super.stopService();
-  }
-
-  /**
-   * Send byte to PCF controller
-   * 
-   * @param cmd
-   *          c
-   * 
-   */
-  // Why are we exposing the writeRegister publicly here.
-  // This is a dangerous method to the HD44780 as anything written here can destabilize it.
-  // not yet removed but should be depreciated or removed if not being used.
-  @Deprecated // use lcdWriteCmd(byte cmd) or lcdWriteData(byte data)
-  public void writeRegister(byte cmd) {
-    if (isReady() && pcf != null) {
-      pcf.writeRegister(cmd);
-    } else {
-      log.error("LCD is not ready / attached !");
-    }
   }
 
   public static void main(String[] args) {
