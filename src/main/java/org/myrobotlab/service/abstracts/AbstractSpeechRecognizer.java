@@ -10,6 +10,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.SpeechRecognizerConfig;
+import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
@@ -243,6 +244,32 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
       setSpeaking(false, null);
     }
   }
+  
+  @Override
+  public void onAudioStart(AudioData data) {
+    log.info("heard sound {}", data);
+    // remove any currently pending "no longer listening" delay tasks, because
+    // we started a new isSpeaking = true, so the pause window after has moved
+    purgeTask("setSpeaking");
+    // isSpeaking = true;
+    setSpeaking(true, data.getFileName());
+    return;
+  }
+
+  @Override
+  public void onAudioEnd(AudioData data) {
+    log.info("sound stopped {}", data);
+    if (afterSpeakingPauseMs > 0) {
+      // remove previous one shot - because we are "sliding" the window of
+      // stopping the publishing of recognized words
+      addTaskOneShot(afterSpeakingPauseMs, "setSpeaking", new Object[] { false });
+      log.warn("isSpeaking = false will occur in {} ms", afterSpeakingPauseMs);
+    } else {
+      setSpeaking(false, null);
+    }    
+  }
+  
+  
 
   public boolean setSpeaking(boolean b) {
     return setSpeaking(b, null);
