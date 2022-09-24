@@ -661,6 +661,10 @@ public class Pcf8574 extends Service
 
   @Override
   public void write(String pin, int value) {
+    if (getPin(pin) == null) {
+      error("could not get pin %s", pin);
+      return;
+    }
     write(getPin(pin).getAddress(), value);
   }
 
