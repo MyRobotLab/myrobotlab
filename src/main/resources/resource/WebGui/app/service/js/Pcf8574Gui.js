@@ -58,6 +58,17 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
         attachName: $scope.service.controllerName
     }
 
+    $scope.changed = function(pinDef, toggleValue) {
+        console.info($scope.toggleValue)
+        if (toggleValue = false) {
+            msg.send('write', pinDef.address, 0)
+        } else {
+            msg.send('write', pinDef.address, 1)
+
+        }
+
+    }
+
     $scope.attach = function() {
         msg.send('attach', $scope.options.attachName)
     }
