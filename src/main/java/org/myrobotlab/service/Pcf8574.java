@@ -560,7 +560,12 @@ public class Pcf8574 extends Service
     return dataread;
   }
 
-  int readRegister() {
+  /**
+   * Reads the input register from the PCF8574.
+   * 
+   * @return Register Value.
+   */
+  public int readRegister() {
     byte[] readbuffer = new byte[1];
     controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
     return ((int) readbuffer[0]) & 0xff;
