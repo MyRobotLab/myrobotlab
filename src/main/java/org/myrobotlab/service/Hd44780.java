@@ -30,7 +30,10 @@ public class Hd44780 extends Service {
 
   private static final long serialVersionUID = 1L;
 
-  protected boolean backLight;
+  protected boolean backLight = false;
+  protected boolean displayEnabled = false;
+  protected boolean cursorEnabled = false;
+  protected boolean blinkEnabled = false;
 
   public final byte Rs = (byte) 0b00000001; // Register select bit
   public final byte Rw = (byte) 0b00000010; // Read/Write bit
@@ -163,12 +166,14 @@ public class Hd44780 extends Service {
   @Override
   public void detach(Attachable attachable) {
     detach(attachable.getName());
+    initialized = false;  // if we attach again, we will need to initialize again.
   }
 
   public void attachPcf8574(Pcf8574 pcf8574) {
     pcf = pcf8574;
     isAttached = true;
     pcfName = pcf.getName();
+    pcf.writeRegister((byte) 0b11110000); // Make sure we initilise the PCF8574 output state
     broadcastState();
   }
 
@@ -265,12 +270,12 @@ public class Hd44780 extends Service {
       warn("must be attached to initialize");
     }else{
       log.info("Init I2C Display");
-      functionSet(true, false); //Set the function Control.
+      setFunction(true, false); //Set the function Control.
       clearDisplay(); //Clear the Display and set DDRAM address 0.
       returnHome(); //Set DDRAM address 0 and return display home.
-      displayControl(true, true, false); //Set the Display Control to on, Cursor On, Not blinking.
-      cursorDisplayShift(false, false); // Set the cursor to move to the left
-      entryModeSet(true, false); //Set the Entry Mode Control.
+      setDisplayControl(true, true, false); //Set the Display Control to on, Cursor On, Not blinking.
+      setCursorDisplayShift(false, false); // Set the cursor to move to the left
+      setEntryMode(true, false); //Set the Entry Mode Control.
       initialized = true;
     }
   }
@@ -288,7 +293,7 @@ public class Hd44780 extends Service {
    *        true = 5 x 10 dots.
    *        false = 5 x 8 dots.
    */
-  public void functionSet(boolean lines, boolean font) {
+  public void setFunction(boolean lines, boolean font) {
     byte n = 0b00001000;
     byte f = 0b00000100;
     if (!lines) {n = 0;}
@@ -306,7 +311,7 @@ public class Hd44780 extends Service {
    *        true = Shift to the right.
    *        false = Shift to the left.
    */
-  public void cursorDisplayShift(boolean displayShift, boolean rightLeft) {
+  public void setCursorDisplayShift(boolean displayShift, boolean rightLeft) {
     byte Sc = 0b00001000;
     byte Rl = 0b00000100;
     if (!displayShift) {Sc = 0;}
@@ -315,7 +320,76 @@ public class Hd44780 extends Service {
   }
 
   /**
+   * This enable or disable the Liquid Crystal Display based on the parameter passed to it.
+   * 
+   * @param enableDisplay
+   *        true enables the display.
+   *        false disables the display.
+   */
+  public void setDisplayEnable(boolean enableDisplay) {
+    setDisplayControl(enableDisplay, cursorEnabled, blinkEnabled);
+  }
+
+  /**
+   * Returns the state of the dispaly enable.
+   * @return
+   *        true is the display is enabled.
+   *        false if the display is disabled.
+   */
+  public boolean getDisplayEnable() {
+    return displayEnabled;
+  }
+
+  /**
+   * This enable or disable the cursor on the LCD based on the parameter passed to it.
+   * The cursor is the small bar under the current location where the next charater will be written to.
+   * 
+   * @param enableCursor
+   */
+  public void setCursorEnable(boolean enableCursor) {
+    setDisplayControl(displayEnabled, enableCursor, blinkEnabled);
+  }
+
+  /**
+   * Returns the state of the cursor enable.
+   * The cursor is the small bar under the current location where the next charater will be written to.
+   * 
+   * @return
+   *        true is the cursor is enabled.
+   *        false if the cursor is disabled.
+   */
+  public boolean getCursorEnabled() {
+    return cursorEnabled;
+  }
+
+  /**
+   * This enables or disables the blinking cof the character where the cursor is.
+   * 
+   * @param enableBlink
+   *        true is blink is enabled.
+   *        false if blink is disabled.
+   */
+  public void setBlinkEnable(boolean enableBlink) {
+    setDisplayControl(displayEnabled, cursorEnabled, enableBlink);
+  }
+
+  /**
+   * Returns the state of the blink enable.
+   * When enabled, the entire character where the cursor is will blink.
+   * 
+   * @return
+   *        true if blink is enabled.
+   *        false if blink is disabled.
+   */
+  public boolean getBlinkEnable() {
+    return blinkEnabled;
+  }
+
+  /**
    * Display on/off control.
+   * When the display os off, no charaters are displayed at all.
+   * The cursor is the line under the charater and may be on or off.
+   * Blink when set to on blinks the entire charater box where the cursor is.
    * @param display 
    *        true the display is on. 
    *        false the display is off.
@@ -326,13 +400,28 @@ public class Hd44780 extends Service {
    *        true the cursor if enabled blinks.
    *        false the cursor if enabled does not blink.
    */
-  public void displayControl(boolean display, boolean cursor, boolean blink) {
+  public void setDisplayControl(boolean display, boolean cursor, boolean blink) {
     byte De = 0b00000100;
     byte Ce = 0b00000010;
     byte Cb = 0b00000001;
-    if (!display) {De = 0;}
-    if (!cursor) {Ce = 0;}
-    if(!blink) {Cb = 0;}
+    if (!display) {
+      De = 0;
+      displayEnabled = false;
+    } else{
+      displayEnabled = true;
+    }
+    if (!cursor) {
+      Ce = 0;
+      cursorEnabled = false;
+    } else {
+      cursorEnabled = true;
+    }
+    if(!blink) {
+      Cb = 0;
+      blinkEnabled = false;
+    } else {
+      blinkEnabled = true;
+    }
     lcdWriteCmd((byte)(0b00001000 | De | Ce | Cb));
   }
 
@@ -347,7 +436,7 @@ public class Hd44780 extends Service {
    *        Accompanies display shift.  
    *        The datasheet wasn't that helpfull in this case.
    */
-  public void entryModeSet(boolean incDec, boolean s) {
+  public void setEntryMode(boolean incDec, boolean s) {
     byte Id = 0b00000010;
     byte Shift = 0b00000001;
     if(!incDec) { Id = 0;}
@@ -387,9 +476,24 @@ public class Hd44780 extends Service {
       if (address < 80){ // Make sure the address is in a valid range
         lcdWriteCmd((byte) (address | 0b10000000));
       } else {
-        error("%d Outside allowed range 0 - 79", address);
+        error("%d Outside allowed DDRAM Address range 0 - 79", address);
       }
   }
+
+  /**
+   * Set the address to read or write data to the Caracter Generator RAM.
+   * The HD44780 has a built in 205 charater generator rom as well as a 8 charater generator RAM.
+   * The only the lower 5 bits are used with 8 bytes allocated to each of the 8 characters that may be used.
+   * Not that the last by of each charater is not used as this is where the cursor sits.
+   * @param address
+   */
+  public void setCgramAddress(int address) {
+    if (address < 64){ // Make sure the address is in a valid range
+      lcdWriteCmd((byte) (address | 0b01000000));
+    } else {
+      error("%d Outside allowed CGRAM Address range 0 - 63", address);
+    }
+}
 
   /**
    * Write a string of charaters to the data register.
@@ -451,16 +555,16 @@ public class Hd44780 extends Service {
         pcf.writeRegister((byte) (0b00000000 | Blight | lcmd)); // ~Rs | ~Rw | ~En
         // repeat the read loop until the Busy Flag is set to 0
         do{
-          pcf.writeRegister((byte) (0x00000110 | Blight | 0xF0)); // ~Rs | Rw | En
+          pcf.writeRegister((byte) (0b11110110 | Blight)); // ~Rs | Rw | En
           hresult = (byte) pcf.readRegister();
-          pcf.writeRegister((byte) (0x00000010 | Blight | 0xF0)); // ~Rs | Rw | ~En 
-          pcf.writeRegister((byte) (0x00000110 | Blight | 0xF0)); // ~Rs | Rw | En
+          pcf.writeRegister((byte) (0x11110010 | Blight)); // ~Rs | Rw | ~En 
+          pcf.writeRegister((byte) (0x11110110 | Blight)); // ~Rs | Rw | En
           lresult = (byte) pcf.readRegister();
-          pcf.writeRegister((byte) (0x00000010 | Blight | 0xF0)); // ~Rs | Rw | ~En 
+          pcf.writeRegister((byte) (0x11110010 | Blight)); // ~Rs | Rw | ~En 
           result = (byte)((hresult & 0xF0) | ((lresult & 0xF0) >> 4));
         }while ((result & BF) > 0);
       } else {
-        pcf.writeRegister((byte) (0b00000000 | Blight));  // we are not sending any commands to the HD44780 so we don't need to check the busy flag.
+        pcf.writeRegister((byte) (0b11110000 | Blight));  // we are not sending any commands to the HD44780 so we don't need to check the busy flag.
       }
     } else {
       log.error("LCD is not ready / attached !");
@@ -471,7 +575,7 @@ public class Hd44780 extends Service {
   public void preShutdown() {
     if (isAttached) {
       clear();
-      displayControl(false, false, false);
+      setDisplayControl(false, false, false);
       setBackLight(false);
     }
     super.stopService();
