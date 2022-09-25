@@ -671,6 +671,7 @@ public class Pcf8574 extends Service
   public void writeRegister(int data) {
     byte[] writebuffer = { (byte) data };
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
+    writeRegister = data; // good idea to save the current state of the output register when we write out the register to the PCF8574.
   }
   
   public static void main(String[] args) {
