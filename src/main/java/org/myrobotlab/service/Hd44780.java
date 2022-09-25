@@ -444,7 +444,7 @@ public class Hd44780 extends Service {
     byte hcmd = (byte)(cmd & 0xF0);
     byte lcmd = (byte)((cmd << 4) & 0xF0);
     if (isReady() && pcf != null) {
-      if (cmd ==0) {
+      if (cmd > 0) {
         pcf.writeRegister((byte) (0b00000100 | Blight | hcmd)); // ~Rs | ~Rw | En
         pcf.writeRegister((byte) (0b00000000 | Blight | hcmd)); // ~Rs | ~Rw | ~En
         pcf.writeRegister((byte) (0b00000100 | Blight | lcmd)); //  ~Rs | ~Rw | En 
