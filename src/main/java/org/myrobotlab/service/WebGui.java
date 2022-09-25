@@ -577,7 +577,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         } else {
           bodyData = new String(request.body().asBytes());
         }
-          
+
       }
 
       request.destroy();
@@ -752,8 +752,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     @Override
     public void run() {
       isRunning = true;
-      try {
-        while (isRunning) {
+      while (isRunning) {
+        try {
           InvokeData data = inMsgQueue.poll(1, TimeUnit.SECONDS);
 
           if (data != null) {
@@ -764,12 +764,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
             Object ret = data.method.invoke(data.si, data.params);
             data.si.out(data.method.getName(), ret);
           }
+        } catch (InterruptedException interrupt) {
+          log.info("shutting down");
+          isRunning = false;
+        } catch (Exception e) {
+          log.error("IncomingMessageQueue threw", e);
         }
-      } catch (InterruptedException interrupt) {
-        log.info("interrupted");
-      } catch (Exception e) {
-        log.error("IncomingMessageQueue threw", e);
-      }
+
+      } // while is running
 
       isRunning = false;
       worker = null;
