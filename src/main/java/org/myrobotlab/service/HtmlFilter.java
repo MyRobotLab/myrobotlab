@@ -68,14 +68,23 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
   
   @Override
   public String processText(String text) {
+    
+    invoke("publishRawText", text);
+    
+    String processedText = text;
 
     if (stripHtml) {
-      String cleanText = stripHtml(text);
-      invoke("publishText", cleanText);
+      // clean text
+      processedText = stripHtml(text);
+      invoke("publishText", processedText);
     } else {
-      String htmlText = addHtml(text);
-      invoke("publishText", htmlText);
+      processedText = addHtml(text);
+      invoke("publishText", processedText);
     }
+    return processedText;
+  }
+  
+  public String publishRawText(String text) {
     return text;
   }
 
