@@ -335,7 +335,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
     // EEK! clean up the API!
     invoke("publishRequest", text); // publisher used by uis
-    invoke("publishResponse", response);
     invoke("publishRaw", response.msg);
 
     String msg = response.msg;
@@ -344,6 +343,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       msg = filter.processText(msg);
     }
 
+    response.msg = msg;
+    invoke("publishResponse", response);
     invoke("publishText", msg);
 
     return response;
