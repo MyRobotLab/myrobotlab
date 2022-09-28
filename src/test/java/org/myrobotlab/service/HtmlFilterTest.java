@@ -9,9 +9,12 @@ public class HtmlFilterTest extends AbstractTest {
 
   @Test
   public void testHtmlFilter() {
+    HtmlFilter filter = (HtmlFilter)Runtime.start("htmlFilter", "HtmlFilter");
     String html = "<div>test...</div>";
     String expected = "test...";
     String actual = HtmlFilter.stripHtml(html);
+    assertEquals(expected, actual);
+    actual = filter.processText(html);
     assertEquals(expected, actual);
   }
 
