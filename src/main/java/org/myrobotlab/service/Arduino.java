@@ -1102,7 +1102,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
         pinList.add(pindef);
       }
     } else {
-      for (int i = 0; i < 20; ++i) {
+      int pinCount = 20;
+      if (board.contains("nano")){
+        pinCount = 22;
+      }
+      for (int i = 0; i < pinCount; ++i) {
         PinDefinition pindef = new PinDefinition(getName(), i);
         String pinName = null;
         if (i == 0) {
@@ -1110,6 +1114,12 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
         }
         if (i == 1) {
           pindef.setTx(true);
+        }
+        if (i == 18) {
+          pindef.setSda(true);
+        }
+        if (i == 19) {
+          pindef.setScl(true);
         }
         if (i < 14) {
           pinName = String.format("D%d", i);

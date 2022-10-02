@@ -31,6 +31,7 @@ public class Hd44780 extends Service {
   private static final long serialVersionUID = 1L;
 
   protected boolean backLight = false;
+  protected boolean verifyBusyFlag = false;
   protected boolean displayEnabled = false;
   protected boolean cursorEnabled = false;
   protected boolean blinkEnabled = false;
@@ -201,7 +202,7 @@ public class Hd44780 extends Service {
       setDdramAddress((byte) 0x00);
         break;
       case 1:
-      setDdramAddress((byte) 0x40);
+      setDdramAddress((byte) 0x28);
         break;
       case 2:
       setDdramAddress((byte) 0x14);
@@ -529,6 +530,31 @@ public class Hd44780 extends Service {
   }
 
   /**
+   * Set or clear the test busy flag in the HD44780.
+   * There are two ways of ensuring the HD44780 is ready for the next instruction.
+   * You can either read the instruction register until the MSB D7 is clear.
+   * Or you can wait a minimum time peiod that ensure the device is ready.
+   * The longest busy period is 10mS after a power reset.
+   * 
+   * @param setFlag
+   *        true = Verify the flag.
+   *        false = use timeout.
+   */
+  public void setVerifyBusyFlag(boolean setFlag){
+    verifyBusyFlag = setFlag;
+  }
+
+  /**
+   * Check the state of the verify Busy Flag setting
+   * @return
+   *        true = verify being used.
+   *        false = timeout being used.
+   */
+  public boolean getVerifyBusyFlag(){
+    return verifyBusyFlag;
+  }
+
+  /**
    * This method will write the cmd value to the instruction register
    * then wait until it is ready for the next instruction.
    * Most commands are pretty quick at around 37uS, but there is the odd one at 1.52mS, 1,520uS
@@ -538,34 +564,38 @@ public class Hd44780 extends Service {
    * @param cmd
    */
   private void lcdWriteCmd(byte cmd) {
-    byte Blight = 0;
+    byte Blight = 0b00001000;
     byte hresult = 0;
     byte lresult = 0;
     byte result = BF;
-    if (backLight == true) {
-      Blight = Bl;
+    if (!backLight) {
+      Blight = 0;
     }
     byte hcmd = (byte)(cmd & 0xF0);
     byte lcmd = (byte)((cmd << 4) & 0xF0);
     if (isReady() && pcf != null) {
-      if (cmd > 0) {
+      if (cmd == 0) {
+        pcf.writeRegister((byte) (0b11110000 | Blight));  // we are not sending any commands to the HD44780 so we don't need to check the busy flag.
+      } else{
         pcf.writeRegister((byte) (0b00000100 | Blight | hcmd)); // ~Rs | ~Rw | En
         pcf.writeRegister((byte) (0b00000000 | Blight | hcmd)); // ~Rs | ~Rw | ~En
         pcf.writeRegister((byte) (0b00000100 | Blight | lcmd)); //  ~Rs | ~Rw | En 
         pcf.writeRegister((byte) (0b00000000 | Blight | lcmd)); // ~Rs | ~Rw | ~En
-        // repeat the read loop until the Busy Flag is set to 0
-        do{
-          pcf.writeRegister((byte) (0b11110110 | Blight)); // ~Rs | Rw | En
-          hresult = (byte) pcf.readRegister();
-          pcf.writeRegister((byte) (0x11110010 | Blight)); // ~Rs | Rw | ~En 
-          pcf.writeRegister((byte) (0x11110110 | Blight)); // ~Rs | Rw | En
-          lresult = (byte) pcf.readRegister();
-          pcf.writeRegister((byte) (0x11110010 | Blight)); // ~Rs | Rw | ~En 
-          result = (byte)((hresult & 0xF0) | ((lresult & 0xF0) >> 4));
-        }while ((result & BF) > 0);
-      } else {
-        pcf.writeRegister((byte) (0b11110000 | Blight));  // we are not sending any commands to the HD44780 so we don't need to check the busy flag.
-      }
+        if (verifyBusyFlag){
+          // repeat the read loop until the Busy Flag is set to 0
+          do {
+            pcf.writeRegister((byte) (0b11110110 | Blight)); // ~Rs | Rw | En
+            hresult = (byte) pcf.readRegister();
+            pcf.writeRegister((byte) (0x11110010 | Blight)); // ~Rs | Rw | ~En 
+            pcf.writeRegister((byte) (0x11110110 | Blight)); // ~Rs | Rw | En
+            lresult = (byte) pcf.readRegister();
+            pcf.writeRegister((byte) (0x11110010 | Blight)); // ~Rs | Rw | ~En 
+            result = (byte)((hresult & 0xF0) | ((lresult & 0xF0) >> 4));
+          } while ((result & BF) > 0);
+        } else {
+          sleep(10);
+        }
+      } 
     } else {
       log.error("LCD is not ready / attached !");
     }
