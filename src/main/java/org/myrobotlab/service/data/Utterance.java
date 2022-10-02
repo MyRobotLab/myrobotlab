@@ -21,6 +21,9 @@ public class Utterance {
    */
   public String username;
   
+  /**
+   * the source of this utterance was a bot or human
+   */
   public boolean isBot;
   
   /**
@@ -32,6 +35,11 @@ public class Utterance {
    * PUBLIC / PRIVATE 
    */
   public String channelType;
+  
+  /**
+   * name of channel
+   */
+  public String channelName;
   
   /**
    * The text of the utterance

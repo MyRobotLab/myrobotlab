@@ -13,6 +13,7 @@ public interface UtterancePublisher {
 
   // These are all the methods that the utterance publisher should produce.
   public static String[] publishMethods = new String[] {"publishUtterance"};
+  // FIXME - this should be promoted and inherited ^
 
   // Define the methods that an utterance publisher should have
   public Utterance publishUtterance(Utterance utterance);

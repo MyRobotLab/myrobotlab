@@ -3,7 +3,13 @@ package org.myrobotlab.programab;
 import java.util.Date;
 import java.util.List;
 
+import org.myrobotlab.service.data.SearchResults;
+
 /**
+ * FIXME - this class should become a more generalized AI response data object
+ * in org.myrobotlab.data
+ * so that other AI systems (and search engines) can fill it
+ * 
  * Internal class for the program ab response. TODO - probably should have a
  * generalized data response for all bots to support an interface
  */
@@ -19,7 +25,7 @@ public class Response {
    */
   public String userName;
   /**
-   * text only response
+   * text only response - String is as rich as ProgramAB currently allows 
    */
   public String msg;
   /**

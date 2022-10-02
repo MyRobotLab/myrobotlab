@@ -51,6 +51,7 @@ import org.myrobotlab.net.Http;
 import org.myrobotlab.service.config.AudioFileConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
+import org.myrobotlab.service.interfaces.AudioPublisher;
 import org.slf4j.Logger;
 
 /**
@@ -60,7 +61,7 @@ import org.slf4j.Logger;
  * TODO - publishPeak interface
  *
  */
-public class AudioFile extends Service {
+public class AudioFile extends Service implements AudioPublisher {
   static final long serialVersionUID = 1L;
   static final Logger log = LoggerFactory.getLogger(AudioFile.class);
 
@@ -125,9 +126,9 @@ public class AudioFile extends Service {
   protected Map<String, List<String>> playlists = new HashMap<>();
 
   final private transient PlaylistPlayer playlistPlayer = new PlaylistPlayer(this);
-  
+
   protected double peakMultiplier = 1.0;
-  
+
   public double getPeakMultiplier() {
     return peakMultiplier;
   }
@@ -179,7 +180,7 @@ public class AudioFile extends Service {
     if (track == null || track.isEmpty()) {
       track = currentTrack;
     }
-    
+
     if (filename == null || filename.isEmpty()) {
       error("asked to play a null filename!  error");
       return null;
@@ -394,10 +395,12 @@ public class AudioFile extends Service {
     setTrack(DEFAULT_TRACK);
   }
 
+  @Override
   public AudioData publishAudioStart(AudioData data) {
     return data;
   }
 
+  @Override
   public AudioData publishAudioEnd(AudioData data) {
     log.debug("Audio File publishAudioEnd");
     return data;
@@ -437,10 +440,7 @@ public class AudioFile extends Service {
   }
 
   public void addPlaylist(String name, String path) {
-    
-    
-    
-    
+
     List<String> list = null;
     if (!playlists.containsKey(name)) {
       list = new ArrayList<String>();
@@ -522,13 +522,18 @@ public class AudioFile extends Service {
   @Override
   public ServiceConfig getConfig() {
 
-    AudioFileConfig config = new AudioFileConfig();
-    config.mute = mute;
-    config.currentTrack = currentTrack;
-    config.currentPlaylist = currentPlaylist;
-    config.volume = volume;
-    config.playlists = playlists;
-    config.peakMultiplier = peakMultiplier ;
+    AudioFileConfig c = (AudioFileConfig) config;
+    // FIXME - remove members keep data in config !
+    // FIXME - the following is not needed nor desired
+    // useless self assignment
+    c.mute = mute;
+    c.currentTrack = currentTrack;
+    c.currentPlaylist = currentPlaylist;
+    c.volume = volume;
+    c.playlists = playlists;
+    c.peakMultiplier = peakMultiplier;
+    // config.peakSampleInterval <- this one is done correctly no maintenance
+    c.audioListeners = getAttached("publishAudio").toArray(new String[0]);
 
     return config;
   }
@@ -542,9 +547,16 @@ public class AudioFile extends Service {
     if (config.playlists != null) {
       playlists = config.playlists;
     }
+
+    if (config.audioListeners != null) {
+      for (String listener : config.audioListeners) {
+        attachAudioListener(listener);
+      }
+    }
+
     return c;
   }
-  
+
   public double publishPeak(float peak) {
     return peak;
   }
@@ -553,11 +565,11 @@ public class AudioFile extends Service {
 
     try {
       LoggingFactory.init("INFO");
-      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
-      
-      Runtime.start("python", "Python");      
+
+      Runtime.start("python", "Python");
 
       AudioFile player = (AudioFile) Runtime.start("player", "AudioFile");
       player.play("https://upload.wikimedia.org/wikipedia/commons/1/1f/Bach_-_Brandenburg_Concerto.No.1_in_F_Major-_II._Adagio.ogg");
@@ -566,11 +578,9 @@ public class AudioFile extends Service {
       if (done) {
         return;
       }
-      
-      
+
       player.addListener("publishPeak", "servo", "moveTo");
-      
-      
+
       player.addPlaylist("acoustic", "/home/greg/Music/acoustic");
       player.addPlaylist("electronica", "/home/greg/Music/electronica");
       player.setPlaylist("electronica");

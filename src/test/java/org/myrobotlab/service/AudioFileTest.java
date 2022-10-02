@@ -1,21 +1,17 @@
 package org.myrobotlab.service;
 
 import org.junit.Assert;
+import org.junit.Test;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.service.data.AudioData;
+import org.myrobotlab.test.AbstractTest;
 
-public class AudioFileTest extends AbstractServiceTest {
+public class AudioFileTest extends AbstractTest {
 
-  @Override
-  public Service createService() {
-    AudioFile af1 = (AudioFile) Runtime.createAndStart("af1", "AudioFile");
-    return af1;
-  }
-
-  @Override
+  @Test
   public void testService() throws Exception {
-    // TODO Auto-generated method stub
-    AudioFile af1 = (AudioFile) service;
+    AudioFile af1 = (AudioFile) Runtime.start("af1", "AudioFile");    
+    Python python = (Python) Runtime.start("python", "Python");
 
     af1.setVolume(0);
     Assert.assertEquals(0.0, af1.getVolume(), 0.0);
@@ -40,6 +36,9 @@ public class AudioFileTest extends AbstractServiceTest {
 
     // Silence!!
     af1.silence();
+    
+    af1.releaseService();
 
   }
+
 }

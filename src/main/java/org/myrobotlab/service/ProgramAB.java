@@ -35,9 +35,9 @@ import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.Utterance;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.LogPublisher;
+import org.myrobotlab.service.interfaces.ResponsePublisher;
 import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
-import org.myrobotlab.service.interfaces.TextFilter;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.myrobotlab.service.interfaces.UtteranceListener;
@@ -57,7 +57,7 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class ProgramAB extends Service implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener, UtterancePublisher, UtteranceListener {
+public class ProgramAB extends Service implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener, UtterancePublisher, UtteranceListener, ResponsePublisher {
 
   /**
    * default file name that aiml categories comfing from matching a learnf tag
@@ -101,8 +101,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * default user name chatting with the bot
    */
   String currentUserName = "human";
-
-  List<String> filters = new ArrayList<>();
 
   /**
    * display processing and logging
@@ -335,17 +333,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
     // EEK! clean up the API!
     invoke("publishRequest", text); // publisher used by uis
-    invoke("publishRaw", response.msg);
-
-    String msg = response.msg;
-    for (String filterName : filters) {
-      TextFilter filter = (TextFilter) Runtime.getService(filterName);
-      msg = filter.processText(msg);
-    }
-
-    response.msg = msg;
     invoke("publishResponse", response);
-    invoke("publishText", msg);
+    invoke("publishText", response.msg);
 
     return response;
   }
@@ -565,12 +554,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * @return the response
    * 
    */
+  @Override
   public Response publishResponse(Response response) {
     return response;
-  }
-
-  public String publishRaw(String text) {
-    return text;
   }
 
   @Override
@@ -986,8 +972,16 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     return names;
   }
 
+  // FIXME - should be String name - and inside should querry
+  // type NOT by instanceof but by Runtime.getType(name)
   public void attach(Attachable attachable) {
-    if (attachable instanceof TextPublisher) {
+    
+    /*
+    if (attachable instanceof ResponseListener) {
+      // this one is done correctly
+      attachResponseListener(attachable.getName());
+    } else */ 
+      if (attachable instanceof TextPublisher) {
       attachTextPublisher((TextPublisher) attachable);
     } else if (attachable instanceof TextListener) {
       addListener("publishText", attachable.getName(), "onText");
@@ -1210,12 +1204,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       }
     }
 
-    if (config.textFilters != null) {
-      for (String filter : config.textFilters) {
-        filters.add(filter);
-      }
-    }
-
     // TODO: attach to the text publishers... ?
 
     return config;
@@ -1234,6 +1222,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
        */
 
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
+      Runtime.start("bot", "DiscordBot");
+      Runtime.start("python", "Python");
       // Polly polly = (Polly) Runtime.start("polly", "Polly");
 
       // brain.attach("polly");

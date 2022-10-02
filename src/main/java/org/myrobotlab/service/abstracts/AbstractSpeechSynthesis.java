@@ -523,11 +523,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     }
   }
 
-  public void stopService() {
-    super.stopService();
-    unsubscribe(audioFile.getName(), "publishAudioStart");
-    unsubscribe(audioFile.getName(), "publishAudioEnd");
-  }
 
   AudioData play(String filename, boolean block) {
     return play(new AudioData(filename), block);

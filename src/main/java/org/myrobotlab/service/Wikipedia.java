@@ -79,8 +79,8 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
   }
 
   @Override
-  public List<String> imageSearch(String searchText) {
-    List<String> ret = new ArrayList<>();
+  public List<ImageData> imageSearch(String searchText) {
+    List<ImageData> ret = new ArrayList<>();
     SearchResults sr = searchWikipedia(searchText, false, true);
     ret.addAll(sr.images);
     return ret;
@@ -170,11 +170,11 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
         if (originalimage != null) {
           String source = (String) originalimage.get("source");
           if (source != null) {
-            results.images.add(source);
             ImageData img = new ImageData();
             img.name = searchText;
             img.src = source;
             img.source = getName();
+            results.images.add(img);
             invoke("publishImage", img);
           }
         }
@@ -253,6 +253,11 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
       // Runtime.start("python", "Python");
       Wikipedia wiki = (Wikipedia) Runtime.start("wiki", "Wikipedia");
       ImageDisplay display = (ImageDisplay) Runtime.start("display", "ImageDisplay");
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
       
       Map<String,Locale> locales = wiki.getLocales();
       Locale locale = wiki.getLocale();
