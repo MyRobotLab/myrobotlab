@@ -12,6 +12,7 @@ public class HtmlFilterConfig extends ServiceConfig {
 
   //   
   public boolean stripHtml = true;
+  public boolean stripUrls = true;
   // 
   public String preHtmlTag = "<pre>";
   public String postHtmlTag = "</pre>";

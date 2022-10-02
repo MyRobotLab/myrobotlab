@@ -18,7 +18,6 @@ import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.inmoov.Vision;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -89,41 +88,64 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   /**
    * Part of service life cycle - a new servo has been started
    * 
-   * need a directed message sent to a callback simlar to this except it should be a 
-   * "key" not a "fullname" !  .. this could be created with minimal structure .. i think
+   * need a directed message sent to a callback simlar to this except it should
+   * be a "key" not a "fullname" ! .. this could be created with minimal
+   * structure .. i think
    */
   public void onStarted(String fullname) {
     log.info("{} started", fullname);
     try {
       
+      boolean test = true;
+      if (test) {
+        return;
+      }
+      
+      
       // FIXME - problem is fullname is not the peerKey :(
       // String actualName = getPeerName(fullname);
       // getPeer(peerKey)
-      
-      // PROS: 
+
+      // PROS:
       // don't expose type
       // not hardcoded to "i01" !!!
-      
+
       // CONS:
       // incoming is fullname
       // not using the peerKey
-      // all services flow through here - it would be a cross matrix of processing :(
-      
+      // all services flow through here - it would be a cross matrix of
+      // processing :(
+
       // sortof peer ? ¯\_(ツ)_/¯ - TOTAL KLUDGE !!!
-      if (fullname.equals(getName() + ".mouth")) {
-        AbstractSpeechSynthesis mouth = (AbstractSpeechSynthesis)Runtime.getService(getName() + ".mouth");
+      // closer .. but not quite right .. the 
+      // "member" config.mouth should hold the actual name !
+
+      String mouthActualName = getPeerName("mouth");
+      if (mouthActualName.equals(fullname)) {
+
+        AbstractSpeechSynthesis mouth = (AbstractSpeechSynthesis) Runtime.getService(getName() + ".mouth");
         mouth.attachSpeechListener(getName() + ".ear");
-//        ProgramAB chatBot = (ProgramAB)Runtime.getService(getName() + ".chatBot");
-//        if (chatBot != null) {
-//          chatBot.attachTextListener(getName() + ".mouth");
-//        }
+        //// ProgramAB chatBot = (ProgramAB)Runtime.getService(getName() +
+        //// ".chatBot");
+        //// if (chatBot != null) {
+        //// chatBot.attachTextListener(getName() + ".mouth");
+        //// }
+
       }
-      
+
+      // this is worse 
       if (fullname.equals(getName() + ".chatBot")) {
         ProgramAB chatBot = (ProgramAB)Runtime.getService(getName() + ".chatBot");
-        chatBot.attachTextListener(getName() + ".mouth");
+        chatBot.attachTextListener(getName() + ".htmlFilter");
       }
-   
+      
+//      if (fullname.equals(getName() + ".htmlFilter")) {
+//        ProgramAB chatBot = (ProgramAB)Runtime.getService(getName() + ".chatBot");
+//        chatBot.attachTextListener(getName() + ".htmlFilter");
+//      }
+      
+      
+      // chatbot or htmlfilter ? 
       if (fullname.equals(getName() + ".ear")) {
         AbstractSpeechRecognizer ear = (AbstractSpeechRecognizer)Runtime.getService(getName() + ".ear");        
           ear.attachTextListener(getName() + ".chatBot");
@@ -131,18 +153,19 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       }
       
       // Plan plan = Runtime.getPlan();
-      
-      // THIS IS HOW TO MARK PEER DATA STARTED WHEN ITS NOT STARTED BY 
+
+      // THIS IS HOW TO MARK PEER DATA STARTED WHEN ITS NOT STARTED BY
       // THE PARENT :( FIXME - THIS SHOULD BE DONE IN RUNTIME !
-//      ServiceReservation sr = serviceType.getPeerFromActualName(getName(), fullname);
-//      if (sr != null) {
-//        sr.state = "STARTED";
-//      }
-      
-//      String peerKey = fullname.replace(getName(), fullname);
-//      getPeer(peerKey)
-//      isPeerStarted(peerKey);
-//      startPeer(peerKey);
+      // ServiceReservation sr = serviceType.getPeerFromActualName(getName(),
+      // fullname);
+      // if (sr != null) {
+      // sr.state = "STARTED";
+      // }
+
+      // String peerKey = fullname.replace(getName(), fullname);
+      // getPeer(peerKey)
+      // isPeerStarted(peerKey);
+      // startPeer(peerKey);
       ServiceInterface si = Runtime.getService(fullname);
       if ("Servo".equals(si.getSimpleName())) {
         log.info("sending setAutoDisable true to {}", fullname);
@@ -250,8 +273,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return true;
   }
 
-  boolean autoStartBrowser = false;
-
   transient ProgramAB chatBot;
 
   transient SpeechRecognizer ear;
@@ -296,16 +317,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   // waiting controable threaded gestures we warn user
   boolean gestureAlreadyStarted = false;
-  // FIXME - what the hell is this for ?
+
   Set<String> gestures = new TreeSet<String>();
-
-  @Deprecated
-  public Vision vision;
-
-  // FIXME - remove all direct references
-  // transient private HashMap<String, InMoov2Arm> arms = new HashMap<>();
-
-  // protected List<Voice> voices = null;
 
   protected String voiceSelected;
 
@@ -1148,7 +1161,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       // HEH, CANNOT DO THIS !! ITS NOT BLOCKING - NEED BLOCKING
       // BECAUSE A GAZILLION GESTURES DEPEND ON BLOCKING SPEECH !!!
       // sendToPeer("mouth", "speakBlocking", toSpeak);
-      AbstractSpeechSynthesis mouth = (AbstractSpeechSynthesis)getPeer("mouth");
+      AbstractSpeechSynthesis mouth = (AbstractSpeechSynthesis) getPeer("mouth");
       if (mouth != null) {
         mouth.speakBlocking(toSpeak);
       }
@@ -1483,13 +1496,17 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       // Platform.setVirtual(true);
       // Runtime.start("s01", "Servo");
       // Runtime.start("intro", "Intro");
-      
-//       Polly polly = (Polly)Runtime.start("i01.mouth", "Polly");
-      InMoov2 i01 = (InMoov2)Runtime.start("i01", "InMoov2");
 
-//       polly.speakBlocking("Hi, to be or not to be that is the question, wheather to take arms against a see of trouble, and by aposing them end them, to sleep, to die");
-//      i01.startPeer("mouth");
-//       i01.speakBlocking("Hi, to be or not to be that is the question, wheather to take arms against a see of trouble, and by aposing them end them, to sleep, to die");
+      // Polly polly = (Polly)Runtime.start("i01.mouth", "Polly");
+      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+
+      // polly.speakBlocking("Hi, to be or not to be that is the question,
+      // wheather to take arms against a see of trouble, and by aposing them end
+      // them, to sleep, to die");
+      // i01.startPeer("mouth");
+      // i01.speakBlocking("Hi, to be or not to be that is the question,
+      // wheather to take arms against a see of trouble, and by aposing them end
+      // them, to sleep, to die");
 
       // Runtime.startConfig("dewey-2");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
@@ -1498,7 +1515,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       webgui.setPort(8888);
       webgui.startService();
 
-      
       Runtime.start("python", "Python");
 
       boolean done = true;
@@ -1508,8 +1524,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
       i01.startSimulator();
       Plan plan = Runtime.load("webgui", "WebGui");
-//      WebGuiConfig webgui = (WebGuiConfig) plan.get("webgui");
-//      webgui.autoStartBrowser = false;
+      // WebGuiConfig webgui = (WebGuiConfig) plan.get("webgui");
+      // webgui.autoStartBrowser = false;
       Runtime.startConfig("webgui");
       Runtime.start("webgui", "WebGui");
 

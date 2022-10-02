@@ -40,9 +40,12 @@ public class MrlSraixHandler implements SraixHandler {
     } else if (programab != null && programab.getPeer("search") != null) {
       try {
         SearchPublisher search = (SearchPublisher) programab.getPeer("search");
-        SearchResults results = search.search(input);
-
-        return results.getText();
+        if (search != null) {
+          SearchResults results = search.search(input);
+          return results.getTextAndImages();
+        } else {
+          return null;
+        }
 
       } catch (Exception e) {
         return "sorry, I cannot search now " + e.getMessage();
