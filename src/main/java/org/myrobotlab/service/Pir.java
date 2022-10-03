@@ -86,7 +86,7 @@ public class Pir extends Service implements PinListener {
     } else {
       error("do not know how to detach to %s of type %s", name, si.getSimpleName());
     }
-    active = false;
+    active = null;
     isEnabled = false;
     broadcastState();
   }
@@ -129,10 +129,10 @@ public class Pir extends Service implements PinListener {
       return;
     }
 
-    // FixMe - sendTo(pincontrolName,"disablePin", pin)
+    // FIXME - use pinListener pub/sub
     pinControl.disablePin(pin);
     isEnabled = false;
-    active = false;
+    active = null;
     broadcastState();
   }
 
