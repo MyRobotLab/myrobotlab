@@ -140,14 +140,6 @@
   
 <dependencies>
 
-<!-- https://mvnrepository.com/artifact/net.sf.py4j/py4j -->
-<dependency>
-    <groupId>net.sf.py4j</groupId>
-    <artifactId>py4j</artifactId>
-    <version>0.10.9.7</version>
-</dependency>
-
-
 <!-- AudioFile begin -->
   <dependency>
     <groupId>javazoom</groupId>
@@ -1210,6 +1202,15 @@
   </dependency>
 <!-- ProgramAB end -->
 
+<!-- Py4j begin -->
+  <dependency>
+    <groupId>net.sf.py4j</groupId>
+    <artifactId>py4j</artifactId>
+    <version>0.10.9.7</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Py4j end -->
+
 <!-- Python begin -->
   <dependency>
     <groupId>org.python</groupId>
@@ -1529,15 +1530,6 @@
     <version>1.12.0.2</version>
   </dependency>
 <!-- SwingGui end -->
-
-<!-- TarsosDsp begin -->
-  <dependency>
-    <groupId>com.github.axet</groupId>
-    <artifactId>TarsosDSP</artifactId>
-    <version>2.4-1</version>
-    <scope>provided</scope>
-  </dependency>
-<!-- TarsosDsp end -->
 
 <!-- Tensorflow begin -->
   <dependency>

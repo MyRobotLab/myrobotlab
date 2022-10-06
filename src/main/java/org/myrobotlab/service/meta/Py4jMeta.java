@@ -14,11 +14,10 @@ public class Py4jMeta extends MetaData {
    */
   public Py4jMeta() {
 
-    addDescription("Py");
+    addDescription("Python 3.x support");
     addCategory("programming");
     setSponsor("GroG");
     addDependency("net.sf.py4j", "py4j", "0.10.9.7");
-
   }
 
 }

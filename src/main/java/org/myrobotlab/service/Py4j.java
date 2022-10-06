@@ -42,7 +42,6 @@ public class Py4j extends Service {
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    // _TemplateServiceConfig config = (_TemplateServiceConfig) c;
     return c;
   }
 
@@ -62,6 +61,7 @@ public class Py4j extends Service {
       Runtime.start("servo", "Servo");
       Py4j py4j = (Py4j) Runtime.start("py4j", "Py4j");
       py4j.start();
+      
 
     } catch (Exception e) {
       log.error("main threw", e);
