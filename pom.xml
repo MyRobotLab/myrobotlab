@@ -1210,6 +1210,15 @@
   </dependency>
 <!-- ProgramAB end -->
 
+<!-- Py4j begin -->
+  <dependency>
+    <groupId>net.sf.py4j</groupId>
+    <artifactId>py4j</artifactId>
+    <version>0.10.9.7</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Py4j end -->
+
 <!-- Python begin -->
   <dependency>
     <groupId>org.python</groupId>
