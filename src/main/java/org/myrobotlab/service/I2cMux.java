@@ -65,6 +65,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
     try {
       I2cMux i2cMux = (I2cMux) Runtime.start("i2cMux", "I2CMux");
+      i2cMux.setDeviceBus("0");
       Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
@@ -89,6 +90,12 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     return controllers;
   }
 
+  /**
+   * Sets the I2C Bus the i2cMux is attached to.
+   * @param deviceBus 
+   *        default is "1", range "0" - "7".
+   * 
+   */
   @Override
   public void setDeviceBus(String deviceBus) {
     if (isAttached) {
@@ -99,6 +106,12 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     broadcastState();
   }
 
+  /**
+   * Sets the I2C Address of the i2cMux device.
+   * @param deviceAddress
+   *        default "0x70"
+   *        range "0x70" - "0x77"
+   */
   @Override
   public void setDeviceAddress(String deviceAddress) {
     if (isAttached) {
@@ -109,10 +122,19 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     broadcastState();
   }
 
+  /**
+   * Returns the current state of the service, if attached returns true, false if it's not attached.
+   * @return
+   */
   public boolean isAttached() {
     return isAttached;
   }
 
+  /**
+   * Sets which bus future commands will be sent down.
+   * @param busAddress
+   *        Range 0 - 7
+   */
   public void setMuxBus(int busAddress) {
     if (busAddress != lastBusAddress) {
       byte bus[] = new byte[1];
@@ -162,11 +184,11 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     I2CDeviceMap devicedata = new I2CDeviceMap();
     String key = control.getName();
     if (i2cDevices.containsKey(key)) {
-      log.error("Device {} {} {} already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName());
+      log.error("Device {} {} {} already exists.", control.getBus(), control.getAddress(), control.getName());
     } else {
       devicedata.serviceName = key;
-      devicedata.busAddress = control.getDeviceBus();
-      devicedata.deviceAddress = control.getDeviceAddress();
+      devicedata.busAddress = control.getBus();
+      devicedata.deviceAddress = control.getAddress();
       i2cDevices.put(key, devicedata);
       control.attachI2CController(this);
     }
