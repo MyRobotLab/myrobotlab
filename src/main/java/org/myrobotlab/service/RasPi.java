@@ -38,7 +38,7 @@ import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.system.SystemInfo;
-import com.pi4j.wiringpi.I2C;
+//import com.pi4j.wiringpi.I2C;
 import com.pi4j.wiringpi.SoftPwm;
 
 /**
@@ -91,11 +91,6 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
    * so I created this to show the references to i2c device services
    */
   protected Set<String> attachedServices = new HashSet<>();
-
-  // FIXME - all wiringPi type of i2c access should be removed
-  // Pi4j nicely abstracts it away - this interface should be used
-  @Deprecated
-  private boolean wiringPi = false; // Defined to be able to switch between
 
   protected String boardType = null;
 
@@ -166,20 +161,12 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     I2CDeviceMap devicedata = new I2CDeviceMap();
     if (!i2cDevices.containsKey(key)) {
       try {
-        if (wiringPi) {
-          int deviceHandle = I2C.wiringPiI2CSetup(address);
-          devicedata.serviceName = serviceName;
-          devicedata.bus = null;
-          devicedata.device = null;
-          devicedata.deviceHandle = deviceHandle;
-        } else {
-          I2CBus i2cBus = I2CFactory.getInstance(bus);
-          I2CDevice device = i2cBus.getDevice(address);
-          devicedata.serviceName = serviceName;
-          devicedata.bus = i2cBus;
-          devicedata.device = device;
-          devicedata.deviceHandle = -1;
-        }
+        I2CBus i2cBus = I2CFactory.getInstance(bus);
+        I2CDevice device = i2cBus.getDevice(address);
+        devicedata.serviceName = serviceName;
+        devicedata.bus = i2cBus;
+        devicedata.device = device;
+        devicedata.deviceHandle = -1;
         i2cDevices.put(key, devicedata);
         broadcastState();
         log.info("Created device for {} key {}", serviceName, key);
@@ -197,7 +184,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     // The order of the detach is important because the higher level service may
     // want to execute something that
     // needs this service to still be availabe
-    String key = String.format("%d.%d", Integer.parseInt(control.getDeviceBus()), Integer.decode(control.getDeviceAddress()));
+    String key = String.format("%d.%d", Integer.parseInt(control.getBus()), Integer.decode(control.getAddress()));
     if (i2cDevices.containsKey(key)) {
       i2cDevices.remove(key);
       control.detachI2CController(this);
@@ -283,20 +270,8 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     return new ArrayList<PinDefinition>(addressIndex.values());
   }
 
-  /**
-   * Check if wiringPi library is used. Returns true when wiringPi library is
-   * used
-   * 
-   * @return true if library used
-   * 
-   */
-  @Deprecated
-  public boolean getWiringPi() {
-    return wiringPi;
-  }
-
-  @Override // FIXME - I2CControl has bus why is it supplied here as a parameter
-            // or why
+  @Override // FIXME - I2CControl has bus why is it supplied here as a parameter, t
+            // ANSWER: here are two busses on the Raspi. Normally we only use 1, bus 0 is used by the SD card
   public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
     int bytesRead = 0;
     String key = String.format("%d.%d", busAddress, deviceAddress);
@@ -306,18 +281,11 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       devicedata = i2cDevices.get(key);
     }
 
-    if (wiringPi) {
-      for (int i = 0; i < size; i++) {
-        buffer[i] = (byte) (I2C.wiringPiI2CRead(devicedata.deviceHandle) & 0xFF);
-        ++bytesRead;
-      }
-    } else {
-      try {
-        bytesRead = devicedata.device.read(buffer, 0, buffer.length);
-      } catch (IOException e) {
-        error("i2c could not read");
-        log.error("i2cRead threw", e);
-      }
+    try {
+      bytesRead = devicedata.device.read(buffer, 0, buffer.length);
+    } catch (IOException e) {
+      error("i2c could not read");
+      log.error("i2cRead threw", e);
     }
     return bytesRead;
   }
@@ -337,20 +305,10 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       devicedata = i2cDevices.get(key);
     }
 
-    if (wiringPi) {
-      int reg = buffer[0] & 0xFF;
-      for (int i = 1; i < size; i++) {
-        int value = buffer[i] & 0xFF;
-        log.debug(String.format("writing to register {} value {}", reg, value));
-        I2C.wiringPiI2CWriteReg8(devicedata.deviceHandle, reg, value);
-        reg++;
-      }
-    } else {
-      try {
-        devicedata.device.write(buffer, 0, size);
-      } catch (IOException e) {
-        log.error("i2cWrite threw input {} {} {} {}", busAddress, deviceAddress, buffer, size, e);
-      }
+    try {
+      devicedata.device.write(buffer, 0, size);
+    } catch (IOException e) {
+      log.error("i2cWrite threw input {} {} {} {}", busAddress, deviceAddress, buffer, size, e);
     }
   }
 
@@ -367,21 +325,23 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       devicedata = i2cDevices.get(key);
     }
 
-    if (wiringPi) {
-      for (int i = 0; i < readSize; i++) {
-        readBuffer[i] = (byte) (I2C.wiringPiI2CReadReg8(devicedata.deviceHandle, (writeBuffer[0] + i) & 0xFF));
-        log.debug("Read register {} value {}", (writeBuffer[0] + i) & 0xFF, readBuffer[i]);
-      }
-    } else {
-      try {
-        devicedata.device.read(writeBuffer, 0, writeBuffer.length, readBuffer, 0, readBuffer.length);
-      } catch (IOException e) {
-        Logging.logError(e);
-      }
+    try {
+      devicedata.device.read(writeBuffer, 0, writeBuffer.length, readBuffer, 0, readBuffer.length);
+    } catch (IOException e) {
+      Logging.logError(e);
     }
     return readBuffer.length;
   }
 
+  // shouldn't the pin mode be a string?
+  // shouldn't the pin be a string like "GPIO17"
+  /**
+   * Sets the pin mode to Input or Output
+   * @param pin
+   * @param mode
+   *      INPUT = 0x0.
+   *      Output = 0x1.
+   */
   public void pinMode(int pin, int mode) {
 
     PinDefinition pinDef = addressIndex.get(pin);
@@ -414,7 +374,15 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   }
 
   // FIXME - return array
-  // FIXME - return array
+  /**
+   * Starts a scan of the I2C specified and returns a list of addresses that responded.
+   * This command send a wread and write request with do data to each address.
+   * Deviced on the address should respond with an ACK flag as part of the protocol.
+   * Each responding device address is added to a list that is returned when the scan is complete.
+   * @param busAddress
+   * @return
+   *      List of devices.
+   */
   public Integer[] scanI2CDevices(int busAddress) {
     log.info("scanning through I2C devices");
     ArrayList<Integer> list = new ArrayList<Integer>();
@@ -450,19 +418,6 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
 
     Integer[] ret = list.toArray(new Integer[list.size()]);
     return ret;
-  }
-
-  /**
-   * Forces usage of wiringPi library (
-   * http://wiringpi.com/reference/i2c-library/ )
-   * 
-   * @param status
-   *          wiring status for the pi
-   * 
-   */
-  @Deprecated
-  public void setWiringPi(boolean status) {
-    this.wiringPi = status;
   }
 
   @Override
@@ -625,6 +580,9 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     return config;
   }
 
+  // What does this function do other than return what was passed to it?
+  // config is created and set but is not used anywhere.
+  // Can we remove it?
   public ServiceConfig apply(ServiceConfig c) {
     RasPiConfig config = (RasPiConfig) c;
     return c;
