@@ -29,7 +29,12 @@ bool MrlNeopixel::attach(byte pin, int count, byte depth)
   // initialization
   previousWaitMs = millis();
   numPixels = count;
-  strip = new Adafruit_NeoPixel(count, pin, NEO_GRB + NEO_KHZ800);
+  if(depth == 4)
+  {
+    strip = new Adafruit_NeoPixel(count, pin, NEO_GRBW + NEO_KHZ800);
+  } else{
+    strip = new Adafruit_NeoPixel(count, pin, NEO_GRB + NEO_KHZ800);
+  }
   strip->begin();
   color = Adafruit_NeoPixel::Color(0, 110, 0, 0);
   wait = 1000;
