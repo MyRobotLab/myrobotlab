@@ -222,6 +222,15 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
 
     config.controller = this.controller;
 
+    if (syncedServos.size() > 0) {
+        config.synced = new String[syncedServos.size()];
+        int i = 0;
+        for (String s : syncedServos) {
+            config.synced[i] = s;
+            ++i;
+        }
+    }
+
     return config;
   }
 
@@ -252,6 +261,13 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
     speed = config.speed;
     sweepMax = config.sweepMax;
     sweepMin = config.sweepMin;
+    
+    if (config.synced != null) {
+        syncedServos.clear();
+        for (String s: config.synced) {
+           syncedServos.add(s);    
+        }
+    }
 
     // rest = config.rest;
     if (config.rest != null) {
