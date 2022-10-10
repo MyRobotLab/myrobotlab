@@ -129,9 +129,6 @@ public class Plan {
     this.peers.put(name, peers);
     if (peers != null) {
       for (String peerKey: peers.keySet()) {
-        if (peerKey.contains("3")) {
-          log.info("here");
-        }
         addPeerConfig(peerKey);
       }
     }
