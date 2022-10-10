@@ -104,12 +104,12 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
             console.info('onRequest', textData)
             $scope.$apply()
             break
-        case 'onRaw':
+        case 'onResponse':
             var textData = data
             $scope.chatLog.unshift({
                 type: 'Bot',
                 name: $scope.service.currentBotName,
-                text: $sce.trustAsHtml(textData)
+                text: $sce.trustAsHtml(data.msg)
             })
             $scope.lastResponse = textData
             $scope.$apply()
@@ -227,6 +227,9 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     }
 
     $scope.getProperties = function() {
+        if (!$scope.getBotInfo()){
+            return null
+        }
         return $scope.getBotInfo()['properties']
     }
 
@@ -268,7 +271,8 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
 
     // subscribe to the response from programab.
     msg.subscribe('publishRequest')
-    msg.subscribe('publishRaw')
+    msg.subscribe('publishResponse')
+    // msg.subscribe('publishRaw')
     // msg.subscribe('publishText')
     msg.subscribe('publishLog')
     msg.subscribe('publishOOBText')

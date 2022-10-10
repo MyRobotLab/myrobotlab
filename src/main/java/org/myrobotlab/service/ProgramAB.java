@@ -335,7 +335,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
     // EEK! clean up the API!
     invoke("publishRequest", text); // publisher used by uis
-    invoke("publishResponse", response);
     invoke("publishRaw", response.msg);
 
     String msg = response.msg;
@@ -344,6 +343,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       msg = filter.processText(msg);
     }
 
+    response.msg = msg;
+    invoke("publishResponse", response);
     invoke("publishText", msg);
 
     return response;
@@ -1161,7 +1162,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
     for (BotInfo bot : bots.values()) {
 
-      Path pathAbsolute = Paths.get(bot.path.getPath());
+      Path pathAbsolute = Paths.get(bot.path.getAbsolutePath());
       Path pathBase = Paths.get(System.getProperty("user.dir"));
       Path pathRelative = pathBase.relativize(pathAbsolute);
       config.bots.add(pathRelative.toString());

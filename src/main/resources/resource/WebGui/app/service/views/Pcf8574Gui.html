@@ -7,16 +7,10 @@
             <form class="form-inline">
                 <attach options='options'/>
                 bus
-                
-                
-                
                 <select class="form-control" ng-model="service.deviceBus" ng-change="setBus()" ng-options="bus for bus in service.deviceBusList">
                     <option>{{bus}}</option>
                 </select>
                 address
-                
-                
-                
                 <select class="form-control" ng-model="service.deviceAddress" ng-change="setAddress()" ng-options="address for address in service.deviceAddressList">
                     <option>{{address}}</option>
                 </select>
@@ -38,7 +32,7 @@
     <tr ng-show="service.isAttached" data-ng-repeat="(pinKey, pinDef) in service.pinMap">
         <td>
             {{ pinDef.pin }} <!-- toggle ng-model="toggleValue" class="toggle-text" ng-change="changed()" size="btn-sm" on="write" off="read"></toggle -->
-            <toggle ng-model="toggleValue" class="toggle-text" ng-change="changed()" size="btn-sm" on="1" off="0" on-class="btn-success"></toggle>
+            <toggle ng-model="toggleValue" class="toggle-text" ng-change="changed(pinDef, toggleValue)" size="btn-sm" on="1" off="0" on-class="btn-success"></toggle>
             <span class="badge badge-secondary">{{pinDef.value}}</span>
             <!--
             <oscope id="oscope" service-name="{{service.name}}"></oscope>

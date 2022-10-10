@@ -11,8 +11,9 @@ import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.I2cMuxConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
@@ -64,10 +65,11 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
     try {
       I2cMux i2cMux = (I2cMux) Runtime.start("i2cMux", "I2CMux");
+      i2cMux.setDeviceBus("0");
       Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
   }
 
@@ -88,6 +90,12 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     return controllers;
   }
 
+  /**
+   * Sets the I2C Bus the i2cMux is attached to.
+   * @param deviceBus 
+   *        default is "1", range "0" - "7".
+   * 
+   */
   @Override
   public void setDeviceBus(String deviceBus) {
     if (isAttached) {
@@ -98,6 +106,12 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     broadcastState();
   }
 
+  /**
+   * Sets the I2C Address of the i2cMux device.
+   * @param deviceAddress
+   *        default "0x70"
+   *        range "0x70" - "0x77"
+   */
   @Override
   public void setDeviceAddress(String deviceAddress) {
     if (isAttached) {
@@ -108,10 +122,19 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     broadcastState();
   }
 
+  /**
+   * Returns the current state of the service, if attached returns true, false if it's not attached.
+   * @return
+   */
   public boolean isAttached() {
     return isAttached;
   }
 
+  /**
+   * Sets which bus future commands will be sent down.
+   * @param busAddress
+   *        Range 0 - 7
+   */
   public void setMuxBus(int busAddress) {
     if (busAddress != lastBusAddress) {
       byte bus[] = new byte[1];
@@ -161,11 +184,11 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     I2CDeviceMap devicedata = new I2CDeviceMap();
     String key = control.getName();
     if (i2cDevices.containsKey(key)) {
-      log.error("Device {} {} {} already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName());
+      log.error("Device {} {} {} already exists.", control.getBus(), control.getAddress(), control.getName());
     } else {
       devicedata.serviceName = key;
-      devicedata.busAddress = control.getDeviceBus();
-      devicedata.deviceAddress = control.getDeviceAddress();
+      devicedata.busAddress = control.getBus();
+      devicedata.deviceAddress = control.getAddress();
       i2cDevices.put(key, devicedata);
       control.attachI2CController(this);
     }
@@ -330,6 +353,28 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   @Override
   public String getAddress() {
     return deviceAddress;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    I2cMuxConfig config = new I2cMuxConfig();
+    config.bus = deviceBus;
+    config.address = deviceAddress;
+    config.i2cDevices = i2cDevices;
+    config.controller = controllerName;
+    return config;
+  }
+
+  @Override
+  public ServiceConfig apply(ServiceConfig c) {
+    I2cMuxConfig config = (I2cMuxConfig) c;
+    deviceBus = config.bus;
+    deviceAddress = config.address;
+    i2cDevices = config.i2cDevices;
+    if (config.controller != null) {
+      controllerName = config.controller;
+    }
+    return c;
   }
 
 }
