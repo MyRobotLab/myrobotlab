@@ -55,7 +55,11 @@ public class Rekognition extends Service {
   }
 
   public void setMinConfidence(float confidence) {
+    this.minConfidence = confidence;
+  }
 
+  public float getMinConfidence() {
+    return minConfidence;
   }
 
   /**

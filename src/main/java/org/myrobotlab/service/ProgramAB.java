@@ -2,6 +2,8 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,7 @@ import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.LogPublisher;
 import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
+import org.myrobotlab.service.interfaces.TextFilter;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.myrobotlab.service.interfaces.UtteranceListener;
@@ -63,18 +66,16 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   private static final String LEARNF_AIML_FILE = "learnf.aiml";
 
   private static final long serialVersionUID = 1L;
-  
+
   /**
-   * useGlobalSession true will allow the sleep member to 
-   *  control session focus
+   * useGlobalSession true will allow the sleep member to control session focus
    */
   protected boolean useGlobalSession = false;
-  
+
   /**
-   * sleep 
-   * current state of the sleep if globalSession is used
-   *  true : ProgramAB is sleeping and wont respond
-   *  false : ProgramAB is not sleeping and any response requested will be processed
+   * sleep current state of the sleep if globalSession is used true : ProgramAB
+   * is sleeping and wont respond false : ProgramAB is not sleeping and any
+   * response requested will be processed
    */
   protected boolean sleep = false;
 
@@ -100,6 +101,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * default user name chatting with the bot
    */
   String currentUserName = "human";
+
+  List<String> filters = new ArrayList<>();
 
   /**
    * display processing and logging
@@ -314,6 +317,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     // attempt to create it
     if (session == null) {
       session = startSession(userName, botName);
+      if (session == null) {
+        error("username or bot name not valid %s %s", userName, botName);
+        return null;
+      }
     }
 
     // update the current session if we want to change which bot is at
@@ -328,8 +335,17 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
     // EEK! clean up the API!
     invoke("publishRequest", text); // publisher used by uis
+    invoke("publishRaw", response.msg);
+
+    String msg = response.msg;
+    for (String filterName : filters) {
+      TextFilter filter = (TextFilter) Runtime.getService(filterName);
+      msg = filter.processText(msg);
+    }
+
+    response.msg = msg;
     invoke("publishResponse", response);
-    invoke("publishText", response.msg);
+    invoke("publishText", msg);
 
     return response;
   }
@@ -551,6 +567,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    */
   public Response publishResponse(Response response) {
     return response;
+  }
+
+  public String publishRaw(String text) {
+    return text;
   }
 
   @Override
@@ -1141,7 +1161,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     config.utteranceListeners = listeners.toArray(new String[listeners.size()]);
 
     for (BotInfo bot : bots.values()) {
-      config.bots.add(bot.path.getPath());
+
+      Path pathAbsolute = Paths.get(bot.path.getAbsolutePath());
+      Path pathBase = Paths.get(System.getProperty("user.dir"));
+      Path pathRelative = pathBase.relativize(pathAbsolute);
+      config.bots.add(pathRelative.toString());
+
     }
 
     return config;
@@ -1164,11 +1189,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     if (config.currentUserName != null) {
       setCurrentUserName(config.currentUserName);
     }
-    
+
     // useGlobalSession = config.useGlobalSession;
 
     sleep = config.sleep;
-    
+
     setCurrentSession(currentUserName, currentBotName);
 
     // This is "good" in that its using the normalized data from subscription
@@ -1182,6 +1207,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     if (config.utteranceListeners != null) {
       for (String local : config.utteranceListeners) {
         attachUtteranceListener(local);
+      }
+    }
+
+    if (config.textFilters != null) {
+      for (String filter : config.textFilters) {
+        filters.add(filter);
       }
     }
 
@@ -1318,14 +1349,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       error(e);
     }
   }
-  
+
   /**
    * wakes the global session up
    */
   public void wake() {
     sleep = false;
   }
-  
+
   /**
    * sleeps the global session
    */
@@ -1355,7 +1386,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       log.info("Don't talk to myself.");
       return;
     }
-    
 
     boolean shouldIRespond = false;
     // always respond to direct messages.

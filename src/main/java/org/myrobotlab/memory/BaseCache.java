@@ -24,8 +24,8 @@ public abstract class BaseCache implements ManagedCache {
    * Internal method for BaseCache to actually add items to the implementing
    * cache.
    * 
-   * @param name
-   * @param value
+   * @param name - add class name
+   * @param value - value
    */
   protected abstract void addToCache(String name, Object value);
 
@@ -410,8 +410,8 @@ public abstract class BaseCache implements ManagedCache {
   /**
    * Add a value to the cache.
    * 
-   * @param name
-   *          cannot be null or empty
+   * @param name cannot be null or empty
+   *          
    */
   @Override
   public void put(String name, Object value) {
@@ -425,7 +425,7 @@ public abstract class BaseCache implements ManagedCache {
    * Internal method for BaseCache to actually remove items from the
    * implementing cache.
    * 
-   * @param name
+   * @param name class name
    */
   protected abstract void removeFromCache(String name);
 

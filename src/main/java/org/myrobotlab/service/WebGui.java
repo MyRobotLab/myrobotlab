@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
@@ -386,7 +387,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
         cipherSuite = new String[] { "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA", "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256" };
         SelfSignedCertificate ssc = new SelfSignedCertificate();
-        // deprecated -> SslContext sslCtx = SslContext.newServerContext(ssc.certificate(), ssc.privateKey());
+        // deprecated -> SslContext sslCtx =
+        // SslContext.newServerContext(ssc.certificate(), ssc.privateKey());
         SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey());
         // SslContextBuilder.forServer(keyManager).clientAuth(ClientAuth.REQUIRE).trustManager(trustManager).build();
         configBuilder.sslContext(createSSLContext2());// .sslContext(sslCtx);
@@ -566,21 +568,19 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       AtmosphereRequest request = r.getRequest();
 
-      String bodyData = null; 
+      String bodyData = null;
 
-// FIXME - REVERTED THIS BREAKS SERVICE LIST AND UI
-//      if (request.body() != null && !request.body().isEmpty()) {
-//        byte[] bytes = request.body().asBytes();
-//        if (bytes != null) {
-//          bodyData = new String(bytes);
-//        }
-//      }
-      
-      if (request.body() != null && !request.body().isEmpty()) {
+      if (request.body() != null && !request.body().isEmpty() /* && !apiKey.equals(CodecUtils.API_MESSAGES)*/) {
+        log.info("apiKey {}", apiKey);
         // body returns null after destroy
-        bodyData = new String(request.body().asString());
-      }      
-            
+        if (CodecUtils.API_MESSAGES.equals(apiKey)) {
+          bodyData = request.body().asString();
+        } else {
+          bodyData = new String(request.body().asBytes());
+        }
+
+      }
+
       request.destroy();
       String logData = null;
 
@@ -678,32 +678,37 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         }
         msg.setProperty("uuid", uuid);
 
-        Object ret = null;
+        Object ret = null; // isn't this required for blocking return?
 
         // check if we will execute it locally
         if (isLocal(msg)) {
-          log.debug("invoking local msg {}", msg.toString());
+          String serviceName = null;
+          try {
+            log.debug("invoking local msg {}", msg.toString());
 
-          String serviceName = msg.getFullName();
-          Class<?> clazz = Runtime.getClass(serviceName);
-          if (clazz == null) {
-            log.error("cannot derive local type from service {}", serviceName);
+            serviceName = msg.getFullName();
+            Class<?> clazz = Runtime.getClass(serviceName);
+            if (clazz == null) {
+              log.error("cannot derive local type from service {}", serviceName);
+            }
+
+            Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
+
+            Method method = cache.getMethod(clazz, msg.method, params);
+            if (method == null) {
+              error("method cache could not find %s.%s(%s)", clazz.getSimpleName(), msg.method, msg.data);
+              return;
+            }
+
+            ServiceInterface si = Runtime.getService(serviceName);
+
+            // now asychronous
+            // ret = method.invoke(si, params);
+
+            inMsgQueue.add(si, method, params);
+          } catch (Exception e) {
+            error("local msg threw %s.%s.%s", serviceName, msg.method, e);
           }
-
-          Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
-
-          Method method = cache.getMethod(clazz, msg.method, params);
-          if (method == null) {
-            error("method cache could not find %s.%s(%s)", clazz.getSimpleName(), msg.method, msg.data);
-            return;
-          }
-
-          ServiceInterface si = Runtime.getService(serviceName);
-
-          // now asychronous
-          // ret = method.invoke(si, params);
-
-          inMsgQueue.add(si, method, params);
 
           // propagate return data to subscribers
           // si.out(msg.method, ret);
@@ -748,24 +753,26 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     @Override
     public void run() {
       isRunning = true;
-      try {
-        while (isRunning) {
+      while (isRunning) {
+        try {
           InvokeData data = inMsgQueue.poll(1, TimeUnit.SECONDS);
 
           if (data != null) {
             if (data.method == null) {
               log.error("method null %s", data);
               continue;
-            }            
+            }
             Object ret = data.method.invoke(data.si, data.params);
             data.si.out(data.method.getName(), ret);
           }
+        } catch (InterruptedException interrupt) {
+          log.info("shutting down");
+          isRunning = false;
+        } catch (Exception e) {
+          log.error("IncomingMessageQueue threw", e);
         }
-      } catch (InterruptedException interrupt) {
-        log.info("interrupted");
-      } catch (Exception e) {
-        log.error("IncomingMessageQueue threw", e);
-      }
+
+      } // while is running
 
       isRunning = false;
       worker = null;
@@ -1284,6 +1291,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       webgui.startService();
 
       Runtime.start("python", "Python");
+      Runtime.start("i01", "InMoov2");
 
       boolean done = true;
       if (done) {

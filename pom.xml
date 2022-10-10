@@ -171,12 +171,7 @@
 <!-- AzureTranslator end -->
 
 <!-- BodyPart begin -->
-  <dependency>
-    <groupId>org.apache.commons</groupId>
-    <artifactId>commons-lang3</artifactId>
-    <version>3.3.2</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
 <!-- BodyPart end -->
 
 <!-- BoofCv begin -->
@@ -300,6 +295,15 @@
   </dependency>
 <!-- DiscordBot end -->
 
+<!-- Docker begin -->
+  <dependency>
+    <groupId>com.github.docker-java</groupId>
+    <artifactId>docker-java</artifactId>
+    <version>3.2.13</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Docker end -->
+
 <!-- DocumentPipeline begin -->
   <dependency>
     <groupId>org.apache.tika</groupId>
@@ -355,6 +359,7 @@
     <version>1.2.0</version>
     <scope>provided</scope>
   </dependency>
+<!-- Duplicate entry for com.github.pnavais-state-machine-1.2.0 skipping -->
 <!-- FiniteStateMachine end -->
 
 <!-- Git begin -->
@@ -376,17 +381,22 @@
 <!-- GoogleCloud end -->
 
 <!-- GoogleSearch begin -->
+<!-- Duplicate entry for org.jsoup-jsoup-1.15.3 skipping -->
+<!-- GoogleSearch end -->
+
+<!-- HtmlFilter begin -->
   <dependency>
     <groupId>org.jsoup</groupId>
     <artifactId>jsoup</artifactId>
     <version>1.15.3</version>
     <scope>provided</scope>
   </dependency>
-<!-- GoogleSearch end -->
-
-<!-- HtmlFilter begin -->
-<!-- Duplicate entry for org.jsoup-jsoup-1.15.3 skipping -->
-<!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
+  <dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-lang3</artifactId>
+    <version>3.3.2</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- HtmlFilter end -->
 
 <!-- HtmlParser begin -->
@@ -407,17 +417,11 @@
 <!-- InMoov2 end -->
 
 <!-- IndianTts begin -->
-  <dependency>
-    <groupId>org.myrobotlab.audio</groupId>
-    <artifactId>voice-effects</artifactId>
-    <version>1.0</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
+<!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
 <!-- IndianTts end -->
 
 <!-- IntegratedMovement begin -->
-<!-- skipping fr.inmoov inmoov2 fr.inmoov-inmoov2-null null version/latest -->
+<!-- Duplicate entry for fr.inmoov-inmoov2-null skipping -->
 <!-- IntegratedMovement end -->
 
 <!-- JFugue begin -->
@@ -569,7 +573,13 @@
 <!-- LeapMotion end -->
 
 <!-- LocalSpeech begin -->
-<!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
+  <dependency>
+    <groupId>org.myrobotlab.audio</groupId>
+    <artifactId>voice-effects</artifactId>
+    <version>1.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
 <!-- LocalSpeech end -->
 
 <!-- MarySpeech begin -->
@@ -915,24 +925,9 @@
 <!-- Mqtt end -->
 
 <!-- MqttBroker begin -->
-  <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-core</artifactId>
-    <version>2.13.3</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-databind</artifactId>
-    <version>2.13.3</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-annotations</artifactId>
-    <version>2.13.3</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.13.3 skipping -->
   <dependency>
     <groupId>io.moquette</groupId>
     <artifactId>moquette-broker</artifactId>
@@ -1023,12 +1018,7 @@
     <scope>provided</scope>
   </dependency>
 <!-- Duplicate entry for org.bytedeco-javacpp-1.5.7 skipping -->
-  <dependency>
-    <groupId>com.github.sarxos</groupId>
-    <artifactId>webcam-capture-driver-v4l4j</artifactId>
-    <version>0.3.13-SNAPSHOT</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for com.github.sarxos-webcam-capture-driver-v4l4j-0.3.13-SNAPSHOT skipping -->
 <!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
   <dependency>
     <groupId>net.sf.jipcam</groupId>
@@ -1197,12 +1187,7 @@
       </exclusions>
   </dependency>
 <!-- Duplicate entry for org.json-json-20090211 skipping -->
-  <dependency>
-    <groupId>commons-io</groupId>
-    <artifactId>commons-io</artifactId>
-    <version>2.7</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for commons-io-commons-io-2.7 skipping -->
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-analyzers-common</artifactId>
@@ -1216,6 +1201,15 @@
     <scope>provided</scope>
   </dependency>
 <!-- ProgramAB end -->
+
+<!-- Py4j begin -->
+  <dependency>
+    <groupId>net.sf.py4j</groupId>
+    <artifactId>py4j</artifactId>
+    <version>0.10.9.7</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Py4j end -->
 
 <!-- Python begin -->
   <dependency>
@@ -1269,6 +1263,26 @@
     <groupId>com.google.code.gson</groupId>
     <artifactId>gson</artifactId>
     <version>2.8.5</version>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-core</artifactId>
+    <version>2.13.3</version>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-annotations</artifactId>
+    <version>2.13.3</version>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.13.3</version>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.module</groupId>
+    <artifactId>jackson-module-no-ctor-deser</artifactId>
+    <version>2.13.3</version>
   </dependency>
   <dependency>
     <groupId>org.apache.ivy</groupId>
@@ -1465,7 +1479,18 @@
         </exclusion>
       </exclusions>
   </dependency>
-<!-- Duplicate entry for commons-io-commons-io-2.7 skipping -->
+  <dependency>
+    <groupId>commons-io</groupId>
+    <artifactId>commons-io</artifactId>
+    <version>2.7</version>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
+        </exclusion>
+      </exclusions>
+  </dependency>
 <!-- Solr end -->
 
 <!-- Sphinx begin -->
@@ -1597,7 +1622,12 @@
 <!-- WebSocketConnector end -->
 
 <!-- Webcam begin -->
-<!-- Duplicate entry for com.github.sarxos-webcam-capture-driver-v4l4j-0.3.13-SNAPSHOT skipping -->
+  <dependency>
+    <groupId>com.github.sarxos</groupId>
+    <artifactId>webcam-capture-driver-v4l4j</artifactId>
+    <version>0.3.13-SNAPSHOT</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Webcam end -->
 
 <!-- WebkitSpeechSynthesis begin -->
@@ -1605,16 +1635,16 @@
 <!-- WebkitSpeechSynthesis end -->
 
 <!-- Wii begin -->
+<!-- Duplicate entry for wiiusej-wiiusej-wiiusej skipping -->
+<!-- Wii end -->
+
+<!-- WiiDar begin -->
   <dependency>
     <groupId>wiiusej</groupId>
     <artifactId>wiiusej</artifactId>
     <version>wiiusej</version>
     <scope>provided</scope>
   </dependency>
-<!-- Wii end -->
-
-<!-- WiiDar begin -->
-<!-- Duplicate entry for wiiusej-wiiusej-wiiusej skipping -->
 <!-- WiiDar end -->
 
 <!-- WikiDataFetcher begin -->
@@ -2056,4 +2086,3 @@
       <url>https://github.com/MyRobotLab/myrobotlab/issues</url>
   </issueManagement>
 </project>
- 
