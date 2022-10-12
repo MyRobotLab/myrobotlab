@@ -109,6 +109,7 @@ public class MouthControl extends Service implements SpeechListener {
     return "mouth movements or light flashing based on spoken text";
   }
 
+  @Override
   public synchronized void onStartSpeaking(String text) {
     if (neoPixel != null) {
       startMouthAnimation();

@@ -12,6 +12,8 @@ import java.util.UUID;
 //import com.ning.http.client.providers.netty.NettyAsyncHttpProviderConfig;
 
 import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClientConfig;
 import org.asynchttpclient.Dsl;
 import org.atmosphere.wasync.Client;
 import org.atmosphere.wasync.ClientFactory;
@@ -42,6 +44,11 @@ public class WsClient implements Decoder<String, Reader> {
 
   public AsyncHttpClient getAsyncClient() {
     
+    asc = new DefaultAsyncHttpClient(new DefaultAsyncHttpClientConfig.Builder()
+        .setMaxRequestRetry(0)
+        .setWebSocketMaxBufferSize(1024000)
+        .setWebSocketMaxFrameSize(1024000).build());
+    
 //    ClientFactory.getDefault().newClient();
 //    
 //    // Netty Config ..
@@ -62,7 +69,7 @@ public class WsClient implements Decoder<String, Reader> {
 //    AsyncHttpClientConfig config = b.setAsyncHttpClientProviderConfig(nettyConfig).build();
 //    AsyncHttpClient asc = new AsyncHttpClient(config);
     
-    asc = Dsl.asyncHttpClient();
+//     asc = Dsl.asyncHttpClient();
     
     return asc;
   }

@@ -38,20 +38,6 @@ public class InMoov2Head extends Service {
     super(n, id);
   }
   
-  /*autoStartPeers true - this is not needed
-  public void startService() {
-    super.startService();
-    
-    startPeer("jaw");
-    startPeer("eyeX");
-    startPeer("eyeY");
-    startPeer("rothead");
-    startPeer("neck");
-    startPeer("rollNeck");
-    
-  }
-  */
-
   public void blink() {
 
     // TODO: clean stop autoblink if tracking ...

@@ -767,8 +767,17 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
     try {
 
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+      
       InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
       i01.startPeer("rightHand");
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
 
       ServoController controller = (ServoController) Runtime.getService("i01.right");
 

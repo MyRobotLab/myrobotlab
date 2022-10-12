@@ -1,25 +1,5 @@
-.MixerServoName {
-    color: #888888;
-    font-weight: bold;
-    font-size: medium;
-    width: 100%;
-    height: 20px;
-    float: left;
-    margin-right: 0px;
-    overflow: hidden;
-    background-color: transparent;
-}
 
-.sliderMixer {
-    width: 365px;
-    float: left;
-    padding-right: 6px;
-    margin-right: 40px;
-    /* background-color: antiquewhite; */
-    padding-bottom: 20px;
-    padding-top: 10px;
-    border-bottom: 1px solid #afe1ec;
-}
+
 
 .popover {
     width: auto!important;
@@ -581,7 +561,7 @@ table, th, td {
     padding-right: 6px;
     margin-right: 40px;
     padding-top: 0px;
-    border-bottom: 1px solid #afe1ec;
+    /*border-bottom: 1px solid #afe1ec;*/
 }
 
 .restMixer {
@@ -796,25 +776,30 @@ table, th, td {
     align-content: space-between;
 }
 
-.rzMixer .dropdown-toggle {
-    display: none;
-}
 
 .poseName {
     width: 168px !important;
     height: 24px !important;
 }
 
-.MixerServoName {
+
+.servo-mixer-name {
     color: #888888;
     font-weight: bold;
     font-size: medium;
     width: 100%;
     height: 20px;
-    float: left;
     margin-right: 0px;
     overflow: hidden;
     background-color: transparent;
+}
+
+.servo-mixer-value {
+    color: #888888;
+    font-weight: bold;
+    font-size: medium;
+    float: right;
+    height: 20px;
 }
 
 .MixerServo {
@@ -3065,4 +3050,25 @@ toggle.toggle-text .toggle-handle {
 
 .table-method td {
     padding: 5px;
+}
+
+/* this hides the dropdown of servos in servomixer display */
+.rzMixer .dropdown-toggle {
+    display: none;
+}
+
+.servomixer-hidden .tab-header{
+    display: none;
+}
+
+.servomixer-hidden .max-view {
+    display: none;
+}
+
+.servomixer-hidden .min-view {
+    display: block;
+}
+
+.min-view {
+    display: none;
 }

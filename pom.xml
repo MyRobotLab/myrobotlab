@@ -140,12 +140,27 @@
   
 <dependencies>
 
+
+
 <!-- https://mvnrepository.com/artifact/net.sf.py4j/py4j -->
 <dependency>
     <groupId>net.sf.py4j</groupId>
     <artifactId>py4j</artifactId>
     <version>0.10.9.7</version>
 </dependency>
+
+<dependency>
+    <groupId>io.vertx</groupId>
+    <artifactId>vertx-core</artifactId>
+    <version>4.3.4</version>
+</dependency>
+
+<dependency>
+    <groupId>io.vertx</groupId>
+    <artifactId>vertx-web</artifactId>
+    <version>4.3.4</version>
+</dependency>
+
 
 
 <!-- AudioFile begin -->

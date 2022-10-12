@@ -405,4 +405,32 @@ public class MetaData implements Serializable {
       log.error("key {} does not for peer", key);
     }
   }
+
+  public ServiceReservation getPeerFromActualName(String parentName, String fullname) {
+    
+    // filter off name{@id} because this definition is "only" local
+    if (fullname == null) {
+      return null;
+    }
+    
+    String name = null;
+    // take parent prefix off
+    if (fullname.startsWith(parentName + ".")) {
+      name = fullname.replace(parentName + ".", "");
+    }
+    
+    // two ways we can find a match
+    // 1st and most common is if this is simply default with the key
+    if (peers.containsKey(name)){
+      ServiceReservation peer = peers.get(name);
+      return peer;
+    }
+    
+    for (ServiceReservation peer: peers.values()) {
+      if (fullname.equals(peer.actualName)) {
+        return peer;
+      }
+    }
+    return null;
+  }
 }
