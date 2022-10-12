@@ -32,6 +32,7 @@ public class MrlDiscordBotListener extends ListenerAdapter {
     utterance.ts = System.currentTimeMillis();
     utterance.id = event.getMessage().getId();
     
+    
     // Author of the message.
     utterance.username = event.getAuthor().getName();
     utterance.isBot = event.getAuthor().isBot();
@@ -43,6 +44,7 @@ public class MrlDiscordBotListener extends ListenerAdapter {
     // get the response channel and add it to the utterance
     MessageChannel channel = event.getChannel();
     utterance.channel = channel.getId();
+    utterance.channelName = channel.getName();
     utterance.channelType = channel.getType().toString();
     // copy the name of the bot in the channel that is being used to
     // communicate.

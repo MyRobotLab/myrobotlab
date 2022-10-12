@@ -3,7 +3,7 @@ package org.myrobotlab.service.interfaces;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer.ListeningEvent;
 
-public interface SpeechRecognizer extends NameProvider, TextPublisher, LocaleProvider, SpeechListener {
+public interface SpeechRecognizer extends NameProvider, TextPublisher, LocaleProvider, SpeechListener, AudioListener {
 
   /**
    * This method should listen for Mouth events

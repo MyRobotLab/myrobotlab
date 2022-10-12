@@ -13,7 +13,7 @@ public interface SearchPublisher extends TextPublisher, LocaleProvider {
 
   SearchResults search(String searchText) throws IOException;
 
-  List<String> imageSearch(String searchText);
+  List<ImageData> imageSearch(String searchText);
 
   SearchResults publishResults(SearchResults results);
 

@@ -22,7 +22,7 @@ public class ProgramABMeta extends MetaData {
     // add Wikipedia local search !!
     addPeer("search", "Wikipedia", "replacement for handling pannous sriax requests");
     
-    addPeer("htmlFilter", "HtmlFilter");
+    // addPeer("htmlFilter", "HtmlFilter");
 
 
     // TODO: renamed the bots in the program-ab-data folder to prefix them so we
@@ -57,9 +57,8 @@ public class ProgramABMeta extends MetaData {
     Plan plan = new Plan(name);
     // load default peers from meta here
     plan.putPeers(name, peers);
-    programAb.textFilters = new String[] {name + ".htmlFilter"};
+//    programAb.textFilters = new String[] {name + ".htmlFilter"};
     plan.addConfig(programAb);
-
     return plan;
 
   }

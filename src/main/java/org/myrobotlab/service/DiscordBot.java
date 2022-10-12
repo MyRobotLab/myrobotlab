@@ -287,7 +287,6 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
 
       // Brief example of starting a programab chatbot and connecting it to
       // discord
-
       LoggingFactory.getInstance().setLevel("INFO");
 
       Runtime.startConfig("mrturing");

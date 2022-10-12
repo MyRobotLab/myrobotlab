@@ -9,6 +9,7 @@ import org.myrobotlab.service.InMoov2;
 import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.FiniteStateMachineConfig;
+import org.myrobotlab.service.config.HtmlFilterConfig;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.JMonkeyEngineConfig;
 import org.myrobotlab.service.config.MarySpeechConfig;
@@ -44,6 +45,7 @@ public class InMoov2Meta extends MetaData {
     addPeer("fsm", "FiniteStateMachine");
     addPeer("head", "InMoov2Head");
     addPeer("headTracking", "Tracking");
+    addPeer("htmlFilter", "HtmlFilter");
     addPeer("imageDisplay", "ImageDisplay");
     addPeer("leap", "LeapMotion");
     addPeer("left", "Arduino");
@@ -93,8 +95,11 @@ public class InMoov2Meta extends MetaData {
         }
       }
     }    
+    chatBot.textListeners = new String[] {name + ".htmlFilter"};
     chatBot.botDir = "data/ProgramAB";
-    chatBot.textListeners = new String[] {name + ".mouth"};
+
+    HtmlFilterConfig htmlFilter = (HtmlFilterConfig) plan.getPeerConfig("htmlFilter");
+    htmlFilter.textListeners = new String[] {name + ".mouth"};
     
     // FIXME - turns out subscriptions like this are not needed if they are in onStarted
     // == Peer - mouth =============================
@@ -234,6 +239,8 @@ public class InMoov2Meta extends MetaData {
     rm = new RandomMessageConfig(3000, 8000, 85.0, 95.0, 88.0, 93.0, 70.0, 110.0);
     random.randomMessages.put(name + ".moveTorso", rm);
 
+
+    
     // == Peer - headTracking =============================
     TrackingConfig headTracking = (TrackingConfig) plan.getPeerConfig("headTracking");
 
