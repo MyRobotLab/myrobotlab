@@ -1,183 +1,151 @@
-<div class="col-md-12">
-    <div class="dropdown">
-        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
-            <img ng-src="{{::service.simpleName}}.png" alt="" width="32">
-            &nbsp;&nbsp {{::service.simpleName}}&nbsp;&nbsp;{{::service.name}}@{{::service.id}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{::service.serviceVersion}}<span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu">
-            <li class="dropdown-header">service functions</li>
-            <li>
-                <a href="http://myrobotlab.org/service/{{::service.simpleName}}" target="_blank" ng-click="servicemenuDropdownOpen = false">
-                    <i class="glyphicon glyphicon-question-sign"></i>
-                    &nbsp;&nbsp;help
-                </a>
-            </li>
-            <li>
-                <a href="" ng-click="servicemenuDropdownOpen = false;msg.releaseService()">
-                    <i class="glyphicon glyphicon-remove"></i>
-                    &nbsp;&nbsp;release                
-                </a>
-            </li>
-            <li>
-                <a href="" ng-click="servicemenuDropdownOpen = false;msg.broadcastState()">
-                    <i class="glyphicon glyphicon-refresh"></i>
-                    &nbsp;&nbsp;refresh
-                </a>
-            </li>
-            <li>
-                <a href="" target="_blank" width="100%">
-                    <i class="glyphicon glyphicon-equalizer"></i>                
-                    <span ng-show="!parentPanel.showPeerTable" ng-click="showPeers(true)">&nbsp;&nbsp;show peers</span>                 
-                    <span ng-show="parentPanel.showPeerTable" ng-click="showPeers(false)">&nbsp;&nbsp;hide peers</span>                 
-                </a>
-            </li>
-            <li>
-                <a href="" target="_blank">
-                    <i class="glyphicon glyphicon-chevron-down"></i>                
-                    <span ng-show="!service.isVirtual" ng-click="toggleVirtual(true)">&nbsp;&nbsp;virtualization on</span>                 
-                    <span ng-show="service.isVirtual" ng-click="toggleVirtual(false)">&nbsp;&nbsp;virtualization off</span>                 
-                </a>
-            </li>
-            <li>
-                <a href="" target="_blank" ng-click="export()">
-                    <i class="glyphicon glyphicon-save-file"></i>
-                    &nbsp;&nbsp;save service
-                </a>
-            </li>
-            <li>
-                <a href="" target="_blank" ng-click="saveDefault()">
-                    <i class="glyphicon glyphicon-save-file"></i>
-                    &nbsp;&nbsp;save default                
-                </a>
-            </li>
-          
-            <li class="divider"></li>
-            <li class="dropdown-header">json</li>
-                      <li>
-                <!-- a href="" target="_blank" ng-click="showProperties=!showProperties" -->
-                <a href="/api/service/{{::service.name}}" target="_blank">
-                    <i class="glyphicon glyphicon-list-alt"></i>
-                    &nbsp;&nbsp;properties            
-                </a>
-            </li>
-            <li>
-                <!-- a href="" target="_blank" ng-click="showMethods=!showMethods" -->
-                <a href="/api/service/{{::service.name}}/" target="_blank">
-                    <i class="glyphicon glyphicon-list-alt"></i>
-                    &nbsp;&nbsp;methods
-                </a>
-            </li>
-             <li>
-                <!-- a href="" target="_blank" ng-click="showMethods=!showMethods" -->
-                <a href="/api/service/runtime/getNotifyEntries" target="_blank">
-                    <i class="glyphicon glyphicon-list-alt"></i>
-                    &nbsp;&nbsp;subscriptions
-                </a>
-            </li>           
-        </ul>
-    </div>
-</div>
-
-<!-- ================= begin peers ================== -->
-<div ng-show="parentPanel.showPeerTable">
-<table class="table table-sm">
-  <thead>
-    <tr>
-      <th scope="col"></th>
-      <th scope="col"></th>
-      <th scope="col">key</th>
-      <th scope="col">name</th>
-      <th scope="col">type</th>
-      <th scope="col"></th>
-      <th scope="col">
-          state
-          <div class="btn-group" uib-dropdown>
-            <button id="split-button" type="button" ng-class="{'btn':true, 'btn-success':value.state == 'started'}">action</button>
-            <button type="button" ng-class="{'btn':true, 'btn-success':value.state == 'started'}" uib-dropdown-toggle>
-                <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu" uib-dropdown-menu role="menu">
-                <li role="menuitem">
-                    <a href="#">edit</a>
-                </li>
-                <li role="menuitem">
-                    <a href="#">create</a>
-                </li>
-                <li role="menuitem">
-                    <button type="button" ng-click="msg.startPeer(key)" class="btn btn-success btn-block">start</button>
-                </li>
-                <li role="menuitem">
-                    <a href="#">stop</a>
-                </li>
-                <li role="menuitem">
-                    <button type="button" ng-click="msg.releasePeer(key)" class="btn btn-secondary btn-block">release</button>
-                </li>
-            </ul>
-        </div>
-  </th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr ng-repeat="(key, value) in service.serviceType.peers">
-    <td>
-        <input type="checkbox" value="" id="flexCheckDefault">    
-    </td>
-      <td><img ng-src="/{{value.type + '.png'}}" width="16"></td>
-      <td>{{value.key}}</td>
-      <!-- <td>{{value.actualName}}</td>
-      <td>{{value.type}}</td>
-      <td></td> -->
-      <td>{{value.state}}</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<!-- ================= end peers ================== -->
-
-
-
-<!--  BAD IDEA - turns out all these vars are attached to the scope - and updates from servo position cause horrendous slowness in updating the gui !!!
-
-<div ng-show="showProperties">
-    <h3>properties <a href="/api/service/{{::service.name}}" target="_blank">json</a> </h3>
-    <table class="table table-striped">
-        <tr ng-repeat="(key, value) in properties">
-            
-            <td>{{value[0]}}</td>
-            <td ng-show="statusControlMode=='status'">{{value[1]}}</td>
-            <td ng-show="statusControlMode!='status'">
-                <input type="text">
+<div class="tab-header col-md-12">
+    <table>
+        <tr>
+            <td valign="top">
+                <button class="btn btn-default" ng-click="mrl.goBack()" title="back">
+                    <span class="glyphicon glyphicon-arrow-left"></span>
+                </button>
             </td>
             <td>
-           
-            {{value[2]}}
-                    </td>
+                <div class="dropdown">
+                    <button class="btn btn-default  dropdown-toggle" type="button" data-toggle="dropdown">
+                        <img ng-src="{{::service.simpleName}}.png" alt="" width="16">
+                        &nbsp;&nbsp {{::service.simpleName}}&nbsp;&nbsp;{{::service.name}}@{{::service.id}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{::service.serviceVersion}}<span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-header">service functions</li>
+                        <li>
+                            <a href="http://myrobotlab.org/service/{{::service.simpleName}}" target="_blank" ng-click="servicemenuDropdownOpen = false">
+                                <i class="glyphicon glyphicon-question-sign"></i>
+                                &nbsp;&nbsp;help
+                            </a>
+                        </li>
+                        <li>
+                            <a href="" ng-click="servicemenuDropdownOpen = false;msg.releaseService()">
+                                <i class="glyphicon glyphicon-remove"></i>
+                                &nbsp;&nbsp;release
+                            </a>
+                        </li>
+                        <li>
+                            <a href="" ng-click="servicemenuDropdownOpen = false;msg.broadcastState()">
+                                <i class="glyphicon glyphicon-refresh"></i>
+                                &nbsp;&nbsp;refresh
+                            </a>
+                        </li>
+                        <li>
+                            <a href="" target="_blank" width="100%">
+                                <i class="glyphicon glyphicon-equalizer"></i>
+                                <span ng-show="!parentPanel.showPeerTable" ng-click="showPeers(true)">&nbsp;&nbsp;show peers</span>
+                                <span ng-show="parentPanel.showPeerTable" ng-click="showPeers(false)">&nbsp;&nbsp;hide peers</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="" target="_blank">
+                                <i class="glyphicon glyphicon-chevron-down"></i>
+                                <span ng-show="!service.isVirtual" ng-click="toggleVirtual(true)">&nbsp;&nbsp;virtualization on</span>
+                                <span ng-show="service.isVirtual" ng-click="toggleVirtual(false)">&nbsp;&nbsp;virtualization off</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="" target="_blank" ng-click="export()">
+                                <i class="glyphicon glyphicon-save-file"></i>
+                                &nbsp;&nbsp;save service
+                            
+                            
+                            </a>
+                        </li>
+                        <li>
+                            <a href="" target="_blank" ng-click="saveDefault()">
+                                <i class="glyphicon glyphicon-save-file"></i>
+                                &nbsp;&nbsp;save default
+                            
+                            
+                            </a>
+                        </li>
+                        <li class="divider"></li>
+                        <li class="dropdown-header">json</li>
+                        <li>
+                            <!-- a href="" target="_blank" ng-click="showProperties=!showProperties" -->
+                            <a href="/api/service/{{::service.name}}" target="_blank">
+                                <i class="glyphicon glyphicon-list-alt"></i>
+                                &nbsp;&nbsp;properties
+                            
+                            
+                            </a>
+                        </li>
+                        <li>
+                            <!-- a href="" target="_blank" ng-click="showMethods=!showMethods" -->
+                            <a href="/api/service/{{::service.name}}/" target="_blank">
+                                <i class="glyphicon glyphicon-list-alt"></i>
+                                &nbsp;&nbsp;methods
+                            
+                            
+                            </a>
+                        </li>
+                        <li>
+                            <!-- a href="" target="_blank" ng-click="showMethods=!showMethods" -->
+                            <a href="/api/service/runtime/getNotifyEntries" target="_blank">
+                                <i class="glyphicon glyphicon-list-alt"></i>
+                                &nbsp;&nbsp;subscriptions
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </td>
+            <td>
+                <button class="btn btn-default" ng-click="export()" title="save configuration">
+                    <span class="glyphicon glyphicon-save-file"></span>
+                </button>
+            </td>
+            <td>
+                <button class="btn btn-default" ng-click="apply()" title="load and apply configuration">
+                    <span class="glyphicon glyphicon-open-file"></span>
+                </button>
+            </td>
+
         </tr>
     </table>
+    <div ng-show="parentPanel.showPeerTable">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th scope="col">key</th>
+                    <th scope="col">name</th>
+                    <th scope="col">state</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="(key, value) in service.serviceType.peers">
+                    <td>
+                        <span>
+                            {{peer.getActualName(service, key)}}xxx
+                        
+                        
+                            
+                            
+                        
+                            <a href="" ng-click="mrl.changeTab(peer.getActualName(service, key))">
+                                <img ng-src="/{{value.type + '.png'}}" width="48">
+                            </a>
+                        </span>
+                    </td>
+                    <td>
+                        {{value.key}}<br/>{{value.type}}
+    
+                
+                
+                    
+                    
+                
+                    </td>
+                    <td>{{value.state}}</td>
+                    <td>
+                        <toggle width="30" height="28" ng-model="service['is' + key[0].toUpperCase() + key.substring(1) + 'Started']" ng-change="service['is' + key[0].toUpperCase() + key.substring(1) + 'Started']?startPeer(key):releasePeer(key)" on="" off=""/>
+                    </td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
-<div ng-show="showMethods">
-    <h3>methods  <a href="/api/service/{{::service.name}}/" target="_blank">json</a> </h3>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Function</th>
-                <th>Arguments</th>
-                <th>Return type</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{name}}                            
-            
-            <tr ng-repeat="(key, value) in msg._interface.temp.methodMap track by $index">
-                <td>{{value.name}}</td>
-                <td>
-                    <div ng-repeat="arg in value.parameterTypeNames track by $index">
-                        {{arg}}<br>
-                    </div>
-                </td>
-                <td>{{value.returnTypeName}}</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
--->

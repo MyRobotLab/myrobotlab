@@ -7,7 +7,6 @@ import org.myrobotlab.discord.MrlDiscordBotListener;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.DiscordBotConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.ImageData;

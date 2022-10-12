@@ -61,9 +61,9 @@ sleep(4)
 
 # create a new track named "priority"
 # and have the short beeps repeat 8 times
+
 audioPlayer.setTrack("priority")
 audioPlayer.repeat("resource/AudioFile/well.wav", 8)
-
 
 # make a new beep track and play r2d2 noises
 audioPlayer.setTrack("beepTrack")
@@ -99,7 +99,9 @@ audioPlayer.addPlaylist('my list', 'resource/AudioFile')
 player.startPlaylist('my list')
 
 # repeat good evening in the foreground 3 times
+
 audioPlayer.repeat("resource/AudioFile/good_evening.wav", 3)
+
 
 # silence everything
 player.silence()
