@@ -2139,16 +2139,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * Connect to the MRL instance at {@link CmdOptions#connect} in {@link #options}.
-   * 
-   * @see #connect(String)
-   * @throws IOException
-   */
-  public void connect() throws IOException {
-    connect(options.connect); // FIXME - 0 to many
-  }
-
-  /**
    * Disconnect from remote process.
    * FIXME - not implemented
    * @throws IOException Unknown
@@ -2454,7 +2444,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     if (name == null && type == null) {
       RuntimeConfig rconfig = (RuntimeConfig) Runtime.getInstance().readServiceConfig(configName, "runtime");
       if (rconfig == null) {
-        log.error("name null type null and rconfig null");
+        log.error("request to start but config %s does not exist", configName);
         return null;
       }
       for (String rname : rconfig.registry) {

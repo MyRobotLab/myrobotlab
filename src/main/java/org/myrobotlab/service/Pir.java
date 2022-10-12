@@ -17,22 +17,43 @@ public class Pir extends Service implements PinListener {
 
   private static final long serialVersionUID = 1L;
 
+  /**
+   * Name of the controller containing the pin to be used.
+   * Example "arduino".
+   */
   String controllerName;
 
   /**
    * yep there are 3 states to a binary sensor true/false .... and unknown - we
-   * start with "unknown"
+   * start with "unknown".
+   * true = Sensing movement.
+   * false = not sensing movement.
+   * null = unknown, either disabled ot not polled after enabled.
    */
   Boolean active = null;
 
+  /**
+   * This is either true or false.
+   * When false, active should be null.
+   */
   boolean isEnabled = false;
 
+  /**
+   * The pin to be used as a string. 
+   * Example "D4" or "A0".
+   */
   String pin;
 
   transient PinArrayControl pinControl;
 
+  /**
+   * Poll rate in Hz
+   */
   int rateHz = 1;
 
+  /**
+   * Timestamp of the last poll.
+   */
   Long lastChangeTs = null;
 
   public Pir(String n, String id) {
@@ -86,7 +107,7 @@ public class Pir extends Service implements PinListener {
     } else {
       error("do not know how to detach to %s of type %s", name, si.getSimpleName());
     }
-    active = false;
+    active = null;
     isEnabled = false;
     broadcastState();
   }
@@ -118,6 +139,11 @@ public class Pir extends Service implements PinListener {
     }
   }
 
+  /**
+   * Disables the sensor preventing it from polling the input pin.
+   * As a result of disabling the polling, the current state will be null as it will be an unknown state.
+   * 
+   */
   public void disable() {
     if (pinControl == null) {
       error("pin control not set");
@@ -129,17 +155,26 @@ public class Pir extends Service implements PinListener {
       return;
     }
 
-    // FixMe - sendTo(pincontrolName,"disablePin", pin)
+    // FIXME - use pinListener pub/sub
     pinControl.disablePin(pin);
     isEnabled = false;
-    active = false;
+    active = null;
     broadcastState();
   }
 
+  /**
+   * Enables polling at the preset poll rate.
+   */
   public void enable() {
     enable(rateHz);
   }
 
+  /**
+   * Enables polling at the set rate.
+   * 
+   * @param pollBySecond
+   *        rateHz
+   */
   public void enable(int pollBySecond) {
     if (pinControl == null) {
       error("pin control not set");
@@ -151,6 +186,7 @@ public class Pir extends Service implements PinListener {
       return;
     }
 
+    rateHz = pollBySecond;
     pinControl.enablePin(pin, pollBySecond);
     isEnabled = true;
     broadcastState();
@@ -174,14 +210,32 @@ public class Pir extends Service implements PinListener {
     return pin;
   }
 
+  /**
+   * returns the current poll rate in Hz.
+   * @return
+   *    Hz
+   */
   public int getRate() {
     return rateHz;
   }
 
+  /**
+   * Returns the current state of the input.
+   * @return
+   *        true = Sensor is detecting movement.
+   *        false = Sensor is not detecting movement.
+   *        null = Unknown state, the sensor may be disable or has not yet polled.
+   */
   public boolean isActive() {
     return active;
   }
 
+  /**
+   * Returns the current Enable state.
+   * @return
+   *        true = Enabled.
+   *        false = Disabled.
+   */
   public boolean isEnabled() {
     return isEnabled;
   }
@@ -235,6 +289,12 @@ public class Pir extends Service implements PinListener {
     return b;
   }
 
+  /**
+   * Sets the pin to use for the Input of the PIR service.
+   * @param pin
+   * A string representing the pin name.
+   * example "D4" or "A0".
+   */
   public void setPin(String pin) {
     this.pin = pin;
   }
@@ -245,10 +305,19 @@ public class Pir extends Service implements PinListener {
     controllerName = pinControl.getName();
   }
 
+  /**
+   * Sets the polling rate in Hz.
+   * @param rateHz
+   */
   public void setRate(int rateHz) {
     this.rateHz = rateHz;
   }
   
+  /**
+   * The time stamp of the last input poll.
+   * @return
+   * Long representing the timestamp.
+   */
   public Long getLastChangeTs() {
     return lastChangeTs;
   }

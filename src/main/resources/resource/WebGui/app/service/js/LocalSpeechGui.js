@@ -19,6 +19,11 @@ angular.module('mrlapp.service.LocalSpeechGui', []).controller('LocalSpeechGuiCt
         }
     }
 
+    $scope.setType = function(type){
+        msg.send("set"+type)
+    }
+
+	
     $scope.speak = function(text){
         msg.send("speak", text)
     }

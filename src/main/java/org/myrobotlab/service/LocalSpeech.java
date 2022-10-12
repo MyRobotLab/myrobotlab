@@ -3,8 +3,11 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,6 +15,9 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.config.LocalSpeechConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
 import org.slf4j.Logger;
@@ -50,142 +56,28 @@ import com.google.gson.internal.LinkedTreeMap;
  */
 public class LocalSpeech extends AbstractSpeechSynthesis {
 
+  public final static Logger log = LoggerFactory.getLogger(LocalSpeech.class);
+
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(LocalSpeech.class);
-  protected String ttsPath = getResourceDir() + fs + "tts" + fs + "tts.exe";
-  protected String mimicPath = getResourceDir() + fs + "mimic" + fs + "mimic.exe";
-  protected String ttsCommand = null;
   protected String filterChars = "\"\'\n";
+
+  protected String mimicPath = getResourceDir() + fs + "mimic" + fs + "mimic.exe";
+
   protected boolean removeExt = false;
+
+  protected String ttsCommand = null;
+
   protected boolean ttsHack = false;
+
+  protected String type = null;
+
+  protected Set<String> types = new HashSet<>(Arrays.asList("Espeak", "Festival", "Mimic", "MsSpeech", "Say", "Tts"));
+
+  protected String ttsPath = getResourceDir() + fs + "tts" + fs + "tts.exe";
 
   public LocalSpeech(String n, String id) {
     super(n, id);
-  }
-
-  public void startService() {
-    super.startService();
-    // setup the default tts per os
-    Platform platform = Runtime.getPlatform();
-    if (platform.isWindows()) {
-      setTts();
-    } else if (platform.isMac()) {
-      setSay();
-    } else if (platform.isLinux()) {
-      setFestival();
-    } else {
-      error("%s unknown platform %s", getName(), platform.getOS());
-    }
-  }
-
-  public void removeExt(boolean b) {
-    removeExt = b;
-  }
-
-  public void setTtsHack(boolean b) {
-    ttsHack = b;
-  }
-
-  /**
-   * @param ttsCommand
-   *          set the tts command template
-   * 
-   */
-  public void setTtsCommand(String ttsCommand) {
-    info("LocalSpeech template is now: %s", ttsCommand);
-    this.ttsCommand = ttsCommand;
-  }
-
-  /**
-   * @return get the tts command template
-   */
-  public String getTtsCommand() {
-    return ttsCommand;
-  }
-
-  /**
-   * @return setFestival sets the Windows tts template
-   * 
-   */
-  public boolean setTts() {
-    removeExt(false);
-    setTtsHack(true);
-    setTtsCommand("\"" + ttsPath + "\" -f 9 -v {voice} -o {filename} -t \"{text}\"");
-    if (!Runtime.getPlatform().isWindows()) {
-      error("tts only supported on Windows");
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * @return setMimic sets the Windows mimic template
-   */
-  public boolean setMimic() {
-    removeExt(false);
-    setTtsHack(false);
-    if (Runtime.getPlatform().isWindows()) {
-      setTtsCommand(mimicPath + " -voice " + getVoice() + " -o {filename} -t \"{text}\"");
-    } else {
-      setTtsCommand("mimic -voice " + getVoice() + " -o {filename} -t \"{text}\"");
-    }
-    return true;
-  }
-
-  /**
-   * @return setSay sets the Mac say template
-   */
-  public boolean setSay() {
-    removeExt(false);
-    setTtsHack(false);
-    setTtsCommand("/usr/bin/say -v {voice_name} --data-format=LEF32@22050 -o {filename} \"{text}\"");
-    if (!Runtime.getPlatform().isMac()) {
-      error("say only supported on Mac");
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * @return setFestival sets the Linux tts to festival template
-   */
-  public boolean setFestival() {
-    removeExt(false);
-    setTtsHack(false);
-    setTtsCommand("echo \"{text}\" | text2wave -o {filename}");
-    if (!Runtime.getPlatform().isLinux()) {
-      error("festival only supported on Linux");
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * @return setEspeak sets the Linux tts to espeak template
-   */
-  public boolean setEspeak() {
-    removeExt(false);
-    setTtsHack(false);
-    setTtsCommand("espeak \"{text}\" -w {filename}");
-    return true;
-  }
-
-  /**
-   * String of characters to filter out of text to create the tts command.
-   * Typically double quotes should be filtered out of the command as creating
-   * the text to speech process command can be broken by double quotes
-   * 
-   * @param filter
-   *          chars to filter.
-   * 
-   */
-  public void setFilter(String filter) {
-    filterChars = filter;
-  }
-
-  public String getFilter() {
-    return filterChars;
   }
 
   @Override
@@ -264,6 +156,26 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    */
   public String getAudioCacheExtension() {
     return ".wav"; // hopefully Linux festival can do this (if not can we ?)
+  }
+
+  public String getFilter() {
+    return filterChars;
+  }
+
+  @Override
+  public Map<String, Locale> getLocales() {
+    return Locale.getLocaleMap("en-US");
+  }
+
+  /**
+   * @return get the tts command template
+   */
+  public String getTtsCommand() {
+    return ttsCommand;
+  }
+
+  public String getTtsPath() {
+    return ttsPath;
   }
 
   /**
@@ -352,6 +264,144 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     }
   }
 
+  public void removeExt(boolean b) {
+    removeExt = b;
+  }
+
+  /**
+   * @return setEspeak sets the Linux tts to espeak template
+   */
+  public boolean setEspeak() {
+    type = "Espeak";
+    removeExt(false);
+    setTtsHack(false);
+    setTtsCommand("espeak \"{text}\" -w {filename}");
+    return true;
+  }
+
+  /**
+   * @return setFestival sets the Linux tts to festival template
+   */
+  public boolean setFestival() {
+    type = "Festival";
+    removeExt(false);
+    setTtsHack(false);
+    setTtsCommand("echo \"{text}\" | text2wave -o {filename}");
+    if (!Runtime.getPlatform().isLinux()) {
+      error("festival only supported on Linux");
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * String of characters to filter out of text to create the tts command.
+   * Typically double quotes should be filtered out of the command as creating
+   * the text to speech process command can be broken by double quotes
+   * 
+   * @param filter
+   *          chars to filter.
+   * 
+   */
+  public void setFilter(String filter) {
+    filterChars = filter;
+  }
+
+  /**
+   * @return setMimic sets the Windows mimic template
+   */
+  public boolean setMimic() {
+    type = "Mimic";
+    removeExt(false);
+    setTtsHack(false);
+    if (Runtime.getPlatform().isWindows()) {
+      setTtsCommand(mimicPath + " -voice " + getVoice() + " -o {filename} -t \"{text}\"");
+    } else {
+      setTtsCommand("mimic -voice " + getVoice() + " -o {filename} -t \"{text}\"");
+    }
+    return true;
+  }
+
+  public String setType(String type) {
+    if (types.contains(type)) {
+      invoke("set" + type);
+      return type;
+    }
+    error("%s is not a valid type, can be %s", type, types);
+    return null;
+  }
+
+  /**
+   * Microsoft Speech Synthesis template
+   * 
+   * @return true if windows
+   */
+  public boolean setMsSpeech() {
+    if (!Runtime.getPlatform().isWindows()) {
+      error("microsoft speech is only supported on Windows");
+      return false;
+    }
+
+    type = "MsSpeech";
+
+    removeExt(false);
+    setTtsHack(false);
+    StringBuilder sb = new StringBuilder();
+
+    sb.append("Add-Type -AssemblyName System.Speech;");
+    sb.append("$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;");
+    sb.append("$speak.SelectVoice('{{voice_name} }');\n");
+    sb.append("$speak.SetOutputToWaveFile('{filename}');\n");
+    sb.append("$speak.speak('{text}')\n");
+
+    return true;
+  }
+
+  /**
+   * @return setSay sets the Mac say template
+   */
+  public boolean setSay() {
+    type = "Say";
+    removeExt(false);
+    setTtsHack(false);
+    setTtsCommand("/usr/bin/say -v {voice_name} --data-format=LEF32@22050 -o {filename} \"{text}\"");
+    if (!Runtime.getPlatform().isMac()) {
+      error("say only supported on Mac");
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * @return setFestival sets the Windows tts template
+   * 
+   */
+  public boolean setTts() {
+    type = "Tts";
+    removeExt(false);
+    setTtsHack(true);
+    setTtsCommand("\"" + ttsPath + "\" -f 9 -v {voice} -o {filename} -t \"{text}\"");
+    if (!Runtime.getPlatform().isWindows()) {
+      error("tts only supported on Windows");
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * @param ttsCommand
+   *          set the tts command template
+   * 
+   */
+  public void setTtsCommand(String ttsCommand) {
+    info("LocalSpeech speechType %s template is now: %s", type, ttsCommand);
+    this.ttsCommand = ttsCommand;
+  }
+
+  public void setTtsHack(boolean b) {
+    ttsHack = b;
+  }
+
   /**
    * override default tts.exe path
    * 
@@ -363,13 +413,37 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     this.ttsPath = ttsPath;
   }
 
-  public String getTtsPath() {
-    return ttsPath;
+  public void startService() {
+    super.startService();
+    // setup the default tts per os
+    Platform platform = Runtime.getPlatform();
+    if (type == null) {
+      if (platform.isWindows()) {
+        setTts();
+      } else if (platform.isMac()) {
+        setSay();
+      } else if (platform.isLinux()) {
+        setFestival();
+      } else {
+        error("%s unknown platform %s", getName(), platform.getOS());
+      }
+    }
   }
 
   @Override
-  public Map<String, Locale> getLocales() {
-    return Locale.getLocaleMap("en-US");
+  public ServiceConfig apply(ServiceConfig c) {
+    LocalSpeechConfig config = (LocalSpeechConfig) c;
+    if (config.speechType != null) {
+      setType(config.speechType);
+    }
+    return c;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    LocalSpeechConfig config = new LocalSpeechConfig();
+    config.speechType = type;
+    return config;
   }
 
   public static void main(String[] args) {
@@ -430,5 +504,4 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     }
 
   }
-
 }

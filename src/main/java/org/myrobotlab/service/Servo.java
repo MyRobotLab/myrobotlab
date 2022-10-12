@@ -222,9 +222,19 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
 
     config.controller = this.controller;
 
+    if (syncedServos.size() > 0) {
+        config.synced = new String[syncedServos.size()];
+        int i = 0;
+        for (String s : syncedServos) {
+            config.synced[i] = s;
+            ++i;
+        }
+    }
+
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     ServoConfig config = (ServoConfig) c;
 
@@ -251,6 +261,13 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
     speed = config.speed;
     sweepMax = config.sweepMax;
     sweepMin = config.sweepMin;
+    
+    if (config.synced != null) {
+        syncedServos.clear();
+        for (String s: config.synced) {
+           syncedServos.add(s);    
+        }
+    }
 
     // rest = config.rest;
     if (config.rest != null) {
@@ -283,6 +300,18 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
       // Runtime.start("python", "Python");
       // Runtime runtime = Runtime.getInstance();
       
+      Runtime.start("clock", "Servo");
+      Runtime runtime = Runtime.getInstance();
+      runtime.connect("http://localhost:8888");
+      
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      
+      
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
@@ -291,10 +320,6 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
       Servo pan = (Servo) Runtime.start("pan", "Servo");
 
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
       

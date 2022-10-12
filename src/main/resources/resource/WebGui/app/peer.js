@@ -21,7 +21,8 @@ angular.module('peer', []).service('peer', function(/*$rootScope, $log*/
 
     service.isPeerStarted = function(service, key) {
         try {
-            return service.serviceType.peers[key].state == 'STARTED'
+            if (service.serviceType.peers[key])
+                return service.serviceType.peers[key].state == 'STARTED'
         } catch (error) {
             console.error(error);
         }

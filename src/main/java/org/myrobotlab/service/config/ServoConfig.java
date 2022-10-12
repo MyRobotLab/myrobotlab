@@ -23,5 +23,7 @@ public class ServoConfig extends ServiceConfig {
   public Double sweepMin;
   
   public String controller;
+  
+  public String[] synced;
 
 }

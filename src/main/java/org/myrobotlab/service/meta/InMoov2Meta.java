@@ -101,11 +101,16 @@ public class InMoov2Meta extends MetaData {
     HtmlFilterConfig htmlFilter = (HtmlFilterConfig) plan.getPeerConfig("htmlFilter");
     htmlFilter.textListeners = new String[] {name + ".mouth"};
     
-    WebkitSpeechRecognitionConfig ear = (WebkitSpeechRecognitionConfig) plan.getPeerConfig("ear");
-    ear.textListeners = new String[]{name + ".chatBot"};
-
+    // FIXME - turns out subscriptions like this are not needed if they are in onStarted
+    // == Peer - mouth =============================
+    // setup name references to different services
     MarySpeechConfig mouth = (MarySpeechConfig) plan.getPeerConfig("mouth");
-    mouth.speechRecognizers = new String[]{name + ".ear"};
+    mouth.speechRecognizers = new String[] {name + ".ear"};
+
+    // == Peer - ear =============================
+    // setup name references to different services
+    WebkitSpeechRecognitionConfig ear = (WebkitSpeechRecognitionConfig) plan.getPeerConfig("ear");
+    ear.textListeners = new String[] {name + ".chatBot"};
         
     JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.getPeerConfig("simulator");
     // FIXME - SHOULD USE RESOURCE DIR !
