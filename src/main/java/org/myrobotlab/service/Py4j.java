@@ -21,6 +21,9 @@ public class Py4j extends Service {
     super(n, id);
   }
 
+  /**
+   * start the gateway service listening on port
+   */
   public void start() {
     if (server == null) {
       server = new GatewayServer(this);
@@ -31,6 +34,9 @@ public class Py4j extends Service {
     }
   }
 
+  /**
+   * stop the gateway service
+   */
   public void stop() {
     if (server != null) {
       server.shutdown();
