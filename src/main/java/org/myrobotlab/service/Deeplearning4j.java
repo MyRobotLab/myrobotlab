@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.bytedeco.javacv.CanvasFrame;

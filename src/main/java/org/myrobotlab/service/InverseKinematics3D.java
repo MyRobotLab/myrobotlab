@@ -14,7 +14,6 @@ import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
-import org.myrobotlab.service.data.AngleData;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;

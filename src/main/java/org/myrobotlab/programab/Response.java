@@ -3,8 +3,6 @@ package org.myrobotlab.programab;
 import java.util.Date;
 import java.util.List;
 
-import org.myrobotlab.service.data.SearchResults;
-
 /**
  * FIXME - this class should become a more generalized AI response data object
  * in org.myrobotlab.data
