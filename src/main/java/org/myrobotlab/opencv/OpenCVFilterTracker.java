@@ -94,7 +94,7 @@ public class OpenCVFilterTracker extends OpenCVFilter {
 
   // To hold x,y,w,h
   int[] points = new int[4];
-  
+
   transient private CloseableFrameConverter converter = new CloseableFrameConverter();
 
   public OpenCVFilterTracker() {
@@ -115,9 +115,9 @@ public class OpenCVFilterTracker extends OpenCVFilter {
   public IplImage process(IplImage image) {
     // TODO: I suspect this would be faster if we cut color first.
     // cvCutColor()
-    
+
     if (blackAndWhite) {
-      IplImage imageBw = makeGrayScale(image); 
+      IplImage imageBw = makeGrayScale(image);
       // frame = converter.toFrame(imageBw);
       mat = converter.toMat(imageBw);
     } else {
@@ -128,7 +128,7 @@ public class OpenCVFilterTracker extends OpenCVFilter {
       // log.info("Yes ! Bounding box : {} {} {} {} " , boundingBox.x(),
       // boundingBox.y(), boundingBox.width()
       // ,boundingBox.height());
-      synchronized(tracker) {
+      synchronized (tracker) {
         tracker.update(mat, boundingBox);
       }
       // boundingBox.x()
@@ -147,7 +147,7 @@ public class OpenCVFilterTracker extends OpenCVFilter {
       data.put("TrackingPoints", pointsToPublish);
 
     }
-   
+
     return image;
   }
 
@@ -160,35 +160,35 @@ public class OpenCVFilterTracker extends OpenCVFilter {
 
   private Tracker createTracker(String trackerType) {
     // TODO: add a switch for all the other types of trackers!
-    // if (trackerType.equalsIgnoreCase("Boosting")) { 
-    //  return TrackerBoosting.create(); 
-    // } else 
+    // if (trackerType.equalsIgnoreCase("Boosting")) {
+    // return TrackerBoosting.create();
+    // } else
     if (trackerType.equalsIgnoreCase("CSRT")) {
-      TrackerCSRT tracker =TrackerCSRT.create();
+      TrackerCSRT tracker = TrackerCSRT.create();
       return tracker;
     } else if (trackerType.equalsIgnoreCase("GOTURN")) {
       return TrackerGOTURN.create();
     } else if (trackerType.equalsIgnoreCase("KCF")) {
       return TrackerKCF.create();
-    } else 
-      
-    //if (trackerType.equalsIgnoreCase("MedianFlow")) { 
-    //  return TrackerMedianFlow.create(); 
-    //} else 
-      if (trackerType.equalsIgnoreCase("MIL")) {
+    } else
+
+    // if (trackerType.equalsIgnoreCase("MedianFlow")) {
+    // return TrackerMedianFlow.create();
+    // } else
+    if (trackerType.equalsIgnoreCase("MIL")) {
       return TrackerMIL.create();
     } else
-    //if (trackerType.equalsIgnoreCase("MOSSE")) { 
-    //  return TrackerMOSSE.create(); 
-    //} else 
-    //if (trackerType.equalsIgnoreCase("TLD")) {
-    //  return TrackerTLD.create(); 
-    //} else 
+    // if (trackerType.equalsIgnoreCase("MOSSE")) {
+    // return TrackerMOSSE.create();
+    // } else
+    // if (trackerType.equalsIgnoreCase("TLD")) {
+    // return TrackerTLD.create();
+    // } else
     {
       // TODO: why?
       log.warn("Unknown Tracker Algorithm {} defaulting to CSRT", trackerType);
       // default to TLD..
-      TrackerCSRT tracker = TrackerCSRT.create(); 
+      TrackerCSRT tracker = TrackerCSRT.create();
       return tracker;
     }
 
@@ -209,13 +209,13 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     // better to have the current frame and do the
     // initialization here.)
     if (tracker == null) {
-        tracker = createTracker(trackerType);
+      tracker = createTracker(trackerType);
     }
     log.info("Created tracker");
     // TODO: I'm worried about thread safety with the "mat" object.
     if (mat != null) {
       // TODO: what happens if we're already initalized?
-      synchronized(tracker) {
+      synchronized (tracker) {
         tracker.init(mat, boundingBox);
       }
       log.info("Initialized tracker");

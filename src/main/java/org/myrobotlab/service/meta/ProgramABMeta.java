@@ -21,9 +21,8 @@ public class ProgramABMeta extends MetaData {
 
     // add Wikipedia local search !!
     addPeer("search", "Wikipedia", "replacement for handling pannous sriax requests");
-    
-    // addPeer("htmlFilter", "HtmlFilter");
 
+    // addPeer("htmlFilter", "HtmlFilter");
 
     // TODO: renamed the bots in the program-ab-data folder to prefix them so we
     // know they are different than the inmoov bots.
@@ -48,20 +47,19 @@ public class ProgramABMeta extends MetaData {
     addCategory("ai", "control");
 
   }
-  
+
   @Override
   public Plan getDefault(String name) {
-    
+
     ProgramABConfig programAb = new ProgramABConfig();
 
     Plan plan = new Plan(name);
     // load default peers from meta here
     plan.putPeers(name, peers);
-//    programAb.textFilters = new String[] {name + ".htmlFilter"};
+    // programAb.textFilters = new String[] {name + ".htmlFilter"};
     plan.addConfig(programAb);
     return plan;
 
   }
-
 
 }

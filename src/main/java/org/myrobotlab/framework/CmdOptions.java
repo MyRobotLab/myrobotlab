@@ -183,7 +183,6 @@ public class CmdOptions {
       }
     }
 
-
     if (help) {
       cmd.add("-h");
     }

@@ -109,7 +109,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   private String lastRecognizedName = null;
   public String faceModelFilename = "faceModel.bin";
   transient private CloseableFrameConverter converter = new CloseableFrameConverter();
-  
+
   @Override
   public void release() {
     // TODO Auto-generated method stub
@@ -387,7 +387,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   public IplImage process(IplImage image) throws InterruptedException {
     // convert to grayscale
     // Frame grayFrame =
-    
+
     IplImage imageBW = makeGrayScale(image);
     Mat bwImgMat = converter.toMat(imageBW);
     ArrayList<DetectedFace> dFaces = extractDetectedFaces(bwImgMat);

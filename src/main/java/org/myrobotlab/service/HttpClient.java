@@ -307,7 +307,7 @@ public class HttpClient extends Service implements TextPublisher {
     HttpData data = new HttpData(url);
 
     invoke("publishUrl", url);
-    
+
     log.info("url [{}]", url);
 
     HttpResponse response = client.execute(request);
@@ -328,7 +328,7 @@ public class HttpClient extends Service implements TextPublisher {
     if (data.data != null) {
       String text = new String(data.data);
       invoke("publishHttpResponse", text);
-      invoke("publishText", text);      
+      invoke("publishText", text);
     }
 
     return data;
@@ -387,12 +387,12 @@ public class HttpClient extends Service implements TextPublisher {
       error(e);
     }
   }
-  
+
   @Override
   public String publishText(String text) {
     return text;
   }
-  
+
   public String postForm(String url, String... fields) throws ClientProtocolException, IOException {
     if (fields == null || fields.length % 2 != 0) {
       log.error("postForm fields must be in the form \"key1\", \"value1\", \"key2\", \"value2\"");
@@ -404,11 +404,11 @@ public class HttpClient extends Service implements TextPublisher {
     }
     return postForm(url, data);
   }
-  
+
   public String publishUrl(String url) {
     return url;
   }
-  
+
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
@@ -462,8 +462,5 @@ public class HttpClient extends Service implements TextPublisher {
       log.error("main threw", e);
     }
   }
-
-
-
 
 }

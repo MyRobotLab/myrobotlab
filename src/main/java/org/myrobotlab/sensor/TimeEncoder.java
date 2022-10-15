@@ -138,13 +138,12 @@ public class TimeEncoder implements Runnable, EncoderControl {
 
       isRunning = true;
       while (isRunning) {
-        
-        
+
         // wait for next move ...
         synchronized (this) {
-          stopMove  = false;
+          stopMove = false;
           this.wait();
-          stopMove  = false;
+          stopMove = false;
         }
 
         if (speedDegreesPerMs == 0) {
@@ -157,7 +156,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
         boolean started = true;
 
         while (now < endMoveTs && isRunning) {
-          
+
           if (stopMove) {
             endMoveTs = now;
             break;
@@ -195,7 +194,8 @@ public class TimeEncoder implements Runnable, EncoderControl {
         servo.onEncoderData(d);
         // ((Broadcaster)servo).broadcast("publishedServoStopped",
         // ServoStatus.SERVO_STOPPED, estimatedPos);
-        // FYI - broadcast by-passes queues, but can publish based on notify entries
+        // FYI - broadcast by-passes queues, but can publish based on notify
+        // entries
         ((Broadcaster) servo).broadcast("publishServoStopped", servo.getName(), estimatedPos);
       }
     } catch (InterruptedException e) {
@@ -362,13 +362,13 @@ public class TimeEncoder implements Runnable, EncoderControl {
     // TODO Auto-generated method stub
     return null;
   }
-  
+
   public void stopMove() {
     stopMove = true;
   }
 
   @Override
   public void attachEncoderController(EncoderController controller) {
-    // NoOp, the TimeEncoder doesn't need a controller.    
+    // NoOp, the TimeEncoder doesn't need a controller.
   }
 }

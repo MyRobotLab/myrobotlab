@@ -2625,7 +2625,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     if (app != null) {
       // if there is an app we can load immediately
       loadDelayed(c);
-    } 
+    }
     return c;
   }
 

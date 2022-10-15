@@ -60,7 +60,7 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
 
   transient private CloseableFrameConverter converter1 = new CloseableFrameConverter();
   transient private CloseableFrameConverter converter2 = new CloseableFrameConverter();
-  
+
   public OpenCVFilterAddMask(String name) {
     super(name);
   }

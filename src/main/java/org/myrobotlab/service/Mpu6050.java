@@ -595,8 +595,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * For a diagram of the gyroscope and accelerometer signal paths, see Section
    * 8 of the MPU-6000/MPU-6050 Product Specification document.
    *
-   * @return Current sample rate
-   *  MPU6050_RA_SMPLRT_DIV
+   * @return Current sample rate MPU6050_RA_SMPLRT_DIV
    */
   public int getRate() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SMPLRT_DIV);
@@ -606,8 +605,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set gyroscope sample rate divider.
    * 
    * @param rate
-   *          New sample rate divider see getRate()
-   *  MPU6050_RA_SMPLRT_DIV
+   *          New sample rate divider see getRate() MPU6050_RA_SMPLRT_DIV
    */
   public void setRate(int rate) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_SMPLRT_DIV, rate);
@@ -651,7 +649,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * see getExternalFrameSync()
    * 
-   *  MPU6050_RA_CONFIG
+   * MPU6050_RA_CONFIG
+   * 
    * @param sync
    *          New FSYNC configuration value
    */
@@ -682,10 +681,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 7        |   -- Reserved --   |   -- Reserved --   | Reserved
    * </pre>
    *
-   * @return DLFP configuration
-   *  MPU6050_RA_CONFIG
-   *  MPU6050_CFG_DLPF_CFG_BIT
-   *  MPU6050_CFG_DLPF_CFG_LENGTH
+   * @return DLFP configuration MPU6050_RA_CONFIG MPU6050_CFG_DLPF_CFG_BIT
+   *         MPU6050_CFG_DLPF_CFG_LENGTH
    */
   int getDLPFMode() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_CONFIG, MPU6050_CFG_DLPF_CFG_BIT, MPU6050_CFG_DLPF_CFG_LENGTH);
@@ -696,10 +693,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param mode
    *          New DLFP configuration setting see getDLPFBandwidth()
-   *  MPU6050_DLPF_BW_256
-   *  MPU6050_RA_CONFIG
-   *  MPU6050_CFG_DLPF_CFG_BIT
-   *  MPU6050_CFG_DLPF_CFG_LENGTH
+   *          MPU6050_DLPF_BW_256 MPU6050_RA_CONFIG MPU6050_CFG_DLPF_CFG_BIT
+   *          MPU6050_CFG_DLPF_CFG_LENGTH
    */
   public void setDLPFMode(int mode) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_CONFIG, MPU6050_CFG_DLPF_CFG_BIT, MPU6050_CFG_DLPF_CFG_LENGTH, mode);
@@ -718,11 +713,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 3 = +/- 2000 degrees/sec
    * </pre>
    *
-   * @return Current full-scale gyroscope range setting
-   *  MPU6050_GYRO_FS_250
-   *  MPU6050_RA_GYRO_CONFIG
-   *  MPU6050_GCONFIG_FS_SEL_BIT
-   *  MPU6050_GCONFIG_FS_SEL_LENGTH
+   * @return Current full-scale gyroscope range setting MPU6050_GYRO_FS_250
+   *         MPU6050_RA_GYRO_CONFIG MPU6050_GCONFIG_FS_SEL_BIT
+   *         MPU6050_GCONFIG_FS_SEL_LENGTH
    */
   public int getFullScaleGyroRange() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH);
@@ -733,10 +726,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param range
    *          New full-scale gyroscope range value see getFullScaleRange()
-   *  MPU6050_GYRO_FS_250
-   *  MPU6050_RA_GYRO_CONFIG
-   *  MPU6050_GCONFIG_FS_SEL_BIT
-   *  MPU6050_GCONFIG_FS_SEL_LENGTH
+   *          MPU6050_GYRO_FS_250 MPU6050_RA_GYRO_CONFIG
+   *          MPU6050_GCONFIG_FS_SEL_BIT MPU6050_GCONFIG_FS_SEL_LENGTH
    */
   public void setFullScaleGyroRange(int range) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH, range);
@@ -747,8 +738,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * Get self-test factory trim value for accelerometer X axis.
    * 
-   * @return factory trim value
-   *  MPU6050_RA_SELF_TEST_X
+   * @return factory trim value MPU6050_RA_SELF_TEST_X
    */
   public int getAccelXSelfTestFactoryTrim() {
     int selftestX = I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_X);
@@ -759,8 +749,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * Get self-test factory trim value for accelerometer Y axis.
    * 
-   * @return factory trim value
-   *  MPU6050_RA_SELF_TEST_Y
+   * @return factory trim value MPU6050_RA_SELF_TEST_Y
    */
   public int getAccelYSelfTestFactoryTrim() {
     int selftestY = I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_Y);
@@ -771,8 +760,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * Get self-test factory trim value for accelerometer Z axis.
    * 
-   * @return factory trim value
-   *  MPU6050_RA_SELF_TEST_Z
+   * @return factory trim value MPU6050_RA_SELF_TEST_Z
    */
   public int getAccelZSelfTestFactoryTrim() {
     int[] readBuffer = new int[2];
@@ -783,8 +771,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * Get self-test factory trim value for gyro X axis.
    * 
-   * @return factory trim value
-   *  MPU6050_RA_SELF_TEST_X
+   * @return factory trim value MPU6050_RA_SELF_TEST_X
    */
   public int getGyroXSelfTestFactoryTrim() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_X) & 0xff;
@@ -793,8 +780,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * Get self-test factory trim value for gyro Y axis.
    * 
-   * @return factory trim value
-   *  MPU6050_RA_SELF_TEST_Y
+   * @return factory trim value MPU6050_RA_SELF_TEST_Y
    */
   public int getGyroYSelfTestFactoryTrim() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_Y) & 0xff;
@@ -803,8 +789,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * Get self-test factory trim value for gyro Z axis.
    * 
-   * @return factory trim value
-   *  MPU6050_RA_SELF_TEST_Z
+   * @return factory trim value MPU6050_RA_SELF_TEST_Z
    */
   public int getGyroZSelfTestFactoryTrim() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_SELF_TEST_Z) & 0x1F;
@@ -815,8 +800,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * Get self-test enabled setting for accelerometer X axis.
    * 
-   * @return Self-test enabled value
-   *  MPU6050_RA_ACCEL_CONFIG
+   * @return Self-test enabled value MPU6050_RA_ACCEL_CONFIG
    */
   public boolean getAccelXSelfTest() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_XA_ST_BIT);
@@ -826,8 +810,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get self-test enabled setting for accelerometer X axis.
    * 
    * @param enabled
-   *          Self-test enabled value
-   *  MPU6050_RA_ACCEL_CONFIG
+   *          Self-test enabled value MPU6050_RA_ACCEL_CONFIG
    */
   public void setAccelXSelfTest(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_XA_ST_BIT, enabled);
@@ -836,8 +819,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * Get self-test enabled value for accelerometer Y axis.
    * 
-   * @return Self-test enabled value
-   *  MPU6050_RA_ACCEL_CONFIG
+   * @return Self-test enabled value MPU6050_RA_ACCEL_CONFIG
    */
   public boolean getAccelYSelfTest() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_YA_ST_BIT);
@@ -847,8 +829,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get self-test enabled value for accelerometer Y axis.
    * 
    * @param enabled
-   *          Self-test enabled value
-   *  MPU6050_RA_ACCEL_CONFIG
+   *          Self-test enabled value MPU6050_RA_ACCEL_CONFIG
    */
   public void setAccelYSelfTest(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_YA_ST_BIT, enabled);
@@ -857,8 +838,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * Get self-test enabled value for accelerometer Z axis.
    * 
-   * @return Self-test enabled value
-   *  MPU6050_RA_ACCEL_CONFIG
+   * @return Self-test enabled value MPU6050_RA_ACCEL_CONFIG
    */
   public boolean getAccelZSelfTest() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_ZA_ST_BIT);
@@ -868,8 +848,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set self-test enabled value for accelerometer Z axis.
    * 
    * @param enabled
-   *          Self-test enabled value
-   *  MPU6050_RA_ACCEL_CONFIG
+   *          Self-test enabled value MPU6050_RA_ACCEL_CONFIG
    */
   public void setAccelZSelfTest(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_ZA_ST_BIT, enabled);
@@ -887,11 +866,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 3 = +/- 16g
    * </pre>
    *
-   * @return Current full-scale accelerometer range setting
-   *  MPU6050_ACCEL_FS_2
-   *  MPU6050_RA_ACCEL_CONFIG
-   *  MPU6050_ACONFIG_AFS_SEL_BIT
-   *  MPU6050_ACONFIG_AFS_SEL_LENGTH
+   * @return Current full-scale accelerometer range setting MPU6050_ACCEL_FS_2
+   *         MPU6050_RA_ACCEL_CONFIG MPU6050_ACONFIG_AFS_SEL_BIT
+   *         MPU6050_ACONFIG_AFS_SEL_LENGTH
    */
   public int getFullScaleAccelRange() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH);
@@ -940,9 +917,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 7         | Hold        | None
    * </pre>
    *
-   * @return Current high-pass filter configuration
-   *  MPU6050_DHPF_RESET
-   *  MPU6050_RA_ACCEL_CONFIG
+   * @return Current high-pass filter configuration MPU6050_DHPF_RESET
+   *         MPU6050_RA_ACCEL_CONFIG
    */
   public int getDHPFMode() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_ACCEL_HPF_BIT, MPU6050_ACONFIG_ACCEL_HPF_LENGTH);
@@ -953,8 +929,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param bandwidth
    *          New high-pass filter configuration see setDHPFMode()
-   *  MPU6050_DHPF_RESET
-   *  MPU6050_RA_ACCEL_CONFIG
+   *          MPU6050_DHPF_RESET MPU6050_RA_ACCEL_CONFIG
    */
   public void setDHPFMode(int bandwidth) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_ACCEL_HPF_BIT, MPU6050_ACONFIG_ACCEL_HPF_LENGTH, bandwidth);
@@ -976,7 +951,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 56 and 58 of this document.
    *
    * @return Current free-fall acceleration threshold value (LSB = 2mg)
-   *  MPU6050_RA_FF_THR
+   *         MPU6050_RA_FF_THR
    */
   public int getFreefallDetectionThreshold() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_FF_THR);
@@ -987,8 +962,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param threshold
    *          New free-fall acceleration threshold value (LSB = 2mg) see
-   *          getFreefallDetectionThreshold()
-   *  MPU6050_RA_FF_THR
+   *          getFreefallDetectionThreshold() MPU6050_RA_FF_THR
    */
   public void setFreefallDetectionThreshold(int threshold) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_FF_THR, threshold);
@@ -1011,7 +985,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 56 and 58 of this document.
    *
    * @return Current free-fall duration threshold value (LSB = 1ms)
-   *  MPU6050_RA_FF_DUR
+   *         MPU6050_RA_FF_DUR
    */
   public int getFreefallDetectionDuration() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_FF_DUR);
@@ -1022,8 +996,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param duration
    *          New free-fall duration threshold value (LSB = 1ms) see
-   *          getFreefallDetectionDuration()
-   *  MPU6050_RA_FF_DUR
+   *          getFreefallDetectionDuration() MPU6050_RA_FF_DUR
    */
   public void setFreefallDetectionDuration(int duration) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_FF_DUR, duration);
@@ -1048,7 +1021,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * and 58 of this document.
    *
    * @return Current motion detection acceleration threshold value (LSB = 2mg)
-   *  MPU6050_RA_MOT_THR
+   *         MPU6050_RA_MOT_THR
    */
   public int getMotionDetectionThreshold() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_MOT_THR);
@@ -1059,8 +1032,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param threshold
    *          New motion detection acceleration threshold value (LSB = 2mg) see
-   *          getMotionDetectionThreshold()
-   *  MPU6050_RA_MOT_THR
+   *          getMotionDetectionThreshold() MPU6050_RA_MOT_THR
    */
   public void setMotionDetectionThreshold(int threshold) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_MOT_THR, threshold);
@@ -1081,7 +1053,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * MPU-6000/MPU-6050 Product Specification document.
    *
    * @return Current motion detection duration threshold value (LSB = 1ms)
-   *  MPU6050_RA_MOT_DUR
+   *         MPU6050_RA_MOT_DUR
    */
   public int getMotionDetectionDuration() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_MOT_DUR);
@@ -1092,8 +1064,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param duration
    *          New motion detection duration threshold value (LSB = 1ms) see
-   *          getMotionDetectionDuration()
-   *  MPU6050_RA_MOT_DUR
+   *          getMotionDetectionDuration() MPU6050_RA_MOT_DUR
    */
   public void setMotionDetectionDuration(int duration) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_MOT_DUR, duration);
@@ -1126,8 +1097,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 56 and 58 of this document.
    *
    * @return Current zero motion detection acceleration threshold value (LSB =
-   *         2mg)
-   *  MPU6050_RA_ZRMOT_THR
+   *         2mg) MPU6050_RA_ZRMOT_THR
    */
   public int getZeroMotionDetectionThreshold() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_ZRMOT_THR);
@@ -1138,8 +1108,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param threshold
    *          New zero motion detection acceleration threshold value (LSB = 2mg)
-   *          see getZeroMotionDetectionThreshold()
-   *  MPU6050_RA_ZRMOT_THR
+   *          see getZeroMotionDetectionThreshold() MPU6050_RA_ZRMOT_THR
    */
   public void setZeroMotionDetectionThreshold(int threshold) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_ZRMOT_THR, threshold);
@@ -1162,7 +1131,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 56 and 58 of this document.
    *
    * @return Current zero motion detection duration threshold value (LSB = 64ms)
-   *  MPU6050_RA_ZRMOT_DUR
+   *         MPU6050_RA_ZRMOT_DUR
    */
   public int getZeroMotionDetectionDuration() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_ZRMOT_DUR);
@@ -1173,8 +1142,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 
    * @param duration
    *          New zero motion detection duration threshold value (LSB = 1ms) see
-   *          getZeroMotionDetectionDuration()
-   *  MPU6050_RA_ZRMOT_DUR
+   *          getZeroMotionDetectionDuration() MPU6050_RA_ZRMOT_DUR
    */
   public void setZeroMotionDetectionDuration(int duration) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_ZRMOT_DUR, duration);
@@ -1187,10 +1155,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * TEMP_OUT_H and TEMP_OUT_L (Registers 65 and 66) to be written into the FIFO
    * buffer.
    * 
-   * @return Current temperature FIFO enabled value
-   *  MPU6050_RA_FIFO_EN
+   * @return Current temperature FIFO enabled value MPU6050_RA_FIFO_EN
    */
-public boolean getTempFIFOEnabled() {
+  public boolean getTempFIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_TEMP_FIFO_EN_BIT);
   }
 
@@ -1199,7 +1166,7 @@ public boolean getTempFIFOEnabled() {
    * 
    * @param enabled
    *          New temperature FIFO enabled value see getTempFIFOEnabled()
-   *  MPU6050_RA_FIFO_EN
+   *          MPU6050_RA_FIFO_EN
    */
   public void setTempFIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_TEMP_FIFO_EN_BIT, enabled);
@@ -1210,10 +1177,9 @@ public boolean getTempFIFOEnabled() {
    * GYRO_XOUT_H and GYRO_XOUT_L (Registers 67 and 68) to be written into the
    * FIFO buffer.
    * 
-   * @return Current gyroscope X-axis FIFO enabled value
-   *  MPU6050_RA_FIFO_EN
+   * @return Current gyroscope X-axis FIFO enabled value MPU6050_RA_FIFO_EN
    */
-public boolean getXGyroFIFOEnabled() {
+  public boolean getXGyroFIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_XG_FIFO_EN_BIT);
   }
 
@@ -1222,7 +1188,7 @@ public boolean getXGyroFIFOEnabled() {
    * 
    * @param enabled
    *          New gyroscope X-axis FIFO enabled value see getXGyroFIFOEnabled()
-   *  MPU6050_RA_FIFO_EN
+   *          MPU6050_RA_FIFO_EN
    */
   public void setXGyroFIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_XG_FIFO_EN_BIT, enabled);
@@ -1233,10 +1199,9 @@ public boolean getXGyroFIFOEnabled() {
    * GYRO_YOUT_H and GYRO_YOUT_L (Registers 69 and 70) to be written into the
    * FIFO buffer.
    * 
-   * @return Current gyroscope Y-axis FIFO enabled value
-   *  MPU6050_RA_FIFO_EN
+   * @return Current gyroscope Y-axis FIFO enabled value MPU6050_RA_FIFO_EN
    */
-public boolean getYGyroFIFOEnabled() {
+  public boolean getYGyroFIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_YG_FIFO_EN_BIT);
   }
 
@@ -1245,7 +1210,7 @@ public boolean getYGyroFIFOEnabled() {
    * 
    * @param enabled
    *          New gyroscope Y-axis FIFO enabled value see getYGyroFIFOEnabled()
-   *  MPU6050_RA_FIFO_EN
+   *          MPU6050_RA_FIFO_EN
    */
   public void setYGyroFIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_YG_FIFO_EN_BIT, enabled);
@@ -1256,10 +1221,9 @@ public boolean getYGyroFIFOEnabled() {
    * GYRO_ZOUT_H and GYRO_ZOUT_L (Registers 71 and 72) to be written into the
    * FIFO buffer.
    * 
-   * @return Current gyroscope Z-axis FIFO enabled value
-   *  MPU6050_RA_FIFO_EN
+   * @return Current gyroscope Z-axis FIFO enabled value MPU6050_RA_FIFO_EN
    */
-public boolean getZGyroFIFOEnabled() {
+  public boolean getZGyroFIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_ZG_FIFO_EN_BIT);
   }
 
@@ -1268,7 +1232,7 @@ public boolean getZGyroFIFOEnabled() {
    * 
    * @param enabled
    *          New gyroscope Z-axis FIFO enabled value see getZGyroFIFOEnabled()
-   *  MPU6050_RA_FIFO_EN
+   *          MPU6050_RA_FIFO_EN
    */
   public void setZGyroFIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_ZG_FIFO_EN_BIT, enabled);
@@ -1279,10 +1243,9 @@ public boolean getZGyroFIFOEnabled() {
    * ACCEL_XOUT_H, ACCEL_XOUT_L, ACCEL_YOUT_H, ACCEL_YOUT_L, ACCEL_ZOUT_H, and
    * ACCEL_ZOUT_L (Registers 59 to 64) to be written into the FIFO buffer.
    * 
-   * @return Current accelerometer FIFO enabled value
-   *  MPU6050_RA_FIFO_EN
+   * @return Current accelerometer FIFO enabled value MPU6050_RA_FIFO_EN
    */
-public boolean getAccelFIFOEnabled() {
+  public boolean getAccelFIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_ACCEL_FIFO_EN_BIT);
   }
 
@@ -1291,7 +1254,7 @@ public boolean getAccelFIFOEnabled() {
    * 
    * @param enabled
    *          New accelerometer FIFO enabled value see getAccelFIFOEnabled()
-   *  MPU6050_RA_FIFO_EN
+   *          MPU6050_RA_FIFO_EN
    */
   public void setAccelFIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_ACCEL_FIFO_EN_BIT, enabled);
@@ -1302,10 +1265,9 @@ public boolean getAccelFIFOEnabled() {
    * EXT_SENS_DATA registers (Registers 73 to 96) associated with Slave 2 to be
    * written into the FIFO buffer.
    * 
-   * @return Current Slave 2 FIFO enabled value
-   *  MPU6050_RA_FIFO_EN
+   * @return Current Slave 2 FIFO enabled value MPU6050_RA_FIFO_EN
    */
-public boolean getSlave2FIFOEnabled() {
+  public boolean getSlave2FIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_SLV2_FIFO_EN_BIT);
   }
 
@@ -1314,7 +1276,7 @@ public boolean getSlave2FIFOEnabled() {
    * 
    * @param enabled
    *          New Slave 2 FIFO enabled value see getSlave2FIFOEnabled()
-   *  MPU6050_RA_FIFO_EN
+   *          MPU6050_RA_FIFO_EN
    */
   public void setSlave2FIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_SLV2_FIFO_EN_BIT, enabled);
@@ -1325,10 +1287,9 @@ public boolean getSlave2FIFOEnabled() {
    * EXT_SENS_DATA registers (Registers 73 to 96) associated with Slave 1 to be
    * written into the FIFO buffer.
    * 
-   * @return Current Slave 1 FIFO enabled value
-   *  MPU6050_RA_FIFO_EN
+   * @return Current Slave 1 FIFO enabled value MPU6050_RA_FIFO_EN
    */
-public boolean getSlave1FIFOEnabled() {
+  public boolean getSlave1FIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_SLV1_FIFO_EN_BIT);
   }
 
@@ -1337,7 +1298,7 @@ public boolean getSlave1FIFOEnabled() {
    * 
    * @param enabled
    *          New Slave 1 FIFO enabled value see getSlave1FIFOEnabled()
-   *  MPU6050_RA_FIFO_EN
+   *          MPU6050_RA_FIFO_EN
    */
   public void setSlave1FIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_SLV1_FIFO_EN_BIT, enabled);
@@ -1348,10 +1309,9 @@ public boolean getSlave1FIFOEnabled() {
    * EXT_SENS_DATA registers (Registers 73 to 96) associated with Slave 0 to be
    * written into the FIFO buffer.
    * 
-   * @return Current Slave 0 FIFO enabled value
-   *  MPU6050_RA_FIFO_EN
+   * @return Current Slave 0 FIFO enabled value MPU6050_RA_FIFO_EN
    */
-public boolean getSlave0FIFOEnabled() {
+  public boolean getSlave0FIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_SLV0_FIFO_EN_BIT);
   }
 
@@ -1360,7 +1320,7 @@ public boolean getSlave0FIFOEnabled() {
    * 
    * @param enabled
    *          New Slave 0 FIFO enabled value see getSlave0FIFOEnabled()
-   *  MPU6050_RA_FIFO_EN
+   *          MPU6050_RA_FIFO_EN
    */
   public void setSlave0FIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_FIFO_EN, MPU6050_SLV0_FIFO_EN_BIT, enabled);
@@ -1381,10 +1341,9 @@ public boolean getSlave0FIFOEnabled() {
    * the MPU-60X0's bus arbitration detection logic is turned on, enabling it to
    * detect when the bus is available.
    *
-   * @return Current multi-master enabled value
-   *  MPU6050_RA_I2C_MST_CTRL
+   * @return Current multi-master enabled value MPU6050_RA_I2C_MST_CTRL
    */
-public boolean getMultiMasterEnabled() {
+  public boolean getMultiMasterEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_MULT_MST_EN_BIT);
   }
 
@@ -1393,7 +1352,7 @@ public boolean getMultiMasterEnabled() {
    * 
    * @param enabled
    *          New multi-master enabled value see getMultiMasterEnabled()
-   *  MPU6050_RA_I2C_MST_CTRL
+   *          MPU6050_RA_I2C_MST_CTRL
    */
   public void setMultiMasterEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_MULT_MST_EN_BIT, enabled);
@@ -1409,9 +1368,9 @@ public boolean getMultiMasterEnabled() {
    * triggered.
    *
    * @return Current wait-for-external-sensor-data enabled value
-   *  MPU6050_RA_I2C_MST_CTRL
+   *         MPU6050_RA_I2C_MST_CTRL
    */
-public boolean getWaitForExternalSensorEnabled() {
+  public boolean getWaitForExternalSensorEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_WAIT_FOR_ES_BIT);
   }
 
@@ -1420,8 +1379,7 @@ public boolean getWaitForExternalSensorEnabled() {
    * 
    * @param enabled
    *          New wait-for-external-sensor-data enabled value see
-   *          getWaitForExternalSensorEnabled()
-   *  MPU6050_RA_I2C_MST_CTRL
+   *          getWaitForExternalSensorEnabled() MPU6050_RA_I2C_MST_CTRL
    */
   public void setWaitForExternalSensorEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_WAIT_FOR_ES_BIT, enabled);
@@ -1432,10 +1390,9 @@ public boolean getWaitForExternalSensorEnabled() {
    * EXT_SENS_DATA registers (Registers 73 to 96) associated with Slave 3 to be
    * written into the FIFO buffer.
    * 
-   * @return Current Slave 3 FIFO enabled value
-   *  MPU6050_RA_MST_CTRL
+   * @return Current Slave 3 FIFO enabled value MPU6050_RA_MST_CTRL
    */
-public boolean getSlave3FIFOEnabled() {
+  public boolean getSlave3FIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_SLV_3_FIFO_EN_BIT);
   }
 
@@ -1444,7 +1401,7 @@ public boolean getSlave3FIFOEnabled() {
    * 
    * @param enabled
    *          New Slave 3 FIFO enabled value see getSlave3FIFOEnabled()
-   *  MPU6050_RA_MST_CTRL
+   *          MPU6050_RA_MST_CTRL
    */
   public void setSlave3FIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_SLV_3_FIFO_EN_BIT, enabled);
@@ -1459,9 +1416,9 @@ public boolean getSlave3FIFOEnabled() {
    * followed by a start of the successive write will be always used.
    *
    * @return Current slave read/write transition enabled value
-   *  MPU6050_RA_I2C_MST_CTRL
+   *         MPU6050_RA_I2C_MST_CTRL
    */
-public boolean getSlaveReadWriteTransitionEnabled() {
+  public boolean getSlaveReadWriteTransitionEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_I2C_MST_P_NSR_BIT);
   }
 
@@ -1470,8 +1427,7 @@ public boolean getSlaveReadWriteTransitionEnabled() {
    * 
    * @param enabled
    *          New slave read/write transition enabled value see
-   *          getSlaveReadWriteTransitionEnabled()
-   *  MPU6050_RA_I2C_MST_CTRL
+   *          getSlaveReadWriteTransitionEnabled() MPU6050_RA_I2C_MST_CTRL
    */
   public void setSlaveReadWriteTransitionEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_I2C_MST_P_NSR_BIT, enabled);
@@ -1503,8 +1459,7 @@ public boolean getSlaveReadWriteTransitionEnabled() {
    * 15          | 364kHz                 | 22
    * </pre>
    *
-   * @return Current I2C master clock speed
-   *  MPU6050_RA_I2C_MST_CTRL
+   * @return Current I2C master clock speed MPU6050_RA_I2C_MST_CTRL
    */
   public int getMasterClockSpeed() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_I2C_MST_CLK_BIT, MPU6050_I2C_MST_CLK_LENGTH);
@@ -1513,8 +1468,7 @@ public boolean getSlaveReadWriteTransitionEnabled() {
   /**
    * Set I2C master clock speed.
    * 
-   *  speed Current I2C master clock speed
-   *  MPU6050_RA_I2C_MST_CTRL
+   * speed Current I2C master clock speed MPU6050_RA_I2C_MST_CTRL
    */
   public void setMasterClockSpeed(int speed) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_CTRL, MPU6050_I2C_MST_CLK_BIT, MPU6050_I2C_MST_CLK_LENGTH, speed);
@@ -1563,8 +1517,7 @@ public boolean getSlaveReadWriteTransitionEnabled() {
    *
    * @param num
    *          Slave number (0-3)
-   * @return Current address for specified slave
-   *  MPU6050_RA_I2C_SLV0_ADDR
+   * @return Current address for specified slave MPU6050_RA_I2C_SLV0_ADDR
    */
   public int getSlaveAddress(int num) {
     if (num > 3)
@@ -1579,7 +1532,7 @@ public boolean getSlaveReadWriteTransitionEnabled() {
    *          Slave number (0-3)
    * @param address
    *          New address for specified slave see getSlaveAddress()
-   *  MPU6050_RA_I2C_SLV0_ADDR
+   *          MPU6050_RA_I2C_SLV0_ADDR
    */
   public void setSlaveAddress(int num, int address) {
     if (num > 3)
@@ -1597,8 +1550,7 @@ public boolean getSlaveReadWriteTransitionEnabled() {
    *
    * @param num
    *          Slave number (0-3)
-   * @return Current active register for specified slave
-   *  MPU6050_RA_I2C_SLV0_REG
+   * @return Current active register for specified slave MPU6050_RA_I2C_SLV0_REG
    */
   public int getSlaveRegister(int num) {
     if (num > 3)
@@ -1613,7 +1565,7 @@ public boolean getSlaveReadWriteTransitionEnabled() {
    *          Slave number (0-3)
    * @param reg
    *          New active register for specified slave see getSlaveRegister()
-   *  MPU6050_RA_I2C_SLV0_REG
+   *          MPU6050_RA_I2C_SLV0_REG
    */
   public void setSlaveRegister(int num, int reg) {
     if (num > 3)
@@ -1628,10 +1580,9 @@ public boolean getSlaveReadWriteTransitionEnabled() {
    * 
    * @param num
    *          Slave number (0-3)
-   * @return Current enabled value for specified slave
-   *  MPU6050_RA_I2C_SLV0_CTRL
+   * @return Current enabled value for specified slave MPU6050_RA_I2C_SLV0_CTRL
    */
-public boolean getSlaveEnabled(int num) {
+  public boolean getSlaveEnabled(int num) {
     if (num > 3)
       return false;
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_EN_BIT);
@@ -1644,7 +1595,7 @@ public boolean getSlaveEnabled(int num) {
    *          Slave number (0-3)
    * @param enabled
    *          New enabled value for specified slave see getSlaveEnabled()
-   *  MPU6050_RA_I2C_SLV0_CTRL
+   *          MPU6050_RA_I2C_SLV0_CTRL
    */
   public void setSlaveEnabled(int num, boolean enabled) {
     if (num > 3)
@@ -1663,9 +1614,9 @@ public boolean getSlaveEnabled(int num) {
    * @param num
    *          Slave number (0-3)
    * @return Current word pair byte-swapping enabled value for specified slave
-   *  MPU6050_RA_I2C_SLV0_CTRL
+   *         MPU6050_RA_I2C_SLV0_CTRL
    */
-public boolean getSlaveWordByteSwap(int num) {
+  public boolean getSlaveWordByteSwap(int num) {
     if (num > 3)
       return false;
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_BYTE_SW_BIT);
@@ -1678,8 +1629,7 @@ public boolean getSlaveWordByteSwap(int num) {
    *          Slave number (0-3)
    * @param enabled
    *          New word pair byte-swapping enabled value for specified slave see
-   *          getSlaveWordByteSwap()
-   *  MPU6050_RA_I2C_SLV0_CTRL
+   *          getSlaveWordByteSwap() MPU6050_RA_I2C_SLV0_CTRL
    */
   public void setSlaveWordByteSwap(int num, boolean enabled) {
     if (num > 3)
@@ -1697,10 +1647,9 @@ public boolean getSlaveWordByteSwap(int num) {
    * @param num
    *          Slave number (0-3)
    * @return Current write mode for specified slave (0 = register address +
-   *         data, 1 = data only)
-   *  MPU6050_RA_I2C_SLV0_CTRL
+   *         data, 1 = data only) MPU6050_RA_I2C_SLV0_CTRL
    */
-public boolean getSlaveWriteMode(int num) {
+  public boolean getSlaveWriteMode(int num) {
     if (num > 3)
       return false;
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_REG_DIS_BIT);
@@ -1713,8 +1662,7 @@ public boolean getSlaveWriteMode(int num) {
    *          Slave number (0-3)
    * @param mode
    *          New write mode for specified slave (0 = register address + data, 1
-   *          = data only) see getSlaveWriteMode()
-   *  MPU6050_RA_I2C_SLV0_CTRL
+   *          = data only) see getSlaveWriteMode() MPU6050_RA_I2C_SLV0_CTRL
    */
   public void setSlaveWriteMode(int num, boolean mode) {
     if (num > 3)
@@ -1733,9 +1681,9 @@ public boolean getSlaveWriteMode(int num) {
    * @param num
    *          Slave number (0-3)
    * @return Current word pair grouping order offset for specified slave
-   *  MPU6050_RA_I2C_SLV0_CTRL
+   *         MPU6050_RA_I2C_SLV0_CTRL
    */
-public boolean getSlaveWordGroupOffset(int num) {
+  public boolean getSlaveWordGroupOffset(int num) {
     if (num > 3)
       return false;
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV0_CTRL + num * 3, MPU6050_I2C_SLV_GRP_BIT);
@@ -1748,8 +1696,7 @@ public boolean getSlaveWordGroupOffset(int num) {
    *          Slave number (0-3)
    * @param enabled
    *          New word pair grouping order offset for specified slave see
-   *          getSlaveWordGroupOffset()
-   *  MPU6050_RA_I2C_SLV0_CTRL
+   *          getSlaveWordGroupOffset() MPU6050_RA_I2C_SLV0_CTRL
    */
   public void setSlaveWordGroupOffset(int num, boolean enabled) {
     if (num > 3)
@@ -1765,7 +1712,7 @@ public boolean getSlaveWordGroupOffset(int num) {
    * @param num
    *          Slave number (0-3)
    * @return Number of bytes to read for specified slave
-   *  MPU6050_RA_I2C_SLV0_CTRL
+   *         MPU6050_RA_I2C_SLV0_CTRL
    */
   public int getSlaveDataLength(int num) {
     if (num > 3)
@@ -1780,8 +1727,7 @@ public boolean getSlaveWordGroupOffset(int num) {
    *          Slave number (0-3)
    * @param length
    *          Number of bytes to read for specified slave see
-   *          getSlaveDataLength()
-   *  MPU6050_RA_I2C_SLV0_CTRL
+   *          getSlaveDataLength() MPU6050_RA_I2C_SLV0_CTRL
    */
   public void setSlaveDataLength(int num, int length) {
     if (num > 3)
@@ -1798,7 +1744,7 @@ public boolean getSlaveWordGroupOffset(int num) {
    * address of the slave device.
    *
    * @return Current address for Slave 4 see getSlaveAddress()
-   *  MPU6050_RA_I2C_SLV4_ADDR
+   *         MPU6050_RA_I2C_SLV4_ADDR
    */
   public int getSlave4Address() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_ADDR);
@@ -1809,7 +1755,7 @@ public boolean getSlaveWordGroupOffset(int num) {
    * 
    * @param address
    *          New address for Slave 4 see getSlave4Address()
-   *  MPU6050_RA_I2C_SLV4_ADDR
+   *          MPU6050_RA_I2C_SLV4_ADDR
    */
   public void setSlave4Address(int address) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_ADDR, address);
@@ -1820,8 +1766,7 @@ public boolean getSlaveWordGroupOffset(int num) {
    * this slave will be done to whatever internal register address is stored in
    * this MPU register.
    *
-   * @return Current active register for Slave 4
-   *  MPU6050_RA_I2C_SLV4_REG
+   * @return Current active register for Slave 4 MPU6050_RA_I2C_SLV4_REG
    */
   public int getSlave4Register() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_REG);
@@ -1832,7 +1777,7 @@ public boolean getSlaveWordGroupOffset(int num) {
    * 
    * @param reg
    *          New active register for Slave 4 see getSlave4Register()
-   *  MPU6050_RA_I2C_SLV4_REG
+   *          MPU6050_RA_I2C_SLV4_REG
    */
   public void setSlave4Register(int reg) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_REG, reg);
@@ -1844,8 +1789,7 @@ public boolean getSlaveWordGroupOffset(int num) {
    * register has no effect.
    * 
    * @param data
-   *          New byte to write to Slave 4
-   *  MPU6050_RA_I2C_SLV4_DO
+   *          New byte to write to Slave 4 MPU6050_RA_I2C_SLV4_DO
    */
   public void setSlave4OutputByte(int data) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_DO, data);
@@ -1856,10 +1800,9 @@ public boolean getSlaveWordGroupOffset(int num) {
    * Slave 4 for data transfer operations. When cleared to 0, this bit disables
    * Slave 4 from data transfer operations.
    * 
-   * @return Current enabled value for Slave 4
-   *  MPU6050_RA_I2C_SLV4_CTRL
+   * @return Current enabled value for Slave 4 MPU6050_RA_I2C_SLV4_CTRL
    */
-public boolean getSlave4Enabled() {
+  public boolean getSlave4Enabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_EN_BIT);
   }
 
@@ -1868,7 +1811,7 @@ public boolean getSlave4Enabled() {
    * 
    * @param enabled
    *          New enabled value for Slave 4 see getSlave4Enabled()
-   *  MPU6050_RA_I2C_SLV4_CTRL
+   *          MPU6050_RA_I2C_SLV4_CTRL
    */
   public void setSlave4Enabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_EN_BIT, enabled);
@@ -1882,9 +1825,9 @@ public boolean getSlave4Enabled() {
    * status can be observed in Register 54.
    *
    * @return Current enabled value for Slave 4 transaction interrupts.
-   *  MPU6050_RA_I2C_SLV4_CTRL
+   *         MPU6050_RA_I2C_SLV4_CTRL
    */
-public boolean getSlave4InterruptEnabled() {
+  public boolean getSlave4InterruptEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_INT_EN_BIT);
   }
 
@@ -1893,8 +1836,7 @@ public boolean getSlave4InterruptEnabled() {
    * 
    * @param enabled
    *          New enabled value for Slave 4 transaction interrupts. see
-   *          getSlave4InterruptEnabled()
-   *  MPU6050_RA_I2C_SLV4_CTRL
+   *          getSlave4InterruptEnabled() MPU6050_RA_I2C_SLV4_CTRL
    */
   public void setSlave4InterruptEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_INT_EN_BIT, enabled);
@@ -1908,10 +1850,9 @@ public boolean getSlave4InterruptEnabled() {
    * ensuing data transaction will take place.
    *
    * @return Current write mode for Slave 4 (0 = register address + data, 1 =
-   *         data only)
-   *  MPU6050_RA_I2C_SLV4_CTRL
+   *         data only) MPU6050_RA_I2C_SLV4_CTRL
    */
-public boolean getSlave4WriteMode() {
+  public boolean getSlave4WriteMode() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_REG_DIS_BIT);
   }
 
@@ -1920,8 +1861,7 @@ public boolean getSlave4WriteMode() {
    * 
    * @param mode
    *          New write mode for Slave 4 (0 = register address + data, 1 = data
-   *          only) see getSlave4WriteMode()
-   *  MPU6050_RA_I2C_SLV4_CTRL
+   *          only) see getSlave4WriteMode() MPU6050_RA_I2C_SLV4_CTRL
    */
   public void setSlave4WriteMode(boolean mode) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_REG_DIS_BIT, mode);
@@ -1939,8 +1879,7 @@ public boolean getSlave4WriteMode() {
    * to the Sample Rate is determined by I2C_MST_DELAY_CTRL (register 103). For
    * further information regarding the Sample Rate, please refer to register 25.
    *
-   * @return Current Slave 4 master delay value
-   *  MPU6050_RA_I2C_SLV4_CTRL
+   * @return Current Slave 4 master delay value MPU6050_RA_I2C_SLV4_CTRL
    */
   public int getSlave4MasterDelay() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_MST_DLY_BIT, MPU6050_I2C_SLV4_MST_DLY_LENGTH);
@@ -1951,7 +1890,7 @@ public boolean getSlave4WriteMode() {
    * 
    * @param delay
    *          New Slave 4 master delay value see getSlave4MasterDelay()
-   *  MPU6050_RA_I2C_SLV4_CTRL
+   *          MPU6050_RA_I2C_SLV4_CTRL
    */
   public void setSlave4MasterDelay(int delay) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_CTRL, MPU6050_I2C_SLV4_MST_DLY_BIT, MPU6050_I2C_SLV4_MST_DLY_LENGTH, delay);
@@ -1961,8 +1900,7 @@ public boolean getSlave4WriteMode() {
    * Get last available byte read from Slave 4. This register stores the data
    * read from Slave 4. This field is populated after a read transaction.
    * 
-   * @return Last available byte read from to Slave 4
-   *  MPU6050_RA_I2C_SLV4_DI
+   * @return Last available byte read from to Slave 4 MPU6050_RA_I2C_SLV4_DI
    */
   public int getSlate4InputByte() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_I2C_SLV4_DI);
@@ -1977,10 +1915,9 @@ public boolean getSlave4WriteMode() {
    * processor. When set to 1, this bit will cause an interrupt if FSYNC_INT_EN
    * is asserted in INT_PIN_CFG (Register 55).
    * 
-   * @return FSYNC interrupt status
-   *  MPU6050_RA_I2C_MST_STATUS
+   * @return FSYNC interrupt status MPU6050_RA_I2C_MST_STATUS
    */
-public boolean getPassthroughStatus() {
+  public boolean getPassthroughStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_PASS_THROUGH_BIT);
   }
 
@@ -1990,10 +1927,9 @@ public boolean getPassthroughStatus() {
    * bit in the INT_ENABLE register (Register 56) is asserted and if the
    * SLV_4_DONE_INT bit is asserted in the I2C_SLV4_CTRL register (Register 52).
    * 
-   * @return Slave 4 transaction done status
-   *  MPU6050_RA_I2C_MST_STATUS
+   * @return Slave 4 transaction done status MPU6050_RA_I2C_MST_STATUS
    */
-public boolean getSlave4IsDone() {
+  public boolean getSlave4IsDone() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV4_DONE_BIT);
   }
 
@@ -2003,10 +1939,9 @@ public boolean getSlave4IsDone() {
    * condition). This triggers an interrupt if the I2C_MST_INT_EN bit in the
    * INT_ENABLE register (Register 56) is asserted.
    * 
-   * @return Master arbitration lost status
-   *  MPU6050_RA_I2C_MST_STATUS
+   * @return Master arbitration lost status MPU6050_RA_I2C_MST_STATUS
    */
-public boolean getLostArbitration() {
+  public boolean getLostArbitration() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_LOST_ARB_BIT);
   }
 
@@ -2016,10 +1951,9 @@ public boolean getLostArbitration() {
    * interrupt if the I2C_MST_INT_EN bit in the INT_ENABLE register (Register
    * 56) is asserted.
    * 
-   * @return Slave 4 NACK interrupt status
-   *  MPU6050_RA_I2C_MST_STATUS
+   * @return Slave 4 NACK interrupt status MPU6050_RA_I2C_MST_STATUS
    */
-public boolean getSlave4Nack() {
+  public boolean getSlave4Nack() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV4_NACK_BIT);
   }
 
@@ -2029,10 +1963,9 @@ public boolean getSlave4Nack() {
    * interrupt if the I2C_MST_INT_EN bit in the INT_ENABLE register (Register
    * 56) is asserted.
    * 
-   * @return Slave 3 NACK interrupt status
-   *  MPU6050_RA_I2C_MST_STATUS
+   * @return Slave 3 NACK interrupt status MPU6050_RA_I2C_MST_STATUS
    */
-public boolean getSlave3Nack() {
+  public boolean getSlave3Nack() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV3_NACK_BIT);
   }
 
@@ -2042,10 +1975,9 @@ public boolean getSlave3Nack() {
    * interrupt if the I2C_MST_INT_EN bit in the INT_ENABLE register (Register
    * 56) is asserted.
    * 
-   * @return Slave 2 NACK interrupt status
-   *  MPU6050_RA_I2C_MST_STATUS
+   * @return Slave 2 NACK interrupt status MPU6050_RA_I2C_MST_STATUS
    */
-public boolean getSlave2Nack() {
+  public boolean getSlave2Nack() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV2_NACK_BIT);
   }
 
@@ -2055,10 +1987,9 @@ public boolean getSlave2Nack() {
    * interrupt if the I2C_MST_INT_EN bit in the INT_ENABLE register (Register
    * 56) is asserted.
    * 
-   * @return Slave 1 NACK interrupt status
-   *  MPU6050_RA_I2C_MST_STATUS
+   * @return Slave 1 NACK interrupt status MPU6050_RA_I2C_MST_STATUS
    */
-public boolean getSlave1Nack() {
+  public boolean getSlave1Nack() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV1_NACK_BIT);
   }
 
@@ -2068,10 +1999,9 @@ public boolean getSlave1Nack() {
    * interrupt if the I2C_MST_INT_EN bit in the INT_ENABLE register (Register
    * 56) is asserted.
    * 
-   * @return Slave 0 NACK interrupt status
-   *  MPU6050_RA_I2C_MST_STATUS
+   * @return Slave 0 NACK interrupt status MPU6050_RA_I2C_MST_STATUS
    */
-public boolean getSlave0Nack() {
+  public boolean getSlave0Nack() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_STATUS, MPU6050_MST_I2C_SLV0_NACK_BIT);
   }
 
@@ -2082,10 +2012,9 @@ public boolean getSlave0Nack() {
    * active-low.
    * 
    * @return Current interrupt mode (0=active-high, 1=active-low)
-   *  MPU6050_RA_INT_PIN_CFG
-   *  MPU6050_INTCFG_INT_LEVEL_BIT
+   *         MPU6050_RA_INT_PIN_CFG MPU6050_INTCFG_INT_LEVEL_BIT
    */
-public boolean getInterruptMode() {
+  public boolean getInterruptMode() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_LEVEL_BIT);
   }
 
@@ -2094,9 +2023,8 @@ public boolean getInterruptMode() {
    * 
    * @param mode
    *          New interrupt mode (0=active-high, 1=active-low) see
-   *          getInterruptMode()
-   *  MPU6050_RA_INT_PIN_CFG
-   *  MPU6050_INTCFG_INT_LEVEL_BIT
+   *          getInterruptMode() MPU6050_RA_INT_PIN_CFG
+   *          MPU6050_INTCFG_INT_LEVEL_BIT
    */
   public void setInterruptMode(boolean mode) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_LEVEL_BIT, mode);
@@ -2106,10 +2034,9 @@ public boolean getInterruptMode() {
    * Get interrupt drive mode. Will be set 0 for push-pull, 1 for open-drain.
    * 
    * @return Current interrupt drive mode (0=push-pull, 1=open-drain)
-   *  MPU6050_RA_INT_PIN_CFG
-   *  MPU6050_INTCFG_INT_OPEN_BIT
+   *         MPU6050_RA_INT_PIN_CFG MPU6050_INTCFG_INT_OPEN_BIT
    */
-public boolean getInterruptDrive() {
+  public boolean getInterruptDrive() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_OPEN_BIT);
   }
 
@@ -2118,9 +2045,8 @@ public boolean getInterruptDrive() {
    * 
    * @param drive
    *          New interrupt drive mode (0=push-pull, 1=open-drain) see
-   *          getInterruptDrive()
-   *  MPU6050_RA_INT_PIN_CFG
-   *  MPU6050_INTCFG_INT_OPEN_BIT
+   *          getInterruptDrive() MPU6050_RA_INT_PIN_CFG
+   *          MPU6050_INTCFG_INT_OPEN_BIT
    */
   public void setInterruptDrive(boolean drive) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_OPEN_BIT, drive);
@@ -2131,10 +2057,9 @@ public boolean getInterruptDrive() {
    * latch-until-int-cleared.
    * 
    * @return Current latch mode (0=50us-pulse, 1=latch-until-int-cleared)
-   *  MPU6050_RA_INT_PIN_CFG
-   *  MPU6050_INTCFG_LATCH_INT_EN_BIT
+   *         MPU6050_RA_INT_PIN_CFG MPU6050_INTCFG_LATCH_INT_EN_BIT
    */
-public boolean getInterruptLatch() {
+  public boolean getInterruptLatch() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_LATCH_INT_EN_BIT);
   }
 
@@ -2143,9 +2068,8 @@ public boolean getInterruptLatch() {
    * 
    * @param latch
    *          New latch mode (0=50us-pulse, 1=latch-until-int-cleared) see
-   *          getInterruptLatch()
-   *  MPU6050_RA_INT_PIN_CFG
-   *  MPU6050_INTCFG_LATCH_INT_EN_BIT
+   *          getInterruptLatch() MPU6050_RA_INT_PIN_CFG
+   *          MPU6050_INTCFG_LATCH_INT_EN_BIT
    */
   public void setInterruptLatch(boolean latch) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_LATCH_INT_EN_BIT, latch);
@@ -2156,10 +2080,9 @@ public boolean getInterruptLatch() {
    * any-register-read.
    * 
    * @return Current latch clear mode (0=status-read-only, 1=any-register-read)
-   *  MPU6050_RA_INT_PIN_CFG
-   *  MPU6050_INTCFG_INT_RD_CLEAR_BIT
+   *         MPU6050_RA_INT_PIN_CFG MPU6050_INTCFG_INT_RD_CLEAR_BIT
    */
-public boolean getInterruptLatchClear() {
+  public boolean getInterruptLatchClear() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_RD_CLEAR_BIT);
   }
 
@@ -2168,9 +2091,8 @@ public boolean getInterruptLatchClear() {
    * 
    * @param clear
    *          New latch clear mode (0=status-read-only, 1=any-register-read) see
-   *          getInterruptLatchClear()
-   *  MPU6050_RA_INT_PIN_CFG
-   *  MPU6050_INTCFG_INT_RD_CLEAR_BIT
+   *          getInterruptLatchClear() MPU6050_RA_INT_PIN_CFG
+   *          MPU6050_INTCFG_INT_RD_CLEAR_BIT
    */
   public void setInterruptLatchClear(boolean clear) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_INT_RD_CLEAR_BIT, clear);
@@ -2180,11 +2102,10 @@ public boolean getInterruptLatchClear() {
    * Get FSYNC interrupt logic level mode.
    * 
    * @return Current FSYNC interrupt mode (0=active-high, 1=active-low) see
-   *         getFSyncInterruptMode()
-   *  MPU6050_RA_INT_PIN_CFG
-   *  MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT
+   *         getFSyncInterruptMode() MPU6050_RA_INT_PIN_CFG
+   *         MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT
    */
-public boolean getFSyncInterruptLevel() {
+  public boolean getFSyncInterruptLevel() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT);
   }
 
@@ -2193,9 +2114,8 @@ public boolean getFSyncInterruptLevel() {
    * 
    * @param level
    *          New FSYNC interrupt mode (0=active-high, 1=active-low) see
-   *          getFSyncInterruptMode()
-   *  MPU6050_RA_INT_PIN_CFG
-   *  MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT
+   *          getFSyncInterruptMode() MPU6050_RA_INT_PIN_CFG
+   *          MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT
    */
   public void setFSyncInterruptLevel(boolean level) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT, level);
@@ -2205,11 +2125,10 @@ public boolean getFSyncInterruptLevel() {
    * Get FSYNC pin interrupt enabled setting. Will be set 0 for disabled, 1 for
    * enabled.
    * 
-   * @return Current interrupt enabled setting
-   *  MPU6050_RA_INT_PIN_CFG
-   *  MPU6050_INTCFG_FSYNC_INT_EN_BIT
+   * @return Current interrupt enabled setting MPU6050_RA_INT_PIN_CFG
+   *         MPU6050_INTCFG_FSYNC_INT_EN_BIT
    */
-public boolean getFSyncInterruptEnabled() {
+  public boolean getFSyncInterruptEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_FSYNC_INT_EN_BIT);
   }
 
@@ -2218,9 +2137,8 @@ public boolean getFSyncInterruptEnabled() {
    * 
    * @param enabled
    *          New FSYNC pin interrupt enabled setting see
-   *          getFSyncInterruptEnabled()
-   *  MPU6050_RA_INT_PIN_CFG
-   *  MPU6050_INTCFG_FSYNC_INT_EN_BIT
+   *          getFSyncInterruptEnabled() MPU6050_RA_INT_PIN_CFG
+   *          MPU6050_INTCFG_FSYNC_INT_EN_BIT
    */
   public void setFSyncInterruptEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_FSYNC_INT_EN_BIT, enabled);
@@ -2234,11 +2152,10 @@ public boolean getFSyncInterruptEnabled() {
    * directly access the auxiliary I2C bus of the MPU-60X0 regardless of the
    * state of I2C_MST_EN (Register 106 bit[5]).
    * 
-   * @return Current I2C bypass enabled status
-   *  MPU6050_RA_INT_PIN_CFG
-   *  MPU6050_INTCFG_I2C_BYPASS_EN_BIT
+   * @return Current I2C bypass enabled status MPU6050_RA_INT_PIN_CFG
+   *         MPU6050_INTCFG_I2C_BYPASS_EN_BIT
    */
-public boolean getI2CBypassEnabled() {
+  public boolean getI2CBypassEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_I2C_BYPASS_EN_BIT);
   }
 
@@ -2251,9 +2168,8 @@ public boolean getI2CBypassEnabled() {
    * state of I2C_MST_EN (Register 106 bit[5]).
    * 
    * @param enabled
-   *          New I2C bypass enabled status
-   *  MPU6050_RA_INT_PIN_CFG
-   *  MPU6050_INTCFG_I2C_BYPASS_EN_BIT
+   *          New I2C bypass enabled status MPU6050_RA_INT_PIN_CFG
+   *          MPU6050_INTCFG_I2C_BYPASS_EN_BIT
    */
   public void setI2CBypassEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_I2C_BYPASS_EN_BIT, enabled);
@@ -2266,10 +2182,9 @@ public boolean getI2CBypassEnabled() {
    * CLKOUT, please refer to the MPU-60X0 Product Specification document.
    * 
    * @return Current reference clock output enabled status
-   *  MPU6050_RA_INT_PIN_CFG
-   *  MPU6050_INTCFG_CLKOUT_EN_BIT
+   *         MPU6050_RA_INT_PIN_CFG MPU6050_INTCFG_CLKOUT_EN_BIT
    */
-public boolean getClockOutputEnabled() {
+  public boolean getClockOutputEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_CLKOUT_EN_BIT);
   }
 
@@ -2280,9 +2195,8 @@ public boolean getClockOutputEnabled() {
    * CLKOUT, please refer to the MPU-60X0 Product Specification document.
    * 
    * @param enabled
-   *          New reference clock output enabled status
-   *  MPU6050_RA_INT_PIN_CFG
-   *  MPU6050_INTCFG_CLKOUT_EN_BIT
+   *          New reference clock output enabled status MPU6050_RA_INT_PIN_CFG
+   *          MPU6050_INTCFG_CLKOUT_EN_BIT
    */
   public void setClockOutputEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_PIN_CFG, MPU6050_INTCFG_CLKOUT_EN_BIT, enabled);
@@ -2294,9 +2208,8 @@ public boolean getClockOutputEnabled() {
    * Get full interrupt enabled status. Full register byte for all interrupts,
    * for quick reading. Each bit will be set 0 for disabled, 1 for enabled.
    * 
-   * @return Current interrupt enabled status
-   *  MPU6050_RA_INT_ENABLE
-   *  MPU6050_INTERRUPT_FF_BIT
+   * @return Current interrupt enabled status MPU6050_RA_INT_ENABLE
+   *         MPU6050_INTERRUPT_FF_BIT
    **/
   public int getIntEnabled() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE);
@@ -2308,8 +2221,7 @@ public boolean getClockOutputEnabled() {
    * 
    * @param enabled
    *          New interrupt enabled status see getIntFreefallEnabled()
-   *  MPU6050_RA_INT_ENABLE
-   *  MPU6050_INTERRUPT_FF_BIT
+   *          MPU6050_RA_INT_ENABLE MPU6050_INTERRUPT_FF_BIT
    **/
   public void setIntEnabled(int enabled) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, enabled);
@@ -2319,11 +2231,10 @@ public boolean getClockOutputEnabled() {
    * Get Free Fall interrupt enabled status. Will be set 0 for disabled, 1 for
    * enabled.
    * 
-   * @return Current interrupt enabled status
-   *  MPU6050_RA_INT_ENABLE
-   *  MPU6050_INTERRUPT_FF_BIT
+   * @return Current interrupt enabled status MPU6050_RA_INT_ENABLE
+   *         MPU6050_INTERRUPT_FF_BIT
    **/
-public boolean getIntFreefallEnabled() {
+  public boolean getIntFreefallEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_FF_BIT);
   }
 
@@ -2332,8 +2243,7 @@ public boolean getIntFreefallEnabled() {
    * 
    * @param enabled
    *          New interrupt enabled status see getIntFreefallEnabled()
-   *  MPU6050_RA_INT_ENABLE
-   *  MPU6050_INTERRUPT_FF_BIT
+   *          MPU6050_RA_INT_ENABLE MPU6050_INTERRUPT_FF_BIT
    **/
   public void setIntFreefallEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_FF_BIT, enabled);
@@ -2343,11 +2253,10 @@ public boolean getIntFreefallEnabled() {
    * Get Motion Detection interrupt enabled status. Will be set 0 for disabled,
    * 1 for enabled.
    * 
-   * @return Current interrupt enabled status
-   *  MPU6050_RA_INT_ENABLE
-   *  MPU6050_INTERRUPT_MOT_BIT
+   * @return Current interrupt enabled status MPU6050_RA_INT_ENABLE
+   *         MPU6050_INTERRUPT_MOT_BIT
    **/
-public boolean getIntMotionEnabled() {
+  public boolean getIntMotionEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_MOT_BIT);
   }
 
@@ -2356,8 +2265,7 @@ public boolean getIntMotionEnabled() {
    * 
    * @param enabled
    *          New interrupt enabled status see getIntMotionEnabled()
-   *  MPU6050_RA_INT_ENABLE
-   *  MPU6050_INTERRUPT_MOT_BIT
+   *          MPU6050_RA_INT_ENABLE MPU6050_INTERRUPT_MOT_BIT
    **/
   public void setIntMotionEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_MOT_BIT, enabled);
@@ -2367,11 +2275,10 @@ public boolean getIntMotionEnabled() {
    * Get Zero Motion Detection interrupt enabled status. Will be set 0 for
    * disabled, 1 for enabled.
    * 
-   * @return Current interrupt enabled status
-   *  MPU6050_RA_INT_ENABLE
-   *  MPU6050_INTERRUPT_ZMOT_BIT
+   * @return Current interrupt enabled status MPU6050_RA_INT_ENABLE
+   *         MPU6050_INTERRUPT_ZMOT_BIT
    **/
-public boolean getIntZeroMotionEnabled() {
+  public boolean getIntZeroMotionEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_ZMOT_BIT);
   }
 
@@ -2380,8 +2287,7 @@ public boolean getIntZeroMotionEnabled() {
    * 
    * @param enabled
    *          New interrupt enabled status see getIntZeroMotionEnabled()
-   *  MPU6050_RA_INT_ENABLE
-   *  MPU6050_INTERRUPT_ZMOT_BIT
+   *          MPU6050_RA_INT_ENABLE MPU6050_INTERRUPT_ZMOT_BIT
    **/
   public void setIntZeroMotionEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_ZMOT_BIT, enabled);
@@ -2391,11 +2297,10 @@ public boolean getIntZeroMotionEnabled() {
    * Get FIFO Buffer Overflow interrupt enabled status. Will be set 0 for
    * disabled, 1 for enabled.
    * 
-   * @return Current interrupt enabled status
-   *  MPU6050_RA_INT_ENABLE
-   *  MPU6050_INTERRUPT_FIFO_OFLOW_BIT
+   * @return Current interrupt enabled status MPU6050_RA_INT_ENABLE
+   *         MPU6050_INTERRUPT_FIFO_OFLOW_BIT
    **/
-public boolean getIntFIFOBufferOverflowEnabled() {
+  public boolean getIntFIFOBufferOverflowEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_FIFO_OFLOW_BIT);
   }
 
@@ -2404,8 +2309,7 @@ public boolean getIntFIFOBufferOverflowEnabled() {
    * 
    * @param enabled
    *          New interrupt enabled status see getIntFIFOBufferOverflowEnabled()
-   *  MPU6050_RA_INT_ENABLE
-   *  MPU6050_INTERRUPT_FIFO_OFLOW_BIT
+   *          MPU6050_RA_INT_ENABLE MPU6050_INTERRUPT_FIFO_OFLOW_BIT
    **/
   public void setIntFIFOBufferOverflowEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_FIFO_OFLOW_BIT, enabled);
@@ -2416,11 +2320,10 @@ public boolean getIntFIFOBufferOverflowEnabled() {
    * interrupt sources to generate an interrupt. Will be set 0 for disabled, 1
    * for enabled.
    * 
-   * @return Current interrupt enabled status
-   *  MPU6050_RA_INT_ENABLE
-   *  MPU6050_INTERRUPT_I2C_MST_INT_BIT
+   * @return Current interrupt enabled status MPU6050_RA_INT_ENABLE
+   *         MPU6050_INTERRUPT_I2C_MST_INT_BIT
    **/
-public boolean getIntI2CMasterEnabled() {
+  public boolean getIntI2CMasterEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_I2C_MST_INT_BIT);
   }
 
@@ -2429,8 +2332,7 @@ public boolean getIntI2CMasterEnabled() {
    * 
    * @param enabled
    *          New interrupt enabled status see getIntI2CMasterEnabled()
-   *  MPU6050_RA_INT_ENABLE
-   *  MPU6050_INTERRUPT_I2C_MST_INT_BIT
+   *          MPU6050_RA_INT_ENABLE MPU6050_INTERRUPT_I2C_MST_INT_BIT
    **/
   public void setIntI2CMasterEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_I2C_MST_INT_BIT, enabled);
@@ -2441,11 +2343,10 @@ public boolean getIntI2CMasterEnabled() {
    * write operation to all of the sensor registers has been completed. Will be
    * set 0 for disabled, 1 for enabled.
    * 
-   * @return Current interrupt enabled status
-   *  MPU6050_RA_INT_ENABLE
-   *  MPU6050_INTERRUPT_DATA_RDY_BIT
+   * @return Current interrupt enabled status MPU6050_RA_INT_ENABLE
+   *         MPU6050_INTERRUPT_DATA_RDY_BIT
    */
-public boolean getIntDataReadyEnabled() {
+  public boolean getIntDataReadyEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DATA_RDY_BIT);
   }
 
@@ -2454,8 +2355,7 @@ public boolean getIntDataReadyEnabled() {
    * 
    * @param enabled
    *          New interrupt enabled status see getIntDataReadyEnabled()
-   *  MPU6050_RA_INT_CFG
-   *  MPU6050_INTERRUPT_DATA_RDY_BIT
+   *          MPU6050_RA_INT_CFG MPU6050_INTERRUPT_DATA_RDY_BIT
    */
   public void setIntDataReadyEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DATA_RDY_BIT, enabled);
@@ -2469,8 +2369,7 @@ public boolean getIntDataReadyEnabled() {
    * since each single bit read clears all of them because it has to read the
    * whole byte.
    * 
-   * @return Current interrupt status
-   *  MPU6050_RA_INT_STATUS
+   * @return Current interrupt status MPU6050_RA_INT_STATUS
    */
   public int getIntStatus() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS);
@@ -2481,11 +2380,10 @@ public boolean getIntDataReadyEnabled() {
    * Free Fall interrupt has been generated. The bit clears to 0 after the
    * register has been read.
    * 
-   * @return Current interrupt status
-   *  MPU6050_RA_INT_STATUS
-   *  MPU6050_INTERRUPT_FF_BIT
+   * @return Current interrupt status MPU6050_RA_INT_STATUS
+   *         MPU6050_INTERRUPT_FF_BIT
    */
-public boolean getIntFreefallStatus() {
+  public boolean getIntFreefallStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_FF_BIT);
   }
 
@@ -2494,11 +2392,10 @@ public boolean getIntFreefallStatus() {
    * when a Motion Detection interrupt has been generated. The bit clears to 0
    * after the register has been read.
    * 
-   * @return Current interrupt status
-   *  MPU6050_RA_INT_STATUS
-   *  MPU6050_INTERRUPT_MOT_BIT
+   * @return Current interrupt status MPU6050_RA_INT_STATUS
+   *         MPU6050_INTERRUPT_MOT_BIT
    */
-public boolean getIntMotionStatus() {
+  public boolean getIntMotionStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_MOT_BIT);
   }
 
@@ -2507,11 +2404,10 @@ public boolean getIntMotionStatus() {
    * 1 when a Zero Motion Detection interrupt has been generated. The bit clears
    * to 0 after the register has been read.
    * 
-   * @return Current interrupt status
-   *  MPU6050_RA_INT_STATUS
-   *  MPU6050_INTERRUPT_ZMOT_BIT
+   * @return Current interrupt status MPU6050_RA_INT_STATUS
+   *         MPU6050_INTERRUPT_ZMOT_BIT
    */
-public boolean getIntZeroMotionStatus() {
+  public boolean getIntZeroMotionStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_ZMOT_BIT);
   }
 
@@ -2520,11 +2416,10 @@ public boolean getIntZeroMotionStatus() {
    * when a Free Fall interrupt has been generated. The bit clears to 0 after
    * the register has been read.
    * 
-   * @return Current interrupt status
-   *  MPU6050_RA_INT_STATUS
-   *  MPU6050_INTERRUPT_FIFO_OFLOW_BIT
+   * @return Current interrupt status MPU6050_RA_INT_STATUS
+   *         MPU6050_INTERRUPT_FIFO_OFLOW_BIT
    */
-public boolean getIntFIFOBufferOverflowStatus() {
+  public boolean getIntFIFOBufferOverflowStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_FIFO_OFLOW_BIT);
   }
 
@@ -2534,11 +2429,10 @@ public boolean getIntFIFOBufferOverflowStatus() {
    * interrupts, please refer to Register 54. The bit clears to 0 after the
    * register has been read.
    * 
-   * @return Current interrupt status
-   *  MPU6050_RA_INT_STATUS
-   *  MPU6050_INTERRUPT_I2C_MST_INT_BIT
+   * @return Current interrupt status MPU6050_RA_INT_STATUS
+   *         MPU6050_INTERRUPT_I2C_MST_INT_BIT
    */
-public boolean getIntI2CMasterStatus() {
+  public boolean getIntI2CMasterStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_I2C_MST_INT_BIT);
   }
 
@@ -2547,11 +2441,10 @@ public boolean getIntI2CMasterStatus() {
    * Data Ready interrupt has been generated. The bit clears to 0 after the
    * register has been read.
    * 
-   * @return Current interrupt status
-   *  MPU6050_RA_INT_STATUS
-   *  MPU6050_INTERRUPT_DATA_RDY_BIT
+   * @return Current interrupt status MPU6050_RA_INT_STATUS
+   *         MPU6050_INTERRUPT_DATA_RDY_BIT
    */
-public boolean getIntDataReadyStatus() {
+  public boolean getIntDataReadyStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_DATA_RDY_BIT);
   }
 
@@ -2593,7 +2486,7 @@ public boolean getIntDataReadyStatus() {
    *          16-bit signed integer container for Y-axis acceleration
    * @param z
    *          16-bit signed integer container for Z-axis acceleration
-   *  MPU6050_RA_GYRO_XOUT_H
+   *          MPU6050_RA_GYRO_XOUT_H
    */
   public void getAcceleration(int[] x, int[] y, int[] z) {
     int readBuffer[] = new int[6];
@@ -2607,8 +2500,7 @@ public boolean getIntDataReadyStatus() {
    * Get X-axis accelerometer reading.
    * 
    * @return X-axis acceleration measurement in 16-bit 2's complement format see
-   *         getMotion6()
-   *  MPU6050_RA_ACCEL_XOUT_H
+   *         getMotion6() MPU6050_RA_ACCEL_XOUT_H
    */
   public int getAccelerationX() {
     int readBuffer[] = new int[2];
@@ -2620,8 +2512,7 @@ public boolean getIntDataReadyStatus() {
    * Get Y-axis accelerometer reading.
    * 
    * @return Y-axis acceleration measurement in 16-bit 2's complement format see
-   *         getMotion6()
-   *  MPU6050_RA_ACCEL_YOUT_H
+   *         getMotion6() MPU6050_RA_ACCEL_YOUT_H
    */
   public int getAccelerationY() {
     int readBuffer[] = new int[2];
@@ -2633,8 +2524,7 @@ public boolean getIntDataReadyStatus() {
    * Get Z-axis accelerometer reading.
    * 
    * @return Z-axis acceleration measurement in 16-bit 2's complement format see
-   *         getMotion6()
-   *  MPU6050_RA_ACCEL_ZOUT_H
+   *         getMotion6() MPU6050_RA_ACCEL_ZOUT_H
    */
   public int getAccelerationZ() {
     int readBuffer[] = new int[2];
@@ -2648,7 +2538,7 @@ public boolean getIntDataReadyStatus() {
    * Get current internal temperature.
    * 
    * @return Temperature reading in 16-bit 2's complement format
-   *  MPU6050_RA_TEMP_OUT_H
+   *         MPU6050_RA_TEMP_OUT_H
    */
   double getTemperatureCelcius() {
     double rawTemp = getTemperature();
@@ -2660,7 +2550,7 @@ public boolean getIntDataReadyStatus() {
    * Get current internal temperature.
    * 
    * @return Temperature reading in 16-bit 2's complement format
-   *  MPU6050_RA_TEMP_OUT_H
+   *         MPU6050_RA_TEMP_OUT_H
    */
   public int getTemperature() {
     int readBuffer[] = new int[2];
@@ -2703,8 +2593,7 @@ public boolean getIntDataReadyStatus() {
    *          16-bit signed integer container for Y-axis rotation
    * @param z
    *          16-bit signed integer container for Z-axis rotation see
-   *          getMotion6()
-   *  MPU6050_RA_GYRO_XOUT_H
+   *          getMotion6() MPU6050_RA_GYRO_XOUT_H
    */
   public void getRotation(int x[], int y[], int z[]) {
     int readBuffer[] = new int[6];
@@ -2718,8 +2607,7 @@ public boolean getIntDataReadyStatus() {
    * Get X-axis gyroscope reading.
    * 
    * @return X-axis rotation measurement in 16-bit 2's complement format see
-   *         getMotion6()
-   *  MPU6050_RA_GYRO_XOUT_H
+   *         getMotion6() MPU6050_RA_GYRO_XOUT_H
    */
   public int getRotationX() {
     int readBuffer[] = new int[2];
@@ -2731,8 +2619,7 @@ public boolean getIntDataReadyStatus() {
    * Get Y-axis gyroscope reading.
    * 
    * @return Y-axis rotation measurement in 16-bit 2's complement format see
-   *         getMotion6()
-   *  MPU6050_RA_GYRO_YOUT_H
+   *         getMotion6() MPU6050_RA_GYRO_YOUT_H
    */
   public int getRotationY() {
     int readBuffer[] = new int[2];
@@ -2744,8 +2631,7 @@ public boolean getIntDataReadyStatus() {
    * Get Z-axis gyroscope reading.
    * 
    * @return Z-axis rotation measurement in 16-bit 2's complement format see
-   *         getMotion6()
-   *  MPU6050_RA_GYRO_ZOUT_H
+   *         getMotion6() MPU6050_RA_GYRO_ZOUT_H
    */
   public int getRotationZ() {
     int readBuffer[] = new int[2];
@@ -2780,8 +2666,8 @@ public boolean getIntDataReadyStatus() {
    *
    * Data is placed in these external sensor data registers according to
    * I2C_SLV0_CTRL, I2C_SLV1_CTRL, I2C_SLV2_CTRL, and I2C_SLV3_CTRL (Registers
-   * 39, 42, 45, and 48). When more than zero bytes are read (I2C_SLVx_LEN &gt; 0)
-   * from an enabled slave (I2C_SLVx_EN = 1), the slave is read at the Sample
+   * 39, 42, 45, and 48). When more than zero bytes are read (I2C_SLVx_LEN &gt;
+   * 0) from an enabled slave (I2C_SLVx_EN = 1), the slave is read at the Sample
    * Rate (as defined in Register 25) or delayed rate (if specified in Register
    * 52 and 103). During each Sample cycle, slave reads are performed in order
    * of Slave number. If all slaves are enabled with more than zero bytes to be
@@ -2868,8 +2754,7 @@ public boolean getIntDataReadyStatus() {
   /**
    * Get full motion detection status register content (all bits).
    * 
-   * @return Motion detection status byte
-   *  MPU6050_RA_MOT_DETECT_STATUS
+   * @return Motion detection status byte MPU6050_RA_MOT_DETECT_STATUS
    */
   public int getMotionStatus() {
     return I2CdevReadByte(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS);
@@ -2878,77 +2763,70 @@ public boolean getIntDataReadyStatus() {
   /**
    * Get X-axis negative motion detection interrupt status.
    * 
-   * @return Motion detection status
-   *  MPU6050_RA_MOT_DETECT_STATUS
-   *  MPU6050_MOTION_MOT_XNEG_BIT
+   * @return Motion detection status MPU6050_RA_MOT_DETECT_STATUS
+   *         MPU6050_MOTION_MOT_XNEG_BIT
    */
-public boolean getXNegMotionDetected() {
+  public boolean getXNegMotionDetected() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_XNEG_BIT);
   }
 
   /**
    * Get X-axis positive motion detection interrupt status.
    * 
-   * @return Motion detection status
-   *  MPU6050_RA_MOT_DETECT_STATUS
-   *  MPU6050_MOTION_MOT_XPOS_BIT
+   * @return Motion detection status MPU6050_RA_MOT_DETECT_STATUS
+   *         MPU6050_MOTION_MOT_XPOS_BIT
    */
-public boolean getXPosMotionDetected() {
+  public boolean getXPosMotionDetected() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_XPOS_BIT);
   }
 
   /**
    * Get Y-axis negative motion detection interrupt status.
    * 
-   * @return Motion detection status
-   *  MPU6050_RA_MOT_DETECT_STATUS
-   *  MPU6050_MOTION_MOT_YNEG_BIT
+   * @return Motion detection status MPU6050_RA_MOT_DETECT_STATUS
+   *         MPU6050_MOTION_MOT_YNEG_BIT
    */
-public boolean getYNegMotionDetected() {
+  public boolean getYNegMotionDetected() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_YNEG_BIT);
   }
 
   /**
    * Get Y-axis positive motion detection interrupt status.
    * 
-   * @return Motion detection status
-   *  MPU6050_RA_MOT_DETECT_STATUS
-   *  MPU6050_MOTION_MOT_YPOS_BIT
+   * @return Motion detection status MPU6050_RA_MOT_DETECT_STATUS
+   *         MPU6050_MOTION_MOT_YPOS_BIT
    */
-public boolean getYPosMotionDetected() {
+  public boolean getYPosMotionDetected() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_YPOS_BIT);
   }
 
   /**
    * Get Z-axis negative motion detection interrupt status.
    * 
-   * @return Motion detection status
-   *  MPU6050_RA_MOT_DETECT_STATUS
-   *  MPU6050_MOTION_MOT_ZNEG_BIT
+   * @return Motion detection status MPU6050_RA_MOT_DETECT_STATUS
+   *         MPU6050_MOTION_MOT_ZNEG_BIT
    */
-public boolean getZNegMotionDetected() {
+  public boolean getZNegMotionDetected() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_ZNEG_BIT);
   }
 
   /**
    * Get Z-axis positive motion detection interrupt status.
    * 
-   * @return Motion detection status
-   *  MPU6050_RA_MOT_DETECT_STATUS
-   *  MPU6050_MOTION_MOT_ZPOS_BIT
+   * @return Motion detection status MPU6050_RA_MOT_DETECT_STATUS
+   *         MPU6050_MOTION_MOT_ZPOS_BIT
    */
-public boolean getZPosMotionDetected() {
+  public boolean getZPosMotionDetected() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_ZPOS_BIT);
   }
 
   /**
    * Get zero motion detection interrupt status.
    * 
-   * @return Motion detection status
-   *  MPU6050_RA_MOT_DETECT_STATUS
-   *  MPU6050_MOTION_MOT_ZRMOT_BIT
+   * @return Motion detection status MPU6050_RA_MOT_DETECT_STATUS
+   *         MPU6050_MOTION_MOT_ZRMOT_BIT
    */
-public boolean getZeroMotionDetected() {
+  public boolean getZeroMotionDetected() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_STATUS, MPU6050_MOTION_MOT_ZRMOT_BIT);
   }
 
@@ -2963,8 +2841,7 @@ public boolean getZeroMotionDetected() {
    * @param num
    *          Slave number (0-3)
    * @param data
-   *          Byte to write
-   *  MPU6050_RA_I2C_SLV0_DO
+   *          Byte to write MPU6050_RA_I2C_SLV0_DO
    */
   public void setSlaveOutputByte(int num, int data) {
     if (num > 3)
@@ -2981,10 +2858,9 @@ public boolean getZeroMotionDetected() {
    * has been received.
    * 
    * @return Current external data shadow delay enabled status.
-   *  MPU6050_RA_I2C_MST_DELAY_CTRL
-   *  MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT
+   *         MPU6050_RA_I2C_MST_DELAY_CTRL MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT
    */
-public boolean getExternalShadowDelayEnabled() {
+  public boolean getExternalShadowDelayEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_DELAY_CTRL, MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT);
   }
 
@@ -2993,9 +2869,8 @@ public boolean getExternalShadowDelayEnabled() {
    * 
    * @param enabled
    *          New external data shadow delay enabled status. see
-   *          getExternalShadowDelayEnabled()
-   *  MPU6050_RA_I2C_MST_DELAY_CTRL
-   *  MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT
+   *          getExternalShadowDelayEnabled() MPU6050_RA_I2C_MST_DELAY_CTRL
+   *          MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT
    */
   public void setExternalShadowDelayEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_DELAY_CTRL, MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT, enabled);
@@ -3018,11 +2893,10 @@ public boolean getExternalShadowDelayEnabled() {
    *
    * @param num
    *          Slave number (0-4)
-   * @return Current slave delay enabled status.
-   *  MPU6050_RA_I2C_MST_DELAY_CTRL
-   *  MPU6050_DELAYCTRL_I2C_SLV0_DLY_EN_BIT
+   * @return Current slave delay enabled status. MPU6050_RA_I2C_MST_DELAY_CTRL
+   *         MPU6050_DELAYCTRL_I2C_SLV0_DLY_EN_BIT
    */
-public boolean getSlaveDelayEnabled(int num) {
+  public boolean getSlaveDelayEnabled(int num) {
     // MPU6050_DELAYCTRL_I2C_SLV4_DLY_EN_BIT is 4, SLV3 is 3, etc.
     if (num > 4)
       return false;
@@ -3035,9 +2909,8 @@ public boolean getSlaveDelayEnabled(int num) {
    * @param num
    *          Slave number (0-4)
    * @param enabled
-   *          New slave delay enabled status.
-   *  MPU6050_RA_I2C_MST_DELAY_CTRL
-   *  MPU6050_DELAYCTRL_I2C_SLV0_DLY_EN_BIT
+   *          New slave delay enabled status. MPU6050_RA_I2C_MST_DELAY_CTRL
+   *          MPU6050_DELAYCTRL_I2C_SLV0_DLY_EN_BIT
    */
   public void setSlaveDelayEnabled(int num, boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_I2C_MST_DELAY_CTRL, num, enabled);
@@ -3049,8 +2922,7 @@ public boolean getSlaveDelayEnabled(int num) {
    * Reset gyroscope signal path. The reset will revert the signal path analog
    * to digital converters and filters to their power up configurations.
    * 
-   *  MPU6050_RA_SIGNAL_PATH_RESET
-   *  MPU6050_PATHRESET_GYRO_RESET_BIT
+   * MPU6050_RA_SIGNAL_PATH_RESET MPU6050_PATHRESET_GYRO_RESET_BIT
    */
   public void resetGyroscopePath() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_SIGNAL_PATH_RESET, MPU6050_PATHRESET_GYRO_RESET_BIT, true);
@@ -3060,8 +2932,7 @@ public boolean getSlaveDelayEnabled(int num) {
    * Reset accelerometer signal path. The reset will revert the signal path
    * analog to digital converters and filters to their power up configurations.
    * 
-   *  MPU6050_RA_SIGNAL_PATH_RESET
-   *  MPU6050_PATHRESET_ACCEL_RESET_BIT
+   * MPU6050_RA_SIGNAL_PATH_RESET MPU6050_PATHRESET_ACCEL_RESET_BIT
    */
   public void resetAccelerometerPath() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_SIGNAL_PATH_RESET, MPU6050_PATHRESET_ACCEL_RESET_BIT, true);
@@ -3071,8 +2942,7 @@ public boolean getSlaveDelayEnabled(int num) {
    * Reset temperature sensor signal path. The reset will revert the signal path
    * analog to digital converters and filters to their power up configurations.
    * 
-   *  MPU6050_RA_SIGNAL_PATH_RESET
-   *  MPU6050_PATHRESET_TEMP_RESET_BIT
+   * MPU6050_RA_SIGNAL_PATH_RESET MPU6050_PATHRESET_TEMP_RESET_BIT
    */
   public void resetTemperaturePath() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_SIGNAL_PATH_RESET, MPU6050_PATHRESET_TEMP_RESET_BIT, true);
@@ -3090,9 +2960,8 @@ public boolean getSlaveDelayEnabled(int num) {
    * Product Specification document for further information regarding the
    * detection modules.
    * 
-   * @return Current accelerometer power-on delay
-   *  MPU6050_RA_MOT_DETECT_CTRL
-   *  MPU6050_DETECT_ACCEL_ON_DELAY_BIT
+   * @return Current accelerometer power-on delay MPU6050_RA_MOT_DETECT_CTRL
+   *         MPU6050_DETECT_ACCEL_ON_DELAY_BIT
    */
   public int getAccelerometerPowerOnDelay() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_ACCEL_ON_DELAY_BIT, MPU6050_DETECT_ACCEL_ON_DELAY_LENGTH);
@@ -3103,9 +2972,8 @@ public boolean getSlaveDelayEnabled(int num) {
    * 
    * @param delay
    *          New accelerometer power-on delay (0-3) see
-   *          getAccelerometerPowerOnDelay()
-   *  MPU6050_RA_MOT_DETECT_CTRL
-   *  MPU6050_DETECT_ACCEL_ON_DELAY_BIT
+   *          getAccelerometerPowerOnDelay() MPU6050_RA_MOT_DETECT_CTRL
+   *          MPU6050_DETECT_ACCEL_ON_DELAY_BIT
    */
   public void setAccelerometerPowerOnDelay(int delay) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_ACCEL_ON_DELAY_BIT, MPU6050_DETECT_ACCEL_ON_DELAY_LENGTH, delay);
@@ -3134,9 +3002,8 @@ public boolean getSlaveDelayEnabled(int num) {
    * reset the counter to 0. For further information on Free Fall detection,
    * please refer to Registers 29 to 32.
    *
-   * @return Current decrement configuration
-   *  MPU6050_RA_MOT_DETECT_CTRL
-   *  MPU6050_DETECT_FF_COUNT_BIT
+   * @return Current decrement configuration MPU6050_RA_MOT_DETECT_CTRL
+   *         MPU6050_DETECT_FF_COUNT_BIT
    */
   public int getFreefallDetectionCounterDecrement() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_FF_COUNT_BIT, MPU6050_DETECT_FF_COUNT_LENGTH);
@@ -3147,9 +3014,8 @@ public boolean getSlaveDelayEnabled(int num) {
    * 
    * @param decrement
    *          New decrement configuration value see
-   *          getFreefallDetectionCounterDecrement()
-   *  MPU6050_RA_MOT_DETECT_CTRL
-   *  MPU6050_DETECT_FF_COUNT_BIT
+   *          getFreefallDetectionCounterDecrement() MPU6050_RA_MOT_DETECT_CTRL
+   *          MPU6050_DETECT_FF_COUNT_BIT
    */
   public void setFreefallDetectionCounterDecrement(int decrement) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_FF_COUNT_BIT, MPU6050_DETECT_FF_COUNT_LENGTH, decrement);
@@ -3188,9 +3054,8 @@ public boolean getSlaveDelayEnabled(int num) {
    * 
    * @param decrement
    *          New decrement configuration value see
-   *          getMotionDetectionCounterDecrement()
-   *  MPU6050_RA_MOT_DETECT_CTRL
-   *  MPU6050_DETECT_MOT_COUNT_BIT
+   *          getMotionDetectionCounterDecrement() MPU6050_RA_MOT_DETECT_CTRL
+   *          MPU6050_DETECT_MOT_COUNT_BIT
    */
   public void setMotionDetectionCounterDecrement(int decrement) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_MOT_DETECT_CTRL, MPU6050_DETECT_MOT_COUNT_BIT, MPU6050_DETECT_MOT_COUNT_LENGTH, decrement);
@@ -3204,11 +3069,10 @@ public boolean getSlaveDelayEnabled(int num) {
    * The FIFO buffer's state does not change unless the MPU-60X0 is power
    * cycled.
    * 
-   * @return Current FIFO enabled status
-   *  MPU6050_RA_USER_CTRL
-   *  MPU6050_USERCTRL_FIFO_EN_BIT
+   * @return Current FIFO enabled status MPU6050_RA_USER_CTRL
+   *         MPU6050_USERCTRL_FIFO_EN_BIT
    */
-public boolean getFIFOEnabled() {
+  public boolean getFIFOEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_FIFO_EN_BIT);
   }
 
@@ -3216,9 +3080,8 @@ public boolean getFIFOEnabled() {
    * Set FIFO enabled status.
    * 
    * @param enabled
-   *          New FIFO enabled status see getFIFOEnabled()
-   *  MPU6050_RA_USER_CTRL
-   *  MPU6050_USERCTRL_FIFO_EN_BIT
+   *          New FIFO enabled status see getFIFOEnabled() MPU6050_RA_USER_CTRL
+   *          MPU6050_USERCTRL_FIFO_EN_BIT
    */
   public void setFIFOEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_FIFO_EN_BIT, enabled);
@@ -3232,11 +3095,10 @@ public boolean getFIFOEnabled() {
    * and SCL). This is a precondition to enabling Bypass Mode. For further
    * information regarding Bypass Mode, please refer to Register 55.
    * 
-   * @return Current I2C Master Mode enabled status
-   *  MPU6050_RA_USER_CTRL
-   *  MPU6050_USERCTRL_I2C_MST_EN_BIT
+   * @return Current I2C Master Mode enabled status MPU6050_RA_USER_CTRL
+   *         MPU6050_USERCTRL_I2C_MST_EN_BIT
    */
-public boolean getI2CMasterModeEnabled() {
+  public boolean getI2CMasterModeEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_MST_EN_BIT);
   }
 
@@ -3245,8 +3107,7 @@ public boolean getI2CMasterModeEnabled() {
    * 
    * @param enabled
    *          New I2C Master Mode enabled status see getI2CMasterModeEnabled()
-   *  MPU6050_RA_USER_CTRL
-   *  MPU6050_USERCTRL_I2C_MST_EN_BIT
+   *          MPU6050_RA_USER_CTRL MPU6050_USERCTRL_I2C_MST_EN_BIT
    */
   public void setI2CMasterModeEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_MST_EN_BIT, enabled);
@@ -3265,8 +3126,7 @@ public boolean getI2CMasterModeEnabled() {
    * equals 0. This bit automatically clears to 0 after the reset has been
    * triggered.
    * 
-   *  MPU6050_RA_USER_CTRL
-   *  MPU6050_USERCTRL_FIFO_RESET_BIT
+   * MPU6050_RA_USER_CTRL MPU6050_USERCTRL_FIFO_RESET_BIT
    */
   public void resetFIFO() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_FIFO_RESET_BIT, true);
@@ -3277,8 +3137,7 @@ public boolean getI2CMasterModeEnabled() {
    * I2C_MST_EN equals 0. This bit automatically clears to 0 after the reset has
    * been triggered.
    * 
-   *  MPU6050_RA_USER_CTRL
-   *  MPU6050_USERCTRL_I2C_MST_RESET_BIT
+   * MPU6050_RA_USER_CTRL MPU6050_USERCTRL_I2C_MST_RESET_BIT
    */
   public void resetI2CMaster() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_MST_RESET_BIT, true);
@@ -3293,8 +3152,7 @@ public boolean getI2CMasterModeEnabled() {
    * When resetting only the signal path (and not the sensor registers), please
    * use Register 104, SIGNAL_PATH_RESET.
    *
-   *  MPU6050_RA_USER_CTRL
-   *  MPU6050_USERCTRL_SIG_COND_RESET_BIT
+   * MPU6050_RA_USER_CTRL MPU6050_USERCTRL_SIG_COND_RESET_BIT
    */
   public void resetSensors() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_SIG_COND_RESET_BIT, true);
@@ -3318,11 +3176,10 @@ public boolean getI2CMasterModeEnabled() {
    * To save power, the individual standby selections for each of the gyros
    * should be used if any gyro axis is not used by the application.
    * 
-   * @return Current sleep mode enabled status
-   *  MPU6050_RA_PWR_MGMT_1
-   *  MPU6050_PWR1_SLEEP_BIT
+   * @return Current sleep mode enabled status MPU6050_RA_PWR_MGMT_1
+   *         MPU6050_PWR1_SLEEP_BIT
    */
-public boolean getSleepEnabled() {
+  public boolean getSleepEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_SLEEP_BIT);
   }
 
@@ -3331,8 +3188,7 @@ public boolean getSleepEnabled() {
    * 
    * @param enabled
    *          New sleep mode enabled status see getSleepEnabled()
-   *  MPU6050_RA_PWR_MGMT_1
-   *  MPU6050_PWR1_SLEEP_BIT
+   *          MPU6050_RA_PWR_MGMT_1 MPU6050_PWR1_SLEEP_BIT
    */
   public void setSleepEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_SLEEP_BIT, enabled);
@@ -3344,11 +3200,10 @@ public boolean getSleepEnabled() {
    * a single sample of data from active sensors at a rate determined by
    * LP_WAKE_CTRL (register 108).
    * 
-   * @return Current sleep mode enabled status
-   *  MPU6050_RA_PWR_MGMT_1
-   *  MPU6050_PWR1_CYCLE_BIT
+   * @return Current sleep mode enabled status MPU6050_RA_PWR_MGMT_1
+   *         MPU6050_PWR1_CYCLE_BIT
    */
-public boolean getWakeCycleEnabled() {
+  public boolean getWakeCycleEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CYCLE_BIT);
   }
 
@@ -3357,8 +3212,7 @@ public boolean getWakeCycleEnabled() {
    * 
    * @param enabled
    *          New sleep mode enabled status see getWakeCycleEnabled()
-   *  MPU6050_RA_PWR_MGMT_1
-   *  MPU6050_PWR1_CYCLE_BIT
+   *          MPU6050_RA_PWR_MGMT_1 MPU6050_PWR1_CYCLE_BIT
    */
   public void setWakeCycleEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CYCLE_BIT, enabled);
@@ -3373,11 +3227,10 @@ public boolean getWakeCycleEnabled() {
    * true/false values to indicate whether the sensor is enabled or disabled,
    * respectively.
    *
-   * @return Current temperature sensor enabled status
-   *  MPU6050_RA_PWR_MGMT_1
-   *  MPU6050_PWR1_TEMP_DIS_BIT
+   * @return Current temperature sensor enabled status MPU6050_RA_PWR_MGMT_1
+   *         MPU6050_PWR1_TEMP_DIS_BIT
    */
-public boolean getTempSensorEnabled() {
+  public boolean getTempSensorEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_TEMP_DIS_BIT);
     // 1 is actually disabled here
   }
@@ -3390,8 +3243,7 @@ public boolean getTempSensorEnabled() {
    *
    * @param enabled
    *          New temperature sensor enabled status see getTempSensorEnabled()
-   *  MPU6050_RA_PWR_MGMT_1
-   *  MPU6050_PWR1_TEMP_DIS_BIT
+   *          MPU6050_RA_PWR_MGMT_1 MPU6050_PWR1_TEMP_DIS_BIT
    */
   public void setTempSensorEnabled(boolean enabled) {
     // 1 is actually disabled here
@@ -3401,10 +3253,8 @@ public boolean getTempSensorEnabled() {
   /**
    * Get clock source setting.
    * 
-   * @return Current clock source setting
-   *  MPU6050_RA_PWR_MGMT_1
-   *  MPU6050_PWR1_CLKSEL_BIT
-   *  MPU6050_PWR1_CLKSEL_LENGTH
+   * @return Current clock source setting MPU6050_RA_PWR_MGMT_1
+   *         MPU6050_PWR1_CLKSEL_BIT MPU6050_PWR1_CLKSEL_LENGTH
    */
   public int getClockSource() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CLKSEL_BIT, MPU6050_PWR1_CLKSEL_LENGTH);
@@ -3438,9 +3288,8 @@ public boolean getTempSensorEnabled() {
    *
    * @param source
    *          New clock source setting see getClockSource()
-   *  MPU6050_RA_PWR_MGMT_1
-   *  MPU6050_PWR1_CLKSEL_BIT
-   *  MPU6050_PWR1_CLKSEL_LENGTH
+   *          MPU6050_RA_PWR_MGMT_1 MPU6050_PWR1_CLKSEL_BIT
+   *          MPU6050_PWR1_CLKSEL_LENGTH
    */
   public void setClockSource(int source) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CLKSEL_BIT, MPU6050_PWR1_CLKSEL_LENGTH, source);
@@ -3466,8 +3315,7 @@ public boolean getTempSensorEnabled() {
    * For further information regarding the MPU-60X0's power modes, please refer
    * to Register 107.
    *
-   * @return Current wake frequency
-   *  MPU6050_RA_PWR_MGMT_2
+   * @return Current wake frequency MPU6050_RA_PWR_MGMT_2
    */
   public int getWakeFrequency() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_LP_WAKE_CTRL_BIT, MPU6050_PWR2_LP_WAKE_CTRL_LENGTH);
@@ -3477,8 +3325,7 @@ public boolean getTempSensorEnabled() {
    * Set wake frequency in Accel-Only Low Power Mode.
    * 
    * @param frequency
-   *          New wake frequency
-   *  MPU6050_RA_PWR_MGMT_2
+   *          New wake frequency MPU6050_RA_PWR_MGMT_2
    */
   public void setWakeFrequency(int frequency) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_LP_WAKE_CTRL_BIT, MPU6050_PWR2_LP_WAKE_CTRL_LENGTH, frequency);
@@ -3488,11 +3335,10 @@ public boolean getTempSensorEnabled() {
    * Get X-axis accelerometer standby enabled status. If enabled, the X-axis
    * will not gather or report data (or use power).
    * 
-   * @return Current X-axis standby enabled status
-   *  MPU6050_RA_PWR_MGMT_2
-   *  MPU6050_PWR2_STBY_XA_BIT
+   * @return Current X-axis standby enabled status MPU6050_RA_PWR_MGMT_2
+   *         MPU6050_PWR2_STBY_XA_BIT
    */
-public boolean getStandbyXAccelEnabled() {
+  public boolean getStandbyXAccelEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_XA_BIT);
   }
 
@@ -3501,8 +3347,7 @@ public boolean getStandbyXAccelEnabled() {
    * 
    * @param enabled
    *          X-axis standby enabled status see getStandbyXAccelEnabled()
-   *  MPU6050_RA_PWR_MGMT_2
-   *  MPU6050_PWR2_STBY_XA_BIT
+   *          MPU6050_RA_PWR_MGMT_2 MPU6050_PWR2_STBY_XA_BIT
    */
   public void setStandbyXAccelEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_XA_BIT, enabled);
@@ -3512,11 +3357,10 @@ public boolean getStandbyXAccelEnabled() {
    * Get Y-axis accelerometer standby enabled status. If enabled, the Y-axis
    * will not gather or report data (or use power).
    * 
-   * @return Current Y-axis standby enabled status
-   *  MPU6050_RA_PWR_MGMT_2
-   *  MPU6050_PWR2_STBY_YA_BIT
+   * @return Current Y-axis standby enabled status MPU6050_RA_PWR_MGMT_2
+   *         MPU6050_PWR2_STBY_YA_BIT
    */
-public boolean getStandbyYAccelEnabled() {
+  public boolean getStandbyYAccelEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_YA_BIT);
   }
 
@@ -3525,8 +3369,7 @@ public boolean getStandbyYAccelEnabled() {
    * 
    * @param enabled
    *          Y-axis standby enabled status see getStandbyYAccelEnabled()
-   *  MPU6050_RA_PWR_MGMT_2
-   *  MPU6050_PWR2_STBY_YA_BIT
+   *          MPU6050_RA_PWR_MGMT_2 MPU6050_PWR2_STBY_YA_BIT
    */
   public void setStandbyYAccelEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_YA_BIT, enabled);
@@ -3536,11 +3379,10 @@ public boolean getStandbyYAccelEnabled() {
    * Get Z-axis accelerometer standby enabled status. If enabled, the Z-axis
    * will not gather or report data (or use power).
    * 
-   * @return Current Z-axis standby enabled status
-   *  MPU6050_RA_PWR_MGMT_2
-   *  MPU6050_PWR2_STBY_ZA_BIT
+   * @return Current Z-axis standby enabled status MPU6050_RA_PWR_MGMT_2
+   *         MPU6050_PWR2_STBY_ZA_BIT
    */
-public boolean getStandbyZAccelEnabled() {
+  public boolean getStandbyZAccelEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_ZA_BIT);
   }
 
@@ -3549,8 +3391,7 @@ public boolean getStandbyZAccelEnabled() {
    * 
    * @param enabled
    *          Z-axis standby enabled status see getStandbyZAccelEnabled()
-   *  MPU6050_RA_PWR_MGMT_2
-   *  MPU6050_PWR2_STBY_ZA_BIT
+   *          MPU6050_RA_PWR_MGMT_2 MPU6050_PWR2_STBY_ZA_BIT
    */
   public void setStandbyZAccelEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_ZA_BIT, enabled);
@@ -3560,11 +3401,10 @@ public boolean getStandbyZAccelEnabled() {
    * Get X-axis gyroscope standby enabled status. If enabled, the X-axis will
    * not gather or report data (or use power).
    * 
-   * @return Current X-axis standby enabled status
-   *  MPU6050_RA_PWR_MGMT_2
-   *  MPU6050_PWR2_STBY_XG_BIT
+   * @return Current X-axis standby enabled status MPU6050_RA_PWR_MGMT_2
+   *         MPU6050_PWR2_STBY_XG_BIT
    */
-public boolean getStandbyXGyroEnabled() {
+  public boolean getStandbyXGyroEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_XG_BIT);
   }
 
@@ -3573,8 +3413,7 @@ public boolean getStandbyXGyroEnabled() {
    * 
    * @param enabled
    *          X-axis standby enabled status see getStandbyXGyroEnabled()
-   *  MPU6050_RA_PWR_MGMT_2
-   *  MPU6050_PWR2_STBY_XG_BIT
+   *          MPU6050_RA_PWR_MGMT_2 MPU6050_PWR2_STBY_XG_BIT
    */
   public void setStandbyXGyroEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_XG_BIT, enabled);
@@ -3584,11 +3423,10 @@ public boolean getStandbyXGyroEnabled() {
    * Get Y-axis gyroscope standby enabled status. If enabled, the Y-axis will
    * not gather or report data (or use power).
    * 
-   * @return Current Y-axis standby enabled status
-   *  MPU6050_RA_PWR_MGMT_2
-   *  MPU6050_PWR2_STBY_YG_BIT
+   * @return Current Y-axis standby enabled status MPU6050_RA_PWR_MGMT_2
+   *         MPU6050_PWR2_STBY_YG_BIT
    */
-public boolean getStandbyYGyroEnabled() {
+  public boolean getStandbyYGyroEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_YG_BIT);
   }
 
@@ -3597,8 +3435,7 @@ public boolean getStandbyYGyroEnabled() {
    * 
    * @param enabled
    *          Y-axis standby enabled status see getStandbyYGyroEnabled()
-   *  MPU6050_RA_PWR_MGMT_2
-   *  MPU6050_PWR2_STBY_YG_BIT
+   *          MPU6050_RA_PWR_MGMT_2 MPU6050_PWR2_STBY_YG_BIT
    */
   public void setStandbyYGyroEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_YG_BIT, enabled);
@@ -3608,11 +3445,10 @@ public boolean getStandbyYGyroEnabled() {
    * Get Z-axis gyroscope standby enabled status. If enabled, the Z-axis will
    * not gather or report data (or use power).
    * 
-   * @return Current Z-axis standby enabled status
-   *  MPU6050_RA_PWR_MGMT_2
-   *  MPU6050_PWR2_STBY_ZG_BIT
+   * @return Current Z-axis standby enabled status MPU6050_RA_PWR_MGMT_2
+   *         MPU6050_PWR2_STBY_ZG_BIT
    */
-public boolean getStandbyZGyroEnabled() {
+  public boolean getStandbyZGyroEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_ZG_BIT);
   }
 
@@ -3621,8 +3457,7 @@ public boolean getStandbyZGyroEnabled() {
    * 
    * @param enabled
    *          Z-axis standby enabled status see getStandbyZGyroEnabled()
-   *  MPU6050_RA_PWR_MGMT_2
-   *  MPU6050_PWR2_STBY_ZG_BIT
+   *          MPU6050_RA_PWR_MGMT_2 MPU6050_PWR2_STBY_ZG_BIT
    */
   public void setStandbyZGyroEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_PWR_MGMT_2, MPU6050_PWR2_STBY_ZG_BIT, enabled);
@@ -3686,7 +3521,7 @@ public boolean getStandbyZGyroEnabled() {
    * 
    * see getFIFOByte()
    * 
-   *  MPU6050_RA_FIFO_R_W
+   * MPU6050_RA_FIFO_R_W
    */
   public void setFIFOByte(int data) {
     I2CdevWriteByte(Integer.decode(deviceAddress), MPU6050_RA_FIFO_R_W, data);
@@ -3698,10 +3533,8 @@ public boolean getStandbyZGyroEnabled() {
    * Get Device ID. This register is used to verify the identity of the device
    * (0b110100, 0x34).
    * 
-   * @return Device ID (6 bits only! should be 0x34)
-   *  MPU6050_RA_WHO_AM_I
-   *  MPU6050_WHO_AM_I_BIT
-   *  MPU6050_WHO_AM_I_LENGTH
+   * @return Device ID (6 bits only! should be 0x34) MPU6050_RA_WHO_AM_I
+   *         MPU6050_WHO_AM_I_BIT MPU6050_WHO_AM_I_LENGTH
    */
   public int getDeviceID() {
     return I2CdevReadBits(Integer.decode(deviceAddress), MPU6050_RA_WHO_AM_I, MPU6050_WHO_AM_I_BIT, MPU6050_WHO_AM_I_LENGTH);
@@ -3712,17 +3545,15 @@ public boolean getStandbyZGyroEnabled() {
    * should ever be necessary though).
    * 
    * @param id
-   *          New device ID to set. see getDeviceID()
-   *  MPU6050_RA_WHO_AM_I
-   *  MPU6050_WHO_AM_I_BIT
-   *  MPU6050_WHO_AM_I_LENGTH
+   *          New device ID to set. see getDeviceID() MPU6050_RA_WHO_AM_I
+   *          MPU6050_WHO_AM_I_BIT MPU6050_WHO_AM_I_LENGTH
    */
   public void setDeviceID(int id) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_WHO_AM_I, MPU6050_WHO_AM_I_BIT, MPU6050_WHO_AM_I_LENGTH, id);
   }
 
   // ======== UNDOCUMENTED/DMP REGISTERS/METHODS ========
-public boolean getOTPBankValid() {
+  public boolean getOTPBankValid() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_XG_OFFS_TC, MPU6050_TC_OTP_BNK_VLD_BIT);
   }
 
@@ -3838,7 +3669,7 @@ public boolean getOTPBankValid() {
     I2CdevWriteWord(Integer.decode(deviceAddress), MPU6050_RA_ZG_OFFS_USRH, offset);
   }
 
-public boolean getIntPLLReadyEnabled() {
+  public boolean getIntPLLReadyEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_PLL_RDY_INT_BIT);
   }
 
@@ -3846,7 +3677,7 @@ public boolean getIntPLLReadyEnabled() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_PLL_RDY_INT_BIT, enabled);
   }
 
-public boolean getIntDMPEnabled() {
+  public boolean getIntDMPEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DMP_INT_BIT);
   }
 
@@ -3854,39 +3685,39 @@ public boolean getIntDMPEnabled() {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DMP_INT_BIT, enabled);
   }
 
-public boolean getDMPInt5Status() {
+  public boolean getDMPInt5Status() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_5_BIT);
   }
 
-public boolean getDMPInt4Status() {
+  public boolean getDMPInt4Status() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_4_BIT);
   }
 
-public boolean getDMPInt3Status() {
+  public boolean getDMPInt3Status() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_3_BIT);
   }
 
-public boolean getDMPInt2Status() {
+  public boolean getDMPInt2Status() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_2_BIT);
   }
 
-public boolean getDMPInt1Status() {
+  public boolean getDMPInt1Status() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_1_BIT);
   }
 
-public boolean getDMPInt0Status() {
+  public boolean getDMPInt0Status() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_DMP_INT_STATUS, MPU6050_DMPINT_0_BIT);
   }
 
-public boolean getIntPLLReadyStatus() {
+  public boolean getIntPLLReadyStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_PLL_RDY_INT_BIT);
   }
 
-public boolean getIntDMPStatus() {
+  public boolean getIntDMPStatus() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_INT_STATUS, MPU6050_INTERRUPT_DMP_INT_BIT);
   }
 
-public boolean getDMPEnabled() {
+  public boolean getDMPEnabled() {
     return I2CdevReadBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_DMP_EN_BIT);
   }
 
@@ -3960,7 +3791,7 @@ public boolean getDMPEnabled() {
     }
   }
 
-public boolean writeMemoryBlock(int[] data, int dataSize, int bank, int address, boolean verify) {
+  public boolean writeMemoryBlock(int[] data, int dataSize, int bank, int address, boolean verify) {
     setMemoryBank(bank);
     setMemoryStartAddress(address);
     int chunkSize;
@@ -4045,15 +3876,15 @@ public boolean writeMemoryBlock(int[] data, int dataSize, int bank, int address,
     return true;
   }
 
-public boolean writeProgMemoryBlock(int[] data, int dataSize, int bank, int address, boolean verify) {
+  public boolean writeProgMemoryBlock(int[] data, int dataSize, int bank, int address, boolean verify) {
     return writeMemoryBlock(data, dataSize, bank, address, verify);
   }
 
-public boolean writeProgMemoryBlock(int[] data, int dataSize) {
+  public boolean writeProgMemoryBlock(int[] data, int dataSize) {
     return writeMemoryBlock(data, dataSize, 0, 0, true);
   }
 
-public boolean writeDMPConfigurationSet(int[] data, int dataSize) {
+  public boolean writeDMPConfigurationSet(int[] data, int dataSize) {
     int[] progBuffer;
     int special;
     boolean success = false;
@@ -4120,7 +3951,7 @@ public boolean writeDMPConfigurationSet(int[] data, int dataSize) {
     return true;
   }
 
-public boolean writeProgDMPConfigurationSet(int[] data, int dataSize) {
+  public boolean writeProgDMPConfigurationSet(int[] data, int dataSize) {
     return writeDMPConfigurationSet(data, dataSize);
   }
 
@@ -4176,7 +4007,7 @@ public boolean writeProgDMPConfigurationSet(int[] data, int dataSize) {
    *          Bit position to read (0-7)
    * @return Status of read operation (true = success)
    */
-public boolean I2CdevReadBit(int devAddr, int regAddr, int bitNum) {
+  public boolean I2CdevReadBit(int devAddr, int regAddr, int bitNum) {
     int bitmask = 1;
     int byteValue = I2CdevReadByte(devAddr, regAddr);
     int bitValue = byteValue & (bitmask << bitNum);
@@ -4307,7 +4138,7 @@ public boolean I2CdevReadBit(int devAddr, int regAddr, int bitNum) {
    *          Right-aligned value to write
    * @return Status of operation (true = success)
    */
-public boolean I2CdevWriteBits(int devAddr, int regAddr, int bitStart, int length, int data) {
+  public boolean I2CdevWriteBits(int devAddr, int regAddr, int bitStart, int length, int data) {
     // 010 value to write
     // 76543210 bit numbers
     // xxx args: bitStart=4, length=3
@@ -4344,7 +4175,7 @@ public boolean I2CdevWriteBits(int devAddr, int regAddr, int bitStart, int lengt
    *          Right-aligned value to write
    * @return Status of operation (true = success)
    */
-public boolean I2CdevWriteBitsW(int devAddr, int regAddr, int bitStart, int length, int data) {
+  public boolean I2CdevWriteBitsW(int devAddr, int regAddr, int bitStart, int length, int data) {
     // 010 value to write
     // fedcba9876543210 bit numbers
     // xxx args: bitStart=12, length=3
@@ -4379,7 +4210,7 @@ public boolean I2CdevWriteBitsW(int devAddr, int regAddr, int bitStart, int leng
    *          New bit value to write
    * @return Status of operation (true = success)
    */
-public boolean I2CdevWriteBit(int devAddr, int regAddr, int bitNum, boolean data) {
+  public boolean I2CdevWriteBit(int devAddr, int regAddr, int bitNum, boolean data) {
     int b = 0;
     int newbyte = 0;
     int bitmask = 1;
@@ -4395,12 +4226,12 @@ public boolean I2CdevWriteBit(int devAddr, int regAddr, int bitNum, boolean data
     return I2CdevWriteByte(devAddr, regAddr, newbyte);
   }
 
-public boolean I2CdevWriteByte(int devAddr, int regAddr, int data) {
+  public boolean I2CdevWriteByte(int devAddr, int regAddr, int data) {
     int[] writebuffer = { data };
     return I2CdevWriteBytes(devAddr, regAddr, 1, writebuffer);
   }
 
-public boolean I2CdevWriteWord(int devAddr, int regAddr, int data) {
+  public boolean I2CdevWriteWord(int devAddr, int regAddr, int data) {
     int[] writebuffer = { data };
     return I2CdevWriteWords(devAddr, regAddr, 1, writebuffer);
   }
@@ -4418,7 +4249,7 @@ public boolean I2CdevWriteWord(int devAddr, int regAddr, int data) {
    *          Buffer to copy new data from
    * @return Status of operation (true = success)
    */
-public boolean I2CdevWriteBytes(int devAddr, int regAddr, int length, int[] data) {
+  public boolean I2CdevWriteBytes(int devAddr, int regAddr, int length, int[] data) {
     byte[] writebuffer = new byte[length + 1];
     writebuffer[0] = (byte) (regAddr & 0xff);
     for (int i = 0; i < length; i++) {

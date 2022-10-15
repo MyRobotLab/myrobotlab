@@ -92,8 +92,9 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
   /**
    * Sets the I2C Bus the i2cMux is attached to.
-   * @param deviceBus 
-   *        default is "1", range "0" - "7".
+   * 
+   * @param deviceBus
+   *          default is "1", range "0" - "7".
    * 
    */
   @Override
@@ -108,9 +109,9 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
   /**
    * Sets the I2C Address of the i2cMux device.
+   * 
    * @param deviceAddress
-   *        default "0x70"
-   *        range "0x70" - "0x77"
+   *          default "0x70" range "0x70" - "0x77"
    */
   @Override
   public void setDeviceAddress(String deviceAddress) {
@@ -123,7 +124,9 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   }
 
   /**
-   * Returns the current state of the service, if attached returns true, false if it's not attached.
+   * Returns the current state of the service, if attached returns true, false
+   * if it's not attached.
+   * 
    * @return
    */
   public boolean isAttached() {
@@ -132,8 +135,9 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
   /**
    * Sets which bus future commands will be sent down.
+   * 
    * @param busAddress
-   *        Range 0 - 7
+   *          Range 0 - 7
    */
   public void setMuxBus(int busAddress) {
     if (busAddress != lastBusAddress) {

@@ -77,7 +77,7 @@ public class ServiceReservation implements Serializable {
     this.key = key;
     this.actualName = actualName;
     this.type = typeName;
-    this.comment = comment;    
+    this.comment = comment;
   }
 
   @Override

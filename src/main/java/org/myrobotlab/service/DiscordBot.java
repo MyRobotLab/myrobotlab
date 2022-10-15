@@ -67,7 +67,7 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     }
 
     if (config.connect && config.token != null && !config.token.isEmpty()) {
-        connect();
+      connect();
     } else if (config.token == null || config.token.isEmpty()) {
       error("requires valid token to connect");
     }

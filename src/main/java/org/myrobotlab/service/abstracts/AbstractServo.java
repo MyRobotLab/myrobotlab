@@ -1003,7 +1003,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     }
     syncedServos.remove(name);
   }
-  
+
   @Override
   public void sync(String name) {
     if (name == null) {
@@ -1016,7 +1016,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     syncedServos.add(name);
   }
 
-
   @Override
   public void unsync(ServoControl sc) {
     if (sc == null) {
@@ -1024,7 +1023,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     }
     unsync(sc.getName());
   }
-
 
   @Override
   public void waitTargetPos() {

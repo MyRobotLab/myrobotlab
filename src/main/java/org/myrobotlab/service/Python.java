@@ -766,8 +766,11 @@ public class Python extends Service implements ServiceLifeCycleListener {
 
   /**
    * Save a script
-   * @param scriptName - path and name of script
-   * @param code - content
+   * 
+   * @param scriptName
+   *          - path and name of script
+   * @param code
+   *          - content
    * @return true if successful
    */
   public boolean saveScript(String scriptName, String code) {
@@ -775,7 +778,7 @@ public class Python extends Service implements ServiceLifeCycleListener {
       FileIO.toFile(scriptName, code.getBytes());
       info("saved script %s", scriptName);
       return true;
-    } catch(Exception e) {
+    } catch (Exception e) {
       error("%s could not save script %s", getName(), scriptName);
     }
     return false;

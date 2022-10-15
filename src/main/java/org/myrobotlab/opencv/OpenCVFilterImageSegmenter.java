@@ -35,7 +35,7 @@ public class OpenCVFilterImageSegmenter extends OpenCVFilter {
   // purely for display purposes, only consider the first N regions?
   int numToDisplay = 50;
   transient private CloseableFrameConverter converter = new CloseableFrameConverter();
-  
+
   public OpenCVFilterImageSegmenter() {
     super();
     initModel();

@@ -30,7 +30,6 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
    * set of text publishers publishing text "to" us
    */
   protected Set<String> publishers = new HashSet<>();
-  
 
   public HtmlFilter(String n, String id) {
     super(n, id);
@@ -38,7 +37,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
 
   // helper function to add html tags
   public String addHtml(String text) {
-    HtmlFilterConfig c = (HtmlFilterConfig)config;
+    HtmlFilterConfig c = (HtmlFilterConfig) config;
     return c.preHtmlTag + text + c.postHtmlTag;
   }
 
@@ -47,17 +46,17 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
   }
 
   public String getPostHtmlTag() {
-    HtmlFilterConfig c = (HtmlFilterConfig)config;
+    HtmlFilterConfig c = (HtmlFilterConfig) config;
     return c.postHtmlTag;
   }
 
   public String getPreHtmlTag() {
-    HtmlFilterConfig c = (HtmlFilterConfig)config;
+    HtmlFilterConfig c = (HtmlFilterConfig) config;
     return c.preHtmlTag;
   }
 
   public boolean isStripHtml() {
-    HtmlFilterConfig c = (HtmlFilterConfig)config;
+    HtmlFilterConfig c = (HtmlFilterConfig) config;
     return c.stripHtml;
   }
 
@@ -66,13 +65,13 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
     // process the text and then publish the new text.
     processText(text);
   }
-  
+
   @Override
   public String processText(String text) {
-    HtmlFilterConfig c = (HtmlFilterConfig)config;
-    
+    HtmlFilterConfig c = (HtmlFilterConfig) config;
+
     invoke("publishRawText", text);
-    
+
     String processedText = text;
 
     if (c.stripHtml) {
@@ -81,15 +80,15 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
     } else {
       processedText = addHtml(text);
     }
-    
+
     if (c.stripUrls) {
       processedText = stripUrls(processedText);
     }
-    
+
     invoke("publishText", processedText);
     return processedText;
   }
-  
+
   public String publishRawText(String text) {
     return text;
   }
@@ -106,7 +105,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
    *          - a string to append to the text
    */
   public void setPostHtmlTag(String postHtmlTag) {
-    HtmlFilterConfig c = (HtmlFilterConfig)config;
+    HtmlFilterConfig c = (HtmlFilterConfig) config;
     c.postHtmlTag = postHtmlTag;
   }
 
@@ -117,7 +116,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
    *          - a string to prepend to the text.
    */
   public void setPreHtmlTag(String preHtmlTag) {
-    HtmlFilterConfig c = (HtmlFilterConfig)config;
+    HtmlFilterConfig c = (HtmlFilterConfig) config;
     c.preHtmlTag = preHtmlTag;
   }
 
@@ -129,7 +128,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
    *          - if true, all content between &lt;and &gt; will be removed.
    */
   public void setStripHtml(boolean stripHtml) {
-    HtmlFilterConfig c = (HtmlFilterConfig)config;
+    HtmlFilterConfig c = (HtmlFilterConfig) config;
     c.stripHtml = stripHtml;
   }
 
@@ -140,22 +139,21 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
     String cleanText = Jsoup.parse(text).text().trim();
     return cleanText.trim();
   }
-  
-  
+
   public String stripUrls(String text) {
     String urlPattern = "((https?|ftp|gopher|telnet|file|Unsure|http):((//)|(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
-    //String urlPattern = "<\\b(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]>";
-    Pattern p = Pattern.compile(urlPattern,Pattern.CASE_INSENSITIVE);
+    // String urlPattern =
+    // "<\\b(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]>";
+    Pattern p = Pattern.compile(urlPattern, Pattern.CASE_INSENSITIVE);
     Matcher m = p.matcher(text);
     int i = 0;
     while (m.find()) {
-      text = text.replace(m.group(i),"").trim();
-        i++;
+      text = text.replace(m.group(i), "").trim();
+      i++;
     }
     return text;
-//    return text.replaceAll("http.*?\\s", "");
+    // return text.replaceAll("http.*?\\s", "");
   }
-
 
   @Override
   public void attachTextListener(TextListener service) {
@@ -165,7 +163,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
     }
     attachTextListener(service.getName());
   }
-  
+
   @Override
   public void attachTextPublisher(TextPublisher service) {
     if (service == null) {
@@ -174,7 +172,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
     }
     attachTextPublisher(service.getName());
   }
-  
+
   public void attachTextPublisher(String serviceName) {
     if (serviceName == null) {
       log.error("{}.attachTextPublisher(null)", getName());
@@ -193,7 +191,6 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
     publishers.remove(service.getName());
   }
 
-  
   @Override
   public void attachTextListener(String name) {
     addListener("publishText", name);
@@ -205,7 +202,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
 
     Set<String> listeners = getAttached("publishText");
     config.textListeners = listeners.toArray(new String[listeners.size()]);
-    
+
     return config;
   }
 
@@ -213,11 +210,11 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
     HtmlFilterConfig config = (HtmlFilterConfig) c;
 
     if (config.textListeners != null) {
-      for (String serviceName: config.textListeners) {
+      for (String serviceName : config.textListeners) {
         attachTextListener(serviceName);
       }
     }
-   
+
     return c;
   }
 

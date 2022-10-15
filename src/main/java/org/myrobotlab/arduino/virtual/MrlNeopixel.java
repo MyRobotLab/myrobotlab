@@ -9,7 +9,7 @@ public class MrlNeopixel extends Device {
   int pin;
   int numPixels;
   int depth;
-  
+
   public MrlNeopixel(int deviceId, VirtualArduino virtual) {
     super(deviceId, Msg.DEVICE_TYPE_NEOPIXEL, virtual);
   }

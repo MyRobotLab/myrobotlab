@@ -76,7 +76,7 @@ public class Outbox implements Runnable, Serializable {
   public Map<String, List<MRLListener>> notifyList = new HashMap<String, List<MRLListener>>();
 
   List<MessageListener> listeners = new ArrayList<MessageListener>();
-  
+
   private boolean autoClean = true;
 
   public boolean isAutoClean() {

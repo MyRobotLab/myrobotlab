@@ -73,7 +73,6 @@ public class Inbox implements Serializable {
      * msg.historyList.add(name);
      */
 
-
     // --- sendBlocking support begin --------------------
     // TODO - possible safety check msg.status == Message.RETURN
     // &&
@@ -95,7 +94,7 @@ public class Inbox implements Serializable {
       // been notified and data returned
       // --- sendBlocking support end --------------------
     } else {
-      //We do want to invoke this message
+      // We do want to invoke this message
       synchronized (msgBox) {
         while (blocking && (msgBox.size() >= maxQueue)) // queue "full"
         {
@@ -121,7 +120,7 @@ public class Inbox implements Serializable {
       }
     }
 
-    //Even if message is a blocking return, we still want to notify (right?)
+    // Even if message is a blocking return, we still want to notify (right?)
     // TODO: move this to a base class Inbox/Outbox are very similar.
     // now that it's actually in the queue. let's notify the listeners
     for (MessageListener ml : listeners) {

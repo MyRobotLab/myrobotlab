@@ -13,7 +13,7 @@ public class MultiWiiMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    */
   public MultiWiiMeta() {
-   
+
     addDescription("MultiWii interface");
     addCategory("control");
 

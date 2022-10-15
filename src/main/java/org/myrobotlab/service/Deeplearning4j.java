@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.bytedeco.javacv.CanvasFrame;
@@ -524,7 +523,7 @@ public class Deeplearning4j extends Service {
   public void loadMiniEXCEPTION() throws IOException, UnsupportedKerasConfigurationException, InvalidKerasConfigurationException {
     // load it up!
     String filename = "models" + File.separator + "miniXCEPTION" + File.separator + "_mini_XCEPTION.102-0.66.hdf5";
-    
+
     miniXCEPTION = KerasModelImport.importKerasModelAndWeights(filename);
   }
 
@@ -542,20 +541,22 @@ public class Deeplearning4j extends Service {
     // ok.. here we probably need to re-size the input? possibly some other
     // input transforms?
     BufferedImage buffImg = converter.toBufferedImage(ret);
-    
+
     // Mat mat = OpenCV.toMat(ret);
     // OpenCVFilter.show(buffImg, "buff");
     NativeImageLoader loader = new NativeImageLoader(64, 64, 1, new ColorConversionTransform(COLOR_BGR2GRAY));
-    /// used to work like this.. i guess we'd have to run permute on the resultimg image
+    /// used to work like this.. i guess we'd have to run permute on the
+    /// resultimg image
 
-    // This asMatrix call returns the data in the wrong format now as of DL4j beta7.
+    // This asMatrix call returns the data in the wrong format now as of DL4j
+    // beta7.
     INDArray image = loader.asMatrix(buffImg);
     // This is to convert the channel order to support this model..
     // reference: https://github.com/eclipse/deeplearning4j/issues/8975
-    image = image.permute(0,2,3,1); //NCHW to NHWC
-    
-    //INDArray image = loader.asMatrix(bais, false);
-    
+    image = image.permute(0, 2, 3, 1); // NCHW to NHWC
+
+    // INDArray image = loader.asMatrix(bais, false);
+
     DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
     scaler.transform(image);
 

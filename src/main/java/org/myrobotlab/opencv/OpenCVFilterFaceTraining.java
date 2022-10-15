@@ -187,7 +187,7 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
    * without underscore - it will likely cause a 're-train'
    */
   transient private CloseableFrameConverter converter1 = new CloseableFrameConverter();
-  
+
   public class OpenCVClassifier {
     File root;
     FaceRecognizer recognizer;
@@ -375,12 +375,12 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
       recognizer.train(images, labels);
       log.error("training done in {}", (System.currentTimeMillis() - startTrainingTs) / 1000L);
       log.info("here");
-      
+
       // clean up the frame converters
       for (CloseableFrameConverter c : converters) {
         c.close();
       }
-      converters = null;      
+      converters = null;
     }
   }
 

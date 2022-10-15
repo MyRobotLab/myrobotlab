@@ -29,7 +29,6 @@ import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.openni.OpenNiData;
-import org.myrobotlab.service.data.AngleData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoEvent;
@@ -512,9 +511,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     }
   }
 
-
   @Override
-  public Map<String,Double> publishJointAngles(Map<String,Double> angleMap) {
+  public Map<String, Double> publishJointAngles(Map<String, Double> angleMap) {
     return angleMap;
   }
 

@@ -157,7 +157,7 @@ public class OpenCVData extends CvData {
 
   // for use with text detection / ocr filters.
   protected ArrayList<DetectedText> detectedText;
-  
+
   transient private CloseableFrameConverter firstImageConverter = new CloseableFrameConverter();
 
   public OpenCVData() {
@@ -256,8 +256,9 @@ public class OpenCVData extends CvData {
         // bi = converterToJava.convert(getInputFrame());
         bi = displayConverter.toBufferedImage(image);
       } else {
-        bi = displayConverter.toBufferedImage(getInputFrame()); // logic should probably
-                                                      // not be buried down
+        bi = displayConverter.toBufferedImage(getInputFrame()); // logic should
+                                                                // probably
+        // not be buried down
       }
       // cache result
       sources.put(key, bi);

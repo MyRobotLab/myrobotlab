@@ -19,7 +19,8 @@ public interface ServiceLifeCycleListener extends NameProvider {
   public void onStopped(String name);
 
   public void onReleased(String name);
-  
-  // public void attachServiceLifeCyclePublisher(ServiceLifeCyclePublisher service);
+
+  // public void attachServiceLifeCyclePublisher(ServiceLifeCyclePublisher
+  // service);
 
 }

@@ -101,7 +101,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
   protected Map<String, Integer> nameToIndex = new HashMap<>();
   protected int winSize = 15;
   protected long currentPntCnt;
-  // TODO: can i just create a new Mat instead of having to convert an IplImage to a mat first?!
+  // TODO: can i just create a new Mat instead of having to convert an IplImage
+  // to a mat first?!
   transient Mat zeroPoints = null;
   transient Mat cornersA = null;
   transient Mat cornersB = null;
@@ -127,7 +128,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
   public OpenCVFilterLKOpticalTrack(String name) {
     super(name);
-    
+
     zeroPoints = converter1.toMat(IplImage.create(new CvSize().width(0).height(0), 32, 2));
     cornersA = zeroPoints;
   }
@@ -148,8 +149,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
     FloatIndexer idx = cornersA.createIndexer();
 
-    idx.put(0,idx.size(0) - 1, 0, x);
-    idx.put(0,idx.size(0) - 1, 1, y);
+    idx.put(0, idx.size(0) - 1, 0, x);
+    idx.put(0, idx.size(0) - 1, 1, y);
     idx.release();
 
     return id;
@@ -193,7 +194,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
     // copy contents
     for (int i = 0; i < idx.size(0); i++) {
-      sb.append(String.format("(%d,%d)", (int) idx.get(0,i,0), (int) idx.get(0,i,1)));
+      sb.append(String.format("(%d,%d)", (int) idx.get(0, i, 0), (int) idx.get(0, i, 1)));
     }
     idx.release();
     log.info(sb.toString());
@@ -250,10 +251,10 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     }
 
     if (cornersA.address() == 0) {
-      // No corners!  null matrix!!
+      // No corners! null matrix!!
       return image;
     }
-    
+
     FloatIndexer cornersAidx = cornersA.createIndexer();
     if (cornersAidx.size(0) == 0) {
       // no requested tracking points
@@ -296,8 +297,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
         // continue;
 
       }
-      TrackingPoint direction = new TrackingPoint(i, Math.round(cornersAidx.get(0,i, 0)), Math.round(cornersAidx.get(0,i, 1)), Math.round(cornersBidx.get(0,i, 0)),
-          Math.round(cornersBidx.get(0,i, 1)));
+      TrackingPoint direction = new TrackingPoint(i, Math.round(cornersAidx.get(0, i, 0)), Math.round(cornersAidx.get(0, i, 1)), Math.round(cornersBidx.get(0, i, 0)),
+          Math.round(cornersBidx.get(0, i, 1)));
 
       direction.found = featuresFoundIdx.get(i);
       direction.error = featureErrorsIdx.get(i);

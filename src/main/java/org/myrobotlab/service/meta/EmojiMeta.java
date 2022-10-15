@@ -20,26 +20,21 @@ public class EmojiMeta extends MetaData {
     addPeer("http", "HttpClient", "downloader");
     addCategory("general");
   }
-  
-  
+
   @Override
   public Plan getDefault(String name) {
-    
+
     Plan plan = new Plan(name);
     plan.putPeers(name, peers);
-    
+
     EmojiConfig config = new EmojiConfig();
     config.display = name + ".display";
     config.http = name + ".http";
-    
-    
+
     // add self last - desired order or construction
     plan.addConfig(config);
 
     return plan;
   }
-
-  
-  
 
 }
