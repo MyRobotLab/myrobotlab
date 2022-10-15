@@ -39,7 +39,7 @@ public abstract class MapperBase implements Serializable, Mapper {
   public MapperBase(double minX, double maxX, double minY, double maxY) {
     map(minX, maxX, minY, maxY);
   }
-  
+
   public MapperBase(double minX, double maxX, double minY, double maxY, boolean clip, boolean inverted) {
     setClip(clip);
     setInverted(inverted);

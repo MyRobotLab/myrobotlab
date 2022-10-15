@@ -79,7 +79,7 @@ public class OpenCVFilterMotionDetect extends OpenCVFilter {
     // gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     IplImage gray = cvCreateImage(image.cvSize(), 8, 1);
     cvCvtColor(image, gray, CV_BGR2GRAY);
-    
+
     Mat grayMat = converter.toMat(gray);
     // gray = cv2.GaussianBlur(gray, (21, 21), 0)
     GaussianBlur(grayMat, grayMat, new Size(21, 21), 0.0);

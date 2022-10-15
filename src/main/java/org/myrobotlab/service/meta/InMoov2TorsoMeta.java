@@ -27,11 +27,11 @@ public class InMoov2TorsoMeta extends MetaData {
 
   @Override
   public Plan getDefault(String name) {
-    
+
     Plan plan = new Plan(name);
     // load default peers from meta here
     plan.putPeers(name, peers);
-    
+
     InMoov2TorsoConfig torso = new InMoov2TorsoConfig();
 
     // RuntimeConfig runtime = new RuntimeConfig();
@@ -92,7 +92,7 @@ public class InMoov2TorsoMeta extends MetaData {
     lowStom.speed = 20.0;
     lowStom.sweepMax = null;
     lowStom.sweepMin = null;
-    
+
     plan.addConfig(torso);
 
     return plan;

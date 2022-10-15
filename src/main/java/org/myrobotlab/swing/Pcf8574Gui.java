@@ -105,58 +105,36 @@ public class Pcf8574Gui extends ServiceGui implements ActionListener {
   @Override
   public void unsubscribeGui() {
   }
-  
+
   /*
-
-  public void onState(Pcf8574 service) {
-
-    removeListeners();
-    refreshControllers();
-    if (service.controller != null) {
-      controllerList.setSelectedItem(service.controllerName);
-      deviceBusList.setSelectedItem(service.deviceBus);
-      deviceAddressList.setSelectedItem(service.deviceAddress);
-    }
-    if (service.isAttached) {
-      attachButton.setText(detach);
-      controllerList.setEnabled(false);
-      deviceBusList.setEnabled(false);
-      deviceAddressList.setEnabled(false);
-    } else {
-      attachButton.setText(attach);
-      controllerList.setEnabled(true);
-      deviceBusList.setEnabled(true);
-      deviceAddressList.setEnabled(true);
-    }
-    restoreListeners();
-  }
-
-  public void getDeviceBusList() {
-    List<String> mbl = boundService.deviceBusList;
-    for (int i = 0; i < mbl.size(); i++) {
-      deviceBusList.addItem(mbl.get(i));
-    }
-  }
-
-  public void getDeviceAddressList() {
-
-    List<String> mal = boundService.deviceAddressList;
-    for (int i = 0; i < mal.size(); i++) {
-      deviceAddressList.addItem(mal.get(i));
-    }
-  }
-
-  public void refreshControllers() {
-    List<String> v = boundService.refreshControllers();
-    controllerList.removeAllItems();
-    for (int i = 0; i < v.size(); ++i) {
-      controllerList.addItem(v.get(i));
-    }
-    if (boundService.controller != null) {
-      controllerList.setSelectedItem(boundService.controller.getName());
-    }
-  }
-  */
+   * 
+   * public void onState(Pcf8574 service) {
+   * 
+   * removeListeners(); refreshControllers(); if (service.controller != null) {
+   * controllerList.setSelectedItem(service.controllerName);
+   * deviceBusList.setSelectedItem(service.deviceBus);
+   * deviceAddressList.setSelectedItem(service.deviceAddress); } if
+   * (service.isAttached) { attachButton.setText(detach);
+   * controllerList.setEnabled(false); deviceBusList.setEnabled(false);
+   * deviceAddressList.setEnabled(false); } else { attachButton.setText(attach);
+   * controllerList.setEnabled(true); deviceBusList.setEnabled(true);
+   * deviceAddressList.setEnabled(true); } restoreListeners(); }
+   * 
+   * public void getDeviceBusList() { List<String> mbl =
+   * boundService.deviceBusList; for (int i = 0; i < mbl.size(); i++) {
+   * deviceBusList.addItem(mbl.get(i)); } }
+   * 
+   * public void getDeviceAddressList() {
+   * 
+   * List<String> mal = boundService.deviceAddressList; for (int i = 0; i <
+   * mal.size(); i++) { deviceAddressList.addItem(mal.get(i)); } }
+   * 
+   * public void refreshControllers() { List<String> v =
+   * boundService.refreshControllers(); controllerList.removeAllItems(); for
+   * (int i = 0; i < v.size(); ++i) { controllerList.addItem(v.get(i)); } if
+   * (boundService.controller != null) {
+   * controllerList.setSelectedItem(boundService.controller.getName()); } }
+   */
 
   public void removeListeners() {
     attachButton.removeActionListener(this);

@@ -136,7 +136,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
   // TODO - this could be Java 8 default interface implementation
   @Override
   public void detach(String controllerName) {
-	isAttached = false;
+    isAttached = false;
     if (controller == null || !controllerName.equals(controller.getName())) {
       return;
     }
@@ -248,7 +248,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
         // using rate limiting and not yet ready to process
         return range;
       } else {
-        nextSampleTs = System.currentTimeMillis() + (long)(1000 * 1/rateHz);
+        nextSampleTs = System.currentTimeMillis() + (long) (1000 * 1 / rateHz);
       }
     }
 

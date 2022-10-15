@@ -656,7 +656,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
     security.setKey(keyName, keyValue);
     broadcastState();
   }
-  
+
   @Override
   public ServiceConfig getConfig() {
     MqttBrokerConfig c = new MqttBrokerConfig();
@@ -665,10 +665,9 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
     c.wsPort = wsPort;
     c.username = username;
     c.password = password;
-    return c; 
+    return c;
   }
 
-  
   @Override
   public ServiceConfig apply(ServiceConfig c) {
     MqttBrokerConfig config = (MqttBrokerConfig) c;
@@ -680,5 +679,4 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
     return config;
   }
 
-  
 }

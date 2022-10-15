@@ -37,7 +37,7 @@ public class SearchResults {
     for (String t : text) {
       sb.append(t);
     }
-    
+
     // might have to do some encoding at some point in the future
     // arbitrary format
     for (ImageData img : images) {

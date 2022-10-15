@@ -57,7 +57,8 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class ProgramAB extends Service implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener, UtterancePublisher, UtteranceListener, ResponsePublisher {
+public class ProgramAB extends Service
+    implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener, UtterancePublisher, UtteranceListener, ResponsePublisher {
 
   /**
    * default file name that aiml categories comfing from matching a learnf tag
@@ -975,13 +976,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   // FIXME - should be String name - and inside should querry
   // type NOT by instanceof but by Runtime.getType(name)
   public void attach(Attachable attachable) {
-    
+
     /*
-    if (attachable instanceof ResponseListener) {
-      // this one is done correctly
-      attachResponseListener(attachable.getName());
-    } else */ 
-      if (attachable instanceof TextPublisher) {
+     * if (attachable instanceof ResponseListener) { // this one is done
+     * correctly attachResponseListener(attachable.getName()); } else
+     */
+    if (attachable instanceof TextPublisher) {
       attachTextPublisher((TextPublisher) attachable);
     } else if (attachable instanceof TextListener) {
       addListener("publishText", attachable.getName(), "onText");

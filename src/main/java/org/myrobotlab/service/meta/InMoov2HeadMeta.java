@@ -27,7 +27,6 @@ public class InMoov2HeadMeta extends MetaData {
     addPeer("eyelidLeft", "Servo", "eyelidLeft or both servo");
     addPeer("eyelidRight", "Servo", "Eyelid right servo");
     addPeer("mouthControl", "MouthControl");
-    
 
   }
 
@@ -35,17 +34,16 @@ public class InMoov2HeadMeta extends MetaData {
   public Plan getDefault(String name) {
 
     InMoov2HeadConfig head = new InMoov2HeadConfig();
-    
+
     Plan plan = new Plan(name);
     // load default peers from meta here
     plan.putPeers(name, peers);
-
 
     // RuntimeConfig runtime = new RuntimeConfig();
     // runtime.registry = new String[] { controllerName, cvName, tiltName,
     // panName, pidName, trackingName };
 
-    // set local names and config 
+    // set local names and config
     // PEERS ???? I think so ....
     head.jaw = name + ".jaw";
     head.eyeX = name + ".eyeX";
@@ -55,8 +53,8 @@ public class InMoov2HeadMeta extends MetaData {
     head.rollNeck = name + ".rollNeck";
     head.eyelidLeft = name + ".eyelidLeft";
     head.eyelidRight = name + ".eyelidRight";
-        
-    ServoConfig jaw = (ServoConfig) plan.getPeerConfig("jaw");    
+
+    ServoConfig jaw = (ServoConfig) plan.getPeerConfig("jaw");
     jaw.autoDisable = true;
     jaw.clip = true;
     jaw.controller = "i01.left";
@@ -72,7 +70,7 @@ public class InMoov2HeadMeta extends MetaData {
     jaw.sweepMax = null;
     jaw.sweepMin = null;
 
-    ServoConfig eyeX = (ServoConfig) plan.getPeerConfig("eyeX");    
+    ServoConfig eyeX = (ServoConfig) plan.getPeerConfig("eyeX");
     eyeX.autoDisable = true;
     eyeX.clip = true;
     eyeX.controller = "i01.left";
@@ -88,7 +86,7 @@ public class InMoov2HeadMeta extends MetaData {
     eyeX.sweepMax = null;
     eyeX.sweepMin = null;
 
-    ServoConfig eyeY = (ServoConfig) plan.getPeerConfig("eyeY");    
+    ServoConfig eyeY = (ServoConfig) plan.getPeerConfig("eyeY");
     eyeY.autoDisable = true;
     eyeY.clip = true;
     eyeY.controller = "i01.left";
@@ -104,7 +102,7 @@ public class InMoov2HeadMeta extends MetaData {
     eyeY.sweepMax = null;
     eyeY.sweepMin = null;
 
-    ServoConfig rothead = (ServoConfig) plan.getPeerConfig("rothead");        
+    ServoConfig rothead = (ServoConfig) plan.getPeerConfig("rothead");
     rothead.autoDisable = true;
     rothead.clip = true;
     rothead.controller = "i01.left";
@@ -121,7 +119,7 @@ public class InMoov2HeadMeta extends MetaData {
     rothead.sweepMax = null;
     rothead.sweepMin = null;
 
-    ServoConfig neck = (ServoConfig) plan.getPeerConfig("neck");        
+    ServoConfig neck = (ServoConfig) plan.getPeerConfig("neck");
     neck.autoDisable = true;
     neck.clip = true;
     neck.controller = "i01.left";
@@ -138,7 +136,7 @@ public class InMoov2HeadMeta extends MetaData {
     neck.sweepMax = null;
     neck.sweepMin = null;
 
-    ServoConfig rollNeck = (ServoConfig) plan.getPeerConfig("rollNeck");            
+    ServoConfig rollNeck = (ServoConfig) plan.getPeerConfig("rollNeck");
     rollNeck.autoDisable = true;
     rollNeck.clip = true;
     rollNeck.controller = "i01.right";
@@ -155,7 +153,7 @@ public class InMoov2HeadMeta extends MetaData {
     rollNeck.sweepMax = null;
     rollNeck.sweepMin = null;
 
-    ServoConfig eyelidLeft = (ServoConfig) plan.getPeerConfig("eyelidLeft");                
+    ServoConfig eyelidLeft = (ServoConfig) plan.getPeerConfig("eyelidLeft");
     eyelidLeft.autoDisable = true;
     eyelidLeft.clip = true;
     eyelidLeft.controller = "i01.right";
@@ -172,7 +170,7 @@ public class InMoov2HeadMeta extends MetaData {
     eyelidLeft.sweepMax = null;
     eyelidLeft.sweepMin = null;
 
-    ServoConfig eyelidRight = (ServoConfig) plan.getPeerConfig("eyelidRight");                    
+    ServoConfig eyelidRight = (ServoConfig) plan.getPeerConfig("eyelidRight");
     eyelidRight.autoDisable = true;
     eyelidRight.clip = true;
     eyelidRight.controller = "i01.right";
@@ -188,7 +186,7 @@ public class InMoov2HeadMeta extends MetaData {
     eyelidRight.speed = 50.0;
     eyelidRight.sweepMax = null;
     eyelidRight.sweepMin = null;
-    
+
     // == Peer - mouthControl =============================
     MouthControlConfig mouthControl = (MouthControlConfig) plan.getPeerConfig("mouthControl");
 
@@ -199,10 +197,9 @@ public class InMoov2HeadMeta extends MetaData {
     if (index > 0) {
       i01Name = name.substring(0, name.indexOf("."));
     }
-     
+
     mouthControl.mouth = i01Name + ".mouth";
-    
-    
+
     plan.addConfig(head);
 
     return plan;

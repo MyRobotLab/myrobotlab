@@ -7,7 +7,7 @@ import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.data.SearchResults;
 
 public interface SearchListener extends NameProvider {
-  
+
   public void onResults(SearchResults results);
 
   public void onImage(ImageData image);

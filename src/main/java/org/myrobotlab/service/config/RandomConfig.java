@@ -13,24 +13,10 @@ public class RandomConfig extends ServiceConfig {
     public long maxIntervalMs;
     public boolean enabled = true;
     
-    public RandomMessageConfig() {      
+    public RandomMessageConfig() {
     }
 
-    public RandomMessageConfig(long minIntervalMs , long maxIntervalMs, double... ranges) {
-      this.minIntervalMs = minIntervalMs;
-      this.maxIntervalMs = maxIntervalMs;
-      this.data = new Range[ranges.length / 2];
-
-      for (int i = 0; i < ranges.length; i += 2) {
-        Range range = new Range();
-        range.min = ranges[i];
-        range.max = ranges[i + 1];
-        data[i / 2] = range;
-      }
-    }
-    
-    
-    public RandomMessageConfig(long minIntervalMs , long maxIntervalMs, int... ranges) {
+    public RandomMessageConfig(long minIntervalMs, long maxIntervalMs, double... ranges) {
       this.minIntervalMs = minIntervalMs;
       this.maxIntervalMs = maxIntervalMs;
       this.data = new Range[ranges.length / 2];
@@ -43,7 +29,20 @@ public class RandomConfig extends ServiceConfig {
       }
     }
 
-    public RandomMessageConfig(long minIntervalMs , long maxIntervalMs, float... ranges) {
+    public RandomMessageConfig(long minIntervalMs, long maxIntervalMs, int... ranges) {
+      this.minIntervalMs = minIntervalMs;
+      this.maxIntervalMs = maxIntervalMs;
+      this.data = new Range[ranges.length / 2];
+
+      for (int i = 0; i < ranges.length; i += 2) {
+        Range range = new Range();
+        range.min = ranges[i];
+        range.max = ranges[i + 1];
+        data[i / 2] = range;
+      }
+    }
+
+    public RandomMessageConfig(long minIntervalMs, long maxIntervalMs, float... ranges) {
       this.minIntervalMs = minIntervalMs;
       this.maxIntervalMs = maxIntervalMs;
       for (int i = 0; i < (ranges.length / 2); i += 2) {
@@ -53,10 +52,9 @@ public class RandomConfig extends ServiceConfig {
         data[i / 2] = range;
       }
     }
-    
-    
+
   }
-  
+
   public boolean enabled = true;
   public Map<String, RandomMessageConfig> randomMessages = new HashMap<>();
 

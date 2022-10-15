@@ -88,7 +88,7 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
 
   CustomModel personModel = null;
   boolean enabled = true;
-  
+
   transient Thread classifier;
   boolean running = false;
 
@@ -477,5 +477,5 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
   public void release() {
     running = false;
   }
-  
+
 }

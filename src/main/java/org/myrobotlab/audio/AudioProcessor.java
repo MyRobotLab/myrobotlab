@@ -202,7 +202,7 @@ public class AudioProcessor extends Thread {
           if (audioFile.isMute()) {
             // NoOp for a mute audioFile.
           } else {
-            AudioFileConfig config = (AudioFileConfig)audioFile.getConfig();
+            AudioFileConfig config = (AudioFileConfig) audioFile.getConfig();
             if (cnt % config.peakSampleInterval == 0) {
 
               float peak = 0f;
@@ -214,13 +214,13 @@ public class AudioProcessor extends Thread {
 
                 sample |= buffer[i++] & 0xFF; // (reverse these two lines
                 sample |= buffer[i++] << 8; // if the format is big endian)
-                
+
                 float abs = Math.abs(sample / 32768f);
                 if (abs > peak) {
                   peak = abs;
                 }
               }
-              
+
               audioFile.invoke("publishPeak", peak * (float) audioFile.getPeakMultiplier());
             }
 

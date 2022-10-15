@@ -244,7 +244,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
       setSpeaking(false, null);
     }
   }
-  
+
   @Override
   public void onAudioStart(AudioData data) {
     log.info("heard sound {}", data);
@@ -266,10 +266,8 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
       log.warn("isSpeaking = false will occur in {} ms", afterSpeakingPauseMs);
     } else {
       setSpeaking(false, null);
-    }    
+    }
   }
-  
-  
 
   public boolean setSpeaking(boolean b) {
     return setSpeaking(b, null);
@@ -584,7 +582,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   @Override
   public ServiceConfig getConfig() {
-    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig) config;
     c.listening = isListening();
     c.wakeWord = getWakeWord();
     Set<String> listeners = getAttached("publishText");
@@ -592,18 +590,18 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     return c;
   }
 
-  public ServiceConfig apply(ServiceConfig c) {    
-      SpeechRecognizerConfig config = (SpeechRecognizerConfig) c;
-      setWakeWord(config.wakeWord);
-      if (config.listening) {
-        startListening();
-      }
+  public ServiceConfig apply(ServiceConfig c) {
+    SpeechRecognizerConfig config = (SpeechRecognizerConfig) c;
+    setWakeWord(config.wakeWord);
+    if (config.listening) {
+      startListening();
+    }
 
-      if (config.textListeners != null) {
-        for (String listener : config.textListeners) {
-          addListener("publishText", listener);
-        }
+    if (config.textListeners != null) {
+      for (String listener : config.textListeners) {
+        addListener("publishText", listener);
       }
+    }
     return c;
   }
 

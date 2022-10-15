@@ -54,7 +54,7 @@ public interface PinArrayControl extends PinArrayPublisher {
   public void write(int address, int value);
 
   Integer getAddress(String pin);
-  
+
   public void attach(String name) throws Exception;
 
   public void detach(String name) throws Exception;

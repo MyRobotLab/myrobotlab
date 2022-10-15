@@ -523,7 +523,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     }
   }
 
-
   AudioData play(String filename, boolean block) {
     return play(new AudioData(filename), block);
   }
@@ -1120,7 +1119,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
     return c;
   }
-  
+
   @Override
   public void attachSpeechControl(SpeechSynthesisControl control) {
     // TODO Auto-generated method stub
@@ -1129,11 +1128,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     addListener(control.getName(), "publishSetMute");
     addListener(control.getName(), "publishReplaceWord");
   }
-  
-  
+
   @Override
   public ServiceConfig getConfig() {
-    SpeechSynthesisConfig c = (SpeechSynthesisConfig)config;
+    SpeechSynthesisConfig c = (SpeechSynthesisConfig) config;
     c.mute = mute;
     c.blocking = blocking;
     if (substitutions != null && substitutions.size() > 0) {

@@ -114,7 +114,7 @@ public class Clock extends Service {
   protected volatile boolean running;
 
   final protected transient ClockThread myClock = new ClockThread();
-  
+
   protected int interval = 1000;
 
   protected List<ClockEvent> events = new ArrayList<ClockEvent>();

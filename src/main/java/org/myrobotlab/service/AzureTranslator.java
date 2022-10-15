@@ -171,7 +171,7 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
       // if ()
       List<LinkedTreeMap> list = CodecUtils.fromJson(resp, List.class);
       for (LinkedTreeMap t : list) {
-        LinkedTreeMap detected =  (LinkedTreeMap)t.get("detectedLanguage");
+        LinkedTreeMap detected = (LinkedTreeMap) t.get("detectedLanguage");
         if (detected != null) {
           invoke("publishDetectedLanguage", detected.get("language"));
         }

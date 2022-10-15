@@ -4,5 +4,5 @@ public class WebkitSpeechRecognitionConfig extends SpeechRecognizerConfig {
 
   public WebkitSpeechRecognitionConfig() {
   }
-  
+
 }

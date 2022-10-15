@@ -49,7 +49,7 @@ public class Random extends Service {
     public long interval;
     public boolean oneShot = false;
 
-    public RandomMessage() {      
+    public RandomMessage() {
     }
   }
 

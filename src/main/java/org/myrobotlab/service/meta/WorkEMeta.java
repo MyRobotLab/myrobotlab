@@ -59,18 +59,18 @@ public class WorkEMeta extends MetaData {
     addCategory("robot");
 
   }
-  
+
   @Override
   public Plan getDefault(String name) {
 
     WorkEConfig worke = new WorkEConfig();
-    
+
     Plan plan = new Plan(name);
     // load default peers from meta here
     plan.putPeers(name, peers);
     worke.autoStartPeers = false;
     plan.addConfig(worke);
-    
+
     return plan;
   }
 }

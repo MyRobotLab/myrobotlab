@@ -250,8 +250,8 @@ public class MethodCache {
     }
     return size;
   }
-  
-  public Set<String> getCachedObjectNames(){
+
+  public Set<String> getCachedObjectNames() {
     return objectCache.keySet();
   }
 

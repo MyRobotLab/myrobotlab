@@ -145,9 +145,9 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 
   public void releaseService() {
     poller.stop();
-    super.releaseService();    
+    super.releaseService();
   }
-  
+
   @Override
   public void startService() {
     super.startService();
@@ -220,7 +220,7 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 
   public void onFrame(Frame frame) {
     LeapData data = new LeapData();
-    
+
     // The old publishFrame method for those who want it.
     data.frame = frame;
     invoke("publishFrame", data.frame);
@@ -297,7 +297,7 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
       try {
         while (running) {
           if (controller.isConnected()) {
-            if(firstTimeConnected) {
+            if (firstTimeConnected) {
               controller.enableGesture(Gesture.Type.TYPE_SWIPE);
               controller.enableGesture(Gesture.Type.TYPE_CIRCLE);
               controller.enableGesture(Gesture.Type.TYPE_SCREEN_TAP);
@@ -307,7 +307,7 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
             onFrame(controller.frame());
             // FIXME - running average or other filter
             // TODO - optimization publish on change
-            Service.sleep(50);            
+            Service.sleep(50);
           } else {
             log.info("controller not connected");
             firstTimeConnected = true;

@@ -16,7 +16,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 public class UserData implements Savable {
-  
+
   public final static Logger log = LoggerFactory.getLogger(UserData.class);
 
   public transient JMonkeyEngine jme;
@@ -47,15 +47,15 @@ public class UserData implements Savable {
    * bucket to hold the unit axis
    */
   transient public Node axis;
-  
+
   public UserData() {
   }
 
   public UserData(MapperLinear mapper, String rotationMask) {
     this.mapper = mapper;
-    this.rotationMask = rotationMask;    
+    this.rotationMask = rotationMask;
   }
-  
+
   public UserData(JMonkeyEngine jme, Spatial spatial) {
     this.jme = jme;
     this.spatial = spatial;
@@ -97,6 +97,5 @@ public class UserData implements Savable {
     // sb.append(" ") TODO - other parts
     return sb.toString();
   }
-
 
 }

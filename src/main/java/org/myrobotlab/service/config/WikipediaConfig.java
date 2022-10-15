@@ -5,5 +5,5 @@ public class WikipediaConfig extends ServiceConfig {
   
   public Integer maxSentencesReturned = 1;
   public String[] imagePublishers;
-      
+
 }

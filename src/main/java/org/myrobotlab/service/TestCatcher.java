@@ -306,13 +306,12 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     log.info("onDouble {}", data);
     return data;
   }
-  
+
   public int waitForThis(int data, long sleep) {
     sleep(sleep);
     log.info("waitForThis {}", data);
     return data;
   }
-
 
   // @Override
   public void onReady(Integer t01, Double t02, Date d) {
