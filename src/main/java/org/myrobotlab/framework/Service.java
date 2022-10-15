@@ -1746,9 +1746,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public ServiceInterface startPeer(String peerKey) {
     String actualName = getPeerName(peerKey);
     if (actualName == null) {
-      log.error("startPeer could not find actual name of {} in {}", peerKey, getName());  
+      log.error("startPeer could not find actual name of {} in {}", peerKey, getName());
     }
-    
+
     ServiceInterface si = Runtime.start(actualName, null);
     if (si != null) {
       ServiceReservation sr = serviceType.getPeer(peerKey);
@@ -1765,7 +1765,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return si;
   }
-  
+
   public String getPeerType(String peerKey) {
     ServiceReservation sr = serviceType.getPeer(peerKey);
     return sr.type;
@@ -2546,5 +2546,4 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     apply(sc);
   }
 
-  
 }

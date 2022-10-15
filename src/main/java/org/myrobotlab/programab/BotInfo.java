@@ -41,7 +41,7 @@ public class BotInfo {
     this.programab = programab;
     programab.info("found bot %s", name);
     try {
-      FileInputStream fis = new FileInputStream(FileIO.gluePaths(path.getAbsolutePath(), "manifest.txt")); 
+      FileInputStream fis = new FileInputStream(FileIO.gluePaths(path.getAbsolutePath(), "manifest.txt"));
       properties.load(new InputStreamReader(fis, Charset.forName("UTF-8")));
       log.info("loaded properties");
     } catch (FileNotFoundException e) {

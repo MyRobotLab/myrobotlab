@@ -21,15 +21,14 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
   private boolean installed = false;
 
   /**
-   * Whether this dependency should be packaged
-   * in the final jar, instead of being fetched
-   * on-demand at runtime.
+   * Whether this dependency should be packaged in the final jar, instead of
+   * being fetched on-demand at runtime.
    */
   private boolean includeInOneJar = false;
 
   /**
-   * Whether this dependency should be skipped. This should only
-   * be set by a {@link Repo} when it detects duplicate dependencies
+   * Whether this dependency should be skipped. This should only be set by a
+   * {@link Repo} when it detects duplicate dependencies
    */
   private boolean skipped = false;
 

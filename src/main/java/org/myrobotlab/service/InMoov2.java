@@ -93,13 +93,12 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   public void onStarted(String fullname) {
     log.info("{} started", fullname);
     try {
-      
+
       boolean test = true;
       if (test) {
         return;
       }
-      
-      
+
       // FIXME - problem is fullname is not the peerKey :(
       // String actualName = getPeerName(fullname);
       // getPeer(peerKey)
@@ -115,7 +114,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       // processing :(
 
       // sortof peer ? ¯\_(ツ)_/¯ - TOTAL KLUDGE !!!
-      // closer .. but not quite right .. the 
+      // closer .. but not quite right .. the
       // "member" config.mouth should hold the actual name !
 
       String mouthActualName = getPeerName("mouth");
@@ -131,25 +130,25 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
       }
 
-      // this is worse 
+      // this is worse
       if (fullname.equals(getName() + ".chatBot")) {
-        ProgramAB chatBot = (ProgramAB)Runtime.getService(getName() + ".chatBot");
+        ProgramAB chatBot = (ProgramAB) Runtime.getService(getName() + ".chatBot");
         chatBot.attachTextListener(getName() + ".htmlFilter");
       }
-      
-//      if (fullname.equals(getName() + ".htmlFilter")) {
-//        ProgramAB chatBot = (ProgramAB)Runtime.getService(getName() + ".chatBot");
-//        chatBot.attachTextListener(getName() + ".htmlFilter");
-//      }
-      
-      
-      // chatbot or htmlfilter ? 
+
+      // if (fullname.equals(getName() + ".htmlFilter")) {
+      // ProgramAB chatBot = (ProgramAB)Runtime.getService(getName() +
+      // ".chatBot");
+      // chatBot.attachTextListener(getName() + ".htmlFilter");
+      // }
+
+      // chatbot or htmlfilter ?
       if (fullname.equals(getName() + ".ear")) {
-        AbstractSpeechRecognizer ear = (AbstractSpeechRecognizer)Runtime.getService(getName() + ".ear");        
-          ear.attachTextListener(getName() + ".chatBot");
-        
+        AbstractSpeechRecognizer ear = (AbstractSpeechRecognizer) Runtime.getService(getName() + ".ear");
+        ear.attachTextListener(getName() + ".chatBot");
+
       }
-      
+
       // Plan plan = Runtime.getPlan();
 
       // THIS IS HOW TO MARK PEER DATA STARTED WHEN ITS NOT STARTED BY

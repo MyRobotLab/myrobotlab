@@ -49,7 +49,8 @@ public class OpenCVFilterFloodFill extends OpenCVFilter {
 
   transient CvPoint startPoint = cvPoint(180, 120);
   transient CvScalar fillColor = cvScalar(255.0, 0.0, 0.0, 1.0);
-  transient CvScalar lo_diff = CV_RGB(20.0, 20.0, 20.0);// cvScalar(20, 0.0, 0.5, 1.0);
+  transient CvScalar lo_diff = CV_RGB(20.0, 20.0, 20.0);// cvScalar(20, 0.0,
+                                                        // 0.5, 1.0);
   transient CvScalar up_diff = CV_RGB(20.0, 20.0, 20.0);
 
   public OpenCVFilterFloodFill() {

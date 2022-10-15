@@ -514,12 +514,9 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
       public void run() {
         currentPos.setText(String.format("%.1f", data.pos));
         /*
-        if (ServoStatus.SERVO_STARTED.equals(data.state)) {
-          moving.setVisible(true);
-        } else {
-          moving.setVisible(false);
-        }
-        */
+         * if (ServoStatus.SERVO_STARTED.equals(data.state)) {
+         * moving.setVisible(true); } else { moving.setVisible(false); }
+         */
       }
     });
   }

@@ -125,8 +125,8 @@ public class Platform implements Serializable {
       if ("i386".equals(arch) || "i486".equals(arch) || "i586".equals(arch) || "i686".equals(arch) || "amd64".equals(arch) || arch.startsWith("x86")) {
         platform.arch = "x86"; // don't care at the moment
       }
-      
-      platform.osBitness = ("amd64".equals(arch))?64:32;
+
+      platform.osBitness = ("amd64".equals(arch)) ? 64 : 32;
 
       if ("arm".equals(arch)) {
 
@@ -153,7 +153,7 @@ public class Platform implements Serializable {
       }
 
       // === BITNESS ===
-            
+
       if (platform.isWindows()) {
         // https://blogs.msdn.microsoft.com/david.wang/2006/03/27/howto-detect-process-bitness/
         // this will attempt to guess the bitness of the underlying OS, Java
@@ -527,7 +527,7 @@ public class Platform implements Serializable {
     }
   }
 
-  public String getVmVersion() {    
+  public String getVmVersion() {
     return vmVersion;
   }
 }

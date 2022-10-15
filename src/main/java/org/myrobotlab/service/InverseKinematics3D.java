@@ -366,7 +366,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   }
 
   @Override
-  public Map<String,Double> publishJointAngles(Map<String,Double> angleData) {
+  public Map<String, Double> publishJointAngles(Map<String, Double> angleData) {
     return angleData;
   }
 

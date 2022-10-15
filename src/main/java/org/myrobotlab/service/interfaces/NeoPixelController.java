@@ -50,8 +50,10 @@ public interface NeoPixelController extends Attachable {
    * 
    * |address | red | green | blue | white
    * 
-   * @param neopixel - neopixel service
-   * @param buffer - array of pixel values and addresses sent to MrlComm
+   * @param neopixel
+   *          - neopixel service
+   * @param buffer
+   *          - array of pixel values and addresses sent to MrlComm
    */
   public void neoPixelWriteMatrix(String neopixel, int[] buffer);
 
@@ -59,12 +61,18 @@ public interface NeoPixelController extends Attachable {
    * Sets an "onboard" animation's color and speed values then starts the
    * animation
    * 
-   * @param neopixel - the neopixel service
-   * @param animation - the index of the animation to play
-   * @param red - value 0-255
-   * @param green - value 0-255
-   * @param blue - value 0-255
-   * @param white - value 0-255
+   * @param neopixel
+   *          - the neopixel service
+   * @param animation
+   *          - the index of the animation to play
+   * @param red
+   *          - value 0-255
+   * @param green
+   *          - value 0-255
+   * @param blue
+   *          - value 0-255
+   * @param white
+   *          - value 0-255
    * @param wait_ms
    *          - number of ms to wait in "show" pixels
    */
@@ -73,27 +81,38 @@ public interface NeoPixelController extends Attachable {
   /**
    * Optimized fill of a continuous segment of pixels
    * 
-   * @param neopixel - the service
-   * @param beginAddress - the begin address to fil
-   * @param count - number of pixels to set after the begin address
-   * @param red - value 0-255
-   * @param green - value 0-255
-   * @param blue - value 0-255
-   * @param white - value 0-255
+   * @param neopixel
+   *          - the service
+   * @param beginAddress
+   *          - the begin address to fil
+   * @param count
+   *          - number of pixels to set after the begin address
+   * @param red
+   *          - value 0-255
+   * @param green
+   *          - value 0-255
+   * @param blue
+   *          - value 0-255
+   * @param white
+   *          - value 0-255
    */
   public void neoPixelFill(String neopixel, int beginAddress, int count, int red, int green, int blue, int white);
 
   /**
    * Sets the brightness of all pixels
    * 
-   * @param neopixel the neopixel address
-   * @param brightness the brightness level 0-255 (logarithmic)
+   * @param neopixel
+   *          the neopixel address
+   * @param brightness
+   *          the brightness level 0-255 (logarithmic)
    */
   public void neoPixelSetBrightness(String neopixel, int brightness);
 
   /**
-   * Optimize clear of all the pixels, does a memset on board 
-   * @param neopixel - the neopixel service
+   * Optimize clear of all the pixels, does a memset on board
+   * 
+   * @param neopixel
+   *          - the neopixel service
    */
   public void neoPixelClear(String neopixel);
 

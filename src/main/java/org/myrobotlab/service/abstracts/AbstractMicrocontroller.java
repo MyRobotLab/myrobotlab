@@ -43,7 +43,7 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
   /**
    * other services subscribed to pins
    */
-  @Deprecated /* use pub/sub  :(  */
+  @Deprecated /* use pub/sub :( */
   transient protected Map<String, PinArrayListener> pinArrayListeners = new ConcurrentHashMap<String, PinArrayListener>();
 
   /**
@@ -57,7 +57,6 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
    * name index of pins to pin definitions
    */
   protected Map<String, PinDefinition> pinIndex = new TreeMap<>();
-  
 
   /**
    * possible types of boards
@@ -149,14 +148,14 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
     if (pinIndex.containsKey(pinName)) {
       return pinIndex.get(pinName);
     }
-    
+
     // another attempt - if user used address instead of pin
     try {
-     int address = Integer.parseInt(pinName);
-     return addressIndex.get(address);
-    } catch(Exception e) {
+      int address = Integer.parseInt(pinName);
+      return addressIndex.get(address);
+    } catch (Exception e) {
     }
-    
+
     // log.error("pinMap does not contain pin {}", pinName);
     return null;
   }

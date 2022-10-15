@@ -20,7 +20,7 @@ public class LocalSpeechMeta extends AbstractSpeechSynthesisMeta {
     setAvailable(true);
     addCategory("speech");
   }
-  
+
   public Plan getDefault(String name) {
 
     Plan plan = new Plan(name);
@@ -34,6 +34,5 @@ public class LocalSpeechMeta extends AbstractSpeechSynthesisMeta {
 
     return plan;
   }
-
 
 }

@@ -114,48 +114,44 @@ public class Intro extends Service {
       System.setProperty("java.version", "11.0");
       LoggingFactory.init("info");
 
-      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
-      
+
       Runtime.start("i01", "InMoov2");
-      
+
       // Runtime.start("python","Python");
       // Runtime.start("polly","Polly");
-//      Runtime.start("s1", "Servo");
-//      Runtime.start("intro", "Intro");
-            
-      //Runtime.release("python");
+      // Runtime.start("s1", "Servo");
+      // Runtime.start("intro", "Intro");
+
+      // Runtime.release("python");
       // Runtime.releaseAll();
       Runtime.start("python", "Python");
       // Runtime.start("mega", "Arduino");
       // Runtime.start("ada", "Adafruit16CServoDriver");
-      
+
       boolean done = true;
       if (done) {
         return;
       }
-      
+
       // this will not continue to work :(
       // Runtime.loadService("python", "Python");
       // Runtime.start("python");
-      
+
       Runtime.startConfig("track-worky-3");
-      
+
       Runtime.saveConfig("track-worky-4");
-      
+
       Runtime.start("python", "Python");
-      
-      
+
       // Runtime.startConfigSet(fs);
 
       // Runtime.main(new String[]{"--config", "i01-9"});
       // Runtime.start("runtime", "Runtime"); i
-      
-      
-      
-      
-      Servo s1 = (Servo)Runtime.start("s1","Servo");
+
+      Servo s1 = (Servo) Runtime.start("s1", "Servo");
       s1.setRest(0);
       s1.moveToBlocking(0);
       s1.setSpeed(12.311);
@@ -164,17 +160,10 @@ public class Intro extends Service {
       s1.moveToBlocking(9.5);
       log.info("finished servo move");
 
-
-      
-
       // Runtime.main(new String[]{"--config", "i01-9"});
       // Runtime.start("runtime", "Runtime"); i
 
-
-
-      
       Runtime.start("i01", "InMoov2");
-
 
       DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");

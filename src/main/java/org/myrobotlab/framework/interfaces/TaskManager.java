@@ -4,29 +4,34 @@ import java.util.Map;
 import java.util.Timer;
 
 public interface TaskManager {
-  
+
   /**
    * get all timed tasks for this service
+   * 
    * @return - returns all currently defined tasks
    */
   public Map<String, Timer> getTasks();
 
   /**
    * purge a task
-   * @param taskName - name of task to be purged
+   * 
+   * @param taskName
+   *          - name of task to be purged
    */
   public void purgeTask(String taskName);
-  
+
   /**
    * purge all tasks
    */
   public void purgeTasks();
-  
+
   /**
    * add a repeating task with interval intervalMs
    * 
-   * @param intervalMs - interval from "now" to invoke task
-   * @param method - method to invoke
+   * @param intervalMs
+   *          - interval from "now" to invoke task
+   * @param method
+   *          - method to invoke
    */
   public void addTask(long intervalMs, String method);
 

@@ -515,9 +515,9 @@ public class Updater extends Service {
 
             // FIXME - re-implement
             // export current state
-//            if (Runtime.exists()) {
-//              Runtime.getInstance().save("last-restart/runtime.yml");
-//            }
+            // if (Runtime.exists()) {
+            // Runtime.getInstance().save("last-restart/runtime.yml");
+            // }
 
             // replace our current jar (classes ? build?)
             log.info("writing {} to myrobotlab.jar", latestFile);

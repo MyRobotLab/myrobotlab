@@ -367,7 +367,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       log.warn("controller not set");
       return;
     }
-    
+
     if (wait_ms_per_frame == null) {
       wait_ms_per_frame = 25L;
     }
@@ -826,8 +826,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
     return c;
   }
-  
-  public String onStarted(String name){
+
+  public String onStarted(String name) {
     return name;
   }
 

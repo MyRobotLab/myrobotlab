@@ -45,7 +45,8 @@ import org.slf4j.Logger;
  *         https://learn.adafruit.com/16-channel-pwm-servo-driver
  */
 @Ignore
-public class Adafruit16CServoDriver extends Service implements I2CControl, ServoController, MotorController /*, ServoStatusPublisher*/ {
+public class Adafruit16CServoDriver extends Service implements I2CControl, ServoController,
+    MotorController /* , ServoStatusPublisher */ {
 
   /**
    * SpeedControl, calculates the next position at regular intervals to make the
@@ -298,7 +299,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   public Adafruit16CServoDriver(String n, String id) {
     super(n, id);
-    createPinList();    
+    createPinList();
     registerForInterfaceChange(I2CController.class);
   }
 
@@ -380,7 +381,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
    * Set the PWM frequency. i.e. the frequency between positive pulses.
    * 
    * @param pin
-   *          the pin. This is not really used as the frequency is set for all 16 channels.
+   *          the pin. This is not really used as the frequency is set for all
+   *          16 channels.
    * @param hz
    *          the frequency in hz
    * 
@@ -456,7 +458,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   @Override
   public void onServoMoveTo(ServoMove move) {
-    ServoControl servo = (ServoControl)Runtime.getService(move.name);
+    ServoControl servo = (ServoControl) Runtime.getService(move.name);
     ServoEvent ServoEvent = servoMap.get(servo.getName());
     if (!pwmFreqSet) {
       setPWMFreq(ServoEvent.pin, defaultPwmFreq);
@@ -486,7 +488,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   /**
    * Set the servo to a position using uS
-   *  
+   * 
    * @param servo
    *          Servo service to be moved
    * @param uS
@@ -630,11 +632,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   }
 
-   /**
-   * Set Output Power of a pin.
-   * This is a value betweeom 0.0 and 1.0
-   * if you are using this to drive an LED.
-   * Connect the LED between VCC and the output pic, then invert this value where 1.0 is off and 0.0 is full on.
+  /**
+   * Set Output Power of a pin. This is a value betweeom 0.0 and 1.0 if you are
+   * using this to drive an LED. Connect the LED between VCC and the output pic,
+   * then invert this value where 1.0 is off and 0.0 is full on.
    * 
    * @param pinLabel
    *          the pin not really used
@@ -948,7 +949,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       log.error("servo data {} could not get servo from map", servoName);
       return;
     }
-	int pulseWidthOff = SERVOMIN + (int) (ServoEvent.servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
+    int pulseWidthOff = SERVOMIN + (int) (ServoEvent.servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
     setPWM(ServoEvent.pin, 0, pulseWidthOff);
     ServoEvent.isEnergized = true;
     log.info("pin " + ServoEvent.pin + " enabled from " + servoName);
@@ -1001,13 +1002,19 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   }
 
-  @Deprecated /* controllers shouldn't publish "servo events" - they should broacast encoder data back to a ServoControl */
+  @Deprecated /*
+               * controllers shouldn't publish "servo events" - they should
+               * broacast encoder data back to a ServoControl
+               */
   // @Override
   public String publishServoStarted(String name) {
     return name;
   }
 
-  @Deprecated /* controllers shouldn't publish "servo events" - they should broacast encoder data back to a ServoControl */
+  @Deprecated /*
+               * controllers shouldn't publish "servo events" - they should
+               * broacast encoder data back to a ServoControl
+               */
   // @Override
   public String publishServoStopped(String name) {
     return name;

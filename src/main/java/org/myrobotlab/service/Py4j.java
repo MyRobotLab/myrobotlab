@@ -67,7 +67,6 @@ public class Py4j extends Service {
       Runtime.start("servo", "Servo");
       Py4j py4j = (Py4j) Runtime.start("py4j", "Py4j");
       py4j.start();
-      
 
     } catch (Exception e) {
       log.error("main threw", e);

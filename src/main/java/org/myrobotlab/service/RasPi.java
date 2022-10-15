@@ -107,7 +107,8 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       log.info("Executing on Raspberry PI");
       getPinList();
     } catch (Exception e) {
-      // an error in the constructor won't get broadcast - so we need Runtime to do it
+      // an error in the constructor won't get broadcast - so we need Runtime to
+      // do it
       Runtime.getInstance().error("raspi service requires arm %s is not arm - %s", getName(), e.getMessage());
     }
   }
@@ -271,8 +272,10 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     return new ArrayList<PinDefinition>(addressIndex.values());
   }
 
-  @Override // FIXME - I2CControl has bus why is it supplied here as a parameter, t
-            // ANSWER: here are two busses on the Raspi. Normally we only use 1, bus 0 is used by the SD card
+  @Override // FIXME - I2CControl has bus why is it supplied here as a
+            // parameter, t
+            // ANSWER: here are two busses on the Raspi. Normally we only use 1,
+            // bus 0 is used by the SD card
   public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
     int bytesRead = 0;
     String key = String.format("%d.%d", busAddress, deviceAddress);
@@ -294,12 +297,12 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   @Override
   public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
     String key = String.format("%d.%d", busAddress, deviceAddress);
-    
+
     if (buffer == null || buffer.length == 0) {
       log.warn("buffer 0 not writing to i2c bus");
       return;
     }
-    
+
     I2CDeviceMap devicedata = i2cDevices.get(key);
     if (devicedata == null) {
       createI2cDevice(busAddress, deviceAddress, control.getName());
@@ -338,10 +341,10 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   // shouldn't the pin be a string like "GPIO17"
   /**
    * Sets the pin mode to Input or Output
+   * 
    * @param pin
    * @param mode
-   *      INPUT = 0x0.
-   *      Output = 0x1.
+   *          INPUT = 0x0. Output = 0x1.
    */
   public void pinMode(int pin, int mode) {
 
@@ -376,13 +379,14 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
 
   // FIXME - return array
   /**
-   * Starts a scan of the I2C specified and returns a list of addresses that responded.
-   * This command send a wread and write request with do data to each address.
-   * Deviced on the address should respond with an ACK flag as part of the protocol.
-   * Each responding device address is added to a list that is returned when the scan is complete.
+   * Starts a scan of the I2C specified and returns a list of addresses that
+   * responded. This command send a wread and write request with do data to each
+   * address. Deviced on the address should respond with an ACK flag as part of
+   * the protocol. Each responding device address is added to a list that is
+   * returned when the scan is complete.
+   * 
    * @param busAddress
-   * @return
-   *      List of devices.
+   * @return List of devices.
    */
   public Integer[] scanI2CDevices(int busAddress) {
     log.info("scanning through I2C devices");

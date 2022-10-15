@@ -744,32 +744,31 @@ public class CodecUtils {
     }
     return false;
   }
-  
+
   public static ServiceConfig readServiceConfig(String filename) throws IOException {
     String data = new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8);
     Yaml yaml = new Yaml();
-    return (ServiceConfig)yaml.load(data);
+    return (ServiceConfig) yaml.load(data);
   }
 
   public static void setField(Object o, String field, Object value) {
     try {
       // TODO - handle all types :P
-     Field f =  o.getClass().getDeclaredField(field);
-     f.setAccessible(true);
-     f.set(o, value);
+      Field f = o.getClass().getDeclaredField(field);
+      f.setAccessible(true);
+      f.set(o, value);
     } catch (Exception e) {
       /** don't care - if its not there don't set it */
     }
   }
-  
-  
+
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
     try {
-      
+
       Object o = readServiceConfig("data/config/InMoov2_FingerStarter/i01.chatBot.yml");
-      
+
       String json = CodecUtils.fromJson("test", String.class);
       log.info("json {}", json);
       json = CodecUtils.fromJson("a test", String.class);
@@ -783,7 +782,4 @@ public class CodecUtils {
     }
   }
 
-  
-  
-  
 }

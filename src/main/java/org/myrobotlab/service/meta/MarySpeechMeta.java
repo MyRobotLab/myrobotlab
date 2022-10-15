@@ -48,11 +48,11 @@ public class MarySpeechMeta extends AbstractSpeechSynthesisMeta {
     exclude("com.google.guava", "guava");
     exclude("org.apache.opennlp", "opennlp-tools");
     exclude("org.slf4j", "slf4j-log4j12");
-    
+
     addDependency("org.apache.logging.log4j", "log4j-1.2-api", "2.12.1");
 
   }
-  
+
   public Plan getDefault(String name) {
 
     Plan plan = new Plan(name);

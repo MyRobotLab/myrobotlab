@@ -55,7 +55,7 @@ public class PinDefinition extends SensorDefinition implements Serializable {
   }
 
   boolean isSda = false;
-  
+
   boolean isScl = false;
 
   boolean canRead = true;
@@ -67,8 +67,7 @@ public class PinDefinition extends SensorDefinition implements Serializable {
   transient Object pinImpl;
 
   /**
-   * rate in Hz for which the pin will be polled
-   * 0 == no rate imposed 
+   * rate in Hz for which the pin will be polled 0 == no rate imposed
    */
   int pollRateHz = 0;
 
@@ -221,9 +220,9 @@ public class PinDefinition extends SensorDefinition implements Serializable {
   }
 
   public void setPollRate(int rateHz) {
-    this.pollRateHz  = rateHz;
+    this.pollRateHz = rateHz;
   }
-  
+
   public int getPollRate() {
     return pollRateHz;
   }

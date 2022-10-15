@@ -44,7 +44,7 @@ public class GoogleSearch extends Service implements ImagePublisher, TextPublish
   transient private static Pattern patternDomainName;
 
   transient private Matcher matcher;
-  
+
   GoogleSearchConfig c;
 
   private static final String DOMAIN_NAME_PATTERN = "([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}";
@@ -66,18 +66,17 @@ public class GoogleSearch extends Service implements ImagePublisher, TextPublish
     excludeTextFilter.add("Wikipedia");
     // setLowerCase();
   }
-  
+
   @Override
   public ServiceConfig apply(ServiceConfig config) {
     c = (GoogleSearchConfig) config;
     return c;
   }
-  
+
   @Override
   public ServiceConfig getConfig() {
     return config;
   }
-
 
   public void setLowerCase() {
     c.lowerCase = true;
@@ -230,7 +229,7 @@ public class GoogleSearch extends Service implements ImagePublisher, TextPublish
         img.name = searchText;
         img.src = imageUrl.src;
         img.source = getName();
-        
+
         invoke("publishImage", img);
         // System.out.println(imageUrl);
       }
@@ -275,7 +274,6 @@ public class GoogleSearch extends Service implements ImagePublisher, TextPublish
     return images;
   }
 
-
   @Deprecated /* use standard attachTextListener */
   public void addTextListener(TextListener service) {
     attachTextListener(service.getName());
@@ -312,7 +310,6 @@ public class GoogleSearch extends Service implements ImagePublisher, TextPublish
       if (isDone) {
         return;
       }
-
 
       // List<String> base64Images =
       // google.extractImageRefs("/lhome/grperry/github/mrl.develop/myrobotlab/data/GoogleSearch/cachedFiles/gorilla.html");

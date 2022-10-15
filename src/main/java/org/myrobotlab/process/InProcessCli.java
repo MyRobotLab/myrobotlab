@@ -394,7 +394,7 @@ public class InProcessCli implements Runnable {
       }
     }
 
-    if (out != null  && !System.out.equals(out)) {
+    if (out != null && !System.out.equals(out)) {
       try {
         out.close();
       } catch (Exception e) {

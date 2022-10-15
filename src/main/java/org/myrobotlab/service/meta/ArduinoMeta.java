@@ -24,22 +24,22 @@ public class ArduinoMeta extends MetaData {
 
   @Override
   public Plan getDefault(String name) {
-    
+
     Plan plan = new Plan(name);
     plan.putPeers(name, peers);
     // NOTE: you want to do any aliasing at the beginning
     // plan.setPeerName("serial", "serialx");
-    
+
     ArduinoConfig arduinoConfig = new ArduinoConfig();
     arduinoConfig.serial = name + ".serial";
-    
 
-    // == Peer serial - TODO - automagically add it when you add peers (meta's peers have type info)
+    // == Peer serial - TODO - automagically add it when you add peers (meta's
+    // peers have type info)
     SerialConfig serialConfig = (SerialConfig) plan.addPeerConfig("serial");
 
     // pull out specific config and modify
     serialConfig.port = arduinoConfig.port;
-    
+
     // add self last - desired order or construction
     plan.addConfig(arduinoConfig);
 

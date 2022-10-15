@@ -511,9 +511,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     }
   }
 
-
   @Override
-  public Map<String,Double> publishJointAngles(Map<String,Double> angleMap) {
+  public Map<String, Double> publishJointAngles(Map<String, Double> angleMap) {
     return angleMap;
   }
 

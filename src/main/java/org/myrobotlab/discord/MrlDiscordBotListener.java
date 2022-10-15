@@ -31,8 +31,7 @@ public class MrlDiscordBotListener extends ListenerAdapter {
     Utterance utterance = new Utterance();
     utterance.ts = System.currentTimeMillis();
     utterance.id = event.getMessage().getId();
-    
-    
+
     // Author of the message.
     utterance.username = event.getAuthor().getName();
     utterance.isBot = event.getAuthor().isBot();

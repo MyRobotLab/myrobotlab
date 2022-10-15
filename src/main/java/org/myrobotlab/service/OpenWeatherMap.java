@@ -246,9 +246,9 @@ public class OpenWeatherMap extends HttpClient {
   public String getLocalUnits() {
     return localUnits;
   }
-  
+
   public String getApiKey() {
-    return  Runtime.getSecurity().getKey("OPENWEATHERMAP");
+    return Runtime.getSecurity().getKey("OPENWEATHERMAP");
   }
 
   @Override
