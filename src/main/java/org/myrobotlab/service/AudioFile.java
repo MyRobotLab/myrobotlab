@@ -553,7 +553,11 @@ public class AudioFile extends Service implements AudioPublisher {
         attachAudioListener(listener);
       }
     }
-
+    
+    // FIXME - THIS IS ALL THATS NEEDED AND IT CAN BE 
+    // DONE IN THE SERVICE LEVEL
+    // if services need "special" handling they can override
+    this.config = c;
     return c;
   }
 
