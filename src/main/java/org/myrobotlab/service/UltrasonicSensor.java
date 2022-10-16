@@ -125,6 +125,9 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     broadcastState();
   }
 
+  /**
+   * This method is used to clear the Min, Max, last range and ping count values.
+   */
   public void clear() {
     pingCount = 0;
     lastRange = null;
@@ -173,22 +176,49 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     return controller;
   }
 
+  /**
+   * There are two pins used on an Ultrasonic sensor, Trigger and Echo.
+   * This function returns the Echo Pin which is the pin the signal is returned on.
+   * @return
+   * Pin number.
+   */
   public int getEchoPin() {
     return echoPin;
   }
 
+  /**
+   * Used to get the Maximum range detected since the last clear() command.
+   * @return
+   * centimeters or inches based on the current setting.
+   */
   public Double getMax() {
     return max;
   }
 
+  /**
+   * Used to get the Minimum range detected since the last clear() command.
+   * @return
+   * centimeters or inches based on the current setting.
+   */
   public Double getMin() {
     return min;
   }
 
+  /**
+   * Used to get the number of pings sent since the last clear() command.
+   * @return
+   * Number of pings.
+   */
   public long getPingCount() {
     return pingCount;
   }
 
+  /**
+   * There are two pins used on an Ultrasonic sensor, Trigger and Echo.
+   * This function returns the Trigger Pin which is used to trigger the ping.
+   * @return
+   * Pin number.
+   */
   public int getTriggerPin() {
     return trigPin;
   }
@@ -331,19 +361,40 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     broadcastState();
   }
 
+  /**
+   * There are two pins used on an Ultrasonic sensor, Trigger and Echo.
+   * This method set the Echo Pin which is the pin the signal is returned on.
+   * @param pin
+   *  The pin the echo will be returned on.
+   */
   public void setEchoPin(int pin) {
     echoPin = pin;
   }
 
+  /**
+   * There are two pins used on an Ultrasonic sensor.
+   * Trigger and Echo.
+   * This method set the Trigger Pin which starts the ranging process.
+   * @param pin
+   *  The pin used to trigger the ranging process.
+   */
   public void setTriggerPin(int pin) {
     trigPin = pin;
   }
 
+  /**
+   * The measured distance can be either Metric (centimeters) or imperial (inches).
+   * This method sets the returned ranging value to Metric centimeters.
+   */
   @Override
   public void setUnitCm() {
     multiplier = 1;
   }
 
+  /**
+   * The measured distance can be either Metric (centimeters) or imperial (inches).
+   * This method sets the returned ranging value to Imperial Inches.
+   */
   @Override
   public void setUnitInches() {
     multiplier = 0.393701;
