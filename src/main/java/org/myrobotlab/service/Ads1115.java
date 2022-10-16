@@ -1178,5 +1178,4 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
     return c;
   }
 
-  
 }

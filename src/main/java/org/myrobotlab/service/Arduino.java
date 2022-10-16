@@ -1103,7 +1103,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       }
     } else {
       int pinCount = 20;
-      if (board.contains("nano")){
+      if (board.contains("nano")) {
         pinCount = 22;
       }
       for (int i = 0; i < pinCount; ++i) {

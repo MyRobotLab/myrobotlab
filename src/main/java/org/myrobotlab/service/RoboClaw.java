@@ -2556,8 +2556,8 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       m1.pid.kd = bytes4ToLong(data, 8);
       // MaxI ??? m1.pid.kd = bytes4ToLong(data, 12);
       m1.pid.deadband = bytes4ToLong(data, 16);
-      m1.pid.outMin = (double)bytes4ToLong(data, 20);
-      m1.pid.outMax = (double)bytes4ToLong(data, 24);
+      m1.pid.outMin = (double) bytes4ToLong(data, 20);
+      m1.pid.outMax = (double) bytes4ToLong(data, 24);
       log.info("m1.pid {}", m1.pid.toString());
     }
 
@@ -2584,8 +2584,8 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       m2.pid.kd = bytes4ToLong(data, 8);
       // MaxI ??? m1.pid.kd = bytes4ToLong(data, 12);
       m2.pid.deadband = bytes4ToLong(data, 16);
-      m2.pid.outMin = (double)bytes4ToLong(data, 20);
-      m2.pid.outMax = (double)bytes4ToLong(data, 24);
+      m2.pid.outMin = (double) bytes4ToLong(data, 20);
+      m2.pid.outMax = (double) bytes4ToLong(data, 24);
       log.info("m2.pid {}", m2.pid.toString());
     }
 

@@ -62,7 +62,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   boolean isAttached = false;
 
-
   public InMoov2Hand(String n, String id) {
     super(n, id);
   }
@@ -760,7 +759,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     }
     return ret;
   }
-
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);

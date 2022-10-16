@@ -294,7 +294,6 @@ public class Blender extends Service {
       String vLeftPort = "vleft";
       String vRightPort = "vright";
 
-
     } catch (Exception e) {
       Logging.logError(e);
     }

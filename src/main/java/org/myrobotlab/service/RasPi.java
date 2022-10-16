@@ -107,7 +107,9 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       log.info("Executing on Raspberry PI");
       getPinList();
     } catch (Exception e) {
-      error("raspi service requires arm %s is not arm - %s", getName(), e.getMessage());
+      // an error in the constructor won't get broadcast - so we need Runtime to
+      // do it
+      Runtime.getInstance().error("raspi service requires arm %s is not arm - %s", getName(), e.getMessage());
     }
   }
 
@@ -270,8 +272,10 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     return new ArrayList<PinDefinition>(addressIndex.values());
   }
 
-  @Override // FIXME - I2CControl has bus why is it supplied here as a parameter, t
-            // ANSWER: here are two busses on the Raspi. Normally we only use 1, bus 0 is used by the SD card
+  @Override // FIXME - I2CControl has bus why is it supplied here as a
+            // parameter, t
+            // ANSWER: here are two busses on the Raspi. Normally we only use 1,
+            // bus 0 is used by the SD card
   public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
     int bytesRead = 0;
     String key = String.format("%d.%d", busAddress, deviceAddress);
@@ -293,12 +297,12 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   @Override
   public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
     String key = String.format("%d.%d", busAddress, deviceAddress);
-    
+
     if (buffer == null || buffer.length == 0) {
       log.warn("buffer 0 not writing to i2c bus");
       return;
     }
-    
+
     I2CDeviceMap devicedata = i2cDevices.get(key);
     if (devicedata == null) {
       createI2cDevice(busAddress, deviceAddress, control.getName());
@@ -561,7 +565,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
         }
       }
 
-      log.info("scan found: ---");
+      log.info("scanning bus {} found: ---", busNumber);
       for (String a : addresses) {
         log.info("address: " + a);
       }

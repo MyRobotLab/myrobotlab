@@ -129,7 +129,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
 
   @Override
   public void onServoMoveTo(ServoMove move) {
-    ServoControl servo = (ServoControl)Runtime.getService(move.name);
+    ServoControl servo = (ServoControl) Runtime.getService(move.name);
     // # <ch> P <pw> ​S​​<spd>​​T​<time> <cr>
     log.info("servoMove {}", servo.getTargetOutput());
     StringBuilder sb = new StringBuilder();

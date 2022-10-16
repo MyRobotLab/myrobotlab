@@ -4,9 +4,9 @@ import org.myrobotlab.service.data.PinData;
 
 public interface PinListener extends Listener {
 
-  public void setPin(String  pin);
+  public void setPin(String pin);
 
   public String getPin();
-  
+
   public void onPin(PinData pindata);
 }

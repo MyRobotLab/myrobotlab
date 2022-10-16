@@ -108,10 +108,10 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
   @Override
   public void startService() {
     super.startService();
-    bicep = (ServoControl)startPeer("bicep");
-    rotate = (ServoControl)startPeer("rotate");
-    shoulder = (ServoControl)startPeer("shoulder");
-    omoplate = (ServoControl)startPeer("omoplate");
+    bicep = (ServoControl) startPeer("bicep");
+    rotate = (ServoControl) startPeer("rotate");
+    shoulder = (ServoControl) startPeer("shoulder");
+    omoplate = (ServoControl) startPeer("omoplate");
   }
 
   @Override

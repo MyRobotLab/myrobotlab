@@ -3,8 +3,6 @@ package org.myrobotlab.service;
 import java.util.List;
 import java.util.Set;
 
-import javax.security.auth.login.LoginException;
-
 import org.myrobotlab.discord.MrlDiscordBotListener;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -12,8 +10,10 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.DiscordBotConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.data.Utterance;
-import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.interfaces.ImageListener;
+import org.myrobotlab.service.interfaces.ImagePublisher;
 import org.myrobotlab.service.interfaces.UtteranceListener;
 import org.myrobotlab.service.interfaces.UtterancePublisher;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
  * channels. The bot user also needs a token that is used to authenticate and
  * identify the bot.
  */
-public class DiscordBot extends Service implements UtterancePublisher, UtteranceListener {
+public class DiscordBot extends Service implements UtterancePublisher, UtteranceListener, ImageListener {
 
   transient public final static Logger log = LoggerFactory.getLogger(DiscordBot.class);
 
@@ -47,7 +47,7 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
 
   protected Utterance lastUtterance = null;
 
-  protected String token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+  protected String token = null;
 
   public DiscordBot(String reservedKey, String inId) {
     super(reservedKey, inId);
@@ -56,7 +56,9 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
   public ServiceConfig apply(ServiceConfig c) {
     DiscordBotConfig config = (DiscordBotConfig) c;
 
-    setToken(config.token);
+    if (config.token != null) {
+      setToken(config.token);
+    }
 
     if (config.utteranceListeners != null) {
       for (String name : config.utteranceListeners) {
@@ -64,12 +66,10 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
       }
     }
 
-    if (config.connect) {
-      try {
-        connect();
-      } catch (Exception e) {
-        error("could not connect %s", e.getMessage());
-      }
+    if (config.connect && config.token != null && !config.token.isEmpty()) {
+      connect();
+    } else if (config.token == null || config.token.isEmpty()) {
+      error("requires valid token to connect");
     }
 
     return config;
@@ -87,7 +87,13 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
   public void attach(Attachable attachable) {
     if (attachable instanceof UtteranceListener) {
       attachUtteranceListener(attachable.getName());
-    } else {
+    }
+
+    if (attachable instanceof ImagePublisher) {
+      attachImagePublisher(attachable.getName());
+    }
+
+    if (!(attachable instanceof UtteranceListener) && !(attachable instanceof ImagePublisher)) {
       error("don't know how to attach a %s", attachable.getName());
     }
   }
@@ -109,18 +115,21 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     return config;
   }
 
-  public void connect() throws LoginException {
-    // TOOD: create a bot and connect with our token
-    if (bot == null) {
-      jda = JDABuilder.createDefault(token);
-      discordListener = new MrlDiscordBotListener(this);
-      jda.addEventListeners(discordListener);
-      bot = jda.build();
-      botName = bot.getSelfUser().getName();
-      connected = true;
-      broadcastState();
-    } else {
-      info("discord bot %s already connected", botName);
+  public void connect() {
+    try {
+      if (bot == null) {
+        jda = JDABuilder.createDefault(token);
+        discordListener = new MrlDiscordBotListener(this);
+        jda.addEventListeners(discordListener);
+        bot = jda.build();
+        botName = bot.getSelfUser().getName();
+        connected = true;
+        broadcastState();
+      } else {
+        info("discord bot %s already connected", botName);
+      }
+    } catch (Exception e) {
+      error(e.getMessage());
     }
 
   }
@@ -213,6 +222,11 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
    */
   public void sendReaction(String code, String id, String channelName) {
 
+    if (code == null || code.trim().isEmpty()) {
+      error("no code value");
+      return;
+    }
+
     code = code.trim();
 
     if (channelName == null) {
@@ -245,28 +259,74 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     this.botName = name;
   }
 
-  public static void main(String[] args) {
+  @Override
+  public void onImage(ImageData img) {
+    sendImage(img, null, null);
+  }
+
+  public void sendImage(ImageData img, String id, String channelName) {
+    if (channelName == null) {
+      channelName = "general";
+    }
+
+    if (id == null && lastUtterance != null) {
+      id = lastUtterance.id;
+    }
+
+    if (img.src != null && img.src.startsWith("http")) {
+      sendUtterance(img.src, channelName);
+    } else {
+      // TODO - implement binary message
+      log.error("implement binary message");
+    }
+
+  }
+
+  public static void main(String[] args) throws Exception {
     try {
+
       // Brief example of starting a programab chatbot and connecting it to
       // discord
-      // LoggingFactory.getInstance().setLevel("INFO");
-      // Let's create a programab instance.
-      
+      LoggingFactory.getInstance().setLevel("INFO");
+
       Runtime.startConfig("mrturing");
-      
+
+      DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
+      bot.attach("brain.search");
+      bot.attach("brain");
+
+      // Runtime.start("webgui", "WebGui");
+      // Runtime.start("brain", "ProgramAB");
+      // DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
+      // bot.setToken("XXXXXXXXXXXXXXXXXXXXXX");
+      // bot.attach("brain.search");
+      // bot.attach("brain");
+      // bot.connect();
+      // Runtime.saveConfig("mrturing");
+
+      // bot.attach("brain.search");
+
+      // Runtime.setConfig("mrturing");
+
+      // // Let's create a programab instance.
+      // ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
+      // brain.setCurrentBotName("Alice");
+      // DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
+      //
+      // bot.runMrT();
+
+      // Runtime.load("mrturing");
+
       boolean done = true;
       if (done) {
         return;
       }
-      
-      ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
-      brain.setCurrentBotName("Alice");
-      DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
 
-      bot.attachUtteranceListener(brain.getName());
-      brain.attachUtteranceListener(bot.getName());
-      bot.token = "YOUR_TOKEN_HERE";
-      bot.connect();
+      // bot.attachUtteranceListener(brain.getName());
+      // brain.attachUtteranceListener(bot.getName());
+      // bot.id =
+      // bot.token = "YOUR_TOKEN_HERE";
+      // bot.connect();
       // System.err.println("done.. press any key.");
       // System.in.read();
     } catch (Exception e) {

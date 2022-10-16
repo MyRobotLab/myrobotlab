@@ -41,7 +41,7 @@ public class InMoov2Torso extends Service {
   public void releaseService() {
     try {
       disable();
-      
+
       // releasePeer("topStom");
       // releasePeer("midStom");
       // releasePeer("lowStom");
@@ -289,5 +289,5 @@ public class InMoov2Torso extends Service {
     if (lowStom != null)
       lowStom.stop();
   }
-  
+
 }

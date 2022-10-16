@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
@@ -570,8 +569,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       String bodyData = null;
 
-      if (request.body() != null && !request.body().isEmpty() /* && !apiKey.equals(CodecUtils.API_MESSAGES)*/) {
-        log.info("apiKey {}", apiKey);
+      if (request.body() != null && !request.body()
+          .isEmpty() /* && !apiKey.equals(CodecUtils.API_MESSAGES) */) {
+        // log.info("apiKey {}", apiKey);
         // body returns null after destroy
         if (CodecUtils.API_MESSAGES.equals(apiKey)) {
           bodyData = request.body().asString();

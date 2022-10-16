@@ -988,11 +988,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     if (sc == null) {
       log.error("{}.sync(null)", getName());
     }
-    if (sc.equals(this)) {
-      error("you cannot set a servo synced to itself");
-      return;
-    }
-    syncedServos.add(sc.getName());
+    sync(sc.getName());
   }
 
   @Deprecated /* Use fullSpeed() instead. */
@@ -1001,11 +997,31 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   }
 
   @Override
+  public void unsync(String name) {
+    if (name == null) {
+      log.error("{}.unsync(null)", getName());
+    }
+    syncedServos.remove(name);
+  }
+
+  @Override
+  public void sync(String name) {
+    if (name == null) {
+      log.error("{}.sync(null)", getName());
+    }
+    if (getName().equals(name)) {
+      error("you cannot set a servo synced to itself");
+      return;
+    }
+    syncedServos.add(name);
+  }
+
+  @Override
   public void unsync(ServoControl sc) {
     if (sc == null) {
       log.error("{}.unsync(null)", getName());
     }
-    syncedServos.remove(sc.getName());
+    unsync(sc.getName());
   }
 
   @Override

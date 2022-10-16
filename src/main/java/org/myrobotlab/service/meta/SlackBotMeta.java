@@ -4,10 +4,9 @@ import org.myrobotlab.service.meta.abstracts.MetaData;
 
 public class SlackBotMeta extends MetaData {
   private static final long serialVersionUID = 1L;
-  
+
   /**
-   * SlackBot Metadata
-   * This uses the Slack official API.
+   * SlackBot Metadata This uses the Slack official API.
    * 
    */
   public SlackBotMeta() {

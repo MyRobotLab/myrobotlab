@@ -803,9 +803,9 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
       // in this example we will search for images and display them
       // start a google search and get the images back, then display them
       GoogleSearch google = (GoogleSearch) Runtime.start("google", "GoogleSearch");
-      List<String> images = google.imageSearch("monkey");
-      for (String img : images) {
-        display.displayFullScreen(img);
+      List<ImageData> images = google.imageSearch("monkey");
+      for (ImageData img : images) {
+        display.displayFullScreen(img.src);
         // display.display(img);
         sleep(1000);
       }

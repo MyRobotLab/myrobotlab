@@ -32,7 +32,7 @@ import org.myrobotlab.service.meta.abstracts.MetaData;
 public class IvyWrapper extends Repo implements Serializable {
 
   private static final long serialVersionUID = 1L;
-  
+
   public static final String IVY_VERSION = "2.5.0";
 
   class IvyWrapperLogger extends AbstractMessageLogger {
@@ -294,9 +294,9 @@ public class IvyWrapper extends Repo implements Serializable {
 
     createFilteredFile(snr, location, "ivysettings", "xml");
   }
-  
+
   public String[] buidCmdLine(String location) {
-    
+
     // TODO - noterminate :P
     // String[] cmd = new String[] { "-settings", location +
     // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
@@ -307,13 +307,13 @@ public class IvyWrapper extends Repo implements Serializable {
     // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
     // location + "/jar" + "/[artifact]-[revision].[ext]" };
 
-    StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-"+IVY_VERSION+".jar");
+    StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-" + IVY_VERSION + ".jar");
     for (String s : cmd) {
       sb.append(" ");
       sb.append(s);
     }
     log.info("cmd {}", sb);
-    
+
     return cmd;
 
   }
@@ -448,15 +448,16 @@ public class IvyWrapper extends Repo implements Serializable {
       // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
       // location + "/jar" + "/[artifact]-[revision].[ext]" };
 
-      // StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-4.jar");
+      // StringBuilder sb = new StringBuilder("java -jar
+      // ..\\..\\ivy-2.4.0-4.jar");
       StringBuilder sb = new StringBuilder();
-      sb.append("wget https://repo1.maven.org/maven2/org/apache/ivy/ivy/"+IVY_VERSION+"/ivy-"+IVY_VERSION+".jar\n");
-      sb.append("java -jar ivy-"+IVY_VERSION+".jar");
+      sb.append("wget https://repo1.maven.org/maven2/org/apache/ivy/ivy/" + IVY_VERSION + "/ivy-" + IVY_VERSION + ".jar\n");
+      sb.append("java -jar ivy-" + IVY_VERSION + ".jar");
       for (String s : cmd) {
         sb.append(" ");
         sb.append(s);
       }
-      
+
       sb.append("\n");
 
       log.info("cmd {}", sb);
@@ -550,32 +551,30 @@ public class IvyWrapper extends Repo implements Serializable {
 
       LoggingFactory.init(Level.INFO);
 
-      IvyWrapper repo = (IvyWrapper)Repo.getInstance("IvyWrapper");
+      IvyWrapper repo = (IvyWrapper) Repo.getInstance("IvyWrapper");
 
       String serviceType = "all";
       long ts = System.currentTimeMillis();
       String dir = String.format("install.ivy.%s.update", serviceType);
 
       String[] types = null;
-      
-      types = ServiceData.getLocalInstance().getServiceTypeNames();      
+
+      types = ServiceData.getLocalInstance().getServiceTypeNames();
       repo.createBuildFiles(dir, types);
-      
+
       String[] cmd = repo.buidCmdLine(".");
-      
+
       StringBuilder sb = new StringBuilder();
-      sb.append("wget https://repo1.maven.org/maven2/org/apache/ivy/ivy/"+IVY_VERSION+"/ivy-"+IVY_VERSION+".jar\n");
-      sb.append("java -jar ivy-"+IVY_VERSION+".jar");
-      
+      sb.append("wget https://repo1.maven.org/maven2/org/apache/ivy/ivy/" + IVY_VERSION + "/ivy-" + IVY_VERSION + ".jar\n");
+      sb.append("java -jar ivy-" + IVY_VERSION + ".jar");
+
       for (String s : cmd) {
         sb.append(" ");
         sb.append(s);
       }
-      
+
       FileIO.toFile(dir + "/test.sh", sb.toString().getBytes());
-      
-      
-      
+
       // repo.installTo("install.ivy");
       // repo.install(dir, serviceType);
 

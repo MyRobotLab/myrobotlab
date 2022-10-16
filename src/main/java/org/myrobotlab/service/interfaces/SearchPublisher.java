@@ -7,13 +7,13 @@ import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.data.SearchResults;
 
 public interface SearchPublisher extends TextPublisher, LocaleProvider {
-  
+
   // These are all the methods that the image publisher should produce.
-  public static String[] publishMethods = new String[] {"publishResults", "publishImage", "publishImages"};
+  public static String[] publishMethods = new String[] { "publishResults", "publishImage", "publishImages" };
 
   SearchResults search(String searchText) throws IOException;
 
-  List<String> imageSearch(String searchText);
+  List<ImageData> imageSearch(String searchText);
 
   SearchResults publishResults(SearchResults results);
 
@@ -22,24 +22,24 @@ public interface SearchPublisher extends TextPublisher, LocaleProvider {
   List<String> publishImages(List<String> images);
 
   int setMaxImages(int cnt);
-  
+
   default public void attachSearchListener(SearchListener display) {
     attachSearchListener(display.getName());
   }
-  
-  // Default way to attach an image listener so implementing classes need 
+
+  // Default way to attach an image listener so implementing classes need
   // not worry about these details.
   default public void attachSearchListener(String name) {
     for (String publishMethod : SearchPublisher.publishMethods) {
       addListener(publishMethod, name);
     }
   }
-  
+
   default public void detachSearchListener(SearchListener display) {
     detachSearchListener(display.getName());
   }
-  
-  // Default way to attach an image listener so implementing classes need 
+
+  // Default way to attach an image listener so implementing classes need
   // not worry about these details.
   default public void detachSearchListener(String name) {
     for (String publishMethod : SearchPublisher.publishMethods) {
@@ -47,10 +47,9 @@ public interface SearchPublisher extends TextPublisher, LocaleProvider {
     }
   }
 
-  
   // Add the addListener method to the interface all services implement this.
   public void addListener(String topicMethod, String callbackName);
-  public void removeListener(String topicMethod, String callbackName);
 
+  public void removeListener(String topicMethod, String callbackName);
 
 }

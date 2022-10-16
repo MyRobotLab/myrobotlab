@@ -24,10 +24,9 @@ public class Deeplearning4jMeta extends MetaData {
 
     // Force javacpp 1.5.3 to resolve conflict between dl4j and javacv
     addDependency("org.bytedeco", "javacpp", "1.5.7");
-    
+
     // REMOVED FOR COLLISION
-//     addDependency("org.bytedeco", "openblas", "0.3.17-" + "1.5.6"); 
-    
+    // addDependency("org.bytedeco", "openblas", "0.3.17-" + "1.5.6");
 
     // dl4j deps.
     addDependency("org.deeplearning4j", "deeplearning4j-core", dl4jVersion);

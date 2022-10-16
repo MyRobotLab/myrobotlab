@@ -23,6 +23,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // object containing all panels
     let panels = {}
 
+    // history of tab changes
+    let history = []
+
     // dictionary of images to display and their display properties
     let displayImages = {}
 
@@ -1194,6 +1197,15 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 console.error('tabsViewCtrl is null - cannot changeTab')
             } else {
                 tabsViewCtrl.changeTab(serviceName)
+                history.push(serviceName)
+            }
+        }
+
+        _self.goBack = function() {
+            if (!tabsViewCtrl) {
+                console.error('tabsViewCtrl is null - cannot goBack')
+            } else {
+                tabsViewCtrl.goBack()                
             }
         }
 
@@ -1457,6 +1469,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             setTabsViewCtrl: _self.setTabsViewCtrl,
             error: _self.error,
             changeTab: _self.changeTab,
+            goBack: _self.goBack,
             search: _self.search,
             createMessage: _self.createMessage,
             display: _self.display,

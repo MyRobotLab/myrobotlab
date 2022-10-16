@@ -12,7 +12,7 @@ public class PythonConfig extends ServiceConfig {
 
   /**
    * scripts to execute when python is stopped
-   */  
+   */
   public List<String> stopScripts = new ArrayList<>();
 
 }

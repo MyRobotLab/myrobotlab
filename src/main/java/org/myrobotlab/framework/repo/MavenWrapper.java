@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
@@ -125,60 +128,63 @@ public class MavenWrapper extends Repo implements Serializable {
 
     ServiceData sd = ServiceData.getLocalInstance();
 
-    //A map from dependency keys to lists of all dependencies matching
-    //those keys. Used to store all duplicate dependencies and check for
-    //which ones should be given priority
+    // A map from dependency keys to lists of all dependencies matching
+    // those keys. Used to store all duplicate dependencies and check for
+    // which ones should be given priority
     Map<String, List<ServiceDependency>> allDependencies = new HashMap<>();
 
-    //A map from service type names to their metadata
+    // A map from service type names to their metadata
     Map<String, MetaData> serviceMetaData = new HashMap<>();
 
-    //Fills serviceMetaData
+    // Fills serviceMetaData
     Arrays.stream(serviceTypes).forEach(service -> serviceMetaData.put(service, ServiceData.getMetaData(service)));
 
-    //A big long stream, hang on
+    // A big long stream, hang on
     serviceMetaData.values().stream()
 
-            //First, we convert all the metadata into lists of dependencies
-            .map(MetaData::getDependencies)
+        // First, we convert all the metadata into lists of dependencies
+        .map(MetaData::getDependencies)
 
-            //We flatten the list, so now we have a single stream of all dependencies, including duplicates
-            .flatMap(List::stream)
+        // We flatten the list, so now we have a single stream of all
+        // dependencies, including duplicates
+        .flatMap(List::stream)
 
-            //Now we loop over each dependency in the stream,
-            //aka all dependencies of all services including duplicates
-            .forEach(serviceDependency -> {
+        // Now we loop over each dependency in the stream,
+        // aka all dependencies of all services including duplicates
+        .forEach(serviceDependency -> {
 
-              //If we haven't seen this dependency before, add it to our known dependencies
-              if(!allDependencies.containsKey(serviceDependency.getKey()))
-                allDependencies.put(serviceDependency.getKey(), new ArrayList<>(List.of(serviceDependency)));
-              else {
-                //We have seen it, so loop over all dependencies with matching keys
-                allDependencies.get(serviceDependency.getKey()).forEach(existingDependency -> {
+          // If we haven't seen this dependency before, add it to our known
+          // dependencies
+          if (!allDependencies.containsKey(serviceDependency.getKey()))
+            allDependencies.put(serviceDependency.getKey(), new ArrayList<>(List.of(serviceDependency)));
+          else {
+            // We have seen it, so loop over all dependencies with matching keys
+            allDependencies.get(serviceDependency.getKey()).forEach(existingDependency -> {
 
-                  //Check priority, if this dependency is higher priority than existing,
-                  //skip existing. Otherwise, skip this one. This is the meat
-                  //of the stream, we're modifying the dependencies held in serviceMetaData
-                  //so the write phase accesses the modified data
-                  if (serviceDependency.getIncludeInOneJar() && !existingDependency.getIncludeInOneJar())
-                    existingDependency.setSkipped(true);
-                  else
-                    serviceDependency.setSkipped(true);
-                });
-                //Add the dependency to the known dependencies
-                allDependencies.get(serviceDependency.getKey()).add(serviceDependency);
-
-              }
+              // Check priority, if this dependency is higher priority than
+              // existing,
+              // skip existing. Otherwise, skip this one. This is the meat
+              // of the stream, we're modifying the dependencies held in
+              // serviceMetaData
+              // so the write phase accesses the modified data
+              if (serviceDependency.getIncludeInOneJar() && !existingDependency.getIncludeInOneJar())
+                existingDependency.setSkipped(true);
+              else
+                serviceDependency.setSkipped(true);
             });
+            // Add the dependency to the known dependencies
+            allDependencies.get(serviceDependency.getKey()).add(serviceDependency);
 
+          }
+        });
 
     snr.put("{{repositories}}", getRepositories());
 
     deps.append("<dependencies>\n\n");
 
     for (String serviceType : serviceTypes) {
-      //Get from our map because ServiceData.getMetaData()
-      //can create new objects, bypassing our previous fix
+      // Get from our map because ServiceData.getMetaData()
+      // can create new objects, bypassing our previous fix
       MetaData service = serviceMetaData.get(serviceType);
 
       // FIXME - getUnFufilledDependencies ???
@@ -193,19 +199,11 @@ public class MavenWrapper extends Repo implements Serializable {
       for (ServiceDependency dependency : dependencies) {
         String depKey = dependency.getOrgId() + "-" + dependency.getArtifactId() + "-" + dependency.getVersion();
         if (dependency.isSkipped()) {
-          dep.append("<!-- Duplicate entry for ")
-                  .append(depKey)
-                  .append(" skipping -->\n");
+          dep.append("<!-- Duplicate entry for ").append(depKey).append(" skipping -->\n");
           continue;
         }
         if (dependency.getVersion() == null) {
-          dep.append("<!-- skipping ")
-                  .append(dependency.getOrgId())
-                  .append(" ")
-                  .append(dependency.getArtifactId())
-                  .append(" ")
-                  .append(depKey)
-                  .append(" null version/latest -->\n");
+          dep.append("<!-- skipping ").append(dependency.getOrgId()).append(" ").append(dependency.getArtifactId()).append(" ").append(depKey).append(" null version/latest -->\n");
           continue;
         }
 

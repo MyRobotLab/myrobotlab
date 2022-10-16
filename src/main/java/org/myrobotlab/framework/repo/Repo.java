@@ -160,18 +160,24 @@ public abstract class Repo {
       // remotes.add(new RemoteRepo("alfresco",
       // "https://artifacts.alfresco.com/nexus/content/repositories/public",
       // "swinggui mxgraph"));
-      // remotes.add(new RemoteRepo("talend", "https://nexus.talanlabs.com/content/repositories/releases/", "swinggui mxgraph"));
+      // remotes.add(new RemoteRepo("talend",
+      // "https://nexus.talanlabs.com/content/repositories/releases/", "swinggui
+      // mxgraph"));
 
       // probably safe to drop this one - maven central should have it
-      // remotes.add(new RemoteRepo("marytts", "http://mary.dfki.de/repo", "some marytts voices"));
+      // remotes.add(new RemoteRepo("marytts", "http://mary.dfki.de/repo", "some
+      // marytts voices"));
 
       // This one is needed because of a transient dependency of solr
       // org.restlet.jee .. not sure where
-      // remotes.add(new RemoteRepo("maven-restlet", "https://maven.restlet.talend.com", "Public online Restlet repository"));
+      // remotes.add(new RemoteRepo("maven-restlet",
+      // "https://maven.restlet.talend.com", "Public online Restlet
+      // repository"));
 
-      // This is the repo for the Java Discord API for the Discord Bot service lives.
+      // This is the repo for the Java Discord API for the Discord Bot service
+      // lives.
       remotes.add(new RemoteRepo("dv8tion", "https://m2.dv8tion.net/releases", "Discord Bot - m2-dv8tion"));
-      
+
       load();
     } catch (Exception e) {
       log.error(e.getMessage(), e);
@@ -510,7 +516,7 @@ public abstract class Repo {
   }
 
   public void removeStatusPublishers() {
-    installStatusPublishers.clear();   
+    installStatusPublishers.clear();
   }
 
 }

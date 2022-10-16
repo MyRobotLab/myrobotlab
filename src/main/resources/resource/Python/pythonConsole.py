@@ -21,7 +21,7 @@ class Console:
     
   def write(self,string):
     if myService is not None:
-        myService.invoke("publishStdOut", string)
+        myService.invoke(u"publishStdOut", string)
     
   def attach(self):
     if (self.stdout == None):    

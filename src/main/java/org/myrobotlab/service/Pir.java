@@ -307,6 +307,7 @@ public class Pir extends Service implements PinListener {
 
   /**
    * Sets the polling rate in Hz.
+   * 
    * @param rateHz
    */
   public void setRate(int rateHz) {

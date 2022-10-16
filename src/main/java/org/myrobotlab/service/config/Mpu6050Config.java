@@ -22,7 +22,7 @@ public class Mpu6050Config extends ServiceConfig {
    */
   public Double sampleRate;
 
-  /** 
+  /**
    * I2C Controller
    */
   public String controller;

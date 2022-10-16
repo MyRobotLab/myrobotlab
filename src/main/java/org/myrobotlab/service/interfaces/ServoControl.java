@@ -324,7 +324,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void setRest(double rest);
 
   public void setSpeed(Integer degreesPerSecond);
-  
+
   /**
    * set the speed of the servo measured in degrees per second.
    * 
@@ -347,9 +347,26 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void sync(ServoControl sc);
 
   /**
+   * synchronizing servos together e.g. leftEye.sync("rightEye")
+   * 
+   * @param servo
+   *          name that's being synched e.g. master.synch("slave")
+   */
+  void sync(String name);
+
+  /**
+   * unsync a servo
+   * 
+   * @param name
+   *          of the servo being synched
+   */
+  void unsync(String name);
+
+  /**
    * unsync a servo
    * 
    * @param sc
+   *          reference of the servo beign synched
    */
   void unsync(ServoControl sc);
 
@@ -389,5 +406,5 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    */
   @Deprecated /* implement setSpeed(null) */
   void fullSpeed();
-  
+
 }

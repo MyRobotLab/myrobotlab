@@ -184,6 +184,7 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
   /**
    * When this service is releasing it will only remove the peers it started
    * this method allows that check.
+   * 
    * @param actualPeerName
    * @return
    */
