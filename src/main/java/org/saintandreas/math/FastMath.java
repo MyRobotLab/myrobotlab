@@ -229,7 +229,7 @@ final public class FastMath {
     c3 = 2 * T * p0 + (T - 3) * p1 + (3 - 2 * T) * p2 + -T * p3;
     c4 = -T * p0 + (2 - T) * p1 + (T - 2) * p2 + T * p3;
 
-    return ((c4 * u + c3) * u + c2) * u + c1;
+    return (float) (((c4 * u + c3) * u + c2) * u + c1);
   }
 
   /**
@@ -1045,7 +1045,7 @@ final public class FastMath {
    * @return floating point value of the half.
    */
   public static float convertHalfToFloat(short half) {
-    switch (half) {
+    switch ((int) half) {
       case 0x0000:
         return 0f;
       case 0x8000:
