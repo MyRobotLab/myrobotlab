@@ -322,6 +322,7 @@ public class MainMenuState extends BaseAppState {
 
     DragHandler dragHandler = new DragHandler();
     dragHandler.setDraggableLocator(new Function<Spatial, Spatial>() {
+      @Override
       public Spatial apply(Spatial spatial) {
         return spatial.getParent();
       }

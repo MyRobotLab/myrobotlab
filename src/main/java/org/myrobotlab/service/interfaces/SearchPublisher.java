@@ -48,8 +48,10 @@ public interface SearchPublisher extends TextPublisher, LocaleProvider {
   }
 
   // Add the addListener method to the interface all services implement this.
+  @Override
   public void addListener(String topicMethod, String callbackName);
 
+  @Override
   public void removeListener(String topicMethod, String callbackName);
 
 }

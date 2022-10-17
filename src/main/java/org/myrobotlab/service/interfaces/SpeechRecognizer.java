@@ -33,6 +33,7 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
    * listener
    * 
    */
+  @Override
   public void attachTextListener(TextListener listener);
 
   /**

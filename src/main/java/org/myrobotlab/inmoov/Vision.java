@@ -105,7 +105,7 @@ public class Vision {
     if (gui != null) {
       gui.maximize();
     }
-    return (OpenCVFilter) instance.getOpenCV().getFilter(filterName);
+    return instance.getOpenCV().getFilter(filterName);
   }
 
   public boolean test() {

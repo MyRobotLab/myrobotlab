@@ -204,6 +204,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
     myThread = null;
   }
 
+  @Override
   public String toString() {
     return String.format("@ ts %d starting at position %.1f %s will travel %.1f degrees to position %.1f in %.1f ms ending at %d ts", beginMoveTs, beginPos, name, distance,
         targetPos, moveTimeMs, endMoveTs);

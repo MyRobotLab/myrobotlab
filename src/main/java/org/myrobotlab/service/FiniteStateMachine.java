@@ -83,6 +83,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
     registerTransition(transition);
   }
 
+  @Override
   public void attach(Attachable service) throws Exception {
     if (service instanceof EventHandler) {
       if (service.isLocal()) {
@@ -181,6 +182,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
     }
   }
 
+  @Override
   public State getCurrentState() {
     return lastChangedState;
   }
@@ -317,6 +319,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
     return c;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     FiniteStateMachineConfig config = (FiniteStateMachineConfig) c;
     states.clear();

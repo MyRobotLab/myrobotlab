@@ -84,6 +84,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     }
   }
 
+  @Override
   public void releaseService() {
     super.releaseService();
     clear();
@@ -115,6 +116,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       return new int[] { this.address, this.red, this.green, this.blue, this.white };
     }
 
+    @Override
     public String toString() {
       return String.format("%d:%d,%d,%d,%d", address, red, green, blue, white);
     }
@@ -520,6 +522,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     return red;
   }
 
+  @Override
   public void playAnimation(String animation) {
 
     if (animations.containsKey(animation)) {
@@ -619,6 +622,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     p.white = white;
   }
 
+  @Override
   public void setPin(int pin) {
     this.pin = pin;
     broadcastState();
@@ -627,6 +631,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   /**
    * basic setting of a pixel
    */
+  @Override
   public void setPixel(int address, int red, int green, int blue) {
     setPixel(currentMatrix, currentSequence, address, red, green, blue, 0, 0);
   }
@@ -789,6 +794,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     NeoPixelConfig config = (NeoPixelConfig) c;
     setPixelDepth(config.pixelDepth);

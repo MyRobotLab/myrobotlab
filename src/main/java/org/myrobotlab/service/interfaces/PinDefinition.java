@@ -141,6 +141,7 @@ public class PinDefinition extends SensorDefinition implements Serializable {
     return pinImpl;
   }
 
+  @Override
   public String toString() {
     StringBuffer sb = new StringBuffer();
     sb.append("pin def ");

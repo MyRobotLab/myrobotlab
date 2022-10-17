@@ -577,6 +577,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * Setting the runtime virtual will set the platform virtual too. All
    * subsequent services will be virtual
    */
+  @Override
   public boolean setVirtual(boolean b) {
     setAllVirtual(b);
     return b;
@@ -1500,6 +1501,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
 
     installerThread = new Thread() {
+      @Override
       public void run() {
         try {
           if (serviceType == null) {
@@ -1970,6 +1972,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     } else {
 
       new Thread() {
+        @Override
         public void run() {
           processRelease(releaseRuntime);
         }
@@ -2946,6 +2949,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @param registration
    *          - contains all the information need for a registration to process
    */
+  @Override
   public Registration registered(Registration registration) {
     return registration;
   }
@@ -2955,6 +2959,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * this event is triggered
    * 
    */
+  @Override
   public String released(String name) {
     return name;
   }
@@ -2992,6 +2997,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // to avoid deadlock of shutting down from external messages
     // we spawn a kill thread
     new Thread("kill-thread") {
+      @Override
       public void run() {
         try {
 
@@ -3451,6 +3457,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    *
    * @return A map between IDs and instances.
    */
+  @Override
   public Map<String, Locale> getLocales() {
     return locales;
   }
@@ -3716,6 +3723,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @param connection
    *          Details of the connection
    */
+  @Override
   public void addConnection(String uuid, String id, Connection connection) {
     Connection attr = null;
     if (!connections.containsKey(uuid)) {
@@ -3749,6 +3757,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @param uuid
    *          The ID of the client
    */
+  @Override
   public void removeConnection(String uuid) {
 
     Connection conn = connections.remove(uuid);
@@ -4050,6 +4059,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * off the @{id/connection} and treat it as local if id is ours - peel it off
    * !
    */
+  @Override
   public boolean isLocal(Message msg) {
 
     if (msg.getId() == null || getId().equals(msg.getId())) {
@@ -4621,6 +4631,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return name;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     RuntimeConfig config = (RuntimeConfig) c;
     setLocale(config.locale);
@@ -5019,7 +5030,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
 
     // heh so, simple
-    ServiceConfig sc = runtime.getPlan().get(peerName);
+    ServiceConfig sc = Runtime.getPlan().get(peerName);
 
     if (sc == null) {
       error("%s not found - was it defined as a peer?", peerName);
@@ -5070,7 +5081,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
 
     // heh so, simple
-    ServiceConfig sc = runtime.getPlan().get(peerName);
+    ServiceConfig sc = Runtime.getPlan().get(peerName);
 
     if (sc == null) {
       error("%s not found - was it defined as a peer?", peerName);

@@ -49,6 +49,7 @@ public class Console implements Appender<ILoggingEvent> {
     // textarea not threadsafe, needs invokelater
     EventQueue.invokeLater(new Runnable() {
       // @Override
+      @Override
       public void run() {
         textArea.append(msg + "\n");
       }
@@ -72,7 +73,7 @@ public class Console implements Appender<ILoggingEvent> {
    * by default logging is off
    */
   public void startLogging() {
-    ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
     // root.setLevel(ch.qos.logback.classic.Level.INFO); GAH !!! DONT DO THIS
     // runtime sets the root
     root.addAppender(this);
@@ -207,6 +208,7 @@ public class Console implements Appender<ILoggingEvent> {
       // textarea not threadsafe, needs invokelater
       EventQueue.invokeLater(new Runnable() {
         // @Override
+        @Override
         public void run() {
           textArea.append(msg);
         }

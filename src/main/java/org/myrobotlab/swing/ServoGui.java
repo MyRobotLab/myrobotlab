@@ -45,6 +45,7 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
@@ -193,7 +194,7 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
     mapOutput.setMaximum(180);
 
     targetPos.setFont(targetPos.getFont().deriveFont(32.0f));
-    targetPos.setHorizontalAlignment(JLabel.RIGHT);
+    targetPos.setHorizontalAlignment(SwingConstants.RIGHT);
 
     enabledIcon.setIcon(Util.getImageIcon("enabled.png"));
     currentPos.setFont(targetPos.getFont().deriveFont(32.0f));

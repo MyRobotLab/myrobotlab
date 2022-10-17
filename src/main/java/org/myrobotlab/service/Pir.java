@@ -240,6 +240,7 @@ public class Pir extends Service implements PinListener {
     return isEnabled;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     PirConfig config = (PirConfig) c;
 
@@ -295,6 +296,7 @@ public class Pir extends Service implements PinListener {
    * A string representing the pin name.
    * example "D4" or "A0".
    */
+  @Override
   public void setPin(String pin) {
     this.pin = pin;
   }

@@ -136,6 +136,7 @@ public class Joystick extends Service implements AnalogPublisher {
 
     transient Thread myThread = null;
 
+    @Override
     public void run() {
       poll();
     }
@@ -210,7 +211,7 @@ public class Joystick extends Service implements AnalogPublisher {
           if (Math.abs(input - component.value) > 0.0001) {
 
             if (mappers.containsKey(id)) {
-              input = Double.valueOf(mappers.get(id).calcOutput((double) input)).floatValue();
+              input = Double.valueOf(mappers.get(id).calcOutput(input)).floatValue();
             }
 
             JoystickData data = new JoystickData(id, input);
@@ -343,6 +344,7 @@ public class Joystick extends Service implements AnalogPublisher {
     }
   }
 
+  @Override
   public void attachAnalogListener(AnalogListener service) {
     String id = service.getAnalogId();
     String serviceName = service.getName();
@@ -467,6 +469,7 @@ public class Joystick extends Service implements AnalogPublisher {
     poller.stop();
   }
 
+  @Override
   public void startService() {
     super.startService();
     initNativeLibs();
@@ -490,6 +493,7 @@ public class Joystick extends Service implements AnalogPublisher {
     return controller;
   }
 
+  @Override
   public void releaseService() {
     super.releaseService();
     stopPolling();
@@ -702,6 +706,7 @@ public class Joystick extends Service implements AnalogPublisher {
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
 
     // "special" needs native libs

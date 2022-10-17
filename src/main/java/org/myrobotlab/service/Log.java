@@ -60,6 +60,7 @@ public class Log extends Service implements Appender<ILoggingEvent> {
       body = event.getFormattedMessage();
     }
 
+    @Override
     public String toString() {
       return String.format("%d %s %s %s %s", ts, level, threadName, className, body);
     }
@@ -272,6 +273,7 @@ public class Log extends Service implements Appender<ILoggingEvent> {
     addTask(minIntervalMs, "flush");
   }
 
+  @Override
   public void startService() {
     super.startService();
     startLogging();
@@ -292,6 +294,7 @@ public class Log extends Service implements Appender<ILoggingEvent> {
     purgeTasks();
   }
 
+  @Override
   public void stopService() {
     super.stopService();
     stopLogging();

@@ -41,6 +41,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.opencv.opencv_core.AbstractCvMemStorage;
 import org.bytedeco.opencv.opencv_core.CvMemStorage;
 import org.bytedeco.opencv.opencv_core.CvPoint;
 import org.bytedeco.opencv.opencv_core.CvSeq;
@@ -93,7 +94,7 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
     }
 
     if (storage == null) {
-      storage = CvMemStorage.create();
+      storage = AbstractCvMemStorage.create();
     }
 
     if (inlines == null) {

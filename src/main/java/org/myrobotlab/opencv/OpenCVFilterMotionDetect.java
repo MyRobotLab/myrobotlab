@@ -170,10 +170,10 @@ public class OpenCVFilterMotionDetect extends OpenCVFilter {
     // Draw the rects where motion was detected and the motion count
     if (rects != null) {
       for (Rect rect : rects) {
-        int x = (int) rect.x();
-        int y = (int) rect.y();
-        int width = (int) rect.width();
-        int height = (int) rect.height();
+        int x = rect.x();
+        int y = rect.y();
+        int width = rect.width();
+        int height = rect.height();
         graphics.setColor(Color.GREEN);
         graphics.drawRect(x, y, width, height);
       }

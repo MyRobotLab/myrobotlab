@@ -101,6 +101,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     log.error("do not know how to attach to a {}", service.getClass().getSimpleName());
   }
 
+  @Override
   public void attach(UltrasonicSensorController controller, Integer trigPin, Integer echoPin) throws Exception {
 
     // critical test
@@ -232,6 +233,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     return this.controller == controller;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     UltrasonicSensorConfig config = (UltrasonicSensorConfig) c;
 
@@ -329,6 +331,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     return null;
   }
 
+  @Override
   public Double publishRange(Double range) {
 
     lastRange = range; // * 0.393701 inches

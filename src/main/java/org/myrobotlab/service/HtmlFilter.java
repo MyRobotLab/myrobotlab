@@ -173,6 +173,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
     attachTextPublisher(service.getName());
   }
 
+  @Override
   public void attachTextPublisher(String serviceName) {
     if (serviceName == null) {
       log.error("{}.attachTextPublisher(null)", getName());
@@ -206,6 +207,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     HtmlFilterConfig config = (HtmlFilterConfig) c;
 
@@ -221,6 +223,6 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
   public static void main(String[] args) {
     LoggingFactory.init("INFO");
     HtmlFilter htmlFilter = (HtmlFilter) Runtime.createAndStart("htmlFilter", "HtmlFilter");
-    log.info(">>>>>>>>>>" + htmlFilter.stripHtml("This is <a>foo</a> bar."));
+    log.info(">>>>>>>>>>" + HtmlFilter.stripHtml("This is <a>foo</a> bar."));
   }
 }

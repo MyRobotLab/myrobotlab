@@ -14,6 +14,7 @@ public abstract class AbstractVideoSink extends Service implements VideoSink {
     super(n, id);
   }
 
+  @Override
   public boolean attach(VideoSource vs) {
     subscribe(vs.getName(), "publishDisplay");
     return true;
@@ -30,6 +31,7 @@ public abstract class AbstractVideoSink extends Service implements VideoSink {
     return false;
   }
 
+  @Override
   public boolean detach(VideoSource vs) {
     unsubscribe(vs.getName(), "publishDisplay");
     return true;
@@ -46,6 +48,7 @@ public abstract class AbstractVideoSink extends Service implements VideoSink {
     return false;
   }
 
+  @Override
   abstract public void onDisplay(SerializableImage img);
 
 }

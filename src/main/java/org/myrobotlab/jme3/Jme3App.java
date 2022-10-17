@@ -42,6 +42,7 @@ public class Jme3App extends SimpleApplication {
 
   }
 
+  @Override
   public BitmapFont loadGuiFont() {
     return super.loadGuiFont();
   }
@@ -57,6 +58,7 @@ public class Jme3App extends SimpleApplication {
 
   }
 
+  @Override
   public void simpleUpdate(float tpf) {
     // callbacks to Service - since it cannot "extend" from SimpleApplication
     // jme service provides the "default app" - if you really need something

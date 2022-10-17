@@ -667,6 +667,7 @@ public class Hd44780 extends Service {
   /**
    * Applies the config to the service attaching to the PCF8574 if it exists.
    */
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     Hd44780Config config = (Hd44780Config) c;
 

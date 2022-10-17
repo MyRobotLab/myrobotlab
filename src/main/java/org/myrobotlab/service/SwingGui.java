@@ -29,6 +29,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Frame;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -382,7 +383,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
    */
   synchronized public void addTab(final ServiceInterface sw) {
 
-    if (Runtime.isHeadless() && firstHeadlessError) {
+    if (Service.isHeadless() && firstHeadlessError) {
       log.warn("{} SwingGui is in headless environment", getName());
       firstHeadlessError = false;
       return;
@@ -465,7 +466,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
   }
 
   public JFrame createJFrame(boolean fullscreen) {
-    if (Runtime.isHeadless()) {
+    if (Service.isHeadless()) {
       log.warn("{} SwingGui is in headless environment", getName());
       return null;
     }
@@ -492,7 +493,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
       frame.add(tabPanel);
       frame.setJMenuBar(createMenu());
 
-      frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+      frame.setExtendedState(Frame.MAXIMIZED_BOTH);
       frame.setUndecorated(true);
       frame.setVisible(true);
     }
@@ -500,7 +501,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
   }
 
   public void maximize() {
-    frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+    frame.setExtendedState(frame.getExtendedState() | Frame.MAXIMIZED_BOTH);
   }
 
   /*
@@ -978,7 +979,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
   }
 
   public Component getDisplay() {
-    return (Component) tabs.getTabs();
+    return tabs.getTabs();
   }
 
   public void setDesktop(String name) {

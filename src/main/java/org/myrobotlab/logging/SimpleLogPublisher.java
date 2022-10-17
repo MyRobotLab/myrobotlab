@@ -37,7 +37,7 @@ public class SimpleLogPublisher implements Appender<ILoggingEvent> {
 
   @Override
   public void start() {
-    ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
     root.addAppender(this);
     isStarted = true;
   }

@@ -107,7 +107,7 @@ final public class Search {
     /* loop through the moves */
     Iterator<HMove> i = validCaptures.iterator();
     while (i.hasNext()) {
-      HMove m = (HMove) i.next();
+      HMove m = i.next();
       if (!board.makeMove(m))
         continue;
       ++ply;
@@ -185,7 +185,7 @@ final public class Search {
     int b = beta;
     boolean first = true;
     while (i.hasNext()) {
-      HMove m = (HMove) i.next();
+      HMove m = i.next();
       if (!board.makeMove(m))
         continue;
       ++ply;
@@ -259,7 +259,7 @@ final public class Search {
       return;
     Iterator<HMove> i = moves.iterator();
     while (i.hasNext()) {
-      HMove m = (HMove) i.next();
+      HMove m = i.next();
       if (m.equals(pv[0][ply])) {
         followPV = true;
         m.score += 10000000;

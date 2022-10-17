@@ -153,6 +153,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * overridden because mac is silly for not being mp3 and ms tts is a mess
    * because it appends 0.mp3 :P
    */
+  @Override
   public String getAudioCacheExtension() {
     return ".wav"; // hopefully Linux festival can do this (if not can we ?)
   }
@@ -412,6 +413,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     this.ttsPath = ttsPath;
   }
 
+  @Override
   public void startService() {
     super.startService();
     // setup the default tts per os

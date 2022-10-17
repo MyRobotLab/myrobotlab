@@ -149,6 +149,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   /**
    * routable attach handles attaching based on type info
    */
+  @Override
   public void attach(Attachable attachable) {
     if (attachable instanceof SpeechSynthesis) {
       attachSpeechSynthesis((SpeechSynthesis) attachable);
@@ -166,6 +167,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    * talkig to ourselves ...
    * 
    */
+  @Override
   public void attachSpeechSynthesis(SpeechSynthesis mouth) {
     if (mouth == null) {
       log.warn("{}.attachSpeechSynthesis(null)", getName());
@@ -174,6 +176,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     mouth.attachSpeechListener(this.getName());
   }
 
+  @Override
   public void attachTextListener(TextListener service) {
     if (service == null) {
       log.warn("{}.attachTextListener(null)", getName());
@@ -192,6 +195,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   /**
    * @return Get the current wake word
    */
+  @Override
   public String getWakeWord() {
     return wakeWord;
   }
@@ -476,6 +480,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    * listening" similar to "hey google"
    * 
    */
+  @Override
   public void setWakeWord(String word) {
     if (word == null || word.trim().length() == 0) {
       word = null;
@@ -530,6 +535,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     broadcastState();
   }
 
+  @Override
   public void startService() {
     super.startService();
     startRecording();
@@ -558,6 +564,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     broadcastState();
   }
 
+  @Override
   public void stopService() {
     super.stopService();
     stopListening();
@@ -576,6 +583,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   /**
    * Stop wake word functionality .. after being called stop and start
    */
+  @Override
   public void unsetWakeWord() {
     setWakeWord(null);
   }
@@ -590,6 +598,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     return c;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     SpeechRecognizerConfig config = (SpeechRecognizerConfig) c;
     setWakeWord(config.wakeWord);

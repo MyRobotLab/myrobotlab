@@ -56,6 +56,7 @@ public class ServoMixer extends Service {
   /**
    * name attach "the best"
    */
+  @Override
   public void attach(String name) {
     // FIXME - check type in registry, describe, or query ... make sure Servo
     // type..
@@ -73,6 +74,7 @@ public class ServoMixer extends Service {
   /**
    * general interface attach
    */
+  @Override
   public void attach(Attachable attachable) {
     if (attachable instanceof Servo) {
       attachServo((Servo) attachable);
@@ -436,7 +438,7 @@ public class ServoMixer extends Service {
         filename += ".seq";
       }
 
-      Sequence seq = (Sequence) CodecUtils.fromJson(json, Sequence.class);
+      Sequence seq = CodecUtils.fromJson(json, Sequence.class);
       if (seq != null) {
         String path = servoMixerDirectory + fs + filename;
         FileOutputStream fos = new FileOutputStream(path);
@@ -449,6 +451,7 @@ public class ServoMixer extends Service {
     }
   }
 
+  @Override
   public void startService() {
     try {
       List<String> all = Runtime.getServiceNamesFromInterface(ServoControl.class);
