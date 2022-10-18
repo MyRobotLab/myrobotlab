@@ -84,7 +84,7 @@
                         </li>
                         <li>
                             <!-- a href="" target="_blank" ng-click="showMethods=!showMethods" -->
-                            <a href="/api/service/runtime/getNotifyEntries" target="_blank">
+                            <a href="/api/service/runtime/getNotifyEntries/{{service.name}}" target="_blank">
                                 <i class="glyphicon glyphicon-list-alt"></i>
                                 &nbsp;&nbsp;subscriptions
                             </a>
@@ -93,7 +93,7 @@
                 </div>
             </td>
             <td>
-                <button class="btn btn-default" ng-click="export()" title="save configuration">
+                <button class="btn btn-default" ng-click="export()" title="save service configuration">
                     <span class="glyphicon glyphicon-save-file"></span>
                 </button>
             </td>

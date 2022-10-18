@@ -77,7 +77,7 @@ public class Outbox implements Runnable, Serializable {
 
   List<MessageListener> listeners = new ArrayList<MessageListener>();
 
-  private boolean autoClean = true;
+  private boolean autoClean = false;
 
   public boolean isAutoClean() {
     return autoClean;
@@ -297,6 +297,9 @@ public class Outbox implements Runnable, Serializable {
           if (sender != null) {
             sender.removeListener(msg.sendingMethod, msg.getName(), msg.method);
           }
+          return;
+        } else if (sw == null) {
+          log.info("could not find service {} to process {} from sender {}", msg.getName(), msg.method, msg.sender);
           return;
         }
 

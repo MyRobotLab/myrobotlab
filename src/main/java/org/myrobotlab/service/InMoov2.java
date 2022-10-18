@@ -96,11 +96,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     log.info("{} started", fullname);
     try {
 
-      boolean test = true;
-      if (test) {
-        return;
-      }
-
       // FIXME - problem is fullname is not the peerKey :(
       // String actualName = getPeerName(fullname);
       // getPeer(peerKey)
@@ -119,36 +114,28 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       // closer .. but not quite right .. the
       // "member" config.mouth should hold the actual name !
 
-      String mouthActualName = getPeerName("mouth");
-      if (mouthActualName.equals(fullname)) {
-
-        AbstractSpeechSynthesis mouth = (AbstractSpeechSynthesis) Runtime.getService(getName() + ".mouth");
-        mouth.attachSpeechListener(getName() + ".ear");
-        //// ProgramAB chatBot = (ProgramAB)Runtime.getService(getName() +
-        //// ".chatBot");
-        //// if (chatBot != null) {
-        //// chatBot.attachTextListener(getName() + ".mouth");
-        //// }
-
+      String actualName = getPeerName("ear");
+      if (actualName.equals(fullname)) {
+        AbstractSpeechRecognizer ear = (AbstractSpeechRecognizer) Runtime.getService(actualName);
+        ear.attachTextListener(getPeerName("chatBot"));
+      }
+      
+      actualName = getPeerName("mouth");
+      if (actualName.equals(fullname)) {
+        AbstractSpeechSynthesis mouth = (AbstractSpeechSynthesis) Runtime.getService(actualName);
+        mouth.attachSpeechListener(getPeerName("ear"));
       }
 
-      // this is worse
-      if (fullname.equals(getName() + ".chatBot")) {
-        ProgramAB chatBot = (ProgramAB) Runtime.getService(getName() + ".chatBot");
-        chatBot.attachTextListener(getName() + ".htmlFilter");
+      actualName = getPeerName("chatBot");
+      if (actualName.equals(fullname)) {
+        ProgramAB chatBot = (ProgramAB) Runtime.getService(actualName);
+        chatBot.attachTextListener(getPeerName("htmlFilter"));
       }
 
-      // if (fullname.equals(getName() + ".htmlFilter")) {
-      // ProgramAB chatBot = (ProgramAB)Runtime.getService(getName() +
-      // ".chatBot");
-      // chatBot.attachTextListener(getName() + ".htmlFilter");
-      // }
-
-      // chatbot or htmlfilter ?
-      if (fullname.equals(getName() + ".ear")) {
-        AbstractSpeechRecognizer ear = (AbstractSpeechRecognizer) Runtime.getService(getName() + ".ear");
-        ear.attachTextListener(getName() + ".chatBot");
-
+      actualName = getPeerName("htmlFilter");
+      if (actualName.equals(fullname)) {
+        TextPublisher htmlFilter = (TextPublisher) Runtime.getService(actualName);
+        htmlFilter.attachTextListener(getPeerName("mouth"));
       }
 
       // Plan plan = Runtime.getPlan();
