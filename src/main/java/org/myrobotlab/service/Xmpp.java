@@ -63,6 +63,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
     public String name;
     public String status;
 
+    @Override
     public String toString() {
       return String.format("user: %s, name: %s, presence: %s, type: %s, status: %s", user, name, type, presence, status);
     }
@@ -135,6 +136,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
     // FIXME - implement direct callback or pub sub support ??
   }
 
+  @Override
   public void chatCreated(Chat chat, boolean locallyCreated) {
     // test if locallyCreated
     if (!locallyCreated) {
@@ -272,6 +274,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   /**
    * Process received messages
    */
+  @Override
   public void processMessage(Chat chat, Message message) {
     XmppMsg xmppMsg = new XmppMsg(chat, message);
     invoke("publishXmppMsg", xmppMsg);

@@ -38,6 +38,7 @@ public class DeviceMapping implements Serializable {
     return device;
   }
 
+  @Override
   public String toString() {
     return String.format("id:%d name:%s", id, device.getName());
   }

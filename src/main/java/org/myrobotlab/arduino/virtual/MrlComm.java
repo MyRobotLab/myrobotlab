@@ -478,6 +478,7 @@ public class MrlComm implements SerialDataListener {
     return virtualMsg;
   }
 
+  @Override
   public String getName() {
     return virtual.getName();
   }
@@ -612,6 +613,7 @@ public class MrlComm implements SerialDataListener {
     virtualMsg.publishMRLCommError(f);
   }
 
+  @Override
   public void onBytes(byte[] newBytes) {
     log.info("MrlComm called onBytes : {}", newBytes);
     virtualMsg.onBytes(newBytes);

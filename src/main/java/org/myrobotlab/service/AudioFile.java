@@ -538,6 +538,7 @@ public class AudioFile extends Service implements AudioPublisher {
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     AudioFileConfig config = (AudioFileConfig) c;
     setMute(config.mute);

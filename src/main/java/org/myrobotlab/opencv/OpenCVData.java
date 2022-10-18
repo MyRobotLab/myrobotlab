@@ -19,6 +19,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
@@ -104,7 +105,7 @@ public class OpenCVData extends CvData {
 
       JFrame jframe = new JFrame();
       ImageIcon icon = new ImageIcon(img);
-      JLabel label = new JLabel(icon, JLabel.CENTER);
+      JLabel label = new JLabel(icon, SwingConstants.CENTER);
       JPanel jpanel = new JPanel();
       jpanel.add(label);
       jframe.setContentPane(jpanel);
@@ -469,6 +470,7 @@ public class OpenCVData extends CvData {
     this.timestamp = timestamp;
   }
 
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append(String.format("%s ts %d fi %d\n", name, timestamp, frameIndex));
@@ -538,10 +540,12 @@ public class OpenCVData extends CvData {
     }
   }
 
+  @Override
   public List<PointCloud> getPointCloudList() {
     return (List<PointCloud>) sources.get(CvData.POINT_CLOUDS);
   }
 
+  @Override
   public PointCloud getPointCloud() {
     List<PointCloud> pcs = getPointCloudList();
     if (pcs == null || pcs.size() == 0) {

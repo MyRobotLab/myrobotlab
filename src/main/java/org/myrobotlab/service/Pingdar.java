@@ -132,7 +132,7 @@ public class Pingdar extends Service implements RangingControl, RangeListener, E
       servo = getServo();
 
       sensor.addRangeListener(this);
-      servo.attach((EncoderListener) this);
+      servo.attach(this);
 
       // servo.setSpeed(60);
       servo.setSpeed(30.0);

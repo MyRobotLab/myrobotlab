@@ -252,6 +252,7 @@ public abstract class OpenCVFilter implements Serializable, CvFilter {
     }
   }
 
+  @Override
   public void disable() {
     enabled = false;
   }
@@ -260,6 +261,7 @@ public abstract class OpenCVFilter implements Serializable, CvFilter {
     displayEnabled = false;
   }
 
+  @Override
   public void enable() {
     enabled = true;
   }
@@ -449,6 +451,7 @@ public abstract class OpenCVFilter implements Serializable, CvFilter {
     conv.close();
   }
 
+  @Override
   public boolean isEnabled() {
     return enabled;
   }

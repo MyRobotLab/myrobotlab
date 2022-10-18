@@ -172,7 +172,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
           pending = false;
           count++;
           if (count % 10 == 0) {
-            double rate = 1000.0 * count / (float) (System.currentTimeMillis() - start);
+            double rate = 1000.0 * count / (System.currentTimeMillis() - start);
             log.info("Yolo Classification Rate : {}", rate);
           }
 

@@ -126,8 +126,8 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
   public OpenCVGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
     self = this;
-    Runtime myRuntime = (Runtime) Runtime.getInstance();
-    OpenCV opencv = (OpenCV) myRuntime.getService(boundServiceName);
+    Runtime myRuntime = Runtime.getInstance();
+    OpenCV opencv = (OpenCV) Runtime.getService(boundServiceName);
     fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     fc.setDialogTitle("open file");
 
@@ -525,6 +525,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 
   public void removeAllFiltersFromGUI() {
     SwingUtilities.invokeLater(new Runnable() {
+      @Override
       public void run() {
         currentFilterListModel.removeAllElements();
       }
@@ -533,6 +534,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 
   public void removeFilterFromGui(final String name) {
     SwingUtilities.invokeLater(new Runnable() {
+      @Override
       public void run() {
         currentFilterListModel.removeElement(name);
       }

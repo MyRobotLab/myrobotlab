@@ -743,7 +743,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   }
 
   public Object[] publishAngles(String name, double positionValueDeg) {
-    Object[] retval = new Object[] { (Object) name, (Object) positionValueDeg };
+    Object[] retval = new Object[] { name, positionValueDeg };
     return retval;
   }
 

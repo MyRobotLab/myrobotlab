@@ -260,6 +260,7 @@ public class OpenWeatherMap extends HttpClient {
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     OpenWeatherMapConfig config = (OpenWeatherMapConfig) c;
     setUnits(config.currentUnits);

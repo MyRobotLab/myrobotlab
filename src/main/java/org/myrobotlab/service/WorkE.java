@@ -727,6 +727,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
     mouth = name;
   }
 
+  @Override
   public boolean setMute(boolean mute) {
     broadcast("publishSetMute", mute);
     return mute;

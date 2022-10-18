@@ -275,6 +275,7 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
   }
 
   // FIXME - framework should auto-release - unless configured not to
+  @Override
   public void releaseService() {
     try {
       disable();

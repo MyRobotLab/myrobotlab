@@ -108,25 +108,30 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   }
 
   // FIXME separate the methods into mrl & roboclaw native
+  @Override
   public void connect(String port) throws Exception {
     connect(port, 38400, 8, 1, 0);
   }
 
+  @Override
   public void disconnect() throws IOException {
     if (serial != null) {
       serial.close();
     }
   }
 
+  @Override
   public boolean motorDetach(String name) {
     motors.remove(name);
     return true;
   }
 
+  @Override
   public void motorMove(String name) {
     motorMove((MotorControl) Runtime.getService(name));
   }
 
+  @Override
   public void motorMoveTo(String name, Integer position) {
     error("not implemented");
   }
@@ -390,11 +395,13 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
     sleep(3000);
   }
 
+  @Override
   public void detach(MotorControl device) {
     motors.remove(device);
   }
 
   // FIXME - become interface for motor port shields & controllers
+  @Override
   public List<String> getPorts() {
     return ports;
   }

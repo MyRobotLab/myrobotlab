@@ -79,6 +79,7 @@ public class InProcessCli implements Runnable {
       this.method = method;
     }
 
+    @Override
     public String toString() {
       return String.format("%s.%s", srcFullName, method);
     }

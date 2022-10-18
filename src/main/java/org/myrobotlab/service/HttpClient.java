@@ -85,6 +85,7 @@ public class HttpClient extends Service implements TextPublisher {
     super(n, id);
   }
 
+  @Override
   public void attach(Attachable service) {
     // determine type
     if (HttpDataListener.class.isAssignableFrom(service.getClass())) {
@@ -372,6 +373,7 @@ public class HttpClient extends Service implements TextPublisher {
     return data;
   }
 
+  @Override
   public void startService() {
     super.startService();
     if (client == null) {

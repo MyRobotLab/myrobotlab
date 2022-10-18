@@ -79,6 +79,7 @@ public class Pid extends Service implements PidControl {
       this.value = output;
     }
 
+    @Override
     public String toString() {
       return String.format("%s %d %f %f", key, ts, input, value);
     }
@@ -161,6 +162,7 @@ public class Pid extends Service implements PidControl {
                  */
     public boolean inAuto = true;
 
+    @Override
     public String toString() {
       return String.format("kp %f ki %f kd %f inverted %b input %f output %f setpoint %f deadband %f outMin %f outMax %f", kp, ki, kd, inverted, input, output, setpoint, deadband,
           outMin, outMax);
@@ -190,6 +192,7 @@ public class Pid extends Service implements PidControl {
     super(n, id);
   }
 
+  @Override
   public PidData addPid(PidData pid) {
     log.info("adding pid {}", pid);
     data.put(pid.key, pid);
@@ -197,6 +200,7 @@ public class Pid extends Service implements PidControl {
     return pid;
   }
 
+  @Override
   public PidData deletePid(String key) {
     PidData pid = data.remove(key);
     if (pid != null) {
@@ -424,6 +428,7 @@ public class Pid extends Service implements PidControl {
     }
   }
 
+  @Override
   public void setSetpoint(String key, double setPoint) {
     PidData piddata = data.get(key);
     piddata.setpoint = setPoint;
@@ -438,6 +443,7 @@ public class Pid extends Service implements PidControl {
     return data;
   }
 
+  @Override
   public Double compute(String key, double sensorValue) {
     PidData piddata = null;
     if (data.containsKey(key)) {
@@ -526,6 +532,7 @@ public class Pid extends Service implements PidControl {
     piddata.iTerm = 0;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     PidConfig config = (PidConfig) c;
     if (config.data != null) {

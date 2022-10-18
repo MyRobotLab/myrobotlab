@@ -80,6 +80,7 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
    * @param blocking
    * @param timeoutMs
    */
+  @Override
   protected boolean processMove(Double newPos, boolean blocking, Long timeoutMs) {
 
     // This is to allow attaching disabled

@@ -47,6 +47,7 @@ import java.util.Map;
 
 import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.javacpp.indexer.UByteIndexer;
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.CvSize;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -129,7 +130,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
   public OpenCVFilterLKOpticalTrack(String name) {
     super(name);
 
-    zeroPoints = converter1.toMat(IplImage.create(new CvSize().width(0).height(0), 32, 2));
+    zeroPoints = converter1.toMat(AbstractIplImage.create(new CvSize().width(0).height(0), 32, 2));
     cornersA = zeroPoints;
   }
 
@@ -161,7 +162,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     FloatIndexer idx = toResize.createIndexer();
     CvSize sz = new CvSize();
     sz.width(1).height((int) idx.size(0) + amount);
-    Mat tmp = converter2.toMat(IplImage.create(sz, 32, 2));
+    Mat tmp = converter2.toMat(AbstractIplImage.create(sz, 32, 2));
     FloatIndexer newIdx = tmp.createIndexer();
     // copy contents
     for (int i = 0; i < idx.size(0); i++) {
@@ -179,8 +180,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
   @Override
   public void imageChanged(IplImage image) {
 
-    grayImgA = IplImage.create(image.cvSize(), 8, 1);
-    grayImgB = IplImage.create(image.cvSize(), 8, 1);
+    grayImgA = AbstractIplImage.create(image.cvSize(), 8, 1);
+    grayImgB = AbstractIplImage.create(image.cvSize(), 8, 1);
 
     if (channels == 3) {
       cvCvtColor(image, grayImgB, CV_BGR2GRAY);
@@ -204,7 +205,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < dir.size(); ++i) {
       TrackingPoint d = dir.get(i);
-      sb.append(String.format("%03d,%03d->%03d,%03d|", (int) d.p0.x, (int) d.p0.y, (int) d.p1.x, (int) d.p1.y));
+      sb.append(String.format("%03d,%03d->%03d,%03d|", d.p0.x, d.p0.y, d.p1.x, d.p1.y));
     }
     log.info("{}", sb);
   }
@@ -382,6 +383,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     return image;
   }
 
+  @Override
   public void samplePoint(Integer x, Integer y) {
     samplePoint = new Point(x, y);
   }

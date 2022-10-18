@@ -76,6 +76,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     protected boolean isRunning = false;
     private transient Thread thread = null;
 
+    @Override
     public void run() {
       try {
         isRunning = true;
@@ -143,6 +144,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     protected double gyroDegreeY = 0;
     protected double gyroDegreeZ = 0;
 
+    @Override
     public String toString() {
       StringBuilder sb = new StringBuilder();
       sb.append(orientation.toString());
@@ -258,13 +260,13 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     byte[] readbuffer = new byte[14];
     controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
     // Fill the variables with the result from the read operation
-    data.accelX = (byte) readbuffer[0] << 8 | readbuffer[1] & 0xFF;
-    data.accelY = (byte) readbuffer[2] << 8 | readbuffer[3] & 0xFF;
-    data.accelZ = (byte) readbuffer[4] << 8 | readbuffer[5] & 0xFF;
-    data.temperature = (byte) readbuffer[6] << 8 | readbuffer[7] & 0xFF;
-    data.gyroX = (byte) readbuffer[8] << 8 | readbuffer[9] & 0xFF;
-    data.gyroY = (byte) readbuffer[10] << 8 | readbuffer[11] & 0xFF;
-    data.gyroZ = (byte) readbuffer[12] << 8 | readbuffer[13] & 0xFF;
+    data.accelX = readbuffer[0] << 8 | readbuffer[1] & 0xFF;
+    data.accelY = readbuffer[2] << 8 | readbuffer[3] & 0xFF;
+    data.accelZ = readbuffer[4] << 8 | readbuffer[5] & 0xFF;
+    data.temperature = readbuffer[6] << 8 | readbuffer[7] & 0xFF;
+    data.gyroX = readbuffer[8] << 8 | readbuffer[9] & 0xFF;
+    data.gyroY = readbuffer[10] << 8 | readbuffer[11] & 0xFF;
+    data.gyroZ = readbuffer[12] << 8 | readbuffer[13] & 0xFF;
     // Convert acceleration to G assuming min-max 2G as set in initialize()
     data.accelGX = data.accelX / 16384.0;
     data.accelGY = data.accelY / 16384.0;
@@ -4285,6 +4287,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * This sensor has one purpose - read orientation data - it should have a
    * simple method - starts the reading/publishing
    */
+  @Override
   public synchronized void start() {
     publisher.start();
   }
@@ -4298,6 +4301,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * This sensor has one purpose - read orientation data - it should have a
    * simple method - stops the reading/publishing
    */
+  @Override
   public synchronized void stop() {
     publisher.stop();
   }
@@ -4320,6 +4324,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * the simple router attach
    */
+  @Override
   public void attach(Attachable service) throws Exception {
     if (I2CController.class.isAssignableFrom(service.getClass())) {
       attachI2CController((I2CController) service);
@@ -4332,6 +4337,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     attachI2CController(controller, deviceBus, deviceAddress);
   }
 
+  @Override
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
     attachI2CController(controller, deviceBus, deviceAddress);
   }
@@ -4357,6 +4363,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     broadcastState();
   }
 
+  @Override
   public void detach() {
     log.info("detaching");
     // super.detach(); BAD NOT DESIRED
@@ -4369,7 +4376,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // TODO: This default code could be in Attachable
   @Override
   public void detach(String service) {
-    detach((Attachable) Runtime.getService(service));
+    detach(Runtime.getService(service));
   }
 
   @Override
@@ -4407,11 +4414,13 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     return ret;
   }
 
+  @Override
   @Deprecated
   public String getDeviceBus() {
     return this.deviceBus;
   }
 
+  @Override
   @Deprecated
   public String getDeviceAddress() {
     return this.deviceAddress;
@@ -4436,6 +4445,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     Mpu6050Config config = (Mpu6050Config) c;
     if (config.start) {
@@ -4498,7 +4508,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
        * RasPi raspi = (RasPi) Runtime.start("RasPi","RasPi");
        * mpu6050.setController(raspi); mpu6050.dmpInitialize();
        */
-      int[] buffer = new int[] { (int) 0xff, (int) 0xd0 };
+      int[] buffer = new int[] { 0xff, 0xd0 };
       int a = (byte) buffer[0] << 8 | buffer[1] & 0xff;
       log.info("0xffd0 should be -48 is = {}", a);
 

@@ -20,10 +20,12 @@ public class StageConfiguration extends Configuration {
     config = new HashMap<String, Object>();
   }
 
+  @Override
   public void setStringParam(String name, String value) {
     config.put(name, value);
   }
 
+  @Override
   public String getStringParam(String name) {
     if (config.containsKey(name)) {
       Object val = config.get(name);

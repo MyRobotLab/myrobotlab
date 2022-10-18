@@ -223,6 +223,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
     return wsPort;
   }
 
+  @Override
   public boolean isLocal(Message msg) {
     return Runtime.getInstance().isLocal(msg);
   }

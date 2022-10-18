@@ -221,6 +221,7 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     WikipediaConfig config = (WikipediaConfig) c;
 
@@ -272,7 +273,7 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
 
       Runtime runtime = Runtime.getInstance();
       // runtime.setLocales("ga"); - this is selection
-      runtime.setAllLocales("ga"); // this is all
+      Runtime.setAllLocales("ga"); // this is all
       runtime.getLocale();
 
       language = wiki.getLanguage();

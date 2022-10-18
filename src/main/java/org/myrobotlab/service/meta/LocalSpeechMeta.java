@@ -21,6 +21,7 @@ public class LocalSpeechMeta extends AbstractSpeechSynthesisMeta {
     addCategory("speech");
   }
 
+  @Override
   public Plan getDefault(String name) {
 
     Plan plan = new Plan(name);

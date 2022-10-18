@@ -29,6 +29,7 @@ public class TestPhysicsHingeJoint extends SimpleApplication implements AnalogLi
     inputManager.addListener(this, "Left", "Right", "SwingGui");
   }
 
+  @Override
   public void onAnalog(String binding, float value, float tpf) {
     if (binding.equals("Left")) {
       joint.enableMotor(true, 1, .1f);

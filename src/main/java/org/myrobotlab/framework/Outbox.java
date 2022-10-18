@@ -310,7 +310,7 @@ public class Outbox implements Runnable, Serializable {
         }
       } else {
         // get gateway
-        Gateway gateway = (Gateway) Runtime.getInstance().getGatway(msg.getId());
+        Gateway gateway = Runtime.getInstance().getGatway(msg.getId());
         if (gateway == null) {
           // log.error("gateway not found for msg.id {} {}", msg.getId(), msg);
           return;

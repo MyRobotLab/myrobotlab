@@ -31,6 +31,7 @@ import java.util.HashMap;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
@@ -62,7 +63,7 @@ public class VideoWidget2 extends JFrame {
     getContentPane().add(display);
     // set initial default output
     addVideoDisplayPanel("output", null);
-    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
   }
 
   public VideoDisplayPanel2 addVideoDisplayPanel(String source, ImageIcon icon) {

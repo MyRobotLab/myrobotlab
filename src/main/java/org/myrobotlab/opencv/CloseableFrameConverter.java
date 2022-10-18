@@ -74,6 +74,7 @@ public class CloseableFrameConverter implements AutoCloseable {
     return converterToMat.convert(converterToMat.convert(image));
   }
 
+  @Override
   public void close() {
     // clean up and release memory!
     converter.close();

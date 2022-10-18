@@ -97,6 +97,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       }
     }
 
+    @Override
     public void run() {
       // prior to running reset, MrlComm would be reset,
       // this is also what happens if you press the reset button on
@@ -147,6 +148,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   /**
    * Connect to a serial port to the uart/DCE side of a virtual serial port.
    */
+  @Override
   public void connect(String portName) throws IOException {
     if (portName == null) {
       log.warn("{}.connect(null) not valid", getName());
@@ -240,6 +242,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     uart = (Serial) startPeer("uart");
   }
 
+  @Override
   public void releaseService() {
     super.releaseService();
     if (runner != null) {
@@ -454,6 +457,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     }
   }
 
+  @Override
   public void stopService() {
     super.stopService();
     stop();

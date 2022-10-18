@@ -170,14 +170,17 @@ public class CharacterIterator implements DataSetIterator {
     return validCharacters[(int) (rng.nextDouble() * validCharacters.length)];
   }
 
+  @Override
   public boolean hasNext() {
     return exampleStartOffsets.size() > 0;
   }
 
+  @Override
   public DataSet next() {
     return next(miniBatchSize);
   }
 
+  @Override
   public DataSet next(int num) {
     if (exampleStartOffsets.size() == 0)
       throw new NoSuchElementException();
@@ -216,14 +219,17 @@ public class CharacterIterator implements DataSetIterator {
     return (fileCharacters.length - 1) / miniBatchSize - 2;
   }
 
+  @Override
   public int inputColumns() {
     return validCharacters.length;
   }
 
+  @Override
   public int totalOutcomes() {
     return validCharacters.length;
   }
 
+  @Override
   public void reset() {
     exampleStartOffsets.clear();
     initializeOffsets();
@@ -245,6 +251,7 @@ public class CharacterIterator implements DataSetIterator {
     Collections.shuffle(exampleStartOffsets, rng);
   }
 
+  @Override
   public boolean resetSupported() {
     return true;
   }
@@ -254,6 +261,7 @@ public class CharacterIterator implements DataSetIterator {
     return true;
   }
 
+  @Override
   public int batch() {
     return miniBatchSize;
   }
@@ -266,6 +274,7 @@ public class CharacterIterator implements DataSetIterator {
     return totalExamples();
   }
 
+  @Override
   public void setPreProcessor(DataSetPreProcessor preProcessor) {
     throw new UnsupportedOperationException("Not implemented");
   }

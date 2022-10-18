@@ -129,6 +129,7 @@ public class SendToSolr extends AbstractStage {
 
   }
 
+  @Override
   public synchronized void flush() {
 
     log.info("Flush called for Send to solr stage. ");

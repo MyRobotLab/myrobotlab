@@ -59,6 +59,7 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
 
   public Outbox getOutbox();
 
+  @Override
   public String getSimpleName();
 
   /**

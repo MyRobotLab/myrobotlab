@@ -35,6 +35,7 @@ import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.SphericalCoordinates;
 import org.bytedeco.javacpp.indexer.UShortRawIndexer;
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -206,7 +207,7 @@ public class OpenCVFilterKinectFloorFinder extends OpenCVFilter {
     }
 
     if (color == null) {
-      color = IplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3);
+      color = AbstractIplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3);
     }
 
     // f = camera focal length
@@ -297,6 +298,7 @@ public class OpenCVFilterKinectFloorFinder extends OpenCVFilter {
     return image;
   }
 
+  @Override
   public void samplePoint(Integer x, Integer y) {
     if (lastDepth != null) {
       final UShortRawIndexer depthIdx = (UShortRawIndexer) lastDepth.createIndexer();

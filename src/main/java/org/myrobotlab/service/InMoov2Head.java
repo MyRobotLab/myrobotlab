@@ -304,6 +304,7 @@ public class InMoov2Head extends Service {
     disable();
   }
 
+  @Override
   public void releaseService() {
     disable();
     /*

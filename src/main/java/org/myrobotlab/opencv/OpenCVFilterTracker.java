@@ -37,6 +37,8 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
+import org.bytedeco.opencv.opencv_core.AbstractCvScalar;
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -106,7 +108,7 @@ public class OpenCVFilterTracker extends OpenCVFilter {
   }
 
   private IplImage makeGrayScale(IplImage image) {
-    IplImage imageBW = IplImage.create(image.width(), image.height(), 8, 1);
+    IplImage imageBW = AbstractIplImage.create(image.width(), image.height(), 8, 1);
     cvCvtColor(image, imageBW, CV_BGR2GRAY);
     return imageBW;
   }
@@ -132,16 +134,16 @@ public class OpenCVFilterTracker extends OpenCVFilter {
         tracker.update(mat, boundingBox);
       }
       // boundingBox.x()
-      int x0 = (int) (boundingBox.x());
-      int y0 = (int) (boundingBox.y());
-      int x1 = x0 + (int) (boundingBox.width());
-      int y1 = y0 + (int) (boundingBox.height());
+      int x0 = (boundingBox.x());
+      int y0 = (boundingBox.y());
+      int x1 = x0 + (boundingBox.width());
+      int y1 = y0 + (boundingBox.height());
       // log.info("Drawing {} {} -- {} {}", x0,y0,x1,y1);
-      cvDrawRect(image, cvPoint(x0, y0), cvPoint(x1, y1), CvScalar.RED, 1, 1, 0);
+      cvDrawRect(image, cvPoint(x0, y0), cvPoint(x1, y1), AbstractCvScalar.RED, 1, 1, 0);
 
       ArrayList<Point2df> pointsToPublish = new ArrayList<Point2df>();
-      float xC = (float) (boundingBox.x() + boundingBox.width() / 2);
-      float yC = (float) (boundingBox.y() + boundingBox.height() / 2);
+      float xC = boundingBox.x() + boundingBox.width() / 2;
+      float yC = boundingBox.y() + boundingBox.height() / 2;
       Point2df center = new Point2df(xC, yC);
       pointsToPublish.add(center);
       data.put("TrackingPoints", pointsToPublish);
@@ -198,6 +200,7 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     samplePoint((int) (x * width), (int) (y * height));
   }
 
+  @Override
   public void samplePoint(Integer x, Integer y) {
     // TODO: implement a state machine where you select the first corner. then
     // you select the second corner

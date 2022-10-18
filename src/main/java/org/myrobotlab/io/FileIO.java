@@ -309,7 +309,7 @@ public class FileIO {
 
       // jar access is non-recursive
       while (enumEntries.hasMoreElements()) {
-        JarEntry file = (JarEntry) enumEntries.nextElement();
+        JarEntry file = enumEntries.nextElement();
         // log.debug(file.getName());
 
         // spin through resources until a match
@@ -638,7 +638,7 @@ public class FileIO {
        * one spot
        */
       while (enumEntries.hasMoreElements()) {
-        JarEntry jarEntry = (JarEntry) enumEntries.nextElement();
+        JarEntry jarEntry = enumEntries.nextElement();
 
         // search for matching entries
         if (!jarEntry.getName().startsWith(src)) {

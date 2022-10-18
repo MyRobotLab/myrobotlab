@@ -20,6 +20,7 @@ public class WebkitSpeechSynthesisMeta extends AbstractSpeechSynthesisMeta {
     addCategory("speech", "sound");
   }
 
+  @Override
   public Plan getDefault(String name) {
 
     Plan plan = new Plan(name);

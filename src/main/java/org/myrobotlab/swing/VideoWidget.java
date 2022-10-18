@@ -51,6 +51,7 @@ public class VideoWidget extends ServiceGui {
     addVideoDisplayPanel("output");
   }
 
+  @Override
   public void setTitle(String t) {
     TitledBorder title;
     title = BorderFactory.createTitledBorder(t);

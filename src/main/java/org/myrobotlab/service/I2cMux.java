@@ -224,7 +224,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   // This section contains all the new attach logic
   @Override
   public void attach(String service) throws Exception {
-    attach((Attachable) Runtime.getService(service));
+    attach(Runtime.getService(service));
   }
 
   @Override
@@ -240,6 +240,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     attach((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
   }
 
+  @Override
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
 
     if (isAttached && this.controller != controller) {
@@ -257,6 +258,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     broadcastState();
   }
 
+  @Override
   public void attachI2CController(I2CController controller) {
 
     if (isAttached(controller))
@@ -282,7 +284,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   // TODO: This default code could be in Attachable
   @Override
   public void detach(String service) {
-    detach((Attachable) Runtime.getService(service));
+    detach(Runtime.getService(service));
   }
 
   @Override

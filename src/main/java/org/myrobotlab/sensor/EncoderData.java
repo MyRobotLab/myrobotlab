@@ -47,6 +47,7 @@ public class EncoderData {
     this.angle = angle;
   }
 
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("[EncoderData: source:");

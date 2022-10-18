@@ -38,6 +38,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.SphericalCoordinates;
 import org.bytedeco.javacpp.indexer.UByteIndexer;
 import org.bytedeco.javacpp.indexer.UShortRawIndexer;
 import org.bytedeco.javacv.Parallel;
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
@@ -155,7 +156,7 @@ public class OpenCVFilterKinectPointCloud extends OpenCVFilter {
     }
 
     if (color == null) {
-      color = IplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3);
+      color = AbstractIplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3);
     }
 
     final UShortRawIndexer depthIdx = (UShortRawIndexer) depth.createIndexer();
@@ -192,6 +193,7 @@ public class OpenCVFilterKinectPointCloud extends OpenCVFilter {
     Point2D_F64 n = new Point2D_F64();
 
     Parallel.loop(0, height, new Parallel.Looper() {
+      @Override
       public void loop(int from, int to, int looperID) {
         for (int xv = from; xv < to; xv++) {
           for (int yv = 0; yv < width; yv++) {
@@ -272,6 +274,7 @@ public class OpenCVFilterKinectPointCloud extends OpenCVFilter {
     return image;
   }
 
+  @Override
   public void samplePoint(Integer x, Integer y) {
     samplePoints.add(new Point(x, y));
   }

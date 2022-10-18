@@ -55,6 +55,7 @@ public class Registration {
     this.service = service;
   }
 
+  @Override
   public String toString() {
     return String.format("%s %s %s", id, name, typeKey);
   }
