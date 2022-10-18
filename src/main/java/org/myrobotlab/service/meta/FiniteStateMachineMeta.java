@@ -14,8 +14,7 @@ public class FiniteStateMachineMeta extends MetaData {
    */
   public FiniteStateMachineMeta() {
     addDescription("general service which can create and maintaine multiple finite state machines");
-    addDependency("com.github.pnavais", "state-machine", "1.2.0");
-    
+    // addDependency("orgId", "artifactId", "2.4.0");
     addCategory("general", "ai");
 
     addDependency("com.github.pnavais", "state-machine", "1.2.0");

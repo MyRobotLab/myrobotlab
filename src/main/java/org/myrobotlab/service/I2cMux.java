@@ -124,7 +124,9 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   }
 
   /**
-   * Returns the current state of the service, if attached returns true, false if it's not attached.
+   * Returns the current state of the service, if attached returns true, false
+   * if it's not attached.
+   * 
    * @return
    */
   public boolean isAttached() {
