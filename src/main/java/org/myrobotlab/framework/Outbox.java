@@ -298,6 +298,9 @@ public class Outbox implements Runnable, Serializable {
             sender.removeListener(msg.sendingMethod, msg.getName(), msg.method);
           }
           return;
+        } else if (sw == null) {
+          log.info("could not find service {} to process {} from sender {}", msg.getName(), msg.method, msg.sender);
+          return;
         }
 
         // if service is local - give it to that service's inbox
