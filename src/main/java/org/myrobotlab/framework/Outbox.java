@@ -77,7 +77,7 @@ public class Outbox implements Runnable, Serializable {
 
   List<MessageListener> listeners = new ArrayList<MessageListener>();
 
-  private boolean autoClean = true;
+  private boolean autoClean = false;
 
   public boolean isAutoClean() {
     return autoClean;

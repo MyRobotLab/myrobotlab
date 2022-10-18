@@ -763,10 +763,23 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
     return null;
   }
-
+  
   static public Map<String, Map<String, List<MRLListener>>> getNotifyEntries() {
+    return getNotifyEntries(null);
+  }
+
+  static public Map<String, Map<String, List<MRLListener>>> getNotifyEntries(String service) {
     Map<String, Map<String, List<MRLListener>>> ret = new TreeMap<String, Map<String, List<MRLListener>>>();
-    Map<String, ServiceInterface> sorted = getLocalServices();
+    Map<String, ServiceInterface> sorted = null;
+    if (service == null) {
+      sorted = getLocalServices();
+    } else {
+      sorted = new HashMap<String, ServiceInterface>();
+      ServiceInterface si = Runtime.getService(service);
+      if (si != null) {
+        sorted.put(service, si);
+      }
+    }
     for (Map.Entry<String, ServiceInterface> entry : sorted.entrySet()) {
       log.info(entry.getKey() + "/" + entry.getValue());
       List<String> flks = entry.getValue().getNotifyListKeySet();

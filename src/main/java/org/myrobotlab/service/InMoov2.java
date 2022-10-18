@@ -128,7 +128,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       if (actualName.equals(fullname)) {
         ProgramAB chatBot = (ProgramAB) Runtime.getService(actualName);
         chatBot.attachTextListener(getPeerName("htmlFilter"));
-        chatBot.attachUtteranceListener(getPeerName("ear"));
       }
 
       actualName = getPeerName("htmlFilter");
