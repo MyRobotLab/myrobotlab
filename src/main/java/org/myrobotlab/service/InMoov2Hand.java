@@ -66,6 +66,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     super(n, id);
   }
 
+  @Override
   public void startService() {
     super.startService();
     thumb = (ServoControl) startPeer("thumb");
@@ -105,7 +106,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   public boolean isAttached() {
     if (controller != null) {
-      if (((Arduino) controller).getDeviceId((Attachable) this) != null) {
+      if (((Arduino) controller).getDeviceId(this) != null) {
         isAttached = true;
         return true;
       }
@@ -139,6 +140,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     moveTo(130, 140, 180, 180, 180);
   }
 
+  @Override
   public void releaseService() {
     try {
       disable();

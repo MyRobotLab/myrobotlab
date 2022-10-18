@@ -38,7 +38,7 @@ public class Sequence {
 
   public static Sequence loadSequence(String filename) throws IOException {
     String json = FileIO.toString(filename);
-    Sequence pose = (Sequence) CodecUtils.fromJson(json, Sequence.class);
+    Sequence pose = CodecUtils.fromJson(json, Sequence.class);
     return pose;
   }
 

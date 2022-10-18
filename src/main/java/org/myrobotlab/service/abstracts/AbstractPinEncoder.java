@@ -23,6 +23,7 @@ public abstract class AbstractPinEncoder extends Service implements EncoderContr
     super(n, id);
   }
 
+  @Override
   public void attachEncoderController(EncoderController controller) {
     if (this.controller == controller) {
       log.info("{} already attached to controller {}", getName(), controller.getName());

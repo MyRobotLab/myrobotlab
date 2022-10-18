@@ -32,6 +32,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -95,7 +96,7 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
 
       lastDepthImage = depth;
 
-      IplImage color = IplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3); // 1
+      IplImage color = AbstractIplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3); // 1
       // channel
       // for
       // grey
@@ -166,6 +167,7 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
     return image;
   }
 
+  @Override
   public void samplePoint(Integer inX, Integer inY) {
     ++clickCounter;
     if (lastDepthImage != null) {

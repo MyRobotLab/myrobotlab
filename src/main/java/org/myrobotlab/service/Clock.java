@@ -208,6 +208,7 @@ public class Clock extends Service {
     return c;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     ClockConfig config = (ClockConfig) c;
     if (config.running != null) {

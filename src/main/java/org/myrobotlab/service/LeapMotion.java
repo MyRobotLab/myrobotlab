@@ -143,6 +143,7 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
     return data;
   }
 
+  @Override
   public void releaseService() {
     poller.stop();
     super.releaseService();

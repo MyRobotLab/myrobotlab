@@ -215,11 +215,13 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
     }
   }
 
+  @Override
   public void onDisconnect(String portName) {
     openMrlComm.setEnabled(true);
     status.setText("disconnected");
   }
 
+  @Override
   public void onConnect(String portName) {
     openMrlComm.setEnabled(false);
   }

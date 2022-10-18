@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Map;
 
+import org.bytedeco.opencv.opencv_core.AbstractCvScalar;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
@@ -68,7 +69,7 @@ public class OpenCVFilterTesseract extends OpenCVFilter implements Runnable {
   }
 
   private void displayResult(IplImage image, String result) {
-    cvPutText(image, result, cvPoint(20, 60), font, CvScalar.YELLOW);
+    cvPutText(image, result, cvPoint(20, 60), font, AbstractCvScalar.YELLOW);
   }
 
   private String formatResultString(Map<String, Double> result) {

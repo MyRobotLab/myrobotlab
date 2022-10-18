@@ -24,6 +24,7 @@ public class VoiceRssMeta extends AbstractSpeechSynthesisMeta {
     addDependency("com.voicerss", "tts", "1.0");
   }
 
+  @Override
   public Plan getDefault(String name) {
 
     Plan plan = new Plan(name);

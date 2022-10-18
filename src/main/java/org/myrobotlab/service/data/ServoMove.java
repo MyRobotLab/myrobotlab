@@ -25,6 +25,7 @@ public class ServoMove {
     this.outputPos = outputPos;
   }
 
+  @Override
   public String toString() {
     return String.format("%s inputPos %.2f outputPos %.2f", name, inputPos, outputPos);
   }

@@ -186,7 +186,7 @@ public class WsClient implements Decoder<String, Reader> {
     // public Reader decode(Event type, String data) {
     // System.out.println("=========== decode <----- ===========");
     // System.out.println("decoding [{} - {}]", type, s);
-    String data = (String) dataIn;
+    String data = dataIn;
     if (data != null && "X".equals(data)) {
       // System.out.println("MESSAGE - X");
       return null;

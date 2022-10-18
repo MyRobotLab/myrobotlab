@@ -422,6 +422,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
     }
   }
 
+  @Override
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
 
     if (isAttached && this.controller != controller) {
@@ -445,6 +446,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
   }
 
+  @Override
   public void attachPinListener(PinListener listener, int pinAddress) {
     attach(listener, String.format("%d", pinAddress));
   }
@@ -477,7 +479,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
   // This section contains all the new attach logic
   @Override
   public void attach(String service) throws Exception {
-    attach((Attachable) Runtime.getService(service));
+    attach(Runtime.getService(service));
   }
 
   public void attach(String listener, int pinAddress) {
@@ -488,6 +490,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
     attach((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
   }
 
+  @Override
   public void attachI2CController(I2CController controller) {
 
     if (isAttached(controller))
@@ -546,7 +549,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
   // TODO: This default code could be in Attachable
   @Override
   public void detach(String service) {
-    detach((Attachable) Runtime.getService(service));
+    detach(Runtime.getService(service));
   }
 
   @Override
@@ -694,6 +697,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
     }
   }
 
+  @Override
   public PinDefinition getPin(int address) {
     if (pinIndex.containsKey(address)) {
       return pinIndex.get(address);
@@ -702,6 +706,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
     return null;
   }
 
+  @Override
   public PinDefinition getPin(String pin) {
     if (pinMap.containsKey(pin)) {
       return pinMap.get(pin);
@@ -807,6 +812,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
    * 
    * @return the pin definition passed in. (used by invoke.)
    */
+  @Override
   public PinDefinition publishPinDefinition(PinDefinition pinDef) {
     return pinDef;
   }
@@ -969,7 +975,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
     i2cWrite(ADS1015_REG_POINTER_CONVERT);
     byte[] readbuffer = new byte[2];
     controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
-    return ((int) readbuffer[0]) << 8 | (int) (readbuffer[1] & 0xff);
+    return (readbuffer[0]) << 8 | readbuffer[1] & 0xff;
   }
 
   /**

@@ -175,10 +175,10 @@ public class AudioProcessor extends Thread {
               // float scaled = (float) (Math.log(data.volume) / Math.log(10.0)
               // * 20.0);
 
-              if (MathUtils.round(ctrl.getValue(), 3) != MathUtils.round((float) (ctrl.getMinimum() + ((double) (ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)), 3)) {
+              if (MathUtils.round(ctrl.getValue(), 3) != MathUtils.round((float) (ctrl.getMinimum() + ((ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)), 3)) {
                 if (data.volume <= 1.0f && data.volume >= 0) {
 
-                  ctrl.setValue((float) (ctrl.getMinimum() + ((double) (ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)));
+                  ctrl.setValue((float) (ctrl.getMinimum() + ((ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)));
                   log.debug("Audioprocessor set volume to : " + ctrl.getValue());
                 } else {
                   log.error("Requested volume value " + data.volume.toString() + " not allowed");

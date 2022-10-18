@@ -58,6 +58,7 @@ public class MouthControl extends Service implements SpeechListener {
     registerForInterfaceChange(NeoPixelControl.class);
   }
 
+  @Override
   public void attach(Attachable attachable) {
     if (attachable instanceof SpeechSynthesis) {
       ((SpeechSynthesis) attachable).attachSpeechListener(getName());
@@ -165,12 +166,12 @@ public class MouthControl extends Service implements SpeechListener {
         if ((s == 'a' || s == 'e' || s == 'i' || s == 'o' || s == 'u' || s == 'y' || s == 'é' || s == 'è' || s == 'û' || s == 'и' || s == 'й' || s == 'У' || s == 'я' || s == 'э'
             || s == 'Ы' || s == 'ё' || s == 'ю' || s == 'е' || s == 'а' || s == 'о') && !ison) {
           // jaw.moveTo((double) mouthOpenedPos); // # move the servo to the
-          moveJaw((double) mouthOpenedPos);
+          moveJaw(mouthOpenedPos);
           // open spot
           ison = true;
           sleep(delaytime);
           // jaw.moveTo((double) mouthClosedPos);// #// close the servo
-          moveJaw((double) mouthClosedPos);
+          moveJaw(mouthClosedPos);
 
         } else if (s == '.') {
           ison = false;
@@ -186,6 +187,7 @@ public class MouthControl extends Service implements SpeechListener {
     }
   }
 
+  @Override
   public synchronized void onEndSpeaking(String utterance) {
     log.info("Mouth control recognized end speaking.");
     if (neoPixel != null) {
@@ -194,7 +196,7 @@ public class MouthControl extends Service implements SpeechListener {
 
     if (jaw != null) {
       // FIXME should just stop
-      moveJaw((double) mouthClosedPos);
+      moveJaw(mouthClosedPos);
     }
   }
 
@@ -243,6 +245,7 @@ public class MouthControl extends Service implements SpeechListener {
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     MouthControlConfig config = (MouthControlConfig) c;
 

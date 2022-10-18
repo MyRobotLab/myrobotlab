@@ -223,12 +223,14 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    *          - position to move to
    * @return true (why?)
    */
+  @Override
   Double moveToBlocking(Double pos);
 
   /**
    * moveToBlocking with a timeout blocking calling thread until either move has
    * been completed, or timeout reached
    */
+  @Override
   Double moveToBlocking(Double pos, Long timeoutMs);
 
   /**

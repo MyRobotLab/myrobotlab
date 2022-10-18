@@ -53,6 +53,7 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     super(reservedKey, inId);
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     DiscordBotConfig config = (DiscordBotConfig) c;
 
@@ -79,11 +80,13 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     return botName;
   }
 
+  @Override
   public void releaseService() {
     super.releaseService();
     disconnect();
   }
 
+  @Override
   public void attach(Attachable attachable) {
     if (attachable instanceof UtteranceListener) {
       attachUtteranceListener(attachable.getName());

@@ -83,6 +83,7 @@ public class Tracking extends Service {
    * with input name route and attach by type - 2 instances of the same type
    * cannot be routed
    */
+  @Override
   public void attach(String name) {
     ServiceInterface si = Runtime.getService(name);
     if (si == null) {
@@ -289,6 +290,7 @@ public class Tracking extends Service {
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     TrackingConfig config = (TrackingConfig) c;
 

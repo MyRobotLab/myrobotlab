@@ -48,6 +48,7 @@ public class WorkflowWorker extends Thread {
     }
   }
 
+  @Override
   public void run() {
     Document doc;
     boolean running = true;

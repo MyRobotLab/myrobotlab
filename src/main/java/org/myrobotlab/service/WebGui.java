@@ -130,15 +130,18 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   // FIXME - move to security !
   transient private static final TrustManager DUMMY_TRUST_MANAGER = new X509TrustManager() {
+    @Override
     public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
     }
 
+    @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
       if (!TRUST_SERVER_CERT.get()) {
         throw new CertificateException("Server certificate not trusted.");
       }
     }
 
+    @Override
     public X509Certificate[] getAcceptedIssuers() {
       return new X509Certificate[0];
     }
@@ -476,7 +479,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
      */
     Enumeration<String> headerNames = request.getHeaderNames();
     while (headerNames.hasMoreElements()) {
-      String key = (String) headerNames.nextElement();
+      String key = headerNames.nextElement();
       String value = request.getHeader(key);
       map.put(key.toLowerCase(), value);
     }
@@ -803,6 +806,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   }
 
+  @Override
   public boolean isLocal(Message msg) {
     return Runtime.getInstance().isLocal(msg);
   }
@@ -992,6 +996,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     // similar thread within stop
     // From a web request you cannot block on a request to stop/start self
     new Thread() {
+      @Override
       public void run() {
         try {
           while (nettosphere != null) {
@@ -1163,6 +1168,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     BareBonesBrowserLaunch.openURL(String.format(URL, port));
   }
 
+  @Override
   public void startService() {
     super.startService();
     inMsgQueue.start();
@@ -1175,6 +1181,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // done so a thread "from" webgui can stop itself :P
       // Must not be called from a I/O-Thread to prevent deadlocks!
       new Thread() {
+        @Override
         public void run() {
           nettosphere.framework().removeAllAtmosphereHandler();
           nettosphere.stop();
@@ -1185,6 +1192,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
 
+  @Override
   public void releaseService() {
     super.releaseService();
     stopMdns();
@@ -1261,6 +1269,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     WebGuiConfig config = (WebGuiConfig) c;
 

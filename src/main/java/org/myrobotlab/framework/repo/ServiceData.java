@@ -101,7 +101,7 @@ public class ServiceData implements Serializable {
           continue;
         }
 
-        MetaData serviceType = (MetaData) getMetaData(fullClassName);
+        MetaData serviceType = getMetaData(fullClassName);
 
         if (!fullClassName.equals(serviceType.getType())) {
           log.error("Class name {} not equal to the MetaData's name {}", fullClassName, serviceType.getType());

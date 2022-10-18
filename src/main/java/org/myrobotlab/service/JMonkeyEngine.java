@@ -382,6 +382,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   // Routing Attach - should be based on string type info and name (ie a
   // Registration)
+  @Override
   public void attach(Attachable attachable) throws Exception {
     String name = attachable.getName();
     ServiceInterface service = Runtime.getService(name);
@@ -844,7 +845,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
     float result = rawAngle;
     if (data.mapper != null) {
-      result = Double.valueOf(data.mapper.calcInput((double) rawAngle)).floatValue();
+      result = Double.valueOf(data.mapper.calcInput(rawAngle)).floatValue();
     }
     return result;
   }
@@ -2224,7 +2225,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   // dynamic create of type... TODO fix name start --> create
   synchronized public SimpleApplication start(String appName, String appType) {
-    if (Runtime.isHeadless()) {
+    if (Service.isHeadless()) {
       log.warn("running in headless mode - will not start jmonkey app");
       return null;
     }
@@ -2261,6 +2262,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       // before this is done will
       // will generate error from jmonkey - this should "block"
       mainThread = new Thread() {
+        @Override
         public void run() {
           app.start();
         }
@@ -2269,6 +2271,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       mainThread.start();
 
       Callable<String> callable = new Callable<String>() {
+        @Override
         public String call() throws Exception {
           System.out.println("Asynchronous Callable");
           return "Callable Result";
@@ -2294,6 +2297,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     return app;
   }
 
+  @Override
   public void startService() {
     try {
       super.startService();
@@ -2692,6 +2696,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     return c;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     if (app != null) {
       // if there is an app we can load immediately

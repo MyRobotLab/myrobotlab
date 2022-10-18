@@ -317,8 +317,8 @@ public class Lloyd extends Service {
       labels.add(c.getName());
     }
     Collections.sort(labels);
-    long trainMaxOffset = (long) ((double) numFound * trainPerc);
-    long testMaxOffset = (long) ((double) numFound * (1.0 - trainPerc));
+    long trainMaxOffset = (long) (numFound * trainPerc);
+    long testMaxOffset = (long) (numFound * (1.0 - trainPerc));
 
     // training query
     SolrQuery trainQuery = memory.makeDatasetQuery(queryString, labelField);
@@ -386,8 +386,8 @@ public class Lloyd extends Service {
       labels.add(c.getName());
     }
     Collections.sort(labels);
-    long trainMaxOffset = (long) ((double) numFound * trainPerc);
-    long testMaxOffset = (long) ((double) numFound * (1.0 - trainPerc));
+    long trainMaxOffset = (long) (numFound * trainPerc);
+    long testMaxOffset = (long) (numFound * (1.0 - trainPerc));
 
     // training query
     SolrQuery trainQuery = memory.makeDatasetQuery(queryString, labelField);

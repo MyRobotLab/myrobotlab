@@ -200,6 +200,7 @@ public class Pcf8574 extends Service
     }
   }
 
+  @Override
   @Deprecated /* use attach(controller) */
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
 
@@ -225,6 +226,7 @@ public class Pcf8574 extends Service
     attach(listener, String.format("%d", address));
   }
 
+  @Override
   public void attach(PinListener listener, String pin) {
     String name = listener.getName();
 
@@ -271,6 +273,7 @@ public class Pcf8574 extends Service
     attach((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
   }
 
+  @Override
   public void attachI2CController(I2CController controller) {
 
     if (this.controllerName == controller.getName()) {
@@ -308,6 +311,7 @@ public class Pcf8574 extends Service
     return pinMap;
   }
 
+  @Override
   public void detach() {
     if (controller != null) {
       detachI2CController(controller);
@@ -327,7 +331,7 @@ public class Pcf8574 extends Service
   // TODO: This default code could be in Attachable
   @Override
   public void detach(String service) {
-    detach((Attachable) Runtime.getService(service));
+    detach(Runtime.getService(service));
   }
 
   @Override
@@ -452,6 +456,7 @@ public class Pcf8574 extends Service
     return null;
   }
 
+  @Override
   public PinDefinition getPin(String pin) {
     if (pinMap.containsKey(pin)) {
       return pinMap.get(pin);
@@ -536,6 +541,7 @@ public class Pcf8574 extends Service
    * method to communicate changes in pinmode or state changes
    * 
    */
+  @Override
   public PinDefinition publishPinDefinition(PinDefinition pinDef) {
     return pinDef;
   }
@@ -572,7 +578,7 @@ public class Pcf8574 extends Service
   public int readRegister() {
     byte[] readbuffer = new byte[1];
     controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
-    return ((int) readbuffer[0]) & 0xff;
+    return (readbuffer[0]) & 0xff;
   }
 
   /**
@@ -727,6 +733,7 @@ public class Pcf8574 extends Service
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     Pcf8574Config config = (Pcf8574Config) c;
     if (config.address != null) {

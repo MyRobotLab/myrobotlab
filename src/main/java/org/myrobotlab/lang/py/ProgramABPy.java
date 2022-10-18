@@ -14,7 +14,7 @@ public class ProgramABPy extends LangPyUtils implements PythonGenerator {
 
   public String toPython(ProgramAB si) {
     // common stuff
-    ProgramAB brain = (ProgramAB) si;
+    ProgramAB brain = si;
     StringBuilder content = new StringBuilder();
     String safename = safeRefName(brain);
 

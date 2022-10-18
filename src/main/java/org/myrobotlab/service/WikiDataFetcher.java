@@ -269,7 +269,7 @@ public class WikiDataFetcher extends Service {
             dataType = ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatatype().toString();
             // TODO Add all snaks instead of only the main snak
             al.add(dataType);
-            al.add((JacksonValueSnak) s.getClaim().getMainSnak());
+            al.add(s.getClaim().getMainSnak());
 
           }
 
@@ -293,25 +293,25 @@ public class WikiDataFetcher extends Service {
       // TODO put switch in a function out of getData()
       switch (dataType) {
         case "wikibase-item"://
-          String info = (String) data.toString();
+          String info = data.toString();
           int beginIndex = info.indexOf('Q');
           int endIndex = info.indexOf("(");
           info = info.substring(beginIndex, endIndex - 1);
           answer = getLabelById(info);
           break;
         case "time"://
-          data = (TimeValue) data;
+          data = data;
           answer = String.valueOf(((TimeValue) data).getDay()) + "/" + String.valueOf(((TimeValue) data).getMonth()) + "/" + String.valueOf(((TimeValue) data).getYear());
           break;
         case "globe-coordinate":
           answer = ((GlobeCoordinatesValue) data).toString();
           break;
         case "monolingualtext"://
-          data = (MonolingualTextValue) data;
+          data = data;
           answer = data.toString();
           break;
         case "quantity"://
-          data = (QuantityValue) data;
+          data = data;
           String quantity = String.valueOf(((QuantityValue) data).getNumericValue());
           String unit = String.valueOf(((QuantityValue) data).getUnit());
           // String unit = data.toString();

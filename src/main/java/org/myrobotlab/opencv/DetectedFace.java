@@ -77,9 +77,9 @@ public class DetectedFace {
     Point2f srcTri = new Point2f(3);
 
     // populate source triangle
-    srcTri.position(0).x((float) centerleftx).y((float) centerlefty);
-    srcTri.position(1).x((float) centerrightx).y((float) centerrighty);
-    srcTri.position(2).x((float) centermouthx).y((float) centermouthy);
+    srcTri.position(0).x(centerleftx).y(centerlefty);
+    srcTri.position(1).x(centerrightx).y(centerrighty);
+    srcTri.position(2).x(centermouthx).y(centermouthy);
 
     return srcTri;
   }

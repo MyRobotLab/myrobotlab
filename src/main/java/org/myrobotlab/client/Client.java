@@ -408,6 +408,7 @@ public class Client implements Runnable, Decoder<String, Reader>, Encoder<String
     }
   }
 
+  @Override
   public void run() {
     prompt();
     while (!done) {

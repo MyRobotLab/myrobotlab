@@ -40,6 +40,7 @@ public class FileChooser extends JButton implements ActionListener {
     chooser.setAcceptAllFileFilterUsed(false);
   }
 
+  @Override
   public void actionPerformed(ActionEvent e) {
     if (field.getText() != null) {
       chooser.setCurrentDirectory(new File(field.getText()));
@@ -70,6 +71,7 @@ public class FileChooser extends JButton implements ActionListener {
     panel.add(field);
     panel.add(chooser);
     frame.addWindowListener(new WindowAdapter() {
+      @Override
       public void windowClosing(WindowEvent e) {
         System.exit(0);
       }

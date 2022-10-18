@@ -23,6 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
@@ -532,7 +533,7 @@ public class Deeplearning4j extends Service {
     CloseableFrameConverter converter = new CloseableFrameConverter();
     // resize the image to the target size of 64x64
     // resize to 64x64
-    IplImage ret = IplImage.create(64, 64, iplImage.depth(), iplImage.nChannels());
+    IplImage ret = AbstractIplImage.create(64, 64, iplImage.depth(), iplImage.nChannels());
     cvResize(iplImage, ret, Imgproc.INTER_AREA);
 
     // show(ret, "resized");
@@ -661,7 +662,7 @@ public class Deeplearning4j extends Service {
     scaler.transform(image);
     INDArray outputs = tinyyolo.outputSingle(image);
 
-    List<DetectedObject> objs = YoloUtils.getPredictedObjects(Nd4j.create(((TinyYOLO) tinyYOLOModel).getPriorBoxes()), outputs, 0.6, 0.4);
+    List<DetectedObject> objs = YoloUtils.getPredictedObjects(Nd4j.create(tinyYOLOModel.getPriorBoxes()), outputs, 0.6, 0.4);
     // List<DetectedObject> objs =
     // YoloUtils.getPredictedObjects(Nd4j.create(TinyYOLO.priorBoxes), outputs,
     // 0.6, 0.4);

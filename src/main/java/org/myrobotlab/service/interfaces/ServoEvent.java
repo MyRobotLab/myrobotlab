@@ -24,6 +24,7 @@ public class ServoEvent {
     this.pos = pos;
   }
 
+  @Override
   public String toString() {
     if (pos == null) {
       return String.format("%s null", name);

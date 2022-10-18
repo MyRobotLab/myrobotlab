@@ -50,6 +50,7 @@ public class MrlSerialRelay extends Device {
 
   }
 
+  @Override
   public void update() {
     int[] buffer = new int[VirtualMsg.MAX_MSG_SIZE];
     int pos = 0;

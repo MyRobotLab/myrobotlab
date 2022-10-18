@@ -44,6 +44,7 @@ public class PollyMeta extends AbstractSpeechSynthesisMeta {
 
   }
 
+  @Override
   public Plan getDefault(String name) {
 
     Plan plan = new Plan(name);

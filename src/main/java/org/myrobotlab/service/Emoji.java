@@ -96,6 +96,7 @@ public class Emoji extends Service implements TextListener, EventHandler, ImageP
     ((EmojiConfig) config).map.clear();
   }
 
+  @Override
   public void startService() {
     super.startService();
 

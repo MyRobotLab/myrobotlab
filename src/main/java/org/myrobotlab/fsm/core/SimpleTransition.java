@@ -43,6 +43,7 @@ public class SimpleTransition implements Transition {
     id = Utils.DEFAULT_TRANSITION_NAME;
   }
 
+  @Override
   public State getSourceState() {
     return sourceState;
   }
@@ -51,6 +52,7 @@ public class SimpleTransition implements Transition {
     this.sourceState = sourceState;
   }
 
+  @Override
   public State getTargetState() {
     return targetState;
   }
@@ -59,6 +61,7 @@ public class SimpleTransition implements Transition {
     this.targetState = targetState;
   }
 
+  @Override
   public String getName() {
     return id;
   }
@@ -67,6 +70,7 @@ public class SimpleTransition implements Transition {
     this.id = name;
   }
 
+  @Override
   public EventHandler getEventHandler() {
     return eventHandler;
   }

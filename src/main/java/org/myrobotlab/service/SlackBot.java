@@ -50,6 +50,7 @@ public class SlackBot extends Service implements UtteranceListener, UtterancePub
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     SlackBotConfig config = (SlackBotConfig) c;
     appToken = config.appToken;

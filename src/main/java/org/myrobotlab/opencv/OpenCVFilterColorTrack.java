@@ -135,6 +135,7 @@ public class OpenCVFilterColorTrack extends OpenCVFilter {
 
   }
 
+  @Override
   public void samplePoint(Integer x, Integer y) {
     CloseableFrameConverter converter = new CloseableFrameConverter();
     BufferedImage frameBuffer = converter.toBufferedImage(hsv);

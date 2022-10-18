@@ -385,6 +385,7 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
   }
 
   FilenameFilter imgFilter = new FilenameFilter() {
+    @Override
     public boolean accept(File dir, String name) {
       name = name.toLowerCase();
       return name.endsWith(".jpg") || name.endsWith(".pgm") || name.endsWith(".png");

@@ -290,6 +290,7 @@ public class OculusDisplay implements Runnable {
   }
 
   // Main rendering loop for running the oculus display.
+  @Override
   public void run() {
     internalInit();
     // Load the screen in the scene i guess first.

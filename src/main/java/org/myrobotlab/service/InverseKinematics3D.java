@@ -242,7 +242,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
       // angles between 0 - 360 degrees.. not sure what people will really want?
       // - 180 to + 180 ?
       double angle = MathUtils.radToDeg(theta) + l.getOffset();
-      angleMap.put(jointName, (double) angle % 360.0F);
+      angleMap.put(jointName, angle % 360.0F);
       log.info("Servo : {}  Angle : {}", jointName, angleMap.get(jointName));
     }
     invoke("publishJointAngles", angleMap);
@@ -280,6 +280,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     this.arms.put(name, arm);
   }
 
+  @Override
   public void attach(Attachable attachable) {
     if (attachable instanceof IKJointAngleListener) {
       addListener("publishJointAngle", attachable.getName(), "onJointAngle");

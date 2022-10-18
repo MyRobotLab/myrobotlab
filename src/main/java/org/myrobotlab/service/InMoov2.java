@@ -92,6 +92,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
    * be a "key" not a "fullname" ! .. this could be created with minimal
    * structure .. i think
    */
+  @Override
   public void onStarted(String fullname) {
     log.info("{} started", fullname);
     try {
@@ -163,6 +164,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     }
   }
 
+  @Override
   public void startService() {
     super.startService();
     Runtime runtime = Runtime.getInstance();
@@ -216,6 +218,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     runtime.invoke("publishConfigList");
   }
 
+  @Override
   public void onCreated(String fullname) {
     log.info("{} created", fullname);
   }
@@ -389,6 +392,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return configList;
   }
 
+  @Override
   public void attachTextPublisher(String name) {
     subscribe(name, "publishText");
   }
@@ -902,6 +906,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return text;
   }
 
+  @Override
   public void releaseService() {
     try {
       disable();
@@ -1350,6 +1355,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     p.stop();
   }
 
+  @Override
   public ServiceInterface startPeer(String peer) {
     speakBlocking(get("STARTING" + peer.toUpperCase()));
 
@@ -1361,6 +1367,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return si;
   }
 
+  @Override
   public void releasePeer(String peer) {
     speakBlocking(get("STOP" + peer.toUpperCase()));
     super.releasePeer(peer);
@@ -1404,7 +1411,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     if (head != null) {
       mouthControl.attach(head.getPeer("jaw"));
     }
-    mouthControl.attach((Attachable) getPeer("mouth"));
+    mouthControl.attach(getPeer("mouth"));
   }
 
   // -----------------------------------------------------------------------------
@@ -1565,6 +1572,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   }
 
+  @Override
   public String publishPeerStarted(String peerKey) {
     // if ("mouth".equals(peerKey)) {
     // SpeechSynthesis mouth = (SpeechSynthesis)getPeer(peerKey);

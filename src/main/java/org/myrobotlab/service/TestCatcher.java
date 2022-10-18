@@ -104,6 +104,7 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    * awesome override to simulate remote services - e.g. in
    * Serial.addByteListener
    */
+  @Override
   public boolean isLocal() {
     return isLocal;
   }
@@ -117,6 +118,7 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    * but use a callback thread from the other service as an optimization onByte
    * is one of those methods
    */
+  @Override
   public void onBytes(byte[] b) {
     // NoOp
   }

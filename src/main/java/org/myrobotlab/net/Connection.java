@@ -70,11 +70,12 @@ public class Connection {
     return (String) serializable.get("uuid");
   }
 
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     for (String s : serializable.keySet()) {
       sb.append("\n");
-      sb.append(String.format("%s=%s", s, (String) serializable.get(s)));
+      sb.append(String.format("%s=%s", s, serializable.get(s)));
     }
     sb.append("\n");
     return sb.toString();

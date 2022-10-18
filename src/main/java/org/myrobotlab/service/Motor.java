@@ -80,6 +80,7 @@ public class Motor extends AbstractMotor {
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     super.apply(c);
     MotorConfig config = (MotorConfig) c;
@@ -160,7 +161,7 @@ public class Motor extends AbstractMotor {
       // m1.attach(arduino, Motor.TYPE_PULSE_STEP, pwmPin, dirPin);
       // m1.attach(arduino, Motor.TYPE_2_PWM, pwmPin, dirPin);
       // m1.attach(arduino, Motor.TYPE_SIMPLE, pwmPin, dirPin);
-      m1.attachMotorController((MotorController) arduino);
+      m1.attachMotorController(arduino);
 
       m1.move(1.0);
       m1.move(-1.0);

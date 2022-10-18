@@ -16,6 +16,7 @@ public class SearchResults {
     this.searchText = searchText;
   }
 
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     for (String t : text) {

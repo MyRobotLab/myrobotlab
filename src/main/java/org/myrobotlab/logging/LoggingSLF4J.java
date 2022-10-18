@@ -42,7 +42,7 @@ public class LoggingSLF4J extends Logging {
     ple.start();
 
     // allows you to add appenders to different logging locations
-    Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    Logger logger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
     logger.setAdditive(false);
 
     if (AppenderType.CONSOLE.equalsIgnoreCase(type)) {
@@ -86,10 +86,10 @@ public class LoggingSLF4J extends Logging {
 
   @Override
   public String getLevel() {
-    if (!(LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) instanceof Logger)) {
+    if (!(LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) instanceof Logger)) {
       return "UNKNOWN";
     }
-    Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    Logger logger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
     Level level = logger.getLevel();
     if (level.equals(Level.DEBUG)) {
       return "DEBUG";
@@ -105,8 +105,8 @@ public class LoggingSLF4J extends Logging {
 
   @Override
   public void removeAllAppenders() {
-    if (LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) instanceof Logger) {
-      Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    if (LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) instanceof Logger) {
+      Logger logger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
       logger.detachAndStopAllAppenders();
     }
   }
@@ -119,9 +119,9 @@ public class LoggingSLF4J extends Logging {
 
   @Override
   public void removeAppender(String name) {
-    if (LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) instanceof Logger) {
+    if (LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) instanceof Logger) {
 
-      Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+      Logger logger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
       logger.detachAppender(name); // does this stop it too ?
     }
   }
@@ -134,7 +134,7 @@ public class LoggingSLF4J extends Logging {
   @Override
   public void setLevel(String clazz, String targetLevel) {
     if (clazz == null || clazz.length() == 0) {
-      clazz = Logger.ROOT_LOGGER_NAME;
+      clazz = org.slf4j.Logger.ROOT_LOGGER_NAME;
     }
     // why can't slf4j make a common set log level interface :(
     if (LoggerFactory.getILoggerFactory() instanceof LoggerContext) {

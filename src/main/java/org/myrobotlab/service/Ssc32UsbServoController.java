@@ -76,6 +76,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
    * current Baud rate. 9600 (green) 38400 (red) 115200 (both green and red)
    * Press the button to cycle through baud rates
    */
+  @Override
   public void connect(String port) throws IOException {
     connect(port, defaultBaud, 8, 1, 0);
   }
@@ -83,6 +84,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   /**
    * disconnect serial
    */
+  @Override
   public void disconnect() {
     if (serial != null && serial.isConnected()) {
       serial.disconnect();
@@ -230,6 +232,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
    * Routing detach - routes ServiceInterface.detach(service) to appropriate
    * methods for this class
    */
+  @Override
   public void detach(Attachable service) {
     if (ServoControl.class.isAssignableFrom(service.getClass())) {
       detachServoControl((ServoControl) service);
@@ -251,6 +254,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     }
   }
 
+  @Override
   public boolean isAttached(String name) {
     return servos.containsKey(name);
   }

@@ -245,7 +245,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       attachMotorControl((MotorControl) service);
       return;
     } else if (service instanceof UltrasonicSensorControl) {
-      attach((UltrasonicSensorControl) service);
+      attach(service);
       return;
     } else if (service instanceof EncoderControl) {
       attachEncoderControl((EncoderControl) service);
@@ -483,7 +483,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       // reattach logic - FIXME Pir has no Control interface :(
     } else if (attachable instanceof PinListener) {
       PinListener pl = (PinListener) attachable;
-      attachPinListener((PinListener) pl);
+      attachPinListener(pl);
 
       // on reattach get back to its previous state enabled/disabled
       if (attachable instanceof Pir) {
@@ -500,6 +500,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     }
   }
 
+  @Override
   public void connect(String port) {
     connect(port, Serial.BAUD_115200, 8, 1, 0);
   }
@@ -646,6 +647,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     msg.customMsg(params);
   }
 
+  @Override
   public void detach() {
     // make list copy - to iterate without fear of thread or modify issues
     ArrayList<DeviceMapping> newList = new ArrayList<>(deviceIndex.values());
@@ -662,6 +664,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   // @Override
   // > deviceDetach/deviceId
+  @Override
   public void detach(Attachable device) {
     if (device == null) {
       return;
@@ -775,10 +778,12 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * disable all pins
    */
+  @Override
   public void disablePins() {
     msg.disablePins();
   }
 
+  @Override
   public void disconnect() {
     // FIXED - all don in 'onDisconnect()'
     // enableBoardInfo(false);
@@ -806,6 +811,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     boolean running = false;
     Thread thread = null;
 
+    @Override
     public void run() {
       try {
         running = true;
@@ -850,6 +856,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   // > enablePin/address/type/b16 rate
+  @Override
   public void enablePin(int address, int rate) {
     PinDefinition pinDef = getPin(address);
     msg.enablePin(address, getMrlPinType(pinDef), rate);
@@ -861,6 +868,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * start polling reads of selected pin enablePin/address/type/b16 rate
    */
+  @Override
   public void enablePin(String pin, int rate) {
     // no longer a hard requirement
     // if (!isConnected()) {
@@ -901,6 +909,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * 
    * getBoardInfo
    */
+  @Override
   public BoardInfo getBoardInfo() {
     return boardInfo;
   }
@@ -1154,6 +1163,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     return pinList;
   }
 
+  @Override
   public String getPortName() {
     return serial.getPortName();
   }
@@ -1455,6 +1465,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    *
    */
 
+  @Override
   public synchronized void onBytes(byte[] bytes) {
     // log.info("On Bytes called in Arduino. {}", bytes);
     // These bytes arrived from the serial port data, push them down into the
@@ -1547,12 +1558,14 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * name it...
    * 
    */
+  @Override
   public void pinMode(String pin, String mode) {
     PinDefinition pinDef = getPin(pin);
     pinMode(pinDef.getAddress(), mode);
   }
 
   // < publishAck/function
+  @Override
   public void publishAck(Integer function/* byte */) {
     if (msg.debug) {
       log.info("{} Message Ack received: =={}==", getName(), Msg.methodToString(function));
@@ -1561,6 +1574,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[]
   // deviceSummary
+  @Override
   public BoardInfo publishBoardInfo(Integer version/* byte */,
       Integer boardTypeId/* byte */, Integer microsPerLoop/* b16 */,
       Integer sram/* b16 */, Integer activePins, int[] deviceSummary/* [] */) {
@@ -1609,11 +1623,13 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   // < publishCustomMsg/[] msg
+  @Override
   public int[] publishCustomMsg(int[] msg/* [] */) {
     return msg;
   }
 
   // < publishDebug/str debugMsg
+  @Override
   public String publishDebug(String debugMsg/* str */) {
     log.info("publishDebug {}", debugMsg);
     return debugMsg;
@@ -1628,6 +1644,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * publishEcho/b32 sInt/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[]
    * 
    */
+  @Override
   public void publishEcho(float myFloat, int myByte, float secondFloat) {
     log.info("myFloat {} {} {} ", myFloat, myByte, secondFloat);
   }
@@ -1639,6 +1656,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   // callback for generated method from arduinoMsg.schema
+  @Override
   public EncoderData publishEncoderData(Integer deviceId, Integer position) {
     // Also need to log this
 
@@ -1678,6 +1696,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    *          - data to publish from I2c
    */
   // < publishI2cData/deviceId/[] data
+  @Override
   public void publishI2cData(Integer deviceId, int[] data) {
     log.info("publishI2cData");
     i2cReturnData(data);
@@ -1691,6 +1710,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * @return the published error message
    */
   // < publishMRLCommError/str errorMsg
+  @Override
   public String publishMRLCommError(String errorMsg/* str */) {
     warn("MrlCommError: " + errorMsg);
     log.error("MRLCommError: {}", errorMsg);
@@ -1698,6 +1718,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   // < publishPinArray/[] data
+  @Override
   public PinData[] publishPinArray(int[] data) {
     log.debug("publishPinArray {}", data);
     // if subscribers -
@@ -1767,11 +1788,13 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * FIXME - I bet this doesnt work - test it
    * 
    */
+  @Override
   public SerialRelayData publishSerialData(Integer deviceId, int[] data) {
     SerialRelayData serialData = new SerialRelayData(deviceId, data);
     return serialData;
   }
 
+  @Override
   public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
     if (getDevice(deviceId) != null) {
       Attachable attachable = getDevice(deviceId);
@@ -1798,6 +1821,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   // FIXME should be in Control interface - for callback
   // < publishUltrasonicSensorData/deviceId/b16 echoTime
+  @Override
   public Integer publishUltrasonicSensorData(Integer deviceId, Integer echoTime) {
     // log.info("echoTime {}", echoTime);
     ((UltrasonicSensor) getDevice(deviceId)).onUltrasonicSensorData(echoTime.doubleValue());
@@ -1832,6 +1856,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * resets both MrlComm-land &amp; Java-land
    */
+  @Override
   public void reset() {
     log.info("reset - resetting all devices");
 
@@ -1869,6 +1894,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   // > servoDetachPin/deviceId
+  @Override
   public void onServoDisable(String servoName) {
     Integer id = getDeviceId(servoName);
     if (id != null && msg != null) {
@@ -2161,10 +2187,12 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     return deviceList;
   }
 
+  @Override
   public void ackTimeout() {
     log.warn("{} Ack Timeout seen.  TODO: consider resetting the com port {}, reconnecting and re syncing all devices.", getName(), port);
   }
 
+  @Override
   public void publishMrlCommBegin(Integer version) {
     // If we were already connected up and clear to send.. this is a problem..
     // it means the board was reset on it.
@@ -2372,7 +2400,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
       vmega = (VirtualArduino) Runtime.start("vmega", "VirtualArduino");
       vmega.connect("COM7");
-      Serial sd = (Serial) vmega.getSerial();
+      Serial sd = vmega.getSerial();
       sd.startTcpServer();
 
       // Runtime.start("webgui", "WebGui");

@@ -975,6 +975,7 @@ public class ProgramAB extends Service
 
   // FIXME - should be String name - and inside should querry
   // type NOT by instanceof but by Runtime.getType(name)
+  @Override
   public void attach(Attachable attachable) {
 
     /*
@@ -1166,6 +1167,7 @@ public class ProgramAB extends Service
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     ProgramABConfig config = (ProgramABConfig) c;
     if (config.bots != null && config.bots.size() > 0) {

@@ -28,6 +28,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.bytedeco.opencv.opencv_core.AbstractCvScalar;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -233,11 +234,11 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
       String label = obj.label + " (" + df2.format(obj.confidence * 100) + "%)";
       String subLabel = obj.sublabel;
       // anchor point for text.
-      cvPutText(image, label, cvPoint(obj.boundingBox.x(), obj.boundingBox.y()), font, CvScalar.YELLOW);
+      cvPutText(image, label, cvPoint(obj.boundingBox.x(), obj.boundingBox.y()), font, AbstractCvScalar.YELLOW);
       if (!StringUtils.isEmpty(subLabel)) {
-        cvPutText(image, subLabel, cvPoint(obj.boundingBox.x(), obj.boundingBox.y() + 20), font, CvScalar.YELLOW);
+        cvPutText(image, subLabel, cvPoint(obj.boundingBox.x(), obj.boundingBox.y() + 20), font, AbstractCvScalar.YELLOW);
       }
-      drawRect(image, obj.boundingBox, CvScalar.BLUE);
+      drawRect(image, obj.boundingBox, AbstractCvScalar.BLUE);
     }
   }
 
@@ -284,7 +285,7 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
         pending = false;
         count++;
         if (count % 10 == 0) {
-          double rate = 1000.0 * count / (float) (System.currentTimeMillis() - start);
+          double rate = 1000.0 * count / (System.currentTimeMillis() - start);
           log.info("Yolo Classification Rate : {}", rate);
         }
         invoke("publishYoloClassification", lastResult);
@@ -461,6 +462,7 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
     this.personModel = personModel;
   }
 
+  @Override
   public boolean isEnabled() {
     return enabled;
   }
@@ -474,6 +476,7 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
     return image;
   }
 
+  @Override
   public void release() {
     running = false;
   }

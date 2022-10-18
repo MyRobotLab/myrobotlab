@@ -38,6 +38,7 @@ import java.awt.image.BufferedImage;
 
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
+import org.bytedeco.opencv.opencv_core.AbstractCvScalar;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
@@ -94,7 +95,7 @@ public class OpenCVFilterSolr extends OpenCVFilter {
     if (solr == null)
       initSolr();
 
-    cvPutText(image, formattedSearchResult, cvPoint(20, 40), font, CvScalar.GREEN);
+    cvPutText(image, formattedSearchResult, cvPoint(20, 40), font, AbstractCvScalar.GREEN);
     // TODO: get a handle to the solr instance.
     // TODO: display the solr search result text.
     return image;

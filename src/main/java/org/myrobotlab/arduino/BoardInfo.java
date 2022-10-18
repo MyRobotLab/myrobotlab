@@ -44,6 +44,7 @@ public class BoardInfo implements Serializable {
     return version;
   }
 
+  @Override
   public String toString() {
     if (version != null) {
       return String.format("version %s load %d heartbeat %d sram %d devices %d recvTs %d", version, microsPerLoop, heartbeatMs, sram,
