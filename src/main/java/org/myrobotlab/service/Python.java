@@ -183,10 +183,6 @@ public class Python extends Service implements ServiceLifeCycleListener {
 
   protected int newScriptCnt = 0;
 
-  final List<String> startScripts = new ArrayList<>();
-
-  final List<String> stopScripts = new ArrayList<>();
-
   /**
    * Any script executed is put in a openedScripts map... Helpful in IDE
    * displays
@@ -289,11 +285,6 @@ public class Python extends Service implements ServiceLifeCycleListener {
    * local pthon files of current script directory
    */
   List<String> localPythonFiles = new ArrayList<String>();
-
-  /**
-   * default location for python modules
-   */
-  String modulesDir = "pythonModules";
 
   boolean pythonConsoleInitialized = false;
 
@@ -438,17 +429,18 @@ public class Python extends Service implements ServiceLifeCycleListener {
     PythonInterpreter.initialize(preprops, props, new String[0]);
 
     interp = new PythonInterpreter();
+  }
 
-    PySystemState sys = Py.getSystemState();
-
-    if (modulesDir != null) {
-      sys.path.append(new PyString(modulesDir));
+  public void addModulePath(String path) {
+    PythonConfig c = (PythonConfig) config;
+    if (c.modulePaths != null) {
+      c.modulePaths.add(path);
+      if (interp != null) {
+        PySystemState sys = Py.getSystemState();
+        sys.path.append(new PyString(path));
+        log.info("Python System Path: {}", sys.path);
+      }
     }
-
-    sys.path.append(new PyString(Runtime.getInstance().getConfigDir()));
-
-    log.info("Python System Path: {}", sys.path);
-
   }
 
   public String eval(String method) {
@@ -807,8 +799,9 @@ public class Python extends Service implements ServiceLifeCycleListener {
     // register runtime life cycle events for other services
     Runtime.getInstance().attachServiceLifeCycleListener(getName());
 
+    PythonConfig c = (PythonConfig)config;
     // run start scripts if there are any
-    for (String script : startScripts) {
+    for (String script : c.startScripts) {
       // i think in this context its safer to block
       try {
         execFile(script, true);
@@ -856,7 +849,9 @@ public class Python extends Service implements ServiceLifeCycleListener {
   @Override
   public void stopService() {
     // run any stop scripts
-    for (String script : stopScripts) {
+    PythonConfig c = (PythonConfig)config;
+
+    for (String script : c.stopScripts) {
       // i think in this context its safer to block
       try {
         execFile(script, true);
@@ -916,8 +911,6 @@ public class Python extends Service implements ServiceLifeCycleListener {
 
   @Override
   public ServiceConfig getConfig() {
-    PythonConfig config = new PythonConfig();
-    config.startScripts = startScripts;
     return config;
   }
 
@@ -925,13 +918,9 @@ public class Python extends Service implements ServiceLifeCycleListener {
   public ServiceConfig apply(ServiceConfig c) {
     PythonConfig config = (PythonConfig) c;
     if (config.startScripts != null && config.startScripts.size() > 0) {
-      startScripts.clear();
-      startScripts.addAll(config.startScripts);
-      // if were already running and told to load
-      // we run the scripts - if this service has only been created
-      // the startService method will run the start scripts
+
       if (isRunning()) {
-        for (String script : startScripts) {
+        for (String script : config.startScripts) {
           try {
             execFile(script);
           } catch (Exception e) {
@@ -940,12 +929,17 @@ public class Python extends Service implements ServiceLifeCycleListener {
         }
       }
     }
+    
+    PySystemState sys = Py.getSystemState();
 
-    if (config.stopScripts != null && config.stopScripts.size() > 0) {
-      stopScripts.clear();
-      stopScripts.addAll(config.stopScripts);
+    if (config.modulePaths != null) {
+      for (String path : config.modulePaths) {
+        sys.path.append(new PyString(path));
+      }
     }
 
+    log.info("Python System Path: {}", sys.path);
+    
     return c;
   }
 
