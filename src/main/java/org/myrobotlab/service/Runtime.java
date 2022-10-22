@@ -890,8 +890,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
           try {
             if (options.config != null) {
-              runtime.setConfigName(options.config);
-              runtime.load();
+              Runtime.startConfig(options.config);
             }
           } catch (Exception e) {
             log.info("runtime will not be loading config");
