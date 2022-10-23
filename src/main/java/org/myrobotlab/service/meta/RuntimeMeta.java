@@ -25,6 +25,10 @@ public class RuntimeMeta extends MetaData {
     includeServiceInOneJar(true);
     // apache 2.0 license
     addDependency("com.google.code.gson", "gson", "2.8.5");
+
+    // for proxy generation
+    addDependency("net.bytebuddy", "byte-buddy", "1.12.16");
+
     // apache 2.0 license
     // addDependency("org.apache.ivy", "ivy", "2.4.0-5");
     addDependency("org.apache.ivy", "ivy", IvyWrapper.IVY_VERSION);
