@@ -20,7 +20,8 @@ public class _TemplateService extends Service {
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    ServoConfig config = (ServoConfig) c;
+    super.apply(c);
+    // _TemplateServiceConfig config = (_TemplateServiceConfig) c;
     return c;
   }
 

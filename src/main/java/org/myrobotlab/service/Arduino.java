@@ -2220,7 +2220,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   public void onServoStop(ServoControl servo) {
     Integer id = getDeviceId(servo);
-    if (id != null) {
+    if (id != null && msg != null) {
       msg.servoStop(id);
     }
   }

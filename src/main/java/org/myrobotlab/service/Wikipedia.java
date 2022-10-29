@@ -168,6 +168,16 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
         LinkedHashTreeMap<String, Object> json = CodecUtils.fromJson(response, LinkedHashTreeMap.class);
         String extract = (String) json.get("extract");
         if (extract != null) {
+          
+          if (c.maxSentencesReturned != null) {
+            String[] sentences = extract.split("\\.");
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < c.maxSentencesReturned && i < sentences.length; ++i) {
+              sb.append(sentences[i] + ". ");
+            }
+            extract = sb.toString().trim();
+          }
+          
           results.text.add(extract);
           invoke("publishText", extract);
         }
@@ -223,6 +233,7 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
+    super.apply(c);
     WikipediaConfig config = (WikipediaConfig) c;
 
     if (config.imagePublishers != null) {

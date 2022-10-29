@@ -49,9 +49,8 @@ public class CmdOptions {
   public boolean autoUpdate = false;
 
   // launcher
-  @Option(names = { "-c", "--config" }, description = "Configuration file. If specified all configuration from the file will be used as a \"base\" of configuration. "
-      + "All configuration of last run is saved to {data-dir}/lastjson. This file can be used as a starter config for subsequent --cfg config.json. "
-      + "If this value is set, all other configuration flags are ignored.")
+  @Option(names = { "-c",
+      "--config" }, description = "Specify a configuration set to start. The config set is a directory which has all the necessary configuration files. It loads runtime.yml first, and subsequent service configuration files will then load. \n example: --config data/config/my-config-dir")
   public String config = null;
 
   @Option(names = {

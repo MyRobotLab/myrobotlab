@@ -900,4 +900,17 @@ public class NeoPixel extends Service implements NeoPixelControl {
     }
   }
 
+  @Override
+  public void setPin(String pin) {
+    try {
+      if (pin == null) {
+        this.pin = null;
+        return;
+      }
+      this.pin = Integer.parseInt(pin);
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
 }
