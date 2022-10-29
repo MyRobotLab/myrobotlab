@@ -7,18 +7,13 @@ public class FiniteStateMachineConfig extends ServiceConfig {
 
   public static class Transition {
     
-    public Transition() {
-
+    public Transition() {    
+    }
+    
     public Transition(String from, String on, String to) {
       this.from = from;
       this.on = on;
       this.to = to;
-    }
-
-    public Transition(String origin, String message, String target) {
-      this.origin = origin;
-      this.message = message;
-      this.target = target;
     }
 
     public String from;
