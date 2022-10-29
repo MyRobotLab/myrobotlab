@@ -24,12 +24,15 @@ public class WorkEMeta extends MetaData {
     addPeer("motorLeft", "MotorPort", "left wheel motor");
     addPeer("motorRight", "MotorPort", "right wheel motor");
 
+    addPeer("joystick", "Joystick", "for manual control");
+    
     // global simulator
     addPeer("simulator", "simulator", "JMonkeyEngine", "a simulator, when the hardware isn't worky");
 
     // global python
     addPeer("python", "python", "Python", "the python programming interface");
 
+    
     // global webgui
     addPeer("webgui", "webgui", "WebGui", "web interface");
 

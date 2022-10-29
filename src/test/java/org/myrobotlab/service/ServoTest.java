@@ -126,6 +126,7 @@ public class ServoTest extends AbstractTest {
     arduino01.connect(port01);
 
     Servo s = (Servo) Runtime.start("ser1", "Servo");
+    Servo s2 = (Servo) Runtime.start("ser2", "Servo");
 
     // the pin should always be set to something.
     s.setPin(pin);
@@ -178,10 +179,23 @@ public class ServoTest extends AbstractTest {
     s.disable();
     assertFalse(s.isEnabled());
 
-    s.detach(arduino01);
+    s2.sync(s);
+    s.getCurrentInputPos();
+    s2.moveTo(100);
+    Service.sleep(300); // FIXME - change to await on change with timeout 
+    assertEquals(100.0, s.getCurrentInputPos(), 0.1f);
+    s2.moveTo(60);
+    Service.sleep(300);// FIXME - change to await on change
+    assertEquals(60.0, s.getCurrentInputPos(), 0.1f);
+    s2.unsync(s);
+    s2.moveTo(50);
+    Service.sleep(300);// FIXME - change to await on change
+    assertEquals(60.0, s.getCurrentInputPos(), 0.1f);
 
+    s.detach(arduino01);
     s.releaseService();
     arduino01.releaseService();
+    s2.releaseService();
 
   }
 

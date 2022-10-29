@@ -34,9 +34,10 @@ public class InMoov2Torso extends Service {
   @Override
   public void startService() {
     super.startService();
-    topStom = (ServoControl) startPeer("topStom");
-    midStom = (ServoControl) startPeer("midStom");
-    lowStom = (ServoControl) startPeer("lowStom");
+    
+    topStom = (ServoControl) getPeer("topStom");
+    midStom = (ServoControl) getPeer("midStom");
+    lowStom = (ServoControl) getPeer("lowStom");
   }
 
   @Override
@@ -44,9 +45,6 @@ public class InMoov2Torso extends Service {
     try {
       disable();
 
-      // releasePeer("topStom");
-      // releasePeer("midStom");
-      // releasePeer("lowStom");
       topStom = null;
       midStom = null;
       lowStom = null;

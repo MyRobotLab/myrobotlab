@@ -35,7 +35,7 @@ public class ServiceLifeCycleTest extends AbstractTest {
   public void serviceLifeCycleTest() throws Exception {
 
     // clear plan
-    Runtime.clear();
+    Runtime.clearConfig();
 
     // load a simple plan
     Runtime.load("c1", "Clock");
@@ -49,7 +49,7 @@ public class ServiceLifeCycleTest extends AbstractTest {
     }
 
     // clear plan
-    Runtime.clear();
+    Runtime.clearConfig();
 
     plan = Runtime.getPlan();
     assertEquals(0, plan.size());
@@ -72,7 +72,7 @@ public class ServiceLifeCycleTest extends AbstractTest {
     assertNull(Runtime.getService("controller"));
     assertNull(Runtime.getService("controller.serial"));
 
-    Runtime.clear();
+    Runtime.clearConfig();
 
     /**
      * use case - load a default config - modify it substantially then start the
@@ -100,7 +100,7 @@ public class ServiceLifeCycleTest extends AbstractTest {
     track.releaseService();
     assertNull(Runtime.getService("track.controller"));
 
-    Runtime.clear();
+    Runtime.clearConfig();
     plan = Runtime.load("i02", "InMoov2");
 
     log.info("plan has {} services", plan.size());

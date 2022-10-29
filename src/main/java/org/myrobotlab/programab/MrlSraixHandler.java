@@ -31,7 +31,7 @@ public class MrlSraixHandler implements SraixHandler {
 
   @Override
   public String sraix(Chat chatSession, String input, String defaultResponse, String hint, String host, String botid, String apiKey, String limit, Locale locale) {
-    log.debug("MRL Sraix handler! Input {}");
+    log.debug("MRL Sraix handler! Input {}", input);
     // the INPUT has the string we care about. if this is an OOB tag, let's
     // evaluate it and return the result.
     if (containsOOB(input)) {

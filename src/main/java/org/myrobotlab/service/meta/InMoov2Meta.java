@@ -13,6 +13,7 @@ import org.myrobotlab.service.config.HtmlFilterConfig;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.JMonkeyEngineConfig;
 import org.myrobotlab.service.config.MarySpeechConfig;
+import org.myrobotlab.service.config.MouthControlConfig;
 import org.myrobotlab.service.config.NeoPixelConfig;
 import org.myrobotlab.service.config.PidConfig;
 import org.myrobotlab.service.config.ProgramABConfig;
@@ -20,6 +21,7 @@ import org.myrobotlab.service.config.RandomConfig;
 import org.myrobotlab.service.config.RandomConfig.RandomMessageConfig;
 import org.myrobotlab.service.config.TrackingConfig;
 import org.myrobotlab.service.config.WebkitSpeechRecognitionConfig;
+import org.myrobotlab.service.config.WebkitSpeechSynthesisConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
@@ -61,6 +63,7 @@ public class InMoov2Meta extends MetaData {
     addPeer("right", "Arduino");
     addPeer("rightArm", "InMoov2Arm");
     addPeer("rightHand", "InMoov2Hand");
+    addPeer("search", "Wikipedia");
     addPeer("servoMixer", "ServoMixer");
     addPeer("simulator", "JMonkeyEngine");
     addPeer("torso", "InMoov2Torso");
@@ -181,16 +184,16 @@ public class InMoov2Meta extends MetaData {
     simulator.cameraLookAt = name + ".torso.lowStom";
 
     FiniteStateMachineConfig fsm = (FiniteStateMachineConfig) plan.getPeerConfig("fsm");
-    fsm.states.add("start"); // fist time
-    fsm.states.add("init"); // fist time
-    fsm.states.add("identify_user"); // fist time
-    fsm.states.add("detected_face"); // fist time
-    fsm.states.add("sleeping"); // pir running ? wake word ?
-    fsm.states.add("executing_gesture"); // gesture running
-    fsm.states.add("safe_random_movements"); // random movements
-    fsm.states.add("unsafe_random_movements"); // random movements
-    fsm.states.add("tracking"); // tracking
-    fsm.states.add("power_down"); // process of shutting down stuff
+//    fsm.states.add("start"); // fist time
+//    fsm.states.add("init"); // fist time
+//    fsm.states.add("identify_user"); // fist time
+//    fsm.states.add("detected_face"); // fist time
+//    fsm.states.add("sleeping"); // pir running ? wake word ?
+//    fsm.states.add("executing_gesture"); // gesture running
+//    fsm.states.add("safe_random_movements"); // random movements
+//    fsm.states.add("unsafe_random_movements"); // random movements
+//    fsm.states.add("tracking"); // tracking
+//    fsm.states.add("power_down"); // process of shutting down stuff
 
     fsm.transitions.add(new FiniteStateMachineConfig.Transition("start", "first_time", "init"));
     fsm.transitions.add(new FiniteStateMachineConfig.Transition("init", "first_time", "identify_user"));

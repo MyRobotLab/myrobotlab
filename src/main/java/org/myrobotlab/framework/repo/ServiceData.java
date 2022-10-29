@@ -266,10 +266,6 @@ public class ServiceData implements Serializable {
 
       MetaData metaData = MetaData.get(type);
 
-      if (metaData == null) {
-        log.info("here");
-      }
-
       Map<String, ServiceReservation> peers = metaData.getPeers();
       for (ServiceReservation sr : peers.values()) {
 

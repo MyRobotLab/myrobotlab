@@ -95,14 +95,19 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
             $scope.drawPixels()
         }
 
-        if (firstTime) {
+        if (firstTime && service.pixelCount) {
             $scope.pixelCount = service.pixelCount
-            firstTime = false
+        }
+
+        if (firstTime && service.pin) {
+            $scope.pin = service.pin
         }
 
         if (!$scope.state.controller) {
             $scope.state.controller = $scope.service.controller
         }
+        
+        firstTime = false
     }
 
     this.onMsg = function(inMsg) {
@@ -132,6 +137,12 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
         msg.send('broadcastState')
     }
 
+    $scope.setPin = function(pin) {
+        $scope.pin = pin
+        msg.send('setPin', pin)
+        // msg.send('broadcastState')
+    }
+    
     $scope.fill = function() {
         msg.send('fill', $scope.rgb[0], $scope.rgb[1], $scope.rgb[2])
     }
@@ -141,8 +152,8 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
     }
 
     $scope.attach = function() {
-        msg.send('setPin', $scope.service.pin)
-        msg.send('setPixelCount', $scope.service.pixelCount)
+        msg.send('setPin', $scope.pin)
+        msg.send('setPixelCount', $scope.pixelCount)
         msg.send('attach', $scope.state.controller)
     }
 

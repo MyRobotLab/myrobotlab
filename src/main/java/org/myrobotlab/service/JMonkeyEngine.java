@@ -358,7 +358,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   public void addGrid(String name, Vector3f pos, int size, String color) {
     Spatial s = find(name);
     if (s != null) {
-      log.warn("addGrid {} already exists");
+      log.warn("addGrid {} already exists", name);
       return;
     }
     Geometry g = new Geometry("wireframe grid", new Grid(size, size, 1.0f));
@@ -437,7 +437,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * depth for an access key useDepth=true and another that is a flat model.
    * Both can have collisions. When the parents of nodes change, the depth model
    * "should" change to reflect the changes in branches. The flat model does not
-   * need to change, but has a higher likelyhood of collisions.
+   * need to change, but has a higher likely hood of collisions.
    * 
    * @param tree
    *          t
@@ -2389,6 +2389,27 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
       LoggingFactory.init("WARN");
 
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+
+      boolean worky = false;
+      if (worky) {
+        Runtime.setConfig("dewey-2");
+        InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+        i01.startPeer("simulator");
+
+      } else {
+        Runtime.setConfig("dewey-3");
+        InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+        i01.startPeer("simulator");
+      }
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
       Platform.setVirtual(true);
       // Runtime.main(new String[] { "--interactive", "--id", "admin" });
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("simulator", "JMonkeyEngine");
@@ -2401,15 +2422,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       Node m = jme.getNode("Gui Node");
       // jme.getNode("Gui Node").move(1,1,1);
       jme.getMenuNode().move(1.0f, 3.0f, 2.0f);
-
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.startService();
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       // Runtime.start("gui", "SwingGui");
 
@@ -2585,6 +2597,62 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     Collections.sort(config.modelPaths);
     config.nodes = nodes;
     config.multiMapped = multiMapped;
+
+    log.info("herex");
+    // simulator.nodes.put("i01.head.jaw", new UserData(new
+    // MapperLinear(0.0,180.0, -5.0, 80.0, true, false), "x"));
+
+    // generate defaults begin ---------
+    StringBuilder sb = new StringBuilder();
+
+    // sb.append("");
+
+    // if (config.multiMapped != null) {
+    // for (String multi : multiMapped.keySet()) {
+    // String conf = null;
+    // String[] n = multiMapped.get(multi);
+    // if (n != null) {
+    // for (String mm : n) {
+    // sb.append("\t" + mm + "\n");
+    // }
+    // }
+    // }
+    // }
+
+    try {
+
+      if (config.nodes != null) {
+        for (String nodeKey : nodes.keySet()) {
+          UserData n = nodes.get(nodeKey);
+          if (n.getName() != null && n.getName().contains(".")) {
+            sb.append(String.format("\tsimulator.nodes.put(name + \".%s\", new UserData(", nodeKey));
+          } else if (n.mapper == null && n.rotationMask == null) {
+            sb.append(String.format("\tsimulator.nodes.put(\"%s\", new UserData(", nodeKey));
+          } else {
+            sb.append(String.format("\tsimulator.nodes.put(\"%s\", new UserData(", nodeKey));
+          }
+          if (n.mapper != null) {
+            sb.append(
+                String.format(" new MapperLinear(%.1f, %.1f, %.1f, %.1f, %b, %b) ", n.mapper.minX, n.mapper.maxX, n.mapper.minY, n.mapper.maxY, n.mapper.clip, n.mapper.inverted));
+          } else {
+            sb.append("null");
+          }
+          if (n.rotationMask != null) {
+            sb.append(String.format(",\"%s\"));\n", n.rotationMask));
+          } else {
+            sb.append(String.format(", null);\n", n.rotationMask));
+          }
+        }
+      }
+
+      FileIO.toFile(new File("config.txt"), sb.toString().getBytes());
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    // generate defaults end ---------
+
     return config;
   }
 
@@ -2598,16 +2666,19 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     }
 
     if (config.nodes != null) {
+      // nodes.putAll(config.nodes);
       for (String path : config.nodes.keySet()) {
         UserData ud = config.nodes.get(path);
+        if (ud == null) {
+          addNode(path);
+          ud = config.nodes.get(path);
+        }
         if (ud.mapper != null) {
           MapperLinear m = ud.mapper;
           setMapper(path, m.minX, m.maxX, m.minY, m.maxY);
         }
         if (ud.rotationMask != null) {
           setRotation(path, ud.rotationMask);
-          // setRotation(path, ud.rotationMask.x, ud.rotationMask.y,
-          // ud.rotationMask.z);
         }
       }
     }

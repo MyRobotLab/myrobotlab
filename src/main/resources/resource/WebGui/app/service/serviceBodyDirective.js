@@ -58,6 +58,10 @@ angular.module('mrlapp.service').directive('serviceBody', ['peer', '$compile', '
                         mrl.sendTo('runtime', 'saveDefault', scope.panel.displayName, scope.panel.simpleName)
                     }
 
+                    newscope.release = function(peerKey) {
+                        mrl.sendTo(scope.panel.name, 'releaseService')
+                    }
+
                     newscope.startPeer = function(peerKey) {
                         mrl.sendTo(scope.panel.name, 'startPeer', peerKey)
                     }
@@ -66,8 +70,8 @@ angular.module('mrlapp.service').directive('serviceBody', ['peer', '$compile', '
                         mrl.sendTo(scope.panel.name, 'releasePeer', peerKey)
                     }
 
-                    newscope.export = function() {
-                        mrl.sendTo('runtime', 'export', scope.panel.displayName)
+                    newscope.save = function() {
+                        mrl.sendTo('runtime', 'save', scope.panel.displayName)
                     }
 
                     newscope.apply = function() {

@@ -93,11 +93,11 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         $scope.newType = serviceType
     }
 
-    $scope.setConfigName = function() {
-        console.info('setConfigName')
+    $scope.setConfig = function() {
+        console.info('setConfig')
         if ($scope.selectedConfig.length > 0) {
             $scope.service.configName = $scope.selectedConfig[0]
-            msg.sendTo('runtime', 'setConfigName', $scope.service.configName)
+            msg.sendTo('runtime', 'setConfig', $scope.service.configName)
         }
     }
 
@@ -282,16 +282,16 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         if ($scope.selectedConfig.length) {
             for (let i = 0; i < $scope.selectedConfig.length; ++i) {
                 // msg.sendTo('runtime', 'load', 'data/config/' + $scope.selectedConfig[i] + '/runtime.yml')
-                msg.sendTo('runtime', 'setConfigName', $scope.selectedConfig[i])
+                msg.sendTo('runtime', 'setConfig', $scope.selectedConfig[i])
                 msg.sendTo('runtime', 'load', 'runtime')
             }
         }
     }
 
 
-    $scope.unsetConfigName = function() {
-        console.info('unsetConfigName')
-        msg.sendTo('runtime', 'unsetConfigName')
+    $scope.unsetConfig = function() {
+        console.info('unsetConfig')
+        msg.sendTo('runtime', 'unsetConfig')
     }
 
     
@@ -300,7 +300,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         if ($scope.selectedConfig.length) {
             for (let i = 0; i < $scope.selectedConfig.length; ++i) {
                 // msg.sendTo('runtime', 'load', 'data/config/' + $scope.selectedConfig[i] + '/runtime.yml')
-                msg.sendTo('runtime', 'startConfigSet', $scope.selectedConfig[i])
+                msg.sendTo('runtime', 'startConfig', 'data/config/'+ $scope.selectedConfig[i])
             }
         }
     }
@@ -321,8 +321,9 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         console.info('saveConfig')
 
         let onOK = function() {
-            msg.sendTo('runtime', 'setConfigName', $scope.service.configName)
-            msg.sendTo('runtime', 'save')
+            // msg.sendTo('runtime', 'setConfig', $scope.service.configName)
+            msg.sendTo('runtime', 'saveConfig', $scope.service.configName)
+            // msg.sendTo('runtime', 'save')
         }
 
         let onCancel = function() {

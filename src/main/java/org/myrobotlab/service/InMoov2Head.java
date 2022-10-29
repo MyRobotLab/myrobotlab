@@ -37,17 +37,7 @@ public class InMoov2Head extends Service {
   public InMoov2Head(String n, String id) {
     super(n, id);
   }
-
-  /*
-   * autoStartPeers true - this is not needed public void startService() {
-   * super.startService();
-   * 
-   * startPeer("jaw"); startPeer("eyeX"); startPeer("eyeY");
-   * startPeer("rothead"); startPeer("neck"); startPeer("rollNeck");
-   * 
-   * }
-   */
-
+  
   public void blink() {
 
     // TODO: clean stop autoblink if tracking ...
@@ -307,11 +297,6 @@ public class InMoov2Head extends Service {
   @Override
   public void releaseService() {
     disable();
-    /*
-     * not needed now with autoStartPeer and auto release releasePeer("jaw");
-     * releasePeer("eyeX"); releasePeer("eyeY"); releasePeer("rothead");
-     * releasePeer("neck"); releasePeer("rollNeck");
-     */
     super.releaseService();
   }
 

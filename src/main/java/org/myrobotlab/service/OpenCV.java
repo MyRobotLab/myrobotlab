@@ -1944,7 +1944,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   @Override
   public void enableFilter(String name) {
     OpenCVFilter f = filters.get(name);
-    if (!f.isEnabled()) {
+    if (f != null && !f.isEnabled()) {
       f.enable();
       broadcastState();
     }
@@ -1953,7 +1953,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   @Override
   public void disableFilter(String name) {
     OpenCVFilter f = filters.get(name);
-    if (f.isEnabled()) {
+    if (f != null && f.isEnabled()) {
       f.disable();
       broadcastState();
     }
@@ -1961,11 +1961,13 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   public void toggleFilter(String name) {
     OpenCVFilter f = filters.get(name);
+    if (f != null) {
     if (f.isEnabled())
       f.disable();
     else
       f.enable();
     broadcastState();
+    }
   }
 
   public void setDisplay(boolean b) {

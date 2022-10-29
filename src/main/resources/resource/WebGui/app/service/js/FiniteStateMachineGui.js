@@ -3,37 +3,64 @@ angular.module('mrlapp.service.FiniteStateMachineGui', []).controller('FiniteSta
     var _self = this
     var msg = this.msg
 
-    $scope.servoUpIsActive = function() {
-        msg.send('runtime.start("servoUp", "Servo")')
-    }
-    $scope.servoMiddleIsActive = function() {
-        msg.send('runtime.start("servoMiddle", "Servo")')
-    }
-    $scope.servoDownIsActive = function() {
-        msg.send('runtime.start("servoDown", "Servo")')
+    // current state
+    $scope.current = null
+    // desired state when set
+    $scope.state = null
+    // event key to fire
+    $scope.msgKey = null
+
+    $scope.addTransition = function() {
+        msg.send('addTransition', $scope.origin, $scope.message, $scope.target)
+        msg.send('broadcastState')
     }
 
-    // init
+    $scope.removeTransition = function(origin, message, target) {
+        msg.send('removeTransition', origin, message, target)
+        msg.send('broadcastState')
+    }
+    
+
+    $scope.setCurrent = function() {
+        msg.send('setCurrent', $scope.state)
+        msg.send('broadcastState')
+    }
+
+    $scope.fire = function() {
+        msg.send('fire', $scope.msgKey)
+    }
+
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
+        if (service.current) {
+            $scope.current = service.current.name
+        }
+
     }
 
     this.onMsg = function(inMsg) {
         var data = inMsg.data[0]
         switch (inMsg.method) {
+        case 'onStatus':
+            break
         case 'onState':
             _self.updateState(data)
             $scope.$apply()
             break
+        case 'onNewState':
+            $scope.current = data
+            $scope.$apply()
+            break
         default:
-            $log.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method)
+            console.error("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method)
             break
         }
 
     }
 
+    msg.subscribe("publishNewState")
     msg.subscribe(this)
 }
 ])

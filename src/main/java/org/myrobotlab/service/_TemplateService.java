@@ -37,7 +37,7 @@ public class _TemplateService extends Service {
 
       Runtime.start("template", "_TemplateService");
       Runtime.start("servo", "Servo");
-      Runtime.start("gui", "SwingGui");
+      Runtime.start("webgui", "WebGui");
 
     } catch (Exception e) {
       log.error("main threw", e);

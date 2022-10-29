@@ -24,5 +24,9 @@ public class InMoov2Config extends ServiceConfig {
    * idle time measures the time the fsm is in an idle state
    */
   public boolean idleTimer = true;
+  
+  public InMoov2Config() {
+    autoStartPeers = false;
+  }
 
 }

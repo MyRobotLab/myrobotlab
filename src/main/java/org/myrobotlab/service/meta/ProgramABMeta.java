@@ -18,8 +18,6 @@ public class ProgramABMeta extends MetaData {
 
     addDescription("AIML 2.0 Reference interpreter based on Program AB");
     addCategory("ai");
-
-    // add Wikipedia local search !!
     addPeer("search", "Wikipedia", "replacement for handling pannous sriax requests");
 
     // addPeer("htmlFilter", "HtmlFilter");

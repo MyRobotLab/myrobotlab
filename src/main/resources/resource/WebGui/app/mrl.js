@@ -1193,7 +1193,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         }
 
         _self.changeTab = function(serviceName) {
-            if (!tabsViewCtrl) {
+            if (!tabsViewCtrl || !_self.getService(serviceName)) {
                 console.error('tabsViewCtrl is null - cannot changeTab')
             } else {
                 tabsViewCtrl.changeTab(serviceName)

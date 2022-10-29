@@ -1339,9 +1339,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     log.info("Default service config loading for service: {} type: {}", getName(), getType());
     // setVirtual(config.isVirtual); "overconfigured" - user Runtimes virtual
     // setLocale(config.locale);
+    
+    // IMPORTANT !!! THIS IS WHAT WE WANT !!! VERY EXCITING !
+    this.config = config;
 
-    // FIXME - TODO -
-    // assigne a ServiceConfig config member variable the incoming config
     return config;
   }
 
@@ -2588,8 +2589,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return peerKey;
   }
 
+  /**
+   * apply the current config path config file for this service directly
+   */
   public void apply() {
-    ServiceConfig sc = Runtime.getInstance().readServiceConfig(null, name);
+    Runtime runtime = Runtime.getInstance();
+    ServiceConfig sc = runtime.readServiceConfig(runtime.getConfigPath(), name);
+    // updating plan
+    Runtime.getPlan().put(getName(), sc);
+    // applying config to self
     apply(sc);
   }
 

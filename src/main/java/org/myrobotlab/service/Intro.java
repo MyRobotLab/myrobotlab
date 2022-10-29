@@ -146,7 +146,7 @@ public class Intro extends Service {
 
       Runtime.start("python", "Python");
 
-      // Runtime.startConfigSet(fs);
+      // Runtime.startConfig(fs);
 
       // Runtime.main(new String[]{"--config", "i01-9"});
       // Runtime.start("runtime", "Runtime"); i
@@ -182,7 +182,7 @@ public class Intro extends Service {
       Runtime.setConfig("InMoov2_FingerStarter");
 
       Runtime.create("i01.chatBot");
-      Runtime.load("i01.chatBot");
+      Runtime.load("i01.chatBot", "ProgramAB");
       Runtime.startConfig("i01.chatBot");
 
       Runtime.start("intro", "Intro");

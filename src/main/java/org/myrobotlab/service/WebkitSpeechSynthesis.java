@@ -116,19 +116,23 @@ public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis {
     try {
 
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(true);
-      Runtime.main(new String[] { "--interactive", "--id", "inmoov" });
+//      Platform.setVirtual(true);
+//      Runtime.main(new String[] { "--interactive", "--id", "inmoov" });
 
+      Runtime.start("python", "Python");
+      
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
 
+      WebkitSpeechSynthesis webkit = (WebkitSpeechSynthesis) Runtime.start("webkit", "WebkitSpeechSynthesis");
+      
+      
       boolean done = true;
       if (done) {
         return;
       }
-
-      WebkitSpeechSynthesis webkit = (WebkitSpeechSynthesis) Runtime.start("webkit", "WebkitSpeechSynthesis");
+      
 
       for (int i = 0; i < 1000; ++i) {
         webkit.setVoice("Google UK English Female");
@@ -147,6 +151,7 @@ public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis {
         webkit.speak("Ubriaco come una scimmia");
 
       }
+
 
     } catch (Exception e) {
       log.error("main threw", e);

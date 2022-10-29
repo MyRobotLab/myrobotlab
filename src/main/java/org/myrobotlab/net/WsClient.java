@@ -12,6 +12,8 @@ import java.util.UUID;
 //import com.ning.http.client.providers.netty.NettyAsyncHttpProviderConfig;
 
 import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClientConfig;
 import org.asynchttpclient.Dsl;
 import org.atmosphere.wasync.Client;
 import org.atmosphere.wasync.ClientFactory;

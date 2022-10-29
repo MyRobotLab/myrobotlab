@@ -14,8 +14,8 @@ import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
-import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
@@ -39,6 +39,7 @@ import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
+
 
 public class InMoov2 extends Service implements ServiceLifeCycleListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
@@ -118,7 +119,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
         AbstractSpeechRecognizer ear = (AbstractSpeechRecognizer) Runtime.getService(actualName);
         ear.attachTextListener(getPeerName("chatBot"));
       }
-      
+
       actualName = getPeerName("mouth");
       if (actualName.equals(fullname)) {
         AbstractSpeechSynthesis mouth = (AbstractSpeechSynthesis) Runtime.getService(actualName);
@@ -344,8 +345,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     // REALLY NEEDS TO BE CLEANED UP - no direct references
     // "publish" scripts which should be executed :(
     // python = (Python) startPeer("python");
-    python = (Python) Runtime.start("python", "Python"); // this crud should
-                                                         // stop
+    python = (Python) Runtime.start("python", "Python");
     // load(locale.getTag()); WTH ?
 
     // get events of new services and shutdown

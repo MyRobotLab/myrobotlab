@@ -284,6 +284,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
     controller = neoCntrlr.getName();
     neoCntrlr.neoPixelAttach(getName(), pin, pixelCount, pixelDepth);
+    // send("neoPixelAttach", getName(), pin, pixelCount, pixelDepth);
     broadcastState();
   }
 
@@ -310,7 +311,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     setAnimation(0, 0, 0, 0, speedFps);
 
     clearPixelSet();
-    log.info("clear getPixelSet {}", getPixelSet().flatten());
+    log.debug("clear getPixelSet {}", getPixelSet().flatten());
 
     NeoPixelController np2 = (NeoPixelController) Runtime.getService(controller);
     if (controller == null || np2 == null) {
@@ -556,7 +557,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       error("%s could not set animation no attached controller", getName());
       return;
     }
-    log.info("setAnimation {} {} {} {} {}", animation, red, green, blue, speedFps);
+    log.debug("setAnimation {} {} {} {} {}", animation, red, green, blue, speedFps);
     NeoPixelController nc2 = (NeoPixelController) Runtime.getService(controller);
     Double wait_ms_per_frame = fpsToWaitMs(speedFps);
     nc2.neoPixelSetAnimation(getName(), animation, red, green, blue, 0, wait_ms_per_frame.intValue());

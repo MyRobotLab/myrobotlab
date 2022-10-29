@@ -53,11 +53,12 @@ public class Clock extends Service {
 
     @Override
     public void run() {
+      ClockConfig c = (ClockConfig)config;
 
       try {
         boolean firstTime = true;
-        running = true;
-        while (running) {
+        c.running = true;
+        while (c.running) {
           Date now = new Date();
           Iterator<ClockEvent> i = events.iterator();
           while (i.hasNext()) {
@@ -70,7 +71,7 @@ public class Clock extends Service {
             }
           }
 
-          if (firstTime && skipFirst) {
+          if (firstTime && c.skipFirst) {
             firstTime = false;
             continue;
           }
@@ -78,13 +79,13 @@ public class Clock extends Service {
           invoke("publishTime", now);
           invoke("publishEpoch", now);
 
-          Thread.sleep(interval);
+          Thread.sleep(c.interval);
           firstTime = false;
         }
       } catch (InterruptedException e) {
         log.info("ClockThread interrupt");
       }
-      running = false;
+      c.running = false;
       thread = null;
     }
 
@@ -111,15 +112,10 @@ public class Clock extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(Clock.class);
 
-  protected volatile boolean running;
-
   final protected transient ClockThread myClock = new ClockThread();
-
-  protected int interval = 1000;
 
   protected List<ClockEvent> events = new ArrayList<ClockEvent>();
 
-  private boolean skipFirst = false;
 
   public Clock(String n, String id) {
     super(n, id);
@@ -133,7 +129,8 @@ public class Clock extends Service {
   // FIXME - to spec would be "publishClockStarted()"
   // clock started event
   public void publishClockStarted() {
-    running = true;
+    ClockConfig c = (ClockConfig)config;
+    c.running = true;
     log.info("clock started");
     broadcastState();
   }
@@ -142,7 +139,8 @@ public class Clock extends Service {
    * The clock was stopped event
    */
   public void publishClockStopped() {
-    running = false;
+    ClockConfig c = (ClockConfig)config;
+    c.running = false;
     broadcastState();
   }
 
@@ -166,12 +164,14 @@ public class Clock extends Service {
   }
 
   public void setInterval(Integer milliseconds) {
-    interval = milliseconds;
+    ClockConfig c = (ClockConfig)config;
+    c.interval = milliseconds;
     broadcastState();
   }
 
   public void startClock(boolean skipFirst) {
-    this.skipFirst = skipFirst;
+    ClockConfig c = (ClockConfig)config;
+    c.skipFirst = skipFirst;
     myClock.start();
     invoke("publishClockStarted");
   }
@@ -181,7 +181,8 @@ public class Clock extends Service {
   }
 
   public boolean isClockRunning() {
-    return running;
+    ClockConfig c = (ClockConfig)config;
+    return c.running;
   }
 
   public void stopClock() {
@@ -196,20 +197,13 @@ public class Clock extends Service {
   }
 
   public Integer getInterval() {
-    return interval;
+    return ((ClockConfig)config).interval;
   }
 
-  @Override
-  public ServiceConfig getConfig() {
-    ClockConfig c = (ClockConfig) config;
-    c.interval = interval;
-    c.skipFirst = skipFirst;
-    c.running = running;
-    return c;
-  }
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
+    super.apply(c);    
     ClockConfig config = (ClockConfig) c;
     if (config.running != null) {
       if (config.running) {
@@ -218,8 +212,6 @@ public class Clock extends Service {
         stopClock();
       }
     }
-    interval = config.interval;
-    skipFirst = config.skipFirst;
     return config;
   }
 

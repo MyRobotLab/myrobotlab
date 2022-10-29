@@ -1084,13 +1084,13 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   @Override
   @Deprecated /* use setMute(b) */
   public void mute() {
-    this.mute = true;
+    setMute(true);
   }
 
   @Override
   @Deprecated /* use setMute(b) */
   public void unmute() {
-    this.mute = false;
+    setMute(false);
   }
 
   @Override

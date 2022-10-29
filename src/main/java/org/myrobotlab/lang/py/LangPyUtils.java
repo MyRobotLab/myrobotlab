@@ -210,7 +210,7 @@ public class LangPyUtils implements PythonGenerator {
     }
 
     if (folder == null) {
-      folder = Runtime.getInstance().getConfigDir() + File.separator + "default";
+      folder = Runtime.getInstance().getConfigPath() + File.separator + "default";
     }
 
     Map<Integer, String> serviceFileWritten = new HashMap<>();

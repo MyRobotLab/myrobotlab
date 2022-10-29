@@ -1170,7 +1170,6 @@ public class ProgramAB extends Service
   @Override
   public ServiceConfig apply(ServiceConfig c) {
     ProgramABConfig config = (ProgramABConfig) c;
-
     if (config.bots != null && config.bots.size() > 0) {
       bots.clear();
       for (String botPath : config.bots) {
