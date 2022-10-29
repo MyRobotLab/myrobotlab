@@ -140,29 +140,6 @@
   
 <dependencies>
 
-
-
-<!-- https://mvnrepository.com/artifact/net.sf.py4j/py4j -->
-<dependency>
-    <groupId>net.sf.py4j</groupId>
-    <artifactId>py4j</artifactId>
-    <version>0.10.9.7</version>
-</dependency>
-
-<dependency>
-    <groupId>io.vertx</groupId>
-    <artifactId>vertx-core</artifactId>
-    <version>4.3.4</version>
-</dependency>
-
-<dependency>
-    <groupId>io.vertx</groupId>
-    <artifactId>vertx-web</artifactId>
-    <version>4.3.4</version>
-</dependency>
-
-
-
 <!-- AudioFile begin -->
   <dependency>
     <groupId>javazoom</groupId>
@@ -382,7 +359,6 @@
     <version>1.2.0</version>
     <scope>provided</scope>
   </dependency>
-<!-- Duplicate entry for com.github.pnavais-state-machine-1.2.0 skipping -->
 <!-- FiniteStateMachine end -->
 
 <!-- Git begin -->
@@ -1554,15 +1530,6 @@
   </dependency>
 <!-- SwingGui end -->
 
-<!-- TarsosDsp begin -->
-  <dependency>
-    <groupId>com.github.axet</groupId>
-    <artifactId>TarsosDSP</artifactId>
-    <version>2.4-1</version>
-    <scope>provided</scope>
-  </dependency>
-<!-- TarsosDsp end -->
-
 <!-- Tensorflow begin -->
   <dependency>
     <groupId>org.tensorflow</groupId>
@@ -1620,6 +1587,21 @@
     <scope>provided</scope>
   </dependency>
 <!-- Twitter end -->
+
+<!-- Vertx begin -->
+  <dependency>
+    <groupId>io.vertx</groupId>
+    <artifactId>vertx-core</artifactId>
+    <version>4.3.4</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>io.vertx</groupId>
+    <artifactId>vertx-web</artifactId>
+    <version>4.3.4</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Vertx end -->
 
 <!-- VoiceRss begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
