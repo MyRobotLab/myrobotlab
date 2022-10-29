@@ -441,9 +441,6 @@ public class Python extends Service implements ServiceLifeCycleListener {
         log.info("Python System Path: {}", sys.path);
       }
     }
-
-    log.info("Python System Path: {}", sys.path);
-
   }
 
   public String eval(String method) {
