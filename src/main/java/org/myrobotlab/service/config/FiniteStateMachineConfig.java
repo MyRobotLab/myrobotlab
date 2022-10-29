@@ -7,7 +7,7 @@ public class FiniteStateMachineConfig extends ServiceConfig {
 
   public static class Transition {
     
-    public Transition() {    
+    public Transition() {
     }
     
     public Transition(String from, String on, String to) {

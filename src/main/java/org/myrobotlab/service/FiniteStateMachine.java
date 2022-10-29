@@ -54,10 +54,10 @@ public class FiniteStateMachine extends Service {
     com.github.pnavais.machine.model.State origin = state.getOrigin();
     Message message = state.getMessage();
     com.github.pnavais.machine.model.State target = state.getTarget();
-    transition.from = origin.getName();
+    transition.origin = origin.getName();
     // transition.id = state.getMessage().getMessageId();
-    transition.on = message.getPayload().get().toString();
-    transition.to = target.getName();
+    transition.message = message.getPayload().get().toString();
+    transition.target = target.getName();
     return transition;
   }
 
@@ -205,6 +205,10 @@ public class FiniteStateMachine extends Service {
       // re-apply the config using addTransition
       List<Transition> newTransistions = new ArrayList<>();
       newTransistions.addAll(newConfig.transitions);
+      clear();
+      for (Transition t : newTransistions) {
+        addTransition(t.origin, t.message, t.target);
+      }
       broadcastState();
     }
     return c;
