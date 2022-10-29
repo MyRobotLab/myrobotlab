@@ -18,7 +18,7 @@ public class ConfigTest extends AbstractTest {
   public void serviceLifeCycleTest() throws Exception {
 
     // clear plan
-    Runtime.clear();
+    Runtime.clearConfig();
 
     // load a simple plan
     Runtime.load("c1", "Clock");
