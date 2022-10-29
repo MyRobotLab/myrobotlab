@@ -207,7 +207,7 @@ public class FiniteStateMachine extends Service {
       newTransistions.addAll(newConfig.transitions);
       clear();
       for (Transition t : newTransistions) {
-        addTransition(t.from, t.on, t.from);
+        addTransition(t.from, t.on, t.to);
       }
       broadcastState();
     }
