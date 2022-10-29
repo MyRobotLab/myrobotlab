@@ -246,9 +246,9 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     }
 
     public void stop() {
-      log.warn("request to stop");
+      log.info("request to stop");
       if (!capturing) {
-        log.warn("processor already stopped");
+        log.info("processor already stopped");
         return;
       }
 
@@ -261,18 +261,18 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
         sleep(10);
       }
       broadcastState();
-      log.warn("stopCapture waited {} times - done now", waitTime);
+      log.info("stopCapture waited {} times - done now", waitTime);
     }
 
     public void start() {
-      log.warn("request to start");
+      log.info("request to start");
       if (!capturing) {
         videoThread = new Thread(vp, String.format("%s-video-processor-%d", getName(), ++vpId));
         videoThread.start();
         broadcastState();
-        log.warn("capture - started");
+        log.info("capture - started");
       } else {
-        log.warn("capture - already capturing - leaving");
+        log.info("capture - already capturing - leaving");
       }
     }
   }

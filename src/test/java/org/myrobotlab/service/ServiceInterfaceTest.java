@@ -56,6 +56,9 @@ public class ServiceInterfaceTest extends AbstractTest {
 
   private boolean serviceInterfaceTest(String service) throws IOException {
     // see if we can start/stop and release the service.
+    
+    // set a configuration path
+    Runtime.setConfig("serviceInterfaceTest");
 
     ServiceInterface foo = Runtime.create(service.toLowerCase(), service);
     if (foo == null) {

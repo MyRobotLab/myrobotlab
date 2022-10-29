@@ -686,7 +686,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
     log.info("detaching device {}", device.getName());
     Integer id = getDeviceId(device);
-    if (id != null) {
+    if (id != null && msg != null) {
       msg.deviceDetach(id);
       deviceIndex.remove(id);
     }

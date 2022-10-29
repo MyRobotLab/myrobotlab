@@ -149,7 +149,7 @@ public class AbstractTest {
    */
   public static void releaseServices() {
 
-    log.warn("end of test - id {} remaining services {}", Platform.getLocalInstance().getId(), Arrays.toString(Runtime.getServiceNames()));
+    log.info("end of test - id {} remaining services {}", Platform.getLocalInstance().getId(), Arrays.toString(Runtime.getServiceNames()));
     
     // release all including runtime - be careful of default runtime.yml
     // Runtime.releaseAll(true, true);
@@ -176,7 +176,7 @@ public class AbstractTest {
       }
     }
     if (threadsRemaining.size() > 0) {
-      log.warn("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
+      log.info("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
     }
     
     // log.warn("end of test - id {} remaining services after release {}", Platform.getLocalInstance().getId(), Arrays.toString(Runtime.getServiceNames()));
@@ -185,7 +185,7 @@ public class AbstractTest {
   public AbstractTest() {
     simpleName = this.getClass().getSimpleName();
     if (logWarnTestHeader) {
-      log.warn("=========== starting test {} ===========", this.getClass().getSimpleName());
+      log.info("=========== starting test {} ===========", this.getClass().getSimpleName());
     }
   }
 
