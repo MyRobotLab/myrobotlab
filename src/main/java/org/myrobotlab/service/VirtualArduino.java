@@ -170,10 +170,12 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       runner = new InoScriptRunner(this, ino);
     }
 
-    // connect the DCE/uart port side
-    uart = Serial.connectVirtualUart(uart, portName, portName + ".UART");
     // register our selves to listen for the bytes
     uart.addByteListener(this);
+    
+    // connect the DCE/uart port side
+    uart = Serial.connectVirtualUart(uart, portName, portName + ".UART");
+    
     // create a new mrlcommino runner..
     start();
     // There is a small race condition. so wait for the runner to actually be
