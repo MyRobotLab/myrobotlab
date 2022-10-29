@@ -39,17 +39,7 @@ public class FiniteStateMachine extends Service {
 
   protected State last = null;
 
-  private static Transition toFsmTransition(StateTransition state) {
-    Transition transition = new Transition();
-    com.github.pnavais.machine.model.State origin = state.getOrigin();
-    Message message = state.getMessage();
-    com.github.pnavais.machine.model.State target = state.getTarget();
-    transition.from = origin.getName();
-    // transition.id = state.getMessage().getMessageId();
-    transition.on = message.getPayload().get().toString();
-    transition.to = target.getName();
-    return transition;
-  }
+  protected State current;
 
   // must be transient since StateTransition is non serializable
   protected transient Map<String, Tuple> map = new HashMap<>();
@@ -64,10 +54,10 @@ public class FiniteStateMachine extends Service {
     com.github.pnavais.machine.model.State origin = state.getOrigin();
     Message message = state.getMessage();
     com.github.pnavais.machine.model.State target = state.getTarget();
-    transition.origin = origin.getName();
+    transition.from = origin.getName();
     // transition.id = state.getMessage().getMessageId();
-    transition.message = message.getPayload().get().toString();
-    transition.target = target.getName();
+    transition.on = message.getPayload().get().toString();
+    transition.to = target.getName();
     return transition;
   }
 
@@ -215,10 +205,6 @@ public class FiniteStateMachine extends Service {
       // re-apply the config using addTransition
       List<Transition> newTransistions = new ArrayList<>();
       newTransistions.addAll(newConfig.transitions);
-      clear();
-      for (Transition t : newTransistions) {
-        addTransition(t.from, t.on, t.to);
-      }
       broadcastState();
     }
     return c;
