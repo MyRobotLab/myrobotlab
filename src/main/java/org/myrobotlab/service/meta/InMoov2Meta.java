@@ -63,7 +63,6 @@ public class InMoov2Meta extends MetaData {
     addPeer("right", "Arduino");
     addPeer("rightArm", "InMoov2Arm");
     addPeer("rightHand", "InMoov2Hand");
-    addPeer("search", "Wikipedia");
     addPeer("servoMixer", "ServoMixer");
     addPeer("simulator", "JMonkeyEngine");
     addPeer("torso", "InMoov2Torso");
