@@ -27,14 +27,13 @@ package org.myrobotlab.service;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.ClockConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.data.ClockEvent;
 import org.slf4j.Logger;
 
 /**
@@ -53,34 +52,20 @@ public class Clock extends Service {
 
     @Override
     public void run() {
-      ClockConfig c = (ClockConfig)config;
+      ClockConfig c = (ClockConfig) config;
 
       try {
-        boolean firstTime = true;
+
         c.running = true;
         while (c.running) {
+          Thread.sleep(c.interval);
           Date now = new Date();
-          Iterator<ClockEvent> i = events.iterator();
-          while (i.hasNext()) {
-            ClockEvent event = i.next();
-            if (now.after(event.time)) {
-              // TODO repeat - don't delete set time forward
-              // interval
-              send(event.name, event.method, event.data);
-              i.remove();
-            }
-          }
-
-          if (firstTime && c.skipFirst) {
-            firstTime = false;
-            continue;
+          for (Message msg: events) {
+            send(msg);
           }
           invoke("pulse", now);
           invoke("publishTime", now);
           invoke("publishEpoch", now);
-
-          Thread.sleep(c.interval);
-          firstTime = false;
         }
       } catch (InterruptedException e) {
         log.info("ClockThread interrupt");
@@ -89,6 +74,8 @@ public class Clock extends Service {
       thread = null;
     }
 
+    // FIXME - synchronized methods is silly here - access needs to be synchronized "between" start & stop
+    // TODO - create and use a single thread - use wait(sleep) notify for control  
     synchronized public void start() {
       if (thread == null) {
         thread = new Thread(this, getName() + "_ticking_thread");
@@ -98,38 +85,43 @@ public class Clock extends Service {
       }
     }
 
-    public void stop() {
+    synchronized public void stop() {
+      ClockConfig c = (ClockConfig) config;
       if (thread != null) {
         thread.interrupt();
-        thread = null;
       } else {
         log.info("{} already stopped");
       }
+      c.running = false;
+      thread = null;
     }
   }
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(Clock.class);
+  final public static Logger log = LoggerFactory.getLogger(Clock.class);
 
   final protected transient ClockThread myClock = new ClockThread();
 
-  protected List<ClockEvent> events = new ArrayList<ClockEvent>();
-
+  final protected List<Message> events = new ArrayList<>();
 
   public Clock(String n, String id) {
     super(n, id);
   }
 
-  public void addClockEvent(Date time, String name, String method, Object... data) {
-    ClockEvent event = new ClockEvent(time, name, method, data);
+  public void addClockEvent(String name, String method, Object... data) {
+    Message event = Message.createMessage(getName(), name, method, data);
     events.add(event);
+  }
+  
+  public void clearClockEvents() {
+    events.clear();
   }
 
   // FIXME - to spec would be "publishClockStarted()"
   // clock started event
   public void publishClockStarted() {
-    ClockConfig c = (ClockConfig)config;
+    ClockConfig c = (ClockConfig) config;
     c.running = true;
     log.info("clock started");
     broadcastState();
@@ -139,7 +131,7 @@ public class Clock extends Service {
    * The clock was stopped event
    */
   public void publishClockStopped() {
-    ClockConfig c = (ClockConfig)config;
+    ClockConfig c = (ClockConfig) config;
     c.running = false;
     broadcastState();
   }
@@ -164,13 +156,13 @@ public class Clock extends Service {
   }
 
   public void setInterval(Integer milliseconds) {
-    ClockConfig c = (ClockConfig)config;
+    ClockConfig c = (ClockConfig) config;
     c.interval = milliseconds;
     broadcastState();
   }
 
   public void startClock(boolean skipFirst) {
-    ClockConfig c = (ClockConfig)config;
+    ClockConfig c = (ClockConfig) config;
     c.skipFirst = skipFirst;
     myClock.start();
     invoke("publishClockStarted");
@@ -181,7 +173,7 @@ public class Clock extends Service {
   }
 
   public boolean isClockRunning() {
-    ClockConfig c = (ClockConfig)config;
+    ClockConfig c = (ClockConfig) config;
     return c.running;
   }
 
@@ -197,13 +189,12 @@ public class Clock extends Service {
   }
 
   public Integer getInterval() {
-    return ((ClockConfig)config).interval;
+    return ((ClockConfig) config).interval;
   }
-
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    super.apply(c);    
+    super.apply(c);
     ClockConfig config = (ClockConfig) c;
     if (config.running != null) {
       if (config.running) {
@@ -213,6 +204,11 @@ public class Clock extends Service {
       }
     }
     return config;
+  }
+  
+  public void restartClock() {
+    stopClock();
+    startClock();    
   }
 
   public static void main(String[] args) throws Exception {
@@ -263,5 +259,7 @@ public class Clock extends Service {
       log.error("main threw", e);
     }
   }
+
+
 
 }
