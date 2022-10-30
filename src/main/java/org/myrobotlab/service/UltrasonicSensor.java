@@ -385,36 +385,43 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     trigPin = pin;
   }
 
-  /**
-   * The measured distance can be either Metric (centimeters) or imperial (inches).
-   * This method sets the returned ranging value to Metric centimeters.
-   */
   @Override
   public void setUnitCm() {
     multiplier = 1;
   }
 
-  /**
-   * The measured distance can be either Metric (centimeters) or imperial (inches).
-   * This method sets the returned ranging value to Imperial Inches.
-   */
   @Override
   public void setUnitInches() {
     multiplier = 0.393701;
   }
 
+  /**
+   * Sets the rate at which ranging is done to be as fast as possible (Uses more processing power).
+   */
   public void maxRate() {
     useRate = false;
   }
 
+  /**
+   * Sets the ranging rate to the rate using setRate(value).
+   */
   public void useRate() {
     useRate = true;
   }
 
+  /**
+   * Set the ping rate when ranging to the frequence supplied in the parameter.
+   * To set rates lower than one, use public void setRate(double hz) instead.
+   * @param hz
+   */
   public void setRate(int hz) {
     setRate((double) hz);
   }
 
+  /**
+   * Set the ping rate when ranging to the frequence supplied in the parameter.
+   * @param hz
+   */
   public void setRate(double hz) {
     rateHz = hz;
     useRate();
@@ -465,7 +472,9 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
       // arduino.setDebug(false);
 
       Servo servo = (Servo) Runtime.start("servo", "Servo");
-      servo.attach(arduino, 6);
+      servo.setPin(6);
+      servo.attach(arduino);
+      // servo.attach(arduino, 6);
       servo.moveTo(30.0);
 
       srf04.startRanging();
