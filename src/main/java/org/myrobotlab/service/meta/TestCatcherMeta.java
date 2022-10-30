@@ -22,7 +22,10 @@ public class TestCatcherMeta extends MetaData {
     // loop
     addPeer("subpeer", "TestThrower", "comment"); // Don't do recursive infinite
                                                   // loop
-    addPeer("globalPeer", "thrower01", "TestThrower", "comment"); // Don't do
+    
+    // FIXME "global names" are no worky - need another refactor of peers, peerKeys and global names
+    addPeer("globalPeer", "TestThrower", "comment"); 
+    // addPeer("globalPeer", "thrower01", "TestThrower", "comment"); // Don't do
                                                                   // recursive
                                                                   // infinite
                                                                   // loop
