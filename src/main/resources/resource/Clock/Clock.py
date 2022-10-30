@@ -1,4 +1,12 @@
+#########################################
+# Clock.py
+# description: basic clock service
+# categories: time programming
+# more info @: http://myrobotlab.org/service/Clock
+#########################################
+# basic service function
 # start the services
+python = runtime.start("python","Python")
 clock = runtime.start("clock","Clock")
 
 # define the on_date event handler
@@ -13,9 +21,54 @@ def on_epoch(timedata):
 clock.addListener("publishTime", "python", "on_time")
 clock.addListener("publishEpoch", "python", "on_epoch")
 
-# start the clock
+# set interval at 1000 ms or 1s
 clock.setInterval(1000)
 clock.startClock()
-# optional : wait the first loop before execution start
-# clock.startClock(1)
-# clock.stopClock() when you are done
+# wait and watch the clock data flow
+sleep(5)
+
+#########################################
+# Watchdog Timer - a common usage of clock
+# https://en.wikipedia.org/wiki/Watchdog_timer
+# its like a heartbeat monitor - if a reset doesn't come
+# along within a certain time "corrective action" is taken
+
+# create a watchdog - for example if it doesn't get a stream of
+# data from a joystick it will stop the robot
+watchdog = runtime.start("watchdog","Clock")
+# set our watchdog to fire if its not reset within a second
+watchdog.setInterval(1000) 
+# add the stop command which will stop the robot from moving
+watchdog.addClockEvent("python","exec", "stop_robot()")
+
+# define the method that will stop the robot
+def stop_robot():
+    print("stopping robot ! watchdog apply corrective action")
+
+# start our watchdog
+watchdog.startClock()
+
+# wait for 1/2 a second
+sleep(0.5)
+# reset with data from another source - like the joystick
+print('we got data - things are good')
+watchdog.restartClock()
+
+# wait for 1/2 a second
+sleep(0.5)
+# reset with data from another source - like the joystick
+print('we got data - things are good')
+watchdog.restartClock()
+
+# wait for 1/2 a second
+sleep(0.5)
+# reset with data from another source - like the joystick
+print('we got data - things are good')
+watchdog.restartClock()
+
+# wait 1.5 s which is TOO LATE ! - perhaps the joystick got 
+# disconnected, but the robot comes to a halt because the data
+# has not come within 1 second
+sleep(1.5)
+
+

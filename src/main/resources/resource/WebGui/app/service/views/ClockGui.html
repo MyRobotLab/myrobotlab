@@ -9,9 +9,9 @@
 <div class="row">
         <form class="form-inline">
             pulse interval in ms<br/>
-            <input class="form-control" type="text" ng-model="service.interval" ng-disabled="service.running" ng-trim="false"/>
-            <button class="btn btn-default" ng-if="!service.running" ng-click="msg.setInterval(service.interval); msg.startClock();">start</button>
-            <button class="btn btn-default" ng-if="service.running" ng-click="msg.stopClock();">stop</button>
+            <input class="form-control" type="text" ng-model="service.config.interval" ng-disabled="service.config.running" ng-trim="false"/>
+            <button class="btn btn-default" ng-if="!service.config.running" ng-click="msg.setInterval(service.config.interval); msg.startClock();">start</button>
+            <button class="btn btn-default" ng-if="service.config.running" ng-click="msg.stopClock();">stop</button>
         </form>
 </div>
 <script>console.error('CLOCK !!!!')</script>
