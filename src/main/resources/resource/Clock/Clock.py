@@ -7,7 +7,14 @@
 # basic service function
 # start the services
 python = runtime.start("python","Python")
+
+# You can create multiple clock services for different functions within your robot.
 clock = runtime.start("clock","Clock")
+# will start a clock service but not start the clock.
+
+clock.setInterval(1000)
+
+# will set the time between pulses to every 1000 milliseconds or 1Hz
 
 # define the on_date event handler
 def on_time(timedata):
