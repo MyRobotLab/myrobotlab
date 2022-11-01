@@ -172,7 +172,7 @@ public class Clock extends Service {
 
   @Deprecated /* use startClock skipFirst is default behavior */
   public void startClock(boolean skipFirst) {
-
+    startClock()
   }
 
   /**
