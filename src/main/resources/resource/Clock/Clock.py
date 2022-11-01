@@ -16,7 +16,7 @@ clock.setInterval(1000)
 clock.addListener("pulse", "python", "clock_pulse")
 
 # will cause the clock service to call the "clock_pulse" method in Python, 
-# you will need to have defined this method.  
+# you will need to have defined this method.
 # You can define the callback method like this
 
 def clock_pulse(timedata):
@@ -113,5 +113,5 @@ sleep(1.5)
 watchdog.stopClock()
 clock.startClock()
 
-runtime.release('clock')
-runtime.release('watchdog')
+# runtime.release('clock')
+# runtime.release('watchdog')
