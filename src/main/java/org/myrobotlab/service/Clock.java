@@ -1,25 +1,6 @@
 /**
  *                    
  * @author grog (at) myrobotlab.org
- *  
- * This file is part of MyRobotLab (http://myrobotlab.org).
- *
- * MyRobotLab is free software: you can redistribute it and/or modify
- * it under the terms of the Apache License 2.0 as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version (subject to the "Classpath" exception
- * as provided in the LICENSE.txt file that accompanied this code).
- *
- * MyRobotLab is distributed in the hope that it will be useful or fun,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * Apache License 2.0 for more details.
- *
- * All libraries in thirdParty bundle are subject to their own license
- * requirements - please refer to http://myrobotlab.org/libraries for 
- * details.
- * 
- * Enjoy !
  * 
  * */
 
@@ -112,6 +93,9 @@ public class Clock extends Service {
 
   final protected transient ClockThread myClock = new ClockThread();
 
+  /**
+   * list of messages the clock can send - these are set with addClockEvent
+   */
   final protected List<Message> events = new ArrayList<>();
 
   public Clock(String n, String id) {
@@ -123,47 +107,63 @@ public class Clock extends Service {
     events.add(event);
   }
 
+  /**
+   * clears all the clock events
+   */
   public void clearClockEvents() {
     events.clear();
   }
 
-  // FIXME - to spec would be "publishClockStarted()"
-  // clock started event
+  /**
+   * event published for when the clock is started
+   */
   public void publishClockStarted() {
-    ClockConfig c = (ClockConfig) config;
-    c.running = true;
     log.info("clock started");
     broadcastState();
   }
 
   /**
-   * The clock was stopped event
+   * the clock was stopped event
    */
   public void publishClockStopped() {
-    ClockConfig c = (ClockConfig) config;
-    c.running = false;
+    log.info("clock stopped");
     broadcastState();
   }
 
   /**
-   * Date is published at an interval here
+   * date is published at an interval here
    * 
    * @param time
    *          t
    * @return t
    */
+  @Deprecated /* use publishTime or preferably publishEpoch as epoch is in a useful millisecond value */
   public Date pulse(Date time) {
     return time;
   }
 
+  /**
+   * publishing point for a the current date object
+   * @param time
+   * @return
+   */
   public Date publishTime(Date time) {
     return time;
   }
 
+  /**
+   * publishing point for epoch
+   * @param time - epoch value, number of milliseconds from Jan 1 1970
+   * @return
+   */
   public long publishEpoch(Date time) {
     return time.getTime();
   }
 
+  /**
+   * set the interval of clock events to the current millisecond value
+   * @param milliseconds
+   */
   public void setInterval(Integer milliseconds) {
     ClockConfig c = (ClockConfig) config;
     c.interval = milliseconds;
@@ -175,15 +175,25 @@ public class Clock extends Service {
 
   }
 
+  /**
+   * start the clock
+   */
   public void startClock() {
     myClock.start();
   }
 
+  /**
+   * see if the clock is running
+   * @return
+   */
   public boolean isClockRunning() {
     ClockConfig c = (ClockConfig) config;
     return c.running;
   }
 
+  /**
+   * stop a clock
+   */
   public void stopClock() {
     myClock.stop();
   }
@@ -194,6 +204,10 @@ public class Clock extends Service {
     stopClock();
   }
 
+  /**
+   * return the current interval in milliseconds
+   * @return
+   */
   public Integer getInterval() {
     return ((ClockConfig) config).interval;
   }
