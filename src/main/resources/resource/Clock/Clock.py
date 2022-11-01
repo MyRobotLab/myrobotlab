@@ -4,12 +4,51 @@
 # categories: time programming
 # more info @: http://myrobotlab.org/service/Clock
 #########################################
-# basic service function
-# start the services
-python = runtime.start("python","Python")
+
 clock = runtime.start("clock","Clock")
 
-# define the on_date event handler
+# will start a clock service but not start the clock.
+
+clock.setInterval(1000)
+
+# will set the time between pulses to every 1000 milliseconds or 1Hz
+
+clock.addListener("pulse", "python", "clock_pulse")
+
+# will cause the clock service to call the "clock_pulse" method in Python, 
+# you will need to have defined this method.
+# You can define the callback method like this
+
+def clock_pulse(timedata):
+    print("The clock has pulsed " + str(timedata))
+
+# The timedata is required to be in the definition and contains the current time.
+# There are other signals that can also be captured as well.
+
+clock.addListener("clockStarted", "python", "clock_start")
+
+def clock_start():
+    print("The clock has started")
+
+# This will be called whenever the service is started.
+# You could use this to turn on or off an output or move a servo to 
+# open a slide while the clock is running.
+# The call back method would be like the following.
+
+clock.addListener("clockStopped", "python", "clock_stopped")
+
+def clock_stopped():
+    print("The clock has been stopped")
+
+# This will be called when ever the clock service is stopped.
+# This can be used to start or stop a motor or to signal a method to put your robot to sleep.
+# The callback method would be on_stopped
+
+# The clock is capable of being started and stopped. Starting the clock can be done like this
+
+clock.startClock()
+
+# You can define the on_date event handler
 def on_time(timedata):
     print("on_date " + str(timedata))
 
@@ -71,4 +110,8 @@ watchdog.restartClock()
 # has not come within 1 second
 sleep(1.5)
 
+watchdog.stopClock()
+clock.startClock()
 
+# runtime.release('clock')
+# runtime.release('watchdog')
