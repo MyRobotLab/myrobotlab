@@ -181,6 +181,7 @@ public class Clock extends Service {
   public void startClock() {
     myClock.start();
   }
+  
 
   /**
    * see if the clock is running
