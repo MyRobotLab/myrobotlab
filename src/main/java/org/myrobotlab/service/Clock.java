@@ -170,18 +170,16 @@ public class Clock extends Service {
     broadcastState();
   }
 
-  @Deprecated /* use startClock skipFirst is default behavior */
-  public void startClock(boolean skipFirst) {
-    startClock();
+  @Deprecated /* use startClock() skipping first is default behavior */
+  synchronized public void startClock(boolean skipFirst) {
+    myClock.start();
+    invoke("publishClockStarted");
   }
 
-  /**
-   * start the clock
-   */
-  public void startClock() {
-    myClock.start();
+  synchronized public void startClock() {
+    startClock(false);
   }
-  
+
 
   /**
    * see if the clock is running
