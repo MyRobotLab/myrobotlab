@@ -1,0 +1,9 @@
+!!org.myrobotlab.service.config.RuntimeConfig
+enableCli: true
+locale: null
+logLevel: null
+registry:
+- motorhat4pi.hat
+- motorhat4pi
+type: Runtime
+virtual: null

@@ -1,0 +1,5 @@
+!!org.myrobotlab.service.config.Hd44780Config
+backlight: true
+controller: null
+delay: null
+type: Hd44780
