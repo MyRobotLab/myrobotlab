@@ -1,0 +1,12 @@
+!!org.myrobotlab.service.config.RuntimeConfig
+enableCli: true
+locale: null
+logLevel: null
+registry:
+- pingdar.controller.serial
+- pingdar.controller
+- pingdar.sensors
+- pingdar.servo
+- pingdar
+type: Runtime
+virtual: null

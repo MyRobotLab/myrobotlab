@@ -1,0 +1,4 @@
+!!org.myrobotlab.service.config.PidConfig
+data: {
+  }
+type: Pid

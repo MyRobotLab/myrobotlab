@@ -1,0 +1,10 @@
+!!org.myrobotlab.service.config.InMoov2HeadConfig
+eyeX: inmoov2head.eyeX
+eyeY: inmoov2head.eyeY
+eyelidLeft: inmoov2head.eyelidLeft
+eyelidRight: inmoov2head.eyelidRight
+jaw: inmoov2head.jaw
+neck: inmoov2head.neck
+rollNeck: inmoov2head.rollNeck
+rothead: inmoov2head.rothead
+type: InMoov2Head
