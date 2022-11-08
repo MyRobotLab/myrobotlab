@@ -1299,8 +1299,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       webgui.setPort(8888);
       webgui.startService();      
       Runtime.start("python", "Python");
-      //Runtime.start("i01", "InMoov2");
-      Runtime.startConfig("worky");
+      // Runtime.start("i01", "InMoov2");
+      // Runtime.startConfig("worky");
 
       boolean done = true;
       if (done) {

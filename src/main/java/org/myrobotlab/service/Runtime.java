@@ -434,7 +434,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     MetaData md = MetaData.get(sc.type);
     Map<String, ServiceReservation> peers = md.getPeers();
 
-    if (sc.autoStartPeers && peers != null && peers.size() > 0) {
+    if (peers != null && peers.size() > 0) {
       log.info("auto start peers and {} of type {} has {} peers", name, sc.type, peers.size());
       // RECURSE ! - if we found peers and autoStartPeers is true - we start all
       // the children up
@@ -1840,26 +1840,30 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     unregister(name);
     Plan plan = Runtime.getPlan();
     ServiceConfig sc = plan.get(inName);
+    
+    
+    
     if (sc != null) {
       sc.state = "RELEASED";
+      // FIXME - TODO RELEASE PEERS ! which is any inName.* !!!
 
       // iterate through peers
-      if (sc.autoStartPeers) {
-        // get peers from meta data
-        MetaData md = MetaData.get(sc.type);
-        Map<String, ServiceReservation> peers = md.getPeers();
-        log.info("auto start peers and {} of type {} has {} peers", inName, sc.type, peers.size());
-        // RECURSE ! - if we found peers and autoStartPeers is true - we start
-        // all
-        // the children up
-        for (String peer : peers.keySet()) {
-          // get actual Name
-          String actualPeerName = getPeerName(peer, sc, peers, inName);
-          if (actualPeerName != null && isStarted(actualPeerName) && si.autoStartedPeersContains(actualPeerName)) {
-            release(actualPeerName);
-          }
-        }
-      }
+//      if (sc.autoStartPeers) {
+//        // get peers from meta data
+//        MetaData md = MetaData.get(sc.type);
+//        Map<String, ServiceReservation> peers = md.getPeers();
+//        log.info("auto start peers and {} of type {} has {} peers", inName, sc.type, peers.size());
+//        // RECURSE ! - if we found peers and autoStartPeers is true - we start
+//        // all
+//        // the children up
+//        for (String peer : peers.keySet()) {
+//          // get actual Name
+//          String actualPeerName = getPeerName(peer, sc, peers, inName);
+//          if (actualPeerName != null && isStarted(actualPeerName) && si.autoStartedPeersContains(actualPeerName)) {
+//            release(actualPeerName);
+//          }
+//        }
+//      }
     }
 
     return true;

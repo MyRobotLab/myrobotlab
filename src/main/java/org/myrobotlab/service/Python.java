@@ -875,7 +875,6 @@ public class Python extends Service implements ServiceLifeCycleListener {
 
   public static void main(String[] args) {
     try {
-      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
       LoggingFactory.init("INFO");
 
       // Runtime.start("i01.head.rothead", "Servo");

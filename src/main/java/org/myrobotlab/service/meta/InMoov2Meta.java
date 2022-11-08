@@ -305,7 +305,6 @@ public class InMoov2Meta extends MetaData {
     plan.removeConfig(name + ".eyeTracking.controller.serial");
     plan.removeConfig(name + ".eyeTracking.cv");
 
-    inmoov.autoStartPeers = false;
     plan.addConfig(inmoov);
 
     return plan;
