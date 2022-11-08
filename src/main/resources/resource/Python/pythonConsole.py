@@ -1,17 +1,4 @@
 import sys
-from javax.swing import JFrame
-from javax.swing import JPanel
-from javax.swing import JLabel
-from javax.swing import JTextArea
-from javax.swing import JScrollPane
-from javax.swing import JTabbedPane
-from javax.swing import WindowConstants
-from java.awt import BorderLayout
-from java.lang import Boolean
-
-# myService is a local variable
-# created to point to this Python
-# service
 
 class Console:
 
@@ -21,7 +8,7 @@ class Console:
     
   def write(self,string):
     if myService is not None:
-        myService.invoke(u"publishStdOut", string)
+        myService.invoke(u'publishStdOut', string)
     
   def attach(self):
     if (self.stdout == None):    
