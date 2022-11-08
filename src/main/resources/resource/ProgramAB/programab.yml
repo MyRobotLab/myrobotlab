@@ -1,0 +1,12 @@
+!!org.myrobotlab.service.config.ProgramABConfig
+botDir: null
+bots: [
+  ]
+currentBotName: Alice
+currentUserName: null
+search: null
+sleep: false
+textFilters: null
+textListeners: null
+type: ProgramAB
+utteranceListeners: null

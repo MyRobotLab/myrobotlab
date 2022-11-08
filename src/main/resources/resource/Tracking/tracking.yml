@@ -1,0 +1,9 @@
+!!org.myrobotlab.service.config.TrackingConfig
+controller: tracking.controller
+cv: tracking.cv
+enabled: false
+lostTrackingDelayMs: 1000
+pan: tracking.pan
+pid: tracking.pid
+tilt: tracking.tilt
+type: Tracking

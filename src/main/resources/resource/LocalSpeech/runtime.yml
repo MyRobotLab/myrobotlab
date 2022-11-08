@@ -1,0 +1,9 @@
+!!org.myrobotlab.service.config.RuntimeConfig
+enableCli: true
+locale: null
+logLevel: null
+registry:
+- localspeech.audioFile
+- localspeech
+type: Runtime
+virtual: null

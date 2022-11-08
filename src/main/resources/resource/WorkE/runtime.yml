@@ -1,0 +1,26 @@
+!!org.myrobotlab.service.config.RuntimeConfig
+enableCli: true
+locale: null
+logLevel: null
+registry:
+- worke.brain.search
+- worke.brain
+- worke.controller.serial
+- worke.controller
+- worke.ear
+- worke.emoji.display
+- worke.emoji.http
+- worke.emoji
+- worke.eye
+- worke.git
+- worke.joystick
+- worke.motorLeft
+- worke.motorRight
+- worke.mouth.audioFile
+- worke.mouth
+- python
+- simulator
+- webgui
+- worke
+type: Runtime
+virtual: null

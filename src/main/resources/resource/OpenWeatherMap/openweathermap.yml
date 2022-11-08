@@ -1,0 +1,4 @@
+!!org.myrobotlab.service.config.OpenWeatherMapConfig
+currentTown: null
+currentUnits: null
+type: OpenWeatherMap

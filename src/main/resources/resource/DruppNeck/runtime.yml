@@ -1,0 +1,11 @@
+!!org.myrobotlab.service.config.RuntimeConfig
+enableCli: true
+locale: null
+logLevel: null
+registry:
+- druppneck.down
+- druppneck.middle
+- druppneck.up
+- druppneck
+type: Runtime
+virtual: null

@@ -1,0 +1,5 @@
+!!org.myrobotlab.service.config.Adafruit16CServoDriverConfig
+controller: null
+deviceAddress: null
+deviceBus: null
+type: Adafruit16CServoDriver
