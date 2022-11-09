@@ -300,7 +300,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         if ($scope.selectedConfig.length) {
             for (let i = 0; i < $scope.selectedConfig.length; ++i) {
                 // msg.sendTo('runtime', 'load', 'data/config/' + $scope.selectedConfig[i] + '/runtime.yml')
-                msg.sendTo('runtime', 'startConfig', 'data/config/'+ $scope.selectedConfig[i])
+                msg.sendTo('runtime', 'startConfig', $scope.selectedConfig[i])
             }
         }
     }

@@ -2,11 +2,16 @@ package org.myrobotlab.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.MessageListener;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -41,6 +46,11 @@ public class FiniteStateMachine extends Service {
 
   protected State current;
 
+  protected Set<String> messageListeners = new HashSet<>();
+
+  // TODO - .from("A").to("B").on(Messages.ANY)
+  // TODO - .from("A").to("B").on(Messages.EMPTY)
+
   // must be transient since StateTransition is non serializable
   protected transient Map<String, Tuple> map = new HashMap<>();
 
@@ -56,7 +66,7 @@ public class FiniteStateMachine extends Service {
     com.github.pnavais.machine.model.State target = state.getTarget();
     transition.from = origin.getName();
     // transition.id = state.getMessage().getMessageId();
-    transition.on = message.getPayload().get().toString();
+    transition.event = message.getPayload().get().toString();
     transition.to = target.getName();
     return transition;
   }
@@ -76,7 +86,7 @@ public class FiniteStateMachine extends Service {
     Optional<State> s = stateMachine.getNext(msg);
     if (s.get() != null) {
       return s.get().getName();
-    }    
+    }
     return null;
   }
 
@@ -132,6 +142,7 @@ public class FiniteStateMachine extends Service {
 
   /**
    * fires a message type
+   * 
    * @param msg
    */
   public void fire(String msg) {
@@ -153,6 +164,7 @@ public class FiniteStateMachine extends Service {
 
   /**
    * gets the current state of this state machine
+   * 
    * @return
    */
   public String getCurrent() {
@@ -164,6 +176,7 @@ public class FiniteStateMachine extends Service {
 
   /**
    * get the previous state of this state machine
+   * 
    * @return
    */
   public String getLast() {
@@ -180,38 +193,73 @@ public class FiniteStateMachine extends Service {
 
   /**
    * publishes state if changed here
+   * 
    * @param state
    * @return
    */
   public String publishNewState(String state) {
     log.info("publishNewState {}", state);
+    for (String listener: messageListeners) {
+      ServiceInterface service = Runtime.getService(listener);
+      if (service != null) {
+        org.myrobotlab.framework.Message msg = org.myrobotlab.framework.Message.createMessage(getName(), listener, CodecUtils.getCallbackTopicName(state), null);
+        service.in(msg);
+      }
+    }
     return state;
   }
 
   @Override
   public ServiceConfig getConfig() {
     FiniteStateMachineConfig c = (FiniteStateMachineConfig) config;
+    c.current = getCurrent();
+    c.messageListeners = new ArrayList<>();
+    c.messageListeners.addAll(messageListeners);
     return c;
   }
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    FiniteStateMachineConfig newConfig = (FiniteStateMachineConfig) c;
-    
-    if (newConfig.transitions != null) {
-      
+    super.apply(c);
+    FiniteStateMachineConfig config = (FiniteStateMachineConfig) c;
+
+    if (config.transitions != null) {
+
       // since this service operates directly from config
       // when config is "applied" we need to copy out and
       // re-apply the config using addTransition
       List<Transition> newTransistions = new ArrayList<>();
-      newTransistions.addAll(newConfig.transitions);
+      newTransistions.addAll(config.transitions);
       clear();
       for (Transition t : newTransistions) {
-        addTransition(t.from, t.on, t.to);
+        addTransition(t.from, t.event, t.to);
       }
+
+      messageListeners = new HashSet<>();
+      messageListeners.addAll(config.messageListeners);
       broadcastState();
     }
+
+    // setCurrent
+    setCurrent(config.current);
+
     return c;
+  }
+  
+  public void attach(String name) {
+    attachMessageListener(name);
+  }
+  
+  public void attach(MessageListener listener) {
+    attachMessageListener(listener.getName());
+  }
+
+  public void attachMessageListener(String listener) {
+    messageListeners.add(listener);
+  }
+
+  public void detachMessageListener(String listener) {
+    messageListeners.remove(listener);
   }
 
   public static void main(String[] args) {
@@ -219,22 +267,48 @@ public class FiniteStateMachine extends Service {
 
       LoggingFactory.init(Level.INFO);
 
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      // webgui.setSsl(true);
-      webgui.autoStartBrowser(false);
-      webgui.startService();
-      // Runtime.setConfig("dewey-2");
-      Runtime.startConfig("dewey-2");
+      // WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      // // webgui.setSsl(true);
+      // webgui.autoStartBrowser(false);
+      // webgui.startService();
+      // FIXME !!! - setConfig and it operates on that config ... is that really
+      // desired ?
+      // Runtime.setConfig("fsm-test-01");
+      // Runtime.startConfig("dewey-2");
+
+      Runtime.startConfig("worky");
+
+      // YAMLImporter.builder().build().parseFile("docker-machine.yml");
+
+      FiniteStateMachine fsm = (FiniteStateMachine) Runtime.start("i01.fsm", "FiniteStateMachine");
+      // Runtime.start("servo", "Servo");
+      Runtime.start("webgui", "WebGui");
+
+      // TODO - need properties for each state ?
+
+      fsm.addTransition("start", "starting", "initialize");
+
+      fsm.addTransition("initialize", "initialized", "idle");
+
+      fsm.addTransition("idle", "random", "random");
+      fsm.addTransition("idle", "report", "report");
+      fsm.addTransition("idle", "searching", "searching");
+      fsm.addTransition("idle", "sleeping", "sleeping");
+      fsm.addTransition("idle", "tracking", "tracking");
+
+      fsm.addTransition("random", "idle", "idle");
+      fsm.addTransition("report", "idle", "idle");
+      fsm.addTransition("searching", "idle", "idle");
+      fsm.addTransition("sleeping", "wake", "waking");
+      fsm.addTransition("sleeping", "idle", "idle");
+      fsm.addTransition("tracking", "idle", "idle");
+
+      fsm.setCurrent("start");
 
       boolean done = true;
       if (done) {
         return;
       }
-
-      FiniteStateMachine fsm = (FiniteStateMachine) Runtime.start("fsm", "FiniteStateMachine");
-      // Runtime.start("servo", "Servo");
-      Runtime.start("webgui", "WebGui");
-
 
       // fsm.createFsm("emotional-state");
 

@@ -11,12 +11,12 @@ angular.module('mrlapp.service.FiniteStateMachineGui', []).controller('FiniteSta
     $scope.msgKey = null
 
     $scope.addTransition = function() {
-        msg.send('addTransition', $scope.origin, $scope.message, $scope.target)
+        msg.send('addTransition', $scope.from, $scope.on, $scope.to)
         msg.send('broadcastState')
     }
 
-    $scope.removeTransition = function(origin, message, target) {
-        msg.send('removeTransition', origin, message, target)
+    $scope.removeTransition = function(from, on, to) {
+        msg.send('removeTransition', from, on, to)
         msg.send('broadcastState')
     }
     

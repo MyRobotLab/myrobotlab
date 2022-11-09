@@ -1896,6 +1896,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   // > servoDetachPin/deviceId
   @Override
   public void onServoDisable(String servoName) {
+    if (!isConnected() || msg == null) {
+      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected(), msg == null);
+      return;
+    }
+    
     Integer id = getDeviceId(servoName);
     if (id != null && msg != null) {
       msg.servoDetachPin(id);
@@ -1904,6 +1909,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   @Override
   public void onServoEnable(String servoName) {
+    if (!isConnected() || msg == null) {
+      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected(), msg == null);
+      return;
+    }    
+    
     Integer deviceId = getDeviceId(servoName);
     if (deviceId == null) {
       log.warn("servoEnable servo {} does not have a corresponding device currently - did you attach?", servoName);
@@ -1926,7 +1936,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   // > servoWrite/deviceId/target
   public void onServoMoveTo(ServoMove move) {
-    // ServoControl s = (ServoControl)Runtime.getService(move.name);
+    if (!isConnected() || msg == null) {
+      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected(), msg == null);
+      return;
+    }
+    
     Integer deviceId = getDeviceId(move.name);
     if (deviceId == null) {
       log.warn("servoMoveTo servo {} does not have a corresponding device currently - did you attach?", move.name);
@@ -1943,10 +1957,15 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   // > servoSetVelocity/deviceId/b16 velocity
   public void onServoSetSpeed(ServoSpeed servoSpeed) {
 
+    if (!isConnected() || msg == null) {
+      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected(), msg == null);
+      return;
+    }
+
     // FIXME - FIND OTHER FUNCTIONS THAT CANNOT BE SET WHEN NOT CONNECTED
     // AND HANDLE THE SAME AS BELOW !!!
-    if (!isConnected()) {
-      error("Arduino cannot set speed when not connected");
+    if (!isConnected() || msg == null) {
+      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected(), msg == null);
       return;
     }
 
@@ -1971,12 +1990,21 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   // > servoWriteMicroseconds/deviceId/b16 ms
   public void onServoWriteMicroseconds(ServoControl servo, int uS) {
+    if (!isConnected() || msg == null) {
+      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected(), msg == null);
+      return;
+    }
+    
     int deviceId = getDeviceId(servo);
     log.debug("writeMicroseconds {} {} id {}", servo.getName(), uS, deviceId);
     msg.servoMoveToMicroseconds(deviceId, uS);
   }
 
   public void setAref(String aref) {
+    if (!isConnected() || msg == null) {
+      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected(), msg == null);
+      return;
+    }    
     aref = aref.toUpperCase();
     if (this.getBoard().contains("mega")) {
       if (aref == "INTERNAL") {

@@ -13,15 +13,14 @@ import org.myrobotlab.service.config.HtmlFilterConfig;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.JMonkeyEngineConfig;
 import org.myrobotlab.service.config.MarySpeechConfig;
-import org.myrobotlab.service.config.MouthControlConfig;
 import org.myrobotlab.service.config.NeoPixelConfig;
 import org.myrobotlab.service.config.PidConfig;
 import org.myrobotlab.service.config.ProgramABConfig;
 import org.myrobotlab.service.config.RandomConfig;
 import org.myrobotlab.service.config.RandomConfig.RandomMessageConfig;
+import org.myrobotlab.service.config.RuntimeConfig;
 import org.myrobotlab.service.config.TrackingConfig;
 import org.myrobotlab.service.config.WebkitSpeechRecognitionConfig;
-import org.myrobotlab.service.config.WebkitSpeechSynthesisConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
@@ -78,8 +77,12 @@ public class InMoov2Meta extends MetaData {
     InMoov2Config inmoov = new InMoov2Config();
 
     Plan plan = new Plan(name);
-    // load default peers from meta here
-    plan.putPeers(name, peers);
+    // load default peers from meta here - recursive peers can have peers
+    plan.putPeers(name, peers); // <-- somewhere in here yet ANOTHER plan is made :(
+    
+    // FIXME ! - look at this !!! I've made austartPeers = false !
+    // by just sending a runtime that starts only i01
+    RuntimeConfig rtConfig = (RuntimeConfig)plan.get("runtime");
 
     ProgramABConfig chatBot = (ProgramABConfig) plan.getPeerConfig("chatBot");
     Runtime runtime = Runtime.getInstance();
@@ -194,9 +197,9 @@ public class InMoov2Meta extends MetaData {
 //    fsm.states.add("tracking"); // tracking
 //    fsm.states.add("power_down"); // process of shutting down stuff
 
-    fsm.transitions.add(new FiniteStateMachineConfig.Transition("start", "first_time", "init"));
-    fsm.transitions.add(new FiniteStateMachineConfig.Transition("init", "first_time", "identify_user"));
-    fsm.transitions.add(new FiniteStateMachineConfig.Transition("detected_face", "first_time", "identify_user"));
+//    fsm.transitions.add(new FiniteStateMachineConfig.Transition("start", "first_time", "init"));
+//    fsm.transitions.add(new FiniteStateMachineConfig.Transition("init", "first_time", "identify_user"));
+//    fsm.transitions.add(new FiniteStateMachineConfig.Transition("detected_face", "first_time", "identify_user"));
 
     // == Peer - random =============================
     RandomConfig random = (RandomConfig) plan.getPeerConfig("random");
@@ -306,6 +309,11 @@ public class InMoov2Meta extends MetaData {
     plan.removeConfig(name + ".eyeTracking.cv");
 
     plan.addConfig(inmoov);
+    
+    // REMOVING ALL PEER FROM STARTING ! effectively autoStartPeers = false
+    rtConfig.clear();
+    rtConfig.add(name); // <-- adding i01 / not needed
+
 
     return plan;
   }

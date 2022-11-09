@@ -16,11 +16,11 @@ public class ServiceConfig {
   // heh non transient makes it easy to debug !
   transient public String state = "INIT"; // INIT | LOADED | CREATED | STARTED |
                                           // STOPPED | RELEASED
-
-  /**
-   * if this service has peers - auto start them / and autoRelease them
-   */
-  public boolean autoStartPeers = true;
+  // FIXME - SO IMPORTANT !
+  public String get(String key) {
+    // FIXME - return reflected value
+    return null;
+  }
 
   public ServiceConfig() {
     String configTypeName = this.getClass().getSimpleName();

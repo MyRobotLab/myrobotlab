@@ -535,13 +535,6 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     broadcastState();
   }
 
-  @Override
-  public void startService() {
-    super.startService();
-    startRecording();
-    startListening();
-  }
-
   /**
    * prevents the publishing of recognized events - does NOT prevent audio being
    * recorded and processed for webkit - startRecognizer consists of setting a

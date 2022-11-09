@@ -14,6 +14,7 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
@@ -48,7 +49,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class Python extends Service implements ServiceLifeCycleListener {
+public class Python extends Service implements ServiceLifeCycleListener, MessageListener {
 
   /**
    * this thread handles all callbacks to Python process all input and sets msg
@@ -940,6 +941,12 @@ public class Python extends Service implements ServiceLifeCycleListener {
     log.info("Python System Path: {}", sys.path);
     
     return c;
+  }
+
+  @Override
+  public void onMessage(Message msg) {
+    // TODO Auto-generated method stub
+    
   }
 
 }

@@ -3,23 +3,23 @@
         <h3>Current State: {{current}}</h3>
         <table class="tableController table-condensed table-striped table-bordered">
             <tr>
-                <th>Origin State</th>
-                <th>Message Type</th>
-                <th>Target State</th>
+                <th>From State</th>
+                <th>On Event</th>
+                <th>To State</th>
                 <th></th>
             </tr>
             <tr ng-repeat="transition in service.config.transitions">
-                <td>{{transition.origin}}</td>
+                <td>{{transition.from}}</td>
                 <td>
                     <span class="glyphicon glyphicon-arrow-right"></span>
-                    &nbsp;&nbsp;&nbsp;&nbsp;{{transition.message}}
+                    &nbsp;&nbsp;&nbsp;&nbsp;{{transition.on}}
                 </td>
                 <td>
                     <span class="glyphicon glyphicon-arrow-right"></span>
-                    &nbsp;&nbsp;&nbsp;&nbsp;{{transition.target}}
+                    &nbsp;&nbsp;&nbsp;&nbsp;{{transition.to}}
                 </td>
                 <td>
-                    <button class="btn btn-default" ng-click="removeTransition(transition.origin, transition.message, transition.target)">
+                    <button class="btn btn-default" ng-click="removeTransition(transition.from, transition.on, transition.to)">
                         <span class="glyphicon glyphicon-minus"></span>
                     </button>
                         
@@ -27,13 +27,13 @@
             </tr>
             <tr>
                 <td>
-                    <input class="form-control" type="text" ng-model="origin" placeholder="Origin" style="width:200px"/>
+                    <input class="form-control" type="text" ng-model="from" placeholder="From" style="width:200px"/>
                 </td>
                 <td>
-                    <input class="form-control" type="text" ng-model="message" placeholder="Message" style="width:200px"/>
+                    <input class="form-control" type="text" ng-model="on" placeholder="On" style="width:200px"/>
                 </td>
                 <td>
-                    <input class="form-control" type="text" ng-model="target" placeholder="Target" style="width:200px"/>
+                    <input class="form-control" type="text" ng-model="to" placeholder="To" style="width:200px"/>
                 </td>
                 <td>
                     <button class="btn btn-default" ng-click="addTransition()">
@@ -47,7 +47,7 @@
                     <button class="btn btn-default" ng-click="setCurrent()">set</button>
                 </td>
                 <td>
-                    <input class="form-control" type="text" ng-model="msgKey" placeholder="Message" style="width:200px"/>
+                    <input class="form-control" type="text" ng-model="msgKey" placeholder="on" style="width:200px"/>
                     <button class="btn btn-default" ng-click="fire()">fire</button>
                 </td>
                 <td></td>

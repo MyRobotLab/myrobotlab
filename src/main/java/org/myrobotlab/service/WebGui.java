@@ -1284,7 +1284,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   public static void main(String[] args) {
-    LoggingFactory.init(Level.WARN);
+    LoggingFactory.init(Level.INFO);
 
     try {
 
@@ -1297,10 +1297,20 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
       webgui.setPort(8888);
-      webgui.startService();      
-      Runtime.start("python", "Python");
+      webgui.startService();
+      
+      Runtime runtime = Runtime.getInstance();
+      runtime.saveAllDefaults();
+      
       // Runtime.start("i01", "InMoov2");
+      // Runtime.start("python", "Python");
+      // Runtime.start("i01", "InMoov2");
+      
+      // Runtime.start("i01", "InMoov2");
+      // Runtime.start("track", "Tracking");
       // Runtime.startConfig("worky");
+      // Runtime.startConfig("InMoov2Head");
+      Runtime.startConfig("Tracking");
 
       boolean done = true;
       if (done) {

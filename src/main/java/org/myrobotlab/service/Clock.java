@@ -170,16 +170,17 @@ public class Clock extends Service {
     broadcastState();
   }
 
-  @Deprecated /* use startClock() skipping first is default behavior */
-  synchronized public void startClock(boolean skipFirst) {
+  @Deprecated /* use startClock skipFirst is default behavior */
+  public void startClock(boolean skipFirst) {
+    startClock();
+  }
+
+  /**
+   * start the clock
+   */
+  public void startClock() {
     myClock.start();
-    invoke("publishClockStarted");
   }
-
-  synchronized public void startClock() {
-    startClock(false);
-  }
-
 
   /**
    * see if the clock is running
@@ -234,7 +235,6 @@ public class Clock extends Service {
     try {
 
       Runtime.start("webgui", "WebGui");
-
 
       Clock c1 = (Clock) Runtime.start("c1", "Clock");
       c1.startClock();

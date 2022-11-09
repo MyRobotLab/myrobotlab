@@ -25,8 +25,7 @@ public class InMoov2Config extends ServiceConfig {
    */
   public boolean idleTimer = true;
   
-  public InMoov2Config() {
-    autoStartPeers = false;
+  public InMoov2Config() {   
   }
 
 }

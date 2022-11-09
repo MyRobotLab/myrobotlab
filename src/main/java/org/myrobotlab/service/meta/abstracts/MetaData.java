@@ -342,7 +342,9 @@ public class MetaData implements Serializable {
       Class<?> c = Class.forName(type);
       Constructor<?> mc = c.getConstructor();
       MetaData meta = (MetaData) mc.newInstance();
-      return meta.getDefault(name);
+      Plan plan = meta.getDefault(name);
+      
+      return plan;
 
       // FIXME - add runtime ? - or should this be available to the concrete
       // metadata ?
@@ -356,7 +358,6 @@ public class MetaData implements Serializable {
 
   public Plan getDefault(String name) {
 
-    // LinkedHashMap<String, ServiceConfig> ret = new LinkedHashMap<>();
     Plan plan = new Plan(name);
     plan.putPeers(name, peers);
     try {
@@ -374,10 +375,6 @@ public class MetaData implements Serializable {
       sc.type = simpleName;
       plan.put(name, sc);
     }
-
-    // plan.setConfig(ret);
-    // plan.merge(plan);
-
     return plan;
   }
 
@@ -407,26 +404,26 @@ public class MetaData implements Serializable {
   }
 
   public ServiceReservation getPeerFromActualName(String parentName, String fullname) {
-    
+
     // filter off name{@id} because this definition is "only" local
     if (fullname == null) {
       return null;
     }
-    
+
     String name = null;
     // take parent prefix off
     if (fullname.startsWith(parentName + ".")) {
       name = fullname.replace(parentName + ".", "");
     }
-    
+
     // two ways we can find a match
     // 1st and most common is if this is simply default with the key
-    if (peers.containsKey(name)){
+    if (peers.containsKey(name)) {
       ServiceReservation peer = peers.get(name);
       return peer;
     }
-    
-    for (ServiceReservation peer: peers.values()) {
+
+    for (ServiceReservation peer : peers.values()) {
       if (fullname.equals(peer.actualName)) {
         return peer;
       }

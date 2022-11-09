@@ -303,6 +303,8 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
 
     // $scope.setState('start')
     msg.subscribe(this)
+    msg.send('broadcastState')
+
 
 }
 ])

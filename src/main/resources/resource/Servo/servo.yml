@@ -1,6 +1,5 @@
 !!org.myrobotlab.service.config.ServoConfig
 autoDisable: false
-autoStartPeers: true
 clip: true
 controller: null
 enabled: true

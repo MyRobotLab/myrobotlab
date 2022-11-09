@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.TreeSet;
 
 import org.alicebot.ab.Chat;
 import org.alicebot.ab.Predicates;
@@ -82,7 +83,9 @@ public class Session {
 
   public void savePredicates() {
     StringBuilder sb = new StringBuilder();
-    for (String predicate : getChat().predicates.keySet()) {
+    TreeSet<String> sort = new TreeSet<>();
+    sort.addAll(getChat().predicates.keySet());
+    for (String predicate : sort) {
       String value = getChat().predicates.get(predicate);
       sb.append(predicate + ":" + value + "\n");
     }
