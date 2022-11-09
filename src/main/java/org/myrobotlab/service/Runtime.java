@@ -5074,10 +5074,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       return saveDefault( DEFAULT_CONFIG_DIR + fs + name, name, type);
   }
   
-  final public Plan saveDefault(String configPath, String name, String type) {
-    if (name.equals("inmoov2")) {
-      name = "i01";
-    }
+  final public Plan saveDefault(String configPath, String name, String type) {    
     Plan plan = MetaData.getDefault(name, type);
     for (String service : plan.getConfig().keySet()) {
       String filename = configPath + fs + service + ".yml";
