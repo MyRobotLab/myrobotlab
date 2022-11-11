@@ -1,0 +1,11 @@
+!!org.myrobotlab.service.config.RuntimeConfig
+enableCli: true
+locale: null
+logLevel: null
+registry:
+- oculusdiy.arduino.serial
+- oculusdiy.arduino
+- oculusdiy.mpu6050
+- oculusdiy
+type: Runtime
+virtual: null

@@ -23,6 +23,7 @@ public class GoPro extends Service {
     super(n, id);
   }
 
+  @Override
   public void startService() {
     super.startService();
     http = (HttpClient) startPeer("http");

@@ -101,7 +101,7 @@ public class ServiceData implements Serializable {
           continue;
         }
 
-        MetaData serviceType = (MetaData) getMetaData(fullClassName);
+        MetaData serviceType = getMetaData(fullClassName);
 
         if (!fullClassName.equals(serviceType.getType())) {
           log.error("Class name {} not equal to the MetaData's name {}", fullClassName, serviceType.getType());
@@ -257,15 +257,15 @@ public class ServiceData implements Serializable {
           type = sr.type;
         }
       }
-      
-//      if (type.equals("org.myrobotlab.service.Cron")) {
-//        log.info("here");
-//      }
+
+      // if (type.equals("org.myrobotlab.service.Cron")) {
+      // log.info("here");
+      // }
 
       type = getFullMetaTypeName(type);
 
       MetaData metaData = MetaData.get(type);
-      
+
       if (metaData == null) {
         log.info("here");
       }
@@ -456,7 +456,6 @@ public class ServiceData implements Serializable {
     return false;
   }
 
- 
   public static void main(String[] args) {
     try {
       // LoggingFactory.init(); - don't change logging for mvn

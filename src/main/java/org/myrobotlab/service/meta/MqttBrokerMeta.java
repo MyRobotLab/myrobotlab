@@ -23,7 +23,7 @@ public class MqttBrokerMeta extends MetaData {
     addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.13.3");
 
     addDependency("io.moquette", "moquette-broker", "0.15");
-    
+
     exclude("com.fasterxml.jackson.core", "jackson-core");
     exclude("com.fasterxml.jackson.core", "jackson-databind");
     exclude("com.fasterxml.jackson.core", "jackson-annotations");

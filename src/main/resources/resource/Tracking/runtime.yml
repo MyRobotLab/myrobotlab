@@ -1,0 +1,14 @@
+!!org.myrobotlab.service.config.RuntimeConfig
+enableCli: true
+locale: null
+logLevel: null
+registry:
+- tracking.controller.serial
+- tracking.controller
+- tracking.cv
+- tracking.pan
+- tracking.pid
+- tracking.tilt
+- tracking
+type: Runtime
+virtual: null

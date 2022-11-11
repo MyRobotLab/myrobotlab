@@ -322,7 +322,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 
     Runtime runtime = Runtime.getInstance();
 
-    setTitle(String.format("%s %s", runtime.getPlatform().toString(), runtime.getLocaleTag()));
+    setTitle(String.format("%s %s", Runtime.getPlatform().toString(), runtime.getLocaleTag()));
 
     JPanel flow = new JPanel();
     flow.add(createCategories());
@@ -665,7 +665,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        Platform platform = myRuntime.getPlatform();
+        Platform platform = Runtime.getPlatform();
         totalMemory.setText(String.format("%d", java.lang.Runtime.getRuntime().totalMemory() / 1048576));
         freeMemory.setText(String.format("%d", java.lang.Runtime.getRuntime().freeMemory() / 1048576));
         totalPhysicalMemory.setText(String.format("%d", java.lang.Runtime.getRuntime().maxMemory() / 1048576));
@@ -704,6 +704,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
    * overridden - looking specifically for a key'd status to signal install
    * progress dialog events
    */
+  @Override
   public void onStatus(Status status) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override

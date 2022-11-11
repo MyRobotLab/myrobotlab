@@ -37,7 +37,6 @@ public class InMoov2HandMeta extends MetaData {
     // load default peers from meta here
     plan.putPeers(name, peers);
 
-        
     // RuntimeConfig runtime = new RuntimeConfig();
     // runtime.registry = new String[] { controllerName, cvName, tiltName,
     // panName, pidName, trackingName };
@@ -123,7 +122,7 @@ public class InMoov2HandMeta extends MetaData {
     ringFinger.sweepMax = null;
     ringFinger.sweepMin = null;
 
-    ServoConfig pinky = (ServoConfig) plan.getPeerConfig("pinky");    
+    ServoConfig pinky = (ServoConfig) plan.getPeerConfig("pinky");
     pinky.autoDisable = true;
     pinky.controller = cname;
     pinky.clip = true;

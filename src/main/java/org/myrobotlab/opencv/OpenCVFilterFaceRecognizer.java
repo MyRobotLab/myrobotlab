@@ -31,6 +31,8 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.opencv_core.AbstractCvScalar;
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -109,7 +111,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   private String lastRecognizedName = null;
   public String faceModelFilename = "faceModel.bin";
   transient private CloseableFrameConverter converter = new CloseableFrameConverter();
-  
+
   @Override
   public void release() {
     // TODO Auto-generated method stub
@@ -321,6 +323,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     ArrayList<File> trainingFiles = new ArrayList<File>();
     // only jpg , png , pgm files. TODO: other formats? bmp/tiff/etc?
     FilenameFilter imgFilter = new FilenameFilter() {
+      @Override
       public boolean accept(File dir, String name) {
         name = name.toLowerCase();
         // TODO: figure out which formats we can actually accept?
@@ -387,7 +390,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   public IplImage process(IplImage image) throws InterruptedException {
     // convert to grayscale
     // Frame grayFrame =
-    
+
     IplImage imageBW = makeGrayScale(image);
     Mat bwImgMat = converter.toMat(imageBW);
     ArrayList<DetectedFace> dFaces = extractDetectedFaces(bwImgMat);
@@ -418,9 +421,9 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
           if (!StringUtils.isEmpty(trainName)) {
             try {
               saveTrainingImage(trainName, dFaceMat);
-              cvPutText(image, "Snapshot Saved: " + trainName, cvPoint(20, 60), font, CvScalar.CYAN);
+              cvPutText(image, "Snapshot Saved: " + trainName, cvPoint(20, 60), font, AbstractCvScalar.CYAN);
             } catch (IOException e) {
-              cvPutText(image, "Error saving: " + trainName, cvPoint(20, 60), font, CvScalar.CYAN);
+              cvPutText(image, "Error saving: " + trainName, cvPoint(20, 60), font, AbstractCvScalar.CYAN);
               log.warn("Unable to save the training image.", e);
             }
           }
@@ -437,7 +440,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
             face = true;
             // Resize the face to pass it to the predicter
             String name = predictFace(dFaceMat);
-            cvPutText(image, name, dF.resolveGlobalLowerLeftCorner(), font, CvScalar.CYAN);
+            cvPutText(image, name, dF.resolveGlobalLowerLeftCorner(), font, AbstractCvScalar.CYAN);
             // If it's a new name. invoke it an publish.
             if (lastRecognizedName != name) {
               invoke("publishRecognizedFace", name);
@@ -516,7 +519,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   }
 
   private IplImage makeGrayScale(IplImage image) {
-    IplImage imageBW = IplImage.create(image.width(), image.height(), 8, 1);
+    IplImage imageBW = AbstractIplImage.create(image.width(), image.height(), 8, 1);
     cvCvtColor(image, imageBW, CV_BGR2GRAY);
     return imageBW;
   }
@@ -611,20 +614,20 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 
   private void drawFaceRects(IplImage image, DetectedFace dFace) {
     // helper function to draw rectangles around the detected face(s)
-    drawRect(image, dFace.getFace(), CvScalar.MAGENTA);
+    drawRect(image, dFace.getFace(), AbstractCvScalar.MAGENTA);
     if (dFace.getLeftEye() != null) {
       // Ok the eyes are relative to the face
       Rect offset = new Rect(dFace.getFace().x() + dFace.getLeftEye().x(), dFace.getFace().y() + dFace.getLeftEye().y(), dFace.getLeftEye().width(), dFace.getLeftEye().height());
-      drawRect(image, offset, CvScalar.BLUE);
+      drawRect(image, offset, AbstractCvScalar.BLUE);
     }
     if (dFace.getRightEye() != null) {
       Rect offset = new Rect(dFace.getFace().x() + dFace.getRightEye().x(), dFace.getFace().y() + dFace.getRightEye().y(), dFace.getRightEye().width(),
           dFace.getRightEye().height());
-      drawRect(image, offset, CvScalar.BLUE);
+      drawRect(image, offset, AbstractCvScalar.BLUE);
     }
     if (dFace.getMouth() != null) {
       Rect offset = new Rect(dFace.getFace().x() + dFace.getMouth().x(), dFace.getFace().y() + dFace.getMouth().y(), dFace.getMouth().width(), dFace.getMouth().height());
-      drawRect(image, offset, CvScalar.GREEN);
+      drawRect(image, offset, AbstractCvScalar.GREEN);
     }
   }
 

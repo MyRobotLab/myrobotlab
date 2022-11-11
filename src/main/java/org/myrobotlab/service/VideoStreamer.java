@@ -60,6 +60,7 @@ public class VideoStreamer
     super(n, id);
   }
 
+  @Override
   public void attach(String videoSource) {
     try {
       VideoSource vs = (VideoSource) Runtime.getService(videoSource);

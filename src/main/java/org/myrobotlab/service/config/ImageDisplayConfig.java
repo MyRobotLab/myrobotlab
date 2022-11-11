@@ -44,14 +44,13 @@ public class ImageDisplayConfig extends ServiceConfig {
     public Float opacity = null;
 
     public Float scale = null;
-    
+
     public Boolean visible = null;
-    
-    
+
   }
 
   // DEFAULT VALUES FOR DISPLAYS !
-  
+
   /**
    * if not set - default will be center of screen
    */
@@ -80,20 +79,19 @@ public class ImageDisplayConfig extends ServiceConfig {
   public Float opacity = null;
 
   public Float scale = null;
-  
+
   public boolean visible = true;
-  
+
   /**
-   * default src of images - if one is not supplied
-   * will be resource/ImageDisplay/mrl_logo.jpg 
+   * default src of images - if one is not supplied will be
+   * resource/ImageDisplay/mrl_logo.jpg
    */
   public String src = "/ImageDisplay/mrl_logo.jpg ";
 
-
   public HashMap<String, Display> displays = new HashMap<>();
-  
+
   /**
-   * enables the service - making this false will prevent the ImageDisplay from 
+   * enables the service - making this false will prevent the ImageDisplay from
    * displaying anymore images
    */
   public boolean enabled = true;

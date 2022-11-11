@@ -1,0 +1,5 @@
+!!org.myrobotlab.service.config.InMoov2TorsoConfig
+lowStom: inmoov2torso.lowStom
+midStom: inmoov2torso.midStom
+topStom: inmoov2torso.topStom
+type: InMoov2Torso

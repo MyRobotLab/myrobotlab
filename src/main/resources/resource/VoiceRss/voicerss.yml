@@ -1,0 +1,8 @@
+!!org.myrobotlab.service.config.VoiceRssConfig
+audioFile: voicerss.audioFile
+blocking: false
+mute: false
+speechRecognizers: null
+substitutions: null
+type: VoiceRss
+voice: null

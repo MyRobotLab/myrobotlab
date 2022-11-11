@@ -309,7 +309,7 @@ public class FileIO {
 
       // jar access is non-recursive
       while (enumEntries.hasMoreElements()) {
-        JarEntry file = (JarEntry) enumEntries.nextElement();
+        JarEntry file = enumEntries.nextElement();
         // log.debug(file.getName());
 
         // spin through resources until a match
@@ -638,7 +638,7 @@ public class FileIO {
        * one spot
        */
       while (enumEntries.hasMoreElements()) {
-        JarEntry jarEntry = (JarEntry) enumEntries.nextElement();
+        JarEntry jarEntry = enumEntries.nextElement();
 
         // search for matching entries
         if (!jarEntry.getName().startsWith(src)) {
@@ -1563,7 +1563,7 @@ public class FileIO {
     }
     return String.format("%s%s%s", path1, FileIO.fs, path2);
   }
-  
+
   public static String getExt(final String filename) {
     if (filename == null) {
       return null;
@@ -1575,11 +1575,11 @@ public class FileIO {
     return null;
   }
 
-  
   /**
    * flips all \ to / or / to \ depending on OS
    * 
-   * @param dirPath - non normalized path
+   * @param dirPath
+   *          - non normalized path
    * @return - fixed path
    */
   public static String normalize(String dirPath) {
@@ -1591,8 +1591,7 @@ public class FileIO {
       return dirPath.replace("/", "\\");
     } else {
       return dirPath.replace("\\", "/");
-    }    
+    }
   }
 
-  
 }

@@ -85,6 +85,7 @@ public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis {
     addVoice(name, null, lang, null);
   }
 
+  @Override
   public boolean setVoice(String name) {
     if (voices.containsKey(name)) {
       voice = voices.get(name);

@@ -91,7 +91,8 @@ public interface Mapper {
   /**
    * Inverts the calculation multiplies the output by -1
    * 
-   * @param invert - true is inverted false is not
+   * @param invert
+   *          - true is inverted false is not
    */
   void setInverted(boolean invert);
 

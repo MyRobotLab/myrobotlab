@@ -612,10 +612,12 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
    * @param initialAngle : initial angle of rotation of the part (in radian)
    */
 
+  @Override
   public void updatePosition(ServoEvent event) {
     eventQueue.add(event);
   }
 
+  @Override
   public void simpleUpdate(float tpf) {
     // start the clock on how much time we will take
     startUpdateTs = System.currentTimeMillis();
@@ -638,7 +640,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
         float currentAngle = (float) node.getUserData("currentAngle");
         Mapper map = maps.get(node.getName());
         float rotation = (float) ((map.calcOutput(event.pos)) * Math.PI / 180 - currentAngle * Math.PI / 180);
-        Vector3f angle = rotMask.mult((float) rotation);
+        Vector3f angle = rotMask.mult(rotation);
         node.rotate(angle.x, angle.y, angle.z);
         node.setUserData("currentAngle", (map.calcOutput(event.pos)));
         servoToNode.put(event.name, node);
@@ -758,11 +760,13 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     }
   }
 
+  @Override
   public void setService(Service service) {
     this.service = service;
   }
 
   private AnalogListener analogListener = new AnalogListener() {
+    @Override
     public void onAnalog(String name, float keyPressed, float tpf) {
       if (name.equals("MouseClickL")) {
         // rotate+= keyPressed;

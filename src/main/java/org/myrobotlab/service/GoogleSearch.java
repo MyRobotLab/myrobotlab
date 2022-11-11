@@ -44,7 +44,7 @@ public class GoogleSearch extends Service implements ImagePublisher, TextPublish
   transient private static Pattern patternDomainName;
 
   transient private Matcher matcher;
-  
+
   GoogleSearchConfig c;
 
   private static final String DOMAIN_NAME_PATTERN = "([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}";
@@ -66,18 +66,17 @@ public class GoogleSearch extends Service implements ImagePublisher, TextPublish
     excludeTextFilter.add("Wikipedia");
     // setLowerCase();
   }
-  
+
   @Override
   public ServiceConfig apply(ServiceConfig config) {
     c = (GoogleSearchConfig) config;
     return c;
   }
-  
+
   @Override
   public ServiceConfig getConfig() {
     return config;
   }
-
 
   public void setLowerCase() {
     c.lowerCase = true;
@@ -204,9 +203,9 @@ public class GoogleSearch extends Service implements ImagePublisher, TextPublish
 
   // FIXME - use gson not simpl json
   @Override
-  public List<String> imageSearch(String searchText) {
+  public List<ImageData> imageSearch(String searchText) {
 
-    List<String> resultUrls = new ArrayList<String>();
+    List<ImageData> resultUrls = new ArrayList<>();
 
     try {
       // can only grab first 100 results
@@ -224,13 +223,13 @@ public class GoogleSearch extends Service implements ImagePublisher, TextPublish
 
       System.out.println("number of results: " + resultUrls.size());
 
-      for (String imageUrl : resultUrls) {
+      for (ImageData imageUrl : resultUrls) {
 
         ImageData img = new ImageData();
         img.name = searchText;
-        img.src = imageUrl;
+        img.src = imageUrl.src;
         img.source = getName();
-        
+
         invoke("publishImage", img);
         // System.out.println(imageUrl);
       }
@@ -275,7 +274,6 @@ public class GoogleSearch extends Service implements ImagePublisher, TextPublish
     return images;
   }
 
-
   @Deprecated /* use standard attachTextListener */
   public void addTextListener(TextListener service) {
     attachTextListener(service.getName());
@@ -313,11 +311,6 @@ public class GoogleSearch extends Service implements ImagePublisher, TextPublish
         return;
       }
 
-      List<String> htmlImagePage = google.imageSearch("gorilla");
-      for (String image : htmlImagePage) {
-        log.info(image);
-      }
-
       // List<String> base64Images =
       // google.extractImageRefs("/lhome/grperry/github/mrl.develop/myrobotlab/data/GoogleSearch/cachedFiles/gorilla.html");
 
@@ -336,8 +329,8 @@ public class GoogleSearch extends Service implements ImagePublisher, TextPublish
     }
   }
 
-  public List<String> extractImageRefs(String data) throws IOException {
-    List<String> ret = new ArrayList<>();
+  public List<ImageData> extractImageRefs(String data) throws IOException {
+    List<ImageData> ret = new ArrayList<>();
 
     // String data = FileIO.toString(filename);
 
@@ -354,7 +347,7 @@ public class GoogleSearch extends Service implements ImagePublisher, TextPublish
 
         if (pos1 > 0) {
           String ref = data.substring(pos1 + 1, pos0 + 3);
-          ret.add(ref);
+          ret.add(new ImageData(ref));
           if (ret.size() == c.maxImages) {
             return ret;
           }

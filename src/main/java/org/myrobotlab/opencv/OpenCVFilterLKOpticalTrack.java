@@ -47,6 +47,7 @@ import java.util.Map;
 
 import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.javacpp.indexer.UByteIndexer;
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.CvSize;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -101,7 +102,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
   protected Map<String, Integer> nameToIndex = new HashMap<>();
   protected int winSize = 15;
   protected long currentPntCnt;
-  // TODO: can i just create a new Mat instead of having to convert an IplImage to a mat first?!
+  // TODO: can i just create a new Mat instead of having to convert an IplImage
+  // to a mat first?!
   transient Mat zeroPoints = null;
   transient Mat cornersA = null;
   transient Mat cornersB = null;
@@ -127,8 +129,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
   public OpenCVFilterLKOpticalTrack(String name) {
     super(name);
-    
-    zeroPoints = converter1.toMat(IplImage.create(new CvSize().width(0).height(0), 32, 2));
+
+    zeroPoints = converter1.toMat(AbstractIplImage.create(new CvSize().width(0).height(0), 32, 2));
     cornersA = zeroPoints;
   }
 
@@ -148,8 +150,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
     FloatIndexer idx = cornersA.createIndexer();
 
-    idx.put(0,idx.size(0) - 1, 0, x);
-    idx.put(0,idx.size(0) - 1, 1, y);
+    idx.put(0, idx.size(0) - 1, 0, x);
+    idx.put(0, idx.size(0) - 1, 1, y);
     idx.release();
 
     return id;
@@ -160,7 +162,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     FloatIndexer idx = toResize.createIndexer();
     CvSize sz = new CvSize();
     sz.width(1).height((int) idx.size(0) + amount);
-    Mat tmp = converter2.toMat(IplImage.create(sz, 32, 2));
+    Mat tmp = converter2.toMat(AbstractIplImage.create(sz, 32, 2));
     FloatIndexer newIdx = tmp.createIndexer();
     // copy contents
     for (int i = 0; i < idx.size(0); i++) {
@@ -178,8 +180,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
   @Override
   public void imageChanged(IplImage image) {
 
-    grayImgA = IplImage.create(image.cvSize(), 8, 1);
-    grayImgB = IplImage.create(image.cvSize(), 8, 1);
+    grayImgA = AbstractIplImage.create(image.cvSize(), 8, 1);
+    grayImgB = AbstractIplImage.create(image.cvSize(), 8, 1);
 
     if (channels == 3) {
       cvCvtColor(image, grayImgB, CV_BGR2GRAY);
@@ -193,7 +195,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
     // copy contents
     for (int i = 0; i < idx.size(0); i++) {
-      sb.append(String.format("(%d,%d)", (int) idx.get(0,i,0), (int) idx.get(0,i,1)));
+      sb.append(String.format("(%d,%d)", (int) idx.get(0, i, 0), (int) idx.get(0, i, 1)));
     }
     idx.release();
     log.info(sb.toString());
@@ -203,7 +205,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < dir.size(); ++i) {
       TrackingPoint d = dir.get(i);
-      sb.append(String.format("%03d,%03d->%03d,%03d|", (int) d.p0.x, (int) d.p0.y, (int) d.p1.x, (int) d.p1.y));
+      sb.append(String.format("%03d,%03d->%03d,%03d|", d.p0.x, d.p0.y, d.p1.x, d.p1.y));
     }
     log.info("{}", sb);
   }
@@ -250,10 +252,10 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     }
 
     if (cornersA.address() == 0) {
-      // No corners!  null matrix!!
+      // No corners! null matrix!!
       return image;
     }
-    
+
     FloatIndexer cornersAidx = cornersA.createIndexer();
     if (cornersAidx.size(0) == 0) {
       // no requested tracking points
@@ -296,8 +298,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
         // continue;
 
       }
-      TrackingPoint direction = new TrackingPoint(i, Math.round(cornersAidx.get(0,i, 0)), Math.round(cornersAidx.get(0,i, 1)), Math.round(cornersBidx.get(0,i, 0)),
-          Math.round(cornersBidx.get(0,i, 1)));
+      TrackingPoint direction = new TrackingPoint(i, Math.round(cornersAidx.get(0, i, 0)), Math.round(cornersAidx.get(0, i, 1)), Math.round(cornersBidx.get(0, i, 0)),
+          Math.round(cornersBidx.get(0, i, 1)));
 
       direction.found = featuresFoundIdx.get(i);
       direction.error = featureErrorsIdx.get(i);
@@ -381,6 +383,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     return image;
   }
 
+  @Override
   public void samplePoint(Integer x, Integer y) {
     samplePoint = new Point(x, y);
   }

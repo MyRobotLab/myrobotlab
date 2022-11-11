@@ -13,6 +13,7 @@ import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 
+import org.bytedeco.opencv.opencv_core.AbstractCvScalar;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -132,8 +133,8 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
     for (String label : result.keySet()) {
       i++;
       String val = df2.format(result.get(label) * 100) + "%";
-      cvPutText(image, label + " : ", cvPoint(20, 60 + (i * 12)), font, CvScalar.YELLOW);
-      cvPutText(image, val, cvPoint(20 + percentOffset, 60 + (i * 12)), font, CvScalar.YELLOW);
+      cvPutText(image, label + " : ", cvPoint(20, 60 + (i * 12)), font, AbstractCvScalar.YELLOW);
+      cvPutText(image, val, cvPoint(20 + percentOffset, 60 + (i * 12)), font, AbstractCvScalar.YELLOW);
     }
   }
 

@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
@@ -156,7 +157,7 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
   public IplImage process(IplImage image) {
 
     if (channels == 3) {
-      grey = IplImage.create(image.cvSize(), 8, 1);
+      grey = AbstractIplImage.create(image.cvSize(), 8, 1);
       cvCvtColor(image, grey, CV_BGR2GRAY);
     } else {
       grey = image;

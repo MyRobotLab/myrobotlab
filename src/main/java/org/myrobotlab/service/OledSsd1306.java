@@ -416,7 +416,7 @@ public class OledSsd1306 extends Service implements I2CControl {
     // I2C
     byte control = 0x00; // Co = 0, D/C = 0
     byte buffer[] = { control, (byte) c };
-    controller.i2cWrite((I2CControl) this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
+    controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
   }
 
   // startscrollright
@@ -545,7 +545,7 @@ public class OledSsd1306 extends Service implements I2CControl {
       }
       i--;
       // Wire.endTransmission();
-      controller.i2cWrite((I2CControl) this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writeBuffer, writeBuffer.length);
+      controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writeBuffer, writeBuffer.length);
     }
 
   }
@@ -848,7 +848,7 @@ public class OledSsd1306 extends Service implements I2CControl {
   // This section contains all the new attach logic
   @Override
   public void attach(String service) throws Exception {
-    attach((Attachable) Runtime.getService(service));
+    attach(Runtime.getService(service));
   }
 
   @Override
@@ -864,6 +864,7 @@ public class OledSsd1306 extends Service implements I2CControl {
     attach((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
   }
 
+  @Override
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
 
     if (isAttached && this.controller != controller) {
@@ -881,6 +882,7 @@ public class OledSsd1306 extends Service implements I2CControl {
     broadcastState();
   }
 
+  @Override
   public void attachI2CController(I2CController controller) {
 
     if (isAttached(controller))
@@ -902,7 +904,7 @@ public class OledSsd1306 extends Service implements I2CControl {
   // TODO: This default code could be in Attachable
   @Override
   public void detach(String service) {
-    detach((Attachable) Runtime.getService(service));
+    detach(Runtime.getService(service));
   }
 
   @Override

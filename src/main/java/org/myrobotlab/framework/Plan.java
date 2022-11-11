@@ -18,9 +18,9 @@ public class Plan {
   final String name;
 
   public final static Logger log = LoggerFactory.getLogger(Plan.class);
-  
+
   LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
-  
+
   @Deprecated /* use definition in config and contract of String fieldnames */
   public Map<String, Map<String, ServiceReservation>> peers = new TreeMap<String, Map<String, ServiceReservation>>();
 
@@ -30,6 +30,7 @@ public class Plan {
     this.name = name;
   }
 
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("\n");
     for (Map.Entry<String, ServiceConfig> e : config.entrySet()) {
@@ -82,8 +83,7 @@ public class Plan {
         peers.put(peerName, ret.peers.get(peerName));
       }
     }
-    
-    
+
     for (String peerName : ret.keySet()) {
       if (replaceMatching || !config.containsKey(peerName)) {
         config.put(peerName, ret.get(peerName));
@@ -128,10 +128,7 @@ public class Plan {
   public void putPeers(String name, Map<String, ServiceReservation> peers) {
     this.peers.put(name, peers);
     if (peers != null) {
-      for (String peerKey: peers.keySet()) {
-        if (peerKey.contains("3")) {
-          log.info("here");
-        }
+      for (String peerKey : peers.keySet()) {
         addPeerConfig(peerKey);
       }
     }
@@ -163,7 +160,7 @@ public class Plan {
     } else {
       actualName = name + "." + peerKey;
     }
-    return addConfig(actualName, sr.type);  
+    return addConfig(actualName, sr.type);
   }
 
   public ServiceConfig addConfig(ServiceConfig sc) {
@@ -181,7 +178,7 @@ public class Plan {
       actualName = sr.actualName;
     } else {
       actualName = name + "." + peerKey;
-    }    
+    }
     return config.get(actualName);
   }
 
@@ -189,7 +186,7 @@ public class Plan {
     return config.remove(actualName);
   }
 
-  public Map<String,Map<String,ServiceReservation>> getPeers() {
+  public Map<String, Map<String, ServiceReservation>> getPeers() {
     return peers;
   }
 

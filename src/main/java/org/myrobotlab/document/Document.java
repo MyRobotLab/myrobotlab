@@ -63,7 +63,7 @@ public class Document {
   public Object getValue(String fieldName) {
     List<Object> ret = getField(fieldName);
     if (ret != null && ret.size() > 0) {
-      return (Object) ret.get(0);
+      return ret.get(0);
     }
     return null;
   }

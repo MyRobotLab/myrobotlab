@@ -74,15 +74,18 @@ public class Security extends Service implements AuthorizationProvider {
       this.tm = tm;
     }
 
+    @Override
     public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
       this.chain = chain;
       tm.checkServerTrusted(chain, authType);
     }
 
+    @Override
     public X509Certificate[] getAcceptedIssuers() {
 
       /**

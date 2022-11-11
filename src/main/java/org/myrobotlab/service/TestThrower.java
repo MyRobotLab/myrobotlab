@@ -70,6 +70,7 @@ public class TestThrower extends Service {
     }
   }
 
+  @Override
   public void attach(Attachable attachable) {
     if (attachable.isType("TestCatcher")) {
       addListener("publishInteger", attachable.getName());

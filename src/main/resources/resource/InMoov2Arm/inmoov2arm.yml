@@ -1,0 +1,6 @@
+!!org.myrobotlab.service.config.InMoov2ArmConfig
+bicep: inmoov2arm.bicep
+omoplate: inmoov2arm.omoplate
+rotate: inmoov2arm.rotate
+shoulder: inmoov2arm.shoulder
+type: InMoov2Arm

@@ -40,6 +40,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
@@ -114,7 +115,7 @@ public class OpenCVFilterOverlay extends OpenCVFilter {
     // IPL_DEPTH_8U
 
     // make 4 channel buffer based on attributes of 3 channel image coming in...
-    IplImage channel4 = IplImage.create(image.width(), image.height(), image.depth(), 4);
+    IplImage channel4 = AbstractIplImage.create(image.width(), image.height(), image.depth(), 4);
 
     // create "mixer" extra channel(2) --goes to--> channel(3)
     int from_to[] = { 0, 0, 1, 1, 2, 2, 2, 3 };

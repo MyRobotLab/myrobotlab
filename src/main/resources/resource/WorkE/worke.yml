@@ -1,0 +1,13 @@
+!!org.myrobotlab.service.config.WorkEConfig
+brain: null
+controller: null
+emoji: null
+eye: null
+git: null
+motorLeft: null
+motorRight: null
+mouth: null
+python: null
+simulator: null
+type: WorkE
+webgui: null

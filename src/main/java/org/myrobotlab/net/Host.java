@@ -9,6 +9,7 @@ public class Host {
   public String description;
   public Long lastActiveTs;
 
+  @Override
   public String toString() {
     return String.format("%s %s %s %d", ip, name, state, lastActiveTs);
   }

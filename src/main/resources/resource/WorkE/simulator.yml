@@ -1,0 +1,9 @@
+!!org.myrobotlab.service.config.JMonkeyEngineConfig
+cameraLookAt: null
+modelPaths: [
+  ]
+multiMapped: {
+  }
+nodes: {
+  }
+type: JMonkeyEngine

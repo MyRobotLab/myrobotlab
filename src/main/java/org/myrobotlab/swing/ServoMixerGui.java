@@ -14,6 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -61,8 +62,8 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
       servoMiniControl.setLayout(new BorderLayout());
       // TODO: make this lable render vertically
       JideLabel servoLabel = new JideLabel(sc.getName());
-      servoLabel.setOrientation(JideLabel.VERTICAL);
-      JSlider servoSlider = new JSlider(JSlider.VERTICAL, 0, 180, Double.valueOf(sc.getCurrentInputPos()).intValue());
+      servoLabel.setOrientation(SwingConstants.VERTICAL);
+      JSlider servoSlider = new JSlider(SwingConstants.VERTICAL, 0, 180, Double.valueOf(sc.getCurrentInputPos()).intValue());
       servoSlider.setName(sc.getName());
       servoSlider.addChangeListener(this);
       servoMiniControl.add(servoSlider, BorderLayout.PAGE_START);

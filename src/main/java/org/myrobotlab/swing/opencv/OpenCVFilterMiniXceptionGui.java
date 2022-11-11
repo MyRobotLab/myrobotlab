@@ -98,7 +98,7 @@ public class OpenCVFilterMiniXceptionGui extends OpenCVFilterGui implements Acti
         confidence.setValue((int) (bf.getConfidence() * 100));
 
         slopSizeText.setText(Integer.toString(bf.getBoxSlop()));
-        slopSize.setValue((int) (bf.getBoxSlop()));
+        slopSize.setValue((bf.getBoxSlop()));
       }
     });
   }

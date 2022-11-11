@@ -96,17 +96,13 @@ public class ClockGui extends ServiceGui implements ActionListener {
      * SwingUtilities.invokeLater(new Runnable() { public void run() {
      */
     /*
-
-    interval.setText((c.interval + ""));
-
-    if (c.running) {
-      startClock.setText("stop clock");
-      interval.setEnabled(false);
-    } else {
-      startClock.setText("start clock");
-      interval.setEnabled(true);
-    }
-    */
+     * 
+     * interval.setText((c.interval + ""));
+     * 
+     * if (c.running) { startClock.setText("stop clock");
+     * interval.setEnabled(false); } else { startClock.setText("start clock");
+     * interval.setEnabled(true); }
+     */
   }
 
   public void onPulse(Date date) {

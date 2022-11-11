@@ -79,6 +79,7 @@ public class InProcessCli implements Runnable {
       this.method = method;
     }
 
+    @Override
     public String toString() {
       return String.format("%s.%s", srcFullName, method);
     }
@@ -394,7 +395,7 @@ public class InProcessCli implements Runnable {
       }
     }
 
-    if (out != null  && !System.out.equals(out)) {
+    if (out != null && !System.out.equals(out)) {
       try {
         out.close();
       } catch (Exception e) {
