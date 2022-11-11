@@ -88,7 +88,7 @@ public class CodecUtils {
      * use Jackson.
      * TODO Replace with enum to allow extension for multiple backends
      */
-    public static final boolean USING_GSON = true;
+    public static final boolean USING_GSON = false;
     /**
      * The key used to locate type information
      * in a JSON dictionary. This is used to serialize
