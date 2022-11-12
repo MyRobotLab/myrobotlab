@@ -70,7 +70,7 @@ public class GsonPolymorphicTypeAdapterFactory implements TypeAdapterFactory {
                     JsonElement element = delegate.toJsonTree(value);
                     if(element.isJsonObject()) {
                         JsonObject object = delegate.toJsonTree(value).getAsJsonObject();
-                        object.addProperty(CodecUtils.CLASS_META_KEY, value.getClass().getCanonicalName());
+                        object.addProperty(CodecUtils.CLASS_META_KEY, value.getClass().getName());
                         elementAdapter.write(out, object);
                     } else
                         delegate.write(out, value);

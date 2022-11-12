@@ -22,22 +22,22 @@ public class CodecUtilsTest extends AbstractTest {
         code = "-";
         mrlLocale = new Locale(code);
         json = CodecUtils.toJson(mrlLocale);
-        assertEquals("{\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+        assertEquals("{\"language\":null,\"displayLanguage\":null,\"country\":null,\"displayCountry\":null,\"tag\":null,\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
 
         code = " - ";
         mrlLocale = new Locale(code);
         json = CodecUtils.toJson(mrlLocale);
-        assertEquals("{\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+        assertEquals("{\"language\":null,\"displayLanguage\":null,\"country\":null,\"displayCountry\":null,\"tag\":null,\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
 
         code = "  ";
         mrlLocale = new Locale(code);
         json = CodecUtils.toJson(mrlLocale);
-        assertEquals("{\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+        assertEquals("{\"language\":null,\"displayLanguage\":null,\"country\":null,\"displayCountry\":null,\"tag\":null,\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
 
         code = "";
         mrlLocale = new Locale(code);
         json = CodecUtils.toJson(mrlLocale);
-        assertEquals("{\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+        assertEquals("{\"language\":null,\"displayLanguage\":null,\"country\":null,\"displayCountry\":null,\"tag\":null,\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
 
         code = "-uS";
         mrlLocale = new Locale(code);

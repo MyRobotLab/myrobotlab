@@ -1266,22 +1266,22 @@
   <dependency>
     <groupId>com.fasterxml.jackson.core</groupId>
     <artifactId>jackson-core</artifactId>
-    <version>2.13.3</version>
+    <version>2.14.0</version>
   </dependency>
   <dependency>
     <groupId>com.fasterxml.jackson.core</groupId>
     <artifactId>jackson-annotations</artifactId>
-    <version>2.13.3</version>
+    <version>2.14.0</version>
   </dependency>
   <dependency>
     <groupId>com.fasterxml.jackson.core</groupId>
     <artifactId>jackson-databind</artifactId>
-    <version>2.13.3</version>
+    <version>2.14.0</version>
   </dependency>
   <dependency>
     <groupId>com.fasterxml.jackson.module</groupId>
     <artifactId>jackson-module-no-ctor-deser</artifactId>
-    <version>2.13.3</version>
+    <version>2.14.0</version>
   </dependency>
   <dependency>
     <groupId>org.apache.ivy</groupId>
@@ -1728,7 +1728,6 @@
 <!-- Xmpp end -->
 
   </dependencies>
-
   
   <build>
     <resources>
@@ -1883,7 +1882,6 @@
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
-                                        <exclude>module-info.class</exclude>
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>

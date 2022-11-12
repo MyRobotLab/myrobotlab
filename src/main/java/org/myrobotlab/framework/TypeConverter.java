@@ -4,13 +4,12 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
-
-import com.google.gson.Gson;
 
 /**
  * JSON TypeConverter - used in general REST api to convert url JSON parameters
@@ -23,7 +22,7 @@ public class TypeConverter {
 
   public final static Logger log = LoggerFactory.getLogger(TypeConverter.class);
 
-  private static Gson gson = new Gson();
+  // private static Gson gson = new Gson();
 
   // Possible Optimization -> pointers to known method signatures -
   // optimization so that once a
@@ -78,7 +77,7 @@ public class TypeConverter {
               // add quotes
               param = String.format("\"%s\"", param);
             }
-            newGSONTypedParamters[j] = gson.fromJson(param, pType);
+            newGSONTypedParamters[j] =  CodecUtils.fromJson(param, pType);
 
           }
 
