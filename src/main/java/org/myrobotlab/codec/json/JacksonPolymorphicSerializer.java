@@ -104,7 +104,7 @@ public class JacksonPolymorphicSerializer extends BeanSerializerBase {
     public void serialize(Object o, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeStartObject();
         serializeFields(o, jsonGenerator, serializerProvider);
-        jsonGenerator.writeStringField(CodecUtils.CLASS_META_KEY, o.getClass().getCanonicalName());
+        jsonGenerator.writeStringField(CodecUtils.CLASS_META_KEY, o.getClass().getName());
         jsonGenerator.writeEndObject();
 
     }
