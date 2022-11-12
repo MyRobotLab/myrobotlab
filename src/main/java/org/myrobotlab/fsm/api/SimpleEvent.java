@@ -52,10 +52,12 @@ public class SimpleEvent extends Event {
     this.name = eventName;
   }
 
+  @Override
   public String getName() {
     return name;
   }
 
+  @Override
   public long getTimestamp() {
     return timestamp;
   }

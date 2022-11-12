@@ -1,0 +1,18 @@
+!!org.myrobotlab.service.config.ImageDisplayConfig
+alwaysOnTop: true
+autoscaleExtendsMax: true
+bgColor: '#000000'
+displays: {
+  }
+enabled: true
+fullscreen: false
+height: null
+opacity: null
+scale: null
+screen: null
+src: '/ImageDisplay/mrl_logo.jpg '
+type: ImageDisplay
+visible: true
+width: null
+x: null
+y: null

@@ -78,6 +78,7 @@ public class MotorDualPwm extends AbstractMotor {
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     super.apply(c);
     MotorDualPwmConfig config = (MotorDualPwmConfig) c;

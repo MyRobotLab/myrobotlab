@@ -300,6 +300,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   }
 
+  @Override
   public void detachMotorController(MotorController controller) {
     controller.detach(this);
     controller = null;
@@ -384,6 +385,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     return controller != null;
   }
 
+  @Override
   public void detach() {
     // super.detach(); BAD NOT DESIRED !
     if (controller != null) {
@@ -430,6 +432,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   // FIXME promote to interface
+  @Override
   public double calcControllerOutput() {
     return mapper.calcOutput(getPowerLevel());
   }
@@ -449,9 +452,10 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     move(data.value);
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     GeneralMotorConfig config = (GeneralMotorConfig) c;
-    
+
     if (config.minIn != null) {
       mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
     } else {

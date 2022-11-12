@@ -37,6 +37,7 @@ public abstract class AbstractMotorController extends Service implements MotorCo
   }
 
   // TODO - switch to MotorControl interface instead of AbstractMotor
+  @Override
   public double motorCalcOutput(MotorControl mc) {
     double calculatedMotorControllerOutput = mc.calcControllerOutput();
     log.debug("{}.move({}) -> {}.motorMove {} -> hardware", mc.getName(), mc.getPowerLevel(), getName(), calculatedMotorControllerOutput);

@@ -27,6 +27,7 @@ public class VideoProcessWorker implements Runnable {
   }
 
   // throw from video processing method
+  @Override
   public void run() {
     processing = true;
     while (processing) {

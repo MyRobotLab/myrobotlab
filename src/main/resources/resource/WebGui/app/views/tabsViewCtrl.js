@@ -1,6 +1,8 @@
-angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$location', '$scope', '$log', '$filter', '$timeout', 'mrl', '$state', '$stateParams', function($location, $scope, $log, $filter, $timeout, mrl, $state, $stateParams) {
-    $log.info('tabsViewCtrl $scope.$id - ' + $scope.$id)
+angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$location', '$scope', '$filter', '$timeout', 'mrl', '$state', '$stateParams', function($location, $scope, $filter, $timeout, mrl, $state, $stateParams) {
+    console.info('tabsViewCtrl $scope.$id - ' + $scope.$id)
     _self = this
+
+    $scope.history = []
 
     $scope.view_tab = null
     $scope.servicename = $stateParams.servicename
@@ -39,11 +41,15 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$location', '$scope', 
         }
     }
 
+    /**
+     * go to a service tab
+     * direction - reverse or null (forward)
+     */
     $scope.changeTab = function(tab) {
         tab = mrl.getFullName(tab)
         $scope.view_tab = tab
+        $scope.history.push(tab)
 
-        var newId = "s1"
         // $location.path('service/' + tab, false)
         // $state.go('tabs2','/service/' + tab)
 
@@ -73,11 +79,28 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$location', '$scope', 
         })*/
     }
 
+    $scope.goBack = function(){
+        // pop self
+        $scope.history.pop()
+        // go back one
+        tab = $scope.history[$scope.history.length - 1]
+        $scope.view_tab = tab
+
+        $state.go('tabs2', {
+            servicename: tab
+        }, {
+            notify: false,
+            reload: false
+        })
+        
+    }
+
     $scope.searchText = {// displayName: ""
     }
 
     $scope.hasNewStatus = true
     _self.changeTab = $scope.changeTab
+    _self.goBack = $scope.goBack
     panelsUpdated(mrl.getPanelList())
     mrl.setSearchFunction($scope.setSearchText)
     mrl.setTabsViewCtrl(this)

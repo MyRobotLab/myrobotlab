@@ -173,6 +173,7 @@ public class Locale {
     return new java.util.Locale(getTag());
   }
 
+  @Override
   public String toString() {
     return getTag();
   }

@@ -101,6 +101,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     log.error("do not know how to attach to a {}", service.getClass().getSimpleName());
   }
 
+  @Override
   public void attach(UltrasonicSensorController controller, Integer trigPin, Integer echoPin) throws Exception {
 
     // critical test
@@ -125,6 +126,9 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     broadcastState();
   }
 
+  /**
+   * This method is used to clear the Min, Max, last range and ping count values.
+   */
   public void clear() {
     pingCount = 0;
     lastRange = null;
@@ -136,7 +140,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
   // TODO - this could be Java 8 default interface implementation
   @Override
   public void detach(String controllerName) {
-	isAttached = false;
+    isAttached = false;
     if (controller == null || !controllerName.equals(controller.getName())) {
       return;
     }
@@ -173,22 +177,49 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     return controller;
   }
 
+  /**
+   * There are two pins used on an Ultrasonic sensor, Trigger and Echo.
+   * This function returns the Echo Pin which is the pin the signal is returned on.
+   * @return
+   * Pin number.
+   */
   public int getEchoPin() {
     return echoPin;
   }
 
+  /**
+   * Used to get the Maximum range detected since the last clear() command.
+   * @return
+   * centimeters or inches based on the current setting.
+   */
   public Double getMax() {
     return max;
   }
 
+  /**
+   * Used to get the Minimum range detected since the last clear() command.
+   * @return
+   * centimeters or inches based on the current setting.
+   */
   public Double getMin() {
     return min;
   }
 
+  /**
+   * Used to get the number of pings sent since the last clear() command.
+   * @return
+   * Number of pings.
+   */
   public long getPingCount() {
     return pingCount;
   }
 
+  /**
+   * There are two pins used on an Ultrasonic sensor, Trigger and Echo.
+   * This function returns the Trigger Pin which is used to trigger the ping.
+   * @return
+   * Pin number.
+   */
   public int getTriggerPin() {
     return trigPin;
   }
@@ -202,6 +233,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     return this.controller == controller;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     UltrasonicSensorConfig config = (UltrasonicSensorConfig) c;
 
@@ -248,7 +280,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
         // using rate limiting and not yet ready to process
         return range;
       } else {
-        nextSampleTs = System.currentTimeMillis() + (long)(1000 * 1/rateHz);
+        nextSampleTs = System.currentTimeMillis() + (long) (1000 * 1 / rateHz);
       }
     }
 
@@ -299,6 +331,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     return null;
   }
 
+  @Override
   public Double publishRange(Double range) {
 
     lastRange = range; // * 0.393701 inches
@@ -331,10 +364,23 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     broadcastState();
   }
 
+  /**
+   * There are two pins used on an Ultrasonic sensor, Trigger and Echo.
+   * This method set the Echo Pin which is the pin the signal is returned on.
+   * @param pin
+   *  The pin the echo will be returned on.
+   */
   public void setEchoPin(int pin) {
     echoPin = pin;
   }
 
+  /**
+   * There are two pins used on an Ultrasonic sensor.
+   * Trigger and Echo.
+   * This method set the Trigger Pin which starts the ranging process.
+   * @param pin
+   *  The pin used to trigger the ranging process.
+   */
   public void setTriggerPin(int pin) {
     trigPin = pin;
   }
@@ -349,18 +395,33 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     multiplier = 0.393701;
   }
 
+  /**
+   * Sets the rate at which ranging is done to be as fast as possible (Uses more processing power).
+   */
   public void maxRate() {
     useRate = false;
   }
 
+  /**
+   * Sets the ranging rate to the rate using setRate(value).
+   */
   public void useRate() {
     useRate = true;
   }
 
+  /**
+   * Set the ping rate when ranging to the frequence supplied in the parameter.
+   * To set rates lower than one, use public void setRate(double hz) instead.
+   * @param hz
+   */
   public void setRate(int hz) {
     setRate((double) hz);
   }
 
+  /**
+   * Set the ping rate when ranging to the frequence supplied in the parameter.
+   * @param hz
+   */
   public void setRate(double hz) {
     rateHz = hz;
     useRate();
@@ -411,7 +472,9 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
       // arduino.setDebug(false);
 
       Servo servo = (Servo) Runtime.start("servo", "Servo");
-      servo.attach(arduino, 6);
+      servo.setPin(6);
+      servo.attach(arduino);
+      // servo.attach(arduino, 6);
       servo.moveTo(30.0);
 
       srf04.startRanging();

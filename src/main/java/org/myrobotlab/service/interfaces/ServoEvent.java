@@ -14,8 +14,8 @@ public class ServoEvent {
    */
   final public String name;
   /**
-   * I believe this is OUTPUT since it comes from the controller ???
-   * IS IT ALWAYS OUTPUT ?
+   * I believe this is OUTPUT since it comes from the controller ??? IS IT
+   * ALWAYS OUTPUT ?
    */
   final public Double pos;
 
@@ -23,7 +23,8 @@ public class ServoEvent {
     this.name = name;
     this.pos = pos;
   }
-  
+
+  @Override
   public String toString() {
     if (pos == null) {
       return String.format("%s null", name);

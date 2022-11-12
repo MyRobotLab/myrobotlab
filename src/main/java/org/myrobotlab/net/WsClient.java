@@ -44,29 +44,31 @@ public class WsClient implements Decoder<String, Reader> {
   protected final List<String> WEBSOCKET_EVENTS = List.of("OPEN", "CLOSE", "CLOSED", "REOPENED");
 
   public AsyncHttpClient getAsyncClient() {
-    
-//    ClientFactory.getDefault().newClient();
-//    
-//    // Netty Config ..
-//    NettyAsyncHttpProviderConfig nettyConfig = new NettyAsyncHttpProviderConfig();
-//    nettyConfig.addProperty("tcpNoDelay", "true");
-//    nettyConfig.addProperty("keepAlive", "true");
-//    nettyConfig.addProperty("reuseAddress", true);
-//    // nettyConfig.addProperty("connectTimeoutMillis",
-//    // nettyConnectionTimeout);
-//    nettyConfig.setWebSocketMaxFrameSize(262144);
-//    nettyConfig.addProperty("child.tcpNoDelay", "true");
-//    nettyConfig.addProperty("child.keepAlive", "true");
-//    // nettyConfig.setWebSocketMaxFrameSize(65536);
-//
-//    // AsyncHttpClientConfig Config
-//    AsyncHttpClientConfig.Builder b = new AsyncHttpClientConfig.Builder();
-//    b.setFollowRedirect(true).setMaxRequestRetry(-1).setConnectTimeout(-1).setReadTimeout(30000);
-//    AsyncHttpClientConfig config = b.setAsyncHttpClientProviderConfig(nettyConfig).build();
-//    AsyncHttpClient asc = new AsyncHttpClient(config);
-    
+
+    // ClientFactory.getDefault().newClient();
+    //
+    // // Netty Config ..
+    // NettyAsyncHttpProviderConfig nettyConfig = new
+    // NettyAsyncHttpProviderConfig();
+    // nettyConfig.addProperty("tcpNoDelay", "true");
+    // nettyConfig.addProperty("keepAlive", "true");
+    // nettyConfig.addProperty("reuseAddress", true);
+    // // nettyConfig.addProperty("connectTimeoutMillis",
+    // // nettyConnectionTimeout);
+    // nettyConfig.setWebSocketMaxFrameSize(262144);
+    // nettyConfig.addProperty("child.tcpNoDelay", "true");
+    // nettyConfig.addProperty("child.keepAlive", "true");
+    // // nettyConfig.setWebSocketMaxFrameSize(65536);
+    //
+    // // AsyncHttpClientConfig Config
+    // AsyncHttpClientConfig.Builder b = new AsyncHttpClientConfig.Builder();
+    // b.setFollowRedirect(true).setMaxRequestRetry(-1).setConnectTimeout(-1).setReadTimeout(30000);
+    // AsyncHttpClientConfig config =
+    // b.setAsyncHttpClientProviderConfig(nettyConfig).build();
+    // AsyncHttpClient asc = new AsyncHttpClient(config);
+
     asc = Dsl.asyncHttpClient();
-    
+
     return asc;
   }
 
@@ -107,7 +109,7 @@ public class WsClient implements Decoder<String, Reader> {
       // this.socket =
       // client.create(client.newOptionsBuilder().reconnect(false).runtime(getAsyncClient()).build());
       asc = getAsyncClient();
-      this.socket = client.create(client.newOptionsBuilder()./*runtime(asc).*/build());
+      this.socket = client.create(client.newOptionsBuilder()./* runtime(asc). */build());
       socket.on(Event.CLOSE.name(), new Function<String>() {
         @Override
         public void on(String t) {

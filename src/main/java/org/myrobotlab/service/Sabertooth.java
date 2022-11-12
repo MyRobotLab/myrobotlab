@@ -95,10 +95,12 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     map(-1.0, 1.0, -127, 127);
   }
 
+  @Override
   public void connect(String port) throws Exception {
     connect(port, 9600, 8, 1, 0);
   }
 
+  @Override
   public void disconnect() throws IOException {
     if (serial != null) {
       serial.close();
@@ -269,6 +271,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
   }
 
   // FIXME - become interface for motor port shields & controllers
+  @Override
   public List<String> getPorts() {
     return motorPorts;
   }
@@ -306,6 +309,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     SabertoothConfig config = (SabertoothConfig) c;
     if (config.connect) {
@@ -314,7 +318,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       } catch (Exception e) {
         error(e);
       }
-    }	
+    }
     return c;
   }
 

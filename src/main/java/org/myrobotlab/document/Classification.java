@@ -49,7 +49,7 @@ public class Classification extends Document {
   public Float getConfidence() {
     return (Float) getValue("confidence");
   }
-  
+
   public void setCenterX(double confidence) {
     setField("centerX", confidence);
   }

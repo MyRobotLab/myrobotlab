@@ -156,10 +156,12 @@ public class TestJmeIMModel extends SimpleApplication implements IntegratedMovem
     nodeQueue.add(node);
   }
 
+  @Override
   public void updatePosition(ServoEvent event) {
     eventQueue.add(event);
   }
 
+  @Override
   public void simpleUpdate(float tpf) {
     if (updateCollisionItem) {
       for (Node node : collisionItems) {
@@ -216,6 +218,7 @@ public class TestJmeIMModel extends SimpleApplication implements IntegratedMovem
   }
 
   public ActionListener actionListener = new ActionListener() {
+    @Override
     public void onAction(String name, boolean keyPressed, float tpf) {
       if (name.equals("MouseClickL")) {
         // rotate+= keyPressed;
@@ -232,6 +235,7 @@ public class TestJmeIMModel extends SimpleApplication implements IntegratedMovem
   };
 
   private AnalogListener analogListener = new AnalogListener() {
+    @Override
     public void onAnalog(String name, float keyPressed, float tpf) {
       if (name.equals("MouseClickL")) {
         // rotate+= keyPressed;
@@ -259,6 +263,7 @@ public class TestJmeIMModel extends SimpleApplication implements IntegratedMovem
   private HashMap<String, Geometry> shapes = new HashMap<String, Geometry>();
   private boolean updateCollisionItem = false;
 
+  @Override
   public void addObject(CollisionItem item) {
     if (!item.isRender()) {
       return;
@@ -302,6 +307,7 @@ public class TestJmeIMModel extends SimpleApplication implements IntegratedMovem
     }
   }
 
+  @Override
   public void addObject(ConcurrentHashMap<String, CollisionItem> items) {
     updateCollisionItem = true;
     for (CollisionItem item : items.values()) {
@@ -310,6 +316,7 @@ public class TestJmeIMModel extends SimpleApplication implements IntegratedMovem
     updateCollisionItem = false;
   }
 
+  @Override
   public void addPoint(Point point) {
     pointQueue.add(point);
 

@@ -32,6 +32,7 @@ public final class DockableFrame extends JFrame {
 
     // this.getRootPane().addComponentListener(new ComponentAdapter() {
     this.addComponentListener(new ComponentAdapter() {
+      @Override
       public void componentMoved(ComponentEvent e) {
         // tabData.x
         tabData.x = e.getComponent().getX();
@@ -39,6 +40,7 @@ public final class DockableFrame extends JFrame {
         self.tabPane.save();
       }
 
+      @Override
       public void componentResized(ComponentEvent e) {
         // Component c = e.getComponent();
         /*

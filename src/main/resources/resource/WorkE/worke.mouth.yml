@@ -1,0 +1,10 @@
+!!org.myrobotlab.service.config.PollyConfig
+audioFile: worke.mouth.audioFile
+autoDetectSsml: true
+blocking: false
+mute: false
+speechRecognizers: null
+ssml: false
+substitutions: null
+type: Polly
+voice: Brian

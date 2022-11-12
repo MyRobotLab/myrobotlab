@@ -246,9 +246,9 @@ public class OpenWeatherMap extends HttpClient {
   public String getLocalUnits() {
     return localUnits;
   }
-  
+
   public String getApiKey() {
-    return  Runtime.getSecurity().getKey("OPENWEATHERMAP");
+    return Runtime.getSecurity().getKey("OPENWEATHERMAP");
   }
 
   @Override
@@ -260,6 +260,7 @@ public class OpenWeatherMap extends HttpClient {
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     OpenWeatherMapConfig config = (OpenWeatherMapConfig) c;
     setUnits(config.currentUnits);

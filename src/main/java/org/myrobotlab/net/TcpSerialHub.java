@@ -88,6 +88,7 @@ public class TcpSerialHub implements Runnable {
     // serial.addByteListener(this);
   }
 
+  @Override
   synchronized public void run() {
     try {
       listener = new ServerSocket(port);

@@ -1,0 +1,5 @@
+!!org.myrobotlab.service.config.JoystickConfig
+analogListeners: null
+componentListeners: null
+controller: null
+type: Joystick

@@ -190,6 +190,7 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
     samplePoint((int) (x * width), (int) (y * height));
   }
 
+  @Override
   public void samplePoint(Integer x, Integer y) {
     // MouseEvent me = (MouseEvent)params[0];
     // if (event.getButton() == 1) {

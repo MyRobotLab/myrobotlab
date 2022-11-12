@@ -1,0 +1,3 @@
+!!org.myrobotlab.service.config.VertxConfig
+port: 8443
+type: Vertx

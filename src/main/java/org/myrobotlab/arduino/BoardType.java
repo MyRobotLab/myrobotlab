@@ -18,6 +18,7 @@ public class BoardType {
    */
   Integer id;
 
+  @Override
   public String toString() {
     return name;
   }

@@ -35,6 +35,7 @@ public class MotorHat4Pi extends AbstractMotor {
     }
   }
 
+  @Override
   public Set<String> refreshControllers() {
     controllers.clear();
     controllers.addAll(Runtime.getServiceNamesFromInterface(AdafruitMotorHat4Pi.class));
@@ -98,6 +99,7 @@ public class MotorHat4Pi extends AbstractMotor {
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     super.apply(c);
     MotorHat4PiConfig config = (MotorHat4PiConfig) c;

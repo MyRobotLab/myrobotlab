@@ -2,8 +2,15 @@
     <table>
         <tr>
             <td>
-                If you will be using I2C GPIO pins make sure you have enabled 
-     i2c with raspiconfig
+                <a href ng-click="setup = !setup">setup</a>
+            </td>
+        </tr>
+        <tr ng-show="setup">
+            <td>
+                If you will be using I2C GPIO pins make sure you have enabled i2c with 
+                <pre>sudo raspiconfig </pre> <br/>
+                <img src="RasPi/setup-1.png" /> <br/><br/>
+                <img src="RasPi/setup-2.png" /> <br/><br/>
     <pre>sudo apt-get install -y i2c-tools</pre>
                 More recent rasbian distributions require building and installing this library 
     <a href=https://github.com/WiringPi/WiringPi>https://github.com/WiringPi/WiringPi</a>
@@ -39,25 +46,25 @@
     <uib-tabset active="active">
         <!-- begin -->
         <uib-tab heading="Pins">
-        <div class="row">
-            <div class="col-md-8">
-             <br/>
-                <div class="columns">
-                    <div class="content" ng-repeat="(pinKey, pinDef) in service.addressIndex">
-                        {{ pinDef.pin }} 
+            <div class="row">
+                <div class="col-md-8">
+                    <br/>
+                    <div class="columns">
+                        <div class="content" ng-repeat="(pinKey, pinDef) in service.addressIndex">
+                            {{ pinDef.pin }} 
             <toggle ng-model="pinDef.readWrite" class="toggle-text" ng-change="readWrite(pinDef)" size="btn-sm" on-class="btn-success" on="write" off="read"></toggle>
-                        <span ng-show="pinDef.isRx" class="badge badge-danger" style="background:red">Rx</span>
-                        <span ng-show="pinDef.isTx" class="badge badge-primary" style="background:yellow;color:grey">Tx</span>
-                        <span ng-show="pinDef.isPwm && !pinDef.readWrite" class="badge badge-primary" style="background:aquamarine;color:grey">Pwm</span>
-                        <span ng-show="pinDef.isSda" class="badge badge-primary" style="background:lightcyan;color:grey">Sda</span>
-                        <span ng-show="pinDef.isScl" class="badge badge-primary" style="background:lightskyblue;color:grey">Scl</span>
-                        <toggle ng-show="pinDef.readWrite" ng-model="pinDef.valueDisplay" class="toggle-text" ng-change="write(pinDef)" size="btn-sm" on="1" off="0" on-class="btn-success"></toggle>
-                        <!-- input ng-show="pinDef.readWrite" min="0" max="255" value="pinDef.value" class="base-slider slider-width100" ng-show="service.autoDisable" type="range" name="idleSeconds" ng-model="pinDef.value" min="1" max="10" ng-change="pwm(pinDef)" -->
-                        <span ng-show="pinDef.readWrite" class="badge badge-secondary">{{pinDef.value}}</span>
+                            <span ng-show="pinDef.isRx" class="badge badge-danger" style="background:red">Rx</span>
+                            <span ng-show="pinDef.isTx" class="badge badge-primary" style="background:yellow;color:grey">Tx</span>
+                            <span ng-show="pinDef.isPwm && !pinDef.readWrite" class="badge badge-primary" style="background:aquamarine;color:grey">Pwm</span>
+                            <span ng-show="pinDef.isSda" class="badge badge-primary" style="background:lightcyan;color:grey">Sda</span>
+                            <span ng-show="pinDef.isScl" class="badge badge-primary" style="background:lightskyblue;color:grey">Scl</span>
+                            <toggle ng-show="pinDef.readWrite" ng-model="pinDef.valueDisplay" class="toggle-text" ng-change="write(pinDef)" size="btn-sm" on="1" off="0" on-class="btn-success"></toggle>
+                            <!-- input ng-show="pinDef.readWrite" min="0" max="255" value="pinDef.value" class="base-slider slider-width100" ng-show="service.autoDisable" type="range" name="idleSeconds" ng-model="pinDef.value" min="1" max="10" ng-change="pwm(pinDef)" -->
+                            <span ng-show="pinDef.readWrite" class="badge badge-secondary">{{pinDef.value}}</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
         </uib-tab>
         <!-- end -->
         <!-- begin -->

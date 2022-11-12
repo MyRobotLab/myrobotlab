@@ -8,8 +8,9 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.config.SpeechRecognizerConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.SpeechRecognizerConfig;
+import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
@@ -148,6 +149,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   /**
    * routable attach handles attaching based on type info
    */
+  @Override
   public void attach(Attachable attachable) {
     if (attachable instanceof SpeechSynthesis) {
       attachSpeechSynthesis((SpeechSynthesis) attachable);
@@ -165,6 +167,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    * talkig to ourselves ...
    * 
    */
+  @Override
   public void attachSpeechSynthesis(SpeechSynthesis mouth) {
     if (mouth == null) {
       log.warn("{}.attachSpeechSynthesis(null)", getName());
@@ -173,6 +176,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     mouth.attachSpeechListener(this.getName());
   }
 
+  @Override
   public void attachTextListener(TextListener service) {
     if (service == null) {
       log.warn("{}.attachTextListener(null)", getName());
@@ -191,6 +195,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   /**
    * @return Get the current wake word
    */
+  @Override
   public String getWakeWord() {
     return wakeWord;
   }
@@ -234,6 +239,30 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     // affect "recognizing"
     // FIXME - add a deta time after ...
 
+    if (afterSpeakingPauseMs > 0) {
+      // remove previous one shot - because we are "sliding" the window of
+      // stopping the publishing of recognized words
+      addTaskOneShot(afterSpeakingPauseMs, "setSpeaking", new Object[] { false });
+      log.warn("isSpeaking = false will occur in {} ms", afterSpeakingPauseMs);
+    } else {
+      setSpeaking(false, null);
+    }
+  }
+
+  @Override
+  public void onAudioStart(AudioData data) {
+    log.info("heard sound {}", data);
+    // remove any currently pending "no longer listening" delay tasks, because
+    // we started a new isSpeaking = true, so the pause window after has moved
+    purgeTask("setSpeaking");
+    // isSpeaking = true;
+    setSpeaking(true, data.getFileName());
+    return;
+  }
+
+  @Override
+  public void onAudioEnd(AudioData data) {
+    log.info("sound stopped {}", data);
     if (afterSpeakingPauseMs > 0) {
       // remove previous one shot - because we are "sliding" the window of
       // stopping the publishing of recognized words
@@ -451,6 +480,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    * listening" similar to "hey google"
    * 
    */
+  @Override
   public void setWakeWord(String word) {
     if (word == null || word.trim().length() == 0) {
       word = null;
@@ -505,6 +535,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     broadcastState();
   }
 
+  @Override
   public void startService() {
     super.startService();
     startRecording();
@@ -533,6 +564,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     broadcastState();
   }
 
+  @Override
   public void stopService() {
     super.stopService();
     stopListening();
@@ -551,30 +583,32 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   /**
    * Stop wake word functionality .. after being called stop and start
    */
+  @Override
   public void unsetWakeWord() {
     setWakeWord(null);
   }
 
-  /*
-   * @Override public ServiceConfig getConfig() { AbstractSpeechRecognizerConfig
-   * config = new AbstractSpeechRecognizerConfig(); config.listening =
-   * isListening(); config.wakeWord = getWakeWord(); Set<String> listeners =
-   * getAttached("publishText"); config.textListeners = listeners.toArray(new
-   * String[listeners.size()]); return config; }
-   */
+  @Override
+  public ServiceConfig getConfig() {
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig) config;
+    c.listening = isListening();
+    c.wakeWord = getWakeWord();
+    Set<String> listeners = getAttached("publishText");
+    c.textListeners = listeners.toArray(new String[listeners.size()]);
+    return c;
+  }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
-    if (c instanceof SpeechRecognizerConfig) {
-      SpeechRecognizerConfig config = (SpeechRecognizerConfig) c;
-      setWakeWord(config.wakeWord);
-      if (config.listening) {
-        startListening();
-      }
+    SpeechRecognizerConfig config = (SpeechRecognizerConfig) c;
+    setWakeWord(config.wakeWord);
+    if (config.listening) {
+      startListening();
+    }
 
-      if (config.textListeners != null) {
-        for (String listener : config.textListeners) {
-          addListener("publishText", listener);
-        }
+    if (config.textListeners != null) {
+      for (String listener : config.textListeners) {
+        addListener("publishText", listener);
       }
     }
     return c;

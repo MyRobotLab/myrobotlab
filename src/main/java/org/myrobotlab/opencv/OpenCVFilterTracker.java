@@ -37,6 +37,8 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
+import org.bytedeco.opencv.opencv_core.AbstractCvScalar;
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -94,7 +96,7 @@ public class OpenCVFilterTracker extends OpenCVFilter {
 
   // To hold x,y,w,h
   int[] points = new int[4];
-  
+
   transient private CloseableFrameConverter converter = new CloseableFrameConverter();
 
   public OpenCVFilterTracker() {
@@ -106,7 +108,7 @@ public class OpenCVFilterTracker extends OpenCVFilter {
   }
 
   private IplImage makeGrayScale(IplImage image) {
-    IplImage imageBW = IplImage.create(image.width(), image.height(), 8, 1);
+    IplImage imageBW = AbstractIplImage.create(image.width(), image.height(), 8, 1);
     cvCvtColor(image, imageBW, CV_BGR2GRAY);
     return imageBW;
   }
@@ -115,9 +117,9 @@ public class OpenCVFilterTracker extends OpenCVFilter {
   public IplImage process(IplImage image) {
     // TODO: I suspect this would be faster if we cut color first.
     // cvCutColor()
-    
+
     if (blackAndWhite) {
-      IplImage imageBw = makeGrayScale(image); 
+      IplImage imageBw = makeGrayScale(image);
       // frame = converter.toFrame(imageBw);
       mat = converter.toMat(imageBw);
     } else {
@@ -128,26 +130,26 @@ public class OpenCVFilterTracker extends OpenCVFilter {
       // log.info("Yes ! Bounding box : {} {} {} {} " , boundingBox.x(),
       // boundingBox.y(), boundingBox.width()
       // ,boundingBox.height());
-      synchronized(tracker) {
+      synchronized (tracker) {
         tracker.update(mat, boundingBox);
       }
       // boundingBox.x()
-      int x0 = (int) (boundingBox.x());
-      int y0 = (int) (boundingBox.y());
-      int x1 = x0 + (int) (boundingBox.width());
-      int y1 = y0 + (int) (boundingBox.height());
+      int x0 = (boundingBox.x());
+      int y0 = (boundingBox.y());
+      int x1 = x0 + (boundingBox.width());
+      int y1 = y0 + (boundingBox.height());
       // log.info("Drawing {} {} -- {} {}", x0,y0,x1,y1);
-      cvDrawRect(image, cvPoint(x0, y0), cvPoint(x1, y1), CvScalar.RED, 1, 1, 0);
+      cvDrawRect(image, cvPoint(x0, y0), cvPoint(x1, y1), AbstractCvScalar.RED, 1, 1, 0);
 
       ArrayList<Point2df> pointsToPublish = new ArrayList<Point2df>();
-      float xC = (float) (boundingBox.x() + boundingBox.width() / 2);
-      float yC = (float) (boundingBox.y() + boundingBox.height() / 2);
+      float xC = boundingBox.x() + boundingBox.width() / 2;
+      float yC = boundingBox.y() + boundingBox.height() / 2;
       Point2df center = new Point2df(xC, yC);
       pointsToPublish.add(center);
       data.put("TrackingPoints", pointsToPublish);
 
     }
-   
+
     return image;
   }
 
@@ -160,35 +162,35 @@ public class OpenCVFilterTracker extends OpenCVFilter {
 
   private Tracker createTracker(String trackerType) {
     // TODO: add a switch for all the other types of trackers!
-    // if (trackerType.equalsIgnoreCase("Boosting")) { 
-    //  return TrackerBoosting.create(); 
-    // } else 
+    // if (trackerType.equalsIgnoreCase("Boosting")) {
+    // return TrackerBoosting.create();
+    // } else
     if (trackerType.equalsIgnoreCase("CSRT")) {
-      TrackerCSRT tracker =TrackerCSRT.create();
+      TrackerCSRT tracker = TrackerCSRT.create();
       return tracker;
     } else if (trackerType.equalsIgnoreCase("GOTURN")) {
       return TrackerGOTURN.create();
     } else if (trackerType.equalsIgnoreCase("KCF")) {
       return TrackerKCF.create();
-    } else 
-      
-    //if (trackerType.equalsIgnoreCase("MedianFlow")) { 
-    //  return TrackerMedianFlow.create(); 
-    //} else 
-      if (trackerType.equalsIgnoreCase("MIL")) {
+    } else
+
+    // if (trackerType.equalsIgnoreCase("MedianFlow")) {
+    // return TrackerMedianFlow.create();
+    // } else
+    if (trackerType.equalsIgnoreCase("MIL")) {
       return TrackerMIL.create();
     } else
-    //if (trackerType.equalsIgnoreCase("MOSSE")) { 
-    //  return TrackerMOSSE.create(); 
-    //} else 
-    //if (trackerType.equalsIgnoreCase("TLD")) {
-    //  return TrackerTLD.create(); 
-    //} else 
+    // if (trackerType.equalsIgnoreCase("MOSSE")) {
+    // return TrackerMOSSE.create();
+    // } else
+    // if (trackerType.equalsIgnoreCase("TLD")) {
+    // return TrackerTLD.create();
+    // } else
     {
       // TODO: why?
       log.warn("Unknown Tracker Algorithm {} defaulting to CSRT", trackerType);
       // default to TLD..
-      TrackerCSRT tracker = TrackerCSRT.create(); 
+      TrackerCSRT tracker = TrackerCSRT.create();
       return tracker;
     }
 
@@ -198,6 +200,7 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     samplePoint((int) (x * width), (int) (y * height));
   }
 
+  @Override
   public void samplePoint(Integer x, Integer y) {
     // TODO: implement a state machine where you select the first corner. then
     // you select the second corner
@@ -209,13 +212,13 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     // better to have the current frame and do the
     // initialization here.)
     if (tracker == null) {
-        tracker = createTracker(trackerType);
+      tracker = createTracker(trackerType);
     }
     log.info("Created tracker");
     // TODO: I'm worried about thread safety with the "mat" object.
     if (mat != null) {
       // TODO: what happens if we're already initalized?
-      synchronized(tracker) {
+      synchronized (tracker) {
         tracker.init(mat, boundingBox);
       }
       log.info("Initialized tracker");

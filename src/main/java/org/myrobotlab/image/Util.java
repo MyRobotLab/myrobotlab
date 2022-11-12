@@ -579,7 +579,7 @@ public class Util {
     }
     FloatPointer confidencesFV = arrayListToFloatPointer(confidences);
     IntPointer indicesIp = new IntPointer();
-    NMSBoxes(boxesRV, confidencesFV, (float) threshold, nmsThreshold, indicesIp);
+    NMSBoxes(boxesRV, confidencesFV, threshold, nmsThreshold, indicesIp);
     ArrayList<DetectedText> goodOnes = new ArrayList<DetectedText>();
     for (int m = 0; m < indicesIp.limit(); m++) {
       int i = indicesIp.get(m);

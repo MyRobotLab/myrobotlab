@@ -84,14 +84,17 @@ public class Proxy extends Service {
   // methodMap data - dynaFuncs
   // overloaded serialization toJson ...
 
+  @Override
   public String getId() {
     return "unknown";
   }
 
+  @Override
   public boolean isLocal() {
     return false;
   }
 
+  @Override
   public String getType() {
     // overloaded to support other types
     return Proxy.class.getCanonicalName();

@@ -1,25 +1,6 @@
 /**
  *                    
  * @author grog (at) myrobotlab.org
- *  
- * This file is part of MyRobotLab (http://myrobotlab.org).
- *
- * MyRobotLab is free software: you can redistribute it and/or modify
- * it under the terms of the Apache License 2.0 as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version (subject to the "Classpath" exception
- * as provided in the LICENSE.txt file that accompanied this code).
- *
- * MyRobotLab is distributed in the hope that it will be useful or fun,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * Apache License 2.0 for more details.
- *
- * All libraries in thirdParty bundle are subject to their own license
- * requirements - please refer to http://myrobotlab.org/libraries for 
- * details.
- * 
- * Enjoy !
  * 
  * */
 
@@ -27,14 +8,13 @@ package org.myrobotlab.service;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.ClockConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.data.ClockEvent;
 import org.slf4j.Logger;
 
 /**
@@ -53,140 +33,169 @@ public class Clock extends Service {
 
     @Override
     public void run() {
+      ClockConfig c = (ClockConfig) config;
 
       try {
-        boolean firstTime = true;
-        running = true;
-        while (running) {
-          Date now = new Date();
-          Iterator<ClockEvent> i = events.iterator();
-          while (i.hasNext()) {
-            ClockEvent event = i.next();
-            if (now.after(event.time)) {
-              // TODO repeat - don't delete set time forward
-              // interval
-              send(event.name, event.method, event.data);
-              i.remove();
-            }
-          }
 
-          if (firstTime && skipFirst) {
-            firstTime = false;
-            continue;
+        c.running = true;
+        while (c.running) {
+          Thread.sleep(c.interval);
+          Date now = new Date();
+          for (Message msg : events) {
+            send(msg);
           }
           invoke("pulse", now);
           invoke("publishTime", now);
           invoke("publishEpoch", now);
-
-          Thread.sleep(interval);
-          firstTime = false;
         }
       } catch (InterruptedException e) {
         log.info("ClockThread interrupt");
       }
-      running = false;
+      c.running = false;
       thread = null;
     }
 
+    // FIXME - synchronized methods is silly here - access needs to be
+    // synchronized "between" start & stop
+    // TODO - create and use a single thread - use wait(sleep) notify for
+    // control
     synchronized public void start() {
       if (thread == null) {
         thread = new Thread(this, getName() + "_ticking_thread");
         thread.start();
+        invoke("publishClockStarted");
       } else {
         log.info("{} already started", getName());
       }
     }
 
-    public void stop() {
+    synchronized public void stop() {
+      ClockConfig c = (ClockConfig) config;
       if (thread != null) {
         thread.interrupt();
-        thread = null;
       } else {
         log.info("{} already stopped");
       }
+
+      // change state - broadcast it
+      if (c.running == true) {
+        broadcastState();
+      }
+
+      c.running = false;
+      thread = null;
     }
   }
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(Clock.class);
-
-  protected volatile boolean running;
+  final public static Logger log = LoggerFactory.getLogger(Clock.class);
 
   final protected transient ClockThread myClock = new ClockThread();
-  
-  protected int interval = 1000;
 
-  protected List<ClockEvent> events = new ArrayList<ClockEvent>();
-
-  private boolean skipFirst = false;
+  /**
+   * list of messages the clock can send - these are set with addClockEvent
+   */
+  final protected List<Message> events = new ArrayList<>();
 
   public Clock(String n, String id) {
     super(n, id);
   }
 
-  public void addClockEvent(Date time, String name, String method, Object... data) {
-    ClockEvent event = new ClockEvent(time, name, method, data);
+  public void addClockEvent(String name, String method, Object... data) {
+    Message event = Message.createMessage(getName(), name, method, data);
     events.add(event);
   }
 
-  // FIXME - to spec would be "publishClockStarted()"
-  // clock started event
+  /**
+   * clears all the clock events
+   */
+  public void clearClockEvents() {
+    events.clear();
+  }
+
+  /**
+   * event published for when the clock is started
+   */
   public void publishClockStarted() {
-    running = true;
     log.info("clock started");
     broadcastState();
   }
 
   /**
-   * The clock was stopped event
+   * the clock was stopped event
    */
   public void publishClockStopped() {
-    running = false;
+    log.info("clock stopped");
     broadcastState();
   }
 
   /**
-   * Date is published at an interval here
+   * date is published at an interval here
    * 
    * @param time
    *          t
    * @return t
    */
+  @Deprecated /* use publishTime or preferably publishEpoch as epoch is in a useful millisecond value */
   public Date pulse(Date time) {
     return time;
   }
 
+  /**
+   * publishing point for a the current date object
+   * @param time
+   * @return
+   */
   public Date publishTime(Date time) {
     return time;
   }
 
+  /**
+   * publishing point for epoch
+   * @param time - epoch value, number of milliseconds from Jan 1 1970
+   * @return
+   */
   public long publishEpoch(Date time) {
     return time.getTime();
   }
 
+  /**
+   * set the interval of clock events to the current millisecond value
+   * @param milliseconds
+   */
   public void setInterval(Integer milliseconds) {
-    interval = milliseconds;
+    ClockConfig c = (ClockConfig) config;
+    c.interval = milliseconds;
     broadcastState();
   }
 
+  @Deprecated /* use startClock skipFirst is default behavior */
   public void startClock(boolean skipFirst) {
-    this.skipFirst = skipFirst;
-    myClock.start();
-    invoke("publishClockStarted");
+    startClock();
   }
 
+  /**
+   * start the clock
+   */
   public void startClock() {
-    startClock(false);
+    myClock.start();
   }
 
+  /**
+   * see if the clock is running
+   * @return
+   */
   public boolean isClockRunning() {
-    return running;
+    ClockConfig c = (ClockConfig) config;
+    return c.running;
   }
 
+  /**
+   * stop a clock
+   */
   public void stopClock() {
     myClock.stop();
-    broadcastState();
   }
 
   @Override
@@ -195,20 +204,17 @@ public class Clock extends Service {
     stopClock();
   }
 
+  /**
+   * return the current interval in milliseconds
+   * @return
+   */
   public Integer getInterval() {
-    return interval;
+    return ((ClockConfig) config).interval;
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    ClockConfig c = (ClockConfig) config;
-    c.interval = interval;
-    c.skipFirst = skipFirst;
-    c.running = running;
-    return c;
-  }
-
   public ServiceConfig apply(ServiceConfig c) {
+    super.apply(c);
     ClockConfig config = (ClockConfig) c;
     if (config.running != null) {
       if (config.running) {
@@ -217,54 +223,22 @@ public class Clock extends Service {
         stopClock();
       }
     }
-    interval = config.interval;
-    skipFirst = config.skipFirst;
     return config;
+  }
+
+  public void restartClock() {
+    stopClock();
+    startClock();
   }
 
   public static void main(String[] args) throws Exception {
     try {
-      // LoggingFactory.init(Level.WARN);
 
-      Runtime runtime = Runtime.getInstance();
+      Runtime.start("webgui", "WebGui");
 
       Clock c1 = (Clock) Runtime.start("c1", "Clock");
-      c1.startClock(true);
+      c1.startClock();
       c1.stopClock();
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
-      // connections
-      boolean mqtt = true;
-      boolean rconnect = false;
-
-      /*
-       * 
-       * WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui"); //
-       * webgui.setSsl(true); webgui.autoStartBrowser(false);
-       * webgui.setPort(8887); webgui.startService();
-       */
-      if (mqtt) {
-        // Mqtt mqtt02 = (Mqtt)Runtime.create("broker", "MqttBroker");
-        Mqtt mqtt02 = (Mqtt) Runtime.start("mqtt02", "Mqtt");
-        /*
-         * mqtt02.setCert("certs/home-client/rootCA.pem",
-         * "certs/home-client/cert.pem.crt", "certs/home-client/private.key");
-         * mqtt02.connect(
-         * "mqtts://a22mowsnlyfeb6-ats.iot.us-west-2.amazonaws.com:8883");
-         */
-        // mqtt02.connect("mqtt://broker.emqx.io:1883");
-        mqtt02.connect("mqtt://localhost:1883");
-      }
-
-      if (rconnect) {
-        // Runtime runtime = Runtime.getInstance();
-        // runtime.connect("http://localhost:8888");
-
-      }
 
     } catch (Exception e) {
       log.error("main threw", e);

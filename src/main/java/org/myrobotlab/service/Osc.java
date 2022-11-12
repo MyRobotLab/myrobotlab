@@ -58,6 +58,7 @@ public class Osc extends Service implements OSCListener {
       return address;
     }
 
+    @Override
     public String toString() {
       StringBuilder sb = new StringBuilder();
       sb.append("osc ");
@@ -148,6 +149,7 @@ public class Osc extends Service implements OSCListener {
     invoke("publishOscMessage", new Date().getTime(), message);
   }
 
+  @Override
   public void stopService() {
     super.stopService();
     stopListening();

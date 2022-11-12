@@ -19,7 +19,8 @@ public class WebkitSpeechSynthesisMeta extends AbstractSpeechSynthesisMeta {
     setAvailable(true); // false if you do not want it viewable in a
     addCategory("speech", "sound");
   }
-  
+
+  @Override
   public Plan getDefault(String name) {
 
     Plan plan = new Plan(name);
@@ -33,6 +34,5 @@ public class WebkitSpeechSynthesisMeta extends AbstractSpeechSynthesisMeta {
 
     return plan;
   }
-
 
 }

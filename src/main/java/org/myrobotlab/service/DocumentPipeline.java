@@ -155,6 +155,7 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
   }
 
   // TODO: put this on a base class or something?
+  @Override
   public ProcessingStatus onDocuments(List<Document> docs) {
     ProcessingStatus totalStat = ProcessingStatus.OK;
     for (Document d : docs) {

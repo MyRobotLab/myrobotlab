@@ -1,0 +1,13 @@
+!!org.myrobotlab.service.config.NeoPixelConfig
+blue: 0
+brightness: 255
+controller: null
+currentAnimation: null
+fill: false
+green: 0
+pin: null
+pixelCount: null
+pixelDepth: 3
+red: 0
+speed: 10
+type: NeoPixel

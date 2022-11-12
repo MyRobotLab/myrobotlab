@@ -1,4 +1,4 @@
-angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templateCache', 'mrl', 'modalService', '$state', '$stateParams', function($compile, $templateCache, mrl, modalService, $state, $stateParams) {
+angular.module('mrlapp.service').directive('serviceBody', ['peer', '$compile', '$templateCache', 'mrl', 'modalService', '$state', '$stateParams', function(peer, $compile, $templateCache, mrl, modalService, $state, $stateParams) {
     return {
         scope: {
             panel: '='
@@ -11,7 +11,7 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
             if (!scope.panel) {
                 // Intro is trying to access panels probably in ng-show="false" state
                 // but it will still explode since they are just being registered
-                console.error('service directive panel is null')
+                console.info('service directive panel is null')
                 return
             }
 
@@ -58,9 +58,25 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                         mrl.sendTo('runtime', 'saveDefault', scope.panel.displayName, scope.panel.simpleName)
                     }
 
+                    newscope.startPeer = function(peerKey) {
+                        mrl.sendTo(scope.panel.name, 'startPeer', peerKey)
+                    }
+
+                    newscope.releasePeer = function(peerKey) {
+                        mrl.sendTo(scope.panel.name, 'releasePeer', peerKey)
+                    }
+
                     newscope.export = function() {
                         mrl.sendTo('runtime', 'export', scope.panel.displayName)
                     }
+
+                    newscope.apply = function() {
+                        mrl.sendTo(scope.panel.displayName, 'apply')
+                        mrl.sendTo(scope.panel.displayName, 'broadcastState')
+                    }
+                        
+                    // making peer service/singleton available in drop down scope
+                    newscope.peer = peer
 
                     var header = $templateCache.get('service/tab-header.html')
                     var content = $templateCache.get(scope.panel.simpleName + 'Gui.html')

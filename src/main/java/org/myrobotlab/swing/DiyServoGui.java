@@ -45,6 +45,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeListener;
@@ -300,7 +301,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 
     disableDelayGrace.setPreferredSize(new Dimension(40, 24));
     boundPos.setFont(boundPos.getFont().deriveFont(32.0f));
-    boundPos.setHorizontalAlignment(JLabel.RIGHT);
+    boundPos.setHorizontalAlignment(SwingConstants.RIGHT);
     imageenabled.setIcon(enabled);
     velocityPic.setIcon(velocityPng);
     autoDisable.setSelected(false);

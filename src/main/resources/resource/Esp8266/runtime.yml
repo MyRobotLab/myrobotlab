@@ -1,0 +1,8 @@
+!!org.myrobotlab.service.config.RuntimeConfig
+enableCli: true
+locale: null
+logLevel: null
+registry:
+- esp8266
+type: Runtime
+virtual: null

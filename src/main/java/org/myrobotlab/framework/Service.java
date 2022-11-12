@@ -729,6 +729,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     addListener(listener.topicMethod, listener.callbackName, listener.callbackMethod);
   }
 
+  @Override
   public void addListener(String topicMethod, String callbackName) {
     addListener(topicMethod, callbackName, CodecUtils.getCallbackTopicName(topicMethod));
   }
@@ -746,6 +747,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @param callbackMethod
    *          - name of the method to send return data to
    */
+  @Override
   public void addListener(String topicMethod, String callbackName, String callbackMethod) {
     MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
     if (outbox.notifyList.containsKey(listener.topicMethod)) {
@@ -956,6 +958,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return this.getClass().getDeclaredMethods();
   }
 
+  @Override
   public Inbox getInbox() {
     return inbox;
   }
@@ -1078,6 +1081,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return ret;
   }
 
+  @Override
   public Outbox getOutbox() {
     return outbox;
   }
@@ -1330,6 +1334,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * service specific configuration in the service yaml files.
    * 
    */
+  @Override
   public ServiceConfig apply(ServiceConfig config) {
     log.info("Default service config loading for service: {} type: {}", getName(), getType());
     // setVirtual(config.isVirtual); "overconfigured" - user Runtimes virtual
@@ -1344,12 +1349,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * Default getConfig returns name and type with null service specific config
    * 
    */
+  @Override
   public ServiceConfig getConfig() {
-    // FIXME !!! - this should be null for services that do not have it !
-    // log.info("{} of type {} does not currently define its own config",
-    // getName(), getSimpleName());
-    // ServiceConfig config = new ServiceConfig();
-    // config.type = getClass().getSimpleName();
     return config;
   }
 
@@ -1358,6 +1359,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     this.config = config;
   }
 
+  @Override
   @Deprecated /*
                * this is being used wrongly - Runtime knows how to load services
                * don't - what is desired here is apply()
@@ -1367,6 +1369,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return plan.get(getName());
   }
 
+  @Override
   public void out(Message msg) {
     outbox.add(msg);
   }
@@ -1377,6 +1380,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * motor drivers by creating a different static route The motor is not "Aware"
    * of the driver - only that it wants to method="write" data to the driver
    */
+  @Override
   public void out(String method, Object o) {
     Message m = Message.createMessage(getFullName(), null, method, o);
 
@@ -1420,6 +1424,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * 
    * @return the service
    */
+  @Override
   public Service publishState() {
     return this;
   }
@@ -1440,6 +1445,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     outbox.notifyList.clear();
   }
 
+  @Override
   public void removeListener(String topicMethod, String callbackName) {
     removeListener(topicMethod, callbackName, CodecUtils.getCallbackTopicName(topicMethod));
   }
@@ -1528,6 +1534,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return Runtime.getService(actualName);
   }
 
+  @Override
   public void send(String name, String method) {
     send(name, method, (Object[]) null);
   }
@@ -1559,6 +1566,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return sendBlocking(getPeerName(peerName), method, data);
   }
 
+  @Override
   public void send(String name, String method, Object... data) {
     if (name == null) {
       log.debug("{}.send null, {} address", getName(), method);
@@ -1583,6 +1591,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     send(msg);
   }
 
+  @Override
   public void send(Message msg) {
     outbox.add(msg);
   }
@@ -1601,6 +1610,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     outbox.add(msg);
   }
 
+  @Override
   public Object sendBlocking(String name, Integer timeout, String method, Object... data) throws InterruptedException, TimeoutException {
     Message msg = Message.createMessage(getName(), name, method, data);
     msg.sender = this.getFullName();
@@ -1622,6 +1632,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * </pre>
    * 
    */
+  @Override
   public Object sendBlocking(Message msg, Integer timeout) throws InterruptedException, TimeoutException {
     if (Runtime.getInstance().isLocal(msg)) {
       return invoke(msg);
@@ -1685,6 +1696,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       // starting a thread for the program counter to reach the
       // wait before the msg is sent
       new Thread("blocking-msg") {
+        @Override
         public void run() {
           Runtime.getInstance().send(sendMsg);
         }
@@ -1711,15 +1723,18 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   // equivalent to sendBlocking without the sending a message
+  @Override
   public Object waitFor(String fullName, String method, Integer timeout) throws InterruptedException, TimeoutException {
     return waitOn(fullName, method, timeout, null);
   }
 
   // BOXING - End --------------------------------------
+  @Override
   public Object sendBlocking(String name, String method) throws InterruptedException, TimeoutException {
     return sendBlocking(name, method, (Object[]) null);
   }
 
+  @Override
   public Object sendBlocking(String name, String method, Object... data) throws InterruptedException, TimeoutException {
     // default 1 second timeout - FIXME CONFIGURABLE
     return sendBlocking(name, 1000, method, data);
@@ -1751,9 +1766,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public ServiceInterface startPeer(String peerKey) {
     String actualName = getPeerName(peerKey);
     if (actualName == null) {
-      log.error("startPeer could not find actual name of {} in {}", peerKey, getName());  
+      log.error("startPeer could not find actual name of {} in {}", peerKey, getName());
     }
-    
+
     ServiceInterface si = Runtime.start(actualName, null);
     if (si != null) {
       ServiceReservation sr = serviceType.getPeer(peerKey);
@@ -1770,7 +1785,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return si;
   }
-  
+
   public String getPeerType(String peerKey) {
     ServiceReservation sr = serviceType.getPeer(peerKey);
     return sr.type;
@@ -1837,11 +1852,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   // -------------- Messaging Begins -----------------------
+  @Override
   public void subscribe(NameProvider topicName, String topicMethod) {
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     subscribe(topicName.getName(), topicMethod, getName(), callbackMethod);
   }
 
+  @Override
   public void subscribe(String topicName, String topicMethod) {
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     subscribe(topicName, topicMethod, getName(), callbackMethod);
@@ -1863,6 +1880,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     unsubscribe(Runtime.getInstance().getName(), method, getName(), CodecUtils.getCallbackTopicName(method));
   }
 
+  @Override
   public void subscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
     log.info("subscribe [{}/{} ---> {}/{}]", topicName, topicMethod, callbackName, callbackMethod);
     // TODO - do regex matching
@@ -1886,16 +1904,19 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
   }
 
+  @Override
   public void unsubscribe(NameProvider topicName, String topicMethod) {
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     unsubscribe(topicName.getName(), topicMethod, getName(), callbackMethod);
   }
 
+  @Override
   public void unsubscribe(String topicName, String topicMethod) {
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     unsubscribe(topicName, topicMethod, getName(), callbackMethod);
   }
 
+  @Override
   public void unsubscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
     log.info("unsubscribe [{}/{} ---> {}/{}]", topicName, topicMethod, callbackName, callbackMethod);
     send(Message.createMessage(getName(), topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
@@ -1903,6 +1924,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   // -------------- Messaging Ends -----------------------
   // ---------------- Status processing begin ------------------
+  @Override
   public Status error(Exception e) {
     log.error("status:", e);
     Status ret = Status.error(e);
@@ -1979,6 +2001,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return status;
   }
 
+  @Override
   public Status publishStatus(Status status) {
     return status;
   }
@@ -1989,6 +2012,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   // interesting this is not just in memory
+  @Override
   public Map<String, MethodEntry> getMethodMap() {
     return Runtime.getMethodMap(getName());
   }
@@ -2007,6 +2031,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return stats;
   }
 
+  @Override
   public String getDescription() {
     return serviceType.getDescription();
   }
@@ -2021,6 +2046,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * implementation - it would always work when serialized (and not registered)
    * 
    */
+  @Override
   public void detach(String serviceName) {
     detach(Runtime.getService(serviceName));
   }
@@ -2030,6 +2056,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * special requirements, they can override this WARNING - if used this will
    * remove all UI and other perhaps necessary subscriptions
    */
+  @Override
   @Deprecated /*
                * dangerous method, not to be used as lazy detach when you don't
                * know the controller name
@@ -2042,6 +2069,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * Attachable.attach(serviceName) - routes to reference parameter
    * Attachable.attach(Attachable)
    */
+  @Override
   public void attach(String serviceName) throws Exception {
     attach(Runtime.getService(serviceName));
   }
@@ -2049,6 +2077,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * is Attached - means there is a subscriber with that (full name)
    */
+  @Override
   public boolean isAttached(String serviceName) {
     return getAttached().contains(serviceName);
   }
@@ -2145,11 +2174,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     attach(service.getName());
   }
 
+  @Override
   public boolean setVirtual(boolean b) {
     this.isVirtual = b;
     return isVirtual;
   }
 
+  @Override
   public boolean isVirtual() {
     return isVirtual;
   }
@@ -2193,6 +2224,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * Called by Runtime when system is shutting down a service can use this
    * method when it has to do some "ordered" cleanup.
    */
+  @Override
   public void preShutdown() {
   }
 
@@ -2216,6 +2248,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return java.awt.GraphicsEnvironment.isHeadless();
   }
 
+  @Override
   public void setOrder(int creationCount) {
     this.creationOrder = creationCount;
   }
@@ -2225,10 +2258,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return null;
   }
 
+  @Override
   public String getId() {
     return id;
   }
 
+  @Override
   public String getFullName() {
     return String.format("%s@%s", name, id);
   }
@@ -2387,6 +2422,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
   }
 
+  @Override
   public void loadLocalizations() {
 
     if (defaultLocalization == null) {
@@ -2402,6 +2438,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * set by Runtimes locale
    * 
    */
+  @Override
   public void setLocale(String code) {
     locale = new Locale(code);
     log.info("{} new locale is {}", getName(), code);
@@ -2452,6 +2489,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return locale.getTag();
   }
 
+  @Override
   public boolean hasInterface(String interfaze) {
     // probably a bad idea - but nice for lazy people
     if (!interfaze.contains(".")) {
@@ -2506,6 +2544,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return 1;
   }
 
+  @Override
   public int getCreationOrder() {
     return creationOrder;
   }
@@ -2526,14 +2565,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return MetaData.getDefault(getName(), this.getClass().getSimpleName());
   }
 
+  @Override
   public void addAutoStartedPeer(String actualPeerName) {
     autoStartedPeers.add(actualPeerName);
   }
 
+  @Override
   public boolean autoStartedPeersContains(String actualPeerName) {
     return autoStartedPeers.contains(actualPeerName);
   }
 
+  @Override
   public MetaData getMetaData() {
     return serviceType;
   }
@@ -2551,5 +2593,4 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     apply(sc);
   }
 
-  
 }

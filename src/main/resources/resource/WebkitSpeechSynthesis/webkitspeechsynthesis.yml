@@ -1,0 +1,8 @@
+!!org.myrobotlab.service.config.WebkitSpeechSynthesisConfig
+audioFile: webkitspeechsynthesis.audioFile
+blocking: false
+mute: false
+speechRecognizers: null
+substitutions: null
+type: WebkitSpeechSynthesis
+voice: null

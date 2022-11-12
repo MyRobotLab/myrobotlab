@@ -66,10 +66,12 @@ public class CheckBoxTitledBorder extends AbstractBorder {
         }
       }
 
+      @Override
       public void mousePressed(MouseEvent me) {
         dispatchEvent(me);
       }
 
+      @Override
       public void mouseReleased(MouseEvent me) {
         dispatchEvent(me);
       }

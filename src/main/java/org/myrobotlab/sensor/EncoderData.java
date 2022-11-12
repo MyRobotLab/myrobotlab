@@ -39,7 +39,6 @@ public class EncoderData {
    * mapped value of input
    */
   public double mappedValue;
-  
 
   public EncoderData(String source, String pin, double value, Double angle) {
     this.timestamp = System.currentTimeMillis();
@@ -48,6 +47,7 @@ public class EncoderData {
     this.angle = angle;
   }
 
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("[EncoderData: source:");

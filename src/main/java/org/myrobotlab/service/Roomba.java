@@ -109,9 +109,8 @@ public class Roomba extends Service {
        * roomba.setHardwareHandshake(false);
        */
       SwingGui gui = (SwingGui) Runtime.start("gui", "SwingGui");
-      
-      gui.startService();
 
+      gui.startService();
 
     } catch (Exception e) {
       Logging.logError(e);

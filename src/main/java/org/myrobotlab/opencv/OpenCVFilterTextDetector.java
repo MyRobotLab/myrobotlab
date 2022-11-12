@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 import org.bytedeco.javacpp.indexer.FloatIndexer;
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
@@ -123,7 +124,7 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     // east detector.
     Point2f ratio = new Point2f((float) image.width() / newWidth, (float) image.height() / newHeight);
     // Resize the image to mat
-    IplImage ret = IplImage.create(newWidth, newHeight, image.depth(), image.nChannels());
+    IplImage ret = AbstractIplImage.create(newWidth, newHeight, image.depth(), image.nChannels());
     cvResize(image, ret, Imgproc.INTER_AREA);
     CloseableFrameConverter converter2 = new CloseableFrameConverter();
     Mat frame = converter2.toMat(ret);

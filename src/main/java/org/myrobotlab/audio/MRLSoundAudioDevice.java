@@ -23,7 +23,7 @@ public class MRLSoundAudioDevice extends JavaSoundAudioDevice {
       for (int i = 0; i < paramArrayOfShort.length; i++) {
         // Multiplication is volume control! amplify the signal by the gain
         // EEK that's a lot of type casting!
-        volumeAdjusted[i] = (short) (((float) paramArrayOfShort[i]) * gain);
+        volumeAdjusted[i] = (short) ((paramArrayOfShort[i]) * gain);
       }
       // pass the volume adjusted array to the underlying audio device
       super.write(volumeAdjusted, paramInt1, paramInt2);

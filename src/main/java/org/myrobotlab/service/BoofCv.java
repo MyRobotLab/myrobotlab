@@ -20,10 +20,12 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
     super(n, id);
   }
 
+  @Override
   public Point2df publishPoint2Df(Point2df point) {
     return point;
   }
 
+  @Override
   public Point2df onPoint2Df(Point2df point) {
     // System.out.println("Receinvig");
     return point;

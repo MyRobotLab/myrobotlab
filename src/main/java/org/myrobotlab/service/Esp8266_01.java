@@ -14,6 +14,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -22,8 +23,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
-
-import com.google.gson.Gson;
 
 /**
  * 
@@ -116,8 +115,6 @@ public class Esp8266_01 extends Service implements I2CController {
   @Override
   public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 
-    Gson gson = new Gson();
-
     String stringBuffer = Hex.encodeHexString(buffer);
     i2cParms senddata = new i2cParms();
     senddata.setBus(Integer.toString(busAddress));
@@ -134,7 +131,7 @@ public class Esp8266_01 extends Service implements I2CController {
     HttpPost post = new HttpPost(url);
     StringEntity postingString = null;
     try {
-      postingString = new StringEntity(gson.toJson(senddata));
+      postingString = new StringEntity(CodecUtils.toJson(senddata));
     } catch (UnsupportedEncodingException e) {
       Logging.logError(e);
     }
@@ -184,8 +181,6 @@ public class Esp8266_01 extends Service implements I2CController {
   @Override
   public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
 
-    Gson gson = new Gson();
-
     i2cParms senddata = new i2cParms();
     senddata.setBus(Integer.toString(busAddress));
     senddata.setDevice(Integer.toString(deviceAddress));
@@ -199,7 +194,7 @@ public class Esp8266_01 extends Service implements I2CController {
     StringEntity postingString = null;
 
     try {
-      postingString = new StringEntity(gson.toJson(senddata));
+      postingString = new StringEntity(CodecUtils.toJson(senddata));
     } catch (UnsupportedEncodingException e) {
       Logging.logError(e);
     }
@@ -239,20 +234,13 @@ public class Esp8266_01 extends Service implements I2CController {
       } catch (IOException e) {
         Logging.logError(e);
       }
-
       // log.info(result.toString());
-
-      Gson resultGson = new Gson();
-
-      returndata = resultGson.fromJson(result.toString(), i2cParms.class);
-      // log.info(resultGson.fromJson(result.toString(),
+      returndata = CodecUtils.fromJson(result.toString(), i2cParms.class);
+      // log.info(CodecUtils.fromJson(result.toString(),
       // i2cParms.class).toString());
-
       log.info("bus {}, device {}, size {}, buffer {}", returndata.bus, returndata.device, returndata.readSize, returndata.buffer);
     }
-
     hexStringToArray(returndata.buffer, buffer);
-
     return size;
   }
 
@@ -279,8 +267,6 @@ public class Esp8266_01 extends Service implements I2CController {
   @Override
   public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
 
-    Gson gson = new Gson();
-
     String stringBuffer = Hex.encodeHexString(writeBuffer);
 
     i2cParms senddata = new i2cParms();
@@ -298,7 +284,7 @@ public class Esp8266_01 extends Service implements I2CController {
     HttpPost post = new HttpPost(url);
     StringEntity postingString = null;
     try {
-      postingString = new StringEntity(gson.toJson(senddata));
+      postingString = new StringEntity(CodecUtils.toJson(senddata));
     } catch (UnsupportedEncodingException e) {
       Logging.logError(e);
     }
@@ -342,10 +328,8 @@ public class Esp8266_01 extends Service implements I2CController {
 
       // log.info(result.toString());
 
-      Gson resultGson = new Gson();
-
-      returndata = resultGson.fromJson(result.toString(), i2cParms.class);
-      // log.info(resultGson.fromJson(result.toString(),
+      returndata = CodecUtils.fromJson(result.toString(), i2cParms.class);
+      // log.info(CodecUtils.fromJson(result.toString(),
       // i2cParms.class).toString());
 
       log.info("bus {}, device {}, readSize {}, buffer {}", returndata.bus, returndata.device, returndata.readSize, returndata.buffer);

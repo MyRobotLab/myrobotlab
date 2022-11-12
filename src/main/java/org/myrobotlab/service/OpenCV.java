@@ -63,6 +63,7 @@ import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameGrabber.ImageMode;
 import org.bytedeco.javacv.FrameRecorder;
 import org.bytedeco.javacv.OpenKinectFrameGrabber;
+import org.bytedeco.opencv.opencv_core.AbstractCvScalar;
 /*
 <pre>
 // extremely useful list of static imports - since auto-complete won't work with statics
@@ -367,25 +368,25 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   static public CvScalar getColor(String color) {
     String c = color.toUpperCase().trim();
     if (c.equals("WHITE")) {
-      return CvScalar.WHITE;
+      return AbstractCvScalar.WHITE;
     } else if (c.equals("GRAY")) {
-      return CvScalar.GRAY;
+      return AbstractCvScalar.GRAY;
     } else if (c.equals("BLACK")) {
-      return CvScalar.BLACK;
+      return AbstractCvScalar.BLACK;
     } else if (c.equals("RED")) {
-      return CvScalar.RED;
+      return AbstractCvScalar.RED;
     } else if (c.equals("GREEN")) {
-      return CvScalar.GREEN;
+      return AbstractCvScalar.GREEN;
     } else if (c.equals("BLUE")) {
-      return CvScalar.BLUE;
+      return AbstractCvScalar.BLUE;
     } else if (c.equals("CYAN")) {
-      return CvScalar.CYAN;
+      return AbstractCvScalar.CYAN;
     } else if (c.equals("MAGENTA")) {
-      return CvScalar.MAGENTA;
+      return AbstractCvScalar.MAGENTA;
     } else if (c.equals("YELLOW")) {
-      return CvScalar.YELLOW;
+      return AbstractCvScalar.YELLOW;
     } else {
-      return CvScalar.BLACK;
+      return AbstractCvScalar.BLACK;
     }
   }
 
@@ -621,16 +622,18 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     return addFilter(filterName, filterType);
   }
 
+  @Override
   public CvFilter addFilter(String name, String filterType) {
     String type = String.format("org.myrobotlab.opencv.OpenCVFilter%s", filterType);
     OpenCVFilter filter = (OpenCVFilter) Instantiator.getNewInstance(type, name);
     addFilter(filter);
-    return (CvFilter) filter;
+    return filter;
   }
 
   /**
    * capture starts the frame grabber and video processing threads
    */
+  @Override
   synchronized public void capture() {
     log.info("capture()");
 
@@ -1349,6 +1352,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    * FIXME - input needs to be OpenCVData THIS IS NOT USED ! VideoProcessor NOW
    * DOES OpenCVData - this will return NULL REMOVE !!
    */
+  @Override
   public final SerializableImage publishDisplay(SerializableImage img) {
     return img;
   }
@@ -1560,7 +1564,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
       outputFileStreams.get(recordingSource).record(frame);
 
       if (closeOutputs) {
-        FrameRecorder output = (FrameRecorder) outputFileStreams.get(recordingSource);
+        FrameRecorder output = outputFileStreams.get(recordingSource);
         outputFileStreams.remove(recordingSource);
         output.stop();
         output.release();
@@ -1610,6 +1614,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    * @param name
    *          remove a filter by name
    */
+  @Override
   synchronized public void removeFilter(String name) {
     if (filters.containsKey(name)) {
       Map<String, OpenCVFilter> newFilters = new LinkedHashMap<>();
@@ -1624,6 +1629,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   /**
    * remove all the filters in the pipeline
    */
+  @Override
   synchronized public void removeFilters() {
     for (OpenCVFilter filter : filters.values()) {
       filter.release();
@@ -1635,6 +1641,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   /**
    * disable all the filters in the pipeline
    */
+  @Override
   synchronized public void disableAll() {
     for (OpenCVFilter filter : filters.values()) {
       filter.disable();
@@ -1673,6 +1680,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     converter.close();
   }
 
+  @Override
   public Integer setCameraIndex(Integer index) {
     this.cameraIndex = index;
     return index;
@@ -1698,6 +1706,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     setDisplayFilter(name);
   }
 
+  @Override
   public void setDisplayFilter(String name) {
     displayFilter = name;
     OpenCVFilter filter = filters.get(name);
@@ -1815,6 +1824,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     nativeViewer = b;
   }
 
+  @Override
   synchronized public void stopCapture() {
     log.info("stopCapture");
     if (!capturing) {
@@ -1931,6 +1941,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   }
 
   // Filter enable/disable helper methods.
+  @Override
   public void enableFilter(String name) {
     OpenCVFilter f = filters.get(name);
     if (!f.isEnabled()) {
@@ -1939,6 +1950,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     }
   }
 
+  @Override
   public void disableFilter(String name) {
     OpenCVFilter f = filters.get(name);
     if (f.isEnabled()) {
@@ -2011,6 +2023,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     OpenCVConfig config = (OpenCVConfig) c;
     setCameraIndex(config.cameraIndex);
@@ -2142,6 +2155,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     return image;
   }
 
+  @Override
   public void attach(Attachable attachable) {
     if (attachable instanceof ImageListener) {
       attachImageListener(attachable.getName());
