@@ -195,8 +195,8 @@ public class CodecUtils {
 
         //Disables Jackson's automatic property detection
         mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.PUBLIC_ONLY);
-        mapper.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.PUBLIC_ONLY);
+        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+//        mapper.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.PUBLIC_ONLY);
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
         //Make jackson behave like gson in that unknown properties are ignored
