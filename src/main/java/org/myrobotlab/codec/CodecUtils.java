@@ -89,7 +89,7 @@ public class CodecUtils {
      * use Jackson.
      * TODO Replace with enum to allow extension for multiple backends
      */
-    public static final boolean USING_GSON = true;
+    public static final boolean USING_GSON = false;
     /**
      * The key used to locate type information
      * in a JSON dictionary. This is used to serialize
@@ -195,7 +195,7 @@ public class CodecUtils {
 
         //Disables Jackson's automatic property detection
         mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.PUBLIC_ONLY);
         mapper.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.ANY);
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
