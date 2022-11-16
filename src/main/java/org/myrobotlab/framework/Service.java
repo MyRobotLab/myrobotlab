@@ -202,7 +202,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   int creationOrder = 0;
 
   // FIXME SecurityProvider
-  protected AuthorizationProvider authProvider = null;
+  protected transient AuthorizationProvider authProvider = null;
 
   protected Status lastError = null;
   protected Long lastErrorTs = null;
