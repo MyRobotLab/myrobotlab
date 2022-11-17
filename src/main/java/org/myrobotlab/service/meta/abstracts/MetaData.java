@@ -88,12 +88,8 @@ public class MetaData implements Serializable {
    */
   String type;
 
-  /**
-   * key'd structure of other services that are necessary for the correct
-   * function of this service can be modified with overrides before starting
-   * named instance of this service
-   */
-  public Map<String, ServiceReservation> peers = new TreeMap<String, ServiceReservation>();
+
+  // public Map<String, ServiceReservation> peers = new TreeMap<String, ServiceReservation>();
 
   /**
    * true if the service requires a key e.g. Polly
@@ -117,7 +113,7 @@ public class MetaData implements Serializable {
 
   Integer workingLevel = null;
 
-  static public String getFullMetaTypeName(String type) {
+  static public String getConfigType(String type) {
     if (type.contains(".") && type.endsWith("Meta")) {
       return type;
     }
@@ -204,16 +200,6 @@ public class MetaData implements Serializable {
     return link;
   }
 
-  // FIXME - change to name ... change name to type
-  // check for webgui breakage
-  // public String getName() {
-  // return serviceName;
-  // }
-
-  public Map<String, ServiceReservation> getPeers() {
-    return peers;
-  }
-
   public String getSimpleName() {
     return simpleName;
   }
@@ -274,94 +260,32 @@ public class MetaData implements Serializable {
   public String toString() {
     StringBuffer sb = new StringBuffer();
     sb.append(String.format("\n%s\n", simpleName));
-
-    for (ServiceReservation sr : peers.values()) {
-      sb.append(sr).append("\n");
-    }
-
     return sb.toString();
   }
+  
+  
 
-  public ServiceReservation getPeer(String peerKey) {
-    if (peers.get(peerKey) == null) {
-      log.warn("{} not found in peer keys - possible keys follow:", peerKey);
-      for (String key : peers.keySet()) {
-        log.info(key);
-      }
-    }
-    return peers.get(peerKey);
-  }
-
-  /**
-   * typical adding of a service reservation .. the actual name is left null, so
-   * that this template will dynamically generate peer names depending on the
-   * parents name
-   * 
-   * @param key
-   *          k
-   * @param peerType
-   *          p
-   * @param comment
-   *          c
-   * 
-   */
-  public void addPeer(String key, String peerType, String comment) {
-    peers.put(key, new ServiceReservation(key, null, peerType, comment));
-  }
-
-  public void addPeer(String key, String peerType) {
-    peers.put(key, new ServiceReservation(key, null, peerType, null));
-  }
-
-  public void addPeer(String key, String actualName, String peerType, String comment) {
-    peers.put(key, new ServiceReservation(key, actualName, peerType, comment));
-  }
 
   public String getType() {
     return type;
   }
 
-  /**
-   * Dynamically gets a default "load" for runtime to execute !
-   * 
-   * @param name
-   * @param type
-   * @return
-   */
-  public static Plan getDefault(String name, String type) {
-
-    try {
-
-      if (type == null) {
-        log.error("getDefault(null)");
-        return null;
-      }
-
-      type = getFullMetaTypeName(type);
-
-      Class<?> c = Class.forName(type);
-      Constructor<?> mc = c.getConstructor();
-      MetaData meta = (MetaData) mc.newInstance();
-      Plan plan = meta.getDefault(name);
-      
-      return plan;
-
-      // FIXME - add runtime ? - or should this be available to the concrete
-      // metadata ?
-
-    } catch (Exception e) {
-      log.error("getting meta data failed on {}", type, e);
-    }
-
-    return null;
-  }
-
+  @Deprecated /* use ServiceConfig */
   public Plan getDefault(String name) {
 
+    // FIXME - plan passed in
     Plan plan = new Plan(name);
-    plan.putPeers(name, peers);
     try {
 
+      // FIXME-sc read from 
+      // either overwrite starting with base default
+      // or invert - do not overwrite if override is supplied
+      
+      // gonna try - use first file only - don't seek override, never overwrite
+      // 1. attempt to read data/config/blah/name.yml
+      // 2. try resources/resource/Type/type.yml
+      // 3. construct new ServiceConfig ?
+      
       Class<?> c = Class.forName("org.myrobotlab.service.config." + simpleName + "Config");
       Constructor<?> con = c.getConstructor();
       ServiceConfig sc = (ServiceConfig) con.newInstance();
@@ -378,9 +302,10 @@ public class MetaData implements Serializable {
     return plan;
   }
 
+  @Deprecated /* use ServiceConfig */
   public static MetaData get(String type) {
     try {
-      type = getFullMetaTypeName(type);
+      type = getConfigType(type);
       Class<?> c = Class.forName(type);
       Constructor<?> con = c.getConstructor();
       return (MetaData) con.newInstance();
@@ -391,43 +316,4 @@ public class MetaData implements Serializable {
     return null;
   }
 
-  protected void setPeerName(String key, String actualName) {
-    // FIXME - do we bother to check if a peer exists or just make one? - we
-    // don't have type info ...
-    // FIXME - do we bother to check if its already set ? (merge ???)
-    ServiceReservation sr = peers.get(key);
-    if (sr != null) {
-      sr.actualName = actualName;
-    } else {
-      log.error("key {} does not for peer", key);
-    }
-  }
-
-  public ServiceReservation getPeerFromActualName(String parentName, String fullname) {
-
-    // filter off name{@id} because this definition is "only" local
-    if (fullname == null) {
-      return null;
-    }
-
-    String name = null;
-    // take parent prefix off
-    if (fullname.startsWith(parentName + ".")) {
-      name = fullname.replace(parentName + ".", "");
-    }
-
-    // two ways we can find a match
-    // 1st and most common is if this is simply default with the key
-    if (peers.containsKey(name)) {
-      ServiceReservation peer = peers.get(name);
-      return peer;
-    }
-
-    for (ServiceReservation peer : peers.values()) {
-      if (fullname.equals(peer.actualName)) {
-        return peer;
-      }
-    }
-    return null;
-  }
 }

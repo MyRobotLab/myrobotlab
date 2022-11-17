@@ -13,12 +13,13 @@ import java.util.Set;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -289,26 +290,31 @@ public class LangPyUtils implements PythonGenerator {
 
       content.append(newPythonContent);
 
-      MetaData serviceType = ServiceData.getMetaData(si.getName(), si.getSimpleName());
-      Map<String, ServiceReservation> peers = serviceType.getPeers();
+      MetaData.getConfigType(filename);
+
+      // static getDefault routes by type
+      Plan plan = ServiceConfig.getDefault(Runtime.getPlan(), si.getName(), si.getSimpleName());
+      ServiceConfig sc = plan.get(si.getName());
+      Map<String, ServiceReservation> peers = sc.getPeers();
 
       // FIXME - do "indent"
       boolean firstTime = true;
-      if (maxDepth == null || maxDepth < currentDepth) {
+      if ((maxDepth == null || maxDepth < currentDepth) && peers != null) {
         for (String peer : peers.keySet()) {
           ServiceReservation sr = peers.get(peer);
-          ServiceInterface peerSi = Runtime.getService(sr.actualName);
+          String noWorky = "noWorky"; // had to fix
+          ServiceInterface peerSi = Runtime.getService(noWorky);
           if (peerSi != null) {
             if (currentDepth >= splitLevel) {
               // concatenate content
               if (firstTime) {
                 content.append(String.format("\n  # %s peers\n", si.getSimpleName()));
               }
-              serviceFileWritten.putAll(buildPython(content, false, numericPrefix, folder, sr.actualName, currentDepth + 1, splitLevel, overwrite, maxDepth));
+              serviceFileWritten.putAll(buildPython(content, false, numericPrefix, folder, noWorky, currentDepth + 1, splitLevel, overwrite, maxDepth));
               content.append("\n");
             } else {
               // don't concatenate - split files
-              serviceFileWritten.putAll(buildPython(null, true, numericPrefix, folder, sr.actualName, currentDepth + 1, splitLevel, overwrite, maxDepth));
+              serviceFileWritten.putAll(buildPython(null, true, numericPrefix, folder, noWorky, currentDepth + 1, splitLevel, overwrite, maxDepth));
             }
           }
           firstTime = false;

@@ -16,8 +16,6 @@ public class OculusRiftMeta extends MetaData {
 
     addDescription("The Oculus Rift Head Tracking Service");
     addCategory("video", "control", "sensors", "telerobotics");
-    addPeer("leftOpenCV", "OpenCV", "Left Eye Camera");
-    addPeer("rightOpenCV", "OpenCV", "Right Eye Camera");
     // dependencies. we also need lwjgl3 added here. currently it's pulled in
     // from jme3-lwjgl3
     addDependency("org.saintandreas", "jovr", "1.8.0.0");

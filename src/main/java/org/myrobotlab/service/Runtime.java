@@ -403,9 +403,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       createdServices.put(service, si);
     }
 
-    return createdServices;
-  }
-
+    sc.state = "CREATING";
+    si = createService(name, sc.type, null);
+    for (String peerName : autoStartedPeers) {
+      si.addAutoStartedPeer(peerName);
+    }
 
   public String getServiceExample(String serviceType) {
     String url = "https://raw.githubusercontent.com/MyRobotLab/myrobotlab/develop/src/main/resources/resource/" + serviceType + "/" + serviceType + ".py";
@@ -1819,22 +1821,24 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // FIXME - TODO RELEASE PEERS ! which is any inName.* !!!
 
       // iterate through peers
-//      if (sc.autoStartPeers) {
-//        // get peers from meta data
-//        MetaData md = MetaData.get(sc.type);
-//        Map<String, ServiceReservation> peers = md.getPeers();
-//        log.info("auto start peers and {} of type {} has {} peers", inName, sc.type, peers.size());
-//        // RECURSE ! - if we found peers and autoStartPeers is true - we start
-//        // all
-//        // the children up
-//        for (String peer : peers.keySet()) {
-//          // get actual Name
-//          String actualPeerName = getPeerName(peer, sc, peers, inName);
-//          if (actualPeerName != null && isStarted(actualPeerName) && si.autoStartedPeersContains(actualPeerName)) {
-//            release(actualPeerName);
-//          }
-//        }
-//      }
+      // if (sc.autoStartPeers) {
+      // // get peers from meta data
+      // MetaData md = MetaData.get(sc.type);
+      // Map<String, ServiceReservation> peers = md.getPeers();
+      // log.info("auto start peers and {} of type {} has {} peers", inName,
+      // sc.type, peers.size());
+      // // RECURSE ! - if we found peers and autoStartPeers is true - we start
+      // // all
+      // // the children up
+      // for (String peer : peers.keySet()) {
+      // // get actual Name
+      // String actualPeerName = getPeerName(peer, sc, peers, inName);
+      // if (actualPeerName != null && isStarted(actualPeerName) &&
+      // si.autoStartedPeersContains(actualPeerName)) {
+      // release(actualPeerName);
+      // }
+      // }
+      // }
     }
 
     return true;
@@ -4466,12 +4470,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * get current config of runtime 
+   * get current config of runtime
    */
   @Override
   public ServiceConfig getConfig() {
 
-    RuntimeConfig c = (RuntimeConfig)config;
+    RuntimeConfig c = (RuntimeConfig) config;
 
     // is this necessary ??
     Map<String, ServiceInterface> services = getLocalServices();
@@ -4496,7 +4500,20 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * load a single service entry into the plan through yml or default
+   * Load a single service entry into the plan through yml or default. This
+   * method is responsible for resolving the Type and ServiceConfig for a single
+   * service. Since some service Types are composites and require Peers, it can
+   * potentially be recursive. The level of overrides are from highest priority
+   * to lowest :
+   * 
+   * <pre>
+   *       if a Plan definition of {name} exists, use it   - "current" plan definition !
+   *       /data/config/{configName}/{service}.yml          - user's yml override
+   *       /resource/config/{configName}/{service}.yml      - system yml default
+   *       {ServiceConfig}.java                             - system java type default
+   * 
+   * 
+   * </pre>
    *
    * @param name
    *          Name of the service
@@ -4511,67 +4528,73 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   synchronized private Plan loadService(Plan plan, String name, String type, int level) throws IOException {
 
-    if (name.equals("i01")) {
-      log.info("here");
+    log.error("loading - {} {} {}", name, type, level);
+    
+    if (name.equals("arduino")) {
+      log.info("here x");
     }
-
-    String configPath = runtime.getConfigPath();
-    // find if a current yml config file exists
-    ServiceConfig sc = readServiceConfig(configPath, name);
-
-    // try to resolve type
-    // if type == null - get it from yml
-    // if type != null, level != 0 and yml exists - get it from yml
-    // if yml == null, it better be passed in
-    // If user passes in explicit type - it should be honored, if recursion
-    // passes in type
-    // and there is a yml file, use yml file definition
-    if ((type == null || level != 0) && sc != null) {
-      type = sc.type;
-    }
-
-    // type should be set at this point
-    if (type == null) {
-      
-      ServiceConfig preExistingSc = plan.get(name);
-      if (preExistingSc != null) {
-        type = preExistingSc.type;
-      } else {
-      // there are no existing type hints or priorites - but we found a pre-existing one
-      info("cannot find override type for %s given current config path %s", name, configPath);
+    
+    if (plan == null) {
+      log.error("plan required to load a system");
       return null;
+    }
+
+    // PRIORITY #0 - reuse plan definition ! NEVER OVERWRITE IT !
+    ServiceConfig sc = plan.get(name);
+    if (sc != null) {
+      log.info("priority #0 - already have a plan for {} {}", name, type);
+      return plan;
+    }
+    
+
+    // PRIORITY #1
+    String configPath = runtime.getConfigPath();    
+    if (configPath != null) {
+      log.info("priority #1 user's yml override {}", configPath + fs + name + ".yml");
+      // PRIORITY #1
+      // find if a current yml config file exists - highest priority
+      sc = readServiceConfig(configPath, name);
+    }
+
+    if (sc == null && type == null) {
+      log.error("no local config and unknown type");
+    }
+
+    // PRIORITY #2
+    if (sc == null) {
+      // PRIORITY #2 - default resource/{ServiceType}/{servicetype}.yml
+      String yml = getResourceRoot() + fs + type + fs + type.toLowerCase() + ".yml";
+      try {
+        log.info("priority #2 checking system default yml {}", yml);
+        // FIXME - CLOSE BUT NOT QUITE RIGHT - {ServiceType}/runtime.yml - should be loaded as "peer set"
+        // the set will need recursive integration
+        sc = CodecUtils.readServiceConfig(yml);
+      } catch(Exception e) {
+        log.info("priority #2 checking system default yml {} not found", yml);
       }
     }
 
-    // # priority 2 - "default" with resolved type - a default should be used
-    // entered into the plan first
-    // MetaData md = MetaData.get(type);
-    Plan defaultPlan = MetaData.getDefault(name, type); // <- this is a
-                                                        // recursive call for
-                                                        // "default" - because it loads default peers !
-    
-    // # priority 1 - the yml file definition override
-    if (sc != null) {
-      sc.state = "YML-LOADED"; // <- FIXME FIXME FIXME CONTROLLED STATE !
-      defaultPlan.put(name, sc);
+    // PRIORITY #3
+    if (sc == null) {
+      // PRIORITY #3
+      
+      if (type == null) {
+        log.error("cannot get Java def with type == null");
+      }
+      log.info("priority #3 getting Java definition {} {}", name, type);
+      // Plan newPlan = ServiceConfig.getDefault(plan, name, type);
+      ServiceConfig.getDefault(plan, name, type);
+      // log.info("priority #3 - merging Java plan {}", newPlan);
+      // plan.merge(newPlan);
     }
     
+    if (plan.get(name) == null && sc != null) {
+      plan.put(name, sc);
+    } 
 
-    // FIXME !! - should just be returning a plan - not merging here
-    plan.merge(defaultPlan);
-
-    // at this point we should have a default plan for the resolved type
-    // time to supply override configuration if there is any
-
-
-    // recurse now for overrides
-//    Map<String, ServiceReservation> peers = md.getPeers();
-//    for (ServiceReservation peer : peers.values()) {
-//      // recursive call - peers is still a bit of a mess
-//      String actualPeerName = getPeerName(peer.key, null, peers, name);
-//      // suggested type is peer.type, but yml will override !
-//      loadService(plan, actualPeerName, peer.type, level + 1);
-//    }
+    if (plan.get(name) == null) {
+      error("could not load %s %s %d", name, type, level);
+    }
 
     return plan;
   }
@@ -4935,9 +4958,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     Map<String, ServiceReservation> servicePeers = masterPlan.peers.get(name);
     if (servicePeers != null) {
       sr = servicePeers.get(reservedKey);
-      if (sr != null && sr.actualName != null) {
-        peerName = sr.actualName;
-      }
     }
 
     // heh so, simple
@@ -4985,11 +5005,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       return;
     }
     String peerName = null;
-    if (sr.actualName == null) {
-      peerName = String.format("%s.%s", name, reservedKey);
-    } else {
-      peerName = sr.actualName;
-    }
+    // FIXME - get from Service config ! - default doesn't exist
+    peerName = String.format("%s.%s", name, reservedKey);
 
     // heh so, simple
     ServiceConfig sc = Runtime.getPlan().get(peerName);
@@ -5067,43 +5084,50 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   final public Plan getDefault(String name, String type) {
-    return MetaData.getDefault(name, type);
+    return ServiceConfig.getDefault(Runtime.getPlan(), name, type);
   }
 
-  final public Plan saveDefault(String name, String type) {    
-      return saveDefault( DEFAULT_CONFIG_DIR + fs + name, name, type);
+  final public Plan saveDefault(String name, String type) {
+    return saveDefault(DEFAULT_CONFIG_DIR + fs + name, name, type);
   }
-  
-  final public Plan saveDefault(String configPath, String name, String type) {    
-    Plan plan = MetaData.getDefault(name, type);
-    for (String service : plan.getConfig().keySet()) {
-      String filename = configPath + fs + service + ".yml";
-      ServiceConfig sc = plan.get(service);
-//      if (sc.getClass() == ServiceConfig.class) {
-//        File remove = new File(filename);
-//        if (remove.exists()) {
-//          remove.delete();
-//        }
-//        continue;
-//      }
-      String yaml = CodecUtils.toYaml(sc);
-      try {
-        FileIO.toFile(filename, yaml);
-        info("saved %s", filename);
-      } catch (IOException e) {
-        error(e);
+
+  final public Plan saveDefault(String configPath, String name, String type) {
+    // Runtime.getPlan()
+    File resourceDir = new File(configPath);
+    for (File file: resourceDir.listFiles()) {
+      if (file.getName().endsWith(".yml")) {
+        file.delete();
       }
+    }
+    Plan plan = ServiceConfig.getDefault(new Plan(name), name, type);
+    for (String service : plan.getConfig().keySet()) {
+//      String filename = configPath + fs + service + ".yml";
+      // ServiceConfig sc = plan.get(service);
+      // if (sc.getClass() == ServiceConfig.class) {
+//       File remove = new File(filename);
+//       if (remove.exists()) {
+//       remove.delete();
+//       }
+//       continue;
+//       }
+//      String yaml = CodecUtils.toYaml(sc);
+//      try {
+//        FileIO.toFile(filename, yaml);
+//        info("saved %s", filename);
+//      } catch (IOException e) {
+//        error(e);
+//      }
     }
     return plan;
   }
-  
+
   public void saveAllDefaults() {
     saveAllDefaults(new File(getResourceDir()).getParent());
   }
-  
+
   public void saveAllDefaults(String configPath) {
     List<MetaData> types = serviceData.getAvailableServiceTypes();
-    for (MetaData meta: types) {
+    for (MetaData meta : types) {
       saveDefault(configPath + fs + meta.getSimpleName(), meta.getSimpleName().toLowerCase(), meta.getSimpleName());
     }
   }

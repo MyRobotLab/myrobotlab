@@ -18,13 +18,6 @@ public class TestCatcherMeta extends MetaData {
     setAvailable(false);
     addCategory("testing", "framework");
 
-    // addPeer("subpeer", "TestCatcher", "comment"); Don't do recursive infinite
-    // loop
-    addPeer("subpeer", "TestThrower", "comment"); // Don't do recursive infinite
-                                                  // loop
-    
-    // FIXME "global names" are no worky - need another refactor of peers, peerKeys and global names
-    addPeer("globalPeer", "TestThrower", "comment"); 
     // addPeer("globalPeer", "thrower01", "TestThrower", "comment"); // Don't do
                                                                   // recursive
                                                                   // infinite

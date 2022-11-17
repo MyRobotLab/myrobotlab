@@ -21,7 +21,6 @@ public class ServiceReservation implements Serializable {
   transient public final static Logger log = LoggerFactory.getLogger(ServiceReservation.class);
 
   public String key;
-  public String actualName;
   public String type;
   public String comment;
 
@@ -75,7 +74,6 @@ public class ServiceReservation implements Serializable {
     }
 
     this.key = key;
-    this.actualName = actualName;
     this.type = typeName;
     this.comment = comment;
   }
@@ -83,13 +81,7 @@ public class ServiceReservation implements Serializable {
   @Override
   public String toString() {
 
-    StringBuffer sb = new StringBuffer();
-    // sb.append(key).append("=");
-    if (actualName != null) {
-      sb.append("[");
-      sb.append(actualName);
-      sb.append("] ");
-    }
+    StringBuffer sb = new StringBuffer();    
     sb.append(type);
 
     return sb.toString();

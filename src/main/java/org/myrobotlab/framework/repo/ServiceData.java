@@ -18,6 +18,7 @@ import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
@@ -37,6 +38,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
+@Deprecated /* at some point this should all move over to MetaData */
 public class ServiceData implements Serializable {
 
   static private ServiceData localInstance = null;
@@ -265,39 +267,32 @@ public class ServiceData implements Serializable {
       type = getFullMetaTypeName(type);
 
       MetaData metaData = MetaData.get(type);
+      ServiceConfig sc = ServiceConfig.getDefaultServiceConfig(type);
+      Map<String, ServiceReservation> peers = sc.getPeers();
+      if (peers != null) {
+        for (ServiceReservation sr : peers.values()) {
 
-      Map<String, ServiceReservation> peers = metaData.getPeers();
-      for (ServiceReservation sr : peers.values()) {
+          // handle overrides !
+          String fullkey = ServiceData.getPeerKey(serviceName, sr.key);
+          // return override if exists
+          ServiceReservation override = ServiceData.planStore.get(fullkey);
+          if (override != null) {
 
-        // handle overrides !
-        String fullkey = ServiceData.getPeerKey(serviceName, sr.key);
-        // return override if exists
-        ServiceReservation override = ServiceData.planStore.get(fullkey);
-        if (override != null) {
-          if (override.actualName != null) {
-            sr.actualName = override.actualName;
-          }
-          if (override.type != null) {
-            sr.type = override.type;
+            if (override.type != null) {
+              sr.type = override.type;
+            }
+
+            if (override.comment != null) {
+              sr.comment = override.comment;
+            }
           }
 
-          if (override.comment != null) {
-            sr.comment = override.comment;
+          if (cyclicalCheck.contains(sr.type)) {
+            throw new MrlException("cyclical type error %s is of type %s has a parent of the same type - please adjust your meta data", serviceName, type);
           }
-        } else {
-          // if actual name wasn't set in the getMetaData - assign it as
-          // {parentName}.{peerKey}
-          if (sr.actualName == null) {
-            sr.actualName = ServiceData.getPeerKey(serviceName, sr.key);
-          }
+
         }
-
-        if (cyclicalCheck.contains(sr.type)) {
-          throw new MrlException("cyclical type error %s is of type %s has a parent of the same type - please adjust your meta data", serviceName, type);
-        }
-
       }
-      // }
 
       return metaData;
 
@@ -529,22 +524,27 @@ public class ServiceData implements Serializable {
       throw new MrlException("cyclical type error %s is of type %s has a parent of the same type - please adjust your meta data", name, type);
     }
     // push the configuration into the static store
-    Map<String, ServiceReservation> peers = metaData.getPeers();
-    for (Map.Entry<String, ServiceReservation> entry : peers.entrySet()) {
+    ServiceConfig sc = ServiceConfig.getDefaultServiceConfig(type);
+    Map<String, ServiceReservation> peers = sc.getPeers();
 
-      // name is actual name - peer.getKey() is key of peer
-      // peerKey is actualParent + . + peer.getKey()
-      // this peerKey is used to look up "actual" name of peer
-      String peerKey = getPeerKey(name, entry.getKey());
-      ServiceReservation peer = entry.getValue();
+    // Map<String, ServiceReservation> peers = metaData.getPeers();
+    if (peers != null) {
+      for (Map.Entry<String, ServiceReservation> entry : peers.entrySet()) {
 
-      log.info("pk {} => {}", peerKey, peer);
+        // name is actual name - peer.getKey() is key of peer
+        // peerKey is actualParent + . + peer.getKey()
+        // this peerKey is used to look up "actual" name of peer
+        String peerKey = getPeerKey(name, entry.getKey());
+        ServiceReservation peer = entry.getValue();
 
-      if (!force && planStore.containsKey(peerKey)) {
-        continue;
+        log.info("pk {} => {}", peerKey, peer);
+
+        if (!force && planStore.containsKey(peerKey)) {
+          continue;
+        }
+        planStore.put(peerKey, entry.getValue());
+
       }
-      planStore.put(peerKey, entry.getValue());
-
     }
 
     // breadth first recursion
@@ -556,7 +556,7 @@ public class ServiceData implements Serializable {
         cyclicalCheck = new HashSet<>();
         cyclicalCheck.add(type);
       }
-      setMetaData(peer.actualName, peer.type, force, cyclicalCheck);
+      setMetaData(name, peer.type, force, cyclicalCheck);
     }
 
     // get the meta data again with overrides ???
@@ -573,4 +573,5 @@ public class ServiceData implements Serializable {
     }
     return null;
   }
+
 }

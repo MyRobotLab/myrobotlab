@@ -1291,6 +1291,18 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // Platform.setVirtual(true);
 
       // Runtime.main(new String[] { "--id", "w1", "--from-launcher", "--log-level", "WARN" });
+      
+      Runtime.main(new String[] { "--id", "w1", "--from-launcher", "--log-level", "WARN", "-c", "yml-css-01" });
+
+      Runtime runtime = Runtime.getInstance();
+      runtime.saveAllDefaults();
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+
       // Runtime.start("python", "Python");
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
@@ -1299,24 +1311,18 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       webgui.setPort(8888);
       webgui.startService();
       
-      Runtime runtime = Runtime.getInstance();
-      runtime.saveAllDefaults();
       
       // Runtime.start("i01", "InMoov2");
       // Runtime.start("python", "Python");
       // Runtime.start("i01", "InMoov2");
       
       // Runtime.start("i01", "InMoov2");
-      // Runtime.start("track", "Tracking");
+      Runtime.start("track", "Tracking");
       // Runtime.startConfig("worky");
       // Runtime.startConfig("InMoov2Head");
-      Runtime.startConfig("Tracking");
+      // Runtime.startConfig("Tracking");
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
+ 
       MqttBroker broker = (MqttBroker) Runtime.start("broker", "MqttBroker");
       broker.listen();
 

@@ -16,7 +16,6 @@ public class MarySpeechMeta extends AbstractSpeechSynthesisMeta {
    */
   public MarySpeechMeta() {
 
-    addPeer("audioFile", "AudioFile", "audioFile");
     addCategory("speech", "sound");
     addDescription("Speech synthesis based on MaryTTS");
 
@@ -53,19 +52,5 @@ public class MarySpeechMeta extends AbstractSpeechSynthesisMeta {
 
   }
 
-  @Override
-  public Plan getDefault(String name) {
-
-    Plan plan = new Plan(name);
-    plan.putPeers(name, peers);
-
-    MarySpeechConfig config = new MarySpeechConfig();
-    config.audioFile = name + ".audioFile";
-
-    // add self last - desired order or construction
-    plan.addConfig(config);
-
-    return plan;
-  }
 
 }

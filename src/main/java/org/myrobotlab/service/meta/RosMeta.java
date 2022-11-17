@@ -13,12 +13,9 @@ public class RosMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    */
   public RosMeta() {
-
     addDescription("interface to Ros");
     addCategory("bridge");
-    addPeer("serial", "Serial", "serial");
     setAvailable(false);
-
   }
 
 }

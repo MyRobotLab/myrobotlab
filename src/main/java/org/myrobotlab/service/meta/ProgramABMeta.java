@@ -18,18 +18,7 @@ public class ProgramABMeta extends MetaData {
 
     addDescription("AIML 2.0 Reference interpreter based on Program AB");
     addCategory("ai");
-    addPeer("search", "Wikipedia", "replacement for handling pannous sriax requests");
-
-    // addPeer("htmlFilter", "HtmlFilter");
-
-    // TODO: renamed the bots in the program-ab-data folder to prefix them so we
-    // know they are different than the inmoov bots.
-    // each bot should have their own name, it's confusing that the inmoov bots
-    // are named en-US and so are the program ab bots.
-
-    // addDependency("program-ab", "program-ab-data", "1.2", "zip");
-    // addDependency("program-ab", "program-ab-kw", "0.0.8.5");
-
+    
     addDependency("program-ab", "program-ab-data", null, "zip");
     addDependency("program-ab", "program-ab-kw", "0.0.8.9");
     exclude("ch.qos.logback", "logback-classic");
@@ -46,18 +35,6 @@ public class ProgramABMeta extends MetaData {
 
   }
 
-  @Override
-  public Plan getDefault(String name) {
 
-    ProgramABConfig programAb = new ProgramABConfig();
-
-    Plan plan = new Plan(name);
-    // load default peers from meta here
-    plan.putPeers(name, peers);
-    // programAb.textFilters = new String[] {name + ".htmlFilter"};
-    plan.addConfig(programAb);
-    return plan;
-
-  }
 
 }

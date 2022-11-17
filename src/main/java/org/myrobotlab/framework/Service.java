@@ -1772,10 +1772,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     ServiceInterface si = Runtime.start(actualName, null);
     if (si != null) {
-      ServiceReservation sr = serviceType.getPeer(peerKey);
+      ServiceReservation sr = config.getPeer(peerKey);
       if (sr != null) {
         sr.state = "STARTED";
-        sr.actualName = actualName;
         sr.type = si.getSimpleName();
         if (si != null) {
           CodecUtils.setField(this, peerKey, si);
@@ -1788,16 +1787,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public String getPeerType(String peerKey) {
-    ServiceReservation sr = serviceType.getPeer(peerKey);
+    ServiceReservation sr = config.getPeer(peerKey);
     return sr.type;
   }
 
   public void releasePeer(String peerKey) {
     String actualName = getPeerName(peerKey);
     Runtime.release(actualName);
-    ServiceReservation sr = serviceType.getPeer(peerKey);
+    ServiceReservation sr = config.getPeer(peerKey);
     if (sr != null) {
-      sr.actualName = actualName;
       sr.state = "RELEASED";
       invoke("publishPeerReleased", peerKey);
     }
@@ -2551,7 +2549,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public String getPeerName(String peerKey) {
-    return Runtime.getPeerName(peerKey, config, serviceType.peers, getName());
+    return Runtime.getPeerName(peerKey, config, config.peers, getName());
   }
 
   public boolean isPeerStarted(String peerKey) {
@@ -2563,7 +2561,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   final public Plan getDefault() {
-    return MetaData.getDefault(getName(), this.getClass().getSimpleName());
+    return ServiceConfig.getDefault(Runtime.getPlan(), getName(), this.getClass().getSimpleName());
   }
 
   @Override

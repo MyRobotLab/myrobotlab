@@ -2378,7 +2378,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       // Platform.setVirtual(true);
 
       LoggingFactory.init(Level.INFO);
+      
+      Runtime runtime = Runtime.getInstance();
+      runtime.saveAllDefaults();
 
+      Runtime.start("arduino", "Arduino");
       Runtime.start("webgui", "WebGui");
 
       boolean isDone = true;
