@@ -36,6 +36,7 @@ import javax.swing.AbstractButton;
 import javax.swing.ButtonModel;
 import javax.swing.JFrame;
 import javax.swing.JToggleButton;
+import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -43,7 +44,7 @@ public class SelectingToggle {
   public static void main(String args[]) {
     String title = (args.length == 0 ? "Selecting Toggle" : args[0]);
     JFrame frame = new JFrame(title);
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     JToggleButton toggleButton = new JToggleButton("Selected");
     ActionListener actionListener = new ActionListener() {
       @Override

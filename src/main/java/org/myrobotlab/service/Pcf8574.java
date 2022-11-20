@@ -30,13 +30,18 @@ import org.slf4j.Logger;
  * PCF8574 / PCF8574A Remote I/O expander for i2c bus with interrupt ( interrupt
  * not yet implemented )
  * 
- * @author Mats
+ * References:
+ * http://www.digikey.com/product-detail/en/nxp-semiconductors/PCF8574T-3,518/568-1077-1-ND/735791
  * 
- *         References:
- *         http://www.digikey.com/product-detail/en/nxp-semiconductors
- *         /PCF8574T-3,518/568-1077-1-ND/735791
+ * A quasi-bidirectional I/O is an input or output port without using a
+ * direction control register. Whenever the master reads the register, the value
+ * returned to master depends on the actual voltage or status of the pin. At
+ * power on, all the ports are HIGH with a weak 100 A internal pull-up to VDD,
+ * but can be driven LOW by an internal transistor, or an external signal. The
+ * I/O ports are entirely independent of each other, but each I/O octal is
+ * controlled by the same read or write data byte.
  * 
- *         FIXME - this is a i2c controller as well as an i2c device
+ * @author Mats Onnerby modified by Ray Edgley.
  * 
  */
 
@@ -105,7 +110,7 @@ public class Pcf8574 extends Service
   }
 
   public static final int INPUT = 0x0;
-  
+
   public final static Logger log = LoggerFactory.getLogger(Pcf8574.class);
 
   public static final int OUTPUT = 0x1;
@@ -115,12 +120,15 @@ public class Pcf8574 extends Service
   protected transient I2CController controller;
 
   protected String controllerName;
-  
+
   protected List<String> controllers;
 
+  /**
+   * I2C buss address. Default of "0x38"
+   */
   protected String deviceAddress = "0x38";
-  
-  /*
+
+  /**
    * 0x20 - 0x27 for PCF8574 0c38 - 0x3F for PCF8574A Only difference between to
    * two IC circuits is the address range
    */
@@ -134,7 +142,7 @@ public class Pcf8574 extends Service
   protected int directionRegister = 0xff; // byte
 
   protected boolean isAttached = false;
-  
+
   // Publisher
   protected boolean isPublishing = false;
 
@@ -169,22 +177,11 @@ public class Pcf8574 extends Service
    */
   protected double sampleFreq = 1; // Set
 
-  // track
-  // of
-  // I/O
-  // for
-  // each
-  // pin
-  protected int writeRegister = 0; // byte
-  // to
-  // write
-  // after
-  // taking
-  // care
-  // of
-  // input
-  // output
-  // assignment
+  /**
+   * The writeRegister is what was last sent to the PCF8574. By default on power
+   * up, all pins are set to True.
+   */
+  protected int writeRegister = 0xFF; // byte
 
   public Pcf8574(String n, String id) {
     super(n, id);
@@ -203,6 +200,7 @@ public class Pcf8574 extends Service
     }
   }
 
+  @Override
   @Deprecated /* use attach(controller) */
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
 
@@ -228,6 +226,7 @@ public class Pcf8574 extends Service
     attach(listener, String.format("%d", address));
   }
 
+  @Override
   public void attach(PinListener listener, String pin) {
     String name = listener.getName();
 
@@ -257,7 +256,7 @@ public class Pcf8574 extends Service
   public void attach(String name) throws Exception {
     ServiceInterface si = Runtime.getService(name);
     if (si instanceof I2CController) {
-      attachI2CController((I2CController)si);
+      attachI2CController((I2CController) si);
       return;
     } else {
       log.error("%s does not know how to attach to %s of type %s", getName(), si.getName(), si.getSimpleName());
@@ -274,6 +273,7 @@ public class Pcf8574 extends Service
     attach((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
   }
 
+  @Override
   public void attachI2CController(I2CController controller) {
 
     if (this.controllerName == controller.getName()) {
@@ -303,14 +303,15 @@ public class Pcf8574 extends Service
       pindef.setPwm(false);
       pindef.setPinName(name);
       pindef.setAddress(i);
-      pindef.setMode("INPUT");
+      pindef.setMode("BIDIRECTIONAL");
       pinMap.put(name, pindef);
       pinIndex.put(i, pindef);
     }
 
     return pinMap;
   }
-  
+
+  @Override
   public void detach() {
     if (controller != null) {
       detachI2CController(controller);
@@ -330,7 +331,7 @@ public class Pcf8574 extends Service
   // TODO: This default code could be in Attachable
   @Override
   public void detach(String service) {
-    detach((Attachable) Runtime.getService(service));
+    detach(Runtime.getService(service));
   }
 
   @Override
@@ -455,6 +456,7 @@ public class Pcf8574 extends Service
     return null;
   }
 
+  @Override
   public PinDefinition getPin(String pin) {
     if (pinMap.containsKey(pin)) {
       return pinMap.get(pin);
@@ -499,23 +501,20 @@ public class Pcf8574 extends Service
 
   public void pinMode(int address, int mode) {
     PinDefinition pinDef = getPin(address);
-    if (mode == INPUT) {
-      pinDef.setMode("INPUT");
-      directionRegister &= ~(1 << address);
-    } else {
-      pinDef.setMode("OUTPUT");
-      directionRegister |= (1 << address);
-    }
+    // There is no direction register in the PCF8574 it is always BIDRECTIONAL.
+    pinDef.setMode("BIDIRECTIONAL");
     invoke("publishPinDefinition", pinDef);
   }
 
   @Override
   public void pinMode(int address, String mode) {
-    if (mode != null && mode.equalsIgnoreCase("INPUT")) {
-      pinMode(address, INPUT);
-    } else {
-      pinMode(address, OUTPUT);
+    PinDefinition pinDef = getPin(address);
+    // There is no direction register in the PCF8574 it is always BIDRECTIONAL.
+    if (mode != "BIDIRECTIONAL") {
+      log.error("There is no direction register, address {} mode must be BIDIRECTIONAL", address);
     }
+    pinDef.setMode("BIDIRECTIONAL");
+    invoke("publishPinDefinition", pinDef);
   }
 
   @Override
@@ -542,6 +541,7 @@ public class Pcf8574 extends Service
    * method to communicate changes in pinmode or state changes
    * 
    */
+  @Override
   public PinDefinition publishPinDefinition(PinDefinition pinDef) {
     return pinDef;
   }
@@ -562,6 +562,7 @@ public class Pcf8574 extends Service
 
   int read8() {
     int dataread = readRegister();
+    // it is possible to test for a change in value at this point.
     for (int i = 0; i < 8; i++) {
       int value = (dataread >> i) & 1;
       getPin(i).setValue(value);
@@ -569,10 +570,40 @@ public class Pcf8574 extends Service
     return dataread;
   }
 
-  int readRegister() {
+  /**
+   * Reads the input register from the PCF8574.
+   * 
+   * @return Register Value.
+   */
+  public int readRegister() {
     byte[] readbuffer = new byte[1];
     controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
-    return ((int) readbuffer[0]) & 0xff;
+    return (readbuffer[0]) & 0xff;
+  }
+
+  /**
+   * This returns the last set value on the pin. When this is set to True, a
+   * read value of false indicates the pin is pulled low by external influence.
+   * 
+   * @param address
+   *          Integer The pin to be looked at
+   * @return current state of the output register for the pin
+   */
+  public int readOutputPin(int address) {
+    int value = (writeRegister >> address) & 1;
+    return value;
+  }
+
+  /**
+   * This returns the last set value on the pin. When this is set to True, a
+   * read value of false indicates the pin is pulled low by external influence.
+   * 
+   * @param pinName
+   *          String
+   * @return current state of the output register for the pin
+   */
+  public int readOutputPin(String pinName) {
+    return readOutputPin(getPin(pinName).getAddress());
   }
 
   public List<String> refreshControllers() {
@@ -590,19 +621,27 @@ public class Pcf8574 extends Service
     setDeviceBus(bus);
   }
 
+  /**
+   * Set the I2C Address of the device.
+   * 
+   */
   @Override
   public void setDeviceAddress(String deviceAddress) {
     this.deviceAddress = deviceAddress;
     broadcastState();
   }
 
+  /**
+   * Set the bus the device is physically attached to.
+   * 
+   */
   @Override
   public void setDeviceBus(String deviceBus) {
     this.deviceBus = deviceBus;
     broadcastState();
   }
 
-  /*
+  /**
    * Set the sample rate in Hz, I.e the number of polls per second
    * 
    * @return - returns the rate that was set
@@ -619,30 +658,35 @@ public class Pcf8574 extends Service
   @Override
   public void write(int address, int value) {
 
-    PinDefinition pinDef = getPin(address);
-    if (pinDef.getMode() == "OUTPUT") {
-      if (value == 0) {
-        writeRegister = directionRegister &= ~(1 << address);
-      } else {
-        writeRegister = directionRegister |= (1 << address);
-      }
+    // PinDefinition pinDef = getPin(address); // this doesn't get used at all
+    if (value == 0) {
+      writeRegister = writeRegister &= ~(1 << address);
     } else {
-      log.error("Can't write to a pin in input mode. Change direction to OUTPUT ({}) with pinMode first.", OUTPUT);
+      writeRegister = writeRegister |= (1 << address);
     }
     writeRegister(writeRegister);
-    pinDef.setValue(value);
+    // The writeRegister and the value we read in are not the same thing.
+    // We should not be setting the pins value based on what we write out to it.
+    // pinDef.setValue(value);
   }
 
   @Override
   public void write(String pin, int value) {
+    if (getPin(pin) == null) {
+      error("could not get pin %s", pin);
+      return;
+    }
     write(getPin(pin).getAddress(), value);
   }
 
   public void writeRegister(int data) {
     byte[] writebuffer = { (byte) data };
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
+    writeRegister = data; // good idea to save the current state of the output
+                          // register when we write out the register to the
+                          // PCF8574.
   }
-  
+
   public static void main(String[] args) {
     LoggingFactory.init("info");
 
@@ -650,15 +694,15 @@ public class Pcf8574 extends Service
 
       Runtime.start("mega", "Arduino");
       Runtime.start("webgui", "WebGui");
-      
+
       Runtime.start("lcd", "Hd44780");
       // arduino = Runtime.start("arduino","Arduino")
       // arduino.setBoardMega()
       // arduino.connect("COM3")
-      
-      int KeyColumn = 0;
-      int LastKeyPress = 0;
-      Pcf8574 KeyPad = (Pcf8574) Runtime.start("pcf", "Pcf8574");
+
+      // int KeyColumn = 0;
+      // int LastKeyPress = 0;
+      // Pcf8574 KeyPad = (Pcf8574) Runtime.start("pcf", "Pcf8574");
       // Before we can use this,
       // we need to configure the I2C Bus
       // KeyPad.setBus("1")
@@ -667,28 +711,29 @@ public class Pcf8574 extends Service
       // KeyPad.attachI2CController(raspi)
       // KeyPad.attach(raspi, "1", "0x20");
       // KeyPad.attach(raspi, "1", "0x20");
-//      KeyPad.attach(raspi);
-//      KeyPad.setBus("1");
-//      KeyPad.setAddress("0x20");
+      // KeyPad.attach(raspi);
+      // KeyPad.setBus("1");
+      // KeyPad.setAddress("0x20");
 
     } catch (Exception e) {
       log.error("main threw", e);
     }
   }
-  
+
   @Override
   public ServiceConfig getConfig() {
 
     Pcf8574Config config = new Pcf8574Config();
     config.address = deviceAddress;
     config.bus = deviceBus;
-    if (controller != null) {      
+    if (controller != null) {
       config.controller = controllerName;
     }
 
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     Pcf8574Config config = (Pcf8574Config) c;
     if (config.address != null) {
@@ -697,16 +742,15 @@ public class Pcf8574 extends Service
     if (config.bus != null) {
       setBus(config.bus);
     }
-    
+
     if (config.controller != null) {
       try {
         attach(config.controller);
-      } catch(Exception e) {
+      } catch (Exception e) {
         error(e);
       }
     }
     return c;
   }
-  
 
 }

@@ -25,7 +25,9 @@ public abstract class BaseCache implements ManagedCache {
    * cache.
    * 
    * @param name
+   *          - add class name
    * @param value
+   *          - value
    */
   protected abstract void addToCache(String name, Object value);
 
@@ -412,6 +414,7 @@ public abstract class BaseCache implements ManagedCache {
    * 
    * @param name
    *          cannot be null or empty
+   * 
    */
   @Override
   public void put(String name, Object value) {
@@ -426,6 +429,7 @@ public abstract class BaseCache implements ManagedCache {
    * implementing cache.
    * 
    * @param name
+   *          class name
    */
   protected abstract void removeFromCache(String name);
 

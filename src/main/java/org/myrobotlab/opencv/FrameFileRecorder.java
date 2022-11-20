@@ -36,7 +36,7 @@ public class FrameFileRecorder extends FrameRecorder {
   public void record(Frame frame) throws Exception {
     String filename = String.format(framesDir + File.separator + "%08d.%s", frameIndex, format);
     CloseableFrameConverter converter = new CloseableFrameConverter();
-    OpenCV.saveToFile(filename,converter.toImage(frame));
+    OpenCV.saveToFile(filename, converter.toImage(frame));
     converter.close();
     ++frameIndex;
   }

@@ -1,0 +1,8 @@
+!!org.myrobotlab.service.config.InMoov2HandConfig
+index: inmoov2hand.index
+majeure: inmoov2hand.majeure
+pinky: inmoov2hand.pinky
+ringFinger: inmoov2hand.ringFinger
+thumb: inmoov2hand.thumb
+type: InMoov2Hand
+wrist: inmoov2hand.wrist

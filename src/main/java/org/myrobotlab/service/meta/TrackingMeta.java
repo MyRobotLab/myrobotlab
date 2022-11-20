@@ -21,11 +21,11 @@ public class TrackingMeta extends MetaData {
    */
   public TrackingMeta() {
 
-    // FIXME - could be debatable if base should 
+    // FIXME - could be debatable if base should
     // have a peer servo controller definition
-    // maybe it should use only 
+    // maybe it should use only
     addPeer("controller", "Arduino");
-    
+
     addPeer("cv", "OpenCV");
     addPeer("pan", "Servo");
     addPeer("tilt", "Servo");
@@ -53,7 +53,6 @@ public class TrackingMeta extends MetaData {
     // NOTE: you want to do any aliasing at the beginning
     // plan.setPeerName("tilt", name + ".head.neck");
 
-    
     TrackingConfig tracking = new TrackingConfig();
 
     tracking.controller = name + ".controller";
@@ -101,7 +100,7 @@ public class TrackingMeta extends MetaData {
     tiltData.kd = 0.0;
 
     pid.data.put(tracking.tilt, tiltData);
-    
+
     plan.addConfig(tracking);
 
     return plan;

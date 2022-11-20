@@ -79,7 +79,7 @@ public class OpenCVFilterMotionDetect extends OpenCVFilter {
     // gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     IplImage gray = cvCreateImage(image.cvSize(), 8, 1);
     cvCvtColor(image, gray, CV_BGR2GRAY);
-    
+
     Mat grayMat = converter.toMat(gray);
     // gray = cv2.GaussianBlur(gray, (21, 21), 0)
     GaussianBlur(grayMat, grayMat, new Size(21, 21), 0.0);
@@ -170,10 +170,10 @@ public class OpenCVFilterMotionDetect extends OpenCVFilter {
     // Draw the rects where motion was detected and the motion count
     if (rects != null) {
       for (Rect rect : rects) {
-        int x = (int) rect.x();
-        int y = (int) rect.y();
-        int width = (int) rect.width();
-        int height = (int) rect.height();
+        int x = rect.x();
+        int y = rect.y();
+        int width = rect.width();
+        int height = rect.height();
         graphics.setColor(Color.GREEN);
         graphics.drawRect(x, y, width, height);
       }

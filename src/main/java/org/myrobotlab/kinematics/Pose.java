@@ -45,7 +45,7 @@ public class Pose {
 
   public static Pose loadPose(String filename) throws IOException {
     String json = FileIO.toString(filename);
-    Pose pose = (Pose) CodecUtils.fromJson(json, Pose.class);
+    Pose pose = CodecUtils.fromJson(json, Pose.class);
     return pose;
   }
 

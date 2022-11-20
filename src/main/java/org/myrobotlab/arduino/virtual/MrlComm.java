@@ -478,6 +478,7 @@ public class MrlComm implements SerialDataListener {
     return virtualMsg;
   }
 
+  @Override
   public String getName() {
     return virtual.getName();
   }
@@ -540,19 +541,19 @@ public class MrlComm implements SerialDataListener {
 
   // > motorMove/deviceId/pwr
   public void motorMove(Integer deviceId, Integer pwr) {
-    
+
     MrlMotor motor = (MrlMotor) getDevice(deviceId);
     if (motor != null) {
       motor.move(pwr);
     } else {
       log.warn("motor device {} not found", deviceId);
     }
-    
+
   }
 
   // > motorMoveTo/deviceId/pos
   public void motorMoveTo(Integer deviceId, Integer pos) {
-    
+
     MrlMotor motor = (MrlMotor) getDevice(deviceId);
     if (motor != null) {
       motor.moveTo(pos);
@@ -576,7 +577,7 @@ public class MrlComm implements SerialDataListener {
   // > neoPixelAttach/pin/b16 numPixels
   public void neoPixelSetAnimation(int deviceId, int animation, int red, int green, int blue, int speed) {
     virtualMsg.publishDebug("MrlNeopixel.setAnimation!");
-    MrlNeopixel neopixel = (MrlNeopixel)getDevice(deviceId);
+    MrlNeopixel neopixel = (MrlNeopixel) getDevice(deviceId);
     if (neopixel != null) {
       neopixel.setAnimation(animation, red, green, blue, speed);
     } else {
@@ -586,12 +587,12 @@ public class MrlComm implements SerialDataListener {
 
   // > neoPixelWriteMatrix/deviceId/[] buffer
   public void neoPixelWriteMatrix(int deviceId, int[] buffer) {
-    MrlNeopixel neopixel = (MrlNeopixel)getDevice(deviceId);
+    MrlNeopixel neopixel = (MrlNeopixel) getDevice(deviceId);
     if (neopixel != null) {
       neopixel.neopixelWriteMatrix(buffer.length, buffer);
     } else {
       log.warn("no neopixel device at device id {}", deviceId);
-    }    
+    }
   }
 
   void onDisconnect() {
@@ -612,6 +613,7 @@ public class MrlComm implements SerialDataListener {
     virtualMsg.publishMRLCommError(f);
   }
 
+  @Override
   public void onBytes(byte[] newBytes) {
     log.info("MrlComm called onBytes : {}", newBytes);
     virtualMsg.onBytes(newBytes);
@@ -666,7 +668,7 @@ public class MrlComm implements SerialDataListener {
     if (servo != null) {
       servo.detachPin();
     } else {
-      log.warn("servo not found for {}", deviceId);      
+      log.warn("servo not found for {}", deviceId);
     }
   }
 
@@ -686,18 +688,18 @@ public class MrlComm implements SerialDataListener {
     if (servo != null) {
       servo.setAcceleration(acceleration);
     } else {
-      log.warn("servo not found for {}", deviceId);      
+      log.warn("servo not found for {}", deviceId);
     }
 
   }
 
   // > servoSetVelocity/deviceId/b16 velocity
   public void servoSetVelocity(int deviceId, int velocity) {
-    MrlServo servo = (MrlServo) getDevice(deviceId);    
+    MrlServo servo = (MrlServo) getDevice(deviceId);
     if (servo != null) {
       servo.setVelocity(velocity);
     } else {
-      log.warn("servo not found for {}", deviceId);      
+      log.warn("servo not found for {}", deviceId);
     }
   }
 
@@ -706,7 +708,7 @@ public class MrlComm implements SerialDataListener {
     if (servo != null) {
       servo.startSweep(min, max, step);
     } else {
-      log.warn("servo not found for {}", deviceId);      
+      log.warn("servo not found for {}", deviceId);
     }
   }
 
@@ -715,7 +717,7 @@ public class MrlComm implements SerialDataListener {
     if (servo != null) {
       servo.stopSweep();
     } else {
-      log.warn("servo not found for {}", deviceId);      
+      log.warn("servo not found for {}", deviceId);
     }
   }
 
@@ -812,7 +814,7 @@ public class MrlComm implements SerialDataListener {
     } else {
       log.warn("ultrasonic sensor found for {}", deviceId);
     }
-    
+
   }
 
   // > ultrasonicSensorStopRanging/deviceId

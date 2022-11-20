@@ -222,7 +222,7 @@ public class Updater extends Service {
       byte[] data = Http.get(String.format(REMOTE_BUILDS_URL_HOME + REMOTE_BUILDS_URL, branch));
       if (data != null) {
         String json = new String(data);
-        WorkflowJob job = (WorkflowJob) CodecUtils.fromJson(json, WorkflowJob.class);
+        WorkflowJob job = CodecUtils.fromJson(json, WorkflowJob.class);
         if (job.builds != null) {
           for (WorkflowRun build : job.builds) {
             if ("SUCCESS".equals(build.result)) {
@@ -515,9 +515,9 @@ public class Updater extends Service {
 
             // FIXME - re-implement
             // export current state
-//            if (Runtime.exists()) {
-//              Runtime.getInstance().save("last-restart/runtime.yml");
-//            }
+            // if (Runtime.exists()) {
+            // Runtime.getInstance().save("last-restart/runtime.yml");
+            // }
 
             // replace our current jar (classes ? build?)
             log.info("writing {} to myrobotlab.jar", latestFile);

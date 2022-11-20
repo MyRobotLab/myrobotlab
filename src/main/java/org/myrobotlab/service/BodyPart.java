@@ -116,6 +116,7 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
     servoOrder.put("lowStom", 18);
   }
 
+  @Override
   public void attach(Attachable attachable) {
 
     // attach the child to this node

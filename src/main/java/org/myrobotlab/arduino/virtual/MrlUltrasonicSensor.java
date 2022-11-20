@@ -52,6 +52,7 @@ public class MrlUltrasonicSensor extends Device {
     isRanging = false;
   }
 
+  @Override
   void update() {
     if (!isRanging) {
       return;

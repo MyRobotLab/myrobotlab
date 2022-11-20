@@ -61,8 +61,10 @@ public class Http {
    * non null when successful
    * 
    * @param url
+   *          end point url e.g. https://google.com
    * @param postBody
-   * @return
+   *          body for the post
+   * @return byte data from post
    */
   public static byte[] post(String url, String postBody, String contentType, Map<String, String> formValues) {
 
@@ -83,7 +85,7 @@ public class Http {
 
       StringEntity jsonEntity = new StringEntity(postBody, "UTF-8");
       jsonEntity.setContentEncoding(contentType);
-      
+
       HttpPost httpPost = new HttpPost(url);
       httpPost.setEntity(jsonEntity);
       CloseableHttpResponse response = httpclient.execute(httpPost);
@@ -96,9 +98,9 @@ public class Http {
       // Charsets.toCharset(encodingHeader.getValue());
 
       bytes = EntityUtils.toByteArray(entity);
-      
-//      String ret = new String(bytes);
-//      log.info("string value {}", ret);
+
+      // String ret = new String(bytes);
+      // log.info("string value {}", ret);
 
     } catch (Exception e) {
       log.error("Http.post {} {} threw", url, postBody, e);
@@ -118,7 +120,7 @@ public class Http {
    * failure/success e.g. response code
    * 
    * @param theUrl
-   * @return
+   * @return byte data from the get
    */
   public static byte[] get(String theUrl) {
     log.info("get {}", theUrl);

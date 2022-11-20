@@ -196,7 +196,7 @@ public class MotorHat4PiGui extends ServiceGui implements ActionListener, Change
     motorList.setSelectedItem(motor.getMotorId());
 
     if (motor.isAttached()) {
-      MotorController mc = (MotorController) motor.getController();
+      MotorController mc = motor.getController();
       controllerList.setSelectedItem(mc.getName());
       attachButton.setText(detach);
       controllerList.setEnabled(false);

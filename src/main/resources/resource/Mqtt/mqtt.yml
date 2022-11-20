@@ -1,0 +1,7 @@
+!!org.myrobotlab.service.config.MqttConfig
+address: 0.0.0.0
+mqttPort: 1883
+password: null
+type: Mqtt
+username: null
+wsPort: 8080

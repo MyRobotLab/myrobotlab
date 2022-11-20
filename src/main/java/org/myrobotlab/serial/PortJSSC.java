@@ -63,6 +63,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
     return new ArrayList<String>();
   }
 
+  @Override
   public boolean isCTS() {
     try {
       return port.isCTS();
@@ -71,6 +72,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
     return false;
   }
 
+  @Override
   public boolean isDSR() {
     try {
       return port.isDSR();
@@ -109,6 +111,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
     port = null;
   }
 
+  @Override
   public byte[] readBytes() {
     try {
       // read what's available
@@ -160,6 +163,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
     port.writeInt(data);
   }
 
+  @Override
   public void write(byte[] data) throws Exception {
     if (debug && debugTX) {
       String dataString = StringUtil.byteArrayToIntString(data);

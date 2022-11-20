@@ -1,11 +1,12 @@
 package org.myrobotlab.service.data;
 
 /**
- * This represents an utterance.  It is a represents a message from one user to another.
+ * This represents an utterance. It is a represents a message from one user to
+ * another.
  * 
  */
 public class Utterance {
-  
+
   /**
    * timestamp of the creation of the message - epoch ms
    */
@@ -15,31 +16,40 @@ public class Utterance {
    * unique id of the message
    */
   public String id;
-  
+
   /**
    * user that produced the utterance
    */
   public String username;
-  
-  public boolean isBot;
-  
+
   /**
-   * Where the utterance was heard/created.  (could be a private/direct message, or it could be to a channel / group)
+   * the source of this utterance was a bot or human
+   */
+  public boolean isBot;
+
+  /**
+   * Where the utterance was heard/created. (could be a private/direct message,
+   * or it could be to a channel / group)
    */
   public String channel;
-  
+
   /**
-   * PUBLIC / PRIVATE 
+   * PUBLIC / PRIVATE
    */
   public String channelType;
-  
+
+  /**
+   * name of channel
+   */
+  public String channelName;
+
   /**
    * The text of the utterance
    */
   public String text;
-  
+
   public String channelBotName;
-  
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -52,6 +62,7 @@ public class Utterance {
     result = prime * result + ((username == null) ? 0 : username.hashCode());
     return result;
   }
+
   @Override
   public boolean equals(Object obj) {
     if (this == obj)
@@ -90,13 +101,12 @@ public class Utterance {
       return false;
     return true;
   }
+
   @Override
   public String toString() {
     // TODO: a better tostring.
     return "Utterance [username=" + username + ", isBot=" + isBot + ", channel=" + channel + ", channelType=" + channelType + ", text=" + text + ", channelBotName="
         + channelBotName + "]";
   }
-  
-
 
 }

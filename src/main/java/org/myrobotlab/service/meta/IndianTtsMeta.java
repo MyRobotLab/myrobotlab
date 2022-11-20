@@ -15,7 +15,7 @@ public class IndianTtsMeta extends AbstractSpeechSynthesisMeta {
    * dependencies, and all other meta data related to the service.
    */
   public IndianTtsMeta() {
-    
+
     addDescription("Hindi text to speech support - requires keys");
     setCloudService(true);
     addCategory("speech", "cloud");
@@ -27,7 +27,7 @@ public class IndianTtsMeta extends AbstractSpeechSynthesisMeta {
 
   }
 
-    
+  @Override
   public Plan getDefault(String name) {
 
     Plan plan = new Plan(name);

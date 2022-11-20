@@ -316,6 +316,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
 
   }
 
+  @Override
   public void addTextListener(TextListener service) {
     addListener("publishText", service.getName(), "onText");
   }
@@ -362,6 +363,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
    * recognizedText); }
    */
 
+  @Override
   public void clearLock() {
     lockPhrases.clear();
   }
@@ -470,6 +472,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
    * linguist.allocate(); }
    */
 
+  @Override
   public void lockOutAllGrammarExcept(String lockPhrase) {
     this.lockPhrases.add(lockPhrase);
   }

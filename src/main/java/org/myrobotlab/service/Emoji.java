@@ -96,6 +96,7 @@ public class Emoji extends Service implements TextListener, EventHandler, ImageP
     ((EmojiConfig) config).map.clear();
   }
 
+  @Override
   public void startService() {
     super.startService();
 
@@ -152,24 +153,23 @@ public class Emoji extends Service implements TextListener, EventHandler, ImageP
 
       // FIXME - add by sending
       // common display attributes
-//      display.setAlwaysOnTop(false);
-//      display.setFullScreen(true);
-//      display.setColor("#000");
-//      display.setColor("#000000");
-//      display.display(filename);
-      
+      // display.setAlwaysOnTop(false);
+      // display.setFullScreen(true);
+      // display.setColor("#000");
+      // display.setColor("#000000");
+      // display.display(filename);
+
       ImageData img = new ImageData();
       img.name = source;
       img.src = filename;
       img.source = getName();
-      
+
       invoke("publishImage", img);
-      
+
     } catch (Exception e) {
       log.error("displayFullScreen threw", e);
     }
   }
-  
 
   public int getSize() {
     int size = 128;
@@ -225,14 +225,14 @@ public class Emoji extends Service implements TextListener, EventHandler, ImageP
       LoggingFactory.init(Level.WARN);
 
       Runtime.startConfig("emoji-display-2");
-      
+
       // Runtime.startConfig("emoji-display-1");
       // Runtime.saveConfig("emoji-display-2");
 
-      Emoji emoji = (Emoji) Runtime.start("emoji", "Emoji");    
+      Emoji emoji = (Emoji) Runtime.start("emoji", "Emoji");
       ImageDisplay display = (ImageDisplay) Runtime.start("display", "ImageDisplay");
       emoji.attachImageListener(display);
-      
+
       emoji.display("grinning face");
       sleep(800);
       emoji.display("tired face");
@@ -256,12 +256,11 @@ public class Emoji extends Service implements TextListener, EventHandler, ImageP
       emoji.display("electric light bulb");
       sleep(800);
       display.closeAll();
-      
-      
+
       // Runtime.saveConfig("emoji-display-1");
-//      ImageDisplay image = emoji.getDisplay();
-//      Runtime.saveConfig("emoji-1");
-//      image.closeAll();
+      // ImageDisplay image = emoji.getDisplay();
+      // Runtime.saveConfig("emoji-1");
+      // image.closeAll();
       // FiniteStateMachine fsm = (FiniteStateMachine) emoji.getPeer("fsm");
       //
       // // create a new fsm with 4 states

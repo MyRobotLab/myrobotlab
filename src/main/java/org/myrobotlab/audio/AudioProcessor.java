@@ -16,6 +16,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.AudioFile;
+import org.myrobotlab.service.config.AudioFileConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
@@ -34,7 +35,7 @@ public class AudioProcessor extends Thread {
   // internal registry ... i think
 
   protected int currentTrackCount = 0;
-  
+
   protected int samplesAdded = 0;
 
   protected double volume = 1.0f;
@@ -57,6 +58,11 @@ public class AudioProcessor extends Thread {
 
   protected int repeatCount;
 
+  /**
+   * loop counter
+   */
+  private int cnt = 0;
+
   public AudioProcessor(AudioFile audioFile, String track) {
     super(String.format("%s:track", track));
     this.audioFile = audioFile;
@@ -64,18 +70,19 @@ public class AudioProcessor extends Thread {
   }
 
   /**
-   * Pause the current playing file - if it is paused - it is "still considered" to
-   * be playing so isPlaying needs to remain true (otherwise the file/audio processor
-   * will completely stop)
+   * Pause the current playing file - if it is paused - it is "still considered"
+   * to be playing so isPlaying needs to remain true (otherwise the file/audio
+   * processor will completely stop)
    * 
-   * @param b - to pause or not
+   * @param b
+   *          - to pause or not
    * @return
    */
   public AudioData pause(boolean b) {
     // isPlaying = b; <- DO NOT DO THIS !
     // someone put this bug in - when a song is 'paused' its still playing
     // ie - this needs to remain true otherwise it will not resume when
-    // requested !!      
+    // requested !!
     if (currentAudioData != null) {
       if (b) {
         currentAudioData.waitForLock = new Object();
@@ -111,10 +118,6 @@ public class AudioProcessor extends Thread {
           audioFile.error(String.format("audio file %s 0 byte length", file.getName()));
           return data;
         }
-        /*
-         * fis = new FileInputStream(file); bis = new BufferedInputStream(fis);
-         * in = AudioSystem.getAudioInputStream(bis);
-         */
 
         in = AudioSystem.getAudioInputStream(file);
 
@@ -143,6 +146,7 @@ public class AudioProcessor extends Thread {
         audioFile.invoke("publishAudioStart", data);
 
         while (isPlaying && (nBytesRead = din.read(buffer, 0, buffer.length)) != -1) {
+          ++cnt;
           // byte[] goofy = new byte[4096];
           /*
            * HEE HEE .. if you want to make something sound "bad" i'm sure its
@@ -171,10 +175,10 @@ public class AudioProcessor extends Thread {
               // float scaled = (float) (Math.log(data.volume) / Math.log(10.0)
               // * 20.0);
 
-              if (MathUtils.round(ctrl.getValue(), 3) != MathUtils.round((float) (ctrl.getMinimum() + ((double) (ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)), 3)) {
+              if (MathUtils.round(ctrl.getValue(), 3) != MathUtils.round((float) (ctrl.getMinimum() + ((ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)), 3)) {
                 if (data.volume <= 1.0f && data.volume >= 0) {
 
-                  ctrl.setValue((float) (ctrl.getMinimum() + ((double) (ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)));
+                  ctrl.setValue((float) (ctrl.getMinimum() + ((ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)));
                   log.debug("Audioprocessor set volume to : " + ctrl.getValue());
                 } else {
                   log.error("Requested volume value " + data.volume.toString() + " not allowed");
@@ -195,21 +199,28 @@ public class AudioProcessor extends Thread {
             }
           }
 
-          // BooleanControl
-          // muteControl=(BooleanControl)source.getControl(BooleanControl.Type.MUTE);
-          /*
-           * if (volume == 0) { muteControl.setValue(true); }
-           */
-
-          // the buffer of raw data could be published from here
-          // if a reference of the service is passed in
-
           if (audioFile.isMute()) {
             // NoOp for a mute audioFile.
           } else {
             line.write(buffer, 0, nBytesRead);
+            // Compute the peak value and publish it.
+            AudioFileConfig config = (AudioFileConfig) audioFile.getConfig();
+            if (cnt % config.peakSampleInterval == 0) {
+              float peak = 0f;
+              int b = buffer.length;
+              // convert bytes to samples here
+              for (int i = 0; i < b;) {
+                int sample = 0;
+                sample |= buffer[i++] & 0xFF; // (reverse these two lines
+                sample |= buffer[i++] << 8; // if the format is big endian)
+                float abs = Math.abs(sample / 32768f);
+                if (abs > peak) {
+                  peak = abs;
+                }
+              }
+              audioFile.invoke("publishPeak", peak * (float) audioFile.getPeakMultiplier());
+            }
           }
-
         }
         // Stop
 
@@ -263,7 +274,6 @@ public class AudioProcessor extends Thread {
 
     try {
       AudioData data = null;
-      int lastTrackPlayed = currentTrackCount;
       while (isRunning) {
         // FIXME - timeSinceLastFinishedSample (collect all time)
 
@@ -279,25 +289,8 @@ public class AudioProcessor extends Thread {
           repeatCount = 0;
         }
 
-        // check to see if we should be waiting for another track to finish
-        // FIXME - REMOVE ! NO KEYS JUST LOCK ON OBJECT !!!!
-        /*
-         * if (waitForKey != null) { Object waitForLock =
-         * audioFile.getWaitForLock(waitForKey); synchronized (waitForLock) {
-         * waitForLock.wait(); } }
-         */
-
         play(data);
         ++repeatCount;
-
-        // FIXME - DONT USE KEYS !! DONT USE AUDIOFILE !! LOCK ON OBJECT IN DATA
-        // !!!
-        /*
-         * if (currentTrackCount != lastTrackPlayed) { String key =
-         * String.format("%s:%s", queueName, currentTrackCount); Object
-         * waitForLock = audioFile.getWaitForLock(key); if (waitForLock != null)
-         * { synchronized (waitForLock) { waitForLock.notify(); } } }
-         */
 
         data.stopTs = System.currentTimeMillis();
 

@@ -156,6 +156,7 @@ public class Test extends Service implements StatusListener {
       this.isRunning = false;
     }
 
+    @Override
     public String toString() {
       return String.format("=== TEST ===> testName: %s service: %s/%s status: %s", testName, branch, serviceName, status);
     }
@@ -170,6 +171,7 @@ public class Test extends Service implements StatusListener {
       start();
     }
 
+    @Override
     public void run() {
       test.runTests();
       log.info("Tester is done - leaving");
@@ -733,11 +735,13 @@ public class Test extends Service implements StatusListener {
 
   }
 
+  @Override
   public void startService() {
     super.startService();
     loadDefaultTests();
   }
 
+  @Override
   public void stopService() {
     super.stopService();
     if (tester != null) {

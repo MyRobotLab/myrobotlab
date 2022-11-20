@@ -389,7 +389,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     // Ok directory exists.. iterate results and save bytes
     for (SolrDocument doc : qres.getResults()) {
       // TODO: bunch of null pointer checks here..
-      String id = (String) doc.getFirstValue("id").toString();
+      String id = doc.getFirstValue("id").toString();
       byte[] bytes = (byte[]) doc.getFirstValue("bytes");
       String label = (String) doc.getFirstValue("label");
 
@@ -617,6 +617,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     return solrDoc;
   }
 
+  @Override
   public ProcessingStatus onDocument(Document doc) {
     // always be batching when sending docs.
     ArrayList<Document> docs = new ArrayList<Document>();
@@ -936,6 +937,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   // TODO: see if we can figure out if this is an inbox or an outbox.
   // ok we want to do something like handle an onMessage method.
+  @Override
   public void onMessage(Message message) {
     if (message == null) {
       // This shouldn't happen...

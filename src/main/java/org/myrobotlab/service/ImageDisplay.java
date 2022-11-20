@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
@@ -90,6 +91,7 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
     return config;
   }
 
+  @Override
   public void attach(Attachable attachable) {
     if (attachable instanceof ImagePublisher) {
       attachImagePublisher(attachable.getName());
@@ -319,7 +321,7 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
 
             // gd.setFullScreenWindow(frame);
             // vs
-            display.frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            display.frame.setExtendedState(Frame.MAXIMIZED_BOTH);
             // frame.setLocationRelativeTo(null);
 
           } else if ((display.width != null && display.height != null) || display.scale != null) {
@@ -803,9 +805,9 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
       // in this example we will search for images and display them
       // start a google search and get the images back, then display them
       GoogleSearch google = (GoogleSearch) Runtime.start("google", "GoogleSearch");
-      List<String> images = google.imageSearch("monkey");
-      for (String img : images) {
-        display.displayFullScreen(img);
+      List<ImageData> images = google.imageSearch("monkey");
+      for (ImageData img : images) {
+        display.displayFullScreen(img.src);
         // display.display(img);
         sleep(1000);
       }

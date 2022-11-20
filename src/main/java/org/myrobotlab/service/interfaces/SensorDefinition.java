@@ -14,6 +14,7 @@ public abstract class SensorDefinition implements NameProvider, Serializable {
     this.serviceName = SensorDefinition;
   }
 
+  @Override
   public String getName() {
     return serviceName;
   }

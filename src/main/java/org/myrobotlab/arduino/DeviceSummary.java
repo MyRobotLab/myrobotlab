@@ -13,6 +13,7 @@ public class DeviceSummary implements Serializable {
     this.id = id;
   }
 
+  @Override
   public String toString() {
     return String.format("%s device id %d", name, id);
   }

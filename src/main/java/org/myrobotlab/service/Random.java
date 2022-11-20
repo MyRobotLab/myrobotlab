@@ -49,7 +49,7 @@ public class Random extends Service {
     public long interval;
     public boolean oneShot = false;
 
-    public RandomMessage() {      
+    public RandomMessage() {
     }
   }
 
@@ -254,6 +254,7 @@ public class Random extends Service {
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     RandomConfig config = (RandomConfig) c;
     enabled = config.enabled;

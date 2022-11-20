@@ -38,7 +38,7 @@ public class OpenCVFilterUndistort extends OpenCVFilter {
   transient private Mat distVec = new Mat(1, 5, CV_32FC1);
 
   transient private CloseableFrameConverter converter = new CloseableFrameConverter();
-  
+
   public OpenCVFilterUndistort() {
     super();
     initCameraAndDistortionMatrix();
@@ -122,7 +122,7 @@ public class OpenCVFilterUndistort extends OpenCVFilter {
     // TODO Auto-generated method stub
     super.release();
     converter.close();
-  
+
   }
 
   @Override

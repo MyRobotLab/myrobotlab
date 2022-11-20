@@ -31,7 +31,7 @@ public class MqttBrokerTest extends AbstractServiceTest {
     assertTrue(mqtt.isConnected());
 
     // fire mqtt msg to execute python test and set value of test_value
-    mqtt.publish("api/service/python/exec/test('worky!')");
+    mqtt.publish("api/service/python/exec/\"test(\\\"worky!\\\")\"");
 
     // wait for script to end
     long start = System.currentTimeMillis();

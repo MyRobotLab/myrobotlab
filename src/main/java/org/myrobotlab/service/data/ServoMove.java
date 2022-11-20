@@ -18,15 +18,16 @@ public class ServoMove {
    * the input value after the servos mapper has been applied
    */
   public Double outputPos;
-  
+
   public ServoMove(final String name, final Double inputPos, final Double outputPos) {
     this.name = name;
     this.inputPos = inputPos;
     this.outputPos = outputPos;
   }
 
+  @Override
   public String toString() {
     return String.format("%s inputPos %.2f outputPos %.2f", name, inputPos, outputPos);
   }
-  
+
 }

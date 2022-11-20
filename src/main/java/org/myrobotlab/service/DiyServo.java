@@ -202,6 +202,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   /*
    * Update the list of PinArrayControls
    */
+  @Override
   public void onRegistered(Registration s) {
     refreshPinArrayControls();
     broadcastState();
@@ -248,6 +249,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     return b;
   }
 
+  @Override
   public long getLastActivityTime() {
     return lastActivityTimeTs;
   }
@@ -265,10 +267,12 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     return isPinArrayControlSet;
   }
 
+  @Override
   public boolean isInverted() {
     return mapper.isInverted();
   }
 
+  @Override
   public void map(double minX, double maxX, double minY, double maxY) {
     mapper = new MapperLinear(minX, maxX, minY, maxY);
     broadcastState();
@@ -278,6 +282,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    * The most important method, that tells the servo what position it should
    * move to
    */
+  @Override
   public Double moveTo(Double pos) {
     synchronized (moveToBlocked) {
       moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
@@ -330,10 +335,12 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     return pinArrayControls;
   }
 
+  @Override
   public void rest() {
     moveTo(rest);
   }
 
+  @Override
   public void setInverted(boolean invert) {
     mapper.setInverted(invert);
     motorControl.setInverted(invert);
@@ -355,6 +362,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     map(min, max, min, max);
   }
 
+  @Override
   public void setRest(double rest) {
     this.rest = rest;
   }
@@ -539,11 +547,13 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     }
   }
 
+  @Override
   public void attach(EncoderControl encoder) {
     // TODO: do i need anything else?
     this.encoderControl = encoder;
   }
 
+  @Override
   public void attach(String pinArrayControlName, Integer pin) {
     // myServo = (DiyServo) Runtime.getService(boundServiceName);
     attach((PinArrayControl) Runtime.getService(pinArrayControlName), (int) pin);
@@ -621,10 +631,12 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     return MathUtils.round(currentPosInput, roundPos);
   }
 
+  @Override
   public boolean isEnabled() {
     return !motorControl.isLocked();
   }
 
+  @Override
   public boolean isSweeping() {
     return isSweeping;
   }

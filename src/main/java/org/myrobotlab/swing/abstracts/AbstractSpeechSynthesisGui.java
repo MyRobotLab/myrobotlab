@@ -110,7 +110,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
 
     Runtime runtime = Runtime.getInstance();
 
-    addTop("Class : " + runtime.getService(boundServiceName).getClass().getSimpleName(), isReadyIcon);
+    addTop("Class : " + Runtime.getService(boundServiceName).getClass().getSimpleName(), isReadyIcon);
     addTop("speaking state : ", speakingState);
     addTop("generation time : ", generationTime);
     addTop("audio state : ", audioState);
@@ -366,7 +366,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   @Override
   public void stateChanged(javax.swing.event.ChangeEvent e) {
     if (swingGui != null) {
-      swingGui.send(boundServiceName, "setVolume", (double) Double.valueOf(volume.getValue()) / 100);
+      swingGui.send(boundServiceName, "setVolume", Double.valueOf(volume.getValue()) / 100);
     }
   }
 

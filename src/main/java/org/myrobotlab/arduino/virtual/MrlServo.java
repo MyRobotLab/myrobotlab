@@ -69,6 +69,7 @@ public class MrlServo extends Device implements VirtualServo {
   }
 
   // FIXME - what happened to events ?
+  @Override
   public void update() {
     // it may have an imprecision of +- 1 due to the conversion of currentPosUs
     // to int

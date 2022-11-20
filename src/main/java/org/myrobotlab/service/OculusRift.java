@@ -98,6 +98,7 @@ public class OculusRift extends Service implements PointPublisher {
   }
 
   // Boradcast the state of the peers to notify the gui.
+  @Override
   public void broadcastState() {
     // notify the gui
     if (leftOpenCV != null)

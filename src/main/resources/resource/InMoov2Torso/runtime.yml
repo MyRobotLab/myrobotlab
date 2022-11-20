@@ -1,0 +1,11 @@
+!!org.myrobotlab.service.config.RuntimeConfig
+enableCli: true
+locale: null
+logLevel: null
+registry:
+- inmoov2torso.lowStom
+- inmoov2torso.midStom
+- inmoov2torso.topStom
+- inmoov2torso
+type: Runtime
+virtual: null

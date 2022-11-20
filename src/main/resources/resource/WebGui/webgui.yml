@@ -1,0 +1,5 @@
+!!org.myrobotlab.service.config.WebGuiConfig
+autoStartBrowser: true
+enableMdns: false
+port: 8888
+type: WebGui

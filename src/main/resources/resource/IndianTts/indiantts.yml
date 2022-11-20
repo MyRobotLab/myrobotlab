@@ -1,0 +1,8 @@
+!!org.myrobotlab.service.config.IndianTtsConfig
+audioFile: indiantts.audioFile
+blocking: false
+mute: false
+speechRecognizers: null
+substitutions: null
+type: IndianTts
+voice: null

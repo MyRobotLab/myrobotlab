@@ -20,7 +20,7 @@ public interface AbsolutePositionControl {
   public Double moveToBlocking(Double newPos);
 
   public Double moveToBlocking(Integer newPos, Long timeoutMs);
-  
+
   public Double moveToBlocking(Double newPos, Long timeoutMs);
 
 }

@@ -44,7 +44,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
   public FiniteStateMachine(String n, String id) {
     super(n, id);
   }
-  
+
   public void clear() {
     currentStates.clear();
     finalStates.clear();
@@ -83,6 +83,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
     registerTransition(transition);
   }
 
+  @Override
   public void attach(Attachable service) throws Exception {
     if (service instanceof EventHandler) {
       if (service.isLocal()) {
@@ -116,8 +117,8 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
                                                   // iterate - just use a Map
                                                   // !!!
         if (currentState.equals(transition.getSourceState().getName()) && // fsm
-                                                                        // is in
-                                                                        // the
+        // is in
+        // the
         // right state as
         // expected by
         // transition
@@ -181,6 +182,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
     }
   }
 
+  @Override
   public State getCurrentState() {
     return lastChangedState;
   }
@@ -298,13 +300,11 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
     this.states = states;
     currentStates.add(initialState.getName());
   }
-  
-  
-  
+
   @Override
   public ServiceConfig getConfig() {
 
-    FiniteStateMachineConfig c = (FiniteStateMachineConfig)config;
+    FiniteStateMachineConfig c = (FiniteStateMachineConfig) config;
     c.states.clear();
     for (State s : states) {
       c.states.add(s.getName());
@@ -318,7 +318,8 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
     }
     return c;
   }
-  
+
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     FiniteStateMachineConfig config = (FiniteStateMachineConfig) c;
     states.clear();
@@ -331,7 +332,6 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
     }
     return c;
   }
-
 
   public SimpleEvent publishEvent(SimpleEvent event) {
     return event;
@@ -368,8 +368,8 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
       fsm.fire("ill-event");
       fsm.fire("ill-event");
       fsm.fire("ill-event");
-      
-        fsm.save();
+
+      fsm.save();
 
       fsm.addScheduledEvent("clear-event", 1000);
 

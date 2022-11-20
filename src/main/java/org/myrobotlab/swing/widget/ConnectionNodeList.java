@@ -7,6 +7,7 @@ import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.WindowConstants;
 
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
@@ -22,7 +23,7 @@ public class ConnectionNodeList extends JPanel {
     LoggingFactory.init(Level.DEBUG);
 
     JFrame frame = new JFrame("List Example");
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     ConnectionNodeList cl = new ConnectionNodeList();
 
     frame.setContentPane(cl);

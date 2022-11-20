@@ -81,6 +81,7 @@ public class Polly extends AbstractSpeechSynthesis {
    * loadVoices - must be loaded by SpeechSynthesis class - contract of
    * AbstractSpeechSynthesis
    */
+  @Override
   protected void loadVoices() {
     getPolly();
 

@@ -39,7 +39,7 @@ public abstract class MapperBase implements Serializable, Mapper {
   public MapperBase(double minX, double maxX, double minY, double maxY) {
     map(minX, maxX, minY, maxY);
   }
-  
+
   public MapperBase(double minX, double maxX, double minY, double maxY, boolean clip, boolean inverted) {
     setClip(clip);
     setInverted(inverted);
@@ -100,6 +100,7 @@ public abstract class MapperBase implements Serializable, Mapper {
   /**
    * invert the Y range
    */
+  @Override
   public void setInverted(boolean invert) {
     inverted = invert;
   }
@@ -123,14 +124,17 @@ public abstract class MapperBase implements Serializable, Mapper {
     setMinMax((double) minXY, (double) maxXY);
   }
 
+  @Override
   public boolean isClip() {
     return clip;
   }
 
+  @Override
   public void setClip(boolean clip) {
     this.clip = clip;
   }
 
+  @Override
   public String toString() {
     return String.format(" map(%.2f,%.2f,%.2f,%.2f) inverted %b", minX, maxX, minY, maxY, inverted);
   }

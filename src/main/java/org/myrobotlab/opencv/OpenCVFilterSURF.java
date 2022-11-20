@@ -43,6 +43,8 @@ import java.awt.image.BufferedImage;
 
 import org.bytedeco.javacv.ObjectFinder;
 import org.bytedeco.javacv.ObjectFinder.Settings;
+import org.bytedeco.opencv.opencv_core.AbstractCvScalar;
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
@@ -84,11 +86,11 @@ public class OpenCVFilterSURF extends OpenCVFilter {
       return image;
     }
 
-    IplImage objectColor = IplImage.create(object.width(), object.height(), 8, 3);
+    IplImage objectColor = AbstractIplImage.create(object.width(), object.height(), 8, 3);
     cvCvtColor(object, objectColor, CV_GRAY2BGR);
 
     // object is now black and white
-    IplImage imageBW = IplImage.create(image.width(), image.height(), 8, 1);
+    IplImage imageBW = AbstractIplImage.create(image.width(), image.height(), 8, 1);
     cvCvtColor(image, imageBW, CV_BGR2GRAY);
     // image bw is now black and white
 
@@ -97,7 +99,7 @@ public class OpenCVFilterSURF extends OpenCVFilter {
     int correspondHeight = Max(image.height(), object.height());
 
     // Create a new image to hold the object and the image side by side
-    IplImage correspond = IplImage.create(correspondWidth, correspondHeight, 8, 1);
+    IplImage correspond = AbstractIplImage.create(correspondWidth, correspondHeight, 8, 1);
 
     // IplImage correspond = IplImage.create(Max(image.width(), object.width()),
     // object.height() + image.height(), 8, 1);
@@ -163,7 +165,7 @@ public class OpenCVFilterSURF extends OpenCVFilter {
         // TODO: draw a line on the new corresponding image ?
         // cvLine(correspond, cvPoint(x1, y1 + object.height()), cvPoint(x2, y2
         // + object.height()), CvScalar.WHITE, 1, 8, 0);
-        cvLine(correspond, cvPoint(x1, y1), cvPoint(x2 + object.width(), y2), CvScalar.WHITE, 1, 8, 0);
+        cvLine(correspond, cvPoint(x1, y1), cvPoint(x2 + object.width(), y2), AbstractCvScalar.WHITE, 1, 8, 0);
         // increment the loop counter
         i += 4;
       }
