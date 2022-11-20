@@ -10,6 +10,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.RuntimeConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 /**
@@ -31,9 +32,6 @@ public class Plan {
   public final static Logger log = LoggerFactory.getLogger(Plan.class);
 
   LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
-
-  @Deprecated /* use definition in config and contract of String fieldnames */
-  public Map<String, Map<String, ServiceReservation>> peers = new TreeMap<String, Map<String, ServiceReservation>>();
 
   public Plan(String rootName) {
     name = rootName;
@@ -71,18 +69,6 @@ public class Plan {
     return config.put(name, sc);
   }
 
-    if (name.equals("runtime")) {
-      // we do not replace root - we keep our root
-      // and add their request to start
-      log.info("request to replace root runtime ! - probably not what you want - not gonna do it");
-      return sc;
-    }
-    
-    RuntimeConfig rt = (RuntimeConfig)get("runtime");
-    rt.add(name);
-    return config.put(name, sc);
-  }
-
   public ServiceConfig get(String name) {
     return config.get(name);
   }
@@ -108,10 +94,6 @@ public class Plan {
   public void merge(Plan newPlan) {
     if (newPlan == null) {
       return;
-    }
-
-    for (String peerName : newPlan.peers.keySet()) {
-      peers.put(peerName, newPlan.peers.get(peerName));
     }
 
     // config.putAll(ret.config);
@@ -161,34 +143,21 @@ public class Plan {
     return sc;
   }
 
-
-
   public ServiceConfig addConfigx(ServiceConfig sc) {
     // recently changed from return config.put(name, sc); to
     return put(name, sc);
-  }
-
-  public ServiceConfig getPeerConfigx(String peerKey) {
-    ServiceReservation sr = peers.get(name).get(peerKey);
-    String actualName = null;
-    if (sr == null) {
-      log.error("%s key %s not found", name, peerKey);
-      return null;
-    }
-     actualName = name + "." + peerKey;
-    return config.get(actualName);
   }
 
   public ServiceConfig removeConfig(String actualName) {
     return config.remove(actualName);
   }
 
-  public Map<String, Map<String, ServiceReservation>> getPeers() {
-    return peers;
-  }
-
   public int size() {
     return config.size();
+  }
+
+  public ServiceConfig get(Peer peer) {
+    return get(peer.name);
   }
 
 }

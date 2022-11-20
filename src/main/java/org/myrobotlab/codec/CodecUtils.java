@@ -1244,63 +1244,6 @@ public class CodecUtils {
         }
     }
 
-    /**
-     * A description of an API type
-     */
-    public static class ApiDescription {
-        /**
-         * The string to use after {@link #PARAMETER_API}
-         * in URIs to select this API.
-         */
-        public final String key;
-
-        /**
-         * The path to reach this API
-         */
-        public final String path; // {scheme}://{host}:{port}/api/messages
-
-        /**
-         * An example URI to reach this API
-         */
-        public final String exampleUri;
-
-        /**
-         * The description of this API
-         */
-        public final String description;
-
-        /**
-         * Construct a new API description.
-         *
-         * @param key            {@link #key}
-         * @param uriDescription {@link #path}
-         * @param exampleUri     {@link #exampleUri}
-         * @param description    {@link #description}
-         */
-        public ApiDescription(String key, String uriDescription, String exampleUri, String description) {
-            this.key = key;
-            this.path = uriDescription;
-            this.exampleUri = exampleUri;
-            this.description = description;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            ApiDescription that = (ApiDescription) o;
-            return Objects.equals(key, that.key)
-                    && Objects.equals(path, that.path)
-                    && Objects.equals(exampleUri, that.exampleUri)
-                    && Objects.equals(description, that.description);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(key, path, exampleUri, description);
-        }
-    }
-
   /**
    * A description of an API type
    */

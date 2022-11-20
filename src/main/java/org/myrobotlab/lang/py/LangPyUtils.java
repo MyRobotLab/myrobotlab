@@ -13,9 +13,9 @@ import java.util.Set;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
+import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
@@ -295,13 +295,13 @@ public class LangPyUtils implements PythonGenerator {
       // static getDefault routes by type
       Plan plan = ServiceConfig.getDefault(Runtime.getPlan(), si.getName(), si.getSimpleName());
       ServiceConfig sc = plan.get(si.getName());
-      Map<String, ServiceReservation> peers = sc.getPeers();
+      Map<String, Peer> peers = sc.getPeers();
 
       // FIXME - do "indent"
       boolean firstTime = true;
       if ((maxDepth == null || maxDepth < currentDepth) && peers != null) {
         for (String peer : peers.keySet()) {
-          ServiceReservation sr = peers.get(peer);
+          Peer sr = peers.get(peer);
           String noWorky = "noWorky"; // had to fix
           ServiceInterface peerSi = Runtime.getService(noWorky);
           if (peerSi != null) {

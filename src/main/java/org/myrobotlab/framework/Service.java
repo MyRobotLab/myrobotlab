@@ -1337,11 +1337,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public ServiceConfig apply(ServiceConfig config) {
     log.info("Default service config loading for service: {} type: {}", getName(), getType());
-    // setVirtual(config.isVirtual); "overconfigured" - user Runtimes virtual
-    // setLocale(config.locale);
-    
-    // IMPORTANT !!! THIS IS WHAT WE WANT !!! VERY EXCITING !
     this.config = config;
+//    if (config.peers != null) {
+//      peers = config.peers;
+//    }
 
     return config;
   }
@@ -1766,51 +1765,30 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public ServiceInterface startPeer(String peerKey) {
     String actualName = getPeerName(peerKey);
+    // Peer peer = config.getPeer(peerKey);
     if (actualName == null) {
       log.error("startPeer could not find actual name of {} in {}", peerKey, getName());
     }
 
-    ServiceInterface si = Runtime.start(actualName, null);
+    // don't need type definition, as it already should be "loaded"
+    ServiceInterface si = Runtime.create(actualName, null);
+    
+    // FIXME FIXME FIXME - auto assignment of reference field !!!!! <<<<<<<<<    
+    Runtime.start(actualName, null);
+    // si.startService();
+    
+    
     if (si != null) {
-      ServiceReservation sr = config.getPeer(peerKey);
-      if (sr != null) {
-        sr.state = "STARTED";
-        sr.type = si.getSimpleName();
-        if (si != null) {
-          CodecUtils.setField(this, peerKey, si);
-        }
-      }
       invoke("publishPeerStarted", peerKey);
       broadcastState();
     }
     return si;
   }
 
-  public String getPeerType(String peerKey) {
-    ServiceReservation sr = config.getPeer(peerKey);
-    return sr.type;
-  }
-
   public void releasePeer(String peerKey) {
     String actualName = getPeerName(peerKey);
     Runtime.release(actualName);
-    ServiceReservation sr = config.getPeer(peerKey);
-    if (sr != null) {
-      sr.state = "RELEASED";
-      invoke("publishPeerReleased", peerKey);
-    }
     broadcastState();
-  }
-
-  @Override
-  @Deprecated /* use Runtime.start() */
-  public void loadAndStart() {
-    try {
-      load();
-      startService();
-    } catch (Exception e) {
-      log.error("Load and Start failed.", e);
-    }
   }
 
   @Override
@@ -2549,8 +2527,33 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public String getPeerName(String peerKey) {
-    return Runtime.getPeerName(peerKey, config, config.peers, getName());
+    try {
+      return config.getPeerName(peerKey);
+      // REFLECTION WAY - COOL BUT NOT NECESSARY
+      /*
+      Field field = config.getClass().getDeclaredField(peerKey);
+      field.setAccessible(true);
+      Peer value = (Peer) field.get(config);
+      return value.name;
+      */
+    } catch (Exception e) {
+      error(e);
+    }
+    return null;
   }
+  
+  public String getPeerType(String peerKey) {
+    try {
+      Field field = config.getClass().getDeclaredField(peerKey);
+      field.setAccessible(true);
+      Peer peer = (Peer) field.get(config);
+      return peer.type;
+    } catch (Exception e) {
+      error(e);
+    }
+    return null;
+  }
+
 
   public boolean isPeerStarted(String peerKey) {
     return Runtime.isStarted(getPeerName(peerKey));

@@ -16,9 +16,8 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.Plan;
+import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.StatusPublisher;
 import org.myrobotlab.io.FileIO;
@@ -329,11 +328,11 @@ public abstract class Repo {
       // Plan plan = ServiceConfig.getDefault(type.toLowerCase(), type);
       ServiceConfig sc = ServiceConfig.getDefaultServiceConfig(type);
       
-      Map<String, ServiceReservation> peers = sc.getPeers();
+      Map<String, Peer> peers = sc.getPeers();
       if (peers != null) {
         for (String key : peers.keySet()) {
-          ServiceReservation sr = peers.get(key);
-          ret.addAll(getUnfulfilledDependencies(CodecUtils.makeFullTypeName(sr.type)));
+          Peer peer = peers.get(key);
+          ret.addAll(getUnfulfilledDependencies(CodecUtils.makeFullTypeName(peer.type)));
         }
       }
     }

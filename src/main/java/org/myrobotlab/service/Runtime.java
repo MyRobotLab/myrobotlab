@@ -49,6 +49,7 @@ import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.MethodEntry;
+import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
@@ -396,6 +397,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         continue;
       }
       ServiceConfig sc = plan.get(service);
+      sc.state = "CREATING";
       ServiceInterface si = createService(service, sc.type, null);
       sc.state = "CREATED";
       si.setConfig(sc);
@@ -403,11 +405,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       createdServices.put(service, si);
     }
 
-    sc.state = "CREATING";
-    si = createService(name, sc.type, null);
-    for (String peerName : autoStartedPeers) {
-      si.addAutoStartedPeer(peerName);
-    }
+    return createdServices;
+  }
 
   public String getServiceExample(String serviceType) {
     String url = "https://raw.githubusercontent.com/MyRobotLab/myrobotlab/develop/src/main/resources/resource/" + serviceType + "/" + serviceType + ".py";
@@ -1813,9 +1812,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     unregister(name);
     Plan plan = Runtime.getPlan();
     ServiceConfig sc = plan.get(inName);
-    
-    
-    
+
     if (sc != null) {
       sc.state = "RELEASED";
       // FIXME - TODO RELEASE PEERS ! which is any inName.* !!!
@@ -2498,6 +2495,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           requestedService.addAutoStartedPeer(service.getName());
         }
       }
+      
+      ServiceConfig sc = requestedService.getConfig();
+      Map<String, Peer> peers = sc.getPeers();
+      for (String p : peers.keySet()) {
+        Peer peer = peers.get(p);
+        log.info("peer {}", peer);
+      }
+      
       requestedService.startService();
       return requestedService;
     } catch (Exception e) {
@@ -4099,10 +4104,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return name;
   }
 
-  public static void setPeer(String fullKey, String actualName, String serviceType) {
-    ServiceData.setPeer(fullKey, actualName, serviceType);
-  }
-
   public static Plan getPlan() {
     Runtime runtime = Runtime.getInstance();
     return runtime.getLocalPlan();
@@ -4529,11 +4530,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   synchronized private Plan loadService(Plan plan, String name, String type, int level) throws IOException {
 
     log.error("loading - {} {} {}", name, type, level);
-    
-    if (name.equals("arduino")) {
+
+    if (!name.equals("runtime") && !name.equals("security") && !name.equals("webgui")) {
       log.info("here x");
     }
-    
+
     if (plan == null) {
       log.error("plan required to load a system");
       return null;
@@ -4545,10 +4546,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       log.info("priority #0 - already have a plan for {} {}", name, type);
       return plan;
     }
-    
 
     // PRIORITY #1
-    String configPath = runtime.getConfigPath();    
+    String configPath = runtime.getConfigPath();
     if (configPath != null) {
       log.info("priority #1 user's yml override {}", configPath + fs + name + ".yml");
       // PRIORITY #1
@@ -4566,10 +4566,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       String yml = getResourceRoot() + fs + type + fs + type.toLowerCase() + ".yml";
       try {
         log.info("priority #2 checking system default yml {}", yml);
-        // FIXME - CLOSE BUT NOT QUITE RIGHT - {ServiceType}/runtime.yml - should be loaded as "peer set"
+        // FIXME - CLOSE BUT NOT QUITE RIGHT - {ServiceType}/runtime.yml -
+        // should be loaded as "peer set"
         // the set will need recursive integration
         sc = CodecUtils.readServiceConfig(yml);
-      } catch(Exception e) {
+      } catch (Exception e) {
         log.info("priority #2 checking system default yml {} not found", yml);
       }
     }
@@ -4577,7 +4578,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // PRIORITY #3
     if (sc == null) {
       // PRIORITY #3
-      
+
       if (type == null) {
         log.error("cannot get Java def with type == null");
       }
@@ -4587,10 +4588,18 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // log.info("priority #3 - merging Java plan {}", newPlan);
       // plan.merge(newPlan);
     }
-    
+
     if (plan.get(name) == null && sc != null) {
       plan.put(name, sc);
-    } 
+      // RECURSIVE load peers
+      Map<String,Peer> peers = sc.getPeers();
+      for (String peerKey: peers.keySet()) {
+        Peer peer = peers.get(peerKey);
+        if (peer.autoStart) {
+          load(peer.name, peer.type);
+        }
+      }
+    }
 
     if (plan.get(name) == null) {
       error("could not load %s %s %d", name, type, level);
@@ -4929,103 +4938,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return false;
   }
 
-  /**
-   * A concept of a peer is a "good thing". This is where a service depends on
-   * another service to complete its functionality. This "should" be done with
-   * pub/sub messaging. This should not be done by a direct reference. It
-   * prevents distributed instances from working, there is always a chance of an
-   * NPE error. It adds complexity when attaching. If done correctly, you don't
-   * need to "startPeer". You should just have peer name variable in config that
-   * is used to send messages to. Granted, reading or callbacks can be a little
-   * more tricky.
-   *
-   * DEPRECATED: use pub/sub messaging instead
-   * 
-   * @param name
-   * @param reservedKey
-   * @return
-   */
-  @Deprecated /*
-               * you should be using pub/sub messaging - not direct references
-               */
-  public ServiceInterface startPeer(String name, String reservedKey) {
-
-    ServiceInterface si = null;
-    ServiceReservation sr = null;
-
-    String peerName = String.format("%s.%s", name, reservedKey);
-
-    Map<String, ServiceReservation> servicePeers = masterPlan.peers.get(name);
-    if (servicePeers != null) {
-      sr = servicePeers.get(reservedKey);
-    }
-
-    // heh so, simple
-    ServiceConfig sc = Runtime.getPlan().get(peerName);
-
-    if (sc == null) {
-      error("%s not found - was it defined as a peer?", peerName);
-      return null;
-    }
-
-    // FIXME - get rid of this completely
-    if (sr == null) {
-      si = Runtime.start(peerName);
-    } else {
-      si = Runtime.start(peerName, sr.type);
-    }
-
-    if (sr != null) {
-      sr.state = "started";
-    }
-
-    broadcastState();
-    return si;
-
-  }
-
-  /**
-   * DEPRECATED: Use pub/sub messaging instead
-   *
-   * @param name
-   * @param reservedKey
-   */
-  @Deprecated // you should be using pub/sub messaging - not direct references
-  public void releasePeer(String name, String reservedKey) {
-
-    Map<String, ServiceReservation> servicePeers = masterPlan.peers.get(name);
-    if (servicePeers == null) {
-      log.error("startPeer cannot find any entries for {} include {}", name, reservedKey);
-      return;
-    }
-
-    ServiceReservation sr = servicePeers.get(reservedKey);
-    if (sr == null) {
-      error("%s startPeer %s does not exist", name, reservedKey);
-      return;
-    }
-    String peerName = null;
-    // FIXME - get from Service config ! - default doesn't exist
-    peerName = String.format("%s.%s", name, reservedKey);
-
-    // heh so, simple
-    ServiceConfig sc = Runtime.getPlan().get(peerName);
-
-    if (sc == null) {
-      error("%s not found - was it defined as a peer?", peerName);
-      return;
-    }
-
-    // FIXME - get rid of this completely
-    Runtime.release(peerName);
-
-    if (sr != null) {
-      sr.state = "idle";
-    }
-
-    broadcastState();
-
-  }
+  
 
   /**
    * Load all configuration files from a given directory.
@@ -5087,48 +5000,68 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return ServiceConfig.getDefault(Runtime.getPlan(), name, type);
   }
 
+
   final public Plan saveDefault(String name, String type) {
-    return saveDefault(DEFAULT_CONFIG_DIR + fs + name, name, type);
+    return saveDefault(DEFAULT_CONFIG_DIR + fs + name, name, type, false);
   }
 
-  final public Plan saveDefault(String configPath, String name, String type) {
+  
+  final public Plan saveDefault(String name, String type, boolean fullPlan) {
+    return saveDefault(DEFAULT_CONFIG_DIR + fs + name, name, type, fullPlan);
+  }
+
+  
+  final public Plan saveDefault(String configPath, String name, String type, boolean fullPlan) {
     // Runtime.getPlan()
-    File resourceDir = new File(configPath);
-    for (File file: resourceDir.listFiles()) {
-      if (file.getName().endsWith(".yml")) {
-        file.delete();
-      }
-    }
+    // File resourceDir = new File(configPath);
+    // try {
+    //// for (File file : resourceDir.listFiles()) {
+    //// if (file.getName().endsWith(".yml")) {
+    //// file.delete();
+    //// }
+    //// }
+    // } catch (Exception e) {
+    // log.error("here", e);
+    // }
     Plan plan = ServiceConfig.getDefault(new Plan(name), name, type);
-    for (String service : plan.getConfig().keySet()) {
-//      String filename = configPath + fs + service + ".yml";
-      // ServiceConfig sc = plan.get(service);
-      // if (sc.getClass() == ServiceConfig.class) {
-//       File remove = new File(filename);
-//       if (remove.exists()) {
-//       remove.delete();
-//       }
-//       continue;
-//       }
-//      String yaml = CodecUtils.toYaml(sc);
-//      try {
-//        FileIO.toFile(filename, yaml);
-//        info("saved %s", filename);
-//      } catch (IOException e) {
-//        error(e);
-//      }
+    // for (String service : plan.getConfig().keySet()) {
+    if (!fullPlan) {
+    try {
+      String filename = configPath + fs + name + ".yml";
+      ServiceConfig sc = plan.get(name);
+      String yaml = CodecUtils.toYaml(sc);
+      FileIO.toFile(filename, yaml);
+      info("saved %s", filename);
+    } catch (IOException e) {
+      error(e);
     }
+    } else {
+      for (String service: plan.keySet()) {
+        try {
+          String filename = configPath + fs + service + ".yml";
+          ServiceConfig sc = plan.get(service);
+          String yaml = CodecUtils.toYaml(sc);
+          FileIO.toFile(filename, yaml);
+          info("saved %s", filename);
+        } catch (IOException e) {
+          error(e);
+        }
+        
+      }
+      
+    }
+    // }
     return plan;
   }
 
   public void saveAllDefaults() {
-    saveAllDefaults(new File(getResourceDir()).getParent());
+    saveAllDefaults(new File(getResourceDir()).getParent(), false);
   }
 
-  public void saveAllDefaults(String configPath) {
+  public void saveAllDefaults(String configPath, boolean fullPlan) {
     List<MetaData> types = serviceData.getAvailableServiceTypes();
     for (MetaData meta : types) {
-      saveDefault(configPath + fs + meta.getSimpleName(), meta.getSimpleName().toLowerCase(), meta.getSimpleName());
+      saveDefault(configPath + fs + meta.getSimpleName(), meta.getSimpleName().toLowerCase(), meta.getSimpleName(), fullPlan);
     }
   }
 

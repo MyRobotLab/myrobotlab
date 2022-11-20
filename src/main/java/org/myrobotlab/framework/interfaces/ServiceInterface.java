@@ -127,11 +127,6 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
   public ServiceConfig apply(ServiceConfig config);
 
   /**
-   * loads json config and starts the service
-   */
-  public void loadAndStart();
-
-  /**
    * Service life-cycle method, stops the inbox and outbox threads - typically
    * does not release "custom" resources. It's purpose primarily is to stop
    * messaging from flowing in or out of this service - which is handled in the
@@ -192,5 +187,7 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
   public boolean autoStartedPeersContains(String actualPeerName);
 
   public MetaData getMetaData();
+
+  public ServiceInterface startPeer(String peerKey);
 
 }
