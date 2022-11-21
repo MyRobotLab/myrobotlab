@@ -343,7 +343,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     // REALLY NEEDS TO BE CLEANED UP - no direct references
     // "publish" scripts which should be executed :(
     // python = (Python) startPeer("python");
-    python = (Python) Runtime.start("python", "Python");
+    // python = (Python) Runtime.start("python", "Python"); <- BAD !!!!
     // load(locale.getTag()); WTH ?
 
     // get events of new services and shutdown

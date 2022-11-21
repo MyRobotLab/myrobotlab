@@ -4555,30 +4555,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       return plan;
     }
 
-    ServiceConfig originalSc = plan.get(name);
-    if (!overwrite && originalSc != null) {
-      log.info("will not overwrite and plan entry already exists for {}", name);
-      return plan;
-    }
-
-    ServiceConfig sc = readServiceConfig(configName, name);
-
-    if (sc != null) {
-      log.info("{} found yml file - loading into plan", name);
-      sc.state = "LOADED";
-      plan.put(name, sc);
-      // RECURSIVE load peers
-      Map<String, Peer> peers = sc.getPeers();
-      if (sc != null && peers != null) {
-        for (String peerKey : peers.keySet()) {
-          Peer peer = peers.get(peerKey);
-          if (peer.autoStart) {
-            load(peer.name, peer.type);
-          }
-        }
-      }
-    }
-
     // PRIORITY #1
     String configPath = runtime.getConfigPath();
     if (configPath != null) {
@@ -4592,20 +4568,20 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       log.error("no local config and unknown type");
     }
 
-    // PRIORITY #2
-    if (sc == null) {
-      // PRIORITY #2 - default resource/{ServiceType}/{servicetype}.yml
-      String yml = getResourceRoot() + fs + type + fs + type.toLowerCase() + ".yml";
-      try {
-        log.info("priority #2 checking system default yml {}", yml);
-        // FIXME - CLOSE BUT NOT QUITE RIGHT - {ServiceType}/runtime.yml -
-        // should be loaded as "peer set"
-        // the set will need recursive integration
-        sc = CodecUtils.readServiceConfig(yml);
-      } catch (Exception e) {
-        log.info("priority #2 checking system default yml {} not found", yml);
-      }
-    }
+    // PRIORITY #2 CANNOT DO THIS - "name" is user defined can't be type.toLowerCase()
+//    if (sc == null) {
+//      // PRIORITY #2 - default resource/{ServiceType}/{servicetype}.yml
+//      String yml = getResourceRoot() + fs + type + fs + type.toLowerCase() + ".yml";
+//      try {
+//        log.info("priority #2 checking system default yml {}", yml);
+//        // FIXME - CLOSE BUT NOT QUITE RIGHT - {ServiceType}/runtime.yml -
+//        // should be loaded as "peer set"
+//        // the set will need recursive integration
+//        sc = CodecUtils.readServiceConfig(yml);
+//      } catch (Exception e) {
+//        log.info("priority #2 checking system default yml {} not found", yml);
+//      }
+//    }
 
     // PRIORITY #3
     if (sc == null) {
@@ -4617,20 +4593,23 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       log.info("priority #3 getting Java definition {} {}", name, type);
       // Plan newPlan = ServiceConfig.getDefault(plan, name, type);
       ServiceConfig.getDefault(plan, name, type);
+      sc = plan.get(name);
       // log.info("priority #3 - merging Java plan {}", newPlan);
       // plan.merge(newPlan);
     }
 
-    if (plan.get(name) == null && sc != null) {
+    if (sc != null) {
       plan.put(name, sc);
       // RECURSIVE load peers
-      Map<String,Peer> peers = sc.getPeers();
-      for (String peerKey: peers.keySet()) {
+      Map<String, Peer> peers = sc.getPeers();
+      for (String peerKey : peers.keySet()) {
         Peer peer = peers.get(peerKey);
         if (peer.autoStart) {
           load(peer.name, peer.type);
         }
       }
+    } else {
+      error("ServiceConfig is null for %s %s", name, type);
     }
 
     if (plan.get(name) == null) {
@@ -5076,34 +5055,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       }
 
-    }
-    // }
-    return plan;
-  }
-
-  public void saveAllDefaults() {
-    saveAllDefaults(new File(getResourceDir()).getParent(), false);
-  }
-
-  public void saveAllDefaults(String configPath, boolean fullPlan) {
-    List<MetaData> types = serviceData.getAvailableServiceTypes();
-    for (MetaData meta : types) {
-      saveDefault(configPath + fs + meta.getSimpleName(), meta.getSimpleName().toLowerCase(), meta.getSimpleName(), fullPlan);
-    }
-    } else {
-      for (String service: plan.keySet()) {
-        try {
-          String filename = configPath + fs + service + ".yml";
-          ServiceConfig sc = plan.get(service);
-          String yaml = CodecUtils.toYaml(sc);
-          FileIO.toFile(filename, yaml);
-          info("saved %s", filename);
-        } catch (IOException e) {
-          error(e);
-        }
-        
-      }
-      
     }
     // }
     return plan;
