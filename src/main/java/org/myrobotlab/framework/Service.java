@@ -126,6 +126,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   protected String serviceClass;
 
+  // FIXME Deprecated ???
   Set<String> autoStartedPeers = new HashSet<>();
 
   private boolean isRunning = false;
@@ -1106,15 +1107,19 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   @Override
-  public boolean hasPeers() {
-    try {
-      Class<?> theClass = Class.forName(serviceClass);
-      Method method = theClass.getMethod("getPeers", String.class);
-    } catch (Exception e) {
-      log.debug("{} does not have a getPeers", serviceClass);
-      return false;
+  public Map<String, Peer> getPeers() {
+    if (config == null) {
+      return null;
     }
-    return true;
+    return config.getPeers();
+  }
+
+  @Override
+  public Set<String> getPeerNames() {
+    if (config == null || config.peers == null) {
+      return new HashSet<String>();
+    }
+    return config.peers.keySet();
   }
 
   public String help(String format, String level) {
@@ -1338,10 +1343,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public ServiceConfig apply(ServiceConfig config) {
     log.info("Default service config loading for service: {} type: {}", getName(), getType());
     this.config = config;
-//    if (config.peers != null) {
-//      peers = config.peers;
-//    }
-
     return config;
   }
 
@@ -1764,31 +1765,66 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public ServiceInterface startPeer(String peerKey) {
-    String actualName = getPeerName(peerKey);
-    // Peer peer = config.getPeer(peerKey);
-    if (actualName == null) {
-      log.error("startPeer could not find actual name of {} in {}", peerKey, getName());
+    Peer peer = config.getPeer(peerKey);
+
+    if (peer == null) {
+      error("startPeer could not find peerKey of %s in %s", peerKey, getName());
+      return null;
     }
 
-    // don't need type definition, as it already should be "loaded"
-    ServiceInterface si = Runtime.create(actualName, null);
-    
-    // FIXME FIXME FIXME - auto assignment of reference field !!!!! <<<<<<<<<    
-    Runtime.start(actualName, null);
-    // si.startService();
-    
-    
-    if (si != null) {
-      invoke("publishPeerStarted", peerKey);
-      broadcastState();
+    if (Runtime.getService(peer.name) != null) {
+      // so this peer is already started, but are we responsible for
+      // all subpeers ?
+      return Runtime.getService(peer.name);
     }
-    return si;
+
+    // request to modify the plan's runtime to start all service that match
+    // actualName.*
+    Plan plan = Runtime.getPlan();
+    ServiceConfig sc = plan.get(peer.name);
+
+    if (sc == null) {
+      log.info("no current plan for peer {} - since this is a peer request we can make a plan", peer.name);
+      // error("plan.get(%s) == null", actualName);
+      Runtime.load(peer.name, peer.type);
+      sc = plan.get(peer.name);
+    }
+
+    // recursive - start peers of peers of peers ...
+    Map<String, Peer> subPeers = sc.getPeers();
+    if (sc != null && subPeers != null) {
+      for (String subPeerKey : subPeers.keySet()) {
+        // IF AUTOSTART !!!
+        Peer subPeer = subPeers.get(subPeerKey);
+        if (subPeer.autoStart) {
+          Runtime.start(sc.getPeerName(subPeerKey), subPeer.type);
+        }
+      }
+    }
+
+    // start peer requested
+    Runtime.start(peer.name, sc.type);
+    broadcastState();
+    return Runtime.getService(peer.name);
   }
 
   public void releasePeer(String peerKey) {
-    String actualName = getPeerName(peerKey);
-    Runtime.release(actualName);
-    broadcastState();
+
+    if (config != null && config.getPeer(peerKey) != null) {
+      Peer peer = config.getPeer(peerKey);
+      ServiceConfig sc = Runtime.getPlan().get(peer.name);
+      // recursive
+      if (sc != null && sc.getPeers() != null) {
+        for (String subPeerKey : sc.getPeers().keySet()) {
+          Peer subpeer = sc.getPeer(subPeerKey);
+          Runtime.release(subpeer.name);
+        }
+      }
+      Runtime.release(peer.name);
+      broadcastState();
+    } else {
+      error("%s.releasePeer(%s) does not exist", getName(), peerKey);
+    }
   }
 
   @Override
@@ -2527,21 +2563,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public String getPeerName(String peerKey) {
-    try {
-      return config.getPeerName(peerKey);
-      // REFLECTION WAY - COOL BUT NOT NECESSARY
-      /*
-      Field field = config.getClass().getDeclaredField(peerKey);
-      field.setAccessible(true);
-      Peer value = (Peer) field.get(config);
-      return value.name;
-      */
-    } catch (Exception e) {
-      error(e);
+
+    if (config == null) {
+      return null;
     }
-    return null;
+    return config.getPeerName(peerKey);
   }
-  
+
   public String getPeerType(String peerKey) {
     try {
       Field field = config.getClass().getDeclaredField(peerKey);
@@ -2553,7 +2581,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return null;
   }
-
 
   public boolean isPeerStarted(String peerKey) {
     return Runtime.isStarted(getPeerName(peerKey));
@@ -2580,14 +2607,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public MetaData getMetaData() {
     return serviceType;
-  }
-
-  public String publishPeerStarted(String peerKey) {
-    return peerKey;
-  }
-
-  public String publishPeerReleased(String peerKey) {
-    return peerKey;
   }
 
   /**

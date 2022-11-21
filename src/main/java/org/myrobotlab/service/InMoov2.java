@@ -14,7 +14,6 @@ import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
@@ -39,7 +38,6 @@ import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
-
 
 public class InMoov2 extends Service implements ServiceLifeCycleListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
@@ -1568,20 +1566,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   public void onReleased(String name) {
     // TODO Auto-generated method stub
 
-  }
-
-  @Override
-  public String publishPeerStarted(String peerKey) {
-    // if ("mouth".equals(peerKey)) {
-    // SpeechSynthesis mouth = (SpeechSynthesis)getPeer(peerKey);
-    // voices = mouth.getVoices();
-    // Voice voice = mouth.getVoice();
-    // if (voice != null) {
-    // voiceSelected = voice.getName();
-    // }
-    // broadcastState();
-    // }
-    return peerKey;
   }
 
 }

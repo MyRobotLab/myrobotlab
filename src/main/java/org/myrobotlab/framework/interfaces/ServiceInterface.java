@@ -4,11 +4,13 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
+import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.ServiceConfig;
@@ -70,11 +72,19 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
   public String getType();
 
   /**
-   * Does the meta data of this service define peers
+   * Returns peers
    * 
    * @return
    */
-  public boolean hasPeers();
+  public Map<String, Peer> getPeers();
+  
+  /**
+   * Returns peers
+   * 
+   * @return
+   */
+  public Set<String> getPeerNames();
+
 
   /**
    * Service life-cycle method: releaseService will call stopService, release

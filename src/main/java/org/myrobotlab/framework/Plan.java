@@ -4,15 +4,12 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.RuntimeConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServoConfig;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
+
 /**
  * 
  * @author GroG
@@ -37,7 +34,7 @@ public class Plan {
     name = rootName;
     config.put("runtime", new RuntimeConfig());
   }
-  
+
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("\n");
@@ -64,6 +61,7 @@ public class Plan {
       return sc;
     }
 
+    // modify runtime config registry for starting services
     RuntimeConfig rt = (RuntimeConfig) get("runtime");
     rt.add(name);
     return config.put(name, sc);
@@ -85,48 +83,14 @@ public class Plan {
   }
 
   /**
-   * Merges 2 plans. Puts/replaces all config with newPlan. The exception is
-   * with runtime. All newPlan config is updated in this plan, but the registry
-   * is merged separately.
+   * Sometimes composite services need to remove default config put in place by
+   * its peers. This method removes unwanted default config
    * 
-   * @param newPlan
+   * @param actualName
+   * @return
    */
-  public void merge(Plan newPlan) {
-    if (newPlan == null) {
-      return;
-    }
-
-    // config.putAll(ret.config);
-    for (String key : newPlan.keySet()) {
-      if (key.equals("runtime")) {
-        // skipping "our" runtime config and start list
-        // FIXME - probably want to merge all other config "besides" registry
-        // registry should always be merged - until then it will be hard to
-        // change runtime config from defaults
-
-        RuntimeConfig rtConfig = (RuntimeConfig) get("runtime");
-        RuntimeConfig newRtConfig = (RuntimeConfig) newPlan.get("runtime");
-        for (String startService : newRtConfig.getRegistry()) {
-          rtConfig.add(startService);
-        }
-        continue;
-      }
-      config.put(key, newPlan.get(key));
-      // WRONG -> put(key, newPlan.get(key));
-    }
-  }
-
-
-  // NOTE ! - this uses actualName
-  private ServiceConfig addConfigx(String actualName, String type) {
-    Plan plan = ServiceConfig.getDefault(Runtime.getPlan(), actualName, type);
-    // merge config - do not replace root
-    merge(plan);
-    return config.get(actualName);
-  }
-
-  public ServiceConfig remove(String name) {
-    return config.remove(name);
+  public ServiceConfig remove(String actualName) {
+    return config.remove(actualName);
   }
 
   public boolean containsKey(String name) {
@@ -137,27 +101,50 @@ public class Plan {
     return config;
   }
 
-  @Deprecated /* not needed anymore - this all should be in config */
-  public ServiceConfig addPeer(String name, ServiceConfig sc) {
-    config.put(name, sc);
-    return sc;
-  }
-
-  public ServiceConfig addConfigx(ServiceConfig sc) {
-    // recently changed from return config.put(name, sc); to
-    return put(name, sc);
-  }
-
-  public ServiceConfig removeConfig(String actualName) {
-    return config.remove(actualName);
-  }
 
   public int size() {
     return config.size();
   }
 
-  public ServiceConfig get(Peer peer) {
-    return get(peer.name);
+  /**
+   * a way to remove services from auto starting
+   * 
+   * @param startsWith
+   */
+  public void removeRegistry(String startsWith) {
+    RuntimeConfig runtime = (RuntimeConfig) config.get("runtime");
+    if (runtime == null) {
+      log.error("removeRegistry - runtime null !");
+      return;
+    }
+
+    for (String service : runtime.getRegistry()) {
+      if (service.startsWith(startsWith)) {
+        runtime.remove(service);
+      }
+    }
+
+  }
+
+  /**
+   * a way to add to a request services to start
+   * 
+   * @param actualName
+   */
+  public void addRegistry(String actualName) {
+    RuntimeConfig runtime = (RuntimeConfig) config.get("runtime");
+    if (runtime == null) {
+      log.error("removeRegistry - runtime null !");
+      return;
+    }
+    // VERY BAD IDEA
+    // for (String service : config.keySet()) {
+    // if (service.startsWith(actualName)) {
+    // runtime.add(service);
+    // }
+    // }
+    runtime.add(actualName);
+
   }
 
 }
