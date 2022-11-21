@@ -1,9 +1,25 @@
 !!org.myrobotlab.service.config.TrackingConfig
-controller: tracking.controller
-cv: tracking.cv
 enabled: false
 lostTrackingDelayMs: 1000
-pan: tracking.pan
-pid: tracking.pid
-tilt: tracking.tilt
+peers:
+  controller:
+    autoStart: true
+    name: tracking.controller
+    type: Arduino
+  cv:
+    autoStart: true
+    name: tracking.cv
+    type: OpenCV
+  pan:
+    autoStart: true
+    name: tracking.pan
+    type: Servo
+  pid:
+    autoStart: true
+    name: tracking.pid
+    type: Pid
+  tilt:
+    autoStart: true
+    name: tracking.tilt
+    type: Servo
 type: Tracking

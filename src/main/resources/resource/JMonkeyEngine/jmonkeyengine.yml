@@ -6,4 +6,5 @@ multiMapped: {
   }
 nodes: {
   }
+peers: null
 type: JMonkeyEngine

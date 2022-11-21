@@ -1,7 +1,15 @@
 !!org.myrobotlab.service.config.IndianTtsConfig
-audioFile: indiantts.audioFile
 blocking: false
 mute: false
+peers:
+  audioFile:
+    autoStart: true
+    name: indiantts.audioFile
+    type: AudioFile
+  http:
+    autoStart: true
+    name: indiantts.http
+    type: HttpClient
 speechRecognizers: null
 substitutions: null
 type: IndianTts
