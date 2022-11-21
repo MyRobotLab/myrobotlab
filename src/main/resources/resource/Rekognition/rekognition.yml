@@ -1,2 +1,3 @@
 !!org.myrobotlab.service.config.ServiceConfig
+peers: null
 type: Rekognition

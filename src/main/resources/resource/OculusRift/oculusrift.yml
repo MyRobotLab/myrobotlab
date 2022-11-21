@@ -1,2 +1,19 @@
-!!org.myrobotlab.service.config.ServiceConfig
+!!org.myrobotlab.service.config.OculusRiftConfig
+leftOpenCV:
+  autoStart: true
+  name: leftOpenCV
+  type: OpenCV
+peers:
+  leftOpenCV:
+    autoStart: true
+    name: oculusrift.leftOpenCV
+    type: OpenCV
+  rightOpenCV:
+    autoStart: true
+    name: oculusrift.rightOpenCV
+    type: OpenCV
+rightOpenCV:
+  autoStart: true
+  name: rightOpenCV
+  type: OpenCV
 type: OculusRift

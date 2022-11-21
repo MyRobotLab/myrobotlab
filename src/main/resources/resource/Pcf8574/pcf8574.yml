@@ -2,4 +2,5 @@
 address: '0x38'
 bus: '1'
 controller: null
+peers: null
 type: Pcf8574

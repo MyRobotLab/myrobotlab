@@ -1,8 +1,0 @@
-!!org.myrobotlab.service.config.RuntimeConfig
-enableCli: true
-locale: null
-logLevel: null
-registry:
-- mousesim
-type: Runtime
-virtual: null

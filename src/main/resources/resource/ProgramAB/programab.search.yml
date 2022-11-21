@@ -1,5 +1,0 @@
-!!org.myrobotlab.service.config.WikipediaConfig
-enabled: true
-imagePublishers: null
-maxSentencesReturned: 1
-type: Wikipedia
