@@ -11,20 +11,15 @@ public class SpeechSynthesisConfig extends ServiceConfig {
   public String[] speechRecognizers;
   public Map<String, String> substitutions;
   public String voice;
-  
-  // peer names
-  public String audioFile;
-  
+
   @Override
   public Plan getDefault(Plan plan, String name) {
     super.getDefault(plan, name);
-        
+
     // default names
-    audioFile = name + ".audioFile";    
-    addPeer(plan, name, "audioFile", audioFile, "AudioFile", "AudioFile");
+    addDefaultPeerConfig(plan, name, "audioFile", "AudioFile");
 
     return plan;
   }
-
 
 }

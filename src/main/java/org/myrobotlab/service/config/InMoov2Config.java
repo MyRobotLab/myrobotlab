@@ -1,5 +1,6 @@
 package org.myrobotlab.service.config;
 
+import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.jme3.UserData;
@@ -34,43 +35,6 @@ public class InMoov2Config extends ServiceConfig {
    */
   public boolean idleTimer = true;
   
-  public InMoov2Config() {   
-  }
-
-  // peers = new TreeMap<String, ServiceReservation>();
-
-  // peers
-  String audioPlayer;
-  String chatBot;
-  String controller3;
-  String controller4;
-  String ear;
-  String eyeTracking;
-  String fsm;
-  String head;
-  String headTracking;
-  String htmlFilter;
-  String imageDisplay;
-  String leap;
-  String left;
-  String leftArm;
-  String leftHand;
-  String mouth;
-  String mouthControl;
-  String neoPixel;
-  String opencv;
-  String openWeatherMap;
-  String pid;
-  String pir;
-  String random;
-  String right;
-  String rightArm;
-  String rightHand;
-  String servoMixer;
-  String simulator;
-  String torso;
-  String ultrasonicRight;
-  String ultrasonicLeft;
 
   public InMoov2Config() {
   }
@@ -79,72 +43,40 @@ public class InMoov2Config extends ServiceConfig {
   public Plan getDefault(Plan plan, String name) {
     super.getDefault(plan, name);
 
-    // default peer names
-    audioPlayer = name + ".audioPlayer";
-    chatBot = name + ".chatBot";
-    controller3 = name + ".controller3";
-    controller4 = name + ".controller4";
-    ear = name + ".ear";
-    eyeTracking = name + ".eyeTracking";
-    fsm = name + ".fsm";
-    head = name + ".head";
-    headTracking = name + ".headTracking";
-    htmlFilter = name + ".htmlFilter";
-    imageDisplay = name + ".imageDisplay";
-    leap = name + ".leap";
-    left = name + ".left";
-    leftArm = name + ".leftArm";
-    leftHand = name + ".leftHand";
-    mouth = name + ".mouth";
-    mouthControl = name + ".mouthControl";
-    neoPixel = name + ".neoPixel";
-    opencv = name + ".opencv";
-    openWeatherMap = name + ".openWeatherMap";
-    pid = name + ".pid";
-    pir = name + ".pir";
-    random = name + ".random";
-    right = name + ".right";
-    rightArm = name + ".rightArm";
-    rightHand = name + ".rightHand";
-    servoMixer = name + ".servoMixer";
-    simulator = name + ".simulator";
-    torso = name + ".torso";
-    ultrasonicRight = name + ".ultrasonicRight";
-    ultrasonicLeft = name + ".ultrasonicLeft";
+    // peers FIXME global opencv
+    addDefaultPeerConfig(plan, name, "audioPlayer", "AudioFile", true);
+    addDefaultPeerConfig(plan, name, "chatBot", "ProgramAB", false);
+    addDefaultPeerConfig(plan, name, "controller3", "Arduino", false);
+    addDefaultPeerConfig(plan, name, "controller4", "Arduino", false);
+    addDefaultPeerConfig(plan, name, "ear", "WebkitSpeechRecognition", false);
+    addDefaultPeerConfig(plan, name, "eyeTracking", "Tracking", false);
+    addDefaultPeerConfig(plan, name, "fsm", "FiniteStateMachine", false);
+    addDefaultPeerConfig(plan, name, "head", "InMoov2Head", false);
+    addDefaultPeerConfig(plan, name, "headTracking", "Tracking", false);
+    addDefaultPeerConfig(plan, name, "htmlFilter", "HtmlFilter", false);
+    addDefaultPeerConfig(plan, name, "imageDisplay", "ImageDisplay", false);
+    addDefaultPeerConfig(plan, name, "leap", "LeapMotion", false);
+    addDefaultPeerConfig(plan, name, "left", "Arduino", false);
+    addDefaultPeerConfig(plan, name, "leftArm", "InMoov2Aram", false);
+    addDefaultPeerConfig(plan, name, "leftHand", "InMoov2Hand", false);
+    addDefaultPeerConfig(plan, name, "mouth", "MarySpeech", false);
+    addDefaultPeerConfig(plan, name, "mouthControl", "MouthControl", false);
+    addDefaultPeerConfig(plan, name, "neoPixel", "NeoPixel", false);
+    addDefaultPeerConfig(plan, name, "opencv", "OpenCV", false);
+    addDefaultPeerConfig(plan, name, "openWeatherMap", "OpenWeatherMap", false);
+    addDefaultPeerConfig(plan, name, "pid", "Pid", false);
+    addDefaultPeerConfig(plan, name, "pir", "Pir", false);
+    addDefaultPeerConfig(plan, name, "random", "Random", false);
+    addDefaultPeerConfig(plan, name, "right", "Arduino", false);
+    addDefaultPeerConfig(plan, name, "rightArm", "InMoov2Arm", false);
+    addDefaultPeerConfig(plan, name, "rightHand", "InMoov2Hand", false);
+    addDefaultPeerConfig(plan, name, "servoMixer", "ServoMixer", false);
+    addDefaultPeerConfig(plan, name, "simulator", "JMonkeyEngine", false);
+    addDefaultPeerConfig(plan, name, "torso", "InMoov2Torso", false);
+    addDefaultPeerConfig(plan, name, "ultrasonicRight", "UltrasonicSensor", false);
+    addDefaultPeerConfig(plan, name, "ultrasonicLeft", "UltrasonicSensor", false);
 
-    addPeer(plan, name, "audioPlayer", audioPlayer, "AudioFile");
-    addPeer(plan, name, "chatBot", chatBot, "ProgramAB");
-    addPeer(plan, name, "controller3", controller3, "Arduino");
-    addPeer(plan, name, "controller4", controller4, "Arduino");
-    addPeer(plan, name, "ear", ear, "WebkitSpeechRecognition");
-    addPeer(plan, name, "eyeTracking", eyeTracking, "Tracking");
-    addPeer(plan, name, "fsm", fsm, "FiniteStateMachine");
-    addPeer(plan, name, "head", head, "InMoov2Head");
-    addPeer(plan, name, "headTracking", headTracking, "Tracking");
-    addPeer(plan, name, "htmlFilter", htmlFilter, "HtmlFilter");
-    addPeer(plan, name, "imageDisplay", imageDisplay, "ImageDisplay");
-    addPeer(plan, name, "leap", leap, "LeapMotion");
-    addPeer(plan, name, "left", left, "Arduino");
-    addPeer(plan, name, "leftArm", leftArm, "InMoov2Arm");
-    addPeer(plan, name, "leftHand", leftHand, "InMoov2Hand");
-    addPeer(plan, name, "mouth", mouth, "MarySpeech");
-    addPeer(plan, name, "mouthControl", mouthControl, "MouthControl");
-    addPeer(plan, name, "neoPixel", neoPixel, "NeoPixel");
-    addPeer(plan, name, "opencv", opencv, "OpenCV");
-    addPeer(plan, name, "openWeatherMap", openWeatherMap, "OpenWeatherMap");
-    addPeer(plan, name, "pid", pid, "Pid");
-    addPeer(plan, name, "pir", pir, "Pir");
-    addPeer(plan, name, "random", random, "Random");
-    addPeer(plan, name, "right", right, "Arduino");
-    addPeer(plan, name, "rightArm", rightArm, "InMoov2Arm");
-    addPeer(plan, name, "rightHand", rightHand, "InMoov2Hand");
-    addPeer(plan, name, "servoMixer", servoMixer, "ServoMixer");
-    addPeer(plan, name, "simulator", simulator, "JMonkeyEngine");
-    addPeer(plan, name, "torso", torso, "InMoov2Torso");
-    addPeer(plan, name, "ultrasonicRight", ultrasonicRight, "UltrasonicSensor");
-    addPeer(plan, name, "ultrasonicLeft", ultrasonicLeft, "UltrasonicSensor");
-
-    MouthControlConfig mouthControl = (MouthControlConfig) plan.get(this.mouthControl);
+    MouthControlConfig mouthControl = (MouthControlConfig) plan.get(getPeerName("mouthControl"));
 
     // setup name references to different services
     mouthControl.jaw = name + ".jaw";
@@ -160,7 +92,7 @@ public class InMoov2Config extends ServiceConfig {
     // by just sending a runtime that starts only i01
     RuntimeConfig rtConfig = (RuntimeConfig) plan.get("runtime");
 
-    ProgramABConfig chatBot = (ProgramABConfig) plan.get(this.chatBot);
+    ProgramABConfig chatBot = (ProgramABConfig) plan.get(getPeerName("chatBot"));
     Runtime runtime = Runtime.getInstance();
     String[] bots = new String[] { "cn-ZH", "en-US", "fi-FI", "hi-IN", "nl-NL", "ru-RU", "de-DE", "es-ES", "fr-FR", "it-IT", "pt-PT", "tr-TR" };
     String tag = runtime.getLocaleTag();
@@ -177,22 +109,22 @@ public class InMoov2Config extends ServiceConfig {
     chatBot.textListeners = new String[] { name + ".htmlFilter" };
     chatBot.botDir = "data/ProgramAB";
 
-    HtmlFilterConfig htmlFilter = (HtmlFilterConfig) plan.get(this.htmlFilter);
+    HtmlFilterConfig htmlFilter = (HtmlFilterConfig) plan.get(getPeerName("htmlFilter"));
     htmlFilter.textListeners = new String[] { name + ".mouth" };
 
     // FIXME - turns out subscriptions like this are not needed if they are in
     // onStarted
     // == Peer - mouth =============================
     // setup name references to different services
-    MarySpeechConfig mouth = (MarySpeechConfig) plan.get(this.mouth);
+    MarySpeechConfig mouth = (MarySpeechConfig) plan.get(getPeerName("mouth"));
     mouth.speechRecognizers = new String[] { name + ".ear" };
 
     // == Peer - ear =============================
     // setup name references to different services
-    WebkitSpeechRecognitionConfig ear = (WebkitSpeechRecognitionConfig) plan.get(this.ear);
+    WebkitSpeechRecognitionConfig ear = (WebkitSpeechRecognitionConfig) plan.get(getPeerName("ear"));
     ear.textListeners = new String[] { name + ".chatBot" };
 
-    JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.get(this.simulator);
+    JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.get(getPeerName("simulator"));
     // FIXME - SHOULD USE RESOURCE DIR !
     String assestsDir = Service.getResourceDir(InMoov2.class) + "/JMonkeyEngine";
     simulator.modelPaths.add(assestsDir);
@@ -261,7 +193,7 @@ public class InMoov2Config extends ServiceConfig {
     simulator.nodes.put(name + ".rightHand.pinky3", new UserData(new MapperLinear(0.0, 180.0, 60.0, -10.0, true, false), "x"));
     simulator.cameraLookAt = name + ".torso.lowStom";
 
-    FiniteStateMachineConfig fsm = (FiniteStateMachineConfig) plan.get(this.fsm);
+    FiniteStateMachineConfig fsm = (FiniteStateMachineConfig) plan.get(getPeerName("fsm"));
     // fsm.states.add("start"); // fist time
     // fsm.states.add("init"); // fist time
     // fsm.states.add("identify_user"); // fist time
@@ -282,7 +214,7 @@ public class InMoov2Config extends ServiceConfig {
     // "identify_user"));
 
     // == Peer - random =============================
-    RandomConfig random = (RandomConfig) plan.get(this.random);
+    RandomConfig random = (RandomConfig) plan.get(getPeerName("random"));
 
     // setup name references to different services
     RandomMessageConfig rm = new RandomMessageConfig(3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
@@ -322,49 +254,49 @@ public class InMoov2Config extends ServiceConfig {
     random.randomMessages.put(name + ".moveTorso", rm);
 
     // == Peer - headTracking =============================
-    TrackingConfig headTracking = (TrackingConfig) plan.get(this.headTracking);
+    TrackingConfig headTracking = (TrackingConfig) plan.get(getPeerName("headTracking"));
 
     // setup name references to different services
-    headTracking.tilt = name + ".head.neck";
-    headTracking.pan = name + ".head.rothead";
-    headTracking.cv = name + ".opencv";
-    headTracking.pid = name + ".pid";
-    headTracking.controller = name + ".left";
+    headTracking.getPeer("tilt").name = name + ".head.neck";
+    headTracking.getPeer("pan").name = name + ".head.rothead";
+    headTracking.getPeer("cv").name = name + ".opencv";
+    headTracking.getPeer("pid").name = name + ".pid";
+    headTracking.getPeer("controller").name = name + ".left";
 
     // == Peer - eyeTracking =============================
-    TrackingConfig eyeTracking = (TrackingConfig) plan.get(this.eyeTracking);
+    TrackingConfig eyeTracking = (TrackingConfig) plan.get(getPeerName("eyeTracking"));
 
-    // setup name references to different services
-    eyeTracking.tilt = name + ".head.eyeY";
-    eyeTracking.pan = name + ".head.eyeX";
-    eyeTracking.cv = name + ".opencv";
-    eyeTracking.pid = name + ".pid";
-    eyeTracking.controller = name + ".left";
+    // setup name references to different services    
+    eyeTracking.getPeer("tilt").name = name + ".head.eyeY";
+    eyeTracking.getPeer("pan").name = name + ".head.eyeX";
+    eyeTracking.getPeer("cv").name = name + ".opencv";
+    eyeTracking.getPeer("pid").name = name + ".pid";
+    eyeTracking.getPeer("controller").name = name + ".left";
 
     // == Peer - pid =============================
-    PidConfig pid = (PidConfig) plan.get(this.pid);
+    PidConfig pid = (PidConfig) plan.get(getPeerName("pid"));
 
     PidData tiltPid = new PidData();
     tiltPid.ki = 0.001;
     tiltPid.kp = 30.0;
-    pid.data.put(headTracking.tilt, tiltPid);
+    pid.data.put(headTracking.getPeer("tilt").name, tiltPid);
 
     PidData panPid = new PidData();
     panPid.ki = 0.001;
     panPid.kp = 15.0;
-    pid.data.put(headTracking.pan, panPid);
+    pid.data.put(headTracking.getPeer("pan").name, panPid);
 
     PidData eyeTiltPid = new PidData();
     eyeTiltPid.ki = 0.001;
     eyeTiltPid.kp = 10.0;
-    pid.data.put(eyeTracking.tilt, eyeTiltPid);
+    pid.data.put(eyeTracking.getPeer("tilt").name, eyeTiltPid);
 
     PidData eyePanPid = new PidData();
     eyePanPid.ki = 0.001;
     eyePanPid.kp = 10.0;
-    pid.data.put(eyeTracking.pan, eyePanPid);
+    pid.data.put(eyeTracking.getPeer("pan").name, eyePanPid);
 
-    NeoPixelConfig neoPixel = (NeoPixelConfig) plan.get(this.neoPixel);
+    NeoPixelConfig neoPixel = (NeoPixelConfig) plan.get(getPeerName("neoPixel"));
     neoPixel.pin = 2;
     neoPixel.controller = String.format("%s.left", name);
     neoPixel.red = 12;
@@ -374,19 +306,19 @@ public class InMoov2Config extends ServiceConfig {
     neoPixel.currentAnimation = "Ironman";
 
     // remove undesired defaults from our default
-    plan.removeConfig(name + ".headTracking.tilt");
-    plan.removeConfig(name + ".headTracking.pan");
-    plan.removeConfig(name + ".headTracking.pid");
-    plan.removeConfig(name + ".headTracking.controller");
-    plan.removeConfig(name + ".headTracking.controller.serial");
-    plan.removeConfig(name + ".headTracking.cv");
+    plan.remove(name + ".headTracking.tilt");
+    plan.remove(name + ".headTracking.pan");
+    plan.remove(name + ".headTracking.pid");
+    plan.remove(name + ".headTracking.controller");
+    plan.remove(name + ".headTracking.controller.serial");
+    plan.remove(name + ".headTracking.cv");
 
-    plan.removeConfig(name + ".eyeTracking.tilt");
-    plan.removeConfig(name + ".eyeTracking.pan");
-    plan.removeConfig(name + ".eyeTracking.pid");
-    plan.removeConfig(name + ".eyeTracking.controller");
-    plan.removeConfig(name + ".eyeTracking.controller.serial");
-    plan.removeConfig(name + ".eyeTracking.cv");
+    plan.remove(name + ".eyeTracking.tilt");
+    plan.remove(name + ".eyeTracking.pan");
+    plan.remove(name + ".eyeTracking.pid");
+    plan.remove(name + ".eyeTracking.controller");
+    plan.remove(name + ".eyeTracking.controller.serial");
+    plan.remove(name + ".eyeTracking.cv");
 
     // REMOVING ALL PEER FROM STARTING ! effectively autoStartPeers = false
     rtConfig.clear();

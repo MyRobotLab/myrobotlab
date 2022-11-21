@@ -1,25 +1,15 @@
 package org.myrobotlab.service.config;
 
+import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Plan;
 
 public class InMoov2ArmConfig extends ServiceConfig {
-
-  public String bicep;
-  public String omoplate;
-  public String shoulder;
-  public String rotate;
   
   @Override
   public Plan getDefault(Plan plan, String name) {
     super.getDefault(plan, name);
     // load default peers from meta here
     
-    // default names
-    bicep = name + ".bicep";    
-    omoplate = name + ".omoplate";    
-    shoulder = name + ".shoulder";    
-    rotate = name + ".serial";    
-
     // RuntimeConfig runtime = new RuntimeConfig();
     // runtime.registry = new String[] { controllerName, cvName, tiltName,
     // panName, pidName, trackingName };
@@ -30,7 +20,7 @@ public class InMoov2ArmConfig extends ServiceConfig {
       cname = "i01.right"; // FIXME - still terrible to have a i01 here :(
     }
 
-    ServoConfig omoplate = (ServoConfig) addPeer(plan, name, "omoplate", this.omoplate, "Servo", "Servo");
+    ServoConfig omoplate = (ServoConfig) addDefaultPeerConfig(plan, name, "omoplate", "Servo");
     omoplate.autoDisable = true;
     omoplate.controller = cname;
     omoplate.clip = true;
@@ -46,7 +36,7 @@ public class InMoov2ArmConfig extends ServiceConfig {
     omoplate.sweepMax = null;
     omoplate.sweepMin = null;
 
-    ServoConfig shoulder = (ServoConfig)addPeer(plan, name, "shoulder", this.shoulder, "Servo", "Servo");
+    ServoConfig shoulder = (ServoConfig)addDefaultPeerConfig(plan, name, "shoulder", "Servo");
     shoulder.autoDisable = true;
     shoulder.controller = cname;
     shoulder.clip = true;
@@ -62,7 +52,7 @@ public class InMoov2ArmConfig extends ServiceConfig {
     shoulder.sweepMax = null;
     shoulder.sweepMin = null;
     
-    ServoConfig rotate = (ServoConfig) addPeer(plan, name, "rotate", this.rotate, "Servo", "Servo");
+    ServoConfig rotate = (ServoConfig) addDefaultPeerConfig(plan, name, "rotate", "Servo");
     rotate.autoDisable = true;
     rotate.controller = cname;
     rotate.clip = true;
@@ -78,7 +68,7 @@ public class InMoov2ArmConfig extends ServiceConfig {
     rotate.sweepMax = null;
     rotate.sweepMin = null;
     
-    ServoConfig bicep = (ServoConfig) addPeer(plan, name, "bicep", this.bicep, "Servo", "Servo");
+    ServoConfig bicep = (ServoConfig) addDefaultPeerConfig(plan, name, "bicep", "Servo");
     bicep.autoDisable = true;
     bicep.controller = cname;
     bicep.clip = true;

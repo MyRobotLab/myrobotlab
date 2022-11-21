@@ -1,13 +1,13 @@
 package org.myrobotlab.service.config;
 
 import java.lang.reflect.Constructor;
-import org.myrobotlab.service.Runtime;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Plan;
-import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 /**
@@ -48,8 +48,9 @@ public class ServiceConfig {
    * function of this service can be modified with overrides before starting
    * named instance of this service
    */
-  public Map<String, ServiceReservation> peers = null; // new TreeMap<String,
-                                                       // ServiceReservation>();
+  // public Map<String, Peer> peers = new TreeMap<>();
+  public Map<String, Peer> peers = null;
+                                           
 
   public ServiceConfig() {
     String configTypeName = this.getClass().getSimpleName();
@@ -71,48 +72,67 @@ public class ServiceConfig {
 
   ////////// migrated peer methods //////////////////////////////
 
-  public Map<String, ServiceReservation> getPeers() {
+  public Map<String, Peer> getPeers() {
+    if (peers == null) {
+      return new TreeMap<>();
+    }
     return peers;
   }
 
-  public ServiceReservation getPeer(String peerKey) {
-    if (peers.get(peerKey) == null) {
-      log.warn("{} not found in peer keys - possible keys follow:", peerKey);
-      for (String key : peers.keySet()) {
-        log.info(key);
-      }
+  public Peer getPeer(String peerKey) {
+    if (peers == null || peers.get(peerKey) == null) {
+      log.error("{} not found in peer keys - possible keys follow:", peerKey);
+      return null;
     }
     return peers.get(peerKey);
   }
-
-  public ServiceConfig addPeer(Plan plan, String name, String key, String actualName, String peerType) {
-    return addPeer(plan, name, key, actualName, peerType, null);
+  
+  public String getPeerName(String peerKey) {    
+    if (peers == null || getPeer(peerKey) == null) {
+      return null;
+    }
+    return getPeer(peerKey).name;
   }
 
-  public ServiceConfig addPeer(Plan plan, String name, String key, String actualName, String peerType, String comment) {
-    if (peers == null) {
-      peers = new TreeMap<String, ServiceReservation>();
-    }
-    
-    if (actualName == null) {
-      actualName = String.format("%s.%s", name, key);
-    }
-    // recursive !!!
-    ServiceConfig.getDefault(plan, actualName, peerType);
-    ServiceConfig sc = plan.get(actualName);
-    // plan.put(actualName, sc); don't need to do this 
-    peers.put(key, new ServiceReservation(key, actualName, peerType, comment));
+
+  // FIXME - need an autostart param
+  // public ServiceConfig addDefaultPeerConfig(Plan plan, String name, String key, Peer peer) {
+  
+  public ServiceConfig addDefaultPeerConfig(Plan plan, String name, String key, String peerType) {
+    return addDefaultPeerConfig(plan, name, key, peerType, true);
+  }
+  
+  public ServiceConfig addDefaultPeerConfig(Plan plan, String name, String key, String peerType, boolean autoStart) {
+    ServiceConfig sc = addDefaultGlobalConfig(plan, key, String.format("%s.%s", name, key), peerType, autoStart);
     return sc;
   }
-
-  protected void setPeerName(String key, String actualName) {
-    // FIXME - do we bother to check if a peer exists or just make one? - we
-    // don't have type info ...
-    // FIXME - do we bother to check if its already set ? (merge ???)
-    ServiceReservation sr = peers.get(key);
-    log.error("key {} does not for peer", key);
+  
+  public ServiceConfig addDefaultGlobalConfig(Plan plan, String key, String globalName, String peerType) {
+    return addDefaultGlobalConfig(plan, key, globalName, peerType, true);
   }
 
+
+  /**
+   * Used typically for shared services.  E.g. headTracking and eyeTracking share the same OpenCV instance.
+   * So, the peer of headTracking and eyeTracking global name for the cv key would be "i01.cv"
+   * @param plan
+   * @param key
+   * @param globalName
+   * @param peer
+   * @return
+   */
+  public ServiceConfig addDefaultGlobalConfig(Plan plan, String key, String globalName, String peerType, boolean autoStart) {
+    Peer peer = new Peer(globalName, peerType, autoStart);
+    // recursive
+    ServiceConfig.getDefault(plan, peer.name, peer.type);
+    ServiceConfig sc = plan.get(peer.name);
+    if (peers == null) {
+      peers = new TreeMap<>();
+    }
+    peers.put(key, peer);
+    return sc;
+  }
+  
   static public String getConfigType(String type) {
     if (type.contains(".") && type.endsWith("Config")) {
       return type;
@@ -129,7 +149,6 @@ public class ServiceConfig {
   }
 
   public static Plan getDefault(Plan plan, String name, String inType) {
-   
     try {
 
       // if (type == null) {
@@ -153,7 +172,7 @@ public class ServiceConfig {
       ServiceConfig sc = new ServiceConfig();
       sc.type = inType;
       plan.put(name, sc);
-    } catch(Exception e) {
+    } catch (Exception e) {
       Runtime.getInstance().error(e);
     }
 

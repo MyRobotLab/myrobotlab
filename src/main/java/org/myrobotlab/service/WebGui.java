@@ -1289,22 +1289,32 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     try {
 
       // Platform.setVirtual(true);
-
-      // Runtime.main(new String[] { "--id", "w1", "--from-launcher", "--log-level", "WARN" });
-      
-      Runtime.main(new String[] { "--id", "w1", "--from-launcher", "--log-level", "WARN", "-c", "yml-css-01" });
+      // Runtime.main(new String[] { "--id", "w1", "--from-launcher",
+      // "--log-level", "WARN" });
+      // Runtime.main(new String[] { "--id", "w1", "--from-launcher",
+      // "--log-level", "WARN", "-c", "yml-css-01" });
 
       Runtime runtime = Runtime.getInstance();
-      runtime.saveAllDefaults();
+      // save full plan off
+      // runtime.saveDefault("worky", "WorkE", true); // FIXME - overwrite
+      // filesystem flag
+      Runtime.startConfig("start");
+      // runtime.saveDefault("i01", "InMoov2", true);
+      // Runtime.setConfig("i01");
+
+      // Runtime.start("worky", "WorkE");
+      //
+      // // Runtime.start("python", "Python");
+      // // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       
+      // runtime.saveDefault("leftArm", "InMoov2Arm");
+      runtime.saveAllDefaults();
+
       boolean done = true;
       if (done) {
         return;
       }
 
-
-      // Runtime.start("python", "Python");
-      // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
@@ -1322,7 +1332,17 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // Runtime.startConfig("InMoov2Head");
       // Runtime.startConfig("Tracking");
 
- 
+
+      // Runtime.start("i01", "InMoov2");
+      // Runtime.start("python", "Python");
+      // Runtime.start("i01", "InMoov2");
+
+      // Runtime.start("i01", "InMoov2");
+      Runtime.start("track", "Tracking");
+      // Runtime.startConfig("worky");
+      // Runtime.startConfig("InMoov2Head");
+      // Runtime.startConfig("Tracking");
+
       MqttBroker broker = (MqttBroker) Runtime.start("broker", "MqttBroker");
       broker.listen();
 

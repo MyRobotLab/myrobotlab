@@ -2441,8 +2441,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       // has to be loaded
+      File file = new File(runtime.getConfigPath() + fs + service + ".yml");
+      if (!file.exists()) {
+        runtime.error("cannot read file %s - skipping", file.getPath());
+        continue;
+      }
+
       ServiceConfig sc = runtime.readServiceConfig(runtime.getConfigPath(), service);
       try {
+        if (sc == null) {
+          continue;
+        }
         runtime.loadService(Runtime.getPlan(), service, sc.type, 0);
       } catch (Exception e) {
         runtime.error(e);
@@ -2495,14 +2504,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           requestedService.addAutoStartedPeer(service.getName());
         }
       }
-      
+
       ServiceConfig sc = requestedService.getConfig();
       Map<String, Peer> peers = sc.getPeers();
-      for (String p : peers.keySet()) {
-        Peer peer = peers.get(p);
-        log.info("peer {}", peer);
+      if (peers != null) {
+        for (String p : peers.keySet()) {
+          Peer peer = peers.get(p);
+          log.info("peer {}", peer);
+        }
       }
-      
+
       requestedService.startService();
       return requestedService;
     } catch (Exception e) {
@@ -4529,11 +4540,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   synchronized private Plan loadService(Plan plan, String name, String type, int level) throws IOException {
 
-    log.error("loading - {} {} {}", name, type, level);
-
-    if (!name.equals("runtime") && !name.equals("security") && !name.equals("webgui")) {
-      log.info("here x");
-    }
+    log.info("loading - {} {} {}", name, type, level);
 
     if (plan == null) {
       log.error("plan required to load a system");
@@ -4544,7 +4551,32 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     ServiceConfig sc = plan.get(name);
     if (sc != null) {
       log.info("priority #0 - already have a plan for {} {}", name, type);
+      plan.addRegistry(name);
       return plan;
+    }
+
+    ServiceConfig originalSc = plan.get(name);
+    if (!overwrite && originalSc != null) {
+      log.info("will not overwrite and plan entry already exists for {}", name);
+      return plan;
+    }
+
+    ServiceConfig sc = readServiceConfig(configName, name);
+
+    if (sc != null) {
+      log.info("{} found yml file - loading into plan", name);
+      sc.state = "LOADED";
+      plan.put(name, sc);
+      // RECURSIVE load peers
+      Map<String, Peer> peers = sc.getPeers();
+      if (sc != null && peers != null) {
+        for (String peerKey : peers.keySet()) {
+          Peer peer = peers.get(peerKey);
+          if (peer.autoStart) {
+            load(peer.name, peer.type);
+          }
+        }
+      }
     }
 
     // PRIORITY #1
@@ -4938,8 +4970,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return false;
   }
 
-  
-
   /**
    * Load all configuration files from a given directory.
    *
@@ -5000,17 +5030,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return ServiceConfig.getDefault(Runtime.getPlan(), name, type);
   }
 
-
   final public Plan saveDefault(String name, String type) {
     return saveDefault(DEFAULT_CONFIG_DIR + fs + name, name, type, false);
   }
 
-  
   final public Plan saveDefault(String name, String type, boolean fullPlan) {
     return saveDefault(DEFAULT_CONFIG_DIR + fs + name, name, type, fullPlan);
   }
 
-  
   final public Plan saveDefault(String configPath, String name, String type, boolean fullPlan) {
     // Runtime.getPlan()
     // File resourceDir = new File(configPath);
@@ -5026,14 +5053,42 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     Plan plan = ServiceConfig.getDefault(new Plan(name), name, type);
     // for (String service : plan.getConfig().keySet()) {
     if (!fullPlan) {
-    try {
-      String filename = configPath + fs + name + ".yml";
-      ServiceConfig sc = plan.get(name);
-      String yaml = CodecUtils.toYaml(sc);
-      FileIO.toFile(filename, yaml);
-      info("saved %s", filename);
-    } catch (IOException e) {
-      error(e);
+      try {
+        String filename = configPath + fs + name + ".yml";
+        ServiceConfig sc = plan.get(name);
+        String yaml = CodecUtils.toYaml(sc);
+        FileIO.toFile(filename, yaml);
+        info("saved %s", filename);
+      } catch (IOException e) {
+        error(e);
+      }
+    } else {
+      for (String service : plan.keySet()) {
+        try {
+          String filename = configPath + fs + service + ".yml";
+          ServiceConfig sc = plan.get(service);
+          String yaml = CodecUtils.toYaml(sc);
+          FileIO.toFile(filename, yaml);
+          info("saved %s", filename);
+        } catch (IOException e) {
+          error(e);
+        }
+
+      }
+
+    }
+    // }
+    return plan;
+  }
+
+  public void saveAllDefaults() {
+    saveAllDefaults(new File(getResourceDir()).getParent(), false);
+  }
+
+  public void saveAllDefaults(String configPath, boolean fullPlan) {
+    List<MetaData> types = serviceData.getAvailableServiceTypes();
+    for (MetaData meta : types) {
+      saveDefault(configPath + fs + meta.getSimpleName(), meta.getSimpleName().toLowerCase(), meta.getSimpleName(), fullPlan);
     }
     } else {
       for (String service: plan.keySet()) {

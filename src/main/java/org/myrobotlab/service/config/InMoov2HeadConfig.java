@@ -1,44 +1,24 @@
 package org.myrobotlab.service.config;
 
+import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Plan;
 
 public class InMoov2HeadConfig extends ServiceConfig {
-
-  // peer names
-  public String jaw;
-  public String eyeX;
-  public String eyeY;
-  public String rothead;
-  public String neck;
-  public String rollNeck;
-
-  public String eyelidLeft;
-  public String eyelidRight;  
   
   @Override
   public Plan getDefault(Plan plan, String name) {
     super.getDefault(plan, name);
+            
+    addDefaultPeerConfig(plan, name, "jaw", "Servo");
+    addDefaultPeerConfig(plan, name, "eyeX", "Servo");
+    addDefaultPeerConfig(plan, name, "eyeY", "Servo");
+    addDefaultPeerConfig(plan, name, "rothead", "Servo");
+    addDefaultPeerConfig(plan, name, "neck", "Servo");
+    addDefaultPeerConfig(plan, name, "rollNeck", "Servo");
+    addDefaultPeerConfig(plan, name, "eyelidLeft", "Servo", false);
+    addDefaultPeerConfig(plan, name, "eyelidRight", "Servo", false);
     
-    // default peer names 
-    jaw= name + ".jaw";
-    eyeX= name + ".eyeX";
-    eyeY= name + ".eyeY";
-    rothead= name + ".rothead";
-    neck= name + ".neck";
-    rollNeck= name + ".rollNeck";
-    eyelidLeft= name + ".eyelidLeft";
-    eyelidRight= name + ".eyelidRight";
-        
-    addPeer(plan, name, "jaw", jaw, "Servo", "Jaw servo");
-    addPeer(plan, name, "eyeX", eyeX, "Servo", "Eyes pan servo");
-    addPeer(plan, name, "eyeY", eyeY, "Servo", "Eyes tilt servo");
-    addPeer(plan, name, "rothead", rothead, "Servo", "Head pan servo");
-    addPeer(plan, name, "neck", neck, "Servo", "Head tilt servo");
-    addPeer(plan, name, "rollNeck", rollNeck, "Servo", "rollNeck Mod servo");
-    addPeer(plan, name, "eyelidLeft", eyelidLeft, "Servo", "eyelidLeft or both servo");
-    addPeer(plan, name, "eyelidRight", eyelidRight, "Servo", "Eyelid right servo");
-    
-    ServoConfig jaw = (ServoConfig) plan.get(this.jaw);
+    ServoConfig jaw = (ServoConfig) plan.get(getPeerName("jaw"));
     jaw.autoDisable = true;
     jaw.clip = true;
     jaw.controller = "i01.left";
@@ -54,7 +34,7 @@ public class InMoov2HeadConfig extends ServiceConfig {
     jaw.sweepMax = null;
     jaw.sweepMin = null;
 
-    ServoConfig eyeX = (ServoConfig) plan.get(this.eyeX);
+    ServoConfig eyeX = (ServoConfig) plan.get(getPeerName("eyeX"));
     eyeX.autoDisable = true;
     eyeX.clip = true;
     eyeX.controller = "i01.left";
@@ -70,7 +50,7 @@ public class InMoov2HeadConfig extends ServiceConfig {
     eyeX.sweepMax = null;
     eyeX.sweepMin = null;
 
-    ServoConfig eyeY = (ServoConfig) plan.get(this.eyeY);
+    ServoConfig eyeY = (ServoConfig) plan.get(getPeerName("eyeY"));
     eyeY.autoDisable = true;
     eyeY.clip = true;
     eyeY.controller = "i01.left";
@@ -86,7 +66,7 @@ public class InMoov2HeadConfig extends ServiceConfig {
     eyeY.sweepMax = null;
     eyeY.sweepMin = null;
 
-    ServoConfig rothead = (ServoConfig) plan.get(this.rothead);
+    ServoConfig rothead = (ServoConfig) plan.get(getPeerName("rothead"));
     rothead.autoDisable = true;
     rothead.clip = true;
     rothead.controller = "i01.left";
@@ -103,7 +83,7 @@ public class InMoov2HeadConfig extends ServiceConfig {
     rothead.sweepMax = null;
     rothead.sweepMin = null;
 
-    ServoConfig neck = (ServoConfig) plan.get(this.neck); 
+    ServoConfig neck = (ServoConfig) plan.get(getPeerName("neck")); 
     neck.autoDisable = true;
     neck.clip = true;
     neck.controller = "i01.left";
@@ -120,7 +100,7 @@ public class InMoov2HeadConfig extends ServiceConfig {
     neck.sweepMax = null;
     neck.sweepMin = null;
 
-    ServoConfig rollNeck = (ServoConfig) plan.get(this.rollNeck);
+    ServoConfig rollNeck = (ServoConfig) plan.get(getPeerName("rollNeck"));
     rollNeck.autoDisable = true;
     rollNeck.clip = true;
     rollNeck.controller = "i01.right";
@@ -137,7 +117,7 @@ public class InMoov2HeadConfig extends ServiceConfig {
     rollNeck.sweepMax = null;
     rollNeck.sweepMin = null;
 
-    ServoConfig eyelidLeft = (ServoConfig) plan.get(this.eyelidLeft);
+    ServoConfig eyelidLeft = (ServoConfig) plan.get(getPeerName("eyelidLeft"));
     eyelidLeft.autoDisable = true;
     eyelidLeft.clip = true;
     eyelidLeft.controller = "i01.right";
@@ -154,7 +134,7 @@ public class InMoov2HeadConfig extends ServiceConfig {
     eyelidLeft.sweepMax = null;
     eyelidLeft.sweepMin = null;
 
-    ServoConfig eyelidRight = (ServoConfig) plan.get(this.eyelidRight);
+    ServoConfig eyelidRight = (ServoConfig) plan.get(getPeerName("eyelidRight"));
     eyelidRight.autoDisable = true;
     eyelidRight.clip = true;
     eyelidRight.controller = "i01.right";

@@ -433,14 +433,14 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                     if (s) {
                         let service = msg.data[0]
                         registry[senderFullName] = service
-                        for ([key,value] of Object.entries(service.serviceType.peers)) {
-                            peerKey = key[0].toUpperCase() + key.substring(1)
-                            if (value.state == 'STARTED') {
-                                service['is' + peerKey + 'Started'] = true
-                            } else {
-                                service['is' + peerKey + 'Started'] = false
-                            }
-                        }
+                        // for ([key,value] of Object.entries(service.serviceType.peers)) {
+                        //     peerKey = key[0].toUpperCase() + key.substring(1)
+                        //     if (value.state == 'STARTED') {
+                        //         service['is' + peerKey + 'Started'] = true
+                        //     } else {
+                        //         service['is' + peerKey + 'Started'] = false
+                        //     }
+                        // }
 
                     }
                 }

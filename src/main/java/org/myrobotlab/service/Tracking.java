@@ -282,10 +282,10 @@ public class Tracking extends Service {
     // but local config should be short name
     // FIXME - the UI should determine if the two attaching services are local
     // to one another - if they are - then it should use shortnames
-    config.cv = CodecUtils.shortName(cv);
-    config.tilt = CodecUtils.shortName(tilt);
-    config.pan = CodecUtils.shortName(pan);
-    config.pid = CodecUtils.shortName(pid);
+//    config.cv = CodecUtils.shortName(cv);
+//    config.tilt = CodecUtils.shortName(tilt);
+//    config.pan = CodecUtils.shortName(pan);
+//    config.pid = CodecUtils.shortName(pid);
     config.enabled = (state == TrackingState.IDLE) ? false : true;
     return config;
   }
@@ -296,18 +296,18 @@ public class Tracking extends Service {
 
     config.lostTrackingDelayMs = lostTrackingDelayMs;
 
-    if (config.pan != null) {
-      attachPan(config.pan);
-    }
-    if (config.tilt != null) {
-      attachTilt(config.tilt);
-    }
-    if (config.pid != null) {
-      attachPid(config.pid);
-    }
-    if (config.cv != null) {
-      attachCv(config.cv);
-    }
+//    if (config.pan != null) {
+//      attachPan(getPeerName("pan"));
+//    }
+//    if (config.tilt != null) {
+//      attachTilt(config.tilt.name);
+//    }
+//    if (config.pid != null) {
+//      attachPid(config.pid.name);
+//    }
+//    if (config.cv != null) {
+//      attachCv(config.cv.name);
+//    }
 
     if (config.enabled) {
       // enable();
