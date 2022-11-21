@@ -7,6 +7,7 @@ maxIn: null
 maxOut: null
 minIn: null
 minOut: null
+peers: null
 pwmFreq: null
 pwrPin: null
 type: Motor

@@ -7,5 +7,6 @@ grabberType: OpenCV
 inputFile: null
 inputSource: camera
 nativeViewer: true
+peers: null
 type: OpenCV
 webViewer: false

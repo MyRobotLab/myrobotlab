@@ -6,5 +6,6 @@ maxIn: null
 maxOut: null
 minIn: null
 minOut: null
+peers: null
 port: null
 type: MotorPort
