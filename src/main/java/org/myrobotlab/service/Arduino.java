@@ -166,7 +166,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   transient Mapper motorPowerMapper = new MapperLinear(-1.0, 1.0, -255.0, 255.0);
 
-  public transient Msg msg;
+  // make final - if not "connected" log error but don't allow Arduino NPEs
+  public final transient Msg msg = new Msg(this, null);
 
   Integer nextDeviceId = 0;
 
@@ -530,7 +531,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
     if (serial == null) {
       serial = (Serial) startPeer("serial");
-      msg = new Msg(this, serial);
+      // msg = new Msg(this, serial);
+      msg.setSerial(serial);
       serial.addByteListener(this);
     }
 
@@ -2310,17 +2312,13 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   @Override
   public ServiceConfig getConfig() {
-    ArduinoConfig config = new ArduinoConfig();
+    ArduinoConfig c = (ArduinoConfig) config;
+    
+    // FIXME "port" shouldn't exist only config.port !
+    c.port = port;
+    c.connect = isConnected();
 
-    // FIXME - shouldn't need the this copying to local fields
-    // config is already set by the framework as part of an apply
-    // so the super.getConfig should be sufficient if
-    // the state of the config is updated during runtime
-
-    config.port = port;
-    config.connect = isConnected();
-
-    return config;
+    return c;
   }
 
   @Override
@@ -2344,7 +2342,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
         error("could not start serial peer %s", getPeerName("serial"));
         return;
       }
-      msg = new Msg(this, serial);
+      // STOP THE NPEs !
+      // msg = new Msg(this, serial);
+      msg.setSerial(serial);
       serial.addByteListener(this);
     } else {
       // TODO: figure out why this gets called so often.

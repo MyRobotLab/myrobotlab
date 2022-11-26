@@ -29,7 +29,7 @@ peers:
     name: inmoov2.eyeTracking
     type: Tracking
   fsm:
-    autoStart: false 
+    autoStart: false
     name: inmoov2.fsm
     type: FiniteStateMachine
   head:
@@ -133,4 +133,3 @@ pirWakeUp: false
 shutdownStartupSpeed: 50.0
 type: InMoov2
 virtual: false
-

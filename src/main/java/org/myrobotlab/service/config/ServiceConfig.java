@@ -147,6 +147,20 @@ public class ServiceConfig {
     }
     return type;
   }
+  
+  public Peer putPeerType(String peerKey, String fullName, String peerType) {
+    if (peers == null) {
+      peers = new TreeMap<>();
+    }
+    Peer peer = peers.get(peerKey);
+    if (peer == null) {
+      peer = new Peer(fullName, peerType);
+    } else {
+      peer.type = peerType;
+    }    
+    peers.put(peerKey, peer);
+    return peer;
+  }
 
   public static Plan getDefault(Plan plan, String name, String inType) {
     try {

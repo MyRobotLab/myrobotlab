@@ -478,7 +478,7 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
    *         false if there was an exception.
    */
   public boolean exec(String code, boolean blocking) {
-    log.info("exec(String) \n{}", code);
+    log.debug("exec(String) \n{}", code);
 
     try {
       if (!blocking) {
@@ -495,6 +495,7 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
       error(pe.toString());
       invoke("publishStdError", pe.toString());
     } catch (Exception e) {
+      log.error(code);
       error(e);
     } finally {
       if (blocking) {
@@ -800,14 +801,16 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
     // register runtime life cycle events for other services
     Runtime.getInstance().attachServiceLifeCycleListener(getName());
 
-    PythonConfig c = (PythonConfig)config;
+    PythonConfig c = (PythonConfig) config;
     // run start scripts if there are any
-    for (String script : c.startScripts) {
-      // i think in this context its safer to block
-      try {
-        execFile(script, true);
-      } catch (IOException e) {
-        log.error("starting scripts threw", e);
+    if (c.startScripts != null) {
+      for (String script : c.startScripts) {
+        // i think in this context its safer to block
+        try {
+          execFile(script, true);
+        } catch (IOException e) {
+          log.error("starting scripts threw", e);
+        }
       }
     }
   }
@@ -850,7 +853,7 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
   @Override
   public void stopService() {
     // run any stop scripts
-    PythonConfig c = (PythonConfig)config;
+    PythonConfig c = (PythonConfig) config;
 
     for (String script : c.stopScripts) {
       // i think in this context its safer to block
@@ -929,7 +932,7 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
         }
       }
     }
-    
+
     PySystemState sys = Py.getSystemState();
 
     if (config.modulePaths != null) {
@@ -939,14 +942,14 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
     }
 
     log.info("Python System Path: {}", sys.path);
-    
+
     return c;
   }
 
   @Override
   public void onMessage(Message msg) {
     // TODO Auto-generated method stub
-    
+
   }
 
 }

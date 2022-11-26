@@ -101,29 +101,22 @@ public class Plan {
     return config;
   }
 
-
   public int size() {
     return config.size();
   }
 
   /**
-   * a way to remove services from auto starting
+   * a way to remove a service from auto starting
    * 
-   * @param startsWith
+   * @param service
    */
-  public void removeRegistry(String startsWith) {
+  public void removeRegistry(String service) {
     RuntimeConfig runtime = (RuntimeConfig) config.get("runtime");
     if (runtime == null) {
       log.error("removeRegistry - runtime null !");
       return;
     }
-
-    for (String service : runtime.getRegistry()) {
-      if (service.startsWith(startsWith)) {
-        runtime.remove(service);
-      }
-    }
-
+    runtime.remove(service);
   }
 
   /**
@@ -137,14 +130,7 @@ public class Plan {
       log.error("removeRegistry - runtime null !");
       return;
     }
-    // VERY BAD IDEA
-    // for (String service : config.keySet()) {
-    // if (service.startsWith(actualName)) {
-    // runtime.add(service);
-    // }
-    // }
     runtime.add(actualName);
-
   }
 
 }

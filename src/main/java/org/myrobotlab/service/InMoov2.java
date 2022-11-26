@@ -93,6 +93,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   public void onStarted(String fullname) {
     log.info("{} started", fullname);
     try {
+      
+       
 
       // FIXME - problem is fullname is not the peerKey :(
       // String actualName = getPeerName(fullname);
@@ -167,6 +169,14 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     Runtime runtime = Runtime.getInstance();
     // FIXME - shouldn't need this anymore
     Runtime.getInstance().attachServiceLifeCycleListener(getName());
+    
+    // power up loopback subscription
+    addListener(getName(),"powerUp");
+    // invoke("powerUp");
+    
+    // for begin and end of processing config ?
+    subscribe("runtime", "publishStartConfig");
+    subscribe("runtime", "publishFinishedConfig");
 
     try {
       // copy config if it doesn't already exist
@@ -213,6 +223,14 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     // }
 
     runtime.invoke("publishConfigList");
+  }
+  
+  public void onFinishedConfig() {
+    log.info("onFinishedConfig");
+  }
+
+  public void onStartConfig() {
+    log.info("onStartConfig");
   }
 
   @Override
@@ -428,8 +446,12 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public void closeAllImages() {
-    // imageDisplay.closeAll();
-    log.error("implement webgui.closeAllImages");
+    // FIXME - follow this pattern ? 
+    // CON npe possible although unlikely
+    // PRO start it when its needed
+    // PRO small easy to read - no clutter npe 
+    imageDisplay = (ImageDisplay)startPeer("imageDisplay");    
+    imageDisplay.closeAll();
   }
 
   public void cycleGestures() {
@@ -508,10 +530,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     finishedGesture("unknown");
   }
 
-  // public State publishState(State state) {
-  // return state;
-  // }
-
+  // FIXME - this may drive to locall references for all servos
   public void finishedGesture(String nameOfGesture) {
     if (gestureAlreadyStarted) {
       waitTargetPos();
@@ -881,6 +900,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   // TODO FIX/CHECK this, migrate from python land
+  // FIXME - defaultPowerUp switchable + override
   public void powerUp() {
     enable();
     rest();
@@ -892,6 +912,21 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     beginCheckingOnInactivity();
 
     python.execMethod("power_up");
+  }
+  
+  // GOOD GOOD GOOD - LOOPBACK - flexible and replacable by python
+  // yet provides a stable default, which can be fully replaced
+  // Works using common pub/sub rules
+  // TODO - this is a loopback power up
+  // its replaceable by typical subscription rules
+  public void onPowerUp() {
+    // CON - type aware
+    NeoPixel neoPixel = (NeoPixel)getPeer("neoPixel");
+    // CON - necessary NPE checking
+    if (neoPixel != null) {
+      neoPixel.setColor(0, 130, 0);
+      neoPixel.playAnimation("Larson Scanner");
+    }
   }
 
   /**
@@ -1079,11 +1114,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public String setSpeechType(String speechType) {
-    // changing runtime plan
-    Plan plan = Runtime.getPlan();
-    plan.remove(getPeerName("mouth"));
-    Runtime.load(getPeerName("mouth"), speechType);
-    // broadcastState();
+    updatePeerType("mouth" /*getPeerName("mouth")*/, speechType);
     return speechType;
   }
 
@@ -1373,8 +1404,9 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     sendToPeer("neopixel", "clear");
   }
 
+  // FIXME - if this is really desired it will drive local references for all servos
   public void waitTargetPos() {
-
+    // FIXME - consider actual reference for this 
     sendToPeer("head", "waitTargetPos");
     sendToPeer("rightHand", "waitTargetPos");
     sendToPeer("leftHand", "waitTargetPos");
@@ -1429,14 +1461,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    InMoov2Config config = new InMoov2Config();
-    return config;
-  }
-
-  @Override
   public ServiceConfig apply(ServiceConfig c) {
-    InMoov2Config config = (InMoov2Config) c;
+    InMoov2Config config = (InMoov2Config) super.apply(c);
     try {
 
       if (config.locale != null) {
@@ -1456,7 +1482,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     } catch (Exception e) {
       error(e);
     }
-
     return c;
   }
 

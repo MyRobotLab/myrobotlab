@@ -12,6 +12,7 @@ public class RuntimeConfig extends ServiceConfig {
   public boolean enableCli = true;
   public String logLevel;
   public String locale;
+  // NEED THIS PRIVATE BUT CANNOT BE
   public List<String> registry = new ArrayList<>();
 
   transient private Set<String> registrySet = new LinkedHashSet<>();

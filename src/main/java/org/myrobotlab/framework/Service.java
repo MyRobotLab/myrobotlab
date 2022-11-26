@@ -82,7 +82,7 @@ import org.slf4j.Logger;
  * messages.
  * 
  */
-public abstract class Service implements Runnable, Serializable, ServiceInterface, Invoker, Broadcaster, QueueReporter {
+public abstract class Service implements Runnable, Serializable, ServiceInterface, Broadcaster, QueueReporter {
 
   // FIXME upgrade to ScheduledExecutorService
   // http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
@@ -1340,9 +1340,22 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * 
    */
   @Override
-  public ServiceConfig apply(ServiceConfig config) {
+  public ServiceConfig apply(ServiceConfig inConfig) {
     log.info("Default service config loading for service: {} type: {}", getName(), getType());
-    this.config = config;
+    // clone or serialize - must be "copy" of plan not the same ref.
+    /**
+     * <pre>
+     * We clone/serialize here because we don't want to use the same reference of of config in the
+     * plan.  If configuration is applied through the plan, "or from anywhere else" we make a
+     * copy of it here. And the copy is applied to the actual service. This keeps the plan
+     * safe to modify without the worry of modifying a running service config. 
+     * </pre>
+     */
+    
+    String yaml = CodecUtils.toYaml(inConfig);
+    ServiceConfig copyOfConfig = CodecUtils.fromYaml(yaml, inConfig.getClass());
+    
+    this.config = copyOfConfig;
     return config;
   }
 
@@ -1527,7 +1540,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public boolean save() {
     Runtime runtime = Runtime.getInstance();
-    return runtime.saveService(null, getName(), null);
+    // save all services ... weird notation - should have explicit saveAllServices
+    return runtime.saveService(null, null, null);
   }
 
   public ServiceInterface getPeer(String peerKey) {
@@ -1764,7 +1778,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     this.thisThread = thisThread;
   }
 
-  public ServiceInterface startPeer(String peerKey) {
+  synchronized public ServiceInterface startPeer(String peerKey) {
     Peer peer = config.getPeer(peerKey);
 
     if (peer == null) {
@@ -1808,18 +1822,22 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return Runtime.getService(peer.name);
   }
 
-  public void releasePeer(String peerKey) {
+  synchronized public void releasePeer(String peerKey) {
 
     if (config != null && config.getPeer(peerKey) != null) {
       Peer peer = config.getPeer(peerKey);
       ServiceConfig sc = Runtime.getPlan().get(peer.name);
-      // recursive
+      // peer recursive
       if (sc != null && sc.getPeers() != null) {
         for (String subPeerKey : sc.getPeers().keySet()) {
           Peer subpeer = sc.getPeer(subPeerKey);
-          Runtime.release(subpeer.name);
+          if (subpeer.autoStart) {
+            Runtime.release(subpeer.name);
+          }
         }
       }
+      Plan plan = Runtime.getPlan();
+      plan.removeRegistry(peer.name);
       Runtime.release(peer.name);
       broadcastState();
     } else {
@@ -2620,5 +2638,68 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // applying config to self
     apply(sc);
   }
+  
+  // FIXME - test
+  public void updatePeerName(String key, String fullName) {
+    Peer peer = config.getPeer(key);
+    String oldName = peer.name;
+    peer.name = fullName;
+    ServiceConfig.getDefault(Runtime.getPlan(), peer.name, peer.type);
+//    Runtime runtime = Runtime.getInstance();
+//    String configPath = runtime.getConfigPath();
+    // seems a bit invasive - but yml file overrides everything
+    // if one exists we need to replace it with the new peer type
+//    if (configPath != null) {
+//      String configFile = configPath + fs + peer.name + ".yml";
+//      File staleFile = new File(configFile);
+//      if (staleFile.exists()) {
+//        log.info("removing old config file {}", configFile);
+//        staleFile.delete();
+//        // save new default in its place
+//        runtime.saveDefault(configPath, peer.name, peer.type, false);
+//      }
+//    }
+    info("updated %s name to %s", oldName, peer.name);
+  }
+  
 
+  public void updatePeerType(String key, String peerType) {
+    
+    // MAKE NOTE ! - CONFIG IS DIFFERENT THAN PLAN !!!!  MODIFY BOTH ???!?
+    
+    // get current plan
+    Plan plan = Runtime.getPlan();
+    
+    // get self
+    ServiceConfig sc = plan.get(getName());
+    if (sc != null) {
+      sc.putPeerType(key, String.format("%s.%s", getName(), key), peerType);
+    }
+        
+    Peer peer = config.getPeer(key);    
+    peer.type = peerType;
+    
+    // not Needed
+    // config.putPeerType(key, String.format("%s.%s", key, getName()), peerType);
+    plan.remove(peer.name);
+    // FIXME - rename putDefault 
+    ServiceConfig.getDefault(Runtime.getPlan(), peer.name, peerType);
+    Runtime runtime = Runtime.getInstance();
+    String configPath = runtime.getConfigPath();
+    // Seems a bit invasive - but yml file overrides everything
+    // if one exists we need to replace it with the new peer type
+    if (configPath != null) {
+      String configFile = configPath + fs + peer.name + ".yml";
+      File staleFile = new File(configFile);
+      if (staleFile.exists()) {
+        log.info("removing old config file {}", configFile);
+        staleFile.delete();
+        // save new default in its place
+        runtime.saveDefault(configPath, peer.name, peer.type, false);
+      }
+    }
+    info("updated %s to type %s", peer.name, peerType);
+  }
+
+  
 }

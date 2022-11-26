@@ -1,6 +1,5 @@
 package org.myrobotlab.service.config;
 
-import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.jme3.UserData;
@@ -34,7 +33,6 @@ public class InMoov2Config extends ServiceConfig {
    * idle time measures the time the fsm is in an idle state
    */
   public boolean idleTimer = true;
-  
 
   public InMoov2Config() {
   }
@@ -57,12 +55,13 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "imageDisplay", "ImageDisplay", false);
     addDefaultPeerConfig(plan, name, "leap", "LeapMotion", false);
     addDefaultPeerConfig(plan, name, "left", "Arduino", false);
-    addDefaultPeerConfig(plan, name, "leftArm", "InMoov2Aram", false);
+    addDefaultPeerConfig(plan, name, "leftArm", "InMoov2Arm", false);
     addDefaultPeerConfig(plan, name, "leftHand", "InMoov2Hand", false);
     addDefaultPeerConfig(plan, name, "mouth", "MarySpeech", false);
     addDefaultPeerConfig(plan, name, "mouthControl", "MouthControl", false);
     addDefaultPeerConfig(plan, name, "neoPixel", "NeoPixel", false);
     addDefaultPeerConfig(plan, name, "opencv", "OpenCV", false);
+    addDefaultPeerConfig(plan, name, "openni", "OpenNi", false);
     addDefaultPeerConfig(plan, name, "openWeatherMap", "OpenWeatherMap", false);
     addDefaultPeerConfig(plan, name, "pid", "Pid", false);
     addDefaultPeerConfig(plan, name, "pir", "Pir", false);
@@ -215,6 +214,7 @@ public class InMoov2Config extends ServiceConfig {
 
     // == Peer - random =============================
     RandomConfig random = (RandomConfig) plan.get(getPeerName("random"));
+    random.enabled = false;
 
     // setup name references to different services
     RandomMessageConfig rm = new RandomMessageConfig(3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
@@ -266,7 +266,7 @@ public class InMoov2Config extends ServiceConfig {
     // == Peer - eyeTracking =============================
     TrackingConfig eyeTracking = (TrackingConfig) plan.get(getPeerName("eyeTracking"));
 
-    // setup name references to different services    
+    // setup name references to different services
     eyeTracking.getPeer("tilt").name = name + ".head.eyeY";
     eyeTracking.getPeer("pan").name = name + ".head.eyeX";
     eyeTracking.getPeer("cv").name = name + ".opencv";
@@ -298,7 +298,8 @@ public class InMoov2Config extends ServiceConfig {
 
     NeoPixelConfig neoPixel = (NeoPixelConfig) plan.get(getPeerName("neoPixel"));
     neoPixel.pin = 2;
-    neoPixel.controller = String.format("%s.left", name);
+    // neoPixel.controller = String.format("%s.left", name);
+    neoPixel.controller = String.format("%s.controller3", name);
     neoPixel.red = 12;
     neoPixel.green = 180;
     neoPixel.blue = 212;

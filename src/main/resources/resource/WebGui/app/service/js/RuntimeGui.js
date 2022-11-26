@@ -96,8 +96,8 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     $scope.setConfig = function() {
         console.info('setConfig')
         if ($scope.selectedConfig.length > 0) {
-            $scope.service.configName = $scope.selectedConfig[0]
-            msg.sendTo('runtime', 'setConfig', $scope.service.configName)
+            $scope.service.configPath = $scope.selectedConfig[0]
+            msg.sendTo('runtime', 'setConfig', $scope.service.configPath)
         }
     }
 
@@ -321,8 +321,8 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         console.info('saveConfig')
 
         let onOK = function() {
-            // msg.sendTo('runtime', 'setConfig', $scope.service.configName)
-            msg.sendTo('runtime', 'saveConfig', $scope.service.configName)
+            // msg.sendTo('runtime', 'setConfig', $scope.service.configPath)
+            msg.sendTo('runtime', 'saveConfig', $scope.service.configPath)
             // msg.sendTo('runtime', 'save')
         }
 
@@ -338,7 +338,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         console.info('saveConfig')
 
         let onOK = function() {
-            msg.sendTo('runtime', 'savePlan', $scope.service.configName)
+            msg.sendTo('runtime', 'savePlan', $scope.service.configPath)
             // msg.sendTo('runtime', 'save')
         }
 
@@ -357,6 +357,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
     // $scope.possibleServices = Object.values(mrl.getPossibleServices())
     msg.subscribe("saveDefaults")
+    msg.subscribe("getConfigPath")
     msg.subscribe("getServiceTypes")
     msg.subscribe("getLocalServices")
     msg.subscribe("registered")
@@ -374,6 +375,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.send("getLocale")
     msg.send("getLocales")
     msg.send("publishInterfaceToNames")
+    msg.send("getConfigPath")
 
     // msg.send("getHosts")
     msg.subscribe(this)

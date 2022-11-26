@@ -4,7 +4,7 @@
 
 console.info('peer')
 
-angular.module('peer', []).service('peer', function(/*$rootScope, $log*/
+angular.module('peer', []).service('peer', function( mrl /*$rootScope, $log*/
 ) {
     service = {};
 
@@ -12,7 +12,7 @@ angular.module('peer', []).service('peer', function(/*$rootScope, $log*/
 
     service.getPeerType = function(service, key) {
         try {
-            return service.serviceType.peers[key].type
+            return service.config.peers[key].type
         } catch (error) {
             console.error(error);
         }
@@ -20,9 +20,11 @@ angular.module('peer', []).service('peer', function(/*$rootScope, $log*/
     }
 
     service.isPeerStarted = function(service, key) {
+
         try {
-            if (service.serviceType.peers[key])
-                return service.serviceType.peers[key].state == 'STARTED'
+        if (service && service.config && service.config.peers){
+            return mrl.getService(service.config.peers[key].name) != null
+        }
         } catch (error) {
             console.error(error);
         }
@@ -31,7 +33,7 @@ angular.module('peer', []).service('peer', function(/*$rootScope, $log*/
 
     service.getActualName = function(service, key) {
         try {
-            return service.serviceType.peers[key].actualName
+            return service.config.peers[key].name
         } catch (error) {
             console.error(error);
         }

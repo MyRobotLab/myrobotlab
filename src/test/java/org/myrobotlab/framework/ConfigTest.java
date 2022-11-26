@@ -93,8 +93,8 @@ public class ConfigTest extends AbstractTest {
     // sr.actualName = "cv";
 
     // set a communal opencv source
-    t1c.cv = "cv";
-    t2c.cv = "cv";
+//    t1c.cv = "cv";
+//    t2c.cv = "cv";
 
     assertEquals("2x tracking with merged opencv expecting 13 (7 + 7 - 2 + 1) services", 13, plan.size());
     // save the plan
@@ -128,7 +128,7 @@ public class ConfigTest extends AbstractTest {
 
     plan = Runtime.getPlan();
     assertEquals("cleared plan should be 0", 0, plan.size());
-    assertEquals("cleared plan peers be 0", 0, plan.getPeers().size());
+    // assertEquals("cleared plan peers be 0", 0, plan.getPeers().size());
 
     // simple single plan
     // load is attempt to load from file - if not available load from memory
