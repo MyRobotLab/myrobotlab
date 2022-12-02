@@ -21,8 +21,6 @@ import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
 import org.slf4j.Logger;
 
-import com.google.gson.internal.LinkedTreeMap;
-
 /**
  * Local OS speech service
  * 
@@ -230,8 +228,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
         Object[] vo = CodecUtils.decodeArray(json);
 
         for (Object v : vo) {
-          LinkedTreeMap<String, Object> m = (LinkedTreeMap<String, Object>) v;
-          LinkedTreeMap<String, Object> vi = (LinkedTreeMap<String, Object>) m.get("VoiceInfo");
+          Map<String, Object> m = (Map<String, Object>) v;
+          Map<String, Object> vi = (Map<String, Object>) m.get("VoiceInfo");
           String name = vi.get("Name").toString();
           String gender = vi.get("Gender").toString().equals("1.0") ? "male" : "female";
           String lang = vi.get("Culture").toString();
