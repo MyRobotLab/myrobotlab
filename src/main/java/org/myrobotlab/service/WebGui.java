@@ -527,10 +527,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   /**
    * This method handles all http:// and ws:// requests. Depending on apiKey
    * which is part of initial GET
-   * 
+   * <p></p>
    * messages api attempts to promote the connection to websocket and suspends
    * the connection for a 2 way channel
-   * 
+   * <p></p>
    * id and session_id authentication should be required
    * 
    */
@@ -544,6 +544,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       String apiKey = getApiKey(r.getRequest().getRequestURI());
 
       // the mrl "id" of the client
+      // TODO remove since not used
       String id = r.getRequest().getParameter("id");
       String uuid = r.uuid();
 
@@ -597,7 +598,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         } else if ((bodyData != null) && log.isDebugEnabled()) {
           logData = bodyData;
         }
-        log.debug("-->{} {} {} - [{}] from connection {}", (newPersistentConnection == true) ? "new" : "", request.getMethod(), request.getRequestURI(), logData, uuid);
+        log.debug("-->{} {} {} - [{}] from connection {}", (newPersistentConnection) ? "new" : "", request.getMethod(), request.getRequestURI(), logData, uuid);
       }
 
       MethodCache cache = MethodCache.getInstance();
@@ -665,7 +666,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         // decoding 1st pass - decodes the containers
         Message msg = null;
         try {
-          msg = CodecUtils.fromJson(bodyData, Message.class);
+          msg = CodecUtils.jsonToMessage(bodyData);
+          if (msg == null) {
+            log.error("Got null message from client, check client code for bugs");
+            return;
+          }
 
           if (msg.containsHop(getId())) {
             log.error("{} dumping duplicate hop msg to avoid cyclical from {} --to--> {}.{}", getName(), msg.sender, msg.name, msg.method);
@@ -690,25 +695,29 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
             log.debug("invoking local msg {}", msg.toString());
 
             serviceName = msg.getFullName();
-            Class<?> clazz = Runtime.getClass(serviceName);
-            if (clazz == null) {
-              log.error("cannot derive local type from service {}", serviceName);
-            }
-
-            Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
-
-            Method method = cache.getMethod(clazz, msg.method, params);
-            if (method == null) {
-              error("method cache could not find %s.%s(%s)", clazz.getSimpleName(), msg.method, msg.data);
-              return;
-            }
+//            Class<?> clazz = Runtime.getClass(serviceName);
+//            if (clazz == null) {
+//              log.error("cannot derive local type from service {}", serviceName);
+//
+//              // Return instead of causing NPE further down
+//              return;
+//            }
+//
+//            Method method = cache.getMethod(clazz, msg.method, msg.data);
+//            if (method == null) {
+//              error("method cache could not find %s.%s(%s)", clazz.getSimpleName(), msg.method, msg.data);
+//              return;
+//            }
 
             ServiceInterface si = Runtime.getService(serviceName);
 
             // now asychronous
             // ret = method.invoke(si, params);
 
-            inMsgQueue.add(si, method, params);
+//            inMsgQueue.add(si, method, msg.data);
+            // Just pass to service to deal with, no duplicated code
+            // and allows things like sendBlocking() to work correctly
+            si.getInbox().add(msg);
           } catch (Exception e) {
             error("local msg threw %s.%s.%s", serviceName, msg.method, e);
           }
