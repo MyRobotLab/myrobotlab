@@ -16,15 +16,19 @@ import org.myrobotlab.codec.json.JsonDeserializationException;
 import org.myrobotlab.codec.json.JsonSerializationException;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -32,6 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -241,11 +246,11 @@ public class CodecUtils {
      * @param clazz The target class.
      * @param <T>   The type of the target class.
      * @return An object of the specified class (or a subclass of) with the state
-     * given by the json.
+     * given by the json. Null is an allowed return object.
      * @throws JsonDeserializationException if an error during deserialization occurs.
      * @see #USING_GSON
      */
-    public static <T extends Object> T fromJson(String json, Class<T> clazz) {
+    public static <T> @Nullable T fromJson(@Nonnull String json, @Nonnull Class<T> clazz) {
         try {
             if (USING_GSON) {
                 return gson.fromJson(json, clazz);
@@ -268,11 +273,12 @@ public class CodecUtils {
      *                      of genericClass.
      * @param <T>           The type of the target class.
      * @return An object of the specified class (or a subclass of) with the state
-     * given by the json.
+     * given by the json. Null is an allowed return object.
      * @throws JsonDeserializationException if an error during deserialization occurs.
      * @see #USING_GSON
      */
-    public static <T extends Object> T fromJson(String json, Class<?> genericClass, Class<?>... parameterized) {
+    public static <T> @Nullable T fromJson(@Nonnull String json, @Nonnull Class<?> genericClass,
+                                           @Nonnull Class<?>... parameterized) {
         try {
             if (USING_GSON) {
                 return gson.fromJson(json, getType(genericClass, parameterized));
@@ -293,11 +299,11 @@ public class CodecUtils {
      * @param type The target type.
      * @param <T>  The type of the target class.
      * @return An object of the specified class (or a subclass of) with the state
-     * given by the json.
+     * given by the json. Null is an allowed return object.
      * @throws JsonDeserializationException if an error during deserialization occurs.
      * @see #USING_GSON
      */
-    public static <T extends Object> T fromJson(String json, Type type) {
+    public static <T> @Nullable T fromJson(@Nonnull String json, @Nonnull Type type) {
         try {
             if (USING_GSON) {
                 return gson.fromJson(json, type);
@@ -485,6 +491,75 @@ public class CodecUtils {
             return inType;
         }
         return String.format("org.myrobotlab.service.%s", inType);
+    }
+
+    /**
+     * Deserializes a message and its data from a JSON
+     * string representation into a fully decoded Message
+     * object. This method will first attempt to use the
+     * method cache to determine what types the data
+     * elements should be deserialized to, and if the method
+     * cache lookup fails it relies on the virtual "class"
+     * field of the JSON to provide the type information.
+     *
+     * @param jsonData The serialized Message in JSON form
+     * @return A completely decoded Message object. Null is allowed if the JSON
+     *  represented null.
+     * @throws JsonDeserializationException if jsonData is malformed
+     */
+    public static @Nullable Message jsonToMessage(@Nonnull String jsonData) {
+        log.debug("Deserializing message: " + jsonData);
+        Message msg = fromJson(jsonData, Message.class);
+
+        if (msg == null) {
+            log.warn("Null message within json, probably shouldn't happen");
+            return null;
+        }
+
+
+        String serviceName = msg.getFullName();
+        Class<?> clazz = Runtime.getClass(serviceName);
+
+        //Nullability of clazz is checked with this, if null
+        //falls back to virt class field
+        boolean useVirtClassField = clazz == null;
+        if (!useVirtClassField) {
+            try {
+                msg.data = MethodCache.getInstance().getDecodedJsonParameters(clazz, msg.method, msg.data);
+            } catch (RuntimeException e) {
+                log.info(String.format("MethodCache lookup fail: %s.%s", serviceName, msg.method));
+                // Fallback to virtual class field
+                useVirtClassField = true;
+            }
+        }
+
+        // Not an else since useVirtClassField can be set in the above if block
+        if (useVirtClassField) {
+            for (int i = 0; i < msg.data.length; i++) {
+                if (msg.data[i] instanceof String) {
+                    // GSON ignores custom deserializers when going to Object
+                    if (!USING_GSON) {
+                        msg.data[i] = fromJson((String) msg.data[i], Object.class);
+                    } else {
+                        // Serializable should cover everything of interest
+                        msg.data[i] = fromJson((String) msg.data[i], Serializable.class);
+                    }
+
+                    if (JSON_DEFAULT_OBJECT_TYPE.isAssignableFrom(msg.data[i].getClass())) {
+                        log.warn("Deserialized parameter to default object type. " +
+                                "Possibly missing virtual class field: " +
+                                msg.data[i]);
+                    }
+                } else {
+                    log.error(
+                            "Attempted fallback Message decoding with virtual class field but " +
+                                    "parameter is not String: %s"
+                    );
+                }
+            }
+        }
+
+        return msg;
     }
 
     public static Message gsonToMsg(String gsonData) {
