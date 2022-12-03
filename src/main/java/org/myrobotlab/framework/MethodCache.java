@@ -5,6 +5,8 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -529,26 +531,50 @@ public class MethodCache {
     return methodIndex.remoteOrdinalIndex.get(ordinalKey);
   }
 
-  public Object[] getDecodedJsonParameters(Class<?> clazz, String methodName, Object[] encodedParams) {
+  /**
+   * Decode parameters from a String Json format into the format
+   * specified by the declared method parameter type.
+   *
+   * <p>
+   *     If clazz or encodedParameters are null, then null is returned.
+   *     If methodName is null then NPE is thrown.
+   * </p>
+   *
+   * <p>
+   *     FIXME Change encodedParameters to String[] to enforce type safety
+   * </p>
+   *
+   * @param clazz The class to lookup methods for
+   * @param methodName The name of the method to decode parameters for
+   * @param encodedParams The encoded parameters in JSON format.
+   * @return The decoded parameters according to a matched method, or null
+   *  if no such method could be found.
+   */
+  public @Nullable Object[] getDecodedJsonParameters(Class<?> clazz, @Nonnull String methodName, Object[] encodedParams) {
     if (encodedParams == null) {
       encodedParams = new Object[0];
     }
 
     if (clazz == null) {
       log.error("cannot query method cache for null class");
+
+      // Null was already returned for this case in the following
+      // conditional but relied on getRemoteOrdinalMethods() returning
+      // null for a null class, best to make this explicit
+      return null;
     }
     // get templates
     // List<MethodEntry> possible = getOrdinalMethods(clazz, methodName,
     // encodedParams.length);
     List<MethodEntry> possible = getRemoteOrdinalMethods(clazz, methodName, encodedParams.length);
     if (possible == null) {
-      log.error("getOrdinalMethods -> {}.{} with ordinal {} does not exist", clazz, methodName, encodedParams);
+      log.error("getRemoteOrdinalMethods -> {}.{} with ordinal {} does not exist", clazz, methodName, encodedParams);
       return null;
     }
     Object[] params = new Object[encodedParams.length];
     // iterate through templates - attempt to decode
-    for (int p = 0; p < possible.size(); ++p) {
-      Class<?>[] paramTypes = possible.get(p).getParameterTypes();
+    for (MethodEntry methodEntry : possible) {
+      Class<?>[] paramTypes = methodEntry.getParameterTypes();
       try {
         for (int i = 0; i < encodedParams.length; ++i) {
           if (CodecUtils.JSON_DEFAULT_OBJECT_TYPE.equals(encodedParams[i].getClass())) {
