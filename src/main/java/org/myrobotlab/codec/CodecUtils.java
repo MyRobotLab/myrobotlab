@@ -526,6 +526,7 @@ public class CodecUtils {
         if (!useVirtClassField) {
             try {
                 msg.data = MethodCache.getInstance().getDecodedJsonParameters(clazz, msg.method, msg.data);
+                msg.encoding = null;
             } catch (RuntimeException e) {
                 log.info(String.format("MethodCache lookup fail: %s.%s", serviceName, msg.method));
                 // Fallback to virtual class field
@@ -557,6 +558,7 @@ public class CodecUtils {
                     );
                 }
             }
+            msg.encoding = null;
         }
 
         return msg;
