@@ -686,8 +686,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         }
         msg.setProperty("uuid", uuid);
 
-        Object ret = null; // isn't this required for blocking return?
-
         // check if we will execute it locally
         if (isLocal(msg)) {
           String serviceName = null;
@@ -695,26 +693,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
             log.debug("invoking local msg {}", msg.toString());
 
             serviceName = msg.getFullName();
-//            Class<?> clazz = Runtime.getClass(serviceName);
-//            if (clazz == null) {
-//              log.error("cannot derive local type from service {}", serviceName);
-//
-//              // Return instead of causing NPE further down
-//              return;
-//            }
-//
-//            Method method = cache.getMethod(clazz, msg.method, msg.data);
-//            if (method == null) {
-//              error("method cache could not find %s.%s(%s)", clazz.getSimpleName(), msg.method, msg.data);
-//              return;
-//            }
 
             ServiceInterface si = Runtime.getService(serviceName);
 
-            // now asychronous
-            // ret = method.invoke(si, params);
-
-//            inMsgQueue.add(si, method, msg.data);
             // Just pass to service to deal with, no duplicated code
             // and allows things like sendBlocking() to work correctly
             si.getInbox().add(msg);
