@@ -5,15 +5,13 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.noctordeser.NoCtorDeserModule;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
-import org.myrobotlab.codec.json.GsonPolymorphicTypeAdapterFactory;
-import org.myrobotlab.codec.json.JacksonPolymorphicModule;
-import org.myrobotlab.codec.json.JsonDeserializationException;
-import org.myrobotlab.codec.json.JsonSerializationException;
+import org.myrobotlab.codec.json.*;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.logging.Level;
@@ -32,10 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -189,6 +184,10 @@ public class CodecUtils {
     static {
         //This allows Jackson to work just like GSON when no default constructor is available
         mapper.registerModule(new NoCtorDeserModule());
+
+        SimpleModule proxySerializerModule = new SimpleModule();
+        proxySerializerModule.addSerializer(Proxy.class, new ProxySerializer());
+        mapper.registerModule(proxySerializerModule);
 
         //Actually add our polymorphic support
         mapper.registerModule(JacksonPolymorphicModule.getPolymorphicModule());
