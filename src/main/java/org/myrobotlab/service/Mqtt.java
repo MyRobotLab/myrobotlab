@@ -219,6 +219,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
     }
   }
 
+  @Override
   public void connect(String url) {
     connect(url, null, null, null);
   }
@@ -437,6 +438,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
     return connected;
   }
 
+  @Override
   public boolean isLocal(Message msg) {
     return Runtime.getInstance().isLocal(msg);
   }
@@ -471,7 +473,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
 
       Message msg = null;
       if (topic.startsWith(mrlTopicApiPrefix)) {
-        msg = (Message) CodecUtils.fromJson(payload, Message.class);
+        msg = CodecUtils.fromJson(payload, Message.class);
 
         // I never want to see a msg again which I have sent away !
         if (msg.containsHop(getId())) {
@@ -647,6 +649,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
     // log.info("success - {} ", tokenToString(token));
   }
 
+  @Override
   public boolean preProcessHook(Message m) {
     if (methodSet.contains(m.method)) {
       // process the message like a regular service

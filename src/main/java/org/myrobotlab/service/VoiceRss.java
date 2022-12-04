@@ -97,7 +97,7 @@ public class VoiceRss extends AbstractSpeechSynthesis {
   }
 
   @Override
-  protected void loadVoices() {
+  public void loadVoices() {
     // derived from
     // http://www.voicerss.org/api/documentation.aspx
     addVoice("Lei", "female", "ca-es", "ca-es"); // Catalan

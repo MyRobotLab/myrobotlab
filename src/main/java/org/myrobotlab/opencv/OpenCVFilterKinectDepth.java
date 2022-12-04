@@ -37,6 +37,7 @@ import java.util.List;
 import org.bytedeco.javacpp.indexer.UByteIndexer;
 import org.bytedeco.javacpp.indexer.UByteRawIndexer;
 import org.bytedeco.javacv.Parallel;
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Point;
@@ -129,13 +130,14 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
       // https://github.com/bytedeco/bytedeco.github.io/blob/master/_posts/2014-12-23-third-release.md
 
       if (color == null) {
-        color = IplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3);
+        color = AbstractIplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3);
       }
 
       final UByteRawIndexer depthIdx = (UByteRawIndexer) depth.createIndexer();
       final UByteIndexer colorIdx = color.createIndexer();
 
       Parallel.loop(0, depth.height(), new Parallel.Looper() {
+        @Override
         public void loop(int from, int to, int looperID) {
           for (int i = from; i < to; i++) {
             for (int j = 0; j < depth.width(); j++) {
@@ -179,6 +181,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
     return image;
   }
 
+  @Override
   public void samplePoint(Integer x, Integer y) {
     samplePoints.add(new Point(x, y));
   }

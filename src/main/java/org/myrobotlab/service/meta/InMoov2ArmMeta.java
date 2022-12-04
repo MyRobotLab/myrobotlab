@@ -29,11 +29,10 @@ public class InMoov2ArmMeta extends MetaData {
 
   @Override
   public Plan getDefault(String name) {
-    
+
     Plan plan = new Plan(name);
     // load default peers from meta here
     plan.putPeers(name, peers);
-
 
     InMoov2ArmConfig arm = new InMoov2ArmConfig();
 

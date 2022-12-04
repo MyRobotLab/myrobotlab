@@ -39,6 +39,7 @@ public class Keyboard extends Service {
 
   public class NativeKeyboard implements NativeKeyListener, NativeMouseInputListener, NativeMouseWheelListener {
 
+    @Override
     public void nativeKeyPressed(NativeKeyEvent nativeKeyEvent) {
       int code = nativeKeyEvent.getKeyCode();
       String key = NativeKeyEvent.getKeyText(code);
@@ -47,12 +48,14 @@ public class Keyboard extends Service {
       lastKeyPressed = key;
     }
 
+    @Override
     public void nativeKeyReleased(NativeKeyEvent nativeKeyEvent) {
       int code = nativeKeyEvent.getKeyCode();
       String key = NativeKeyEvent.getKeyText(code);
       invoke("publishKeyReleased", key);
     }
 
+    @Override
     public void nativeKeyTyped(NativeKeyEvent nativeKeyEvent) {
       int code = nativeKeyEvent.getKeyCode();
       String key = NativeKeyEvent.getKeyText(code);
@@ -98,7 +101,7 @@ public class Keyboard extends Service {
 
   public Keyboard(String n, String id) {
     super(n, id);
-    if (Runtime.isHeadless()) {
+    if (Service.isHeadless()) {
       log.warn("the Keyboard service requires a DISPLAY to function correctly");
       keyboard = null;
       mouseEvent = null;
@@ -123,10 +126,11 @@ public class Keyboard extends Service {
     GlobalScreen.unregisterNativeHook();
   }
 
+  @Override
   public void startService() {
     super.startService();
     try {
-      if (Runtime.isHeadless()) {
+      if (Service.isHeadless()) {
         log.warn("the Keyboard service requires a DISPLAY to function correctly - will not register hooks");
       } else {
         startListening();
@@ -136,10 +140,11 @@ public class Keyboard extends Service {
     }
   }
 
+  @Override
   public void stopService() {
     super.stopService();
     try {
-      if (Runtime.isHeadless()) {
+      if (Service.isHeadless()) {
         log.warn("the Keyboard service requires a DISPLAY to function correctly - will not un-register hooks");
       } else {
         stopListening();

@@ -131,6 +131,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     /**
      * build a clean string key from parts
      */
+    @Override
     public String toString() {
 
       StringBuilder sb = new StringBuilder();
@@ -310,6 +311,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * @param keyValue
    *          the value
    */
+  @Override
   public void setKey(String keyName, String keyValue) {
     Security security = Security.getInstance();
     security.setKey(keyName, keyValue);
@@ -393,6 +395,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     }
   }
 
+  @Override
   public void attachTextPublisher(TextPublisher textPublisher) {
     subscribe(textPublisher.getName(), "publishText");
   }
@@ -413,6 +416,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * textual data, in addition it re-broadcasts the events from audiofile which
    * were used with this text to speak, including the sound file info
    */
+  @Override
   public void onAudioStart(AudioData data) {
     log.debug("onAudioStart {} {}", getName(), data.toString());
 
@@ -423,6 +427,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     }
   }
 
+  @Override
   public void onAudioEnd(AudioData data) {
     log.debug("onAudioEnd {} {}", getName(), data.toString());
 
@@ -436,11 +441,13 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   // FIXME - too anthropomorphic should just be more descriptive e.g.
   // addSpeechRecognizer or simply use attach(ear) !!!
+  @Override
   @Deprecated
   public void addEar(SpeechRecognizer ear) {
     attachSpeechRecognizer(ear);
   }
 
+  @Override
   public void attachSpeechRecognizer(SpeechRecognizer recognizer) {
     if (recognizer == null) {
       log.warn("{}.attachSpeechRecognizer(null)", getName());
@@ -473,6 +480,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   // FIXME - is this in the wrong place ? - evaluate
+  @Override
   @Deprecated
   public void onRequestConfirmation(String text) {
     try {
@@ -511,6 +519,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     }
   }
 
+  @Override
   public void startService() {
     super.startService();
     // FIXME - assigning a Peer to a reference is a no no
@@ -521,12 +530,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     if (voices.size() > 0) {
       setReady(true);
     }
-  }
-
-  public void stopService() {
-    super.stopService();
-    unsubscribe(audioFile.getName(), "publishAudioStart");
-    unsubscribe(audioFile.getName(), "publishAudioEnd");
   }
 
   AudioData play(String filename, boolean block) {
@@ -636,10 +639,12 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * or "something" that phonetically works for the current speech synthesis
    * service
    */
+  @Override
   public void replaceWord(String key, String replacement) {
     substitutions.put(key.toLowerCase(), replacement.toLowerCase());
   }
 
+  @Override
   public void replaceWord(WordFilter filter) {
     substitutions.put(filter.word.toLowerCase(), filter.substitute.toLowerCase());
   }
@@ -688,6 +693,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     return audioData;
   }
 
+  @Override
   public List<AudioData> speak(String toSpeak) {
     return parse(toSpeak);
   }
@@ -735,6 +741,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     return audioFile;
   }
 
+  @Override
   public String getlastUtterance() {
     return lastUtterance;
   }
@@ -770,6 +777,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     audioFile.deleteFiles(this.getClass().getSimpleName());
   }
 
+  @Override
   public Voice getVoice() {
     if (voice == null || voices.size() == 0) {
       // if voices aren't loaded - load them...
@@ -855,7 +863,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * no voices. Its the responsibility of the subclass to addVoice("name",
    * "gender", "lang", impl) all the voices it provides
    */
-  abstract protected void loadVoices() throws Exception;
+  public abstract void loadVoices() throws Exception;
 
   public List<Voice> publishVoices(List<Voice> voices) {
     return voices;
@@ -941,6 +949,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     return false;
   }
 
+  @Override
   public boolean setVoice(String name) {
     if (voices == null) {
       return false;
@@ -1072,20 +1081,24 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     return super.isReady();
   }
 
+  @Override
   @Deprecated /* use setMute(b) */
   public void mute() {
     this.mute = true;
   }
 
+  @Override
   @Deprecated /* use setMute(b) */
   public void unmute() {
     this.mute = false;
   }
 
+  @Override
   public void setMute(boolean b) {
     this.mute = b;
   }
 
+  @Override
   public Boolean setBlocking(Boolean b) {
     blocking = b;
     return b;
@@ -1125,7 +1138,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
     return c;
   }
-  
+
   @Override
   public void attachSpeechControl(SpeechSynthesisControl control) {
     // TODO Auto-generated method stub
@@ -1134,11 +1147,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     addListener(control.getName(), "publishSetMute");
     addListener(control.getName(), "publishReplaceWord");
   }
-  
-  
+
   @Override
   public ServiceConfig getConfig() {
-    SpeechSynthesisConfig c = (SpeechSynthesisConfig)config;
+    SpeechSynthesisConfig c = (SpeechSynthesisConfig) config;
     c.mute = mute;
     c.blocking = blocking;
     if (substitutions != null && substitutions.size() > 0) {

@@ -91,8 +91,8 @@
       <!-- end env vars -->
       <!-- echoproperties / -->
       
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
   </properties>
@@ -108,7 +108,7 @@
         <repository>
           <id>myrobotlab</id>
           <name>myrobotlab</name>
-          <url>http://repo.myrobotlab.org/artifactory/myrobotlab</url>
+          <url>https://repo.myrobotlab.org/artifactory/myrobotlab</url>
         </repository>
         <!-- for sarxos webcam  -->
         <repository>
@@ -127,12 +127,6 @@
           <id>oss-snapshots-repo</id>
           <name>oss-snapshots-repo</name>
           <url>https://oss.sonatype.org/content/groups/public</url>
-        </repository>
-        <!-- some marytts voices  -->
-        <repository>
-          <id>marytts</id>
-          <name>marytts</name>
-          <url>http://mary.dfki.de/repo</url>
         </repository>
         <!-- Discord Bot - m2-dv8tion  -->
         <repository>
@@ -177,12 +171,7 @@
 <!-- AzureTranslator end -->
 
 <!-- BodyPart begin -->
-  <dependency>
-    <groupId>org.apache.commons</groupId>
-    <artifactId>commons-lang3</artifactId>
-    <version>3.3.2</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
 <!-- BodyPart end -->
 
 <!-- BoofCv begin -->
@@ -237,31 +226,37 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacpp</artifactId>
-    <version>1.5.6</version>
+    <version>1.5.7</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-core</artifactId>
-    <version>1.0.0-M1.1</version>
+    <version>1.0.0-M2.1</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-zoo</artifactId>
-    <version>1.0.0-M1.1</version>
+    <version>1.0.0-M2.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-nn</artifactId>
-    <version>1.0.0-M1.1</version>
+    <version>1.0.0-M2.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-modelimport</artifactId>
-    <version>1.0.0-M1.1</version>
+    <version>1.0.0-M2.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -274,7 +269,7 @@
   <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-platform</artifactId>
-    <version>1.0.0-M1.1</version>
+    <version>1.0.0-M2.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -350,22 +345,10 @@
 
 <!-- Elasticsearch begin -->
   <dependency>
-    <groupId>com.fasterxml.jackson.dataformat</groupId>
-    <artifactId>jackson-dataformat-yaml</artifactId>
-    <version>2.13.3</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
     <groupId>pl.allegro.tech</groupId>
     <artifactId>embedded-elasticsearch</artifactId>
     <version>2.7.0</version>
     <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.dataformat</groupId>
-          <artifactId>jackson-dataformat-yaml</artifactId>
-        </exclusion>
-      </exclusions>
   </dependency>
 <!-- Elasticsearch end -->
 
@@ -376,6 +359,7 @@
     <version>1.2.0</version>
     <scope>provided</scope>
   </dependency>
+<!-- Duplicate entry for com.github.pnavais-state-machine-1.2.0 skipping -->
 <!-- FiniteStateMachine end -->
 
 <!-- Git begin -->
@@ -397,21 +381,26 @@
 <!-- GoogleCloud end -->
 
 <!-- GoogleSearch begin -->
-  <dependency>
-    <groupId>org.jsoup</groupId>
-    <artifactId>jsoup</artifactId>
-    <version>1.14.2</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for org.jsoup-jsoup-1.15.3 skipping -->
 <!-- GoogleSearch end -->
 
 <!-- HtmlFilter begin -->
-<!-- Duplicate entry for org.jsoup-jsoup-1.14.2 skipping -->
-<!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
+  <dependency>
+    <groupId>org.jsoup</groupId>
+    <artifactId>jsoup</artifactId>
+    <version>1.15.3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-lang3</artifactId>
+    <version>3.3.2</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- HtmlFilter end -->
 
 <!-- HtmlParser begin -->
-<!-- Duplicate entry for org.jsoup-jsoup-1.14.2 skipping -->
+<!-- Duplicate entry for org.jsoup-jsoup-1.15.3 skipping -->
 <!-- HtmlParser end -->
 
 <!-- ImapEmailConnector begin -->
@@ -428,17 +417,11 @@
 <!-- InMoov2 end -->
 
 <!-- IndianTts begin -->
-  <dependency>
-    <groupId>org.myrobotlab.audio</groupId>
-    <artifactId>voice-effects</artifactId>
-    <version>1.0</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
+<!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
 <!-- IndianTts end -->
 
 <!-- IntegratedMovement begin -->
-<!-- skipping fr.inmoov inmoov2 fr.inmoov-inmoov2-null null version/latest -->
+<!-- Duplicate entry for fr.inmoov-inmoov2-null skipping -->
 <!-- IntegratedMovement end -->
 
 <!-- JFugue begin -->
@@ -590,7 +573,13 @@
 <!-- LeapMotion end -->
 
 <!-- LocalSpeech begin -->
-<!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
+  <dependency>
+    <groupId>org.myrobotlab.audio</groupId>
+    <artifactId>voice-effects</artifactId>
+    <version>1.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
 <!-- LocalSpeech end -->
 
 <!-- MarySpeech begin -->
@@ -936,24 +925,9 @@
 <!-- Mqtt end -->
 
 <!-- MqttBroker begin -->
-  <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-core</artifactId>
-    <version>2.13.3</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-databind</artifactId>
-    <version>2.13.3</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-annotations</artifactId>
-    <version>2.13.3</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.13.3 skipping -->
   <dependency>
     <groupId>io.moquette</groupId>
     <artifactId>moquette-broker</artifactId>
@@ -1025,6 +999,10 @@
           <artifactId>slf4j-api</artifactId>
         </exclusion>
         <exclusion>
+          <groupId>org.lwjgl.lwjgl</groupId>
+          <artifactId>lwjgl</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>com.google.guava</groupId>
           <artifactId>guava</artifactId>
         </exclusion>
@@ -1036,16 +1014,11 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv-platform</artifactId>
-    <version>1.5.6</version>
+    <version>1.5.7</version>
     <scope>provided</scope>
   </dependency>
-<!-- Duplicate entry for org.bytedeco-javacpp-1.5.6 skipping -->
-  <dependency>
-    <groupId>com.github.sarxos</groupId>
-    <artifactId>webcam-capture-driver-v4l4j</artifactId>
-    <version>0.3.13-SNAPSHOT</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for org.bytedeco-javacpp-1.5.7 skipping -->
+<!-- Duplicate entry for com.github.sarxos-webcam-capture-driver-v4l4j-0.3.13-SNAPSHOT skipping -->
 <!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
   <dependency>
     <groupId>net.sf.jipcam</groupId>
@@ -1214,12 +1187,7 @@
       </exclusions>
   </dependency>
 <!-- Duplicate entry for org.json-json-20090211 skipping -->
-  <dependency>
-    <groupId>commons-io</groupId>
-    <artifactId>commons-io</artifactId>
-    <version>2.7</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for commons-io-commons-io-2.7 skipping -->
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-analyzers-common</artifactId>
@@ -1233,6 +1201,15 @@
     <scope>provided</scope>
   </dependency>
 <!-- ProgramAB end -->
+
+<!-- Py4j begin -->
+  <dependency>
+    <groupId>net.sf.py4j</groupId>
+    <artifactId>py4j</artifactId>
+    <version>0.10.9.7</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Py4j end -->
 
 <!-- Python begin -->
   <dependency>
@@ -1288,6 +1265,26 @@
     <version>2.8.5</version>
   </dependency>
   <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-core</artifactId>
+    <version>2.14.0</version>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-annotations</artifactId>
+    <version>2.14.0</version>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.14.0</version>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.module</groupId>
+    <artifactId>jackson-module-no-ctor-deser</artifactId>
+    <version>2.14.0</version>
+  </dependency>
+  <dependency>
     <groupId>org.apache.ivy</groupId>
     <artifactId>ivy</artifactId>
     <version>2.5.0</version>
@@ -1310,7 +1307,7 @@
   <dependency>
     <groupId>org.slf4j</groupId>
     <artifactId>slf4j-api</artifactId>
-    <version>1.7.21</version>
+    <version>1.7.36</version>
   </dependency>
   <dependency>
     <groupId>org.yaml</groupId>
@@ -1328,10 +1325,37 @@
   <dependency>
     <groupId>io.github.java-native</groupId>
     <artifactId>jssc</artifactId>
-    <version>2.9.2</version>
+    <version>2.9.4</version>
     <scope>provided</scope>
   </dependency>
 <!-- Serial end -->
+
+<!-- SlackBot begin -->
+  <dependency>
+    <groupId>com.slack.api</groupId>
+    <artifactId>bolt</artifactId>
+    <version>1.24.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.slack.api</groupId>
+    <artifactId>bolt-socket-mode</artifactId>
+    <version>1.24.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>javax.websocket</groupId>
+    <artifactId>javax.websocket-api</artifactId>
+    <version>1.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.glassfish.tyrus.bundles</groupId>
+    <artifactId>tyrus-standalone-client</artifactId>
+    <version>1.19</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- SlackBot end -->
 
 <!-- Solr begin -->
   <dependency>
@@ -1455,7 +1479,18 @@
         </exclusion>
       </exclusions>
   </dependency>
-<!-- Duplicate entry for commons-io-commons-io-2.7 skipping -->
+  <dependency>
+    <groupId>commons-io</groupId>
+    <artifactId>commons-io</artifactId>
+    <version>2.7</version>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
+        </exclusion>
+      </exclusions>
+  </dependency>
 <!-- Solr end -->
 
 <!-- Sphinx begin -->
@@ -1509,13 +1544,13 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract</artifactId>
-    <version>4.1.1-1.5.6</version>
+    <version>5.0.1-1.5.7</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract-platform</artifactId>
-    <version>4.1.1-1.5.6</version>
+    <version>5.0.1-1.5.7</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -1583,16 +1618,16 @@
 <!-- WebGui end -->
 
 <!-- WebSocketConnector begin -->
-  <dependency>
-    <groupId>javax.websocket</groupId>
-    <artifactId>javax.websocket-api</artifactId>
-    <version>1.1</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for javax.websocket-javax.websocket-api-1.1 skipping -->
 <!-- WebSocketConnector end -->
 
 <!-- Webcam begin -->
-<!-- Duplicate entry for com.github.sarxos-webcam-capture-driver-v4l4j-0.3.13-SNAPSHOT skipping -->
+  <dependency>
+    <groupId>com.github.sarxos</groupId>
+    <artifactId>webcam-capture-driver-v4l4j</artifactId>
+    <version>0.3.13-SNAPSHOT</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Webcam end -->
 
 <!-- WebkitSpeechSynthesis begin -->
@@ -1600,16 +1635,16 @@
 <!-- WebkitSpeechSynthesis end -->
 
 <!-- Wii begin -->
+<!-- Duplicate entry for wiiusej-wiiusej-wiiusej skipping -->
+<!-- Wii end -->
+
+<!-- WiiDar begin -->
   <dependency>
     <groupId>wiiusej</groupId>
     <artifactId>wiiusej</artifactId>
     <version>wiiusej</version>
     <scope>provided</scope>
   </dependency>
-<!-- Wii end -->
-
-<!-- WiiDar begin -->
-<!-- Duplicate entry for wiiusej-wiiusej-wiiusej skipping -->
 <!-- WiiDar end -->
 
 <!-- WikiDataFetcher begin -->
@@ -1678,30 +1713,7 @@
   </dependency>
 <!-- Xmpp end -->
 
-  <!-- Slack stuff -->
-  <dependency>
-    <groupId>com.slack.api</groupId>
-    <artifactId>bolt</artifactId>
-    <version>1.24.0</version>
-    </dependency>
-  <dependency>
-    <groupId>com.slack.api</groupId>
-    <artifactId>bolt-socket-mode</artifactId>
-    <version>1.24.0</version>
-    </dependency>
-  <dependency>
-    <groupId>javax.websocket</groupId>
-    <artifactId>javax.websocket-api</artifactId>
-    <version>1.1</version>
-  </dependency>
-  <dependency>
-    <groupId>org.glassfish.tyrus.bundles</groupId>
-    <artifactId>tyrus-standalone-client</artifactId>
-    <version>1.19</version>
-  </dependency>
-
   </dependencies>
-
   
   <build>
     <resources>
@@ -1894,8 +1906,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.3.2</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <source>11</source>
+          <target>11</target>
           <optimize>true</optimize>
           <debug>true</debug>
           <compilerArgument>-parameters</compilerArgument>          

@@ -4,6 +4,10 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * FIXME - this class should become a more generalized AI response data object
+ * in org.myrobotlab.data so that other AI systems (and search engines) can fill
+ * it
+ * 
  * Internal class for the program ab response. TODO - probably should have a
  * generalized data response for all bots to support an interface
  */
@@ -19,7 +23,7 @@ public class Response {
    */
   public String userName;
   /**
-   * text only response
+   * text only response - String is as rich as ProgramAB currently allows
    */
   public String msg;
   /**
@@ -34,6 +38,7 @@ public class Response {
     this.payloads = payloads;
   }
 
+  @Override
   public String toString() {
     StringBuilder str = new StringBuilder();
     str.append("[");

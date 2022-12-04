@@ -14,7 +14,6 @@ import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
-import org.myrobotlab.service.data.AngleData;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
@@ -243,10 +242,10 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
       // angles between 0 - 360 degrees.. not sure what people will really want?
       // - 180 to + 180 ?
       double angle = MathUtils.radToDeg(theta) + l.getOffset();
-      angleMap.put(jointName, (double) angle % 360.0F);
-      invoke("publishJointAngle", new AngleData(jointName, (double) angle % 360.0F));
+      angleMap.put(jointName, angle % 360.0F);
       log.info("Servo : {}  Angle : {}", jointName, angleMap.get(jointName));
     }
+    invoke("publishJointAngles", angleMap);
     // we want to publish the joint positions
     // this way we can render on the web gui..
     double[][] jointPositionMap = createJointPositionMap(name);
@@ -281,6 +280,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     this.arms.put(name, arm);
   }
 
+  @Override
   public void attach(Attachable attachable) {
     if (attachable instanceof IKJointAngleListener) {
       addListener("publishJointAngle", attachable.getName(), "onJointAngle");
@@ -367,7 +367,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   }
 
   @Override
-  public AngleData publishJointAngle(AngleData angleData) {
+  public Map<String, Double> publishJointAngles(Map<String, Double> angleData) {
     return angleData;
   }
 

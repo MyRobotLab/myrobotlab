@@ -46,6 +46,7 @@ public class WatchDogTimer extends Service {
     int sleepIntervalMs = 200;
     private boolean autoDeactivate = false;
 
+    @Override
     public String toString() {
       return CodecUtils.toJson(this);
     }
@@ -150,6 +151,7 @@ public class WatchDogTimer extends Service {
     String checkPointName;
     boolean active = false;
 
+    @Override
     public String toString() {
       return CodecUtils.toJson(this);
     }

@@ -60,7 +60,7 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
 
   transient private CloseableFrameConverter converter1 = new CloseableFrameConverter();
   transient private CloseableFrameConverter converter2 = new CloseableFrameConverter();
-  
+
   public OpenCVFilterAddMask(String name) {
     super(name);
   }
@@ -119,6 +119,7 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
 
       log.debug("cnt {}", ++cnt);
       Parallel.loop(0, rows, new Parallel.Looper() {
+        @Override
         public void loop(int from, int to, int looperID) {
           for (int i = from; i < to; i++) {
             for (int j = 0; j < cols; j++) {

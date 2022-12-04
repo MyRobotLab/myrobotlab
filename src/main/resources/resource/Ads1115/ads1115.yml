@@ -1,0 +1,6 @@
+!!org.myrobotlab.service.config.Ads1115Config
+address: '0x48'
+bus: '1'
+controller: null
+peers: null
+type: Ads1115

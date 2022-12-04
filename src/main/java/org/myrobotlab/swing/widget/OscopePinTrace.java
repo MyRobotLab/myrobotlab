@@ -225,6 +225,7 @@ public class OscopePinTrace extends JPanel implements ActionListener {
     }
   }
 
+  @Override
   public void setVisible(boolean visible) {
     screenDisplay.setVisible(visible);
   }
@@ -351,7 +352,7 @@ public class OscopePinTrace extends JPanel implements ActionListener {
     }
 
     if (newMinOrMax) {
-      pinMapper = new MapperLinear(min, max, 0.0, (double) yMaxDelta);
+      pinMapper = new MapperLinear(min, max, 0.0, yMaxDelta);
     }
 
     avg = ((cnt - 1) * avg + pinData.value) / cnt;

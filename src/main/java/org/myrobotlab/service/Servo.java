@@ -80,6 +80,7 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
    * @param blocking
    * @param timeoutMs
    */
+  @Override
   protected boolean processMove(Double newPos, boolean blocking, Long timeoutMs) {
 
     // This is to allow attaching disabled
@@ -132,7 +133,8 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
       return false;
     }
 
-    // broadcast("publishServoMoveTo", new ServoMove(getName(), newPos, mapper.calcOutput(newPos))); apparently we want input here
+    // broadcast("publishServoMoveTo", new ServoMove(getName(), newPos,
+    // mapper.calcOutput(newPos))); apparently we want input here
     // THIS IS CONSUMED BY ARDUINO CONTROLLER - IT USES ServoMove.outputPos !!!!
     broadcast("publishServoMoveTo", new ServoMove(getName(), newPos, mapper.calcOutput(newPos)));
 
@@ -171,7 +173,8 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
     if (encoder != null && encoder instanceof TimeEncoder) {
       TimeEncoder timeEncoder = (TimeEncoder) encoder;
       // calculate trajectory calculates and processes this move
-      // blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentOutputPos(), getTargetOutput(), getSpeed());
+      // blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentOutputPos(),
+      // getTargetOutput(), getSpeed());
       blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentInputPos(), getTargetPos(), getSpeed());
     }
 
@@ -222,9 +225,19 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
 
     config.controller = this.controller;
 
+    if (syncedServos.size() > 0) {
+      config.synced = new String[syncedServos.size()];
+      int i = 0;
+      for (String s : syncedServos) {
+        config.synced[i] = s;
+        ++i;
+      }
+    }
+
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     ServoConfig config = (ServoConfig) c;
 
@@ -252,6 +265,13 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
     sweepMax = config.sweepMax;
     sweepMin = config.sweepMin;
 
+    if (config.synced != null) {
+      syncedServos.clear();
+      for (String s : config.synced) {
+        syncedServos.add(s);
+      }
+    }
+
     // rest = config.rest;
     if (config.rest != null) {
       rest = config.rest;
@@ -260,7 +280,7 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
       currentInputPos = config.rest;
       broadcast("publishEncoderData", new EncoderData(getName(), pin, config.rest, config.rest));
     }
-    
+
     if (config.controller != null) {
       try {
         attach(config.controller);
@@ -282,22 +302,25 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
 
       // Runtime.start("python", "Python");
       // Runtime runtime = Runtime.getInstance();
-      
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.startService();
-      
-      Servo tilt = (Servo) Runtime.start("tilt", "Servo");
-      Servo pan = (Servo) Runtime.start("pan", "Servo");
 
+      Runtime.start("clock", "Servo");
+      Runtime runtime = Runtime.getInstance();
+      runtime.connect("http://localhost:8888");
 
       boolean done = true;
       if (done) {
         return;
       }
 
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+
+      Servo tilt = (Servo) Runtime.start("tilt", "Servo");
+      Servo pan = (Servo) Runtime.start("pan", "Servo");
+
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-      
+
       tilt.setPin(4);
       pan.setPin(5);
       tilt.setMinMax(10, 100);
@@ -309,7 +332,7 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
       mega.attach(tilt);
       mega.attach(pan);
 
-      //runtime.save();
+      // runtime.save();
 
       /*
        * mega.save(); tilt.save(); pan.save();

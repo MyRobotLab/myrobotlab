@@ -377,7 +377,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
 
     try {
 
-      int[] buffer = new int[] { (int) 0xff, (int) 0xd0 };
+      int[] buffer = new int[] { 0xff, 0xd0 };
       int a = (byte) buffer[0] << 8 | buffer[1] & 0xff;
       log.info("0xffd0 should be -48 is = {}", a);
 
@@ -528,9 +528,9 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     // Integer.decode(deviceAddress), rbuffer, rbuffer.length);
     controller.i2cWriteRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), wbuffer, wbuffer.length, rbuffer, rbuffer.length);
     log.info("Bno055 i2c Read return {}", rbuffer);
-    event.orientation.x = (((int) (rbuffer[0] & 0xFF)) | (((int) (rbuffer[1])) << 8)) / 16.0;
-    event.orientation.y = (((int) (rbuffer[2] & 0xFF)) | (((int) (rbuffer[3])) << 8)) / 16.0;
-    event.orientation.z = (((int) (rbuffer[4] & 0xFF)) | (((int) (rbuffer[5])) << 8)) / 16.0;
+    event.orientation.x = ((rbuffer[0] & 0xFF) | (((rbuffer[1])) << 8)) / 16.0;
+    event.orientation.y = ((rbuffer[2] & 0xFF) | (((rbuffer[3])) << 8)) / 16.0;
+    event.orientation.z = ((rbuffer[4] & 0xFF) | (((rbuffer[5])) << 8)) / 16.0;
     return event;
 
   }
@@ -768,9 +768,9 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     retval.unit = Unit.ACC_M_S2;
     if (unit == Unit.ACC_MG.value) {
       retval.unit = Unit.ACC_MG;
-      retval.x = (double) ((data[0] & 0xFF) + ((data[1]) << 8));
-      retval.y = (double) ((data[2] & 0xFF) + ((data[3]) << 8));
-      retval.z = (double) ((data[4] & 0xFF) + ((data[5]) << 8));
+      retval.x = (data[0] & 0xFF) + ((data[1]) << 8);
+      retval.y = (data[2] & 0xFF) + ((data[3]) << 8);
+      retval.z = (data[4] & 0xFF) + ((data[5]) << 8);
     } else {
       retval.x = (double) ((data[0] & 0xFF) + ((data[1]) << 8)) / 100;
       retval.y = (double) ((data[2] & 0xFF) + ((data[3]) << 8)) / 100;
@@ -798,9 +798,9 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     retval.unit = Unit.ANGULAR_RATE_DPS;
     if (unit == Unit.ANGULAR_RATE_RPS.value) {
       retval.unit = Unit.ANGULAR_RATE_RPS;
-      retval.x = (double) ((data[0] & 0xFF) + ((data[1]) << 8) / 900);
-      retval.y = (double) ((data[2] & 0xFF) + ((data[3]) << 8) / 900);
-      retval.z = (double) ((data[4] & 0xFF) + ((data[5]) << 8) / 900);
+      retval.x = (data[0] & 0xFF) + ((data[1]) << 8) / 900;
+      retval.y = (data[2] & 0xFF) + ((data[3]) << 8) / 900;
+      retval.z = (data[4] & 0xFF) + ((data[5]) << 8) / 900;
     } else {
       retval.x = (double) ((data[0] & 0xFF) + ((data[1]) << 8)) / 16;
       retval.y = (double) ((data[2] & 0xFF) + ((data[3]) << 8)) / 16;
@@ -817,9 +817,9 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     retval.unit = Unit.EULER_ANGLE_DEG;
     if (unit == Unit.EULER_ANGLE_RAD.value) {
       retval.unit = Unit.EULER_ANGLE_RAD;
-      retval.yaw = (double) ((data[0] & 0xFF) + ((data[1]) << 8) / 900);
-      retval.roll = (double) ((data[2] & 0xFF) + ((data[3]) << 8) / 900);
-      retval.pitch = (double) ((data[4] & 0xFF) + ((data[5]) << 8) / 900);
+      retval.yaw = (data[0] & 0xFF) + ((data[1]) << 8) / 900;
+      retval.roll = (data[2] & 0xFF) + ((data[3]) << 8) / 900;
+      retval.pitch = (data[4] & 0xFF) + ((data[5]) << 8) / 900;
     } else {
       retval.yaw = (double) ((data[0] & 0xFF) + ((data[1]) << 8)) / 16;
       retval.roll = (double) ((data[2] & 0xFF) + ((data[3]) << 8)) / 16;
@@ -848,9 +848,9 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     retval.unit = Unit.ACC_M_S2;
     if (unit == Unit.ACC_MG.value) {
       retval.unit = Unit.ACC_MG;
-      retval.x = (double) ((data[0] & 0xFF) + ((data[1]) << 8));
-      retval.y = (double) ((data[2] & 0xFF) + ((data[3]) << 8));
-      retval.z = (double) ((data[4] & 0xFF) + ((data[5]) << 8));
+      retval.x = (data[0] & 0xFF) + ((data[1]) << 8);
+      retval.y = (data[2] & 0xFF) + ((data[3]) << 8);
+      retval.z = (data[4] & 0xFF) + ((data[5]) << 8);
     } else {
       retval.x = (double) ((data[0] & 0xFF) + ((data[1]) << 8)) / 100;
       retval.y = (double) ((data[2] & 0xFF) + ((data[3]) << 8)) / 100;
@@ -867,9 +867,9 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     retval.unit = Unit.ACC_M_S2;
     if (unit == Unit.ACC_MG.value) {
       retval.unit = Unit.ACC_MG;
-      retval.x = (double) ((data[0] & 0xFF) + ((data[1]) << 8));
-      retval.y = (double) ((data[2] & 0xFF) + ((data[3]) << 8));
-      retval.z = (double) ((data[4] & 0xFF) + ((data[5]) << 8));
+      retval.x = (data[0] & 0xFF) + ((data[1]) << 8);
+      retval.y = (data[2] & 0xFF) + ((data[3]) << 8);
+      retval.z = (data[4] & 0xFF) + ((data[5]) << 8);
     } else {
       retval.x = (double) ((data[0] & 0xFF) + ((data[1]) << 8)) / 100;
       retval.y = (double) ((data[2] & 0xFF) + ((data[3]) << 8)) / 100;
@@ -899,9 +899,9 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     retval.unit = Unit.TEMP_C;
     if (unit == Unit.TEMP_F.value) {
       retval.unit = Unit.TEMP_F;
-      retval.temperature = (double) (data * 2);
+      retval.temperature = data * 2;
     } else {
-      retval.temperature = (double) (data);
+      retval.temperature = (data);
     }
     return retval;
   }
@@ -1292,7 +1292,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
           gyr_int_set &= 0b11011011;
         // gyr_int_set |= 0b1000000;
         i2cWrite(register.GYR_INT_SETTING, gyr_int_set);
-        duration = ((int) (duration / 4) - 1) & 0b11;
+        duration = (duration / 4 - 1) & 0b11;
         // duration |= 0b1100;
         i2cWrite(register.GYR_AM_SET, (byte) duration);
         GyroscopeConfig range = getGyrRange();
@@ -1566,7 +1566,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   // This section contains all the new attach logic
   @Override
   public void attach(String service) throws Exception {
-    attach((Attachable) Runtime.getService(service));
+    attach(Runtime.getService(service));
   }
 
   @Override
@@ -1582,6 +1582,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     attach((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
   }
 
+  @Override
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
 
     if (isAttached && this.controller != controller) {
@@ -1599,6 +1600,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     broadcastState();
   }
 
+  @Override
   public void attachI2CController(I2CController controller) {
 
     if (isAttached(controller))
@@ -1620,7 +1622,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   // TODO: This default code could be in Attachable
   @Override
   public void detach(String service) {
-    detach((Attachable) Runtime.getService(service));
+    detach(Runtime.getService(service));
   }
 
   @Override

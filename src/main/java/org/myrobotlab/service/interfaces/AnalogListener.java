@@ -9,7 +9,8 @@ public interface AnalogListener extends NameProvider {
    * Configuration related - set the axis for which AxisPublishers will publish
    * to on this service
    * 
-   * @param name - sets the name of the access for this AnalogListener e.g. "x"
+   * @param name
+   *          - sets the name of the access for this AnalogListener e.g. "x"
    */
   public void setAnalogId(String name);
 
@@ -22,14 +23,16 @@ public interface AnalogListener extends NameProvider {
   /**
    * call back method to accept AxisData
    * 
-   * @param data - the callback analog data
+   * @param data
+   *          - the callback analog data
    */
   public void onAnalog(AnalogData data);
 
   /**
    * Attaches a publisher to this listener
    * 
-   * @param publisher - the publisher to be attached to
+   * @param publisher
+   *          - the publisher to be attached to
    */
   public void attachAnalogPublisher(AnalogPublisher publisher);
 

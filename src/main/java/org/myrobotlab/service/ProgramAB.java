@@ -2,6 +2,8 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,7 @@ import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.Utterance;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.LogPublisher;
+import org.myrobotlab.service.interfaces.ResponsePublisher;
 import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -54,7 +57,8 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class ProgramAB extends Service implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener, UtterancePublisher, UtteranceListener {
+public class ProgramAB extends Service
+    implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener, UtterancePublisher, UtteranceListener, ResponsePublisher {
 
   /**
    * default file name that aiml categories comfing from matching a learnf tag
@@ -63,18 +67,16 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   private static final String LEARNF_AIML_FILE = "learnf.aiml";
 
   private static final long serialVersionUID = 1L;
-  
+
   /**
-   * useGlobalSession true will allow the sleep member to 
-   *  control session focus
+   * useGlobalSession true will allow the sleep member to control session focus
    */
   protected boolean useGlobalSession = false;
-  
+
   /**
-   * sleep 
-   * current state of the sleep if globalSession is used
-   *  true : ProgramAB is sleeping and wont respond
-   *  false : ProgramAB is not sleeping and any response requested will be processed
+   * sleep current state of the sleep if globalSession is used true : ProgramAB
+   * is sleeping and wont respond false : ProgramAB is not sleeping and any
+   * response requested will be processed
    */
   protected boolean sleep = false;
 
@@ -314,6 +316,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     // attempt to create it
     if (session == null) {
       session = startSession(userName, botName);
+      if (session == null) {
+        error("username or bot name not valid %s %s", userName, botName);
+        return null;
+      }
     }
 
     // update the current session if we want to change which bot is at
@@ -549,6 +555,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * @return the response
    * 
    */
+  @Override
   public Response publishResponse(Response response) {
     return response;
   }
@@ -966,7 +973,15 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     return names;
   }
 
+  // FIXME - should be String name - and inside should querry
+  // type NOT by instanceof but by Runtime.getType(name)
+  @Override
   public void attach(Attachable attachable) {
+
+    /*
+     * if (attachable instanceof ResponseListener) { // this one is done
+     * correctly attachResponseListener(attachable.getName()); } else
+     */
     if (attachable instanceof TextPublisher) {
       attachTextPublisher((TextPublisher) attachable);
     } else if (attachable instanceof TextListener) {
@@ -1141,12 +1156,18 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     config.utteranceListeners = listeners.toArray(new String[listeners.size()]);
 
     for (BotInfo bot : bots.values()) {
-      config.bots.add(bot.path.getPath());
+
+      Path pathAbsolute = Paths.get(bot.path.getAbsolutePath());
+      Path pathBase = Paths.get(System.getProperty("user.dir"));
+      Path pathRelative = pathBase.relativize(pathAbsolute);
+      config.bots.add(pathRelative.toString());
+
     }
 
     return config;
   }
 
+  @Override
   public ServiceConfig apply(ServiceConfig c) {
     ProgramABConfig config = (ProgramABConfig) c;
 
@@ -1164,11 +1185,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     if (config.currentUserName != null) {
       setCurrentUserName(config.currentUserName);
     }
-    
+
     // useGlobalSession = config.useGlobalSession;
 
     sleep = config.sleep;
-    
+
     setCurrentSession(currentUserName, currentBotName);
 
     // This is "good" in that its using the normalized data from subscription
@@ -1203,6 +1224,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
        */
 
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
+      Runtime.start("bot", "DiscordBot");
+      Runtime.start("python", "Python");
       // Polly polly = (Polly) Runtime.start("polly", "Polly");
 
       // brain.attach("polly");
@@ -1318,14 +1341,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       error(e);
     }
   }
-  
+
   /**
    * wakes the global session up
    */
   public void wake() {
     sleep = false;
   }
-  
+
   /**
    * sleeps the global session
    */
@@ -1355,7 +1378,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       log.info("Don't talk to myself.");
       return;
     }
-    
 
     boolean shouldIRespond = false;
     // always respond to direct messages.

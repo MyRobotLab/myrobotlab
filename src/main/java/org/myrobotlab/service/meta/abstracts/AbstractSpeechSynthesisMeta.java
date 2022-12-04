@@ -12,7 +12,5 @@ public abstract class AbstractSpeechSynthesisMeta extends MetaData {
     addCategory("speech");
     addDependency("org.myrobotlab.audio", "voice-effects", "1.0", "zip");
   }
-  
-
 
 }

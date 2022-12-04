@@ -143,8 +143,8 @@ public abstract class Repo {
       // "the big kahuna"));
       // remotes.add(new RemoteRepo("bintray2", "https://dl.bintray.com", "more
       // big kahuna"));
-      remotes.add(new RemoteRepo("myrobotlab", "http://repo.myrobotlab.org/artifactory/myrobotlab", "all other mrl deps"));
-      remotes.add(new RemoteRepo("sarxos", "http://oss.sonatype.org/content/repositories/snapshots", "for sarxos webcam"));
+      remotes.add(new RemoteRepo("myrobotlab", "https://repo.myrobotlab.org/artifactory/myrobotlab", "all other mrl deps"));
+      remotes.add(new RemoteRepo("sarxos", "https://oss.sonatype.org/content/repositories/snapshots", "for sarxos webcam"));
 
       // DO NOT INCLUDE - messed up repo !
       // remotes.add(new RemoteRepo("dcm4che", "http://www.dcm4che.org/maven2",
@@ -160,17 +160,24 @@ public abstract class Repo {
       // remotes.add(new RemoteRepo("alfresco",
       // "https://artifacts.alfresco.com/nexus/content/repositories/public",
       // "swinggui mxgraph"));
-      // remotes.add(new RemoteRepo("talend", "https://nexus.talanlabs.com/content/repositories/releases/", "swinggui mxgraph"));
+      // remotes.add(new RemoteRepo("talend",
+      // "https://nexus.talanlabs.com/content/repositories/releases/", "swinggui
+      // mxgraph"));
 
-      remotes.add(new RemoteRepo("marytts", "http://mary.dfki.de/repo", "some marytts voices"));
+      // probably safe to drop this one - maven central should have it
+      // remotes.add(new RemoteRepo("marytts", "http://mary.dfki.de/repo", "some
+      // marytts voices"));
 
       // This one is needed because of a transient dependency of solr
       // org.restlet.jee .. not sure where
-      // remotes.add(new RemoteRepo("maven-restlet", "https://maven.restlet.talend.com", "Public online Restlet repository"));
+      // remotes.add(new RemoteRepo("maven-restlet",
+      // "https://maven.restlet.talend.com", "Public online Restlet
+      // repository"));
 
-      // This is the repo for the Java Discord API for the Discord Bot service lives.
+      // This is the repo for the Java Discord API for the Discord Bot service
+      // lives.
       remotes.add(new RemoteRepo("dv8tion", "https://m2.dv8tion.net/releases", "Discord Bot - m2-dv8tion"));
-      
+
       load();
     } catch (Exception e) {
       log.error(e.getMessage(), e);
@@ -509,7 +516,7 @@ public abstract class Repo {
   }
 
   public void removeStatusPublishers() {
-    installStatusPublishers.clear();   
+    installStatusPublishers.clear();
   }
 
 }

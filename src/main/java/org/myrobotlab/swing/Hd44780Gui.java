@@ -116,16 +116,12 @@ public class Hd44780Gui extends ServiceGui implements ActionListener {
         }
         StringBuilder str = new StringBuilder();
         /*
-        for (int i = 1; i < 5; i++) {
-          if (lcd.screenContent.get(i) != null) {
-            str.append(lcd.screenContent.get(i)).append("\n");
-          } else {
-            str.append("\n");
-          }
-        }
-        
-        screenContent.setText(str.toString());
-        */
+         * for (int i = 1; i < 5; i++) { if (lcd.screenContent.get(i) != null) {
+         * str.append(lcd.screenContent.get(i)).append("\n"); } else {
+         * str.append("\n"); } }
+         * 
+         * screenContent.setText(str.toString());
+         */
         if (lcd.getBackLight() == true) {
           on.setSelected(true);
         } else {

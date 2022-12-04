@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -14,9 +15,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 public class Blender extends Service {
 
@@ -32,9 +30,6 @@ public class Blender extends Service {
    * @author GroG
    *
    */
-
-  // MAKE NOTE - must NOT pretty print !!! \n will break messages
-  private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
 
   public class ControlHandler extends Thread {
     Socket socket;
@@ -59,7 +54,7 @@ public class Blender extends Service {
           // JSONObject json = new JSONObject(in.readLine());
           String json = in.readLine();
           log.info("{}", json);
-          Message msg = gson.fromJson(json, Message.class);
+          Message msg = CodecUtils.fromJson(json, Message.class);
           log.info("msg {}", msg);
           invoke(msg);
 
@@ -258,7 +253,7 @@ public class Blender extends Service {
         // NOT PRETTY PRINT - delimiter is \n PRETY PRINT WILL BREAK IT !!!
         // Should be able to request a "new" named thread safe encoder !!
         // Adding newline for message delimeter
-        String json = String.format("%s\n", gson.toJson(msg));
+        String json = String.format("%s\n", CodecUtils.toJson(msg));
         info("sending %s", json);
         out.write(json.getBytes());
       } catch (Exception e) {
@@ -293,7 +288,6 @@ public class Blender extends Service {
 
       String vLeftPort = "vleft";
       String vRightPort = "vright";
-
 
     } catch (Exception e) {
       Logging.logError(e);

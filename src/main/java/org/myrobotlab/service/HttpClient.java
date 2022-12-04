@@ -57,6 +57,7 @@ import org.myrobotlab.net.InstallCert;
 import org.myrobotlab.service.data.HttpData;
 import org.myrobotlab.service.interfaces.HttpDataListener;
 import org.myrobotlab.service.interfaces.HttpResponseListener;
+import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
 /**
@@ -72,7 +73,7 @@ import org.slf4j.Logger;
  *         - Proxies proxies proxies ! -
  *         https://memorynotfound.com/configure-http-proxy-settings-java/
  */
-public class HttpClient extends Service {
+public class HttpClient extends Service implements TextPublisher {
 
   public final static Logger log = LoggerFactory.getLogger(HttpClient.class);
 
@@ -84,6 +85,7 @@ public class HttpClient extends Service {
     super(n, id);
   }
 
+  @Override
   public void attach(Attachable service) {
     // determine type
     if (HttpDataListener.class.isAssignableFrom(service.getClass())) {
@@ -102,12 +104,12 @@ public class HttpClient extends Service {
     addListener("publishHttpResponse", service.getName());
   }
 
-  @Deprecated /* use attach(HttpDataListener) */
+  @Deprecated /* use attachHttpDataListener(HttpDataListener) */
   public void addHttpDataListener(HttpDataListener listener) {
     attachHttpDataListener(listener);
   }
 
-  @Deprecated /* used attach(HttpResponseListener) */
+  @Deprecated /* used attachHttpResponseListener(HttpResponseListener) */
   public void addHttpResponseListener(HttpResponseListener listener) {
     attachHttpResponseListener(listener);
   }
@@ -302,9 +304,12 @@ public class HttpClient extends Service {
    * 
    */
   public HttpData processResponse(HttpUriRequest request) throws IOException {
-    HttpData data = new HttpData(request.getURI().toString());
+    String url = request.getURI().toString();
+    HttpData data = new HttpData(url);
 
-    log.info("url [{}]", request.getURI());
+    invoke("publishUrl", url);
+
+    log.info("url [{}]", url);
 
     HttpResponse response = client.execute(request);
     StatusLine statusLine = response.getStatusLine();
@@ -322,7 +327,9 @@ public class HttpClient extends Service {
     // publishing
     invoke("publishHttpData", data);
     if (data.data != null) {
-      invoke("publishHttpResponse", new String(data.data));
+      String text = new String(data.data);
+      invoke("publishHttpResponse", text);
+      invoke("publishText", text);
     }
 
     return data;
@@ -366,6 +373,7 @@ public class HttpClient extends Service {
     return data;
   }
 
+  @Override
   public void startService() {
     super.startService();
     if (client == null) {
@@ -380,6 +388,27 @@ public class HttpClient extends Service {
     } catch (Exception e) {
       error(e);
     }
+  }
+
+  @Override
+  public String publishText(String text) {
+    return text;
+  }
+
+  public String postForm(String url, String... fields) throws ClientProtocolException, IOException {
+    if (fields == null || fields.length % 2 != 0) {
+      log.error("postForm fields must be in the form \"key1\", \"value1\", \"key2\", \"value2\"");
+      return null;
+    }
+    Map<String, String> data = new HashMap<>();
+    for (int i = 0; i < fields.length; i = i + 2) {
+      data.put(fields[i], fields[i + 1]);
+    }
+    return postForm(url, data);
+  }
+
+  public String publishUrl(String url) {
+    return url;
   }
 
   public static void main(String[] args) {
@@ -434,19 +463,6 @@ public class HttpClient extends Service {
     } catch (Exception e) {
       log.error("main threw", e);
     }
-
-  }
-
-  public String postForm(String url, String... fields) throws ClientProtocolException, IOException {
-    if (fields == null || fields.length % 2 != 0) {
-      log.error("postForm fields must be in the form \"key1\", \"value1\", \"key2\", \"value2\"");
-      return null;
-    }
-    Map<String, String> data = new HashMap<>();
-    for (int i = 0; i < fields.length; i = i + 2) {
-      data.put(fields[i], fields[i + 1]);
-    }
-    return postForm(url, data);
   }
 
 }

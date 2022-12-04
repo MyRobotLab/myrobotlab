@@ -4,8 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -121,19 +122,70 @@ public class MavenWrapper extends Repo implements Serializable {
 
   public void createPom(String location, String[] serviceTypes) throws IOException {
 
-    Map<String, String> snr = new HashMap<String, String>();
+    Map<String, String> snr = new HashMap<>();
 
     StringBuilder deps = new StringBuilder();
 
     ServiceData sd = ServiceData.getLocalInstance();
 
+    // A map from dependency keys to lists of all dependencies matching
+    // those keys. Used to store all duplicate dependencies and check for
+    // which ones should be given priority
+    Map<String, List<ServiceDependency>> allDependencies = new HashMap<>();
+
+    // A map from service type names to their metadata
+    Map<String, MetaData> serviceMetaData = new HashMap<>();
+
+    // Fills serviceMetaData
+    Arrays.stream(serviceTypes).forEach(service -> serviceMetaData.put(service, ServiceData.getMetaData(service)));
+
+    // A big long stream, hang on
+    serviceMetaData.values().stream()
+
+        // First, we convert all the metadata into lists of dependencies
+        .map(MetaData::getDependencies)
+
+        // We flatten the list, so now we have a single stream of all
+        // dependencies, including duplicates
+        .flatMap(List::stream)
+
+        // Now we loop over each dependency in the stream,
+        // aka all dependencies of all services including duplicates
+        .forEach(serviceDependency -> {
+
+          // If we haven't seen this dependency before, add it to our known
+          // dependencies
+          if (!allDependencies.containsKey(serviceDependency.getKey()))
+            allDependencies.put(serviceDependency.getKey(), new ArrayList<>(List.of(serviceDependency)));
+          else {
+            // We have seen it, so loop over all dependencies with matching keys
+            allDependencies.get(serviceDependency.getKey()).forEach(existingDependency -> {
+
+              // Check priority, if this dependency is higher priority than
+              // existing,
+              // skip existing. Otherwise, skip this one. This is the meat
+              // of the stream, we're modifying the dependencies held in
+              // serviceMetaData
+              // so the write phase accesses the modified data
+              if (serviceDependency.getIncludeInOneJar() && !existingDependency.getIncludeInOneJar())
+                existingDependency.setSkipped(true);
+              else
+                serviceDependency.setSkipped(true);
+            });
+            // Add the dependency to the known dependencies
+            allDependencies.get(serviceDependency.getKey()).add(serviceDependency);
+
+          }
+        });
+
     snr.put("{{repositories}}", getRepositories());
 
     deps.append("<dependencies>\n\n");
 
-    Set<String> listedDeps = new HashSet<String>();
     for (String serviceType : serviceTypes) {
-      MetaData service = ServiceData.getMetaData(serviceType);
+      // Get from our map because ServiceData.getMetaData()
+      // can create new objects, bypassing our previous fix
+      MetaData service = serviceMetaData.get(serviceType);
 
       // FIXME - getUnFufilledDependencies ???
       List<ServiceDependency> dependencies = service.getDependencies();
@@ -146,16 +198,15 @@ public class MavenWrapper extends Repo implements Serializable {
       dep.append(String.format("<!-- %s begin -->\n", service.getSimpleName()));
       for (ServiceDependency dependency : dependencies) {
         String depKey = dependency.getOrgId() + "-" + dependency.getArtifactId() + "-" + dependency.getVersion();
-        if (listedDeps.contains(depKey)) {
-          dep.append("<!-- Duplicate entry for " + depKey + " skipping -->\n");
+        if (dependency.isSkipped()) {
+          dep.append("<!-- Duplicate entry for ").append(depKey).append(" skipping -->\n");
           continue;
         }
         if (dependency.getVersion() == null) {
-          dep.append("<!-- skipping " + dependency.getOrgId() + " " + dependency.getArtifactId() + " " + depKey + " null version/latest -->\n");
+          dep.append("<!-- skipping ").append(dependency.getOrgId()).append(" ").append(dependency.getArtifactId()).append(" ").append(depKey).append(" null version/latest -->\n");
           continue;
         }
 
-        listedDeps.add(depKey);
         dep.append("  <dependency>\n");
         dep.append(String.format("    <groupId>%s</groupId>\n", dependency.getOrgId()));
         dep.append(String.format("    <artifactId>%s</artifactId>\n", dependency.getArtifactId()));
@@ -170,7 +221,7 @@ public class MavenWrapper extends Repo implements Serializable {
         List<ServiceExclude> excludes = dependency.getExcludes();
 
         // exclusions begin ---
-        if (excludes != null & excludes.size() > 0) {
+        if (excludes != null && excludes.size() > 0) {
           StringBuilder ex = new StringBuilder();
           ex.append("      <exclusions>\n");
           for (ServiceExclude exclude : excludes) {
@@ -209,10 +260,11 @@ public class MavenWrapper extends Repo implements Serializable {
 
   /**
    * (non-Javadoc)
-   * 
+   *
    * @see org.myrobotlab.framework.repo.Repo#createBuildFiles(java.lang.String,
    *      java.lang.String[])
    */
+  @Override
   public void createBuildFiles(String location, String[] serviceTypes) {
     try {
 

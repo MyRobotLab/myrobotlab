@@ -117,6 +117,7 @@ public class CodecOutputStream extends OutputStream implements Serializable {
     }
   }
 
+  @Override
   public void close() {
     try {
       if (out != null) {

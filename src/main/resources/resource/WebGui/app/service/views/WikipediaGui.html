@@ -19,7 +19,7 @@
                 </span><br/>
                  <span ng-repeat="src in rowContent.images track by $index" >
                  <div ngsf-fullscreen>
-                    <img id='target' class="fullscreen" ng-src="{{src}}" />
+                    <img id='target' class="fullscreen" ng-src="{{src.src}}" />
                     <button ngsf-toggle-fullscreen>Toggle fullscreen</button>
                     </div>
                 </span>

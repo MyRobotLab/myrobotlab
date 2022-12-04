@@ -13,25 +13,24 @@ import org.slf4j.Logger;
  *
  */
 public class ClassUtil {
-  
-  public final static Logger log = LoggerFactory.getLogger(ClassUtil.class);
 
+  public final static Logger log = LoggerFactory.getLogger(ClassUtil.class);
 
   private static void crawlInterfaceAncestry(Set<String> ret, Class<?> o, Set<String> filteredInterfaces) {
 
     if (o == null) {
       return;
     }
-    
+
     if (o.isInterface()) {
       // ret.add(o.getCanonicalName());
       if (filteredInterfaces != null && filteredInterfaces.contains(o.getCanonicalName())) {
         // filter it out
       } else {
         ret.add(o.getCanonicalName());
-      }      
+      }
     }
-    
+
     Class<?>[] inter = o.getInterfaces();
     if (inter != null) {
       for (Class<?> i : inter) {

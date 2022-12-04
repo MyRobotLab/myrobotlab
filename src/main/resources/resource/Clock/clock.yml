@@ -1,0 +1,5 @@
+!!org.myrobotlab.service.config.ClockConfig
+interval: 1000
+peers: null
+running: false
+type: Clock

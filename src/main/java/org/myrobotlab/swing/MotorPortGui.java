@@ -208,6 +208,7 @@ public class MotorPortGui extends ServiceGui implements ActionListener, ChangeLi
     unsubscribe("publishChangePos");
   }
 
+  @Override
   public void onRegistered(ServiceInterface si) {
     log.info("new service {}", si);
   }
@@ -232,7 +233,7 @@ public class MotorPortGui extends ServiceGui implements ActionListener, ChangeLi
     portList.setSelectedItem(motor.getPort());
 
     if (motor.isAttached()) {
-      MotorController mc = (MotorController) motor.getController();
+      MotorController mc = motor.getController();
       controllerList.setSelectedItem(mc.getName());
       attachButton.setText(detach);
       controllerList.setEnabled(false);

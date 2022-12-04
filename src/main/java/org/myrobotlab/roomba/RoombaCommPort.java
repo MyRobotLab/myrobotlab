@@ -92,7 +92,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
    * to use it.
    */
   public static boolean isPortInUse(String pname) {
-    Boolean inuse = (Boolean) ports.get(pname);
+    Boolean inuse = ports.get(pname);
     if (inuse != null) {
       return inuse.booleanValue();
     }
@@ -123,6 +123,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
     computeSafetyFault();
   }
 
+  @Override
   public boolean connect(String portid) {
     logmsg("connecting to port '" + portid + "'");
     portname = portid;

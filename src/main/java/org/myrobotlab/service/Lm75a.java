@@ -125,7 +125,7 @@ public class Lm75a extends Service implements I2CControl {
     // readbuffer[1]));
     // The temperature is signed so the MSB can have sign bits, that needs
     // to remain
-    int rawTemp = (int) (readbuffer[0]) << 8 | (int) (readbuffer[1] & 0xff);
+    int rawTemp = (readbuffer[0]) << 8 | readbuffer[1] & 0xff;
     temperature = (double) rawTemp / 256;
     broadcastState();
     return temperature;
@@ -139,7 +139,7 @@ public class Lm75a extends Service implements I2CControl {
     // log.info(String.format("getConf 0x%02X", readbuffer[0]));
     // The temperature is signed so the MSB can have sign bits, that needs
     // to remain
-    int config = (int) (readbuffer[0] & 0xff);
+    int config = readbuffer[0] & 0xff;
     return config;
   }
 
@@ -152,7 +152,7 @@ public class Lm75a extends Service implements I2CControl {
     // readbuffer[1]));
     // The temperature is signed so the MSB can have sign bits, that needs
     // to remain
-    int rawTos = (int) (readbuffer[0]) << 8 | (int) (readbuffer[1] & 0xff);
+    int rawTos = (readbuffer[0]) << 8 | readbuffer[1] & 0xff;
     double tos = rawTos / 256;
     return tos;
   }
@@ -171,7 +171,7 @@ public class Lm75a extends Service implements I2CControl {
     // readbuffer[1]));
     // The temperature is signed so the MSB can have sign bits, that needs
     // to remain
-    int rawThyst = (int) (readbuffer[0]) << 8 | (int) (readbuffer[1] & 0xff);
+    int rawThyst = (readbuffer[0]) << 8 | readbuffer[1] & 0xff;
     double thyst = rawThyst / 256;
     return thyst;
   }
@@ -194,7 +194,7 @@ public class Lm75a extends Service implements I2CControl {
   // This section contains all the new attach logic
   @Override
   public void attach(String service) throws Exception {
-    attach((Attachable) Runtime.getService(service));
+    attach(Runtime.getService(service));
   }
 
   @Override
@@ -210,6 +210,7 @@ public class Lm75a extends Service implements I2CControl {
     attach((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
   }
 
+  @Override
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
 
     if (isAttached && this.controller != controller) {
@@ -227,6 +228,7 @@ public class Lm75a extends Service implements I2CControl {
     broadcastState();
   }
 
+  @Override
   public void attachI2CController(I2CController controller) {
 
     if (isAttached(controller))
@@ -248,7 +250,7 @@ public class Lm75a extends Service implements I2CControl {
   // TODO: This default code could be in Attachable
   @Override
   public void detach(String service) {
-    detach((Attachable) Runtime.getService(service));
+    detach(Runtime.getService(service));
   }
 
   @Override

@@ -17,6 +17,7 @@ public class PoseSequence {
   public PoseSequence() {
   }
 
+  @Override
   public String toString() {
     if (waitTimeMs == null) {
       return name;

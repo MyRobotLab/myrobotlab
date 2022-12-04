@@ -85,6 +85,7 @@ public class FiniteStateMachineException extends Exception {
    * 
    * @return the root cause of the exception
    */
+  @Override
   public Throwable getCause() {
     return cause;
   }

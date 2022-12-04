@@ -117,6 +117,7 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
     this.state = state;
   }
 
+  @Override
   public Document publishDocument(Document doc) {
     return doc;
   }
@@ -125,12 +126,14 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
     return batch;
   }
 
+  @Override
   public void addDocumentListener(DocumentListener listener) {
     addListener("publishDocument", listener.getName(), "onDocument");
     addListener("publishDocuments", listener.getName(), "onDocuments");
     addListener("publishFlush", listener.getName(), "onFlush");
   }
 
+  @Override
   public ConnectorState getConnectorState() {
     return state;
   }

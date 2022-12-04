@@ -160,8 +160,8 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
   /**
    * These are the methods that a speech listener should subscribe to.
    */
-  public static String[] publishSpeechListenerMethods = new String[] {"publishStartSpeaking", "publishEndSpeaking"};
-  
+  public static String[] publishSpeechListenerMethods = new String[] { "publishStartSpeaking", "publishEndSpeaking" };
+
   /**
    * Attach a speech listener which gets on started/stopped speaking callbacks.
    * 
@@ -174,7 +174,8 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
   }
 
   /**
-   * Detach a speech listener that will remove the listeners for the speech listener methods.
+   * Detach a speech listener that will remove the listeners for the speech
+   * listener methods.
    * 
    * @param name
    */
@@ -184,11 +185,12 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
     }
   }
 
-  // All services implement this. 
+  // All services implement this.
   public void addListener(String topicMethod, String callbackName);
-  // All services implement this. 
+
+  // All services implement this.
   public void removeListener(String topicMethod, String callbackName);
-  
+
   /**
    * replace one word with another - instead of "biscuit" say "cookie"
    * 

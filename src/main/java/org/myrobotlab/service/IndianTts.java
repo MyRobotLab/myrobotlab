@@ -33,6 +33,7 @@ public class IndianTts extends AbstractSpeechSynthesis {
     super(n, id);
   }
 
+  @Override
   public void startService() {
     super.startService();
     httpClient = (HttpClient) startPeer("httpClient");
@@ -93,7 +94,7 @@ public class IndianTts extends AbstractSpeechSynthesis {
   }
 
   @Override
-  protected void loadVoices() {
+  public void loadVoices() {
     addVoice("Sri", "female", "hi", null);
   }
 

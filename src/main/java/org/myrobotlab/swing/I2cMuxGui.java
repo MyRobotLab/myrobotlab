@@ -151,7 +151,7 @@ public class I2cMuxGui extends ServiceGui implements ActionListener {
     DefaultTableModel model = (DefaultTableModel) deviceJtable.getModel();
     model.setRowCount(0);
     for (Map.Entry<String, I2CDeviceMap> entry : devices.entrySet()) {
-      I2CDeviceMap device = (I2CDeviceMap) entry.getValue();
+      I2CDeviceMap device = entry.getValue();
       String columns[] = { device.serviceName, device.busAddress, device.deviceAddress };
       model.addRow(columns);
     }

@@ -23,6 +23,7 @@ public class Interpolator {
     public int direction;
     public String axis;
 
+    @Override
     public String toString() {
       return String.format("%s %s %.2f %.2f %d", name, method, newPos, speed, startTs);
     }

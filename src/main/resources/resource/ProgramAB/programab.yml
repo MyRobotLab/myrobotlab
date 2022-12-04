@@ -1,0 +1,16 @@
+!!org.myrobotlab.service.config.ProgramABConfig
+botDir: null
+bots: [
+  ]
+currentBotName: Alice
+currentUserName: null
+peers:
+  search:
+    autoStart: true
+    name: programab.search
+    type: Wikipedia
+sleep: false
+textFilters: null
+textListeners: null
+type: ProgramAB
+utteranceListeners: null

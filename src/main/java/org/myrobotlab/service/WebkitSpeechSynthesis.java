@@ -85,6 +85,7 @@ public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis {
     addVoice(name, null, lang, null);
   }
 
+  @Override
   public boolean setVoice(String name) {
     if (voices.containsKey(name)) {
       voice = voices.get(name);
@@ -106,7 +107,7 @@ public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis {
    * https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis/getVoices
    */
   @Override
-  protected void loadVoices() throws Exception {
+  public void loadVoices() throws Exception {
     // done in the webbrowser - this method is a NOOP
 
   }

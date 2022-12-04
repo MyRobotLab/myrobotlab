@@ -1,0 +1,15 @@
+!!org.myrobotlab.service.config.PingdarConfig
+peers:
+  controller:
+    autoStart: true
+    name: pingdar.controller
+    type: Arduino
+  servo:
+    autoStart: true
+    name: pingdar.servo
+    type: Servo
+  ultrasonic:
+    autoStart: true
+    name: pingdar.ultrasonic
+    type: UltrasonicSensor
+type: Pingdar

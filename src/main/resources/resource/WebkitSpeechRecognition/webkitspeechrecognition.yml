@@ -1,0 +1,7 @@
+!!org.myrobotlab.service.config.WebkitSpeechRecognitionConfig
+listening: false
+peers: null
+recording: false
+textListeners: null
+type: WebkitSpeechRecognition
+wakeWord: null

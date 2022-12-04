@@ -20,6 +20,18 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
 
   private boolean installed = false;
 
+  /**
+   * Whether this dependency should be packaged in the final jar, instead of
+   * being fetched on-demand at runtime.
+   */
+  private boolean includeInOneJar = false;
+
+  /**
+   * Whether this dependency should be skipped. This should only be set by a
+   * {@link Repo} when it detects duplicate dependencies
+   */
+  private boolean skipped = false;
+
   private List<ServiceExclude> excludes = new ArrayList<ServiceExclude>();
   private List<ServiceArtifact> artifacts = new ArrayList<ServiceArtifact>();
 
@@ -70,6 +82,11 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
     this.ext = ext;
   }
 
+  public ServiceDependency(String groubId, String artifactId, String version, String ext, boolean includeInOneJar) {
+    this(groubId, artifactId, version, ext);
+    this.includeInOneJar = includeInOneJar;
+  }
+
   @Override
   public int compare(ServiceDependency o1, ServiceDependency o2) {
     return o1.getKey().compareTo(o2.getKey());
@@ -89,6 +106,18 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
 
   public String getExt() {
     return ext;
+  }
+
+  public boolean getIncludeInOneJar() {
+    return includeInOneJar;
+  }
+
+  public boolean isSkipped() {
+    return skipped;
+  }
+
+  public void setSkipped(boolean skipped) {
+    this.skipped = skipped;
   }
 
   public boolean isInstalled() {

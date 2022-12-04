@@ -17,6 +17,7 @@ public class TrackingPoint {
     p1 = new Point(x1, y1);
   }
 
+  @Override
   public String toString() {
     return String.format("%s %s->%s found %s error %.2f", id, p0, p1, found, error);
   }

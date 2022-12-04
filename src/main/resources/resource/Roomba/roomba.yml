@@ -1,0 +1,7 @@
+!!org.myrobotlab.service.config.RoombaConfig
+peers:
+  serial:
+    autoStart: true
+    name: roomba.serial
+    type: Serial
+type: Roomba

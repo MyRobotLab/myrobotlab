@@ -16,9 +16,10 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 /**
- * This is the ImageFileFrameGrabber.  It can be used as a source of images to the OpenCV service.
- * This grabber will load all of the image files from a specified directory and iterate thought them.
- * The resulting images are converted in to JavaCV Frames.  
+ * This is the ImageFileFrameGrabber. It can be used as a source of images to
+ * the OpenCV service. This grabber will load all of the image files from a
+ * specified directory and iterate thought them. The resulting images are
+ * converted in to JavaCV Frames.
  * 
  */
 public class ImageFileFrameGrabber extends FrameGrabber {
@@ -29,11 +30,10 @@ public class ImageFileFrameGrabber extends FrameGrabber {
   private transient Mat image;
   public String path;
   CloseableFrameConverter converter = new CloseableFrameConverter();
-  
+
   // supported formats for imread
   // https://docs.opencv.org/4.5.3/d4/da8/group__imgcodecs.html#ga288b8b3da0892bd651fce07b3bbd3a56
-  private transient HashSet<String> validFormats = new HashSet<String>(
-      Arrays.asList("bmp","jpg", "jpeg", "jpe", "jp2" ,"png", "tiff", "tif", "hdr", "pic"));
+  private transient HashSet<String> validFormats = new HashSet<String>(Arrays.asList("bmp", "jpg", "jpeg", "jpe", "jp2", "png", "tiff", "tif", "hdr", "pic"));
 
   public ImageFileFrameGrabber(String path) {
     this.path = path;
@@ -52,7 +52,8 @@ public class ImageFileFrameGrabber extends FrameGrabber {
       File[] listOfFiles = target.listFiles();
       for (File file : listOfFiles) {
         if (file.isFile()) {
-          // if the file extension is one of the supported ones, let's assume it's actually an image.
+          // if the file extension is one of the supported ones, let's assume
+          // it's actually an image.
           String ext = FilenameUtils.getExtension(file.getName()).toLowerCase();
           if (validFormats.contains(ext)) {
             // It's an image file! (in theory)

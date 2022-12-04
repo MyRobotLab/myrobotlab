@@ -76,8 +76,8 @@ public class Outbox implements Runnable, Serializable {
   public Map<String, List<MRLListener>> notifyList = new HashMap<String, List<MRLListener>>();
 
   List<MessageListener> listeners = new ArrayList<MessageListener>();
-  
-  private boolean autoClean = true;
+
+  private boolean autoClean = false;
 
   public boolean isAutoClean() {
     return autoClean;
@@ -298,6 +298,9 @@ public class Outbox implements Runnable, Serializable {
             sender.removeListener(msg.sendingMethod, msg.getName(), msg.method);
           }
           return;
+        } else if (sw == null) {
+          log.info("could not find service {} to process {} from sender {}", msg.getName(), msg.method, msg.sender);
+          return;
         }
 
         // if service is local - give it to that service's inbox
@@ -307,7 +310,7 @@ public class Outbox implements Runnable, Serializable {
         }
       } else {
         // get gateway
-        Gateway gateway = (Gateway) Runtime.getInstance().getGatway(msg.getId());
+        Gateway gateway = Runtime.getInstance().getGatway(msg.getId());
         if (gateway == null) {
           // log.error("gateway not found for msg.id {} {}", msg.getId(), msg);
           return;

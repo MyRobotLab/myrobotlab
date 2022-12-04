@@ -19,7 +19,7 @@ public class SolrMeta extends MetaData {
     String solrVersion = "8.11.2";
     String luceneVersion = solrVersion;
     addDependency("org.apache.lucene", "lucene-core", luceneVersion);
-    addDependency("org.apache.solr", "solr-core", solrVersion);    
+    addDependency("org.apache.solr", "solr-core", solrVersion);
     exclude("log4j", "log4j");
     exclude("org.apache.logging.log4j", "log4j-core");
     exclude("org.apache.logging.log4j", "log4j-web");
@@ -29,8 +29,7 @@ public class SolrMeta extends MetaData {
     exclude("com.fasterxml.jackson.core", "jackson-core");
     exclude("com.fasterxml.jackson.core", "jackson-databind");
     exclude("com.fasterxml.jackson.core", "jackson-annotations");
-    
-    
+
     addDependency("org.apache.solr", "solr-test-framework", solrVersion);
     exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
     exclude("log4j", "log4j");
@@ -44,11 +43,9 @@ public class SolrMeta extends MetaData {
     exclude("com.fasterxml.jackson.core", "jackson-databind");
     exclude("com.fasterxml.jackson.core", "jackson-annotations");
 
-
     addDependency("com.fasterxml.jackson.core", "jackson-core", "2.13.3");
     addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.13.3");
     addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.13.3");
-
 
     addDependency("org.apache.solr", "solr-solrj", solrVersion);
 
@@ -56,9 +53,7 @@ public class SolrMeta extends MetaData {
     exclude("com.fasterxml.jackson.core", "jackson-databind");
     exclude("com.fasterxml.jackson.core", "jackson-annotations");
 
-
     addDependency("commons-io", "commons-io", "2.7");
-
 
     // TODO: update this with the latest schema!
     // addDependency("mrl-solr", "mrl-solr-data", "1.0", "zip");

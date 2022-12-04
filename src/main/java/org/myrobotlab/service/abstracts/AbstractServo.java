@@ -19,7 +19,6 @@ import org.myrobotlab.service.data.AngleData;
 import org.myrobotlab.service.data.ServoMove;
 import org.myrobotlab.service.data.ServoSpeed;
 import org.myrobotlab.service.interfaces.EncoderControl;
-import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoControlPublisher;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -54,7 +53,7 @@ import org.slf4j.Logger;
  *         vs status of angles
  *
  */
-public abstract class AbstractServo extends Service implements ServoControl, ServoControlPublisher, ServoStatusPublisher, EncoderPublisher, IKJointAnglePublisher {
+public abstract class AbstractServo extends Service implements ServoControl, ServoControlPublisher, ServoStatusPublisher, EncoderPublisher {
 
   public final static Logger log = LoggerFactory.getLogger(AbstractServo.class);
 
@@ -265,6 +264,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   /**
    * overloaded routing attach
    */
+  @Override
   public void attach(Attachable service) throws Exception {
     if (ServoController.class.isAssignableFrom(service.getClass())) {
       attach((ServoController) service, null, null, null);
@@ -297,6 +297,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     broadcastState();
   }
 
+  @Override
   public void attach(ServoController sc) {
     attach(sc, null, null, null);
   }
@@ -315,6 +316,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     attachServoController(sc.getName(), pin, pos, speed);
   }
 
+  @Override
   public void attach(String sc) throws Exception {
     attachServoController(sc, null, null, null);
   }
@@ -330,10 +332,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   }
 
   @Deprecated
-  @Override /*
-             * Servos Do Not publish Joint Angles - they only publish their
-             * position !
-             */
+  /*
+   * Servos Do Not publish Joint Angles - they only publish their position !
+   */
   public AngleData publishJointAngle(AngleData angle) {
     log.debug("{}.publishJointAngle({})", getName(), angle);
     return angle;
@@ -357,6 +358,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * complexity service should use NAME not a direct reference to
    * ServoController !!!!
    */
+  @Override
   public void attachServoController(String sc, Integer pin, Double pos, Double speed) {
     if (controller != null && controller.equals(sc)) {
       log.info("{} already attached", sc);
@@ -406,6 +408,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   /**
    * disables and detaches from all controllers
    */
+  @Override
   public void detach() {
     detach(controller);
   }
@@ -415,11 +418,13 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     detach(service.getName());
   }
 
+  @Override
   public void detach(ServoController sc) {
     detach(sc.getName());
   }
 
   // AbstractServo -
+  @Override
   public void detach(String controllerName) {
     if (controller == null) {
       log.info("already detached");
@@ -473,6 +478,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // broadcastState();
   }
 
+  @Override
   @Deprecated /* use setMaxSpeed */
   public void fullSpeed() {
     setSpeed((Double) null);
@@ -558,10 +564,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     return speed;
   }
 
+  @Override
   public boolean isAttached(Attachable attachable) {
     return controller != null && controller.equals(attachable.getName());
   }
 
+  @Override
   public boolean isAttached(String name) {
     return controller != null && controller.equals(name);
   }
@@ -607,7 +615,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   public static double microsecondsToDegree(double microseconds) {
     if (microseconds <= 180)
       return microseconds;
-    return (double) (microseconds - 544) * 180 / (2400 - 544);
+    return (microseconds - 544) * 180 / (2400 - 544);
   }
 
   @Override
@@ -724,6 +732,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   /**
    * moveTo requests are published through this publishing point
    */
+  @Override
   public ServoControl publishMoveTo(ServoControl sc) {
     log.debug("{}.publishMoveTo()", getName());
     return sc;
@@ -790,6 +799,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   /**
    * will disable then detach this servo from all controllers
    */
+  @Override
   public void releaseService() {
 
     if (encoder != null) {
@@ -990,11 +1000,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     if (sc == null) {
       log.error("{}.sync(null)", getName());
     }
-    if (sc.equals(this)) {
-      error("you cannot set a servo synced to itself");
-      return;
-    }
-    syncedServos.add(sc.getName());
+    sync(sc.getName());
   }
 
   @Deprecated /* Use fullSpeed() instead. */
@@ -1003,11 +1009,31 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   }
 
   @Override
+  public void unsync(String name) {
+    if (name == null) {
+      log.error("{}.unsync(null)", getName());
+    }
+    syncedServos.remove(name);
+  }
+
+  @Override
+  public void sync(String name) {
+    if (name == null) {
+      log.error("{}.sync(null)", getName());
+    }
+    if (getName().equals(name)) {
+      error("you cannot set a servo synced to itself");
+      return;
+    }
+    syncedServos.add(name);
+  }
+
+  @Override
   public void unsync(ServoControl sc) {
     if (sc == null) {
       log.error("{}.unsync(null)", getName());
     }
-    syncedServos.remove(sc.getName());
+    unsync(sc.getName());
   }
 
   @Override
@@ -1019,6 +1045,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // }
   }
 
+  @Override
   public void writeMicroseconds(int uS) {
     broadcast("publishServoWriteMicroseconds", this, uS);
   }
@@ -1089,6 +1116,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     return new ServoEvent(name, position);
   }
 
+  @Override
   public void startService() {
     super.startService();
     Runtime.getInstance().attachServiceLifeCycleListener(getName());

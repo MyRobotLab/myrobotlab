@@ -151,6 +151,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
   /**
    * default cache file type for Mary
    */
+  @Override
   public String getAudioCacheExtension() {
     return ".wav";
   }
@@ -174,7 +175,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
   }
 
   @Override
-  protected void loadVoices() throws MalformedURLException, IOException, SAXException {
+  public void loadVoices() throws MalformedURLException, IOException, SAXException {
     getMaryTts();
     // It is great that we can query to get voices - but regrettably they are
     // lacking a lot of useful meta-data
@@ -220,6 +221,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     // addVoice("Prudence", "female", "en-GB", "dfki-prudence-hsmm");
   }
 
+  @Override
   public String setAudioEffects(String audioEffects) {
     marytts.setAudioEffects(audioEffects);
     return audioEffects;
