@@ -1294,31 +1294,19 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // Runtime.main(new String[] { "--id", "w1", "--from-launcher",
       // "--log-level", "WARN", "-c", "yml-css-01" });
 
-      Runtime runtime = Runtime.getInstance();
-      // save full plan off
-      // runtime.saveDefault("worky", "WorkE", true); // FIXME - overwrite
-      // filesystem flag
-      // Runtime.startConfig("start");
-      // Runtime.startConfig("i01-09");
-      Runtime.startConfig("i01-10");
-      // runtime.saveDefault("i01", "InMoov2", true);
-      // Runtime.setConfig("i01");
-
-      // Runtime.start("worky", "WorkE");
-      //
-      Runtime.start("python", "Python");
-      // // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
-      
-      // runtime.saveDefault("leftArm", "InMoov2Arm");
-      // runtime.saveAllDefaults();
-
-      
+      /// Runtime.main(new String[] { "--id", "w1", "--from-launcher", "--log-level", "WARN", "-c", "test-01" });
+      // Runtime.start("python", "Python");
+      // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
       webgui.setPort(8888);
       webgui.startService();
-      
+
+      Runtime.start("python", "Python");
+      Runtime.start("intro", "Intro");
+      Runtime.start("i01", "InMoov2");
+
       boolean done = true;
       if (done) {
         return;

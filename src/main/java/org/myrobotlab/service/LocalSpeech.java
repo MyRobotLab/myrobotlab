@@ -185,7 +185,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * implementation of a voice
    */
   @Override
-  protected void loadVoices() {
+  public void loadVoices() {
 
     if (voices.size() > 0) {
       log.info("already loaded voices");

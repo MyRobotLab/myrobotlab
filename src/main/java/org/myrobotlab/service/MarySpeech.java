@@ -175,7 +175,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
   }
 
   @Override
-  protected void loadVoices() throws MalformedURLException, IOException, SAXException {
+  public void loadVoices() throws MalformedURLException, IOException, SAXException {
     getMaryTts();
     // It is great that we can query to get voices - but regrettably they are
     // lacking a lot of useful meta-data
