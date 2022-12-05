@@ -44,7 +44,9 @@ public class FiniteStateMachine extends Service {
 
   protected State last = null;
 
-  protected State current;
+  protected State current = null;
+
+  protected String lastEvent = null;
 
   protected Set<String> messageListeners = new HashSet<>();
 
@@ -143,23 +145,28 @@ public class FiniteStateMachine extends Service {
   /**
    * fires a message type
    * 
-   * @param msg
+   * @param event
    */
-  public void fire(String msg) {
+  public void fire(String event) {
     try {
 
       last = stateMachine.getCurrent();
-      stateMachine.send(msg);
+      stateMachine.send(event);
       current = stateMachine.getCurrent();
 
-      log.info("fired event ({}) -> ({}) moves to ({})", msg, last == null ? null : last.getName(), current == null ? null : current.getName());
+      log.info("fired event ({}) -> ({}) moves to ({})", event, last == null ? null : last.getName(), current == null ? null : current.getName());
 
       if (last != null && !last.equals(current)) {
-        invoke("publishNewState", current.getName());
+        invoke("publishChangedState", current.getName());
       }
     } catch (Exception e) {
       log.error("fire threw", e);
     }
+  }
+
+  public String firedEvent(String event) {
+    lastEvent = event;
+    return event;
   }
 
   /**
@@ -197,9 +204,9 @@ public class FiniteStateMachine extends Service {
    * @param state
    * @return
    */
-  public String publishNewState(String state) {
-    log.info("publishNewState {}", state);
-    for (String listener: messageListeners) {
+  public String publishChangedState(String state) {
+    log.info("publishChangedState {}", state);
+    for (String listener : messageListeners) {
       ServiceInterface service = Runtime.getService(listener);
       if (service != null) {
         org.myrobotlab.framework.Message msg = org.myrobotlab.framework.Message.createMessage(getName(), listener, CodecUtils.getCallbackTopicName(state), null);
@@ -211,7 +218,7 @@ public class FiniteStateMachine extends Service {
 
   @Override
   public ServiceConfig getConfig() {
-    FiniteStateMachineConfig c = (FiniteStateMachineConfig) config;
+    FiniteStateMachineConfig c = (FiniteStateMachineConfig) super.getConfig();
     c.current = getCurrent();
     c.messageListeners = new ArrayList<>();
     c.messageListeners.addAll(messageListeners);
@@ -219,9 +226,8 @@ public class FiniteStateMachine extends Service {
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    super.apply(c);
-    FiniteStateMachineConfig config = (FiniteStateMachineConfig) c;
+  public ServiceConfig apply(ServiceConfig c) {    
+    FiniteStateMachineConfig config = (FiniteStateMachineConfig)super.apply(c);
 
     if (config.transitions != null) {
 
@@ -245,11 +251,11 @@ public class FiniteStateMachine extends Service {
 
     return c;
   }
-  
+
   public void attach(String name) {
     attachMessageListener(name);
   }
-  
+
   public void attach(MessageListener listener) {
     attachMessageListener(listener.getName());
   }
@@ -265,7 +271,14 @@ public class FiniteStateMachine extends Service {
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init(Level.INFO);
+      LoggingFactory.init(Level.WARN);
+      
+      Runtime.startConfig("sub-04");
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
 
       // WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // // webgui.setSsl(true);
@@ -276,13 +289,19 @@ public class FiniteStateMachine extends Service {
       // Runtime.setConfig("fsm-test-01");
       // Runtime.startConfig("dewey-2");
 
-      Runtime.startConfig("worky");
+      // Runtime.startConfig("worky");
 
       // YAMLImporter.builder().build().parseFile("docker-machine.yml");
 
       FiniteStateMachine fsm = (FiniteStateMachine) Runtime.start("i01.fsm", "FiniteStateMachine");
       // Runtime.start("servo", "Servo");
-      Runtime.start("webgui", "WebGui");
+      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+      
+      Runtime.start("python", "Python");
+      
+      
 
       // TODO - need properties for each state ?
 
@@ -304,11 +323,9 @@ public class FiniteStateMachine extends Service {
       fsm.addTransition("tracking", "idle", "idle");
 
       fsm.setCurrent("start");
+      
+      Runtime.start("i01", "InMoov2");
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       // fsm.createFsm("emotional-state");
 
@@ -361,7 +378,7 @@ public class FiniteStateMachine extends Service {
       stateMachine.setCurrent(state);
       current = stateMachine.getCurrent();
       if (last != null && !last.equals(current)) {
-        invoke("publishNewState", current.getName());
+        invoke("publishChangedState", current.getName());
       }
     } catch (Exception e) {
       log.error("setCurrent threw", e);

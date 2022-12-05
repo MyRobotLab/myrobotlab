@@ -780,7 +780,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
   @Override
   public ServiceConfig getConfig() {
 
-    NeoPixelConfig config = new NeoPixelConfig();
+    NeoPixelConfig config = (NeoPixelConfig)super.getConfig();
+    // FIXME - remove local fields in favor of config
     config.pin = pin;
     config.pixelCount = pixelCount;
     config.pixelDepth = pixelDepth;
@@ -797,7 +798,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    NeoPixelConfig config = (NeoPixelConfig) c;
+    NeoPixelConfig config = (NeoPixelConfig) super.apply(c);
+    // FIXME - remove local fields in favor of config
     setPixelDepth(config.pixelDepth);
 
     if (config.pixelCount != null) {

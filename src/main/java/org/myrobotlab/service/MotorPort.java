@@ -33,16 +33,16 @@ public class MotorPort extends AbstractMotor {
 
   @Override
   public ServiceConfig getConfig() {
-    // FIXME - may need to do call super.config for config that has parent :(
-    MotorPortConfig config = new MotorPortConfig();
+    MotorPortConfig config = (MotorPortConfig)super.getConfig();
+    // FIXME - remove local field use config only
     config.port = port;
     return config;
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    super.apply(c);
-    MotorPortConfig config = (MotorPortConfig) c;
+  public ServiceConfig apply(ServiceConfig c) {    
+    // FIXME - remove local field use config only
+    MotorPortConfig config = (MotorPortConfig)super.apply(c);
     setPort(config.port);
     return c;
   }

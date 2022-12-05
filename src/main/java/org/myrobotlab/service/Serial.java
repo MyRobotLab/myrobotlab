@@ -1295,14 +1295,15 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
   @Override
   public ServiceConfig getConfig() {
-    SerialConfig config = new SerialConfig();
+    SerialConfig config = (SerialConfig) super.getConfig();
+    // FIXME remove fields and use config only
     config.port = lastPortName;
     return config;
   }
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    SerialConfig config = (SerialConfig) c;
+    SerialConfig config = (SerialConfig) super.apply(c);
 
     if (config.port != null) {
       try {

@@ -2312,7 +2312,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   @Override
   public ServiceConfig getConfig() {
-    ArduinoConfig c = (ArduinoConfig) config;
+    ArduinoConfig c = (ArduinoConfig) super.getConfig();
     
     // FIXME "port" shouldn't exist only config.port !
     c.port = port;
@@ -2323,7 +2323,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    ArduinoConfig arduinoConfig = (ArduinoConfig) c;
+    ArduinoConfig arduinoConfig = (ArduinoConfig) super.apply(c);
 
     if (isRunning() && arduinoConfig.connect) {
       connect(arduinoConfig.port);

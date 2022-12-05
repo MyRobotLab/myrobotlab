@@ -656,7 +656,7 @@ public class Hd44780 extends Service {
    */
   @Override
   public ServiceConfig getConfig() {
-    Hd44780Config config = new Hd44780Config();
+    Hd44780Config config = (Hd44780Config)super.getConfig();
     if (pcfName != null) {
       config.controller = pcfName;
     }
@@ -669,7 +669,7 @@ public class Hd44780 extends Service {
    */
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    Hd44780Config config = (Hd44780Config) c;
+    Hd44780Config config = (Hd44780Config) super.apply(c);
 
     if (config.controller != null) {
       try {

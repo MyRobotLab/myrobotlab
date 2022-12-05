@@ -1110,7 +1110,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    SpeechSynthesisConfig config = (SpeechSynthesisConfig) c;
+    SpeechSynthesisConfig config = (SpeechSynthesisConfig) super.apply(c);
 
     setMute(config.mute);
 
@@ -1150,7 +1150,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   @Override
   public ServiceConfig getConfig() {
-    SpeechSynthesisConfig c = (SpeechSynthesisConfig) config;
+    SpeechSynthesisConfig c = (SpeechSynthesisConfig) super.getConfig();
     c.mute = mute;
     c.blocking = blocking;
     if (substitutions != null && substitutions.size() > 0) {

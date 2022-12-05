@@ -67,17 +67,6 @@ public class GoogleSearch extends Service implements ImagePublisher, TextPublish
     // setLowerCase();
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig config) {
-    c = (GoogleSearchConfig) config;
-    return c;
-  }
-
-  @Override
-  public ServiceConfig getConfig() {
-    return config;
-  }
-
   public void setLowerCase() {
     c.lowerCase = true;
   }

@@ -660,7 +660,8 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
 
   @Override
   public ServiceConfig getConfig() {
-    MqttBrokerConfig c = new MqttBrokerConfig();
+    MqttBrokerConfig c = (MqttBrokerConfig)super.getConfig();
+    // FIXME - remove local fields in favor of just config
     c.address = address;
     c.mqttPort = mqttPort;
     c.wsPort = wsPort;
@@ -671,7 +672,8 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    MqttBrokerConfig config = (MqttBrokerConfig) c;
+    MqttBrokerConfig config = (MqttBrokerConfig) super.apply(c);
+    // FIXME - remove local fields in favor of just config
     address = config.address;
     mqttPort = config.mqttPort;
     wsPort = config.wsPort;

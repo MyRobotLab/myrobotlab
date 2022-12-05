@@ -215,37 +215,6 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    WikipediaConfig config = (WikipediaConfig) this.config;
-
-    Set<String> imagePublishers = getOutbox().getAttached("publishImage");
-    if (imagePublishers != null) {
-      config.imagePublishers = new String[imagePublishers.size()];
-      int i = 0;
-      for (String publisher : imagePublishers) {
-        config.imagePublishers[i] = publisher;
-        ++i;
-      }
-    }
-
-    return config;
-  }
-
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    super.apply(c);
-    WikipediaConfig config = (WikipediaConfig) c;
-
-    if (config.imagePublishers != null) {
-      for (String publisher : config.imagePublishers) {
-        attachImageListener(publisher);
-      }
-    }
-
-    return config;
-  }
-
-  @Override
   public void attach(String serviceName) throws Exception {
     ServiceInterface si = Runtime.getService(serviceName);
 

@@ -454,7 +454,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    GeneralMotorConfig config = (GeneralMotorConfig) c;
+    GeneralMotorConfig config = (GeneralMotorConfig) super.apply(c);
 
     if (config.minIn != null) {
       mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);

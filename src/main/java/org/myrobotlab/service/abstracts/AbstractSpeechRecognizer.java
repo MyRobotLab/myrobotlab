@@ -583,7 +583,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   @Override
   public ServiceConfig getConfig() {
-    SpeechRecognizerConfig c = (SpeechRecognizerConfig) config;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig) super.getConfig();
     c.listening = isListening();
     c.wakeWord = getWakeWord();
     Set<String> listeners = getAttached("publishText");
@@ -592,9 +592,8 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    super.apply(c);
-    SpeechRecognizerConfig config = (SpeechRecognizerConfig)c;
+  public ServiceConfig apply(ServiceConfig c) {    
+    SpeechRecognizerConfig config = (SpeechRecognizerConfig)super.apply(c);;
     setWakeWord(config.wakeWord);
     if (config.listening) {
       startListening();

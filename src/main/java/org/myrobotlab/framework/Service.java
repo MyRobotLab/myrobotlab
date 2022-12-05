@@ -56,7 +56,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Broadcaster;
-import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.image.Util;
@@ -65,6 +64,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServiceConfig.Listener;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.QueueReporter;
@@ -1348,13 +1348,20 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
      * We clone/serialize here because we don't want to use the same reference of of config in the
      * plan.  If configuration is applied through the plan, "or from anywhere else" we make a
      * copy of it here. And the copy is applied to the actual service. This keeps the plan
-     * safe to modify without the worry of modifying a running service config. 
+     * safe to modify without the worry of modifying a running service config.
      * </pre>
      */
-    
+
     String yaml = CodecUtils.toYaml(inConfig);
     ServiceConfig copyOfConfig = CodecUtils.fromYaml(yaml, inConfig.getClass());
     
+    // TODO - handle subscriptions / listeners
+    if (config.listeners != null) {
+      for (Listener listener: config.listeners) {
+        addListener(listener.method, listener.listener, listener.callback);
+      }
+    }
+
     this.config = copyOfConfig;
     return config;
   }
@@ -1365,6 +1372,28 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public ServiceConfig getConfig() {
+    boolean filterWeb = true;
+    if (getName().equals("i01.htmlFilter")) {
+      log.info("hre");
+    }
+    Map<String, List<MRLListener>> listeners = getOutbox().notifyList;
+    List<Listener> newListeners = new ArrayList<>();
+
+    if (filterWeb) {
+      for (String method : listeners.keySet()) {
+        List<MRLListener> list = listeners.get(method);
+        for (MRLListener listener : list)
+          if (!listener.callbackName.endsWith("@webgui-client")) {
+
+            Listener newConfigListener = new Listener(listener.topicMethod, listener.callbackName, listener.callbackMethod);
+            newListeners.add(newConfigListener);
+          }
+      }
+    }
+
+    if (newListeners.size() > 0) {
+      config.listeners = newListeners;
+    }
     return config;
   }
 
@@ -1540,7 +1569,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public boolean save() {
     Runtime runtime = Runtime.getInstance();
-    // save all services ... weird notation - should have explicit saveAllServices
+    // save all services ... weird notation - should have explicit
+    // saveAllServices
     return runtime.saveService(null, null, null);
   }
 
@@ -2638,51 +2668,51 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // applying config to self
     apply(sc);
   }
-  
+
   // FIXME - test
   public void updatePeerName(String key, String fullName) {
     Peer peer = config.getPeer(key);
     String oldName = peer.name;
     peer.name = fullName;
     ServiceConfig.getDefault(Runtime.getPlan(), peer.name, peer.type);
-//    Runtime runtime = Runtime.getInstance();
-//    String configPath = runtime.getConfigPath();
+    // Runtime runtime = Runtime.getInstance();
+    // String configPath = runtime.getConfigPath();
     // seems a bit invasive - but yml file overrides everything
     // if one exists we need to replace it with the new peer type
-//    if (configPath != null) {
-//      String configFile = configPath + fs + peer.name + ".yml";
-//      File staleFile = new File(configFile);
-//      if (staleFile.exists()) {
-//        log.info("removing old config file {}", configFile);
-//        staleFile.delete();
-//        // save new default in its place
-//        runtime.saveDefault(configPath, peer.name, peer.type, false);
-//      }
-//    }
+    // if (configPath != null) {
+    // String configFile = configPath + fs + peer.name + ".yml";
+    // File staleFile = new File(configFile);
+    // if (staleFile.exists()) {
+    // log.info("removing old config file {}", configFile);
+    // staleFile.delete();
+    // // save new default in its place
+    // runtime.saveDefault(configPath, peer.name, peer.type, false);
+    // }
+    // }
     info("updated %s name to %s", oldName, peer.name);
   }
-  
 
   public void updatePeerType(String key, String peerType) {
-    
-    // MAKE NOTE ! - CONFIG IS DIFFERENT THAN PLAN !!!!  MODIFY BOTH ???!?
-    
+
+    // MAKE NOTE ! - CONFIG IS DIFFERENT THAN PLAN !!!! MODIFY BOTH ???!?
+
     // get current plan
     Plan plan = Runtime.getPlan();
-    
+
     // get self
     ServiceConfig sc = plan.get(getName());
     if (sc != null) {
       sc.putPeerType(key, String.format("%s.%s", getName(), key), peerType);
     }
-        
-    Peer peer = config.getPeer(key);    
+
+    Peer peer = config.getPeer(key);
     peer.type = peerType;
-    
+
     // not Needed
-    // config.putPeerType(key, String.format("%s.%s", key, getName()), peerType);
+    // config.putPeerType(key, String.format("%s.%s", key, getName()),
+    // peerType);
     plan.remove(peer.name);
-    // FIXME - rename putDefault 
+    // FIXME - rename putDefault
     ServiceConfig.getDefault(Runtime.getPlan(), peer.name, peerType);
     Runtime runtime = Runtime.getInstance();
     String configPath = runtime.getConfigPath();
@@ -2701,5 +2731,4 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     info("updated %s to type %s", peer.name, peerType);
   }
 
-  
 }

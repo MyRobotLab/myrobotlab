@@ -4514,45 +4514,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * get current config of runtime
-   */
-  @Override
-  public ServiceConfig getConfig() {
-
-    // FIXME - data Normalization problem
-    // What is my "config" for ? - at the end of createServicesFromPlan update
-    // config from Plan ?
-    RuntimeConfig cCheck = (RuntimeConfig) config; // vs
-    RuntimeConfig c = (RuntimeConfig) getPlan().get("runtime");
-
-    // is this necessary ??
-//    Map<String, ServiceInterface> services = getLocalServices();
-//    List<ServiceInterface> s = new ArrayList<>();
-//    for (ServiceInterface si : services.values()) {
-//      s.add(si);
-//    }
-//
-//    // sort in creation order
-//    Collections.sort(s);
-    // BAD !
-    /*
-    c.registry = new ArrayList<>();
-
-    for (int i = 0; i < s.size(); ++i) {
-      c.add(s.get(i).getName());
-    }
-
-    if (getLocale() != null) {
-      c.locale = getLocale().getTag();
-    }
-    */
-    
-    // DO ALL SERVICES NEED TO BE SAVED AND THE PLAN ???
-
-    return config;
-  }
-
-  /**
    * Load a single service entry into the plan through yml or default. This
    * method is responsible for resolving the Type and ServiceConfig for a single
    * service. Since some service Types are composites and require Peers, it can
@@ -4701,7 +4662,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    RuntimeConfig config = (RuntimeConfig) c;
+    RuntimeConfig config = (RuntimeConfig) super.apply(c);
     setLocale(config.locale);
     info("setting locale to %s", config.locale);
     if (config.virtual != null) {
@@ -4775,12 +4736,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @return
    */
   static public boolean saveConfig(String configName) {
+    Runtime runtime = Runtime.getInstance();
     if (configName == null) {
-      Runtime.getInstance().error("saveConfig require a name cannot be null");
+      runtime.error("saveConfig require a name cannot be null");
       return false;
     }
     setConfig(configName);
-    return Runtime.getInstance().saveService(null, null, null);
+    boolean ret = runtime.saveService(null, null, null);
+    runtime.broadcastState();
+    return ret;
   }
 
   /**

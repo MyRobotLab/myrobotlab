@@ -11,8 +11,8 @@ public class ProgramABConfig extends ServiceConfig {
   public String currentBotName = "Alice";
   public String currentUserName;
   public String[] textFilters;
-  public String[] textListeners;
-  public String[] utteranceListeners;
+//  public String[] textListeners;
+//  public String[] utteranceListeners;
   public String botDir;
   public List<String> bots = new ArrayList<>();
   

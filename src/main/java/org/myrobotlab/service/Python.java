@@ -912,14 +912,10 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
 
   }
 
-  @Override
-  public ServiceConfig getConfig() {
-    return config;
-  }
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    PythonConfig config = (PythonConfig) c;
+    PythonConfig config = (PythonConfig) super.apply(c);
     if (config.startScripts != null && config.startScripts.size() > 0) {
 
       if (isRunning()) {

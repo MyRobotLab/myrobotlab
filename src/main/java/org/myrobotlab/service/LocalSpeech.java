@@ -431,19 +431,13 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    LocalSpeechConfig config = (LocalSpeechConfig) c;
+    LocalSpeechConfig config = (LocalSpeechConfig)super.apply(c);
     if (config.speechType != null) {
       setType(config.speechType);
     }
     return c;
   }
 
-  @Override
-  public ServiceConfig getConfig() {
-    LocalSpeechConfig config = new LocalSpeechConfig();
-    config.speechType = type;
-    return config;
-  }
 
   public static void main(String[] args) {
     try {

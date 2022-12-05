@@ -4,6 +4,7 @@ public class WikipediaConfig extends ServiceConfig {
   public boolean enabled = true;
   
   public Integer maxSentencesReturned = 1;
-  public String[] imagePublishers;
+  // REMOVED FOR SUBSCRIPTION OVERLAP
+  // public String[] imagePublishers;
 
 }

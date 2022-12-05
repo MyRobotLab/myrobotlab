@@ -18,17 +18,6 @@ public class WebXr extends Service {
     super(n, id);
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    WebXrConfig config = (WebXrConfig) c;
-    return c;
-  }
-
-  @Override
-  public ServiceConfig getConfig() {
-    return config;
-  }
-
   public static void main(String[] args) {
     try {
 

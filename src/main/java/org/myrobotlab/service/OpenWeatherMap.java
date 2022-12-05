@@ -253,8 +253,8 @@ public class OpenWeatherMap extends HttpClient {
 
   @Override
   public ServiceConfig getConfig() {
-
-    OpenWeatherMapConfig config = new OpenWeatherMapConfig();
+    OpenWeatherMapConfig config = (OpenWeatherMapConfig)super.getConfig();
+    // FIXME - remove local fields in favor of only config
     config.currentUnits = units;
     config.currentTown = location;
     return config;
@@ -262,7 +262,8 @@ public class OpenWeatherMap extends HttpClient {
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    OpenWeatherMapConfig config = (OpenWeatherMapConfig) c;
+    OpenWeatherMapConfig config = (OpenWeatherMapConfig) super.apply(c);
+    // FIXME - remove local fields in favor of only config
     if (config.currentUnits != null) {
       setUnits(config.currentUnits);
     }

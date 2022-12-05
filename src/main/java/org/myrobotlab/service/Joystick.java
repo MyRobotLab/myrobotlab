@@ -687,7 +687,7 @@ public class Joystick extends Service implements AnalogPublisher {
 
   @Override
   public ServiceConfig getConfig() {
-    JoystickConfig config = new JoystickConfig();
+    JoystickConfig config = (JoystickConfig)super.getConfig();
     config.controller = controller;
 
     if (analogListeners.size() > 0) {
@@ -718,7 +718,7 @@ public class Joystick extends Service implements AnalogPublisher {
     getControllers();
 
     // get controller request from config
-    JoystickConfig config = (JoystickConfig) c;
+    JoystickConfig config = (JoystickConfig)super.apply(c);
     if (config.controller != null) {
       setController(config.controller);
     }

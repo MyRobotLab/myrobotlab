@@ -191,7 +191,7 @@ public class Pir extends Service implements PinListener {
   @Override
   public PirConfig getConfig() {
 
-    PirConfig config = new PirConfig();
+    PirConfig config = (PirConfig)super.getConfig();
 
     config.controller = controllerName;
     config.pin = pin;
@@ -237,7 +237,7 @@ public class Pir extends Service implements PinListener {
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    PirConfig config = (PirConfig) c;
+    PirConfig config = (PirConfig) super.apply(c);
 
     if (config.pin != null)
       setPin(config.pin);

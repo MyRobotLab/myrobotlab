@@ -1262,16 +1262,16 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   @Override
   public ServiceConfig getConfig() {
-    WebGuiConfig config = new WebGuiConfig();
+    WebGuiConfig config = (WebGuiConfig)super.getConfig();
+    // FIXME - remove member variables use config only
     config.port = port;
     config.autoStartBrowser = autoStartBrowser;
-
     return config;
   }
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    WebGuiConfig config = (WebGuiConfig) c;
+    WebGuiConfig config = (WebGuiConfig) super.apply(c);
 
     if (config.port != null && (port != null && config.port.intValue() != port.intValue())) {
       setPort(config.port);
@@ -1298,28 +1298,32 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // save full plan off
       // runtime.saveDefault("worky", "WorkE", true); // FIXME - overwrite
       // filesystem flag
-      Runtime.startConfig("start");
+      // Runtime.startConfig("start");
+      // Runtime.startConfig("i01-09");
+      Runtime.startConfig("i01-10");
       // runtime.saveDefault("i01", "InMoov2", true);
       // Runtime.setConfig("i01");
 
       // Runtime.start("worky", "WorkE");
       //
-      // // Runtime.start("python", "Python");
+      Runtime.start("python", "Python");
       // // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       
       // runtime.saveDefault("leftArm", "InMoov2Arm");
-      runtime.saveAllDefaults();
+      // runtime.saveAllDefaults();
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
+      
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
       webgui.setPort(8888);
       webgui.startService();
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
       
       
       // Runtime.start("i01", "InMoov2");

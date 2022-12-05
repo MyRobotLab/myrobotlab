@@ -363,7 +363,8 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
   @Override
   public ServiceConfig getConfig() {
-    I2cMuxConfig config = new I2cMuxConfig();
+    I2cMuxConfig config = (I2cMuxConfig)super.getConfig();
+    // FIXME this should only be in config, no need for local fields
     config.bus = deviceBus;
     config.address = deviceAddress;
     config.i2cDevices = i2cDevices;
@@ -373,7 +374,8 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    I2cMuxConfig config = (I2cMuxConfig) c;
+    I2cMuxConfig config = (I2cMuxConfig) super.apply(c);
+    // FIXME - remove all this, it should "only" be in config
     deviceBus = config.bus;
     deviceAddress = config.address;
     i2cDevices = config.i2cDevices;

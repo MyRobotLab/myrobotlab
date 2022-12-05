@@ -1142,18 +1142,13 @@ public class ProgramAB extends Service
 
   @Override
   public ServiceConfig getConfig() {
-    ProgramABConfig config = new ProgramABConfig();
+    ProgramABConfig config = (ProgramABConfig)super.getConfig();
+    // REMOVED from overlap with subscriptions
+    // Set<String> listeners = getAttached("publishText");
+    // config.textListeners = listeners.toArray(new String[listeners.size()]);
 
-    config.currentBotName = currentBotName;
-    config.currentUserName = currentUserName;
-    // config.useGlobalSession = useGlobalSession;
-    config.sleep = sleep;
-
-    Set<String> listeners = getAttached("publishText");
-    config.textListeners = listeners.toArray(new String[listeners.size()]);
-
-    listeners = getAttached("publishUtterance");
-    config.utteranceListeners = listeners.toArray(new String[listeners.size()]);
+//    listeners = getAttached("publishUtterance");
+//    config.utteranceListeners = listeners.toArray(new String[listeners.size()]);
 
     for (BotInfo bot : bots.values()) {
 
@@ -1191,21 +1186,18 @@ public class ProgramAB extends Service
 
     setCurrentSession(currentUserName, currentBotName);
 
-    // This is "good" in that its using the normalized data from subscription
-    // vs creating a bunch of cluttery local vars to hold state with error
-    if (config.textListeners != null) {
-      for (String local : config.textListeners) {
-        attachTextListener(local);
-      }
-    }
-
-    if (config.utteranceListeners != null) {
-      for (String local : config.utteranceListeners) {
-        attachUtteranceListener(local);
-      }
-    }
-
-    // TODO: attach to the text publishers... ?
+    // REMOVED because of overlap with subscriptions
+//    if (config.textListeners != null) {
+//      for (String local : config.textListeners) {
+//        attachTextListener(local);
+//      }
+//    }
+//
+//    if (config.utteranceListeners != null) {
+//      for (String local : config.utteranceListeners) {
+//        attachUtteranceListener(local);
+//      }
+//    }
 
     return config;
   }

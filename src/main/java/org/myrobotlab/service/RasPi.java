@@ -579,19 +579,4 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     broadcastState();
   }
 
-  @Override
-  public ServiceConfig getConfig() {
-    RasPiConfig config = new RasPiConfig();
-    return config;
-  }
-
-  // What does this function do other than return what was passed to it?
-  // config is created and set but is not used anywhere.
-  // Can we remove it?
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    RasPiConfig config = (RasPiConfig) c;
-    return c;
-  }
-
 }

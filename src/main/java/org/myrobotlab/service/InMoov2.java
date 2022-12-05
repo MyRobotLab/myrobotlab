@@ -94,7 +94,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     log.info("{} started", fullname);
     try {
       
-       
+      // FIXME DiscordBot utterance subscriptions
 
       // FIXME - problem is fullname is not the peerKey :(
       // String actualName = getPeerName(fullname);
@@ -169,11 +169,11 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     Runtime runtime = Runtime.getInstance();
     // FIXME - shouldn't need this anymore
     Runtime.getInstance().attachServiceLifeCycleListener(getName());
-    
+
     // power up loopback subscription
-    addListener(getName(),"powerUp");
+    addListener(getName(), "powerUp");
     // invoke("powerUp");
-    
+
     // for begin and end of processing config ?
     subscribe("runtime", "publishStartConfig");
     subscribe("runtime", "publishFinishedConfig");
@@ -224,7 +224,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
     runtime.invoke("publishConfigList");
   }
-  
+
   public void onFinishedConfig() {
     log.info("onFinishedConfig");
   }
@@ -446,11 +446,11 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public void closeAllImages() {
-    // FIXME - follow this pattern ? 
+    // FIXME - follow this pattern ?
     // CON npe possible although unlikely
     // PRO start it when its needed
-    // PRO small easy to read - no clutter npe 
-    imageDisplay = (ImageDisplay)startPeer("imageDisplay");    
+    // PRO small easy to read - no clutter npe
+    imageDisplay = (ImageDisplay) startPeer("imageDisplay");
     imageDisplay.closeAll();
   }
 
@@ -913,7 +913,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
     python.execMethod("power_up");
   }
-  
+
   // GOOD GOOD GOOD - LOOPBACK - flexible and replacable by python
   // yet provides a stable default, which can be fully replaced
   // Works using common pub/sub rules
@@ -921,7 +921,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   // its replaceable by typical subscription rules
   public void onPowerUp() {
     // CON - type aware
-    NeoPixel neoPixel = (NeoPixel)getPeer("neoPixel");
+    NeoPixel neoPixel = (NeoPixel) getPeer("neoPixel");
     // CON - necessary NPE checking
     if (neoPixel != null) {
       neoPixel.setColor(0, 130, 0);
@@ -1114,7 +1114,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public String setSpeechType(String speechType) {
-    updatePeerType("mouth" /*getPeerName("mouth")*/, speechType);
+    updatePeerType("mouth" /* getPeerName("mouth") */, speechType);
     return speechType;
   }
 
@@ -1404,9 +1404,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     sendToPeer("neopixel", "clear");
   }
 
-  // FIXME - if this is really desired it will drive local references for all servos
+  // FIXME - if this is really desired it will drive local references for all
+  // servos
   public void waitTargetPos() {
-    // FIXME - consider actual reference for this 
+    // FIXME - consider actual reference for this
     sendToPeer("head", "waitTargetPos");
     sendToPeer("rightHand", "waitTargetPos");
     sendToPeer("leftHand", "waitTargetPos");
@@ -1497,6 +1498,27 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return getName();
   }
 
+  /**
+   * Notifications are published here
+   * 
+   * @param key
+   * @return
+   */
+  public String publishNotification(String key) {
+    return key;
+  }
+
+  /**
+   * Loopback subscription for publishNotification - default handling of
+   * notifications here. User can unsubscribe and publish to Python to override
+   * 
+   * @param key
+   * @return
+   */
+  public String onNotification(String key) {
+    return key;
+  }
+
   // ???? - seems like a good pattern dunno what to do
   // Overriding and polymorphism is a nice way to reduce code
   // public void onHeartbeat(String name) {
@@ -1575,6 +1597,25 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     }
   }
 
+  public InMoov2Config getTypedConfig() {
+    return (InMoov2Config) config;
+  }
+
+  public boolean setPirPlaySounds(boolean b) {
+    getTypedConfig().pirPlaySounds = b;
+    return b;
+  }
+
+  public void onSense(boolean sensed) {
+    if (sensed) {
+      log.info("onSense active");
+      invoke("publishNotification", "senseActive");
+    } else {
+      log.info("onSense deactive");
+      invoke("publishNotification", "senseDeactive");
+    }
+  }
+
   @Override
   public void onRegistered(Registration registration) {
     // TODO Auto-generated method stub
@@ -1593,4 +1634,21 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   }
 
+  public String publishChangeData(String key) {
+    return key;
+  }
+  
+  
+  public Object setData(String key, Object data) {
+    Object o = getTypedConfig().data.put(key, data);
+    if (o == null || !o.equals(data)) {
+      invoke("publishChangeData", key);
+    }
+    return o;
+  }
+  
+  public Object getData(String key) {
+    return getTypedConfig().data.get(key);
+  }
+  
 }

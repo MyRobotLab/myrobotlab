@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -276,38 +275,16 @@ public class Tracking extends Service {
 
   @Override
   public ServiceConfig getConfig() {
-
-    TrackingConfig config = new TrackingConfig();
-    // an interesting problem - the ui uses full name (rightfully so)
-    // but local config should be short name
-    // FIXME - the UI should determine if the two attaching services are local
-    // to one another - if they are - then it should use shortnames
-//    config.cv = CodecUtils.shortName(cv);
-//    config.tilt = CodecUtils.shortName(tilt);
-//    config.pan = CodecUtils.shortName(pan);
-//    config.pid = CodecUtils.shortName(pid);
+    TrackingConfig config = (TrackingConfig) super.getConfig();
     config.enabled = (state == TrackingState.IDLE) ? false : true;
     return config;
   }
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    TrackingConfig config = (TrackingConfig) c;
+    TrackingConfig config = (TrackingConfig) super.apply(c);
 
     config.lostTrackingDelayMs = lostTrackingDelayMs;
-
-//    if (config.pan != null) {
-//      attachPan(getPeerName("pan"));
-//    }
-//    if (config.tilt != null) {
-//      attachTilt(config.tilt.name);
-//    }
-//    if (config.pid != null) {
-//      attachPid(config.pid.name);
-//    }
-//    if (config.cv != null) {
-//      attachCv(config.cv.name);
-//    }
 
     if (config.enabled) {
       // enable();

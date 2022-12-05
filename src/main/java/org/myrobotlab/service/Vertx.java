@@ -23,11 +23,6 @@ public class Vertx extends Service {
     super(n, id);
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    super.apply(c);
-    return c;
-  }
 
   public void start() {
     if (server == null) {
@@ -47,11 +42,6 @@ public class Vertx extends Service {
     } else {
       log.info("{} already stopped", getName());
     }
-  }
-
-  @Override
-  public ServiceConfig getConfig() {
-    return config;
   }
 
   public static void main(String[] args) {

@@ -46,16 +46,6 @@ public class Py4j extends Service {
       log.info("Py4j gateway server already started");
     }
   }
-
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    return c;
-  }
-
-  @Override
-  public ServiceConfig getConfig() {
-    return config;
-  }
   
   // https://stackoverflow.com/questions/23157424/py4j-how-would-i-go-about-on-calling-a-python-method-in-java
   public interface PythonInterface {

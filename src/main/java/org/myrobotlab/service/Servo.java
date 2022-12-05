@@ -200,7 +200,7 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
   @Override
   public ServiceConfig getConfig() {
 
-    ServoConfig config = new ServoConfig();
+    ServoConfig config = (ServoConfig)super.getConfig();
 
     config.autoDisable = autoDisable;
     config.enabled = enabled;
@@ -214,8 +214,7 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
       config.inverted = mapper.isInverted();
     }
 
-    // config.controller = controller;
-
+    // FIXME remove members and use config only
     config.idleTimeout = idleTimeout;
     config.pin = pin;
     config.rest = rest;
@@ -239,7 +238,7 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    ServoConfig config = (ServoConfig) c;
+    ServoConfig config = (ServoConfig) super.apply(c);
 
     autoDisable = config.autoDisable;
 

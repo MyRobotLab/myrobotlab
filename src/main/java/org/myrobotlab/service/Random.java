@@ -238,7 +238,7 @@ public class Random extends Service {
   @Override
   public ServiceConfig getConfig() {
 
-    RandomConfig config = new RandomConfig();
+    RandomConfig config = (RandomConfig)super.getConfig();
 
     config.enabled = enabled;
 

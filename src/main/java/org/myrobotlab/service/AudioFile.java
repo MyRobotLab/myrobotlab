@@ -51,6 +51,7 @@ import org.myrobotlab.net.Http;
 import org.myrobotlab.service.config.AudioFileConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
+import org.myrobotlab.service.interfaces.AudioControl;
 import org.myrobotlab.service.interfaces.AudioPublisher;
 import org.slf4j.Logger;
 
@@ -61,7 +62,7 @@ import org.slf4j.Logger;
  * TODO - publishPeak interface
  *
  */
-public class AudioFile extends Service implements AudioPublisher {
+public class AudioFile extends Service implements AudioPublisher, AudioControl {
   static final long serialVersionUID = 1L;
   static final Logger log = LoggerFactory.getLogger(AudioFile.class);
 
@@ -522,7 +523,7 @@ public class AudioFile extends Service implements AudioPublisher {
   @Override
   public ServiceConfig getConfig() {
 
-    AudioFileConfig c = (AudioFileConfig) config;
+    AudioFileConfig c = (AudioFileConfig) super.getConfig();
     // FIXME - remove members keep data in config !
     // FIXME - the following is not needed nor desired
     // useless self assignment
@@ -540,7 +541,7 @@ public class AudioFile extends Service implements AudioPublisher {
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    AudioFileConfig config = (AudioFileConfig) c;
+    AudioFileConfig config = (AudioFileConfig) super.apply(c);
     setMute(config.mute);
     setTrack(config.currentTrack);
     setVolume(config.volume);
@@ -598,6 +599,11 @@ public class AudioFile extends Service implements AudioPublisher {
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  @Override
+  public void onPlayAudioFile(String file) {
+    play(file);
   }
 
 }

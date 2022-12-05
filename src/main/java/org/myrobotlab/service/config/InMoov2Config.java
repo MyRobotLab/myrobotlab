@@ -1,5 +1,9 @@
 package org.myrobotlab.service.config;
 
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.jme3.UserData;
@@ -20,6 +24,8 @@ public class InMoov2Config extends ServiceConfig {
   public boolean virtual = false;
 
   public String locale = "en-US";
+  
+  public Map<String, Object> data = new TreeMap<>();
 
   /**
    * startup and shutdown will pause inmoov - set the speed to this value then
@@ -33,6 +39,13 @@ public class InMoov2Config extends ServiceConfig {
    * idle time measures the time the fsm is in an idle state
    */
   public boolean idleTimer = true;
+
+  /**
+   * play pir sounds when pir switching states
+   * sound located in data/InMoov2/sounds/pir-activated.mp3
+   * sound located in data/InMoov2/sounds/pir-deactivated.mp3
+   */
+  public boolean pirPlaySounds = true;
 
   public InMoov2Config() {
   }
@@ -105,11 +118,17 @@ public class InMoov2Config extends ServiceConfig {
         }
       }
     }
-    chatBot.textListeners = new String[] { name + ".htmlFilter" };
+    // chatBot.textListeners = new String[] { name + ".htmlFilter" };
+    if (chatBot.listeners == null) {
+      chatBot.listeners = new ArrayList<>();
+    }
+    chatBot.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));
     chatBot.botDir = "data/ProgramAB";
 
     HtmlFilterConfig htmlFilter = (HtmlFilterConfig) plan.get(getPeerName("htmlFilter"));
-    htmlFilter.textListeners = new String[] { name + ".mouth" };
+    // htmlFilter.textListeners = new String[] { name + ".mouth" };
+    htmlFilter.listeners = new ArrayList<>();
+    htmlFilter.listeners.add(new Listener("publishText", name + ".mouth", "onText"));
 
     // FIXME - turns out subscriptions like this are not needed if they are in
     // onStarted

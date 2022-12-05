@@ -2588,7 +2588,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   @Override
   public ServiceConfig getConfig() {
-    JMonkeyEngineConfig config = new JMonkeyEngineConfig();
+    JMonkeyEngineConfig config = (JMonkeyEngineConfig)super.getConfig();
     config.cameraLookAt = cameraLookAt;
     config.modelPaths = new ArrayList<>();
     for (String path : this.modelPaths) {
@@ -2698,6 +2698,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
+    super.apply(c);
     if (app != null) {
       // if there is an app we can load immediately
       loadDelayed(c);

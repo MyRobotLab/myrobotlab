@@ -1,6 +1,7 @@
 package org.myrobotlab.service.config;
 
 import java.lang.reflect.Constructor;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -13,18 +14,60 @@ import org.slf4j.Logger;
 /**
  * Base service configuration class. All services must have a type. The name of
  * the service config file implies the name of the service.
+ * 
+ * FIXME - make a 2 param constructor that makes the "default" callback name
  *
  */
 public class ServiceConfig {
 
   public final static Logger log = LoggerFactory.getLogger(ServiceConfig.class);
+  
+  
+  public static class Listener {
+    
+    public Listener() {
+    }
+    
+    public Listener(String method, String listener, String callback) {
+      this.method = method;
+      this.listener = listener;
+      this.callback = callback;
+    }
+
+    public String method;
+
+    /**
+     * globally unique name of Service the a topic message will be sent to
+     */
+    public String listener;
+
+    /**
+     * the method which will be invoked
+     */
+    public String callback;
+    
+    
+
+    @Override
+    final public int hashCode() {
+      return 37 + method.hashCode() + listener.hashCode() + callback.hashCode();
+    }
+
+    @Override
+    public String toString() {
+      return String.format("%s -will activate-> %s.%s", method, listener, callback);
+    }
+
+  }
+  
 
   /**
    * simple type name of service defined for this config
    */
   public String type;
 
-  // FIXME - change to enum !
+  // FIXME - change to enum ! 
+  // FIXME - remove this - its not used 
   // heh non transient makes it easy to debug !
   transient public String state = "INIT"; // INIT | LOADED | CREATED | STARTED |
                                           // STOPPED | RELEASED
@@ -50,6 +93,7 @@ public class ServiceConfig {
    */
   // public Map<String, Peer> peers = new TreeMap<>();
   public Map<String, Peer> peers = null;
+  public  List<Listener> listeners = null;
                                            
 
   public ServiceConfig() {

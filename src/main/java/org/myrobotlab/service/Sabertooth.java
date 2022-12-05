@@ -32,7 +32,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class Sabertooth extends AbstractMotorController implements PortConnector, MotorController {
+public class Sabertooth extends AbstractMotorController implements PortConnector {
 
   private static final long serialVersionUID = 1L;
 
@@ -303,7 +303,8 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
   @Override
   public ServiceConfig getConfig() {
-    SabertoothConfig config = new SabertoothConfig();
+    SabertoothConfig config = (SabertoothConfig)super.getConfig();
+    // FIXME - remove fields and use config only
     config.port = getSerialPort();
     config.connect = isConnected;
     return config;
@@ -311,7 +312,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    SabertoothConfig config = (SabertoothConfig) c;
+    SabertoothConfig config = (SabertoothConfig) super.apply(c);
     if (config.connect) {
       try {
         connect(config.port);

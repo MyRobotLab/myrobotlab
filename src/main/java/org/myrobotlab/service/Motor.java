@@ -5,7 +5,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.config.MotorConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.interfaces.MotorController;
 
 /**
  * A general motor implementation with a "simple H-bridge" where one control
@@ -71,9 +70,8 @@ public class Motor extends AbstractMotor {
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    // FIXME - may need to do call super.config for config that has parent :(
-    MotorConfig config = new MotorConfig();
+  public ServiceConfig getConfig() {    
+    MotorConfig config = (MotorConfig)super.getConfig();
     config.dirPin = getDirPin();
     config.pwrPin = getPwrPin();
     config.pwmFreq = getPwmFreq();
@@ -82,8 +80,8 @@ public class Motor extends AbstractMotor {
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    super.apply(c);
-    MotorConfig config = (MotorConfig) c;
+    MotorConfig config = (MotorConfig)super.apply(c);
+    
     if (config.pwrPin != null) {
       setPwrPin(pwrPin);
     }

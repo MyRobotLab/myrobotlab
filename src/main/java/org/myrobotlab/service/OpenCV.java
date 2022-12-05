@@ -1966,7 +1966,8 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   @Override
   public ServiceConfig getConfig() {
-    OpenCVConfig config = new OpenCVConfig();
+    OpenCVConfig config = (OpenCVConfig)super.getConfig();
+    // FIXME - remove member vars use config only
     config.capturing = capturing;
     config.cameraIndex = cameraIndex;
     // TODO: make the grabber config a nested object to clean this up..
@@ -1983,7 +1984,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    OpenCVConfig config = (OpenCVConfig) c;
+    OpenCVConfig config = (OpenCVConfig) super.apply(c);
     setCameraIndex(config.cameraIndex);
     setGrabberType(config.grabberType);
     setInputFileName(config.inputFile);
