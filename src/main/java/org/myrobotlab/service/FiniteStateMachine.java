@@ -247,7 +247,9 @@ public class FiniteStateMachine extends Service {
     }
 
     // setCurrent
-    setCurrent(config.current);
+    if (config.current != null) {
+      setCurrent(config.current);
+    }
 
     return c;
   }
@@ -273,12 +275,8 @@ public class FiniteStateMachine extends Service {
 
       LoggingFactory.init(Level.WARN);
       
-      Runtime.startConfig("sub-04");
+      // Runtime.startConfig("sub-04");
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       // WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // // webgui.setSsl(true);
@@ -360,6 +358,12 @@ public class FiniteStateMachine extends Service {
       fsm.fire("ill-event");
 
       fsm.save();
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
 
       // fsm.send("clear-event", 1000);
 
@@ -374,6 +378,10 @@ public class FiniteStateMachine extends Service {
 
   public void setCurrent(String state) {
     try {
+      if (state == null) {
+        warn("attempting to set state to null");
+        return;
+      }
       last = stateMachine.getCurrent();
       stateMachine.setCurrent(state);
       current = stateMachine.getCurrent();

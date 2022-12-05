@@ -51,9 +51,10 @@ public class Vertx extends Service {
 
       // server = new WsServer();
 
-      Runtime.start("vertx", "Vertx");
+      Vertx vertx = (Vertx)Runtime.start("vertx", "Vertx");
+      vertx.start();
       Runtime.start("servo", "Servo");
-      Runtime.start("webgui", "WebGui");
+      // Runtime.start("webgui", "WebGui");
 
     } catch (Exception e) {
       log.error("main threw", e);
