@@ -23,7 +23,7 @@ public class WsServer extends AbstractVerticle {
         vertx.deployVerticle(new WsServer());
     }
 
-    private Integer port;
+    private Integer port = 8080;
 
     private Router eventBusHandler() {
 

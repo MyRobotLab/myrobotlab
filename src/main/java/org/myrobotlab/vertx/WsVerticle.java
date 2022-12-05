@@ -6,15 +6,10 @@ import org.myrobotlab.service.meta.VertxMeta;
 import org.slf4j.Logger;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.ext.bridge.BridgeEventType;
-import io.vertx.ext.bridge.BridgeOptions;
-import io.vertx.ext.bridge.PermittedOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.ErrorHandler;
 import io.vertx.ext.web.handler.StaticHandler;
-import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions;
-import io.vertx.ext.web.handler.sockjs.SockJSHandler;
 
 public class WsVerticle extends AbstractVerticle {
 
