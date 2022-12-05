@@ -6,7 +6,7 @@ port = '/dev/ttyACM0'
 # port = 'COM5'
 
 mpu6050 = runtime.start('mpu6050','Mpu6050')
-mpu6050.setDeviceBus('1')
+mpu6050.setDeviceBus('0') # When using the Arduino, we must use bus 0, on the Raspberry Pi use Bus 1
 mpu6050.setDeviceAddress('0x68')
 mpu6050.setSampleRate(10) # in Hz default is 3Hz
 
