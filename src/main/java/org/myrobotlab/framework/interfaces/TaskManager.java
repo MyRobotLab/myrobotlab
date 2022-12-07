@@ -55,4 +55,6 @@ public interface TaskManager {
    */
   public void addTask(String taskName, long intervalMs, long delayMs, String method, Object... params);
 
+  public void addTask(String taskName, boolean oneShot, long intervalMs, long delayMs, String method, Object... params);
+
 }

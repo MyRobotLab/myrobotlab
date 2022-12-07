@@ -477,7 +477,7 @@ public class Python extends Service implements ServiceLifeCycleListener {
    *         false if there was an exception.
    */
   public boolean exec(String code, boolean blocking) {
-    log.info("exec(String) \n{}", code);
+    log.debug("exec(String) \n{}", code);
 
     try {
       if (!blocking) {
@@ -494,6 +494,7 @@ public class Python extends Service implements ServiceLifeCycleListener {
       error(pe.toString());
       invoke("publishStdError", pe.toString());
     } catch (Exception e) {
+      log.error(code);
       error(e);
     } finally {
       if (blocking) {
@@ -799,14 +800,16 @@ public class Python extends Service implements ServiceLifeCycleListener {
     // register runtime life cycle events for other services
     Runtime.getInstance().attachServiceLifeCycleListener(getName());
 
-    PythonConfig c = (PythonConfig)config;
+    PythonConfig c = (PythonConfig) config;
     // run start scripts if there are any
-    for (String script : c.startScripts) {
-      // i think in this context its safer to block
-      try {
-        execFile(script, true);
-      } catch (IOException e) {
-        log.error("starting scripts threw", e);
+    if (c.startScripts != null) {
+      for (String script : c.startScripts) {
+        // i think in this context its safer to block
+        try {
+          execFile(script, true);
+        } catch (IOException e) {
+          log.error("starting scripts threw", e);
+        }
       }
     }
   }
@@ -849,7 +852,7 @@ public class Python extends Service implements ServiceLifeCycleListener {
   @Override
   public void stopService() {
     // run any stop scripts
-    PythonConfig c = (PythonConfig)config;
+    PythonConfig c = (PythonConfig) config;
 
     for (String script : c.stopScripts) {
       // i think in this context its safer to block
@@ -875,7 +878,6 @@ public class Python extends Service implements ServiceLifeCycleListener {
 
   public static void main(String[] args) {
     try {
-      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
       LoggingFactory.init("INFO");
 
       // Runtime.start("i01.head.rothead", "Servo");
@@ -909,14 +911,10 @@ public class Python extends Service implements ServiceLifeCycleListener {
 
   }
 
-  @Override
-  public ServiceConfig getConfig() {
-    return config;
-  }
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    PythonConfig config = (PythonConfig) c;
+    PythonConfig config = (PythonConfig) super.apply(c);
     if (config.startScripts != null && config.startScripts.size() > 0) {
 
       if (isRunning()) {
@@ -929,7 +927,7 @@ public class Python extends Service implements ServiceLifeCycleListener {
         }
       }
     }
-    
+
     PySystemState sys = Py.getSystemState();
 
     if (config.modulePaths != null) {
@@ -939,7 +937,7 @@ public class Python extends Service implements ServiceLifeCycleListener {
     }
 
     log.info("Python System Path: {}", sys.path);
-    
+
     return c;
   }
 
