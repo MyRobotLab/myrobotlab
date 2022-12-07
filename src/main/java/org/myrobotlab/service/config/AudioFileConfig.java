@@ -17,4 +17,8 @@ public class AudioFileConfig extends ServiceConfig {
    * sample interval for peak
    */
   public double peakSampleInterval = 15;
+  /**
+   * delay to synchronize publishing of peak with actual sound in milliseconds
+   */
+  public Long peakDelayMs = null;
 }

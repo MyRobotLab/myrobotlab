@@ -797,8 +797,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   public void addTaskOneShot(long delayMs, String method, Object... params) {
-    addTask(method, 0, delayMs, method, params);
+    addTask(method, true, 0, delayMs, method, params);
   }
+  
+  @Override
+  synchronized public void addTask(String taskName, long intervalMs, long delayMs, String method, Object... params) {
+    addTask(method, false, 0, delayMs, method, params);
+  }
+
 
   /**
    * a stronger bigger better task handler !
@@ -815,7 +821,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    *          the params to pass
    */
   @Override
-  synchronized public void addTask(String taskName, long intervalMs, long delayMs, String method, Object... params) {
+  synchronized public void addTask(String taskName, boolean oneShot, long intervalMs, long delayMs, String method, Object... params) {
     if (tasks.containsKey(taskName)) {
       log.info("already have active task \"{}\"", taskName);
       return;
@@ -824,7 +830,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     Message msg = Message.createMessage(getName(), getName(), method, params);
     Task task = new Task(this, taskName, intervalMs, msg);
     timer.schedule(task, delayMs);
-    tasks.put(taskName, timer);
+    if (!oneShot) {
+      tasks.put(taskName, timer);
+    }
   }
 
   @Override
