@@ -3334,17 +3334,18 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // OutputStream stdIn = handle.getOutputStream();
 
       outputBuilder = new StringBuilder();
-      byte[] buff = new byte[4096];
+      byte[] buff = new byte[32768];
 
       // TODO: should we read both of these streams?
       // if we break out of the first loop is the process terminated?
 
-      // read stderr
-      for (int n; (n = stdErr.read(buff)) != -1;) {
-        outputBuilder.append(new String(buff, 0, n));
-      }
       // read stdout
       for (int n; (n = stdOut.read(buff)) != -1;) {
+        outputBuilder.append(new String(buff, 0, n));
+      }
+      
+      // read stderr
+      for (int n; (n = stdErr.read(buff)) != -1;) {
         outputBuilder.append(new String(buff, 0, n));
       }
 
