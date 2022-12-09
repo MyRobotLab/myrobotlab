@@ -295,15 +295,6 @@
   </dependency>
 <!-- DiscordBot end -->
 
-<!-- Docker begin -->
-  <dependency>
-    <groupId>com.github.docker-java</groupId>
-    <artifactId>docker-java</artifactId>
-    <version>3.2.13</version>
-    <scope>provided</scope>
-  </dependency>
-<!-- Docker end -->
-
 <!-- DocumentPipeline begin -->
   <dependency>
     <groupId>org.apache.tika</groupId>
@@ -359,7 +350,6 @@
     <version>1.2.0</version>
     <scope>provided</scope>
   </dependency>
-<!-- Duplicate entry for com.github.pnavais-state-machine-1.2.0 skipping -->
 <!-- FiniteStateMachine end -->
 
 <!-- Git begin -->
@@ -1319,6 +1309,11 @@
     <artifactId>async-http-client</artifactId>
     <version>2.12.3</version>
   </dependency>
+  <dependency>
+    <groupId>com.google.code.findbugs</groupId>
+    <artifactId>jsr305</artifactId>
+    <version>3.0.2</version>
+  </dependency>
 <!-- Runtime end -->
 
 <!-- Serial begin -->
@@ -1456,9 +1451,24 @@
         </exclusion>
       </exclusions>
   </dependency>
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.13.3 skipping -->
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-core</artifactId>
+    <version>2.13.3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.13.3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-annotations</artifactId>
+    <version>2.13.3</version>
+    <scope>provided</scope>
+  </dependency>
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-solrj</artifactId>
@@ -1714,6 +1724,7 @@
 <!-- Xmpp end -->
 
   </dependencies>
+
   
   <build>
     <resources>

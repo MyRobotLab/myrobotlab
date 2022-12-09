@@ -52,6 +52,12 @@ public class RuntimeMeta extends MetaData {
     // ws client sockets
     addDependency("org.asynchttpclient", "async-http-client", "2.12.3");
 
+    // Nullability annotations
+    // Contrary to what its group ID implies, this is
+    // the reference implementation for javax.annotation.Nullable / NotNull
+    // Apache 2.0 license
+    addDependency("com.google.code.findbugs", "jsr305", "3.0.2");
+
   }
 
 }

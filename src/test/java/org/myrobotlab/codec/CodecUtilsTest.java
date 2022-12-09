@@ -1,10 +1,13 @@
 package org.myrobotlab.codec;
 
 import org.junit.Test;
+import org.myrobotlab.framework.MRLListener;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.test.AbstractTest;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class CodecUtilsTest extends AbstractTest {
 
@@ -43,6 +46,34 @@ public class CodecUtilsTest extends AbstractTest {
         mrlLocale = new Locale(code);
         json = CodecUtils.toJson(mrlLocale);
         assertEquals("{\"language\":\"\",\"displayLanguage\":\"\",\"country\":\"US\",\"displayCountry\":\"United States\",\"tag\":\"-US\",\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+
+    }
+
+    @Test
+    public void testJsonMessageSerDeser() {
+        Message message = Message.createMessage(
+                "testing-sender",
+                "testService",
+                "testMethod",
+                        new Object[]{
+                                "testParam1",
+                                2,
+                                new MRLListener(
+                                        "topic",
+                                        "callbackService",
+                                        "callbackMethod"
+                                )
+                        }
+                );
+        String json = CodecUtils.toJsonMsg(message);
+        Message deserMessage = CodecUtils.jsonToMessage(json);
+        assertEquals(message, deserMessage);
+    }
+
+    @Test
+    public void testJsonMessageDeserNull() {
+        Message deserMessage = CodecUtils.jsonToMessage("null");
+        assertNull(deserMessage);
 
     }
 }
