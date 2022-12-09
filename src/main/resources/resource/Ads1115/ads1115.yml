@@ -2,5 +2,6 @@
 address: '0x48'
 bus: '1'
 controller: null
+listeners: null
 peers: null
 type: Ads1115

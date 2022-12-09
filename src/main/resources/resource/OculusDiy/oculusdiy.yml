@@ -3,6 +3,7 @@ arduino:
   autoStart: true
   name: arduino
   type: Arduino
+listeners: null
 mpu6050:
   autoStart: true
   name: mpu6050
