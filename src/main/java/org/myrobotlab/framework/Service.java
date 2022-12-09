@@ -1101,6 +1101,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   @Override
+  public String getServiceClass() {
+    return serviceClass;
+  }
+
+  @Override
   public boolean hasError() {
     return lastError != null;
   }
@@ -1737,7 +1742,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public Object sendBlocking(String name, String method, Object... data) throws InterruptedException, TimeoutException {
     // default 1 second timeout - FIXME CONFIGURABLE
-    return sendBlocking(name, 1000, method, data);
+    return sendBlocking(name, 3000, method, data);
   }
 
   @Override

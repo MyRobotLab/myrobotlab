@@ -69,6 +69,8 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    */
   public String getType();
 
+  String getServiceClass();
+
   /**
    * Does the meta data of this service define peers
    * 
