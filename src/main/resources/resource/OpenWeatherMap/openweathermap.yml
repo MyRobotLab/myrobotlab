@@ -5,6 +5,7 @@ httpClient:
   autoStart: true
   name: httpClient
   type: HttpClient
+listeners: null
 peers:
   httpClient:
     autoStart: true
