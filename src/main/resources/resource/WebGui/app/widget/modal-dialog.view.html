@@ -1,7 +1,5 @@
 <div name="modalWindow" class="modal-content">
     <div class="modal-header">
-        <!-- button type="button" class="closeNotElement" data-dismiss="modal" aria-hidden="true"
-                ng-click="cancel()">&times;</button -->
         <h4 class="modal-title" id="myModalLabel">{{title }}</h4>
     </div>
     <div class="modal-body">
@@ -9,10 +7,7 @@
 
         <div class="form-inline">
             <div class="form-group">
-                <input type="text" class="form-control" ng-model="service.configPath" placeholder="myconfig">
-                <!--
-                <button type="button" class="btn btn-primary" ng-click='saveConfig()' tooltip="saves the currents config"
-                    tooltip-placement="bottom">save</button> -->
+                <input type="text" class="form-control" ng-model="service.configName" placeholder="myconfig">
             </div>
         </div>
 

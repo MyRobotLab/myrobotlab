@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-md-9">
-        <h3>Current State: {{current}}</h3>
+        <h3>Last Event {{event}} Current State: {{current}}</h3>
         <table class="tableController table-condensed table-striped table-bordered">
             <tr>
                 <th>From State</th>
@@ -12,7 +12,7 @@
                 <td>{{transition.from}}</td>
                 <td>
                     <span class="glyphicon glyphicon-arrow-right"></span>
-                    &nbsp;&nbsp;&nbsp;&nbsp;{{transition.on}}
+                    &nbsp;&nbsp;&nbsp;&nbsp;{{transition.event}}
                 </td>
                 <td>
                     <span class="glyphicon glyphicon-arrow-right"></span>

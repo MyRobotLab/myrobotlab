@@ -319,11 +319,13 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
     $scope.saveConfig = function() {
         console.info('saveConfig')
+        let path = $scope.service.configPath
+        $scope.service.configName = path.substring(path.lastIndexOf('/') + 1)
 
         let onOK = function() {
-            // msg.sendTo('runtime', 'setConfig', $scope.service.configPath)
-            msg.sendTo('runtime', 'saveConfig', $scope.service.configPath)
-            // msg.sendTo('runtime', 'save')
+            // const path = $scope.service.configPath
+            // const configName = path.substring(path.lastIndexOf('/') + 1)
+            msg.sendTo('runtime', 'saveConfig', $scope.service.configName)
         }
 
         let onCancel = function() {

@@ -835,7 +835,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           // but its necessary because you need an runtime instance before you
           // load
           Runtime.load("runtime", "Runtime");
-          ((RuntimeConfig)runtime.config).add("runtime");
+          ((RuntimeConfig) runtime.config).add("runtime");
 
           runtime.startService();
           // platform virtual is higher priority than service virtual
@@ -2003,8 +2003,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       log.info("releasing service {}", sw.getName());
 
       try {
-        // Runtime.release(sw.getName());
-        sw.releaseService();
+        if (sw != null) {
+          sw.releaseService();
+        }
       } catch (Exception e) {
         runtime.error("%s threw while releasing", e);
       }
@@ -2014,7 +2015,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       runtime.releaseService();
       runtime = null;
     }
-
   }
 
   /**
@@ -2494,7 +2494,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public void publishFinishedConfig() {
     log.info("publishFinishedConfig");
   }
-  
+
   /**
    * Start a service of the specified type as the specified name.
    *
@@ -4162,6 +4162,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static public void clearConfig() {
     Runtime runtime = Runtime.getInstance();
     runtime.masterPlan.clear();
+    runtime.masterPlan.put("runtime", new RuntimeConfig());
     // unset config path
     runtime.configPath = null;
     runtime.publishConfigList();
@@ -4771,10 +4772,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           return false;
         }
       }
-      
+
       // save full plan
       Plan plan = getPlan();
-      for (String key: plan.keySet()) {
+      for (String key : plan.keySet()) {
         String data = CodecUtils.toYaml(plan.get(key));
         File dir = new File(configPath);
         dir.mkdirs();

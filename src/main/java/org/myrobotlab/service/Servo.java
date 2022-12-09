@@ -25,7 +25,9 @@
 
 package org.myrobotlab.service;
 
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.TimeEncoder;
@@ -60,7 +62,7 @@ import org.slf4j.Logger;
  * 
  */
 
-public class Servo extends AbstractServo implements ServoControl, ServiceLifeCycleListener {
+public class Servo extends AbstractServo implements ServiceLifeCycleListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -296,7 +298,7 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
 
       // log.info("{}","blah$Blah".contains("$"));
 
-      // LoggingFactory.init(Level.INFO);
+      LoggingFactory.init(Level.INFO);
       // Platform.setVirtual(true);
 
       // Runtime.start("python", "Python");
@@ -304,12 +306,8 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
 
       Runtime.start("clock", "Servo");
       Runtime runtime = Runtime.getInstance();
-      runtime.connect("http://localhost:8888");
+      // runtime.connect("http://localhost:8888");
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
@@ -319,6 +317,8 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
       Servo pan = (Servo) Runtime.start("pan", "Servo");
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      
+
 
       tilt.setPin(4);
       pan.setPin(5);
@@ -330,6 +330,12 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
 
       mega.attach(tilt);
       mega.attach(pan);
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
 
       // runtime.save();
 

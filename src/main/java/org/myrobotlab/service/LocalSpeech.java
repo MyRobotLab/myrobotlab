@@ -104,6 +104,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     }
 
     Platform platform = Runtime.getPlatform();
+    if (ttsCommand == null) {
+      log.error("tts command is invalid");
+      return null;
+    }
     String cmd = ttsCommand.replace("{text}", toSpeak);
 
     cmd = cmd.replace("{filename}", filename);

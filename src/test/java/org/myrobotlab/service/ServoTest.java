@@ -270,7 +270,7 @@ public class ServoTest extends AbstractTest {
     long delta = System.currentTimeMillis() - start;
     assertTrue("Move to blocking should have taken 3 seconds or more. Time was " + delta, delta >= 3000);
     // log.info("Move to blocking took {} milliseconds", delta);
-    assertTrue("Servo should be ebabled", servo01.isEnabled());
+    assertTrue("Servo should be enabled", servo01.isEnabled());
     assertFalse("Servo should not be moving now.", servo01.isMoving());
     // Now let's wait for the idle disable timer to kick off + 1000ms
     // TODO: figure out why smaller values like 100ms cause this test to fail.

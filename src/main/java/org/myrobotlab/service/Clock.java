@@ -239,6 +239,7 @@ public class Clock extends Service {
       c1.startClock();
       c1.stopClock();
 
+      Runtime.start("servo", "Servo");
     } catch (Exception e) {
       log.error("main threw", e);
     }

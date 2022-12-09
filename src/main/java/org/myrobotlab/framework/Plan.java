@@ -54,15 +54,20 @@ public class Plan {
    */
   public ServiceConfig put(String name, ServiceConfig sc) {
 
-    if (name.equals("runtime")) {
+    if (name.equals("runtime") && get("runtime") != null) {
       // we do not replace root - we keep our root
       // and add their request to start
-      log.info("request to replace root runtime ! - probably not what you want - not gonna do it");
+      log.error("request to replace root runtime ! - probably not what you want - not gonna do it");
       return sc;
     }
 
     // modify runtime config registry for starting services
     RuntimeConfig rt = (RuntimeConfig) get("runtime");
+    if (rt == null) {
+      log.warn("runtime config is null");
+      rt = new RuntimeConfig();
+      config.put("runtime", rt);
+    }
     rt.add(name);
     return config.put(name, sc);
   }
