@@ -1,14 +1,16 @@
 package org.myrobotlab.codec;
 
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.test.AbstractTest;
 
-import static org.junit.Assert.assertEquals;
-
 public class CodecUtilsTest extends AbstractTest {
 
     @Test
+    @Ignore
     public void testLocale() {
         Locale mrlLocale;
 
