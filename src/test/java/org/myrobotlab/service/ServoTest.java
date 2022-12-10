@@ -26,7 +26,7 @@ import org.myrobotlab.test.AbstractTest;
  */
 public class ServoTest extends AbstractTest {
 
-  static final String port01 = "/dev/ttyACM5";
+  static final String port01 = "servoTestPort";
   Integer pin = 3;
   static Arduino arduino01 = null;
   static Servo servo = null;
@@ -38,9 +38,10 @@ public class ServoTest extends AbstractTest {
   public void setUp() throws Exception {
     servo = (Servo) Runtime.start("servoServoTest", "Servo");
     arduino01 = (Arduino) Runtime.start("arduinoServoTest", "Arduino");
+    arduino01.setVirtual(true);
     arduino01.connect(port01);
     servo.setPin(3);
-    servo.attach(arduino01, 3, 40.0);
+    arduino01.attach(servo);
     servo.rest();
     servo.enable();
     servo.map(0, 180, 0, 180);

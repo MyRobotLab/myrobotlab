@@ -168,7 +168,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     // update our board info
     if (runner == null) {
       runner = new InoScriptRunner(this, ino);
-      runner.start();
+      //runner.start();
     }
 
     // FIXME - THIS MAKES NO SENSE - NEXT LINE ASSIGNS IT !?!?!  uart = Serial.connectVirtualUart WTF?

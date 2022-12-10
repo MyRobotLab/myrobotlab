@@ -9,14 +9,16 @@ public class Task extends TimerTask {
   Message msg;
   long interval = 0;
   Service myService;
+  boolean oneShot = false;
 
   // FIXME upgrade to ScheduledExecutorService
   // http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
 
-  public Task(Service myService, String taskName, long interval, Message msg) {
+  public Task(Service myService, boolean oneShot, String taskName, long interval, Message msg) {
     this.myService = myService;
     this.taskName = taskName;
     this.interval = interval;
+    this.oneShot = oneShot;
     this.msg = msg;
   }
 
@@ -25,6 +27,7 @@ public class Task extends TimerTask {
     this.interval = s.interval;
     this.taskName = s.taskName;
     this.myService = s.myService;
+    this.oneShot = s.oneShot;
   }
 
   @Override
@@ -48,6 +51,9 @@ public class Task extends TimerTask {
         } catch (IllegalStateException e) {
         }
       }
+    }
+    if (oneShot) {
+      myService.purgeTask(taskName);
     }
   }
 

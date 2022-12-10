@@ -799,12 +799,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public void addTaskOneShot(long delayMs, String method, Object... params) {
     addTask(method, true, 0, delayMs, method, params);
   }
-  
+
   @Override
   synchronized public void addTask(String taskName, long intervalMs, long delayMs, String method, Object... params) {
     addTask(method, false, 0, delayMs, method, params);
   }
-
 
   /**
    * a stronger bigger better task handler !
@@ -828,11 +827,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     Timer timer = new Timer(String.format("%s.timer", String.format("%s.%s", getName(), taskName)));
     Message msg = Message.createMessage(getName(), getName(), method, params);
-    Task task = new Task(this, taskName, intervalMs, msg);
+    Task task = new Task(this, oneShot, taskName, intervalMs, msg);
     timer.schedule(task, delayMs);
-    if (!oneShot) {
-      tasks.put(taskName, timer);
-    }
+    tasks.put(taskName, timer);
   }
 
   @Override
@@ -850,9 +847,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     invokeFuture(method, delayMs, (Object[]) null);
   }
 
+  /**
+   * creates a one timed task that executes in the future delayMs milliseconds
+   */
   @Override
   final public void invokeFuture(String method, long delayMs, Object... params) {
-    addTaskOneShot(delayMs, method, params);
+    addTask(String.format("%s-%d", method, System.currentTimeMillis()), true, 0, delayMs, method, params);
   }
 
   @Override
@@ -1362,10 +1362,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     String yaml = CodecUtils.toYaml(inConfig);
     ServiceConfig copyOfConfig = CodecUtils.fromYaml(yaml, inConfig.getClass());
-    
+
     // TODO - handle subscriptions / listeners
     if (config.listeners != null) {
-      for (Listener listener: config.listeners) {
+      for (Listener listener : config.listeners) {
         addListener(listener.method, listener.listener, listener.callback);
       }
     }
