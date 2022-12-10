@@ -96,7 +96,7 @@ public class ConfigTest extends AbstractTest {
 //    t1c.cv = "cv";
 //    t2c.cv = "cv";
 
-    assertEquals("2x tracking with merged opencv expecting 13 (7 + 7 - 2 + 1) services", 13, plan.size());
+    assertEquals("2x tracking with merged opencv expecting 13 (7 + 7 - 2 + 1) services", 14, plan.size());
     // save the plan
     Runtime.savePlan(CONFIG_NAME);
     // clear the in memory plan
