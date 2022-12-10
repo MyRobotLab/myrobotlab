@@ -83,6 +83,7 @@ public class ClockTest extends AbstractTest {
     Service.sleep(1100);
     assertEquals(1, catcher.longs.size());
     clock.restartClock();
+    Service.sleep(500);
     assertTrue(clock.isClockRunning());
 
     // starting a watchdog with a new event

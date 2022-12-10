@@ -33,6 +33,16 @@ public class WebGuiTest extends AbstractTest {
     String ret = new String(bytes);
     assertTrue(ret.contains("days"));
   }
+  
+  @Test
+  public void getTestWithParameter() {
+
+    byte[] bytes = Http.get("http://localhost:8889/api/service/runtime/isLocal/runtime");
+    assertNotNull(bytes);
+    String ret = new String(bytes);
+    assertTrue(ret.contains("true"));
+  }
+
 
 // FIXME - ADD WHEN POST API IS WORKY
   @Test
