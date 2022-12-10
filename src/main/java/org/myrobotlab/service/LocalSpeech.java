@@ -309,7 +309,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    *          chars to filter.
    * 
    */
-  public void setFilter(String target, String replace) {
+  public void addFilter(String target, String replace) {
     LocalSpeechConfig c = (LocalSpeechConfig)config;
     if (c.replaceChars == null) {
       c.replaceChars = new HashMap<>();
