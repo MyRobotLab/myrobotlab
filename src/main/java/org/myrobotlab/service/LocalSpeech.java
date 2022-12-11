@@ -127,9 +127,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       // windows 10 minimum - power shell interface - output in json
       args.add("Add-Type -AssemblyName System.Speech;");
       args.add("$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;");
-      args.add("$speak.SelectVoice('" + getVoice().getVoiceProvider().toString() + "');");
-      args.add("$speak.SetOutputToWaveFile('" + localFileName + "');");
-      args.add("$speak.speak('" + toSpeak + "')");
+      args.add("$speak.SelectVoice(\"" + getVoice().getVoiceProvider().toString() + "\");");
+      args.add("$speak.SetOutputToWaveFile(\"" + localFileName + "\");");
+      args.add("$speak.speak(\"" + toSpeak + "\")");
       String ret = Runtime.execute("powershell.exe", args, null, null, null);
 
       log.info("powershell returned : {}", ret);
@@ -371,9 +371,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
     sb.append("Add-Type -AssemblyName System.Speech;");
     sb.append("$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;");
-    sb.append("$speak.SelectVoice('{{voice_name} }');\n");
-    sb.append("$speak.SetOutputToWaveFile('{filename}');\n");
-    sb.append("$speak.speak('{text}')\n");
+    sb.append("$speak.SelectVoice(\"{{voice_name} }\");\n");
+    sb.append("$speak.SetOutputToWaveFile(\"{filename}\");\n");
+    sb.append("$speak.speak(\"{text}\")\n");
 
     return true;
   }
