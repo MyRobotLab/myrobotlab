@@ -100,7 +100,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     if (c.replaceChars == null) {
       // if not user defined - escape double quotes to not affect templates
       c.replaceChars = new HashMap<>(); 
-      c.replaceChars.put("\"", "\\\"");
+      c.replaceChars.put("\'", "\'\'");
     } 
     for (String target: c.replaceChars.keySet()) {
       toSpeak = toSpeak.replace(target, c.replaceChars.get(target));
@@ -127,9 +127,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       // windows 10 minimum - power shell interface - output in json
       args.add("Add-Type -AssemblyName System.Speech;");
       args.add("$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;");
-      args.add("$speak.SelectVoice(\"" + getVoice().getVoiceProvider().toString() + "\");");
-      args.add("$speak.SetOutputToWaveFile(\"" + localFileName + "\");");
-      args.add("$speak.speak(\"" + toSpeak + "\")");
+      args.add("$speak.SelectVoice('" + getVoice().getVoiceProvider().toString() + "');");
+      args.add("$speak.SetOutputToWaveFile('" + localFileName + "');");
+      args.add("$speak.speak('" + toSpeak + "')");
       String ret = Runtime.execute("powershell.exe", args, null, null, null);
 
       log.info("powershell returned : {}", ret);
@@ -464,22 +464,22 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       // Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
       LoggingFactory.init("INFO");
 
-      Runtime.startConfig("localspeech-01");
-      boolean done = true;
-      if (done) {
-        return;
-      }
+      // Runtime.startConfig("localspeech-01");
       
       LocalSpeech mouth = (LocalSpeech) Runtime.start("mouth", "LocalSpeech");
       // mouth.setSay();
       // mouth.speakBlocking("test 1 2 3");
-      mouth.speakBlocking("hello my name is sam, sam i am yet again, how \"are you? do you 'live in a zoo too? ");
+      // mouth.speakBlocking("hello my name is sam, sam i am yet again, how \"are you? do you 'live in a zoo too? ");
 
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
 
+      boolean done = true;
+      if (done) {
+        return;
+      }
 
       // mouth.setMimic();
 
