@@ -22,37 +22,37 @@ public class ClockTest extends AbstractTest {
     Python python = (Python) Runtime.start("python", "Python");
     TestCatcher catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
     catcher.clear();
-    
+
     // check service script
     python.execResource("Clock/Clock.py");
 
     // TODO release clock
     // TODO some verification in python
-    
+
     // basic service functions
     Clock clock = (Clock) Runtime.start("clockTest", "Clock");
     Integer interval = 1000;
     assertNotNull(clock);
     clock.setInterval(interval);
     assertEquals(interval, clock.getInterval());
-    
+
     clock.startClock();
     Service.sleep(10);
     assertTrue(clock.isClockRunning());
-    
+
     clock.stopClock();
     Service.sleep(10);
     assertTrue(!clock.isClockRunning());
 
     // set subscription
     clock.addListener("publishEpoch", "catcher", "onLong");
-    
+
     // watchdog - by default it starts with the "wait" when started vs the event
     // must not have generated a pulse
     clock.startClock();
     Service.sleep(500);
     // starting clock should not immediately fire pulse
-    assertEquals(0, catcher.longs.size());
+    assertEquals("start sleep 500ms", 0, catcher.longs.size());
     Service.sleep(800);
     assertEquals(1, catcher.longs.size());
 
@@ -64,21 +64,21 @@ public class ClockTest extends AbstractTest {
 
     clock.startClock();
     Service.sleep(500);
-    assertEquals(0, catcher.longs.size());
+    assertEquals("after 500ms", 0, catcher.longs.size());
     clock.restartClock();
 
     Service.sleep(500);
-    assertEquals(0, catcher.longs.size());
+    assertEquals("restart 1", 0, catcher.longs.size());
     clock.restartClock();
 
     Service.sleep(500);
-    assertEquals(0, catcher.longs.size());
+    assertEquals("restart 2", 0, catcher.longs.size());
     clock.restartClock();
 
     Service.sleep(500);
-    assertEquals(0, catcher.longs.size());
+    assertEquals("restart 3", 0, catcher.longs.size());
     clock.restartClock();
-    
+
     // wait now for the event
     Service.sleep(1100);
     assertEquals(1, catcher.longs.size());
@@ -93,23 +93,23 @@ public class ClockTest extends AbstractTest {
     catcher.longs.clear();
 
     clock.addClockEvent("catcher", "onString", "hello!");
-    clock.startClock();    
+    clock.startClock();
 
     // reset
     Service.sleep(500);
-    assertEquals(0, catcher.longs.size());
+    assertEquals("after adding clock event start", 0, catcher.longs.size());
     clock.restartClock();
 
     // reset
     Service.sleep(500);
-    assertEquals(0, catcher.longs.size());
+    assertEquals("after restart with event", 0, catcher.longs.size());
     clock.restartClock();
 
     String hello = catcher.strings.poll(1500, TimeUnit.MILLISECONDS);
     assertEquals("hello!", hello);
-    
-    Runtime.release("clock");
-    
+
+    Runtime.release("clockTest");
+
   }
 
 }
