@@ -15,7 +15,7 @@ arduino = runtime.start("Arduino","Arduino")
 arduino.connect(port)
 # Sleep so that the Arduino can be initialized
 sleep(4)
-ads1115.attach(arduino,"1","0x48")
+ads1115.attach(arduino,"0","0x48") # When using the Arduino, it only has a bus 0.
 
 # This section is to be used if you use the i2c pins of the Raspberry PI
 # raspi = runtime.start("Raspi","RasPi")
