@@ -43,6 +43,7 @@ import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinListener;
+import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoEvent;
 import org.slf4j.Logger;
@@ -74,7 +75,7 @@ import org.slf4j.Logger;
  *         TODO : move is not accurate ( 1° step seem not possible )
  */
 
-public class DiyServo extends AbstractServo implements ServoControl, PinListener {
+public class DiyServo extends AbstractServo implements PinListener, ServiceLifeCycleListener {
 
   double lastOutput = 0.0;
   /**
@@ -230,6 +231,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     motorControl = (MotorControl) startPeer("motor");
     initPid();
   }
+  
 
   /**
    * Equivalent to Arduino's Servo.detach() it de-energizes the servo
@@ -699,7 +701,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
       // return;
       // }
       
-      WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
+      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
       
@@ -790,6 +792,21 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   protected boolean processMove(Double newPos, boolean blocking, Long timeoutMs) {
     // TODO Auto-generated method stub
     return false;
+  }
+
+  @Override
+  public void onCreated(String name) {
+    log.info("created {}", name);
+  }
+
+  @Override
+  public void onStopped(String name) {
+    log.info("stopped {}", name);
+  }
+
+  @Override
+  public void onReleased(String name) {
+    log.info("released {}", name);
   }
 
 }
