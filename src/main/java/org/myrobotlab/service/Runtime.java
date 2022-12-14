@@ -2010,6 +2010,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         }
       } catch (Exception e) {
         runtime.error("%s threw while releasing", e);
+        log.error("rease", e);
       }
     }
 

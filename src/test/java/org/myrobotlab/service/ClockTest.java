@@ -30,7 +30,7 @@ public class ClockTest extends AbstractTest {
     // TODO some verification in python
     
     // basic service functions
-    Clock clock = (Clock) Runtime.start("clock", "Clock");
+    Clock clock = (Clock) Runtime.start("clockTest", "Clock");
     Integer interval = 1000;
     assertNotNull(clock);
     clock.setInterval(interval);
