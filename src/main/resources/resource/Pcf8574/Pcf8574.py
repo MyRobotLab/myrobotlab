@@ -5,9 +5,9 @@ arduino.connect("COM3")
 pcf = runtime.start("pcf","Pcf8574")
 # From version 1.0.2316 use attach instead of setController
 # pcf.setController(arduino,"1","0x38")
-pcf.setBus("1")
+pcf.setBus("0")
 pcf.setAddress("0x38")
-pcf.attach(arduino,"1","0x38")
+pcf.attach(arduino,"0","0x38") # When using the Arduino, always use Bus 0, it doesn't have a bus 1
 # Set four pins as output. 
 pcf.pinMode(0,"OUTPUT")
 pcf.pinMode(1,"OUTPUT")
