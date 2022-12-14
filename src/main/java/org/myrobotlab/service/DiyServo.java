@@ -192,9 +192,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    */
   public DiyServo(String n, String id) {
     super(n, id);
-    refreshPinArrayControls();
-    motorControl = (MotorControl) startPeer("motor");
-    initPid();
     subscribeToRuntime("registered");
     lastActivityTimeTs = System.currentTimeMillis();
   }
@@ -224,6 +221,14 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     pid.setSampleTime(pidKey, sampleTime); // Sets the sample time
     pid.setSetpoint(pidKey, setPoint);
     pid.startService();
+  }
+  
+  @Override
+  public void startService() {
+    super.startService();
+    refreshPinArrayControls();
+    motorControl = (MotorControl) startPeer("motor");
+    initPid();
   }
 
   /**
@@ -685,7 +690,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     LoggingFactory.getInstance().setLevel(Level.INFO);
     try {
       // Runtime.start("webgui", "WebGui");
-      Runtime.start("gui", "SwingGui");
+      // Runtime.start("gui", "SwingGui");
       // VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual",
       // "VirtualArduino");
       // virtual.connect("COM3");
@@ -693,6 +698,19 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
       // if (done) {
       // return;
       // }
+      
+      WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+      
+      Runtime.start("diy", "DiyServo");
+      
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+      
 
       String port = "COM4";
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
