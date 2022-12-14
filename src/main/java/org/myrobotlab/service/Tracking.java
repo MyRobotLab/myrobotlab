@@ -40,13 +40,13 @@ public class Tracking extends Service {
   // and let the control system deal with that - having "servos" is
   // too device specific
 
-  String pan;
+  //String pan;
 
-  String tilt;
+  // String tilt;
 
-  String pid;
+  // String pid;
 
-  String cv;
+  // String cv;
 
   long lostTrackingDelayMs = 1000;
 
@@ -102,8 +102,8 @@ public class Tracking extends Service {
   }
 
   public void attachPid(String pid) {
-    this.pid = pid;
-    subscribe(pid, "publishClassification");
+    setPeerName("pid", pid);
+    subscribe(getPeerName("pid"), "publishClassification");
   }
 
   /**
@@ -121,14 +121,14 @@ public class Tracking extends Service {
    */
   public void onPid(PidOutput pid) {
     if (state != TrackingState.IDLE) {
-      if (pid.key.equals(pan)) {
+      if (pid.key.equals(getPeerName("pan"))) {
         // send(pan, "moveIncr", pid.value);
-        send(pan, "moveIncr", pid.value);
+        send(getPeerName("pan"), "moveIncr", pid.value);
         // send(pan, "moveTo", pid.value + panRef.getCurrentInputPos());
         // log.warn("x {}", pid.value);
         // invokeOn(pan, "moveTo", pid.value);
-      } else if (pid.key.equals(tilt)) {
-        send(tilt, "moveIncr", pid.value);
+      } else if (pid.key.equals(getPeerName("tilt"))) {
+        send(getPeerName("tilt"), "moveIncr", pid.value);
         // send(tilt, "moveIncr", pid.value);
         // log.warn("y {}", pid.value);
         // invokeOn(tilt, "moveTo", pid.value);
@@ -142,22 +142,22 @@ public class Tracking extends Service {
    * verify all required service and configuration start tracking
    */
   public void enable() {
-    if (pid == null) {
-      error("pid not attached");
-      return;
-    }
-    if (pan == null) {
-      error("pan not attached");
-      return;
-    }
-    if (tilt == null) {
-      error("tilt not attached");
-      return;
-    }
-    if (cv == null) {
-      error("cv not attached");
-      return;
-    }
+//    if (pid == null) {
+//      error("pid not attached");
+//      return;
+//    }
+//    if (pan == null) {
+//      error("pan not attached");
+//      return;
+//    }
+//    if (tilt == null) {
+//      error("tilt not attached");
+//      return;
+//    }
+//    if (cv == null) {
+//      error("cv not attached");
+//      return;
+//    }
     // configuring pids
     // xPid.key = pan;
     // yPid.key = tilt;
@@ -168,12 +168,12 @@ public class Tracking extends Service {
     // preserve pre-existing filters ?
     // put back when disabled ?
 
-    subscribe(pid, "publishPid");
-    subscribe(cv, "publishClassification");
+    subscribe(getPeerName("pid"), "publishPid");
+    subscribe(getPeerName("cv"), "publishClassification");
     for (String filter : trackingFilters) {
-      send(cv, "addFilter", filter);
+      send(getPeerName("cv"), "addFilter", filter);
     }
-    send(cv, "capture");
+    send(getPeerName("cv"), "capture");
     state = TrackingState.SEARCHING;
     invoke("publishTrackingState");
     broadcastState();
@@ -214,8 +214,8 @@ public class Tracking extends Service {
         log.info("input {} {}", x, y);
 
         // PV - measured value
-        send(pid, "compute", pan, x);
-        send(pid, "compute", tilt, y);
+        send(getPeerName("pid"), "compute", getPeerName("pan"), x);
+        send(getPeerName("pid"), "compute", getPeerName("tilt"), y);
 
         // if largestFaceOnly
 
@@ -256,21 +256,21 @@ public class Tracking extends Service {
   public void disable() {
     state = TrackingState.IDLE;
     for (String filter : trackingFilters) {
-      send(cv, "disableFilter", filter);
+      send(getPeerName("cv"), "disableFilter", filter);
     }
     invoke("publishTrackingState");
   }
 
   public void attachPan(String pan) {
-    this.pan = pan;
+    setPeerName("pan", pan); // this is config NOT plan
   }
 
   public void attachTilt(String tilt) {
-    this.tilt = tilt;
+    setPeerName("pan", tilt); // this is config NOT plan
   }
 
   public void attachCv(String cv) {
-    this.cv = cv;
+    setPeerName("cv", cv);
   }
 
   @Override
@@ -299,8 +299,8 @@ public class Tracking extends Service {
   }
 
   public void rest() {
-    send(pan, "rest");
-    send(tilt, "rest");
+    send(getPeerName("pan"), "rest");
+    send(getPeerName("tilt"), "rest");
   }
 
   public static void main(String[] args) {

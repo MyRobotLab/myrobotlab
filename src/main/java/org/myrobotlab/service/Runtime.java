@@ -2157,7 +2157,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       return;
     }
 
-    // check for peers
+    // check for peers !! check in config or check in Plan ?!?!?
     Map<String, Peer> peers = si.getPeers();
     if (peers != null) {
       for (String peerKey : peers.keySet()) {
@@ -2537,13 +2537,25 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       ServiceConfig sc = requestedService.getConfig();
-      Map<String, Peer> peers = sc.getPeers();
-      if (peers != null) {
-        for (String p : peers.keySet()) {
-          Peer peer = peers.get(p);
-          log.info("peer {}", peer);
+//      Map<String, Peer> peers = sc.getPeers();
+//      if (peers != null) {
+//        for (String p : peers.keySet()) {
+//          Peer peer = peers.get(p);
+//          log.info("peer {}", peer);
+//        }
+//      }
+      // recursive - start peers of peers of peers ...
+      Map<String, Peer> subPeers = sc.getPeers();
+      if (sc != null && subPeers != null) {
+        for (String subPeerKey : subPeers.keySet()) {
+          // IF AUTOSTART !!!
+          Peer subPeer = subPeers.get(subPeerKey);
+          if (subPeer.autoStart) {
+            Runtime.start(sc.getPeerName(subPeerKey), subPeer.type);
+          }
         }
       }
+      
 
       requestedService.startService();
       return requestedService;
@@ -4161,7 +4173,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * Clear the {@link #masterPlan}.
    */
-  static public void clearConfig() {
+  static public void clearPlan() {
     Runtime runtime = Runtime.getInstance();
     runtime.masterPlan.clear();
     runtime.masterPlan.put("runtime", new RuntimeConfig());

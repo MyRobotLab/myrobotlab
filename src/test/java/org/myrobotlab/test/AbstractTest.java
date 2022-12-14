@@ -100,7 +100,7 @@ public class AbstractTest {
       threadSetStart = Thread.getAllStackTraces().keySet();
     }
     installAll();
-    Runtime.clearConfig();
+    Runtime.clearPlan();
   }
 
   static public List<String> getThreadNames() {

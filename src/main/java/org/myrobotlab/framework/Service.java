@@ -802,7 +802,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   synchronized public void addTask(String taskName, long intervalMs, long delayMs, String method, Object... params) {
-    addTask(method, false, 0, delayMs, method, params);
+    addTask(taskName, false, intervalMs, delayMs, method, params);
   }
 
   /**
@@ -1817,6 +1817,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   synchronized public ServiceInterface startPeer(String peerKey) {
+    // get current definition of config and peer
     Peer peer = config.getPeer(peerKey);
 
     if (peer == null) {
@@ -1842,17 +1843,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       sc = plan.get(peer.name);
     }
 
-    // recursive - start peers of peers of peers ...
-    Map<String, Peer> subPeers = sc.getPeers();
-    if (sc != null && subPeers != null) {
-      for (String subPeerKey : subPeers.keySet()) {
-        // IF AUTOSTART !!!
-        Peer subPeer = subPeers.get(subPeerKey);
-        if (subPeer.autoStart) {
-          Runtime.start(sc.getPeerName(subPeerKey), subPeer.type);
-        }
-      }
-    }
+//    // recursive - start peers of peers of peers ...
+//    Map<String, Peer> subPeers = sc.getPeers();
+//    if (sc != null && subPeers != null) {
+//      for (String subPeerKey : subPeers.keySet()) {
+//        // IF AUTOSTART !!!
+//        Peer subPeer = subPeers.get(subPeerKey);
+//        if (subPeer.autoStart) {
+//          Runtime.start(sc.getPeerName(subPeerKey), subPeer.type);
+//        }
+//      }
+//    }
 
     // start peer requested
     Runtime.start(peer.name, sc.type);
@@ -2678,10 +2679,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   // FIXME - test
-  public void updatePeerName(String key, String fullName) {
+  public void setPeerName(String key, String fullName) {
     Peer peer = config.getPeer(key);
     String oldName = peer.name;
     peer.name = fullName;
+    // update plan ?
     ServiceConfig.getDefault(Runtime.getPlan(), peer.name, peer.type);
     // Runtime runtime = Runtime.getInstance();
     // String configPath = runtime.getConfigPath();

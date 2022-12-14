@@ -69,7 +69,7 @@ public class ConfigTest extends AbstractTest {
     Runtime runtime = Runtime.getInstance();
     Plan plan = null;
 
-    Runtime.clearConfig();
+    Runtime.clearPlan();
     removeConfigData();
     Runtime.setConfig(CONFIG_NAME);
 
@@ -100,7 +100,7 @@ public class ConfigTest extends AbstractTest {
     // save the plan
     Runtime.savePlan(CONFIG_NAME);
     // clear the in memory plan
-    Runtime.clearConfig();
+    Runtime.clearPlan();
 
     // start the plan
     Runtime.startConfig(CONFIG_NAME);
@@ -123,22 +123,22 @@ public class ConfigTest extends AbstractTest {
     // its clear with no config or peers
 
     // clear plan
-    Runtime.clearConfig();
+    Runtime.clearPlan();
     removeConfigData();
 
     plan = Runtime.getPlan();
-    assertEquals("cleared plan should be 0", 0, plan.size());
+    assertEquals("cleared plan should be 0", 1, plan.size());
     // assertEquals("cleared plan peers be 0", 0, plan.getPeers().size());
 
     // simple single plan
     // load is attempt to load from file - if not available load from memory
-    Runtime.clearConfig();
+    Runtime.clearPlan();
     Runtime.load("c1", "Clock");
     plan = Runtime.getPlan();
     ClockConfig clock = (ClockConfig) plan.get("c1");
     clock.interval = 3555;
     assertNotNull(clock);
-    assertEquals(1, plan.size());
+    assertEquals(2, plan.size());
 
     // FIXME - use case test individual services being saved - test setting
     // configPath to non default
@@ -194,11 +194,11 @@ public class ConfigTest extends AbstractTest {
     // given i have a composite service
     // when i load it
     // then all services will configured by its default will be loaded
-    Runtime.clearConfig();
+    Runtime.clearPlan();
     plan = Runtime.load("track", "Tracking");
     TrackingConfig track = (TrackingConfig) plan.get("track");
     assertNotNull(track);
-    assertEquals("tracking is 1 service and currently has 6 subservices", 7, plan.size());
+    assertEquals("tracking is 1 service and currently has 6 subservices", 8, plan.size());
 
     // Create creates it does not start - there is no starting of sub systems if
     // you are creating !
