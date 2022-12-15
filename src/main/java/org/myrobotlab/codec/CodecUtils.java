@@ -115,6 +115,25 @@ public class CodecUtils {
             WRAPPER_TYPES.stream().map(Object::getClass).map(Class::getCanonicalName).collect(Collectors.toSet());
     public static final String API_MESSAGES = "messages";
     public static final String API_SERVICE = "service";
+
+    /**
+     * The path from a top-level URL to the messages API
+     * endpoint.
+     * <p></p>
+     * FIXME This should be moved to WebGui,
+     *  CodecUtils should have no knowledge of URLs
+     */
+    public static final String API_MESSAGES_PATH = PARAMETER_API + API_MESSAGES;
+
+
+    /**
+     * The path from a top-level URL to the service API
+     * endpoint.
+     * <p></p>
+     * FIXME This should be moved to WebGui,
+     *  CodecUtils should have no knowledge of URLs
+     */
+    public static final String API_SERVICE_PATH = PARAMETER_API + API_SERVICE;
     /**
      * use {@link MethodCache}
      */
@@ -838,8 +857,8 @@ public class CodecUtils {
         cmd = cmd.trim();
 
         // remove uninteresting api prefix
-        if (cmd.startsWith("/api/service")) {
-            cmd = cmd.substring("/api/service".length());
+        if (cmd.startsWith(API_SERVICE_PATH)) {
+            cmd = cmd.substring(API_SERVICE_PATH.length());
         }
 
         if (contextPath != null) {
@@ -848,6 +867,7 @@ public class CodecUtils {
 
         // assume runtime as 'default'
         if (msg.name == null) {
+            // FIXME "runtime" really needs to be a constant at the very least
             msg.name = "runtime";
         }
 
@@ -1023,9 +1043,9 @@ public class CodecUtils {
      */
     static public List<ApiDescription> getApis() {
         List<ApiDescription> ret = new ArrayList<>();
-        ret.add(new ApiDescription("message", "{scheme}://{host}:{port}/api/messages", "ws://localhost:8888/api/messages",
-                "An asynchronous api useful for bi-directional websocket communication, primary messages api for the webgui.  URI is /api/messages data contains a json encoded Message structure"));
-        ret.add(new ApiDescription("service", "{scheme}://{host}:{port}/api/service", "http://localhost:8888/api/service/runtime/getUptime",
+        ret.add(new ApiDescription("message", "{scheme}://{host}:{port}" + API_MESSAGES_PATH, "ws://localhost:8888" + API_MESSAGES_PATH,
+                "An asynchronous api useful for bi-directional websocket communication, primary messages api for the webgui.  URI is " + API_MESSAGES_PATH + " data contains a json encoded Message structure"));
+        ret.add(new ApiDescription("service", "{scheme}://{host}:{port}" + API_SERVICE_PATH, "http://localhost:8888" + API_SERVICE_PATH +"/runtime/getUptime",
                 "An synchronous api useful for simple REST responses"));
         return ret;
     }
