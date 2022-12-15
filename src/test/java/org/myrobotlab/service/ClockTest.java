@@ -24,7 +24,7 @@ public class ClockTest extends AbstractTest {
     catcher.clear();
 
     // check service script
-    python.execResource("Clock/Clock.py");
+//    python.execResource("Clock/Clock.py");
 
     // TODO release clock
     // TODO some verification in python
@@ -49,6 +49,7 @@ public class ClockTest extends AbstractTest {
 
     // watchdog - by default it starts with the "wait" when started vs the event
     // must not have generated a pulse
+    catcher.longs.clear();
     clock.startClock();
     Service.sleep(500);
     // starting clock should not immediately fire pulse
@@ -63,24 +64,96 @@ public class ClockTest extends AbstractTest {
     catcher.longs.clear();
 
     clock.startClock();
-    Service.sleep(500);
-    assertEquals("after 500ms", 0, catcher.longs.size());
+    Service.sleep(100);
+    assertEquals("after 100ms", 0, catcher.longs.size());
     clock.restartClock();
 
-    Service.sleep(500);
+    Service.sleep(100);
     assertEquals("restart 1", 0, catcher.longs.size());
     clock.restartClock();
 
-    Service.sleep(500);
+    Service.sleep(100);
     assertEquals("restart 2", 0, catcher.longs.size());
     clock.restartClock();
 
-    Service.sleep(500);
+    Service.sleep(100);
     assertEquals("restart 3", 0, catcher.longs.size());
     clock.restartClock();
 
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    Service.sleep(100);
+    assertEquals("restart 3", 0, catcher.longs.size());
+    clock.restartClock();
+    
+    
     // wait now for the event
     Service.sleep(1100);
+    log.info("size {}",catcher.longs.size());
     assertEquals(1, catcher.longs.size());
     clock.restartClock();
     Service.sleep(500);

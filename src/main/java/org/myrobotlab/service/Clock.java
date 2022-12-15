@@ -27,6 +27,8 @@ public class Clock extends Service {
   public class ClockThread implements Runnable {
 
     private transient Thread thread = null;
+    
+    public boolean running = false;
 
     public ClockThread() {
     }
@@ -37,8 +39,9 @@ public class Clock extends Service {
 
       try {
 
-        c.running = true;
-        while (c.running) {
+        // c.running = true;
+        running = true;
+        while (running) {
           Thread.sleep(c.interval);
           Date now = new Date();
           for (Message msg : events) {
@@ -51,7 +54,7 @@ public class Clock extends Service {
       } catch (InterruptedException e) {
         log.info("ClockThread interrupt");
       }
-      c.running = false;
+      running = false;
       thread = null;
     }
 
@@ -60,9 +63,11 @@ public class Clock extends Service {
     // TODO - create and use a single thread - use wait(sleep) notify for
     // control
     synchronized public void start() {
+      ClockConfig c = (ClockConfig) config;
       if (thread == null) {
         thread = new Thread(this, getName() + "_ticking_thread");
         thread.start();
+        c.running = true;
         invoke("publishClockStarted");
       } else {
         log.info("{} already started", getName());
@@ -73,6 +78,7 @@ public class Clock extends Service {
       ClockConfig c = (ClockConfig) config;
       if (thread != null) {
         thread.interrupt();
+        running = false;
       } else {
         log.info("{} already stopped");
       }
