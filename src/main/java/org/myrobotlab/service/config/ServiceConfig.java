@@ -238,7 +238,10 @@ public class ServiceConfig {
   }
 
   public static ServiceConfig getDefaultServiceConfig(String type) {
-    Plan plan = getDefault(Runtime.getPlan(), type.toLowerCase(), type);
+    // Plan plan = getDefault(Runtime.getPlan(), type.toLowerCase(), type);
+    // FIXED - do not modify current plan - this is only to get deps on 
+    // install
+    Plan plan = getDefault(new Plan("runtime"), type.toLowerCase(), type);
     return plan.get(type.toLowerCase());
   }
 }

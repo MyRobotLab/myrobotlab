@@ -36,7 +36,7 @@ public class IndianTts extends AbstractSpeechSynthesis {
   @Override
   public void startService() {
     super.startService();
-    httpClient = (HttpClient) startPeer("httpClient");
+    httpClient = (HttpClient) startPeer("http");
     httpClient.startService();
   }
 
