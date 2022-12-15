@@ -30,9 +30,6 @@ public class Clock extends Service {
     
     public boolean running = false;
 
-    public ClockThread() {
-    }
-
     @Override
     public void run() {
       ClockConfig c = (ClockConfig) config;
@@ -40,7 +37,9 @@ public class Clock extends Service {
       try {
 
         // c.running = true;
+        c.running = true;
         running = true;
+        invoke("publishClockStarted");
         while (running) {
           Thread.sleep(c.interval);
           Date now = new Date();
@@ -55,6 +54,7 @@ public class Clock extends Service {
         log.info("ClockThread interrupt");
       }
       running = false;
+      c.running = false;
       thread = null;
     }
 
@@ -63,33 +63,22 @@ public class Clock extends Service {
     // TODO - create and use a single thread - use wait(sleep) notify for
     // control
     synchronized public void start() {
-      ClockConfig c = (ClockConfig) config;
       if (thread == null) {
         thread = new Thread(this, getName() + "_ticking_thread");
-        thread.start();
-        c.running = true;
-        invoke("publishClockStarted");
+        thread.start();                
       } else {
         log.info("{} already started", getName());
       }
     }
 
     synchronized public void stop() {
-      ClockConfig c = (ClockConfig) config;
       if (thread != null) {
         thread.interrupt();
-        running = false;
       } else {
         log.info("{} already stopped");
       }
-
-      // change state - broadcast it
-      if (c.running == true) {
-        broadcastState();
-      }
-
-      c.running = false;
-      thread = null;
+      running = false;
+      Service.sleep(20);
     }
   }
 
