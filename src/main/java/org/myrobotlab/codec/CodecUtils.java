@@ -530,7 +530,12 @@ public class CodecUtils {
         boolean useVirtClassField = clazz == null;
         if (!useVirtClassField) {
             try {
-                msg.data = MethodCache.getInstance().getDecodedJsonParameters(clazz, msg.method, msg.data);
+                Object[] params = MethodCache.getInstance().getDecodedJsonParameters(clazz, msg.method, msg.data);
+                if (params == null)
+                    useVirtClassField = true;
+                else {
+                    msg.data = params;
+                }
                 msg.encoding = null;
             } catch (RuntimeException e) {
                 log.info(String.format("MethodCache lookup fail: %s.%s", serviceName, msg.method));
@@ -547,8 +552,23 @@ public class CodecUtils {
                     if (!USING_GSON) {
                         msg.data[i] = fromJson((String) msg.data[i], Object.class);
                     } else {
-                        // Serializable should cover everything of interest
-                        msg.data[i] = fromJson((String) msg.data[i], Serializable.class);
+                        // Workaround because GSON won't deserialize a primitive when
+                        // given serializable
+                        if (isBoolean((String) msg.data[i])) {
+                            msg.data[i] = makeBoolean((String) msg.data[i]);
+                        } else if(isInteger((String) msg.data[i])) {
+                            msg.data[i] = makeInteger((String) msg.data[i]);
+                        } else if (isDouble((String) msg.data[i])) {
+                            msg.data[i] = makeDouble((String) msg.data[i]);
+                        } else if (((String) msg.data[i]).startsWith("\"")) {
+                            msg.data[i] = fromJson((String) msg.data[i], String.class);
+                        } else {
+                            // Object
+                            // Serializable should cover everything of interest
+                            
+                            msg.data[i] = fromJson((String) msg.data[i], Serializable.class);
+                        }
+
                     }
 
                     if (JSON_DEFAULT_OBJECT_TYPE.isAssignableFrom(msg.data[i].getClass())) {
@@ -631,7 +651,7 @@ public class CodecUtils {
     public static String toJson(Object o) {
         try {
             if (USING_GSON) {
-                return gson.toJson(o);
+                return gson.toJson(o, o.getClass());
             }
 
             return mapper.writeValueAsString(o);
@@ -1077,7 +1097,9 @@ public class CodecUtils {
     static public Boolean isBoolean(String data) {
         try {
             Boolean.parseBoolean(data);
-            return true;
+            // The above will return false and not throw
+            // exception for most cases
+            return "true".equals(data) || "false".equals(data);
         } catch (Exception ignored) {
             return false;
         }

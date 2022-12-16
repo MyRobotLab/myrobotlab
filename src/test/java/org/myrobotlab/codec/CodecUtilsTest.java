@@ -1,8 +1,5 @@
 package org.myrobotlab.codec;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
@@ -16,7 +13,6 @@ import static org.junit.Assert.assertNull;
 public class CodecUtilsTest extends AbstractTest {
 
     @Test
-    @Ignore
     public void testLocale() {
         Locale mrlLocale;
 
@@ -30,22 +26,38 @@ public class CodecUtilsTest extends AbstractTest {
         code = "-";
         mrlLocale = new Locale(code);
         json = CodecUtils.toJson(mrlLocale);
-        assertEquals("{\"language\":null,\"displayLanguage\":null,\"country\":null,\"displayCountry\":null,\"tag\":null,\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+        if(!CodecUtils.USING_GSON) {
+            assertEquals("{\"language\":null,\"displayLanguage\":null,\"country\":null,\"displayCountry\":null,\"tag\":null,\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+        } else {
+            assertEquals("{\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+        }
 
         code = " - ";
         mrlLocale = new Locale(code);
         json = CodecUtils.toJson(mrlLocale);
-        assertEquals("{\"language\":null,\"displayLanguage\":null,\"country\":null,\"displayCountry\":null,\"tag\":null,\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+        if(!CodecUtils.USING_GSON) {
+            assertEquals("{\"language\":null,\"displayLanguage\":null,\"country\":null,\"displayCountry\":null,\"tag\":null,\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+        } else {
+            assertEquals("{\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+        }
 
         code = "  ";
         mrlLocale = new Locale(code);
         json = CodecUtils.toJson(mrlLocale);
-        assertEquals("{\"language\":null,\"displayLanguage\":null,\"country\":null,\"displayCountry\":null,\"tag\":null,\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+        if (!CodecUtils.USING_GSON) {
+            assertEquals("{\"language\":null,\"displayLanguage\":null,\"country\":null,\"displayCountry\":null,\"tag\":null,\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+        } else {
+            assertEquals("{\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+        }
 
         code = "";
         mrlLocale = new Locale(code);
         json = CodecUtils.toJson(mrlLocale);
-        assertEquals("{\"language\":null,\"displayLanguage\":null,\"country\":null,\"displayCountry\":null,\"tag\":null,\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+        if (!CodecUtils.USING_GSON) {
+            assertEquals("{\"language\":null,\"displayLanguage\":null,\"country\":null,\"displayCountry\":null,\"tag\":null,\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+        } else {
+            assertEquals("{\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+        }
 
         code = "-uS";
         mrlLocale = new Locale(code);
