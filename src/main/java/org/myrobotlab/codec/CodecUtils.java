@@ -560,6 +560,7 @@ public class CodecUtils {
                         } else {
                             // Object
                             // Serializable should cover everything of interest
+                            
                             msg.data[i] = fromJson((String) msg.data[i], Serializable.class);
                         }
 
