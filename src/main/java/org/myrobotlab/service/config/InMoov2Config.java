@@ -231,6 +231,11 @@ public class InMoov2Config extends ServiceConfig {
     // FiniteStateMachineConfig.Transition("detected_face", "first_time",
     // "identify_user"));
 
+    PirConfig pir = (PirConfig) plan.get(getPeerName("pir"));
+    pir.pin = "23";
+    pir.controller = name + ".left";
+
+    
     // == Peer - random =============================
     RandomConfig random = (RandomConfig) plan.get(getPeerName("random"));
     random.enabled = false;
