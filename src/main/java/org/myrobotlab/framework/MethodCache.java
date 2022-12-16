@@ -2,6 +2,7 @@ package org.myrobotlab.framework;
 
 import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.codec.json.JsonDeserializationException;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -585,7 +586,27 @@ public class MethodCache {
             // this will probably need to change too
             encodedParams[i] = CodecUtils.toJson(encodedParams[i]);
           }
-          params[i] = CodecUtils.fromJson((String) encodedParams[i], paramTypes[i]);
+          if (encodedParams[i] instanceof String) {
+            String stringParam = (String) encodedParams[i];
+            if (!String.class.isAssignableFrom(paramTypes[i]) ||
+                    stringParam.startsWith("\"") || stringParam.startsWith("{")) {
+              // Only attempt to deserialize if not supposed to be String,
+              // or if json is formatted as a string or object
+              params[i] = CodecUtils.fromJson((String) encodedParams[i], paramTypes[i]);
+            } else {
+
+              // If supposed to be a string but not formatted like
+              // a json string, just leave it alone
+              params[i] = encodedParams[i];
+            }
+          } else {
+            if (encodedParams[i] != null && !paramTypes[i].isAssignableFrom(encodedParams[i].getClass())) {
+              throw new IllegalArgumentException("encodedParams passed with non-String element " +
+                      params[i] + "that is not of the required type " +
+                      paramTypes[i]);
+            }
+          }
+
         }
         // successfully decoded params
         return params;
