@@ -701,18 +701,18 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
             serviceName = msg.getFullName();
 
-            Class<?> clazz = Runtime.getClass(serviceName);
-            if (clazz == null) {
-              log.error("cannot derive local type from service {}", serviceName);
-            }
-
-            Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
-
-            Method method = cache.getMethod(clazz, msg.method, params);
-            if (method == null) {
-              error("method cache could not find %s.%s(%s)", clazz.getSimpleName(), msg.method, msg.data);
-              return;
-            }
+//            Class<?> clazz = Runtime.getClass(serviceName);
+//            if (clazz == null) {
+//              log.error("cannot derive local type from service {}", serviceName);
+//            }
+//
+//            Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
+//
+//            Method method = cache.getMethod(clazz, msg.method, params);
+//            if (method == null) {
+//              error("method cache could not find %s.%s(%s)", clazz.getSimpleName(), msg.method, msg.data);
+//              return;
+//            }
 
 
             ServiceInterface si = Runtime.getService(serviceName);
