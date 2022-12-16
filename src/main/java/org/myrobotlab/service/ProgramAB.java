@@ -1395,7 +1395,7 @@ public class ProgramAB extends Service
       // Strip the botname from the utterance passed to programab.
       utteranceDisp = utteranceDisp.replace("@" + botName, "");
       Response resp = getResponse(utterance.username, utteranceDisp);
-      if (!StringUtils.isEmpty(resp.msg)) {
+      if (resp != null && !StringUtils.isEmpty(resp.msg)) {
         // Ok.. now what? respond to the user ...
         Utterance response = new Utterance();
         response.username = resp.botName;
