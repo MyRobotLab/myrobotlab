@@ -8,6 +8,8 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
@@ -637,7 +639,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       } else if (apiKey.equals(CodecUtils.API_SERVICE)) {
 
-        Message msg = CodecUtils.cliToMsg(null, getName(), null, r.getRequest().getPathInfo());
+        Message msg = CodecUtils.cliToMsg(
+                null,
+                getName(),
+                null,
+                URLDecoder.decode(r.getRequest().getPathInfo(), StandardCharsets.UTF_8));
         if (bodyData != null) {
           msg.data = CodecUtils.fromJson(bodyData, Object[].class);
         }
@@ -646,7 +652,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
           String serviceName = msg.getFullName();// getName();
           Class<?> clazz = Runtime.getClass(serviceName);
           Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
-          msg.data = params;
+          if (params != null)
+            msg.data = params;
           Object ret = invoke(msg);
           OutputStream out = r.getResponse().getOutputStream();
           out.write(CodecUtils.toJson(ret).getBytes());
