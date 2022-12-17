@@ -825,11 +825,21 @@ public class ProgramAB extends Service
     File botPath = new File(path);
     File verifyAiml = new File(FileIO.gluePaths(path, "aiml"));
     if (botPath.exists() && botPath.isDirectory() && verifyAiml.exists() && verifyAiml.isDirectory()) {
+      
+      for (BotInfo bi: bots.values()) {
+        // check relative & absolute ???
+        if (bi.path.equals(botPath)) {
+          log.info("already loaded bot at {}", path);
+          return path;
+        }
+      }
+      
       BotInfo botInfo = new BotInfo(this, botPath);
 
       // key'ing on "path" probably would be better and only displaying "name"
       // then there would be no put/collisions only duplicate names
       // (preferrable)
+      
       bots.put(botInfo.name, botInfo);
       botInfo.img = getBotImage(botInfo.name);
 
@@ -841,6 +851,7 @@ public class ProgramAB extends Service
     }
     return path;
   }
+  
 
   @Deprecated /* for legacy - use addBotsDir */
   public String setPath(String path) {
@@ -1149,7 +1160,7 @@ public class ProgramAB extends Service
 
 //    listeners = getAttached("publishUtterance");
 //    config.utteranceListeners = listeners.toArray(new String[listeners.size()]);
-
+    config.bots.clear();
     for (BotInfo bot : bots.values()) {
 
       Path pathAbsolute = Paths.get(bot.path.getAbsolutePath());

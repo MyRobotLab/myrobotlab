@@ -2509,7 +2509,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   synchronized static public ServiceInterface start(String name, String type) {
     try {
-      if (name.equals("i01")) {
+      if (name.equals("proxy")) {
         log.info("herex");
       }
 
@@ -2535,6 +2535,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           service.startService();
           requestedService.addAutoStartedPeer(service.getName());
         }
+      }
+      
+      if (requestedService == null) {
+        log.error("here");
       }
 
       ServiceConfig sc = requestedService.getConfig();
@@ -4570,7 +4574,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     if (sc != null) {
       log.info("priority #0 - already have a plan for {} {}", name, type);
       plan.addRegistry(name);
-      return plan;
+//       return plan; REMOVED 12/16/22 - file need priority
     }
 
     // PRIORITY #1
@@ -4676,6 +4680,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return name;
   }
 
+//  @Override 
+//  public ServiceConfig getConfig() {
+//    RuntimeConfig config = (RuntimeConfig)super.getConfig();
+//    List<org.myrobotlab.service.config.ServiceConfig.Listener> listeners = new ArrayList
+//    for (org.myrobotlab.service.config.ServiceConfig.Listener listener: config.listeners) {
+//      if (listener.equals("stopped") || listener.equals("created")|| listener.equals("registered")|| listener.equals("released")) {
+//        
+//      }
+//    }
+//  }
+  
   @Override
   public ServiceConfig apply(ServiceConfig c) {
     RuntimeConfig config = (RuntimeConfig) super.apply(c);
@@ -4788,16 +4803,20 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         }
       }
 
-      // save full plan
-      Plan plan = getPlan();
-      for (String key : plan.keySet()) {
-        String data = CodecUtils.toYaml(plan.get(key));
-        File dir = new File(configPath);
-        dir.mkdirs();
-        String ymlFileName = configPath + fs + key + ".yml";
-        FileIO.toFile(ymlFileName, data.getBytes());
-      }
+      // save full plan WRONG !!! its RUNNING CONFIG ONLY
+      // THIS SAVE WOULD BE "PLAN SAVE"
+//      Plan plan = getPlan();
+//      for (String key : plan.keySet()) {
+//        String data = CodecUtils.toYaml(plan.get(key));
+//        File dir = new File(configPath);
+//        dir.mkdirs();
+//        String ymlFileName = configPath + fs + key + ".yml";
+//        FileIO.toFile(ymlFileName, data.getBytes());
+//      }
 
+      File dir = new File(configPath);
+      dir.mkdirs();      
+      
       // save running services
       Set<String> servicesToSave = new HashSet<>();
 
@@ -4816,8 +4835,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         ServiceInterface si = getService(s);
         ServiceConfig config = si.getConfig();
         String data = CodecUtils.toYaml(config);
-        File dir = new File(configPath);
-        dir.mkdirs();
         String ymlFileName = configPath + fs + CodecUtils.shortName(s) + ".yml";
         FileIO.toFile(ymlFileName, data.getBytes());
         info("saved %s", ymlFileName);

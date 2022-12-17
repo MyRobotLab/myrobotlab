@@ -1,9 +1,7 @@
 package org.myrobotlab.service.config;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 public class RuntimeConfig extends ServiceConfig {
 
@@ -15,31 +13,33 @@ public class RuntimeConfig extends ServiceConfig {
   // NEED THIS PRIVATE BUT CANNOT BE
   public List<String> registry = new ArrayList<>();
 
-  transient private Set<String> registrySet = new LinkedHashSet<>();
-
   /**
    * add and remove a service using these methods and the uniqueness will be
    * preserved so there are no double entries in the registry list
    * 
    * @param name
    */
-  public void add(String name) {
-    if (!registrySet.contains(name)) {
-      registry.add(name);
-      registrySet.add(name);
+  synchronized public void add(String name) {
+    if (name == null) {
+      log.error("RuntimeConfig.add(null)");
+      return;
     }
+    for (String n : registry) {
+      if (n.equals(name)) {
+        return;
+      }
+    }
+    registry.add(name);
   }
 
   public void remove(String name) {
     registry.remove(name);
-    registrySet.remove(name);
   }
 
   public void clear() {
     registry.clear();
-    registrySet.clear();
   }
-  
+
   public String toString() {
     return registry.toString();
   }
