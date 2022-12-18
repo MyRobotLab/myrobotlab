@@ -566,7 +566,7 @@ public class CodecUtils {
 
                     }
 
-                    if (JSON_DEFAULT_OBJECT_TYPE.isAssignableFrom(msg.data[i].getClass())) {
+                    if (msg.data[i] != null && JSON_DEFAULT_OBJECT_TYPE.isAssignableFrom(msg.data[i].getClass())) {
                         log.warn("Deserialized parameter to default object type. " +
                                 "Possibly missing virtual class field: " +
                                 msg.data[i]);
