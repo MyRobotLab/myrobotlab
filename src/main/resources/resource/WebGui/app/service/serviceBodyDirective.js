@@ -59,7 +59,7 @@ angular.module('mrlapp.service').directive('serviceBody', ['peer', '$compile', '
                     }
 
                     newscope.release = function(peerKey) {
-                        mrl.sendTo(scope.panel.name, 'releaseService')
+                        mrl.sendTo('runtime', 'release', scope.panel.name)
                     }
 
                     newscope.startPeer = function(peerKey) {

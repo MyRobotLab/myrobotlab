@@ -288,13 +288,11 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         }
     }
 
-
     $scope.unsetConfig = function() {
         console.info('unsetConfig')
         msg.sendTo('runtime', 'unsetConfig')
     }
 
-    
     $scope.startConfig = function() {
         console.info('startConfig')
         if ($scope.selectedConfig.length) {
@@ -320,7 +318,9 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     $scope.saveConfig = function() {
         console.info('saveConfig')
         let path = $scope.service.configPath
-        $scope.service.configName = path.substring(path.lastIndexOf('/') + 1)
+        if (path) {
+            $scope.service.configName = path.substring(path.lastIndexOf('/') + 1)
+        }
 
         let onOK = function() {
             // const path = $scope.service.configPath

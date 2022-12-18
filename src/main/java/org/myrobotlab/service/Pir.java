@@ -188,6 +188,7 @@ public class Pir extends Service implements PinListener {
     broadcastState();
   }
 
+  // FIXME - use config values directly, remove local members
   @Override
   public PirConfig getConfig() {
 
@@ -239,11 +240,13 @@ public class Pir extends Service implements PinListener {
   public ServiceConfig apply(ServiceConfig c) {
     PirConfig config = (PirConfig) super.apply(c);
 
-    if (config.pin != null)
+    if (config.pin != null) {
       setPin(config.pin);
+    }
 
-    if (config.rate != null)
+    if (config.rate != null) {
       setRate(config.rate);
+    }
 
     if (config.controller != null) {
       try {
@@ -270,13 +273,15 @@ public class Pir extends Service implements PinListener {
     boolean sense = (pindata.value != 0);
 
     // sparse publishing only on state change
-    if (active == null) {
-      invoke("publishSense", sense);
-      active = sense;
-    } else if (active != sense) {
+   if (active == null || active != sense) {
       // state change
       invoke("publishSense", sense);
       active = sense;
+      if (active) {
+        invoke("publishPirOn");
+      } else {
+        invoke("publishPirOff");
+      }
       lastChangeTs = System.currentTimeMillis();
     }
   }
@@ -284,7 +289,17 @@ public class Pir extends Service implements PinListener {
   public Boolean publishSense(Boolean b) {
     return b;
   }
+  
+  
+  public void publishPirOn() {
+    log.info("publishPirOn");
+  }
 
+  public void publishPirOff() {
+    log.info("publishPirOff");
+  }
+  
+  
   /**
    * Sets the pin to use for the Input of the PIR service.
    * 
