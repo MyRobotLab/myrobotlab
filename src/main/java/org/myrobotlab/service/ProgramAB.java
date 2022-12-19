@@ -454,7 +454,10 @@ public class ProgramAB extends Service
   }
 
   public void setPredicate(String userName, String botName, String predicateName, String predicateValue) {
-    getSession(userName, botName).setPredicate(predicateName, predicateValue);
+    Session session = getSession(userName, botName);
+    if (session != null) {
+      session.setPredicate(predicateName, predicateValue);
+    }
   }
 
   @Deprecated
@@ -825,21 +828,21 @@ public class ProgramAB extends Service
     File botPath = new File(path);
     File verifyAiml = new File(FileIO.gluePaths(path, "aiml"));
     if (botPath.exists() && botPath.isDirectory() && verifyAiml.exists() && verifyAiml.isDirectory()) {
-      
-      for (BotInfo bi: bots.values()) {
+
+      for (BotInfo bi : bots.values()) {
         // check relative & absolute ???
         if (bi.path.equals(botPath)) {
           log.info("already loaded bot at {}", path);
           return path;
         }
       }
-      
+
       BotInfo botInfo = new BotInfo(this, botPath);
 
       // key'ing on "path" probably would be better and only displaying "name"
       // then there would be no put/collisions only duplicate names
       // (preferrable)
-      
+
       bots.put(botInfo.name, botInfo);
       botInfo.img = getBotImage(botInfo.name);
 
@@ -851,7 +854,6 @@ public class ProgramAB extends Service
     }
     return path;
   }
-  
 
   @Deprecated /* for legacy - use addBotsDir */
   public String setPath(String path) {
@@ -1153,13 +1155,14 @@ public class ProgramAB extends Service
 
   @Override
   public ServiceConfig getConfig() {
-    ProgramABConfig config = (ProgramABConfig)super.getConfig();
+    ProgramABConfig config = (ProgramABConfig) super.getConfig();
     // REMOVED from overlap with subscriptions
     // Set<String> listeners = getAttached("publishText");
     // config.textListeners = listeners.toArray(new String[listeners.size()]);
 
-//    listeners = getAttached("publishUtterance");
-//    config.utteranceListeners = listeners.toArray(new String[listeners.size()]);
+    // listeners = getAttached("publishUtterance");
+    // config.utteranceListeners = listeners.toArray(new
+    // String[listeners.size()]);
     config.bots.clear();
     for (BotInfo bot : bots.values()) {
 
@@ -1175,7 +1178,7 @@ public class ProgramAB extends Service
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    ProgramABConfig config = (ProgramABConfig) c;
+    ProgramABConfig config = (ProgramABConfig) super.apply(c);
     if (config.bots != null && config.bots.size() > 0) {
       bots.clear();
       for (String botPath : config.bots) {
@@ -1198,17 +1201,17 @@ public class ProgramAB extends Service
     setCurrentSession(currentUserName, currentBotName);
 
     // REMOVED because of overlap with subscriptions
-//    if (config.textListeners != null) {
-//      for (String local : config.textListeners) {
-//        attachTextListener(local);
-//      }
-//    }
-//
-//    if (config.utteranceListeners != null) {
-//      for (String local : config.utteranceListeners) {
-//        attachUtteranceListener(local);
-//      }
-//    }
+    // if (config.textListeners != null) {
+    // for (String local : config.textListeners) {
+    // attachTextListener(local);
+    // }
+    // }
+    //
+    // if (config.utteranceListeners != null) {
+    // for (String local : config.utteranceListeners) {
+    // attachUtteranceListener(local);
+    // }
+    // }
 
     return config;
   }
