@@ -515,8 +515,21 @@ public class CodecUtils {
             log.warn("Null message within json, probably shouldn't happen");
             return null;
         }
+        return decodeMessageParams(msg);
+    }
 
-
+    /**
+     * Performs the second-stage decoding of a Message
+     * with JSON-encoded data parameters. This method is meant
+     * to be a helper for the top-level Message decoding methods
+     * to go straight from the various codecs to a completely decoded Message.
+     *
+     * @param msg The Message object containing the json-encoded data parameters.
+     *            This object will be modified in-place
+     * @return A fully-decoded Message
+     * @throws JsonDeserializationException if any of the data parameters are malformed JSON
+     */
+    private static @Nonnull Message decodeMessageParams(@Nonnull Message msg) {
         String serviceName = msg.getFullName();
         Class<?> clazz = Runtime.getClass(serviceName);
 
