@@ -523,13 +523,16 @@ public class CodecUtils {
      * with JSON-encoded data parameters. This method is meant
      * to be a helper for the top-level Message decoding methods
      * to go straight from the various codecs to a completely decoded Message.
+     * <p>
+     * Package visibility to allow alternative codecs to use this method.
+     * </p>
      *
      * @param msg The Message object containing the json-encoded data parameters.
      *            This object will be modified in-place
      * @return A fully-decoded Message
      * @throws JsonDeserializationException if any of the data parameters are malformed JSON
      */
-    private static @Nonnull Message decodeMessageParams(@Nonnull Message msg) {
+    static @Nonnull Message decodeMessageParams(@Nonnull Message msg) {
         String serviceName = msg.getFullName();
         Class<?> clazz = Runtime.getClass(serviceName);
 

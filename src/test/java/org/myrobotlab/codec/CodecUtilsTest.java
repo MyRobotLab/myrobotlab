@@ -87,6 +87,41 @@ public class CodecUtilsTest extends AbstractTest {
     }
 
     @Test
+    public void testDecodeMessageParams() {
+        Message encodedMessage = Message.createMessage(
+                "testing-sender",
+                "testService",
+                "testMethod",
+                new Object[]{
+                        "\"testParam1\"",
+                        "2",
+                        CodecUtils.toJson(new MRLListener(
+                                "topic",
+                                "callbackService",
+                                "callbackMethod"
+                        ))
+                }
+        );
+
+        Message decodedMessage = Message.createMessage(
+                "testing-sender",
+                "testService",
+                "testMethod",
+                new Object[]{
+                        "testParam1",
+                        2,
+                        new MRLListener(
+                                "topic",
+                                "callbackService",
+                                "callbackMethod"
+                        )
+                }
+        );
+
+        assertEquals(decodedMessage, CodecUtils.decodeMessageParams(encodedMessage));
+    }
+
+    @Test
     public void testJsonMessageDeserNull() {
         Message deserMessage = CodecUtils.jsonToMessage("null");
         assertNull(deserMessage);
