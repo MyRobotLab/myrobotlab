@@ -18,7 +18,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.LocalSpeechConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
 import org.slf4j.Logger;
@@ -100,7 +99,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     if (c.replaceChars == null) {
       // if not user defined - escape double quotes to not affect templates
       c.replaceChars = new HashMap<>(); 
-      c.replaceChars.put("\"", "\\\"");
+      c.replaceChars.put("\'", "\'\'");
     } 
     for (String target: c.replaceChars.keySet()) {
       toSpeak = toSpeak.replace(target, c.replaceChars.get(target));
@@ -375,9 +374,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
     sb.append("Add-Type -AssemblyName System.Speech;");
     sb.append("$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;");
-    sb.append("$speak.SelectVoice('{{voice_name} }');\n");
-    sb.append("$speak.SetOutputToWaveFile('{filename}');\n");
-    sb.append("$speak.speak('{text}')\n");
+    sb.append("$speak.SelectVoice(\"{{voice_name} }\");\n");
+    sb.append("$speak.SetOutputToWaveFile(\"{filename}\");\n");
+    sb.append("$speak.speak(\"{text}\")\n");
 
     return true;
   }
@@ -468,22 +467,22 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       // Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
       LoggingFactory.init("INFO");
 
-      Runtime.startConfig("localspeech-01");
-      boolean done = true;
-      if (done) {
-        return;
-      }
+      // Runtime.startConfig("localspeech-01");
       
       LocalSpeech mouth = (LocalSpeech) Runtime.start("mouth", "LocalSpeech");
       // mouth.setSay();
       // mouth.speakBlocking("test 1 2 3");
-      mouth.speakBlocking("hello my name is sam, sam i am yet again, how \"are you? do you 'live in a zoo too? ");
+      // mouth.speakBlocking("hello my name is sam, sam i am yet again, how \"are you? do you 'live in a zoo too? ");
 
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
 
+      boolean done = true;
+      if (done) {
+        return;
+      }
 
       // mouth.setMimic();
 

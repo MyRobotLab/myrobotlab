@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -21,6 +22,8 @@ public class WebGuiTest extends AbstractTest {
     webgui2.autoStartBrowser(false);
     webgui2.setPort(8889);
     webgui2.startService();
+    
+    Runtime.start("servoApiTest","Servo");
     // need to wait for the OS to open the port
     Service.sleep(3);
   }
@@ -54,4 +57,16 @@ public class WebGuiTest extends AbstractTest {
     assertTrue(ret.contains("@"));
   }
 
+  @Test
+  public void servoApiTest() {    
+    byte[] bytes = Http.get("http://localhost:8889/api/service/servoApiTest/moveTo/35");
+    String ret = new String(bytes);
+    assertEquals(ret, "35.0");
+    sleep(200);
+    Servo servoApiTest = (Servo)Runtime.getService("servoApiTest");
+    Double pos = servoApiTest.getCurrentOutputPos();
+    assertEquals(35.0, pos.doubleValue(), 0.1);
+  }
+
+  
 }
