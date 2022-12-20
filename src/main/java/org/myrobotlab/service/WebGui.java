@@ -649,11 +649,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         }
 
         if (isLocal(msg)) {
-          String serviceName = msg.getFullName();// getName();
-          Class<?> clazz = Runtime.getClass(serviceName);
-          Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
-          if (params != null)
-            msg.data = params;
+          // String serviceName = msg.getFullName();// getName();
+          // Class<?> clazz = Runtime.getClass(serviceName);
+          // Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
+          // msg.data = params;
           Object ret = invoke(msg);
           OutputStream out = r.getResponse().getOutputStream();
           out.write(CodecUtils.toJson(ret).getBytes());
