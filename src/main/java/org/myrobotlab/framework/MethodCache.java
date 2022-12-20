@@ -2,7 +2,6 @@ package org.myrobotlab.framework;
 
 import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.codec.json.JsonDeserializationException;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -548,8 +547,8 @@ public class MethodCache {
     }
     Object[] params = new Object[encodedParams.length];
     // iterate through templates - attempt to decode
-    for (MethodEntry methodEntry : possible) {
-      Class<?>[] paramTypes = methodEntry.getParameterTypes();
+    for (int p = 0; p < possible.size(); ++p) {
+      Class<?>[] paramTypes = possible.get(p).getParameterTypes();
       try {
         for (int i = 0; i < encodedParams.length; ++i) {
           if (CodecUtils.JSON_DEFAULT_OBJECT_TYPE.equals(encodedParams[i].getClass())) {
@@ -560,25 +559,7 @@ public class MethodCache {
             // this will probably need to change too
             encodedParams[i] = CodecUtils.toJson(encodedParams[i]);
           }
-          if (params[i] instanceof String) {
-            String stringParam = (String) params[i];
-            if (!String.class.isAssignableFrom(paramTypes[i]) ||
-                    stringParam.startsWith("\"") || stringParam.startsWith("{")) {
-              // Only attempt to deserialize if not supposed to be String,
-              // or if json is formatted as a string or object
-              params[i] = CodecUtils.fromJson((String) encodedParams[i], paramTypes[i]);
-            }
-
-            // If supposed to be a string but not formatted like
-            // a json string, just leave it alone
-          } else {
-            if (!paramTypes[i].isAssignableFrom(params[i].getClass())) {
-              throw new IllegalArgumentException("encodedParams passed with non-String element " +
-                      params[i] + "that is not of the required type " +
-                      paramTypes[i]);
-            }
-          }
-
+          params[i] = CodecUtils.fromJson((String) encodedParams[i], paramTypes[i]);
         }
         // successfully decoded params
         return params;
