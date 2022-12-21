@@ -56,6 +56,17 @@ public class WebGuiTest extends AbstractTest {
     Servo servoApiTest = (Servo)Runtime.getService("servoApiTest");
     Double pos = servoApiTest.getCurrentOutputPos();
     assertEquals(35.0, pos.doubleValue(), 0.1);
+    
+    // return properties
+    bytes = Http.get("http://localhost:8889/api/service/servoApiTest");
+    ret = new String(bytes);
+    assertTrue(ret.contains("servoApiTest"));
+    
+    // return methods
+    bytes = Http.get("http://localhost:8889/api/service/servoApiTest/");
+    ret = new String(bytes);
+    assertTrue(ret.contains("enableAutoDisable"));
+
   }
 
   
