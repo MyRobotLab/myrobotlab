@@ -67,7 +67,7 @@ public class WebGuiTest extends AbstractTest {
     ret = new String(bytes);
     assertTrue(ret.contains("enableAutoDisable"));
 
-  }
 
+  }
   
 }
