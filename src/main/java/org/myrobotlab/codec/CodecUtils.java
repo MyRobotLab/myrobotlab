@@ -2,6 +2,7 @@ package org.myrobotlab.codec;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -12,6 +13,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
 import org.myrobotlab.codec.json.GsonPolymorphicTypeAdapterFactory;
 import org.myrobotlab.codec.json.JacksonPolymorphicModule;
+import org.myrobotlab.codec.json.JacksonPrettyPrinter;
 import org.myrobotlab.codec.json.JsonDeserializationException;
 import org.myrobotlab.codec.json.JsonSerializationException;
 import org.myrobotlab.framework.MRLListener;
@@ -41,7 +43,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -179,6 +180,14 @@ public class CodecUtils {
      * @see #USING_GSON
      */
     private static final ObjectMapper mapper = new ObjectMapper();
+
+
+    /**
+     * The pretty printer to be used with {@link #mapper}
+     * when {@link #USING_GSON} equals false, i.e. we're using Jackson.
+     */
+    private static final PrettyPrinter jacksonPrettyPrinter = new JacksonPrettyPrinter();
+
     /**
      * The {@link TypeFactory} used to generate type information for
      * {@link #mapper} when the selected backend is Jackson.
@@ -845,15 +854,26 @@ public class CodecUtils {
 
     /**
      * Serializes the specified object to JSON, using
-     * {@link #prettyGson} to pretty-ify the result.
-     * <p>
-     * TODO add Jackson support for pretty JSON
+     * {@link #prettyGson} or {@link #mapper}
+     * with {@link #jacksonPrettyPrinter}
+     * to pretty-ify the result. Which object is used depends on
+     * {@link #USING_GSON}
      *
      * @param ret The object to be serialized
      * @return The object in pretty JSON form
      */
     public static String toPrettyJson(Object ret) {
-        return prettyGson.toJson(ret);
+        try {
+            if (USING_GSON) {
+                return prettyGson.toJson(ret);
+            } else {
+
+                return mapper.writer(jacksonPrettyPrinter).writeValueAsString(ret);
+            }
+        } catch (Exception e) {
+            throw new JsonSerializationException(e);
+        }
+
     }
 
     /**
