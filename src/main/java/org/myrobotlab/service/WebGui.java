@@ -543,9 +543,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       String apiKey = getApiKey(r.getRequest().getRequestURI());
 
-      // the mrl "id" of the client
-      // TODO remove since not used
-      String id = r.getRequest().getParameter("id");
       String uuid = r.uuid();
 
       if (!CodecUtils.API_SERVICE.equals(apiKey) && !CodecUtils.API_MESSAGES.equals(apiKey)) {
