@@ -536,8 +536,7 @@ public class MethodCache {
    * specified by the declared method parameter type.
    *
    * <p>
-   *     If clazz or encodedParameters are null, then null is returned.
-   *     If methodName is null then NPE is thrown.
+   *     If clazz, methodName, or encodedParameters are null, then null is returned.
    * </p>
    *
    * <p>
@@ -550,7 +549,7 @@ public class MethodCache {
    * @return The decoded parameters according to a matched method, or null
    *  if no such method could be found.
    */
-  public @Nullable Object[] getDecodedJsonParameters(Class<?> clazz, @Nonnull String methodName, Object[] encodedParams) {
+  public @Nullable Object[] getDecodedJsonParameters(Class<?> clazz, String methodName, Object[] encodedParams) {
     if (encodedParams == null) {
       encodedParams = new Object[0];
     }
