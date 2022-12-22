@@ -1315,7 +1315,7 @@ public class CodecUtils {
     public static ServiceConfig readServiceConfig(String filename) throws IOException {
         String data = Files.readString(Paths.get(filename));
         Yaml yaml = new Yaml();
-        return (ServiceConfig) yaml.load(data);
+        return yaml.load(data);
     }
 
     /**
