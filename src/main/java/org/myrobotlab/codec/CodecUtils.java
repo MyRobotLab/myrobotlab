@@ -1313,7 +1313,7 @@ public class CodecUtils {
      * @throws IOException if reading the file fails
      */
     public static ServiceConfig readServiceConfig(String filename) throws IOException {
-        String data = new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8);
+        String data = Files.readString(Paths.get(filename));
         Yaml yaml = new Yaml();
         return (ServiceConfig) yaml.load(data);
     }
