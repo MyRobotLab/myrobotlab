@@ -1112,11 +1112,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   @Override
-  public String getServiceClass() {
-    return serviceClass;
-  }
-
-  @Override
   public boolean hasError() {
     return lastError != null;
   }

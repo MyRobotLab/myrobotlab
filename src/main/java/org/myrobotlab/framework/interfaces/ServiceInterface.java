@@ -69,8 +69,6 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    */
   public String getType();
 
-  String getServiceClass();
-
   /**
    * Equivalent to {@link #getType()} but required
    * because the WebGui relies on this field.
