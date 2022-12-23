@@ -582,6 +582,9 @@ public class CodecUtils {
                             msg.data[i] = makeDouble((String) msg.data[i]);
                         } else if (((String) msg.data[i]).startsWith("\"")) {
                             msg.data[i] = fromJson((String) msg.data[i], String.class);
+                        } else if(((String) msg.data[i]).startsWith("[")) {
+                            // Array
+                            msg.data[i] = fromJson((String) msg.data[i], Object[].class);
                         } else {
                             // Object
                             // Serializable should cover everything of interest
