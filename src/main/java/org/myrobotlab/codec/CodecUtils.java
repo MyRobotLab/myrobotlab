@@ -2,6 +2,7 @@ package org.myrobotlab.codec;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -11,7 +12,11 @@ import com.fasterxml.jackson.module.noctordeser.NoCtorDeserModule;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
-import org.myrobotlab.codec.json.*;
+import org.myrobotlab.codec.json.GsonPolymorphicTypeAdapterFactory;
+import org.myrobotlab.codec.json.JacksonPolymorphicModule;
+import org.myrobotlab.codec.json.JacksonPrettyPrinter;
+import org.myrobotlab.codec.json.JsonDeserializationException;
+import org.myrobotlab.codec.json.JsonSerializationException;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
@@ -34,15 +39,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
-
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -199,6 +201,14 @@ public class CodecUtils {
      * @see #USING_GSON
      */
     private static final ObjectMapper mapper = new ObjectMapper();
+
+
+    /**
+     * The pretty printer to be used with {@link #mapper}
+     * when {@link #USING_GSON} equals false, i.e. we're using Jackson.
+     */
+    private static final PrettyPrinter jacksonPrettyPrinter = new JacksonPrettyPrinter();
+
     /**
      * The {@link TypeFactory} used to generate type information for
      * {@link #mapper} when the selected backend is Jackson.
@@ -539,8 +549,54 @@ public class CodecUtils {
             log.warn("Null message within json, probably shouldn't happen");
             return null;
         }
+        return decodeMessageParams(msg);
+    }
 
-
+    /**
+     * Performs the second-stage decoding of a Message
+     * with JSON-encoded data parameters. This method is meant
+     * to be a helper for the top-level Message decoding methods
+     * to go straight from the various codecs to a completely decoded Message.
+     * <p>
+     * Package visibility to allow alternative codecs to use this method.
+     * </p>
+     *<p></p>
+     * <h2>Implementation Details</h2>
+     * There are important caveats to note when using
+     * this method as a result of the implementation chosen.
+     * <p>
+     *     If the method msg invokes is contained within the
+     *     {@link MethodCache}, there exists type information
+     *     for the data parameters and they can be deserialized
+     *     into the correct type using this method.
+     * </p>
+     * <p>
+     *     However, if no such method exists within
+     *     the cache this method falls back on using the
+     *     embedded virtual meta field ({@link #CLASS_META_KEY}).
+     *     Since there is no type information available, there are two
+     *     main caveats to using this fallback method:
+     * </p>
+     *
+     *     <ol>
+     *         <li>GSON has edge cases for arrays of objects, since
+     * we don't know what type is contained within the array we are forced
+     * to deserialize it to an array of Objects, but GSON skips our custom
+     * deserializer for the Object type. So an array of objects that are not
+     * primitives nor Strings *will* deserialize incorrectly unless
+     * we are using Jackson.</li>
+     *          <li>Without the type information from the method cache we have
+     * no way of knowing whether to interpret an array as an array of Objects
+     * or as a List (or even what implementor of List to use)</li>
+     *      </ol>
+     *
+     *
+     * @param msg The Message object containing the json-encoded data parameters.
+     *            This object will be modified in-place
+     * @return A fully-decoded Message
+     * @throws JsonDeserializationException if any of the data parameters are malformed JSON
+     */
+    static @Nonnull Message decodeMessageParams(@Nonnull Message msg) {
         String serviceName = msg.getFullName();
         Class<?> clazz = Runtime.getClass(serviceName);
 
@@ -581,6 +637,9 @@ public class CodecUtils {
                             msg.data[i] = makeDouble((String) msg.data[i]);
                         } else if (((String) msg.data[i]).startsWith("\"")) {
                             msg.data[i] = fromJson((String) msg.data[i], String.class);
+                        } else if(((String) msg.data[i]).startsWith("[")) {
+                            // Array, deserialize to ArrayList to maintain compat with jackson
+                            msg.data[i] = fromJson((String) msg.data[i], ArrayList.class);
                         } else {
                             // Object
                             // Serializable should cover everything of interest
@@ -590,7 +649,7 @@ public class CodecUtils {
 
                     }
 
-                    if (JSON_DEFAULT_OBJECT_TYPE.isAssignableFrom(msg.data[i].getClass())) {
+                    if (msg.data[i] != null && JSON_DEFAULT_OBJECT_TYPE.isAssignableFrom(msg.data[i].getClass())) {
                         log.warn("Deserialized parameter to default object type. " +
                                 "Possibly missing virtual class field: " +
                                 msg.data[i]);
@@ -853,15 +912,26 @@ public class CodecUtils {
 
     /**
      * Serializes the specified object to JSON, using
-     * {@link #prettyGson} to pretty-ify the result.
-     * <p>
-     * TODO add Jackson support for pretty JSON
+     * {@link #prettyGson} or {@link #mapper}
+     * with {@link #jacksonPrettyPrinter}
+     * to pretty-ify the result. Which object is used depends on
+     * {@link #USING_GSON}
      *
      * @param ret The object to be serialized
      * @return The object in pretty JSON form
      */
     public static String toPrettyJson(Object ret) {
-        return prettyGson.toJson(ret);
+        try {
+            if (USING_GSON) {
+                return prettyGson.toJson(ret);
+            } else {
+
+                return mapper.writer(jacksonPrettyPrinter).writeValueAsString(ret);
+            }
+        } catch (Exception e) {
+            throw new JsonSerializationException(e);
+        }
+
     }
 
     /**
@@ -1322,9 +1392,9 @@ public class CodecUtils {
      * @throws IOException if reading the file fails
      */
     public static ServiceConfig readServiceConfig(String filename) throws IOException {
-        String data = new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8);
+        String data = Files.readString(Paths.get(filename));
         Yaml yaml = new Yaml();
-        return (ServiceConfig) yaml.load(data);
+        return yaml.load(data);
     }
 
     /**

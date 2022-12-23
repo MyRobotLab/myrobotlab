@@ -545,9 +545,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       String apiKey = getApiKey(r.getRequest().getRequestURI());
 
-      // the mrl "id" of the client
-      // TODO remove since not used
-      String id = r.getRequest().getParameter("id");
       String uuid = r.uuid();
 
       if (!CodecUtils.API_SERVICE.equals(apiKey) && !CodecUtils.API_MESSAGES.equals(apiKey)) {
@@ -650,11 +647,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         }
 
         if (isLocal(msg)) {
-          String serviceName = msg.getFullName();// getName();
-          Class<?> clazz = Runtime.getClass(serviceName);
-          Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
-          if (params != null)
-            msg.data = params;
+
+          // String serviceName = msg.getFullName();// getName();
+          // Class<?> clazz = Runtime.getClass(serviceName);
+          // Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
+          // msg.data = params;
           Object ret = invoke(msg);
           OutputStream out = r.getResponse().getOutputStream();
           out.write(CodecUtils.toJson(ret).getBytes());
