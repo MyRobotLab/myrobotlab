@@ -535,6 +535,36 @@ public class CodecUtils {
      * <p>
      * Package visibility to allow alternative codecs to use this method.
      * </p>
+     *<p></p>
+     * <h2>Implementation Details</h2>
+     * There are important caveats to note when using
+     * this method as a result of the implementation chosen.
+     * <p>
+     *     If the method msg invokes is contained within the
+     *     {@link MethodCache}, there exists type information
+     *     for the data parameters and they can be deserialized
+     *     into the correct type using this method.
+     * </p>
+     * <p>
+     *     However, if no such method exists within
+     *     the cache this method falls back on using the
+     *     embedded virtual meta field ({@link #CLASS_META_KEY}).
+     *     Since there is no type information available, there are two
+     *     main caveats to using this fallback method:
+     * </p>
+     *
+     *     <ol>
+     *         <li>GSON has edge cases for arrays of objects, since
+     * we don't know what type is contained within the array we are forced
+     * to deserialize it to an array of Objects, but GSON skips our custom
+     * deserializer for the Object type. So an array of objects that are not
+     * primitives nor Strings *will* deserialize incorrectly unless
+     * we are using Jackson.</li>
+     *          <li>Without the type information from the method cache we have
+     * no way of knowing whether to interpret an array as an array of Objects
+     * or as a List (or even what implementor of List to use)</li>
+     *      </ol>
+     *
      *
      * @param msg The Message object containing the json-encoded data parameters.
      *            This object will be modified in-place
@@ -583,8 +613,8 @@ public class CodecUtils {
                         } else if (((String) msg.data[i]).startsWith("\"")) {
                             msg.data[i] = fromJson((String) msg.data[i], String.class);
                         } else if(((String) msg.data[i]).startsWith("[")) {
-                            // Array
-                            msg.data[i] = fromJson((String) msg.data[i], Object[].class);
+                            // Array, deserialize to ArrayList to maintain compat with jackson
+                            msg.data[i] = fromJson((String) msg.data[i], ArrayList.class);
                         } else {
                             // Object
                             // Serializable should cover everything of interest
