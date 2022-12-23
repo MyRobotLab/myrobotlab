@@ -302,7 +302,7 @@ public class Message implements Serializable {
             && Objects.equals(status, message.status)
             && Objects.equals(encoding, message.encoding)
             && Objects.equals(method, message.method)
-            && Arrays.equals(data, message.data);
+            && Arrays.deepEquals(data, message.data);
   }
 
   @Override
