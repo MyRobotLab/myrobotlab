@@ -17,6 +17,7 @@ import org.myrobotlab.codec.json.JacksonPolymorphicModule;
 import org.myrobotlab.codec.json.JacksonPrettyPrinter;
 import org.myrobotlab.codec.json.JsonDeserializationException;
 import org.myrobotlab.codec.json.JsonSerializationException;
+import org.myrobotlab.codec.json.ProxySerializer;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
