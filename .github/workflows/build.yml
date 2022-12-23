@@ -20,4 +20,4 @@ jobs:
       # - name: Build with Maven
       #   run: mvn --batch-mode --update-snapshots -DskipTests package
       - name: Build with Maven
-        run: mvn --batch-mode --update-snapshots -Dtest=!org.myrobotlab.opencv.OpenCVFilterDL4JTest package        
+        run: mvn --batch-mode --update-snapshots package        

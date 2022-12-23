@@ -18,6 +18,7 @@ import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
+import org.junit.Ignore;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Deeplearning4j;
 import org.myrobotlab.service.Runtime;
@@ -25,6 +26,7 @@ import org.myrobotlab.service.Solr;
 import org.slf4j.Logger;
 
 // FIXME - should be OpenCVFilterDl4j
+@Ignore
 public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
 
   private static final long serialVersionUID = 1L;
