@@ -1,5 +1,6 @@
 /.project
 /.classpath
+/*.iml
 /.settings
 /src/main/resources/resource/WebGui/react
 /data

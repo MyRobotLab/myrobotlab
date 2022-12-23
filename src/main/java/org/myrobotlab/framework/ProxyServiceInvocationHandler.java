@@ -69,8 +69,15 @@ public class ProxyServiceInvocationHandler implements InvocationHandler {
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        log.debug(String.format("Executing method %s@%s.%s(%s)", name, inId, method.getName(), ((args == null) ? "" : Arrays.toString(args))));
-        return Runtime.getInstance().sendBlocking(name + "@" + inId, method.getName(),
+        log.debug(
+                "Executing proxy method {}@{}.{}({})",
+                name,
+                inId,
+                method.getName(),
+                ((args == null) ? "" : Arrays.toString(args))
+        );
+        // Timeout should be more sophisticated for long blocking methods
+        return Runtime.getInstance().sendBlocking(name + "@" + inId, 3000, method.getName(),
                 (args != null) ? args : new Object[0]);
     }
 }
