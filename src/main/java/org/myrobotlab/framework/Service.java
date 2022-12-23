@@ -1866,13 +1866,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public void subscribe(NameProvider topicName, String topicMethod) {
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
-    subscribe(topicName.getName(), topicMethod, getName(), callbackMethod);
+    subscribe(topicName.getName(), topicMethod, getFullName(), callbackMethod);
   }
 
   @Override
   public void subscribe(String topicName, String topicMethod) {
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
-    subscribe(topicName, topicMethod, getName(), callbackMethod);
+    subscribe(topicName, topicMethod, getFullName(), callbackMethod);
   }
 
   public void subscribeTo(String service, String method) {
@@ -1884,11 +1884,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public void unsubscribeTo(String service, String method) {
-    unsubscribe(service, method, getName(), CodecUtils.getCallbackTopicName(method));
+    unsubscribe(service, method, getFullName(), CodecUtils.getCallbackTopicName(method));
   }
 
   public void unsubscribeToRuntime(String method) {
-    unsubscribe(Runtime.getInstance().getName(), method, getName(), CodecUtils.getCallbackTopicName(method));
+    unsubscribe(Runtime.getInstance().getFullName(), method, getName(), CodecUtils.getCallbackTopicName(method));
   }
 
   @Override
@@ -1899,18 +1899,18 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       List<String> tnames = Runtime.getServiceNames(topicName);
       for (String serviceName : tnames) {
         MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-        send(Message.createMessage(getName(), serviceName, "addListener", listener));
+        send(Message.createMessage(getFullName(), serviceName, "addListener", listener));
       }
     } else {
       if (topicMethod.contains("*")) { // FIXME "any regex expression
         Set<String> tnames = Runtime.getMethodMap(topicName).keySet();
         for (String method : tnames) {
           MRLListener listener = new MRLListener(method, callbackName, callbackMethod);
-          send(Message.createMessage(getName(), topicName, "addListener", listener));
+          send(Message.createMessage(getFullName(), topicName, "addListener", listener));
         }
       } else {
         MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-        send(Message.createMessage(getName(), topicName, "addListener", listener));
+        send(Message.createMessage(getFullName(), topicName, "addListener", listener));
       }
     }
   }
@@ -1918,19 +1918,19 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public void unsubscribe(NameProvider topicName, String topicMethod) {
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
-    unsubscribe(topicName.getName(), topicMethod, getName(), callbackMethod);
+    unsubscribe(topicName.getName(), topicMethod, getFullName(), callbackMethod);
   }
 
   @Override
   public void unsubscribe(String topicName, String topicMethod) {
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
-    unsubscribe(topicName, topicMethod, getName(), callbackMethod);
+    unsubscribe(topicName, topicMethod, getFullName(), callbackMethod);
   }
 
   @Override
   public void unsubscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
     log.info("unsubscribe [{}/{} ---> {}/{}]", topicName, topicMethod, callbackName, callbackMethod);
-    send(Message.createMessage(getName(), topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
+    send(Message.createMessage(getFullName(), topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
   }
 
   // -------------- Messaging Ends -----------------------
