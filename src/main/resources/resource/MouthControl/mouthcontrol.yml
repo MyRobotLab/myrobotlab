@@ -7,4 +7,5 @@ mouth: null
 mouthClosedPos: 0
 mouthOpenedPos: 180
 neoPixel: null
+peers: null
 type: MouthControl

@@ -2,6 +2,7 @@
 current: null
 messageListeners: [
   ]
+peers: null
 transitions: [
   ]
 type: FiniteStateMachine

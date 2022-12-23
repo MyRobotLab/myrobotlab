@@ -1,5 +1,15 @@
 !!org.myrobotlab.service.config.InMoov2TorsoConfig
-lowStom: inmoov2torso.lowStom
-midStom: inmoov2torso.midStom
-topStom: inmoov2torso.topStom
+peers:
+  lowStom:
+    autoStart: true
+    name: inmoov2torso.lowStom
+    type: Servo
+  midStom:
+    autoStart: true
+    name: inmoov2torso.midStom
+    type: Servo
+  topStom:
+    autoStart: true
+    name: inmoov2torso.topStom
+    type: Servo
 type: InMoov2Torso

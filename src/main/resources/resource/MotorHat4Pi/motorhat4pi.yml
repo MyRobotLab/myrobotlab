@@ -7,4 +7,5 @@ maxOut: null
 minIn: null
 minOut: null
 motorId: null
+peers: null
 type: MotorHat4Pi

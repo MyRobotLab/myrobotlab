@@ -82,7 +82,7 @@ public class Polly extends AbstractSpeechSynthesis {
    * AbstractSpeechSynthesis
    */
   @Override
-  protected void loadVoices() {
+  public void loadVoices() {
     getPolly();
 
     if (polly == null) {

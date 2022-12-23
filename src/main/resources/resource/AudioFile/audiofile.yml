@@ -5,6 +5,7 @@ currentTrack: default
 mute: false
 peakMultiplier: 1.0
 peakSampleInterval: 15.0
+peers: null
 playlists: null
 type: AudioFile
 volume: 1.0

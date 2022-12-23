@@ -94,7 +94,7 @@ public class IndianTts extends AbstractSpeechSynthesis {
   }
 
   @Override
-  protected void loadVoices() {
+  public void loadVoices() {
     addVoice("Sri", "female", "hi", null);
   }
 

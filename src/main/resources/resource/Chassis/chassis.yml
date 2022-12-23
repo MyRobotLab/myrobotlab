@@ -1,2 +1,19 @@
-!!org.myrobotlab.service.config.ServiceConfig
+!!org.myrobotlab.service.config.ChassisConfig
+peers:
+  controller:
+    autoStart: true
+    name: chassis.controller
+    type: Sabertooth
+  joystick:
+    autoStart: true
+    name: chassis.joystick
+    type: Joystick
+  left:
+    autoStart: true
+    name: chassis.left
+    type: Motor
+  right:
+    autoStart: true
+    name: chassis.right
+    type: Motor
 type: Chassis
