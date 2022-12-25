@@ -13,5 +13,7 @@ public class NeoPixelConfig extends ServiceConfig {
   public String currentAnimation = null;
   public Integer brightness = 255;
   public boolean fill = false;
+  public boolean autoClear = false;
+  public int idleTimeout = 1000;
 
 }

@@ -5,6 +5,12 @@ import java.util.List;
 
 public class RuntimeConfig extends ServiceConfig {
 
+  /**
+   * instance id - important to be unique when connecting multiple
+   * mrl instances together
+   */
+  public String id;
+  
   // public String id; Not ready to process this ... yet
   public Boolean virtual = null;
   public boolean enableCli = true;
@@ -32,8 +38,20 @@ public class RuntimeConfig extends ServiceConfig {
     registry.add(name);
   }
 
-  public void remove(String name) {
-    registry.remove(name);
+  public boolean remove(String name) {
+    return registry.remove(name);
+  }
+  
+  public void removeStartsWith(String startsWith) {
+    ArrayList<String> remove = new ArrayList<>();
+    for (String n: registry) {
+      if (n.startsWith(startsWith)) {
+        remove.add(n);
+      }
+    }    
+    for (String n: remove) {
+      registry.remove(n);
+    }
   }
 
   public void clear() {

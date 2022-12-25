@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
@@ -33,6 +34,13 @@ public class ServiceConfig {
       this.listener = listener;
       this.callback = callback;
     }
+    
+    public Listener(String method, String listener) {
+      this.method = method;
+      this.listener = listener;
+      this.callback = CodecUtils.getCallbackTopicName(method);
+    }
+
 
     public String method;
 
