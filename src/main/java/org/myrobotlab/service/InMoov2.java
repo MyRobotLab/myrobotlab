@@ -1682,8 +1682,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
    * flash neopixel
    */
   public void onPirOn() {
-    speak("I AM AWAKE");
     invoke("publishFlash");
+    // pirOn event vs wake event
     invoke("publishEvent", "wake");
   }
   
