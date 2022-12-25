@@ -625,7 +625,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public Service(String reservedKey, String inId) {
 
     log.error("constructing {}", reservedKey);
-    
+
     name = reservedKey;
 
     // necessary for serialized transport\
@@ -1118,11 +1118,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return config.getPeers();
   }
-  
+
   /**
-   * returns the peer key if a name is supplied and matches a peer
-   * name
-   * @param name - name of service
+   * returns the peer key if a name is supplied and matches a peer name
+   * 
+   * @param name
+   *          - name of service
    * @return - key of peer if it exists
    */
   public String getPeerKey(String name) {
@@ -1137,7 +1138,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return null;
   }
-
 
   @Override
   public Set<String> getPeerKeys() {
@@ -1367,14 +1367,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public ServiceConfig apply(ServiceConfig inConfig) {
     log.info("Default service config loading for service: {} type: {}", getName(), getType());
-    // clone or serialize - must be "copy" of plan not the same ref.
-    /**
-     * <pre>
-     * We clone/serialize here because we don't want to use the same reference of of config in the
-     * plan.  If configuration is applied through the plan, "or from anywhere else" we make a
-     * copy of it here. And the copy is applied to the actual service. This keeps the plan
-     * safe to modify without the worry of modifying a running service config.
-     * </pre>
+    /*
+     * We clone/serialize here because we don't want to use the same reference
+     * of of config in the plan. If configuration is applied through the plan,
+     * "or from anywhere else" we make a copy of it here. And the copy is
+     * applied to the actual service. This keeps the plan safe to modify without
+     * the worry of modifying a running service config.
      */
 
     String yaml = CodecUtils.toYaml(inConfig);
@@ -1842,7 +1840,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       error("startPeer could not find peerKey of %s in %s", peerKey, getName());
       return null;
     }
-    
+
     ServiceInterface si = Runtime.getService(peer.name);
     if (si != null) {
       // so this peer is already started, but are we responsible for
@@ -1862,17 +1860,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       sc = plan.get(peer.name);
     }
 
-//    // recursive - start peers of peers of peers ...
-//    Map<String, Peer> subPeers = sc.getPeers();
-//    if (sc != null && subPeers != null) {
-//      for (String subPeerKey : subPeers.keySet()) {
-//        // IF AUTOSTART !!!
-//        Peer subPeer = subPeers.get(subPeerKey);
-//        if (subPeer.autoStart) {
-//          Runtime.start(sc.getPeerName(subPeerKey), subPeer.type);
-//        }
-//      }
-//    }
+    // // recursive - start peers of peers of peers ...
+    // Map<String, Peer> subPeers = sc.getPeers();
+    // if (sc != null && subPeers != null) {
+    // for (String subPeerKey : subPeers.keySet()) {
+    // // IF AUTOSTART !!!
+    // Peer subPeer = subPeers.get(subPeerKey);
+    // if (subPeer.autoStart) {
+    // Runtime.start(sc.getPeerName(subPeerKey), subPeer.type);
+    // }
+    // }
+    // }
 
     // start peer requested
     Runtime.start(peer.name, sc.type);
@@ -1905,7 +1903,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   synchronized public void startService() {
-    
+
     log.error("starting {}", name);
 
     if (!isRunning()) {
@@ -2642,6 +2640,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   /**
    * Return the service name of a peer from its peerKey
+   * 
    * @param peerKey
    * @return - name of peer service
    */
@@ -2654,8 +2653,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
-   * returns if the peer is currently started from its peerkey value
-   * e.g. isPeerStarted("head")
+   * returns if the peer is currently started from its peerkey value e.g.
+   * isPeerStarted("head")
+   * 
    * @param peerKey
    * @return
    */
@@ -2699,8 +2699,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
-   * Set a peer's name to a new service name.  e.g. i01.setPeerName("mouth", "mouth")
-   * will change the InMoov2 peer "mouth" to be simply "mouth" instead of "i01.mouth"  
+   * Set a peer's name to a new service name. e.g. i01.setPeerName("mouth",
+   * "mouth") will change the InMoov2 peer "mouth" to be simply "mouth" instead
+   * of "i01.mouth"
+   * 
    * @param key
    * @param fullName
    */
