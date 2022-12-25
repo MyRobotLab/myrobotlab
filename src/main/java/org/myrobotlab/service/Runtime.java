@@ -179,6 +179,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static final public String DEFAULT_CONFIG_DIR = "data" + fs + "config";
 
   /**
+   * State variable reporting if runtime is currently starting services from
+   * config. If true you can find which config from runtime.getConfigName()
+   */
+  boolean processingConfig = false;
+
+  /**
    * The one config directory where all config is managed the {default} is the
    * current configuration set
    */
@@ -400,12 +406,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         continue;
       }
       ServiceConfig sc = plan.get(service);
+      if (sc == null) {
+        runtime.error("could not get %s from plan", service);
+        continue;
+      }
       sc.state = "CREATING";
       ServiceInterface si = createService(service, sc.type, null);
       sc.state = "CREATED";
       si.setConfig(sc);
       si.apply(sc);
       createdServices.put(service, si);
+      // si.startService(); bad idea
       currentConfig.add(service);
     }
 
@@ -1892,7 +1903,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
 
     // FIXME - release autostarted peers ?
-    
+
     // last step - remove from registry
     registry.remove(name);
 
@@ -2446,7 +2457,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static public void startConfig(String configName) {
     setConfig(configName);
     Runtime runtime = Runtime.getInstance();
-    runtime.invoke("publishStartConfig");
+    runtime.processingConfig = true; // multiple inbox threads not available
+    runtime.invoke("publishStartConfig", configName);
     RuntimeConfig rtConfig = (RuntimeConfig) runtime.readServiceConfig(runtime.getConfigPath(), "runtime");
     if (rtConfig == null) {
       runtime.error("cannot find %s%s%s", runtime.getConfigPath(), fs, "runtime.yml");
@@ -2474,7 +2486,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         if (sc == null) {
           continue;
         }
-        runtime.loadService(Runtime.getPlan(), service, sc.type, 0);
+        runtime.loadService(Runtime.getPlan(), service, sc.type, true, 0);
       } catch (Exception e) {
         runtime.error(e);
       }
@@ -2486,16 +2498,29 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       si.startService();
     }
 
-    runtime.invoke("publishFinishedConfig");
+    runtime.processingConfig = false; // multiple inbox threads not available
+    runtime.invoke("publishFinishedConfig", configName);
 
   }
 
-  public void publishStartConfig() {
-    log.info("publishStartConfig");
+  public String publishStartConfig(String configName) {
+    log.info("publishStartConfig {}", configName);
+    // Make Note: done inline, because the thread actually doing the config
+    // processing
+    // would need to be finished with it before this thread could be invoked
+    // if multiple inbox threads were available then this would be possible
+    // processingConfig = true;
+    return configName;
   }
 
-  public void publishFinishedConfig() {
-    log.info("publishFinishedConfig");
+  public String publishFinishedConfig(String configName) {
+    log.info("publishFinishedConfig {}", configName);
+    // Make Note: done inline, because the thread actually doing the config
+    // processing
+    // would need to be finished with it before this thread could be invoked
+    // if multiple inbox threads were available then this would be possible
+    // processingConfig = false;
+    return configName;
   }
 
   /**
@@ -2512,6 +2537,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       if (name.equals("proxy")) {
         log.info("herex");
       }
+      
+      ServiceInterface requestedService = Runtime.getService(name);
+      if (requestedService != null) {
+        log.info("requested service already exists");
+        if (requestedService.isRunning()) {
+          log.info("requested service already running");
+        } else {
+          requestedService.startService();
+        }
+        return requestedService;
+      }
 
       Runtime.load(name, type);
       // FIXME - does some order need to be maintained
@@ -2522,7 +2558,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         return null;
       }
 
-      ServiceInterface requestedService = Runtime.getService(name);
+      requestedService = Runtime.getService(name);
 
       // FIXME - does some order need to be maintained e.g. all children before
       // parent
@@ -2536,19 +2572,19 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           requestedService.addAutoStartedPeer(service.getName());
         }
       }
-      
+
       if (requestedService == null) {
         log.error("here");
       }
 
       ServiceConfig sc = requestedService.getConfig();
-//      Map<String, Peer> peers = sc.getPeers();
-//      if (peers != null) {
-//        for (String p : peers.keySet()) {
-//          Peer peer = peers.get(p);
-//          log.info("peer {}", peer);
-//        }
-//      }
+      // Map<String, Peer> peers = sc.getPeers();
+      // if (peers != null) {
+      // for (String p : peers.keySet()) {
+      // Peer peer = peers.get(p);
+      // log.info("peer {}", peer);
+      // }
+      // }
       // recursive - start peers of peers of peers ...
       Map<String, Peer> subPeers = sc.getPeers();
       if (sc != null && subPeers != null) {
@@ -2560,7 +2596,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           }
         }
       }
-      
 
       requestedService.startService();
       return requestedService;
@@ -2590,7 +2625,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   synchronized public static Plan load(String name, String type) {
     try {
       Runtime runtime = Runtime.getInstance();
-      return runtime.loadService(Runtime.getPlan(), name, type, 0);
+      return runtime.loadService(Runtime.getPlan(), name, type, true, 0);
     } catch (IOException e) {
       runtime.error(e);
     }
@@ -3399,7 +3434,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       for (int n; (n = stdOut.read(buff)) != -1;) {
         outputBuilder.append(new String(buff, 0, n));
       }
-      
+
       // read stderr
       for (int n; (n = stdErr.read(buff)) != -1;) {
         outputBuilder.append(new String(buff, 0, n));
@@ -4535,6 +4570,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
+   * DEFAULT IF NOTHING EXISTS DO NOT DEFAULT SOMETHING THAT'S ALREADY IN PLAN
+   * OVERRIDE WITH FILE
+   * 
    * Load a single service entry into the plan through yml or default. This
    * method is responsible for resolving the Type and ServiceConfig for a single
    * service. Since some service Types are composites and require Peers, it can
@@ -4549,96 +4587,92 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * 
    * 
    * </pre>
-   *
+   * 
+   * @param plan
+   *          - plan to load
    * @param name
-   *          Name of the service
+   *          - name of service
    * @param type
-   *          Type of the service
-   * @param overwrite
-   *          Whether to overwrite the plan entry if one already exists
-   * @param overwritePeers
-   *          Unknown
-   * @return A constructed plan for the service
+   *          - type of service
+   * @param start
+   *          - weather to specify in RuntimeConfig.registry to "start" this
+   *          service when createFromPlan is run
+   * @param level
+   *          - level of the depth, services may load peers which in turn will
+   *          load more, this is the depth of recursion
+   * @return
    * @throws IOException
    */
-  synchronized private Plan loadService(Plan plan, String name, String type, int level) throws IOException {
+  synchronized private Plan loadService(Plan plan, String name, String type, boolean start, int level) throws IOException {
 
     log.info("loading - {} {} {}", name, type, level);
+    
+    if (name.equals("i01.controller3")) {
+      log.info("here");
+    }
 
     if (plan == null) {
       log.error("plan required to load a system");
       return null;
     }
 
-    // PRIORITY #0 - reuse plan definition ! NEVER OVERWRITE IT !
     ServiceConfig sc = plan.get(name);
-    if (sc != null) {
-      log.info("priority #0 - already have a plan for {} {}", name, type);
-      plan.addRegistry(name);
-//       return plan; REMOVED 12/16/22 - file need priority
+
+    // if there isn't some form of definition in the plan
+    // get a "default" service config and put it in the plan
+    if (sc == null) {
+      if (type == null) {
+        log.error("cannot get Java def with type == null");
+      }
+      log.info("getting default Java definition {} {}", name, type);
+            
+      ServiceConfig.getDefault(plan, name, type);
+      sc = plan.get(name);
     }
 
-    // PRIORITY #1
+    // HIGHEST PRIORITY - OVERRIDE WITH FILE
     String configPath = runtime.getConfigPath();
     if (configPath != null) {
       log.info("priority #1 user's yml override {}", configPath + fs + name + ".yml");
       // PRIORITY #1
       // find if a current yml config file exists - highest priority
-      sc = readServiceConfig(configPath, name);
+      ServiceConfig fileSc = readServiceConfig(configPath, name);
+      if (fileSc != null) {
+        // if definition exists in file form, it overrides current memory one
+        sc = fileSc;
+      }
     }
 
     if (sc == null && type == null) {
       log.error("no local config and unknown type");
     }
 
-    // PRIORITY #2 CANNOT DO THIS - "name" is user defined can't be
-    // type.toLowerCase()
-    // if (sc == null) {
-    // // PRIORITY #2 - default resource/{ServiceType}/{servicetype}.yml
-    // String yml = getResourceRoot() + fs + type + fs + type.toLowerCase() +
-    // ".yml";
-    // try {
-    // log.info("priority #2 checking system default yml {}", yml);
-    // // FIXME - CLOSE BUT NOT QUITE RIGHT - {ServiceType}/runtime.yml -
-    // // should be loaded as "peer set"
-    // // the set will need recursive integration
-    // sc = CodecUtils.readServiceConfig(yml);
-    // } catch (Exception e) {
-    // log.info("priority #2 checking system default yml {} not found", yml);
-    // }
-    // }
-
-    // PRIORITY #3
-    if (sc == null) {
-      // PRIORITY #3
-
-      if (type == null) {
-        log.error("cannot get Java def with type == null");
-      }
-      log.info("priority #3 getting Java definition {} {}", name, type);
-      // Plan newPlan = ServiceConfig.getDefault(plan, name, type);
-      ServiceConfig.getDefault(plan, name, type);
-      sc = plan.get(name);
-      // log.info("priority #3 - merging Java plan {}", newPlan);
-      // plan.merge(newPlan);
-    }
-
+    // finalize
     if (sc != null) {
       plan.put(name, sc);
       // RECURSIVE load peers
       Map<String, Peer> peers = sc.getPeers();
       for (String peerKey : peers.keySet()) {
         Peer peer = peers.get(peerKey);
-        if (peer.autoStart) {
-          load(peer.name, peer.type);
-        }
+        // recursive depth load - parent and child need to be started
+        runtime.loadService(plan, peer.name, peer.type, start && peer.autoStart, level + 1);
       }
-    } else {
-      error("ServiceConfig is null for %s %s", name, type);
-    }
 
-    if (plan.get(name) == null) {
-      error("could not load %s %s %d", name, type, level);
+      // valid service config at this point - now determine if its supposed to
+      // start or not
+      // if its level 0 then it was requested by user or config - so it needs to
+      // start
+      // if its not level 0 then it was loaded because peers were defined and
+      // appropriate config loaded
+      // peer.autoStart should determine if the peer starts if not explicitly
+      // requested by the
+      // user or config
+      if (level == 0 || start) {
+        plan.addRegistry(name);
+      }
+
+    } else {
+      log.info("could not load {} {} {}", name, type, level);
     }
 
     return plan;
@@ -4681,21 +4715,41 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return name;
   }
 
-//  @Override 
-//  public ServiceConfig getConfig() {
-//    RuntimeConfig config = (RuntimeConfig)super.getConfig();
-//    List<org.myrobotlab.service.config.ServiceConfig.Listener> listeners = new ArrayList
-//    for (org.myrobotlab.service.config.ServiceConfig.Listener listener: config.listeners) {
-//      if (listener.equals("stopped") || listener.equals("created")|| listener.equals("registered")|| listener.equals("released")) {
-//        
-//      }
-//    }
-//  }
-  
+  // @Override
+  // public ServiceConfig getConfig() {
+  // RuntimeConfig config = (RuntimeConfig)super.getConfig();
+  // List<org.myrobotlab.service.config.ServiceConfig.Listener> listeners = new
+  // ArrayList
+  // for (org.myrobotlab.service.config.ServiceConfig.Listener listener:
+  // config.listeners) {
+  // if (listener.equals("stopped") || listener.equals("created")||
+  // listener.equals("registered")|| listener.equals("released")) {
+  //
+  // }
+  // }
+  // }
+
+  public String setAllIds(String id) {
+    Platform.getLocalInstance().setId(id);
+    for (ServiceInterface si : getServices()) {
+      si.setId(id);
+    }
+    return id;
+  }
+
   @Override
   public ServiceConfig apply(ServiceConfig c) {
     RuntimeConfig config = (RuntimeConfig) super.apply(c);
     setLocale(config.locale);
+
+    if (config.id != null) {
+      setAllIds(config.id);
+    }
+
+    if (config.logLevel != null) {
+      setLogLevel(config.logLevel);
+    }
+
     info("setting locale to %s", config.locale);
     if (config.virtual != null) {
       info("setting virtual to %b", config.virtual);
@@ -4805,19 +4859,19 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       // save full plan WRONG !!! its RUNNING CONFIG ONLY
-      // THIS SAVE WOULD BE "PLAN SAVE"
-//      Plan plan = getPlan();
-//      for (String key : plan.keySet()) {
-//        String data = CodecUtils.toYaml(plan.get(key));
-//        File dir = new File(configPath);
-//        dir.mkdirs();
-//        String ymlFileName = configPath + fs + key + ".yml";
-//        FileIO.toFile(ymlFileName, data.getBytes());
-//      }
+      // THIS SAVE WOULD BE "SAVE PLAN"
+      // Plan plan = getPlan();
+      // for (String key : plan.keySet()) {
+      // String data = CodecUtils.toYaml(plan.get(key));
+      // File dir = new File(configPath);
+      // dir.mkdirs();
+      // String ymlFileName = configPath + fs + key + ".yml";
+      // FileIO.toFile(ymlFileName, data.getBytes());
+      // }
 
       File dir = new File(configPath);
-      dir.mkdirs();      
-      
+      dir.mkdirs();
+
       // save running services
       Set<String> servicesToSave = new HashSet<>();
 
@@ -4860,6 +4914,18 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   public String getConfigPath() {
     return configPath;
+  }
+
+  public String getConfigName() {
+    if (configPath == null) {
+      return null;
+    }
+    File f = new File(configPath);
+    return f.getName();
+  }
+
+  public boolean isProcessingConfig() {
+    return processingConfig;
   }
 
   public void unsetConfigPath() {
@@ -5053,7 +5119,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
       String name = f.getName().substring(0, f.getName().length() - 4);
       ServiceConfig sc = CodecUtils.readServiceConfig(path);
-      loadService(Runtime.getPlan(), name, sc.type, 0);
+      loadService(Runtime.getPlan(), name, sc.type, true, 0);
       masterPlan.put(name, sc);
     } catch (Exception e) {
       error("loadFile requirese");

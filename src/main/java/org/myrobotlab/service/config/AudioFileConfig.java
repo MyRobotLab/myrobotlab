@@ -10,7 +10,7 @@ public class AudioFileConfig extends ServiceConfig {
   public double volume = 1.0;
   public String currentPlaylist = "default";
   public Map<String, List<String>> playlists;
-  public double peakMultiplier = 1.0;
+  public double peakMultiplier = 100.0;
   public String[] audioListeners;
 
   /**

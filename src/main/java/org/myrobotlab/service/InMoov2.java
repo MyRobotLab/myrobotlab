@@ -21,11 +21,14 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
+import org.myrobotlab.programab.PredicateEvent;
+import org.myrobotlab.programab.Response;
 import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.JoystickData;
+import org.myrobotlab.service.data.LedDisplayData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.JoystickListener;
@@ -90,11 +93,40 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
    * structure .. i think
    */
   @Override
-  public void onStarted(String fullname) {
-    log.info("{} started", fullname);
+  public void onStarted(String name) {
+    log.info("{} started", name);
     try {
       
+      InMoov2Config c = (InMoov2Config)config;    
+      Runtime runtime = Runtime.getInstance();
+      log.error("onStarted {}", name);
+      
+      if (runtime.isProcessingConfig()) {
+        invoke("publishEvent", "configStarted");
+      }
+      
+      String peerKey = getPeerKey(name);
+      if (peerKey != null) {
+        getResponse(peerKey.toUpperCase() + " STARTED");
+      }
+      
+
       // FIXME DiscordBot utterance subscriptions
+      
+//      if (c.startMouthOnBoot) {
+//        startPeer("mouth");
+//         speakBlocking(get("STARTINGMOUTH"));
+//      }
+      
+//      if (c.startBrainOnBoot) {
+//        startPeer("htmlFilter");
+//        startPeer("brain");
+//      }
+      
+//      if (runtime.isStartingConfig()) {
+//        speakBlocking("starting config %s", runtime.getConfigName());
+//      }
+
 
       // FIXME - problem is fullname is not the peerKey :(
       // String actualName = getPeerName(fullname);
@@ -115,25 +147,25 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       // "member" config.mouth should hold the actual name !
 
       String actualName = getPeerName("ear");
-      if (actualName.equals(fullname)) {
+      if (actualName.equals(name)) {
         AbstractSpeechRecognizer ear = (AbstractSpeechRecognizer) Runtime.getService(actualName);
         ear.attachTextListener(getPeerName("chatBot"));
       }
 
       actualName = getPeerName("mouth");
-      if (actualName.equals(fullname)) {
+      if (actualName.equals(name)) {
         AbstractSpeechSynthesis mouth = (AbstractSpeechSynthesis) Runtime.getService(actualName);
         mouth.attachSpeechListener(getPeerName("ear"));
       }
 
       actualName = getPeerName("chatBot");
-      if (actualName.equals(fullname)) {
+      if (actualName.equals(name)) {
         ProgramAB chatBot = (ProgramAB) Runtime.getService(actualName);
         chatBot.attachTextListener(getPeerName("htmlFilter"));
       }
 
       actualName = getPeerName("htmlFilter");
-      if (actualName.equals(fullname)) {
+      if (actualName.equals(name)) {
         TextPublisher htmlFilter = (TextPublisher) Runtime.getService(actualName);
         htmlFilter.attachTextListener(getPeerName("mouth"));
       }
@@ -152,10 +184,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       // getPeer(peerKey)
       // isPeerStarted(peerKey);
       // startPeer(peerKey);
-      ServiceInterface si = Runtime.getService(fullname);
+      ServiceInterface si = Runtime.getService(name);
       if ("Servo".equals(si.getSimpleName())) {
-        log.info("sending setAutoDisable true to {}", fullname);
-        send(fullname, "setAutoDisable", true);
+        log.info("sending setAutoDisable true to {}", name);
+        send(name, "setAutoDisable", true);
         // ServoControl sc = (ServoControl)Runtime.getService(name);
       }
     } catch (Exception e) {
@@ -166,16 +198,54 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   @Override
   public void startService() {
     super.startService();
+    InMoov2Config c = (InMoov2Config)config;    
     Runtime runtime = Runtime.getInstance();
-    // FIXME - shouldn't need this anymore
-    Runtime.getInstance().attachServiceLifeCycleListener(getName());
+       
+    // InMoov2 has a huge amount of peers
+
+    // by default all servos will auto-disable
+    // Servo.setAutoDisableDefault(true); //until peer servo services for
+    // InMoov2 have the auto disable behavior, we should keep this
+
+    // same as created in runtime - send asyc message to all
+    // registered services, this service has started
+    // find all servos - set them all to autoDisable(true)
+    // onStarted(name) will handle all future created servos
+    List<ServiceInterface> services = Runtime.getServices();
+    for (ServiceInterface si : services) {
+      if ("Servo".equals(si.getSimpleName())) {
+        send(si.getFullName(), "setAutoDisable", true);
+      }
+    }
+    
+
+    // REALLY NEEDS TO BE CLEANED UP - no direct references
+    // "publish" scripts which should be executed :(
+    // python = (Python) startPeer("python");
+    // python = (Python) Runtime.start("python", "Python"); <- BAD !!!!
+    // load(locale.getTag()); WTH ?
+
+    // get events of new services and shutdown
+    Runtime r = Runtime.getInstance();
+    subscribe(r.getName(), "shutdown");
+    subscribe(r.getName(), "publishConfigList");
+
+    // FIXME - Framework should auto-magically auto-start peers AFTER
+    // construction - unless explicitly told not to
+    // peers to start on construction
+    // imageDisplay = (ImageDisplay) startPeer("imageDisplay");    
+    
+    
+    if (runtime.isProcessingConfig()) {
+      invoke("publishEvent", "configStarted");
+    }
 
     // power up loopback subscription
     addListener(getName(), "powerUp");
     // invoke("powerUp");
 
     // for begin and end of processing config ?
-    subscribe("runtime", "publishStartConfig");
+    // subscribe("runtime", "publishStartConfig");
     subscribe("runtime", "publishFinishedConfig");
 
     try {
@@ -217,21 +287,20 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     } catch (Exception e) {
       error(e);
     }
-
-    // if (loadGestures) {
-    // loadGestures();
-    // }
-
     runtime.invoke("publishConfigList");
   }
 
-  public void onFinishedConfig() {
+  public void onFinishedConfig(String configName) {
     log.info("onFinishedConfig");
+    // invoke("publishEvent", "configFinished");
+    invoke("publishEvent", "systemCheck");
   }
-
-  public void onStartConfig() {
-    log.info("onStartConfig");
-  }
+  
+//
+//  public void onStartConfig(String configName) {
+//    log.info("onStartConfig");
+//    
+//  }
 
   @Override
   public void onCreated(String fullname) {
@@ -336,43 +405,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   public InMoov2(String n, String id) {
     super(n, id);
-
-    // InMoov2 has a huge amount of peers
-
-    // by default all servos will auto-disable
-    // Servo.setAutoDisableDefault(true); //until peer servo services for
-    // InMoov2 have the auto disable behavior, we should keep this
-
-    // same as created in runtime - send asyc message to all
-    // registered services, this service has started
-    // find all servos - set them all to autoDisable(true)
-    // onStarted(name) will handle all future created servos
-    List<ServiceInterface> services = Runtime.getServices();
-    for (ServiceInterface si : services) {
-      if ("Servo".equals(si.getSimpleName())) {
-        send(si.getFullName(), "setAutoDisable", true);
-      }
-    }
-
-    // dynamically gotten from filesystem/bots ?
-    locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
-    locale = Runtime.getInstance().getLocale();
-
-    // REALLY NEEDS TO BE CLEANED UP - no direct references
-    // "publish" scripts which should be executed :(
-    // python = (Python) startPeer("python");
-    // python = (Python) Runtime.start("python", "Python"); <- BAD !!!!
-    // load(locale.getTag()); WTH ?
-
-    // get events of new services and shutdown
-    Runtime r = Runtime.getInstance();
-    subscribe(r.getName(), "shutdown");
-    subscribe(r.getName(), "publishConfigList");
-
-    // FIXME - Framework should auto-magically auto-start peers AFTER
-    // construction - unless explicitly told not to
-    // peers to start on construction
-    // imageDisplay = (ImageDisplay) startPeer("imageDisplay");
+    
+    Runtime.getInstance().attachServiceLifeCycleListener(getName());
   }
 
   public void addTextListener(TextListener service) {
@@ -549,6 +583,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     sendToPeer("torso", "fullSpeed");
   }
 
+  // FIXME - remove all of this form of localization
   public String get(String key) {
     String ret = localize(key);
     if (ret != null) {
@@ -1092,11 +1127,9 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
     super.setLocale(code);
 
-    locale = new Locale(code);
-
     // super.setLocale(code);
     for (ServiceInterface si : Runtime.getLocalServices().values()) {
-      if (!si.equals(this) && !si.isRuntime()) {
+      if (!si.equals(this)) {
         si.setLocale(code);
       }
     }
@@ -1173,6 +1206,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     // FIXME - publish onText when listening
     invoke("publishText", toSpeak);
 
+    // FIXME - mute is not normalized
     if (!mute && isPeerStarted("mouth")) {
       // sendToPeer("mouth", "speakBlocking", toSpeak);
       // invokePeer("mouth", "speakBlocking", toSpeak);
@@ -1181,7 +1215,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       // sendToPeer("mouth", "speakBlocking", toSpeak);
       AbstractSpeechSynthesis mouth = (AbstractSpeechSynthesis) getPeer("mouth");
       if (mouth != null) {
-        mouth.speakBlocking(toSpeak);
+        mouth.speak(toSpeak);
       }
     }
   }
@@ -1214,6 +1248,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
         chatBot.setCurrentBotName(locale.getTag());
       }
 
+      // FIXME remove get en.properties stuff
       speakBlocking(get("CHATBOTACTIVATED"));
 
       chatBot.attachTextPublisher(ear);
@@ -1460,14 +1495,43 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       }
     }
   }
+  
+  /**
+   * matches on language only not variant
+   * expands language match to full InMoov2 bot locale
+   * @param inLocale
+   * @return
+   */
+  public String getSupportedLocale(String inLocale) {    
+    String ret = "en-US";
+    if (inLocale == null) {
+      return ret;
+    }
+    
+    int pos = inLocale.indexOf("-");
+    if (pos > 0) {
+      inLocale = inLocale.substring(0, pos);
+    }
+    
+    for (String fullLocale : locales.keySet()) {
+      if (fullLocale.startsWith(inLocale)) {
+        return fullLocale;
+      }
+    }
+    return ret;
+  }
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
     InMoov2Config config = (InMoov2Config) super.apply(c);
     try {
 
+      locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
+
       if (config.locale != null) {
         setLocale(config.locale);
+      } else {
+        setLocale(getSupportedLocale(Runtime.getInstance().getLocale().toString()));
       }
 
       if (config.loadGestures) {
@@ -1498,26 +1562,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return getName();
   }
 
-  /**
-   * Notifications are published here
-   * 
-   * @param key
-   * @return
-   */
-  public String publishNotification(String key) {
-    return key;
-  }
-
-  /**
-   * Loopback subscription for publishNotification - default handling of
-   * notifications here. User can unsubscribe and publish to Python to override
-   * 
-   * @param key
-   * @return
-   */
-  public String onNotification(String key) {
-    return key;
-  }
 
   // ???? - seems like a good pattern dunno what to do
   // Overriding and polymorphism is a nice way to reduce code
@@ -1528,10 +1572,27 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init(Level.INFO);
+      LoggingFactory.init(Level.ERROR);
       // Platform.setVirtual(true);
       // Runtime.start("s01", "Servo");
       // Runtime.start("intro", "Intro");
+      
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      // webgui.setSsl(true);
+      webgui.autoStartBrowser(false);
+      webgui.setPort(8888);
+      webgui.startService();
+      
+//      Runtime.start("python", "Python");
+//      //Runtime.start("intro", "Intro");
+//      // Runtime.start("i01", "InMoov2");
+      Runtime.startConfig("i01-05");
+      // Runtime.startConfig("pir-01");
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }            
 
       // Polly polly = (Polly)Runtime.start("i01.mouth", "Polly");
       InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
@@ -1544,19 +1605,9 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       // wheather to take arms against a see of trouble, and by aposing them end
       // them, to sleep, to die");
 
-      // Runtime.startConfig("dewey-2");
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      // webgui.setSsl(true);
-      webgui.autoStartBrowser(false);
-      webgui.setPort(8888);
-      webgui.startService();
 
       Runtime.start("python", "Python");
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       i01.startSimulator();
       Plan plan = Runtime.load("webgui", "WebGui");
@@ -1606,16 +1657,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return b;
   }
 
-  public void onSense(boolean sensed) {
-    if (sensed) {
-      log.info("onSense active");
-      invoke("publishNotification", "senseActive");
-    } else {
-      log.info("onSense deactive");
-      invoke("publishNotification", "senseDeactive");
-    }
-  }
-
   @Override
   public void onRegistered(Registration registration) {
     // TODO Auto-generated method stub
@@ -1633,22 +1674,151 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     // TODO Auto-generated method stub
 
   }
-
-  public String publishChangeData(String key) {
-    return key;
+  
+  /**
+   * initial callback for Pir sensor
+   * Default behavior will be:
+   * send fsm event onPirOn
+   * flash neopixel
+   */
+  public void onPirOn() {
+    speak("I AM AWAKE");
+    invoke("publishFlash");
+    invoke("publishEvent", "wake");
   }
   
+  /**
+   * used to configure a flashing event - could use configuration
+   * to signal different colors and states
+   * @return
+   */
+  public LedDisplayData publishFlash() {
+    LedDisplayData data = new LedDisplayData();
+    data.action = "flash";
+    data.red = 50;
+    data.green = 100;
+    data.blue = 150;
+    return data;
+  }
   
-  public Object setData(String key, Object data) {
-    Object o = getTypedConfig().data.put(key, data);
-    if (o == null || !o.equals(data)) {
-      invoke("publishChangeData", key);
+  /**
+   * event publisher for the fsm - although other services
+   * potentially can consume and filter this event channel
+   * @param event
+   * @return
+   */
+  public String publishEvent(String event) {
+    return event;
+  }
+  
+  public Object setPredicate(String key, Object data) {
+    ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
+    if (chatBot != null) {
+      if (data == null) {
+        chatBot.setPredicate(key, null); // "unknown" "null" other sillyness ?
+      } else {
+        chatBot.setPredicate(key, data.toString());
+      }
+    } else {
+      error("no chatBot available");
     }
-    return o;
+    return data;
   }
   
-  public Object getData(String key) {
-    return getTypedConfig().data.get(key);
+  public Object getPredicate(String key) {
+    ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
+    if (chatBot != null) {
+      return chatBot.getPredicate(key);
+    } else {
+      error("no chatBot available");
+    }
+    return null;
+  }
+  
+  public PredicateEvent onChangePredicate(PredicateEvent event) {
+    log.error("onChangePredicate {}", event);
+    if (event.name.equals("topic")) {
+      getResponse(String.format("TOPIC CHANGED TO %s", event.value));
+    }
+    // depending on configuration ....
+    // call python ?
+    // fire fsm events ?
+    // do defaults ?
+    return event;
+  }
+  
+  public void applyConfig() {
+    log.error("applyConfig()");
+    // always getResponse !
+    speak("InMoov apply config");
+  }
+
+  public void systemCheck() {
+    log.error("systemCheck()");
+    Runtime runtime = Runtime.getInstance();
+    int servoCount = 0;
+    int servoAttachedCount = 0;
+    for (ServiceInterface si : Runtime.getServices()) {
+      if (si.getClass().getSimpleName().equals("Servo")) {
+        servoCount++;
+        if (((Servo)si).getController() != null) {
+          servoAttachedCount++;
+        }
+      }
+    }
+    
+    setPredicate("systemServoCount", servoCount);
+    setPredicate("systemAttachedServoCount", servoAttachedCount);
+    setPredicate("systemFreeMemory", Runtime.getFreeMemory());
+    Platform platform = Runtime.getPlatform();
+    setPredicate("system version", platform.getVersion());
+    // ERROR buffer !!!
+    invoke("publishEvent", "systemCheckFinished");
+  }
+  
+  public void awake() {
+    log.error("awake");
+    addTaskOneShot(30000L, "publishEvent", "sleep");
+  }
+
+  public String onNewState(String state) {
+    log.error("onNewState {}", state);
+    
+    // put configurable filter here !
+    
+    // state substitutions ?
+    // let python subscribe directly to fsm.publishNewState 
+    
+    // if 
+    invoke(state);
+    // depending on configuration ....
+    // call python ?
+    // fire fsm events ?
+    // do defaults ?
+    return state;
+  }
+
+  public Response getResponse(String text) {
+        ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
+        if (chatBot != null) {
+          Response response = chatBot.getResponse(text);
+          return response;
+        } else {
+          log.error("chatbot not ready");
+        }
+        return null;
+  }
+
+  // I THINK THIS IS GOOD (good simple one)- need more info though
+  public boolean onSense(boolean b) {
+    // if wake on Pir config &&
+    // setEvent("pir-sense-on" .. also sets it in config ?  config.handledEvents["pir-sense-on"]
+    if (b) {
+      invoke("publishEvent", "pirOn");
+    } else {
+      invoke("publishEvent", "pirOff");
+    }
+    return b;
   }
   
 }

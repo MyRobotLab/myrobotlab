@@ -128,15 +128,6 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
 
   final private transient PlaylistPlayer playlistPlayer = new PlaylistPlayer(this);
 
-  protected double peakMultiplier = 1.0;
-
-  public double getPeakMultiplier() {
-    return peakMultiplier;
-  }
-
-  public void setPeakMultiplier(double peakMultiplier) {
-    this.peakMultiplier = peakMultiplier;
-  }
 
   public AudioFile(String n, String id) {
     super(n, id);
@@ -532,7 +523,6 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
     c.currentPlaylist = currentPlaylist;
     c.volume = volume;
     c.playlists = playlists;
-    c.peakMultiplier = peakMultiplier;
     // config.peakSampleInterval <- this one is done correctly no maintenance
     c.audioListeners = getAttached("publishAudio").toArray(new String[0]);
 
@@ -563,7 +553,7 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
     return c;
   }
 
-  public double publishPeak(float peak) {
+  public int publishPeak(int peak) {
     return peak;
   }
 

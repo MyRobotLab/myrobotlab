@@ -12,13 +12,12 @@ import org.slf4j.Logger;
 
 /**
  * 
- * @author GroG
- * 
- *         Plans are processed by runtime as requests for future states. They
- *         can be complex multi service multi configuration with overrides and
- *         different peer names, but ultimately its a request to runtime for
- *         services and configuration in the desired "planned" state
+ * Plans are processed by runtime as requests for future states. They can be
+ * complex multi service multi configuration with overrides and different peer
+ * names, but ultimately its a request to runtime for services and configuration
+ * in the desired "planned" state
  *
+ * @author GroG
  */
 public class Plan {
   /**
@@ -54,21 +53,10 @@ public class Plan {
    */
   public ServiceConfig put(String name, ServiceConfig sc) {
 
-    if (name.equals("runtime") && get("runtime") != null) {
-      // we do not replace root - we keep our root
-      // and add their request to start
-      log.error("request to replace root runtime ! - probably not what you want - not gonna do it");
+    if (name.equals("runtime") && get("runtime") != null && config.containsKey("runtime")) {
+      log.error("request to replace root runtime !");
       return sc;
     }
-
-    // modify runtime config registry for starting services
-    RuntimeConfig rt = (RuntimeConfig) get("runtime");
-    if (rt == null) {
-      log.warn("runtime config is null");
-      rt = new RuntimeConfig();
-      config.put("runtime", rt);
-    }
-    rt.add(name);
     return config.put(name, sc);
   }
 
@@ -83,7 +71,6 @@ public class Plan {
   }
 
   public void clear() {
-    // rtConfig.clear();
     config.clear();
   }
 
@@ -91,11 +78,16 @@ public class Plan {
    * Sometimes composite services need to remove default config put in place by
    * its peers. This method removes unwanted default config
    * 
-   * @param actualName
-   * @return
+   * @param service
+   *          - all plan names of services are "actual" names vs peerKeys. ie.
+   *          These would be the names of the services you would see in the
+   *          registry
+   * @return - the service config it replaced
    */
-  public ServiceConfig remove(String actualName) {
-    return config.remove(actualName);
+  public ServiceConfig remove(String service) {
+    RuntimeConfig rtConfig = (RuntimeConfig) config.get("runtime");
+    rtConfig.registry.remove(service);
+    return config.remove(service);
   }
 
   public boolean containsKey(String name) {
@@ -127,15 +119,34 @@ public class Plan {
   /**
    * a way to add to a request services to start
    * 
-   * @param actualName
+   * @param service
+   *          - all Plan names in the keySet are the names the services will
+   *          have when started and put in the runtime registry
    */
-  public void addRegistry(String actualName) {
+  public void addRegistry(String service) {
     RuntimeConfig runtime = (RuntimeConfig) config.get("runtime");
     if (runtime == null) {
       log.error("removeRegistry - runtime null !");
       return;
     }
-    runtime.add(actualName);
+    runtime.add(service);
+  }
+
+  /**
+   * good to prune trees of peers from starting - expecially if the peers
+   * require re-configuring
+   * 
+   * @param startsWith
+   *          - removes RuntimeConfig.registry all services that start with
+   *          input
+   */
+  public void removeStartsWith(String startsWith) {
+    RuntimeConfig runtime = (RuntimeConfig) config.get("runtime");
+    if (runtime == null) {
+      log.error("removeRegistry - runtime null !");
+      return;
+    }
+    runtime.removeStartsWith(startsWith);
   }
 
 }

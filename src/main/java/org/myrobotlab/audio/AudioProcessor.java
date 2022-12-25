@@ -13,7 +13,6 @@ import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.SourceDataLine;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.AudioFile;
 import org.myrobotlab.service.config.AudioFileConfig;
@@ -144,6 +143,8 @@ public class AudioProcessor extends Thread {
         isPlaying = true;
 
         audioFile.invoke("publishAudioStart", data);
+        AudioFileConfig config = (AudioFileConfig) audioFile.getConfig();
+
 
         while (isPlaying && (nBytesRead = din.read(buffer, 0, buffer.length)) != -1) {
           ++cnt;
@@ -204,7 +205,6 @@ public class AudioProcessor extends Thread {
           } else {
             line.write(buffer, 0, nBytesRead);
             // Compute the peak value and publish it.
-            AudioFileConfig config = (AudioFileConfig) audioFile.getConfig();
             if (cnt % config.peakSampleInterval == 0) {
               float peak = 0f;
               int b = buffer.length;
@@ -220,9 +220,9 @@ public class AudioProcessor extends Thread {
               }
               
               if (config.peakDelayMs == null) {
-                audioFile.invoke("publishPeak", peak * (float) audioFile.getPeakMultiplier());
+                audioFile.invoke("publishPeak", Math.round((peak * (float) config.peakMultiplier)));
               } else {
-                audioFile.invokeFuture("publishPeak", config.peakDelayMs, peak * (float) audioFile.getPeakMultiplier());
+                audioFile.invokeFuture("publishPeak", config.peakDelayMs, Math.round(peak * (float) config.peakMultiplier));
               }
             }
           }

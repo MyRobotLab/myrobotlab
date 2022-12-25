@@ -49,7 +49,7 @@ angular.module('mrlapp.service.FiniteStateMachineGui', []).controller('FiniteSta
             _self.updateState(data)
             $scope.$apply()
             break
-        case 'onChangedState':
+        case 'onNewState':
             $scope.current = data
             $scope.$apply()
             break
@@ -60,7 +60,7 @@ angular.module('mrlapp.service.FiniteStateMachineGui', []).controller('FiniteSta
 
     }
 
-    msg.subscribe("publishChangedState")
+    msg.subscribe("publishNewState")
     msg.subscribe(this)
 }
 ])

@@ -193,11 +193,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   protected Map<String, String> interfaceSet;
 
   /**
-   * plan which was used to build this service
-   */
-  protected Plan buildPlanx = null;
-
-  /**
    * order which this service was created
    */
   int creationOrder = 0;
@@ -629,6 +624,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   public Service(String reservedKey, String inId) {
 
+    log.error("constructing {}", reservedKey);
+    
     name = reservedKey;
 
     // necessary for serialized transport\
@@ -1121,9 +1118,29 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return config.getPeers();
   }
+  
+  /**
+   * returns the peer key if a name is supplied and matches a peer
+   * name
+   * @param name - name of service
+   * @return - key of peer if it exists
+   */
+  public String getPeerKey(String name) {
+    Map<String, Peer> peers = getPeers();
+    if (peers != null) {
+      for (String peerKey : peers.keySet()) {
+        Peer peer = peers.get(peerKey);
+        if (name.equals(peer.name)) {
+          return peerKey;
+        }
+      }
+    }
+    return null;
+  }
+
 
   @Override
-  public Set<String> getPeerNames() {
+  public Set<String> getPeerKeys() {
     if (config == null || config.peers == null) {
       return new HashSet<String>();
     }
@@ -1816,6 +1833,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     this.thisThread = thisThread;
   }
 
+  @Override
   synchronized public ServiceInterface startPeer(String peerKey) {
     // get current definition of config and peer
     Peer peer = config.getPeer(peerKey);
@@ -1824,11 +1842,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       error("startPeer could not find peerKey of %s in %s", peerKey, getName());
       return null;
     }
-
-    if (Runtime.getService(peer.name) != null) {
+    
+    ServiceInterface si = Runtime.getService(peer.name);
+    if (si != null) {
       // so this peer is already started, but are we responsible for
       // all subpeers ?
-      return Runtime.getService(peer.name);
+      return si;
     }
 
     // request to modify the plan's runtime to start all service that match
@@ -1886,6 +1905,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   synchronized public void startService() {
+    
+    log.error("starting {}", name);
 
     if (!isRunning()) {
       outbox.start();
@@ -2619,6 +2640,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return creationOrder;
   }
 
+  /**
+   * Return the service name of a peer from its peerKey
+   * @param peerKey
+   * @return - name of peer service
+   */
   public String getPeerName(String peerKey) {
 
     if (config == null) {
@@ -2627,18 +2653,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return config.getPeerName(peerKey);
   }
 
-  public String getPeerType(String peerKey) {
-    try {
-      Field field = config.getClass().getDeclaredField(peerKey);
-      field.setAccessible(true);
-      Peer peer = (Peer) field.get(config);
-      return peer.type;
-    } catch (Exception e) {
-      error(e);
-    }
-    return null;
-  }
-
+  /**
+   * returns if the peer is currently started from its peerkey value
+   * e.g. isPeerStarted("head")
+   * @param peerKey
+   * @return
+   */
   public boolean isPeerStarted(String peerKey) {
     return Runtime.isStarted(getPeerName(peerKey));
   }
@@ -2678,30 +2698,32 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     apply(sc);
   }
 
-  // FIXME - test
+  /**
+   * Set a peer's name to a new service name.  e.g. i01.setPeerName("mouth", "mouth")
+   * will change the InMoov2 peer "mouth" to be simply "mouth" instead of "i01.mouth"  
+   * @param key
+   * @param fullName
+   */
   public void setPeerName(String key, String fullName) {
     Peer peer = config.getPeer(key);
     String oldName = peer.name;
     peer.name = fullName;
     // update plan ?
     ServiceConfig.getDefault(Runtime.getPlan(), peer.name, peer.type);
-    // Runtime runtime = Runtime.getInstance();
-    // String configPath = runtime.getConfigPath();
-    // seems a bit invasive - but yml file overrides everything
-    // if one exists we need to replace it with the new peer type
-    // if (configPath != null) {
-    // String configFile = configPath + fs + peer.name + ".yml";
-    // File staleFile = new File(configFile);
-    // if (staleFile.exists()) {
-    // log.info("removing old config file {}", configFile);
-    // staleFile.delete();
-    // // save new default in its place
-    // runtime.saveDefault(configPath, peer.name, peer.type, false);
-    // }
-    // }
+    // FIXME - determine if only updating the Plan in memory is enough,
+    // should we also make or update a config file - if the config path is set?
     info("updated %s name to %s", oldName, peer.name);
   }
 
+  /**
+   * Update a peer's type. First its done in the current Plan, and it will also
+   * modify the config file if a configpath is set.
+   * 
+   * @param key
+   *          - peerKey of the service .. e.g. "head" for InMoov's head peer
+   * @param peerType
+   *          - desired shortname of the type
+   */
   public void updatePeerType(String key, String peerType) {
 
     // MAKE NOTE ! - CONFIG IS DIFFERENT THAN PLAN !!!! MODIFY BOTH ???!?

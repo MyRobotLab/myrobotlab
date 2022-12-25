@@ -72,19 +72,30 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
   public String getType();
 
   /**
-   * Returns peers
+   * Keys to Peers - the keys are string constants the service uses to refer to a
+   * Peer service. The key never changes. However, the Peer's name and type can.
+   * This returns all peers for a service.
    * 
    * @return
    */
   public Map<String, Peer> getPeers();
-  
+
   /**
-   * Returns peers
+   * Returns peers keys. Peer key is the hardcoded key a composite service
+   * references its peers with - actual name may vary
    * 
    * @return
    */
-  public Set<String> getPeerNames();
+  public Set<String> getPeerKeys();
 
+  /**
+   * Returns the peer key if a name is supplied and matches a peer name
+   * 
+   * @param name
+   *          - service name
+   * @return - coorisponding peer key if it exists
+   */
+  public String getPeerKey(String name);
 
   /**
    * Service life-cycle method: releaseService will call stopService, release
@@ -198,6 +209,20 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
 
   public MetaData getMetaData();
 
+  /**
+   * start a peer using a peerKey E.g. inside InMoov service startPeer("head")
+   * 
+   * @param peerKey
+   * @return
+   */
   public ServiceInterface startPeer(String peerKey);
+
+  /**
+   * setting an instance id on the service - this represents the running
+   * instance's identifier which would be the service's home
+   * 
+   * @param id
+   */
+  public void setId(String id);
 
 }

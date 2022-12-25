@@ -292,7 +292,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     // should hold off creating or starting peers until the service has started
     // audioFile = (AudioFile) createPeer("audioFile");
 
-    getVoices();
+//     getVoices();
 
   }
 
@@ -522,6 +522,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   @Override
   public void startService() {
     super.startService();
+    getVoices();
     // FIXME - assigning a Peer to a reference is a no no
     audioFile = (AudioFile) startPeer("audioFile");
     subscribe(audioFile.getName(), "publishAudioStart");

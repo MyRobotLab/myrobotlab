@@ -10,6 +10,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.PollyConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
@@ -57,7 +59,7 @@ public class Polly extends AbstractSpeechSynthesis {
   private transient AmazonPolly polly;
 
   Regions defaultRegion;
-
+  
   public Polly(String n, String id) {
     super(n, id);
   }
@@ -189,8 +191,13 @@ public class Polly extends AbstractSpeechSynthesis {
    */
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
+//    if (!configured) {
+//      log.error("polly not configured yet");
+//      return null;
+//    }
     PollyConfig c = (PollyConfig) config;
     getPolly();
+    setVoice(c.voice);
     Voice voice = getVoice();
     if (voice == null) {
       error("invalid voice - have keys been set ?");
@@ -399,6 +406,16 @@ public class Polly extends AbstractSpeechSynthesis {
   public boolean isReady() {
     setReady(polly != null ? true : false);
     return ready;
+  }
+  
+  @Override
+  public ServiceConfig apply(ServiceConfig c) {
+    // must initialize polly before getting voices
+    // must get voices before setVoice
+    getVoices();
+    // this will set voice based on config
+    super.apply(c);
+    return c;
   }
 
   // @Override

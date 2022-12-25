@@ -39,6 +39,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.NeoPixelConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.data.LedDisplayData;
 import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.slf4j.Logger;
@@ -409,7 +410,52 @@ public class NeoPixel extends Service implements NeoPixelControl {
     writeMatrix();
 
   }
+  
+  public void onLedDisplay(LedDisplayData data) {
+    
+    if ("flash".equals(data.action)) {
+      flash(data.count, data.interval, data.red, data.green, data.blue);
+    }
+    
+  }
 
+  public void flash(int count, long interval, int r, int g, int b) {
+    long delay = 0;
+    for (int i = 0; i < count; ++i) {
+      addTask(getName()+"fill-"+System.currentTimeMillis(), true, 0, delay, "fill", r, g, b);
+      delay+= interval/2;
+      addTask(getName()+"clear-"+System.currentTimeMillis(), true, 0, delay, "clear");
+      delay+= interval/2;
+    }
+  }
+
+  
+  public void flashBrightness(int brightNess) {
+    NeoPixelConfig c = (NeoPixelConfig)config;
+
+    // FIXME - these need to be moved into config
+//    int count = 2;
+//    int interval = 75;
+    setBrightness(brightNess);
+    fill(red, green, blue);
+    
+//    long delay = 0;
+//    for (int i = 0; i < count; ++i) {
+//      addTask(getName()+"fill-"+System.currentTimeMillis(), true, 0, delay, "fill", red, green, blue);
+//      delay+= interval/2;
+//      addTask(getName()+"clear-"+System.currentTimeMillis(), true, 0, delay, "clear");
+//      delay+= interval/2;
+//    }
+    
+    if (c.autoClear) {
+      purgeTask("clear");
+      // and start our countdown
+      addTaskOneShot(c.idleTimeout, "clear");
+    }
+
+    
+  }
+  
   public void fill(int r, int g, int b) {
     fill(0, pixelCount, r, g, b, null);
   }
@@ -419,6 +465,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
   }
 
   public void fill(int beginAddress, int count, int r, int g, int b, Integer w) {
+    NeoPixelConfig c = (NeoPixelConfig)config;
+    
     if (w == null) {
       w = 0;
     }
@@ -429,6 +477,13 @@ public class NeoPixel extends Service implements NeoPixelControl {
       return;
     }
     np2.neoPixelFill(getName(), beginAddress, count, r, g, b, w);
+    
+    if (c.autoClear) {
+      purgeTask("clear");
+      // and start our countdown
+      addTaskOneShot(c.idleTimeout, "clear");
+    }
+
   }
 
   public void fillMatrix(int r, int g, int b) {
@@ -598,6 +653,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
   }
 
   public void setBrightness(int value) {
+    NeoPixelConfig c = (NeoPixelConfig)config;
+
     NeoPixelController np2 = (NeoPixelController) Runtime.getService(controller);
     if (controller == null || np2 == null) {
       error("%s cannot setPixel controller not set", getName());
@@ -605,6 +662,13 @@ public class NeoPixel extends Service implements NeoPixelControl {
     }
     brightness = value;
     np2.neoPixelSetBrightness(getName(), value);
+    
+    if (c.autoClear) {
+      purgeTask("clear");
+      // and start our countdown
+      addTaskOneShot(c.idleTimeout, "clear");
+    }
+
   }
 
   public void setGreen(int green) {
@@ -654,7 +718,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
    * @param delayMs
    */
   public void setPixel(String matrixName, Integer pixelSetIndex, int address, int red, int green, int blue, int white, Integer delayMs) {
-
+    NeoPixelConfig c = (NeoPixelConfig)config;
     // get and update memory cache
     PixelSet ps = getPixelSet(matrixName, pixelSetIndex);
 
@@ -682,7 +746,12 @@ public class NeoPixel extends Service implements NeoPixelControl {
     }
 
     np2.neoPixelWriteMatrix(getName(), pixel.flatten());
-
+    
+    if (c.autoClear) {
+      purgeTask("clear");
+      // and start our countdown
+      addTaskOneShot(c.idleTimeout, "clear");
+    }
   }
 
   public int setPixelCount(int pixelCount) {
@@ -745,12 +814,21 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   @Override
   public void writeMatrix() {
+    NeoPixelConfig c = (NeoPixelConfig)config;
+    
     NeoPixelController np2 = (NeoPixelController) Runtime.getService(controller);
     if (controller == null || np2 == null) {
       error("%s cannot writeMatrix controller not set", getName());
       return;
     }
     np2.neoPixelWriteMatrix(getName(), getPixelSet().flatten());
+    if (c.autoClear) {
+      purgeTask("clear");
+      // and start our countdown
+      addTaskOneShot(c.idleTimeout, "clear");
+    }
+    
+    
   }
 
   /**
@@ -914,6 +992,12 @@ public class NeoPixel extends Service implements NeoPixelControl {
     } catch (Exception e) {
       error(e);
     }
+  }
+  
+  public boolean setAutoClear(boolean b) {
+    NeoPixelConfig c = (NeoPixelConfig)config;
+    c.autoClear = b;
+    return b;
   }
 
 }

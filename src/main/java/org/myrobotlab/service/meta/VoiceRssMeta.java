@@ -19,6 +19,7 @@ public class VoiceRssMeta extends AbstractSpeechSynthesisMeta {
     addCategory("speech", "cloud");
     addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
     setCloudService(true);
+    setRequiresKeys(true);
     addDependency("com.voicerss", "tts", "1.0");
   }
 

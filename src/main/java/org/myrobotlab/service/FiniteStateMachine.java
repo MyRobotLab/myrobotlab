@@ -141,6 +141,17 @@ public class FiniteStateMachine extends Service {
   public void prune() {
     stateMachine.prune();
   }
+  
+  /**
+   * for fsm event publishers
+   * @param event
+   * @return
+   */
+  public String onEvent(String event) {
+    log.error("{} event arrived", event);
+    fire(event);
+    return event;
+  }
 
   /**
    * fires a message type
@@ -157,7 +168,7 @@ public class FiniteStateMachine extends Service {
       log.info("fired event ({}) -> ({}) moves to ({})", event, last == null ? null : last.getName(), current == null ? null : current.getName());
 
       if (last != null && !last.equals(current)) {
-        invoke("publishChangedState", current.getName());
+        invoke("publishNewState", current.getName());
       }
     } catch (Exception e) {
       log.error("fire threw", e);
@@ -204,8 +215,8 @@ public class FiniteStateMachine extends Service {
    * @param state
    * @return
    */
-  public String publishChangedState(String state) {
-    log.info("publishChangedState {}", state);
+  public String publishNewState(String state) {
+    log.error("publishNewState {}", state);
     for (String listener : messageListeners) {
       ServiceInterface service = Runtime.getService(listener);
       if (service != null) {
@@ -386,7 +397,7 @@ public class FiniteStateMachine extends Service {
       stateMachine.setCurrent(state);
       current = stateMachine.getCurrent();
       if (last != null && !last.equals(current)) {
-        invoke("publishChangedState", current.getName());
+        invoke("publishNewState", current.getName());
       }
     } catch (Exception e) {
       log.error("setCurrent threw", e);

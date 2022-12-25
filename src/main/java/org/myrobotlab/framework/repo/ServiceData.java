@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 /**
  * ServiceData class contains all of the Services meta data. This includes : 1.
  * Dependency information - what libraries are needed to run the class 2.
- * Categories of the service 3.
  * 
  * All this information is Service "type" related - non of it is instance
  * specific. ServiceData has to be created during "build" time since most of the
