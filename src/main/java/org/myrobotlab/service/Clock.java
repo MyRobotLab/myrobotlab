@@ -1,25 +1,6 @@
 /**
  *                    
  * @author grog (at) myrobotlab.org
- *  
- * This file is part of MyRobotLab (http://myrobotlab.org).
- *
- * MyRobotLab is free software: you can redistribute it and/or modify
- * it under the terms of the Apache License 2.0 as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version (subject to the "Classpath" exception
- * as provided in the LICENSE.txt file that accompanied this code).
- *
- * MyRobotLab is distributed in the hope that it will be useful or fun,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * Apache License 2.0 for more details.
- *
- * All libraries in thirdParty bundle are subject to their own license
- * requirements - please refer to http://myrobotlab.org/libraries for 
- * details.
- * 
- * Enjoy !
  * 
  * */
 
@@ -60,7 +41,7 @@ public class Clock extends Service {
         while (c.running) {
           Thread.sleep(c.interval);
           Date now = new Date();
-          for (Message msg: events) {
+          for (Message msg : events) {
             send(msg);
           }
           invoke("pulse", now);
@@ -74,12 +55,15 @@ public class Clock extends Service {
       thread = null;
     }
 
-    // FIXME - synchronized methods is silly here - access needs to be synchronized "between" start & stop
-    // TODO - create and use a single thread - use wait(sleep) notify for control  
+    // FIXME - synchronized methods is silly here - access needs to be
+    // synchronized "between" start & stop
+    // TODO - create and use a single thread - use wait(sleep) notify for
+    // control
     synchronized public void start() {
       if (thread == null) {
         thread = new Thread(this, getName() + "_ticking_thread");
         thread.start();
+        invoke("publishClockStarted");
       } else {
         log.info("{} already started", getName());
       }
@@ -92,6 +76,12 @@ public class Clock extends Service {
       } else {
         log.info("{} already stopped");
       }
+
+      // change state - broadcast it
+      if (c.running == true) {
+        broadcastState();
+      }
+
       c.running = false;
       thread = null;
     }
@@ -103,6 +93,9 @@ public class Clock extends Service {
 
   final protected transient ClockThread myClock = new ClockThread();
 
+  /**
+   * list of messages the clock can send - these are set with addClockEvent
+   */
   final protected List<Message> events = new ArrayList<>();
 
   public Clock(String n, String id) {
@@ -113,73 +106,96 @@ public class Clock extends Service {
     Message event = Message.createMessage(getName(), name, method, data);
     events.add(event);
   }
-  
+
+  /**
+   * clears all the clock events
+   */
   public void clearClockEvents() {
     events.clear();
   }
 
-  // FIXME - to spec would be "publishClockStarted()"
-  // clock started event
+  /**
+   * event published for when the clock is started
+   */
   public void publishClockStarted() {
-    ClockConfig c = (ClockConfig) config;
-    c.running = true;
     log.info("clock started");
     broadcastState();
   }
 
   /**
-   * The clock was stopped event
+   * the clock was stopped event
    */
   public void publishClockStopped() {
-    ClockConfig c = (ClockConfig) config;
-    c.running = false;
+    log.info("clock stopped");
     broadcastState();
   }
 
   /**
-   * Date is published at an interval here
+   * date is published at an interval here
    * 
    * @param time
    *          t
    * @return t
    */
+  @Deprecated /* use publishTime or preferably publishEpoch as epoch is in a useful millisecond value */
   public Date pulse(Date time) {
     return time;
   }
 
+  /**
+   * publishing point for a the current date object
+   * @param time
+   * @return
+   */
   public Date publishTime(Date time) {
     return time;
   }
 
+  /**
+   * publishing point for epoch
+   * @param time - epoch value, number of milliseconds from Jan 1 1970
+   * @return
+   */
   public long publishEpoch(Date time) {
     return time.getTime();
   }
 
+  /**
+   * set the interval of clock events to the current millisecond value
+   * @param milliseconds
+   */
   public void setInterval(Integer milliseconds) {
     ClockConfig c = (ClockConfig) config;
     c.interval = milliseconds;
     broadcastState();
   }
 
+  @Deprecated /* use startClock skipFirst is default behavior */
   public void startClock(boolean skipFirst) {
-    ClockConfig c = (ClockConfig) config;
-    c.skipFirst = skipFirst;
-    myClock.start();
-    invoke("publishClockStarted");
+    startClock();
   }
 
+  /**
+   * start the clock
+   */
   public void startClock() {
-    startClock(false);
+    myClock.start();
   }
 
+  /**
+   * see if the clock is running
+   * @return
+   */
   public boolean isClockRunning() {
     ClockConfig c = (ClockConfig) config;
     return c.running;
   }
 
+  /**
+   * stop a clock
+   */
   public void stopClock() {
     myClock.stop();
-    broadcastState();
   }
 
   @Override
@@ -188,6 +204,10 @@ public class Clock extends Service {
     stopClock();
   }
 
+  /**
+   * return the current interval in milliseconds
+   * @return
+   */
   public Integer getInterval() {
     return ((ClockConfig) config).interval;
   }
@@ -205,61 +225,24 @@ public class Clock extends Service {
     }
     return config;
   }
-  
+
   public void restartClock() {
     stopClock();
-    startClock();    
+    startClock();
   }
 
   public static void main(String[] args) throws Exception {
     try {
-      // LoggingFactory.init(Level.WARN);
 
-      Runtime runtime = Runtime.getInstance();
+      Runtime.start("webgui", "WebGui");
 
       Clock c1 = (Clock) Runtime.start("c1", "Clock");
-      c1.startClock(true);
+      c1.startClock();
       c1.stopClock();
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
-      // connections
-      boolean mqtt = true;
-      boolean rconnect = false;
-
-      /*
-       * 
-       * WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui"); //
-       * webgui.setSsl(true); webgui.autoStartBrowser(false);
-       * webgui.setPort(8887); webgui.startService();
-       */
-      if (mqtt) {
-        // Mqtt mqtt02 = (Mqtt)Runtime.create("broker", "MqttBroker");
-        Mqtt mqtt02 = (Mqtt) Runtime.start("mqtt02", "Mqtt");
-        /*
-         * mqtt02.setCert("certs/home-client/rootCA.pem",
-         * "certs/home-client/cert.pem.crt", "certs/home-client/private.key");
-         * mqtt02.connect(
-         * "mqtts://a22mowsnlyfeb6-ats.iot.us-west-2.amazonaws.com:8883");
-         */
-        // mqtt02.connect("mqtt://broker.emqx.io:1883");
-        mqtt02.connect("mqtt://localhost:1883");
-      }
-
-      if (rconnect) {
-        // Runtime runtime = Runtime.getInstance();
-        // runtime.connect("http://localhost:8888");
-
-      }
 
     } catch (Exception e) {
       log.error("main threw", e);
     }
   }
-
-
 
 }

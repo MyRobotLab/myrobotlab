@@ -13,10 +13,4 @@ public class ClockConfig extends ServiceConfig {
    */
   public Boolean running = false;
 
-  /**
-   * skip first / "immediate" publish event so first event comes at now +
-   * interval from when started
-   */
-  public boolean skipFirst = false;
-
 }

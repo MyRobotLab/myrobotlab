@@ -25,6 +25,11 @@ public class RuntimeMeta extends MetaData {
     includeServiceInOneJar(true);
     // apache 2.0 license
     addDependency("com.google.code.gson", "gson", "2.8.5");
+
+    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.14.0");
+    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.14.0");
+    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.14.0");
+    addDependency("com.fasterxml.jackson.module", "jackson-module-no-ctor-deser", "2.14.0");
     // apache 2.0 license
     // addDependency("org.apache.ivy", "ivy", "2.4.0-5");
     addDependency("org.apache.ivy", "ivy", IvyWrapper.IVY_VERSION);

@@ -1,0 +1,8 @@
+!!org.myrobotlab.service.config.FiniteStateMachineConfig
+current: null
+messageListeners: [
+  ]
+peers: null
+transitions: [
+  ]
+type: FiniteStateMachine

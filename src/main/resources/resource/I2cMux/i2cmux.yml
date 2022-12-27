@@ -1,0 +1,8 @@
+!!org.myrobotlab.service.config.I2cMuxConfig
+address: '0x70'
+bus: '1'
+controller: null
+i2cDevices: {
+  }
+peers: null
+type: I2cMux

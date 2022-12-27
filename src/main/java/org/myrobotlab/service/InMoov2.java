@@ -1195,7 +1195,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       // speakBlocking(get("CHATBOTACTIVATED"));
       chatBot.repetitionCount(10);
       // chatBot.setPath(getResourceDir() + fs + "chatbot");
-      chatBot.setPath(getDataDir() + fs + "chatbot");
+      // chatBot.setPath(getDataDir() + "ProgramAB");
       chatBot.startSession("default", locale.getTag());
       // reset some parameters to default...
       chatBot.setPredicate("topic", "default");

@@ -22,14 +22,12 @@ import org.atmosphere.wasync.Request;
 import org.atmosphere.wasync.RequestBuilder;
 import org.atmosphere.wasync.impl.AtmosphereClient;
 import org.atmosphere.wasync.impl.AtmosphereSocket;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.DescribeQuery;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -54,8 +52,6 @@ import picocli.CommandLine.Option;
  */
 @Command(mixinStandardHelpOptions = true, name = "myrobotlab-client.jar", showDefaultValues = true, version = "0.0.1")
 public class Client implements Runnable, Decoder<String, Reader>, Encoder<String, Reader> {
-
-  private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
 
   /**
    * attached mrl process id
@@ -245,10 +241,10 @@ public class Client implements Runnable, Decoder<String, Reader>, Encoder<String
     }
 
     // System.out.println(s);
-    Message msg = gson.fromJson(s, Message.class);
+    Message msg = CodecUtils.fromJson(s, Message.class);
 
     if ("describe".equals(msg.method)) {
-      serverHelloRequest = gson.fromJson(msg.data[1].toString(), DescribeQuery.class);
+      serverHelloRequest = CodecUtils.fromJson(msg.data[1].toString(), DescribeQuery.class);
       promptId = serverHelloRequest.id;
       System.out.println("attaching to id " + promptId);
     }
@@ -256,7 +252,7 @@ public class Client implements Runnable, Decoder<String, Reader>, Encoder<String
     if (msg.data == null || msg.data[0] == null) {
       System.out.println("null");
     } else {
-      System.out.println(gson.toJson(msg.data[0]));
+      System.out.println(CodecUtils.toJson(msg.data[0]));
     }
     prompt();
     return new StringReader(s);
@@ -380,13 +376,13 @@ public class Client implements Runnable, Decoder<String, Reader>, Encoder<String
       if (params != null) {
         data = new String[params.length];
         for (int i = 0; i < params.length; ++i) {
-          data[i] = gson.toJson(params[i]);
+          data[i] = CodecUtils.toJson(params[i]);
         }
       }
 
       Message msg = Message.createMessage(String.format("%s@%s", "runtime", clientId), service, method, data);
       if (socket != null) {
-        socket.fire(gson.toJson(msg));
+        socket.fire(CodecUtils.toJson(msg));
       } else {
         // System.out.println("could not send msg - no viable socket");
       }
