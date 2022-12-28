@@ -17,37 +17,37 @@ import java.util.TreeSet;
 
 /**
  * 
- * @author GroG
- * 
+ *
+ *
  *         A method cache whos purpose is to build a cache of methods to be
  *         accessed when needed for invoking. This cache is typically used for
  *         services and populated during Runtime.create({name},{Type}). It's a
  *         static resource and contains a single definition per {Type}.
- * 
+ * <p>
  *         It has a single map of "all" MethodEntries per type, and several
  *         indexes to that map. The other utility indexes are supposed to be
  *         useful and relevant for service specific access of methods.
- * 
+ * <p>
  *         The definition of "declared methods" is slightly different for Mrl
  *         services. "Declared methods" are service methods which are expected
  *         to be commonly used. The difference occurs often with abstract
  *         classes such as AbstractSpeechSynthesis. Polly's
  *         class.getDeclaredMethods() would NOT include all the useful methods
  *         commonly defined in AbstractSpeechSynthesis.
- * 
+ * <p>
  *         FIXME - keys should be explicitly typed full signature with execution
- *         format e.g. method(
- * 
- * 
+ *          format e.g. method(
+ * <p>
+ *
  *         The cache is built when new services are created. Method signatures
  *         are used as keys. The keys are string based. All parameters in key
  *         creation are "boxed", this leads to the ability to write actual
  *         functions with primitives e.g. doIt(int x, float y, ...) and invoking
  *         does not need to fail for it to be called directly.
- * 
+ * <p>
  *         Ancestor classes are all indexed, so there is no "special" handling
  *         to call abstract class methods.
- * 
+ * <p>
  *         Special indexes are created when a new service gets created that are
  *         explicitly applicable for remote procedure calls e.g. methods which
  *         contain interfaces in the parameters are not part of this index, if
@@ -55,16 +55,17 @@ import java.util.TreeSet;
  *         remotely, you would make it with a String {name} reference as a
  *         parameter.
  *
+ * @author GroG
  */
 public class MethodCache {
 
   // FIXME - mostly interested in
-  // NOT Object
-  // RARELY Service
-  // OFTEN ANYTHING DEFINED LOWER THAN THAT
-  // WHICH MEANS - filter out Object
-  // CREATE a "Service" Index
-  // -> ALL OTHER METHODS ARE OF INTEREST
+  //  NOT Object
+  //  RARELY Service
+  //  OFTEN ANYTHING DEFINED LOWER THAN THAT
+  //  WHICH MEANS - filter out Object
+  //  CREATE a "Service" Index
+  //  -> ALL OTHER METHODS ARE OF INTEREST
   class MethodIndex {
     // index for typeless resolution and invoking
     Map<String, List<MethodEntry>> methodOrdinalIndex = new TreeMap<>();
