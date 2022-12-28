@@ -167,7 +167,7 @@ public class CodecUtils {
      * @see #USING_GSON
      */
     private static final Gson gson = new GsonBuilder().registerTypeAdapterFactory(new GsonPolymorphicTypeAdapterFactory())
-            .setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
+            .setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").serializeNulls().disableHtmlEscaping().create();
     /**
      * The {@link Gson} object used to pretty-print JSON.
      */
