@@ -10,7 +10,6 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.net.Connection;
