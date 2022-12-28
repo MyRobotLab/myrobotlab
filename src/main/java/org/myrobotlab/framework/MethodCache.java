@@ -5,8 +5,6 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -549,7 +547,7 @@ public class MethodCache {
    * @return The decoded parameters according to a matched method, or null
    *  if no such method could be found.
    */
-  public @Nullable Object[] getDecodedJsonParameters(Class<?> clazz, String methodName, Object[] encodedParams) {
+  public /*@Nullable*/ Object[] getDecodedJsonParameters(Class<?> clazz, String methodName, Object[] encodedParams) {
     if (encodedParams == null) {
       encodedParams = new Object[0];
     }

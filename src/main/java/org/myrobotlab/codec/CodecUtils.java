@@ -29,8 +29,7 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -259,7 +258,7 @@ public class CodecUtils {
      * @throws JsonDeserializationException if an error during deserialization occurs.
      * @see #USING_GSON
      */
-    public static <T> @Nullable T fromJson(@Nonnull String json, @Nonnull Class<T> clazz) {
+    public static <T> /*@Nullable*/ T fromJson(/*@Nonnull*/ String json, /*@Nonnull*/ Class<T> clazz) {
         try {
             if (USING_GSON) {
                 return gson.fromJson(json, clazz);
@@ -286,8 +285,8 @@ public class CodecUtils {
      * @throws JsonDeserializationException if an error during deserialization occurs.
      * @see #USING_GSON
      */
-    public static <T> @Nullable T fromJson(@Nonnull String json, @Nonnull Class<?> genericClass,
-                                           @Nonnull Class<?>... parameterized) {
+    public static <T> /*@Nullable*/ T fromJson(/*@Nonnull*/ String json, /*@Nonnull*/ Class<?> genericClass,
+                                           /*@Nonnull*/ Class<?>... parameterized) {
         try {
             if (USING_GSON) {
                 return gson.fromJson(json, getType(genericClass, parameterized));
@@ -312,7 +311,7 @@ public class CodecUtils {
      * @throws JsonDeserializationException if an error during deserialization occurs.
      * @see #USING_GSON
      */
-    public static <T> @Nullable T fromJson(@Nonnull String json, @Nonnull Type type) {
+    public static <T> /*@Nullable*/ T fromJson(/*@Nonnull*/ String json, /*@Nonnull*/ Type type) {
         try {
             if (USING_GSON) {
                 return gson.fromJson(json, type);
@@ -516,7 +515,7 @@ public class CodecUtils {
      *  represented null.
      * @throws JsonDeserializationException if jsonData is malformed
      */
-    public static @Nullable Message jsonToMessage(@Nonnull String jsonData) {
+    public static /*@Nullable*/ Message jsonToMessage(/*@Nonnull*/ String jsonData) {
         log.debug("Deserializing message: " + jsonData);
         Message msg = fromJson(jsonData, Message.class);
 
@@ -571,7 +570,7 @@ public class CodecUtils {
      * @return A fully-decoded Message
      * @throws JsonDeserializationException if any of the data parameters are malformed JSON
      */
-    static @Nonnull Message decodeMessageParams(@Nonnull Message msg) {
+    static /*@Nonnull*/ Message decodeMessageParams(/*@Nonnull*/ Message msg) {
         String serviceName = msg.getFullName();
         Class<?> clazz = Runtime.getClass(serviceName);
 
