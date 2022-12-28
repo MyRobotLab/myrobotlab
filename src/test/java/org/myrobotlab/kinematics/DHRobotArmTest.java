@@ -3,6 +3,7 @@ package org.myrobotlab.kinematics;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.test.AbstractTest;
@@ -10,7 +11,8 @@ import org.slf4j.Logger;
 
 public class DHRobotArmTest extends AbstractTest {
   public final static Logger log = LoggerFactory.getLogger(DHRobotArmTest.class);
-
+  
+  @Ignore
   public DHRobotArm createArm() {
     log.info("createArm");
 
