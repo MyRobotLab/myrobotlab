@@ -1606,6 +1606,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @return The constructed CLI processor
    */
   public InProcessCli startInteractiveMode(InputStream in, OutputStream out) {
+    return null;
+    /*
     if (cli != null) {
       log.info("already in interactive mode");
       return cli;
@@ -1619,6 +1621,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     addConnection(stdCliUuid, cli.getId(), c);
 
     return cli;
+    */
   }
 
   /**
