@@ -9,10 +9,10 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
+@Ignore
 public class DHRobotArmTest extends AbstractTest {
   public final static Logger log = LoggerFactory.getLogger(DHRobotArmTest.class);
   
-  @Ignore
   public DHRobotArm createArm() {
     log.info("createArm");
 
