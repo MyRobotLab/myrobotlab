@@ -1598,6 +1598,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * Starts an interactive CLI on the specified input and output streams. The
    * CLI command processor runs in its own thread and takes commands according
    * to the CLI API.
+   * 
+   * FIXME - have another shell script which starts jar as ws client with cli interface
+   * Remove this std in/out - it is overly complex and different OSs handle it differently
+   * Windows Java updates have broken it several times
    *
    * @param in
    *          The input stream to take commands from
@@ -1606,8 +1610,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @return The constructed CLI processor
    */
   public InProcessCli startInteractiveMode(InputStream in, OutputStream out) {
-    return null;
-    /*
     if (cli != null) {
       log.info("already in interactive mode");
       return cli;
@@ -1621,7 +1623,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     addConnection(stdCliUuid, cli.getId(), c);
 
     return cli;
-    */
   }
 
   /**
