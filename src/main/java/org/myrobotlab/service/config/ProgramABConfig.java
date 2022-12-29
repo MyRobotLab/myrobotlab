@@ -3,7 +3,6 @@ package org.myrobotlab.service.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Plan;
 
 public class ProgramABConfig extends ServiceConfig {
@@ -11,11 +10,11 @@ public class ProgramABConfig extends ServiceConfig {
   public String currentBotName = "Alice";
   public String currentUserName;
   public String[] textFilters;
-//  public String[] textListeners;
-//  public String[] utteranceListeners;
+  // public String[] textListeners;
+  // public String[] utteranceListeners;
   public String botDir;
   public List<String> bots = new ArrayList<>();
-  
+
   /**
    * current sleep/wake value
    */

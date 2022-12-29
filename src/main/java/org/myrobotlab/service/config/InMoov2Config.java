@@ -1,8 +1,6 @@
 package org.myrobotlab.service.config;
 
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Service;
@@ -11,6 +9,7 @@ import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.service.InMoov2;
 import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.config.FiniteStateMachineConfig.Transition;
 import org.myrobotlab.service.config.RandomConfig.RandomMessageConfig;
 
 public class InMoov2Config extends ServiceConfig {
@@ -23,9 +22,13 @@ public class InMoov2Config extends ServiceConfig {
 
   public boolean virtual = false;
 
-  public String locale = "en-US";
+  /**
+   * default to null - allow the OS to set it, unless explicilty set
+   */
+  public String locale = null; // = "en-US";
   
-  public Map<String, Object> data = new TreeMap<>();
+  // using ProgramAB predicates
+  // public Map<String, Object> data = new TreeMap<>();
 
   /**
    * startup and shutdown will pause inmoov - set the speed to this value then
@@ -34,6 +37,8 @@ public class InMoov2Config extends ServiceConfig {
   public double shutdownStartupSpeed = 50;
 
   public boolean heartbeat = true;
+  
+  public boolean startMouthOnBoot = true;
 
   /**
    * idle time measures the time the fsm is in an idle state
@@ -46,6 +51,8 @@ public class InMoov2Config extends ServiceConfig {
    * sound located in data/InMoov2/sounds/pir-deactivated.mp3
    */
   public boolean pirPlaySounds = true;
+
+  public boolean startBrainOnBoot = true;
 
   public InMoov2Config() {
   }
@@ -212,29 +219,23 @@ public class InMoov2Config extends ServiceConfig {
     simulator.cameraLookAt = name + ".torso.lowStom";
 
     FiniteStateMachineConfig fsm = (FiniteStateMachineConfig) plan.get(getPeerName("fsm"));
-    // fsm.states.add("start"); // fist time
-    // fsm.states.add("init"); // fist time
-    // fsm.states.add("identify_user"); // fist time
-    // fsm.states.add("detected_face"); // fist time
-    // fsm.states.add("sleeping"); // pir running ? wake word ?
-    // fsm.states.add("executing_gesture"); // gesture running
-    // fsm.states.add("safe_random_movements"); // random movements
-    // fsm.states.add("unsafe_random_movements"); // random movements
-    // fsm.states.add("tracking"); // tracking
-    // fsm.states.add("power_down"); // process of shutting down stuff
+    // TODO - events easily gotten from InMoov data ?? auto callbacks in python if exists ?
+    fsm.current = "boot";
+    fsm.transitions.add(new Transition("boot", "configStarted", "applyingConfig"));
+    fsm.transitions.add(new Transition("applyingConfig", "getUserInfo", "getUserInfo"));
+    fsm.transitions.add(new Transition("applyingConfig", "systemCheck", "systemCheck"));
+    fsm.transitions.add(new Transition("applyingConfig", "wake", "awake"));
+    fsm.transitions.add(new Transition("getUserInfo", "systemCheck", "systemCheck"));
+    fsm.transitions.add(new Transition("systemCheck", "systemCheckFinished", "awake"));
+    fsm.transitions.add(new Transition("awake", "sleep", "sleeping"));
 
-    // fsm.transitions.add(new FiniteStateMachineConfig.Transition("start",
-    // "first_time", "init"));
-    // fsm.transitions.add(new FiniteStateMachineConfig.Transition("init",
-    // "first_time", "identify_user"));
-    // fsm.transitions.add(new
-    // FiniteStateMachineConfig.Transition("detected_face", "first_time",
-    // "identify_user"));
-
+    
+    
     PirConfig pir = (PirConfig) plan.get(getPeerName("pir"));
     pir.pin = "23";
     pir.controller = name + ".left";
-
+    pir.listeners = new ArrayList<>();
+    pir.listeners.add(new Listener("publishPirOn", name, "onPirOn"));
     
     // == Peer - random =============================
     RandomConfig random = (RandomConfig) plan.get(getPeerName("random"));
@@ -344,10 +345,18 @@ public class InMoov2Config extends ServiceConfig {
     plan.remove(name + ".eyeTracking.controller");
     plan.remove(name + ".eyeTracking.controller.serial");
     plan.remove(name + ".eyeTracking.cv");
+    
+    // inmoov2 default listeners
+    listeners = new ArrayList<>();
+    // FIXME - should be getPeerName("neoPixel")
+    listeners.add(new Listener("publishFlash", name + ".neoPixel", "onLedDisplay"));
 
-    // REMOVING ALL PEER FROM STARTING ! effectively autoStartPeers = false
-    rtConfig.clear();
-    rtConfig.add(name); // <-- adding i01 / not needed
+    listeners.add(new Listener("publishEvent", name + ".fsm"));
+        
+    // remove the auto-added starts in the plan's runtime RuntimConfig.registry
+    plan.removeStartsWith(name + ".");
+    
+    // rtConfig.add(name); // <-- adding i01 / not needed
 
     return plan;
   }

@@ -14,7 +14,7 @@ public class RosMeta extends MetaData {
    */
   public RosMeta() {
     addDescription("interface to Ros");
-    addCategory("bridge");
+    addCategory("bridge", "programming", "communication");
     setAvailable(false);
   }
 

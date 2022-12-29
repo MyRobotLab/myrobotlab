@@ -22,8 +22,8 @@ public class VertxMeta extends MetaData {
     setAvailable(true);
 
     // add dependencies if necessary
-    addDependency("io.vertx", "vertx-core", "4.3.4");
-    addDependency("io.vertx", "vertx-web", "4.3.4");
+    addDependency("io.vertx", "vertx-core", "4.3.3");
+    addDependency("io.vertx", "vertx-web", "4.3.3");
 
     // setAvailable(false);
 
