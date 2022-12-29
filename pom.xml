@@ -915,9 +915,9 @@
 <!-- Mqtt end -->
 
 <!-- MqttBroker begin -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.14.0 skipping -->
   <dependency>
     <groupId>io.moquette</groupId>
     <artifactId>moquette-broker</artifactId>
@@ -1124,9 +1124,9 @@
 
 <!-- Polly begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.14.0 skipping -->
   <dependency>
     <groupId>com.amazonaws</groupId>
     <artifactId>aws-java-sdk-polly</artifactId>
@@ -1446,24 +1446,9 @@
         </exclusion>
       </exclusions>
   </dependency>
-  <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-core</artifactId>
-    <version>2.13.3</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-databind</artifactId>
-    <version>2.13.3</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-annotations</artifactId>
-    <version>2.13.3</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.14.0 skipping -->
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-solrj</artifactId>
@@ -1673,9 +1658,9 @@
         </exclusion>
       </exclusions>
   </dependency>
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.14.0 skipping -->
 <!-- WikiDataFetcher end -->
 
 <!-- WolframAlpha begin -->
