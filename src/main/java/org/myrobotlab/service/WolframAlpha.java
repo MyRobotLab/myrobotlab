@@ -5,6 +5,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.SearchResults;
 import org.slf4j.Logger;
 
 import com.wolfram.alpha.WAEngine;
@@ -14,6 +15,7 @@ import com.wolfram.alpha.WAPod;
 import com.wolfram.alpha.WAQuery;
 import com.wolfram.alpha.WAQueryResult;
 import com.wolfram.alpha.WASubpod;
+import com.wolfram.alpha.visitor.Visitable;
 
 /**
  * 
@@ -33,8 +35,13 @@ public class WolframAlpha extends Service {
 
     try {
 
-      WolframAlpha template = (WolframAlpha) Runtime.start("wolfram", "WolframAlpha");
-      template.startService();
+      WolframAlpha wolfram = (WolframAlpha) Runtime.start("wolfram", "WolframAlpha");
+      WAQueryResult results = wolfram.getQueryResult("what is a cat?");
+      WAPod pod = results.getPods()[1];
+      WASubpod subpod = pod.getSubpods()[0];
+      Visitable visitable = subpod.getContents()[0];
+      visitable.toString();
+      log.info(results.toString());
 
       Runtime.createAndStart("gui", "SwingGui");
     } catch (Exception e) {
@@ -111,6 +118,17 @@ public class WolframAlpha extends Service {
    */
   public String wolframAlpha(String query) {
     return wolframAlpha(query, false);
+  }
+
+  public SearchResults search(String searchText) {
+    SearchResults results = new SearchResults(searchText);
+    results.text.add(wolframAlpha(searchText, true));
+    invoke("publishResults", results);
+    return results;
+  }
+
+  public SearchResults publishResults(SearchResults results) {
+    return results;
   }
 
   public String wolframAlpha(String query, boolean html) {

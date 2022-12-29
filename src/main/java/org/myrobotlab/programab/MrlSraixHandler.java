@@ -7,6 +7,8 @@ import java.util.regex.Matcher;
 import org.alicebot.ab.Chat;
 import org.alicebot.ab.Sraix;
 import org.alicebot.ab.SraixHandler;
+import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.ProgramAB;
@@ -14,7 +16,11 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.data.SearchResults;
 import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.string.StringUtil;
+// import org.nd4j.shade.jackson.dataformat.xml.XmlMapper;
 import org.slf4j.Logger;
+
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+
 
 public class MrlSraixHandler implements SraixHandler {
   transient public final static Logger log = LoggerFactory.getLogger(MrlSraixHandler.class);
@@ -32,6 +38,22 @@ public class MrlSraixHandler implements SraixHandler {
   @Override
   public String sraix(Chat chatSession, String input, String defaultResponse, String hint, String host, String botid, String apiKey, String limit, Locale locale) {
     log.debug("MRL Sraix handler! Input {}", input);
+
+    try {
+      XmlMapper xmlMapper = new XmlMapper();
+      Oob oob = xmlMapper.readValue(input, Oob.class);
+      if (oob.mrljson != null) {
+        Message msg = CodecUtils.fromJson(oob.mrljson, Message.class);
+        msg.sender = programab.getName();
+        msg.sendingMethod = "sraix";
+        programab.in(msg);
+        return null;
+      }
+      log.info("found oob {}", oob);
+    } catch (Exception e) {
+      programab.error(e);
+    }
+
     // the INPUT has the string we care about. if this is an OOB tag, let's
     // evaluate it and return the result.
     if (containsOOB(input)) {

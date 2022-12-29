@@ -27,6 +27,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.logging.SimpleLogPublisher;
 import org.myrobotlab.programab.BotInfo;
+import org.myrobotlab.programab.PredicateEvent;
 import org.myrobotlab.programab.Response;
 import org.myrobotlab.programab.Session;
 import org.myrobotlab.service.config.ProgramABConfig;
@@ -134,38 +135,38 @@ public class ProgramAB extends Service
     // 1. scan resources .. either "resource/ProgramAB" or
     // ../ProgramAB/resource/ProgramAB (for dev) for valid bot directories
 
-    List<File> resourceBots = scanForBots(getResourceDir());
-
-    if (isDev()) {
-      // 2. dev loading "only" dev bots - from dev location
-      for (File file : resourceBots) {
-        addBotPath(file.getAbsolutePath());
-      }
-    } else {
-      // 2. runtime loading
-      // copy any bot in "resource/ProgramAB/{botName}" not found in
-      // "data/ProgramAB/{botName}"
-      for (File file : resourceBots) {
-        String botName = getBotName(file);
-        File dataBotDir = new File(FileIO.gluePaths("data/ProgramAB", botName));
-        if (dataBotDir.exists()) {
-          log.info("found data/ProgramAB/{} not copying", botName);
-        } else {
-          log.info("will copy new data/ProgramAB/{}", botName);
-          try {
-            FileIO.copy(file, dataBotDir);
-          } catch (Exception e) {
-            error(e);
-          }
-        }
-      }
-
-      // 3. addPath for all bots found in "data/ProgramAB/"
-      List<File> dataBots = scanForBots("data/ProgramAB");
-      for (File file : dataBots) {
-        addBotPath(file.getAbsolutePath());
-      }
-    }
+//    List<File> resourceBots = scanForBots(getResourceDir());
+//
+//    if (isDev()) {
+//      // 2. dev loading "only" dev bots - from dev location
+//      for (File file : resourceBots) {
+//        addBotPath(file.getAbsolutePath());
+//      }
+//    } else {
+//      // 2. runtime loading
+//      // copy any bot in "resource/ProgramAB/{botName}" not found in
+//      // "data/ProgramAB/{botName}"
+//      for (File file : resourceBots) {
+//        String botName = getBotName(file);
+//        File dataBotDir = new File(FileIO.gluePaths("data/ProgramAB", botName));
+//        if (dataBotDir.exists()) {
+//          log.info("found data/ProgramAB/{} not copying", botName);
+//        } else {
+//          log.info("will copy new data/ProgramAB/{}", botName);
+//          try {
+//            FileIO.copy(file, dataBotDir);
+//          } catch (Exception e) {
+//            error(e);
+//          }
+//        }
+//      }
+//
+//      // 3. addPath for all bots found in "data/ProgramAB/"
+//      List<File> dataBots = scanForBots("data/ProgramAB");
+//      for (File file : dataBots) {
+//        addBotPath(file.getAbsolutePath());
+//      }
+//    }
 
   }
 
@@ -330,6 +331,7 @@ public class ProgramAB extends Service
     }
 
     // Get the actual bots aiml based response for this session
+    log.error("getResonse({})", text);
     Response response = session.getResponse(text);
 
     // EEK! clean up the API!
@@ -1163,6 +1165,10 @@ public class ProgramAB extends Service
     // listeners = getAttached("publishUtterance");
     // config.utteranceListeners = listeners.toArray(new
     // String[listeners.size()]);
+    if (config.bots == null) {
+      config.bots = new ArrayList<>();
+    }
+    
     config.bots.clear();
     for (BotInfo bot : bots.values()) {
 
@@ -1172,6 +1178,9 @@ public class ProgramAB extends Service
       config.bots.add(pathRelative.toString());
 
     }
+
+    config.currentBotName = currentBotName;
+    config.currentUserName = currentUserName;
 
     return config;
   }
@@ -1183,6 +1192,13 @@ public class ProgramAB extends Service
       bots.clear();
       for (String botPath : config.bots) {
         addBotPath(botPath);
+      }
+    }
+    
+    if (config.botDir != null) {
+      List<File> botsFromScanning = scanForBots(config.botDir);
+      for (File file : botsFromScanning) {
+        addBotPath(file.getAbsolutePath());
       }
     }
 
@@ -1291,11 +1307,20 @@ public class ProgramAB extends Service
     for (Session s : sessions.values()) {
       if (s.chat == chat) {
         // found session saving predicates
+        invoke("publishChangePredicate", s, chat, predicateName, result);
         s.savePredicates();
         return;
       }
     }
     error("could not find session to save predicates");
+  }
+  
+  public PredicateEvent publishChangePredicate(Session session, Chat chat, String name, String value) {
+    PredicateEvent event = new PredicateEvent();
+    event.id = String.format("%s<->%s", session.userName, session.botInfo.name);
+    event.name = name;
+    event.value = value;
+    return event;
   }
 
   /**

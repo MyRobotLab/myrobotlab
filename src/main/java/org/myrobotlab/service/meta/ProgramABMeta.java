@@ -23,6 +23,8 @@ public class ProgramABMeta extends MetaData {
     addDependency("program-ab", "program-ab-kw", "0.0.8.9");
     exclude("ch.qos.logback", "logback-classic");
     exclude("ch.qos.logback", "logback-core");
+    
+    addDependency("com.fasterxml.jackson.dataformat", "jackson-dataformat-xml", "2.13.3");
 
     addDependency("org.json", "json", "20090211");
     // used by FileIO

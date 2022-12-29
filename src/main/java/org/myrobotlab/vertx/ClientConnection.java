@@ -8,9 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ClientConnection {
-    private Logger logger;
-    private final String id;
-    private final SockJSSocket socket;
+    transient private Logger logger;
+    protected final String id;
+    transient protected final SockJSSocket socket;
 
     private MessageConsumer<String> consumer = null;
     private EventBus eventBus = null;
@@ -35,7 +35,7 @@ public class ClientConnection {
     }
 
     private void handleMessage(final String messageStr) {
-        logger.info("Receive: {}", messageStr);
+        logger.info("received: {}", messageStr);
         JsonObject messageObj = new JsonObject(messageStr);
         String messageType = messageObj.getString("type");
         if (messageType.equalsIgnoreCase("listen")) {

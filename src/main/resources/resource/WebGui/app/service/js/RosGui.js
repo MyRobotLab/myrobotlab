@@ -9,13 +9,15 @@ angular.module('mrlapp.service.RosGui', []).controller('RosGuiCtrl', ['$scope', 
     $scope.rowCount = 0
 
     $scope.state = {
-        selectedTopic : null
+        selectedTopic: null
     }
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
-        service.subscribeToTopics.sort()
+        if (service.config.subscriptions) {
+            service.config.subscriptions.sort()
+        }
     }
 
     // init scope variables
@@ -29,7 +31,8 @@ angular.module('mrlapp.service.RosGui', []).controller('RosGuiCtrl', ['$scope', 
             break
         case 'onRosMsg':
             // demux
-            let rosMsg = JSON.parse(data)
+            let rosMsg = data
+            // JSON.parse(data)
             if (rosMsg.service == "/rosapi/topics") {
                 $scope.topics = rosMsg.values.topics
                 $scope.topics.sort()
@@ -57,6 +60,16 @@ angular.module('mrlapp.service.RosGui', []).controller('RosGuiCtrl', ['$scope', 
         }
     }
 
+    $scope.connect = function() {
+        msg.send('connect', $scope.service.config.bridgeUrl)
+        msg.send('broadcastState')
+    }
+
+    $scope.disconnect = function() {
+        msg.send('disconnect')
+        msg.send('broadcastState')
+    }
+
     $scope.subscribe = function() {
         msg.send('rosSubscribe', $scope.state.selectedTopic)
         msg.send('broadcastState')
@@ -67,9 +80,13 @@ angular.module('mrlapp.service.RosGui', []).controller('RosGuiCtrl', ['$scope', 
         msg.send('broadcastState')
     }
 
+    $scope.publish = function() {
+       msg.send('rosPublish', $scope.publishMsg)
+    }
+
     $scope.clear = function() {
-       $scope.log = []
-       $scope.rowCount = 0
+        $scope.log = []
+        $scope.rowCount = 0
     }
 
     msg.subscribe('publishRosMsg')

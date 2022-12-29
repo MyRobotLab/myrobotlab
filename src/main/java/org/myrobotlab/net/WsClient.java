@@ -12,8 +12,6 @@ import java.util.UUID;
 //import com.ning.http.client.providers.netty.NettyAsyncHttpProviderConfig;
 
 import org.asynchttpclient.AsyncHttpClient;
-import org.asynchttpclient.DefaultAsyncHttpClient;
-import org.asynchttpclient.DefaultAsyncHttpClientConfig;
 import org.asynchttpclient.Dsl;
 import org.atmosphere.wasync.Client;
 import org.atmosphere.wasync.ClientFactory;
@@ -39,6 +37,7 @@ public class WsClient implements Decoder<String, Reader> {
   protected String uuid = null;
   protected transient Socket socket = null;
   protected transient AsyncHttpClient asc = null;
+  @SuppressWarnings("rawtypes")
   protected transient Client client = null;
   protected transient Set<RemoteMessageHandler> handlers = new HashSet<>();
 

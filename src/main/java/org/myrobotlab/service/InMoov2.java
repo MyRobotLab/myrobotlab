@@ -84,6 +84,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       return false;
     }
   }
+  
+  public void fire(String event) {
+    invoke("publishEvent", event);
+  }
 
   /**
    * Part of service life cycle - a new servo has been started
@@ -853,11 +857,11 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public void moveHead(Double neck, Double rothead, Double rollNeck) {
-    moveHead(rollNeck, rothead, null, null, null, rollNeck);
+    moveHead(neck, rothead, null, null, null, rollNeck);
   }
 
   public void moveHead(Integer neck, Integer rothead, Integer rollNeck) {
-    moveHead((double) rollNeck, (double) rothead, null, null, null, (double) rollNeck);
+    moveHead((double) neck, (double) rothead, null, null, null, (double) rollNeck);
   }
 
   public void moveHead(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
@@ -1559,6 +1563,13 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public String publishHeartbeat() {
+    led.action = "flash";
+    led.red = 180;
+    led.green = 10;
+    led.blue = 30;
+    led.count = 1;
+    led.interval = 50;
+    invoke("publishFlash");
     return getName();
   }
 
@@ -1583,10 +1594,11 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       webgui.setPort(8888);
       webgui.startService();
       
-//      Runtime.start("python", "Python");
+      Runtime.start("python", "Python");
+      Runtime.start("ros", "Ros");
 //      //Runtime.start("intro", "Intro");
 //      // Runtime.start("i01", "InMoov2");
-      Runtime.startConfig("i01-05");
+//        Runtime.startConfig("i01-05");
       // Runtime.startConfig("pir-01");
       
       boolean done = true;
@@ -1682,10 +1694,19 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
    * flash neopixel
    */
   public void onPirOn() {
+    led.action = "flash";
+    led.red = 50;
+    led.green = 100;
+    led.blue = 150;
+    led.count = 5;
+    led.interval = 500;
+
     invoke("publishFlash");
     // pirOn event vs wake event
     invoke("publishEvent", "wake");
   }
+  
+  LedDisplayData led = new LedDisplayData();
   
   /**
    * used to configure a flashing event - could use configuration
@@ -1693,12 +1714,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
    * @return
    */
   public LedDisplayData publishFlash() {
-    LedDisplayData data = new LedDisplayData();
-    data.action = "flash";
-    data.red = 50;
-    data.green = 100;
-    data.blue = 150;
-    return data;
+    return led;
   }
   
   /**
@@ -1781,6 +1797,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     addTaskOneShot(30000L, "publishEvent", "sleep");
   }
 
+  public void sleeping() {
+    log.error("sleeping");
+  }
+  
   public String onNewState(String state) {
     log.error("onNewState {}", state);
     

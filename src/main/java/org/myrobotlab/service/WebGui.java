@@ -1288,31 +1288,24 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     try {
 
-      // Platform.setVirtual(true);
-      // Runtime.main(new String[] { "--id", "w1", "--from-launcher",
-      // "--log-level", "WARN" });
-      // Runtime.main(new String[] { "--id", "w1", "--from-launcher",
-      // "--log-level", "WARN", "-c", "yml-css-01" });
-
-      /// Runtime.main(new String[] { "--id", "w1", "--from-launcher", "--log-level", "WARN", "-c", "test-01" });
-      // Runtime.start("python", "Python");
-      // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
       webgui.setPort(8888);
       webgui.startService();
-
-      Runtime.start("python", "Python");
-      Runtime.start("intro", "Intro");
-      Runtime.start("i01", "InMoov2");
-
+      
+//      Runtime.start("python", "Python");
+//      //Runtime.start("intro", "Intro");
+//      // Runtime.start("i01", "InMoov2");
+//      Runtime.startConfig("i01-03");
+      // Runtime.startConfig("pir-01");
+      
       boolean done = true;
       if (done) {
         return;
-      }
+      }      
 
-      
+
       
       // Runtime.start("i01", "InMoov2");
       // Runtime.start("python", "Python");

@@ -7,15 +7,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.myrobotlab.service.Vertx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.config.ConfigRetriever;
-import io.vertx.config.ConfigRetrieverOptions;
-import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Future;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerResponse;
@@ -91,16 +90,17 @@ public class ApiVerticle extends AbstractVerticle {
     router.route("/eventbus/*").subRouter(ebHandler.socketHandler(sockJSSocket -> {
       // Extract the identifier
       final String id = sockJSSocket.writeHandlerID();
-      // Create an object to map the client socket
+      // maps a client id, its socket and event bus
       ClientConnection connection = new ClientConnection(id, sockJSSocket, vertx.eventBus());
       // Keep track of open connections
       clientConnections.put(id, connection);
       // Register for end callback
       sockJSSocket.endHandler((Void) -> {
+        // when socket is closed - removes client
         connection.stop();
         clientConnections.remove(id);
       });
-      // Start the connection
+      // start the connection
       connection.start();
     }));
 
@@ -126,11 +126,33 @@ public class ApiVerticle extends AbstractVerticle {
             result -> {
               if (result.succeeded()) {
                 log.info("Listening now on port {}", port);
-                deployWorkers(workerCount);
+                // deployWorkers(workerCount);
+                for (int i = 0; i < 5; ++i) {
+                  deployWorkers2(service);  
+                }
+                
               } else {
                 log.error("Failed to listen", result.cause());
               }
             });
+  }
+
+  private void deployWorkers2(Vertx service) {
+    // TODO Auto-generated method stub
+    DeploymentOptions workerOpts = new DeploymentOptions()/*.setConfig(config)*/.setWorker(true).setInstances(1).setWorkerPoolSize(1);
+    log.error("deployment xxx {}", vertx.deployVerticle(new ApiWorkerVerticle(service),workerOpts).result());
+    /*
+    vertx.deployVerticle(ApiWorkerVerticle.class.getName(), workerOpts, res -> {
+      if (res.failed()) {
+        log.error("Failed to deploy worker verticle {}", ApiWorkerVerticle.class.getName(), res.cause());
+      } else {
+        String depId = res.result();
+        deployedVerticles.add(depId);
+        log.info("Deployed verticle {} DeploymentID {}", ApiWorkerVerticle.class.getName(), depId);
+      }
+    });
+    */
+    
   }
 
   @Override
@@ -138,30 +160,6 @@ public class ApiVerticle extends AbstractVerticle {
     log.info("stopping api verticle");
     workerExecutor.shutdown();
   }
-//
-//  @Deprecated /* not needed nor wanted */
-//  private void processConfig(JsonObject config) {
-//    m_config = config;
-//    workerCount = m_config.getInteger("worker-count", 1);
-//    maxDelayMs = m_config.getInteger("max-delay-milliseconds", 1000);
-//    Integer workerPoolSize = m_config.getInteger("worker-pool-size", Runtime.getRuntime().availableProcessors() * 2);
-//    log.info("max_delay_milliseconds={} worker_pool_size={}", maxDelayMs, workerPoolSize);
-//    if (workerExecutor == null) {
-//      workerExecutor = Executors.newFixedThreadPool(workerPoolSize);
-//    }
-//    if (scheduler == null) {
-//      scheduler = Schedulers.from(workerExecutor);
-//    }
-//  }
-//
-//  @Deprecated
-//  private void processConfigChange(JsonObject prev, JsonObject current) {
-//    if (prev.getInteger("worker-count", 1) != current.getInteger("worker-count", 1)) {
-//      workerCount = current.getInteger("worker-count", 1);
-//      deployWorkers(workerCount);
-//    }
-//  }
-
 
   private void handleTransaction(RoutingContext rc) {
     HttpServerResponse response = rc.response();
@@ -201,6 +199,7 @@ public class ApiVerticle extends AbstractVerticle {
         .write((new JsonObject().put("status", "OK")).encode());
   }
 
+  // unecessary balancing - overcomplex - not worth the trouble of simply static initialization
   private void deployWorkers(int count) {
     if (count > currentWorkers.get()) {
       while (count > currentWorkers.get()) {
@@ -213,6 +212,7 @@ public class ApiVerticle extends AbstractVerticle {
     }
   }
 
+  // unecessary balancing - overcomplex
   private void addWorker() {
     currentWorkers.incrementAndGet();
     JsonObject config = new JsonObject().put("instance", currentWorkers.get());

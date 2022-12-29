@@ -225,7 +225,7 @@ public class Random extends Service {
       m.data = data.toArray();
     }
     m.sendingMethod = "process";
-    log.debug("random msg @ {} ms {}", msg.interval, m);
+    log.info("random msg @ {} ms {}", msg.interval, m);
     out(m);
 
     purgeTask(key);
