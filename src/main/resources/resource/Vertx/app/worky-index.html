@@ -71,7 +71,7 @@
                 socket = new SockJS("/eventbus/")
                 socket.onopen = function() {
                     display("Socket opened")
-                    listen()
+                    //listen()
                     send('hello', "123")
                 }
 
@@ -122,7 +122,9 @@
                     name: "vertx",//_self.getFullName(inName), FIXME - should be runtime@{id}
                     method: inMethod,
                     sender: "runtime@" + 'webXr',
-                    sendingMethod: null
+                    sendingMethod: null,
+                        type:"listen",
+                        customer:"runtime@" + 'webXr',
                 }
 
                 if (inParams == null || (inParams.length == 1 && inParams[0] === null)) {
@@ -160,6 +162,12 @@
                 sendTransaction()
             }
 
+            function sendMsg(obj) {
+                // Make API call
+                send('hello', '123')
+            }
+
+                
             function handleTransactionStatus(obj) {
                 if (obj.status === 'COMPLETE') {
                     closeSocket()
@@ -197,6 +205,7 @@
                     <input type="text" id="customer-value" placeholder="Customer ID"/>
                 </div>
                 <input type="button" onclick="submitTransaction()" value="Submit"/>
+                <input type="button" onclick="sendMsg()" value="Send"/>
             </div>
             <div class="section" id="completed">
                 <div class="section-header">

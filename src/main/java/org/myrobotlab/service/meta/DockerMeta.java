@@ -25,6 +25,8 @@ public class DockerMeta extends MetaData {
     // addDependency("com.twelvemonkeys.common", "common-lang", "3.1.1");
     
     addDependency("com.github.docker-java", "docker-java", "3.2.13");
+    exclude("io.netty", "*");
+    addDependency("io.netty", "netty-all", "4.1.82.Final");
 
     // setAvailable(false);
 

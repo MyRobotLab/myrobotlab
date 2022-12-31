@@ -36,8 +36,11 @@ public class RuntimeMeta extends MetaData {
 
     // apache 2.0 license
     addDependency("org.apache.httpcomponents", "httpclient", "4.5.13");
-    // apache 2.0 license
+
+    // apache 2.0 license FIXME !!! REMOVE !!!
     addDependency("org.atmosphere", "wasync", "2.1.5");
+    exclude("io.netty", "*"); // it brings in an old version of netty
+    
     // apache 2.0 license
     addDependency("info.picocli", "picocli", "4.4.0");
     // all your logging needs
@@ -46,8 +49,19 @@ public class RuntimeMeta extends MetaData {
     // for config file support.
     addDependency("org.yaml", "snakeyaml", "1.29");
 
-    // ws client sockets
+    // ws client sockets Apache license
     addDependency("org.asynchttpclient", "async-http-client", "2.12.3");
+    exclude("io.netty", "*"); // it brings in an old version of netty
+    exclude("com.typesafe.netty", "netty-reactive-streams"); // it brings in an old version of netty
+    
+    // force correct version of netty
+    addDependency("io.netty", "netty-all", "4.1.82.Final");
+
+
+    // Oracle GPL 2 - MIT license - for https://github.com/TooTallNate/Java-WebSocket
+    // addDependency("javax.websocket", "javax.websocket-api", "1.1");
+    
+
 
   }
 

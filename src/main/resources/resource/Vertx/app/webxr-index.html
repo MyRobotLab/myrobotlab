@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>vertx</title>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- FIXME need this really ? probably not -->
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <!-- import the webpage's stylesheet -->
+        <link rel="stylesheet" href="style.css">
+        <!-- import the webpage's javascript file -->
+        <script src="gl-matrix.js"></script>
+        <script src="webxr-polyfill.js"></script>
+        <script src="script.js" type="module" defer></script>
+        <script>
+
+            let socket = new WebSocket("ws://localhost:8443/eventbus/")
+
+            socket.onopen = function(e) {
+                display("[open] connection established")
+                // alert("Sending to server")
+                // onopen - send your id ? although that was probably done (needs to be done in the ws:// call)
+                // socket.send("query")
+            }
+
+            socket.onmessage = function(event) {
+                // alert(`[message] Data received from server: ${event.data}`)
+                display(`rcv: ${event.data}`)
+            }
+
+            socket.onclose = function(event) {
+                if (event.wasClean) {
+                    alert(`[close] connection closed cleanly, code=${event.code} reason=${event.reason}`)
+                } else {
+                    // e.g. server process killed or network down
+                    // event.code is usually 1006 in this case
+                    alert('[close] connection died')
+                }
+                socket = null;
+            }
+
+            socket.onerror = function(error) {
+                alert(`[error]`)
+            }
+
+            function send(method, data) {
+                var args = Array.prototype.slice.call(arguments, 1)
+                var msg = createMessage(name, method, args)
+                msg.sendingMethod = 'sendTo'
+                sendMessage(msg)
+            }
+
+            function createMessage(inName, inMethod, inParams) {
+                // TODO: consider a different way to pass inParams for a no arg method.
+                // rather than an array with a single null element.
+                // let rSuffix = (_self.remoteId == null || inName.includes('@')) ? "" : "@" + _self.remoteId
+
+                var msg = {
+                    msgId: new Date().getTime(),
+                    name: "vertx",
+                    //_self.getFullName(inName), FIXME - should be runtime@{id}
+                    method: inMethod,
+                    sender: "runtime@" + 'webXr',
+                    sendingMethod: null,
+                    type: "listen",
+                    customer: "runtime@" + 'webXr',
+                }
+
+                if (inParams == null || (inParams.length == 1 && inParams[0] === null)) {
+
+                    return msg
+                } else {
+                    msg["data"] = inParams
+                    return msg
+                }
+            }
+
+            function sendMessage(msg) {
+                let json = JSON.stringify(msg)
+                display("snd: " + json)
+                socket.send(json)
+            }
+
+            function display(msg) {
+                var existing = document.getElementById("update-area").value
+                document.getElementById("update-area").value = existing + "\n" + msg
+            }
+
+            function sendMsg(obj) {
+                // Make API call
+                matrix = {
+                    "name": "head",
+                    "matrix": {
+                        "0": 0.8897867202758789,
+                        "1": 0.11948162317276001,
+                        "2": 0.4404585361480713,
+                        "3": 0,
+                        "4": -0.06561699509620667,
+                        "5": 0.9885863661766052,
+                        "6": -0.13561497628688812,
+                        "7": 0,
+                        "8": -0.45163482427597046,
+                        "9": 0.0917668417096138,
+                        "10": 0.887471079826355,
+                        "11": 0,
+                        "12": 0.017795732244849205,
+                        "13": 0.002389669418334961,
+                        "14": 0.008809167891740799,
+                        "15": 1
+                    }
+                }
+                send('publishMatrix', matrix)
+            }
+        </script>
+    </head>
+    <body>
+        <h1>WebXR: Example with rotating object and user movement</h1>
+        <p>In this example, a 3D cube is textured and shaded, spinning in place in the
+       center of the world. The user can then move around the world and adjust the
+       direction in which they're looking.</p>
+        <p>
+            Click the "Enter WebXR" button to begin the XR session.  Use the <kbd>W</kbd>
+            ,
+       <kbd>A</kbd>
+            , <kbd>S</kbd>
+            , and <kbd>D</kbd>
+            keys to move up and down and to slide left
+       and right, and the <kbd>↑</kbd>
+            and <kbd>↓</kbd>
+            arrow keys to move forward and
+       backward. Press <kbd>R</kbd>
+            to reset everything.
+        </p>
+        <div class="button-box">
+            <div class="button-row">
+                <button id="enter-xr" disabled>Enter WebXR
+        </button>
+                <span class="click-here">← Click here to toggle on and off</span>
+                <canvas width="2602" height="1384"></canvas>
+                <br>
+            </div>
+        </div>
+        <!-- include the Glitch button to show what the webpage is about and
+          to make it easier for folks to view source and remix -->
+        <div class="glitchButton" style="position:fixed;top:20px;right:20px;"></div>
+        <hr>
+        <h2>Matrices used to generate the scene</h2>
+        <section class="matrix-box" id="projection-matrix">
+            <h2>Projection matrix
+      </h2>
+            <div></div>
+        </section>
+        <section class="matrix-box" id="model-view-matrix">
+            <h2>Model view matrix
+      </h2>
+            <div></div>
+        </section>
+        <br>
+        <section class="matrix-box" id="camera-matrix">
+            <h2>Camera matrix
+      </h2>
+            <div></div>
+        </section>
+        <section class="matrix-box" id="normal-matrix">
+            <h2>Normal matrix
+      </h2>
+            <div></div>
+        </section>
+        <br>
+        <section class="matrix-box" id="mouse-matrix">
+            <h2>Mouse tracking matrix
+      </h2>
+            <div></div>
+        </section>
+        <br>
+        <div class="section-container">
+            <div class="section" id="transaction">
+                <input type="button" onclick="sendMsg()" value="send"/>
+            </div>
+            <div class="section" id="completed">
+                <div class="section-header">
+                    <span>Messages</span>
+                </div>
+                <textarea rows="20" cols="100" id="update-area"></textarea>
+            </div>
+        </div>
+    </body>
+</html>

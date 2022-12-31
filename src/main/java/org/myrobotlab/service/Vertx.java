@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.util.HashMap;
 import java.util.Set;
 
 import org.myrobotlab.framework.Service;
@@ -11,6 +12,18 @@ import org.slf4j.Logger;
 
 import io.vertx.core.VertxOptions;
 
+/**
+ * Vertx gateway - used to support a http and websocket gateway for myrobotlab.
+ * Write business logic in Verticles. Also, try not to write any logic besides initialization inside start() method.
+ * 
+ * It currently does not utilize the Vertx event bus - which is pretty much the most important part of Vertx.
+ * TODO: take advantage of publishing on the event bus
+ * 
+ * @see https://medium.com/@pvub/https-medium-com-pvub-vert-x-workers-6a8df9b2b9ee
+ * 
+ * @author greg
+ *
+ */
 public class Vertx extends Service {
 
   private static final long serialVersionUID = 1L;
@@ -56,25 +69,43 @@ public class Vertx extends Service {
     for (String id : ids) {
       vertx.undeploy(id, (result) -> {
         if (result.succeeded()) {
-
+          log.info("succeeded");
         } else {
-
+          log.error("failed");
         }
       });
     }
   }
 
+  public static class Matrix {
+    public String name;
+    public HashMap<String, Float> matrix;
+
+    public Matrix() {
+    };
+  }
+
+  public Matrix publishMatrix(Matrix data) {
+    // log.info("publishMatrix {}", data.name);
+    return data;
+  }
+
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init(Level.INFO);
-
-      // server = new WsServer();
+      LoggingFactory.init(Level.DEBUG);
 
       Vertx vertx = (Vertx) Runtime.start("vertx", "Vertx");
       vertx.start();
-      Runtime.start("servo", "Servo");
-      // Runtime.start("webgui", "WebGui");
+
+       Runtime.start("i01", "InMoov2");
+       Runtime.start("python", "Python");
+      
+       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+       // webgui.setSsl(true);
+       webgui.autoStartBrowser(false);
+       webgui.setPort(8888);
+       webgui.startService();
 
     } catch (Exception e) {
       log.error("main threw", e);

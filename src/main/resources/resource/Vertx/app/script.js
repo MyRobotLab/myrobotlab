@@ -532,6 +532,16 @@ function renderScene(gl, view, programInfo, buffers, texture, deltaTime) {
   displayMatrix(normalMatrix, 4, normalMatrixOut);
   displayMatrix(mouseMatrix, 4, mouseMatrixOut);
 
+  if (socket){
+    // console.info("that was easy!")
+    // Make API call
+      let matrix = {
+          "name": "head",
+          "matrix": view.transform.matrix // [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+      }
+      send('publishMatrix', matrix)
+  }
+
   // Tell WebGL how to pull out the positions from the position
   // buffer into the vertexPosition attribute
   {

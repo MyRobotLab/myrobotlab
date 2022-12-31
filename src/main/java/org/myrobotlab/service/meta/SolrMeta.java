@@ -20,45 +20,31 @@ public class SolrMeta extends MetaData {
     String luceneVersion = solrVersion;
     addDependency("org.apache.lucene", "lucene-core", luceneVersion);
     addDependency("org.apache.solr", "solr-core", solrVersion);
-    exclude("log4j", "log4j");
-    exclude("org.apache.logging.log4j", "log4j-core");
-    exclude("org.apache.logging.log4j", "log4j-web");
-    exclude("org.apache.logging.log4j", "log4j-1.2-api");
-    exclude("org.apache.logging.log4j", "log4j-api");
-    exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
-    exclude("com.fasterxml.jackson.core", "jackson-core");
-    exclude("com.fasterxml.jackson.core", "jackson-databind");
-    exclude("com.fasterxml.jackson.core", "jackson-annotations");
+    exclude("log4j", "*");
+    exclude("org.apache.logging.log4j", "*");
+    exclude("com.fasterxml.jackson.core", "*");
+    exclude("io.netty", "*"); // prevent it from bringing in an old version of netty
 
     addDependency("org.apache.solr", "solr-test-framework", solrVersion);
-    exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
-    exclude("log4j", "log4j");
-    exclude("org.apache.logging.log4j", "log4j-core");
-    exclude("org.apache.logging.log4j", "log4j-web");
-    exclude("org.apache.logging.log4j", "log4j-1.2-api");
-    exclude("org.apache.logging.log4j", "log4j-api");
-    exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
-
-    exclude("com.fasterxml.jackson.core", "jackson-core");
-    exclude("com.fasterxml.jackson.core", "jackson-databind");
-    exclude("com.fasterxml.jackson.core", "jackson-annotations");
-
-    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.13.3");
-    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.13.3");
-    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.13.3");
+    exclude("log4j", "*");
+    exclude("org.apache.logging.log4j", "*");
+    exclude("com.fasterxml.jackson.core", "*");
+    exclude("io.netty", "*");
 
     addDependency("org.apache.solr", "solr-solrj", solrVersion);
-
-    exclude("com.fasterxml.jackson.core", "jackson-core");
-    exclude("com.fasterxml.jackson.core", "jackson-databind");
-    exclude("com.fasterxml.jackson.core", "jackson-annotations");
+    exclude("com.fasterxml.jackson.core", "*");
+    exclude("io.netty", "*");
 
     addDependency("commons-io", "commons-io", "2.7");
 
     // TODO: update this with the latest schema!
     // addDependency("mrl-solr", "mrl-solr-data", "1.0", "zip");
     // log4j-slf4j conflicts with logback in solr 7.4.0+ (maybe earlier)
-    exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
+    exclude("org.apache.logging.log4j", "*");
+    
+    // force correct version of netty
+    addDependency("io.netty", "netty-all", "4.1.82.Final");
+
     // Dependencies issue
     setAvailable(true);
 

@@ -122,7 +122,11 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     }
 
     this.onMsg = function(inMsg) {
-        let data = inMsg.data[0]
+        let data = null
+        if (inMsg.data) {
+            data = inMsg.data[0]
+        }
+
         switch (inMsg.method) {
         case 'onState':
             _self.updateState(data)
@@ -160,8 +164,10 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             break
 
         case 'onConfigList':
-            $scope.service.configList = data.sort()
-            $scope.$apply()
+            if (data) {
+                $scope.service.configList = data.sort()
+                $scope.$apply()
+            }
             break
 
         case 'onSaveDefaults':

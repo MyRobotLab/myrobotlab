@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Responsive Client</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <!-- script src='https://unpkg.io/@vertx/eventbus-bridge-client.js@1.0.0-1/vertx-eventbus.js'></script -->
+        <style>
+            .main-header {
+                text-align: center;
+                background: #1abc9c;
+                color: white;
+                font-size: 30px;
+            }
+
+            .section-header {
+                vertical-align: middle;
+                text-align: center;
+                font-size: 20px;
+                min-width: 160px;
+            }
+
+            .section-container {
+                display: flex;
+                width: 100%;
+            }
+
+            .section {
+                border-radius: 10px;
+                border: 3px solid #BADA55;
+                width: 50%;
+            }
+
+            input[type=text], select {
+                width: 100%;
+                padding: 12px 20px;
+                margin: 8px 0;
+                display: inline-block;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+
+            input[type=button] {
+                width: 100%;
+                background-color: #4CAF50;
+                color: white;
+                padding: 14px 20px;
+                margin: 8px 0;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            input[type=button]:hover {
+                background-color: #45a049;
+            }
+
+            div {
+                border-radius: 5px;
+                background-color: #f2f2f2;
+                padding: 20px;
+            }
+        </style>
+        <script>
+
+            let socket = new WebSocket("ws://localhost:8443/eventbus/")
+
+            socket.onopen = function(e) {
+                display("[open] connection established")
+                // alert("Sending to server")
+                // onopen - send your id ? although that was probably done (needs to be done in the ws:// call)
+                // socket.send("My name is John")
+            }
+
+            socket.onmessage = function(event) {
+                // alert(`[message] Data received from server: ${event.data}`)
+                display(`rcv: ${event.data}`)
+            }
+
+            socket.onclose = function(event) {
+                if (event.wasClean) {
+                    alert(`[close] connection closed cleanly, code=${event.code} reason=${event.reason}`)
+                } else {
+                    // e.g. server process killed or network down
+                    // event.code is usually 1006 in this case
+                    alert('[close] connection died')
+                }
+            }
+
+            socket.onerror = function(error) {
+                alert(`[error]`)
+            }
+
+            function send(method, data) {
+                var args = Array.prototype.slice.call(arguments, 1)
+                var msg = createMessage(name, method, args)
+                msg.sendingMethod = 'sendTo'
+                // FIXME - not very useful
+                sendMessage(msg)
+            }
+
+            function createMessage(inName, inMethod, inParams) {
+                // TODO: consider a different way to pass inParams for a no arg method.
+                // rather than an array with a single null element.
+                // let rSuffix = (_self.remoteId == null || inName.includes('@')) ? "" : "@" + _self.remoteId
+
+                var msg = {
+                    msgId: new Date().getTime(),
+                    name: "vertx",
+                    //_self.getFullName(inName), FIXME - should be runtime@{id}
+                    method: inMethod,
+                    sender: "runtime@" + 'webXr',
+                    sendingMethod: null,
+                    type: "listen",
+                    customer: "runtime@" + 'webXr',
+                }
+
+                if (inParams == null || (inParams.length == 1 && inParams[0] === null)) {
+
+                    return msg
+                } else {
+                    msg["data"] = inParams
+                    return msg
+                }
+            }
+
+            function sendMessage(msg) {
+                let json = JSON.stringify(msg)
+                display("Socket SND: " + json)
+                socket.send(json)
+            }
+
+            function display(msg) {
+                var existing = document.getElementById("update-area").value
+                document.getElementById("update-area").value = existing + "\n" + msg
+            }
+
+            function sendMsg(obj) {
+                // Make API call
+                matrix = {
+                    "name": "head",
+                    "matrix": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                }
+                send('publishMatrix', matrix)
+            }
+        </script>
+    </head>
+    <body>
+        <div class="main-header">Transaction Updates</div>
+        <div class="section-container">
+            <div class="section" id="transaction">
+                <div class="section-header">
+                    <span>Submit Transaction</span>
+                </div>
+                <div class="section-value">
+                    <span>Transaction</span>
+                    <input type="text" id="transaction-value" placeholder="Transaction ID"/>
+                </div>
+                <div class="section-value">
+                    <span>Customer</span>
+                    <input type="text" id="customer-value" placeholder="Customer ID"/>
+                </div>
+                <input type="button" onclick="submitTransaction()" value="Submit"/>
+                <input type="button" onclick="sendMsg()" value="Send"/>
+            </div>
+            <div class="section" id="completed">
+                <div class="section-header">
+                    <span>Transaction Updates</span>
+                </div>
+                <textarea rows="20" cols="100" id="update-area"></textarea>
+            </div>
+        </div>
+    </body>
+</html>

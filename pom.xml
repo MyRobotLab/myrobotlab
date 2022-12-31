@@ -161,24 +161,6 @@
   </dependency>
 <!-- AudioFile end -->
 
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-web</artifactId>
-            <version>4.3.7</version>
-        </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-rx-java</artifactId>
-            <version>4.3.7</version>
-        </dependency>
-        <!--Config -->
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-config</artifactId>
-            <version>4.3.7</version>
-        </dependency>
-
-
 <!-- AzureTranslator begin -->
   <dependency>
     <groupId>com.squareup.okhttp3</groupId>
@@ -319,13 +301,14 @@
     <artifactId>docker-java</artifactId>
     <version>3.2.13</version>
     <scope>provided</scope>
-    <exclusions>
-    	<exclusion>
-    		<groupId>io.netty</groupId>
-    		<artifactId>*</artifactId>
-    	</exclusion>
-    </exclusions>
+      <exclusions>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
+<!-- Duplicate entry for io.netty-netty-all-4.1.82.Final skipping -->
 <!-- Docker end -->
 
 <!-- DocumentPipeline begin -->
@@ -948,9 +931,6 @@
 <!-- Mqtt end -->
 
 <!-- MqttBroker begin -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.13.3 skipping -->
   <dependency>
     <groupId>io.moquette</groupId>
     <artifactId>moquette-broker</artifactId>
@@ -959,27 +939,22 @@
       <exclusions>
         <exclusion>
           <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-core</artifactId>
+          <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-databind</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-annotations</artifactId>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
         </exclusion>
-    	<exclusion>
-    		<groupId>io.netty</groupId>
-    		<artifactId>*</artifactId>
-    	</exclusion>
-        
       </exclusions>
   </dependency>
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.14.0 skipping -->
+<!-- Duplicate entry for io.netty-netty-all-4.1.82.Final skipping -->
 <!-- MqttBroker end -->
 
 <!-- MyoThalmic begin -->
@@ -1162,9 +1137,9 @@
 
 <!-- Polly begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.14.0 skipping -->
   <dependency>
     <groupId>com.amazonaws</groupId>
     <artifactId>aws-java-sdk-polly</artifactId>
@@ -1214,13 +1189,12 @@
         </exclusion>
       </exclusions>
   </dependency>
-    <dependency>
+  <dependency>
     <groupId>com.fasterxml.jackson.dataformat</groupId>
     <artifactId>jackson-dataformat-xml</artifactId>
-    <version>2.13.3</version>
+    <version>2.14.0</version>
     <scope>provided</scope>
   </dependency>
-  
 <!-- Duplicate entry for org.json-json-20090211 skipping -->
 <!-- Duplicate entry for commons-io-commons-io-2.7 skipping -->
   <dependency>
@@ -1333,12 +1307,12 @@
     <groupId>org.atmosphere</groupId>
     <artifactId>wasync</artifactId>
     <version>2.1.5</version>
-    <exclusions>
-    	<exclusion>
-    		<groupId>io.netty</groupId>
-    		<artifactId>*</artifactId>
-    	</exclusion>
-    </exclusions>
+      <exclusions>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>info.picocli</groupId>
@@ -1359,17 +1333,18 @@
     <groupId>org.asynchttpclient</groupId>
     <artifactId>async-http-client</artifactId>
     <version>2.12.3</version>
-    <exclusions>
-    	<exclusion>
-    		<groupId>io.netty</groupId>
-    		<artifactId>*</artifactId>
-    	</exclusion>
-    	<exclusion>
-    		<groupId>com.typesafe.netty</groupId>
-    		<artifactId>netty-reactive-streams</artifactId>
-    	</exclusion>
-    </exclusions>
+      <exclusions>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.typesafe.netty</groupId>
+          <artifactId>netty-reactive-streams</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
+<!-- Duplicate entry for io.netty-netty-all-4.1.82.Final skipping -->
 <!-- Runtime end -->
 
 <!-- Serial begin -->
@@ -1423,43 +1398,19 @@
       <exclusions>
         <exclusion>
           <groupId>log4j</groupId>
-          <artifactId>log4j</artifactId>
+          <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
           <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-web</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-1.2-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-slf4j-impl</artifactId>
+          <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
           <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-core</artifactId>
+          <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-databind</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-annotations</artifactId>
-        </exclusion>
-        <exclusion>
-        	<groupId>io.netty</groupId>
-        	<artifactId>*</artifactId>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
         </exclusion>
       </exclusions>
   </dependency>
@@ -1470,54 +1421,23 @@
     <scope>provided</scope>
       <exclusions>
         <exclusion>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-slf4j-impl</artifactId>
-        </exclusion>
-        <exclusion>
           <groupId>log4j</groupId>
-          <artifactId>log4j</artifactId>
+          <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
           <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-web</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-1.2-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-slf4j-impl</artifactId>
+          <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
           <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-core</artifactId>
+          <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-databind</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-annotations</artifactId>
-        </exclusion>
-        <exclusion>
-        	<groupId>io.netty</groupId>
-        	<artifactId>*</artifactId>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
         </exclusion>
       </exclusions>
   </dependency>
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.13.3 skipping -->
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-solrj</artifactId>
@@ -1526,19 +1446,11 @@
       <exclusions>
         <exclusion>
           <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-core</artifactId>
+          <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-databind</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-annotations</artifactId>
-        </exclusion>
-        <exclusion>
-        	<groupId>io.netty</groupId>
-        	<artifactId>*</artifactId>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
         </exclusion>
       </exclusions>
   </dependency>
@@ -1550,10 +1462,11 @@
       <exclusions>
         <exclusion>
           <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-slf4j-impl</artifactId>
+          <artifactId>*</artifactId>
         </exclusion>
       </exclusions>
   </dependency>
+<!-- Duplicate entry for io.netty-netty-all-4.1.82.Final skipping -->
 <!-- Solr end -->
 
 <!-- Sphinx begin -->
@@ -1656,43 +1569,28 @@
   <dependency>
     <groupId>io.vertx</groupId>
     <artifactId>vertx-core</artifactId>
-    <version>4.3.4</version>
-    <scope>provided</scope>    
-    <exclusions>
-<!--     
-    	<exclusion>
-    		<groupId>io.netty</groupId>
-    		<artifactId>netty-common</artifactId>
-    	</exclusion>
-    	<exclusion>
-    		<groupId>io.netty</groupId>
-    		<artifactId>netty-buffer</artifactId>
-    	</exclusion>
-    	<exclusion>
-    		<groupId>io.netty</groupId>
-    		<artifactId>netty-codec-http</artifactId>
-    	</exclusion>
-    	<exclusion>
-    		<groupId>io.netty</groupId>
-    		<artifactId>netty-handler</artifactId>
-    	</exclusion>
-    	<exclusion>
-    		<groupId>io.netty</groupId>
-    		<artifactId>netty-codec</artifactId>
-    	</exclusion>
-    	<exclusion>
-    		<groupId>io.netty</groupId>
-    		<artifactId>netty-resolver</artifactId>
-    	</exclusion>
- -->    	
-    </exclusions>
+    <version>4.3.3</version>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>io.vertx</groupId>
     <artifactId>vertx-web</artifactId>
-    <version>4.3.4</version>
+    <version>4.3.3</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
+<!-- Duplicate entry for io.netty-netty-all-4.1.82.Final skipping -->
 <!-- Vertx end -->
 
 <!-- VoiceRss begin -->
@@ -1711,35 +1609,26 @@
     <artifactId>jmdns</artifactId>
     <version>3.5.5</version>
   </dependency>
-<!-- https://mvnrepository.com/artifact/io.netty/netty-transport-native-epoll -->
-<dependency>
-    <groupId>io.netty</groupId>
-    <artifactId>netty-transport-native-epoll</artifactId>
-    <version>4.1.82.Final</version>
-</dependency>
-<!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
-<dependency>
-    <groupId>io.netty</groupId>
-    <artifactId>netty-all</artifactId>
-    <version>4.1.82.Final</version>
-</dependency>
-
-  
   <dependency>
     <groupId>org.atmosphere</groupId>
     <artifactId>nettosphere</artifactId>
     <version>3.2.2</version>
-    <exclusions>
-    	<exclusion>
-    		<groupId>io.netty</groupId>
-    		<artifactId>*</artifactId>
-    	</exclusion>
-    </exclusions>
+      <exclusions>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>javax.annotation</groupId>
     <artifactId>javax.annotation-api</artifactId>
     <version>1.3.2</version>
+  </dependency>
+  <dependency>
+    <groupId>io.netty</groupId>
+    <artifactId>netty-all</artifactId>
+    <version>4.1.82.Final</version>
   </dependency>
 <!-- WebGui end -->
 
@@ -1782,21 +1671,17 @@
       <exclusions>
         <exclusion>
           <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
+          <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
           <groupId>org.apache.httpcomponents</groupId>
-          <artifactId>httpcore</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.httpcomponents</groupId>
-          <artifactId>httpclient</artifactId>
+          <artifactId>*</artifactId>
         </exclusion>
       </exclusions>
   </dependency>
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.14.0 skipping -->
 <!-- WikiDataFetcher end -->
 
 <!-- WolframAlpha begin -->
@@ -1840,6 +1725,7 @@
 <!-- Xmpp end -->
 
   </dependencies>
+
   
   <build>
     <resources>
@@ -1994,6 +1880,7 @@
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
+                                        <exclude>module-info.class</exclude>
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
@@ -2104,7 +1991,7 @@
                    -->
               </systemPropertyVariables>
         </configuration>
-        <version>2.22.2</version>
+        <version>2.19</version>
       </plugin>
       <!-- This plugin deletes the .myrobotlab on a build also the target directory from previous builds -->
       <plugin>
@@ -2150,7 +2037,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.7</version>
+        <version>0.8.5</version>
         <executions>
           <execution>
             <id>prepare-agent</id>
@@ -2193,7 +2080,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>2.22.2</version>
+        <version>2.21.0</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
