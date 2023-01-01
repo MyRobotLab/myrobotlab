@@ -189,7 +189,7 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
   }
 
   private LeapHand mapLeapHandData(Hand lh) {
-    LeapMotionConfig c = (LeapMotionConfig)config;
+    LeapMotionConfig c = (LeapMotionConfig) config;
     LeapHand mrlHand = new LeapHand();
     // process the normal
     Vector palmNormal = lh.palmNormal();
@@ -200,12 +200,12 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
     mrlHand.posX = lh.arm().center().getX();
     mrlHand.posY = lh.arm().center().getY();
     mrlHand.posZ = lh.arm().center().getZ();
-    
-    float index = lh.isLeft()?c.leftIndex:c.rightIndex;
-    float middle = lh.isLeft()?c.leftIndex:c.rightIndex;
-    float ring = lh.isLeft()?c.leftIndex:c.rightIndex;
-    float pinky = lh.isLeft()?c.leftIndex:c.rightIndex;
-    float thumb = lh.isLeft()?c.leftIndex:c.rightIndex;
+
+    float index = lh.isLeft() ? c.leftIndex : c.rightIndex;
+    float middle = lh.isLeft() ? c.leftIndex : c.rightIndex;
+    float ring = lh.isLeft() ? c.leftIndex : c.rightIndex;
+    float pinky = lh.isLeft() ? c.leftIndex : c.rightIndex;
+    float thumb = lh.isLeft() ? c.leftIndex : c.rightIndex;
 
     // handle the fingers.
     for (Finger.Type t : Finger.Type.values()) {
