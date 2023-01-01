@@ -202,10 +202,10 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
     mrlHand.posZ = lh.arm().center().getZ();
 
     float index = lh.isLeft() ? c.leftIndex : c.rightIndex;
-    float middle = lh.isLeft() ? c.leftIndex : c.rightIndex;
-    float ring = lh.isLeft() ? c.leftIndex : c.rightIndex;
-    float pinky = lh.isLeft() ? c.leftIndex : c.rightIndex;
-    float thumb = lh.isLeft() ? c.leftIndex : c.rightIndex;
+    float middle = lh.isLeft() ? c.leftMiddle : c.rightMiddle;
+    float ring = lh.isLeft() ? c.leftRing : c.rightRing;
+    float pinky = lh.isLeft() ? c.leftPinky : c.rightPinky;
+    float thumb = lh.isLeft() ? c.leftThumb : c.rightThumb;
 
     // handle the fingers.
     for (Finger.Type t : Finger.Type.values()) {
