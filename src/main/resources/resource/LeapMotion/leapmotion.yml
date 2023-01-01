@@ -1,3 +1,13 @@
-!!org.myrobotlab.service.config.ServiceConfig
-peers: null
+!!org.myrobotlab.service.config.LeapMotionConfig
+autoStartPeers: true
+leftIndex: 1.0
+leftMiddle: 1.0
+leftPinky: 1.0
+leftRing: 1.0
+leftThumb: 1.0
+rightIndex: 1.0
+rightMiddle: 1.0
+rightPinky: 1.0
+rightRing: 1.0
+rightThumb: 1.0
 type: LeapMotion
