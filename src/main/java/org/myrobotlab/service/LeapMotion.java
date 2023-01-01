@@ -8,6 +8,7 @@ import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.LeapMotionConfig;
 import org.myrobotlab.service.data.LeapData;
 import org.myrobotlab.service.data.LeapHand;
 import org.myrobotlab.service.interfaces.LeapDataListener;
@@ -188,6 +189,7 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
   }
 
   private LeapHand mapLeapHandData(Hand lh) {
+    LeapMotionConfig c = (LeapMotionConfig) config;
     LeapHand mrlHand = new LeapHand();
     // process the normal
     Vector palmNormal = lh.palmNormal();
@@ -199,20 +201,26 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
     mrlHand.posY = lh.arm().center().getY();
     mrlHand.posZ = lh.arm().center().getZ();
 
+    float index = lh.isLeft() ? c.leftIndex : c.rightIndex;
+    float middle = lh.isLeft() ? c.leftMiddle : c.rightMiddle;
+    float ring = lh.isLeft() ? c.leftRing : c.rightRing;
+    float pinky = lh.isLeft() ? c.leftPinky : c.rightPinky;
+    float thumb = lh.isLeft() ? c.leftThumb : c.rightThumb;
+
     // handle the fingers.
     for (Finger.Type t : Finger.Type.values()) {
       Finger f = lh.fingers().get(t.ordinal());
       int angle = (int) computeAngleDegrees(f, palmNormal);
       if (t.equals(Finger.Type.TYPE_INDEX))
-        mrlHand.index = angle;
+        mrlHand.index = Math.round(angle * index);
       else if (t.equals(Finger.Type.TYPE_MIDDLE))
-        mrlHand.middle = angle;
+        mrlHand.middle = Math.round(angle * middle);
       else if (t.equals(Finger.Type.TYPE_RING))
-        mrlHand.ring = angle;
+        mrlHand.ring = Math.round(angle * ring);
       else if (t.equals(Finger.Type.TYPE_PINKY))
-        mrlHand.pinky = angle;
+        mrlHand.pinky = Math.round(angle * pinky);
       else if (t.equals(Finger.Type.TYPE_THUMB))
-        mrlHand.thumb = angle;
+        mrlHand.thumb = Math.round(angle * thumb);
       else
         log.warn("Unknown finger! eek..");
     }
