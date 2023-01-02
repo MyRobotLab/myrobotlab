@@ -421,30 +421,32 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
     // If the hand data came from a valid frame, update the finger postions.
     // move all fingers
-    if (index != null) {
-      index.moveTo(h.index);
-    } else {
-      log.debug("Index finger isn't attached or is null.");
-    }
-    if (thumb != null) {
-      thumb.moveTo(h.thumb);
-    } else {
-      log.debug("Thumb isn't attached or is null.");
-    }
-    if (pinky != null) {
-      pinky.moveTo(h.pinky);
-    } else {
-      log.debug("Pinky finger isn't attached or is null.");
-    }
-    if (ringFinger != null) {
-      ringFinger.moveTo(h.ring);
-    } else {
-      log.debug("Ring finger isn't attached or is null.");
-    }
-    if (majeure != null) {
-      majeure.moveTo(h.middle);
-    } else {
-      log.debug("Middle(Majeure) finger isn't attached or is null.");
+    if (h != null) {
+      if (index != null) {
+        index.moveTo(h.index);
+      } else {
+        log.debug("Index finger isn't attached or is null.");
+      }
+      if (thumb != null) {
+        thumb.moveTo(h.thumb);
+      } else {
+        log.debug("Thumb isn't attached or is null.");
+      }
+      if (pinky != null) {
+        pinky.moveTo(h.pinky);
+      } else {
+        log.debug("Pinky finger isn't attached or is null.");
+      }
+      if (ringFinger != null) {
+        ringFinger.moveTo(h.ring);
+      } else {
+        log.debug("Ring finger isn't attached or is null.");
+      }
+      if (majeure != null) {
+        majeure.moveTo(h.middle);
+      } else {
+        log.debug("Middle(Majeure) finger isn't attached or is null.");
+      }
     }
 
     return data;
