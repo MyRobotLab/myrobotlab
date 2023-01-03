@@ -1,6 +1,0 @@
-{
-    "port": 8443,
-    "max-delay-milliseconds": 800,
-    "worker-count": 1
-}
-
