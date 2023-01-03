@@ -1,4 +1,5 @@
 !!org.myrobotlab.service.config.LidarConfig
+listeners: null
 peers:
   topStom:
     autoStart: true

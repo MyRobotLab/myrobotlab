@@ -1,5 +1,6 @@
 !!org.myrobotlab.service.config.SabertoothConfig
 connect: false
+listeners: null
 peers:
   serial:
     autoStart: true

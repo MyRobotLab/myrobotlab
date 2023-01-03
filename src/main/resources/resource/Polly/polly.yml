@@ -1,6 +1,7 @@
 !!org.myrobotlab.service.config.PollyConfig
 autoDetectSsml: true
 blocking: false
+listeners: null
 mute: false
 peers:
   audioFile:

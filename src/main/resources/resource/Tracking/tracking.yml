@@ -1,5 +1,6 @@
 !!org.myrobotlab.service.config.TrackingConfig
 enabled: false
+listeners: null
 lostTrackingDelayMs: 1000
 peers:
   controller:
