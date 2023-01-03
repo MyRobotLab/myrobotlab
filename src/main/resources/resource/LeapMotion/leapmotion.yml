@@ -1,4 +1,54 @@
-!!org.myrobotlab.service.config.ServiceConfig
-listeners: null
-peers: null
+!!org.myrobotlab.service.config.LeapMotionConfig
+autoStartPeers: true
+# mappings for all fingers
+leftIndex:
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
+leftMiddle:
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
+leftPinky:
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
+leftRing:
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
+leftThumb:
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
+rightIndex: # minIn 10 maxIn 100 minOut 180 maxOut 0
+  maxIn: 100
+  maxOut: 0
+  minIn: 10
+  minOut: 180
+rightMiddle:
+  maxIn: 100
+  maxOut: 0
+  minIn: 10
+  minOut: 180
+rightPinky:
+  maxIn: 100
+  maxOut: 0
+  minIn: 10
+  minOut: 180
+rightRing:
+  maxIn: 100
+  maxOut: 0
+  minIn: 10
+  minOut: 180
+rightThumb:
+  maxIn: 100
+  maxOut: 0
+  minIn: 10
+  minOut: 180
 type: LeapMotion

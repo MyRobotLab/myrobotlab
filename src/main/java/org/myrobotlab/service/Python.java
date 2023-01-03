@@ -287,8 +287,6 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
    */
   List<String> localPythonFiles = new ArrayList<String>();
 
-  boolean pythonConsoleInitialized = false;
-
   /**
    * opened scripts
    */
@@ -303,7 +301,10 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
 
     log.info("creating module directory pythonModules");
     new File("pythonModules").mkdir();
-
+    
+    createPythonInterpreter();
+    sleep(250);
+    
     inputQueueThread = new InputQueue(this);
 
     // I love ServiceData !
@@ -319,7 +320,6 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
 
     localPythonFiles = getFileListing();
 
-    createPythonInterpreter();
     attachPythonConsole();
 
     String selfReferenceScript = "from time import sleep\nfrom org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
@@ -378,14 +378,12 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
    * SwingGui
    */
   public void attachPythonConsole() {
-    if (!pythonConsoleInitialized) {
       // FIXME - this console script has hardcoded globals to
       // reference this service that will break with more than on python service
       // !
       String consoleScript = getResourceAsString("pythonConsole.py");
-      exec(consoleScript, false);
-      pythonConsoleInitialized = true;
-    }
+      // block, don't use queue on different thread (before python is initialized)
+      exec(consoleScript, true);
   }
 
   /**

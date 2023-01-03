@@ -197,7 +197,7 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
         }
 
       } else {
-        error("no response for %s", searchText);
+        log.info("no response for %s", searchText);
       }
       invoke("publishResults", results);
 

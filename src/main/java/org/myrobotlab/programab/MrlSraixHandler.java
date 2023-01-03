@@ -63,10 +63,23 @@ public class MrlSraixHandler implements SraixHandler {
       try {
         SearchPublisher search = (SearchPublisher) programab.getPeer("search");
         if (search != null) {
-          SearchResults results = search.search(input);
-          return results.getTextAndImages();
+          SearchResults results = search.search(input);  
+          String searchResponse = results.getTextAndImages();
+          
+          if (searchResponse == null || searchResponse.length() == 0) {
+            Session session = programab.getSession();
+            // TODO - perhaps more rich codes for details of failure
+            // Response r = session.getResponse("SRAIXFAILED_WIKIPEDIA " + input);
+            Response r = session.getResponse("SRAIXFAILED " + input);
+            return r.msg;
+          }
+          return searchResponse;
         } else {
-          return null;
+          // TODO - perhaps more rich codes for details of failure
+          // Response r = programab.getResponse("SRAIXFAILED_WIKIPEDIA_NOT_AVAILABLE");
+          Session session = programab.getSession();
+          Response r = session.getResponse("SRAIXFAILED " + input);
+          return r.msg;
         }
 
       } catch (Exception e) {
