@@ -384,7 +384,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     if (!data.frame.isValid()) {
       // TODO: we could return void here? not sure
       // who wants the return value form this method.
-      log.info("Leap data frame not valid.");
+      log.debug("Leap data frame not valid.");
       return data;
     }
     LeapHand h;
