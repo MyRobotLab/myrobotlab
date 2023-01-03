@@ -215,15 +215,15 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
       Finger f = lh.fingers().get(t.ordinal());
       int angle = (int) computeAngleDegrees(f, palmNormal);
       if (t.equals(Finger.Type.TYPE_INDEX))
-        mrlHand.index = (int) index.calcOutput(angle);
+        mrlHand.index = (int) Math.round(index.calcOutput(angle));
       else if (t.equals(Finger.Type.TYPE_MIDDLE))
-        mrlHand.middle = (int) middle.calcOutput(angle);
+        mrlHand.middle = (int) Math.round(middle.calcOutput(angle));
       else if (t.equals(Finger.Type.TYPE_RING))
-        mrlHand.ring = (int) ring.calcOutput(angle);
+        mrlHand.ring = (int) Math.round(ring.calcOutput(angle));
       else if (t.equals(Finger.Type.TYPE_PINKY))
-        mrlHand.pinky = (int) pinky.calcOutput(angle);
+        mrlHand.pinky = (int) Math.round(pinky.calcOutput(angle));
       else if (t.equals(Finger.Type.TYPE_THUMB)) {
-        mrlHand.thumb = (int) thumb.calcOutput(angle);
+        mrlHand.thumb = (int) Math.round(thumb.calcOutput(angle));
       } else
         log.warn("Unknown finger! eek..");
     }
