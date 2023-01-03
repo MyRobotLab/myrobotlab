@@ -3,12 +3,15 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.service.config.LeapMotionConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.LeapData;
 import org.myrobotlab.service.data.LeapHand;
 import org.myrobotlab.service.interfaces.LeapDataListener;
@@ -201,27 +204,27 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
     mrlHand.posY = lh.arm().center().getY();
     mrlHand.posZ = lh.arm().center().getZ();
 
-    float index = lh.isLeft() ? c.leftIndex : c.rightIndex;
-    float middle = lh.isLeft() ? c.leftMiddle : c.rightMiddle;
-    float ring = lh.isLeft() ? c.leftRing : c.rightRing;
-    float pinky = lh.isLeft() ? c.leftPinky : c.rightPinky;
-    float thumb = lh.isLeft() ? c.leftThumb : c.rightThumb;
+    MapperLinear index = lh.isLeft() ? leftIndex : rightIndex;
+    MapperLinear middle = lh.isLeft() ? leftMiddle : rightMiddle;
+    MapperLinear ring = lh.isLeft() ? leftRing : rightRing;
+    MapperLinear pinky = lh.isLeft() ? leftPinky : rightPinky;
+    MapperLinear thumb = lh.isLeft() ? leftThumb : rightThumb;
 
     // handle the fingers.
     for (Finger.Type t : Finger.Type.values()) {
       Finger f = lh.fingers().get(t.ordinal());
       int angle = (int) computeAngleDegrees(f, palmNormal);
       if (t.equals(Finger.Type.TYPE_INDEX))
-        mrlHand.index = Math.round(angle * index);
+        mrlHand.index = (int) Math.round(index.calcOutput(angle));
       else if (t.equals(Finger.Type.TYPE_MIDDLE))
-        mrlHand.middle = Math.round(angle * middle);
+        mrlHand.middle = (int) Math.round(middle.calcOutput(angle));
       else if (t.equals(Finger.Type.TYPE_RING))
-        mrlHand.ring = Math.round(angle * ring);
+        mrlHand.ring = (int) Math.round(ring.calcOutput(angle));
       else if (t.equals(Finger.Type.TYPE_PINKY))
-        mrlHand.pinky = Math.round(angle * pinky);
-      else if (t.equals(Finger.Type.TYPE_THUMB))
-        mrlHand.thumb = Math.round(angle * thumb);
-      else
+        mrlHand.pinky = (int) Math.round(pinky.calcOutput(angle));
+      else if (t.equals(Finger.Type.TYPE_THUMB)) {
+        mrlHand.thumb = (int) Math.round(thumb.calcOutput(angle));
+      } else
         log.warn("Unknown finger! eek..");
     }
     return mrlHand;
@@ -260,7 +263,7 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
       invoke("publishLeapData", data);
 
       ArrayList<Point> points = new ArrayList<Point>();
-      for (Hand h : data.frame.hands()) {
+      for (Hand h : data.frame.hands()) { 
         // position information
         double x = h.arm().center().getX();
         double y = h.arm().center().getY();
@@ -350,11 +353,44 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
       }
     }
   }
+
   /////////// thread management end
+  MapperLinear leftIndex = new MapperLinear();
+  MapperLinear leftMiddle = new MapperLinear();
+  MapperLinear leftRing = new MapperLinear();
+  MapperLinear leftPinky = new MapperLinear();
+  MapperLinear leftThumb = new MapperLinear();
+
+  MapperLinear rightIndex = new MapperLinear();
+  MapperLinear rightMiddle = new MapperLinear();
+  MapperLinear rightRing = new MapperLinear();
+  MapperLinear rightPinky = new MapperLinear();
+  MapperLinear rightThumb = new MapperLinear();
+
+  @Override
+  public ServiceConfig apply(ServiceConfig config) {
+    LeapMotionConfig c = (LeapMotionConfig) super.apply(config);
+    leftIndex = new MapperLinear(c.leftIndex.minIn, c.leftIndex.maxIn, c.leftIndex.minOut, c.leftIndex.maxOut);
+    leftMiddle = new MapperLinear(c.leftMiddle.minIn, c.leftMiddle.maxIn, c.leftMiddle.minOut, c.leftMiddle.maxOut);
+    leftRing = new MapperLinear(c.leftRing.minIn, c.leftRing.maxIn, c.leftRing.minOut, c.leftRing.maxOut);
+    leftPinky = new MapperLinear(c.leftPinky.minIn, c.leftPinky.maxIn, c.leftPinky.minOut, c.leftPinky.maxOut);
+    leftThumb = new MapperLinear(c.leftThumb.minIn, c.leftThumb.maxIn, c.leftThumb.minOut, c.leftThumb.maxOut);
+
+    rightIndex = new MapperLinear(c.rightIndex.minIn, c.rightIndex.maxIn, c.rightIndex.minOut, c.rightIndex.maxOut);
+    rightMiddle = new MapperLinear(c.rightMiddle.minIn, c.rightMiddle.maxIn, c.rightMiddle.minOut, c.rightMiddle.maxOut);
+    rightRing = new MapperLinear(c.rightRing.minIn, c.rightRing.maxIn, c.rightRing.minOut, c.rightRing.maxOut);
+    rightPinky = new MapperLinear(c.rightPinky.minIn, c.rightPinky.maxIn, c.rightPinky.minOut, c.rightPinky.maxOut);
+    rightThumb = new MapperLinear(c.rightThumb.minIn, c.rightThumb.maxIn, c.rightThumb.minOut, c.rightThumb.maxOut);
+
+    return config;
+  }
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
     try {
+
+      String s = CodecUtils.toYaml(new LeapMotionConfig());
+      System.out.print(s);
 
       // leap.startService();
       Runtime.start("webgui", "WebGui");
