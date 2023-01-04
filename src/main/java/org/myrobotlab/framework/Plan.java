@@ -54,7 +54,8 @@ public class Plan {
   public ServiceConfig put(String name, ServiceConfig sc) {
 
     if (name.equals("runtime") && get("runtime") != null && config.containsKey("runtime")) {
-      log.error("request to replace root runtime !");
+      // once runtime is set in a plan it will not be "replaced"
+      // log.error("request to replace root runtime !");
       return sc;
     }
     return config.put(name, sc);
