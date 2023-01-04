@@ -1959,7 +1959,8 @@
 
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <!-- <configuration> <skip>true</skip> </configuration> -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <version>2.9</version>
         <configuration>
           <argLine>-Djava.library.path=libraries/native -Djna.library.path=libraries/native ${argLine}</argLine>
           <includes>
@@ -1967,6 +1968,7 @@
           </includes>
           <excludes>
             <exclude>**/integration/*</exclude>
+            <exclude>**/OpenCV*/*</exclude> <!-- filtering out OpenCV for github actions-->
           </excludes>
              <systemPropertyVariables>
                   <!-- 
@@ -1977,7 +1979,6 @@
                    -->
               </systemPropertyVariables>
         </configuration>
-        <version>2.9</version>
       </plugin>
       <!-- This plugin deletes the .myrobotlab on a build also the target directory from previous builds -->
       <plugin>
