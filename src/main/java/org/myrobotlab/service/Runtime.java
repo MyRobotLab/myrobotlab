@@ -1907,7 +1907,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
 
     // FIXME - release autostarted peers ?
-    
+
     // last step - remove from registry
     registry.remove(name);
 
@@ -2314,30 +2314,56 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   @Override
   public void connect(String url) {
     try {
-
-      // get authorization through POST - username/password etc..
-
-      // use session_id from auth & id to form upgrade GET request
-      // /messages?id=x&session_id=y
-
+      
+      // TODO - do auth, ssl and unit tests for them
+      // TODO - get session id
       // request default describe - on describe do registrations .. zzz
 
-      WsClient client = new WsClient();
-      Connection c = client.connect(this, getFullName(), getId(), url);
+      // standardize request - TODO check for ws wss not http https
+      if (!url.contains("api/messages")) {
+        url += "/api/messages";
+      }
+
+      if (!url.contains("id=")) {
+        url += "?id=" + getId();
+      }
+      
+      WsClient client2 = new WsClient();      
+      client2.connect(this, url);
+
+//      WsClient client = new WsClient();
+//      Connection c = client.connect(this, getFullName(), getId(), url);
 
       // URI uri = new URI(url);
       // adding "id" as full url :P ... because we don't know it !!!
-      addConnection(client.getUuid(), url, c);
+      Connection connection = new Connection(client2.getId(), getId(), getFullName());
+
+      // connection specific
+      connection.put("c-type", "Runtime");
+      // attributes.put("c-endpoint", endpoint);
+      connection.put("c-client", client2);
+
+      // cli specific
+      connection.put("cwd", "/");
+      connection.put("url", url);
+      connection.put("uri", url); // not really correct
+      connection.put("user", "root");
+      connection.put("host", "local");
+
+      // addendum
+      connection.put("User-Agent", "runtime-client");
+      
+      addConnection(client2.getId(), url, connection);
 
       // direct send - may not have and "id" so it will be too runtime vs
       // runtime@{id}
       // subscribe to "describe"
       MRLListener listener = new MRLListener("describe", getFullName(), "onDescribe");
       Message msg = Message.createMessage(getFullName(), "runtime", "addListener", listener);
-      client.send(CodecUtils.toJson(msg));
+      client2.send(CodecUtils.toJson(msg));
 
       // send describe
-      client.send(CodecUtils.toJson(getDescribeMsg(null)));
+      client2.send(CodecUtils.toJson(getDescribeMsg(null)));
 
     } catch (Exception e) {
       log.error("connect to {} giving up {}", url, e.getMessage());
