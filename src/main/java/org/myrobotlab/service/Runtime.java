@@ -1907,6 +1907,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
 
     // FIXME - release autostarted peers ?
+    
     // last step - remove from registry
     registry.remove(name);
 
