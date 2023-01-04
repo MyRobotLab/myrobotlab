@@ -17,7 +17,7 @@ jobs:
           distribution: 'adopt'
       # - name: Test with Maven
       #   run: mvn test -Dtest=!org.myrobotlab.opencv.OpenCVFilterDL4JTest
-      - name: build with maven
-        run: mvn --batch-mode --update-snapshots -DskipTests package
       # - name: build with maven
-      #   run: mvn --batch-mode --update-snapshots package        
+      #   run: mvn --batch-mode --update-snapshots -DskipTests package
+      - name: build with maven
+        run: mvn --batch-mode --update-snapshots package
