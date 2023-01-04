@@ -103,7 +103,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       
       InMoov2Config c = (InMoov2Config)config;    
       Runtime runtime = Runtime.getInstance();
-      log.error("onStarted {}", name);
+      log.info("onStarted {}", name);
       
       if (runtime.isProcessingConfig()) {
         invoke("publishEvent", "configStarted");

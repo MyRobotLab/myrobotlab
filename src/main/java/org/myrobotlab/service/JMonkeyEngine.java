@@ -1213,7 +1213,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 //      info("already loaded %s", dirPath);
 //      return;
 //    }
-    c.modelPaths.add(dirPath);
+    c.addModelPath(dirPath);
     traverseLoadModels(dirPath);
   }
 

@@ -623,9 +623,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * 
    */
   public Service(String reservedKey, String inId) {
-
-    log.error("constructing {}", reservedKey);
-
+    log.info("constructing {}", reservedKey);
     name = reservedKey;
 
     // necessary for serialized transport\
@@ -1395,10 +1393,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public ServiceConfig getConfig() {
+    
     boolean filterWeb = true;
-    if (getName().equals("i01.htmlFilter")) {
-      log.info("hre");
-    }
+    
     Map<String, List<MRLListener>> listeners = getOutbox().notifyList;
     List<Listener> newListeners = new ArrayList<>();
 
@@ -1903,10 +1900,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   synchronized public void startService() {
-
-    log.error("starting {}", name);
-
     if (!isRunning()) {
+      log.info("starting {}", getName());
       outbox.start();
       if (thisThread == null) {
         thisThread = new Thread(this, name);

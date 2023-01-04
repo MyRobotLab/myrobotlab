@@ -2157,21 +2157,22 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * Release a specific service. Releasing shuts down the service and removes it
    * from registries.
    *
-   * @param name
+   * @param fullName full name
    *          The service to be released
    *
    */
-  static public void release(String name) {
-    if (name == null) {
+  static public void release(String fullName) {
+    if (fullName == null) {
       log.error("release(null)");
       return;
     }
 
-    ServiceInterface si = Runtime.getService(name);
+    ServiceInterface si = Runtime.getService(fullName);
     if (si == null) {
-      log.info("{} already released", name);
+      log.info("{} already released", fullName);
       return;
     }
+    String shortName = si.getName();
 
     // check for peers !! check in config or check in Plan ?!?!?
     Map<String, Peer> peers = si.getPeers();
@@ -2188,7 +2189,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // many are derived that take care of additional thread
     // cleanup
     Plan plan = Runtime.getPlan();
-    plan.removeRegistry(name);
+    plan.remove(shortName);
     si.releaseService();
   }
 
@@ -4884,7 +4885,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       if (configPath == null) {
         configPath = getConfigPath();
         if (configPath == null) {
-          error("configuration path not set");
+          error("configuration path not set, please set in runtime");
           return false;
         }
       }

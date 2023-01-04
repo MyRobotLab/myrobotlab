@@ -152,7 +152,7 @@ public class InMoov2Config extends ServiceConfig {
     JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.get(getPeerName("simulator"));
     // FIXME - SHOULD USE RESOURCE DIR !
     String assestsDir = Service.getResourceDir(InMoov2.class) + "/JMonkeyEngine";
-    simulator.modelPaths.add(assestsDir);
+    simulator.addModelPath(assestsDir);
 
     simulator.multiMapped.put(name + ".leftHand.index", new String[] { name + ".leftHand.index", name + ".leftHand.index2", name + ".leftHand.index3" });
     simulator.multiMapped.put(name + ".leftHand.majeure", new String[] { name + ".leftHand.majeure", name + ".leftHand.majeure2", name + ".leftHand.majeure3" });
