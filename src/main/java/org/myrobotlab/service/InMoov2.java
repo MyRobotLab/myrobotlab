@@ -1596,9 +1596,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       
       Runtime.start("python", "Python");
       Runtime.start("ros", "Ros");
-//      //Runtime.start("intro", "Intro");
-//      // Runtime.start("i01", "InMoov2");
-//        Runtime.startConfig("i01-05");
+      Runtime.start("intro", "Intro");
+      InMoov2 i01 = (InMoov2)Runtime.start("i01", "InMoov2");
+      i01.startPeer("simulator");
+        // Runtime.startConfig("i01-05");
       // Runtime.startConfig("pir-01");
       
       boolean done = true;
@@ -1607,7 +1608,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       }            
 
       // Polly polly = (Polly)Runtime.start("i01.mouth", "Polly");
-      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+      i01 = (InMoov2) Runtime.start("i01", "InMoov2");
 
       // polly.speakBlocking("Hi, to be or not to be that is the question,
       // wheather to take arms against a see of trouble, and by aposing them end

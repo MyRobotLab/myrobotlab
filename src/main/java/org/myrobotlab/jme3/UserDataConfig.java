@@ -1,7 +1,12 @@
 package org.myrobotlab.jme3;
 
 import org.myrobotlab.math.MapperLinear;
-
+/**
+ * POJO for moving config from/to JMonkeyEngine simulator
+ * 
+ * @author GroG
+ *
+ */
 public class UserDataConfig {
 
   /**

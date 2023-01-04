@@ -4,8 +4,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.net.Http;
@@ -15,6 +19,8 @@ import org.slf4j.Logger;
 public class WebGuiTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(WebGui.class);
+  
+  // FIXME - DO A WEBSOCKET TEST 
 
   @Before
   public void setUp() {
@@ -48,13 +54,46 @@ public class WebGuiTest extends AbstractTest {
 
 
 // FIXME - ADD WHEN POST API IS WORKY
+// FIXME object non primitive (no string) post
+
   @Test
   public void postTest() {
+    
+    // 1st post - simple input - simple return
     String postBody = "[\"runtime\"]";
     byte[] bytes = Http.post("http://localhost:8889/api/service/runtime/getFullName", postBody);
+    sleep(200); // FIXME - do a wait(1000, bytes or future)
     assertNotNull(bytes);
     String ret = new String(bytes);
     assertTrue(ret.contains("@"));
+    
+    // second post - simple input - complex return
+    postBody = "[\"runtime\"]";
+    bytes = Http.post("http://localhost:8889/api/service/runtime/getService", postBody);
+    sleep(200);
+    assertNotNull(bytes);
+    ret = new String(bytes);
+    assertTrue(ret.contains("@"));
+    
+    
+    // post non primitive non string object
+    MRLListener listener = new MRLListener("getRegistry", "runtime@webguittest", "onRegistry");
+    postBody = "[" + CodecUtils.toJson(listener) + "]";    
+    // postBody = "[\"runtime\"]";
+    bytes = Http.post("http://localhost:8889/api/service/runtime/addListener", postBody);
+    sleep(200);
+    assertNotNull(bytes);
+    
+    Runtime runtime = Runtime.getInstance();
+    boolean found = false;
+    List<MRLListener> check = runtime.getNotifyList("getRegistry");
+    for (int i = 0; i < check.size(); ++i) {
+      if (check.get(i).equals(listener)) {
+        found = true;
+      }
+    }    
+    assertTrue("listener not found !", found);
+    
   }
 
   @Test
@@ -62,6 +101,7 @@ public class WebGuiTest extends AbstractTest {
     byte[] bytes = Http.get("http://localhost:8889/api/service/servoApiTest/moveTo/35");
     String ret = new String(bytes);
     assertEquals(ret, "35.0");
+    // asynchronous part - msg is put on queue
     sleep(200);
     Servo servoApiTest = (Servo)Runtime.getService("servoApiTest");
     Double pos = servoApiTest.getCurrentOutputPos();
@@ -77,7 +117,7 @@ public class WebGuiTest extends AbstractTest {
     ret = new String(bytes);
     assertTrue(ret.contains("enableAutoDisable"));
 
-
   }
+  
   
 }

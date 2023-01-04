@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
@@ -16,7 +16,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Http;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.WikipediaConfig;
 import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.data.Locale;
@@ -27,7 +26,6 @@ import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-import com.google.gson.internal.LinkedHashTreeMap;
 
 /**
  * Wikipedia via the official rest api docs here:
@@ -165,7 +163,7 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
       if (bytes != null) {
         String response = new String(bytes, StandardCharsets.UTF_8);
         @SuppressWarnings("unchecked")
-        LinkedHashTreeMap<String, Object> json = CodecUtils.fromJson(response, LinkedHashTreeMap.class);
+        LinkedHashMap<String, Object> json = CodecUtils.fromJson(response, LinkedHashMap.class);
         String extract = (String) json.get("extract");
         if (extract != null) {
           

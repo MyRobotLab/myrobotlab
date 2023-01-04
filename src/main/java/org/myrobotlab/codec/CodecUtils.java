@@ -139,7 +139,7 @@ public class CodecUtils {
      * without knowing the target type, e.g. if the target
      * is {@link Object}.
      */
-    private static final Class<?> GSON_DEFAULT_OBJECT_TYPE = LinkedTreeMap.class;
+    private static final Class<?> GSON_DEFAULT_OBJECT_TYPE = LinkedHashMap.class;
     /**
      * The type that Jackson uses when it attempts to deserialize
      * without knowing the target type, e.g. if the target
@@ -248,6 +248,9 @@ public class CodecUtils {
     public static <T extends Object> T fromJson(String json, Class<T> clazz) {
         try {
             if (USING_GSON) {
+                if (clazz == null) {
+                  clazz = (Class<T>)LinkedHashMap.class;
+                }
                 return gson.fromJson(json, clazz);
             }
 
@@ -1302,6 +1305,17 @@ public class CodecUtils {
     public int hashCode() {
       return Objects.hash(key, path, exampleUri, description);
     }
+  }
+
+  /**
+   * Single parameter from JSON. Will use default return type, currently LinkedHashMap
+   * to return a POJO object that can be easily accessed.
+   * 
+   * @param json
+   * @return
+   */
+  public static Object fromJson(String json) {
+    return fromJson(json, null);
   }
 
 }

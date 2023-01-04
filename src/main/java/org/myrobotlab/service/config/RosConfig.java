@@ -5,7 +5,7 @@ import java.util.List;
 
 public class RosConfig extends ServiceConfig {
 
-  public boolean connect = true;
+  public boolean connect = false;
   public long serviceCallTimeoutMs = 3000;
   public String bridgeUrl = "ws://localhost:9090";
   public List<String> subscriptions = new ArrayList<>();

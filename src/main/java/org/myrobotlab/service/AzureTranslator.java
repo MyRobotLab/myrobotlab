@@ -9,6 +9,7 @@
 
 package org.myrobotlab.service;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.myrobotlab.codec.CodecUtils;
@@ -19,8 +20,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
-
-import com.google.gson.internal.LinkedTreeMap;
 
 import okhttp3.HttpUrl;
 import okhttp3.HttpUrl.Builder;
@@ -169,14 +168,14 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
       Response response = client.newCall(request).execute();
       String resp = response.body().string();
       // if ()
-      List<LinkedTreeMap> list = CodecUtils.fromJson(resp, List.class);
-      for (LinkedTreeMap t : list) {
-        LinkedTreeMap detected = (LinkedTreeMap) t.get("detectedLanguage");
+      List<LinkedHashMap> list = CodecUtils.fromJson(resp, List.class);
+      for (LinkedHashMap t : list) {
+        LinkedHashMap detected = (LinkedHashMap) t.get("detectedLanguage");
         if (detected != null) {
           invoke("publishDetectedLanguage", detected.get("language"));
         }
-        List<LinkedTreeMap> translations = (List<LinkedTreeMap>) t.get("translations");
-        for (LinkedTreeMap trans : translations) {
+        List<LinkedHashMap> translations = (List<LinkedHashMap>) t.get("translations");
+        for (LinkedHashMap trans : translations) {
           sb.append(trans.get("text"));
         }
       }

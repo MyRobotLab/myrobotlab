@@ -1,8 +1,5 @@
 package org.myrobotlab.service;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,23 +7,20 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.lucene.search.TimeLimitingCollector.TimeExceededException;
-import org.atmosphere.wasync.Client;
-import org.atmosphere.wasync.ClientFactory;
-import org.atmosphere.wasync.Decoder;
-import org.atmosphere.wasync.Encoder;
-import org.atmosphere.wasync.Event;
-import org.atmosphere.wasync.Function;
-import org.atmosphere.wasync.Request;
-import org.atmosphere.wasync.RequestBuilder;
-import org.atmosphere.wasync.Socket;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.net.WsClient;
 import org.myrobotlab.service.config.RosConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.interfaces.ConnectionEventListener;
+import org.myrobotlab.service.interfaces.RemoteMessageHandler;
 import org.slf4j.Logger;
+
+import okhttp3.Response;
+import okhttp3.WebSocket;
 
 /**
  * Ros service uses websockets over the rosbridge
@@ -42,7 +36,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class Ros extends Service implements Decoder<String, Reader> {
+public class Ros extends Service implements RemoteMessageHandler, ConnectionEventListener {
 
   /**
    * @see https://github.com/biobotus/rosbridge_suite/blob/master/ROSBRIDGE_PROTOCOL.md
@@ -75,10 +69,10 @@ public class Ros extends Service implements Decoder<String, Reader> {
      * return (optional) from service_call
      */
     public Object values;
-    
-    public String toString() {
-      return CodecUtils.toJson(this);
-    }
+
+//    public String toString() {
+//      return CodecUtils.toJson(this);
+//    }
   }
 
   public class RosServiceCallback {
@@ -94,6 +88,13 @@ public class Ros extends Service implements Decoder<String, Reader> {
     try {
       Ros ros = (Ros) Runtime.start("ros", "Ros");
 
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      // webgui.setSsl(true);
+      webgui.autoStartBrowser(false);
+      webgui.setPort(8888);
+      // webgui.setSsl(true);
+      webgui.startService();
+
     } catch (Exception e) {
       log.error("main threw", e);
     }
@@ -102,14 +103,9 @@ public class Ros extends Service implements Decoder<String, Reader> {
   Map<String, RosServiceCallback> callbacks = new HashMap<>();
 
   @SuppressWarnings("rawtypes")
-  transient private Client client = null;
+  transient private WsClient client = null;
 
   protected boolean connected = false;
-
-  @SuppressWarnings("rawtypes")
-  transient private RequestBuilder request = null;
-
-  transient private Socket socket = null;
 
   public Ros(String n, String id) {
     super(n, id);
@@ -131,41 +127,14 @@ public class Ros extends Service implements Decoder<String, Reader> {
 
   // FIXME - TODO reconnect
   public void connect(String url) {
-    try {
 
-      if (connected) {
-        info("already connected");
-        return;
-      }
-
-      client = ClientFactory.getDefault().newClient();
-
-      request = client.newRequestBuilder().method(Request.METHOD.GET).uri(url).encoder(new Encoder<String, Reader>() {
-        @Override
-        public Reader encode(String s) {
-          return new StringReader(s);
-        }
-      }).decoder(this).transport(Request.TRANSPORT.WEBSOCKET) // Try WebSocket
-          .transport(Request.TRANSPORT.LONG_POLLING); // Fallback to
-                                                      // Long-Polling
-
-      socket = client.create();
-      socket.on(new Function<Reader>() {
-        @Override
-        public void on(Reader r) {
-          // log.error("r {}", r);
-        }
-      }).on(new Function<IOException>() {
-
-        @Override
-        public void on(IOException ioe) {
-          error(ioe);
-        }
-
-      }).open(request.build())/* .fire("echo").fire("bong") */;
-    } catch (Exception e) {
-      error(e);
+    if (connected) {
+      info("already connected");
+      return;
     }
+
+    client = new WsClient();
+    client.connect(this, url);
   }
 
   // TODO - getTopics
@@ -173,62 +142,9 @@ public class Ros extends Service implements Decoder<String, Reader> {
   // setNodeName ?
   //
 
-  @Override
-  public Reader decode(Event e, String msg) {
-    try {
-
-      if (msg != null && "X".equals(msg)) {
-        // System.out.println("MESSAGE - X");
-        return null;
-      }
-      if ("OPEN".equals(msg)) {
-        connected = true;
-        broadcastState();
-        return null;
-      }
-
-      if ("CLOSED".equals(msg)) {
-        connected = false;
-        broadcastState();
-        return null;
-      }
-
-      RosMsg rosMsg = CodecUtils.fromJson(msg, RosMsg.class);
-      if (rosMsg.id != null && rosMsg.service != null) {
-        // service call response
-        RosServiceCallback callback = callbacks.get(rosMsg.id);
-        if (callback != null) {
-          synchronized (callback) {
-            callback.msg = rosMsg;
-            callback.notifyAll();
-          }
-          callbacks.remove(rosMsg.id);
-        } else {
-          error("couldn't find callback for msg %s", rosMsg.id);
-        }
-      }
-      invoke("publishRosMsg", rosMsg);
-
-      log.error(msg);
-
-      // main response
-      // System.out.println(data);
-      // for (RemoteMessageHandler handler : handlers) {
-      // handler.onRemoteMessage(uuid, data);
-      // }
-
-      // response
-      // System.out.println("OPENED" + s);
-    } catch (Exception ex) {
-      error(ex);
-    }
-
-    return new StringReader(msg);
-  }
-
   public void disconnect() {
-    if (socket != null) {
-      socket.close();
+    if (client != null) {
+      client.close();
     }
   }
 
@@ -249,10 +165,14 @@ public class Ros extends Service implements Decoder<String, Reader> {
     if (ret == null) {
       return null;
     }
-    RosMsg msg = (RosMsg)ret.msg;
-    List topics = (List)((Map)msg.values).get("topics");
-    log.info(ret.toString());
-    return topics;
+    RosMsg msg = (RosMsg) ret.msg;
+    if (msg != null) {
+      List topics = (List) ((Map) msg.values).get("topics");
+      log.info(ret.toString());
+      return topics;
+    } else {
+      return new ArrayList<>();
+    }
   }
 
   public RosMsg publishRosMsg(RosMsg msg) {
@@ -272,11 +192,12 @@ public class Ros extends Service implements Decoder<String, Reader> {
       msg.id = id;
       msg.op = "call_service";
       msg.service = service;
-      socket.fire(CodecUtils.toJson(msg));
+
+      sendJson(CodecUtils.toJson(msg));
       synchronized (callback) {
         callback.wait(c.serviceCallTimeoutMs);
       }
-      return callback; //callbacks.get(id);
+      return callback; // callbacks.get(id);
 
     } catch (TimeExceededException ex) {
       warn("timeout exceeded on ros service call");
@@ -286,39 +207,40 @@ public class Ros extends Service implements Decoder<String, Reader> {
     return null;
   }
 
-  public void rosPublish(String json) {
+  public void sendJson(String json) {
     try {
-      // log.info(msg.getClass().getSimpleName());
-      // socket.fire(CodecUtils.toJson(msg));
-      socket.fire(json);
-    } catch(Exception e) {
-      error(e);
-    }
-  }
-  
-  public void rosPublish(String topic, Object data) {
-      RosMsg msg = new RosMsg();
-      msg.op = "publish";
-      msg.topic = topic;
-      msg.msg = data;
-      rosPublish(topic, msg);
-  }
-
-  public void rosSendJson(String json) {
-    try {
-      socket.fire(json);
+      if (client == null) {
+        error("client not connected");
+        return;
+      }
+      client.send(json);
     } catch (Exception e) {
       error(e);
     }
   }
   
+  public void rosSendMsg(RosMsg msg) {
+    String json = CodecUtils.toJson(msg);
+    sendJson(json);
+  }
+
+  public void rosPublish(String topic, String json) {
+    RosMsg msg = new RosMsg();
+    msg.op = "publish";
+    msg.topic = topic;
+    msg.msg = CodecUtils.fromJson(json);    
+    String msgJson = CodecUtils.toJson(msg);
+    sendJson(msgJson);
+  }
+
+
   public void rosSubscribe(String topic) {
     try {
       RosConfig c = (RosConfig) config;
       RosMsg msg = new RosMsg();
       msg.op = "subscribe";
       msg.topic = topic;
-      socket.fire(CodecUtils.toJson(msg));
+      sendJson(CodecUtils.toJson(msg));
       if (c.subscriptions == null) {
         c.subscriptions = new ArrayList<>();
       }
@@ -335,7 +257,7 @@ public class Ros extends Service implements Decoder<String, Reader> {
       RosMsg msg = new RosMsg();
       msg.op = "unsubscribe";
       msg.topic = topic;
-      socket.fire(CodecUtils.toJson(msg));
+      client.send(CodecUtils.toJson(msg));
       if (c.subscriptions == null) {
         c.subscriptions = new ArrayList<>();
       }
@@ -343,6 +265,52 @@ public class Ros extends Service implements Decoder<String, Reader> {
     } catch (Exception e) {
       error(e);
     }
+  }
+
+  @Override
+  public void onRemoteMessage(String uuid, String msg) {
+
+    try {
+
+      RosMsg rosMsg = CodecUtils.fromJson(msg, RosMsg.class);
+      if (rosMsg.id != null && rosMsg.service != null) {
+        // service call response
+        RosServiceCallback callback = callbacks.get(rosMsg.id);
+        if (callback != null) {
+          synchronized (callback) {
+            callback.msg = rosMsg;
+            callback.notifyAll();
+          }
+          callbacks.remove(rosMsg.id);
+        } else {
+          error("couldn't find callback for msg %s", rosMsg.id);
+        }
+      }
+      invoke("publishRosMsg", rosMsg);
+
+      // log.error(msg);
+
+    } catch (Exception ex) {
+      error(ex);
+    }
+  }
+
+  @Override
+  public void onOpen(WebSocket webSocket, Response response) {
+    connected = true;
+    broadcastState();
+  }
+
+  @Override
+  public void onClosing(WebSocket webSocket, int code, String reason) {
+    connected = false;
+    broadcastState();
+  }
+
+  @Override
+  public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+    error("websocket failure");
+    log.error("onFailure", new Exception(t));
   }
 
 }

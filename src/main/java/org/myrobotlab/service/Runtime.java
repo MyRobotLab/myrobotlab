@@ -2607,6 +2607,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         log.error("here");
       }
 
+      // getConfig() was problematic here for JMonkeyEngine
       ServiceConfig sc = requestedService.getConfig();
       // Map<String, Peer> peers = sc.getPeers();
       // if (peers != null) {

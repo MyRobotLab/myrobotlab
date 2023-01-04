@@ -34,12 +34,9 @@ public class RuntimeMeta extends MetaData {
     // addDependency("org.apache.ivy", "ivy", "2.4.0-5");
     addDependency("org.apache.ivy", "ivy", IvyWrapper.IVY_VERSION);
 
-    // apache 2.0 license
+    // apache 2.0 license - REMOVE in favor of okhttp
+    // FIXME - replace apache with okhttp
     addDependency("org.apache.httpcomponents", "httpclient", "4.5.13");
-
-    // apache 2.0 license FIXME !!! REMOVE !!!
-    addDependency("org.atmosphere", "wasync", "2.1.5");
-    exclude("io.netty", "*"); // it brings in an old version of netty
     
     // apache 2.0 license
     addDependency("info.picocli", "picocli", "4.4.0");
@@ -49,19 +46,11 @@ public class RuntimeMeta extends MetaData {
     // for config file support.
     addDependency("org.yaml", "snakeyaml", "1.32");
 
-    // ws client sockets Apache license
-    addDependency("org.asynchttpclient", "async-http-client", "2.12.3");
-    exclude("io.netty", "*"); // it brings in an old version of netty
-    exclude("com.typesafe.netty", "netty-reactive-streams"); // it brings in an old version of netty
-    
-    // force correct version of netty
-    addDependency("io.netty", "netty-all", "4.1.82.Final");
-
-
-    // Oracle GPL 2 - MIT license - for https://github.com/TooTallNate/Java-WebSocket
-    // addDependency("javax.websocket", "javax.websocket-api", "1.1");
-    
-
+    // ws best client websockets with Apache license
+    addDependency("com.squareup.okhttp3", "okhttp", "3.9.0");
+        
+    // force correct version of netty - needed for Vertx but not for Runtime ?
+    addDependency("io.netty", "netty-all", "4.1.82.Final");    
 
   }
 

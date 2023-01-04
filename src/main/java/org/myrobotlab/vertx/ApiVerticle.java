@@ -11,9 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.net.SelfSignedCertificate;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.CorsHandler;
@@ -51,8 +53,16 @@ public class ApiVerticle extends AbstractVerticle {
         .allowedHeader("Content-Type"));
 
     // static file routing
-    router.route("/*").handler(StaticHandler.create("src/main/resources/resource/Vertx/app"));
-    router.route("/static/*").handler(StaticHandler.create("webroot"));
+
+    //StaticHandler root = StaticHandler.create("src/main/resources/resource/Vertx/app");
+    StaticHandler root = StaticHandler.create("src/main/resources/resource/Vertx/app");
+    root.setCachingEnabled(false);
+    root.setDirectoryListing(true);
+    root.setIndexPage("index.html");
+    // root.setAllowRootFileSystemAccess(true);
+    // root.setWebRoot(null);
+    router.route("/*").handler(root);    
+
 
     // router.get("/health").handler(this::generateHealth);
     // router.get("/api/transaction/:customer/:tid").handler(this::handleTransaction);
@@ -68,60 +78,23 @@ public class ApiVerticle extends AbstractVerticle {
       httpOptions.setTrustOptions(certificate.trustOptions());
     }
     httpOptions.setPort(config.port);
+    
 
     HttpServer server = vertx.createHttpServer(httpOptions);
     // TODO - this is where multiple workers would be defined
     // .createHttpServer()
+    
+    // WebSocketHandler webSocketHandler =  new WebSocketHandler(service);
+    // server.webSocketHandler(webSocketHandler);
 
     // FIXME - don't do "long" or "common" processing in the start()
     // FIXME - how to do this -> server.webSocketHandler(this::handleWebSocket);
-    server.webSocketHandler((ctx) -> {
-      // ctx.writeTextMessage("ping"); FIXME - query ?
-      ctx.textMessageHandler((json) -> {
-        log.info("handling {}", json);
-
-        Method method;
-        try {
-
-          org.myrobotlab.framework.Message msg = CodecUtils.fromJson(json, org.myrobotlab.framework.Message.class);
-
-          Class<?> clazz = Runtime.getClass(msg.name);
-          if (clazz == null) {
-            log.error("cannot derive local type from service {}", msg.name);
-            return;
-          }
-
-          MethodCache cache = MethodCache.getInstance();
-          Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
-
-          method = cache.getMethod(clazz, msg.method, params);
-          if (method == null) {
-            service.error("method cache could not find %s.%s(%s)", clazz.getSimpleName(), msg.method, msg.data);
-            return;
-          }
-
-          ServiceInterface si = Runtime.getService(msg.name);
-          Object ret = method.invoke(si, params);
-
-          // put msg on mrl msg bus :)
-          // service.in(msg); <- NOT DECODE PARAMS !!
-
-          // if ((new Random()).nextInt(100) == 0) {
-          // ctx.close(); - will close the websocket !!!
-          // } else {
-          // ctx.writeTextMessage("ping"); Useful is writing back
-          // }
-
-        } catch (Exception e) {
-          service.error(e);
-        }
-      });
-    });
-
+    server.webSocketHandler(new WebSocketHandler(service));
     server.requestHandler(router);
     // start servers
     server.listen();
   }
+  
 
   @Override
   public void stop() throws Exception {

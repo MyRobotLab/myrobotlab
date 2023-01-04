@@ -93,14 +93,16 @@ public class Vertx extends Service {
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init(Level.DEBUG);
+      LoggingFactory.init(Level.INFO);
 
       Vertx vertx = (Vertx) Runtime.start("vertx", "Vertx");
       vertx.start();
 
-       Runtime.start("i01", "InMoov2");
-       Runtime.start("python", "Python");
-      
+       InMoov2 i01 = (InMoov2)Runtime.start("i01", "InMoov2");
+       // i01.startSimulator();
+       JMonkeyEngine jme = (JMonkeyEngine)i01.startPeer("simulator");
+//       Runtime.start("python", "Python");
+//      
        WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
        // webgui.setSsl(true);
        webgui.autoStartBrowser(false);

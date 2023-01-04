@@ -162,12 +162,7 @@
 <!-- AudioFile end -->
 
 <!-- AzureTranslator begin -->
-  <dependency>
-    <groupId>com.squareup.okhttp3</groupId>
-    <artifactId>okhttp</artifactId>
-    <version>3.9.0</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for com.squareup.okhttp3-okhttp-3.9.0 skipping -->
 <!-- AzureTranslator end -->
 
 <!-- BodyPart begin -->
@@ -1304,17 +1299,6 @@
     <version>4.5.13</version>
   </dependency>
   <dependency>
-    <groupId>org.atmosphere</groupId>
-    <artifactId>wasync</artifactId>
-    <version>2.1.5</version>
-      <exclusions>
-        <exclusion>
-          <groupId>io.netty</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-      </exclusions>
-  </dependency>
-  <dependency>
     <groupId>info.picocli</groupId>
     <artifactId>picocli</artifactId>
     <version>4.4.0</version>
@@ -1330,19 +1314,9 @@
     <version>1.32</version>
   </dependency>
   <dependency>
-    <groupId>org.asynchttpclient</groupId>
-    <artifactId>async-http-client</artifactId>
-    <version>2.12.3</version>
-      <exclusions>
-        <exclusion>
-          <groupId>io.netty</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.typesafe.netty</groupId>
-          <artifactId>netty-reactive-streams</artifactId>
-        </exclusion>
-      </exclusions>
+    <groupId>com.squareup.okhttp3</groupId>
+    <artifactId>okhttp</artifactId>
+    <version>3.9.0</version>
   </dependency>
 <!-- Duplicate entry for io.netty-netty-all-4.1.82.Final skipping -->
 <!-- Runtime end -->
@@ -1769,12 +1743,34 @@
             <artifactId>properties-maven-plugin</artifactId>
             <version>1.0.0</version>
           </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <version>3.1.0</version>
+         </plugin>
         </plugins>
       </pluginManagement>
   
           <!-- use plugin -->
       <plugins>
-      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+            <execution>
+                <id>no-duplicate-declared-dependencies</id>
+                <goals>
+                    <goal>enforce</goal>
+                </goals>
+                <configuration>
+                    <rules>
+                        <banDuplicatePomDependencyVersions/>
+                    </rules>
+                </configuration>
+            </execution>
+        </executions>
+      </plugin>
+
       <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>properties-maven-plugin</artifactId>        
@@ -1929,16 +1925,6 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-eclipse-plugin</artifactId>
-        <version>2.8</version>
-        <configuration>
-          <downloadSources>true</downloadSources>
-        </configuration>
-      </plugin>
-
-      <!-- -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <version>2.4.3</version>
       </plugin>
@@ -2037,42 +2023,24 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.5</version>
+        <version>0.8.8</version>
         <executions>
           <execution>
-            <id>prepare-agent</id>
             <goals>
               <goal>prepare-agent</goal>
             </goals>
           </execution>
+          <!-- attached to Maven test phase -->
           <execution>
             <id>report</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>report</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>post-unit-test</id>
             <phase>test</phase>
             <goals>
               <goal>report</goal>
             </goals>
-            <configuration>
-              <!-- Sets the path to the file which contains the execution data. -->
-              <dataFile>target/jacoco.exec</dataFile>
-              <!-- Sets the output directory for the code coverage report. -->
-              <outputDirectory>target/jacoco-ut</outputDirectory>
-            </configuration>
           </execution>
         </executions>
-        <configuration>
-          <systemPropertyVariables>
-            <jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
-          </systemPropertyVariables>
-        </configuration>
       </plugin>
-      
+
     </plugins>
   </build>
     <reporting>    

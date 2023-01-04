@@ -1,13 +1,12 @@
 package org.myrobotlab.process;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.net.Http;
-
-import com.google.gson.internal.LinkedTreeMap;
 
 public class GitHub {
 
@@ -37,7 +36,7 @@ public class GitHub {
     if (data != null) {
       Object[] files = CodecUtils.decodeArray(new String(data));
       for (int i = 0; i < files.length; ++i) {
-        LinkedTreeMap<String, String> file = (LinkedTreeMap<String, String>) files[i];
+        LinkedHashMap<String, String> file = (LinkedHashMap<String, String>) files[i];
         String name = file.get("name");
         list.add(name);
       }

@@ -11,11 +11,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -42,6 +40,7 @@ import org.myrobotlab.jme3.MainMenuState;
 import org.myrobotlab.jme3.PhysicsTestHelper;
 import org.myrobotlab.jme3.Search;
 import org.myrobotlab.jme3.UserData;
+import org.myrobotlab.jme3.UserDataConfig;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
@@ -240,11 +239,10 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   int width = 1024;
 
-  protected Set<String> modelPaths = new LinkedHashSet<>();
+  // protected Set<String> modelPaths = new LinkedHashSet<>();
 
   protected Map<String, UserData> nodes = new LinkedHashMap<>();
 
-  protected String cameraLookAt;
 
   public JMonkeyEngine(String n, String id) {
     super(n, id);
@@ -495,12 +493,13 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   public void cameraLookAt(String name) {
+    JMonkeyEngineConfig c = (JMonkeyEngineConfig)config;
     Spatial s = get(name);
     if (s == null) {
       log.error("cameraLookAt - cannot find {}", name);
       return;
     }
-    cameraLookAt = name;
+    c.cameraLookAt = name;
     cameraLookAt(s);
   }
 
@@ -1208,11 +1207,13 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   public void loadModels(String dirPath) {
-    if (modelPaths.contains(dirPath)) {
-      info("already loaded %s", dirPath);
-      return;
-    }
-    modelPaths.add(dirPath);
+    JMonkeyEngineConfig c = (JMonkeyEngineConfig)config;
+    // FIXME - must be unique AND AND ... only loaded once !
+//    if (c.modelPaths.contains(dirPath)) {
+//      info("already loaded %s", dirPath);
+//      return;
+//    }
+    c.modelPaths.add(dirPath);
     traverseLoadModels(dirPath);
   }
 
@@ -1987,8 +1988,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   transient private Thread mainThread;
 
-  protected JMonkeyEngineConfig newConfig;
-
   public void simpleInitApp() {
 
     stateManager = app.getStateManager();
@@ -2322,13 +2321,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
         }
       }
 
-      // if we have config to process
-      // process it
-      newConfig = (JMonkeyEngineConfig) config;
-      if (newConfig != null) {
-        loadDelayed(newConfig);
-        newConfig = null;
-      }
+      // WARNING - WE CANNOT PROCESS CONFIG UNTIL THE JMONKYENGINE IS STARTED
+      loadDelayed((JMonkeyEngineConfig) config);
 
     } catch (Exception e) {
       log.error("{} startService exploded", getName(), e);
@@ -2585,74 +2579,33 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       rotateOnAxis(name, null, servo.getTargetPos(), velocity);
     }
   }
-
+  
+  public UserDataConfig toUserDataConfig(UserData userData) {
+    UserDataConfig udc = new UserDataConfig(userData.mapper, userData.rotationMask);
+    return udc;
+  }
+  
   @Override
   public ServiceConfig getConfig() {
     JMonkeyEngineConfig config = (JMonkeyEngineConfig)super.getConfig();
-    config.cameraLookAt = cameraLookAt;
-    config.modelPaths = new ArrayList<>();
-    for (String path : this.modelPaths) {
-      config.modelPaths.add(path);
+
+    if (config.modelPaths != null) {
+      Collections.sort(config.modelPaths);
     }
-    Collections.sort(config.modelPaths);
-    config.nodes = nodes;
-    config.multiMapped = multiMapped;
-
-    log.info("herex");
-    // simulator.nodes.put("i01.head.jaw", new UserData(new
-    // MapperLinear(0.0,180.0, -5.0, 80.0, true, false), "x"));
-
-    // generate defaults begin ---------
-    StringBuilder sb = new StringBuilder();
-
-    // sb.append("");
-
-    // if (config.multiMapped != null) {
-    // for (String multi : multiMapped.keySet()) {
-    // String conf = null;
-    // String[] n = multiMapped.get(multi);
-    // if (n != null) {
-    // for (String mm : n) {
-    // sb.append("\t" + mm + "\n");
-    // }
-    // }
-    // }
-    // }
-
-    try {
-
-      if (config.nodes != null) {
-        for (String nodeKey : nodes.keySet()) {
-          UserData n = nodes.get(nodeKey);
-          if (n.getName() != null && n.getName().contains(".")) {
-            sb.append(String.format("\tsimulator.nodes.put(name + \".%s\", new UserData(", nodeKey));
-          } else if (n.mapper == null && n.rotationMask == null) {
-            sb.append(String.format("\tsimulator.nodes.put(\"%s\", new UserData(", nodeKey));
-          } else {
-            sb.append(String.format("\tsimulator.nodes.put(\"%s\", new UserData(", nodeKey));
-          }
-          if (n.mapper != null) {
-            sb.append(
-                String.format(" new MapperLinear(%.1f, %.1f, %.1f, %.1f, %b, %b) ", n.mapper.minX, n.mapper.maxX, n.mapper.minY, n.mapper.maxY, n.mapper.clip, n.mapper.inverted));
-          } else {
-            sb.append("null");
-          }
-          if (n.rotationMask != null) {
-            sb.append(String.format(",\"%s\"));\n", n.rotationMask));
-          } else {
-            sb.append(String.format(", null);\n", n.rotationMask));
-          }
-        }
-      }
-
-      FileIO.toFile(new File("config.txt"), sb.toString().getBytes());
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    
+    // WARNING - getConfig is "used" before the delayed apply is processed
+    // so if you detroy things here - ie clear nodes, you will be unable to load them appropriately
+    // you need to guard with null checking
+    for (String key : nodes.keySet()) {
+      config.nodes.put(key, toUserDataConfig(nodes.get(key)));
+    }
+    
+    if (multiMapped != null && multiMapped.size() > 0) {
+      // FIXME - FIXED ! config.multiMapped = multiMapped; <- MUST DO NON DESTRUCTIVE ADDITION
+      config.multiMapped.putAll(multiMapped);
     }
 
     // generate defaults end ---------
-
     return config;
   }
 
@@ -2660,7 +2613,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     JMonkeyEngineConfig config = (JMonkeyEngineConfig) c;
 
     if (config.modelPaths != null) {
-      for (String modelPath : config.modelPaths) {
+      List<String> tempList = new ArrayList<>(config.modelPaths);
+      for (String modelPath : tempList) {
         loadModels(modelPath);
       }
     }
@@ -2668,17 +2622,26 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     if (config.nodes != null) {
       // nodes.putAll(config.nodes);
       for (String path : config.nodes.keySet()) {
-        UserData ud = config.nodes.get(path);
+        // getUserData(path)
+        UserData ud = getUserData(path);
+        UserDataConfig udc = config.nodes.get(path);
+        // UserData ud = new UserData(config.nodes.get(path));
+//        if (ud == null) {
+//          addNode(path);
+//          ud = nodes.get(path); // new UserData(config.nodes.get(path));
+//        }
+        
         if (ud == null) {
-          addNode(path);
-          ud = config.nodes.get(path);
+          log.error("could not find node for {}", path);
+          continue;
         }
-        if (ud.mapper != null) {
-          MapperLinear m = ud.mapper;
+        
+        if (udc.mapper != null) {
+          MapperLinear m = udc.mapper;
           setMapper(path, m.minX, m.maxX, m.minY, m.maxY);
         }
-        if (ud.rotationMask != null) {
-          setRotation(path, ud.rotationMask);
+        if (udc.rotationMask != null) {
+          setRotation(path, udc.rotationMask);
         }
       }
     }
@@ -2696,15 +2659,17 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     return c;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    super.apply(c);
-    if (app != null) {
-      // if there is an app we can load immediately
-      loadDelayed(c);
-    }
-    return c;
-  }
+
+
+//  @Override
+//  public ServiceConfig apply(ServiceConfig c) {
+//    JMonkeyEngineConfig config = (JMonkeyEngineConfig) super.apply(c);
+//    if (app != null) {
+//      // if there is an app we can load immediately
+//      loadDelayed(config);
+//    }
+//    return config;
+//  }
 
   public void multiMap(String name, String... nodeNames) {
     if (nodeNames != null) {
