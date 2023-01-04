@@ -5,8 +5,6 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <!-- FIXME need this really ? probably not -->
-        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
         <!-- import the webpage's stylesheet -->
         <link rel="stylesheet" href="style.css">
         <!-- import the webpage's javascript file -->
@@ -15,7 +13,11 @@
         <script src="script.js" type="module" defer></script>
         <script>
 
-            let socket = new WebSocket("ws://localhost:8443/eventbus/")
+        let loc = new URL(window.location.href)
+        // FIXME upper lower case ???
+        let protocol = (loc.protocol == "https:")?"wss:":"ws:"
+            // let socket = new WebSocket("wss://localhost:8443/api/messages?id=vertx-client")
+                let socket = new WebSocket(protocol + "//"+loc.host+"/api/messages?id=vertx-client")
 
             socket.onopen = function(e) {
                 display("[open] connection established")
@@ -115,7 +117,7 @@
         </script>
     </head>
     <body>
-        <h1>WebXR: Example with rotating object and user movement</h1>
+        <h1>WebXR: Examples with rotating object and user movement</h1>
         <p>In this example, a 3D cube is textured and shaded, spinning in place in the
        center of the world. The user can then move around the world and adjust the
        direction in which they're looking.</p>
@@ -131,6 +133,7 @@
             arrow keys to move forward and
        backward. Press <kbd>R</kbd>
             to reset everything.
+        
         </p>
         <div class="button-box">
             <div class="button-row">

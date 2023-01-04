@@ -1,8 +1,6 @@
-// Add mozilla header here
-
 // Options that can be configured to alter behavior of the sample
 // These are constants but in theory could be changed to variables
-// to allow uture UI additions to change them in-flight.
+// to allow future UI additions to change them in-flight.
 
 const xRotationDegreesPerSecond = 25;      // Rotation per second around X axis
 const yRotationDegreesPerSecond = 15;      // Rotation per second around Y axis
@@ -12,7 +10,7 @@ const allowMouseRotation = true;
 const allowKeyboardMotion = true;
 const enableForcePolyfill = false;
 const SESSION_TYPE = "immersive-vr";       // "immersive-vr" or "inline"
-//const SESSION_TYPE = "inline";
+// const SESSION_TYPE = "inline";
 const MOUSE_SPEED = 0.003;
 const MOVE_DISTANCE = 0.4;
 
@@ -537,7 +535,7 @@ function renderScene(gl, view, programInfo, buffers, texture, deltaTime) {
     // Make API call
       let matrix = {
           "name": "head",
-          "matrix": view.transform.matrix // [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          "matrix": modelViewMatrix // [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
       }
       send('publishMatrix', matrix)
   }

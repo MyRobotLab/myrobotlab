@@ -18,6 +18,10 @@ angular.module('mrlapp.service.RosGui', []).controller('RosGuiCtrl', ['$scope', 
         if (service.config.subscriptions) {
             service.config.subscriptions.sort()
         }
+        if (service.connected) {
+            msg.send('rosCallService', '/rosapi/topics')
+        }
+
     }
 
     // init scope variables
@@ -81,7 +85,7 @@ angular.module('mrlapp.service.RosGui', []).controller('RosGuiCtrl', ['$scope', 
     }
 
     $scope.publish = function() {
-       msg.send('rosPublish', $scope.publishMsg)
+        msg.send('rosPublish', $scope.state.selectedTopic, $scope.publishMsg)
     }
 
     $scope.clear = function() {
@@ -90,7 +94,7 @@ angular.module('mrlapp.service.RosGui', []).controller('RosGuiCtrl', ['$scope', 
     }
 
     msg.subscribe('publishRosMsg')
-    msg.send('rosCallService', '/rosapi/topics')
     msg.subscribe(this)
+
 }
 ])
