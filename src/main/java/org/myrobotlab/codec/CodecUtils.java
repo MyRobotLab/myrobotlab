@@ -89,7 +89,7 @@ public class CodecUtils {
      * use Jackson.
      * TODO Replace with enum to allow extension for multiple backends
      */
-    public static final boolean USING_GSON = false;
+    public static final boolean USING_GSON = true;
     /**
      * The key used to locate type information
      * in a JSON dictionary. This is used to serialize
@@ -861,7 +861,7 @@ public class CodecUtils {
 
             if (parts.length < 3) {
                 msg.method = "ls";
-                msg.data = new Object[]{"\"" + cmd + "\""};
+                msg.data = new Object[]{cmd};
                 return msg;
             }
 
@@ -914,7 +914,7 @@ public class CodecUtils {
                 // think)
                 // so we are going to error on the side of String parameters - other
                 // data types will have problems
-                payload[i - 1] = "\"" + spaces[i] + "\"";
+                payload[i - 1] = spaces[i];
             }
             msg.data = payload;
 
