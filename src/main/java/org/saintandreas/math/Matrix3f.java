@@ -31,6 +31,8 @@
  */
 package org.saintandreas.math;
 
+import org.checkerframework.checker.interning.qual.EqualsMethod;
+
 /**
  * <code>Matrix3f</code> defines a 3x3 matrix. Matrix data is maintained
  * internally and is accessible via the get and set methods. Convenience methods
@@ -549,15 +551,17 @@ public final class Matrix3f implements java.io.Serializable {
    *          the object to compare for equality
    * @return true if they are equal
    */
+  @EqualsMethod
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof Matrix3f) || o == null) {
-      return false;
-    }
-
     if (this == o) {
       return true;
     }
+
+    if (!(o instanceof Matrix3f)) {
+      return false;
+    }
+
 
     Matrix3f comp = (Matrix3f) o;
     if (Float.compare(m00, comp.m00) != 0) {

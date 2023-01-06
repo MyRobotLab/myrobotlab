@@ -7,6 +7,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.checkerframework.checker.formatter.qual.FormatMethod;
 import org.myrobotlab.framework.interfaces.LoggingSink;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -103,6 +104,7 @@ public abstract class Codec {
 
   abstract public int[] encode(String source);
 
+  @FormatMethod
   public void error(String format, Object... args) {
     if (sink != null) {
       sink.error(format, args);

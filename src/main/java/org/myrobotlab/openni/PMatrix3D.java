@@ -1,5 +1,6 @@
 package org.myrobotlab.openni;
 
+import org.checkerframework.checker.interning.qual.FindDistinct;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -307,7 +308,7 @@ public final class PMatrix3D /* implements PMatrix3D , PConstants */ {
    * Multiply a three or four element vector against this matrix. If out is null
    * or not length 3 or 4, a new float array (length 3) will be returned.
    */
-  public float[] mult(float[] source, float[] target) {
+  public float[] mult(@FindDistinct float[] source, float[] target) {
     if (target == null || target.length < 3) {
       target = new float[3];
     }

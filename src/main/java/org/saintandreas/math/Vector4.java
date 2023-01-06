@@ -32,6 +32,8 @@
 
 package org.saintandreas.math;
 
+import org.checkerframework.checker.interning.qual.EqualsMethod;
+
 /**
  * <code>Vector4f</code> defines a Vector for a four float value tuple.
  * <code>Vector4f</code> can represent any four dimensional value, such as a
@@ -106,15 +108,18 @@ public abstract class Vector4<ResultType extends Vector4<ResultType>> extends Ve
    *          the object to compare for equality
    * @return true if they are equal
    */
+  @EqualsMethod
   @Override
   public final boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+
     if (!(o instanceof Vector4)) {
       return false;
     }
 
-    if (this == o) {
-      return true;
-    }
+
 
     @SuppressWarnings("unchecked")
     Vector4<ResultType> comp = (Vector4<ResultType>) o;

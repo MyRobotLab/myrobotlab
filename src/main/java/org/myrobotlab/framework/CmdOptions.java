@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.checkerframework.checker.interning.qual.Interned;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -113,7 +114,7 @@ public class CmdOptions {
   public CmdOptions(CmdOptions other) throws IllegalArgumentException, IllegalAccessException {
     Field[] fields = this.getClass().getDeclaredFields();
     for (Field field : fields) {
-      field.set(this, field.get(other));
+      field.set(this, (@Interned Object) field.get(other));
     }
   }
 

@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.checkerframework.checker.formatter.qual.ConversionCategory;
+import org.checkerframework.checker.formatter.qual.Format;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.io.FileIO;
@@ -245,7 +247,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   // This is the format string that will be used when asking for confirmation.
   // FIXME - why is this in english - does it make sense ? - should probably not
   // be here
-  public String confirmationString = "did you say %s ?";
+  public @Format(ConversionCategory.GENERAL) String confirmationString = "did you say %s ?";
 
   protected Map<String, Voice> voiceKeyIndex = new TreeMap<>();
 
@@ -709,7 +711,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   private String filterText(String toSpeak) {
 
-    if (toSpeak == null || toSpeak.isEmpty() || toSpeak == " ") {
+    if (toSpeak == null || toSpeak.isEmpty() || toSpeak.equals(" ")) {
       return " , ";
     }
     toSpeak = toSpeak.trim();

@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.Objects;
 
+import org.checkerframework.checker.formatter.qual.FormatMethod;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -69,6 +70,7 @@ public class Status implements Serializable {// extends Exception {
   public Object source;
 
   // --- static creation of typed Status objects ----
+  @FormatMethod
   public static Status debug(String format, Object... args) {
     Status status = new Status(String.format(format, args));
     status.level = DEBUG;
@@ -87,6 +89,7 @@ public class Status implements Serializable {// extends Exception {
     return s;
   }
 
+  @FormatMethod
   public static Status error(String format, Object... args) {
     Status status = new Status(String.format(format, args));
     status.level = ERROR;
@@ -99,6 +102,7 @@ public class Status implements Serializable {// extends Exception {
     return s;
   }
 
+  @FormatMethod
   public static Status warn(String format, Object... args) {
     Status status = new Status(String.format(format, args));
     status.level = WARN;
@@ -111,6 +115,7 @@ public class Status implements Serializable {// extends Exception {
     return s;
   }
 
+  @FormatMethod
   public static Status info(String format, Object... args) {
     String formattedInfo = String.format(format, args);
     Status status = new Status(formattedInfo);

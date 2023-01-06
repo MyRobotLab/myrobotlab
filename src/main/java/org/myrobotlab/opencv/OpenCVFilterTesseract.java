@@ -15,6 +15,8 @@ import org.bytedeco.opencv.opencv_core.AbstractCvScalar;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
+import org.checkerframework.checker.formatter.qual.ConversionCategory;
+import org.checkerframework.checker.formatter.util.FormatUtil;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TesseractOcr;
@@ -65,7 +67,7 @@ public class OpenCVFilterTesseract extends OpenCVFilter implements Runnable {
   }
 
   public static String padRight(String s, int n) {
-    return String.format("%1$-" + n + "s", s);
+    return String.format(FormatUtil.asFormat("%1$-" + n + "s", ConversionCategory.GENERAL), s);
   }
 
   private void displayResult(IplImage image, String result) {

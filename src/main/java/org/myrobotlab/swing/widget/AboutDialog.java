@@ -95,6 +95,7 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
     setVisible(true);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object source = e.getSource();

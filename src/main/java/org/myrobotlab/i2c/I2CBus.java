@@ -3,6 +3,7 @@ package org.myrobotlab.i2c;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.checkerframework.checker.interning.qual.FindDistinct;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
@@ -56,7 +57,7 @@ public class I2CBus implements Attachable, I2CBusControl {
    * a Java 8 default implementation to the interface
    */
   @Override
-  public boolean isAttached(Attachable service) {
+  public boolean isAttached(@FindDistinct Attachable service) {
     return (controller != null && controller == service);
   }
 

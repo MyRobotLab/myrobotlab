@@ -17,6 +17,7 @@ import org.apache.ivy.util.AbstractMessageLogger;
 import org.apache.ivy.util.Message;
 import org.apache.ivy.util.filter.Filter;
 import org.apache.ivy.util.filter.NoFilter;
+import org.checkerframework.checker.formatter.util.FormatUtil;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.StatusLevel;
@@ -352,7 +353,7 @@ public class IvyWrapper extends Repo implements Serializable {
           if (!errStr.startsWith("WARN:  symlinkmass")) {
             error = true;
           }
-          error(errStr);
+          error(FormatUtil.asFormat(errStr));
         }
       }
 
@@ -396,7 +397,7 @@ public class IvyWrapper extends Repo implements Serializable {
       publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of %s", library)));
 
     } catch (Exception e) {
-      error(e.getMessage());
+      error(FormatUtil.asFormat(e.getMessage()));
       log.error(e.getMessage(), e);
     }
 
@@ -482,7 +483,7 @@ public class IvyWrapper extends Repo implements Serializable {
           if (!errStr.startsWith("WARN:  symlinkmass")) {
             error = true;
           }
-          error(errStr);
+          error(FormatUtil.asFormat(errStr));
         }
       }
 
@@ -525,7 +526,7 @@ public class IvyWrapper extends Repo implements Serializable {
       publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of %s", (Object[]) serviceTypes)));
 
     } catch (Exception e) {
-      error(e.getMessage());
+      error(FormatUtil.asFormat(e.getMessage()));
       log.error(e.getMessage(), e);
     }
 

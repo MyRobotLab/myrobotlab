@@ -37,6 +37,7 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.checkerframework.checker.interning.qual.Interned;
 import org.myrobotlab.codec.ClassUtil;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.CodecUtils.ApiDescription;
@@ -113,6 +114,7 @@ import picocli.CommandLine;
  * VAR OF RUNTIME !
  *
  */
+@Interned
 public class Runtime extends Service implements MessageListener, ServiceLifeCyclePublisher, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider {
   final static private long serialVersionUID = 1L;
 
@@ -2567,7 +2569,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     synchronized (INSTANCE_LOCK) {
       if (runtime == null) {
         // fist and only time....
-        runtime = this;
+        runtime = (@Interned Runtime) this;
         repo = (IvyWrapper) Repo.getInstance(LIBRARIES, "IvyWrapper");
       }
     }
@@ -2587,7 +2589,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     String userHome = System.getProperty("user.home");
 
     // initialize the config list
-    publishConfigList();
+    // Needed to make Checker happy, just tells it this
+    // is interned so don't blow up on receiver mismatch
+    ((@Interned Runtime) this).publishConfigList();
 
     // TODO this should be a single log statement
     // http://developer.android.com/reference/java/lang/System.html

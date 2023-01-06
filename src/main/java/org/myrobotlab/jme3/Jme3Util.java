@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.checkerframework.checker.formatter.qual.FormatMethod;
 import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.JMonkeyEngine;
@@ -70,14 +71,17 @@ public class Jme3Util {
                                          // msg.method, msg.data);
   }
 
+  @FormatMethod
   public void info(String format, Object... params) {
     jme.info(format, params);
   }
 
+  @FormatMethod
   public void warn(String format, Object... params) {
     jme.warn(format, params);
   }
 
+  @FormatMethod
   public void error(String format, Object... params) {
     jme.error(format, params);
   }
@@ -110,7 +114,7 @@ public class Jme3Util {
     log.info(String.format("setTranslation %s, %.2f,%.2f,%.2f", name, x, y, z));
     Spatial s = jme.get(name);
     s.setLocalTranslation((float) x, (float) y, (float) z);
-    if (currentMenuView != null && s == selectedForView) {
+    if (currentMenuView != null && s.equals(selectedForView)) {
       currentMenuView.putText(selectedForView);
     }
   }
@@ -123,7 +127,7 @@ public class Jme3Util {
     float zRotInit = (float) zRot * FastMath.DEG_TO_RAD;
     q.fromAngles(zRotInit, xRotInit, yRotInit);
     s.setLocalRotation(q);
-    if (currentMenuView != null && s == selectedForView) {
+    if (currentMenuView != null && s.equals(selectedForView)) {
       currentMenuView.putText(selectedForView);
     }
   }
@@ -199,7 +203,7 @@ public class Jme3Util {
       q.fromAngles(euler[0], euler[1], euler[2]);
       n.setLocalRotation(q);
 
-      if (currentMenuView != null && n == selectedForView) {
+      if (currentMenuView != null && n.equals(selectedForView)) {
         currentMenuView.putText(selectedForView);
       }
     } catch (Exception e) {

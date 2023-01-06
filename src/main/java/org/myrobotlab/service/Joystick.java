@@ -161,6 +161,7 @@ public class Joystick extends Service implements AnalogPublisher {
   /**
    * main polling loop - data read and published
    */
+  @SuppressWarnings("not.interned")
   public void poll() {
 
     Controller pollingController = null;

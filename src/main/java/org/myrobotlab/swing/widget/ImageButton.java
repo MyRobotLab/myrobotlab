@@ -77,6 +77,7 @@ public class ImageButton extends JButton {
     setIcon(icon);
   }
 
+  @SuppressWarnings("not.interned")
   public boolean isActive() {
     return getIcon() == activatedIcon;
   }

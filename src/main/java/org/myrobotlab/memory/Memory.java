@@ -57,7 +57,7 @@ public class Memory {
   }
 
   public Object get(String path) {
-    if (path == null || path == "") // TODO - test for .getNode(null) !!!
+    if (path == null || path.equals("")) // TODO - test for .getNode(null) !!!
     {
       return root;
     } else {

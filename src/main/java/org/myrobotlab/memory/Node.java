@@ -2,6 +2,7 @@ package org.myrobotlab.memory;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Objects;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.Level;
@@ -93,10 +94,10 @@ public class Node implements Serializable {
    * @return - an object found at the given path
    */
   public Object get(String path) {
-    if (path == "") {
+    if (Objects.equals(path, "")) {
       return this;
     }
-    if (path == "/") {
+    if (Objects.equals(path, "/")) {
       return this.data;
     }
 

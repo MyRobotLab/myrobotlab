@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.arduino.DeviceSummary;
@@ -391,17 +392,17 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       return;
     }
 
-    Integer motorType = null;
-    int[] pins = null;
+    int motorType;
+    Integer[] pins;
 
     if (motor.getClass().equals(Motor.class)) {
       motorType = MOTOR_TYPE_SIMPLE;
       Motor m = (Motor) motor;
-      pins = new int[] { getAddress(m.getPwrPin()), getAddress(m.getDirPin()) };
+      pins = new Integer[] { getAddress(m.getPwrPin()), getAddress(m.getDirPin()) };
     } else if (motor.getClass().equals(MotorDualPwm.class)) {
       motorType = MOTOR_TYPE_DUAL_PWM;
       MotorDualPwm m = (MotorDualPwm) motor;
-      pins = new int[] { getAddress(m.getLeftPwmPin()), getAddress(m.getRightPwmPin()) };
+      pins = new Integer[] { getAddress(m.getLeftPwmPin()), getAddress(m.getRightPwmPin()) };
       // } else if (motor.getClass().equals(MotorStepper)){ // FIXME implement
 
     } else {
@@ -417,7 +418,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
     // send data to micro-controller - convert degrees to microseconds
     // int uS = degreeToMicroseconds(targetOutput);
-    msg.motorAttach(deviceId, motorType, pins);
+    msg.motorAttach(deviceId, motorType, ArrayUtils.toPrimitive(pins));
 
     // the callback - motor better have a check
     // isAttached(MotorControl) to prevent infinite loop
@@ -1979,12 +1980,12 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public void setAref(String aref) {
     aref = aref.toUpperCase();
     if (this.getBoard().contains("mega")) {
-      if (aref == "INTERNAL") {
+      if (aref.equals("INTERNAL")) {
         error("Aref " + aref + " is not compatible with your board " + this.getBoard());
         aref = "DEFAULT";
       }
     } else {
-      if (aref == "INTERNAL1V1" || aref == "INTERNAL2V56") {
+      if (aref.equals("INTERNAL1V1") || aref.equals("INTERNAL2V56")) {
         error("Aref INTERNALxV is not compatible with your board " + this.getBoard());
         aref = "DEFAULT";
       }

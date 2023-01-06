@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -276,7 +277,7 @@ public class Pcf8574 extends Service
   @Override
   public void attachI2CController(I2CController controller) {
 
-    if (this.controllerName == controller.getName()) {
+    if (Objects.equals(this.controllerName, controller.getName())) {
       log.info("already attached to {}, use detach({}) first", controllerName, controllerName);
       return;
     }
@@ -510,7 +511,7 @@ public class Pcf8574 extends Service
   public void pinMode(int address, String mode) {
     PinDefinition pinDef = getPin(address);
     // There is no direction register in the PCF8574 it is always BIDRECTIONAL.
-    if (mode != "BIDIRECTIONAL") {
+    if (!Objects.equals(mode, "BIDIRECTIONAL")) {
       log.error("There is no direction register, address {} mode must be BIDIRECTIONAL", address);
     }
     pinDef.setMode("BIDIRECTIONAL");

@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import org.checkerframework.checker.formatter.qual.ConversionCategory;
+import org.checkerframework.checker.formatter.util.FormatUtil;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -276,7 +278,12 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
     String poseString = null;
     if (currentPose != null) {
       String poseTypeString = currentPose.getType().toString();
-      poseString = String.format("[%s%" + (scale - poseTypeString.length()) + "s]", poseTypeString, " ");
+      poseString = String.format(
+              FormatUtil.asFormat(
+                      "[%s%" + (scale - poseTypeString.length()) + "s]",
+                      ConversionCategory.GENERAL,
+                      ConversionCategory.GENERAL)
+              , poseTypeString, " ");
     } else {
       poseString = String.format("[%14s]", " ");
     }

@@ -513,7 +513,7 @@ public class PImage implements PConstants, Cloneable {
       // dx2 /= 2f; dy2 /= 2f;
     }
 
-    if ((src == this) && intersect(sx1, sy1, sx2, sy2, dx1, dy1, dx2, dy2)) {
+    if ((equals(src)) && intersect(sx1, sy1, sx2, sy2, dx1, dy1, dx2, dy2)) {
       blit_resize(get(sx1, sy1, sx2 - sx1, sy2 - sy1), 0, 0, sx2 - sx1 - 1, sy2 - sy1 - 1, pixels, width, height, dx1, dy1, dx2, dy2, mode);
     } else {
       blit_resize(src, sx1, sy1, sx2, sy2, pixels, width, height, dx1, dy1, dx2, dy2, mode);
@@ -886,7 +886,7 @@ public class PImage implements PConstants, Cloneable {
       // dx2 /= 2f; dy2 /= 2f;
     }
 
-    if ((src == this) && intersect(sx1, sy1, sx2, sy2, dx1, dy1, dx2, dy2)) {
+    if (equals(src) && intersect(sx1, sy1, sx2, sy2, dx1, dy1, dx2, dy2)) {
       // if src is me, and things intersect, make a copy of the data
       blit_resize(get(sx1, sy1, sx2 - sx1, sy2 - sy1), 0, 0, sx2 - sx1 - 1, sy2 - sy1 - 1, pixels, width, height, dx1, dy1, dx2, dy2, REPLACE);
     } else {

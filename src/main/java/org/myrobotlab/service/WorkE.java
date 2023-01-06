@@ -3,6 +3,8 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.checkerframework.checker.formatter.qual.FormatMethod;
+import org.checkerframework.checker.formatter.util.FormatUtil;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
@@ -752,9 +754,10 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
 
   @Override
   public String speak(String text) {
-    return speak(text, (Object[]) null);
+    return speak(FormatUtil.asFormat(text), (Object[]) null);
   }
 
+  @FormatMethod
   public String speak(String inText, Object... args) {
 
     String text = null;

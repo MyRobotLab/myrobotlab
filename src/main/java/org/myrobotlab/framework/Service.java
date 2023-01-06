@@ -53,6 +53,12 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.checkerframework.checker.formatter.qual.ConversionCategory;
+import org.checkerframework.checker.formatter.qual.Format;
+import org.checkerframework.checker.formatter.qual.FormatMethod;
+import org.checkerframework.checker.formatter.util.FormatUtil;
+import org.checkerframework.checker.interning.qual.EqualsMethod;
+import org.checkerframework.checker.interning.qual.Interned;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Broadcaster;
@@ -237,6 +243,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    *          s
    * @return o
    */
+  @EqualsMethod
   public static Object copyShallowFrom(Object target, Object source) {
     if (target == source) { // data is myself - operating on local copy
       return target;
@@ -259,12 +266,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     for (Class<?> sourceClass : ancestry) {
 
-      Field fields[] = sourceClass.getDeclaredFields();
-      for (int j = 0, m = fields.length; j < m; j++) {
+      Field[] fields = sourceClass.getDeclaredFields();
+      for (Field field : fields) {
         try {
-          Field f = fields[j];
 
-          int modifiers = f.getModifiers();
+          int modifiers = field.getModifiers();
 
           // if (Modifier.isPublic(mod)
           // !(Modifier.isPublic(f.getModifiers())
@@ -274,19 +280,19 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
           // GROG - recent change from this
           // if ((!Modifier.isPublic(modifiers)
           // to this
-          String fname = f.getName();
+          String fname = field.getName();
           /*
            * if (fname.equals("desktops") || fname.equals("useLocalResources")
            * ){ log.info("here"); }
            */
 
           if (Modifier.isPrivate(modifiers) || fname.equals("log") || Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
-            log.debug("skipping {}", f.getName());
+            log.debug("skipping {}", field.getName());
             continue;
           } else {
-            log.debug("copying {}", f.getName());
+            log.debug("copying {}", field.getName());
           }
-          Type t = f.getType();
+          Type t = field.getType();
 
           // log.info(String.format("setting %s", f.getName()));
           /*
@@ -296,30 +302,30 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
           // GroG - this is new 1/26/2017 - needed to get webgui data to
           // load
-          f.setAccessible(true);
-          Field targetField = sourceClass.getDeclaredField(f.getName());
+          field.setAccessible(true);
+          Field targetField = sourceClass.getDeclaredField(field.getName());
           targetField.setAccessible(true);
 
-          if (t.equals(java.lang.Boolean.TYPE)) {
-            targetField.setBoolean(target, f.getBoolean(source));
-          } else if (t.equals(java.lang.Character.TYPE)) {
-            targetField.setChar(target, f.getChar(source));
-          } else if (t.equals(java.lang.Byte.TYPE)) {
-            targetField.setByte(target, f.getByte(source));
-          } else if (t.equals(java.lang.Short.TYPE)) {
-            targetField.setShort(target, f.getShort(source));
-          } else if (t.equals(java.lang.Integer.TYPE)) {
-            targetField.setInt(target, f.getInt(source));
-          } else if (t.equals(java.lang.Long.TYPE)) {
-            targetField.setLong(target, f.getLong(source));
-          } else if (t.equals(java.lang.Float.TYPE)) {
-            targetField.setFloat(target, f.getFloat(source));
-          } else if (t.equals(java.lang.Double.TYPE)) {
-            targetField.setDouble(target, f.getDouble(source));
+          if (t.equals(Boolean.TYPE)) {
+            targetField.setBoolean(target, field.getBoolean(source));
+          } else if (t.equals(Character.TYPE)) {
+            targetField.setChar(target, field.getChar(source));
+          } else if (t.equals(Byte.TYPE)) {
+            targetField.setByte(target, field.getByte(source));
+          } else if (t.equals(Short.TYPE)) {
+            targetField.setShort(target, field.getShort(source));
+          } else if (t.equals(Integer.TYPE)) {
+            targetField.setInt(target, field.getInt(source));
+          } else if (t.equals(Long.TYPE)) {
+            targetField.setLong(target, field.getLong(source));
+          } else if (t.equals(Float.TYPE)) {
+            targetField.setFloat(target, field.getFloat(source));
+          } else if (t.equals(Double.TYPE)) {
+            targetField.setDouble(target, field.getDouble(source));
           } else {
             // log.debug(String.format("setting reference to remote
             // object %s", f.getName()));
-            targetField.set(target, f.get(source));
+            targetField.set(target, (@Interned Object) field.get(source));
           }
         } catch (Exception e) {
           log.error("copy failed source {} to a {}", source, target, e);
@@ -1934,6 +1940,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return ret;
   }
 
+  @FormatMethod
   @Override
   public Status error(String format, Object... args) {
     Status ret = null;
@@ -1950,13 +1957,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public Status error(String msg) {
-    return error(msg, (Object[]) null);
+    return error((@Format(ConversionCategory.UNUSED) String) msg, (Object[]) null);
   }
 
   public Status warn(String msg) {
-    return warn(msg, (Object[]) null);
+    return warn((@Format(ConversionCategory.UNUSED) String) msg, (Object[]) null);
   }
 
+  @FormatMethod
   @Override
   public Status warn(String format, Object... args) {
     Status status = Status.warn(format, args);
@@ -1974,13 +1982,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @return string
    */
   public Status info(String msg) {
-    return info(msg, (Object[]) null);
+    return info((@Format(ConversionCategory.UNUSED) String)msg, (Object[]) null);
   }
 
   /**
    * set status broadcasts an formatted info string to any subscribers
    */
   @Override
+  @FormatMethod
   public Status info(String format, Object... args) {
     Status status = Status.info(format, args);
     status.name = getName();
@@ -2418,7 +2427,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     if (args == null) {
       return prop.toString();
     } else {
-      return String.format(prop.toString(), args);
+      return String.format(FormatUtil.asFormat(prop.toString()), args);
     }
   }
 

@@ -108,6 +108,7 @@ public class StackTraceDialog extends JDialog implements ActionListener, MouseLi
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     // TODO Auto-generated method stub

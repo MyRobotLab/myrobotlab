@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.myrobotlab.framework.Service;
@@ -112,7 +113,7 @@ public class SerialRelay extends Service implements SerialDevice, Attachable {
   }
 
   public int[] onSerialData(SerialRelayData data) {
-    if (data.deviceId == controller.getDeviceId(this)) {
+    if (Objects.equals(data.deviceId, controller.getDeviceId(this))) {
       byte[] byteData = new byte[data.data.length];
       // TODO: convert serial relay data to pass around a byte array..
       for (int i = 0; i < data.data.length; i++) {

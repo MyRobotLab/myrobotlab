@@ -125,8 +125,8 @@ public class CaptureCalibrationImagesApp implements KeyListener, StreamOpenKinec
         while (true) {
           if (savedImages && userChoice != -1) {
             if (userChoice == 1) {
-              UtilImageIO.savePPM(savedRgb, String.format(directory + "rgb%07d.ppm", frameNumber), buffer);
-              UtilOpenKinect.saveDepth(savedDepth, String.format(directory + "depth%07d.depth", frameNumber), buffer);
+              UtilImageIO.savePPM(savedRgb, String.format("%srgb%07d.ppm", directory, frameNumber), buffer);
+              UtilOpenKinect.saveDepth(savedDepth, String.format("%sdepth%07d.depth", directory, frameNumber), buffer);
               frameNumber++;
               text = "Image Saved!";
             } else {

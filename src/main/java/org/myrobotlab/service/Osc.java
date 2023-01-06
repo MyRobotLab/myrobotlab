@@ -89,7 +89,7 @@ public class Osc extends Service implements OSCListener {
 
   public void listen(String filter, Integer newPort) throws IOException {
 
-    if (port != null && port != newPort) {
+    if (port != null && !port.equals(newPort)) {
       receiver.stopListening();
       receiver = null;
     }

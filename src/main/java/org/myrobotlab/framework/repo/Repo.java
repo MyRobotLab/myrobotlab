@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.checkerframework.checker.formatter.qual.FormatMethod;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceReservation;
@@ -62,6 +63,7 @@ public abstract class Repo {
     return LOCATION + File.separator + REPO_STATE_FILE_NAME;
   }
 
+  @FormatMethod
   public void error(String format, Object... args) {
     publishStatus(Status.error(format, args));
   }
@@ -352,6 +354,7 @@ public abstract class Repo {
     }
   }
 
+  @FormatMethod
   static public void info(String format, Object... args) {
     publishStatus(Status.info(format, args));
   }
@@ -406,7 +409,7 @@ public abstract class Repo {
   }
 
   public void installEach() {
-    String workDir = String.format(String.format("libraries.ivy.services.%d", System.currentTimeMillis()));
+    String workDir = String.format("libraries.ivy.services.%d", System.currentTimeMillis());
     installEachTo(workDir);
   }
 

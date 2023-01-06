@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.myrobotlab.framework.Registration;
@@ -55,19 +56,19 @@ public class MotorHat4Pi extends AbstractMotor {
   }
 
   public void setMotor(String motorId) {
-    if (motorId == "M1") {
+    if (Objects.equals(motorId, "M1")) {
       pwmPin = 8;
       leftDirPin = 9;
       rightDirPin = 10;
-    } else if (motorId == "M2") {
+    } else if (Objects.equals(motorId, "M2")) {
       pwmPin = 13;
       leftDirPin = 12;
       rightDirPin = 11;
-    } else if (motorId == "M3") {
+    } else if (Objects.equals(motorId, "M3")) {
       pwmPin = 2;
       leftDirPin = 3;
       rightDirPin = 4;
-    } else if (motorId == "M4") {
+    } else if (Objects.equals(motorId, "M4")) {
       pwmPin = 7;
       leftDirPin = 6;
       rightDirPin = 5;

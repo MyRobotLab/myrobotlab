@@ -7,6 +7,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.checkerframework.checker.interning.qual.FindDistinct;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
@@ -229,7 +230,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     return isAttached;
   }
 
-  protected boolean isAttached(UltrasonicSensorController controller) {
+  protected boolean isAttached(@FindDistinct UltrasonicSensorController controller) {
     return this.controller == controller;
   }
 

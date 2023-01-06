@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Hex;
@@ -353,8 +354,8 @@ public class Esp8266_01 extends Service implements I2CController {
     I2CDeviceMap devicedata = new I2CDeviceMap();
     if (i2cDevices.containsKey(key)) {
       devicedata = i2cDevices.get(key);
-      if (control.getName() != devicedata.serviceName) {
-        log.error("Attach of {} failed: {} already exists on bus %s address {}", control.getName(), devicedata.serviceName, control.getDeviceBus(), control.getDeviceAddress());
+      if (!Objects.equals(control.getName(), devicedata.serviceName)) {
+        log.error("Attach of {} failed: {} already exists on bus {} address {}", control.getName(), devicedata.serviceName, control.getDeviceBus(), control.getDeviceAddress());
       }
     } else {
       devicedata.serviceName = control.getName();

@@ -94,6 +94,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
     setSize(320, 300);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent event) {
     Object source = event.getSource();

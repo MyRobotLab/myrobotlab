@@ -46,6 +46,8 @@ import javax.swing.ImageIcon;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.checkerframework.checker.formatter.qual.FormatMethod;
+import org.checkerframework.checker.interning.qual.Interned;
 import org.myrobotlab.cv.CvFilter;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Service;
@@ -270,6 +272,7 @@ public abstract class OpenCVFilter implements Serializable, CvFilter {
     displayEnabled = true;
   }
 
+  @FormatMethod
   public void error(String format, Object... args) {
     if (opencv == null) {
       log.error(String.format(format, args));

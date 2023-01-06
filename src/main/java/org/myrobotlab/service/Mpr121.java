@@ -6,8 +6,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
+import org.checkerframework.checker.interning.qual.FindDistinct;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -351,7 +353,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   @Override
   public void setDeviceBus(String deviceBus) {
     if (isAttached) {
-      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
+      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName, this.controllerName));
       return;
     }
     this.deviceBus = deviceBus;
@@ -361,7 +363,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   @Override
   public void setDeviceAddress(String deviceAddress) {
     if (isAttached) {
-      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
+      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName, this.controllerName));
       return;
     }
     this.deviceAddress = deviceAddress;
@@ -544,8 +546,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
 
   @Override
   public List<PinDefinition> getPinList() {
-    List<PinDefinition> list = new ArrayList<PinDefinition>(pinIndex.values());
-    return list;
+    return new ArrayList<PinDefinition>(pinIndex.values());
   }
 
   @Override
@@ -589,11 +590,11 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     String name = listener.getName();
 
     if (listener.isLocal()) {
-      List<PinListener> list = null;
+      List<PinListener> list;
       if (pinListeners.containsKey(pinAddress)) {
         list = pinListeners.get(pinAddress);
       } else {
-        list = new ArrayList<PinListener>();
+        list = new ArrayList<>();
       }
       list.add(listener);
       pinListeners.put(pinAddress, list);
@@ -741,10 +742,10 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   @Override
-  public void attach(I2CController controller, String deviceBus, String deviceAddress) {
+  public void attach(@FindDistinct I2CController controller, String deviceBus, String deviceAddress) {
 
     if (isAttached && this.controller != controller) {
-      log.error("Already attached to {}, use detach({}) first", this.controllerName);
+      log.error("Already attached to {}, use detach({}) first", this.controllerName, this.controllerName);
     }
 
     controllerName = controller.getName();
@@ -764,7 +765,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     if (isAttached(controller))
       return;
 
-    if (this.controllerName != controller.getName()) {
+    if (!Objects.equals(this.controllerName, controller.getName())) {
       log.error("Trying to attached to {}, but already attached to ({})", controller.getName(), this.controllerName);
       return;
     }
@@ -832,7 +833,6 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     if (controller != null && controller.getName().equals(instance.getName())) {
       return isAttached;
     }
-    ;
     return false;
   }
 

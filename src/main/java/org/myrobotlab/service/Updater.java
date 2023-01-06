@@ -9,6 +9,9 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.checkerframework.checker.formatter.qual.ConversionCategory;
+import org.checkerframework.checker.formatter.qual.Format;
+import org.checkerframework.checker.formatter.util.FormatUtil;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.CmdOptions;
 import org.myrobotlab.framework.MrlException;
@@ -76,15 +79,18 @@ public class Updater extends Service {
   @Option(names = { "-a", "--auto-update" }, arity = "0..1", description = "automatically apply update")
   protected boolean autoUpdate = true;
 
-  final public static String MULTI_BRANCH_LATEST_BUILD_URL = "http://build.myrobotlab.org:8080/job/myrobotlab/job/%s/lastSuccessfulBuild/artifact/target/myrobotlab.jar";
+  final public static @Format(ConversionCategory.GENERAL) String MULTI_BRANCH_LATEST_BUILD_URL =
+          "http://build.myrobotlab.org:8080/job/myrobotlab/job/%s/lastSuccessfulBuild/artifact/target/myrobotlab.jar";
 
   // for more info -
   // myrobotlab-multibranch/job/develop/api/json
   // WARNING Jenkins url api format for multi-branch pipelines is different from
   // maven builds !
-  final static String REMOTE_BUILDS_URL = "job/%s/api/json?tree=builds[number,status,timestamp,id,result]";
+  final static @Format(ConversionCategory.GENERAL) String REMOTE_BUILDS_URL =
+          "job/%s/api/json?tree=builds[number,status,timestamp,id,result]";
 
-  final static String REMOTE_JAR_URL = "job/%s/%s/artifact/target/myrobotlab.jar";
+  final static @Format({ConversionCategory.GENERAL, ConversionCategory.GENERAL}) String REMOTE_JAR_URL =
+          "job/%s/%s/artifact/target/myrobotlab.jar";
 
   final static String REMOTE_MULTI_BRANCH_JOBS = "api/json";
 
@@ -219,7 +225,9 @@ public class Updater extends Service {
     Set<String> versions = new TreeSet<String>();
     try {
 
-      byte[] data = Http.get(String.format(REMOTE_BUILDS_URL_HOME + REMOTE_BUILDS_URL, branch));
+      byte[] data = Http.get(String.format(
+              FormatUtil.asFormat(REMOTE_BUILDS_URL_HOME + REMOTE_BUILDS_URL,
+                      ConversionCategory.GENERAL), branch));
       if (data != null) {
         String json = new String(data);
         WorkflowJob job = CodecUtils.fromJson(json, WorkflowJob.class);
@@ -304,7 +312,8 @@ public class Updater extends Service {
     purgeTask("checkForUpdates");
   }
 
-  protected static final String MULTI_BRANCH_VERSION = "http://build.myrobotlab.org:8080/job/myrobotlab/job/%s/api/xml?xpath=/*/lastStableBuild/number";
+  protected static final @Format(ConversionCategory.GENERAL) String MULTI_BRANCH_VERSION =
+          "http://build.myrobotlab.org:8080/job/myrobotlab/job/%s/api/xml?xpath=/*/lastStableBuild/number";
 
   public String getRemoteVersion(String branch) throws UnsupportedEncodingException {
     byte[] v = Http.get(String.format(MULTI_BRANCH_VERSION, branch));

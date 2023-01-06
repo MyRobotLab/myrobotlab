@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.checkerframework.checker.interning.qual.FindDistinct;
 import org.junit.Ignore;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -712,14 +713,14 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   @Override
-  public boolean isAttached(Attachable instance) {
+  public boolean isAttached(@FindDistinct Attachable instance) {
     // FIXME - this is messy !
     if (controller == null) {
       return false;
     }
 
     // attached controller
-    if (controller != null && controller == instance) {
+    if (controller == instance) {
       return isAttached;
     }
 
@@ -802,13 +803,13 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   @Override
-  public void attachI2CController(I2CController controller) {
+  public void attachI2CController(@FindDistinct I2CController controller) {
 
     // FIXME - way way too complex - clean up
     if (isAttached(controller))
       return;
 
-    if (this.controllerName != null && this.controllerName != controller.getName()) {
+    if (this.controllerName != null && !this.controllerName.equals(controller.getName())) {
       log.info("Trying to attached to {}, but already attached to ({})", controller.getName(), this.controllerName);
       return;
     }

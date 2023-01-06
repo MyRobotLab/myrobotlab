@@ -16,6 +16,8 @@ import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
+import org.checkerframework.checker.formatter.qual.ConversionCategory;
+import org.checkerframework.checker.formatter.util.FormatUtil;
 import org.myrobotlab.deeplearning4j.CustomModel;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.kinematics.Point;
@@ -509,7 +511,12 @@ public class Lloyd extends Service {
     webgui = (WebGui) Runtime.create("webgui", "WebGui");
     webgui.autoStartBrowser(false);
     webgui.startService();
-    webgui.startBrowser("http://localhost:8888/#/service/" + ear.getName());
+    webgui.startBrowser(
+            FormatUtil.asFormat(
+                    "http://localhost:%d/#/service/" + ear.getName(),
+                    ConversionCategory.INT
+            )
+    );
   }
 
   public void attachCallbacks() {
