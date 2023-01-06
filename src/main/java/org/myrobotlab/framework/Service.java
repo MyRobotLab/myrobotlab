@@ -31,6 +31,7 @@ import org.checkerframework.checker.formatter.qual.FormatMethod;
 import org.checkerframework.checker.formatter.util.FormatUtil;
 import org.checkerframework.checker.interning.qual.EqualsMethod;
 import org.checkerframework.checker.interning.qual.Interned;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Broadcaster;
@@ -1949,7 +1950,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public Status error(String format, Object... args) {
     Status ret;
-    ret = Status.error(String.format(Objects.requireNonNullElse(format, ""), args));
+    ret = Status.error(String.format(format, args));
     ret.name = getName();
     log.error(ret.toString());
     lastError = ret;
@@ -1958,11 +1959,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public Status error(String msg) {
-    return error((@Format(ConversionCategory.UNUSED) String) msg, (Object[]) null);
+    return error(FormatUtil.asFormat(msg), (Object[]) null);
   }
 
   public Status warn(String msg) {
-    return warn((@Format(ConversionCategory.UNUSED) String) msg, (Object[]) null);
+    return warn(FormatUtil.asFormat(msg), (Object[]) null);
   }
 
   @FormatMethod
@@ -1983,7 +1984,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @return string
    */
   public Status info(String msg) {
-    return info((@Format(ConversionCategory.UNUSED) String)msg, (Object[]) null);
+    return info(FormatUtil.asFormat(msg), (Object[]) null);
   }
 
   /**
