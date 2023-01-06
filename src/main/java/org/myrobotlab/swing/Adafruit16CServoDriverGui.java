@@ -74,6 +74,7 @@ public class Adafruit16CServoDriverGui extends ServiceGui implements ActionListe
     restoreListeners();
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(final ActionEvent event) {
     // TODO Auto-generated method stub

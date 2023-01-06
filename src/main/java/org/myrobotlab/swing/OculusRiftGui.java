@@ -25,9 +25,9 @@ public class OculusRiftGui extends ServiceGui implements VideoGUISource, ActionL
     super(boundServiceName, myService);
 
     // Create the 2 video widgets
-    leftEye = new VideoWidget(String.format("%s." + OculusRift.LEFT_OPEN_CV, boundServiceName), myService);
+    leftEye = new VideoWidget(String.format("%s.%s", boundServiceName, OculusRift.LEFT_OPEN_CV), myService);
 
-    rightEye = new VideoWidget(String.format("%s." + OculusRift.RIGHT_OPEN_CV, boundServiceName), myService);
+    rightEye = new VideoWidget(String.format("%s.%s", boundServiceName, OculusRift.RIGHT_OPEN_CV), myService);
 
     JPanel leftVideoPanel = new JPanel();
     leftVideoPanel.add(leftEye.display);

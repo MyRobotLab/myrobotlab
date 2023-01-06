@@ -413,6 +413,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
   }
 
   // zod
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent event) {
     MetaData c = (MetaData) possibleServicesModel.getValueAt(popupRow, 0);
@@ -607,7 +608,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
         List<MetaData> possibleService = serviceData.getServiceTypes();
         for (int i = 0; i < possibleService.size(); ++i) {
           MetaData serviceType = possibleService.get(i);
-          if (filtered == "" || serviceType.getSimpleName().toLowerCase().indexOf(filtered.toLowerCase()) != -1) {
+          if (filtered.equals("") || serviceType.getSimpleName().toLowerCase().contains(filtered.toLowerCase())) {
             if (serviceType.isAvailable()) {
               possibleServicesModel.addRow(new Object[] { serviceType, "" });
             }
@@ -741,6 +742,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     progressDialog.beginUpdates();
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void valueChanged(ListSelectionEvent e) {
     Object o = e.getSource();

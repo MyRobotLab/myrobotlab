@@ -81,6 +81,7 @@ public class Hd44780Gui extends ServiceGui implements ActionListener {
     save.addActionListener(this);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(final ActionEvent event) {
     SwingUtilities.invokeLater(new Runnable() {

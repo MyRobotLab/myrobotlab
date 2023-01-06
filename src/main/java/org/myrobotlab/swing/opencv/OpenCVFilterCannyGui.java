@@ -120,6 +120,7 @@ public class OpenCVFilterCannyGui extends OpenCVFilterGui implements ChangeListe
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void stateChanged(ChangeEvent e) {
 

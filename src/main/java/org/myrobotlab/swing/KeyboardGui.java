@@ -106,6 +106,7 @@ public class KeyboardGui extends ServiceGui implements ActionListener {
     });
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();

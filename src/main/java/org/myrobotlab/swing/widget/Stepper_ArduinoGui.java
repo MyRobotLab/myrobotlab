@@ -64,6 +64,7 @@ public class Stepper_ArduinoGui extends StepperControllerPanel implements Action
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();

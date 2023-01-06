@@ -94,6 +94,7 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
     return controlPane;
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     log.info("IntegratedMovementGUI actionPerformed");

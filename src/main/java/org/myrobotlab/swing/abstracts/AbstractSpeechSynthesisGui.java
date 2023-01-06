@@ -258,6 +258,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     return ret;
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent event) {
     SwingUtilities.invokeLater(new Runnable() {

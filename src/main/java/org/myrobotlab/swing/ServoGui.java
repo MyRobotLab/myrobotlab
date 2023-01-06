@@ -357,6 +357,7 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
   }
 
   // SwingGui's action processing section - data from user
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(final ActionEvent event) {
     SwingUtilities.invokeLater(new Runnable() {

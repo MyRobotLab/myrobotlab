@@ -117,6 +117,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
     monitor.addActionListener(this);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();
@@ -230,6 +231,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
   }
 
   // onChange of ports
+  @SuppressWarnings("not.interned")
   @Override
   public void itemStateChanged(ItemEvent event) {
     Object o = event.getSource();

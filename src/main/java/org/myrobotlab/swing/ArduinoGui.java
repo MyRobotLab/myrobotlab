@@ -177,6 +177,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
    * The guts of the business logic of handling all the graphical components and
    * their relations with each other.
    */
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();
@@ -484,6 +485,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
     update(arduino);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void itemStateChanged(ItemEvent event) {
     Object o = event.getSource();

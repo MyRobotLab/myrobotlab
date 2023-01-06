@@ -35,6 +35,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
+import org.checkerframework.checker.formatter.qual.ConversionCategory;
+import org.checkerframework.checker.formatter.qual.Format;
 import org.myrobotlab.service.Clock;
 import org.myrobotlab.service.SwingGui;
 
@@ -44,7 +46,7 @@ public class ClockGui extends ServiceGui implements ActionListener {
   JButton startClock = new JButton("start clock");
 
   JLabel clockDisplay = new JLabel("<html><p style=\"font-size:15px;\">00:00:00.</p></html>");
-  String displayFormat = "<html><p style=\"font-size:15px\">%s</p></html>";
+  @Format(ConversionCategory.GENERAL) String displayFormat = "<html><p style=\"font-size:15px\">%s</p></html>";
   DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
   JTextField interval = new JTextField("1000", 8);
 
@@ -56,6 +58,7 @@ public class ClockGui extends ServiceGui implements ActionListener {
     startClock.addActionListener(this);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();

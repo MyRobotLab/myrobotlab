@@ -41,6 +41,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
+import org.checkerframework.checker.formatter.qual.FormatMethod;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodCache;
@@ -121,14 +122,17 @@ public abstract class ServiceGui implements WindowListener {
     // addTop(new JButton("save"), new JButton("load"));
   }
 
+  @FormatMethod
   public void info(String msg, Object... params) {
     swingGui.info(msg, params);
   }
 
+  @FormatMethod
   public void warn(String msg, Object... params) {
     swingGui.warn(msg, params);
   }
 
+  @FormatMethod
   public void error(String msg, Object... params) {
     swingGui.error(msg, params);
   }

@@ -164,6 +164,7 @@ public class MotorGui extends ServiceGui implements ActionListener, ChangeListen
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object source = e.getSource();
@@ -251,6 +252,7 @@ public class MotorGui extends ServiceGui implements ActionListener, ChangeListen
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void stateChanged(ChangeEvent ce) {
     Object source = ce.getSource();

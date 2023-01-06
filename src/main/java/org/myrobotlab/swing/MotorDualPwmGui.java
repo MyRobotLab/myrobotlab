@@ -130,6 +130,7 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
     restoreListeners();
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
 
@@ -236,6 +237,7 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void stateChanged(ChangeEvent ce) {
     Object source = ce.getSource();

@@ -69,6 +69,7 @@ public class Motor_Adafruit16CServoDriverGui extends MotorControllerPanel implem
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();

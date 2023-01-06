@@ -103,6 +103,7 @@ public class OpenCVFilterMiniXceptionGui extends OpenCVFilterGui implements Acti
     });
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void stateChanged(ChangeEvent e) {
     OpenCVFilterMiniXception bf = (OpenCVFilterMiniXception) boundFilter.filter;

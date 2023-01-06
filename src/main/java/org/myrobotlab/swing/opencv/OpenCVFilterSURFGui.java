@@ -56,6 +56,7 @@ public class OpenCVFilterSURFGui extends OpenCVFilterGui implements ActionListen
     display.add(j, gc);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent event) {
     // TODO Auto-generated method stub

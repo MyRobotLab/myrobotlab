@@ -60,6 +60,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import org.checkerframework.checker.interning.qual.FindDistinct;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Message;
@@ -280,6 +281,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
   }
 
   @Override
+  @SuppressWarnings("not.interned")
   public void actionPerformed(ActionEvent e) {
     String cmd = e.getActionCommand();
     Object o = e.getSource();
@@ -564,7 +566,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
    *          gui
    * 
    */
-  public void subscribeToServiceMethod(String key, ServiceGui sg) {
+  public void subscribeToServiceMethod(String key, @FindDistinct ServiceGui sg) {
     List<ServiceGui> list = null;
     if (nameMethodCallbackMap.containsKey(key)) {
       list = nameMethodCallbackMap.get(key);
@@ -574,10 +576,10 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     }
 
     boolean found = false;
-    for (int i = 0; i < list.size(); ++i) {
-      ServiceGui existingSg = list.get(i);
+    for (ServiceGui existingSg : list) {
       if (existingSg == sg) {
         found = true;
+        break;
       }
     }
     if (!found) {

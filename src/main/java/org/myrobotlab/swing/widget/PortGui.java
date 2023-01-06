@@ -77,6 +77,7 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
     });
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(final ActionEvent e) {
     SwingUtilities.invokeLater(new Runnable() {

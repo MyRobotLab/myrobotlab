@@ -47,6 +47,7 @@ public class OpenCVFilterErodeGui extends OpenCVFilterGui implements ActionListe
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();

@@ -55,6 +55,7 @@ public class OpenCVFilterKinectPointCloudGui extends OpenCVFilterGui implements 
     display.add(flow, BorderLayout.CENTER);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     // OpenCVFilterKinectPointCloud filter = (OpenCVFilterKinectPointCloud)

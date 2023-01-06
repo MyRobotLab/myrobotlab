@@ -69,6 +69,7 @@ public class Motor_ArduinoGui extends MotorControllerPanel implements ActionList
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();

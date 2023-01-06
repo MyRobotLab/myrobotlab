@@ -82,6 +82,7 @@ public class I2cMuxGui extends ServiceGui implements ActionListener {
     restoreListeners();
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent event) {
     Object o = event.getSource();
