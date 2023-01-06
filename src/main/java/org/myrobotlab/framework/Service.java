@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -1460,13 +1461,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public void removeListener(String outMethod, String serviceName, String inMethod) {
     if (outbox.notifyList.containsKey(outMethod)) {
       List<MRLListener> nel = outbox.notifyList.get(outMethod);
-      for (int i = 0; i < nel.size(); ++i) {
-        MRLListener target = nel.get(i);
-        if (target.callbackName.compareTo(serviceName) == 0) {
-          nel.remove(i);
+      nel.removeIf(target -> {
+        if (serviceName.equals(target.callbackName)) {
           log.info("removeListener requested {}.{} to be removed", serviceName, outMethod);
+          return true;
+        } else {
+          return false;
         }
-      }
+      });
     } else {
       log.info("removeListener requested {}.{} to be removed - but does not exist", serviceName, outMethod);
     }
