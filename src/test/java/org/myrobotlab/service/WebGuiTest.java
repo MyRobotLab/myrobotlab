@@ -4,9 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.atmosphere.cpr.AtmosphereResource;
+import org.atmosphere.cpr.AtmosphereResourceImpl;
 import org.junit.Before;
 import org.junit.Test;
+import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.TimeoutException;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.net.Http;
 import org.myrobotlab.test.AbstractTest;
@@ -56,6 +61,33 @@ public class WebGuiTest extends AbstractTest {
     Servo servoApiTest = (Servo)Runtime.getService("servoApiTest");
     Double pos = servoApiTest.getCurrentOutputPos();
     assertEquals(35.0, pos.doubleValue(), 0.1);
+  }
+
+  @Test
+  public void sendBlockingTest() throws InterruptedException, TimeoutException {
+    String retVal = "retVal";
+    // Put directly in blocking list because sendBlocking() won't use it for local services
+    Runtime.getInstance().getInbox().blockingList.put("runtime.onBlocking", new Object[1]);
+    Object[] blockingListRet = Runtime.getInstance().getInbox().blockingList.get("runtime.onBlocking");
+
+    // Delay in a new thread so we can get our wait() call in first
+    new Thread(() -> {
+      try {
+        Thread.sleep(50);
+      } catch (InterruptedException ignored) {}
+      Http.post("http://localhost:8889/api/service/runtime/onBlocking", "[\""+retVal+"\"]");
+    }).start();
+
+    long timeout = 1000;
+    synchronized (blockingListRet) {
+      long startTs = System.currentTimeMillis();
+      blockingListRet.wait(timeout);
+      if (System.currentTimeMillis() - startTs >= timeout) {
+        throw new TimeoutException("timeout of %d exceeded", timeout);
+      }
+    }
+
+    assertEquals(retVal, blockingListRet[0]);
   }
 
   
