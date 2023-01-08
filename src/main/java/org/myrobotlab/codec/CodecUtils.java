@@ -703,7 +703,7 @@ public class CodecUtils {
     public static String toJson(Object o) {
         try {
             if (USING_GSON) {
-                return gson.toJson(o, o.getClass());
+                return gson.toJson(o);
             }
 
             return mapper.writeValueAsString(o);
