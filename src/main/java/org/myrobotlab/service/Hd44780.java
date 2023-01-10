@@ -258,6 +258,10 @@ public class Hd44780 extends Service {
       warn("must be attached to initialize");
     } else {
       log.info("Init I2C Display");
+      lcdWriteCmd((byte) (0b00100010)); // this is an odd Set Function command, performed only during init()
+                                        // On power up, the HD44780 is in 8 bit mode. and we are potentially
+                                        // sending another instruction before the command is processed.
+                                        // We need to ensure the command is still set function to 4 bits.
       setFunction(true, false); // Set the function Control.
       clearDisplay(); // Clear the Display and set DDRAM address 0.
       returnHome(); // Set DDRAM address 0 and return display home.

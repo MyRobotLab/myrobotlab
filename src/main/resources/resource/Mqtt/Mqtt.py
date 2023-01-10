@@ -2,32 +2,33 @@
 # Mqtt.py
 # more info @: http://myrobotlab.org/service/Mqtt
 #########################################
+from time import sleep
 
-topic = "myrobotlab/test"
-qos = 1 # At most once (0), At least once (1), Exactly once (2).
-broker = "tcp://broker.mqttdashboard.com:1883"
-
-clientID = "MrlMqttPython1"
+# start service
 mqtt = runtime.start("mqtt", "Mqtt")
+broker = runtime.start("broker", "MqttBroker")
 python = runtime.start("python", "Mqtt")
 
-print(mqtt.getDescription())
+# start the local mqtt broker on standard port
+broker.listen()
 
-mqtt.setBroker(broker)
-mqtt.setQos(qos)
-mqtt.setPubTopic(topic)
-mqtt.setClientId(clientID)
-mqtt.connect(broker)
+topic = "echoTopic"
+
+mqtt.connect("tcp://localhost:1883")
 # authentification mqtt.connect(broker,"guest","guest")
+ 
+mqtt.subscribe(topic)
 
-mqtt.subscribe("myrobotlab/test", 0)
-mqtt.publish("hello myrobotlab world")
-python.subscribe("mqtt", "publishMqttMsgString")
+# qos = 1 # At most once (0), At least once (1), Exactly once (2).
+mqtt.publish("echoTopic", "hello myrobotlab world")
+python.subscribe("mqtt", "publishMqttMsg")
 # or mqtt.addListener("publishMqttMsgString", "python")
+ 
+# publishMqttMsg --> onMqttMsg(msg)
+def onMqttMsg(msg):
+  print ("message : ", msg)
 
-#  MQTT call-back
-# publishMqttMsgString --> onMqttMsgString(msg)
-def onMqttMsgString(msg):
-  # print "message : ", msg
-  print "message : ",msg[0]
-  print "topic : ",msg[1]
+
+for i in range(30):
+    mqtt.publish(topic, "hello myrobotlab ! " + str(i))
+    sleep(0.5)

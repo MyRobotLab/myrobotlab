@@ -53,14 +53,25 @@ public class WebGuiTest extends AbstractTest {
   }
 
   @Test
-  public void servoApiTest() {    
+  public void servoApiTest() {
     byte[] bytes = Http.get("http://localhost:8889/api/service/servoApiTest/moveTo/35");
     String ret = new String(bytes);
     assertEquals(ret, "35.0");
     sleep(200);
-    Servo servoApiTest = (Servo)Runtime.getService("servoApiTest");
+    Servo servoApiTest = (Servo) Runtime.getService("servoApiTest");
     Double pos = servoApiTest.getCurrentOutputPos();
     assertEquals(35.0, pos.doubleValue(), 0.1);
+
+    // return properties
+    bytes = Http.get("http://localhost:8889/api/service/servoApiTest");
+    ret = new String(bytes);
+    assertTrue(ret.contains("servoApiTest"));
+
+    // return methods
+    bytes = Http.get("http://localhost:8889/api/service/servoApiTest/");
+    ret = new String(bytes);
+    assertTrue(ret.contains("enableAutoDisable"));
+
   }
 
   @Test
@@ -89,6 +100,5 @@ public class WebGuiTest extends AbstractTest {
 
     assertEquals(retVal, blockingListRet[0]);
   }
-
   
 }

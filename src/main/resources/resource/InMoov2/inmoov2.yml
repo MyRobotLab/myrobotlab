@@ -1,6 +1,9 @@
 !!org.myrobotlab.service.config.InMoov2Config
+data: {
+  }
 heartbeat: true
 idleTimer: true
+listeners: null
 loadGestures: true
 locale: en-US
 peers:
@@ -29,7 +32,7 @@ peers:
     name: inmoov2.eyeTracking
     type: Tracking
   fsm:
-    autoStart: false 
+    autoStart: false
     name: inmoov2.fsm
     type: FiniteStateMachine
   head:
@@ -59,7 +62,7 @@ peers:
   leftArm:
     autoStart: false
     name: inmoov2.leftArm
-    type: InMoov2Aram
+    type: InMoov2Arm
   leftHand:
     autoStart: false
     name: inmoov2.leftHand
@@ -84,6 +87,10 @@ peers:
     autoStart: false
     name: inmoov2.opencv
     type: OpenCV
+  openni:
+    autoStart: false
+    name: inmoov2.openni
+    type: OpenNi
   pid:
     autoStart: false
     name: inmoov2.pid
@@ -129,8 +136,8 @@ peers:
     name: inmoov2.ultrasonicRight
     type: UltrasonicSensor
 pirEnableTracking: false
+pirPlaySounds: true
 pirWakeUp: false
 shutdownStartupSpeed: 50.0
 type: InMoov2
 virtual: false
-
