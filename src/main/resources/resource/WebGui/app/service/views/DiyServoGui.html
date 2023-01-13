@@ -1,0 +1,86 @@
+<!-- diyServoGui.html -->
+<div>
+    <tr>
+        <td>
+            &nbsp;&nbsp;&nbsp;&nbsp;<label>ONLY DISPLAY UI/WORK IN PROGRESS UI</label>
+        </td>
+    </tr>
+</div>
+<div>
+    <tr>
+        <td>
+            &nbsp;&nbsp;&nbsp;&nbsp;<label>USE MOTOR UI</label>
+        </td>
+    </tr>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="tableController" border="0">
+            <tr>
+                <td>Controller</td>
+                <td>AnglePin</td>
+                <!--<td>&nbsp;</td>
+                <td>Enable</td>
+                <td>&nbsp;&nbsp;AutoDisable</td>
+                <td ng-show="service.autoDisable">TimeOut = {{service.idleTimeout/1000}} s</td>-->
+            </tr>
+            <tr>
+                <td>
+                    <select ng-disabled="service.controller != null" class="form-control" ng-model="state.controller">
+                        <option ng-repeat="c in service.controllers" value="{{c}}">
+                            {{c}} </option>
+                    </select>
+                </td>
+                <td>
+                    <!-- pin -->
+                    <select class="form-control" ng-model="service.pin" ng-change="setPin()" ng-options="item for item in pinList">
+                        <option>{{item}}</option>
+                    </select>
+                </td>
+                <td>
+                    <!-- TODO - send pos ! ??? -->
+                    <button ng-show="!state.attached" class="btn btn-default"
+                        ng-click="attachController()">attach</button>
+                    <button ng-show="state.attached" class="btn btn-default"
+                        ng-click="msg.detach()">detach</button>
+                </td>
+                <!--<td>
+                    <toggle ng-model="service.enabled" class="miniBTN" title="Energize the servo"
+                        ng-change="service.enabled?msg.enable():msg.disable()" on="" off="" size="btn-lg" />
+                    </toggle>
+                </td>
+                <td>
+                    &nbsp;&nbsp;<toggle ng-model="service.autoDisable" class="miniBTN" title="Stops energizing the servo after a given time but will energize again when moving the servo slider"
+                        ng-change="msg.setAutoDisable(service.autoDisable)" on="" off="" size="btn-lg" />
+                </td>
+                <td>
+                    <input class="base-slider slider-width100" ng-show="service.autoDisable" type="range" name="idleSeconds"
+                        ng-model="idleSeconds" min="1" max="10" ng-change="setIdleTimeout(idleSeconds)">
+                </td>-->
+            </tr>
+        </table>
+    </div>
+    <!-- /.col-md-12 -->
+</div>
+<div>
+    <tr>
+        <td>&nbsp;</td>
+    </tr>
+</div>
+<div id="servo-basic" class="row">
+    <div class="col-md-12">
+        <table class="servo-limits-table" border="0">
+            <tr>
+                <td>Speed</td>
+                <td>
+                    <td colspan="2">
+                        <input class="base-slider slider-width100" type="range" name="speedRange" ng-model="service.speed"
+                                    min="1" max="201" ng-change="setSpeed()" />
+                    </td>
+                    <td>{{speedDisplay}}°/s &nbsp;</td>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>           
