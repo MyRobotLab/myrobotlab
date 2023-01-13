@@ -3,7 +3,7 @@
         <!-- desired vs reported -->
         <table width="100%">
         <tr>
-        <td colspan="3"><b>power</b></td>
+        <td colspan="3"><b>Power</b></td>
         </tr>
             <tr>
                 <td>
@@ -26,7 +26,7 @@
             <table width="100%">
                 <tr>
                     <td colspan="5">
-                        <b>mapping</b>
+                        <b>Mapping</b>
                     </td>
                 </tr>
                 <tr>
@@ -79,10 +79,7 @@
                     <a href="" ng-click="setController(c)">{{c}}</a>
                 </li>
             </ul>
-        </div>
-        <button type="button" class="btn btn-default" ng-click='attach()' ng-show='!service.controllerName'>attach</button>
-        <button type="button" class="btn btn-default" ng-click='detach()' ng-show='service.controllerName'>detach</button>
-
+        </div>   
         <div class="btn-group" uib-dropdown>
             <button type="button" class="btn btn-default">left pin {{service.leftPwmPin}}</button>
             <button id="single-button" ng-disabled="service.controller != null" type="button" class="btn btn-default" uib-dropdown-toggle>
@@ -105,7 +102,8 @@
                 </li>
             </ul>
         </div>
-
+        <button type="button" class="btn btn-default" ng-click='attach()' ng-show='!service.controllerName'>attach</button>
+        <button type="button" class="btn btn-default" ng-click='detach()' ng-show='service.controllerName'>detach</button>
 
         <button type="button" class="btn btn-default" ng-click='stop()' ng-show='service.controllerName'>
             <img src="stop-large.png" width="40"/>
@@ -113,16 +111,19 @@
     </div>
     <div class="col-md-6">&nbsp;</div>
 </div>
+<div>
+    <tr>
+        <td>&nbsp;</td>
+    </tr>
+</div>    
 <div class="row">
     <div class="col-md-6">
         <table width="100%">
             <tr>
                 <td>
-                    <b>power</b>
-                            <input type="range" ng-model="requestedPower" min="-100" max="100" step="1" ng-change="setSpeed()"/>
+                    <b>Power/Speed</b>
+                    <input class="servo-move-to-slider" type="range" ng-model="requestedPower" min="-100" max="100" step="1" ng-change="powerOutput">
                 </td>
-                <td>&nbsp;</td>
-                <td></td>
             </tr>
         </table>
     </div>
