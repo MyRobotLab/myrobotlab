@@ -37,7 +37,10 @@ public class AudioProcessor extends Thread {
 
   protected int samplesAdded = 0;
 
-  protected double volume = 1.0f;
+  /**
+   * unless explicitly set - uses master volue of AudioFile service
+   */
+  protected Double volume = null;
 
   protected float balance = 0.0f;
 
@@ -164,30 +167,35 @@ public class AudioProcessor extends Thread {
             }
           }
 
-          if (data.volume == null) {
-            data.volume = volume;
+          // determining volume through precedence
+          // first master volume
+          Double volume = audioFile.getVolume();
+          // unless track is explicitly set
+          if (this.volume != null) {
+            volume = this.volume;
+          }
+          // unless file itself is explicitly set
+          if (data.volume != null) {
+            volume = data.volume;
           }
 
-          if (data.volume != null) {
+          if (line.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
 
-            if (line.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+            FloatControl ctrl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
+            // float scaled = (float) (Math.log(data.volume) / Math.log(10.0)
+            // * 20.0);
 
-              FloatControl ctrl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
-              // float scaled = (float) (Math.log(data.volume) / Math.log(10.0)
-              // * 20.0);
+            if (MathUtils.round(ctrl.getValue(), 3) != MathUtils.round((float) (ctrl.getMinimum() + ((ctrl.getMaximum() - ctrl.getMinimum()) * volume)), 3)) {
+              if (volume <= 1.0f && volume >= 0) {
 
-              if (MathUtils.round(ctrl.getValue(), 3) != MathUtils.round((float) (ctrl.getMinimum() + ((ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)), 3)) {
-                if (data.volume <= 1.0f && data.volume >= 0) {
-
-                  ctrl.setValue((float) (ctrl.getMinimum() + ((ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)));
-                  log.debug("Audioprocessor set volume to : " + ctrl.getValue());
-                } else {
-                  log.error("Requested volume value " + data.volume.toString() + " not allowed");
-                  data.volume = 1.0;
-                }
+                ctrl.setValue((float) (ctrl.getMinimum() + ((ctrl.getMaximum() - ctrl.getMinimum()) * volume)));
+                log.debug("Audioprocessor set volume to : " + ctrl.getValue());
+              } else {
+                log.error("Requested volume value " + volume.toString() + " not allowed");
+                volume = 1.0;
               }
-              // volume.setValue(scaled);
             }
+            // volume.setValue(scaled);
           }
 
           if (balance != targetBalance) {
@@ -200,31 +208,31 @@ public class AudioProcessor extends Thread {
             }
           }
 
-          if (audioFile.isMute()) {
-            // NoOp for a mute audioFile.
-          } else {
+          if (!audioFile.isMute()) {
             line.write(buffer, 0, nBytesRead);
-            // Compute the peak value and publish it.
-            if (cnt % config.peakSampleInterval == 0) {
-              float peak = 0f;
-              int b = buffer.length;
-              // convert bytes to samples here
-              for (int i = 0; i < b;) {
-                int sample = 0;
-                sample |= buffer[i++] & 0xFF; // (reverse these two lines
-                sample |= buffer[i++] << 8; // if the format is big endian)
-                float abs = Math.abs(sample / 32768f);
-                if (abs > peak) {
-                  peak = abs;
-                }
-              }
-              
-              if (config.peakDelayMs == null) {
-                audioFile.invoke("publishPeak", Math.round((peak * (float) config.peakMultiplier)));
-              } else {
-                audioFile.invokeFuture("publishPeak", config.peakDelayMs, Math.round(peak * (float) config.peakMultiplier));
+          } else {
+            // rough estimate of play time - the above blocks the thread
+            // if we are not computing and blocking the loops is much too fast
+            // by definition "mute" should still read/process the file, just not
+            // make any sound
+            sleep(100);
+          }
+          // Compute the peak value and publish it.
+          AudioFileConfig config = (AudioFileConfig) audioFile.getConfig();
+          if (cnt % config.peakSampleInterval == 0) {
+            float peak = 0f;
+            int b = buffer.length;
+            // convert bytes to samples here
+            for (int i = 0; i < b;) {
+              int sample = 0;
+              sample |= buffer[i++] & 0xFF; // (reverse these two lines
+              sample |= buffer[i++] << 8; // if the format is big endian)
+              float abs = Math.abs(sample / 32768f);
+              if (abs > peak) {
+                peak = abs;
               }
             }
+            audioFile.invoke("publishPeak", peak * (float) audioFile.getPeakMultiplier());
           }
         }
         // Stop
@@ -307,11 +315,11 @@ public class AudioProcessor extends Thread {
     log.info("audio processor {} exiting", getName());
   }
 
-  public void setVolume(double volume) {
+  public void setVolume(Double volume) {
     this.volume = volume;
   }
 
-  public double getVolume() {
+  public Double getVolume() {
     return volume;
   }
 

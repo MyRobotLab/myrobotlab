@@ -118,11 +118,30 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
 
   transient Map<String, AudioProcessor> processors = new HashMap<String, AudioProcessor>();
 
+  /**
+   * Volume range 0 to 1.0. Over 1.0 can cause distortions
+   */
   double volume = 1.0f;
-  // if set to true, playback will become a no-op
+
+  /**
+   * mute - is reading through the audiofile and blocking or effectively reading the file
+   * but not outputing to the sound line.
+   */
   private boolean mute = false;
 
   protected String currentPlaylist = "default";
+  
+  /**
+   * The currently played audio data - or the last activated
+   * since AudioFile can play multiple tracks simultaneously.
+   * The "latest" played AudioData - should be playing 
+   */
+  protected AudioData current = null; 
+  
+  /**
+   * the last AudioData to be played
+   */
+  protected AudioData lastPlayed = null;
 
   protected Map<String, List<String>> playlists = new HashMap<>();
 
@@ -236,8 +255,8 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
     if (data.track == null) {
       data.track = currentTrack;
     }
-    setTrack(data.track);
-    processors.get(data.track).setVolume(volume);
+    setTrack(data.track);    
+
     if (AudioData.MODE_QUEUED.equals(data.mode)) {
       // stick it on top of queue and let our default player play it
       return processors.get(data.track).add(data);
@@ -306,12 +325,17 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
     playlistPlayer.stop();
   }
 
-  /*
+  /**
    * Specify the volume for playback on the audio file value 0.0 = off 1.0 =
    * normal volume. (values greater than 1.0 may distort the original signal)
    * 
+   * @param volume
    */
   public void setVolume(float volume) {
+    if (volume > 1.0) {
+      error("volume must be in a range between 0.0 and 1.0");
+      return;
+    }
     this.volume = volume;
   }
 
@@ -389,12 +413,15 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
 
   @Override
   public AudioData publishAudioStart(AudioData data) {
+    current = data;
     return data;
   }
 
   @Override
   public AudioData publishAudioEnd(AudioData data) {
     log.debug("Audio File publishAudioEnd");
+    current = null;
+    lastPlayed = data;
     return data;
   }
 
@@ -545,8 +572,8 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
         attachAudioListener(listener);
       }
     }
-    
-    // FIXME - THIS IS ALL THATS NEEDED AND IT CAN BE 
+
+    // FIXME - THIS IS ALL THATS NEEDED AND IT CAN BE
     // DONE IN THE SERVICE LEVEL
     // if services need "special" handling they can override
     this.config = c;
