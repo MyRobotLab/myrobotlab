@@ -94,6 +94,10 @@ import org.bytedeco.opencv.opencv_core.CvSize;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
+import org.checkerframework.checker.formatter.qual.ConversionCategory;
+import org.checkerframework.checker.formatter.qual.FormatMethod;
+import org.checkerframework.checker.formatter.util.FormatUtil;
+import org.checkerframework.checker.interning.qual.FindDistinct;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.cv.CvData;
 import org.myrobotlab.cv.CvFilter;
@@ -1466,12 +1470,17 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    *          args to format into the text
    * 
    */
+  @FormatMethod
   public void putText(String format, Object... args) {
     if (overlays.containsKey(format)) {
       Overlay overlay = overlays.get(format);
       overlay.text = String.format(format, args);
     } else {
-      putText(format, 20, 10 * overlays.size(), "black");
+      putText(
+              FormatUtil.asFormat(format,
+                      ConversionCategory.INT,
+                      ConversionCategory.INT,
+                      ConversionCategory.GENERAL), 20, 10 * overlays.size(), "black");
     }
   }
 
@@ -1546,7 +1555,12 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
          */
         FrameRecorder recorder = null;
         if (!recordingFrames) {
-          recordingFilename = String.format(getDataDir() + File.separator + "%s-%d.flv", recordingSource, System.currentTimeMillis());
+          recordingFilename = String.format(
+                  FormatUtil.asFormat(
+                          getDataDir() + File.separator + "%s-%d.flv",
+                            ConversionCategory.GENERAL,
+                            ConversionCategory.INT
+                  ), recordingSource, System.currentTimeMillis());
           info("recording %s", recordingFilename);
           recorder = new FFmpegFrameRecorder(recordingFilename, frame.imageWidth, frame.imageHeight, 0);
           recorder.setFormat("flv");
@@ -1740,10 +1754,10 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    *          JNI members or pointer references it will break, mark all of
    *          these.
    */
-  public void setFilterState(FilterWrapper otherFilter) {
+  public void setFilterState(@FindDistinct FilterWrapper otherFilter) {
     OpenCVFilter filter = getFilter(otherFilter.name);
     if (filter != null) {
-      if (filter != otherFilter.filter) {
+      if (!filter.equals(otherFilter.filter)) {
         Service.copyShallowFrom(filter, otherFilter.filter);
       }
     } else {

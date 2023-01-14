@@ -106,6 +106,7 @@ public class OpenCVFilterFaceDetectGui extends OpenCVFilterGui {
     }
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();

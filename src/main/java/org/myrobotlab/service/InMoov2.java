@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.io.FilenameUtils;
+import org.checkerframework.checker.formatter.qual.FormatMethod;
+import org.checkerframework.checker.formatter.util.FormatUtil;
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
@@ -1126,10 +1128,11 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public void speakBlocking(String speak) {
-    speakBlocking(speak, (Object[]) null);
+    speakBlocking(FormatUtil.asFormat(speak), (Object[]) null);
   }
 
   // FIXME - publish text regardless if mouth exists ...
+  @FormatMethod
   public void speakBlocking(String format, Object... args) {
 
     if (format == null) {

@@ -41,6 +41,7 @@ public class OpenCVListAdapter extends MouseAdapter implements ActionListener {
     popup.add(addMenuItem);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();

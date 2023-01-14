@@ -49,6 +49,11 @@ public class RuntimeMeta extends MetaData {
     // ws client sockets
     addDependency("org.asynchttpclient", "async-http-client", "2.12.3");
 
+    // Checker framework
+    addDependency("org.checkerframework", "checker-qual", "3.28.0");
+    addDependency("org.checkerframework", "checker", "3.28.0");
+    addDependency("org.checkerframework", "checker-util", "3.28.0");
+
   }
 
 }

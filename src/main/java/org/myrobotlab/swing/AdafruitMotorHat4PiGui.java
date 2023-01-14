@@ -74,6 +74,7 @@ public class AdafruitMotorHat4PiGui extends ServiceGui implements ActionListener
     restoreListeners();
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(final ActionEvent event) {
     // TODO Auto-generated method stub

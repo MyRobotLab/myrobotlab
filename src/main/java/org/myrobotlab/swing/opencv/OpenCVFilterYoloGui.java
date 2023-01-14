@@ -88,6 +88,7 @@ public class OpenCVFilterYoloGui extends OpenCVFilterGui implements ActionListen
     });
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void stateChanged(ChangeEvent e) {
     OpenCVFilterYolo bf = (OpenCVFilterYolo) boundFilter.filter;

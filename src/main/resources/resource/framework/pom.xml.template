@@ -167,6 +167,7 @@
                     <rules>
                         <banDuplicatePomDependencyVersions/>
                     </rules>
+
                 </configuration>
             </execution>
         </executions>
@@ -320,7 +321,21 @@
           <target>11</target>
           <optimize>true</optimize>
           <debug>true</debug>
-          <compilerArgument>-parameters</compilerArgument>          
+          <compilerArgument>-parameters</compilerArgument>
+          <annotationProcessors>
+            <!--<annotationProcessor>-->
+            <!--  org.checkerframework.checker.nullness.NullnessChecker-->
+            <!--</annotationProcessor>-->
+            <annotationProcessor>
+              org.checkerframework.checker.interning.InterningChecker
+            </annotationProcessor>
+            <!--<annotationProcessor>-->
+            <!--  org.checkerframework.checker.fenum.FenumChecker-->
+            <!--</annotationProcessor>-->
+            <annotationProcessor>
+              org.checkerframework.checker.formatter.FormatterChecker
+            </annotationProcessor>
+          </annotationProcessors>
         </configuration>
       </plugin>
 

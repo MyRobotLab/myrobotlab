@@ -211,6 +211,7 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
     display.setBounds(x, y, width, height);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     log.info("actionPerformed");

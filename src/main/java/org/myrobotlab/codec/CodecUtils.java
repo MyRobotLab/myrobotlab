@@ -10,6 +10,8 @@ import com.fasterxml.jackson.module.noctordeser.NoCtorDeserModule;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
+import org.checkerframework.checker.interning.qual.FindDistinct;
+import org.checkerframework.checker.interning.qual.Interned;
 import org.myrobotlab.codec.json.GsonPolymorphicTypeAdapterFactory;
 import org.myrobotlab.codec.json.JacksonPolymorphicModule;
 import org.myrobotlab.codec.json.JsonDeserializationException;
@@ -1218,9 +1220,10 @@ public class CodecUtils {
             // TODO - handle all types :P
             Field f = o.getClass().getDeclaredField(field);
             f.setAccessible(true);
-            f.set(o, value);
+            // Checker doesn't like using non-interned values for Field.set() for some reason
+            f.set(o, (@Interned Object) value);
         } catch (Exception e) {
-            /** don't care - if its not there don't set it */
+            /* don't care - if its not there don't set it */
         }
     }
 

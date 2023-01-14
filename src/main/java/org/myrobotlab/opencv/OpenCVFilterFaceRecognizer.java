@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.imageio.ImageIO;
@@ -261,7 +262,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
       trained = false;
     }
     // populate the human readable labels on the trained model
-    for (int k : idToLabelMap.keySet()) {
+    for (Integer k : idToLabelMap.keySet()) {
       faceRecognizer.setLabelInfo(k, idToLabelMap.get(k));
     }
     return true;
@@ -442,7 +443,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
             String name = predictFace(dFaceMat);
             cvPutText(image, name, dF.resolveGlobalLowerLeftCorner(), font, AbstractCvScalar.CYAN);
             // If it's a new name. invoke it an publish.
-            if (lastRecognizedName != name) {
+            if (!Objects.equals(lastRecognizedName, name)) {
               invoke("publishRecognizedFace", name);
             }
             // TODO: might be good to store more metadata with the last

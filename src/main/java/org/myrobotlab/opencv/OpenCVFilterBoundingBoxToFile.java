@@ -39,6 +39,8 @@ import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.opencv.opencv_core.CvRect;
 import org.bytedeco.opencv.opencv_core.CvSize;
 import org.bytedeco.opencv.opencv_core.IplImage;
+import org.checkerframework.checker.formatter.qual.ConversionCategory;
+import org.checkerframework.checker.formatter.util.FormatUtil;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.slf4j.Logger;
@@ -82,7 +84,12 @@ public class OpenCVFilterBoundingBoxToFile extends OpenCVFilter {
         IplImage copy = cvCreateImage(size, image.depth(), image.nChannels());
         cvCopy(image, copy, null); // roi vs mask ?
 
-        saveToFile(String.format("%s" + File.separator + "%07d-%03d.png", targetDir, opencv.getFrameIndex(), i), copy);
+        saveToFile(String.format(
+                FormatUtil.asFormat(
+                        "%s" + File.separator + "%07d-%03d.png",
+                        ConversionCategory.GENERAL, ConversionCategory.INT
+                ),
+                targetDir, opencv.getFrameIndex(), i), copy);
         // cvSaveImage(String.format("%s"+File.separator+"%07d-%03d.png",
         // targetDir, opencv.getFrameIndex(), i), copy);
         roiRect.close();

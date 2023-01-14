@@ -27,26 +27,28 @@ import SimpleOpenNI.SimpleOpenNI;
 import SimpleOpenNI.SimpleOpenNIConstants;
 
 /**
- * @author GroG
- * 
+ *
+ *
  *         Service to expose the capabilities of kinect like sensors through a
  *         modified SimpleOpenNI interface
- * 
+ * <p>
  *         Dependencies on Linux : boost-devel
- * 
- *         References
- * 
- *         http://stackoverflow.com/questions/2676719/calculating-the-angle-
- *         between-the-line-defined-by-two-points
- *         http://stackoverflow.com/questions
- *         /9614109/how-to-calculate-an-angle-from-points
- *         http://nghiaho.com/?page_id=846
- *         https://www.youtube.com/watch?v=KKuiuctKGRQ Some snippets are taken
+ * <p>
+ *         <h2>References</h2>
+ * <p>
+ *     <ol>
+ *         <li><a href="http://stackoverflow.com/questions/2676719/calculating-the-angle-between-the-line-defined-by-two-points">Calculating the angle between a line and the x-axis</a></li>
+ *         <li><a href="http://stackoverflow.com/questions/9614109/how-to-calculate-an-angle-from-points">How to calculate an angle from points?</a></li>
+ *         <li>http://nghiaho.com/?page_id=846</li>
+ *         <li><a href="https://www.youtube.com/watch?v=KKuiuctKGRQ">3D Game Math | Matrices - Multiplication & Representation</a></li>
+ *         <li>Some snippets are taken
  *         from "Making Things See" a excellent book and I recommend buying it
- *         http://shop.oreilly.com/product/0636920020684.do
- * 
- * 
- * 
+ *         <a href="http://shop.oreilly.com/product/0636920020684.do">Making Things See</a></li>
+ *
+ * </ol>
+ *
+ * @author GroG
+ *
  */
 public class OpenNi extends Service // implements
 // UserTracker.NewFrameListener,
@@ -219,7 +221,7 @@ public class OpenNi extends Service // implements
   public void addRubySketchUpFrame(Skeleton skeleton, boolean singleFrame) {
     try {
       StringBuffer sb = new StringBuffer();
-      sb.append(String.format(String.format("\n#-----------------------frame %d begin----------------------\n", frameNumber)));
+      sb.append(String.format("\n#-----------------------frame %d begin----------------------\n", frameNumber));
       sb.append(String.format("head = [%f,%f,%f]\n", skeleton.head.x, skeleton.head.z, skeleton.head.y));
       sb.append(String.format("neck = [%f,%f,%f]\n", skeleton.neck.x, skeleton.neck.z, skeleton.neck.y));
 
@@ -263,7 +265,7 @@ public class OpenNi extends Service // implements
       sb.append("model.entities.add_line(rightHip, rightKnee)\n");
       sb.append("model.entities.add_line(rightKnee, rightFoot)\n");
 
-      sb.append(String.format(String.format("\n#-----------------------frame %d begin----------------------\n", frameNumber)));
+      sb.append(String.format("\n#-----------------------frame %d begin----------------------\n", frameNumber));
 
       if (rubySketchUpFile == null) {
         String filename = String.format("skeleton.%d.rb", skeleton.frameNumber);

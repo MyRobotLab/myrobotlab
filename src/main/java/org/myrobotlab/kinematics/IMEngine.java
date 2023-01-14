@@ -4,6 +4,7 @@
 package org.myrobotlab.kinematics;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import org.myrobotlab.genetic.Chromosome;
 import org.myrobotlab.genetic.Genetic;
@@ -753,7 +754,7 @@ public class IMEngine extends Thread implements Genetic {
       moveInfo.lastLink = arm.getLink(arm.getNumLinks() - 1);
     } else {
       for (DHLink link : arm.getLinks()) {
-        if (link.getName() == moveInfo.lastLinkName) {
+        if (Objects.equals(link.getName(), moveInfo.lastLinkName)) {
           moveInfo.lastLink = link;
           break;
         }

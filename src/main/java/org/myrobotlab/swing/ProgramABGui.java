@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Objects;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -170,6 +171,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     visualDebug.addActionListener(this);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent event) {
     Object o = event.getSource();
@@ -277,7 +279,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   }
 
   private void setLogLevelForConsole() {
-    if (LoggingFactory.getInstance().getLevel() == "WARN" || LoggingFactory.getInstance().getLevel() == "ERROR") {
+    if (Objects.equals(LoggingFactory.getInstance().getLevel(), "WARN") || Objects.equals(LoggingFactory.getInstance().getLevel(), "ERROR")) {
       for (String s : logsClassOnly) {
         if (!LoggerFactory.getLogger(s).isInfoEnabled()) {
           LoggingFactory.getInstance().setLevel(s, "INFO");

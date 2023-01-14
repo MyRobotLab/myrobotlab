@@ -38,6 +38,7 @@ public class LogGui extends ServiceGui implements ActionListener {
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent action) {
     Object o = action.getSource();

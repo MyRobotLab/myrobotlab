@@ -29,6 +29,7 @@ import java.nio.IntBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.saintandreas.gl.BufferUtils;
 import org.saintandreas.gl.OpenGL;
 import org.saintandreas.math.Matrix4f;
@@ -37,6 +38,7 @@ import org.saintandreas.math.Vector4f;
 import org.saintandreas.resources.Resource;
 import org.saintandreas.resources.ResourceManager;
 
+@UsesObjectEquals
 public class Program {
 
   // private static final Logger LOG = LoggerFactory.getLogger(Program.class);

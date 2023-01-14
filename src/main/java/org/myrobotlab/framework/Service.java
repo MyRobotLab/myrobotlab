@@ -25,34 +25,13 @@
 
 package org.myrobotlab.framework;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
-import java.net.InetAddress;
-import java.net.URI;
-import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.concurrent.CopyOnWriteArrayList;
-
+import org.checkerframework.checker.formatter.qual.ConversionCategory;
+import org.checkerframework.checker.formatter.qual.Format;
+import org.checkerframework.checker.formatter.qual.FormatMethod;
+import org.checkerframework.checker.formatter.util.FormatUtil;
+import org.checkerframework.checker.interning.qual.EqualsMethod;
+import org.checkerframework.checker.interning.qual.Interned;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Broadcaster;
@@ -71,6 +50,36 @@ import org.myrobotlab.service.interfaces.QueueReporter;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 /**
  * 
  * Service is the base of the MyRobotLab Service Oriented Architecture. All
@@ -88,7 +97,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   // http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
 
   /**
-   * contains all the meta data about the service - pulled from the static
+   * contains all the metadata about the service - pulled from the static
    * method getMetaData() each instance will call the method and populate the
    * data for an instance
    * 
@@ -97,7 +106,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   private static final long serialVersionUID = 1L;
 
-  transient public final static Logger log = LoggerFactory.getLogger(Service.class);
+  public final static Logger log = LoggerFactory.getLogger(Service.class);
 
   /**
    * key into Runtime's hosts of ServiceEnvironments mrlscheme://[gateway
@@ -109,7 +118,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * unique name of the service (eqv. hostname)
    */
-  private String name;
+  private final String name;
 
   /**
    * unique id - (eqv. domain suffix)
@@ -132,9 +141,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   transient protected Thread thisThread = null;
 
-  transient protected Inbox inbox = null;
+  transient protected Inbox inbox;
 
-  transient protected Outbox outbox = null;
+  transient protected Outbox outbox;
 
   protected String serviceVersion = null;
 
@@ -165,7 +174,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * for promoting portability and good pathing
    */
-  final transient protected static String fs = File.separator;
+  final protected static String fs = File.separator;
 
   /**
    * for promoting portability and good pathing
@@ -175,7 +184,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * a more capable task handler
    */
-  transient Map<String, Timer> tasks = new HashMap<String, Timer>();
+  transient Map<String, Timer> tasks = new HashMap<>();
 
   /**
    * used as a static cache for quick method name testing FIXME - if you make
@@ -185,7 +194,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   transient protected Set<String> methodSet;
 
   /**
-   * This is the map of interfaces - its really "static" information, since its
+   * This is the map of interfaces - its really "static" information, since it's
    * a definition. However, since gson will not process statics - we are making
    * it a member variable
    */
@@ -237,16 +246,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    *          s
    * @return o
    */
+  @EqualsMethod
   public static Object copyShallowFrom(Object target, Object source) {
     if (target == source) { // data is myself - operating on local copy
       return target;
     }
-    Set<Class<?>> ancestry = new HashSet<Class<?>>();
+    Set<Class<?>> ancestry = new HashSet<>();
     Class<?> targetClass = source.getClass();
 
     ancestry.add(targetClass);
 
-    // if we are a org.myrobotlab object climb up the ancestry to
+    // if we are an org.myrobotlab object climb up the ancestry to
     // copy all super-type fields ...
     // GroG says: I wasn't comfortable copying of "Service" - because its never
     // been tested before - so we copy all definitions from
@@ -259,12 +269,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     for (Class<?> sourceClass : ancestry) {
 
-      Field fields[] = sourceClass.getDeclaredFields();
-      for (int j = 0, m = fields.length; j < m; j++) {
+      Field[] fields = sourceClass.getDeclaredFields();
+      for (Field field : fields) {
         try {
-          Field f = fields[j];
 
-          int modifiers = f.getModifiers();
+          int modifiers = field.getModifiers();
 
           // if (Modifier.isPublic(mod)
           // !(Modifier.isPublic(f.getModifiers())
@@ -274,19 +283,19 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
           // GROG - recent change from this
           // if ((!Modifier.isPublic(modifiers)
           // to this
-          String fname = f.getName();
+          String fname = field.getName();
           /*
            * if (fname.equals("desktops") || fname.equals("useLocalResources")
            * ){ log.info("here"); }
            */
 
           if (Modifier.isPrivate(modifiers) || fname.equals("log") || Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
-            log.debug("skipping {}", f.getName());
+            log.debug("skipping {}", field.getName());
             continue;
           } else {
-            log.debug("copying {}", f.getName());
+            log.debug("copying {}", field.getName());
           }
-          Type t = f.getType();
+          Type t = field.getType();
 
           // log.info(String.format("setting %s", f.getName()));
           /*
@@ -296,30 +305,30 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
           // GroG - this is new 1/26/2017 - needed to get webgui data to
           // load
-          f.setAccessible(true);
-          Field targetField = sourceClass.getDeclaredField(f.getName());
+          field.setAccessible(true);
+          Field targetField = sourceClass.getDeclaredField(field.getName());
           targetField.setAccessible(true);
 
-          if (t.equals(java.lang.Boolean.TYPE)) {
-            targetField.setBoolean(target, f.getBoolean(source));
-          } else if (t.equals(java.lang.Character.TYPE)) {
-            targetField.setChar(target, f.getChar(source));
-          } else if (t.equals(java.lang.Byte.TYPE)) {
-            targetField.setByte(target, f.getByte(source));
-          } else if (t.equals(java.lang.Short.TYPE)) {
-            targetField.setShort(target, f.getShort(source));
-          } else if (t.equals(java.lang.Integer.TYPE)) {
-            targetField.setInt(target, f.getInt(source));
-          } else if (t.equals(java.lang.Long.TYPE)) {
-            targetField.setLong(target, f.getLong(source));
-          } else if (t.equals(java.lang.Float.TYPE)) {
-            targetField.setFloat(target, f.getFloat(source));
-          } else if (t.equals(java.lang.Double.TYPE)) {
-            targetField.setDouble(target, f.getDouble(source));
+          if (t.equals(Boolean.TYPE)) {
+            targetField.setBoolean(target, field.getBoolean(source));
+          } else if (t.equals(Character.TYPE)) {
+            targetField.setChar(target, field.getChar(source));
+          } else if (t.equals(Byte.TYPE)) {
+            targetField.setByte(target, field.getByte(source));
+          } else if (t.equals(Short.TYPE)) {
+            targetField.setShort(target, field.getShort(source));
+          } else if (t.equals(Integer.TYPE)) {
+            targetField.setInt(target, field.getInt(source));
+          } else if (t.equals(Long.TYPE)) {
+            targetField.setLong(target, field.getLong(source));
+          } else if (t.equals(Float.TYPE)) {
+            targetField.setFloat(target, field.getFloat(source));
+          } else if (t.equals(Double.TYPE)) {
+            targetField.setDouble(target, field.getDouble(source));
           } else {
             // log.debug(String.format("setting reference to remote
             // object %s", f.getName()));
-            targetField.set(target, f.get(source));
+            targetField.set(target, (@Interned Object) field.get(source));
           }
         } catch (Exception e) {
           log.error("copy failed source {} to a {}", source, target, e);
@@ -370,11 +379,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public static void sleep(long millis) {
     try {
       Thread.sleep(millis);
-    } catch (InterruptedException e) {
+    } catch (InterruptedException ignored) {
     }
   }
 
-  public final static String stackToString(final Throwable e) {
+  public static String stackToString(final Throwable e) {
     StringWriter sw;
     try {
       sw = new StringWriter();
@@ -398,9 +407,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     String dataDir = Runtime.DATA_DIR + fs + typeName;
     File f = new File(dataDir);
     if (!f.exists()) {
-      f.mkdirs();
+      if(!f.mkdirs()) {
+        log.error("mkdir failed: {}", f.getAbsolutePath());
+      }
     }
-    return Runtime.DATA_DIR + fs + typeName;
+    return dataDir;
   }
 
   public String getDataDir() {
@@ -411,9 +422,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     String dataDir = Runtime.DATA_DIR + fs + getClass().getSimpleName() + fs + getName();
     File f = new File(dataDir);
     if (!f.exists()) {
-      f.mkdirs();
+      if(!f.mkdirs()) {
+        log.error("mkdir failed: {}", f.getAbsolutePath());
+      }
     }
-    return Runtime.DATA_DIR + fs + getClass().getSimpleName() + fs + getName();
+    return dataDir;
   }
 
   // ============== resources begin ======================================
@@ -493,8 +506,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
-   * non static get resource path return the path to a resource - since the root
-   * can change depending if in debug or runtime - it gets the appropriate root
+   * non-static get resource path return the path to a resource - since the root
+   * can change depending on if in debug or runtime - it gets the appropriate root
    * and adds the additionalPath..
    * 
    * @param additionalPath
@@ -592,7 +605,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     byte[] data = getResource(resourceName);
     if (data != null) {
       try {
-        return new String(data, "UTF-8");
+        return new String(data, StandardCharsets.UTF_8);
       } catch (Exception e) {
         log.error("getResourceAsString threw", e);
       }
@@ -608,7 +621,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     byte[] data = getResource(serviceType, resourceName);
     if (data != null) {
       try {
-        return new String(data, "UTF-8");
+        return new String(data, StandardCharsets.UTF_8);
       } catch (Exception e) {
         log.error("getResourceAsString threw", e);
       }
@@ -706,12 +719,23 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   /**
    * new overload - mqtt uses this for json encoded MrlListener to process
-   * subscriptions
+   * subscriptions. data must be a {@code Map<String, Object>} with the
+   * following keys and corresponding values:
+   * <ul>
+   *     <li>{@code topicMethod}: The method that is being subscribed to</li>
+   *     <li>{@code callbackName}: The service that will receive the callback.</li>
+   *     <li>{@code callbackMethod}: The method that will be used as the callback.</li>
+   * </ul>
+   *
+   * The values may be any Object but the value used for the listener will be the result
+   * of the value's {@link Object#toString()} method.
+   *
+   * @see #addListener(String, String, String)
    * 
    * @param data
    *          - listener callback info
    */
-  public void addListener(Map data) {
+  public void addListener(Map<String, Object> data) {
     // {topicMethod=pulse, callbackName=mqtt01, callbackMethod=onPulse}
     if (!data.containsKey("topicMethod")) {
       error("addListener topicMethod missing");
@@ -754,8 +778,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       // iterate through all looking for duplicate
       boolean found = false;
       List<MRLListener> nes = outbox.notifyList.get(listener.topicMethod);
-      for (int i = 0; i < nes.size(); ++i) {
-        MRLListener entry = nes.get(i);
+      for (MRLListener entry : nes) {
         if (entry.equals(listener)) {
           log.debug("attempting to add duplicate MRLListener {}", listener);
           found = true;
@@ -767,7 +790,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         nes.add(listener);
       }
     } else {
-      List<MRLListener> notifyList = new CopyOnWriteArrayList<MRLListener>();
+      List<MRLListener> notifyList = new CopyOnWriteArrayList<>();
       notifyList.add(listener);
       log.debug("adding addListener from {}.{} to {}.{}", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod);
       outbox.notifyList.put(listener.topicMethod, notifyList);
@@ -855,7 +878,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         try {
           timer.cancel();
           timer.purge();
-          timer = null;
         } catch (Exception e) {
           log.info(e.getMessage());
         }
@@ -874,7 +896,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         try {
           timer.purge();
           timer.cancel();
-          timer = null;
         } catch (Exception e) {
           log.info(e.getMessage());
         }
@@ -927,17 +948,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     if (w == null) {
       return;
     }
-    try {
+    try (w) {
       w.flush();
     } catch (Exception e) {
       Logging.logError(e);
-    } finally {
-      try {
-        w.close();
-      } catch (Exception e) {
-        // don't really care
-      }
     }
+    // don't really care
   }
 
   @Override
@@ -979,11 +995,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   // FIXME - use the method cache
   public Set<String> getMessageSet() {
-    Set<String> ret = new TreeSet<String>();
+    Set<String> ret = new TreeSet<>();
     Method[] methods = getMethods();
     log.debug("getMessageSet loading {} non-sub-routable methods", methods.length);
-    for (int i = 0; i < methods.length; ++i) {
-      ret.add(methods[i].getName());
+    for (Method method : methods) {
+      ret.add(method.getName());
     }
     return ret;
   }
@@ -1013,13 +1029,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public Map<String, String> getInterfaceSet() {
-    Map<String, String> ret = new TreeMap<String, String>();
+    Map<String, String> ret = new TreeMap<>();
     Class<?> c = getClass();
     while (c != Object.class) {
 
       Class<?>[] interfaces = c.getInterfaces();
-      for (int i = 0; i < interfaces.length; ++i) {
-        Class<?> interfaze = interfaces[i];
+      for (Class<?> interfaze : interfaces) {
         // ya silly :P - but gson's default conversion of a HashSet is an
         // array
         ret.put(interfaze.getName(), interfaze.getName());
@@ -1058,9 +1073,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public ArrayList<String> getNotifyListKeySet() {
-    ArrayList<String> ret = new ArrayList<String>();
     if (getOutbox() == null) {
       // this is remote system - it has a null outbox, because its
       // been serialized with a transient outbox
@@ -1076,9 +1091,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
       return remote;
     } else {
-      ret.addAll(getOutbox().notifyList.keySet());
+      return new ArrayList<>(getOutbox().notifyList.keySet());
     }
-    return ret;
   }
 
   @Override
@@ -1118,23 +1132,19 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public String help(String format, String level) {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     Method[] methods = this.getClass().getDeclaredMethods();
-    TreeMap<String, Method> sorted = new TreeMap<String, Method>();
+    TreeMap<String, Method> sorted = new TreeMap<>();
 
-    for (int i = 0; i < methods.length; ++i) {
-      Method m = methods[i];
+    for (Method m : methods) {
       sorted.put(m.getName(), m);
     }
     for (String key : sorted.keySet()) {
       Method m = sorted.get(key);
       sb.append("/").append(getName()).append("/").append(m.getName());
       Class<?>[] types = m.getParameterTypes();
-      if (types != null) {
-        for (int j = 0; j < types.length; ++j) {
-          Class<?> c = types[j];
-          sb.append("/").append(c.getSimpleName());
-        }
+      for (Class<?> c : types) {
+        sb.append("/").append(c.getSimpleName());
       }
       sb.append("\n");
     }
@@ -1153,7 +1163,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   final public Object invoke(Message msg) {
-    Object retobj = null;
+    Object retobj;
 
     if (log.isDebugEnabled()) {
       log.debug("--invoking {}.{}({}) {} --", name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId);
@@ -1257,9 +1267,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         if (subList != null) {
           for (MRLListener listener : subList) {
             Message msg = Message.createMessage(getFullName(), listener.callbackName, listener.callbackMethod, retobj);
-            if (msg == null) {
-              log.error("Unable to create message.. null message created");
-            }
             msg.sendingMethod = methodName;
             if (runtime.isLocal(msg)) {
               ServiceInterface si = Runtime.getService(listener.callbackName);
@@ -1283,7 +1290,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
                     // we attempted to invoke this , it blew up. Catch it here,
                     // continue
                     // through the rest of the listeners instead of bombing out.
-                    log.error("Invoke blew up! on: {} calling method {} ", si.getName(), m.toString(), e);
+                    log.error("Invoke blew up! on: {} calling method {} ", si.getName(), m, e);
                   }
                 }
               }
@@ -1454,13 +1461,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public void removeListener(String outMethod, String serviceName, String inMethod) {
     if (outbox.notifyList.containsKey(outMethod)) {
       List<MRLListener> nel = outbox.notifyList.get(outMethod);
-      for (int i = 0; i < nel.size(); ++i) {
-        MRLListener target = nel.get(i);
-        if (target.callbackName.compareTo(serviceName) == 0) {
-          nel.remove(i);
+      nel.removeIf(target -> {
+        if (serviceName.equals(target.callbackName)) {
           log.info("removeListener requested {}.{} to be removed", serviceName, outMethod);
+          return true;
+        } else {
+          return false;
         }
-      }
+      });
     } else {
       log.info("removeListener requested {}.{} to be removed - but does not exist", serviceName, outMethod);
     }
@@ -1666,7 +1674,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   protected Object waitOn(String fullName, String method, Integer timeout, Message sendMsg) throws InterruptedException, TimeoutException {
 
-    String subscriber = null;
+    String subscriber;
     if (sendMsg != null) {
       // InProcCli proxies - so the subscription needs to be from the sender NOT
       // from runtime !
@@ -1678,7 +1686,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // put in-process lock in map
     String callbackMethod = CodecUtils.getCallbackTopicName(method);
     String blockingKey = String.format("%s.%s", subscriber, callbackMethod);
-    Object[] blockingLockContainer = null;
+    Object[] blockingLockContainer;
     if (!inbox.blockingList.containsKey(blockingKey)) {
       blockingLockContainer = new Object[1];
       inbox.blockingList.put(blockingKey, blockingLockContainer);
@@ -1776,9 +1784,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         sr.state = "STARTED";
         sr.actualName = actualName;
         sr.type = si.getSimpleName();
-        if (si != null) {
-          CodecUtils.setField(this, peerKey, si);
-        }
+        CodecUtils.setField(this, peerKey, si);
       }
       invoke("publishPeerStarted", peerKey);
       broadcastState();
@@ -1892,7 +1898,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       }
     } else {
       if (topicMethod.contains("*")) { // FIXME "any regex expression
-        Set<String> tnames = Runtime.getMethodMap(topicName).keySet();
+        var methodMap = Runtime.getMethodMap(topicName);
+        if (methodMap == null) {
+          error("Service with name %s does not exist, cannot subscribe to wildcard topic method %s",
+                  topicName, topicMethod);
+          return;
+        }
+        Set<String> tnames = methodMap.keySet();
         for (String method : tnames) {
           MRLListener listener = new MRLListener(method, callbackName, callbackMethod);
           send(Message.createMessage(getName(), topicName, "addListener", listener));
@@ -1934,14 +1946,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return ret;
   }
 
+  @FormatMethod
   @Override
   public Status error(String format, Object... args) {
-    Status ret = null;
-    if (format != null) {
-      ret = Status.error(String.format(format, args));
-    } else {
-      ret = Status.error(String.format("", args));
-    }
+    Status ret;
+    ret = Status.error(String.format(format, args));
     ret.name = getName();
     log.error(ret.toString());
     lastError = ret;
@@ -1950,13 +1959,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public Status error(String msg) {
-    return error(msg, (Object[]) null);
+    return error(FormatUtil.asFormat(msg), (Object[]) null);
   }
 
   public Status warn(String msg) {
-    return warn(msg, (Object[]) null);
+    return warn(FormatUtil.asFormat(msg), (Object[]) null);
   }
 
+  @FormatMethod
   @Override
   public Status warn(String format, Object... args) {
     Status status = Status.warn(format, args);
@@ -1974,13 +1984,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @return string
    */
   public Status info(String msg) {
-    return info(msg, (Object[]) null);
+    return info(FormatUtil.asFormat(msg), (Object[]) null);
   }
 
   /**
    * set status broadcasts an formatted info string to any subscribers
    */
   @Override
+  @FormatMethod
   public Status info(String format, Object... args) {
     Status status = Status.info(format, args);
     status.name = getName();
@@ -2354,10 +2365,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       return true;
     }
     check = new File(FileIO.gluePaths(String.format("../%s/resource", simpleName), simpleName));
-    if (check.exists()) {
-      return true;
-    }
-    return false;
+    return check.exists();
 
   }
 
@@ -2406,7 +2414,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       if (this != runtime) {
         // if we are not runtime - we ask runtime
         prop = runtime.localize(key, args);
-      } else if (this == runtime) {
+      } else {
         // if we are runtime - we try default en
         prop = runtime.localizeDefault(key);
       }
@@ -2418,7 +2426,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     if (args == null) {
       return prop.toString();
     } else {
-      return String.format(prop.toString(), args);
+      return String.format(FormatUtil.asFormat(prop.toString()), args);
     }
   }
 
@@ -2535,13 +2543,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   public int compareTo(ServiceInterface o) {
-    if (this.creationOrder == o.getCreationOrder()) {
-      return 0;
-    }
-    if (this.creationOrder < o.getCreationOrder()) {
-      return -1;
-    }
-    return 1;
+    return Integer.compare(this.creationOrder, o.getCreationOrder());
   }
 
   @Override

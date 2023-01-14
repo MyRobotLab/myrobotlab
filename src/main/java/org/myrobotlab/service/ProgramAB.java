@@ -19,6 +19,7 @@ import org.alicebot.ab.Chat;
 import org.alicebot.ab.MagicBooleans;
 import org.alicebot.ab.ProgramABListener;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.interning.qual.FindDistinct;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.image.Util;
@@ -1274,7 +1275,7 @@ public class ProgramAB extends Service
   }
 
   @Override
-  synchronized public void onChangePredicate(Chat chat, String predicateName, String result) {
+  synchronized public void onChangePredicate(@FindDistinct Chat chat, String predicateName, String result) {
     log.info("{} on predicate change {}={}", chat.bot.name, predicateName, result);
 
     // a little janky because program-ab doesn't know the predicate filename,

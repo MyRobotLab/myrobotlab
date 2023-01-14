@@ -155,15 +155,15 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
   public void setMaxVoltage(int maxVolts) {
     int actualValue = (int) Math.round(maxVolts / 5.12);
-    info("setting max voltage to %d volts - actual value %f", actualValue);
+    info("setting max voltage to %d volts - actual value %d", maxVolts, actualValue);
     sendPacket(SET_MAX_VOLTAGE, actualValue);
   }
 
   public void setMinVoltage(int min) {
     int actualValue = (min - 6) * 5;
-    info("setting max voltage to %d volts - actual value %d", actualValue);
+    info("setting min voltage to %d volts - actual value %d", min, actualValue);
     if (actualValue < 0 || actualValue > 120) {
-      error("invalid value must be between 0 and 120 %d", actualValue);
+      error("invalid value must be between 0 and 120: %d", actualValue);
       return;
     }
     sendPacket(SET_MIN_VOLTAGE, actualValue);
@@ -237,7 +237,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
         driveBackwardsMotor2(Math.abs(power));
       }
     } else {
-      error("invalid port number %d", port);
+      error("invalid port number %s", port);
     }
   }
 

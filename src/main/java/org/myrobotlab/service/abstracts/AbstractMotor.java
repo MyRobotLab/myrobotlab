@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.checkerframework.checker.interning.qual.FindDistinct;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -167,7 +168,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   @Override
-  public boolean isAttached(MotorController controller) {
+  public boolean isAttached(@FindDistinct MotorController controller) {
     return this.controller == controller;
   }
 

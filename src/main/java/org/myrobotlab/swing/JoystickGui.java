@@ -95,6 +95,7 @@ public class JoystickGui extends ServiceGui implements ActionListener, ItemListe
     refresh.addActionListener(this);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();
@@ -234,6 +235,7 @@ public class JoystickGui extends ServiceGui implements ActionListener, ItemListe
     }
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void itemStateChanged(final ItemEvent e) {
     SwingUtilities.invokeLater(new Runnable() {

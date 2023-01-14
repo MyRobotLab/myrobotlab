@@ -64,6 +64,7 @@ public class OpenCVFilterKinectDepthGui extends OpenCVFilterGui implements Actio
     clearSamplePoints.addActionListener(this);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();

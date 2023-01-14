@@ -127,6 +127,7 @@ public class MotorHat4PiGui extends ServiceGui implements ActionListener, Change
     restoreListeners();
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
 
@@ -222,6 +223,7 @@ public class MotorHat4PiGui extends ServiceGui implements ActionListener, Change
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void stateChanged(ChangeEvent ce) {
     Object source = ce.getSource();

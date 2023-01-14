@@ -80,6 +80,7 @@ public class TwitterGui extends ServiceGui implements ActionListener {
     display.add(tweetPanel, BorderLayout.SOUTH);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent event) {
     Object o = event.getSource();

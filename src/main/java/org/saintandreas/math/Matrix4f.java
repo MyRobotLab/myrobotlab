@@ -31,6 +31,8 @@
  */
 package org.saintandreas.math;
 
+import org.checkerframework.checker.interning.qual.EqualsMethod;
+
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
@@ -1012,15 +1014,18 @@ public final class Matrix4f implements java.io.Serializable {
    *          the object to compare for equality
    * @return true if they are equal
    */
+  @EqualsMethod
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof Matrix4f) || o == null) {
-      return false;
-    }
-
     if (this == o) {
       return true;
     }
+
+    if (!(o instanceof Matrix4f)) {
+      return false;
+    }
+
+
 
     Matrix4f comp = (Matrix4f) o;
     if (Float.compare(m00, comp.m00) != 0) {

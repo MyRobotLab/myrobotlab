@@ -103,6 +103,7 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent event) {
     Object o = event.getSource();

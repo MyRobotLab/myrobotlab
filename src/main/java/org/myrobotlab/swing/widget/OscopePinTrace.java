@@ -167,6 +167,7 @@ public class OscopePinTrace extends JPanel implements ActionListener {
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();
@@ -333,7 +334,7 @@ public class OscopePinTrace extends JPanel implements ActionListener {
       lastX = drawPointX;
     }
 
-    valueLabel.setText(String.format("%.2f", pinData.value));
+    valueLabel.setText(String.format("%.2f", (float) pinData.value));
     // TODO - NOW IS THE TIME TO UPDATE BUFFERED IMAGES !!!
     // TODO - optimization of shifting the raster data ?
 

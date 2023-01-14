@@ -28,6 +28,7 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.checkerframework.checker.interning.qual.FindDistinct;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
@@ -447,7 +448,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     }
   }
 
-  public void detach(PinArrayControl pinArrayControl) {
+  public void detach(@FindDistinct PinArrayControl pinArrayControl) {
     if (this.pinArrayControl == pinArrayControl) {
       this.pinArrayControl = null;
       isPinArrayControlSet = false;

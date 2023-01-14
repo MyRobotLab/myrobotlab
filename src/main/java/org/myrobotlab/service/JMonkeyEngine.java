@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.checkerframework.checker.interning.qual.FindDistinct;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.cv.CvData;
 import org.myrobotlab.framework.Instantiator;
@@ -969,7 +970,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     }
   }
 
-  public Spatial getRootChild(Spatial spatial) {
+  public Spatial getRootChild(@FindDistinct Spatial spatial) {
     if (spatial == null) {
       log.error("spatial is null");
       return null;
@@ -981,7 +982,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       return null;
     }
 
-    while (p != null && p != rootNode) {
+    // Spatial uses default equals() so equivalent to p != rootNode
+    while (p != null && !p.equals(rootNode)) {
       c = p;
       p = c.getParent();
     }

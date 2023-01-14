@@ -82,6 +82,7 @@ public class Pcf8574Gui extends ServiceGui implements ActionListener {
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent event) {
     Object o = event.getSource();

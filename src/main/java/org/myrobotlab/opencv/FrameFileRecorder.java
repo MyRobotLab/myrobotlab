@@ -4,6 +4,8 @@ import java.io.File;
 
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameRecorder;
+import org.checkerframework.checker.formatter.qual.ConversionCategory;
+import org.checkerframework.checker.formatter.util.FormatUtil;
 import org.myrobotlab.service.OpenCV;
 
 public class FrameFileRecorder extends FrameRecorder {
@@ -34,7 +36,8 @@ public class FrameFileRecorder extends FrameRecorder {
 
   @Override
   public void record(Frame frame) throws Exception {
-    String filename = String.format(framesDir + File.separator + "%08d.%s", frameIndex, format);
+    String filename = String.format(FormatUtil.asFormat(framesDir + File.separator + "%08d.%s",
+            ConversionCategory.INT, ConversionCategory.GENERAL), frameIndex, format);
     CloseableFrameConverter converter = new CloseableFrameConverter();
     OpenCV.saveToFile(filename, converter.toImage(frame));
     converter.close();

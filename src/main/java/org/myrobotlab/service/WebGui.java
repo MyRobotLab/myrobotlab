@@ -43,6 +43,8 @@ import org.atmosphere.nettosphere.Handler;
 import org.atmosphere.nettosphere.Nettosphere;
 //import org.jboss.netty.handler.ssl.SslContext;
 //import org.jboss.netty.handler.ssl.util.SelfSignedCertificate;
+import org.checkerframework.checker.formatter.qual.ConversionCategory;
+import org.checkerframework.checker.formatter.qual.Format;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
@@ -238,7 +240,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public boolean isSsl = false;
 
-  public String startURL = "http://localhost:%d/#/tabs";
+  public @Format(ConversionCategory.INT) String startURL = "http://localhost:%d/#/tabs";
 
   transient LiveVideoStreamHandler stream = new LiveVideoStreamHandler();
 
@@ -1164,7 +1166,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
 
-  public void startBrowser(String URL) {
+  public void startBrowser(@Format(ConversionCategory.INT) String URL) {
     BareBonesBrowserLaunch.openURL(String.format(URL, port));
   }
 

@@ -99,6 +99,7 @@ public class Ads1115Gui extends ServiceGui implements ActionListener {
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent event) {
     log.info("Ads1115GUI actionPerformed");

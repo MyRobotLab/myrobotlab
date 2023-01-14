@@ -72,6 +72,7 @@ public class OledSsd1306Gui extends ServiceGui implements ActionListener {
   }
 
   @Override
+  @SuppressWarnings("not.interned")
   public void actionPerformed(final ActionEvent event) {
     // TODO Auto-generated method stub
     SwingUtilities.invokeLater(new Runnable() {

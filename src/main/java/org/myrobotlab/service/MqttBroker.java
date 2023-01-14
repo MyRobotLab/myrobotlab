@@ -483,7 +483,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
         byte[] encodedhash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
         // String credline = String.format(username + ":" +
         // StringUtil.bytesToHex(encodedhash));
-        String credline = String.format(username + ":" + bytesToHex(encodedhash));
+        String credline = username + ":" + bytesToHex(encodedhash);
         fos.write(credline.getBytes());
         fos.close();
       }

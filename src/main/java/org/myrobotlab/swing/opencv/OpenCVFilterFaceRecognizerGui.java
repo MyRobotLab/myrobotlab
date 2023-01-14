@@ -82,6 +82,7 @@ public class OpenCVFilterFaceRecognizerGui extends OpenCVFilterGui implements Ac
     display.add(jp2, gc);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();

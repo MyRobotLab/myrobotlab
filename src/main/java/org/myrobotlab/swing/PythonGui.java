@@ -50,6 +50,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultCaret;
 
+import org.checkerframework.checker.formatter.util.FormatUtil;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.rsyntaxtextarea.TextEditorPane;
@@ -156,6 +157,7 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
     return tabs.getTitleAt(tabs.getSelectedIndex());
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent arg0) {
 
@@ -440,6 +442,7 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void mousePressed(MouseEvent me) {
     // TODO Auto-generated method stub
@@ -463,13 +466,13 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
       String filename = FileUtil.getLastFileOpened();
       Script script = new Script(filename, newfile);
       addNewEditorPanel(script);
-      info("Loaded: " + FileUtil.getLastFileOpened());
+      info("Loaded: %s", FileUtil.getLastFileOpened());
       return;
     }
     if (FileUtil.getLastStatus() == null) {
       info("no file selected");
     } else {
-      info(FileUtil.getLastStatus());
+      info(FormatUtil.asFormat(FileUtil.getLastStatus()));
     }
     return;
   }

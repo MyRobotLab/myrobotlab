@@ -69,6 +69,7 @@ public class ThingSpeakGui extends ServiceGui implements ActionListener {
     display.add(input);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent event) {
     Object o = event.getSource();

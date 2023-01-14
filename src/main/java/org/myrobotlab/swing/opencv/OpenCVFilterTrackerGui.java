@@ -71,6 +71,7 @@ public class OpenCVFilterTrackerGui extends OpenCVFilterGui implements ActionLis
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();

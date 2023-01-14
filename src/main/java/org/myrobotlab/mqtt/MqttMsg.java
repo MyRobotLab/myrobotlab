@@ -1,5 +1,7 @@
 package org.myrobotlab.mqtt;
 
+import org.checkerframework.checker.interning.qual.EqualsMethod;
+
 import java.util.Objects;
 
 public class MqttMsg {
@@ -146,13 +148,28 @@ public class MqttMsg {
   }
 
   @Override
-  public boolean equals(Object obj) {
-    return (this == obj);
-  }
-
-  @Override
   public final int hashCode() {
     return Objects.hash(messageType, ts, dupe, qosLevel, retain, remainingLength, clientId, username, topicName, packetId, payload);
   }
 
+  @EqualsMethod
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    MqttMsg mqttMsg = (MqttMsg) o;
+
+    if (ts != mqttMsg.ts) return false;
+    if (dupe != mqttMsg.dupe) return false;
+    if (qosLevel != mqttMsg.qosLevel) return false;
+    if (retain != mqttMsg.retain) return false;
+    if (remainingLength != mqttMsg.remainingLength) return false;
+    if (packetId != mqttMsg.packetId) return false;
+    if (!Objects.equals(messageType, mqttMsg.messageType)) return false;
+    if (!Objects.equals(clientId, mqttMsg.clientId)) return false;
+    if (!Objects.equals(username, mqttMsg.username)) return false;
+    if (!Objects.equals(topicName, mqttMsg.topicName)) return false;
+    return Objects.equals(payload, mqttMsg.payload);
+  }
 }

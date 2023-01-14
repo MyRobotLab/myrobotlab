@@ -124,6 +124,7 @@ public class OpenCVFilterLKOpticalTrackGui extends OpenCVFilterGui implements Ac
     myService.send(boundServiceName, "publishFilterState", boundFilterName);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();

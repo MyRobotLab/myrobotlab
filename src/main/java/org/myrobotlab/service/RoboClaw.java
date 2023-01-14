@@ -273,7 +273,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
         driveBackwardM1(Math.abs(power));
       }
     } else {
-      error("invalid port number %d", port);
+      error("invalid port number %s", port);
     }
 
   }

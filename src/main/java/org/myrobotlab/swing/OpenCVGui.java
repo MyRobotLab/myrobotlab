@@ -241,6 +241,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
   }
 
   // gui events handled - never "set" status of a ui component here ...
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();

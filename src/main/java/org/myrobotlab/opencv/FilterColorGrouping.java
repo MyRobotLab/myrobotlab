@@ -148,6 +148,7 @@ public final class FilterColorGrouping {
     groupList = new ArrayList<Group>();
   }
 
+  @SuppressWarnings("not.interned")
   public Object process(BufferedImage output, BufferedImage image) {
     // TODO pre-allocate in init or constructor (init?)?
 

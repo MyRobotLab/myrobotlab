@@ -1309,6 +1309,21 @@
     <artifactId>async-http-client</artifactId>
     <version>2.12.3</version>
   </dependency>
+  <dependency>
+    <groupId>org.checkerframework</groupId>
+    <artifactId>checker-qual</artifactId>
+    <version>3.28.0</version>
+  </dependency>
+  <dependency>
+    <groupId>org.checkerframework</groupId>
+    <artifactId>checker</artifactId>
+    <version>3.28.0</version>
+  </dependency>
+  <dependency>
+    <groupId>org.checkerframework</groupId>
+    <artifactId>checker-util</artifactId>
+    <version>3.28.0</version>
+  </dependency>
 <!-- Runtime end -->
 
 <!-- Serial begin -->
@@ -1771,6 +1786,7 @@
                     <rules>
                         <banDuplicatePomDependencyVersions/>
                     </rules>
+
                 </configuration>
             </execution>
         </executions>
@@ -1924,7 +1940,21 @@
           <target>11</target>
           <optimize>true</optimize>
           <debug>true</debug>
-          <compilerArgument>-parameters</compilerArgument>          
+          <compilerArgument>-parameters</compilerArgument>
+          <annotationProcessors>
+            <!--<annotationProcessor>-->
+            <!--  org.checkerframework.checker.nullness.NullnessChecker-->
+            <!--</annotationProcessor>-->
+            <annotationProcessor>
+              org.checkerframework.checker.interning.InterningChecker
+            </annotationProcessor>
+            <!--<annotationProcessor>-->
+            <!--  org.checkerframework.checker.fenum.FenumChecker-->
+            <!--</annotationProcessor>-->
+            <annotationProcessor>
+              org.checkerframework.checker.formatter.FormatterChecker
+            </annotationProcessor>
+          </annotationProcessors>
         </configuration>
       </plugin>
 

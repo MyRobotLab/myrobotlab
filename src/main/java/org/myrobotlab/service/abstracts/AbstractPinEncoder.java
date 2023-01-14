@@ -1,5 +1,6 @@
 package org.myrobotlab.service.abstracts;
 
+import org.checkerframework.checker.interning.qual.FindDistinct;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.interfaces.EncoderControl;
@@ -24,7 +25,7 @@ public abstract class AbstractPinEncoder extends Service implements EncoderContr
   }
 
   @Override
-  public void attachEncoderController(EncoderController controller) {
+  public void attachEncoderController(@FindDistinct EncoderController controller) {
     if (this.controller == controller) {
       log.info("{} already attached to controller {}", getName(), controller.getName());
     }

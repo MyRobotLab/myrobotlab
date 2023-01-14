@@ -102,6 +102,7 @@ public class MqttGui extends ServiceGui implements ActionListener {
     });
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent event) {
     Object o = event.getSource();

@@ -96,6 +96,7 @@ public class SolrGui extends ServiceGui implements ActionListener {
   public final static Logger log = LoggerFactory.getLogger(SolrGui.class.toString());
   static final long serialVersionUID = 1L;
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent event) {
     // TODO Auto-generated method stub

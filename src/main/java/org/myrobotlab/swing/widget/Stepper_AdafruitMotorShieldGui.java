@@ -45,6 +45,7 @@ public class Stepper_AdafruitMotorShieldGui extends StepperControllerPanel imple
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();

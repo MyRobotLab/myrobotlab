@@ -27,6 +27,7 @@ package org.myrobotlab.cmdline;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class CmdLine extends HashMap<String, CcmdParam> {
 
@@ -155,7 +156,7 @@ public class CmdLine extends HashMap<String, CcmdParam> {
         CcmdParam cmd = new CcmdParam();
 
         // only add non-empty args
-        if (arg != "") {
+        if (!Objects.equals(arg, "")) {
           cmd.m_strings.add(arg);
         }
 

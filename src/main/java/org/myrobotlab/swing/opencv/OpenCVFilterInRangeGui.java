@@ -165,6 +165,7 @@ public class OpenCVFilterInRangeGui extends OpenCVFilterGui implements ChangeLis
     });
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void stateChanged(ChangeEvent e) {
     Object o = e.getSource();

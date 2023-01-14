@@ -48,6 +48,7 @@ public class OpenCVFilterDetectorGui extends OpenCVFilterGui implements ActionLi
     learn.addActionListener(this);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();

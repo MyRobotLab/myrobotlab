@@ -252,7 +252,7 @@ public class AdafruitLEDBackpack implements I2CDevice {
     // d1 d2 : d3 d4
     byte[] display = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-    if (data == null || data == "") {
+    if (data == null || data.equals("")) {
       writeDisplay(display);
       return data;
     }

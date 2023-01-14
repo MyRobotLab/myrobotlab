@@ -19,6 +19,8 @@ import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
+import org.checkerframework.checker.formatter.qual.ConversionCategory;
+import org.checkerframework.checker.formatter.util.FormatUtil;
 import org.deeplearning4j.nn.modelimport.keras.exceptions.InvalidKerasConfigurationException;
 import org.deeplearning4j.nn.modelimport.keras.exceptions.UnsupportedKerasConfigurationException;
 import org.myrobotlab.logging.LoggerFactory;
@@ -119,7 +121,7 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
   }
 
   public static String padRight(String s, int n) {
-    return String.format("%1$-" + n + "s", s);
+    return String.format(FormatUtil.asFormat("%1$-" + n + "s", ConversionCategory.GENERAL), s);
   }
 
   public void drawRect(IplImage image, Rect rect, CvScalar color) {

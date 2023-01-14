@@ -80,6 +80,7 @@ public class WebkitSpeechRecognitionGui extends ServiceGui implements ActionList
 
   }
 
+  @SuppressWarnings({"not.interned", "argument"})
   @Override
   public void actionPerformed(final ActionEvent event) {
     SwingUtilities.invokeLater(new Runnable() {

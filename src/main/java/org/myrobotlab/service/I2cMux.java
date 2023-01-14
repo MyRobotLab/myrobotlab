@@ -5,8 +5,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
+import org.checkerframework.checker.interning.qual.FindDistinct;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -241,10 +243,10 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   }
 
   @Override
-  public void attach(I2CController controller, String deviceBus, String deviceAddress) {
+  public void attach(@FindDistinct I2CController controller, String deviceBus, String deviceAddress) {
 
     if (isAttached && this.controller != controller) {
-      log.error("Already attached to {}, use detach({}) first", this.controllerName);
+      log.error("Already attached to {}, use detach({}) first", this.controllerName, this.controllerName);
     }
 
     controllerName = controller.getName();
@@ -264,7 +266,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     if (isAttached(controller))
       return;
 
-    if (this.controllerName != controller.getName()) {
+    if (!Objects.equals(this.controllerName, controller.getName())) {
       log.error("Trying to attached to {}, but already attached to ({})", controller.getName(), this.controllerName);
       return;
     }

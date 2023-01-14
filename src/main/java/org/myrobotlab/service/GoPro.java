@@ -7,6 +7,8 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+import java.util.Objects;
+
 public class GoPro extends Service {
 
   transient public HttpClient http;
@@ -43,7 +45,7 @@ public class GoPro extends Service {
   }
 
   public void turnCameraOff() {
-    if (cameraModel == "HERO4") {
+    if (Objects.equals(cameraModel, "HERO4")) {
       sendHttpGet("/gp/gpControl/command/system/sleep");
     } else {
       System.out.println("Select your Camera Before");
@@ -51,9 +53,9 @@ public class GoPro extends Service {
   }
 
   public void shutterOn() {
-    if (cameraModel == "HERO4") {
+    if (Objects.equals(cameraModel, "HERO4")) {
       sendHttpGet("/gp/gpControl/command/shutter?p=1");
-    } else if (cameraModel == "HERO3" && password != null) {
+    } else if (Objects.equals(cameraModel, "HERO3") && password != null) {
       sendHttpGet("/bacpac/SH?t=" + password + "&p=%01");
     } else {
       log.error("Select your Camera model and insert your wifi password before");

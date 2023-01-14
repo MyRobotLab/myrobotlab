@@ -87,6 +87,7 @@ public class OpenCVFilterAffineGui extends OpenCVFilterGui implements ChangeList
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent event) {
     // TODO Auto-generated method stub
@@ -115,6 +116,7 @@ public class OpenCVFilterAffineGui extends OpenCVFilterGui implements ChangeList
 
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void stateChanged(ChangeEvent e) {
     Object o = e.getSource();

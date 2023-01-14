@@ -32,6 +32,8 @@
 
 package org.saintandreas.math;
 
+import org.checkerframework.checker.interning.qual.EqualsMethod;
+
 import javax.annotation.Nonnull;
 
 /**
@@ -218,15 +220,18 @@ public final class Vector3f extends Vector<Vector3f> implements java.io.Serializ
    *          the object to compare for equality
    * @return true if they are equal
    */
+  @EqualsMethod
   @Override
   public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+
     if (!(o instanceof Vector3f)) {
       return false;
     }
 
-    if (this == o) {
-      return true;
-    }
+
 
     Vector3f comp = (Vector3f) o;
     if (Float.compare(x, comp.x) != 0)

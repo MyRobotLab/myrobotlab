@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
 
+import org.checkerframework.checker.formatter.qual.FormatMethod;
+import org.checkerframework.checker.formatter.util.FormatUtil;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
@@ -115,6 +117,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     serial.open(port, rate, databits, stopbits, parity);
   }
 
+  @FormatMethod
   public void write(String cmd, Object... params) {
     if (serial == null || !serial.isConnected()) {
       error("must be connected to serial port - connect(port)");
@@ -154,7 +157,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     // String cmd = "#%dP%d";
     // write("#%dP%d", servo.getPin(),
     // (int)servo.toUs(servo.getTargetOutput()));
-    write(sb.toString());
+    write(FormatUtil.asFormat(sb.toString()));
   }
 
   @Override
@@ -167,7 +170,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
       // sb.append("T").append(velocity * 10); // T is us per second
       sb.append("T").append(velocity * 100);
     }
-    write(sb.toString());
+    write(FormatUtil.asFormat(sb.toString()));
   }
 
   @Override

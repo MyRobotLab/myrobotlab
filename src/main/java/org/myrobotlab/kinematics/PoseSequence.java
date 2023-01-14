@@ -22,7 +22,7 @@ public class PoseSequence {
     if (waitTimeMs == null) {
       return name;
     } else {
-      return String.format("%s %d ms");
+      return String.format("%s %d ms", name, waitTimeMs);
     }
   }
 }

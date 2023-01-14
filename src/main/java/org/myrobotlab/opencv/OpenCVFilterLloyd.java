@@ -37,6 +37,8 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_dnn.Net;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
+import org.checkerframework.checker.formatter.qual.ConversionCategory;
+import org.checkerframework.checker.formatter.util.FormatUtil;
 import org.myrobotlab.deeplearning4j.CustomModel;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Deeplearning4j;
@@ -225,7 +227,7 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
   }
 
   public static String padRight(String s, int n) {
-    return String.format("%1$-" + n + "s", s);
+    return String.format(FormatUtil.asFormat("%1$-" + n + "s", ConversionCategory.GENERAL), s);
   }
 
   private void displayResult(IplImage image, ArrayList<YoloDetectedObject> result) {

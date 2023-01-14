@@ -70,6 +70,7 @@ public class FiniteStateMachineGui extends ServiceGui implements ActionListener 
     set.addActionListener(this);
   }
 
+  @SuppressWarnings("not.interned")
   @Override
   public void actionPerformed(ActionEvent event) {
     Object o = event.getSource();

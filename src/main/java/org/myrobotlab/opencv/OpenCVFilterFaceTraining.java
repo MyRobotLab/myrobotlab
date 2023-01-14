@@ -165,7 +165,7 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
 
   // all machine dirs with have underscore "_"{subclass}
   File rootTrainingDir = new File("training");
-  File facesSubclass = new File(String.format(rootTrainingDir + File.separator + "faces"));
+  File facesSubclass = new File(rootTrainingDir + File.separator + "faces");
 
   public boolean saveFaces = true;
 
@@ -778,7 +778,7 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
   private String getMachineFileName(File subclass, int frameIndex, int faceCnt) {
     String parent = subclass.getParent();
     String machineSubclass = "_" + subclass.getName();
-    return String.format(parent + File.separator + machineSubclass + File.separator + String.format("%07d-%03d.png", frameIndex, faceCnt));
+    return parent + File.separator + machineSubclass + File.separator + String.format("%07d-%03d.png", frameIndex, faceCnt);
   }
 
   @Override
