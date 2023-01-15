@@ -460,7 +460,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public static void main(String[] args) {
     try {
 
-      // Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
+      // Runtime.main(new String[] { "--id", "admin"});
       LoggingFactory.init("INFO");
 
       // Runtime.startConfig("localspeech-01");

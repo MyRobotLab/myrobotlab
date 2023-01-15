@@ -2504,7 +2504,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     if (name == null && type == null) {
       RuntimeConfig rconfig = (RuntimeConfig) Runtime.getInstance().readServiceConfig(configName, "runtime");
       if (rconfig == null) {
-        log.error("request to start but config %s does not exist", configName);
+        log.error("request to start but config {} does not exist", configName);
         return null;
       }
       for (String rname : rconfig.registry) {

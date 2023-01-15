@@ -599,7 +599,7 @@ public class Joystick extends Service implements AnalogPublisher {
   public static void main(String args[]) {
     try {
 
-      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
+      Runtime.main(new String[] { "--id", "admin"});
       LoggingFactory.init("INFO");
 
       Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
