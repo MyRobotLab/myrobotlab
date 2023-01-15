@@ -40,6 +40,7 @@ import java.util.TreeSet;
 import org.myrobotlab.codec.ClassUtil;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.CodecUtils.ApiDescription;
+import org.myrobotlab.framework.CmdConfig;
 import org.myrobotlab.framework.CmdOptions;
 import org.myrobotlab.framework.DescribeQuery;
 import org.myrobotlab.framework.DescribeResults;
@@ -219,6 +220,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * command line options
    */
   static CmdOptions options = new CmdOptions();
+  
+  /**
+   * command line configuration
+   */
+  static CmdConfig startYml = null;
 
   /**
    * the platform (local instance) for this runtime. It must be a non-static as
@@ -891,6 +897,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           try {
             if (options.config != null) {
               Runtime.startConfig(options.config);
+            } else if (startYml != null && startYml.config != null) {
+              Runtime.startConfig(startYml.config);
             }
           } catch (Exception e) {
             log.info("runtime will not be loading config");
@@ -3037,8 +3045,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
             runtime.releaseService();
           }
 
-          options.fromLauncher = true; // from launcher meaningless now
-
           // make sure python is included
           // options.services.add("python");
           // options.services.add("Python");
@@ -4326,10 +4332,26 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         return;
       }
 
-      // id always required
-      if (options.id == null) {
-        options.id = NameGenerator.getName();
+      startYml = null;
+      File checkStart = new File("start.yml");
+      if (checkStart.exists()) {
+        String yml = FileIO.toString("start.yml");
+        startYml = CodecUtils.fromYaml(yml, CmdConfig.class);
       }
+
+      
+      // id always required - precedence 
+      // if none supplied one will be generated
+      // if in start.yml it will be used
+      // if supplied by the command line it will be used
+      // command line has the highest precedence
+      if (options.id == null) {
+        if (startYml == null || startYml.id == null) {
+          options.id = NameGenerator.getName();
+        } else {
+          options.id = startYml.id;
+        }
+      }      
 
       // String id = (options.fromLauncherx) ? options.id :
       // String.format("%s-launcher", options.id);
@@ -4347,22 +4369,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       if (options.virtual) {
         Platform.setVirtual(true);
-      }
-
-      if (options.addKeys != null) {
-        if (options.addKeys.length < 2) {
-          Runtime.mainHelp();
-          shutdown();
-        }
-        Security security = Runtime.getSecurity();
-        for (int i = 0; i < options.addKeys.length; i += 2) {
-          security.setKey(options.addKeys[i], options.addKeys[i + 1]);
-          log.info("encrypted key : {} XXXXXXXXXXXXXXXXXXXXXXX added to {}", options.addKeys[i], security.getStoreFileName());
-        }
-
-        if (options.services.size() == 0) {
-          shutdown();
-        }
       }
 
       // FIXME TEST THIS !! 0 length, single service, multiple !
@@ -4385,7 +4391,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // if a you specify a config file it becomes the "base" of configuration
       // inline flags will still override values
-      if (options.config != null) {
+      if (options.config != null || (startYml != null && startYml.config != null)) {
         // if this is a valid config, it will load
         Runtime.getInstance();
       }
@@ -4731,6 +4737,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       setConfig(configName);
+      
+      // conditional boolean to flip and save a config name to start.yml ?
+      startYml = new CmdConfig();
+      startYml.id = getId();
+      startYml.config = configName;
+      FileIO.toFile("start.yml", CodecUtils.toYaml(startYml));
 
       // get service
       if (serviceName == null) {

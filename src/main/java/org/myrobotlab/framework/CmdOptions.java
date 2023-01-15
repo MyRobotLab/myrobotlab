@@ -26,7 +26,7 @@ import picocli.CommandLine.Option;
  * </pre>
  */
 @Command(name = "java -jar myrobotlab.jar ")
-public class CmdOptions {
+public class CmdOptions {  
 
   public final String DEFAULT_CONNECT = "http://localhost:8888";
 
@@ -38,11 +38,6 @@ public class CmdOptions {
     }
     return false;
   }
-
-  // FIXME - should work with a startup ...
-  @Option(names = { "-k", "--add-key" }, arity = "2..*", description = "adds a key to the key store\n"
-      + "@bold,italic java -jar myrobotlab.jar -k amazon.polly.user.key ABCDEFGHIJKLM amazon.polly.user.secret Fidj93e9d9fd88gsakjg9d93")
-  public String addKeys[];
 
   // launcher ??
   @Option(names = { "-a", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
@@ -59,15 +54,6 @@ public class CmdOptions {
                                       * defaultValue = DEFAULT_CONNECT,
                                       */ fallbackValue = DEFAULT_CONNECT, description = "connects this mrl instance to another mrl instance - default is " + DEFAULT_CONNECT)
   public String connect = null;
-
-  // TODO - daemon / fork
-  @Option(names = { "-d", "--daemon" }, description = "daemon - fork process from current process - no inherited io no cli")
-  public boolean daemon = false;
-
-  // if --from-launcher knows to createAndStart service on -s
-  @Option(names = { "--from-launcher" }, description = "prevents starting in interactive mode - reading from stdin")
-  @Deprecated /* no more java launcher - we use scripts now */
-  public boolean fromLauncher = true; // from launcher meaningless now
 
   @Option(names = { "-h", "-?", "--help" }, description = "shows help")
   public boolean help = false;
@@ -151,13 +137,6 @@ public class CmdOptions {
 
     List<String> cmd = new ArrayList<>();
 
-    if (addKeys != null) {
-      cmd.add("-k");
-      for (int i = 0; i < addKeys.length; ++i) {
-        cmd.add(addKeys[i]);
-      }
-    }
-
     if (autoUpdate) {
       cmd.add("-a");
     }
@@ -170,10 +149,6 @@ public class CmdOptions {
     if (connect != null) {
       cmd.add("-c");
       cmd.add(connect);
-    }
-
-    if (daemon) {
-      cmd.add("-d");
     }
 
     if (invoke != null) {
