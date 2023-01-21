@@ -623,4 +623,8 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
     play(file);
   }
 
+  public double getPeakMultiplier() {
+    return ((AudioFileConfig)config).peakMultiplier;
+  }
+
 }

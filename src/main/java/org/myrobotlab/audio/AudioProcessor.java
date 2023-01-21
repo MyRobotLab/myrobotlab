@@ -218,7 +218,6 @@ public class AudioProcessor extends Thread {
             sleep(100);
           }
           // Compute the peak value and publish it.
-          AudioFileConfig config = (AudioFileConfig) audioFile.getConfig();
           if (cnt % config.peakSampleInterval == 0) {
             float peak = 0f;
             int b = buffer.length;

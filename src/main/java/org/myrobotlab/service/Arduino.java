@@ -2334,18 +2334,16 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       serial = (Serial) startPeer("serial");
       if (serial == null) {
         log.error("serial is null");
-      }
-      msg = new Msg(this, serial);
+      }      
+      msg.setSerial(serial);
       serial.addByteListener(this);
     } else {
       // TODO: figure out why this gets called so often.
       log.info("Init serial we already have a msg class.");
     }
 
-    ArduinoConfig c = (ArduinoConfig) config;
-
-    if (c.connect && c.port != null) {
-      connect(c.port);
+    if (config.connect && config.port != null) {
+      connect(config.port);
     }
 
     return config;
