@@ -172,8 +172,6 @@ public class Intro extends Service {
       brain.attach(bot);
       bot.attach(brain);
 
-      // Runtime.main(new String[] { "--from-launcher" });// FIXME - get rid of
-      // this !
       // similar to a peer reserve - ie - specifying type - now autoload
       // ProgramAB brain = (ProgramAB)Runtime.start("brain");
       Runtime.start("brain", "ProgramAB");

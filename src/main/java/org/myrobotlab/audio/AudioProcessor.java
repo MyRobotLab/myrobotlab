@@ -204,7 +204,7 @@ public class AudioProcessor extends Thread {
               control.setValue(balance);
               balance = targetBalance;
             } catch (Exception e) {
-              log.error("setValue on line control failed",e);
+              log.error("floatcontrol threw", e);
             }
           }
 

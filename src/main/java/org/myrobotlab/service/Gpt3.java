@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
@@ -14,7 +13,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.Response;
 import org.myrobotlab.service.config.Gpt3Config;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Utterance;
 import org.myrobotlab.service.interfaces.ResponsePublisher;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -72,6 +70,8 @@ public class Gpt3 extends Service implements TextListener, TextPublisher, Uttera
     try {
 
       Gpt3Config c = (Gpt3Config) config;
+      
+      invoke("publishRequest", text);
 
       if (text == null || text.trim().length() == 0) {
         log.info("emtpy text, not responding");
@@ -139,6 +139,10 @@ public class Gpt3 extends Service implements TextListener, TextPublisher, Uttera
       error(e);
     }
     return null;
+  }
+  
+  public String publishRequest(String text) {
+    return text;
   }
 
   public void setToken(String token) {
@@ -228,7 +232,11 @@ public class Gpt3 extends Service implements TextListener, TextPublisher, Uttera
       LoggingFactory.init(Level.INFO);
 
       // Runtime runtime = Runtime.getInstance();
-      Runtime.startConfig("gpt3-01");
+      // Runtime.startConfig("gpt3-01");
+
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
 
       /*
        * Gpt3 i01_chatBot = (Gpt3) Runtime.start("i01.chatBot", "Gpt3");

@@ -31,6 +31,15 @@ angular.module('mrlapp.service.Gpt3Gui', []).controller('Gpt3GuiCtrl', ['$scope'
             }
             $scope.$apply()
             break
+        case 'onRequest':
+            request = {"username":"friend", "text":data}
+            $scope.utterances.push(request)
+            // remove the beginning if we are at maxRecords
+            if ($scope.utterances.length > $scope.maxRecords) {
+                $scope.utterances.shift()
+            }
+            $scope.$apply()
+            break
         case 'onEpoch':
             $scope.onEpoch = data
             $scope.$apply()
@@ -41,6 +50,7 @@ angular.module('mrlapp.service.Gpt3Gui', []).controller('Gpt3GuiCtrl', ['$scope'
         }
     }
 
+    msg.subscribe('publishRequest')
     msg.subscribe('publishUtterance')
     msg.subscribe(this)
 }

@@ -4,19 +4,25 @@
     <a href="" ng-show="showInstructions" ng-click="showInstructions=false">hide</a>
 </div>
 <div class="row" ng-show="showInstructions">
+
+    <ul>
+        <li>Go to <a href="https://beta.openai.com/account/api-keys">https://beta.openai.com/account/api-keys</a></li>
+        <li>Sign up</li>        
+        <li>Create a new key by clicking the "Create new secret key" button</li>
+    </ul>
+
     Official Documentation : <a href="https://beta.openai.com/account/api-keys">OpenAi Api Keys</a>
     <br/>
 </div>
 <div class="row">
     <img ng-show="service.config.token" src="/connected.png"/>
     <img ng-show="!service.config.token" src="/disconnected.png"/>
-    <button class="btn btn-default" ng-click="msg.disconnect();msg.broadcastState()">set token</button>
 </div>
 <div class="row">
     <form class="form-inline">
         token<br/>
         <input class="form-control" type="password" ng-model="service.config.token" placeholder="bot token" title="token">
-        <button class="btn btn-default" ng-click="msg.setToken(service.config.token);msg.save()">save</button>
+        <button class="btn btn-default" ng-click="msg.setToken(service.config.token);msg.save()">set token</button>
     </form>
 </div>
 <div class="row" ng-show="service.config.token">

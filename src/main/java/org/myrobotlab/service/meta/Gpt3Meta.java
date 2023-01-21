@@ -16,21 +16,15 @@ public class Gpt3Meta extends MetaData {
   public Gpt3Meta() {
 
     // add a cool description
-    addDescription("used as a general template");
-
-    // false will prevent it being seen in the ui
-    setAvailable(true);
-
-    // not worth it
-    // addDependency("com.theokanning.openai-gpt3-java", "client", "0.8.0");
-
-    setAvailable(false);
+    addDescription("Gpt3 api interface");
 
     // add it to one or many categories
-    addCategory("general");
+    addCategory("AI");
+    
+    addPeer("http", "HttpClient");
+    
+    setCloudService(true);
 
-    // add a sponsor to this service
-    // the person who will do maintenance
     // setSponsor("GroG");
 
   }
