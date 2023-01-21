@@ -161,14 +161,6 @@
   </dependency>
 <!-- AudioFile end -->
 
-<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-gmail -->
-<dependency>
-    <groupId>com.google.apis</groupId>
-    <artifactId>google-api-services-gmail</artifactId>
-    <version>v1-rev110-1.25.0</version>
-</dependency>
-
-
 <!-- AzureTranslator begin -->
   <dependency>
     <groupId>com.squareup.okhttp3</groupId>
@@ -1980,7 +1972,6 @@
           </includes>
           <excludes>
             <exclude>**/integration/*</exclude>
-            <exclude>**/OpenCV*</exclude>
           </excludes>
              <systemPropertyVariables>
                   <!-- 
