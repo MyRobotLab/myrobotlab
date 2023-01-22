@@ -282,7 +282,7 @@ public class GoogleSearch extends Service implements ImagePublisher, TextPublish
   public static void main(String[] args) {
     try {
 
-      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
+      Runtime.main(new String[] { "--id", "admin"});
       LoggingFactory.init(Level.INFO);
 
       GoogleSearch google = (GoogleSearch) Runtime.start("google", "GoogleSearch");

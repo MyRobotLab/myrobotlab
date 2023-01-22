@@ -326,7 +326,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
   public static void main(String[] args) {
     try {
 
-      Runtime.main(new String[] { "--from-launcher" });
+      Runtime.main(new String[] {});
       Runtime.start("intro", "Intro");
       Runtime.start("python", "Python");
       Platform.setVirtual(true);

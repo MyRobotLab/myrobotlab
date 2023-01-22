@@ -91,8 +91,6 @@ public class Launcher {
     // main class
     cmd.add("org.myrobotlab.service.Runtime");
 
-    options.fromLauncher = true; // from launcher meaningless now
-
     cmd.addAll(options.getOutputCmd());
 
     // FIXME - daemonize? does that mean handle stream differently?

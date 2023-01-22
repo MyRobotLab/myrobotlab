@@ -588,7 +588,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
   public static void main(String[] args) {
     try {
       LoggingFactory.init("info");
-      Runtime.main(new String[] { "--id", "c2", "--from-launcher" });
+      Runtime.main(new String[] { "--id", "c2"});
       Python python = (Python) Runtime.start("python", "Python");
 
       python.exec("test_value = None\ndef test(msg):\n\tglobal test_value\n\ttest_value = msg\n\tprint(msg)");

@@ -2016,7 +2016,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   public static void main(String[] args) throws Exception {
 
     try {
-      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
+      Runtime.main(new String[] { "--id", "admin"});
       LoggingFactory.init("INFO");
 
       // Runtime.getInstance().load();
