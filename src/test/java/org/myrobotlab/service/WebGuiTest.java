@@ -29,6 +29,7 @@ public class WebGuiTest extends AbstractTest {
     webgui2.startService();
     
     Runtime.start("servoApiTest","Servo");
+    Runtime.start("pythonApiTest", "Python");
     // need to wait for the OS to open the port
     Service.sleep(3);
   }
@@ -72,6 +73,22 @@ public class WebGuiTest extends AbstractTest {
     ret = new String(bytes);
     assertTrue(ret.contains("enableAutoDisable"));
 
+  }
+
+  @Test
+  public void urlEncodingTest() {
+    //exec("print \"hello\"")
+    byte[] bytes = Http.get("http://localhost:8889/api/service/pythonApiTest/exec/%22print+%5C%22hello%5C%22%22");
+    String ret = new String(bytes);
+    assertEquals("true", ret);
+  }
+
+  @Test
+  public void noQuotesTest() {
+    //exec(print)
+    byte[] bytes = Http.get("http://localhost:8889/api/service/pythonApiTest/exec/print");
+    String ret = new String(bytes);
+    assertEquals("true", ret);
   }
 
   @Test
