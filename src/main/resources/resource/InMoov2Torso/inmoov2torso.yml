@@ -1,4 +1,5 @@
 !!org.myrobotlab.service.config.InMoov2TorsoConfig
+listeners: null
 peers:
   lowStom:
     autoStart: true

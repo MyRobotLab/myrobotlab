@@ -1,6 +1,7 @@
 !!org.myrobotlab.service.config.PirConfig
 controller: null
 enable: false
+listeners: null
 peers: null
 pin: null
 rate: null

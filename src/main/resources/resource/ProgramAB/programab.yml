@@ -4,6 +4,7 @@ bots: [
   ]
 currentBotName: Alice
 currentUserName: null
+listeners: null
 peers:
   search:
     autoStart: true
@@ -11,6 +12,4 @@ peers:
     type: Wikipedia
 sleep: false
 textFilters: null
-textListeners: null
 type: ProgramAB
-utteranceListeners: null

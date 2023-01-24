@@ -43,9 +43,9 @@ public class SolrMeta extends MetaData {
     exclude("com.fasterxml.jackson.core", "jackson-databind");
     exclude("com.fasterxml.jackson.core", "jackson-annotations");
 
-    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.13.3");
-    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.13.3");
-    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.13.3");
+    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.14.0");
+    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.14.0");
+    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.14.0");
 
     addDependency("org.apache.solr", "solr-solrj", solrVersion);
 

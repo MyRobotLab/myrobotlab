@@ -160,10 +160,6 @@ public abstract class OpenCVFilter implements Serializable, CvFilter {
     return null;
   }
 
-  static public String putCacheFile(String url, byte[] data) {
-    return putCacheFile(url, data);
-  }
-
   static private Mat read(String filename) {
     return imread(filename, IMREAD_UNCHANGED);
   }
