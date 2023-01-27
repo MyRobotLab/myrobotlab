@@ -161,14 +161,6 @@
   </dependency>
 <!-- AudioFile end -->
 
-<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-gmail -->
-<dependency>
-    <groupId>com.google.apis</groupId>
-    <artifactId>google-api-services-gmail</artifactId>
-    <version>v1-rev110-1.25.0</version>
-</dependency>
-
-
 <!-- AzureTranslator begin -->
 <!-- Duplicate entry for com.squareup.okhttp3-okhttp-3.9.0 skipping -->
 <!-- AzureTranslator end -->

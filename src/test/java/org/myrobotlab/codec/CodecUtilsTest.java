@@ -6,8 +6,15 @@ import java.util.LinkedHashMap;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.myrobotlab.framework.MRLListener;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.test.AbstractTest;
+
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class CodecUtilsTest extends AbstractTest {
 
