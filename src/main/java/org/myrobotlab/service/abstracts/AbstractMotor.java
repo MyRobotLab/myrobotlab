@@ -130,7 +130,8 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     // so that we "try" to maintain a standard default of -1.0 <=> 1.0 with same
     // input limits
     // "bottom" half of the mapper will be set by the controller
-    mapper.map(min, max, -1.0, 1.0);
+    registerForInterfaceChange(MotorController.class);
+    // mapper.map(min, max, -1.0, 1.0);
     // Runtime.getInstance().attachServiceLifeCycleListener(getName());
     refreshControllers();
   }
@@ -152,7 +153,6 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   public Set<String> refreshControllers() {
     controllers.clear();
     controllers.addAll(Runtime.getServiceNamesFromInterface(MotorController.class));
-    broadcastState();
     return controllers;
   }
 
@@ -229,6 +229,12 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   public void map(double minX, double maxX, double minY, double maxY) {
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    c.minIn = minX;
+    c.maxIn = maxX;
+    c.minOut = minY;
+    c.maxOut = maxY;
+
     mapper.map(minX, maxX, minY, maxY);
     broadcastState();
   }
@@ -456,13 +462,18 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   public ServiceConfig apply(ServiceConfig c) {
     GeneralMotorConfig config = (GeneralMotorConfig) super.apply(c);
 
-    if (config.minIn != null) {
-      mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
-    } else {
-      mapper = new MapperLinear();
+    mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
+    // mapper.setInverted(config.inverted);
+    // mapper.setClip(config.clip);
+
+    // FIXME ?? future use only ServiceConfig.listeners ?
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch (Exception e) {
+        error(e);
+      }
     }
-    mapper.setInverted(config.inverted);
-    mapper.setClip(config.clip);
 
     if (locked) {
       lock();

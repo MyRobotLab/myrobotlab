@@ -170,14 +170,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   protected final Set<String> serviceTypes = new HashSet<>();
 
   /**
-   * the path of the configuration directory
+   * The directory name currently being used for config. This is NOT full path
+   * name. It cannot be null, it cannot have "/" or "\" in the name - it has to
+   * be a valid file name for the OS. It's defaulted to "default". Changed often
    */
-  protected String configPath = null;
+  protected String configName = "default";
 
   /**
-   * default parent path of configPath
+   * default parent path of configPath - rarely changed FIXME - don't make it
+   * static !
    */
-  static final public String DEFAULT_CONFIG_DIR = "data" + fs + "config";
+  static final protected String configRoot = "data" + fs + "config";
 
   /**
    * State variable reporting if runtime is currently starting services from
@@ -237,7 +240,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * command line options
    */
   static CmdOptions options = new CmdOptions();
-  
+
   /**
    * command line configuration
    */
@@ -1303,28 +1306,21 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   // FIXME !!! - use single implementation that gets parents
   @Deprecated /*
                * no longer used or needed - change events are pushed no longer
-               * pulled
+               * pulled <-- Over complicated solution
                */
   public static synchronized List<ServiceInterface> getServicesFromInterface(Class<?> interfaze) {
     List<ServiceInterface> ret = new ArrayList<ServiceInterface>();
 
-    Iterator<String> it = registry.keySet().iterator();
-    String serviceName;
-    ServiceInterface sw;
-    Class<?> c;
-    Class<?>[] interfaces;
-    Class<?> m;
-    while (it.hasNext()) {
-      serviceName = it.next();
-      sw = registry.get(serviceName);
-      c = sw.getClass();
-      interfaces = c.getInterfaces();
-      for (int i = 0; i < interfaces.length; ++i) {
-        m = interfaces[i];
-
-        if (m.equals(interfaze)) {
-          ret.add(sw);
+    for (String service : getServiceNames()) {
+      Class<?> clazz = getService(service).getClass();
+      while (clazz != null) {
+        for (Class<?> inter : clazz.getInterfaces()) {
+          if (inter.getName().equals(interfaze.getName())) {
+            ret.add(getService(service));
+            continue;
+          }
         }
+        clazz = clazz.getSuperclass();
       }
     }
     return ret;
@@ -1588,9 +1584,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * CLI command processor runs in its own thread and takes commands according
    * to the CLI API.
    * 
-   * FIXME - have another shell script which starts jar as ws client with cli interface
-   * Remove this std in/out - it is overly complex and different OSs handle it differently
-   * Windows Java updates have broken it several times
+   * FIXME - have another shell script which starts jar as ws client with cli
+   * interface Remove this std in/out - it is overly complex and different OSs
+   * handle it differently Windows Java updates have broken it several times
    *
    * @param in
    *          The input stream to take commands from
@@ -2111,24 +2107,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public List<String> publishConfigList() {
     configList = new ArrayList<>();
 
-    File configDir = null;
-
-    if (configPath != null) {
-      try {
-        configDir = new File(configPath).getParentFile();
-      } catch (Exception e) {
-      }
+    File configDirFile = new File(configRoot);
+    if (!configDirFile.exists() || !configDirFile.isDirectory()) {
+      error("%s config root does not exist", configDirFile.getAbsolutePath());
+      return configList;
     }
 
-    if (configDir == null) {
-      configDir = new File("data" + fs + "config");
-    }
-
-    if (!configDir.exists()) {
-      configDir.mkdirs();
-    }
-
-    File[] files = configDir.listFiles();
+    File[] files = configDirFile.listFiles();
     for (File file : files) {
       String n = file.getName();
 
@@ -2168,8 +2153,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * Release a specific service. Releasing shuts down the service and removes it
    * from registries.
    *
-   * @param fullName full name
-   *          The service to be released
+   * @param fullName
+   *          full name The service to be released
    *
    */
   static public void release(String fullName) {
@@ -2326,7 +2311,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   @Override
   public void connect(String url) {
     try {
-      
+
       // TODO - do auth, ssl and unit tests for them
       // TODO - get session id
       // request default describe - on describe do registrations .. zzz
@@ -2339,12 +2324,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       if (!url.contains("id=")) {
         url += "?id=" + getId();
       }
-      
-      WsClient client2 = new WsClient();      
+
+      WsClient client2 = new WsClient();
       client2.connect(this, url);
 
-//      WsClient client = new WsClient();
-//      Connection c = client.connect(this, getFullName(), getId(), url);
 
       // URI uri = new URI(url);
       // adding "id" as full url :P ... because we don't know it !!!
@@ -2364,7 +2347,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // addendum
       connection.put("User-Agent", "runtime-client");
-      
+
       addConnection(client2.getId(), url, connection);
 
       // direct send - may not have and "id" so it will be too runtime vs
@@ -2501,9 +2484,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     Runtime runtime = Runtime.getInstance();
     runtime.processingConfig = true; // multiple inbox threads not available
     runtime.invoke("publishStartConfig", configName);
-    RuntimeConfig rtConfig = (RuntimeConfig) runtime.readServiceConfig(runtime.getConfigPath(), "runtime");
+    RuntimeConfig rtConfig = (RuntimeConfig) runtime.readServiceConfig(runtime.getConfigName(), "runtime");
     if (rtConfig == null) {
-      runtime.error("cannot find %s%s%s", runtime.getConfigPath(), fs, "runtime.yml");
+      runtime.error("cannot find %s%s%s", runtime.getConfigName(), fs, "runtime.yml");
       return;
     }
 
@@ -2517,13 +2500,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       // has to be loaded
-      File file = new File(runtime.getConfigPath() + fs + service + ".yml");
+      File file = new File(Runtime.configRoot + fs + runtime.getConfigName() + fs + service + ".yml");
       if (!file.exists()) {
         runtime.error("cannot read file %s - skipping", file.getPath());
         continue;
       }
 
-      ServiceConfig sc = runtime.readServiceConfig(runtime.getConfigPath(), service);
+      ServiceConfig sc = runtime.readServiceConfig(runtime.getConfigName(), service);
       try {
         if (sc == null) {
           continue;
@@ -2579,7 +2562,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       if (name.equals("proxy")) {
         log.info("herex");
       }
-      
+
       ServiceInterface requestedService = Runtime.getService(name);
       if (requestedService != null) {
         log.info("requested service already exists");
@@ -4260,7 +4243,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     runtime.masterPlan.clear();
     runtime.masterPlan.put("runtime", new RuntimeConfig());
     // unset config path
-    runtime.configPath = null;
+    runtime.configName = null;
     runtime.publishConfigList();
   }
 
@@ -4461,8 +4444,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         startYml = CodecUtils.fromYaml(yml, CmdConfig.class);
       }
 
-      
-      // id always required - precedence 
+      // id always required - precedence
       // if none supplied one will be generated
       // if in start.yml it will be used
       // if supplied by the command line it will be used
@@ -4473,7 +4455,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         } else {
           options.id = startYml.id;
         }
-      }      
+      }
 
       // String id = (options.fromLauncherx) ? options.id :
       // String.format("%s-launcher", options.id);
@@ -4647,7 +4629,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   synchronized private Plan loadService(Plan plan, String name, String type, boolean start, int level) throws IOException {
 
     log.info("loading - {} {} {}", name, type, level);
-    
+
     if (name.equals("i01.controller3")) {
       log.info("here");
     }
@@ -4666,13 +4648,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         log.error("cannot get Java def with type == null");
       }
       log.info("getting default Java definition {} {}", name, type);
-            
+
       ServiceConfig.getDefault(plan, name, type);
       sc = plan.get(name);
     }
 
     // HIGHEST PRIORITY - OVERRIDE WITH FILE
-    String configPath = runtime.getConfigPath();
+    String configPath = runtime.getConfigName();
     if (configPath != null) {
       log.info("priority #1 user's yml override {}", configPath + fs + name + ".yml");
       // PRIORITY #1
@@ -4721,25 +4703,25 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * 
-   * @param configPath
+   * @param configName
    *          - filename or dir of config set
    * @param name
    *          - name of config file within that dir e.g. {name}.yml
    * @return
    */
-  public ServiceConfig readServiceConfig(String configPath, String name) {
+  public ServiceConfig readServiceConfig(String configName, String name) {
     // if config path set and yaml file exists - it takes precedence
 
-    if (configPath == null) {
-      configPath = runtime.getConfigPath();
+    if (configName == null) {
+      configName = runtime.getConfigName();
     }
 
-    if (configPath == null) {
-      log.info("config path is null cannot load {} file system", name);
+    if (configName == null) {
+      log.info("config name is null cannot load {} file system", name);
       return null;
     }
 
-    String filename = configPath + fs + name + ".yml";
+    String filename = configRoot + fs + configName + fs + name + ".yml";
     File check = new File(filename);
     ServiceConfig sc = null;
     if (check.exists()) {
@@ -4813,7 +4795,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * release the current config
    */
   static public void releaseConfig() {
-    String currentConfigPath = Runtime.getInstance().getConfigPath();
+    String currentConfigPath = Runtime.getInstance().getConfigName();
     if (currentConfigPath != null) {
       releaseConfigPath(currentConfigPath);
     }
@@ -4826,7 +4808,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   static public void releaseConfig(String configName) {
     setConfig(configName);
-    releaseConfigPath(Runtime.getInstance().getConfigPath());
+    releaseConfigPath(Runtime.getInstance().getConfigName());
   }
 
   /**
@@ -4840,7 +4822,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   static public void releaseConfigPath(String configPath) {
     try {
-      String filename = Runtime.getInstance().getConfigPath() + fs + "runtime.yml";
+      String filename = Runtime.getInstance().getConfigName() + fs + "runtime.yml";
       String releaseData = FileIO.toString(new File(filename));
       RuntimeConfig config = CodecUtils.fromYaml(releaseData, RuntimeConfig.class);
       List<String> registry = config.getRegistry();
@@ -4868,8 +4850,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       runtime.error("saveConfig require a name cannot be null");
       return false;
     }
-    setConfig(configName);
-    boolean ret = runtime.saveService(null, null, null);
+    boolean ret = runtime.saveService(configName, null, null);
     runtime.broadcastState();
     return ret;
   }
@@ -4880,7 +4861,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * service in the current "config path", if the config path does not exist
    * will error
    * 
-   * @param configPath
+   * @param configName
    *          - config set name if null defaults to default
    * @param serviceName
    *          - service name if null defaults to saveAll
@@ -4888,24 +4869,24 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    *          - if not explicitly set - will be standard yml filename
    * @return - true if all goes well
    */
-  public boolean saveService(String configPath, String serviceName, String filename) {
+  public boolean saveService(String configName, String serviceName, String filename) {
     try {
 
-      if (configPath == null) {
-        configPath = getConfigPath();
-        if (configPath == null) {
-          error("configuration path not set, please set in runtime");
-          return false;
-        }
+      if (configName == null) {
+        error("config name cannot be null");
+        return false;
       }
+
+      setConfig(configName);
+
+      String configPath = configRoot + fs + configName;
 
       File dir = new File(configPath);
       dir.mkdirs();
 
       // save running services
       Set<String> servicesToSave = new HashSet<>();
-      setConfig(configName);
-      
+
       // conditional boolean to flip and save a config name to start.yml ?
       startYml = new CmdConfig();
       startYml.id = getId();
@@ -4941,57 +4922,48 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return false;
   }
 
-  public String setConfigPath(String configPath) {
-    if (configPath != null) {
-      this.configPath = configPath.trim();
+  public String setConfigName(String name) {
+    if (name != null && name.contains(fs)) {
+      error("invalid character " + fs + " in configuration name");
+      return configName;
+    }
+    if (name != null) {
+      configName = name.trim();
     }
     invoke("publishConfigList");
-    return configPath;
-  }
-
-  public String getConfigPath() {
-    return configPath;
+    return name;
   }
 
   public String getConfigName() {
-    if (configPath == null) {
-      return null;
-    }
-    File f = new File(configPath);
-    return f.getName();
+    return configName;
   }
 
   public boolean isProcessingConfig() {
     return processingConfig;
   }
 
-  public void unsetConfigPath() {
-    configPath = null;
-  }
-
   /**
-   * static wrapper around setConfigPath - so it can be used in the same way as
-   * all the other common static service methods
+   * Sets the directory for the current config. This will be under configRoot +
+   * fs + configName Equivalent to setConfigName except its a static wrapper.
    * 
    * @param configName
-   *          - config dir name under configPath for example -
-   *          data/config/{configName}
+   * @return
    */
   public static String setConfig(String configName) {
     Runtime runtime = Runtime.getInstance();
-    String configPath = runtime.getConfigPath();
-    if (configPath == null) {
-      // if null set to data/config/{configName}
-      runtime.setConfigPath(DEFAULT_CONFIG_DIR + fs + configName);
-    } else {
-      // back up one + .. /{configName}
-      runtime.setConfigPath(new File(configPath).getParent() + fs + configName);
-    }
+    runtime.setConfigName(configName);
     return configName;
   }
 
   // FIXME - move this to service and add default (no servicename) method
   // signature
+  @Deprecated /*
+               * I don't think this was a good solution - to handle interface
+               * lists in the js client - the js runtime should register for
+               * lifecycle events, the individiual services within that js
+               * runtime should only have local event handling to change attach
+               * lists
+               */
   public void registerForInterfaceChange(String requestor, Class<?> interestedInterface) {
     registerForInterfaceChange(interestedInterface.getCanonicalName());
   }
@@ -5039,7 +5011,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static public void savePlan(String configName) {
     Runtime runtime = Runtime.getInstance();
     Runtime.setConfig(configName);
-    Runtime.getInstance().savePlanInternal(runtime.getConfigPath());
+    Runtime.getInstance().savePlanInternal(runtime.getConfigName());
   }
 
   private void savePlanInternal(String configPath) {
@@ -5118,7 +5090,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     Runtime.setConfig(configPath);
     Runtime runtime = Runtime.getInstance();
 
-    String configSetDir = runtime.getConfigPath() + fs + runtime.getConfigPath();
+    String configSetDir = runtime.getConfigName() + fs + runtime.getConfigName();
     File check = new File(configSetDir);
     if (configPath == null || configPath.isEmpty() || !check.exists() || !check.isDirectory()) {
       runtime.error("config set %s does not exist or is not a directory", check.getAbsolutePath());
@@ -5168,11 +5140,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   final public Plan saveDefault(String name, String type) {
-    return saveDefault(DEFAULT_CONFIG_DIR + fs + name, name, type, false);
+    return saveDefault(configRoot + fs + name, name, type, false);
   }
 
   final public Plan saveDefault(String name, String type, boolean fullPlan) {
-    return saveDefault(DEFAULT_CONFIG_DIR + fs + name, name, type, fullPlan);
+    return saveDefault(configRoot + fs + name, name, type, fullPlan);
   }
 
   final public Plan saveDefault(String configPath, String name, String type, boolean fullPlan) {
@@ -5231,6 +5203,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     for (MetaData meta : types) {
       saveDefault(configPath + fs + meta.getSimpleName(), meta.getSimpleName().toLowerCase(), meta.getSimpleName(), fullPlan);
     }
+  }
+
+  public String getConfigPath() {
+    if (configName == null) {
+      error("config name is not set");
+      return null;
+    }
+    return configRoot + fs + configName;
   }
 
 }

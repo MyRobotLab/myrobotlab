@@ -2686,7 +2686,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   public void apply() {
     Runtime runtime = Runtime.getInstance();
-    ServiceConfig sc = runtime.readServiceConfig(runtime.getConfigPath(), name);
+    ServiceConfig sc = runtime.readServiceConfig(null, name);
     // updating plan
     Runtime.getPlan().put(getName(), sc);
     // applying config to self
@@ -2744,7 +2744,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // FIXME - rename putDefault
     ServiceConfig.getDefault(Runtime.getPlan(), peer.name, peerType);
     Runtime runtime = Runtime.getInstance();
-    String configPath = runtime.getConfigPath();
+    String configPath = runtime.getConfigName();
     // Seems a bit invasive - but yml file overrides everything
     // if one exists we need to replace it with the new peer type
     if (configPath != null) {

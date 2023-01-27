@@ -1,4 +1,19 @@
 <div class="row">
+    ROS Installation and Starting instructions
+    <a href="" ng-show="!showInstructions" ng-click="showInstructions=true">show</a>
+    <a href="" ng-show="showInstructions" ng-click="showInstructions=false">hide</a>
+</div>
+<div class="row" ng-show="showInstructions">
+
+    <ul>
+        <li><a href="http://wiki.ros.org/ROS/Installation">Install ROS </a></li>
+        <li><a href="http://wiki.ros.org/rosbridge_suite/Tutorials/RunningRosbridge">Install and start ROS Bridge</a></li>
+    </ul>
+    <br/>
+</div>
+
+
+<div class="row">
     <form class="form-inline">
     <img ng-show="service.connected" src="/connected.png"/>
     <img ng-hide="service.connected" src="/disconnected.png"/>

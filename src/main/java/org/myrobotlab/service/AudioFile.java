@@ -580,7 +580,7 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
     return c;
   }
 
-  public int publishPeak(int peak) {
+  public double publishPeak(double peak) {
     return peak;
   }
 

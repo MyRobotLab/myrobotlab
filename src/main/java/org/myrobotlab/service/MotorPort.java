@@ -1,8 +1,6 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.service.abstracts.AbstractMotor;
-import org.myrobotlab.service.config.MotorPortConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 
 /**
  * Motor - MotorController which uses a "Port". Examples are Adafruit Motor
@@ -29,22 +27,6 @@ public class MotorPort extends AbstractMotor {
 
   public String getPort() {
     return port;
-  }
-
-  @Override
-  public ServiceConfig getConfig() {
-    MotorPortConfig config = (MotorPortConfig)super.getConfig();
-    // FIXME - remove local field use config only
-    config.port = port;
-    return config;
-  }
-
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {    
-    // FIXME - remove local field use config only
-    MotorPortConfig config = (MotorPortConfig)super.apply(c);
-    setPort(config.port);
-    return c;
   }
 
 }

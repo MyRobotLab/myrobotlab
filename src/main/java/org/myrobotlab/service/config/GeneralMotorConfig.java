@@ -2,14 +2,14 @@ package org.myrobotlab.service.config;
 
 public class GeneralMotorConfig extends ServiceConfig {
 
-  public boolean locked;
+  public boolean locked = false;
 
   // mapper values
-  public boolean inverted;
-  public boolean clip;
-  public Double minIn;
-  public Double maxIn;
-  public Double minOut;
-  public Double maxOut;
+  public double minIn = -100;
+  public double maxIn = 100;
+  public double minOut = -100;
+  public double maxOut = 100;
+
+  public String controller;
 
 }

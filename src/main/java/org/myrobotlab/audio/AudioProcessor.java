@@ -231,7 +231,7 @@ public class AudioProcessor extends Thread {
                 peak = abs;
               }
             }
-            audioFile.invoke("publishPeak", peak * (float) audioFile.getPeakMultiplier());
+            audioFile.invoke("publishPeak", peak * (double) audioFile.getPeakMultiplier());
           }
         }
         // Stop

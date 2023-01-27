@@ -150,7 +150,7 @@ public class ConfigTest extends AbstractTest {
     Clock c2 = (Clock) Runtime.start("c2", "Clock");
     c2.setInterval(5000);
     c2.save();
-    File check = new File(Runtime.getInstance().getConfigPath() + File.separator + "c2.yml");
+    File check = new File(Runtime.getInstance().getConfigName() + File.separator + "c2.yml");
     assertTrue(check.exists());
     ClockConfig clockConfig = CodecUtils.fromYaml(FileIO.toString(CONFIG_PATH + File.separator + "c2.yml"), ClockConfig.class);
     assertTrue(clockConfig.interval == 5000);
@@ -236,9 +236,9 @@ public class ConfigTest extends AbstractTest {
     assertTrue(check.exists());
     assertTrue(check.isDirectory());
 
-    check = new File(Runtime.getInstance().getConfigPath() + File.separator + "track.yml");
+    check = new File(Runtime.getInstance().getConfigName() + File.separator + "track.yml");
     assertTrue(check.exists());
-    check = new File(Runtime.getInstance().getConfigPath() + File.separator + "track.cv.yml");
+    check = new File(Runtime.getInstance().getConfigName() + File.separator + "track.cv.yml");
     assertTrue(check.exists());
 
     // TODO - check file details

@@ -12,7 +12,6 @@ import org.myrobotlab.service.abstracts.AbstractMotorController;
 import org.myrobotlab.service.config.SabertoothConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.MotorControl;
-import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
@@ -124,9 +123,15 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
   public void driveForwardMotor2(int speed) {
     sendPacket(MOTOR2_FORWARD, speed);
   }
+  
+  public void stop() {
+    driveForwardMotor1(0);
+    driveForwardMotor2(0);
+  }
 
   public void sendPacket(int command, int data) {
     try {
+      Serial serial = (Serial)getPeer("serial");
       if (serial == null || !serial.isConnected()) {
         error("serial device not connected");
         return;
@@ -325,16 +330,28 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
   public static void main(String[] args) {
     try {
+      
+      Runtime.main(new String[] {"--log-level", "warn"});
 
-      Runtime.main(new String[] {});
-      Runtime.start("intro", "Intro");
-      Runtime.start("python", "Python");
-      Platform.setVirtual(true);
+      Runtime.startConfig("worke-2");
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
       webgui.startService();
+
+
+      // Runtime.main(new String[] {});
+      Runtime.start("intro", "Intro");
+      Runtime.start("python", "Python");
+      // Platform.setVirtual(true);
+      
+
 
       boolean virtual = true;
       //////////////////////////////////////////////////////////////////////////////////
@@ -391,10 +408,6 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       // m1.stop();
       // m2.stop();
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       // speed up the motor
       for (int i = 0; i < 100; ++i) {

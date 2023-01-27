@@ -47,7 +47,7 @@ public class ArduinoServoConfigTest {
     ard1.disconnect();
 
     // save this configuration as the "simple" config/
-    Runtime.getInstance().setConfigPath("simple");
+    Runtime.getInstance().setConfigName("simple");
     Runtime.getInstance().save();
   }
 

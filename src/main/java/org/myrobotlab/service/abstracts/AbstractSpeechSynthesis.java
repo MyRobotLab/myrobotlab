@@ -949,34 +949,35 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     }
     return false;
   }
+  
 
   @Override
   public boolean setVoice(String name) {
-    if (voices == null) {
-      return false;
-    }
-    if (voices.containsKey(name)) {
+      if (voices == null) {
+          return false;
+      }
+
+      SpeechSynthesisConfig config = (SpeechSynthesisConfig)this.config;
       voice = voices.get(name);
+      
+      if (voice == null) {
+        voice = voiceKeyIndex.get(name);
+      }
+      
+      if (voice == null) {
+        voice = voiceProviderIndex.get(name);
+      }
+      
+      if (voice == null) {
+          error("could not set voice %s - valid voices are %s", name, String.join(", ", getVoiceNames()));
+          return false;
+      }
+
+      config.voice = name;
       broadcastState();
       return true;
-    }
-
-    if (voiceKeyIndex.containsKey(name)) {
-      voice = voiceKeyIndex.get(name);
-      broadcastState();
-      return true;
-    }
-
-    if (voiceProviderIndex.containsKey(name)) {
-      voice = voiceProviderIndex.get(name);
-      broadcastState();
-      return true;
-    }
-
-    error("could not set voice %s - valid voices are %s", name, String.join(", ", getVoiceNames()));
-    return false;
   }
-
+  
   public boolean setVoice(Integer index) {
     if (index > voiceList.size() || index < 0) {
       error("setVoice({}) not valid pick range 0 to {}", index, voiceList.size());
