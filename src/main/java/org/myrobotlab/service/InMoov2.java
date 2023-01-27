@@ -1591,11 +1591,11 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
-      webgui.setPort(8888);
+      // webgui.setPort(8888);
       webgui.startService();
       
       Runtime.start("python", "Python");
-      Runtime.start("ros", "Ros");
+      // Runtime.start("ros", "Ros");
       Runtime.start("intro", "Intro");
       InMoov2 i01 = (InMoov2)Runtime.start("i01", "InMoov2");
       // i01.startPeer("simulator");

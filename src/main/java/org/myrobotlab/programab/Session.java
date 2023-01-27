@@ -2,6 +2,9 @@ package org.myrobotlab.programab;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TreeSet;
@@ -87,15 +90,22 @@ public class Session {
     sort.addAll(getChat().predicates.keySet());
     for (String predicate : sort) {
       String value = getChat().predicates.get(predicate);
+      if (predicate.equals("test")) {
+        log.info("here");
+      }
       sb.append(predicate + ":" + value + "\n");
     }
     File predicates = new File(FileIO.gluePaths(botInfo.path.getAbsolutePath(), String.format("config/%s.predicates.txt", userName)));
     predicates.getParentFile().mkdirs();
     log.info("Bot : {} User : {} Predicates Filename : {} ", botInfo.name, userName, predicates);
     try {
-      FileOutputStream fos = new FileOutputStream(predicates);
-      fos.write(sb.toString().getBytes());
-      fos.close();
+      FileWriter writer = new FileWriter(predicates, StandardCharsets.UTF_8);
+      writer.write(sb.toString());
+      writer.close();
+      
+//      FileOutputStream fos = new FileOutputStream(predicates);
+//      fos.write(sb.toString().getBytes(), StandardCharsets.UTF_8);
+//      fos.close();
     } catch (Exception e) {
       log.error("writing predicates threw", e);
     }

@@ -245,6 +245,11 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       error("invalid port number %d", port);
     }
   }
+  
+  public void stop() {
+    driveForwardMotor1(0);
+    driveForwardMotor2(0);
+  }
 
   @Override
   public boolean isConnected() {
@@ -362,8 +367,8 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       // uncomment for virtual hardware
       // virtual = True
 
-      String port = "COM14";
-      // String port = "/dev/ttyUSB0";
+      // String port = "COM14";
+      String port = "/dev/ttyUSB0";
       /*
        * // start optional virtual serial service, used for test if (virtual) {
        * // use static method Serial.connectVirtualUart to create // a virtual

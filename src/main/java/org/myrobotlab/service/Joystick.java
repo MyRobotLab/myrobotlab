@@ -106,7 +106,7 @@ public class Joystick extends Service implements AnalogPublisher {
   /**
    * polling state
    */
-  protected boolean isPolling = false;
+  volatile protected boolean isPolling = false;
 
   /**
    * name to index map of controllers
@@ -151,10 +151,10 @@ public class Joystick extends Service implements AnalogPublisher {
     }
 
     public synchronized void stop() {
+      isPolling = false;
       if (myThread != null) {
         myThread.interrupt();
-      }
-      isPolling = false;
+      }      
     }
   }
 
@@ -290,10 +290,12 @@ public class Joystick extends Service implements AnalogPublisher {
     }
     return controllerNames;
   }
+  
+  List<Controller> virtualControllers = new ArrayList<>();
 
   // FIXME - clear global
   public List<Controller> getControllerList() {
-    List<Controller> controllers = new ArrayList<Controller>();
+    List<Controller> controllers = new ArrayList<>();
     net.java.games.input.Controller[] jinputControllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
     for (net.java.games.input.Controller controller : jinputControllers) {
       try {
@@ -303,6 +305,8 @@ public class Joystick extends Service implements AnalogPublisher {
         log.error("adding new controller threw", e);
       }
     }
+    
+    controllers.addAll(virtualControllers);
     // FIXME - add virtual
     return controllers;
   }
