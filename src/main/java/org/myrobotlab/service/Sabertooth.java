@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -124,11 +123,6 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     sendPacket(MOTOR2_FORWARD, speed);
   }
   
-  public void stop() {
-    driveForwardMotor1(0);
-    driveForwardMotor2(0);
-  }
-
   public void sendPacket(int command, int data) {
     try {
       Serial serial = (Serial)getPeer("serial");

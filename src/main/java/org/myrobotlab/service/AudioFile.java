@@ -130,9 +130,6 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
 
   protected double peakMultiplier = 1.0;
 
-  public double getPeakMultiplier() {
-    return peakMultiplier;
-  }
 
   public void setPeakMultiplier(double peakMultiplier) {
     this.peakMultiplier = peakMultiplier;

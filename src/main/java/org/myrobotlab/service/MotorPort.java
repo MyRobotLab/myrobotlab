@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
+import org.myrobotlab.service.config.MotorPortConfig;
 
 /**
  * Motor - MotorController which uses a "Port". Examples are Adafruit Motor
