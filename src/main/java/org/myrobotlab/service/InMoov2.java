@@ -1598,7 +1598,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       Runtime.start("ros", "Ros");
       Runtime.start("intro", "Intro");
       InMoov2 i01 = (InMoov2)Runtime.start("i01", "InMoov2");
-      i01.startPeer("simulator");
+      // i01.startPeer("simulator");
         // Runtime.startConfig("i01-05");
       // Runtime.startConfig("pir-01");
       
