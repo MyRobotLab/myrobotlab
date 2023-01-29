@@ -22,7 +22,7 @@ angular.module('peer', []).service('peer', function( mrl /*$rootScope, $log*/
     service.isPeerStarted = function(service, key) {
 
         try {
-        if (service && service.config && service.config.peers){
+        if (service && service.config && service.config.peers && service.config.peers[key]){
             return mrl.getService(service.config.peers[key].name) != null
         }
         } catch (error) {

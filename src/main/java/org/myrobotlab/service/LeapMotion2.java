@@ -51,7 +51,7 @@ public class LeapMotion2 extends Service implements LeapDataListener, LeapDataPu
   }
 
   @Override
-  public LeapData publishLeapData(LeapData data) {    
+  public LeapData publishLeapData(LeapData data) {
     return data;
   }
 
@@ -94,11 +94,10 @@ public class LeapMotion2 extends Service implements LeapDataListener, LeapDataPu
     addListener("publishPoints", s.getName(), "onPoints");
   }
 
-  
   public class LeapWsListener {
 
     private transient LeapMotion2 service;
-    // private transient AsyncHttpClient client;
+
     WsClient websocket;
 
     public LeapWsListener(LeapMotion2 service) {
@@ -146,7 +145,7 @@ public class LeapMotion2 extends Service implements LeapDataListener, LeapDataPu
 
   @Override
   public void onRemoteMessage(String uuid, String data) {
-   invoke("publishLeapDataJson", data);
+    invoke("publishLeapDataJson", data);
   }
 
 }
