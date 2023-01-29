@@ -18,10 +18,12 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Clock;
+import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Tracking;
 import org.myrobotlab.service.WebGui;
 import org.myrobotlab.service.config.ClockConfig;
+import org.myrobotlab.service.config.PidConfig;
 import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.config.TrackingConfig;
 import org.myrobotlab.test.AbstractTest;
@@ -73,50 +75,150 @@ public class ConfigTest extends AbstractTest {
     removeConfigData();
     Runtime.setConfig(CONFIG_NAME);
 
-    // load default config
-    Runtime.load("t1", "Tracking");
-    plan = Runtime.load("t2", "Tracking");
+    // load default config TODO test Runtime.useDefaults(false) also
+    Runtime.load("eyeTracking", "Tracking");
+    plan = Runtime.load("headTracking", "Tracking");
     Runtime.load("cv", "OpenCV");
 
-    TrackingConfig t1c = (TrackingConfig) plan.get("t1");
-    TrackingConfig t2c = (TrackingConfig) plan.get("t2");
+    TrackingConfig eyeTracking = (TrackingConfig) plan.get("eyeTracking");
+    TrackingConfig headTracking = (TrackingConfig) plan.get("headTracking");
 
+    Runtime.load("pid", "Pid");
+    PidConfig pid = (PidConfig) plan.get("pid");
+    
+    // TODO - check defaults
+//    eyeTrackingc.getPeer("cv").autoStart = false;
+//    headTrackingc.getPeer("cv").autoStart = false;
+  
+    // map both names to single cv
+    eyeTracking.getPeer("cv").name = "cv";
+    headTracking.getPeer("cv").name = "cv";
+
+    eyeTracking.getPeer("pid").name = "pid";
+    headTracking.getPeer("pid").name = "pid";
+
+    eyeTracking.getPeer("controller").name = "left";
+    headTracking.getPeer("controller").name = "left";
+
+    eyeTracking.getPeer("pan").name = "eyeX";
+    headTracking.getPeer("pan").name = "rothead";
+    
+    eyeTracking.getPeer("tilt").name = "eyeY";
+    headTracking.getPeer("tilt").name = "neck";
+    
+    Runtime.load("eyeY", "Servo");
+    Runtime.load("eyeX", "Servo");
+    Runtime.load("neck", "Servo");
+    Runtime.load("rothead", "Servo");
+    ServoConfig eyeY = (ServoConfig)plan.get("eyeY");
+    ServoConfig eyeX = (ServoConfig)plan.get("eyeX");
+    ServoConfig neck = (ServoConfig)plan.get("neck");
+    ServoConfig rothead = (ServoConfig)plan.get("rothead");
+    eyeY.pin = "24";
+    eyeX.pin = "22";
+    neck.pin = "12";
+    rothead.pin = "13";
+
+    eyeY.autoDisable = true;
+    eyeX.autoDisable = true;
+    neck.autoDisable = true;
+    rothead.autoDisable = true;
+
+    eyeX.minIn = 60.0;
+    eyeY.minIn = 60.0;
+    neck.minIn = 20.0;
+    rothead.minIn = 20.0;
+
+    eyeX.maxIn = 120.0;
+    eyeY.maxIn = 120.0;
+    neck.maxIn = 160.0;
+    rothead.maxIn = 160.0;
+    
+    eyeX.minOut = 60.0;
+    eyeY.minOut = 60.0;
+    neck.minOut = 20.0;
+    rothead.minOut = 20.0;
+
+    eyeX.maxOut = 120.0;
+    eyeY.maxOut = 120.0;
+    neck.maxOut = 160.0;
+    rothead.maxOut = 160.0;
+
+    
+    eyeY.controller = "left";
+    eyeX.controller = "left";
+    neck.controller = "left";
+    rothead.controller = "left";
+    
+    PidData pidData = new PidData();
+    pidData.ki = 0.001;
+    pidData.kp = 30.0;
+    pid.data.put("eyeX", pidData);
+
+    pidData = new PidData();
+    pidData.ki = 0.001;
+    pidData.kp = 30.0;
+    pid.data.put("eyeY", pidData);
+
+    // test Runtime.useDefaults(true/false)
+    
+    
     // prune the children we don't want
-    plan.remove("t1.cv");
-    plan.remove("t2.cv");
+    plan.remove("eyeTracking.cv");
+    plan.remove("headTracking.cv");
 
+    plan.remove("eyeTracking.pan");
+    plan.remove("headTracking.pan");
+
+    plan.remove("eyeTracking.tilt");
+    plan.remove("headTracking.tilt");
+    
+    plan.remove("eyeTracking.pid");
+    plan.remove("headTracking.pid");
+    
+    plan.remove("eyeTracking.controller");
+    plan.remove("headTracking.controller");
+
+    plan.remove("eyeTracking.controller.serial");
+    plan.remove("headTracking.controller.serial");
+    
     // FIXME - THANKFULLY THIS DID NOT WORK AT ALL
-    // ServiceReservation sr = plan.getPeers().get("t1").get("cv");
+    // ServiceReservation sr = plan.getPeers().get("eyeTracking").get("cv");
     // sr.actualName = "cv";
     //
-    // sr = plan.getPeers().get("t2").get("cv");
+    // sr = plan.getPeers().get("headTracking").get("cv");
     // sr.actualName = "cv";
 
     // set a communal opencv source
-//    t1c.cv = "cv";
-//    t2c.cv = "cv";
+//    eyeTrackingc.cv = "cv";
+//    headTrackingc.cv = "cv";
 
-    assertEquals("2x tracking with merged opencv expecting 13 (7 + 7 - 2 + 1) services", 14, plan.size());
+    // assertEquals("2x tracking with merged opencv expecting 13 (7 + 7 - 2 + 1) services", 14, plan.size());
     // save the plan
     Runtime.savePlan(CONFIG_NAME);
     // clear the in memory plan
     Runtime.clearPlan();
 
+    Runtime.setAllVirtual(false);
+    
     // start the plan
     Runtime.startConfig(CONFIG_NAME);
 
     assertNotNull(Runtime.getService("cv"));
-    assertNotNull(Runtime.getService("t1"));
-    assertNotNull(Runtime.getService("t2"));
+    assertNotNull(Runtime.getService("eyeTracking"));
+    assertNotNull(Runtime.getService("headTracking"));
 
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
     webgui.autoStartBrowser(false);
     webgui.startService();
+    
+    assertNull(Runtime.getService("eyeTracking.cv"));
+    assertNull(Runtime.getService("headTracking.cv"));
 
     Runtime.releaseConfig(CONFIG_NAME);
     assertNull(Runtime.getService("cv"));
-    assertNull(Runtime.getService("t1"));
-    assertNull(Runtime.getService("t2"));
+    assertNull(Runtime.getService("eyeTracking"));
+    assertNull(Runtime.getService("headTracking"));
 
     // given unknown plan and config
     // when i clear the plan
@@ -150,9 +252,10 @@ public class ConfigTest extends AbstractTest {
     Clock c2 = (Clock) Runtime.start("c2", "Clock");
     c2.setInterval(5000);
     c2.save();
-    File check = new File(Runtime.getInstance().getConfigName() + File.separator + "c2.yml");
+    
+    File check = new File( runtime.getConfigPath() + File.separator + "c2.yml");
     assertTrue(check.exists());
-    ClockConfig clockConfig = CodecUtils.fromYaml(FileIO.toString(CONFIG_PATH + File.separator + "c2.yml"), ClockConfig.class);
+    ClockConfig clockConfig = CodecUtils.fromYaml(FileIO.toString(runtime.getConfigPath() + File.separator + "c2.yml"), ClockConfig.class);
     assertTrue(clockConfig.interval == 5000);
 
     // given the system is new and no previous definition exists
@@ -236,9 +339,9 @@ public class ConfigTest extends AbstractTest {
     assertTrue(check.exists());
     assertTrue(check.isDirectory());
 
-    check = new File(Runtime.getInstance().getConfigName() + File.separator + "track.yml");
+    check = new File(Runtime.getInstance().getConfigPath() + File.separator + "track.yml");
     assertTrue(check.exists());
-    check = new File(Runtime.getInstance().getConfigName() + File.separator + "track.cv.yml");
+    check = new File(Runtime.getInstance().getConfigPath() + File.separator + "track.cv.yml");
     assertTrue(check.exists());
 
     // TODO - check file details

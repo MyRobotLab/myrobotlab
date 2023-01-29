@@ -1609,7 +1609,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     Runtime runtime = Runtime.getInstance();
     // save all services ... weird notation - should have explicit
     // saveAllServices
-    return runtime.saveService(null, getName(), null);
+    return runtime.saveService(runtime.getConfigName(), getName(), null);
   }
 
   public ServiceInterface getPeer(String peerKey) {

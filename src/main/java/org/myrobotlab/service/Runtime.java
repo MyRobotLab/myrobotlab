@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -180,7 +179,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * default parent path of configPath - rarely changed FIXME - don't make it
    * static !
    */
-  static final protected String configRoot = "data" + fs + "config";
+  static final protected String CONFIG_ROOT = "data" + fs + "config";
 
   /**
    * State variable reporting if runtime is currently starting services from
@@ -2107,7 +2106,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public List<String> publishConfigList() {
     configList = new ArrayList<>();
 
-    File configDirFile = new File(configRoot);
+    File configDirFile = new File(CONFIG_ROOT);
     if (!configDirFile.exists() || !configDirFile.isDirectory()) {
       error("%s config root does not exist", configDirFile.getAbsolutePath());
       return configList;
@@ -2328,7 +2327,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       WsClient client2 = new WsClient();
       client2.connect(this, url);
 
-
       // URI uri = new URI(url);
       // adding "id" as full url :P ... because we don't know it !!!
       Connection connection = new Connection(client2.getId(), getId(), getFullName());
@@ -2500,7 +2498,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       // has to be loaded
-      File file = new File(Runtime.configRoot + fs + runtime.getConfigName() + fs + service + ".yml");
+      File file = new File(Runtime.CONFIG_ROOT + fs + runtime.getConfigName() + fs + service + ".yml");
       if (!file.exists()) {
         runtime.error("cannot read file %s - skipping", file.getPath());
         continue;
@@ -4649,6 +4647,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
       log.info("getting default Java definition {} {}", name, type);
 
+      // TODO !!!! - switch on Runtime var useDefaults = true/false
       ServiceConfig.getDefault(plan, name, type);
       sc = plan.get(name);
     }
@@ -4721,7 +4720,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       return null;
     }
 
-    String filename = configRoot + fs + configName + fs + name + ".yml";
+    String filename = CONFIG_ROOT + fs + configName + fs + name + ".yml";
     File check = new File(filename);
     ServiceConfig sc = null;
     if (check.exists()) {
@@ -4822,7 +4821,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   static public void releaseConfigPath(String configPath) {
     try {
-      String filename = Runtime.getInstance().getConfigName() + fs + "runtime.yml";
+      String filename = CONFIG_ROOT + fs + Runtime.getInstance().getConfigName() + fs + "runtime.yml";
       String releaseData = FileIO.toString(new File(filename));
       RuntimeConfig config = CodecUtils.fromYaml(releaseData, RuntimeConfig.class);
       List<String> registry = config.getRegistry();
@@ -4836,6 +4835,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     } catch (Exception e) {
       Runtime.getInstance().error("could not release %s", configPath);
     }
+  }
+
+  public static String getConfigRoot() {
+    return CONFIG_ROOT;
   }
 
   /**
@@ -4879,7 +4882,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       setConfig(configName);
 
-      String configPath = configRoot + fs + configName;
+      String configPath = CONFIG_ROOT + fs + configName;
 
       File dir = new File(configPath);
       dir.mkdirs();
@@ -5014,13 +5017,18 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     Runtime.getInstance().savePlanInternal(runtime.getConfigName());
   }
 
-  private void savePlanInternal(String configPath) {
+  private void savePlanInternal(String configName) {
 
-    File f = new File(configPath);
-    f.mkdirs();
+    if (configName == null) {
+      error("cannot save plan config name is null");
+      return;
+    }
+
+    File configDirectory = new File(CONFIG_ROOT + fs + configName);
+    configDirectory.mkdirs();
 
     for (String s : masterPlan.keySet()) {
-      String filename = configPath + fs + s + ".yml";
+      String filename = CONFIG_ROOT + fs + configName + fs + s + ".yml";
       String data = CodecUtils.toYaml(masterPlan.get(s));
       try {
         FileIO.toFile(filename, data.getBytes());
@@ -5140,11 +5148,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   final public Plan saveDefault(String name, String type) {
-    return saveDefault(configRoot + fs + name, name, type, false);
+    return saveDefault(CONFIG_ROOT + fs + name, name, type, false);
   }
 
   final public Plan saveDefault(String name, String type, boolean fullPlan) {
-    return saveDefault(configRoot + fs + name, name, type, fullPlan);
+    return saveDefault(CONFIG_ROOT + fs + name, name, type, fullPlan);
   }
 
   final public Plan saveDefault(String configPath, String name, String type, boolean fullPlan) {
@@ -5210,7 +5218,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       error("config name is not set");
       return null;
     }
-    return configRoot + fs + configName;
+    return CONFIG_ROOT + fs + configName;
   }
 
 }
