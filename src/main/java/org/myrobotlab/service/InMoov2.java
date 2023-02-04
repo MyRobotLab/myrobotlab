@@ -1423,7 +1423,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   @Override
   public ServiceInterface startPeer(String peer) {
-    speakBlocking(get("STARTING" + peer.toUpperCase()));
+    speakBlocking(get("STARTING " + peer.toUpperCase()));
 
     // FIXME - do reflective look for local vars named the same thing
     // to set the field
@@ -1435,7 +1435,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   @Override
   public void releasePeer(String peer) {
-    speakBlocking(get("STOP" + peer.toUpperCase()));
+    speakBlocking(get("STOPPING " + peer.toUpperCase()));
     super.releasePeer(peer);
   }
 
@@ -1825,7 +1825,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
           Response response = chatBot.getResponse(text);
           return response;
         } else {
-          log.error("chatbot not ready");
+          log.info("chatbot not ready");
         }
         return null;
   }

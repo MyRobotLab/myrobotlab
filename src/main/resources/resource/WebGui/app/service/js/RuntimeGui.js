@@ -222,6 +222,9 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         case 'onReleased':
             console.info("runtime - onRelease" + data)
             break
+        case 'onConfigName':
+            console.info("runtime - onConfigName" + data)
+            break
         case 'onHeartbeat':
             let heartbeat = data
             let hb = heartbeat.name + '@' + heartbeat.id + ' sent onHeartbeat - ';

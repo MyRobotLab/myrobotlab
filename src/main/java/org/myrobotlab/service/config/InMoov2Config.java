@@ -98,7 +98,7 @@ public class InMoov2Config extends ServiceConfig {
     MouthControlConfig mouthControl = (MouthControlConfig) plan.get(getPeerName("mouthControl"));
 
     // setup name references to different services
-    mouthControl.jaw = name + ".jaw";
+    mouthControl.jaw = name + "head.jaw";
     String i01Name = name;
     int index = name.indexOf(".");
     if (index > 0) {

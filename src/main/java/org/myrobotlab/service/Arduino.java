@@ -783,6 +783,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public void disablePin(String pinName) {
     // PinDefinition pinDef = getPin(address);
     PinDefinition pinDef = getPin(pinName);
+    if (pinDef == null) {
+      warn("pin definition %s does not exist", pinName);
+      return;
+    }
+    
     pinDef.setEnabled(false);
     msg.disablePin(pinDef.getAddress());
   }

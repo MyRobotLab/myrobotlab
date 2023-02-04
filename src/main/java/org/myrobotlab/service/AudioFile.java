@@ -575,6 +575,9 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
       Runtime.start("python", "Python");
 
       AudioFile player = (AudioFile) Runtime.start("player", "AudioFile");
+      
+      // Audio stream
+      // player.play("http://icecast.radiofrance.fr/fip-midfi.mp3");
       player.play("https://upload.wikimedia.org/wikipedia/commons/1/1f/Bach_-_Brandenburg_Concerto.No.1_in_F_Major-_II._Adagio.ogg");
 
       boolean done = true;

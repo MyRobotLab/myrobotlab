@@ -1342,7 +1342,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         out(methodName, retobj);
       }
     } catch (Exception e) {
-      error("could not invoke %s.%s (%s) - check logs for details", getName(), methodName, params);
+      // error(e);
+      // e.getCause()
+      error("could not invoke %s.%s (%s) %s - check logs for details", getName(), methodName, params, e.getCause());
       log.error("could not invoke {}.{} ({})", getName(), methodName, params, e);
     }
     return retobj;
