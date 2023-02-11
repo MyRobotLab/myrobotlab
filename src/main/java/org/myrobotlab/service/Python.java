@@ -368,8 +368,9 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
    *          the code to append
    * @return the resulting concatenation
    */
-  public Script appendScript(String data) {
-    return new Script("append", data);
+  public String appendScript(String code) {
+    invoke("publishAppend", code);
+    return code;
   }
 
   /**
@@ -733,6 +734,10 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
     // be freed of such tasks - it has to do all the inbound routing
     inputQueue.add(msg);
     return false;
+  }
+  
+  public String publishAppend(String code) {
+    return code;
   }
 
   public String publishStdOut(String data) {

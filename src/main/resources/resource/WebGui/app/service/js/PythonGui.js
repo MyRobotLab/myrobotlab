@@ -52,6 +52,10 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
             $scope.log = data + $scope.log
             $scope.$apply()
             break
+        case 'onAppend':
+            $scope.log = data + $scope.log
+            $scope.$apply()
+            break                
         case 'onStatus':
             $scope.lastStatus = data
             if (data.level == 'error'){
@@ -185,6 +189,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
 
     // $scope.possibleServices = Object.values(mrl.getPossibleServices())
     msg.subscribe('publishStdOut')
+    msg.subscribe('publishAppend')
     msg.subscribe(this)
     msg.send('newScript')
 }

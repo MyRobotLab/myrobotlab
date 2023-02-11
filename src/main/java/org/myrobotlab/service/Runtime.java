@@ -2116,7 +2116,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     for (File file : files) {
       String n = file.getName();
 
-      if (!file.isDirectory()) {
+      if (!file.isDirectory() || file.isHidden()) {
         log.info("ignoring {} expecting directory not file", n);
         continue;
       }
@@ -3213,6 +3213,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     Logging logging = LoggingFactory.getInstance();
     logging.setLevel(level);
     log.info("setLogLevel {}", level);
+    return level;
+  }
+  
+  static public String setLogLevel(String clazz, String level) {
     return level;
   }
 

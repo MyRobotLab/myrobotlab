@@ -627,8 +627,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
               log.error("cannot derive local type from service {}", serviceName);
             }
 
-            Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
-
+            // do not decode unless needed
+            // Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
 
             ServiceInterface si = Runtime.getService(serviceName);
 

@@ -538,7 +538,9 @@ public class CodecUtils {
      * @throws JsonDeserializationException if jsonData is malformed
      */
     public static /*@Nullable*/ Message jsonToMessage(/*@Nonnull*/ String jsonData) {
-        log.debug("Deserializing message: " + jsonData);
+      if (log.isDebugEnabled()) {
+        log.debug("Deserializing message: %s",jsonData);
+      }
         Message msg = fromJson(jsonData, Message.class);
 
         if (msg == null) {

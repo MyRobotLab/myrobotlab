@@ -209,12 +209,6 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
   @Override
   public void motorMove(MotorControl mc) {
-
-    if (!motors.contains(mc.getName())) {
-      error("%s not attached to %s", mc.getName(), getName());
-      return;
-    }
-
     MotorPort motor = (MotorPort) Runtime.getService(mc.getName());
     String port = motor.getPort();
 

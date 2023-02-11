@@ -1,145 +1,109 @@
 <div class="row">
-    <div class="col-md-5">
-        <!-- desired vs reported -->
+    <div class="col-md-6">
         <table class="table" width="100%">
             <tr>
-                <td colspan="3">
+                <td colspan="2">
                     <b>power</b>
                 </td>
             </tr>
             <tr>
                 <td>
-                    requested<h1>{{(requestedPower/100).toFixed(2)}}</h1>
-                </td>
-                <td>
-                    reported
-                    <h1>
-                        <font color="grey">{{service.powerInput.toFixed(2)}}</font>
+                    input<br/>
+                    <h1>{{service.powerInput}}
                     </h1>
                 </td>
                 <td>
-                    output
-                    <h1>
-                        <font color="grey">{{powerOutput.toFixed(2)}}</font>
+                    output<br/>
+                    <h1>{{powerOutput.toFixed(0)}}
                     </h1>
                 </td>
             </tr>
-            <br />
-            <table class="table" width="100%">
-                <tr>
-                    <td colspan="5">
-                        <b>mapping</b>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">input</td>
-                    <td colspan="2">output</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>
-                        <input class="form-control" type="text" width="4" ng-model="service.mapper.minX"
-                            title="minimum input" />
-                    </td>
-                    <td>
-                        <input class="form-control" type="text" width="4" ng-model="service.mapper.maxX"
-                            title="maximum input" />
-                    </td>
-                    <td>
-                        <input class="form-control" type="text" width="4" ng-model="service.mapper.minY"
-                            title="minimum output" />
-                    </td>
-                    <td>
-                        <input class="form-control" type="text" width="4" ng-model="service.mapper.maxY"
-                            title="maximum output" />
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-default" ng-click='update()'>update</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="5">&nbsp;</td>
-                </tr>
-                <tr>
-                    <td>
-                        <!-- FIXME call a js method and remap
+        </table>
+        <br/>
+        <table class="table" width="100%">
+            <tr>
+                <td colspan="5">
+                    <b>mapping</b>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">input</td>
+                <td colspan="2">output</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>
+                    <input class="form-control" type="text" width="4" ng-model="service.config.mapper.minIn" title="minimum input"/>
+                </td>
+                <td>
+                    <input class="form-control" type="text" width="4" ng-model="service.config.mapper.maxIn" title="maximum input"/>
+                </td>
+                <td>
+                    <input class="form-control" type="text" width="4" ng-model="service.config.mapper.minOut" title="minimum output"/>
+                </td>
+                <td>
+                    <input class="form-control" type="text" width="4" ng-model="service.config.mapper.maxOut" title="maximum output"/>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-default" ng-click='update()'>update</button>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5">&nbsp;</td>
+            </tr>
+            <tr>
+                <td>
+                    <!-- FIXME call a js method and remap
                         <b>invert</b>
                         &nbsp;
                         <toggle ng-model="service.mapper.inverted" class="miniBTN"
                             title="This will invert motor direction"
                             ng-change="msg.setInverted(service.mapper.inverted)" on="" off="" size="btn-lg" />
                             -->
-
-                        <div class="btn-group" uib-dropdown>
-                            <button type="button" class="btn btn-default">controller {{requestedController}}</button>
-                            <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
-                                <span class="caret"></span>
-                            </button>
-                            <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
-                                <li ng-repeat="c in service.controllers">
-                                    <a href="" ng-click="setController(c)">{{c}}</a>
-                                </li>
-                            </ul>
-                        </div>
-
-
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-default" ng-click='attach()'
-                            ng-show='!service.controllerName'>attach</button>
-                        <button type="button" class="btn btn-default" ng-click='detach()'
-                            ng-show='service.controllerName'>detach</button>
-                    </td>
-                    <td>
-                        <div class="btn-group" uib-dropdown>
-                            <button type="button" class="btn btn-default">port {{service.port}}</button>
-                            <button id="single-button" ng-disabled="service.controller != null" type="button"
-                                class="btn btn-default" uib-dropdown-toggle>
-                                <span class="caret"></span>
-                            </button>
-                            <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
-                                        <!-- FIXME - needs to query the controller.getPorts() -->
-                                <li ng-repeat="c in ['m1','m2']">
-                                    <a href="" ng-click="msg.setPort(c)">{{c}}</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                        <b>power</b><br/>
-
-                    <td colspan="5">
-                        <input type="range" class="styled-slider" ng-model="requestedPower" min="-100" max="100"
-                        step="1" ng-change="setSpeed()" />
-
-                    </td>
-                </tr>
-            </table>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <button type="button" class="btn btn-default" ng-click='stop()' ng-show='service.controllerName'>
-                        <img src="stop-large.png" width="40" />
+                    <div class="btn-group" uib-dropdown>
+                        <button type="button" class="btn btn-default">controller {{requestedController}}</button>
+                        <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
+                            <span class="caret"></span>
+                        </button>
+                        <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                            <li ng-repeat="c in service.controllers">
+                                <a href="" ng-click="setController(c)">{{c}}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+                <td>
+                    <div class="btn-group" uib-dropdown>
+                        <button type="button" class="btn btn-default">port {{service.config.port}}</button>
+                        <button id="single-button" ng-disabled="service.config.controller != null" type="button" class="btn btn-default" uib-dropdown-toggle>
+                            <span class="caret"></span>
+                        </button>
+                        <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                            <!-- FIXME - needs to query the controller.getPorts() -->
+                            <li ng-repeat="c in ['m1','m2']">
+                                <a href="" ng-click="msg.setPort(c);msg.broadcastState()">{{c}}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-default" ng-click='attach()' ng-show='!service.config.controller'>attach</button>
+                    <button type="button" class="btn btn-default" ng-click='detach()' ng-show='service.config.controller'>detach</button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-default" ng-click='stop()' ng-show='service.config.controller'>
+                        <img src="stop-large.png" width="40"/>
                     </button>
-                </div>
-                <div class="col-md-6">&nbsp;</div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <table width="100%">
-                        <tr>
-                            <td colspan="100%">
-                            </td>
-                            <td>&nbsp;</td>
-                            <td></td>
-                        </tr>
-                    </table>
-                </div>
-                <div class="col-md-6">&nbsp;</div>
-            </div>
-
-
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <br/>
+                <td colspan="4">
+                    <input type="range" class="styled-slider" ng-model="requestedPower" min="-100" max="100" step="1" ng-change="setSpeed()"/>
+                </td>
+                <td></td>
+            </tr>
+        </table>
     </div>
+</div>

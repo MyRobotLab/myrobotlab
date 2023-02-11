@@ -88,6 +88,11 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
 
     return arm;
   }
+  
+  public void onMoveArm(HashMap<String, Double> map) {
+    moveTo(map.get("bicep"), map.get("rotate"), map.get("shoulder"), map.get("omoplate"));
+  }
+
 
   /**
    * peer services FIXME - framework should always - startPeers() unless
@@ -188,11 +193,9 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     return rotate;
   }
 
-  @Deprecated /* use UtilLang classes */
-  public String getScript(String inMoovServiceName) {
-    // FIXME - this is cheesy
-    String side = inMoovServiceName.contains("left") ? "left" : "right";
-    return String.format(Locale.ENGLISH, "%s.moveArm(\"%s\",%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, bicep.getCurrentInputPos(), rotate.getCurrentInputPos(),
+  public String getScript(String service) {
+    String side = getName().contains("left") ? "left" : "right";
+    return String.format("%s.moveArm(\"%s\",%.0f,%.0f,%.0f,%.0f)\n", service, side, bicep.getCurrentInputPos(), rotate.getCurrentInputPos(),
         shoulder.getCurrentInputPos(), omoplate.getCurrentInputPos());
   }
 

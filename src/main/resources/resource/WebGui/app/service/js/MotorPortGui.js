@@ -25,17 +25,11 @@ angular.module('mrlapp.service.MotorPortGui', []).controller('MotorPortGuiCtrl',
         }
     }
 
-    $scope.pins = []
-
-    for(i = 0; i < 30 ; ++i){
-        $scope.pins.push(i)
-    }
-
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
         if (firstTime) {
-            $scope.requestedController = service.controllerName
+            $scope.requestedController = service.config.controller
             firstTime = false
         }
     }
@@ -49,6 +43,11 @@ angular.module('mrlapp.service.MotorPortGui', []).controller('MotorPortGuiCtrl',
             $scope.$apply()
             break
 
+        case 'onRefreshControllers':
+            $scope.service.controllers = data
+            $scope.$apply()
+            break
+                
         case 'onStatus':
             console.info('onStatus', data)
             break
@@ -77,7 +76,7 @@ angular.module('mrlapp.service.MotorPortGui', []).controller('MotorPortGuiCtrl',
 
     $scope.update = function() {
         console.info('update')
-        msg.send('map', $scope.service.mapper.minX, $scope.service.mapper.maxX, $scope.service.mapper.minY, $scope.service.mapper.maxY)
+        msg.send('map', $scope.service.config.mapper.minIn, $scope.service.config.mapper.maxIn, $scope.service.config.mapper.minOut, $scope.service.config.mapper.maxOut)
     }
 
     $scope.setController = function(c) {
@@ -91,8 +90,8 @@ angular.module('mrlapp.service.MotorPortGui', []).controller('MotorPortGuiCtrl',
     }
 
     $scope.detach = function() {
-        console.info('detach', $scope.service.controllerName)
-        msg.send('detach', $scope.service.controllerName)
+        console.info('detach', $scope.service.config.controller)
+        msg.send('detach', $scope.service.config.controller)
     }
 
     $scope.moveTo = function() {
@@ -102,12 +101,13 @@ angular.module('mrlapp.service.MotorPortGui', []).controller('MotorPortGuiCtrl',
 
     
     $scope.setSpeed = function() {
-        msg.send('move', $scope.requestedPower/100)
+        msg.send('move', $scope.requestedPower)
     }
-
-
+    
+    msg.subscribe("refreshControllers")
     msg.subscribe("publishPowerChange")
     msg.subscribe("publishPowerOutputChange")
+    msg.send("refreshControllers")
     msg.subscribe(this)
 }
 ])

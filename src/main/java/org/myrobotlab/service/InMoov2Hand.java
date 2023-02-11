@@ -2,14 +2,13 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -36,84 +35,101 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   private static final long serialVersionUID = 1L;
 
-  /**
-   * peer services FIXME - need to be protected !
-   */
-  transient public LeapMotion leap;
+  public static void main(String[] args) {
+    LoggingFactory.init(Level.INFO);
+
+    try {
+
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+
+      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+      i01.startPeer("rightHand");
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      ServoController controller = (ServoController) Runtime.getService("i01.right");
+
+      InMoov2Hand rightHand = (InMoov2Hand) Runtime.start("r01", "InMoov2Hand");// InMoovHand("r01");
+      rightHand.close();
+      rightHand.open();
+      rightHand.openPinch();
+      rightHand.closePinch();
+      rightHand.rest();
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
   transient public ServoController controller;
-  transient public ServoControl thumb;
-  transient public ServoControl index;
-  transient public ServoControl majeure;
-  transient public ServoControl ringFinger;
-  transient public ServoControl pinky;
-  transient public ServoControl wrist;
-
-  // The pins for the finger tip sensors
-  public String[] sensorPins = new String[] { "A0", "A1", "A2", "A3", "A4" };
-  // public int[] sensorLastValues = new int[] {0,0,0,0,0};
-  public boolean sensorsEnabled = false;
-  public int[] sensorThresholds = new int[] { 500, 500, 500, 500, 500 };
-
+  public String controllerName;
   /**
    * list of names of possible controllers
    */
   public List<String> controllers = Runtime.getServiceNamesFromInterface(ServoController.class);
-  public String controllerName;
-
+  transient public ServoControl index;
   boolean isAttached = false;
+  /**
+   * peer services FIXME - need to be protected !
+   */
+  transient public LeapMotion leap;
+  transient public ServoControl majeure;
+
+  transient public ServoControl pinky;
+  transient public ServoControl ringFinger;
+  // The pins for the finger tip sensors
+  public String[] sensorPins = new String[] { "A0", "A1", "A2", "A3", "A4" };
+
+  // public int[] sensorLastValues = new int[] {0,0,0,0,0};
+  public boolean sensorsEnabled = false;
+  public int[] sensorThresholds = new int[] { 500, 500, 500, 500, 500 };
+
+  transient public ServoControl thumb;
+
+  transient public ServoControl wrist;
 
   public InMoov2Hand(String n, String id) {
     super(n, id);
   }
 
-  @Override
-  public void startService() {
-    super.startService();
-    thumb = (ServoControl) startPeer("thumb");
-    index = (ServoControl) startPeer("index");
-    majeure = (ServoControl) startPeer("majeure");
-    ringFinger = (ServoControl) startPeer("ringFinger");
-    pinky = (ServoControl) startPeer("pinky");
-    wrist = (ServoControl) startPeer("wrist");
+  public void attach(ServoController controller, int sensorPin) {
+    try {
+      if (controller == null) {
+        error("setting null as controller");
+        return;
+      }
+      if (isAttached) {
+        log.info("Sensor already attached");
+        return;
+      }
+
+      controller.attach(controller);
+
+      log.info("{} setController {}", getName(), controller.getName());
+      this.controller = controller;
+      controllerName = this.controller.getName();
+      isAttached = true;
+      broadcastState();
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
+  public void attach(String controllerName, int sensorPin) throws Exception {
+    attach((ServoController) Runtime.getService(controllerName), sensorPin);
+  }
+
+  public void attach(String controllerName, String sensorPin) throws Exception {
+    attach((ServoController) Runtime.getService(controllerName), Integer.parseInt(sensorPin));
   }
 
   public void bird() {
     moveTo(150.0, 180.0, 0.0, 180.0, 180.0, 90.0);
-  }
-
-  public void onRegistered(Registration s) {
-    refreshControllers();
-    broadcastState();
-  }
-
-  public List<String> refreshControllers() {
-    controllers = Runtime.getServiceNamesFromInterface(ServoController.class);
-    return controllers;
-  }
-
-  // @Override
-  public ServoController getController() {
-    return controller;
-  }
-
-  public String getControllerName() {
-    String controlerName = null;
-    if (controller != null) {
-      controlerName = controller.getName();
-    }
-    return controlerName;
-  }
-
-  public boolean isAttached() {
-    if (controller != null) {
-      if (((Arduino) controller).getDeviceId(this) != null) {
-        isAttached = true;
-        return true;
-      }
-      controller = null;
-    }
-    isAttached = false;
-    return false;
   }
 
   @Override
@@ -140,16 +156,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     moveTo(130, 140, 180, 180, 180);
   }
 
-  @Override
-  public void releaseService() {
-    try {
-      disable();
-      super.releaseService();
-    } catch (Exception e) {
-      error(e);
-    }
-  }
-
   public void count() {
     one();
     sleep(1);
@@ -160,6 +166,18 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     four();
     sleep(1);
     five();
+  }
+
+  public void detach(ServoController controller) {
+    // let the controller you want to detach this device
+    if (controller != null) {
+      controller.detach(this);
+    }
+    // setting controller reference to null
+    this.controller = null;
+    isAttached = false;
+    refreshControllers();
+    broadcastState();
   }
 
   public void devilHorns() {
@@ -241,6 +259,28 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     return sensorPins;
   }
 
+  @Override
+  public Set<String> getAttached() {
+    Set<String> ret = new HashSet<String>();
+    if (controller != null) {
+      ret.add(controller.getName());
+    }
+    return ret;
+  }
+
+  // @Override
+  public ServoController getController() {
+    return controller;
+  }
+
+  public String getControllerName() {
+    String controlerName = null;
+    if (controller != null) {
+      controlerName = controller.getName();
+    }
+    return controlerName;
+  }
+
   public long getLastActivityTime() {
 
     long lastActivityTime = Math.max(index.getLastActivityTime(), thumb.getLastActivityTime());
@@ -254,15 +294,58 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   }
 
-  @Deprecated /* use LangUtils */
-  public String getScript(String inMoovServiceName) {
+  public String getScript(String service) {
     String side = getName().contains("left") ? "left" : "right";
-    return String.format(Locale.ENGLISH, "%s.moveHand(\"%s\",%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, thumb.getCurrentInputPos(), index.getCurrentInputPos(),
-        majeure.getCurrentInputPos(), ringFinger.getCurrentInputPos(), pinky.getCurrentInputPos(), wrist.getCurrentInputPos());
+    return String.format("%s.moveHand(\"%s\",%.0f,%.0f,%.0f,%.0f,%.0f,%.0f)\n", service, side, thumb.getCurrentInputPos(), index.getCurrentInputPos(), majeure.getCurrentInputPos(),
+        ringFinger.getCurrentInputPos(), pinky.getCurrentInputPos(), wrist.getCurrentInputPos());
   }
 
   public void hangTen() {
     moveTo(0.0, 180.0, 180.0, 180.0, 0.0, 90.0);
+  }
+
+  public boolean isAttached() {
+    if (controller != null) {
+      if (((Arduino) controller).getDeviceId(this) != null) {
+        isAttached = true;
+        return true;
+      }
+      controller = null;
+    }
+    isAttached = false;
+    return false;
+  }
+
+  @Override
+  public boolean isAttached(String name) {
+    return controller != null && name.equals(controller.getName());
+  }
+
+  @Deprecated
+  public boolean loadFile(String file) {
+    File f = new File(file);
+    Python p = (Python) Runtime.getService("python");
+    log.info("Loading  Python file {}", f.getAbsolutePath());
+    if (p == null) {
+      log.error("Python instance not found");
+      return false;
+    }
+    String script = null;
+    try {
+      script = FileIO.toString(f.getAbsolutePath());
+    } catch (IOException e) {
+      log.error("IO Error loading file : ", e);
+      return false;
+    }
+    // evaluate the scripts in a blocking way.
+    boolean result = p.exec(script, true);
+    if (!result) {
+      log.error("Error while loading file {}", f.getAbsolutePath());
+      return false;
+    } else {
+      log.debug("Successfully loaded {}", f.getAbsolutePath());
+    }
+    return true;
   }
 
   public void map(double minX, double maxX, double minY, double maxY) {
@@ -329,53 +412,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   public void one() {
     moveTo(150.0, 0.0, 180.0, 180.0, 180.0, 90.0);
-  }
-
-  public void attach(String controllerName, int sensorPin) throws Exception {
-    attach((ServoController) Runtime.getService(controllerName), sensorPin);
-  }
-
-  public void attach(String controllerName, String sensorPin) throws Exception {
-    attach((ServoController) Runtime.getService(controllerName), Integer.parseInt(sensorPin));
-  }
-
-  public void attach(ServoController controller, int sensorPin) {
-    try {
-      if (controller == null) {
-        error("setting null as controller");
-        return;
-      }
-      if (isAttached) {
-        log.info("Sensor already attached");
-        return;
-      }
-
-      controller.attach(controller);
-
-      log.info("{} setController {}", getName(), controller.getName());
-      this.controller = controller;
-      controllerName = this.controller.getName();
-      isAttached = true;
-      broadcastState();
-    } catch (Exception e) {
-      error(e);
-    }
-  }
-
-  public void detach(ServoController controller) {
-    // let the controller you want to detach this device
-    if (controller != null) {
-      controller.detach(this);
-    }
-    // setting controller reference to null
-    this.controller = null;
-    isAttached = false;
-    refreshControllers();
-    broadcastState();
-  }
-
-  public void refresh() {
-    broadcastState();
   }
 
   @Override
@@ -452,6 +488,10 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     return data;
   }
 
+  public void onMoveHand(HashMap<String, Double> map) {
+    moveTo(map.get("thumb"), map.get("index"), map.get("majeure"), map.get("majeure"), map.get("pinky"), map.get("wrist"));
+  }
+
   // FIXME - use pub/sub attach to set this up without having this method !
   @Override
   public void onPinArray(PinData[] pindata) {
@@ -498,6 +538,11 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     }
   }
 
+  public void onRegistered(Registration s) {
+    refreshControllers();
+    broadcastState();
+  }
+
   public void open() {
     rest();
   }
@@ -506,8 +551,27 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     moveTo(0, 0, 180, 180, 180);
   }
 
+  public void refresh() {
+    broadcastState();
+  }
+
+  public List<String> refreshControllers() {
+    controllers = Runtime.getServiceNamesFromInterface(ServoController.class);
+    return controllers;
+  }
+
   public void release() {
     disable();
+  }
+
+  @Override
+  public void releaseService() {
+    try {
+      disable();
+      super.releaseService();
+    } catch (Exception e) {
+      error(e);
+    }
   }
 
   public void rest() {
@@ -540,33 +604,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
       pinky.save();
     if (wrist != null)
       wrist.save();
-    return true;
-  }
-
-  @Deprecated
-  public boolean loadFile(String file) {
-    File f = new File(file);
-    Python p = (Python) Runtime.getService("python");
-    log.info("Loading  Python file {}", f.getAbsolutePath());
-    if (p == null) {
-      log.error("Python instance not found");
-      return false;
-    }
-    String script = null;
-    try {
-      script = FileIO.toString(f.getAbsolutePath());
-    } catch (IOException e) {
-      log.error("IO Error loading file : ", e);
-      return false;
-    }
-    // evaluate the scripts in a blocking way.
-    boolean result = p.exec(script, true);
-    if (!result) {
-      log.error("Error while loading file {}", f.getAbsolutePath());
-      return false;
-    } else {
-      log.debug("Successfully loaded {}", f.getAbsolutePath());
-    }
     return true;
   }
 
@@ -674,6 +711,17 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     return;
   }
 
+  @Override
+  public void startService() {
+    super.startService();
+    thumb = (ServoControl) startPeer("thumb");
+    index = (ServoControl) startPeer("index");
+    majeure = (ServoControl) startPeer("majeure");
+    ringFinger = (ServoControl) startPeer("ringFinger");
+    pinky = (ServoControl) startPeer("pinky");
+    wrist = (ServoControl) startPeer("wrist");
+  }
+
   public void stop() {
     if (thumb != null)
       thumb.stop();
@@ -748,50 +796,5 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
       pinky.waitTargetPos();
     if (wrist != null)
       wrist.waitTargetPos();
-  }
-
-  @Override
-  public boolean isAttached(String name) {
-    return controller != null && name.equals(controller.getName());
-  }
-
-  @Override
-  public Set<String> getAttached() {
-    Set<String> ret = new HashSet<String>();
-    if (controller != null) {
-      ret.add(controller.getName());
-    }
-    return ret;
-  }
-
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-
-    try {
-
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.startService();
-      
-      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
-      i01.startPeer("rightHand");
-      
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
-      ServoController controller = (ServoController) Runtime.getService("i01.right");
-
-      InMoov2Hand rightHand = (InMoov2Hand) Runtime.start("r01", "InMoov2Hand");// InMoovHand("r01");
-      rightHand.close();
-      rightHand.open();
-      rightHand.openPinch();
-      rightHand.closePinch();
-      rightHand.rest();
-
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
   }
 }
