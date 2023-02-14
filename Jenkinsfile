@@ -164,12 +164,12 @@ pipeline {
          }
       }
 
-      stage('jacoco') {
-         steps {
-            jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
-            jacoco()
-         }
-      }
+      // stage('jacoco') {
+      //    steps {
+      //       jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
+      //       jacoco()
+      //    }
+      // }
 
       stage('publish-github') {
          when { expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' } }
