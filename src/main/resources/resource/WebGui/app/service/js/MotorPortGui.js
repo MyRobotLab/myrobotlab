@@ -101,7 +101,8 @@ angular.module('mrlapp.service.MotorPortGui', []).controller('MotorPortGuiCtrl',
 
     
     $scope.setSpeed = function() {
-        msg.send('move', $scope.requestedPower)
+        msg.send('move', $scope.requestedPower/100)
+        // console.info('move', $scope.requestedPower/100)
     }
     
     msg.subscribe("refreshControllers")

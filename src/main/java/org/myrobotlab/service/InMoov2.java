@@ -277,7 +277,9 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return c;
   }
 
+  // FIXME FIXME !!! THIS IS A MESS !!
   public void applyConfig() {
+    super.apply();
     log.error("applyConfig()");
     // always getResponse !
     speak("InMoov apply config");

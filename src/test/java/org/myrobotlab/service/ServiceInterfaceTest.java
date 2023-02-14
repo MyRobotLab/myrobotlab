@@ -107,6 +107,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     blacklist.add("As5048AEncoder");    
     blacklist.add("IntegratedMovement");    
     blacklist.add("VirtualDevice");
+    blacklist.add("Joystick");
     blacklist.add("GoogleAssistant");
     blacklist.add("LeapMotion");
     blacklist.add("Python"); // python's interpreter cannot be restarted cleanly

@@ -430,13 +430,13 @@ public class NeoPixel extends Service implements NeoPixelControl {
   }
 
   
-  public void flashBrightness(int brightNess) {
+  public void flashBrightness(double brightNess) {
     NeoPixelConfig c = (NeoPixelConfig)config;
 
     // FIXME - these need to be moved into config
 //    int count = 2;
 //    int interval = 75;
-    setBrightness(brightNess);
+    setBrightness((int)brightNess);
     fill(red, green, blue);
     
 //    long delay = 0;

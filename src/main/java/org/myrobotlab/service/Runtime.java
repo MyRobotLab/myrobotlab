@@ -78,6 +78,8 @@ import org.myrobotlab.process.InProcessCli;
 import org.myrobotlab.process.Launcher;
 import org.myrobotlab.service.config.RuntimeConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
+import org.myrobotlab.service.config.ServiceConfig.Listener;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.ServiceTypeNameResults;
 import org.myrobotlab.service.interfaces.ConnectionManager;
@@ -3880,6 +3882,24 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     return msg;
   }
+  
+  @Override
+  public ServiceConfig getFilteredConfig() {
+    RuntimeConfig sc = (RuntimeConfig) super.getFilteredConfig();
+    Set<Listener> removeList = new HashSet<>();
+    for (Listener listener : sc.listeners) {
+      if (listener.callback.equals("onReleased") || listener.callback.equals("onStarted")
+          || listener.callback.equals("onRegistered") || listener.callback.equals("onStopped") || listener.callback.equals("onCreated")
+          ) {
+        removeList.add(listener);
+      }
+    }
+    for (Listener remove : removeList) {
+      sc.listeners.remove(remove);
+    }
+    return sc;
+  }
+
 
   /**
    * Unregister all connections that a specified client has made.
@@ -4913,7 +4933,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           log.info("here");
         }
         ServiceInterface si = getService(s);
-        ServiceConfig config = si.getConfig();
+        // TODO - switch to save "NON FILTERED" config !!!!
+        // get filtered clone of config for saving
+        ServiceConfig config = si.getFilteredConfig();
         String data = CodecUtils.toYaml(config);
         String ymlFileName = configPath + fs + CodecUtils.shortName(s) + ".yml";
         FileIO.toFile(ymlFileName, data.getBytes());

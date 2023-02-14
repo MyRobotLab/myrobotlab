@@ -350,7 +350,7 @@ public class Joystick extends Service implements AnalogPublisher {
 
   @Override
   public void attachAnalogListener(AnalogListener service) {
-    String id = service.getAnalogId();
+    String id = service.getAxis();
     String serviceName = service.getName();
     getComponents();
     if (components != null && !components.containsKey(id)) {
@@ -379,10 +379,15 @@ public class Joystick extends Service implements AnalogPublisher {
     listeners.add(serviceName);
     // service.attachAnalogPublisher(this);
   }
+  
+  public void clearListeners() {
+    analogListeners.clear();
+    digitalListeners.clear();
+  }
 
   @Override
   public void detachAnalogListener(AnalogListener listener) {
-    String id = listener.getAnalogId();
+    String id = listener.getAxis();
     String serviceName = listener.getName();
     Set<String> listeners = analogListeners.get(id);
     if (listeners != null) {

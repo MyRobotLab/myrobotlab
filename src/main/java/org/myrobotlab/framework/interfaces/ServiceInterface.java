@@ -225,4 +225,10 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    */
   public void setId(String id);
 
+  /**
+   * Get a clone of config that is filtered based on service preference
+   * @return
+   */
+  public ServiceConfig getFilteredConfig();
+
 }

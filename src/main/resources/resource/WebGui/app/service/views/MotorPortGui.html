@@ -8,19 +8,14 @@
             </tr>
             <tr>
                 <td>
-                    input<br/>
-                    <h1>{{service.powerInput}}
-                    </h1>
+                    input<h2>{{service.powerInput}}</h2>
                 </td>
                 <td>
-                    output<br/>
-                    <h1>{{powerOutput.toFixed(0)}}
-                    </h1>
+                    output<h2>{{powerOutput.toFixed(0)}}</h2>
                 </td>
             </tr>
         </table>
-        <br/>
-        <table class="table" width="100%">
+        <table class="table table-striped" width="100%">
             <tr>
                 <td colspan="5">
                     <b>mapping</b>
@@ -49,7 +44,11 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="5">&nbsp;</td>
+                <td>
+                    <b>axis</b>
+                </td>
+                <td>{{service.config.axis}}</td>
+                <td colspan="3">&nbsp;</td>
             </tr>
             <tr>
                 <td>
@@ -98,11 +97,20 @@
                 <td></td>
             </tr>
             <tr>
-                <br/>
-                <td colspan="4">
-                    <input type="range" class="styled-slider" ng-model="requestedPower" min="-100" max="100" step="1" ng-change="setSpeed()"/>
+                <td>
+                    <b>min {{service.config.mapper.minIn}}</b>
                 </td>
                 <td></td>
+                <td></td>
+                <td></td>
+                <td>
+                    <b>max {{service.config.mapper.maxIn}}</b>
+                </td>
+            </tr>
+            <tr>
+                <td align="center" colspan="5">
+                    <input type="range" class="styled-slider" ng-model="requestedPower" min="-100" max="100" step="1" ng-change="setSpeed()"/>
+                </td>
             </tr>
         </table>
     </div>

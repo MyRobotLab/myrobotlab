@@ -99,7 +99,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   protected Double positionCurrent; // aka currentPos
 
-  private String axisName;
+  // private String axisName;
 
   public AbstractMotor(String n, String id) {
     super(n, id);
@@ -454,13 +454,16 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   @Override
-  public void setAnalogId(String name) {
-    axisName = name;
+  public void setAxis(String name) {
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    c.axis = name;
+    broadcastState();
   }
 
   @Override
-  public String getAnalogId() {
-    return axisName;
+  public String getAxis() {
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    return c.axis;
   }
 
   @Override

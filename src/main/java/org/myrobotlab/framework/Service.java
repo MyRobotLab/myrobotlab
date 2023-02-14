@@ -1419,6 +1419,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     Map<String, List<MRLListener>> listeners = getOutbox().notifyList;
     List<Listener> newListeners = new ArrayList<>();
 
+    // TODO - perhaps a switch for "remote" things ?
     if (filterWeb) {
       for (String method : listeners.keySet()) {
         List<MRLListener> list = listeners.get(method);
@@ -1435,6 +1436,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       config.listeners = newListeners;
     }
     return config;
+  }
+  
+  @Override
+  public ServiceConfig getFilteredConfig() {
+    ServiceConfig sc = getConfig();
+    // deep clone
+    sc = (ServiceConfig)CodecUtils.fromYaml(CodecUtils.toYaml(sc), sc.getClass());
+    return sc;
   }
 
   @Override

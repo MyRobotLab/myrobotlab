@@ -14,4 +14,6 @@ public class GeneralMotorConfig extends ServiceConfig {
 
   public String controller;
 
+  public String axis;
+
 }

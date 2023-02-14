@@ -25,6 +25,9 @@
 
 package org.myrobotlab.service;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -33,10 +36,10 @@ import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServiceConfig.Listener;
 import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.data.ServoMove;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
-import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
 /**
@@ -202,7 +205,7 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
   @Override
   public ServiceConfig getConfig() {
 
-    ServoConfig config = (ServoConfig)super.getConfig();
+    ServoConfig config = (ServoConfig) super.getConfig();
 
     config.autoDisable = autoDisable;
     config.enabled = enabled;
@@ -293,6 +296,23 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
     return c;
   }
 
+  @Override
+  public ServiceConfig getFilteredConfig() {
+    ServoConfig sc = (ServoConfig) super.getFilteredConfig();
+    Set<Listener> removeList = new HashSet<>();
+    for (Listener listener : sc.listeners) {
+      if (listener.callback.equals("onServoEnable") || listener.callback.equals("onServoDisable") || listener.callback.equals("onEncoderData")
+          || listener.callback.equals("onServoSetSpeed") || listener.callback.equals("onServoWriteMicroseconds") || listener.callback.equals("onServoMoveTo")
+          || listener.callback.equals("onServoStop")) {
+        removeList.add(listener);
+      }
+    }
+    for (Listener remove : removeList) {
+      sc.listeners.remove(remove);
+    }
+    return sc;
+  }
+
   public static void main(String[] args) throws InterruptedException {
     try {
 
@@ -308,7 +328,6 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
       Runtime runtime = Runtime.getInstance();
       // runtime.connect("http://localhost:8888");
 
-
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
@@ -317,8 +336,6 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
       Servo pan = (Servo) Runtime.start("pan", "Servo");
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-      
-
 
       tilt.setPin(4);
       pan.setPin(5);
@@ -330,12 +347,11 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
 
       mega.attach(tilt);
       mega.attach(pan);
-      
+
       boolean done = true;
       if (done) {
         return;
       }
-
 
       // runtime.save();
 

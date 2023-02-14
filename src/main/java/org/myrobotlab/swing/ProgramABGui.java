@@ -314,12 +314,6 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
         if (programab.getCurrentBotName() != null) {
           botName.setSelectedItem(programab.getCurrentBotName());
         }
-        visualDebug.setSelected(programab.getVisualDebug());
-        if (programab.getVisualDebug()) {
-          enableVisualDebug();
-        } else {
-          disableVisualDebug();
-        }
       }
     });
 

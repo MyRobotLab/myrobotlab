@@ -128,11 +128,10 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
 
   final private transient PlaylistPlayer playlistPlayer = new PlaylistPlayer(this);
 
-  protected double peakMultiplier = 1.0;
-
 
   public void setPeakMultiplier(double peakMultiplier) {
-    this.peakMultiplier = peakMultiplier;
+    AudioFileConfig c = (AudioFileConfig)config;
+    c.peakMultiplier = peakMultiplier;
   }
 
   public AudioFile(String n, String id) {
@@ -527,7 +526,7 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
     c.mute = mute;
     c.currentTrack = currentTrack;
     c.currentPlaylist = currentPlaylist;
-    c.peakMultiplier = peakMultiplier;
+    // c.peakMultiplier = peakMultiplier;
     c.volume = volume;
     c.playlists = playlists;
     // config.peakSampleInterval <- this one is done correctly no maintenance
