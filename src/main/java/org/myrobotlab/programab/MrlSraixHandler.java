@@ -38,20 +38,32 @@ public class MrlSraixHandler implements SraixHandler {
   @Override
   public String sraix(Chat chatSession, String input, String defaultResponse, String hint, String host, String botid, String apiKey, String limit, Locale locale) {
     log.debug("MRL Sraix handler! Input {}", input);
-
+    
+    // FIXME - "list of AIs in priority order to attempt to handle request
+    // best synopsis of sraix I've found - https://gist.github.com/onlurking/f6431e672cfa202c09a7c7cf92ac8a8b
     try {
       XmlMapper xmlMapper = new XmlMapper();
       Oob oob = xmlMapper.readValue(input, Oob.class);
+      StringBuilder responseText = new StringBuilder();
       if (oob.mrljson != null) {
-        Message msg = CodecUtils.fromJson(oob.mrljson, Message.class);
-        msg.sender = programab.getName();
-        msg.sendingMethod = "sraix";
-        programab.in(msg);
-        return null;
+        Message[] msgs = CodecUtils.fromJson(oob.mrljson, Message[].class);
+        for (Message msg: msgs) {
+          msg.sender = programab.getName();
+          msg.sendingMethod = "sraix";
+          // buffered asynchronous - use invoke synchronous
+          // programab.in(msg);
+          // invoking to keep it synchronous
+          ServiceInterface si = Runtime.getService(msg.getName());
+          Object ret = si.invoke(msg.method, msg.data);
+          if (ret != null) {
+            responseText.append(ret.toString());
+          }
+        }
+        return responseText.toString();
       }
       log.info("found oob {}", oob);
     } catch (Exception e) {
-      programab.error(e);
+      // programab.error("threw on input %s", input);
     }
 
     // the INPUT has the string we care about. if this is an OOB tag, let's

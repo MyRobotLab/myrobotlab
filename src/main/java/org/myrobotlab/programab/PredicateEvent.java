@@ -21,6 +21,8 @@ public class PredicateEvent {
    * new value
    */
   public String value;
+  public String botName;
+  public String userName;
   
   @Override
   public String toString() {

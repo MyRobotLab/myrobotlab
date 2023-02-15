@@ -24,6 +24,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.logging.SimpleLogPublisher;
 import org.myrobotlab.programab.BotInfo;
@@ -103,11 +104,6 @@ public class ProgramAB extends Service
    * default user name chatting with the bot
    */
   String currentUserName = "human";
-
-  /**
-   * display processing and logging
-   */
-  boolean visualDebug = true;
 
   /**
    * start GoogleSearch (a peer) instead of sraix web service which is down or
@@ -331,7 +327,7 @@ public class ProgramAB extends Service
     }
 
     // Get the actual bots aiml based response for this session
-    log.error("getResonse({})", text);
+    log.info("getResonse({})", text);
     Response response = session.getResponse(text);
 
     // EEK! clean up the API!
@@ -873,15 +869,6 @@ public class ProgramAB extends Service
     broadcastState();
   }
 
-  public void setVisualDebug(Boolean visualDebug) {
-    this.visualDebug = visualDebug;
-    broadcastState();
-  }
-
-  public Boolean getVisualDebug() {
-    return visualDebug;
-  }
-
   public void setCurrentUserName(String currentUserName) {
     this.currentUserName = currentUserName;
     broadcastState();
@@ -1025,6 +1012,10 @@ public class ProgramAB extends Service
 
     logPublisher = new SimpleLogPublisher(this);
     logPublisher.filterClasses(new String[] { "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans", "class org.myrobotlab.programab.MrlSraixHandler" });
+    Logging logging = LoggingFactory.getInstance();
+    logging.setLevel("org.alicebot.ab.Graphmaster", "DEBUG");
+    logging.setLevel("org.alicebot.ab.MagicBooleans", "DEBUG");
+    logging.setLevel("class org.myrobotlab.programab.MrlSraixHandler", "DEBUG");
     logPublisher.start();
 
   }
@@ -1318,6 +1309,8 @@ public class ProgramAB extends Service
   public PredicateEvent publishChangePredicate(Session session, Chat chat, String name, String value) {
     PredicateEvent event = new PredicateEvent();
     event.id = String.format("%s<->%s", session.userName, session.botInfo.name);
+    event.userName = session.userName;
+    event.botName = session.botInfo.name;
     event.name = name;
     event.value = value;
     return event;
