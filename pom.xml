@@ -1968,7 +1968,6 @@
           </includes>
           <excludes>
             <exclude>**/integration/*</exclude>
-            <exclude>**/OpenCV*/*</exclude> <!-- filtering out OpenCV for github actions-->
           </excludes>
              <systemPropertyVariables>
                   <!-- 
@@ -2020,8 +2019,8 @@
                   </filesets>
                 </configuration>
       </plugin>
-
-<!--
+      <!-- attached to Maven test phase -->
+      <!--
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
@@ -2031,8 +2030,7 @@
             <goals>
               <goal>prepare-agent</goal>
             </goals>
-          </execution>
-          
+          </execution>          
           <execution>
             <id>report</id>
             <phase>test</phase>
@@ -2042,7 +2040,7 @@
           </execution>
         </executions>
       </plugin>
--->
+      -->
     </plugins>
   </build>
     <reporting>    
