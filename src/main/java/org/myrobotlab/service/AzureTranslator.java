@@ -9,8 +9,9 @@
 
 package org.myrobotlab.service;
 
-import java.util.LinkedHashMap;
+
 import java.util.List;
+import java.util.Map;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
@@ -168,14 +169,14 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
       Response response = client.newCall(request).execute();
       String resp = response.body().string();
       // if ()
-      List<LinkedHashMap> list = CodecUtils.fromJson(resp, List.class);
-      for (LinkedHashMap t : list) {
-        LinkedHashMap detected = (LinkedHashMap) t.get("detectedLanguage");
+      List<Map> list = CodecUtils.fromJson(resp, List.class);
+      for (Map t : list) {
+        Map detected = (Map) t.get("detectedLanguage");
         if (detected != null) {
           invoke("publishDetectedLanguage", detected.get("language"));
         }
-        List<LinkedHashMap> translations = (List<LinkedHashMap>) t.get("translations");
-        for (LinkedHashMap trans : translations) {
+        List<Map> translations = (List<Map>) t.get("translations");
+        for (Map trans : translations) {
           sb.append(trans.get("text"));
         }
       }

@@ -2,6 +2,7 @@ package org.myrobotlab.net;
 
 import java.util.concurrent.TimeUnit;
 
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.interfaces.ConnectionEventListener;
@@ -65,13 +66,17 @@ public class WsClient extends WebSocketListener {
     return uuid;
   }
 
-  public void connect(ServiceInterface si, String url) {
-    this.si = si;
-    this.url = url;
+  public void connect(Object si, String url) {
     
+    this.url = url;
+
     if (url == null) {
       error("url cannot be null");
       return;
+    }
+    
+    if (si instanceof Service) {
+      this.si = (Service)si;  
     }
 
     if (si instanceof RemoteMessageHandler) {
@@ -151,10 +156,11 @@ public class WsClient extends WebSocketListener {
 
   @Override
   public void onFailure(WebSocket webSocket, Throwable t, Response response) {
-    t.printStackTrace();
-    error(new Exception(t));
     if (listener != null) {
       listener.onFailure(webSocket, t, response);
+    } else {
+      t.printStackTrace();
+      error(new Exception(t));
     }
   }
 

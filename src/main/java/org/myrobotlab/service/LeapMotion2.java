@@ -10,11 +10,15 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.WsClient;
 import org.myrobotlab.service.config.LeapMotion2Config;
 import org.myrobotlab.service.data.LeapData;
+import org.myrobotlab.service.interfaces.ConnectionEventListener;
 import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.myrobotlab.service.interfaces.LeapDataPublisher;
 import org.myrobotlab.service.interfaces.PointPublisher;
 import org.myrobotlab.service.interfaces.RemoteMessageHandler;
 import org.slf4j.Logger;
+
+import okhttp3.Response;
+import okhttp3.WebSocket;
 
 public class LeapMotion2 extends Service implements LeapDataListener, LeapDataPublisher, PointPublisher, RemoteMessageHandler {
 
@@ -94,7 +98,7 @@ public class LeapMotion2 extends Service implements LeapDataListener, LeapDataPu
     addListener("publishPoints", s.getName(), "onPoints");
   }
 
-  public class LeapWsListener {
+  public class LeapWsListener implements ConnectionEventListener {
 
     private transient LeapMotion2 service;
 
@@ -117,10 +121,32 @@ public class LeapMotion2 extends Service implements LeapDataListener, LeapDataPu
 
         websocket = new WsClient();
         LeapMotion2Config c = (LeapMotion2Config) config;
-        websocket.connect(service, c.websocketUrl);
+        websocket.connect(this, c.websocketUrl);
 
       } catch (Exception e) {
         service.error(e);
+      }
+    }
+
+    @Override
+    public void onOpen(WebSocket webSocket, Response response) {
+      // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onClosing(WebSocket webSocket, int code, String reason) {
+      // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+      if (service.isRunning()) {
+        LeapMotion2Config c = (LeapMotion2Config) config;
+        info("could not connect to ... %s", c.websocketUrl);
+        sleep(5000);
+        websocket.connect(this, c.websocketUrl);
       }
     }
   }
