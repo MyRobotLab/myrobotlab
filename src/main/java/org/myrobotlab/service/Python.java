@@ -477,7 +477,7 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
    *         false if there was an exception.
    */
   public boolean exec(String code, boolean blocking) {
-    log.debug("exec(String) \n{}", code);
+    log.info("exec(String) \n{}", code);
 
     try {
       if (!blocking) {

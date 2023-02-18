@@ -195,7 +195,7 @@ public class Polly extends AbstractSpeechSynthesis {
 //      log.error("polly not configured yet");
 //      return null;
 //    }
-    log.error("toSpeak {}", toSpeak);
+    log.info("toSpeak {}", toSpeak);
     
     PollyConfig c = (PollyConfig) config;
     getPolly();
