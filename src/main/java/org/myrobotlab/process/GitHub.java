@@ -1,7 +1,7 @@
 package org.myrobotlab.process;
 
 import java.util.HashSet;
-import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.myrobotlab.codec.CodecUtils;
@@ -36,7 +36,7 @@ public class GitHub {
     if (data != null) {
       Object[] files = CodecUtils.decodeArray(new String(data));
       for (int i = 0; i < files.length; ++i) {
-        LinkedHashMap<String, String> file = (LinkedHashMap<String, String>) files[i];
+        Map<String, String> file = (Map<String, String>) files[i];
         String name = file.get("name");
         list.add(name);
       }
