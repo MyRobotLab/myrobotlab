@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.Map;
 
@@ -163,7 +163,7 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
       if (bytes != null) {
         String response = new String(bytes, StandardCharsets.UTF_8);
         @SuppressWarnings("unchecked")
-        LinkedHashMap<String, Object> json = CodecUtils.fromJson(response, LinkedHashMap.class);
+        Map<String, Object> json = CodecUtils.fromJson(response, Map.class);
         String extract = (String) json.get("extract");
         if (extract != null) {
           
