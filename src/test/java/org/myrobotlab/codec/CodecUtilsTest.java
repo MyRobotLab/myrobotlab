@@ -2,23 +2,19 @@ package org.myrobotlab.codec;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.myrobotlab.framework.MRLListener;
-import org.myrobotlab.framework.Message;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.test.AbstractTest;
 
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 public class CodecUtilsTest extends AbstractTest {
 
-  @Ignore /* need to ignore it for the moment - should not compare exact json - not effective */
+  @Ignore /*
+           * need to ignore it for the moment - should not compare exact json -
+           * not effective
+           */
   @Test
   public void testLocale() {
     Locale mrlLocale;
@@ -72,7 +68,7 @@ public class CodecUtilsTest extends AbstractTest {
 
     // default serialization
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    LinkedHashMap<String, Object> defaultObj = (LinkedHashMap) CodecUtils.fromJson(json);
+    Map<String, Object> defaultObj = (Map) CodecUtils.fromJson(json);
     assertEquals("en", defaultObj.get("language"));
 
     // type supplied

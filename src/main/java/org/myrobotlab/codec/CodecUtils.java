@@ -1,35 +1,5 @@
 package org.myrobotlab.codec;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.PrettyPrinter;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.module.noctordeser.NoCtorDeserModule;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.internal.LinkedTreeMap;
-import org.myrobotlab.codec.json.GsonPolymorphicTypeAdapterFactory;
-import org.myrobotlab.codec.json.JacksonPolymorphicModule;
-import org.myrobotlab.codec.json.JacksonPrettyPrinter;
-import org.myrobotlab.codec.json.JsonDeserializationException;
-import org.myrobotlab.codec.json.JsonSerializationException;
-import org.myrobotlab.framework.MRLListener;
-import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.MethodCache;
-import org.myrobotlab.logging.Level;
-import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.config.ServiceConfig;
-import org.slf4j.Logger;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
-
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -51,9 +21,40 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.myrobotlab.codec.json.GsonPolymorphicTypeAdapterFactory;
+import org.myrobotlab.codec.json.JacksonPolymorphicModule;
+import org.myrobotlab.codec.json.JacksonPrettyPrinter;
+import org.myrobotlab.codec.json.JsonDeserializationException;
+import org.myrobotlab.codec.json.JsonSerializationException;
+import org.myrobotlab.framework.MRLListener;
+import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.MethodCache;
+import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.slf4j.Logger;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.PrettyPrinter;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.module.noctordeser.NoCtorDeserModule;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.internal.LinkedTreeMap;
 
 /**
  * handles all encoding and decoding of MRL messages or api(s) assumed context -
@@ -284,9 +285,17 @@ public class CodecUtils {
                   clazz = (Class<T>)LinkedHashMap.class;
                 }
                 return gson.fromJson(json, clazz);
+            } else {
+              if (clazz == null) {
+                // FIXME - look for array if
+                // JsonNode jsonNode = mapper.readTree(jsonString);
+                // if (jsonNode.isArray()) {..
+                // } else if (jsonNode.isObject())
+                                
+                clazz = (Class<T>)Map.class;
+              }
+              return mapper.readValue(json, clazz);
             }
-
-            return mapper.readValue(json, clazz);
         } catch (Exception e) {
             throw new JsonDeserializationException(e);
         }
