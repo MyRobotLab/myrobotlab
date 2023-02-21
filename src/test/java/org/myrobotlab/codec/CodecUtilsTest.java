@@ -2,6 +2,8 @@ package org.myrobotlab.codec;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.junit.Ignore;
@@ -79,8 +81,23 @@ public class CodecUtilsTest extends AbstractTest {
     check = (Locale) CodecUtils.fromJson(json, Locale.class);
     assertEquals("en", check.getLanguage());
 
-    System.out.println();
+    // primitives objects arrays
+    Object test = CodecUtils.fromJson("1");
+    assertEquals(test.getClass(), Integer.class);
 
+    test = CodecUtils.fromJson("1.0");
+    assertEquals(test.getClass(), Double.class);
+    
+    test = CodecUtils.fromJson("\"Ahoy!\"");
+    assertEquals(test.getClass(), String.class);
+    
+    test = CodecUtils.fromJson("[]");
+    assertEquals(test.getClass(), ArrayList.class);
+    
+    test = CodecUtils.fromJson("{}");
+    assertEquals(test.getClass(), LinkedHashMap.class);
+    
+    
   }
 
 }

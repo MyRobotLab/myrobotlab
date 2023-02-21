@@ -46,8 +46,12 @@ import org.yaml.snakeyaml.constructor.Constructor;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -271,13 +275,14 @@ public class CodecUtils {
      * using the selected JSON backend.
      *
      * @param json  The JSON to be deserialized in String form
-     * @param clazz The target class.
+     * @param clazz The target class. If a class is not supplied the default class returned will be an LinkedHashMap
      * @param <T>   The type of the target class.
      * @return An object of the specified class (or a subclass of) with the state
      * given by the json. Null is an allowed return object.
      * @throws JsonDeserializationException if an error during deserialization occurs.
      * @see #USING_GSON
      */
+    @SuppressWarnings("unchecked")
     public static <T> /*@Nullable*/ T fromJson(/*@Nonnull*/ String json, /*@Nonnull*/ Class<T> clazz) {
         try {
             if (USING_GSON) {
@@ -287,12 +292,30 @@ public class CodecUtils {
                 return gson.fromJson(json, clazz);
             } else {
               if (clazz == null) {
-                // FIXME - look for array if
-                // JsonNode jsonNode = mapper.readTree(jsonString);
-                // if (jsonNode.isArray()) {..
-                // } else if (jsonNode.isObject())
-                                
-                clazz = (Class<T>)Map.class;
+ 
+                JsonFactory factory = new JsonFactory();
+                JsonParser parser = factory.createParser(json);
+
+                // "peek" at the next token to determine its type
+                JsonToken token = parser.nextToken();
+
+                if (token == JsonToken.START_OBJECT) {
+                  clazz = (Class<T>)Map.class;
+                } else if (token == JsonToken.START_ARRAY) {
+                  clazz = (Class<T>)ArrayList.class;
+                } else if (token.isScalarValue()) {
+                  ObjectMapper objectMapper = new ObjectMapper();
+                  JsonNode node = objectMapper.readTree(json);
+                  if (node.isInt()) {
+                      return mapper.readValue(json, (Class<T>)Integer.class);
+                  } else if (node.isDouble()) {
+                      return mapper.readValue(json, (Class<T>)Double.class);
+                  } else if (node.isTextual()) {
+                    return mapper.readValue(json, (Class<T>)String.class);
+                  }
+                } else {
+                    log.error("could not derive type from peeking json {}", json);
+                }
               }
               return mapper.readValue(json, clazz);
             }
@@ -1429,7 +1452,7 @@ public class CodecUtils {
         LoggingFactory.init(Level.INFO);
 
         try {
-
+         
             Object o = readServiceConfig("data/config/InMoov2_FingerStarter/i01.chatBot.yml");
 
             String json = CodecUtils.fromJson("test", String.class);
