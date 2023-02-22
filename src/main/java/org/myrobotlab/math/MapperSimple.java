@@ -4,16 +4,46 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.slf4j.Logger;
 
+/**
+ * "Inverted" was added to MapperLinear. This was not an appropriate thing to
+ * do. Now there are many dependencies on it where and added complexity when
+ * using negative values would have sufficed. Additionally, there is no reason
+ * to have Clip either. The use case can be handled by simply setting the minIn
+ * and maxIn values, or expanding them. "Clipping" is always assumed and can be
+ * explicitly set at "any values"
+ * 
+ * The original Arduino map() method this was inspired from has no such values.
+ * This was an attempt to "clean up" exposing the map to config. Otherwise,
+ * users setting config would be asking the same questions regarding the useless
+ * fields Inverted & Clip
+ * 
+ * 
+ * @author gperry
+ *
+ */
 public class MapperSimple implements Mapper {
 
   public final static Logger log = LoggerFactory.getLogger(MapperSimple.class);
 
+  /**
+   * minIn - min value input can be
+   */
   public double minIn;
+  /**
+   * maxIn - max value input can be
+   */
   public double maxIn;
+  /**
+   * maxOut - max value output can be
+   */
   public double minOut;
+  /**
+   * maxOut - max value output can be
+   */
   public double maxOut;
-  
-  public MapperSimple(){}
+
+  public MapperSimple() {
+  }
 
   public MapperSimple(double minIn, double maxIn, double minOut, double maxOut) {
     map(minIn, maxIn, minOut, maxOut);
