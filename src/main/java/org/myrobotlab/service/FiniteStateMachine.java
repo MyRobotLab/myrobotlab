@@ -27,12 +27,10 @@ import com.github.pnavais.machine.model.StateTransition;
 import com.github.pnavais.machine.model.StringMessage;
 
 /**
+ * Utilizing the excellent FSM implementation here
+ * https://github.com/pnavais/state-machine
  * 
  * @author GroG
- * 
- *         Utilizing the excellent FSM implementation here
- *         https://github.com/pnavais/state-machine
- *
  */
 public class FiniteStateMachine extends Service {
 
@@ -141,9 +139,10 @@ public class FiniteStateMachine extends Service {
   public void prune() {
     stateMachine.prune();
   }
-  
+
   /**
    * for fsm event publishers
+   * 
    * @param event
    * @return
    */
@@ -237,8 +236,8 @@ public class FiniteStateMachine extends Service {
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {    
-    FiniteStateMachineConfig config = (FiniteStateMachineConfig)super.apply(c);
+  public ServiceConfig apply(ServiceConfig c) {
+    FiniteStateMachineConfig config = (FiniteStateMachineConfig) super.apply(c);
 
     if (config.transitions != null) {
 
@@ -285,9 +284,8 @@ public class FiniteStateMachine extends Service {
     try {
 
       LoggingFactory.init(Level.WARN);
-      
-      // Runtime.startConfig("sub-04");
 
+      // Runtime.startConfig("sub-04");
 
       // WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // // webgui.setSsl(true);
@@ -304,13 +302,11 @@ public class FiniteStateMachine extends Service {
 
       FiniteStateMachine fsm = (FiniteStateMachine) Runtime.start("i01.fsm", "FiniteStateMachine");
       // Runtime.start("servo", "Servo");
-      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
-      
+
       Runtime.start("python", "Python");
-      
-      
 
       // TODO - need properties for each state ?
 
@@ -332,9 +328,8 @@ public class FiniteStateMachine extends Service {
       fsm.addTransition("tracking", "idle", "idle");
 
       fsm.setCurrent("start");
-      
-      Runtime.start("i01", "InMoov2");
 
+      Runtime.start("i01", "InMoov2");
 
       // fsm.createFsm("emotional-state");
 
@@ -369,12 +364,11 @@ public class FiniteStateMachine extends Service {
       fsm.fire("ill-event");
 
       fsm.save();
-      
+
       boolean done = true;
       if (done) {
         return;
       }
-
 
       // fsm.send("clear-event", 1000);
 
