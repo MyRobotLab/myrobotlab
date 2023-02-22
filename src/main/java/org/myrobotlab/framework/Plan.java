@@ -11,7 +11,6 @@ import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 /**
- * 
  * Plans are processed by runtime as requests for future states. They can be
  * complex multi service multi configuration with overrides and different peer
  * names, but ultimately its a request to runtime for services and configuration
@@ -21,16 +20,26 @@ import org.slf4j.Logger;
  */
 public class Plan {
   /**
-   * the root of the tree of configuration
+   * the root of the tree of configuration - not currently used, but 
+   * there is value in being able to create and save a plan, yet not execute it.
+   * A "name" was thought might help in this endeavor, to identify unique "plans".
+   * Not currently used.
    */
   final String name;
 
   public final static Logger log = LoggerFactory.getLogger(Plan.class);
 
+  /**
+   * The configuration for this plan
+   */
   protected Map<String, ServiceConfig> config = new LinkedHashMap<>();
 
   public Plan(String rootName) {
     name = rootName;
+    /**
+     * A plan needs a default RuntimeConfig, a sort of bootstrap, since it will be
+     * responsible for all other service life-cycles
+     */
     config.put("runtime", new RuntimeConfig());
   }
 
