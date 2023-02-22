@@ -343,6 +343,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return null;
   }
 
+  /**
+   * Create which only has name (no type).  This is only possible, if there is an
+   * appropriately named service config in the Plan (in memory) or (more commonly) on
+   * the filesystem.  Since ServiceConfig comes with type information, a name is 
+   * all that is needed to start the service.
+   * 
+   * @param name
+   * @return
+   */
   static public ServiceInterface create(String name) {
     return create(name, null);
   }
@@ -356,15 +365,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * check - checking all planned service have met appropriate licensing and dependency checks create -
    * </pre>
    * 
-   * @param name
-   * @param type
-   * @return
+   * @param name - Required, cannot be null
+   * @param type - Can be null if a service file exists for named service
+   * @return the service
    */
-  // FIXME - this method should be private - user should not able to create
-  // without starting
-  // there is no point ... and it just makes it more complicated, if you want to
-  // adjust
-  // configuration adjust config in the plan before starting
   static public synchronized ServiceInterface create(String name, String type) {
 
     try {
