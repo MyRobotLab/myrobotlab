@@ -3,12 +3,33 @@ package org.myrobotlab.framework;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * A generic class 
+ * @author GroG
+ *
+ */
 public class Task extends TimerTask {
 
+  /**
+   * unique name of task
+   */
   String taskName;
+  /**
+   * message to send at each interval
+   */
   Message msg;
+  /**
+   * interval of time to pass before sending another message
+   */
   long interval = 0;
+  /**
+   * services associated with this task
+   */
   Service myService;
+  
+  /**
+   * if its not interval but a single shot timer event after which its removed
+   */
   boolean oneShot = false;
 
   // FIXME upgrade to ScheduledExecutorService

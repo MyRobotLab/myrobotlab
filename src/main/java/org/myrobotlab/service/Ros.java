@@ -57,6 +57,42 @@ public class Ros extends Service implements RemoteMessageHandler, ConnectionEven
    *
    */
 
+  /**
+   * This operation is used to subscribe to a ROS topic. The ROS bridge server
+   * will forward any messages received on the topic to the client.
+   */
+  static final public String OP_SUBSCRIBE = "subscribe";
+  /**
+   * This operation is used to unsubscribe from a ROS topic. The ROS bridge
+   * server will stop forwarding messages received on the topic to the client.
+   */
+  static final public String OP_UNSUBSCRIBE = "unsubscribe";
+
+  /**
+   * This operation is used to publish a message to a ROS topic. The ROS bridge
+   * server will forward the message to any subscribers of the topic.
+   */
+  static final public String OP_PUBLISH = "publish";
+  /**
+   * This operation is used to call a ROS service. The ROS bridge server will
+   * forward the request to the service and return the response to the client.
+   */
+  static final public String OP_CALL_SERVICE = "call_service";
+
+  /**
+   * This operation is used to advertise a ROS topic. The ROS bridge server will
+   * create a new topic with the specified name and forward any messages
+   * received on the topic to any subscribers.
+   */
+  static final public String OP_ADVERTISE = "advertise";
+
+  /**
+   * This operation is used to stop advertising a ROS topic. The ROS bridge
+   * server will stop forwarding messages received on the topic to any
+   * subscribers.
+   */
+  static final public String OP_UNADVERTISE = "unadvertise";
+
   static public class RosMsg {
     public List<Object> args;
     public String compression;
@@ -70,12 +106,12 @@ public class Ros extends Service implements RemoteMessageHandler, ConnectionEven
      */
     public Object values;
 
-//    public String toString() {
-//      return CodecUtils.toJson(this);
-//    }
+    // public String toString() {
+    // return CodecUtils.toJson(this);
+    // }
   }
 
-  public class RosServiceCallback {
+  static public class RosServiceCallback {
     public String id;
     public Object msg;
   }
@@ -102,7 +138,6 @@ public class Ros extends Service implements RemoteMessageHandler, ConnectionEven
 
   Map<String, RosServiceCallback> callbacks = new HashMap<>();
 
-  @SuppressWarnings("rawtypes")
   transient private WsClient client = null;
 
   protected boolean connected = false;
@@ -190,7 +225,7 @@ public class Ros extends Service implements RemoteMessageHandler, ConnectionEven
 
       RosMsg msg = new RosMsg();
       msg.id = id;
-      msg.op = "call_service";
+      msg.op = OP_CALL_SERVICE;
       msg.service = service;
 
       sendJson(CodecUtils.toJson(msg));
@@ -218,7 +253,7 @@ public class Ros extends Service implements RemoteMessageHandler, ConnectionEven
       error(e);
     }
   }
-  
+
   public void rosSendMsg(RosMsg msg) {
     String json = CodecUtils.toJson(msg);
     sendJson(json);
@@ -226,19 +261,18 @@ public class Ros extends Service implements RemoteMessageHandler, ConnectionEven
 
   public void rosPublish(String topic, String json) {
     RosMsg msg = new RosMsg();
-    msg.op = "publish";
+    msg.op = OP_PUBLISH;
     msg.topic = topic;
-    msg.msg = CodecUtils.fromJson(json);    
+    msg.msg = CodecUtils.fromJson(json);
     String msgJson = CodecUtils.toJson(msg);
     sendJson(msgJson);
   }
-
 
   public void rosSubscribe(String topic) {
     try {
       RosConfig c = (RosConfig) config;
       RosMsg msg = new RosMsg();
-      msg.op = "subscribe";
+      msg.op = OP_SUBSCRIBE;
       msg.topic = topic;
       sendJson(CodecUtils.toJson(msg));
       if (c.subscriptions == null) {
@@ -255,7 +289,7 @@ public class Ros extends Service implements RemoteMessageHandler, ConnectionEven
       RosConfig c = (RosConfig) config;
 
       RosMsg msg = new RosMsg();
-      msg.op = "unsubscribe";
+      msg.op = OP_UNSUBSCRIBE;
       msg.topic = topic;
       client.send(CodecUtils.toJson(msg));
       if (c.subscriptions == null) {

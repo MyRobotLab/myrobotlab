@@ -27,7 +27,7 @@ public class Plan {
 
   public final static Logger log = LoggerFactory.getLogger(Plan.class);
 
-  LinkedHashMap<String, ServiceConfig> config = new LinkedHashMap<>();
+  protected Map<String, ServiceConfig> config = new LinkedHashMap<>();
 
   public Plan(String rootName) {
     name = rootName;
@@ -95,7 +95,7 @@ public class Plan {
     return config.containsKey(name);
   }
 
-  public LinkedHashMap<String, ServiceConfig> getConfig() {
+  public Map<String, ServiceConfig> getConfig() {
     return config;
   }
 

@@ -1,5 +1,12 @@
 package org.myrobotlab.service.data;
-
+/**
+ * Class to publish to specify details on how to display an led or a group of leds.
+ * There is a need to "flash" LEDs in order to signal some event.  This is the
+ * beginning of an easy way to publish a message to do that.
+ * 
+ * @author GroG
+ *
+ */
 public class LedDisplayData {
 
     public String action; // fill | flash | play animation | stop | clear

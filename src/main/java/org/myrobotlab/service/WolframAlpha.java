@@ -43,13 +43,9 @@ public class WolframAlpha extends Service {
       visitable.toString();
       log.info(results.toString());
 
-      Runtime.createAndStart("gui", "SwingGui");
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw",e);
     }
-    /*
-     * SwingGui gui = new SwingGui("gui"); gui.startService();
-     */
   }
 
   public WolframAlpha(String n, String id) {
