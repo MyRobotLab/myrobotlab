@@ -113,6 +113,7 @@ public class Ros extends Service implements RemoteMessageHandler, ConnectionEven
 
   static public class RosServiceCallback {
     public String id;
+    // FIXME - change type to RosMsg
     public Object msg;
   }
 
@@ -194,7 +195,7 @@ public class Ros extends Service implements RemoteMessageHandler, ConnectionEven
     return ((RosConfig) config).subscriptions;
   }
 
-  public List<String> getTopics() throws InterruptedException {
+  public List<String> getTopics() {
 
     RosServiceCallback ret = rosCallService("/rosapi/topics");
     if (ret == null) {
@@ -202,7 +203,8 @@ public class Ros extends Service implements RemoteMessageHandler, ConnectionEven
     }
     RosMsg msg = (RosMsg) ret.msg;
     if (msg != null) {
-      List topics = (List) ((Map) msg.values).get("topics");
+      @SuppressWarnings("unchecked")
+      List<String> topics = (List<String>) ((Map) msg.values).get("topics");
       log.info(ret.toString());
       return topics;
     } else {
