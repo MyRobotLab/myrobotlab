@@ -42,7 +42,7 @@ public class RuntimeConfig extends ServiceConfig {
     return registry.remove(name);
   }
   
-  public void removeStartsWith(String startsWith) {
+  synchronized public void removeStartsWith(String startsWith) {
     ArrayList<String> remove = new ArrayList<>();
     for (String n: registry) {
       if (n.startsWith(startsWith)) {

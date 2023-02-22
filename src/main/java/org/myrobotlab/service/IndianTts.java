@@ -34,13 +34,6 @@ public class IndianTts extends AbstractSpeechSynthesis {
   }
 
   @Override
-  public void startService() {
-    super.startService();
-    httpClient = (HttpClient) startPeer("http");
-    httpClient.startService();
-  }
-
-  @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
 
     String userid = getKey(INDIANTTS_USER_USERID);
