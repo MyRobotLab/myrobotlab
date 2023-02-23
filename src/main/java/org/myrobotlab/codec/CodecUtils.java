@@ -292,10 +292,9 @@ public class CodecUtils {
                 return gson.fromJson(json, clazz);
             } else {
               if (clazz == null) {
- 
-                JsonFactory factory = new JsonFactory();
-                JsonParser parser = factory.createParser(json);
 
+                JsonParser parser = mapper.getFactory().createParser(json);
+                
                 // "peek" at the next token to determine its type
                 JsonToken token = parser.nextToken();
 
@@ -304,8 +303,7 @@ public class CodecUtils {
                 } else if (token == JsonToken.START_ARRAY) {
                   clazz = (Class<T>)ArrayList.class;
                 } else if (token.isScalarValue()) {
-                  ObjectMapper objectMapper = new ObjectMapper();
-                  JsonNode node = objectMapper.readTree(json);
+                  JsonNode node = mapper.readTree(json);
                   if (node.isInt()) {
                       return mapper.readValue(json, (Class<T>)Integer.class);
                   } else if (node.isDouble()) {
@@ -316,6 +314,9 @@ public class CodecUtils {
                 } else {
                     log.error("could not derive type from peeking json {}", json);
                 }
+                
+                parser.close();
+                
               }
               return mapper.readValue(json, clazz);
             }
