@@ -20,6 +20,6 @@ jobs:
       # - name: build with maven
       #   run: mvn --batch-mode --update-snapshots -DskipTests package
       - name: build with maven
-        run: mvn --version
+        # run: mvn --version
         run: mvn -DskipTests package
         # run: mvn --batch-mode --update-snapshots package
