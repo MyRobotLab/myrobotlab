@@ -2,8 +2,10 @@ package org.myrobotlab.codec;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -19,6 +21,7 @@ import org.myrobotlab.codec.json.JsonSerializationException;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
+import org.myrobotlab.framework.StaticType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -315,6 +318,21 @@ public class CodecUtils {
         } catch (Exception e) {
             throw new JsonDeserializationException(e);
         }
+    }
+
+    /**
+     * Deserializes a json string into the type represented by
+     * {@link T}. {@code type} must must match {@link T} exactly,
+     * otherwise the deserializers may not deserialize into T.
+     *
+     * @param json A string encoded in JSON
+     * @param type Reified type information to pass to the deserializers
+     * @return An instance of T decoded from the json
+     * @param <T> The type to deserialize into
+     * @throws JsonDeserializationException if the selected deserializer throws an exception
+     */
+    public static <T> /*@Nullable*/ T fromJson(/*@NonNull*/ String json, /*@NonNull*/ StaticType<T> type) {
+        return fromJson(json, type.getType());
     }
 
     /**

@@ -1,15 +1,19 @@
 package org.myrobotlab.codec;
 
 import org.junit.Test;
+import org.myrobotlab.codec.json.JsonDeserializationException;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.StaticType;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.test.AbstractTest;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 
 public class CodecUtilsTest extends AbstractTest {
 
@@ -138,5 +142,23 @@ public class CodecUtilsTest extends AbstractTest {
         Message deserMessage = CodecUtils.jsonToMessage("null");
         assertNull(deserMessage);
 
+    }
+
+    @Test
+    public void testStaticTypeDeser() {
+        String json = "[{\"Test\": 1}]";
+        List<Map<String, Integer>> data = CodecUtils.fromJson(json, new StaticType<>(){});
+        assertEquals(1, (int) data.get(0).get("Test"));
+    }
+
+    @Test
+    public void testIncorrectStaticTypeDeser() {
+        assertThrows(JsonDeserializationException.class, () -> {
+            String json = "[{\"Test\": 1}]";
+            // Throws exception because the first element is an object
+            // instead of a String, showing the deserializer is aware of what
+            // our list should contain via generics
+            List<String> data = CodecUtils.fromJson(json, new StaticType<>(){});
+        });
     }
 }
