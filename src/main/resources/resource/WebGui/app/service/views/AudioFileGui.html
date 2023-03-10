@@ -20,10 +20,13 @@
                 <button class="btn btn-default" ng-click="msg.stop()">
                     <span class="glyphicon glyphicon-stop" title="stop"/>
                 </button>
-                <button class="btn btn-default" ng-click="msg.mute(true)">
+                <button class="btn btn-default" ng-click="msg.setMute(!service.mute);msg.broadcastState()">
                     <span class="glyphicon glyphicon-volume-off" title="mute"/>
                 </button>
-                <button class="btn btn-default" ng-click="msg.volume(2.0)">
+                <button class="btn btn-default" ng-click="msg.setVolume(service.volume - 0.01);msg.broadcastState()">
+                    <span class="glyphicon glyphicon-volume-down" title="pump up the volume"/>
+                </button>
+                <button class="btn btn-default" ng-click="msg.setVolume(service.volume + 0.01);msg.broadcastState()">
                     <span class="glyphicon glyphicon-volume-up" title="pump up the volume"/>
                 </button>
             </td>
@@ -32,7 +35,7 @@
     <table border="1" class="table table-hover table-condensed table-striped table-bordered">
         <tr>
             <td>{{activity}} &nbsp;</td>
-            <td>{{playing.filename}}</td>
+            <td>{{playing}}</td>
         </tr>
         <tr>
             <td>selected</td>
@@ -44,7 +47,7 @@
         </tr>
         <tr>
             <td>volume</td>
-            <td>{{service.volume}}</td>
+            <td>{{service.volume.toFixed(2) * 100}}</td>
         </tr>
     </table>
     <br/>

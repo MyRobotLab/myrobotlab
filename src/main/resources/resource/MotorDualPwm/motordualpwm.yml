@@ -2,6 +2,7 @@
 clip: false
 inverted: false
 leftPwmPin: null
+listeners: null
 locked: false
 maxIn: null
 maxOut: null

@@ -6,6 +6,7 @@ filters: {
 grabberType: OpenCV
 inputFile: null
 inputSource: camera
+listeners: null
 nativeViewer: true
 peers: null
 type: OpenCV

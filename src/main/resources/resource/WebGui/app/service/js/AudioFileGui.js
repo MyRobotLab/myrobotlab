@@ -11,34 +11,53 @@ angular.module('mrlapp.service.AudioFileGui', []).controller('AudioFileGuiCtrl',
     //     msg.send('playFile', $scope.selectedFile)
     // }
 
-    $scope.play = function(){
+    $scope.play = function() {
         // if (blah){
         // $scope.selectedFile = selectedFiles[0]    
         // } else {
         //     $scope.selectedFile = selectedFiles[0]    
         // }
+        let playFile = $scope.selectedFile
         msg.send('play', $scope.selectedFile)
-        
+
     }
 
-
-    $scope.setSelectedFileFromTrack = function(selected){
+    $scope.setSelectedFileFromTrack = function(selected) {
         $scope.selectedFile = selected
     }
 
     $scope.startPlaylist = function() {
-        if ($scope.selectedPlaylist){
-            msg.send('startPlaylist', $scope.selectedPlaylist[0])    
+        if ($scope.selectedPlaylist) {
+            msg.send('startPlaylist', $scope.selectedPlaylist[0])
         } else {
             msg.send('startPlaylist')
         }
     }
-    
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
         $scope.service.loudness = 20
+        if (!$scope.selectedFile) {
+
+            if (service.lastPlayed) {
+                $scope.selectedFile = service.lastPlayed.filename;
+            }
+
+            if (service.current) {
+                $scope.selectedFile = service.current.filename;
+            }
+        }
+
+        if (service.current) {
+            $scope.playing = service.current.filename;
+            $scope.activity = 'playing'
+        }
+
+        if (!$scope.inputSelectedFile){
+            $scope.inputSelectedFile = $scope.selectedFile
+        }
+
     }
 
     this.onMsg = function(inMsg) {
@@ -49,20 +68,21 @@ angular.module('mrlapp.service.AudioFileGui', []).controller('AudioFileGuiCtrl',
             $scope.$apply()
             break
         case 'onAudioStart':
-            $scope.playing = data
+            $scope.playing = data.filename
             $scope.activity = 'playing'
             $scope.$apply()
             break
         case 'onAudioEnd':
-            $scope.playing = data
+            $scope.playing = data.filename
             $scope.activity = 'stopped'
             $scope.$apply()
+            $scope.service.lastPlayed = data.filename
             break
         case 'onPeak':
             $scope.peak = Math.round(data * 100)
             $scope.$apply()
             break
-                
+
         default:
             console.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method)
             break

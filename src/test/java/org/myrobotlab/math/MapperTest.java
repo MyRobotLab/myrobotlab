@@ -17,6 +17,23 @@ public class MapperTest extends AbstractTest {
     double actualResult = myMapper.calcOutput(testValue);
     assertEquals("calc(15) should return 150", expectedResult, actualResult, 3);
   }
+  
+  @Test
+  public void testInversion() {
+    double testValue = 15;
+    double expectedResult = 165;
+    MapperLinear mapper = new MapperLinear(180, 0, 0, 180);
+    double actualResult = mapper.calcOutput(testValue);
+    assertEquals("calc(15) should return 165", expectedResult, actualResult, 3);
+    
+    mapper.isInverted(); // expected is false ? why wtf is inverted?
+    mapper.setInverted(true);
+    actualResult = mapper.calcOutput(testValue);
+    assertEquals("calc(15) should return 15", testValue, actualResult, 3);
+    
+    
+  }
+
 
   @Test
   public void testGetMaxX() {

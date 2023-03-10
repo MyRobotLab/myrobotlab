@@ -1,5 +1,6 @@
 !!org.myrobotlab.service.config.LocalSpeechConfig
 blocking: false
+listeners: null
 mute: false
 peers:
   audioFile:

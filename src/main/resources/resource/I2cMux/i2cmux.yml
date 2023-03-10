@@ -4,5 +4,6 @@ bus: '1'
 controller: null
 i2cDevices: {
   }
+listeners: null
 peers: null
 type: I2cMux

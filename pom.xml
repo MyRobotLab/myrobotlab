@@ -295,15 +295,6 @@
   </dependency>
 <!-- DiscordBot end -->
 
-<!-- Docker begin -->
-  <dependency>
-    <groupId>com.github.docker-java</groupId>
-    <artifactId>docker-java</artifactId>
-    <version>3.2.13</version>
-    <scope>provided</scope>
-  </dependency>
-<!-- Docker end -->
-
 <!-- DocumentPipeline begin -->
   <dependency>
     <groupId>org.apache.tika</groupId>
@@ -359,7 +350,6 @@
     <version>1.2.0</version>
     <scope>provided</scope>
   </dependency>
-<!-- Duplicate entry for com.github.pnavais-state-machine-1.2.0 skipping -->
 <!-- FiniteStateMachine end -->
 
 <!-- Git begin -->
@@ -925,9 +915,9 @@
 <!-- Mqtt end -->
 
 <!-- MqttBroker begin -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.14.0 skipping -->
   <dependency>
     <groupId>io.moquette</groupId>
     <artifactId>moquette-broker</artifactId>
@@ -1134,9 +1124,9 @@
 
 <!-- Polly begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.14.0 skipping -->
   <dependency>
     <groupId>com.amazonaws</groupId>
     <artifactId>aws-java-sdk-polly</artifactId>
@@ -1287,7 +1277,7 @@
   <dependency>
     <groupId>org.apache.ivy</groupId>
     <artifactId>ivy</artifactId>
-    <version>2.5.0</version>
+    <version>2.5.1</version>
   </dependency>
   <dependency>
     <groupId>org.apache.httpcomponents</groupId>
@@ -1312,7 +1302,7 @@
   <dependency>
     <groupId>org.yaml</groupId>
     <artifactId>snakeyaml</artifactId>
-    <version>1.29</version>
+    <version>1.32</version>
   </dependency>
   <dependency>
     <groupId>org.asynchttpclient</groupId>
@@ -1456,9 +1446,9 @@
         </exclusion>
       </exclusions>
   </dependency>
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.14.0 skipping -->
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-solrj</artifactId>
@@ -1668,9 +1658,9 @@
         </exclusion>
       </exclusions>
   </dependency>
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.13.3 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.13.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.14.0 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.14.0 skipping -->
 <!-- WikiDataFetcher end -->
 
 <!-- WolframAlpha begin -->
@@ -1714,6 +1704,7 @@
 <!-- Xmpp end -->
 
   </dependencies>
+
   
   <build>
     <resources>
@@ -1757,12 +1748,34 @@
             <artifactId>properties-maven-plugin</artifactId>
             <version>1.0.0</version>
           </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <version>3.1.0</version>
+         </plugin>
         </plugins>
       </pluginManagement>
   
           <!-- use plugin -->
       <plugins>
-      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+            <execution>
+                <id>no-duplicate-declared-dependencies</id>
+                <goals>
+                    <goal>enforce</goal>
+                </goals>
+                <configuration>
+                    <rules>
+                        <banDuplicatePomDependencyVersions/>
+                    </rules>
+                </configuration>
+            </execution>
+        </executions>
+      </plugin>
+
       <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>properties-maven-plugin</artifactId>        
@@ -1868,6 +1881,7 @@
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
+                                        <exclude>module-info.class</exclude>
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
@@ -1914,16 +1928,6 @@
         </configuration>
       </plugin>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-eclipse-plugin</artifactId>
-        <version>2.8</version>
-        <configuration>
-          <downloadSources>true</downloadSources>
-        </configuration>
-      </plugin>
-
-      <!-- -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
@@ -2024,42 +2028,24 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.5</version>
+        <version>0.8.8</version>
         <executions>
           <execution>
-            <id>prepare-agent</id>
             <goals>
               <goal>prepare-agent</goal>
             </goals>
           </execution>
+          <!-- attached to Maven test phase -->
           <execution>
             <id>report</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>report</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>post-unit-test</id>
             <phase>test</phase>
             <goals>
               <goal>report</goal>
             </goals>
-            <configuration>
-              <!-- Sets the path to the file which contains the execution data. -->
-              <dataFile>target/jacoco.exec</dataFile>
-              <!-- Sets the output directory for the code coverage report. -->
-              <outputDirectory>target/jacoco-ut</outputDirectory>
-            </configuration>
           </execution>
         </executions>
-        <configuration>
-          <systemPropertyVariables>
-            <jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
-          </systemPropertyVariables>
-        </configuration>
       </plugin>
-      
+
     </plugins>
   </build>
     <reporting>    

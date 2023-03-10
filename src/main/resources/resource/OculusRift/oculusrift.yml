@@ -3,6 +3,7 @@ leftOpenCV:
   autoStart: true
   name: leftOpenCV
   type: OpenCV
+listeners: null
 peers:
   leftOpenCV:
     autoStart: true

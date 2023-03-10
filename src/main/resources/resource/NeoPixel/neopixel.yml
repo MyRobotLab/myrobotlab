@@ -5,6 +5,7 @@ controller: null
 currentAnimation: null
 fill: false
 green: 0
+listeners: null
 peers: null
 pin: null
 pixelCount: null
