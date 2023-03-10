@@ -1735,16 +1735,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
             return null;
           }
 
-          Class<?>[] interfaces = registration.interfaces.stream().map(i -> {
-            try {
-              return Class.forName(i);
-            } catch (ClassNotFoundException e) {
-              throw new RuntimeException("Unable to load interface " + i + " defined in remote registration " + registration, e);
-            }
-          }).toArray(Class<?>[]::new);
+//          Class<?>[] interfaces = registration.interfaces.stream().map(i -> {
+//            try {
+//              return Class.forName(i);
+//            } catch (ClassNotFoundException e) {
+//              throw new RuntimeException("Unable to load interface " + i + " defined in remote registration " + registration, e);
+//            }
+//          }).toArray(Class<?>[]::new);
 
-          registration.service = (ServiceInterface) Proxy.newProxyInstance(Runtime.class.getClassLoader(), interfaces,
-                  new ProxyServiceInvocationHandler(registration.getName(), registration.getId()));
+//          registration.service = (ServiceInterface) Proxy.newProxyInstance(Runtime.class.getClassLoader(), interfaces,
+//                  new ProxyServiceInvocationHandler(registration.getName(), registration.getId()));
+          registration.service = ProxyFactory.createProxyService(registration);
           log.info("Created proxy: " + registration.service);
         }
       }
