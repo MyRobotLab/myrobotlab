@@ -95,7 +95,7 @@ public class Ros extends Service implements RemoteMessageHandler, ConnectionEven
 
   static public class RosMsg {
     public List<Object> args;
-    public String compression;
+    public String compression = "none"; /* was optional :P - none | bz2 | zlib */
     public String id; /* optional id */
     public Object msg;
     public String op; // publish | subscribe | ? call_service ?
@@ -229,10 +229,23 @@ public class Ros extends Service implements RemoteMessageHandler, ConnectionEven
       msg.id = id;
       msg.op = OP_CALL_SERVICE;
       msg.service = service;
-
+      
       sendJson(CodecUtils.toJson(msg));
       synchronized (callback) {
-        callback.wait(c.serviceCallTimeoutMs);
+        
+        long startTime = System.currentTimeMillis();
+        long remainingTime = c.serviceCallTimeoutMs;
+        while (true) {
+            try {
+                callback.wait(remainingTime);
+                break;
+            } catch (InterruptedException e) {
+                remainingTime = c.serviceCallTimeoutMs - (System.currentTimeMillis() - startTime);
+                if (remainingTime <= 0) {
+                    break;
+                }
+            }
+        }
       }
       return callback; // callbacks.get(id);
 

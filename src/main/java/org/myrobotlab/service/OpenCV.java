@@ -545,8 +545,6 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   boolean undockDisplay = false;
 
-  transient Thread videoThreadx = null;
-
   final private VideoProcessor vp = new VideoProcessor();
 
   Integer width = null;
