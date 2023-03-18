@@ -2598,7 +2598,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         }
         if (!Runtime.isStarted(service.getName())) {
           service.startService();
-          requestedService.addAutoStartedPeer(service.getName());
         }
       }
 

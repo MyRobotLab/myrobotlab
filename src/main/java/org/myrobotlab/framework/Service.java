@@ -70,7 +70,7 @@ import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.QueueReporter;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
-
+ 
 /**
  * 
  * Service is the base of the MyRobotLab Service Oriented Architecture. All
@@ -125,9 +125,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * full class name used in serialization
    */
   protected String serviceClass;
-
-  // FIXME Deprecated ???
-  Set<String> autoStartedPeers = new HashSet<>();
 
   private boolean isRunning = false;
 
@@ -2693,16 +2690,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   final public Plan getDefault() {
     return ServiceConfig.getDefault(Runtime.getPlan(), getName(), this.getClass().getSimpleName());
-  }
-
-  @Override
-  public void addAutoStartedPeer(String actualPeerName) {
-    autoStartedPeers.add(actualPeerName);
-  }
-
-  @Override
-  public boolean autoStartedPeersContains(String actualPeerName) {
-    return autoStartedPeers.contains(actualPeerName);
   }
 
   @Override
