@@ -320,8 +320,14 @@ public class Ros extends Service implements RemoteMessageHandler, ConnectionEven
   public void onRemoteMessage(String uuid, String msg) {
 
     try {
-
+      
       RosMsg rosMsg = CodecUtils.fromJson(msg, RosMsg.class);
+      
+      if (rosMsg == null) {
+        error("decoding ros msg is null %s", msg);
+        return;
+      }
+      
       if (rosMsg.id != null && rosMsg.service != null) {
         // service call response
         RosServiceCallback callback = callbacks.get(rosMsg.id);
@@ -336,9 +342,6 @@ public class Ros extends Service implements RemoteMessageHandler, ConnectionEven
         }
       }
       invoke("publishRosMsg", rosMsg);
-
-      // log.error(msg);
-
     } catch (Exception ex) {
       error(ex);
     }
