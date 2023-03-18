@@ -924,7 +924,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   @Override
   public void onJointAngles(Map<String, Double> angleMap) {
-    log.info("onJointAngles {}", angleMap);
+    log.debug("onJointAngles {}", angleMap);
     // here we can make decisions on what ik sets we want to use and
     // what body parts are to move
     for (String name : angleMap.keySet()) {

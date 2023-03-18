@@ -11,7 +11,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.PollyConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
@@ -59,7 +58,7 @@ public class Polly extends AbstractSpeechSynthesis {
   private transient AmazonPolly polly;
 
   Regions defaultRegion;
-  
+
   public Polly(String n, String id) {
     super(n, id);
   }
@@ -132,12 +131,13 @@ public class Polly extends AbstractSpeechSynthesis {
     String key = getKey(AMAZON_POLLY_USER_KEY);
     String secret = getKey(AMAZON_POLLY_USER_SECRET);
 
-    if (key == null || secret == null) {
-      error("this service requires a key and a secret");
-      return null;
-    }
-
     if (polly == null) {
+
+      if (key == null || secret == null) {
+        error("this service requires a key and a secret");
+        return null;
+      }
+
       try {
 
         if (credentials == null) {
@@ -191,12 +191,12 @@ public class Polly extends AbstractSpeechSynthesis {
    */
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
-//    if (!configured) {
-//      log.error("polly not configured yet");
-//      return null;
-//    }
+    // if (!configured) {
+    // log.error("polly not configured yet");
+    // return null;
+    // }
     log.info("toSpeak {}", toSpeak);
-    
+
     PollyConfig c = (PollyConfig) config;
     getPolly();
     setVoice(c.voice);
@@ -239,9 +239,34 @@ public class Polly extends AbstractSpeechSynthesis {
     return ssml;
   }
 
+  @Override
+  public void releaseService() {
+    super.releaseService();
+    if (polly != null) {
+      polly.shutdown();
+    }
+  }
+
+  @Override
+  public boolean isReady() {
+    setReady(polly != null ? true : false);
+    return ready;
+  }
+
+  @Override
+  public ServiceConfig apply(ServiceConfig c) {
+    super.apply(c);
+    getVoices();
+    return c;
+  }
+
+  public void setPollyClient(AmazonPolly pollyClient) {
+    this.polly = pollyClient;
+  }
+
   public static void main(String[] args) {
     try {
-      LoggingFactory.init("INFO");
+      LoggingFactory.init("WARN");
 
       Runtime.start("polly", "Polly");
       // Runtime runtime = Runtime.getInstance();
@@ -395,35 +420,5 @@ public class Polly extends AbstractSpeechSynthesis {
       log.error("main threw", e);
     }
   }
-
-  @Override
-  public void releaseService() {
-    super.releaseService();
-    if (polly != null) {
-      polly.shutdown();
-    }
-  }
-
-  @Override
-  public boolean isReady() {
-    setReady(polly != null ? true : false);
-    return ready;
-  }
-  
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    // must initialize polly before getting voices
-    // must get voices before setVoice
-    getVoices();
-    // this will set voice based on config
-    super.apply(c);
-    return c;
-  }
-
-  // @Override
-  // public ServiceConfig getConfig() {
-  // PollyConfig config = (PollyConfig) super.getConfig();
-  // return config;
-  // }
 
 }

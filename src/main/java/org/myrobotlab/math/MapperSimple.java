@@ -18,7 +18,7 @@ import org.slf4j.Logger;
  * fields Inverted & Clip
  * 
  * 
- * @author gperry
+ * @author GroG
  *
  */
 public class MapperSimple implements Mapper {
@@ -37,7 +37,7 @@ public class MapperSimple implements Mapper {
    * maxOut - max value output can be
    */
   public double minOut;
-  /**
+  /** 
    * maxOut - max value output can be
    */
   public double maxOut;

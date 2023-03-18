@@ -137,9 +137,7 @@
      </repositories>
   
   
-  
-<dependencies>
-
+  <dependencies>
 <!-- AudioFile begin -->
   <dependency>
     <groupId>javazoom</groupId>
@@ -457,18 +455,6 @@
     <groupId>org.jmonkeyengine</groupId>
     <artifactId>jme3-jogg</artifactId>
     <version>3.3.2-stable</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.simsilica</groupId>
-    <artifactId>lemur</artifactId>
-    <version>1.11.0</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.simsilica</groupId>
-    <artifactId>lemur-proto</artifactId>
-    <version>1.10.0</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -1698,8 +1684,14 @@
   </dependency>
 <!-- Xmpp end -->
 
-  </dependencies>
 
+  	<dependency>
+	    <groupId>org.mockito</groupId>
+	    <artifactId>mockito-core</artifactId>
+	    <version>3.12.4</version>
+	    <scope>test</scope>
+	</dependency>
+  </dependencies>
   
   <build>
     <resources>

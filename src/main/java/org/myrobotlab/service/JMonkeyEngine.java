@@ -36,7 +36,6 @@ import org.myrobotlab.jme3.Interpolator;
 import org.myrobotlab.jme3.Jme3App;
 import org.myrobotlab.jme3.Jme3Msg;
 import org.myrobotlab.jme3.Jme3Util;
-import org.myrobotlab.jme3.MainMenuState;
 import org.myrobotlab.jme3.PhysicsTestHelper;
 import org.myrobotlab.jme3.Search;
 import org.myrobotlab.jme3.UserData;
@@ -108,8 +107,6 @@ import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Quad;
 import com.jme3.system.AppSettings;
 import com.jme3.util.BufferUtils;
-import com.simsilica.lemur.GuiGlobals;
-import com.simsilica.lemur.style.BaseStyles;
 
 /**
  * A simulator built on JMonkey 3 Engine.
@@ -190,8 +187,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   final public String KEY_SEPERATOR = "/";
 
   transient DisplayMode lastDisplayMode = null;
-
-  transient MainMenuState menu;
 
   String modelsDir = assetsDir + File.separator + "Models";
 
@@ -1354,8 +1349,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
     if ("full-screen".equals(name)) {
       enableFullScreen(true);
-    } else if ("menu".equals(name)) {
-      menu.setEnabled(true);
     } else if ("select-root".equals(name)) {
       setSelected(rootNode);
     } else if (CAMERA.equals(name)) {
@@ -1926,10 +1919,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // view
     // so that it can update the view with changes on the item
     // TODO - optimize for when there is no view
-    util.setSelectedForView(menu, selectedForView);
-
-    // display in menu
-    menu.putText(newSelected);
+    util.setSelectedForView(selectedForView);
 
     // turn on new
     if (newSelected != null) {
@@ -2006,12 +1996,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     inputManager = app.getInputManager();
 
     guiNode = app.getGuiNode();
-
-    GuiGlobals.initialize(app);
-    // Load the 'glass' style
-    BaseStyles.loadGlassStyle();
-    // Set 'glass' as the default style when not specified
-    GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
 
     // disable flycam we are going to use our
     // own camera
@@ -2167,10 +2151,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // rootNode.scale(.5f);
     // rootNode.setLocalTranslation(0, -200, 0);
     rootNode.setLocalTranslation(0, 0, 0);
-
-    menu = app.getMainMenu();// new MainMenuState(this);
-    // menu.setEnabled(false);
-    // menu.loadGui();
 
     if (usePhysics) {
       bulletAppState.setDebugEnabled(false);

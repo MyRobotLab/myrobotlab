@@ -1123,7 +1123,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
         replaceWord(n, config.substitutions.get(n));
       }
     }
-
+    // some systems require querying set of voices
+    getVoices();
+    
     if (config.voice != null) {
       setVoice(config.voice);
     }
