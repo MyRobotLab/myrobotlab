@@ -55,6 +55,23 @@ public interface TaskManager {
    */
   public void addTask(String taskName, long intervalMs, long delayMs, String method, Object... params);
 
+  /**
+   * 
+   * @param taskName
+   *          - unique name of task
+   * @param oneShot
+   *          - this does not do a repeated task, rather it activates from the
+   *          current time with the delayMs
+   * @param intervalMs
+   *          - time interval in ms until the next task event
+   * @param delayMs
+   *          - the amount of delay from current time when the first event will
+   *          start
+   * @param method
+   *          - method to invoke
+   * @param params
+   *          - parameters to the method
+   */
   public void addTask(String taskName, boolean oneShot, long intervalMs, long delayMs, String method, Object... params);
 
 }
