@@ -1542,7 +1542,7 @@ public class CodecUtils {
    * @return
    */
   public static Object fromJson(String json) {
-    return fromJson(json, DEFAULT_OBJECT_TYPE);
+    return fromJson(json, null);
   }
 
 }
