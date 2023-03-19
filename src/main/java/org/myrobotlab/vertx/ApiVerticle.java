@@ -55,7 +55,8 @@ public class ApiVerticle extends AbstractVerticle {
     // static file routing
 
     //StaticHandler root = StaticHandler.create("src/main/resources/resource/Vertx/app");
-    StaticHandler root = StaticHandler.create("src/main/resources/resource/Vertx/app");
+    // StaticHandler root = StaticHandler.create("src/main/resources/resource/Vertx/app");
+    StaticHandler root = StaticHandler.create("../robotlab-x-app/build/");
     root.setCachingEnabled(false);
     root.setDirectoryListing(true);
     root.setIndexPage("index.html");
