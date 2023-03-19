@@ -1394,8 +1394,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     ServiceConfig copyOfConfig = CodecUtils.fromYaml(yaml, inConfig.getClass());
 
     // TODO - handle subscriptions / listeners
-    if (config.listeners != null) {
-      for (Listener listener : config.listeners) {
+    if (copyOfConfig.listeners != null) {
+      for (Listener listener : copyOfConfig.listeners) {
         addListener(listener.method, listener.listener, listener.callback);
       }
     }
