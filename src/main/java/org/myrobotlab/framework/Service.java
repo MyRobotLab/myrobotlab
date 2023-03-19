@@ -1901,6 +1901,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return Runtime.getService(peer.name);
   }
 
+  /**
+   * Release a peer by peerKey.
+   * There can be advantages to refer to a peer with a peer key instead of a typed
+   * reference. This allows more modularity and the ability to plug in different types of peers,
+   * even with different instance names.  The peerKey is an internal key the service uses to 
+   * perform operations on its peers.  This one will release a peer.
+   * @param peerKey
+   */
   synchronized public void releasePeer(String peerKey) {
 
     if (config != null && config.getPeer(peerKey) != null) {

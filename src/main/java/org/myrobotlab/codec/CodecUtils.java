@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -46,7 +45,6 @@ import org.yaml.snakeyaml.constructor.Constructor;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.PrettyPrinter;
@@ -168,14 +166,14 @@ public class CodecUtils {
      * without knowing the target type, e.g. if the target
      * is {@link Object}.
      */
-    private static final Class<?> GSON_DEFAULT_OBJECT_TYPE = LinkedHashMap.class;
+    private static final Class<?> GSON_DEFAULT_OBJECT_TYPE = LinkedTreeMap.class;
     /**
      * The type that Jackson uses when it attempts to deserialize
      * without knowing the target type, e.g. if the target
      * is {@link Object} and no field matching {@link #CLASS_META_KEY}
      * is found.
      */
-    private static final Class<?> JACKSON_DEFAULT_OBJECT_TYPE = LinkedHashMap.class;
+    private static final Class<?> JACKSON_DEFAULT_OBJECT_TYPE = LinkedTreeMap.class;
     /**
      * The type that the chosen JSON backend uses when it attempts to deserialize
      * without knowing the target type, e.g. if the target
@@ -183,6 +181,13 @@ public class CodecUtils {
      * is found.
      */
     public static final Class<?> JSON_DEFAULT_OBJECT_TYPE = (USING_GSON) ? GSON_DEFAULT_OBJECT_TYPE : JACKSON_DEFAULT_OBJECT_TYPE;
+    
+    /**
+     * Default type for single parameter fromJson(String json), we initially assume this type 
+     */
+    public static final Class<?> DEFAULT_OBJECT_TYPE = LinkedTreeMap.class;
+    
+    
     /**
      * The {@link Gson} object used for JSON operations when the selected backend is
      * Gson.
@@ -275,7 +280,7 @@ public class CodecUtils {
      * using the selected JSON backend.
      *
      * @param json  The JSON to be deserialized in String form
-     * @param clazz The target class. If a class is not supplied the default class returned will be an LinkedHashMap
+     * @param clazz The target class. If a class is not supplied the default class returned will be an LinkedTreeMap
      * @param <T>   The type of the target class.
      * @return An object of the specified class (or a subclass of) with the state
      * given by the json. Null is an allowed return object.
@@ -287,7 +292,7 @@ public class CodecUtils {
         try {
             if (USING_GSON) {
                 if (clazz == null) {
-                  clazz = (Class<T>)LinkedHashMap.class;
+                  clazz = (Class<T>)LinkedTreeMap.class;
                 }
                 return gson.fromJson(json, clazz);
             } else {
@@ -1530,14 +1535,14 @@ public class CodecUtils {
   }
 
   /**
-   * Single parameter from JSON. Will use default return type, currently LinkedHashMap
+   * Single parameter from JSON. Will use default return type, currently LinkedTreeMap
    * to return a POJO object that can be easily accessed.
    * 
    * @param json
    * @return
    */
   public static Object fromJson(String json) {
-    return fromJson(json, null);
+    return fromJson(json, DEFAULT_OBJECT_TYPE);
   }
 
 }
