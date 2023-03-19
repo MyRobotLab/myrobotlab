@@ -280,7 +280,7 @@ public class CodecUtils {
      * using the selected JSON backend.
      *
      * @param json  The JSON to be deserialized in String form
-     * @param clazz The target class. If a class is not supplied the default class returned will be an LinkedTreeMap
+     * @param clazz The target class. If a class is not supplied the default class returned will be an {@link DEFAULT_OBJECT_TYPE} 
      * @param <T>   The type of the target class.
      * @return An object of the specified class (or a subclass of) with the state
      * given by the json. Null is an allowed return object.
