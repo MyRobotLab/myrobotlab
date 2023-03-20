@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -173,7 +174,7 @@ public class CodecUtils {
      * is {@link Object} and no field matching {@link #CLASS_META_KEY}
      * is found.
      */
-    private static final Class<?> JACKSON_DEFAULT_OBJECT_TYPE = LinkedTreeMap.class;
+    private static final Class<?> JACKSON_DEFAULT_OBJECT_TYPE = LinkedHashMap.class;
     /**
      * The type that the chosen JSON backend uses when it attempts to deserialize
      * without knowing the target type, e.g. if the target
@@ -185,7 +186,7 @@ public class CodecUtils {
     /**
      * Default type for single parameter fromJson(String json), we initially assume this type 
      */
-    public static final Class<?> DEFAULT_OBJECT_TYPE = LinkedTreeMap.class;
+    public static final Class<?> DEFAULT_OBJECT_TYPE = LinkedHashMap.class;
     
     
     /**
@@ -280,7 +281,7 @@ public class CodecUtils {
      * using the selected JSON backend.
      *
      * @param json  The JSON to be deserialized in String form
-     * @param clazz The target class. If a class is not supplied the default class returned will be an {@link DEFAULT_OBJECT_TYPE} 
+     * @param clazz The target class. If a class is not supplied the default class returned will be an {@link #DEFAULT_OBJECT_TYPE}
      * @param <T>   The type of the target class.
      * @return An object of the specified class (or a subclass of) with the state
      * given by the json. Null is an allowed return object.
@@ -292,7 +293,7 @@ public class CodecUtils {
         try {
             if (USING_GSON) {
                 if (clazz == null) {
-                  clazz = (Class<T>)LinkedTreeMap.class;
+                  clazz = (Class<T>)DEFAULT_OBJECT_TYPE;
                 }
                 return gson.fromJson(json, clazz);
             } else {
@@ -1542,7 +1543,7 @@ public class CodecUtils {
    * @return
    */
   public static Object fromJson(String json) {
-    return fromJson(json, DEFAULT_OBJECT_TYPE);
+    return fromJson(json, null);
   }
 
 }
