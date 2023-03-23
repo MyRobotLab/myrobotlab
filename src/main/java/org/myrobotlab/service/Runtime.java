@@ -3756,17 +3756,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     addRoute(id, uuid, 10);
   }
 
-  @Override
-  public Message getDescribeMsg(String connId) {
-    // TODO support queries
-    // FIXME !!! - msg.name is wrong with only "runtime" it should be
-    // "runtime@id"
-    // TODO - lots of options for a default "describe"
-    Message msg = Message.createMessage(String.format("%s@%s", getName(), getId()), "runtime", "describe",
-        new Object[] { "fill-uuid", new DescribeQuery(Platform.getLocalInstance().getId(), connId) });
-
-    return msg;
-  }
 
   /**
    * Unregister all connections that a specified client has made.
