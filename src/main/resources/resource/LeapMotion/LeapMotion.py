@@ -1,26 +1,13 @@
-#####################################################
-#
-# this simple script will print in the python tab the grab strength 
-# of your left hand
-#
-# LeapMotion finger types are defined
-# as the following:
-# Type.TYPE_THUMB 
-# Type.TYPE_INDEX 
-# Type.TYPE_MIDDLE
-# Type.TYPE_RING 
-# Type.TYPE_PINKY
+leap = runtime.start('leap','LeapMotion')
 
-from com.leapmotion.leap.Finger import Type
-# from __future__ import division
+python.subscribe('leap', 'publishLeapData')
 
-leap = runtime.start("leap","LeapMotion")
+def onLeapData(data):
+    # print(data)
+    leftHand = data.leftHand
+    rightHand = data.rightHand
+    if leftHand:
+        print("left",leftHand.thumb, leftHand.index, leftHand.middle, leftHand.ring, leftHand.pinky)
+    if rightHand:
+        print("right",rightHand.thumb, rightHand.index, rightHand.middle, rightHand.ring, rightHand.pinky)
 
-leap.addFrameListener(python)
-
-def onFrame(frame):
- 
- strength = ((frame.hands().leftmost().grabStrength())*100)
- print strength
-
-leap.startTracking()

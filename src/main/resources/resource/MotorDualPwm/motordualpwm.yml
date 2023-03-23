@@ -2,11 +2,13 @@
 clip: false
 inverted: false
 leftPwmPin: null
+listeners: null
 locked: false
 maxIn: null
 maxOut: null
 minIn: null
 minOut: null
+peers: null
 pwmFreq: null
 rightPwmPin: null
 type: MotorDualPwm

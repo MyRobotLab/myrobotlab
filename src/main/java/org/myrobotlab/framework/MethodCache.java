@@ -17,37 +17,37 @@ import java.util.TreeSet;
 
 /**
  * 
- * @author GroG
- * 
+ *
+ *
  *         A method cache whos purpose is to build a cache of methods to be
  *         accessed when needed for invoking. This cache is typically used for
  *         services and populated during Runtime.create({name},{Type}). It's a
  *         static resource and contains a single definition per {Type}.
- * 
+ * <p>
  *         It has a single map of "all" MethodEntries per type, and several
  *         indexes to that map. The other utility indexes are supposed to be
  *         useful and relevant for service specific access of methods.
- * 
+ * <p>
  *         The definition of "declared methods" is slightly different for Mrl
  *         services. "Declared methods" are service methods which are expected
  *         to be commonly used. The difference occurs often with abstract
  *         classes such as AbstractSpeechSynthesis. Polly's
  *         class.getDeclaredMethods() would NOT include all the useful methods
  *         commonly defined in AbstractSpeechSynthesis.
- * 
+ * <p>
  *         FIXME - keys should be explicitly typed full signature with execution
- *         format e.g. method(
- * 
- * 
+ *          format e.g. method(
+ * <p>
+ *
  *         The cache is built when new services are created. Method signatures
  *         are used as keys. The keys are string based. All parameters in key
  *         creation are "boxed", this leads to the ability to write actual
  *         functions with primitives e.g. doIt(int x, float y, ...) and invoking
  *         does not need to fail for it to be called directly.
- * 
+ * <p>
  *         Ancestor classes are all indexed, so there is no "special" handling
  *         to call abstract class methods.
- * 
+ * <p>
  *         Special indexes are created when a new service gets created that are
  *         explicitly applicable for remote procedure calls e.g. methods which
  *         contain interfaces in the parameters are not part of this index, if
@@ -55,16 +55,17 @@ import java.util.TreeSet;
  *         remotely, you would make it with a String {name} reference as a
  *         parameter.
  *
+ * @author GroG
  */
 public class MethodCache {
 
   // FIXME - mostly interested in
-  // NOT Object
-  // RARELY Service
-  // OFTEN ANYTHING DEFINED LOWER THAN THAT
-  // WHICH MEANS - filter out Object
-  // CREATE a "Service" Index
-  // -> ALL OTHER METHODS ARE OF INTEREST
+  //  NOT Object
+  //  RARELY Service
+  //  OFTEN ANYTHING DEFINED LOWER THAN THAT
+  //  WHICH MEANS - filter out Object
+  //  CREATE a "Service" Index
+  //  -> ALL OTHER METHODS ARE OF INTEREST
   class MethodIndex {
     // index for typeless resolution and invoking
     Map<String, List<MethodEntry>> methodOrdinalIndex = new TreeMap<>();
@@ -529,26 +530,49 @@ public class MethodCache {
     return methodIndex.remoteOrdinalIndex.get(ordinalKey);
   }
 
-  public Object[] getDecodedJsonParameters(Class<?> clazz, String methodName, Object[] encodedParams) {
+  /**
+   * Decode parameters from a String Json format into the format
+   * specified by the declared method parameter type.
+   *
+   * <p>
+   *     If clazz, methodName, or encodedParameters are null, then null is returned.
+   * </p>
+   *
+   * <p>
+   *     FIXME Change encodedParameters to String[] to enforce type safety
+   * </p>
+   *
+   * @param clazz The class to lookup methods for
+   * @param methodName The name of the method to decode parameters for
+   * @param encodedParams The encoded parameters in JSON format.
+   * @return The decoded parameters according to a matched method, or null
+   *  if no such method could be found.
+   */
+  public /*@Nullable*/ Object[] getDecodedJsonParameters(Class<?> clazz, String methodName, Object[] encodedParams) {
     if (encodedParams == null) {
       encodedParams = new Object[0];
     }
 
     if (clazz == null) {
       log.error("cannot query method cache for null class");
+
+      // Null was already returned for this case in the following
+      // conditional but relied on getRemoteOrdinalMethods() returning
+      // null for a null class, best to make this explicit
+      return null;
     }
     // get templates
     // List<MethodEntry> possible = getOrdinalMethods(clazz, methodName,
     // encodedParams.length);
     List<MethodEntry> possible = getRemoteOrdinalMethods(clazz, methodName, encodedParams.length);
     if (possible == null) {
-      log.error("getOrdinalMethods -> {}.{} with ordinal {} does not exist", clazz, methodName, encodedParams);
+      log.error("getRemoteOrdinalMethods -> {}.{} with ordinal {} does not exist", clazz, methodName, encodedParams);
       return null;
     }
     Object[] params = new Object[encodedParams.length];
     // iterate through templates - attempt to decode
-    for (int p = 0; p < possible.size(); ++p) {
-      Class<?>[] paramTypes = possible.get(p).getParameterTypes();
+    for (MethodEntry methodEntry : possible) {
+      Class<?>[] paramTypes = methodEntry.getParameterTypes();
       try {
         for (int i = 0; i < encodedParams.length; ++i) {
           if (CodecUtils.JSON_DEFAULT_OBJECT_TYPE.equals(encodedParams[i].getClass())) {

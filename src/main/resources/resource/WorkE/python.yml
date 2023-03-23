@@ -1,8 +1,0 @@
-!!org.myrobotlab.service.config.PythonConfig
-modulePaths: [
-  ]
-startScripts: [
-  ]
-stopScripts: [
-  ]
-type: Python

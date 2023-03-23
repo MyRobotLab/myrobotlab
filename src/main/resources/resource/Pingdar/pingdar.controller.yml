@@ -1,5 +1,0 @@
-!!org.myrobotlab.service.config.ArduinoConfig
-connect: false
-port: null
-serial: pingdar.controller.serial
-type: Arduino

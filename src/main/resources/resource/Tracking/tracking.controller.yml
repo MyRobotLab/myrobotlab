@@ -1,5 +1,0 @@
-!!org.myrobotlab.service.config.ArduinoConfig
-connect: true
-port: null
-serial: tracking.controller.serial
-type: Arduino

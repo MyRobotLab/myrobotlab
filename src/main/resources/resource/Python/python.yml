@@ -1,6 +1,8 @@
 !!org.myrobotlab.service.config.PythonConfig
+listeners: null
 modulePaths: [
   ]
+peers: null
 startScripts: [
   ]
 stopScripts: [

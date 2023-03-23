@@ -2,6 +2,8 @@
 address: null
 bus: null
 controller: null
+listeners: null
+peers: null
 sampleRate: null
 start: false
 type: Mpu6050

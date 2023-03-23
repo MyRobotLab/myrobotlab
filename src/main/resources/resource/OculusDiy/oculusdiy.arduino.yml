@@ -1,5 +1,0 @@
-!!org.myrobotlab.service.config.ArduinoConfig
-connect: false
-port: null
-serial: oculusdiy.arduino.serial
-type: Arduino
