@@ -4496,6 +4496,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         dataDir.mkdirs();
       }
 
+      File configRoot = new File(Runtime.CONFIG_ROOT);
+      if (!configRoot.exists()) {
+        configRoot.mkdirs();
+      }
+            
       if (options.virtual) {
         Platform.setVirtual(true);
       }

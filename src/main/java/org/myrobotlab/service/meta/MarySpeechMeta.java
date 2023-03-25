@@ -49,7 +49,8 @@ public class MarySpeechMeta extends AbstractSpeechSynthesisMeta {
     exclude("org.slf4j", "slf4j-log4j12");
 
     addDependency("org.apache.logging.log4j", "log4j-1.2-api", "2.12.1");
-
+    addDependency("org.apache.logging.log4j", "log4j-api", "2.12.1");
+   
   }
 
 
