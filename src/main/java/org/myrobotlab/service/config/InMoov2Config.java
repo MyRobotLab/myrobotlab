@@ -69,6 +69,7 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "ear", "WebkitSpeechRecognition", false);
     addDefaultPeerConfig(plan, name, "eyeTracking", "Tracking", false);
     addDefaultPeerConfig(plan, name, "fsm", "FiniteStateMachine", false);
+    addDefaultPeerConfig(plan, name, "gpt", "Gpt3", false);
     addDefaultPeerConfig(plan, name, "head", "InMoov2Head", false);
     addDefaultPeerConfig(plan, name, "headTracking", "Tracking", false);
     addDefaultPeerConfig(plan, name, "htmlFilter", "HtmlFilter", false);
