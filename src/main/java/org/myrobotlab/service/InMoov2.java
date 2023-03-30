@@ -748,7 +748,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
    * @return true/false
    */
   public boolean loadGestures(String directory) {
-    chatBot.getResponse("SYSTEM_STARTED GESTURES");
+    // chatBot.getResponse("SYSTEM_STARTED GESTURES");
 
     // iterate over each of the python files in the directory
     // and load them into the python interpreter.
