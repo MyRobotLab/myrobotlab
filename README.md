@@ -99,4 +99,3 @@ When code is ready, submit a pull request to the develop branch!
 Enjoy the code review, address issues and concern in the code review
 Reviewer merges pull request to develop.
 Reviewer deletes branch.
-
