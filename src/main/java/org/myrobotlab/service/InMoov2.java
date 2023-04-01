@@ -98,6 +98,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       // Platform.setVirtual(true);
       // Runtime.start("s01", "Servo");
       // Runtime.start("intro", "Intro");
+
+      // Runtime.startConfig("pr-1213-1");
+      
+      
       
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
@@ -112,14 +116,15 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       // i01.startPeer("simulator");
         // Runtime.startConfig("i01-05");
       // Runtime.startConfig("pir-01");
+
+      // Polly polly = (Polly)Runtime.start("i01.mouth", "Polly");
+      i01 = (InMoov2) Runtime.start("i01", "InMoov2");
       
       boolean done = true;
       if (done) {
         return;
       }            
 
-      // Polly polly = (Polly)Runtime.start("i01.mouth", "Polly");
-      i01 = (InMoov2) Runtime.start("i01", "InMoov2");
 
       // polly.speakBlocking("Hi, to be or not to be that is the question,
       // wheather to take arms against a see of trouble, and by aposing them end
@@ -1042,10 +1047,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       
       String peerKey = getPeerKey(name);
       if (peerKey != null) {
-        getResponse("SYSTEM " + peerKey.toUpperCase() + " STARTED");
+        getResponse("SYSTEM_STARTED " + peerKey.toUpperCase());
       }
-      
-
 
       String actualName = getPeerName("ear");
       if (actualName.equals(name)) {
@@ -1063,6 +1066,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       if (actualName.equals(name)) {
         ProgramAB chatBot = (ProgramAB) Runtime.getService(actualName);
         chatBot.attachTextListener(getPeerName("htmlFilter"));
+        startPeer("htmlFilter");
       }
 
       actualName = getPeerName("htmlFilter");
@@ -1779,11 +1783,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   
   @Override
   public ServiceInterface startPeer(String peer) {
-    speakBlocking(get("STARTING " + peer.toUpperCase()));
-
-    // FIXME - do reflective look for local vars named the same thing
-    // to set the field
-
+//    Response response = getResponse("SYSTEM_STARTING " + peer.toUpperCase());
+//    if (response != null) {
+//      speakBlocking(response.msg);
+//    }
     ServiceInterface si = super.startPeer(peer);
 
     return si;
