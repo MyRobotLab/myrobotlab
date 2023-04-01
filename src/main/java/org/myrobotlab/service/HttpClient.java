@@ -184,6 +184,30 @@ public class HttpClient extends Service implements TextPublisher {
     }
     return null;
   }
+  
+  /**
+   * Post JSON with authorization of type bearer token
+   * @param auth
+   * @param url
+   * @param json
+   * @return
+   * @throws IOException
+   */
+  public String postJson(String auth, String url, String json) throws IOException {
+    HttpPost request = new HttpPost(url);
+    StringEntity params = new StringEntity(json);
+    if (auth != null) {
+      request.addHeader("Authorization", "Bearer " + auth);
+    }    
+    request.addHeader("Content-Type", "application/json");
+    request.setEntity(params);
+    HttpData data = processResponse(request);
+    if (data.data != null) {
+      return new String(data.data);
+    }
+    return null;
+
+  }
 
   /**
    * Post a json string to an endpoint. This method adds the appropriate
@@ -199,15 +223,7 @@ public class HttpClient extends Service implements TextPublisher {
    * 
    */
   public String postJson(String url, String json) throws IOException {
-    HttpPost request = new HttpPost(url);
-    StringEntity params = new StringEntity(json);
-    request.addHeader("content-type", "application/json");
-    request.setEntity(params);
-    HttpData data = processResponse(request);
-    if (data.data != null) {
-      return new String(data.data);
-    }
-    return null;
+    return postJson(null, url, json);
   }
 
   /**

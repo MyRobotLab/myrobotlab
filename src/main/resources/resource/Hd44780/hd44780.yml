@@ -2,4 +2,6 @@
 backlight: true
 controller: null
 delay: null
+listeners: null
+peers: null
 type: Hd44780

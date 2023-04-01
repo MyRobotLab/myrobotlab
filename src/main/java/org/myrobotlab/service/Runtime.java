@@ -1598,6 +1598,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * Starts an interactive CLI on the specified input and output streams. The
    * CLI command processor runs in its own thread and takes commands according
    * to the CLI API.
+   * 
+   * FIXME - have another shell script which starts jar as ws client with cli interface
+   * Remove this std in/out - it is overly complex and different OSs handle it differently
+   * Windows Java updates have broken it several times
    *
    * @param in
    *          The input stream to take commands from
@@ -3334,17 +3338,18 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // OutputStream stdIn = handle.getOutputStream();
 
       outputBuilder = new StringBuilder();
-      byte[] buff = new byte[4096];
+      byte[] buff = new byte[32768];
 
       // TODO: should we read both of these streams?
       // if we break out of the first loop is the process terminated?
 
-      // read stderr
-      for (int n; (n = stdErr.read(buff)) != -1;) {
-        outputBuilder.append(new String(buff, 0, n));
-      }
       // read stdout
       for (int n; (n = stdOut.read(buff)) != -1;) {
+        outputBuilder.append(new String(buff, 0, n));
+      }
+      
+      // read stderr
+      for (int n; (n = stdErr.read(buff)) != -1;) {
         outputBuilder.append(new String(buff, 0, n));
       }
 
@@ -3751,17 +3756,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     addRoute(id, uuid, 10);
   }
 
-  @Override
-  public Message getDescribeMsg(String connId) {
-    // TODO support queries
-    // FIXME !!! - msg.name is wrong with only "runtime" it should be
-    // "runtime@id"
-    // TODO - lots of options for a default "describe"
-    Message msg = Message.createMessage(String.format("%s@%s", getName(), getId()), "runtime", "describe",
-        new Object[] { "fill-uuid", new DescribeQuery(Platform.getLocalInstance().getId(), connId) });
-
-    return msg;
-  }
 
   /**
    * Unregister all connections that a specified client has made.

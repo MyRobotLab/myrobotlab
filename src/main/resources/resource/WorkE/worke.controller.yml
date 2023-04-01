@@ -1,4 +1,0 @@
-!!org.myrobotlab.service.config.SabertoothConfig
-connect: false
-port: null
-type: Sabertooth

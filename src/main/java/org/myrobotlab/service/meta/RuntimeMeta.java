@@ -44,10 +44,11 @@ public class RuntimeMeta extends MetaData {
     addDependency("org.slf4j", "slf4j-api", "1.7.36");
 
     // for config file support.
-    addDependency("org.yaml", "snakeyaml", "1.29");
+    addDependency("org.yaml", "snakeyaml", "1.32");
 
     // ws client sockets
     addDependency("org.asynchttpclient", "async-http-client", "2.12.3");
+    
 
   }
 

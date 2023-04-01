@@ -2,4 +2,6 @@
 analogListeners: null
 componentListeners: null
 controller: null
+listeners: null
+peers: null
 type: Joystick

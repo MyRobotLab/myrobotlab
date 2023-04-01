@@ -1,10 +1,12 @@
 !!org.myrobotlab.service.config.MotorPortConfig
 clip: false
 inverted: false
+listeners: null
 locked: false
 maxIn: null
 maxOut: null
 minIn: null
 minOut: null
+peers: null
 port: null
 type: MotorPort

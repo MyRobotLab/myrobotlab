@@ -1,9 +1,0 @@
-!!org.myrobotlab.service.config.RuntimeConfig
-enableCli: true
-locale: null
-logLevel: null
-registry:
-- gopro.http
-- gopro
-type: Runtime
-virtual: null

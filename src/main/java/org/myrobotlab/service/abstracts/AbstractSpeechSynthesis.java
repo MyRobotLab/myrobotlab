@@ -863,7 +863,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * no voices. Its the responsibility of the subclass to addVoice("name",
    * "gender", "lang", impl) all the voices it provides
    */
-  abstract protected void loadVoices() throws Exception;
+  public abstract void loadVoices() throws Exception;
 
   public List<Voice> publishVoices(List<Voice> voices) {
     return voices;

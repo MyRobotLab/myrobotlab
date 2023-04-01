@@ -202,7 +202,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   int creationOrder = 0;
 
   // FIXME SecurityProvider
-  protected AuthorizationProvider authProvider = null;
+  protected transient AuthorizationProvider authProvider = null;
 
   protected Status lastError = null;
   protected Long lastErrorTs = null;
@@ -1169,6 +1169,24 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     if (Runtime.getInstance().isLocal(msg) && !name.equals(msg.getName())) {
       // wrong Service - get the correct one
       return Runtime.getService(msg.getName()).invoke(msg);
+    }
+
+    String blockingKey = String.format("%s.%s", msg.getFullName(), msg.getMethod());
+    if (inbox.blockingList.containsKey(blockingKey)) {
+      Object[] returnContainer = inbox.blockingList.get(blockingKey);
+      if (msg.getData() == null) {
+        returnContainer[0] = null;
+      } else {
+        // transferring data
+        returnContainer[0] = msg.getData()[0];
+      }
+
+      synchronized (returnContainer) {
+        inbox.blockingList.remove(blockingKey);
+        returnContainer.notifyAll(); // addListener sender
+      }
+
+      return null;
     }
 
     retobj = invokeOn(false, this, msg.method, msg.data);

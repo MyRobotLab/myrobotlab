@@ -1,2 +1,4 @@
 !!org.myrobotlab.service.config.RasPiConfig
+listeners: null
+peers: null
 type: RasPi
