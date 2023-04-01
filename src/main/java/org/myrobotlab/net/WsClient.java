@@ -23,6 +23,7 @@ import org.atmosphere.wasync.Function;
 import org.atmosphere.wasync.Request;
 import org.atmosphere.wasync.RequestBuilder;
 import org.atmosphere.wasync.Socket;
+import org.atmosphere.wasync.impl.AtmosphereClient;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.interfaces.RemoteMessageHandler;
 import org.slf4j.Logger;
@@ -38,10 +39,22 @@ public class WsClient implements Decoder<String, Reader> {
   protected String uuid = null;
   protected transient Socket socket = null;
   protected transient AsyncHttpClient asc = null;
+
+  /**
+   * The wAsync client that actually handles the connection
+   * and socket lifecycle. By default, this is initialized to
+   * {@link org.atmosphere.wasync.impl.DefaultClient}, but that
+   * can be changed with the system property {@code wasync.client},
+   * which should be set to the fully-qualified class name of the desired
+   * client.
+   */
+  // Suppressing rawtypes because the generics of Client are a mess.
+  // We're using the default factory w/ the default client, but that
+  // signature just uses wildcards, and one of the bounds is also a raw type
+  // anyway.
+  @SuppressWarnings("rawtypes")
   protected transient Client client = null;
   protected transient Set<RemoteMessageHandler> handlers = new HashSet<>();
-
-  protected final List<String> WEBSOCKET_EVENTS = List.of("OPEN", "CLOSE", "CLOSED", "REOPENED");
 
   public AsyncHttpClient getAsyncClient() {
 
@@ -72,6 +85,8 @@ public class WsClient implements Decoder<String, Reader> {
     return asc;
   }
 
+  // Suppressing unchecked since client is using raw types
+  @SuppressWarnings("unchecked")
   public Connection connect(RemoteMessageHandler handler, String gatewayFullName, String srcId, String url) {
     try {
 
@@ -85,7 +100,7 @@ public class WsClient implements Decoder<String, Reader> {
       }
 
       this.handlers.add(handler);
-      this.client = ClientFactory.getDefault().newClient();
+      this.client = ClientFactory.getDefault().newClient(AtmosphereClient.class);
 
       UUID u = java.util.UUID.randomUUID();
       this.uuid = u.toString();
@@ -93,14 +108,10 @@ public class WsClient implements Decoder<String, Reader> {
       RequestBuilder<?> request = client.newRequestBuilder();
       request.method(Request.METHOD.GET);
       request.uri(url);
-      request.encoder(new Encoder<String, Reader>() { // Stream
-        @Override
-        public Reader encode(String s) {
-          // System.out.println("=========== encode -----> ===========");
-          // System.out.println("encoding [{}]", s);
-          return new StringReader(s);
-        }
-      }).decoder(this).transport(Request.TRANSPORT.WEBSOCKET); // Try
+      // Stream
+      // System.out.println("=========== encode -----> ===========");
+      // System.out.println("encoding [{}]", s);
+      request.encoder((Encoder<String, Reader>) StringReader::new).decoder(this).transport(Request.TRANSPORT.WEBSOCKET); // Try
                                                                // WebSocket
       // .transport(Request.TRANSPORT.LONG_POLLING); // Fallback to
       // Long-Polling
@@ -110,48 +121,19 @@ public class WsClient implements Decoder<String, Reader> {
       // client.create(client.newOptionsBuilder().reconnect(false).runtime(getAsyncClient()).build());
       asc = getAsyncClient();
       this.socket = client.create(client.newOptionsBuilder()./* runtime(asc). */build());
-      socket.on(Event.CLOSE.name(), new Function<String>() {
-        @Override
-        public void on(String t) {
-          System.out.println("CLOSE " + t);
-        }
-      }).on(Event.REOPENED.name(), new Function<String>() {
-        @Override
-        public void on(String t) {
-          System.out.println("REOPENED " + t);
-        }
-      }).on(Event.MESSAGE.name(), new Function<String>() {
-        @Override
-        public void on(String t) {
-          // all messages
-          // System.out.println("MESSAGE {}", t);
-        }
-      }).on(new Function<IOException>() {
-        @Override
-        public void on(IOException ioe) {
-          ioe.printStackTrace();
-        }
-      }).on(Event.STATUS.name(), new Function<String>() {
-        @Override
-        public void on(String t) {
-          System.out.println("STATUS " + t);
-        }
-      }).on(Event.HEADERS.name(), new Function<String>() {
-        @Override
-        public void on(String t) {
-          System.out.println("HEADERS " + t);
-        }
-      }).on(Event.MESSAGE_BYTES.name(), new Function<String>() {
-        @Override
-        public void on(String t) {
-          System.out.println("MESSAGE_BYTES " + t);
-        }
-      }).on(Event.OPEN.name(), new Function<String>() {
-        @Override
-        public void on(String t) {
-          System.out.println("OPEN " + t);
-        }
-      }).open(request.build());
+      socket
+              .on(Event.CLOSE.name(), t -> System.out.println("CLOSE " + t))
+              .on(Event.REOPENED.name(), t -> System.out.println("REOPENED " + t))
+              .on(Event.MESSAGE.name(), t -> {
+                // all messages
+                // System.out.println("MESSAGE {}", t);
+              })
+              .on((Function<IOException>) Throwable::printStackTrace)
+              .on(Event.STATUS.name(), t -> System.out.println("STATUS " + t))
+              .on(Event.HEADERS.name(), t -> System.out.println("HEADERS " + t))
+              .on(Event.MESSAGE_BYTES.name(), t -> System.out.println("MESSAGE_BYTES " + t))
+              .on(Event.OPEN.name(), t -> System.out.println("OPEN " + t))
+              .open(request.build());
 
       // put as many attribs as possible in
       Connection connection = new Connection(uuid, srcId, gatewayFullName);
@@ -187,13 +169,19 @@ public class WsClient implements Decoder<String, Reader> {
     // public Reader decode(Event type, String data) {
     // System.out.println("=========== decode <----- ===========");
     // System.out.println("decoding [{} - {}]", type, s);
-    //Null check handled by equals()
+
+    // Null check handled by equals()
+    // This checks for the heartbeat, we just ignore it
+    // cause the heartbeat just keeps the connection up
     if ("X".equals(dataIn)) {
       // System.out.println("MESSAGE - X");
       return null;
     }
-    if(WEBSOCKET_EVENTS.contains(dataIn))
+
+    // Ignores all the other events like OPENED or CLOSED
+    if(!(e.equals(Event.MESSAGE) || e.equals(Event.MESSAGE_BYTES))) {
       return null;
+    }
 
     // main response
     // System.out.println(data);
@@ -209,7 +197,7 @@ public class WsClient implements Decoder<String, Reader> {
   }
 
   // FIXME - should be Message type ...
-  // and WsClient should encode it !!!
+  //  and WsClient should encode it !!!
   public void send(String raw) {
     try {
       socket.fire(raw);
