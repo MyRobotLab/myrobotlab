@@ -2768,10 +2768,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // FIXME - rename putDefault
     ServiceConfig.getDefault(Runtime.getPlan(), peer.name, peerType);
     Runtime runtime = Runtime.getInstance();
-    String configPath = runtime.getConfigName();
+    String configPath = runtime.getConfigPath();
     // Seems a bit invasive - but yml file overrides everything
     // if one exists we need to replace it with the new peer type
-    if (configPath != null) {
+    if (configPath != null) {      
       String configFile = configPath + fs + peer.name + ".yml";
       File staleFile = new File(configFile);
       if (staleFile.exists()) {
