@@ -312,7 +312,9 @@ public class CodecUtils {
                   JsonNode node = mapper.readTree(json);
                   if (node.isInt()) {
                       return mapper.readValue(json, (Class<T>)Integer.class);
-                  } else if (node.isDouble()) {
+                  } else if (node.isBoolean()) {
+                    return mapper.readValue(json, (Class<T>)Boolean.class);
+                  } else if (node.isNumber()) {
                       return mapper.readValue(json, (Class<T>)Double.class);
                   } else if (node.isTextual()) {
                     return mapper.readValue(json, (Class<T>)String.class);
