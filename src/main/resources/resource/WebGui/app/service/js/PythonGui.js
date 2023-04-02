@@ -24,6 +24,9 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
         $scope.service = service
         $scope.scriptCount = 0
 
+        $scope.scripts = {}
+        $scope.scriptCount = 0
+
         angular.forEach(service.openedScripts, function(value, key) {
             if (!angular.isDefined($scope.scripts[key])) {
                 $scope.scripts[key] = value
@@ -116,9 +119,8 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
     $scope.closeScript = function(scriptName) {
         // FIXME - save first ?
         msg.send('closeScript', scriptName)
-        $scope.scriptCount--
-        delete $scope.scripts[scriptName]
-        console.log("removed " + scriptName)
+        msg.broadcastState()
+        // console.log("removed " + scriptName)
     }
 
     $scope.exec = function() {
