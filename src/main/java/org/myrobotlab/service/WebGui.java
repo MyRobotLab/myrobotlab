@@ -1138,11 +1138,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     this.useLocalResources = useLocalResources;
   }
 
-  @Override
-  public Message getDescribeMsg(String connId) {
-    return Runtime.getInstance().getDescribeMsg(connId);
-  }
-
   public void display(String image) {
     // FIXME
     // http/https can be proxied if necessary or even fetched,
