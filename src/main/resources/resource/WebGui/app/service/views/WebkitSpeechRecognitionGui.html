@@ -52,10 +52,10 @@ security exceptions to get mic working - https://medium.com/@Carmichaelize/enabl
               Restarts: {{restartCnt}}
             </td>
             <td class="leftBorder">
-              <input ng-disabled="service.config.wakeWord"  type="text" class="form-control" style="width: 80%" placeholder="Hey Robot" ng-model="service.config.wakeWord"/>
+              <input ng-disabled="service.config.wakeWord"  type="text" class="form-control" style="width: 80%" placeholder="Hey Robot" ng-model="service.wakeWord"/>
             </td>
             <td>
-              <button ng-show="!service.config.wakeWord" class="btn btn-default" ng-click="msg.setWakeWord(wakeWord)">Set</button>
+              <button ng-show="!service.config.wakeWord" class="btn btn-default" ng-click="msg.setWakeWord(service.wakeWord)">Set</button>
               <button ng-show="service.config.wakeWord" class="btn btn-default" ng-click="msg.unsetWakeWord()">UnSet</button>
             </td>
           </tr>
