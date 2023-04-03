@@ -52,10 +52,6 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   protected HashMap<String, Message> commands = new HashMap<>();
 
-  /**
-   * status of listening
-   */
-  protected boolean isListening = false;
 
   /**
    * status when wake word is used and is ready to publish recognized events
@@ -64,10 +60,6 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   
   public Long lastWakeWordTs = null;
 
-  /**
-   * status of publishing recognized text
-   */
-  protected boolean isRecording = false;
 
   @Deprecated /* remove ! - is from webkit - should be handled in js */
   protected long lastAutoListenEvent = System.currentTimeMillis();
@@ -186,13 +178,15 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    */
   @Override
   public boolean isListening() {
-    return isListening;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    return c.listening;
   }
 
   @Override
   @Deprecated /* use publishListening(boolean event) */
   public void listeningEvent(Boolean event) {
-    isListening = event;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    c.listening = event;
     broadcastState();
     return;
   }
@@ -270,8 +264,10 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     isSpeaking = b;
 
     ListeningEvent event = new ListeningEvent();
-    event.isRecording = isRecording;
-    event.isListening = isListening;
+    
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    event.isRecording = c.recording;
+    event.isListening = c.listening;
     event.isAwake = isAwake;
     event.isSpeaking = isSpeaking;
 
@@ -314,8 +310,8 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
     for (int i = 0; i < results.length; ++i) {
       ListeningEvent event = results[i];
-      event.isRecording = isRecording;
-      event.isListening = isListening;
+      event.isRecording = c.recording;
+      event.isListening = c.listening;
       event.isAwake = isAwake;
       event.isSpeaking = isSpeaking;
 
@@ -385,8 +381,8 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     isAwake = b;
 
     ListeningEvent event = new ListeningEvent();
-    event.isRecording = isRecording;
-    event.isListening = isListening;
+    event.isRecording = c.recording;
+    event.isListening = c.listening;
     event.isAwake = isAwake;
     event.isSpeaking = isSpeaking;
     event.text = text;
@@ -396,7 +392,6 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   @Override
   public boolean publishListening(boolean listening) {
-    this.isListening = listening;
     return listening;
   }
 
@@ -497,11 +492,14 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     c.wakeWordIdleTimeoutSeconds = wakeWordTimeoutSeconds;
     broadcastState();
   }
+  
 
   @Override
   public void startListening() {
     log.debug("Start listening event seen.");
-    isListening = true;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    c.listening = true;
+    c.recording = true;
     broadcastState();
   }
 
@@ -521,7 +519,8 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    */
   @Override
   public void startRecording() {
-    isRecording = true;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    c.recording = true;
     broadcastState();
   }
 
@@ -533,7 +532,8 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   @Override
   public void stopListening() {
     log.debug("stopListening()");
-    isListening = false;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    c.listening = false;
     broadcastState();
   }
 
@@ -543,7 +543,8 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   @Override
   public void stopRecording() {
-    isRecording = false;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    c.recording = false;
     broadcastState();
   }
 
