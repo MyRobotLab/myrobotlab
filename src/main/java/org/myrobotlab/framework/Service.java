@@ -56,6 +56,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Broadcaster;
+import org.myrobotlab.framework.interfaces.FutureInvoker;
+import org.myrobotlab.framework.interfaces.MessageInvoker;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.image.Util;
@@ -82,7 +84,7 @@ import org.slf4j.Logger;
  * messages.
  * 
  */
-public abstract class Service implements Runnable, Serializable, ServiceInterface, Broadcaster, QueueReporter {
+public abstract class Service implements Runnable, Serializable, ServiceInterface, Broadcaster, QueueReporter, FutureInvoker {
 
   // FIXME upgrade to ScheduledExecutorService
   // http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
@@ -663,16 +665,20 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     this.inbox = new Inbox(getFullName());
     this.outbox = new Outbox(this);
 
+    if (name.equals("i01")) {
+      log.info("here");
+    }
+    
     File versionFile = new File(getResourceDir() + fs + "version.txt");
     if (versionFile.exists()) {
       try {
         String version = FileIO.toString(versionFile);
         if (version != null) {
-          version = version.trim();
-          serviceVersion = version;
+          serviceVersion = version.trim();
         }
       } catch (Exception e) {
-        /* don't care */}
+        log.error("extracting service version info threw", e);
+      }
     }
 
     // register this service if local - if we are a foreign service, we probably

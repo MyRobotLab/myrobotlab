@@ -17,8 +17,8 @@ import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher,
-    ServiceStatus, TaskManager, Attachable, Comparable<ServiceInterface> {
+public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher, 
+    ServiceStatus, TaskManager, Attachable, MessageInvoker, Comparable<ServiceInterface> {
 
   // does this work ?
   public final static Logger log = LoggerFactory.getLogger(Service.class);
