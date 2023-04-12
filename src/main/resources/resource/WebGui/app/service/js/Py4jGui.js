@@ -138,7 +138,7 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
     }
 
     $scope.saveScript = function() {
-        msg.send('saveScript', $scope.activeScript.file.path, $scope.activeScript.code)
+        msg.send('saveScript', $scope.activeScript.file, $scope.activeScript.code)
     }
 
     $scope.downloadScript = function() {
@@ -146,7 +146,7 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
             type: 'text/plain'
         })
         var downloadLink = document.createElement("a")
-        downloadLink.download = $scope.getName($scope.activeScript.file.path)
+        downloadLink.download = $scope.getName($scope.activeScript.file)
         downloadLink.innerHTML = "Download File"
         if (window.webkitURL != null) {
             // Chrome allows the link to be clicked
