@@ -140,7 +140,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
     }
 
     $scope.saveScript = function() {
-        msg.send('saveScript', $scope.activeScript.file.path, $scope.activeScript.code)
+        msg.send('saveScript', $scope.activeScript.file, $scope.activeScript.code)
     }
 
     $scope.downloadScript = function() {
@@ -148,7 +148,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
             type: 'text/plain'
         })
         var downloadLink = document.createElement("a")
-        downloadLink.download = $scope.getName($scope.activeScript.file.path)
+        downloadLink.download = $scope.getName($scope.activeScript.file)
         downloadLink.innerHTML = "Download File"
         if (window.webkitURL != null) {
             // Chrome allows the link to be clicked
