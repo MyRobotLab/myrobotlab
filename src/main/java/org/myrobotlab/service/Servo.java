@@ -300,15 +300,17 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
   public ServiceConfig getFilteredConfig() {
     ServoConfig sc = (ServoConfig) super.getFilteredConfig();
     Set<Listener> removeList = new HashSet<>();
-    for (Listener listener : sc.listeners) {
-      if (listener.callback.equals("onServoEnable") || listener.callback.equals("onServoDisable") || listener.callback.equals("onEncoderData")
-          || listener.callback.equals("onServoSetSpeed") || listener.callback.equals("onServoWriteMicroseconds") || listener.callback.equals("onServoMoveTo")
-          || listener.callback.equals("onServoStop")) {
-        removeList.add(listener);
+    if (sc.listeners != null) {
+      for (Listener listener : sc.listeners) {
+        if (listener.callback.equals("onServoEnable") || listener.callback.equals("onServoDisable") || listener.callback.equals("onEncoderData")
+            || listener.callback.equals("onServoSetSpeed") || listener.callback.equals("onServoWriteMicroseconds") || listener.callback.equals("onServoMoveTo")
+            || listener.callback.equals("onServoStop")) {
+          removeList.add(listener);
+        }
       }
-    }
-    for (Listener remove : removeList) {
-      sc.listeners.remove(remove);
+      for (Listener remove : removeList) {
+        sc.listeners.remove(remove);
+      }
     }
     return sc;
   }
