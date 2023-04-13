@@ -1922,7 +1922,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     // last step - remove from registry
     registry.remove(name);
-
+    // and config
+    RuntimeConfig c = (RuntimeConfig)Runtime.getInstance().config;
+    c.registry.remove(CodecUtils.shortName(name));
+    
     log.info("released {}", name);
   }
 
