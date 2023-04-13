@@ -42,7 +42,6 @@ public class _TemplateService extends Service {
       LoggingFactory.init(Level.INFO);
 
       Runtime.start("template", "_TemplateService");
-      Runtime.start("servo", "Servo");
       Runtime.start("webgui", "WebGui");
 
     } catch (Exception e) {
