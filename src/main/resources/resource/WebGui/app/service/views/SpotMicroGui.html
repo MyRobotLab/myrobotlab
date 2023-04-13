@@ -128,12 +128,12 @@
         <label>Controller Right</label>
     </td>
     <td>
-        <button class="btn btn-secondary" ng-show="!peer.isPeerStarted(service, 'right')"
+        <button class="btn btn-secondary" ng-show="!peer.isPeerStarted('right')"
             ng-click="startPeer('right')">off</button>
-        <button class="btn btn-info" ng-show="peer.isPeerStarted(service, 'right')"
+        <button class="btn btn-info" ng-show="peer.isPeerStarted('right')"
             ng-click="releasePeer('right')">on</button>
-        <span ng-show="peer.isPeerStarted(service, 'right')">
-            <a href="" ng-click="mrl.changeTab(peer.getActualName(service, 'right'))">
+        <span ng-show="peer.isPeerStarted('right')">
+            <a href="" ng-click="mrl.changeTab(peer.getActualName('right'))">
                 <img src="settings.png" width="30" />
             </a>
         </span>
@@ -145,17 +145,34 @@
         <label>Controller Left</label>
     </td>
     <td>
-        <button class="btn btn-secondary" ng-show="!peer.isPeerStarted(service, 'left')"
+        <button class="btn btn-secondary" ng-show="!peer.isPeerStarted('left')"
             ng-click="startPeer('left')">off</button>
-        <button class="btn btn-info" ng-show="peer.isPeerStarted(service, 'left')"
+        <button class="btn btn-info" ng-show="peer.isPeerStarted('left')"
             ng-click="releasePeer('left')">on</button>
-        <span ng-show="peer.isPeerStarted(service, 'left')">
-            <a href="" ng-click="mrl.changeTab(peer.getActualName(service, 'left'))">
+        <span ng-show="peer.isPeerStarted('left')">
+            <a href="" ng-click="mrl.changeTab(peer.getActualName('left'))">
                 <img src="settings.png" width="30" />
             </a>
         </span>
     </td>
 </tr>
+<tr>
+    <td>
+        <img src="../Mpu6050.png" />
+        <label>MPU 6050</label>
+    </td>
+    <td>
+        <button class="btn btn-secondary" ng-show="!peer.isPeerStarted('mpu')"
+            ng-click="startPeer('mpu')">off</button>
+        <button class="btn btn-info" ng-show="peer.isPeerStarted('mpu')"
+            ng-click="releasePeer('mpu')">on</button>
+        <span ng-show="peer.isPeerStarted('mpu')">
+            <a href="" ng-click="mrl.changeTab(peer.getActualName('mpu'))">
+                <img src="settings.png" width="30" />
+            </a>
+        </span>
+    </td>
+</tr>    
 <tr>
     <td>
         <button class="btn btn-default" ng-click="mrl.sendTo('runtime', 'export', 'controllers')">Save controllers Config</button>
