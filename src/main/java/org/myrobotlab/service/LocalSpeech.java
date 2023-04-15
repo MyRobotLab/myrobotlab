@@ -66,7 +66,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
   protected boolean ttsHack = false;
 
-  protected Set<String> types = new HashSet<>(Arrays.asList("Espeak", "Festival", "Mimic", "MsSpeech", "Say", "Tts"));
+  protected Set<String> types = new HashSet<>(Arrays.asList("Espeak", "Festival", "Mimic", "MsSpeech", "Say", "Tts", "Pico2Wav"));
 
   protected String ttsPath = getResourceDir() + fs + "tts" + fs + "tts.exe";
 
@@ -190,6 +190,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * Use protected addVoice(name, gender, lang, voiceProvider) to add voices
    * Voice.voiceProvider allows a serializable key to map MRL's Voice to a
    * implementation of a voice
+   * 
+   * FIXME create voices based on type, some types support different languages .. some do not
+   * 
    */
   @Override
   public void loadVoices() {
@@ -281,6 +284,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public boolean setEspeak() {
     LocalSpeechConfig c = (LocalSpeechConfig)config;
     c.speechType = "Espeak";
+    voices.clear();
+    addVoice("Linus", "male", "en-US", "festival");
     removeExt(false);
     setTtsHack(false);
     setTtsCommand("espeak \"{text}\" -w {filename}");
@@ -292,6 +297,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    */
   public boolean setFestival() {
     LocalSpeechConfig c = (LocalSpeechConfig)config;
+    voices.clear();
+    addVoice("Linus", "male", "en-US", "festival");
     c.speechType = "Festival";
     removeExt(false);
     setTtsHack(false);
@@ -300,6 +307,33 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       error("festival only supported on Linux");
       return false;
     }
+    return true;
+  }
+  
+  
+  /**
+   * @return setFestival sets the Linux tts to festival template
+   */
+  public boolean setPico2Wav() {
+    LocalSpeechConfig c = (LocalSpeechConfig)config;
+    c.speechType = "Pico2Wav";
+    removeExt(false);
+    setTtsHack(false);
+    
+    voices.clear();
+    addVoice("de-DE", "female", "de-DE", "pico2wav");
+    addVoice("en-GB", "female", "en-GB", "pico2wav");
+    addVoice("en-US", "female", "en-US", "pico2wav");
+    addVoice("es-ES", "female", "es-ES", "pico2wav");
+    addVoice("fr-FR", "female", "fr-FR", "pico2wav");
+    addVoice("it-IT", "female", "it-IT", "pico2wav");
+
+    setTtsCommand("pico2wave -l {voice_name} -w {filename} \"{text}\" ");
+    if (!Runtime.getPlatform().isLinux()) {
+      error("festival only supported on Linux");
+      return false;
+    }
+    broadcastState();
     return true;
   }
 
@@ -336,13 +370,14 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     return true;
   }
 
-  @Deprecated /* use appopriate named setSpeechType setter */
+  @Deprecated /* use appopriate named setSpeechType setter - use setSpeechType*/
   public String setType(String type) {
     return setSpeechType(type);
   }
 
   public String setSpeechType(String speechType) {
     if (types.contains(speechType)) {
+      // clever way to demux
       invoke("set" + speechType);
       return speechType;
     }
