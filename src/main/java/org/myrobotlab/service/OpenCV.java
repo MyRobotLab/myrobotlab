@@ -62,6 +62,7 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameGrabber.ImageMode;
 import org.bytedeco.javacv.FrameRecorder;
+import org.bytedeco.javacv.OpenCVFrameGrabber;
 import org.bytedeco.javacv.OpenKinectFrameGrabber;
 import org.bytedeco.opencv.opencv_core.AbstractCvScalar;
 /*
@@ -714,6 +715,44 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   public void captureFromResourceFile(String filename) throws IOException {
     capture(filename);
   }
+  
+  /**
+   * Gets valid camera indexes by iterating through 8 
+   * @return
+   */
+  public List<Integer> getCameraIndexes(){
+    List<Integer> cameraIndexes = new ArrayList<>();
+    if (isCapturing()) {
+      error("cannot get indexes when capturing");
+      return cameraIndexes;
+    }
+
+    // preserving original state
+    String previousType = grabberType;
+    Integer previousIndex = cameraIndex; 
+
+    for (int i = 0; i < 8; i++) {
+      try {
+        FrameGrabber grabber = new OpenCVFrameGrabber(i);
+        grabber.start();
+        Frame frame = grabber.grab();
+        if (frame != null) {
+          cameraIndexes.add(i);
+        }
+        grabber.stop();
+        sleep(1000);
+        grabber = null;
+      } catch(Exception e) {
+        log.info(String.format("not able to camera grab a frame from camera %d", i));
+      }
+    }
+    
+    // resetting to original type
+    grabberType = previousType;
+    cameraIndex = previousIndex;
+
+    return cameraIndexes;
+  }
 
   public int getCameraIndex() {
     return this.cameraIndex;
@@ -1082,10 +1121,12 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     return recording;
   }
 
+  @Deprecated /* was used in SwingGui - nice feature through .. ability to undock displays */
   public boolean isUndocked() {
     return undockDisplay;
   }
 
+  @Deprecated /* not implemented remove */
   synchronized public void pauseCapture() {
     // FIXME !!!
     // capturing = false; NOT SURE WHAT TO DO ... PROBABLY stopCapture without
@@ -1255,6 +1296,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     return data;
   }
 
+  // FIXME - this is good in it has a bunch of publish points, but there is no POJO Classification publish point .. yet
   // when containers are published the <T>ypes are unknown to the publishing
   // function
   public ArrayList<?> publish(ArrayList<?> polygons) {
@@ -1296,6 +1338,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     return rects;
   }
 
+  // FIXME - POJO classification :( not doc
   public Map<String, List<Classification>> publishClassification(Map<String, List<Classification>> data) {
     // log.info("Publish Classification in opencv!");
     // aggregate locally for fun - "better" is to send it to a search engine
