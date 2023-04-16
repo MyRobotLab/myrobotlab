@@ -106,7 +106,7 @@ public class Joystick extends Service implements AnalogPublisher {
   /**
    * polling state
    */
-  protected boolean isPolling = false;
+  volatile protected boolean isPolling = false;
 
   /**
    * name to index map of controllers
@@ -151,10 +151,10 @@ public class Joystick extends Service implements AnalogPublisher {
     }
 
     public synchronized void stop() {
+      isPolling = false;
       if (myThread != null) {
         myThread.interrupt();
-      }
-      isPolling = false;
+      }      
     }
   }
 
@@ -290,10 +290,12 @@ public class Joystick extends Service implements AnalogPublisher {
     }
     return controllerNames;
   }
+  
+  List<Controller> virtualControllers = new ArrayList<>();
 
   // FIXME - clear global
   public List<Controller> getControllerList() {
-    List<Controller> controllers = new ArrayList<Controller>();
+    List<Controller> controllers = new ArrayList<>();
     net.java.games.input.Controller[] jinputControllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
     for (net.java.games.input.Controller controller : jinputControllers) {
       try {
@@ -303,6 +305,8 @@ public class Joystick extends Service implements AnalogPublisher {
         log.error("adding new controller threw", e);
       }
     }
+    
+    controllers.addAll(virtualControllers);
     // FIXME - add virtual
     return controllers;
   }
@@ -346,7 +350,7 @@ public class Joystick extends Service implements AnalogPublisher {
 
   @Override
   public void attachAnalogListener(AnalogListener service) {
-    String id = service.getAnalogId();
+    String id = service.getAxis();
     String serviceName = service.getName();
     getComponents();
     if (components != null && !components.containsKey(id)) {
@@ -375,10 +379,15 @@ public class Joystick extends Service implements AnalogPublisher {
     listeners.add(serviceName);
     // service.attachAnalogPublisher(this);
   }
+  
+  public void clearListeners() {
+    analogListeners.clear();
+    digitalListeners.clear();
+  }
 
   @Override
   public void detachAnalogListener(AnalogListener listener) {
-    String id = listener.getAnalogId();
+    String id = listener.getAxis();
     String serviceName = listener.getName();
     Set<String> listeners = analogListeners.get(id);
     if (listeners != null) {
@@ -599,7 +608,7 @@ public class Joystick extends Service implements AnalogPublisher {
   public static void main(String args[]) {
     try {
 
-      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
+      Runtime.main(new String[] { "--id", "admin"});
       LoggingFactory.init("INFO");
 
       Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
@@ -687,7 +696,7 @@ public class Joystick extends Service implements AnalogPublisher {
 
   @Override
   public ServiceConfig getConfig() {
-    JoystickConfig config = new JoystickConfig();
+    JoystickConfig config = (JoystickConfig)super.getConfig();
     config.controller = controller;
 
     if (analogListeners.size() > 0) {
@@ -718,7 +727,7 @@ public class Joystick extends Service implements AnalogPublisher {
     getControllers();
 
     // get controller request from config
-    JoystickConfig config = (JoystickConfig) c;
+    JoystickConfig config = (JoystickConfig)super.apply(c);
     if (config.controller != null) {
       setController(config.controller);
     }

@@ -25,9 +25,9 @@ create a new service
 <div class="row">
     <div class="form-group col-md-6">
         <div>
-            configurations <span class="glyphicon glyphicon-refresh" ng-click="msg.publishConfigList()"></span> <b>{{service.configName}}</b>
+            configurations <a href="" ng-click="msg.publishConfigList()"> <span class="glyphicon glyphicon-refresh" ></span></a> <b>{{getConfigName()}}</b>
             <br/>
-            <select multiple class="form-control width100pct" ng-change="setConfigName()" ng-model="selectedConfig" id="selectedConfig-id" title="configurations">
+            <select multiple class="form-control width100pct" ng-change="setConfig()" ng-model="selectedConfig" id="selectedConfig-id" title="configurations">
                 <option ng-repeat="config in service.configList">{{config}}</option>
             </select>
         </div>
@@ -38,7 +38,7 @@ create a new service
     <button class="btn btn-default" title="This will save a config module to data/config" ng-click="saveConfig()">save config</button>
     <!-- <button class="btn btn-default" title="This will load a config module" ng-click="loadConfig()">load</button>
     <button class="btn btn-default" title="This will unset current config set" ng-click="savePlan()">save plan</button>
-    <button class="btn btn-default" title="This will unset current config set" ng-click="unsetConfigName()">unset</button>
+    <button class="btn btn-default" title="This will unset current config set" ng-click="unsetConfig()">unset</button>
     -->
     <button class="btn btn-default" title="This will start a config set" ng-click="startConfig()">start</button>
     <button class="btn btn-default" title="This will release a config module" ng-click="releaseConfig()">release</button>

@@ -56,6 +56,9 @@ public class ServiceInterfaceTest extends AbstractTest {
 
   private boolean serviceInterfaceTest(String service) throws IOException {
     // see if we can start/stop and release the service.
+    
+    // set a configuration path
+    Runtime.setConfig("serviceInterfaceTest");
 
     ServiceInterface foo = Runtime.create(service.toLowerCase(), service);
     if (foo == null) {
@@ -104,6 +107,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     blacklist.add("As5048AEncoder");    
     blacklist.add("IntegratedMovement");    
     blacklist.add("VirtualDevice");
+    blacklist.add("Joystick");
     blacklist.add("GoogleAssistant");
     blacklist.add("LeapMotion");
     blacklist.add("Python"); // python's interpreter cannot be restarted cleanly

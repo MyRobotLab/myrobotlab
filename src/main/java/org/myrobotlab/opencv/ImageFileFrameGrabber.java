@@ -79,6 +79,13 @@ public class ImageFileFrameGrabber extends FrameGrabber {
     // increment our count.
     grabCount++;
     grabCount = grabCount % imageFiles.size();
+    if (converter == null) {
+      // not ready ?
+      return null;
+    }
+    if (image == null) {
+      return null;
+    }
     return converter.toFrame(image);
   }
 

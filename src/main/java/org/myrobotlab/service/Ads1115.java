@@ -1166,7 +1166,8 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
   @Override
   public ServiceConfig getConfig() {
-    Ads1115Config config = new Ads1115Config();
+    Ads1115Config config = (Ads1115Config)super.getConfig();
+    // FIXME remove member variables - use config only
     config.bus = deviceBus;
     config.address = deviceAddress;
     config.controller = controllerName;
@@ -1175,7 +1176,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    Ads1115Config config = (Ads1115Config) c;
+    Ads1115Config config = (Ads1115Config) super.apply(c);
     deviceBus = config.bus;
     deviceAddress = config.address;
     if (config.controller != null) {
@@ -1183,5 +1184,6 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
     }
     return c;
   }
+
 
 }

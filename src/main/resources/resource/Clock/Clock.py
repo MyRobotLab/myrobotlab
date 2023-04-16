@@ -6,6 +6,10 @@
 #########################################
 
 clock = runtime.start("clock","Clock")
+# will start a clock service but not start the clock.
+
+clock.setInterval(1000)
+# will set the time between pulses to every 1000 milliseconds or 1Hz
 
 # will start a clock service but not start the clock.
 

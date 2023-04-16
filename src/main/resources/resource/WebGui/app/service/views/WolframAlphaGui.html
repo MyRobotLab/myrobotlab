@@ -1,0 +1,49 @@
+<div class="row">
+    <input class="form-control" type="text" ng-model="searchText" name="searchText" id="searchText" ng-init="" press-enter="search()" placeholder="type here"/>
+    <span class="input-group-btn">
+        <button class="btn btn-default" ng-click="search()">Search</button>
+    </span>
+
+	 
+    <!--  the conversation history/log table -->
+    <table   class="table table-striped">
+        <thead>
+            <tr>
+                <th width="200">Search Log:</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="rowContent in rows track by $index" >
+            <td>
+                <b>search text :</b><i>"{{rowContent.searchText}}"</i><br/>
+                <span ng-repeat="text in rowContent.text track by $index" >
+					<div ng-bind-html="trustAsHtml(text)" /> 
+                </span><br/>
+                 <span ng-repeat="src in rowContent.images track by $index" >
+                 <div ngsf-fullscreen>
+                    <img id='target' class="fullscreen" ng-src="{{src.src}}" />
+                    <button ngsf-toggle-fullscreen>Toggle fullscreen</button>
+                    </div>
+                </span>
+                {{rowContent.errorText}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+<button id='button'>button</button>
+
+<script>
+
+const element = document.getElementById('target');
+
+document.getElementById('button').addEventListener('click', () => {
+	if (screenfull.isEnabled) {
+		screenfull.request(element);
+	}
+});
+
+</script>
+<button ng-click="showAdvanced()">show advanced</button>
