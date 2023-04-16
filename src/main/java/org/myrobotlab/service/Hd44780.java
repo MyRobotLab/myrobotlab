@@ -551,6 +551,12 @@ public class Hd44780 extends Service {
     return verifyBusyFlag;
   }
 
+  /**
+   * This method will first make sure the HD44780 is in a known state
+   * and that we are syncrnised to the state.
+   * It does this by setting the module into 8 bit mode
+   * then setting it back to 4 bit mode.
+   */
   private void setInterface() {
     byte Blight = 0b00001000; // The backlight bit is not used by the HD44780 chip.
     if (!backLight) {
