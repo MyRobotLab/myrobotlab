@@ -18,9 +18,9 @@ public class MqttBrokerMeta extends MetaData {
         "This is an Mqtt client based on the Paho Mqtt client library. Mqtt is a machine-to-machine (M2M)/'Internet of Things' connectivity protocol. See http://mqtt.org");
     addCategory("cloud", "network");
 
-    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.13.3");
-    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.13.3");
-    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.13.3");
+    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.14.0");
+    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.14.0");
+    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.14.0");
 
     addDependency("io.moquette", "moquette-broker", "0.15");
 

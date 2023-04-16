@@ -2,6 +2,7 @@ package org.myrobotlab.codec;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -12,18 +13,22 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
 import org.myrobotlab.codec.json.GsonPolymorphicTypeAdapterFactory;
 import org.myrobotlab.codec.json.JacksonPolymorphicModule;
+import org.myrobotlab.codec.json.JacksonPrettyPrinter;
 import org.myrobotlab.codec.json.JsonDeserializationException;
 import org.myrobotlab.codec.json.JsonSerializationException;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
+
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,11 +37,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -89,7 +94,7 @@ public class CodecUtils {
      * use Jackson.
      * TODO Replace with enum to allow extension for multiple backends
      */
-    public static final boolean USING_GSON = true;
+    public static final boolean USING_GSON = false;
     /**
      * The key used to locate type information
      * in a JSON dictionary. This is used to serialize
@@ -115,6 +120,25 @@ public class CodecUtils {
             WRAPPER_TYPES.stream().map(Object::getClass).map(Class::getCanonicalName).collect(Collectors.toSet());
     public static final String API_MESSAGES = "messages";
     public static final String API_SERVICE = "service";
+
+    /**
+     * The path from a top-level URL to the messages API
+     * endpoint.
+     * <p></p>
+     * FIXME This should be moved to WebGui,
+     *  CodecUtils should have no knowledge of URLs
+     */
+    public static final String API_MESSAGES_PATH = PARAMETER_API + API_MESSAGES;
+
+
+    /**
+     * The path from a top-level URL to the service API
+     * endpoint.
+     * <p></p>
+     * FIXME This should be moved to WebGui,
+     *  CodecUtils should have no knowledge of URLs
+     */
+    public static final String API_SERVICE_PATH = PARAMETER_API + API_SERVICE;
     /**
      * use {@link MethodCache}
      */
@@ -161,7 +185,7 @@ public class CodecUtils {
      * @see #USING_GSON
      */
     private static final Gson gson = new GsonBuilder().registerTypeAdapterFactory(new GsonPolymorphicTypeAdapterFactory())
-            .setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
+            .setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").serializeNulls().disableHtmlEscaping().create();
     /**
      * The {@link Gson} object used to pretty-print JSON.
      */
@@ -174,6 +198,14 @@ public class CodecUtils {
      * @see #USING_GSON
      */
     private static final ObjectMapper mapper = new ObjectMapper();
+
+
+    /**
+     * The pretty printer to be used with {@link #mapper}
+     * when {@link #USING_GSON} equals false, i.e. we're using Jackson.
+     */
+    private static final PrettyPrinter jacksonPrettyPrinter = new JacksonPrettyPrinter();
+
     /**
      * The {@link TypeFactory} used to generate type information for
      * {@link #mapper} when the selected backend is Jackson.
@@ -241,11 +273,11 @@ public class CodecUtils {
      * @param clazz The target class.
      * @param <T>   The type of the target class.
      * @return An object of the specified class (or a subclass of) with the state
-     * given by the json.
+     * given by the json. Null is an allowed return object.
      * @throws JsonDeserializationException if an error during deserialization occurs.
      * @see #USING_GSON
      */
-    public static <T extends Object> T fromJson(String json, Class<T> clazz) {
+    public static <T> /*@Nullable*/ T fromJson(/*@Nonnull*/ String json, /*@Nonnull*/ Class<T> clazz) {
         try {
             if (USING_GSON) {
                 return gson.fromJson(json, clazz);
@@ -268,11 +300,12 @@ public class CodecUtils {
      *                      of genericClass.
      * @param <T>           The type of the target class.
      * @return An object of the specified class (or a subclass of) with the state
-     * given by the json.
+     * given by the json. Null is an allowed return object.
      * @throws JsonDeserializationException if an error during deserialization occurs.
      * @see #USING_GSON
      */
-    public static <T extends Object> T fromJson(String json, Class<?> genericClass, Class<?>... parameterized) {
+    public static <T> /*@Nullable*/ T fromJson(/*@Nonnull*/ String json, /*@Nonnull*/ Class<?> genericClass,
+                                           /*@Nonnull*/ Class<?>... parameterized) {
         try {
             if (USING_GSON) {
                 return gson.fromJson(json, getType(genericClass, parameterized));
@@ -293,11 +326,11 @@ public class CodecUtils {
      * @param type The target type.
      * @param <T>  The type of the target class.
      * @return An object of the specified class (or a subclass of) with the state
-     * given by the json.
+     * given by the json. Null is an allowed return object.
      * @throws JsonDeserializationException if an error during deserialization occurs.
      * @see #USING_GSON
      */
-    public static <T extends Object> T fromJson(String json, Type type) {
+    public static <T> /*@Nullable*/ T fromJson(/*@Nonnull*/ String json, /*@Nonnull*/ Type type) {
         try {
             if (USING_GSON) {
                 return gson.fromJson(json, type);
@@ -485,6 +518,146 @@ public class CodecUtils {
             return inType;
         }
         return String.format("org.myrobotlab.service.%s", inType);
+    }
+
+    /**
+     * Deserializes a message and its data from a JSON
+     * string representation into a fully decoded Message
+     * object. This method will first attempt to use the
+     * method cache to determine what types the data
+     * elements should be deserialized to, and if the method
+     * cache lookup fails it relies on the virtual "class"
+     * field of the JSON to provide the type information.
+     *
+     * @param jsonData The serialized Message in JSON form
+     * @return A completely decoded Message object. Null is allowed if the JSON
+     *  represented null.
+     * @throws JsonDeserializationException if jsonData is malformed
+     */
+    public static /*@Nullable*/ Message jsonToMessage(/*@Nonnull*/ String jsonData) {
+        log.debug("Deserializing message: " + jsonData);
+        Message msg = fromJson(jsonData, Message.class);
+
+        if (msg == null) {
+            log.warn("Null message within json, probably shouldn't happen");
+            return null;
+        }
+        return decodeMessageParams(msg);
+    }
+
+    /**
+     * Performs the second-stage decoding of a Message
+     * with JSON-encoded data parameters. This method is meant
+     * to be a helper for the top-level Message decoding methods
+     * to go straight from the various codecs to a completely decoded Message.
+     * <p>
+     * Package visibility to allow alternative codecs to use this method.
+     * </p>
+     *<p></p>
+     * <h2>Implementation Details</h2>
+     * There are important caveats to note when using
+     * this method as a result of the implementation chosen.
+     * <p>
+     *     If the method msg invokes is contained within the
+     *     {@link MethodCache}, there exists type information
+     *     for the data parameters and they can be deserialized
+     *     into the correct type using this method.
+     * </p>
+     * <p>
+     *     However, if no such method exists within
+     *     the cache this method falls back on using the
+     *     embedded virtual meta field ({@link #CLASS_META_KEY}).
+     *     Since there is no type information available, there are two
+     *     main caveats to using this fallback method:
+     * </p>
+     *
+     *     <ol>
+     *         <li>GSON has edge cases for arrays of objects, since
+     * we don't know what type is contained within the array we are forced
+     * to deserialize it to an array of Objects, but GSON skips our custom
+     * deserializer for the Object type. So an array of objects that are not
+     * primitives nor Strings *will* deserialize incorrectly unless
+     * we are using Jackson.</li>
+     *          <li>Without the type information from the method cache we have
+     * no way of knowing whether to interpret an array as an array of Objects
+     * or as a List (or even what implementor of List to use)</li>
+     *      </ol>
+     *
+     *
+     * @param msg The Message object containing the json-encoded data parameters.
+     *            This object will be modified in-place
+     * @return A fully-decoded Message
+     * @throws JsonDeserializationException if any of the data parameters are malformed JSON
+     */
+    static /*@Nonnull*/ Message decodeMessageParams(/*@Nonnull*/ Message msg) {
+        String serviceName = msg.getFullName();
+        Class<?> clazz = Runtime.getClass(serviceName);
+
+        //Nullability of clazz is checked with this, if null
+        //falls back to virt class field
+        boolean useVirtClassField = clazz == null;
+        if (!useVirtClassField) {
+            try {
+                Object[] params = MethodCache.getInstance().getDecodedJsonParameters(clazz, msg.method, msg.data);
+                if (params == null)
+                    useVirtClassField = true;
+                else {
+                    msg.data = params;
+                }
+                msg.encoding = null;
+            } catch (RuntimeException e) {
+                log.info(String.format("MethodCache lookup fail: %s.%s", serviceName, msg.method));
+                // Fallback to virtual class field
+                useVirtClassField = true;
+            }
+        }
+
+        // Not an else since useVirtClassField can be set in the above if block
+        if (useVirtClassField) {
+            for (int i = 0; i < msg.data.length; i++) {
+                if (msg.data[i] instanceof String) {
+                    // GSON ignores custom deserializers when going to Object
+                    if (!USING_GSON) {
+                        msg.data[i] = fromJson((String) msg.data[i], Object.class);
+                    } else {
+                        // Workaround because GSON won't deserialize a primitive when
+                        // given serializable
+                        if (isBoolean((String) msg.data[i])) {
+                            msg.data[i] = makeBoolean((String) msg.data[i]);
+                        } else if(isInteger((String) msg.data[i])) {
+                            msg.data[i] = makeInteger((String) msg.data[i]);
+                        } else if (isDouble((String) msg.data[i])) {
+                            msg.data[i] = makeDouble((String) msg.data[i]);
+                        } else if (((String) msg.data[i]).startsWith("\"")) {
+                            msg.data[i] = fromJson((String) msg.data[i], String.class);
+                        } else if(((String) msg.data[i]).startsWith("[")) {
+                            // Array, deserialize to ArrayList to maintain compat with jackson
+                            msg.data[i] = fromJson((String) msg.data[i], ArrayList.class);
+                        } else {
+                            // Object
+                            // Serializable should cover everything of interest
+                            
+                            msg.data[i] = fromJson((String) msg.data[i], Serializable.class);
+                        }
+
+                    }
+
+                    if (msg.data[i] != null && JSON_DEFAULT_OBJECT_TYPE.isAssignableFrom(msg.data[i].getClass())) {
+                        log.warn("Deserialized parameter to default object type. " +
+                                "Possibly missing virtual class field: " +
+                                msg.data[i]);
+                    }
+                } else {
+                    log.error(
+                            "Attempted fallback Message decoding with virtual class field but " +
+                                    "parameter is not String: %s"
+                    );
+                }
+            }
+            msg.encoding = null;
+        }
+
+        return msg;
     }
 
     public static Message gsonToMsg(String gsonData) {
@@ -732,15 +905,26 @@ public class CodecUtils {
 
     /**
      * Serializes the specified object to JSON, using
-     * {@link #prettyGson} to pretty-ify the result.
-     * <p>
-     * TODO add Jackson support for pretty JSON
+     * {@link #prettyGson} or {@link #mapper}
+     * with {@link #jacksonPrettyPrinter}
+     * to pretty-ify the result. Which object is used depends on
+     * {@link #USING_GSON}
      *
      * @param ret The object to be serialized
      * @return The object in pretty JSON form
      */
     public static String toPrettyJson(Object ret) {
-        return prettyGson.toJson(ret);
+        try {
+            if (USING_GSON) {
+                return prettyGson.toJson(ret);
+            } else {
+
+                return mapper.writer(jacksonPrettyPrinter).writeValueAsString(ret);
+            }
+        } catch (Exception e) {
+            throw new JsonSerializationException(e);
+        }
+
     }
 
     /**
@@ -838,8 +1022,8 @@ public class CodecUtils {
         cmd = cmd.trim();
 
         // remove uninteresting api prefix
-        if (cmd.startsWith("/api/service")) {
-            cmd = cmd.substring("/api/service".length());
+        if (cmd.startsWith(API_SERVICE_PATH)) {
+            cmd = cmd.substring(API_SERVICE_PATH.length());
         }
 
         if (contextPath != null) {
@@ -848,6 +1032,7 @@ public class CodecUtils {
 
         // assume runtime as 'default'
         if (msg.name == null) {
+            // FIXME "runtime" really needs to be a constant at the very least
             msg.name = "runtime";
         }
 
@@ -995,7 +1180,9 @@ public class CodecUtils {
     static public Boolean isBoolean(String data) {
         try {
             Boolean.parseBoolean(data);
-            return true;
+            // The above will return false and not throw
+            // exception for most cases
+            return "true".equals(data) || "false".equals(data);
         } catch (Exception ignored) {
             return false;
         }
@@ -1023,9 +1210,9 @@ public class CodecUtils {
      */
     static public List<ApiDescription> getApis() {
         List<ApiDescription> ret = new ArrayList<>();
-        ret.add(new ApiDescription("message", "{scheme}://{host}:{port}/api/messages", "ws://localhost:8888/api/messages",
-                "An asynchronous api useful for bi-directional websocket communication, primary messages api for the webgui.  URI is /api/messages data contains a json encoded Message structure"));
-        ret.add(new ApiDescription("service", "{scheme}://{host}:{port}/api/service", "http://localhost:8888/api/service/runtime/getUptime",
+        ret.add(new ApiDescription("message", "{scheme}://{host}:{port}" + API_MESSAGES_PATH, "ws://localhost:8888" + API_MESSAGES_PATH,
+                "An asynchronous api useful for bi-directional websocket communication, primary messages api for the webgui.  URI is " + API_MESSAGES_PATH + " data contains a json encoded Message structure"));
+        ret.add(new ApiDescription("service", "{scheme}://{host}:{port}" + API_SERVICE_PATH, "http://localhost:8888" + API_SERVICE_PATH +"/runtime/getUptime",
                 "An synchronous api useful for simple REST responses"));
         return ret;
     }
@@ -1198,9 +1385,9 @@ public class CodecUtils {
      * @throws IOException if reading the file fails
      */
     public static ServiceConfig readServiceConfig(String filename) throws IOException {
-        String data = new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8);
+        String data = Files.readString(Paths.get(filename));
         Yaml yaml = new Yaml();
-        return (ServiceConfig) yaml.load(data);
+        return yaml.load(data);
     }
 
     /**

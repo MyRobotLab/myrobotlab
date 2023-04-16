@@ -1,6 +1,6 @@
 myrobotlab
 ==========
-
+![WebXR and InMoov2 Simulator](./doc/inmoov-quest2.gif)
 ## MyRobotLab Nixie Release
 
 Open Source Framework for Robotics and Creative Machine Control

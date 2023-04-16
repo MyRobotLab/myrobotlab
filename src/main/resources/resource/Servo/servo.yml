@@ -1,11 +1,11 @@
 !!org.myrobotlab.service.config.ServoConfig
 autoDisable: false
-autoStartPeers: true
 clip: true
 controller: null
 enabled: true
 idleTimeout: null
 inverted: false
+listeners: null
 maxIn: 180.0
 maxOut: 180.0
 minIn: 0.0

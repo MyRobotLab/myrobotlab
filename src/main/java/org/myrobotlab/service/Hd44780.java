@@ -258,6 +258,7 @@ public class Hd44780 extends Service {
       warn("must be attached to initialize");
     } else {
       log.info("Init I2C Display");
+
       setInterface(); // this commands ensures we are in 4 bit mode and our commands are in sync.
       setFunction(true, false); // Set the function Control.
       clearDisplay(); // Clear the Display and set DDRAM address 0.
