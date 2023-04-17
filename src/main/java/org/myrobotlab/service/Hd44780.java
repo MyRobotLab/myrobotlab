@@ -258,10 +258,8 @@ public class Hd44780 extends Service {
       warn("must be attached to initialize");
     } else {
       log.info("Init I2C Display");
-      lcdWriteCmd((byte) (0b00100010)); // this is an odd Set Function command, performed only during init()
-                                        // On power up, the HD44780 is in 8 bit mode. and we are potentially
-                                        // sending another instruction before the command is processed.
-                                        // We need to ensure the command is still set function to 4 bits.
+
+      setInterface(); // this commands ensures we are in 4 bit mode and our commands are in sync.
       setFunction(true, false); // Set the function Control.
       clearDisplay(); // Clear the Display and set DDRAM address 0.
       returnHome(); // Set DDRAM address 0 and return display home.
@@ -555,6 +553,30 @@ public class Hd44780 extends Service {
   }
 
   /**
+   * This method will first make sure the HD44780 is in a known state
+   * and that we are syncrnised to the state.
+   * It does this by setting the module into 8 bit mode
+   * then setting it back to 4 bit mode.
+   */
+  private void setInterface() {
+    byte Blight = 0b00001000; // The backlight bit is not used by the HD44780 chip.
+    if (!backLight) {
+      Blight = 0;
+    }
+    pcf.writeRegister((byte) (0b00110000 | En | Blight)); // Set to 8 bit mode
+    pcf.writeRegister((byte) (0b00110000 | Blight));      // Strobe in command
+    sleep(10);
+    pcf.writeRegister((byte) (0b00110000 | En | Blight)); // Repeat the set to 8 bit command
+    pcf.writeRegister((byte) (0b00110000 | Blight));      // Strobe in command
+    sleep(10);
+    pcf.writeRegister((byte) (0b00110000 | En | Blight)); // Repeat the set to 8 bit command
+    pcf.writeRegister((byte) (0b00110000 | Blight));      // Strobe in command . We should now be in 8 bit mode and in sync
+    sleep(10);
+    pcf.writeRegister((byte) (0b00100000 | En | Blight)); // Now set for 4 bit mode.
+    pcf.writeRegister((byte) (0b00100000 | Blight));      // Strobe in command. In theory, we should now be in 4 bit mode.
+    sleep(10);
+  }
+  /**
    * This method will write the cmd value to the instruction register then wait
    * until it is ready for the next instruction. Most commands are pretty quick
    * at around 37uS, but there is the odd one at 1.52mS, 1,520uS most I2C read
@@ -623,7 +645,7 @@ public class Hd44780 extends Service {
   public static void main(String[] args) {
     try {
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(true);
+      Platform.setVirtual(false);
 
       Runtime.start("webgui", "WebGui");
       Pcf8574 pcf = (Pcf8574) Runtime.start("pcf8574t", "Pcf8574");
