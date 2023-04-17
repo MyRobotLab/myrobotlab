@@ -110,7 +110,6 @@ public class MotorHat4Pi extends AbstractMotor {
 
     LoggingFactory.init();
 
-    SwingGui swing = (SwingGui) Runtime.start("gui", "SwingGui");
     RasPi raspi = (RasPi) Runtime.start("raspi", "RasPi");
     AdafruitMotorHat4Pi hat = (AdafruitMotorHat4Pi) Runtime.start("hat", "AdafruitMotorHat4Pi");
     MotorHat4Pi motor = (MotorHat4Pi) Runtime.start("motor", "MotorHat4Pi");

@@ -15,8 +15,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.service.InMoov2;
 import org.myrobotlab.service.OpenCV;
-import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.SwingGui;
+
 import org.slf4j.Logger;
 
 /**
@@ -100,11 +99,6 @@ public class Vision {
       instance.getOpenCV().addFilter(filterName);
     }
     instance.getOpenCV().setActiveFilter(filterName);
-    // temporary fix overexpand windows
-    SwingGui gui = (SwingGui) Runtime.getService("gui");
-    if (gui != null) {
-      gui.maximize();
-    }
     return instance.getOpenCV().getFilter(filterName);
   }
 
