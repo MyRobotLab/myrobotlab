@@ -34,6 +34,7 @@ import org.myrobotlab.codec.json.JsonSerializationException;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
+import org.myrobotlab.framework.StaticType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -1560,7 +1561,7 @@ public class CodecUtils {
    * @return
    */
   public static Object fromJson(String json) {
-    return fromJson(json, null);
+    return fromJson(json, (StaticType)null);
   }
 
 }
