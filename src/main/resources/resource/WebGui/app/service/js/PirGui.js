@@ -57,8 +57,6 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
     }
 
     $scope.detach = function() {
-        // FIXME - fix this in the mrl framework
-        // so I can call msg.send('detach')
         if ($scope.service.config.controller) {
             msg.send('detach', $scope.service.config.controller)
         }
@@ -74,8 +72,6 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
         msg.send('broadcastState')
     }
 
-    // FIXME - which i could get rid of this
-    // makes attach directive worky on first load   
     msg.subscribe('publishSense')
     msg.subscribe(this)
 }

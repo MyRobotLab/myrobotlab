@@ -11,10 +11,10 @@
                 <select class="form-control" ng-model="service.pin" ng-change="setPin()" ng-options="item for item in pinList">
                     <option>{{item}}</option>
                 </select>
-                <button ng-show="!service.controllerName" type="button" class="btn btn-default" ng-click="attach()">attach</button>
-                <button ng-show="service.controllerName" type="button" class="btn btn-default" ng-click="detach()">detach</button>
-                <button class="form-control" ng-show="service.controllerName && !service.isEnabled" ng-click="enable()">enable</button>
-                <button class="form-control" ng-show="service.controllerName && service.isEnabled" ng-click="disable()">disable</button>
+                <button ng-show="!service.config.controller" type="button" class="btn btn-default" ng-click="attach()">attach</button>
+                <button ng-show="service.config.controller" type="button" class="btn btn-default" ng-click="detach()">detach</button>
+                <button class="form-control" ng-show="service.config.controller && !service.config.enable" ng-click="enable()">enable</button>
+                <button class="form-control" ng-show="service.config.controller && service.config.enable" ng-click="disable()">disable</button>
             </div>
         </form>
     </div>
