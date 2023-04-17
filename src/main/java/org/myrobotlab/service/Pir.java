@@ -27,7 +27,7 @@ public class Pir extends Service implements PinListener {
   /**
    * The pin to be used as a string. Example "D4" or "A0".
    */
-  String pin;
+  // String pin;
 
   transient PinArrayControl pinControl;
 
@@ -65,7 +65,7 @@ public class Pir extends Service implements PinListener {
       this.pinControl = control;
       c.controller = control.getName();
 
-      if (pin == null) {
+      if (c.pin == null) {
         error("pin should be set before attaching");
       }
       pinControl.attach(getName());
@@ -79,16 +79,15 @@ public class Pir extends Service implements PinListener {
   @Override
   public void detach(String name) {
     PirConfig c = (PirConfig) config;
-
+    
     ServiceInterface si = Runtime.getService(name);
-    if (si instanceof PinArrayControl) {
+    if (si instanceof PinArrayControl && c.pin != null) {
       // FIXME - problem - what if someone else is using this pin ?
       // FIXME - should disable in the context of this service's name
-      ((PinArrayControl) si).disablePin(pin);
+      ((PinArrayControl) si).disablePin(c.pin);
       detachPinArrayControl((PinArrayControl) si);
-    } else {
-      error("do not know how to detach to %s of type %s", name, si.getSimpleName());
-    }
+    } 
+    
     active = null;
     c.enable = false;
     attached = false;
@@ -133,18 +132,10 @@ public class Pir extends Service implements PinListener {
   public void disable() {
     PirConfig c = (PirConfig) config;
 
-    if (pinControl == null) {
-      error("pin control not set");
-      return;
+    if (pinControl != null && c.pin != null) {
+      pinControl.disablePin(c.pin);
     }
 
-    if (pin == null) {
-      error("pin not set");
-      return;
-    }
-
-    // FIXME - use pinListener pub/sub
-    pinControl.disablePin(pin);
     c.enable = false;
     active = null;
     broadcastState();
@@ -172,7 +163,7 @@ public class Pir extends Service implements PinListener {
       return;
     }
 
-    if (pin == null) {
+    if (c.pin == null) {
       error("pin not set");
       return;
     }
@@ -183,14 +174,15 @@ public class Pir extends Service implements PinListener {
     }
 
     c.rate = rateHz;
-    pinControl.enablePin(pin, rateHz);
+    pinControl.enablePin(c.pin, rateHz);
     c.enable = true;
     broadcastState();
   }
 
   @Override
   public String getPin() {
-    return pin;
+    PirConfig c = (PirConfig) config;
+    return c.pin;
   }
 
   /**
@@ -278,7 +270,8 @@ public class Pir extends Service implements PinListener {
    */
   @Override
   public void setPin(String pin) {
-    this.pin = pin;
+    PirConfig c = (PirConfig) config;
+    c.pin = pin;
   }
 
   @Deprecated /* use attach(String) */

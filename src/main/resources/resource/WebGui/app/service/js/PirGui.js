@@ -12,9 +12,8 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
-        // initialize attach directive (one time ???)
-        $scope.options.attachName = service.config.controller
-        $scope.options.isAttached = service.config.controller?true:false
+        $scope.options.attachName = service.config.controller        
+        $scope.options.isAttached = service.attached
     }
 
     // init scope variables
@@ -52,7 +51,7 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
     }
 
     $scope.attach = function() {
-        msg.send('setPin', $scope.service.pin)
+        msg.send('setPin', $scope.service.config.pin)
         msg.send('attach', $scope.service.config.controller)
     }
 
@@ -64,6 +63,11 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
 
     $scope.enable = function() {
         msg.send('enable')
+        msg.send('broadcastState')
+    }
+
+    $scope.setPin = function() {
+        msg.send('setPin', $scope.service.config.pin)
         msg.send('broadcastState')
     }
 
