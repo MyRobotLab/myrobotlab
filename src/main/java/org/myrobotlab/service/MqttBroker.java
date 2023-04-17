@@ -588,7 +588,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
   public static void main(String[] args) {
     try {
       LoggingFactory.init("info");
-      Runtime.main(new String[] { "--id", "c2", "--from-launcher" });
+      Runtime.main(new String[] { "--id", "c2"});
       Python python = (Python) Runtime.start("python", "Python");
 
       python.exec("test_value = None\ndef test(msg):\n\tglobal test_value\n\ttest_value = msg\n\tprint(msg)");
@@ -660,7 +660,8 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
 
   @Override
   public ServiceConfig getConfig() {
-    MqttBrokerConfig c = new MqttBrokerConfig();
+    MqttBrokerConfig c = (MqttBrokerConfig)super.getConfig();
+    // FIXME - remove local fields in favor of just config
     c.address = address;
     c.mqttPort = mqttPort;
     c.wsPort = wsPort;
@@ -671,7 +672,8 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    MqttBrokerConfig config = (MqttBrokerConfig) c;
+    MqttBrokerConfig config = (MqttBrokerConfig) super.apply(c);
+    // FIXME - remove local fields in favor of just config
     address = config.address;
     mqttPort = config.mqttPort;
     wsPort = config.wsPort;

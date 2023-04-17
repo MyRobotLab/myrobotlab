@@ -132,7 +132,7 @@ public class MavenWrapper extends Repo implements Serializable {
     // those keys. Used to store all duplicate dependencies and check for
     // which ones should be given priority
     Map<String, List<ServiceDependency>> allDependencies = new HashMap<>();
-
+ 
     // A map from service type names to their metadata
     Map<String, MetaData> serviceMetaData = new HashMap<>();
 
@@ -180,7 +180,7 @@ public class MavenWrapper extends Repo implements Serializable {
 
     snr.put("{{repositories}}", getRepositories());
 
-    deps.append("<dependencies>\n\n");
+    // deps.append("<dependencies>\n\n");
 
     for (String serviceType : serviceTypes) {
       // Get from our map because ServiceData.getMetaData()
@@ -251,7 +251,7 @@ public class MavenWrapper extends Repo implements Serializable {
       }
 
     } // for each service
-    deps.append("  </dependencies>\n");
+    // deps.append("  </dependencies>\n");
 
     snr.put("{{dependencies}}", deps.toString());
 

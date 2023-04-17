@@ -57,8 +57,7 @@
                         <button class="form-goup btn btn-default" title="clear consoles" ng-click="clearConsoles()">
                             <span class="glyphicon glyphicon-remove-circle"></span>
                         </button>
-                        <select ng-model="format" class="form-goup form-control" title="format the data recieved as ascii, decimal or hex">
-                            <option>decimal</option>
+                        <select ng-model="format" class="form-goup form-control" title="format the data recieved as ascii or hex">
                             <option>hex</option>
                             <option>ascii</option>
                         </select>
@@ -89,10 +88,9 @@
                 <div class="form-goup">
                     <textarea type="text" ng-readonly="!isConnected" placeholder="send data here" ng-model="txData" class="form-control" ng-trim="false"></textarea> <!-- press-enter="writeString(txData)" -->
                     <button class="btn btn-default" ng-readonly="!isConnected" ng-click="writeString(txData)" title="send the data in the data field">send</button>
-                    <select ng-model="sendFormat" class="form-goup form-control" title="format the data sent &#10; ascii - send an ascii string &#10; hex - you can send a space delimited string of hex characters &#10; decimal - send a space delmited string of the values to be sent">
+                    <select ng-model="sendFormat" class="form-goup form-control" title="format the data sent &#10; ascii - send an ascii string &#10; hex - you can send a space delimited string of hex characters &#10; - send a space delmited string of the values to be sent">
                         <option>ascii</option>
                         <option>hex</option>
-                        <option>decimal</option>
                     </select>
                 </div>
             </form>

@@ -82,6 +82,11 @@ If you want to compile and skip the tests, you can use the standard maven approa
 
 `mvn clean install -DskipTests`
 
+## Web UI Style Guide
+* [Title Caps for field names and elements](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/bb246428(v=vs.85)?redirectedfrom=MSDN)
+* [No semi-colons for field names if labels exist](https://ux.stackexchange.com/questions/3611/should-label-and-field-be-separated-with-colon)
+
+
 ## Contributing
 
 All development is done on the `develop` branch.  To contribute code, the typical approach is to create an issue about the feature/bug you're working on.
@@ -94,5 +99,3 @@ When code is ready, submit a pull request to the develop branch!
 Enjoy the code review, address issues and concern in the code review
 Reviewer merges pull request to develop.
 Reviewer deletes branch.
-
-

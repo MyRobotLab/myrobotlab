@@ -16,7 +16,6 @@ public class MarySpeechMeta extends AbstractSpeechSynthesisMeta {
    */
   public MarySpeechMeta() {
 
-    addPeer("audioFile", "AudioFile", "audioFile");
     addCategory("speech", "sound");
     addDescription("Speech synthesis based on MaryTTS");
 
@@ -50,22 +49,9 @@ public class MarySpeechMeta extends AbstractSpeechSynthesisMeta {
     exclude("org.slf4j", "slf4j-log4j12");
 
     addDependency("org.apache.logging.log4j", "log4j-1.2-api", "2.12.1");
-
+    addDependency("org.apache.logging.log4j", "log4j-api", "2.12.1");
+   
   }
 
-  @Override
-  public Plan getDefault(String name) {
-
-    Plan plan = new Plan(name);
-    plan.putPeers(name, peers);
-
-    MarySpeechConfig config = new MarySpeechConfig();
-    config.audioFile = name + ".audioFile";
-
-    // add self last - desired order or construction
-    plan.addConfig(config);
-
-    return plan;
-  }
 
 }

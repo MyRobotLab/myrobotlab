@@ -24,9 +24,11 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.logging.SimpleLogPublisher;
 import org.myrobotlab.programab.BotInfo;
+import org.myrobotlab.programab.PredicateEvent;
 import org.myrobotlab.programab.Response;
 import org.myrobotlab.programab.Session;
 import org.myrobotlab.service.config.ProgramABConfig;
@@ -104,11 +106,6 @@ public class ProgramAB extends Service
   String currentUserName = "human";
 
   /**
-   * display processing and logging
-   */
-  boolean visualDebug = true;
-
-  /**
    * start GoogleSearch (a peer) instead of sraix web service which is down or
    * problematic much of the time
    */
@@ -134,38 +131,38 @@ public class ProgramAB extends Service
     // 1. scan resources .. either "resource/ProgramAB" or
     // ../ProgramAB/resource/ProgramAB (for dev) for valid bot directories
 
-    List<File> resourceBots = scanForBots(getResourceDir());
-
-    if (isDev()) {
-      // 2. dev loading "only" dev bots - from dev location
-      for (File file : resourceBots) {
-        addBotPath(file.getAbsolutePath());
-      }
-    } else {
-      // 2. runtime loading
-      // copy any bot in "resource/ProgramAB/{botName}" not found in
-      // "data/ProgramAB/{botName}"
-      for (File file : resourceBots) {
-        String botName = getBotName(file);
-        File dataBotDir = new File(FileIO.gluePaths("data/ProgramAB", botName));
-        if (dataBotDir.exists()) {
-          log.info("found data/ProgramAB/{} not copying", botName);
-        } else {
-          log.info("will copy new data/ProgramAB/{}", botName);
-          try {
-            FileIO.copy(file, dataBotDir);
-          } catch (Exception e) {
-            error(e);
-          }
-        }
-      }
-
-      // 3. addPath for all bots found in "data/ProgramAB/"
-      List<File> dataBots = scanForBots("data/ProgramAB");
-      for (File file : dataBots) {
-        addBotPath(file.getAbsolutePath());
-      }
-    }
+//    List<File> resourceBots = scanForBots(getResourceDir());
+//
+//    if (isDev()) {
+//      // 2. dev loading "only" dev bots - from dev location
+//      for (File file : resourceBots) {
+//        addBotPath(file.getAbsolutePath());
+//      }
+//    } else {
+//      // 2. runtime loading
+//      // copy any bot in "resource/ProgramAB/{botName}" not found in
+//      // "data/ProgramAB/{botName}"
+//      for (File file : resourceBots) {
+//        String botName = getBotName(file);
+//        File dataBotDir = new File(FileIO.gluePaths("data/ProgramAB", botName));
+//        if (dataBotDir.exists()) {
+//          log.info("found data/ProgramAB/{} not copying", botName);
+//        } else {
+//          log.info("will copy new data/ProgramAB/{}", botName);
+//          try {
+//            FileIO.copy(file, dataBotDir);
+//          } catch (Exception e) {
+//            error(e);
+//          }
+//        }
+//      }
+//
+//      // 3. addPath for all bots found in "data/ProgramAB/"
+//      List<File> dataBots = scanForBots("data/ProgramAB");
+//      for (File file : dataBots) {
+//        addBotPath(file.getAbsolutePath());
+//      }
+//    }
 
   }
 
@@ -330,6 +327,7 @@ public class ProgramAB extends Service
     }
 
     // Get the actual bots aiml based response for this session
+    log.info("getResponse({})", text);
     Response response = session.getResponse(text);
 
     // EEK! clean up the API!
@@ -454,7 +452,10 @@ public class ProgramAB extends Service
   }
 
   public void setPredicate(String userName, String botName, String predicateName, String predicateValue) {
-    getSession(userName, botName).setPredicate(predicateName, predicateValue);
+    Session session = getSession(userName, botName);
+    if (session != null) {
+      session.setPredicate(predicateName, predicateValue);
+    }
   }
 
   @Deprecated
@@ -825,11 +826,21 @@ public class ProgramAB extends Service
     File botPath = new File(path);
     File verifyAiml = new File(FileIO.gluePaths(path, "aiml"));
     if (botPath.exists() && botPath.isDirectory() && verifyAiml.exists() && verifyAiml.isDirectory()) {
+
+      for (BotInfo bi : bots.values()) {
+        // check relative & absolute ???
+        if (bi.path.equals(botPath)) {
+          log.info("already loaded bot at {}", path);
+          return path;
+        }
+      }
+
       BotInfo botInfo = new BotInfo(this, botPath);
 
       // key'ing on "path" probably would be better and only displaying "name"
       // then there would be no put/collisions only duplicate names
       // (preferrable)
+
       bots.put(botInfo.name, botInfo);
       botInfo.img = getBotImage(botInfo.name);
 
@@ -856,15 +867,6 @@ public class ProgramAB extends Service
     this.currentBotName = botName;
     invoke("getBotImage", botName);
     broadcastState();
-  }
-
-  public void setVisualDebug(Boolean visualDebug) {
-    this.visualDebug = visualDebug;
-    broadcastState();
-  }
-
-  public Boolean getVisualDebug() {
-    return visualDebug;
   }
 
   public void setCurrentUserName(String currentUserName) {
@@ -1010,6 +1012,10 @@ public class ProgramAB extends Service
 
     logPublisher = new SimpleLogPublisher(this);
     logPublisher.filterClasses(new String[] { "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans", "class org.myrobotlab.programab.MrlSraixHandler" });
+    Logging logging = LoggingFactory.getInstance();
+    logging.setLevel("org.alicebot.ab.Graphmaster", "DEBUG");
+    logging.setLevel("org.alicebot.ab.MagicBooleans", "DEBUG");
+    logging.setLevel("class org.myrobotlab.programab.MrlSraixHandler", "DEBUG");
     logPublisher.start();
 
   }
@@ -1142,19 +1148,19 @@ public class ProgramAB extends Service
 
   @Override
   public ServiceConfig getConfig() {
-    ProgramABConfig config = new ProgramABConfig();
+    ProgramABConfig config = (ProgramABConfig) super.getConfig();
+    // REMOVED from overlap with subscriptions
+    // Set<String> listeners = getAttached("publishText");
+    // config.textListeners = listeners.toArray(new String[listeners.size()]);
 
-    config.currentBotName = currentBotName;
-    config.currentUserName = currentUserName;
-    // config.useGlobalSession = useGlobalSession;
-    config.sleep = sleep;
-
-    Set<String> listeners = getAttached("publishText");
-    config.textListeners = listeners.toArray(new String[listeners.size()]);
-
-    listeners = getAttached("publishUtterance");
-    config.utteranceListeners = listeners.toArray(new String[listeners.size()]);
-
+    // listeners = getAttached("publishUtterance");
+    // config.utteranceListeners = listeners.toArray(new
+    // String[listeners.size()]);
+    if (config.bots == null) {
+      config.bots = new ArrayList<>();
+    }
+    
+    config.bots.clear();
     for (BotInfo bot : bots.values()) {
 
       Path pathAbsolute = Paths.get(bot.path.getAbsolutePath());
@@ -1164,17 +1170,26 @@ public class ProgramAB extends Service
 
     }
 
+    config.currentBotName = currentBotName;
+    config.currentUserName = currentUserName;
+
     return config;
   }
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    ProgramABConfig config = (ProgramABConfig) c;
-
+    ProgramABConfig config = (ProgramABConfig) super.apply(c);
     if (config.bots != null && config.bots.size() > 0) {
       bots.clear();
       for (String botPath : config.bots) {
         addBotPath(botPath);
+      }
+    }
+    
+    if (config.botDir != null) {
+      List<File> botsFromScanning = scanForBots(config.botDir);
+      for (File file : botsFromScanning) {
+        addBotPath(file.getAbsolutePath());
       }
     }
 
@@ -1192,21 +1207,18 @@ public class ProgramAB extends Service
 
     setCurrentSession(currentUserName, currentBotName);
 
-    // This is "good" in that its using the normalized data from subscription
-    // vs creating a bunch of cluttery local vars to hold state with error
-    if (config.textListeners != null) {
-      for (String local : config.textListeners) {
-        attachTextListener(local);
-      }
-    }
-
-    if (config.utteranceListeners != null) {
-      for (String local : config.utteranceListeners) {
-        attachUtteranceListener(local);
-      }
-    }
-
-    // TODO: attach to the text publishers... ?
+    // REMOVED because of overlap with subscriptions
+    // if (config.textListeners != null) {
+    // for (String local : config.textListeners) {
+    // attachTextListener(local);
+    // }
+    // }
+    //
+    // if (config.utteranceListeners != null) {
+    // for (String local : config.utteranceListeners) {
+    // attachUtteranceListener(local);
+    // }
+    // }
 
     return config;
   }
@@ -1286,11 +1298,22 @@ public class ProgramAB extends Service
     for (Session s : sessions.values()) {
       if (s.chat == chat) {
         // found session saving predicates
+        invoke("publishChangePredicate", s, chat, predicateName, result);
         s.savePredicates();
         return;
       }
     }
     error("could not find session to save predicates");
+  }
+  
+  public PredicateEvent publishChangePredicate(Session session, Chat chat, String name, String value) {
+    PredicateEvent event = new PredicateEvent();
+    event.id = String.format("%s<->%s", session.userName, session.botInfo.name);
+    event.userName = session.userName;
+    event.botName = session.botInfo.name;
+    event.name = name;
+    event.value = value;
+    return event;
   }
 
   /**
@@ -1404,7 +1427,7 @@ public class ProgramAB extends Service
       // Strip the botname from the utterance passed to programab.
       utteranceDisp = utteranceDisp.replace("@" + botName, "");
       Response resp = getResponse(utterance.username, utteranceDisp);
-      if (!StringUtils.isEmpty(resp.msg)) {
+      if (resp != null && !StringUtils.isEmpty(resp.msg)) {
         // Ok.. now what? respond to the user ...
         Utterance response = new Utterance();
         response.username = resp.botName;

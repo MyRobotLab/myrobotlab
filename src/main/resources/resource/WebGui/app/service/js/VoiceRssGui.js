@@ -1,5 +1,5 @@
-angular.module('mrlapp.service.VoiceRssGui', []).controller('VoiceRssGuiCtrl', ['$scope', '$log', 'mrl', '$uibModal', function($scope, $log, mrl, $uibModal) {
-    $log.info('VoiceRssGuiCtrl')
+angular.module('mrlapp.service.VoiceRssGui', []).controller('VoiceRssGuiCtrl', ['$scope', 'mrl', '$uibModal', function($scope, mrl, $uibModal) {
+    console.info('VoiceRssGuiCtrl')
     var _self = this
     var msg = this.msg
 
@@ -17,15 +17,13 @@ angular.module('mrlapp.service.VoiceRssGui', []).controller('VoiceRssGuiCtrl', [
 		$scope.$apply()
 	}
 
-    // console.log('mary', $scope.service)
-
     this.onMsg = function(inMsg) {
         switch (inMsg.method) {
         case 'onState':
             _self.updateState(inMsg.data[0])
             break
         default:
-            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
+            console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
         }
     }

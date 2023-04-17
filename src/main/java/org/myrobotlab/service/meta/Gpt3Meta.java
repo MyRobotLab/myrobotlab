@@ -21,7 +21,7 @@ public class Gpt3Meta extends MetaData {
     // add it to one or many categories
     addCategory("AI");
     
-    addPeer("http", "HttpClient");
+
     
     setCloudService(true);
 

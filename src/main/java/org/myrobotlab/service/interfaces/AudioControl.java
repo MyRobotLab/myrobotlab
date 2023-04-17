@@ -4,7 +4,9 @@ public interface AudioControl {
 
   public void setVolume(double volume);
 
-  public void getVolume(double volume);
+  public double getVolume();
+  
+  public void onPlayAudioFile(String file);
 
   // pause
   // resume

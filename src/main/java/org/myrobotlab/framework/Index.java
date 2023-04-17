@@ -22,11 +22,6 @@ public class Index<T> {
 
     Index<ServiceReservation> reservations = new Index<ServiceReservation>();
 
-    reservations.put("RightArm.Bicep", new ServiceReservation("Bicep", "Servo", "a bicep servo"));
-    reservations.put("RightArm.Shoulder", new ServiceReservation("Shoulder", "Servo", "a shoulder servo"));
-    reservations.put("RightArm.Rotate", new ServiceReservation("Rotate", "Servo", "a servo"));
-    reservations.put("RightArm.RightHand", new ServiceReservation("RightHand", "InMoovHand", "a servo"));
-
     ArrayList<ServiceReservation> ret = reservations.crawlForDataStartingWith("RightArm");
     log.info("size {} from query of RightArm", ret.size());
     log.info(reservations.toString());

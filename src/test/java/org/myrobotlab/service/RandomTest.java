@@ -41,7 +41,7 @@ public class RandomTest extends AbstractServiceTest {
     random.addRandom(0, 200, "clock", "startClock");
     // random.addRandom(0, 200, "clock", "stopClock");
     
-    sleep(200);
+    sleep(500);
     assertTrue("clock should be started 1", clock.isClockRunning());
     
     // disable all of a services random events

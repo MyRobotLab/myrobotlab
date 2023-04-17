@@ -15,7 +15,6 @@ public class MotorHat4PiMeta extends MetaData {
   public MotorHat4PiMeta() {
     addDescription("Motor service for the Raspi Motor HAT");
     addCategory("motor");
-    addPeer("hat", "AdafruitMotorHat4Pi", "Motor HAT");
     setAvailable(true);
 
   }

@@ -12,13 +12,13 @@ public interface AnalogListener extends NameProvider {
    * @param name
    *          - sets the name of the access for this AnalogListener e.g. "x"
    */
-  public void setAnalogId(String name);
+  public void setAxis(String name);
 
   /**
    * Configuration related - get the axis for which AxisPublishers will publish
    * to on this service
    */
-  public String getAnalogId();
+  public String getAxis();
 
   /**
    * call back method to accept AxisData

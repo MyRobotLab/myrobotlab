@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -38,15 +39,17 @@ public class InMoov2Head extends Service {
     super(n, id);
   }
 
-  /*
-   * autoStartPeers true - this is not needed public void startService() {
-   * super.startService();
-   * 
-   * startPeer("jaw"); startPeer("eyeX"); startPeer("eyeY");
-   * startPeer("rothead"); startPeer("neck"); startPeer("rollNeck");
-   * 
-   * }
-   */
+  @Override
+  public void startService() {
+    super.startService();
+
+    jaw = (ServoControl) getPeer("jaw");
+    eyeX = (ServoControl) getPeer("eyeX");
+    eyeY = (ServoControl) getPeer("eyeY");
+    rothead = (ServoControl) getPeer("rothead");
+    neck = (ServoControl) getPeer("neck");
+    rollNeck = (ServoControl) getPeer("rollNeck");
+  }
 
   public void blink() {
 
@@ -151,13 +154,22 @@ public class InMoov2Head extends Service {
     return lastActivityTime;
   }
 
-  @Deprecated /* use LangUtils */
-  public String getScript(String inMoovServiceName) {
-    StringBuilder head = new StringBuilder(String.format(Locale.ENGLISH, "%s.moveHead(%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, neck.getCurrentInputPos(),
-        rothead.getCurrentInputPos(), eyeX.getCurrentInputPos(), eyeY.getCurrentInputPos(), jaw.getCurrentInputPos(), rollNeck.getCurrentInputPos()));
+  public String getScript(String inmoovName) {
+
+    Double jaw = (Servo) getPeer("jaw") == null ? null : ((Servo) getPeer("jaw")).getCurrentInputPos();
+    Double eyeX = (Servo) getPeer("eyeX") == null ? null : ((Servo) getPeer("eyeX")).getCurrentInputPos();
+    Double eyeY = (Servo) getPeer("eyeY") == null ? null : ((Servo) getPeer("eyeY")).getCurrentInputPos();
+    Double rothead = (Servo) getPeer("rothead") == null ? null : ((Servo) getPeer("rothead")).getCurrentInputPos();
+    Double neck = (Servo) getPeer("neck") == null ? null : ((Servo) getPeer("neck")).getCurrentInputPos();
+    Double rollNeck = (Servo) getPeer("rollNeck") == null ? null : ((Servo) getPeer("rollNeck")).getCurrentInputPos();
+    Double eyelidLeft = (Servo) getPeer("eyelidLeft") == null ? null : ((Servo) getPeer("eyelidLeft")).getCurrentInputPos();
+    Double eyelidRight = (Servo) getPeer("eyelidRight") == null ? null : ((Servo) getPeer("eyelidRight")).getCurrentInputPos();
+
+    StringBuilder head = new StringBuilder(String.format("%s.moveHead(%.0f,%.0f,%.0f,%.0f,%.0f,%.0f)\n", inmoovName, neck, rothead, eyeX, eyeY, jaw, rollNeck));
     if (eyelidLeft != null && eyelidRight != null) {
-      head.append(String.format(Locale.ENGLISH, "%s.moveEyelids(%.2f,%.2f)\n", inMoovServiceName, eyelidLeft.getCurrentInputPos(), eyelidRight.getCurrentInputPos()));
+      head.append(String.format("%s.moveEyelids(%.0f,%.0f)\n", inmoovName, eyelidLeft, eyelidRight));
     }
+
     return head.toString();
   }
 
@@ -185,6 +197,10 @@ public class InMoov2Head extends Service {
     log.info("rotation: " + rotation);
     log.info("colatitude: " + colatitude);
     log.info("object distance is {},rothead servo {},neck servo {} ", distance, rotation, colatitude);
+  }
+
+  public void onMoveHead(HashMap<String, Double> map) {
+    moveTo(map.get("neck"), map.get("rothead"), map.get("eyeX"), map.get("eyeY"), map.get("jaw"), map.get("rollNeck"));
   }
 
   // FIXME !!! - this is a mess ... some Double some double ...
@@ -226,24 +242,37 @@ public class InMoov2Head extends Service {
     if (log.isDebugEnabled()) {
       log.debug("head.moveTo {} {} {} {} {} {}", neckPos, rotheadPos, eyeXPos, eyeYPos, jawPos, rollNeckPos);
     }
-    if (Runtime.getService(getName() + ".rothead") != null && rotheadPos != null) {
-      ((ServoControl) Runtime.getService(getName() + ".rothead")).moveTo(rotheadPos);
-    }
-    if (Runtime.getService(getName() + ".neck") != null && neckPos != null) {
-      ((ServoControl) Runtime.getService(getName() + ".neck")).moveTo(neckPos);
-    }
-    if (Runtime.getService(getName() + ".eyeX") != null && eyeXPos != null) {
-      ((ServoControl) Runtime.getService(getName() + ".eyeX")).moveTo(eyeXPos);
-    }
-    if (Runtime.getService(getName() + ".eyeY") != null && eyeYPos != null) {
-      ((ServoControl) Runtime.getService(getName() + ".eyeY")).moveTo(eyeYPos);
-    }
-    if (Runtime.getService(getName() + ".jaw") != null && jawPos != null) {
-      ((ServoControl) Runtime.getService(getName() + ".jaw")).moveTo(jawPos);
+    // In theory this could use mrl standard pub/sub by mapping different output
+    // topics to ServoControl.onServoMoveTo
+    // but I'm tired ... :)
+    ServoControl neck = (ServoControl) Runtime.getService(getPeerName("rothead"));
+    if (neck != null) {
+      neck.moveTo(neckPos);
     }
 
-    if (Runtime.getService(getName() + ".rollNeck") != null && rollNeckPos != null) {
-      ((ServoControl) Runtime.getService(getName() + ".rollNeck")).moveTo(rollNeckPos);
+    ServoControl rothead = (ServoControl) Runtime.getService(getPeerName("rothead"));
+    if (rothead != null) {
+      rothead.moveTo(rotheadPos);
+    }
+
+    ServoControl eyeX = (ServoControl) Runtime.getService(getPeerName("eyeX"));
+    if (eyeX != null) {
+      eyeX.moveTo(eyeXPos);
+    }
+
+    ServoControl eyeY = (ServoControl) Runtime.getService(getPeerName("eyeY"));
+    if (eyeY != null) {
+      eyeY.moveTo(eyeXPos);
+    }
+
+    ServoControl jaw = (ServoControl) Runtime.getService(getPeerName("jaw"));
+    if (jaw != null) {
+      jaw.moveTo(jawPos);
+    }
+
+    ServoControl rollNeck = (ServoControl) Runtime.getService(getPeerName("rollNeck"));
+    if (rollNeck != null) {
+      rollNeck.moveTo(rollNeckPos);
     }
   }
 
@@ -307,11 +336,6 @@ public class InMoov2Head extends Service {
   @Override
   public void releaseService() {
     disable();
-    /*
-     * not needed now with autoStartPeer and auto release releasePeer("jaw");
-     * releasePeer("eyeX"); releasePeer("eyeY"); releasePeer("rothead");
-     * releasePeer("neck"); releasePeer("rollNeck");
-     */
     super.releaseService();
   }
 

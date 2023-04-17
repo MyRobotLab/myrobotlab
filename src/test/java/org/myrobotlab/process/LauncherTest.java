@@ -46,7 +46,7 @@ public class LauncherTest extends AbstractTest {
   @Test
   public void test() throws IllegalArgumentException, IllegalAccessException, IOException, URISyntaxException, InterruptedException, ParseException {
 
-    Launcher.main(new String[] { "--from-launcher", "-c", "-s", "runtime", "Runtime" });
+    Launcher.main(new String[] {"-s", "runtime", "Runtime" });
 
     String help = Launcher.mainHelp();
 

@@ -94,15 +94,14 @@ public class MotorHat4Pi extends AbstractMotor {
   @Override
   public ServiceConfig getConfig() {
     // FIXME - may need to do call super.config for config that has parent :(
-    MotorHat4PiConfig config = new MotorHat4PiConfig();
+    MotorHat4PiConfig config = (MotorHat4PiConfig) super.getConfig();
     config.motorId = motorId;
     return config;
   }
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    super.apply(c);
-    MotorHat4PiConfig config = (MotorHat4PiConfig) c;
+    MotorHat4PiConfig config = (MotorHat4PiConfig) super.apply(c);
     setMotor(config.motorId);
     return c;
   }
@@ -111,7 +110,6 @@ public class MotorHat4Pi extends AbstractMotor {
 
     LoggingFactory.init();
 
-    SwingGui swing = (SwingGui) Runtime.start("gui", "SwingGui");
     RasPi raspi = (RasPi) Runtime.start("raspi", "RasPi");
     AdafruitMotorHat4Pi hat = (AdafruitMotorHat4Pi) Runtime.start("hat", "AdafruitMotorHat4Pi");
     MotorHat4Pi motor = (MotorHat4Pi) Runtime.start("motor", "MotorHat4Pi");

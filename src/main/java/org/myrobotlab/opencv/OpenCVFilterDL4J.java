@@ -24,7 +24,6 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Solr;
 import org.slf4j.Logger;
 
-// FIXME - should be OpenCVFilterDl4j
 public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
 
   private static final long serialVersionUID = 1L;
@@ -48,7 +47,8 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
   }
 
   private void loadDL4j() {
-    dl4j = (Deeplearning4j) Runtime.createAndStart("dl4j", "Deeplearning4j");
+    // TODO: this should be a peer?  ... eek.. a peer of a filter!
+    dl4j = (Deeplearning4j) Runtime.start("dl4j", "Deeplearning4j");
     log.info("Loading VGG 16 Model.");
     try {
       dl4j.loadTinyYOLO();
@@ -57,9 +57,7 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
       // dl4j.loadDarknet();
       // dl4j.loadTinyYOLO();
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-      log.warn("Error loading vgg16 model!");
+      log.warn("Error loading vgg16 model!", e);
       return;
     }
     log.info("Done loading model..");
@@ -129,7 +127,7 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
 
   @Override
   public void imageChanged(IplImage image) {
-    // TODO Auto-generated method stub
+    // NoOp
   }
 
   @Override
@@ -179,9 +177,7 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
           if (lastResult != null)
             log.info(formatResultString(lastResult));
         } catch (IOException e) {
-          // TODO Auto-generated catch block
-          log.warn("Exception classifying image!");
-          e.printStackTrace();
+          log.warn("Exception classifying image!", e);
         }
       } else {
         // log.info("No Image to classify...");
@@ -192,8 +188,7 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
       try {
         Thread.sleep(1);
       } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        log.debug("DL4J Filter thread interrupted.", e);
       }
     }
   }

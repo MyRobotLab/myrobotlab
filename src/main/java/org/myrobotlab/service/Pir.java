@@ -18,29 +18,24 @@ public class Pir extends Service implements PinListener {
   private static final long serialVersionUID = 1L;
 
   /**
-   * Name of the controller containing the pin to be used.
-   * Example "arduino".
+   * Name of the controller containing the pin to be used. Example "arduino".
    */
   String controllerName;
 
   /**
    * yep there are 3 states to a binary sensor true/false .... and unknown - we
-   * start with "unknown".
-   * true = Sensing movement.
-   * false = not sensing movement.
-   * null = unknown, either disabled ot not polled after enabled.
+   * start with "unknown". true = Sensing movement. false = not sensing
+   * movement. null = unknown, either disabled ot not polled after enabled.
    */
   Boolean active = null;
 
   /**
-   * This is either true or false.
-   * When false, active should be null.
+   * This is either true or false. When false, active should be null.
    */
   boolean isEnabled = false;
 
   /**
-   * The pin to be used as a string. 
-   * Example "D4" or "A0".
+   * The pin to be used as a string. Example "D4" or "A0".
    */
   String pin;
 
@@ -140,8 +135,9 @@ public class Pir extends Service implements PinListener {
   }
 
   /**
-   * Disables the sensor preventing it from polling the input pin.
-   * As a result of disabling the polling, the current state will be null as it will be an unknown state.
+   * Disables the sensor preventing it from polling the input pin. As a result
+   * of disabling the polling, the current state will be null as it will be an
+   * unknown state.
    * 
    */
   public void disable() {
@@ -173,7 +169,7 @@ public class Pir extends Service implements PinListener {
    * Enables polling at the set rate.
    * 
    * @param pollBySecond
-   *        rateHz
+   *          rateHz
    */
   public void enable(int pollBySecond) {
     if (pinControl == null) {
@@ -192,10 +188,11 @@ public class Pir extends Service implements PinListener {
     broadcastState();
   }
 
+  // FIXME - use config values directly, remove local members
   @Override
   public PirConfig getConfig() {
 
-    PirConfig config = new PirConfig();
+    PirConfig config = (PirConfig)super.getConfig();
 
     config.controller = controllerName;
     config.pin = pin;
@@ -212,8 +209,8 @@ public class Pir extends Service implements PinListener {
 
   /**
    * returns the current poll rate in Hz.
-   * @return
-   *    Hz
+   * 
+   * @return Hz
    */
   public int getRate() {
     return rateHz;
@@ -221,10 +218,10 @@ public class Pir extends Service implements PinListener {
 
   /**
    * Returns the current state of the input.
-   * @return
-   *        true = Sensor is detecting movement.
-   *        false = Sensor is not detecting movement.
-   *        null = Unknown state, the sensor may be disable or has not yet polled.
+   * 
+   * @return true = Sensor is detecting movement. false = Sensor is not
+   *         detecting movement. null = Unknown state, the sensor may be disable
+   *         or has not yet polled.
    */
   public boolean isActive() {
     return active;
@@ -232,9 +229,8 @@ public class Pir extends Service implements PinListener {
 
   /**
    * Returns the current Enable state.
-   * @return
-   *        true = Enabled.
-   *        false = Disabled.
+   * 
+   * @return true = Enabled. false = Disabled.
    */
   public boolean isEnabled() {
     return isEnabled;
@@ -242,13 +238,15 @@ public class Pir extends Service implements PinListener {
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    PirConfig config = (PirConfig) c;
+    PirConfig config = (PirConfig) super.apply(c);
 
-    if (config.pin != null)
+    if (config.pin != null) {
       setPin(config.pin);
+    }
 
-    if (config.rate != null)
+    if (config.rate != null) {
       setRate(config.rate);
+    }
 
     if (config.controller != null) {
       try {
@@ -270,18 +268,20 @@ public class Pir extends Service implements PinListener {
   @Override
   public void onPin(PinData pindata) {
 
-    log.info("onPin {}", pindata);
+    log.debug("onPin {}", pindata);
 
     boolean sense = (pindata.value != 0);
 
     // sparse publishing only on state change
-    if (active == null) {
-      invoke("publishSense", sense);
-      active = sense;
-    } else if (active != sense) {
+   if (active == null || active != sense) {
       // state change
       invoke("publishSense", sense);
       active = sense;
+      if (active) {
+        invoke("publishPirOn");
+      } else {
+        invoke("publishPirOff");
+      }
       lastChangeTs = System.currentTimeMillis();
     }
   }
@@ -289,12 +289,22 @@ public class Pir extends Service implements PinListener {
   public Boolean publishSense(Boolean b) {
     return b;
   }
+  
+  
+  public void publishPirOn() {
+    log.info("publishPirOn");
+  }
 
+  public void publishPirOff() {
+    log.info("publishPirOff");
+  }
+  
+  
   /**
    * Sets the pin to use for the Input of the PIR service.
+   * 
    * @param pin
-   * A string representing the pin name.
-   * example "D4" or "A0".
+   *          A string representing the pin name. example "D4" or "A0".
    */
   @Override
   public void setPin(String pin) {
@@ -315,11 +325,11 @@ public class Pir extends Service implements PinListener {
   public void setRate(int rateHz) {
     this.rateHz = rateHz;
   }
-  
+
   /**
    * The time stamp of the last input poll.
-   * @return
-   * Long representing the timestamp.
+   * 
+   * @return Long representing the timestamp.
    */
   public Long getLastChangeTs() {
     return lastChangeTs;

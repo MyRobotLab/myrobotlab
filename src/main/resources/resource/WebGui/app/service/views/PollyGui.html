@@ -5,13 +5,17 @@
 </div>
 <div class="row">
     <div class="col-md-6">
-        <table>
+        <table class="table table-striped">
             <tr>
                 <td>
                     <img ng-src="{{(service.ready)?'../green.png':'../red.png'}}"/>
                     <span ng-show="!service.ready">Polly requires AWS Keys</span>
                 </td>
-                <td colspan="3">
+                <td>
+                    mute <toggle width="30" height="30" ng-model="service.mute" ng-change="msg.setMute(service.mute)" on="" off=""/>
+                </td>
+                
+                <td colspan="2">
                     <div class="btn-group" uib-dropdown>
                         <button type="button" class="btn btn-default">{{service.voice.name}} - {{service.voice.locale.tag}} - {{service.voice.gender}}</button>
                         <button type="button" class="btn btn-default" uib-dropdown-toggle>
@@ -27,11 +31,13 @@
             </tr>
             <tr>
                 <td>
-                    ssml <toggle width="70" height="30" ng-model="service.config.ssml" ng-change="msg.setSsml(service.config.ssml)" on="ON" off="OFF"/>
+                    
                 </td>
-                <td>&nbsp;</td>
                 <td>
-                    auto detect ssml <toggle width="70" height="30" ng-model="service.config.autoDetectSsml" ng-change="msg.setSsml(service.config.autoDetectSsml)" on="ON" off="OFF"/>
+                    ssml <toggle width="30" height="30" ng-model="service.config.ssml" ng-change="msg.setSsml(service.config.ssml)" on="" off=""/>
+                </td>
+                <td colspan="2">
+                    auto detect ssml <toggle width="30" height="30" ng-model="service.config.autoDetectSsml" ng-change="msg.setSsml(service.config.autoDetectSsml)" on="" off=""/>
                 </td>
             </tr>
             <tr>
