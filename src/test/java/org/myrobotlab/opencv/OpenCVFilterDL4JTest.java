@@ -4,9 +4,10 @@ import static org.junit.Assert.assertNotNull;
 
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Before;
+import org.junit.Ignore;
 
 // This test takes a long time..  TODO: consider a smaller / lighterweight version of this test
-//@Ignore
+@Ignore
 public class OpenCVFilterDL4JTest extends AbstractOpenCVFilterTest {
 
   @Before

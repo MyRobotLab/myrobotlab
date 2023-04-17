@@ -32,7 +32,6 @@ public class CmdOptionsTest {
     CmdOptions options = new CmdOptions();
     new CommandLine(options).parseArgs(new String[] {});
     // validate defaults
-    assertNull(options.addKeys);
     assertEquals(false, options.autoUpdate);
     assertNull(options.config);
     assertNull(options.connect);

@@ -15,10 +15,6 @@ public class PingdarMeta extends MetaData {
   public PingdarMeta() {
     addDescription("used as a ultra sonic radar");
     addCategory("sensors", "display");
-    // put peer definitions in
-    addPeer("controller", "Arduino", "controller for servo and sensor");
-    addPeer("sensors", "UltrasonicSensor", "sensors");
-    addPeer("servo", "Servo", "servo");
 
     // theoretically - Servo should follow the same share config
     // sharePeer("servo.controller", "controller", "Arduino", "shared

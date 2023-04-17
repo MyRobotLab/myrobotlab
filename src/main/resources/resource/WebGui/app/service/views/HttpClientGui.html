@@ -3,7 +3,7 @@
         <tr>
             <th>url</th>
         </tr>
-        <tr ng-repeat="url in urls">
+        <tr ng-repeat="url in urls track by $index">
             <td>{{url}}</td>
         </tr>
     </table>

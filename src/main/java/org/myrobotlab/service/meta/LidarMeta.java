@@ -16,8 +16,6 @@ public class LidarMeta extends MetaData {
 
     addDescription("The Lidar Service - Light Detection And Ranging");
     addCategory("sensors");
-    addPeer("serial", "Serial", "generic serial service");
-
   }
 
 }

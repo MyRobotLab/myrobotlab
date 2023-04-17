@@ -5,28 +5,36 @@
 # more info @: http://myrobotlab.org/service/Pir
 #########################################
 
+from datetime import datetime
+
 # start the service
-pir = runtime.start('pir','Pir')
+pir = Runtime.start('pir','Pir')
+pir.setPin('23')
 
-# start optional virtual arduino service, used for test
-if ('virtual' in globals() and virtual):
-    virtualArduino = runtime.start("virtualArduino", "VirtualArduino")
-    virtualArduino.connect("COM4")
+# start a micro controller
+mega = Runtime.start('mega','Arduino')
 
-# start the controler
-arduino = runtime.start("arduino","Arduino")
+# start a speech synthesis service
+mouth = Runtime.start('mouth','LocalSpeech')
 
-# connect it
-arduino.connect("COM4")
-arduino.setBoardMega() # used for pin reference
-pir.attach(arduino,2 ) # arduino is controler like i2c arduino ... / 2 is pin number
+# connect the micro controller
+mega.connect('/dev/ttyACM1')
+mega.attach(pir)
 
-# pir start
-pir.isVerbose=True
-pir.enable(1) # 1 is how many time / second we poll the pir
+# attach the pir sensor to the micro controller
+pir.attach('mega')
 
-# event listener
-pir.addListener("publishSense",python.name,"publishSense")
+# subscribe to the pir's publishSense method - callback will be python onSense
+python.subscribe('pir', 'publishSense')
+# enable the pir
+pir.enable()
 
-def publishSense(event):
-  if event:print "Human detected !!!"
+# callback method - change state of pir this method will be called
+def onSense(data):
+    print('onSense', data, str(datetime.now()))
+    mouth = Runtime.getService('mouth')
+    if data:
+        mouth.speak('I see you')
+    else:
+        mouth.speak('where did you go?')
+    

@@ -24,6 +24,9 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
         $scope.service = service
         $scope.scriptCount = 0
 
+        $scope.scripts = {}
+        $scope.scriptCount = 0
+
         angular.forEach(service.openedScripts, function(value, key) {
             if (!angular.isDefined($scope.scripts[key])) {
                 $scope.scripts[key] = value
@@ -52,6 +55,10 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
             $scope.log = data + $scope.log
             $scope.$apply()
             break
+        case 'onAppend':
+            $scope.log = data + $scope.log
+            $scope.$apply()
+            break                
         case 'onStatus':
             $scope.lastStatus = data
             if (data.level == 'error'){
@@ -112,9 +119,8 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
     $scope.closeScript = function(scriptName) {
         // FIXME - save first ?
         msg.send('closeScript', scriptName)
-        $scope.scriptCount--
-        delete $scope.scripts[scriptName]
-        console.log("removed " + scriptName)
+        msg.broadcastState()
+        // console.log("removed " + scriptName)
     }
 
     $scope.exec = function() {
@@ -134,7 +140,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
     }
 
     $scope.saveScript = function() {
-        msg.send('saveScript', $scope.activeScript.file.path, $scope.activeScript.code)
+        msg.send('saveScript', $scope.activeScript.file, $scope.activeScript.code)
     }
 
     $scope.downloadScript = function() {
@@ -142,7 +148,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
             type: 'text/plain'
         })
         var downloadLink = document.createElement("a")
-        downloadLink.download = $scope.getName($scope.activeScript.file.path)
+        downloadLink.download = $scope.getName($scope.activeScript.file)
         downloadLink.innerHTML = "Download File"
         if (window.webkitURL != null) {
             // Chrome allows the link to be clicked
@@ -185,6 +191,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
 
     // $scope.possibleServices = Object.values(mrl.getPossibleServices())
     msg.subscribe('publishStdOut')
+    msg.subscribe('publishAppend')
     msg.subscribe(this)
     msg.send('newScript')
 }

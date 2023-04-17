@@ -231,8 +231,8 @@ public class MouthControl extends Service implements SpeechListener {
   @Override
   public ServiceConfig getConfig() {
 
-    MouthControlConfig config = new MouthControlConfig();
-
+    MouthControlConfig config = (MouthControlConfig)super.getConfig();
+    // FIXME - remove local fields, use config only
     config.jaw = jaw;
     config.mouth = mouth;
     config.mouthClosedPos = mouthClosedPos;
@@ -247,8 +247,8 @@ public class MouthControl extends Service implements SpeechListener {
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    MouthControlConfig config = (MouthControlConfig) c;
-
+    MouthControlConfig config = (MouthControlConfig) super.apply(c);
+    // FIXME - remove local fields, use config only
     mouthClosedPos = config.mouthClosedPos;
     mouthOpenedPos = config.mouthOpenedPos;
     delaytime = config.delaytime;

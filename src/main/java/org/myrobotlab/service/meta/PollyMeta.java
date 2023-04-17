@@ -44,19 +44,4 @@ public class PollyMeta extends AbstractSpeechSynthesisMeta {
 
   }
 
-  @Override
-  public Plan getDefault(String name) {
-
-    Plan plan = new Plan(name);
-    plan.putPeers(name, peers);
-
-    PollyConfig config = new PollyConfig();
-    config.audioFile = name + ".audioFile";
-
-    // add self last - desired order or construction
-    plan.addConfig(config);
-
-    return plan;
-  }
-
 }

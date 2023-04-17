@@ -44,7 +44,8 @@ public class SlackBot extends Service implements UtteranceListener, UtterancePub
 
   @Override
   public ServiceConfig getConfig() {
-    SlackBotConfig config = new SlackBotConfig();
+    SlackBotConfig config = (SlackBotConfig)super.getConfig();
+    // FIXME remove members and use config only
     config.appToken = appToken;
     config.botToken = botToken;
     return config;
@@ -52,7 +53,7 @@ public class SlackBot extends Service implements UtteranceListener, UtterancePub
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    SlackBotConfig config = (SlackBotConfig) c;
+    SlackBotConfig config = (SlackBotConfig) super.apply(c);
     appToken = config.appToken;
     botToken = config.botToken;
     // TODO: should we connect here?

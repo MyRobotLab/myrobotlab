@@ -10,7 +10,6 @@ import org.jsoup.Jsoup;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.HtmlFilterConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.TextFilter;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
@@ -195,29 +194,6 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher, 
   @Override
   public void attachTextListener(String name) {
     addListener("publishText", name);
-  }
-
-  @Override
-  public ServiceConfig getConfig() {
-    HtmlFilterConfig config = new HtmlFilterConfig();
-
-    Set<String> listeners = getAttached("publishText");
-    config.textListeners = listeners.toArray(new String[listeners.size()]);
-
-    return config;
-  }
-
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    HtmlFilterConfig config = (HtmlFilterConfig) c;
-
-    if (config.textListeners != null) {
-      for (String serviceName : config.textListeners) {
-        attachTextListener(serviceName);
-      }
-    }
-
-    return c;
   }
 
   public static void main(String[] args) {

@@ -174,6 +174,9 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     }
 
     $scope.getCurrentSession = function() {
+        if (!$scope.service.sessions){
+            return null
+        }
         if ($scope.getCurrentSessionKey()in $scope.service.sessions) {
             return $scope.service.sessions[$scope.getCurrentSessionKey()]
         }

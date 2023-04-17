@@ -2,6 +2,9 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
     console.info('ServoMixerGuiCtrl')
     var _self = this
     var msg = this.msg
+
+    $scope.minView = true
+    
     $scope.servos = []
     $scope.sliders = []
     // list of current pose files

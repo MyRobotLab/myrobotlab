@@ -11,11 +11,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -38,10 +36,10 @@ import org.myrobotlab.jme3.Interpolator;
 import org.myrobotlab.jme3.Jme3App;
 import org.myrobotlab.jme3.Jme3Msg;
 import org.myrobotlab.jme3.Jme3Util;
-import org.myrobotlab.jme3.MainMenuState;
 import org.myrobotlab.jme3.PhysicsTestHelper;
 import org.myrobotlab.jme3.Search;
 import org.myrobotlab.jme3.UserData;
+import org.myrobotlab.jme3.UserDataConfig;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
@@ -108,8 +106,6 @@ import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Quad;
 import com.jme3.system.AppSettings;
 import com.jme3.util.BufferUtils;
-import com.simsilica.lemur.GuiGlobals;
-import com.simsilica.lemur.style.BaseStyles;
 
 /**
  * A simulator built on JMonkey 3 Engine.
@@ -191,8 +187,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   transient DisplayMode lastDisplayMode = null;
 
-  transient MainMenuState menu;
-
   String modelsDir = assetsDir + File.separator + "Models";
 
   boolean mouseLeftPressed = false;
@@ -237,11 +231,10 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   int width = 1024;
 
-  protected Set<String> modelPaths = new LinkedHashSet<>();
+  // protected Set<String> modelPaths = new LinkedHashSet<>();
 
   protected Map<String, UserData> nodes = new LinkedHashMap<>();
 
-  protected String cameraLookAt;
 
   public JMonkeyEngine(String n, String id) {
     super(n, id);
@@ -434,7 +427,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * depth for an access key useDepth=true and another that is a flat model.
    * Both can have collisions. When the parents of nodes change, the depth model
    * "should" change to reflect the changes in branches. The flat model does not
-   * need to change, but has a higher likelyhood of collisions.
+   * need to change, but has a higher likely hood of collisions.
    * 
    * @param tree
    *          t
@@ -492,12 +485,13 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   public void cameraLookAt(String name) {
+    JMonkeyEngineConfig c = (JMonkeyEngineConfig)config;
     Spatial s = get(name);
     if (s == null) {
       log.error("cameraLookAt - cannot find {}", name);
       return;
     }
-    cameraLookAt = name;
+    c.cameraLookAt = name;
     cameraLookAt(s);
   }
 
@@ -1206,11 +1200,13 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   public void loadModels(String dirPath) {
-    if (modelPaths.contains(dirPath)) {
-      info("already loaded %s", dirPath);
-      return;
-    }
-    modelPaths.add(dirPath);
+    JMonkeyEngineConfig c = (JMonkeyEngineConfig)config;
+    // FIXME - must be unique AND AND ... only loaded once !
+//    if (c.modelPaths.contains(dirPath)) {
+//      info("already loaded %s", dirPath);
+//      return;
+//    }
+    c.addModelPath(dirPath);
     traverseLoadModels(dirPath);
   }
 
@@ -1351,8 +1347,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
     if ("full-screen".equals(name)) {
       enableFullScreen(true);
-    } else if ("menu".equals(name)) {
-      menu.setEnabled(true);
     } else if ("select-root".equals(name)) {
       setSelected(rootNode);
     } else if (CAMERA.equals(name)) {
@@ -1932,10 +1926,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // view
     // so that it can update the view with changes on the item
     // TODO - optimize for when there is no view
-    util.setSelectedForView(menu, selectedForView);
-
-    // display in menu
-    menu.putText(newSelected);
+    util.setSelectedForView(selectedForView);
 
     // turn on new
     if (newSelected != null) {
@@ -1994,8 +1985,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   transient private Thread mainThread;
 
-  protected JMonkeyEngineConfig newConfig;
-
   public void simpleInitApp() {
 
     stateManager = app.getStateManager();
@@ -2014,12 +2003,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     inputManager = app.getInputManager();
 
     guiNode = app.getGuiNode();
-
-    GuiGlobals.initialize(app);
-    // Load the 'glass' style
-    BaseStyles.loadGlassStyle();
-    // Set 'glass' as the default style when not specified
-    GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
 
     // disable flycam we are going to use our
     // own camera
@@ -2176,10 +2159,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // rootNode.setLocalTranslation(0, -200, 0);
     rootNode.setLocalTranslation(0, 0, 0);
 
-    menu = app.getMainMenu();// new MainMenuState(this);
-    // menu.setEnabled(false);
-    // menu.loadGui();
-
     if (usePhysics) {
       bulletAppState.setDebugEnabled(false);
       PhysicsTestHelper.createPhysicsTestWorld(rootNode, assetManager, bulletAppState.getPhysicsSpace());
@@ -2329,13 +2308,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
         }
       }
 
-      // if we have config to process
-      // process it
-      newConfig = (JMonkeyEngineConfig) config;
-      if (newConfig != null) {
-        loadDelayed(newConfig);
-        newConfig = null;
-      }
+      // WARNING - WE CANNOT PROCESS CONFIG UNTIL THE JMONKYENGINE IS STARTED
+      loadDelayed((JMonkeyEngineConfig) config);
 
     } catch (Exception e) {
       log.error("{} startService exploded", getName(), e);
@@ -2392,6 +2366,27 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
       LoggingFactory.init("WARN");
 
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+
+      boolean worky = false;
+      if (worky) {
+        Runtime.setConfig("dewey-2");
+        InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+        i01.startPeer("simulator");
+
+      } else {
+        Runtime.setConfig("dewey-3");
+        InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+        i01.startPeer("simulator");
+      }
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
       Platform.setVirtual(true);
       // Runtime.main(new String[] { "--interactive", "--id", "admin" });
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("simulator", "JMonkeyEngine");
@@ -2404,15 +2399,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       Node m = jme.getNode("Gui Node");
       // jme.getNode("Gui Node").move(1,1,1);
       jme.getMenuNode().move(1.0f, 3.0f, 2.0f);
-
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.startService();
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       // Runtime.start("gui", "SwingGui");
 
@@ -2576,16 +2562,33 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       rotateOnAxis(name, null, servo.getTargetPos(), velocity);
     }
   }
-
+  
+  public UserDataConfig toUserDataConfig(UserData userData) {
+    UserDataConfig udc = new UserDataConfig(userData.mapper, userData.rotationMask);
+    return udc;
+  }
+  
   @Override
   public ServiceConfig getConfig() {
-    JMonkeyEngineConfig config = new JMonkeyEngineConfig();
-    config.cameraLookAt = cameraLookAt;
-    config.modelPaths = new ArrayList<>();
-    config.modelPaths.addAll(this.modelPaths);
-    Collections.sort(config.modelPaths);
-    config.nodes = nodes;
-    config.multiMapped = multiMapped;
+    JMonkeyEngineConfig config = (JMonkeyEngineConfig)super.getConfig();
+
+    if (config.modelPaths != null) {
+      Collections.sort(config.modelPaths);
+    }
+    
+    // WARNING - getConfig is "used" before the delayed apply is processed
+    // so if you detroy things here - ie clear nodes, you will be unable to load them appropriately
+    // you need to guard with null checking
+    for (String key : nodes.keySet()) {
+      config.nodes.put(key, toUserDataConfig(nodes.get(key)));
+    }
+    
+    if (multiMapped != null && multiMapped.size() > 0) {
+      // FIXME - FIXED ! config.multiMapped = multiMapped; <- MUST DO NON DESTRUCTIVE ADDITION
+      config.multiMapped.putAll(multiMapped);
+    }
+
+    // generate defaults end ---------
     return config;
   }
 
@@ -2593,22 +2596,35 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     JMonkeyEngineConfig config = (JMonkeyEngineConfig) c;
 
     if (config.modelPaths != null) {
-      for (String modelPath : config.modelPaths) {
+      List<String> tempList = new ArrayList<>(config.modelPaths);
+      for (String modelPath : tempList) {
         loadModels(modelPath);
       }
     }
 
     if (config.nodes != null) {
+      // nodes.putAll(config.nodes);
       for (String path : config.nodes.keySet()) {
-        UserData ud = config.nodes.get(path);
-        if (ud.mapper != null) {
-          MapperLinear m = ud.mapper;
+        // getUserData(path)
+        UserData ud = getUserData(path);
+        UserDataConfig udc = config.nodes.get(path);
+        // UserData ud = new UserData(config.nodes.get(path));
+//        if (ud == null) {
+//          addNode(path);
+//          ud = nodes.get(path); // new UserData(config.nodes.get(path));
+//        }
+        
+        if (ud == null) {
+          log.error("could not find node for {}", path);
+          continue;
+        }
+        
+        if (udc.mapper != null) {
+          MapperLinear m = udc.mapper;
           setMapper(path, m.minX, m.maxX, m.minY, m.maxY);
         }
-        if (ud.rotationMask != null) {
-          setRotation(path, ud.rotationMask);
-          // setRotation(path, ud.rotationMask.x, ud.rotationMask.y,
-          // ud.rotationMask.z);
+        if (udc.rotationMask != null) {
+          setRotation(path, udc.rotationMask);
         }
       }
     }
@@ -2626,14 +2642,17 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     return c;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    if (app != null) {
-      // if there is an app we can load immediately
-      loadDelayed(c);
-    }
-    return c;
-  }
+
+
+//  @Override
+//  public ServiceConfig apply(ServiceConfig c) {
+//    JMonkeyEngineConfig config = (JMonkeyEngineConfig) super.apply(c);
+//    if (app != null) {
+//      // if there is an app we can load immediately
+//      loadDelayed(config);
+//    }
+//    return config;
+//  }
 
   public void multiMap(String name, String... nodeNames) {
     if (nodeNames != null) {

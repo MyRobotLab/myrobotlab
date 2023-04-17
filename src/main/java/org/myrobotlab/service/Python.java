@@ -14,6 +14,7 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
@@ -48,7 +49,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class Python extends Service implements ServiceLifeCycleListener {
+public class Python extends Service implements ServiceLifeCycleListener, MessageListener {
 
   /**
    * this thread handles all callbacks to Python process all input and sets msg
@@ -367,8 +368,9 @@ public class Python extends Service implements ServiceLifeCycleListener {
    *          the code to append
    * @return the resulting concatenation
    */
-  public Script appendScript(String data) {
-    return new Script("append", data);
+  public String appendScript(String code) {
+    invoke("publishAppend", code);
+    return code;
   }
 
   /**
@@ -492,6 +494,7 @@ public class Python extends Service implements ServiceLifeCycleListener {
       error(pe.toString());
       invoke("publishStdError", pe.toString());
     } catch (Exception e) {
+      log.error(code);
       error(e);
     } finally {
       if (blocking) {
@@ -732,6 +735,10 @@ public class Python extends Service implements ServiceLifeCycleListener {
     inputQueue.add(msg);
     return false;
   }
+  
+  public String publishAppend(String code) {
+    return code;
+  }
 
   public String publishStdOut(String data) {
     return data;
@@ -797,14 +804,16 @@ public class Python extends Service implements ServiceLifeCycleListener {
     // register runtime life cycle events for other services
     Runtime.getInstance().attachServiceLifeCycleListener(getName());
 
-    PythonConfig c = (PythonConfig)config;
+    PythonConfig c = (PythonConfig) config;
     // run start scripts if there are any
-    for (String script : c.startScripts) {
-      // i think in this context its safer to block
-      try {
-        execFile(script, true);
-      } catch (IOException e) {
-        log.error("starting scripts threw", e);
+    if (c.startScripts != null) {
+      for (String script : c.startScripts) {
+        // i think in this context its safer to block
+        try {
+          execFile(script, true);
+        } catch (IOException e) {
+          log.error("starting scripts threw", e);
+        }
       }
     }
   }
@@ -847,7 +856,7 @@ public class Python extends Service implements ServiceLifeCycleListener {
   @Override
   public void stopService() {
     // run any stop scripts
-    PythonConfig c = (PythonConfig)config;
+    PythonConfig c = (PythonConfig) config;
 
     for (String script : c.stopScripts) {
       // i think in this context its safer to block
@@ -873,7 +882,6 @@ public class Python extends Service implements ServiceLifeCycleListener {
 
   public static void main(String[] args) {
     try {
-      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
       LoggingFactory.init("INFO");
 
       // Runtime.start("i01.head.rothead", "Servo");
@@ -907,14 +915,10 @@ public class Python extends Service implements ServiceLifeCycleListener {
 
   }
 
-  @Override
-  public ServiceConfig getConfig() {
-    return config;
-  }
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    PythonConfig config = (PythonConfig) c;
+    PythonConfig config = (PythonConfig) super.apply(c);
     if (config.startScripts != null && config.startScripts.size() > 0) {
 
       if (isRunning()) {
@@ -927,7 +931,7 @@ public class Python extends Service implements ServiceLifeCycleListener {
         }
       }
     }
-    
+
     PySystemState sys = Py.getSystemState();
 
     if (config.modulePaths != null) {
@@ -937,8 +941,14 @@ public class Python extends Service implements ServiceLifeCycleListener {
     }
 
     log.info("Python System Path: {}", sys.path);
-    
+
     return c;
+  }
+
+  @Override
+  public void onMessage(Message msg) {
+    // TODO Auto-generated method stub
+
   }
 
 }
