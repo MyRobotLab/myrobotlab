@@ -14,12 +14,12 @@
 <span class="btn-group" ng-repeat="component in buttons">
     <button type="button" ng-class="component.value == 1 ? 'btn btn-default' : 'btn btn-primary'">{{ component.id }}</button>
 </span>
-<h3>Axis</h3>
-<table>
-    <tr>
-        <td class="text-center" ng-repeat="component in axis">{{ component.id }} 0.0 &nbsp;</td>
-    </tr>
-</table>
-<nvd3-discrete-bar-chart data="axis" id="showValueExample" objectEquality="true" showXAxis="true" showYAxis="true" width="550" height="300" xAxisTickFormat="xAxisTickFormatFunction()" showValues="true" color="colorFunction()">
-    <svg></svg>
-</nvd3-discrete-bar-chart>
+<h3>Analog Listeners</h3>
+ <div ng-repeat="(key, value) in service.analogListeners">
+           <b>{{key}}</b> {{value}}
+  </div>
+
+<h3>Digital Listeners</h3>
+ <div ng-repeat="(key, value) in service.digitalListeners">
+           <b>{{key}}</b> {{value}}
+  </div>

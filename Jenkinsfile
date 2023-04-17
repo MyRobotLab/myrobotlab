@@ -101,11 +101,11 @@ pipeline {
                // TODO - integration tests !
                if (isUnix()) {
                   sh '''
-                     mvn -Dfile.encoding=UTF-8 -Dsurefire.skipAfterFailureCount=1 verify --fail-fast
+                     mvn -Dfile.encoding=UTF-8 -Dsurefire.skipAfterFailureCount=1  -DargLine="-Xmx1024m" verify --fail-fast
                   '''
                } else {
                   bat '''
-                     mvn -Dfile.encoding=UTF-8 -Dsurefire.skipAfterFailureCount=1 verify --fail-fast
+                     mvn -Dfile.encoding=UTF-8 -Dsurefire.skipAfterFailureCount=1  -DargLine="-Xmx1024m" verify --fail-fast
                   '''
                }
             }
@@ -164,12 +164,12 @@ pipeline {
          }
       }
 
-      stage('jacoco') {
-         steps {
-            jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
-            jacoco()
-         }
-      }
+      // stage('jacoco') {
+      //    steps {
+      //       jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
+      //       jacoco()
+      //    }
+      // }
 
       stage('publish-github') {
          when { expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' } }

@@ -784,6 +784,11 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
     send(eye, "stopCapture");
   }
 
+  @Override
+  public void attachTextListener(String name) {
+    addListener("publishText", name);
+  }
+
   public static void main(String[] args) {
     try {
 
@@ -820,11 +825,6 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
     } catch (Exception e) {
       log.error("worke no worky !", e);
     }
-  }
-
-  @Override
-  public void attachTextListener(String name) {
-    addListener("publishText", name);
   }
 
 }

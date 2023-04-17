@@ -63,6 +63,11 @@ public class UserData implements Savable {
     spatial.setUserData("data", this);
   }
 
+  public UserData(UserDataConfig userDataConfig) {
+    this.mapper = userDataConfig.mapper;
+    this.rotationMask = userDataConfig.rotationMask;
+  }
+
   public String getName() {
     return spatial.getName();
   }

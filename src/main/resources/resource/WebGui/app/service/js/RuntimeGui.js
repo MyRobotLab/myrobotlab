@@ -93,11 +93,11 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         $scope.newType = serviceType
     }
 
-    $scope.setConfigName = function() {
-        console.info('setConfigName')
+    $scope.setConfig = function() {
+        console.info('setConfig')
         if ($scope.selectedConfig.length > 0) {
             $scope.service.configName = $scope.selectedConfig[0]
-            msg.sendTo('runtime', 'setConfigName', $scope.service.configName)
+            msg.sendTo('runtime', 'setConfig', $scope.service.configName)
         }
     }
 
@@ -122,7 +122,11 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     }
 
     this.onMsg = function(inMsg) {
-        let data = inMsg.data[0]
+        let data = null
+        if (inMsg.data) {
+            data = inMsg.data[0]
+        }
+
         switch (inMsg.method) {
         case 'onState':
             _self.updateState(data)
@@ -160,8 +164,10 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             break
 
         case 'onConfigList':
-            $scope.service.configList = data.sort()
-            $scope.$apply()
+            if (data) {
+                $scope.service.configList = data.sort()
+                $scope.$apply()
+            }
             break
 
         case 'onSaveDefaults':
@@ -215,6 +221,9 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             break
         case 'onReleased':
             console.info("runtime - onRelease" + data)
+            break
+        case 'onConfigName':
+            console.info("runtime - onConfigName" + data)
             break
         case 'onHeartbeat':
             let heartbeat = data
@@ -282,25 +291,23 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         if ($scope.selectedConfig.length) {
             for (let i = 0; i < $scope.selectedConfig.length; ++i) {
                 // msg.sendTo('runtime', 'load', 'data/config/' + $scope.selectedConfig[i] + '/runtime.yml')
-                msg.sendTo('runtime', 'setConfigName', $scope.selectedConfig[i])
+                msg.sendTo('runtime', 'setConfig', $scope.selectedConfig[i])
                 msg.sendTo('runtime', 'load', 'runtime')
             }
         }
     }
 
-
-    $scope.unsetConfigName = function() {
-        console.info('unsetConfigName')
-        msg.sendTo('runtime', 'unsetConfigName')
+    $scope.unsetConfig = function() {
+        console.info('unsetConfig')
+        msg.sendTo('runtime', 'unsetConfig')
     }
 
-    
     $scope.startConfig = function() {
         console.info('startConfig')
         if ($scope.selectedConfig.length) {
             for (let i = 0; i < $scope.selectedConfig.length; ++i) {
                 // msg.sendTo('runtime', 'load', 'data/config/' + $scope.selectedConfig[i] + '/runtime.yml')
-                msg.sendTo('runtime', 'startConfigSet', $scope.selectedConfig[i])
+                msg.sendTo('runtime', 'startConfig', $scope.selectedConfig[i])
             }
         }
     }
@@ -321,8 +328,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         console.info('saveConfig')
 
         let onOK = function() {
-            msg.sendTo('runtime', 'setConfigName', $scope.service.configName)
-            msg.sendTo('runtime', 'save')
+            msg.sendTo('runtime', 'saveConfig', $scope.service.configName)
         }
 
         let onCancel = function() {
@@ -354,8 +360,13 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         msg.send('saveDefaults', $scope.newType.simpleName)
     }
 
+    $scope.getConfigName = function(){
+        return $scope.service.configName
+    }
+
     // $scope.possibleServices = Object.values(mrl.getPossibleServices())
     msg.subscribe("saveDefaults")
+    msg.subscribe("getConfigName")
     msg.subscribe("getServiceTypes")
     msg.subscribe("getLocalServices")
     msg.subscribe("registered")
@@ -373,6 +384,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.send("getLocale")
     msg.send("getLocales")
     msg.send("publishInterfaceToNames")
+    msg.send("getConfigName")
 
     // msg.send("getHosts")
     msg.subscribe(this)

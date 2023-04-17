@@ -81,7 +81,7 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    ImageDisplayConfig config = (ImageDisplayConfig) c;
+    ImageDisplayConfig config = (ImageDisplayConfig) super.apply(c);
     if (config.displays != null) {
       for (String displayName : config.displays.keySet()) {
         close(displayName);
@@ -429,13 +429,6 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
 
     displays.remove(name);
     display(name);
-  }
-
-  @Override
-  public ServiceConfig getConfig() {
-    ImageDisplayConfig c = (ImageDisplayConfig) config;
-    // don't need to do anything
-    return c;
   }
 
   /**

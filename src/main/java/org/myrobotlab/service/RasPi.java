@@ -341,10 +341,10 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   // shouldn't the pin be a string like "GPIO17"
   /**
    * Sets the pin mode to Input or Output
+   * 
    * @param pin
    * @param mode
-   *      INPUT = 0x0.
-   *      Output = 0x1.
+   *          INPUT = 0x0. Output = 0x1.
    */
   public void pinMode(int pin, int mode) {
 
@@ -379,13 +379,14 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
 
   // FIXME - return array
   /**
-   * Starts a scan of the I2C specified and returns a list of addresses that responded.
-   * This command send a wread and write request with do data to each address.
-   * Deviced on the address should respond with an ACK flag as part of the protocol.
-   * Each responding device address is added to a list that is returned when the scan is complete.
+   * Starts a scan of the I2C specified and returns a list of addresses that
+   * responded. This command send a wread and write request with do data to each
+   * address. Deviced on the address should respond with an ACK flag as part of
+   * the protocol. Each responding device address is added to a list that is
+   * returned when the scan is complete.
+   * 
    * @param busAddress
-   * @return
-   *      List of devices.
+   * @return List of devices.
    */
   public Integer[] scanI2CDevices(int busAddress) {
     log.info("scanning through I2C devices");
@@ -576,21 +577,6 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     }
 
     broadcastState();
-  }
-
-  @Override
-  public ServiceConfig getConfig() {
-    RasPiConfig config = new RasPiConfig();
-    return config;
-  }
-
-  // What does this function do other than return what was passed to it?
-  // config is created and set but is not used anywhere.
-  // Can we remove it?
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    RasPiConfig config = (RasPiConfig) c;
-    return c;
   }
 
 }

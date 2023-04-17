@@ -15,7 +15,6 @@ public class IntegratedMovementMeta extends MetaData {
   public IntegratedMovementMeta() {
     addDescription("a 3D kinematics service supporting D-H parameters");
     addCategory("robot", "control");
-    addPeer("openni", "OpenNi", "Kinect service");
     addDependency("fr.inmoov", "inmoov2", null, "zip");
     // This is the old inmoov1 model. Commenting this out
     // TODO: revisit integrated movement after InMoov2 migration.

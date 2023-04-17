@@ -18,7 +18,6 @@ public class OpenWeatherMapMeta extends MetaData {
     addCategory("weather");
     setCloudService(true);
     addDependency("org.json", "json", "20090211");
-    addPeer("httpClient", "HttpClient", "httpClient");
 
   }
 

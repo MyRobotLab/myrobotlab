@@ -4,6 +4,7 @@ package org.myrobotlab.arduino;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+import org.myrobotlab.service.Serial;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -619,6 +620,10 @@ public class %javaClass% {
   
   public void setInvoke(boolean b){	
     invoke = b;	
+  }
+
+  public void setSerial(Serial serial) {
+    this.serial = serial;
   }
 
 }

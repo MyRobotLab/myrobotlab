@@ -722,20 +722,20 @@ public class Pcf8574 extends Service
 
   @Override
   public ServiceConfig getConfig() {
-
-    Pcf8574Config config = new Pcf8574Config();
+    Pcf8574Config config = (Pcf8574Config)super.getConfig();
+    // FIXME - remove local fields in favor of config only
     config.address = deviceAddress;
     config.bus = deviceBus;
     if (controller != null) {
       config.controller = controllerName;
     }
-
     return config;
   }
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    Pcf8574Config config = (Pcf8574Config) c;
+    Pcf8574Config config = (Pcf8574Config) super.apply(c);
+    // FIXME remove local fields in favor of config only
     if (config.address != null) {
       setAddress(config.address);
     }

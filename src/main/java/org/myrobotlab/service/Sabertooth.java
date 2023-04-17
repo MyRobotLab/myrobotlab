@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -12,7 +11,6 @@ import org.myrobotlab.service.abstracts.AbstractMotorController;
 import org.myrobotlab.service.config.SabertoothConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.MotorControl;
-import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
@@ -32,7 +30,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class Sabertooth extends AbstractMotorController implements PortConnector, MotorController {
+public class Sabertooth extends AbstractMotorController implements PortConnector {
 
   private static final long serialVersionUID = 1L;
 
@@ -124,9 +122,10 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
   public void driveForwardMotor2(int speed) {
     sendPacket(MOTOR2_FORWARD, speed);
   }
-
+  
   public void sendPacket(int command, int data) {
     try {
+      Serial serial = (Serial)getPeer("serial");
       if (serial == null || !serial.isConnected()) {
         error("serial device not connected");
         return;
@@ -210,12 +209,6 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
   @Override
   public void motorMove(MotorControl mc) {
-
-    if (!motors.contains(mc.getName())) {
-      error("%s not attached to %s", mc.getName(), getName());
-      return;
-    }
-
     MotorPort motor = (MotorPort) Runtime.getService(mc.getName());
     String port = motor.getPort();
 
@@ -239,6 +232,11 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     } else {
       error("invalid port number %d", port);
     }
+  }
+  
+  public void stop() {
+    driveForwardMotor1(0);
+    driveForwardMotor2(0);
   }
 
   @Override
@@ -303,7 +301,8 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
   @Override
   public ServiceConfig getConfig() {
-    SabertoothConfig config = new SabertoothConfig();
+    SabertoothConfig config = (SabertoothConfig)super.getConfig();
+    // FIXME - remove fields and use config only
     config.port = getSerialPort();
     config.connect = isConnected;
     return config;
@@ -311,7 +310,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    SabertoothConfig config = (SabertoothConfig) c;
+    SabertoothConfig config = (SabertoothConfig) super.apply(c);
     if (config.connect) {
       try {
         connect(config.port);
@@ -324,16 +323,28 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
   public static void main(String[] args) {
     try {
+      
+      Runtime.main(new String[] {"--log-level", "warn"});
 
-      Runtime.main(new String[] { "--from-launcher" });
-      Runtime.start("intro", "Intro");
-      Runtime.start("python", "Python");
-      Platform.setVirtual(true);
+      Runtime.startConfig("worke-2");
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
       webgui.startService();
+
+
+      // Runtime.main(new String[] {});
+      Runtime.start("intro", "Intro");
+      Runtime.start("python", "Python");
+      // Platform.setVirtual(true);
+      
+
 
       boolean virtual = true;
       //////////////////////////////////////////////////////////////////////////////////
@@ -344,8 +355,8 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       // uncomment for virtual hardware
       // virtual = True
 
-      String port = "COM14";
-      // String port = "/dev/ttyUSB0";
+      // String port = "COM14";
+      String port = "/dev/ttyUSB0";
       /*
        * // start optional virtual serial service, used for test if (virtual) {
        * // use static method Serial.connectVirtualUart to create // a virtual
@@ -370,8 +381,8 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       sabertooth.attach(m1);
       sabertooth.attach(m2);
 
-      m1.setAnalogId("y");
-      m2.setAnalogId("rz");
+      m1.setAxis("y");
+      m2.setAxis("rz");
 
       // m1.attach(joy.getAxis("y"));
       // m2.attach(joy.getAxis("rz"));
@@ -390,10 +401,6 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       // m1.stop();
       // m2.stop();
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       // speed up the motor
       for (int i = 0; i < 100; ++i) {

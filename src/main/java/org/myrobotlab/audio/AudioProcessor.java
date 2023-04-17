@@ -146,6 +146,8 @@ public class AudioProcessor extends Thread {
         isPlaying = true;
 
         audioFile.invoke("publishAudioStart", data);
+        AudioFileConfig config = (AudioFileConfig) audioFile.getConfig();
+
 
         while (isPlaying && (nBytesRead = din.read(buffer, 0, buffer.length)) != -1) {
           ++cnt;
@@ -216,7 +218,6 @@ public class AudioProcessor extends Thread {
             sleep(100);
           }
           // Compute the peak value and publish it.
-          AudioFileConfig config = (AudioFileConfig) audioFile.getConfig();
           if (cnt % config.peakSampleInterval == 0) {
             float peak = 0f;
             int b = buffer.length;
@@ -230,7 +231,7 @@ public class AudioProcessor extends Thread {
                 peak = abs;
               }
             }
-            audioFile.invoke("publishPeak", peak * (float) audioFile.getPeakMultiplier());
+            audioFile.invoke("publishPeak", peak * (double) audioFile.getPeakMultiplier());
           }
         }
         // Stop

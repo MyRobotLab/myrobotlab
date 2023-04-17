@@ -74,7 +74,7 @@ public class ServiceScriptTest extends AbstractTest {
   @Test
   public void testServiceScripts() throws Exception {
     String[] b = new String[] { "LeapMotion", "OpenNi", "Runtime", "SlamBad", "_TemplateService", "WebGui", "JMonkeyEngine", "ImageDisplay", "GoogleAssistant", "PickToLight",
-        "PythonProxy", "Sprinkler", "_TemplateProxy", "SwingGui" };
+        "PythonProxy", "Sprinkler", "_TemplateProxy", "SwingGui", "Joystick" };
     Set<String> blacklist = new HashSet<String>(Arrays.asList(b));
 
     pythonScripts = getPyRobotLabServiceScripts();

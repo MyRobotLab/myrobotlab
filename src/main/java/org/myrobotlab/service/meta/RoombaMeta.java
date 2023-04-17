@@ -16,8 +16,6 @@ public class RoombaMeta extends MetaData {
 
     addDescription("controls a Roomba robot through a blue-tooth serial port");
     addCategory("robot", "control");
-    addPeer("serial", "Serial", "serial");
-
   }
 
 }
