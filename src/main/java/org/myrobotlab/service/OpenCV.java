@@ -157,7 +157,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
     @Override
     synchronized public void run() {
-      // create a closeable frame converter
+      // create a closeable frame converter     
       CloseableFrameConverter converter = new CloseableFrameConverter();
 
       try {
