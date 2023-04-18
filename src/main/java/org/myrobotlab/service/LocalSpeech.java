@@ -285,7 +285,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     LocalSpeechConfig c = (LocalSpeechConfig)config;
     c.speechType = "Espeak";
     voices.clear();
-    addVoice("Linus", "male", "en-US", "festival");
+    addVoice("espeak", "male", "en-US", "espeak");
     removeExt(false);
     setTtsHack(false);
     setTtsCommand("espeak \"{text}\" -w {filename}");
@@ -312,7 +312,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   
   
   /**
-   * @return setFestival sets the Linux tts to festival template
+   * setPico2Wav attempts to switch the sub template of Local Speech
+   * @return true if successfully switched
    */
   public boolean setPico2Wav() {
     LocalSpeechConfig c = (LocalSpeechConfig)config;
@@ -330,7 +331,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
     setTtsCommand("pico2wave -l {voice_name} -w {filename} \"{text}\" ");
     if (!Runtime.getPlatform().isLinux()) {
-      error("festival only supported on Linux");
+      error("pico2wave only supported on Linux");
       return false;
     }
     broadcastState();
