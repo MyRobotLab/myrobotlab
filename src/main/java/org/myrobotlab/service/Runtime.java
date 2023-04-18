@@ -3223,10 +3223,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     log.info("setLogLevel {}", level);
     return level;
   }
-  
-  static public String setLogLevel(String clazz, String level) {
-    return level;
-  }
 
   /**
    * Get the log level of this MRL instance

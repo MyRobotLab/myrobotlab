@@ -58,7 +58,6 @@ import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoControlListener;
 import org.myrobotlab.service.interfaces.ServoStatusListener;
 import org.myrobotlab.service.interfaces.Simulator;
-import org.myrobotlab.swing.ServiceGui;
 import org.slf4j.Logger;
 
 import com.jme3.app.SimpleApplication;
@@ -194,9 +193,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   boolean mouseRightPressed = false;
 
-  Map<String, String[]> multiMapped = new TreeMap<String, String[]>();
-
-  transient Map<String, List<ServiceGui>> nameMethodCallbackMap = new HashMap<String, List<ServiceGui>>();
+  Map<String, String[]> multiMapped = new TreeMap<>();
 
   // https://stackoverflow.com/questions/16861727/jmonkey-engine-3-0-drawing-points
   transient FloatBuffer pointCloudBuffer = null;
@@ -216,7 +213,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   int selectIndex = 0;
 
   @Deprecated /* came from jme3ServoController... */
-  transient Map<String, ServoControl> servos = new TreeMap<String, ServoControl>();
+  transient Map<String, ServoControl> servos = new TreeMap<>();
 
   transient AppSettings settings;
 
@@ -256,7 +253,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // still a race condition ?
     try {
       connect("jme://local/messages");
-    } catch (Exception e) {
+    } catch (Exception ignored) {
     }
 
     // process existing registrations
@@ -287,10 +284,10 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     Node boxNode = null;
     Spatial check = find(name);
 
-    if (check != null && check instanceof Geometry) {
+    if (check instanceof Geometry) {
       log.error("addBox - scene graph already has {} and it is a Geometry", check);
       return null;
-    } else if (check != null && check instanceof Node) {
+    } else if (check instanceof Node) {
       boxNode = (Node) check;
       return boxNode;
     } else {
@@ -467,8 +464,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
     if (spatial instanceof Node) {
       List<Spatial> children = ((Node) spatial).getChildren();
-      for (int i = 0; i < children.size(); ++i) {
-        buildTree(tree, path, children.get(i), includeGeometries, useDepthKeys);
+      for (Spatial child : children) {
+        buildTree(tree, path, child, includeGeometries, useDepthKeys);
       }
     }
     return tree;
@@ -593,7 +590,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   // FIXME !!!! enableCoodinateAxes - same s bb including parent if geometry
   public void enableAxes(Spatial spatial, boolean b) {
 
-    /**
+    /*
      * mmm - may be a bad idea - but may need to figure solution out.. if
      * (spatial instanceof Geometry) { UserData data =
      * jme.getUserData(spatial.getParent()); data.enableCoordinateAxes(b);
@@ -601,7 +598,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
      */
 
     if (spatial.getName().startsWith("_")) {
-      log.warn("enableAxes(%s) a meta object not creating/enabling", spatial.getName());
+      log.warn("enableAxes({}) a meta object not creating/enabling", spatial.getName());
       return;
     }
 
@@ -648,7 +645,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     String name = spatial.getName();
 
     if (name.startsWith("_")) {
-      log.warn("enableBoundingBox(%s) begins with \"_\" is a meta node - will not create new bounding box", name);
+      log.warn("enableBoundingBox({}) begins with \"_\" is a meta node - will not create new bounding box", name);
       // might not be desirable to simply return - might need to "turn off" an
       // existing bounding box
       return;
@@ -764,8 +761,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       startNode = rootNode;
     }
 
-    Spatial child = startNode.getChild(name);
-    return child;
+    return startNode.getChild(name);
   }
 
   public String format(Node node, Integer selected) {
@@ -834,7 +830,13 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       rotMask = util.getUnitVector(data.rotationMask);
     }
 
-    int axisIndex = Jme3Util.getIndexFromUnitVector(rotMask);
+    // Unit vectors just have a length of 1 and can be along multiple axes,
+    // for which getIndexFromUnitVector does not work.
+    Integer axisIndex = Jme3Util.getIndexFromUnitVector(rotMask);
+    if (axisIndex == null) {
+      error("rotMask is not a unit vector along a single axis.");
+      return null;
+    }
     float rawAngle = angles[axisIndex] * 180 / FastMath.PI;
 
     float result = rawAngle;
@@ -856,8 +858,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     if (spatial.getName().startsWith("_")) {
       return null;
     }
-    String geoBbName = String.format("_bb-%s-%s", getType(spatial), spatial.getName());
-    return geoBbName;
+    return String.format("_bb-%s-%s", getType(spatial), spatial.getName());
   }
 
   @Override
@@ -875,8 +876,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     if (spatial.getName().startsWith("_")) {
       return null;
     }
-    String geoBbName = String.format("_axis-%s-%s", getType(spatial), spatial.getName());
-    return geoBbName;
+    return String.format("_axis-%s-%s", getType(spatial), spatial.getName());
   }
 
   @Override
@@ -1168,9 +1168,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
         String json = FileIO.toString(filename);
         Jme3Msg[] msgs = CodecUtils.fromJson(json, Jme3Msg[].class);
         log.info("adding {} msgs", msgs.length);
-        for (Jme3Msg msg : msgs) {
-          jme3MsgQueue.add(msg);
-        }
+        Collections.addAll(jme3MsgQueue, msgs);
       }
 
     } catch (Exception e) {
@@ -1405,27 +1403,37 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
     // ROTATE
     if (mouseLeftPressed && altLeftPressed && !shiftLeftPressed) {
-      if (name.equals("mouse-axis-x")) {
-        selectedForMovement.rotate(0, -keyPressed, 0);
-      } else if (name.equals("mouse-axis-x-negative")) {
-        selectedForMovement.rotate(0, keyPressed, 0);
-      } else if (name.equals("mouse-axis-y")) {
-        selectedForMovement.rotate(-keyPressed, 0, 0);
-      } else if (name.equals("mouse-axis-y-negative")) {
-        selectedForMovement.rotate(keyPressed, 0, 0);
+      switch (name) {
+        case "mouse-axis-x":
+          selectedForMovement.rotate(0, -keyPressed, 0);
+          break;
+        case "mouse-axis-x-negative":
+          selectedForMovement.rotate(0, keyPressed, 0);
+          break;
+        case "mouse-axis-y":
+          selectedForMovement.rotate(-keyPressed, 0, 0);
+          break;
+        case "mouse-axis-y-negative":
+          selectedForMovement.rotate(keyPressed, 0, 0);
+          break;
       }
     }
 
     // PAN
     if (mouseLeftPressed && altLeftPressed && shiftLeftPressed) {
-      if (name.equals("mouse-axis-x")) {
-        selectedForMovement.move(keyPressed * 3, 0, 0);
-      } else if (name.equals("mouse-axis-x-negative")) {
-        selectedForMovement.move(-keyPressed * 3, 0, 0);
-      } else if (name.equals("mouse-axis-y")) {
-        selectedForMovement.move(0, keyPressed * 3, 0);
-      } else if (name.equals("mouse-axis-y-negative")) {
-        selectedForMovement.move(0, -keyPressed * 3, 0);
+      switch (name) {
+        case "mouse-axis-x":
+          selectedForMovement.move(keyPressed * 3, 0, 0);
+          break;
+        case "mouse-axis-x-negative":
+          selectedForMovement.move(-keyPressed * 3, 0, 0);
+          break;
+        case "mouse-axis-y":
+          selectedForMovement.move(0, keyPressed * 3, 0);
+          break;
+        case "mouse-axis-y-negative":
+          selectedForMovement.move(0, -keyPressed * 3, 0);
+          break;
       }
     }
 
@@ -1489,8 +1497,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     pointCloudBuffer.rewind();
     Point3df[] points = pc.getData();
 
-    for (int i = 0; i < points.length; ++i) {
-      Point3df p = points[i];
+    for (Point3df p : points) {
       // log.info("p {}", p);
       // pointCloudBuffer.put(480 - p.y);
       // pointCloudBuffer.put(640 - p.x);
@@ -2339,11 +2346,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   public void toggleVisible() {
-    if (Spatial.CullHint.Always == selectedForView.getCullHint()) {
-      setVisible(true);
-    } else {
-      setVisible(false);
-    }
+    setVisible(CullHint.Always == selectedForView.getCullHint());
   }
 
   public String toJson(Node node) {

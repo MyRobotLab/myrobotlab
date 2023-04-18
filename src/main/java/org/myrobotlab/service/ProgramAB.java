@@ -327,7 +327,7 @@ public class ProgramAB extends Service
     }
 
     // Get the actual bots aiml based response for this session
-    log.info("getResonse({})", text);
+    log.info("getResponse({})", text);
     Response response = session.getResponse(text);
 
     // EEK! clean up the API!

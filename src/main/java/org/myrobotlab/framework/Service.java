@@ -1856,6 +1856,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   synchronized public ServiceInterface startPeer(String peerKey) {
+    if (peerKey == null) {
+      log.warn("peerKey is null");
+      return null;
+    }
+    
+    peerKey = peerKey.trim();
+       
     // get current definition of config and peer
     Peer peer = config.getPeer(peerKey);
 
