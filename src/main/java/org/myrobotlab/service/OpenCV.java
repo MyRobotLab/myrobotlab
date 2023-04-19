@@ -746,7 +746,6 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
           cameraIndexes.add(i);
         }
         grabber.stop();
-        sleep(1000);
         grabber = null;
       } catch (Exception e) {
         log.info(String.format("not able to camera grab a frame from camera %d", i));
