@@ -480,11 +480,11 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   }
 
   @Override
-  public void startService() {
-    super.startService();
+  public ServiceConfig apply(ServiceConfig config) {
+    LocalSpeechConfig c = (LocalSpeechConfig) super.apply(config);
+
     // setup the default tts per os
     Platform platform = Runtime.getPlatform();
-    LocalSpeechConfig c = (LocalSpeechConfig) config;
     if (c.speechType == null) {
       if (platform.isWindows()) {
         setTts();
@@ -498,13 +498,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     } else {
       setSpeechType(c.speechType);
     }
-  }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    LocalSpeechConfig config = (LocalSpeechConfig) super.apply(c);
-    setSpeechType(config.speechType);
-    setVoice(config.voice);
+    if (c.voice != null) {
+      setVoice(c.voice);
+    }
     return c;
   }
 
