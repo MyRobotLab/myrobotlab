@@ -292,7 +292,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     // should hold off creating or starting peers until the service has started
     // audioFile = (AudioFile) createPeer("audioFile");
 
-    getVoices();
+//     getVoices();
 
   }
 
@@ -522,6 +522,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   @Override
   public void startService() {
     super.startService();
+    getVoices();
     // FIXME - assigning a Peer to a reference is a no no
     audioFile = (AudioFile) startPeer("audioFile");
     subscribe(audioFile.getName(), "publishAudioStart");
@@ -948,34 +949,35 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     }
     return false;
   }
+  
 
   @Override
   public boolean setVoice(String name) {
-    if (voices == null) {
-      return false;
-    }
-    if (voices.containsKey(name)) {
+      if (voices == null) {
+          return false;
+      }
+
+      SpeechSynthesisConfig config = (SpeechSynthesisConfig)this.config;
       voice = voices.get(name);
+      
+      if (voice == null) {
+        voice = voiceKeyIndex.get(name);
+      }
+      
+      if (voice == null) {
+        voice = voiceProviderIndex.get(name);
+      }
+      
+      if (voice == null) {
+          error("could not set voice %s - valid voices are %s", name, String.join(", ", getVoiceNames()));
+          return false;
+      }
+
+      config.voice = name;
       broadcastState();
       return true;
-    }
-
-    if (voiceKeyIndex.containsKey(name)) {
-      voice = voiceKeyIndex.get(name);
-      broadcastState();
-      return true;
-    }
-
-    if (voiceProviderIndex.containsKey(name)) {
-      voice = voiceProviderIndex.get(name);
-      broadcastState();
-      return true;
-    }
-
-    error("could not set voice %s - valid voices are %s", name, String.join(", ", getVoiceNames()));
-    return false;
   }
-
+  
   public boolean setVoice(Integer index) {
     if (index > voiceList.size() || index < 0) {
       error("setVoice({}) not valid pick range 0 to {}", index, voiceList.size());
@@ -1084,13 +1086,13 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   @Override
   @Deprecated /* use setMute(b) */
   public void mute() {
-    this.mute = true;
+    setMute(true);
   }
 
   @Override
   @Deprecated /* use setMute(b) */
   public void unmute() {
-    this.mute = false;
+    setMute(false);
   }
 
   @Override
@@ -1110,7 +1112,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    SpeechSynthesisConfig config = (SpeechSynthesisConfig) c;
+    SpeechSynthesisConfig config = (SpeechSynthesisConfig) super.apply(c);
 
     setMute(config.mute);
 
@@ -1121,7 +1123,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
         replaceWord(n, config.substitutions.get(n));
       }
     }
-
+    // some systems require querying set of voices
+    getVoices();
+    
     if (config.voice != null) {
       setVoice(config.voice);
     }
@@ -1150,7 +1154,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   @Override
   public ServiceConfig getConfig() {
-    SpeechSynthesisConfig c = (SpeechSynthesisConfig) config;
+    SpeechSynthesisConfig c = (SpeechSynthesisConfig) super.getConfig();
     c.mute = mute;
     c.blocking = blocking;
     if (substitutions != null && substitutions.size() > 0) {

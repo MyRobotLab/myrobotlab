@@ -79,7 +79,7 @@ angular.module('mrlapp.service.AudioFileGui', []).controller('AudioFileGuiCtrl',
             $scope.service.lastPlayed = data.filename
             break
         case 'onPeak':
-            $scope.peak = Math.round(data * 100)
+            $scope.peak = Math.round(data/* * 100 */)
             $scope.$apply()
             break
 

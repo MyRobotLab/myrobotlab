@@ -56,7 +56,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Broadcaster;
-import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.image.Util;
@@ -65,12 +64,13 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServiceConfig.Listener;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.QueueReporter;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
-
+ 
 /**
  * 
  * Service is the base of the MyRobotLab Service Oriented Architecture. All
@@ -82,7 +82,7 @@ import org.slf4j.Logger;
  * messages.
  * 
  */
-public abstract class Service implements Runnable, Serializable, ServiceInterface, Invoker, Broadcaster, QueueReporter {
+public abstract class Service implements Runnable, Serializable, ServiceInterface, Broadcaster, QueueReporter {
 
   // FIXME upgrade to ScheduledExecutorService
   // http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
@@ -125,8 +125,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * full class name used in serialization
    */
   protected String serviceClass;
-
-  Set<String> autoStartedPeers = new HashSet<>();
 
   private boolean isRunning = false;
 
@@ -190,11 +188,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * it a member variable
    */
   protected Map<String, String> interfaceSet;
-
-  /**
-   * plan which was used to build this service
-   */
-  protected Plan buildPlanx = null;
 
   /**
    * order which this service was created
@@ -627,7 +620,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * 
    */
   public Service(String reservedKey, String inId) {
-
+    log.info("constructing {}", reservedKey);
     name = reservedKey;
 
     // necessary for serialized transport\
@@ -796,7 +789,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   public void addTaskOneShot(long delayMs, String method, Object... params) {
-    addTask(method, 0, delayMs, method, params);
+    addTask(method, true, 0, delayMs, method, params);
+  }
+
+  @Override
+  synchronized public void addTask(String taskName, long intervalMs, long delayMs, String method, Object... params) {
+    addTask(taskName, false, intervalMs, delayMs, method, params);
   }
 
   /**
@@ -814,14 +812,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    *          the params to pass
    */
   @Override
-  synchronized public void addTask(String taskName, long intervalMs, long delayMs, String method, Object... params) {
+  synchronized public void addTask(String taskName, boolean oneShot, long intervalMs, long delayMs, String method, Object... params) {
     if (tasks.containsKey(taskName)) {
       log.info("already have active task \"{}\"", taskName);
       return;
     }
     Timer timer = new Timer(String.format("%s.timer", String.format("%s.%s", getName(), taskName)));
     Message msg = Message.createMessage(getName(), getName(), method, params);
-    Task task = new Task(this, taskName, intervalMs, msg);
+    Task task = new Task(this, oneShot, taskName, intervalMs, msg);
     timer.schedule(task, delayMs);
     tasks.put(taskName, timer);
   }
@@ -841,9 +839,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     invokeFuture(method, delayMs, (Object[]) null);
   }
 
+  /**
+   * creates a one timed task that executes in the future delayMs milliseconds
+   */
   @Override
   final public void invokeFuture(String method, long delayMs, Object... params) {
-    addTaskOneShot(delayMs, method, params);
+    addTask(String.format("%s-%d", method, System.currentTimeMillis()), true, 0, delayMs, method, params);
   }
 
   @Override
@@ -1106,15 +1107,39 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   @Override
-  public boolean hasPeers() {
-    try {
-      Class<?> theClass = Class.forName(serviceClass);
-      Method method = theClass.getMethod("getPeers", String.class);
-    } catch (Exception e) {
-      log.debug("{} does not have a getPeers", serviceClass);
-      return false;
+  public Map<String, Peer> getPeers() {
+    if (config == null) {
+      return null;
     }
-    return true;
+    return config.getPeers();
+  }
+
+  /**
+   * returns the peer key if a name is supplied and matches a peer name
+   * 
+   * @param name
+   *          - name of service
+   * @return - key of peer if it exists
+   */
+  public String getPeerKey(String name) {
+    Map<String, Peer> peers = getPeers();
+    if (peers != null) {
+      for (String peerKey : peers.keySet()) {
+        Peer peer = peers.get(peerKey);
+        if (name.equals(peer.name)) {
+          return peerKey;
+        }
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public Set<String> getPeerKeys() {
+    if (config == null || config.peers == null) {
+      return new HashSet<String>();
+    }
+    return config.peers.keySet();
   }
 
   public String help(String format, String level) {
@@ -1314,7 +1339,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         out(methodName, retobj);
       }
     } catch (Exception e) {
-      error("could not invoke %s.%s (%s) - check logs for details", getName(), methodName, params);
+      // error(e);
+      // e.getCause()
+      error("could not invoke %s.%s (%s) %s - check logs for details", getName(), methodName, params, e.getCause());
       log.error("could not invoke {}.{} ({})", getName(), methodName, params, e);
     }
     return retobj;
@@ -1353,13 +1380,27 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * 
    */
   @Override
-  public ServiceConfig apply(ServiceConfig config) {
+  public ServiceConfig apply(ServiceConfig inConfig) {
     log.info("Default service config loading for service: {} type: {}", getName(), getType());
-    // setVirtual(config.isVirtual); "overconfigured" - user Runtimes virtual
-    // setLocale(config.locale);
+    /*
+     * We clone/serialize here because we don't want to use the same reference
+     * of of config in the plan. If configuration is applied through the plan,
+     * "or from anywhere else" we make a copy of it here. And the copy is
+     * applied to the actual service. This keeps the plan safe to modify without
+     * the worry of modifying a running service config.
+     */
 
-    // FIXME - TODO -
-    // assigne a ServiceConfig config member variable the incoming config
+    String yaml = CodecUtils.toYaml(inConfig);
+    ServiceConfig copyOfConfig = CodecUtils.fromYaml(yaml, inConfig.getClass());
+
+    // TODO - handle subscriptions / listeners
+    if (copyOfConfig.listeners != null) {
+      for (Listener listener : copyOfConfig.listeners) {
+        addListener(listener.method, listener.listener, listener.callback);
+      }
+    }
+
+    this.config = copyOfConfig;
     return config;
   }
 
@@ -1369,7 +1410,37 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public ServiceConfig getConfig() {
+    
+    boolean filterWeb = true;
+    
+    Map<String, List<MRLListener>> listeners = getOutbox().notifyList;
+    List<Listener> newListeners = new ArrayList<>();
+
+    // TODO - perhaps a switch for "remote" things ?
+    if (filterWeb) {
+      for (String method : listeners.keySet()) {
+        List<MRLListener> list = listeners.get(method);
+        for (MRLListener listener : list)
+          if (!listener.callbackName.endsWith("@webgui-client")) {
+
+            Listener newConfigListener = new Listener(listener.topicMethod, listener.callbackName, listener.callbackMethod);
+            newListeners.add(newConfigListener);
+          }
+      }
+    }
+
+    if (newListeners.size() > 0) {
+      config.listeners = newListeners;
+    }
     return config;
+  }
+  
+  @Override
+  public ServiceConfig getFilteredConfig() {
+    ServiceConfig sc = getConfig();
+    // deep clone
+    sc = (ServiceConfig)CodecUtils.fromYaml(CodecUtils.toYaml(sc), sc.getClass());
+    return sc;
   }
 
   @Override
@@ -1544,7 +1615,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public boolean save() {
     Runtime runtime = Runtime.getInstance();
-    return runtime.saveService(null, getName(), null);
+    // save all services ... weird notation - should have explicit
+    // saveAllServices
+    return runtime.saveService(runtime.getConfigName(), getName(), null);
   }
 
   public ServiceInterface getPeer(String peerKey) {
@@ -1781,61 +1854,95 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     this.thisThread = thisThread;
   }
 
-  public ServiceInterface startPeer(String peerKey) {
-    String actualName = getPeerName(peerKey);
-    if (actualName == null) {
-      log.error("startPeer could not find actual name of {} in {}", peerKey, getName());
+  @Override
+  synchronized public ServiceInterface startPeer(String peerKey) {
+    if (peerKey == null) {
+      log.warn("peerKey is null");
+      return null;
+    }
+    
+    peerKey = peerKey.trim();
+       
+    // get current definition of config and peer
+    Peer peer = config.getPeer(peerKey);
+
+    if (peer == null) {
+      error("startPeer could not find peerKey of %s in %s", peerKey, getName());
+      return null;
     }
 
-    ServiceInterface si = Runtime.start(actualName, null);
+    ServiceInterface si = Runtime.getService(peer.name);
     if (si != null) {
-      ServiceReservation sr = serviceType.getPeer(peerKey);
-      if (sr != null) {
-        sr.state = "STARTED";
-        sr.actualName = actualName;
-        sr.type = si.getSimpleName();
-        if (si != null) {
-          CodecUtils.setField(this, peerKey, si);
+      // so this peer is already started, but are we responsible for
+      // all subpeers ?
+      return si;
+    }
+
+    // request to modify the plan's runtime to start all service that match
+    // actualName.*
+    Plan plan = Runtime.getPlan();
+    ServiceConfig sc = plan.get(peer.name);
+
+    if (sc == null) {
+      log.info("no current plan for peer {} - since this is a peer request we can make a plan", peer.name);
+      // error("plan.get(%s) == null", actualName);
+      Runtime.load(peer.name, peer.type);
+      sc = plan.get(peer.name);
+    }
+
+    // // recursive - start peers of peers of peers ...
+    // Map<String, Peer> subPeers = sc.getPeers();
+    // if (sc != null && subPeers != null) {
+    // for (String subPeerKey : subPeers.keySet()) {
+    // // IF AUTOSTART !!!
+    // Peer subPeer = subPeers.get(subPeerKey);
+    // if (subPeer.autoStart) {
+    // Runtime.start(sc.getPeerName(subPeerKey), subPeer.type);
+    // }
+    // }
+    // }
+
+    // start peer requested
+    Runtime.start(peer.name, sc.type);
+    broadcastState();
+    return Runtime.getService(peer.name);
+  }
+
+  /**
+   * Release a peer by peerKey.
+   * There can be advantages to refer to a peer with a peer key instead of a typed
+   * reference. This allows more modularity and the ability to plug in different types of peers,
+   * even with different instance names.  The peerKey is an internal key the service uses to 
+   * perform operations on its peers.  This one will release a peer.
+   * @param peerKey
+   */
+  synchronized public void releasePeer(String peerKey) {
+
+    if (config != null && config.getPeer(peerKey) != null) {
+      Peer peer = config.getPeer(peerKey);
+      ServiceConfig sc = Runtime.getPlan().get(peer.name);
+      // peer recursive
+      if (sc != null && sc.getPeers() != null) {
+        for (String subPeerKey : sc.getPeers().keySet()) {
+          Peer subpeer = sc.getPeer(subPeerKey);
+          if (subpeer.autoStart) {
+            Runtime.release(subpeer.name);
+          }
         }
       }
-      invoke("publishPeerStarted", peerKey);
+      Plan plan = Runtime.getPlan();
+      plan.removeRegistry(peer.name);
+      Runtime.release(peer.name);
       broadcastState();
-    }
-    return si;
-  }
-
-  public String getPeerType(String peerKey) {
-    ServiceReservation sr = serviceType.getPeer(peerKey);
-    return sr.type;
-  }
-
-  public void releasePeer(String peerKey) {
-    String actualName = getPeerName(peerKey);
-    Runtime.release(actualName);
-    ServiceReservation sr = serviceType.getPeer(peerKey);
-    if (sr != null) {
-      sr.actualName = actualName;
-      sr.state = "RELEASED";
-      invoke("publishPeerReleased", peerKey);
-    }
-    broadcastState();
-  }
-
-  @Override
-  @Deprecated /* use Runtime.start() */
-  public void loadAndStart() {
-    try {
-      load();
-      startService();
-    } catch (Exception e) {
-      log.error("Load and Start failed.", e);
+    } else {
+      error("%s.releasePeer(%s) does not exist", getName(), peerKey);
     }
   }
 
   @Override
   synchronized public void startService() {
-
     if (!isRunning()) {
+      log.info("starting {}", getName());
       outbox.start();
       if (thisThread == null) {
         thisThread = new Thread(this, name);
@@ -2567,10 +2674,27 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return creationOrder;
   }
 
+  /**
+   * Return the service name of a peer from its peerKey
+   * 
+   * @param peerKey
+   * @return - name of peer service
+   */
   public String getPeerName(String peerKey) {
-    return Runtime.getPeerName(peerKey, config, serviceType.peers, getName());
+
+    if (config == null) {
+      return null;
+    }
+    return config.getPeerName(peerKey);
   }
 
+  /**
+   * returns if the peer is currently started from its peerkey value e.g.
+   * isPeerStarted("head")
+   * 
+   * @param peerKey
+   * @return
+   */
   public boolean isPeerStarted(String peerKey) {
     return Runtime.isStarted(getPeerName(peerKey));
   }
@@ -2580,17 +2704,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   final public Plan getDefault() {
-    return MetaData.getDefault(getName(), this.getClass().getSimpleName());
-  }
-
-  @Override
-  public void addAutoStartedPeer(String actualPeerName) {
-    autoStartedPeers.add(actualPeerName);
-  }
-
-  @Override
-  public boolean autoStartedPeersContains(String actualPeerName) {
-    return autoStartedPeers.contains(actualPeerName);
+    return ServiceConfig.getDefault(Runtime.getPlan(), getName(), this.getClass().getSimpleName());
   }
 
   @Override
@@ -2598,17 +2712,83 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return serviceType;
   }
 
-  public String publishPeerStarted(String peerKey) {
-    return peerKey;
-  }
-
-  public String publishPeerReleased(String peerKey) {
-    return peerKey;
-  }
-
+  /**
+   * apply the current config path config file for this service directly
+   */
   public void apply() {
-    ServiceConfig sc = Runtime.getInstance().readServiceConfig(null, name);
+    Runtime runtime = Runtime.getInstance();
+    ServiceConfig sc = runtime.readServiceConfig(null, name);
+    // updating plan
+    Runtime.getPlan().put(getName(), sc);
+    // applying config to self
     apply(sc);
+  }
+
+  /**
+   * Set a peer's name to a new service name. e.g. i01.setPeerName("mouth",
+   * "mouth") will change the InMoov2 peer "mouth" to be simply "mouth" instead
+   * of "i01.mouth"
+   * 
+   * @param key
+   * @param fullName
+   */
+  public void setPeerName(String key, String fullName) {
+    Peer peer = config.getPeer(key);
+    String oldName = peer.name;
+    peer.name = fullName;
+    // update plan ?
+    ServiceConfig.getDefault(Runtime.getPlan(), peer.name, peer.type);
+    // FIXME - determine if only updating the Plan in memory is enough,
+    // should we also make or update a config file - if the config path is set?
+    info("updated %s name to %s", oldName, peer.name);
+  }
+
+  /**
+   * Update a peer's type. First its done in the current Plan, and it will also
+   * modify the config file if a configpath is set.
+   * 
+   * @param key
+   *          - peerKey of the service .. e.g. "head" for InMoov's head peer
+   * @param peerType
+   *          - desired shortname of the type
+   */
+  public void updatePeerType(String key, String peerType) {
+
+    // MAKE NOTE ! - CONFIG IS DIFFERENT THAN PLAN !!!! MODIFY BOTH ???!?
+
+    // get current plan
+    Plan plan = Runtime.getPlan();
+
+    // get self
+    ServiceConfig sc = plan.get(getName());
+    if (sc != null) {
+      sc.putPeerType(key, String.format("%s.%s", getName(), key), peerType);
+    }
+
+    Peer peer = config.getPeer(key);
+    peer.type = peerType;
+
+    // not Needed
+    // config.putPeerType(key, String.format("%s.%s", key, getName()),
+    // peerType);
+    plan.remove(peer.name);
+    // FIXME - rename putDefault
+    ServiceConfig.getDefault(Runtime.getPlan(), peer.name, peerType);
+    Runtime runtime = Runtime.getInstance();
+    String configPath = runtime.getConfigPath();
+    // Seems a bit invasive - but yml file overrides everything
+    // if one exists we need to replace it with the new peer type
+    if (configPath != null) {      
+      String configFile = configPath + fs + peer.name + ".yml";
+      File staleFile = new File(configFile);
+      if (staleFile.exists()) {
+        log.info("removing old config file {}", configFile);
+        staleFile.delete();
+        // save new default in its place
+        runtime.saveDefault(configPath, peer.name, peer.type, false);
+      }
+    }
+    info("updated %s to type %s", peer.name, peerType);
   }
 
 }

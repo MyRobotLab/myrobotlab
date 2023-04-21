@@ -110,9 +110,6 @@ public class Jme3Util {
     log.info(String.format("setTranslation %s, %.2f,%.2f,%.2f", name, x, y, z));
     Spatial s = jme.get(name);
     s.setLocalTranslation((float) x, (float) y, (float) z);
-    if (currentMenuView != null && s == selectedForView) {
-      currentMenuView.putText(selectedForView);
-    }
   }
 
   public void setRotation(String name, double xRot, double yRot, double zRot) {
@@ -123,9 +120,6 @@ public class Jme3Util {
     float zRotInit = (float) zRot * FastMath.DEG_TO_RAD;
     q.fromAngles(zRotInit, xRotInit, yRotInit);
     s.setLocalRotation(q);
-    if (currentMenuView != null && s == selectedForView) {
-      currentMenuView.putText(selectedForView);
-    }
   }
 
   public static Integer getIndexFromUnitVector(Vector3f vector) {
@@ -199,9 +193,6 @@ public class Jme3Util {
       q.fromAngles(euler[0], euler[1], euler[2]);
       n.setLocalRotation(q);
 
-      if (currentMenuView != null && n == selectedForView) {
-        currentMenuView.putText(selectedForView);
-      }
     } catch (Exception e) {
       log.error("{}.rotateTo threw", jme.getName(), e);
     }
@@ -370,17 +361,15 @@ public class Jme3Util {
   }
 
   Spatial selectedForView;
-  MainMenuState currentMenuView;
 
-  public void setSelectedForView(MainMenuState menu, Spatial selectedForView) {
-    this.currentMenuView = menu;
+  public void setSelectedForView(Spatial selectedForView) {
     this.selectedForView = selectedForView;
   }
 
   public void addNode(String name) {
     Spatial s = jme.find(name);
     if (s != null) {
-      log.error("addNode({}} already exists", name);
+      log.error("addNode({}) already exists", name);
       return;
     }
     Node n = new Node(name);

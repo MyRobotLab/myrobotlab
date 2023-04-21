@@ -26,7 +26,7 @@ import org.myrobotlab.test.AbstractTest;
  */
 public class ServoTest extends AbstractTest {
 
-  static final String port01 = "/dev/ttyACM5";
+  static final String port01 = "servoTestPort";
   Integer pin = 3;
   static Arduino arduino01 = null;
   static Servo servo = null;
@@ -38,9 +38,10 @@ public class ServoTest extends AbstractTest {
   public void setUp() throws Exception {
     servo = (Servo) Runtime.start("servoServoTest", "Servo");
     arduino01 = (Arduino) Runtime.start("arduinoServoTest", "Arduino");
+    arduino01.setVirtual(true);
     arduino01.connect(port01);
     servo.setPin(3);
-    servo.attach(arduino01, 3, 40.0);
+    arduino01.attach(servo);
     servo.rest();
     servo.enable();
     servo.map(0, 180, 0, 180);
@@ -126,6 +127,7 @@ public class ServoTest extends AbstractTest {
     arduino01.connect(port01);
 
     Servo s = (Servo) Runtime.start("ser1", "Servo");
+    Servo s2 = (Servo) Runtime.start("ser2", "Servo");
 
     // the pin should always be set to something.
     s.setPin(pin);
@@ -178,10 +180,23 @@ public class ServoTest extends AbstractTest {
     s.disable();
     assertFalse(s.isEnabled());
 
-    s.detach(arduino01);
+    s2.sync(s);
+    s.getCurrentInputPos();
+    s2.moveTo(100);
+    Service.sleep(300); // FIXME - change to await on change with timeout 
+    assertEquals(100.0, s.getCurrentInputPos(), 0.1f);
+    s2.moveTo(60);
+    Service.sleep(300);// FIXME - change to await on change
+    assertEquals(60.0, s.getCurrentInputPos(), 0.1f);
+    s2.unsync(s);
+    s2.moveTo(50);
+    Service.sleep(300);// FIXME - change to await on change
+    assertEquals(60.0, s.getCurrentInputPos(), 0.1f);
 
+    s.detach(arduino01);
     s.releaseService();
     arduino01.releaseService();
+    s2.releaseService();
 
   }
 
@@ -256,7 +271,7 @@ public class ServoTest extends AbstractTest {
     long delta = System.currentTimeMillis() - start;
     assertTrue("Move to blocking should have taken 3 seconds or more. Time was " + delta, delta >= 3000);
     // log.info("Move to blocking took {} milliseconds", delta);
-    assertTrue("Servo should be ebabled", servo01.isEnabled());
+    assertTrue("Servo should be enabled", servo01.isEnabled());
     assertFalse("Servo should not be moving now.", servo01.isMoving());
     // Now let's wait for the idle disable timer to kick off + 1000ms
     // TODO: figure out why smaller values like 100ms cause this test to fail.

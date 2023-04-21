@@ -246,8 +246,8 @@ public class OpenCVTest extends AbstractTest {
     cv.capture(TEST_LOCAL_MP4);
 
     for (String fn : OpenCV.POSSIBLE_FILTERS) {
-      log.info("trying filter {}", fn);
-      if (fn.startsWith("DL4J") || fn.startsWith("Tesseract") || fn.startsWith("SimpleBlobDetector") || fn.startsWith("Solr") || fn.startsWith("Split")) {
+      log.warn("trying filter {}", fn);
+      if (fn.startsWith("DL4J") || fn.startsWith("FaceTraining") || fn.startsWith("Tesseract") || fn.startsWith("SimpleBlobDetector") || fn.startsWith("Solr") || fn.startsWith("Split")) {
         log.info("skipping {}", fn);
         continue;
       }

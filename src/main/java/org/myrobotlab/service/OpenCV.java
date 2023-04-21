@@ -151,6 +151,8 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   transient CanvasFrame canvasFrame = null;
 
   class VideoProcessor implements Runnable {
+    
+    transient Thread videoThread = null;
 
     @Override
     synchronized public void run() {
@@ -216,11 +218,10 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
         } // end of while - no longer capturing
 
       } catch (Exception e) {
-        log.error("getting grabber failed", e);
+        log.error("failed getting frame", e);
       }
       // begin capturing ...
 
-      videoThread = null;
       frameIndex = 0;
 
       // attempt to close the grabber
@@ -242,6 +243,37 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
       // sleep(1000);
       broadcastState();
       log.info("run - stopped capture");
+    }
+
+    public void stop() {
+      log.info("request to stop");
+      if (!capturing) {
+        log.info("processor already stopped");
+        return;
+      }
+
+      // begin stopping
+      stopping = true;
+      videoThread.interrupt();
+      int waitTime = 0;
+      while (capturing && waitTime < 1000) {
+        ++waitTime;
+        sleep(10);
+      }
+      broadcastState();
+      log.info("stopCapture waited {} times - done now", waitTime);
+    }
+
+    public void start() {
+      log.info("request to start");
+      if (!capturing) {
+        videoThread = new Thread(vp, String.format("%s-video-processor-%d", getName(), ++vpId));
+        videoThread.start();
+        broadcastState();
+        log.info("capture - started");
+      } else {
+        log.info("capture - already capturing - leaving");
+      }
     }
   }
 
@@ -513,8 +545,6 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   boolean undockDisplay = false;
 
-  transient Thread videoThread = null;
-
   final private VideoProcessor vp = new VideoProcessor();
 
   Integer width = null;
@@ -636,26 +666,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   @Override
   synchronized public void capture() {
     log.info("capture()");
-
-    if (capturing) {
-      log.info("capture - already capturing - leaving");
-      return;
-    } else { // thread should be dead
-      log.info("capture - starting thread");
-
-      if (videoThread == null) {
-        videoThread = new Thread(vp, String.format("%s-video-processor-%d", getName(), ++vpId));
-        videoThread.start();
-      }
-      // block until in started state ?
-      int waitTime = 0;
-      while (!capturing && waitTime < 1000) {
-        ++waitTime;
-        sleep(10);
-      }
-      log.info("capture - waited {} times", waitTime);
-      broadcastState();
-    }
+    vp.start();
   }
 
   public void capture(FrameGrabber grabber) throws org.bytedeco.javacv.FrameGrabber.Exception {
@@ -1104,10 +1115,15 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   private void processVideo(OpenCVData data) throws org.bytedeco.javacv.FrameGrabber.Exception, InterruptedException {
 
+    if (stopping) {
+      log.warn("stopping processing of image capture is stopping");
+      return;
+    }
+    
     // process each filter
     // for (String filterName : filters.keySet()) {
     for (OpenCVFilter filter : filters.values()) {
-      if (filter.isEnabled()) {
+      if (filter.isEnabled() & !stopping) {
         IplImage input = filter.setData(data);
         if (input == null) {
           log.error("could not get setData image");
@@ -1137,21 +1153,9 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
           if (overlay.color != null) {
             g2d.setColor(overlay.color);
           }
-          // TODO - handle drawImage overlay !
           g2d.drawString(overlay.text, overlay.x, overlay.y);
         }
 
-        /**
-         * <pre>
-         * // FIXME - publishDisplay is "NOT" used by the OpenCVGui ! -
-         * // publishDisplay is more transportable - and potentially could be
-         * // "standard"
-         * // since BufferedImage is a standard Java Object (contents of
-         * // OpenCVData are not)
-         * // it has a nice standard name too, but OpenCVData has "way" more
-         * // data ... what to do ?
-         * </pre>
-         */
         BufferedImage b = data.getDisplay();
         SerializableImage si = new SerializableImage(b, displayFilter, frameIndex);
         invoke("publishDisplay", si);
@@ -1166,21 +1170,6 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
         }
 
         if (!isHeadless() && nativeViewer) {
-          /*
-           * if (canvasFrame == null) { // FIXME - strange canvaFrame's
-           * fullscreen mode is not exposed :( // ProjectorDevice pd = new
-           * ProjectorDevice("display 2"); // canvasFrame =
-           * pd.createCanvasFrame();
-           * 
-           * canvasFrame = new CanvasFrame(displayFilter,
-           * CanvasFrame.getDefaultGamma()/grabber.getGamma());
-           * canvasFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); //
-           * canvasFrame.setAlwaysOnTop(true); //
-           * canvasFrame.setResizable(false); canvasFrame.setVisible(true);
-           * canvasFrame.showImage(b); canvasFrame.invalidate();
-           * canvasFrame.setSize(600, 480); canvasFrame.pack(); }
-           * canvasFrame.showImage(b);
-           */
 
           if (canvasFrame == null) {
             canvasFrame = new CanvasFrame(String.format("%s - %s", getName(), displayFilter));
@@ -1195,41 +1184,19 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
               canvasFrame.showImage(frame);
             }
           }
-          /*
-           * if (videoWidget == null) { videoWidget = new
-           * VideoWidget2(getName()); }
-           * 
-           * videoWidget.setVisible(true); videoWidget.displayFrame(si);
-           */
-
         } else if (canvasFrame != null && !nativeViewer) {
           canvasFrame.dispose();
           canvasFrame = null;
-          // videoWidget.dispose();
-          // videoWidget = null;
         }
 
       }
     }
 
-    // useful but chatty debug statement - dumps opencvdata
-    // log.debug("data -> {}", data);
-
-    // FIXME - should have had it
-
-    // FIXME - deprecate it
     invoke("publishOpenCVData", data);
-
-    // future publishing (same as BoofCv !)
+    
+    // standard generic CvData publish
     invoke("publishCvData", data);
 
-    // FIXME - TODO
-    // data.prepareToSerialize();
-    // invoke("publishVideoData", data);
-
-    // this has to be before record as
-    // record uses the queue - this has the "issue" if
-    // the consumer does not pickup-it will get stale
     if (blockingData.size() == 0) {
       blockingData.add(data);
     }
@@ -1827,20 +1794,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   @Override
   synchronized public void stopCapture() {
     log.info("stopCapture");
-    if (!capturing) {
-      log.info("stopCapture !capturing - returning");
-      return;
-    }
-
-    log.info("stopCapture stopping = true");
-    stopping = true;
-    // block until in started state ?
-    int waitTime = 0;
-    while (capturing && waitTime < 1000) {
-      ++waitTime;
-      sleep(10);
-    }
-    log.info("stopCapture waited {} times - done now", waitTime);
+    vp.stop();
   }
 
   public void stopRecording() {
@@ -1944,7 +1898,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   @Override
   public void enableFilter(String name) {
     OpenCVFilter f = filters.get(name);
-    if (!f.isEnabled()) {
+    if (f != null && !f.isEnabled()) {
       f.enable();
       broadcastState();
     }
@@ -1953,7 +1907,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   @Override
   public void disableFilter(String name) {
     OpenCVFilter f = filters.get(name);
-    if (f.isEnabled()) {
+    if (f != null && f.isEnabled()) {
       f.disable();
       broadcastState();
     }
@@ -1961,11 +1915,13 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   public void toggleFilter(String name) {
     OpenCVFilter f = filters.get(name);
+    if (f != null) {
     if (f.isEnabled())
       f.disable();
     else
       f.enable();
     broadcastState();
+    }
   }
 
   public void setDisplay(boolean b) {
@@ -2008,7 +1964,8 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   @Override
   public ServiceConfig getConfig() {
-    OpenCVConfig config = new OpenCVConfig();
+    OpenCVConfig config = (OpenCVConfig)super.getConfig();
+    // FIXME - remove member vars use config only
     config.capturing = capturing;
     config.cameraIndex = cameraIndex;
     // TODO: make the grabber config a nested object to clean this up..
@@ -2025,7 +1982,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    OpenCVConfig config = (OpenCVConfig) c;
+    OpenCVConfig config = (OpenCVConfig) super.apply(c);
     setCameraIndex(config.cameraIndex);
     setGrabberType(config.grabberType);
     setInputFileName(config.inputFile);
@@ -2057,7 +2014,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   public static void main(String[] args) throws Exception {
 
     try {
-      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
+      Runtime.main(new String[] { "--id", "admin"});
       LoggingFactory.init("INFO");
 
       // Runtime.getInstance().load();
@@ -2092,7 +2049,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
       // Runtime.start("gui", "SwingGui");
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(true);
+      webgui.autoStartBrowser(false);
       webgui.startService();
 
       // FFmpegFrameRecorder test = new

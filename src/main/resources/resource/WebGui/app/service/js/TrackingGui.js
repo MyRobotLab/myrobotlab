@@ -6,10 +6,10 @@ angular.module('mrlapp.service.TrackingGui', []).controller('TrackingGuiCtrl', [
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
-        $scope.panOptions.attachName = service.pan
-        $scope.tiltOptions.attachName = service.tilt
-        $scope.pidOptions.attachName = service.pid
-        $scope.cvOptions.attachName = service.cv
+        $scope.panOptions.attachName = service.config.peers['pan'].name
+        $scope.tiltOptions.attachName = service.config.peers['tilt'].name
+        $scope.pidOptions.attachName = service.config.peers['pid'].name
+        $scope.cvOptions.attachName = service.config.peers['cv'].name
 
     }
 

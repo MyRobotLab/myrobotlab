@@ -1,35 +1,5 @@
 package org.myrobotlab.codec;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.PrettyPrinter;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.module.noctordeser.NoCtorDeserModule;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.internal.LinkedTreeMap;
-import org.myrobotlab.codec.json.GsonPolymorphicTypeAdapterFactory;
-import org.myrobotlab.codec.json.JacksonPolymorphicModule;
-import org.myrobotlab.codec.json.JacksonPrettyPrinter;
-import org.myrobotlab.codec.json.JsonDeserializationException;
-import org.myrobotlab.codec.json.JsonSerializationException;
-import org.myrobotlab.framework.MRLListener;
-import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.MethodCache;
-import org.myrobotlab.logging.Level;
-import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.config.ServiceConfig;
-import org.slf4j.Logger;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
-
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -51,9 +21,43 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.myrobotlab.codec.json.GsonPolymorphicTypeAdapterFactory;
+import org.myrobotlab.codec.json.JacksonPolymorphicModule;
+import org.myrobotlab.codec.json.JacksonPrettyPrinter;
+import org.myrobotlab.codec.json.JsonDeserializationException;
+import org.myrobotlab.codec.json.JsonSerializationException;
+import org.myrobotlab.framework.MRLListener;
+import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.MethodCache;
+import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.slf4j.Logger;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.PrettyPrinter;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.module.noctordeser.NoCtorDeserModule;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.internal.LinkedTreeMap;
 
 /**
  * handles all encoding and decoding of MRL messages or api(s) assumed context -
@@ -178,6 +182,13 @@ public class CodecUtils {
      * is found.
      */
     public static final Class<?> JSON_DEFAULT_OBJECT_TYPE = (USING_GSON) ? GSON_DEFAULT_OBJECT_TYPE : JACKSON_DEFAULT_OBJECT_TYPE;
+    
+    /**
+     * Default type for single parameter fromJson(String json), we initially assume this type 
+     */
+    public static final Class<?> DEFAULT_OBJECT_TYPE = LinkedHashMap.class;
+    
+    
     /**
      * The {@link Gson} object used for JSON operations when the selected backend is
      * Gson.
@@ -270,20 +281,53 @@ public class CodecUtils {
      * using the selected JSON backend.
      *
      * @param json  The JSON to be deserialized in String form
-     * @param clazz The target class.
+     * @param clazz The target class. If a class is not supplied the default class returned will be an {@link #DEFAULT_OBJECT_TYPE}
      * @param <T>   The type of the target class.
      * @return An object of the specified class (or a subclass of) with the state
      * given by the json. Null is an allowed return object.
      * @throws JsonDeserializationException if an error during deserialization occurs.
      * @see #USING_GSON
      */
+    @SuppressWarnings("unchecked")
     public static <T> /*@Nullable*/ T fromJson(/*@Nonnull*/ String json, /*@Nonnull*/ Class<T> clazz) {
         try {
             if (USING_GSON) {
+                if (clazz == null) {
+                  clazz = (Class<T>)DEFAULT_OBJECT_TYPE;
+                }
                 return gson.fromJson(json, clazz);
-            }
+            } else {
+              if (clazz == null) {
 
-            return mapper.readValue(json, clazz);
+                JsonParser parser = mapper.getFactory().createParser(json);
+                
+                // "peek" at the next token to determine its type
+                JsonToken token = parser.nextToken();
+
+                if (token == JsonToken.START_OBJECT) {
+                  clazz = (Class<T>)Map.class;
+                } else if (token == JsonToken.START_ARRAY) {
+                  clazz = (Class<T>)ArrayList.class;
+                } else if (token.isScalarValue()) {
+                  JsonNode node = mapper.readTree(json);
+                  if (node.isInt()) {
+                      return mapper.readValue(json, (Class<T>)Integer.class);
+                  } else if (node.isBoolean()) {
+                    return mapper.readValue(json, (Class<T>)Boolean.class);
+                  } else if (node.isNumber()) {
+                      return mapper.readValue(json, (Class<T>)Double.class);
+                  } else if (node.isTextual()) {
+                    return mapper.readValue(json, (Class<T>)String.class);
+                  }
+                } else {
+                    log.error("could not derive type from peeking json {}", json);
+                }
+                
+                parser.close();
+                
+              }
+              return mapper.readValue(json, clazz);
+            }
         } catch (Exception e) {
             throw new JsonDeserializationException(e);
         }
@@ -535,7 +579,9 @@ public class CodecUtils {
      * @throws JsonDeserializationException if jsonData is malformed
      */
     public static /*@Nullable*/ Message jsonToMessage(/*@Nonnull*/ String jsonData) {
-        log.debug("Deserializing message: " + jsonData);
+      if (log.isDebugEnabled()) {
+        log.debug("Deserializing message: %s",jsonData);
+      }
         Message msg = fromJson(jsonData, Message.class);
 
         if (msg == null) {
@@ -1415,7 +1461,7 @@ public class CodecUtils {
         LoggingFactory.init(Level.INFO);
 
         try {
-
+         
             Object o = readServiceConfig("data/config/InMoov2_FingerStarter/i01.chatBot.yml");
 
             String json = CodecUtils.fromJson("test", String.class);
@@ -1431,61 +1477,75 @@ public class CodecUtils {
         }
     }
 
+  /**
+   * A description of an API type
+   */
+  public static class ApiDescription {
     /**
-     * A description of an API type
+     * The string to use after {@link #PARAMETER_API} in URIs to select this
+     * API.
      */
-    public static class ApiDescription {
-        /**
-         * The string to use after {@link #PARAMETER_API}
-         * in URIs to select this API.
-         */
-        public final String key;
+    public final String key;
 
-        /**
-         * The path to reach this API
-         */
-        public final String path; // {scheme}://{host}:{port}/api/messages
+    /**
+     * The path to reach this API
+     */
+    public final String path; // {scheme}://{host}:{port}/api/messages
 
-        /**
-         * An example URI to reach this API
-         */
-        public final String exampleUri;
+    /**
+     * An example URI to reach this API
+     */
+    public final String exampleUri;
 
-        /**
-         * The description of this API
-         */
-        public final String description;
+    /**
+     * The description of this API
+     */
+    public final String description;
 
-        /**
-         * Construct a new API description.
-         *
-         * @param key            {@link #key}
-         * @param uriDescription {@link #path}
-         * @param exampleUri     {@link #exampleUri}
-         * @param description    {@link #description}
-         */
-        public ApiDescription(String key, String uriDescription, String exampleUri, String description) {
-            this.key = key;
-            this.path = uriDescription;
-            this.exampleUri = exampleUri;
-            this.description = description;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            ApiDescription that = (ApiDescription) o;
-            return Objects.equals(key, that.key)
-                    && Objects.equals(path, that.path)
-                    && Objects.equals(exampleUri, that.exampleUri)
-                    && Objects.equals(description, that.description);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(key, path, exampleUri, description);
-        }
+    /**
+     * Construct a new API description.
+     *
+     * @param key
+     *          {@link #key}
+     * @param uriDescription
+     *          {@link #path}
+     * @param exampleUri
+     *          {@link #exampleUri}
+     * @param description
+     *          {@link #description}
+     */
+    public ApiDescription(String key, String uriDescription, String exampleUri, String description) {
+      this.key = key;
+      this.path = uriDescription;
+      this.exampleUri = exampleUri;
+      this.description = description;
     }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o)
+        return true;
+      if (o == null || getClass() != o.getClass())
+        return false;
+      ApiDescription that = (ApiDescription) o;
+      return Objects.equals(key, that.key) && Objects.equals(path, that.path) && Objects.equals(exampleUri, that.exampleUri) && Objects.equals(description, that.description);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(key, path, exampleUri, description);
+    }
+  }
+
+  /**
+   * Single parameter from JSON. Will use default return type, currently LinkedTreeMap
+   * to return a POJO object that can be easily accessed.
+   * 
+   * @param json
+   * @return
+   */
+  public static Object fromJson(String json) {
+    return fromJson(json, null);
+  }
 
 }
