@@ -47,10 +47,14 @@ public class Py4j extends Service implements GatewayServerListener {
       log.info("Py4j gateway server already started");
     }
   }
-  
+
   public void newScript() {
-    if (!openedScripts.containsKey("script.py")) {
-      openScript("script.py", "");
+    newScript("script.py");
+  }  
+
+  public void newScript(String scriptName) {
+    if (!openedScripts.containsKey(scriptName)) {
+      openScript(scriptName, "");
     }
   }
 
