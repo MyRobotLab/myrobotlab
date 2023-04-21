@@ -188,6 +188,10 @@ public class Pcf8574 extends Service
     registerForInterfaceChange(I2CController.class);
     createPinList();
     refreshControllers();
+    for (int i = 0; i < pinDataCnt; ++i) {
+      int value = (writeRegister >> i) & 1;
+      getPin(i).setValue(value);
+    }
     subscribeToRuntime("registered");
   }
 
@@ -657,7 +661,7 @@ public class Pcf8574 extends Service
 
   @Override
   public void write(int address, int value) {
-
+    log.info("Write Pin int {} with {}", address, value);
     // PinDefinition pinDef = getPin(address); // this doesn't get used at all
     if (value == 0) {
       writeRegister = writeRegister &= ~(1 << address);
@@ -672,6 +676,7 @@ public class Pcf8574 extends Service
 
   @Override
   public void write(String pin, int value) {
+    //log.info("Write Pin string {} with {}", pin, value);
     if (getPin(pin) == null) {
       error("could not get pin %s", pin);
       return;
@@ -685,17 +690,21 @@ public class Pcf8574 extends Service
     writeRegister = data; // good idea to save the current state of the output
                           // register when we write out the register to the
                           // PCF8574.
+    for (int i = 0; i < pinDataCnt; ++i) {
+      int value = (data >> i) & 1;
+      getPin(i).setValue(value);
+    }
+    broadcastState();
   }
 
   public static void main(String[] args) {
-    LoggingFactory.init("info");
+    LoggingFactory.init("Info");
 
     try {
 
       Runtime.start("mega", "Arduino");
       Runtime.start("webgui", "WebGui");
-
-      Runtime.start("lcd", "Hd44780");
+      Runtime.start("pcf", "Pcf8574");
       // arduino = Runtime.start("arduino","Arduino")
       // arduino.setBoardMega()
       // arduino.connect("COM3")
