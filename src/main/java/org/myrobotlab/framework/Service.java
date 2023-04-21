@@ -664,10 +664,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     this.inbox = new Inbox(getFullName());
     this.outbox = new Outbox(this);
-
-    if (name.equals("i01")) {
-      log.info("here");
-    }
     
     File versionFile = new File(getResourceDir() + fs + "version.txt");
     if (versionFile.exists()) {
