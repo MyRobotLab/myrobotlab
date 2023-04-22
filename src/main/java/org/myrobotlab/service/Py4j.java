@@ -98,15 +98,13 @@ public class Py4j extends Service implements GatewayServerListener {
       gateway.shutdown();
       gateway = null;
     } else {
-      log.info("Py4j gateway server already started");
+      log.info("Py4j gateway server already stopped");
     }
   }
 
   // https://stackoverflow.com/questions/23157424/py4j-how-would-i-go-about-on-calling-a-python-method-in-java
   public interface PythonInterface {
     public Message onMsg(Message msg);
-    // below overloaded
-    // public int doOperation(int i, int j, int k);
   }
 
   // TODO - now just need to set a reference of callbacks
