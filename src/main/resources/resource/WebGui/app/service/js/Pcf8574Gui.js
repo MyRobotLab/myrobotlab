@@ -15,10 +15,9 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
             if (service.pinMap.hasOwnProperty(key)) {
                 console.log(key, service.pinMap[key]);
 
-                service.pinMap[key].value = 0 //service.pinDef[key].value
-                //if (key == 'D3') {
-                //    service.pinMap[key].value = 1
-                //}
+                //service.pinMap[key].value = 0 //service.pinDef[key].value
+                $scope.pinDef[key].value = service.pinDef[key].value // this set the trailing indicator to match the service pin value.
+                $scope.pinDef[key].toggleValue = 0
             }
         }
     }

@@ -126,7 +126,7 @@ public class Pcf8574 extends Service
   /**
    * I2C buss address. Default of "0x38"
    */
-  protected String deviceAddress = "0x38";
+  protected String deviceAddress = "0x20";
 
   /**
    * 0x20 - 0x27 for PCF8574 0c38 - 0x3F for PCF8574A Only difference between to
@@ -135,7 +135,7 @@ public class Pcf8574 extends Service
   protected List<String> deviceAddressList = Arrays.asList("0x20", "0x21", "0x22", "0x23", "0x24", "0x25", "0x26", "0x27", "0x38", "0x39", "0x3A", "0x3B", "0x3C", "0x3D", "0x3E",
       "0x3F", "0x49", "0x4A", "0x4B"); // Max9744
 
-  protected String deviceBus = "1";
+  protected String deviceBus = "0";
 
   protected List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7");
 
@@ -299,7 +299,7 @@ public class Pcf8574 extends Service
 
     for (int i = 0; i < pinDataCnt; ++i) {
       PinDefinition pindef = new PinDefinition(getName(), i);
-      String name = String.format("D%d", i);
+      String name = String.format("P%d", i);
       pindef.setRx(false);
       pindef.setTx(false);
       pindef.setAnalog(false);
@@ -307,6 +307,8 @@ public class Pcf8574 extends Service
       pindef.setPwm(false);
       pindef.setPinName(name);
       pindef.setAddress(i);
+      pindef.setValue(1);
+      pindef.setState(1);
       pindef.setMode("BIDIRECTIONAL");
       pinMap.put(name, pindef);
       pinIndex.put(i, pindef);
@@ -556,7 +558,7 @@ public class Pcf8574 extends Service
     // otherwise refresh the pinarray
     if (!isPublishing)
       read8();
-    return getPin(address).getValue();
+    return getPin(address).getState();
   }
 
   @Override
@@ -569,7 +571,7 @@ public class Pcf8574 extends Service
     // it is possible to test for a change in value at this point.
     for (int i = 0; i < 8; i++) {
       int value = (dataread >> i) & 1;
-      getPin(i).setValue(value);
+      getPin(i).setState(value);
     }
     return dataread;
   }
@@ -662,7 +664,7 @@ public class Pcf8574 extends Service
   @Override
   public void write(int address, int value) {
     log.info("Write Pin int {} with {}", address, value);
-    // PinDefinition pinDef = getPin(address); // this doesn't get used at all
+    //PinDefinition pinDef = getPin(address); // this doesn't get used at all
     if (value == 0) {
       writeRegister = writeRegister &= ~(1 << address);
     } else {
@@ -671,7 +673,7 @@ public class Pcf8574 extends Service
     writeRegister(writeRegister);
     // The writeRegister and the value we read in are not the same thing.
     // We should not be setting the pins value based on what we write out to it.
-    // pinDef.setValue(value);
+    //pinDef.setValue(value);
   }
 
   @Override
@@ -694,6 +696,7 @@ public class Pcf8574 extends Service
       int value = (data >> i) & 1;
       getPin(i).setValue(value);
     }
+    read8();
     broadcastState();
   }
 

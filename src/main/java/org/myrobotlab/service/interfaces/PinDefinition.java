@@ -64,6 +64,8 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 
   Integer value;
 
+  Integer state;
+
   transient Object pinImpl;
 
   /**
@@ -87,6 +89,14 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 
   public void setValue(int value) {
     this.value = value;
+  }
+
+  public Integer getState() {
+    return state.intValue();
+  }
+
+  public void setState(int value) {
+    this.state = value;
   }
 
   public String getPinName() {

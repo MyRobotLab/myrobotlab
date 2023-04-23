@@ -25,15 +25,15 @@
     </tr>
     <tr>
         <td>
-        <button class="btn btn-default" ng-show="service.isAttached" ng-click="startReading()">stop reading</button>
+        <button class="btn btn-default" ng-show="service.isAttached" ng-click="startReading()">start reading</button>
             <input type="text" class="form-control small-text-form" ng-model="service.rateHz" ng-change="setRate()"/>&nbsp;hz
         </td>
     </tr>
     <tr ng-show="service.isAttached" data-ng-repeat="(pinKey, pinDef) in service.pinMap">
         <td>
             {{ pinDef.pin }} <!-- toggle ng-model="toggleValue" class="toggle-text" ng-change="changed()" size="btn-sm" on="write" off="read"></toggle -->
-            <toggle ng-model="toggleValue" class="toggle-text" ng-change="changed(pinDef, toggleValue)" size="btn-sm" on="1" off="0" on-class="btn-success"></toggle>
-            <span class="badge badge-secondary">{{pinDef.value}}</span>
+            <toggle ng-model="toggleValue" class="toggle-text" ng-change="changed(pinDef, toggleValue)" size="btn-sm" on="1" off="0" on-class="btn-success" off-class="btn-danger"></toggle>
+            <span class="badge badge-secondary">{{pinDef.value}}</span> <span class="badge badge-secondary">{{pinDef.state}}</span>
             <!--
             <oscope id="oscope" service-name="{{service.name}}"></oscope>
             -->
