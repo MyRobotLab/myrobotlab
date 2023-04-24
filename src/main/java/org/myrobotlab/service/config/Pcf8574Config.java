@@ -15,17 +15,6 @@ public class Pcf8574Config extends ServiceConfig {
   /**
    * pin controller for this pcf
    */
-   */
-  public String address = "0x20";
-  
-  /**
-   * arduino is always 0 raspi is usually 1
-   */
-  public String bus = "0";
-  
-  /**
-   * pin controller for this pcf
-   */
   public String controller;
 
 }
