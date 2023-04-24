@@ -61,36 +61,28 @@ public class Pcf8574 extends Service
     void publishPinData() {
       // Read a single byte containing all 8 pins
       read8();
-      PinData[] pinArray = new PinData[pinDataCnt];
-      for (int i = 0; i < pinArray.length; ++i) {
-        PinData pinData = new PinData(i, read(i));
-        pinArray[i] = pinData;
-        String address = pinData.pin;
-
-        // handle individual pins
-        if (pinListeners.containsKey(address)) {
-          List<PinListener> list = pinListeners.get(address);
-          for (int j = 0; j < list.size(); ++j) {
-            PinListener pinListner = list.get(j);
-            if (pinListner.isLocal()) {
-              pinListner.onPin(pinData);
-            } else {
-              invoke("publishPin", pinData);
-            }
-          }
+      List<PinData> pinArray = new ArrayList<>();
+      for (int address = 0; address < 8; ++address) {
+        PinData pinData = new PinData(getPin(address).getPin(), read(address));
+        PinDefinition pindef = getPin(address);
+        
+        if (pindef.isEnabled()) {
+          invoke("publishPin", pinData);
+          pinArray.add(pinData);
         }
-      }
-
+        
+      } // for
+      
       // publish array
-      invoke("publishPinArray", new Object[] { pinArray });
+      invoke("publishPinArray", new Object[] {pinArray.toArray(new PinData[0])});
     }
 
     // FIXME - have a read "rate" in Hz
     @Override
     public void run() {
-
-      log.info("New publisher instance started at a sample frequency of {} Hz", sampleFreq);
-      long sleepTime = 1000 / (long) sampleFreq;
+      Pcf8574Config c = (Pcf8574Config) config;
+      log.info("New publisher instance started at a sample frequency of {} Hz", c.rateHz);
+      long sleepTime = 1000 / (long) c.rateHz;
       isPublishing = true;
       try {
         while (isPublishing) {
@@ -99,12 +91,8 @@ public class Pcf8574 extends Service
         }
 
       } catch (Exception e) {
-        if (e instanceof InterruptedException) {
-          log.info("Shutting down Publisher");
-        } else {
           isPublishing = false;
           log.error("publisher threw", e);
-        }
       }
     }
   }
@@ -156,7 +144,8 @@ public class Pcf8574 extends Service
   protected Map<Integer, PinDefinition> pinIndex = new HashMap<>();
 
   /**
-   * map of pin listeners
+   * map of pin listeners FIXME - probably should be deprecated in favor of
+   * simple mrl listener
    */
   protected transient Map<String, List<PinListener>> pinListeners = new HashMap<String, List<PinListener>>();
 
@@ -171,11 +160,6 @@ public class Pcf8574 extends Service
   protected Map<String, Set<Integer>> pinSets = new HashMap<String, Set<Integer>>();
 
   protected transient Thread publisher = null;
-
-  /**
-   * default sample rate 1 Hz
-   */
-  protected double sampleFreq = 1; // Set
 
   /**
    * The writeRegister is what was last sent to the PCF8574. By default on power
@@ -395,22 +379,33 @@ public class Pcf8574 extends Service
       publisher = new Publisher(getName());
       publisher.start();
     }
+    broadcastState();
   }
 
   @Override
   public void enablePin(int address, int rate) {
-    // TODO Auto-generated method stub
-
+    setSampleRate(rate);
+    enablePin(address);
   }
 
   @Override
   public void enablePin(String pin) {
-    enablePin(getPin(pin).getAddress());
+    PinDefinition pindef = getPin(pin);
+    if (pindef == null) {
+      error("pin %s not found", pin);
+      return;
+    }
+    enablePin(pindef.getAddress());
   }
 
   @Override
   public void enablePin(String pin, int rate) {
-    enablePin(getPin(pin).getAddress(), rate);
+    PinDefinition pindef = getPin(pin);
+    if (pindef == null) {
+      error("pin %s not found", pin);
+      return;
+    }
+    enablePin(pindef.getAddress(), rate);
   }
 
   @Override
@@ -420,8 +415,12 @@ public class Pcf8574 extends Service
 
   @Override
   public Integer getAddress(String pin) {
-    // TODO Auto-generated method stub
-    return null;
+    PinDefinition pindef = getPin(pin);
+    if (pindef == null) {
+      error("pin %s not found", pin);
+      return null;
+    }
+    return pindef.getAddress();
   }
 
   // This section contains all the methods used to query / show all attached
@@ -530,8 +529,6 @@ public class Pcf8574 extends Service
 
   @Override
   public PinData publishPin(PinData pinData) {
-    // caching last value
-    getPin(pinData.pin).setValue(pinData.value);
     return pinData;
   }
 
@@ -554,11 +551,8 @@ public class Pcf8574 extends Service
 
   @Override
   public int read(int address) {
-    // When publishing the refresh is done in the publishing method
-    // otherwise refresh the pinarray
-    if (!isPublishing)
       read8();
-    return getPin(address).getState();
+    return getPin(address).getValue();
   }
 
   @Override
@@ -571,7 +565,7 @@ public class Pcf8574 extends Service
     // it is possible to test for a change in value at this point.
     for (int i = 0; i < 8; i++) {
       int value = (dataread >> i) & 1;
-      getPin(i).setState(value);
+      getPin(i).setValue(value);
     }
     return dataread;
   }
@@ -583,7 +577,7 @@ public class Pcf8574 extends Service
    */
   public int readRegister() {
     byte[] readbuffer = new byte[1];
-    controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
+    controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);    
     return (readbuffer[0]) & 0xff;
   }
 
@@ -653,18 +647,19 @@ public class Pcf8574 extends Service
    * @return - returns the rate that was set
    */
   public double setSampleRate(double rate) {
+    Pcf8574Config c = (Pcf8574Config) config;
     if (rate < 0) {
-      log.error("setSampleRate. Rate must be > 0. Ignored {}, returning to {}", rate, this.sampleFreq);
-      return this.sampleFreq;
+      log.error("setSampleRate. Rate must be > 0. Ignored {}, returning to {}", rate, c.rateHz);
+      return c.rateHz;
     }
-    this.sampleFreq = rate;
+    c.rateHz = rate;
     return rate;
   }
 
   @Override
   public void write(int address, int value) {
     log.info("Write Pin int {} with {}", address, value);
-    //PinDefinition pinDef = getPin(address); // this doesn't get used at all
+    // PinDefinition pinDef = getPin(address); // this doesn't get used at all
     if (value == 0) {
       writeRegister = writeRegister &= ~(1 << address);
     } else {
@@ -673,12 +668,12 @@ public class Pcf8574 extends Service
     writeRegister(writeRegister);
     // The writeRegister and the value we read in are not the same thing.
     // We should not be setting the pins value based on what we write out to it.
-    //pinDef.setValue(value);
+    // pinDef.setValue(value);
   }
 
   @Override
   public void write(String pin, int value) {
-    //log.info("Write Pin string {} with {}", pin, value);
+    // log.info("Write Pin string {} with {}", pin, value);
     if (getPin(pin) == null) {
       error("could not get pin %s", pin);
       return;
@@ -731,10 +726,16 @@ public class Pcf8574 extends Service
       log.error("main threw", e);
     }
   }
+  
+  @Override
+  public void stopService() {
+    super.stopService();
+    isPublishing = false;
+  }
 
   @Override
   public ServiceConfig getConfig() {
-    Pcf8574Config config = (Pcf8574Config)super.getConfig();
+    Pcf8574Config config = (Pcf8574Config) super.getConfig();
     // FIXME - remove local fields in favor of config only
     config.address = deviceAddress;
     config.bus = deviceBus;

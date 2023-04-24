@@ -16,5 +16,10 @@ public class Pcf8574Config extends ServiceConfig {
    * pin controller for this pcf
    */
   public String controller;
+  
+  /**
+   * read polling rate in Hertz
+   */
+  public double rateHz = 1;
 
 }

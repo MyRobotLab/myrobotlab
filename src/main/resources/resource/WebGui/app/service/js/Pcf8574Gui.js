@@ -11,15 +11,6 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
     this.updateState = function(service) {
         $scope.service = service
 
-        for (var key in service.pinMap) {
-            if (service.pinMap.hasOwnProperty(key)) {
-                console.log(key, service.pinMap[key]);
-
-                //service.pinMap[key].value = 0 //service.pinDef[key].value
-                $scope.pinDef[key].value = service.pinDef[key].value // this set the trailing indicator to match the service pin value.
-                $scope.pinDef[key].toggleValue = 0
-            }
-        }
     }
 
     this.onMsg = function(inMsg) {
@@ -27,6 +18,14 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
         switch (inMsg.method) {
         case 'onState':
             _self.updateState(data)
+            $scope.$apply()
+            break
+        case 'onPin':
+            $scope.service.pinMap[data.pin].value = data.value
+            $scope.$apply()
+            break
+        case 'onPinDefinition':
+            $scope.service.pinMap[data.pin] = data
             $scope.$apply()
             break
         case 'onPinArray':
@@ -68,6 +67,14 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
 
     }
 
+    $scope.enablePin = function(pin, enable) {
+        if (enable) {
+            msg.send('enablePin', pin)
+        } else {
+            msg.send('disablePin', pin)
+        }
+            }
+
     $scope.attach = function() {
         msg.send('attach', $scope.options.attachName)
     }
@@ -81,6 +88,10 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
     // Java service - although msg.sweep() was tried for ng-click
     // for some reason Js resolved msg.sweep(null, null, null, null) :P
 
+
+    
+    msg.subscribe('publishPin')
+    msg.subscribe('publishPinDefinition')
     msg.subscribe(this)
 }
 ])
