@@ -61,8 +61,10 @@ public class Pcf8574 extends Service
       // Read a single byte containing all 8 pins
       read8();
       List<PinData> pinArray = new ArrayList<>();
+      // reads a byte of data in
+      readRegister();
       for (int address = 0; address < 8; ++address) {
-        PinData pinData = new PinData(getPin(address).getPin(), read(address));
+        PinData pinData = new PinData(getPin(address).getPin(), getPin(address).getValue());
         PinDefinition pindef = getPin(address);
         
         if (pindef.isEnabled()) {
@@ -556,11 +558,6 @@ public class Pcf8574 extends Service
 
   int read8() {
     int dataread = readRegister();
-    // it is possible to test for a change in value at this point.
-    for (int i = 0; i < 8; i++) {
-      int value = (dataread >> i) & 1;
-      getPin(i).setValue(value);
-    }
     return dataread;
   }
 
@@ -572,8 +569,13 @@ public class Pcf8574 extends Service
   public int readRegister() {
     byte[] readbuffer = new byte[1];
     Pcf8574Config c = (Pcf8574Config)config;
-    controller.i2cRead(this, Integer.parseInt(c.bus), Integer.decode(c.address), readbuffer, readbuffer.length);    
-    return (readbuffer[0]) & 0xff;
+    controller.i2cRead(this, Integer.parseInt(c.bus), Integer.decode(c.address), readbuffer, readbuffer.length);
+    int dataread = (readbuffer[0]) & 0xff;
+    for (int i = 0; i < 8; i++) {
+      int value = (dataread >> i) & 1;
+      getPin(i).setValue(value);
+    }    
+    return dataread;
   }
 
   /**
