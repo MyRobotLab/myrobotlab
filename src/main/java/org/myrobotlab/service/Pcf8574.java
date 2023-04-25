@@ -59,7 +59,7 @@ public class Pcf8574 extends Service
 
     void publishPinData() {
       // Read a single byte containing all 8 pins
-      read8();
+      readRegister();
       List<PinData> pinArray = new ArrayList<>();
       // reads a byte of data in
       readRegister();
@@ -547,18 +547,13 @@ public class Pcf8574 extends Service
 
   @Override
   public int read(int address) {
-      read8();
+      readRegister();
     return getPin(address).getValue();
   }
 
   @Override
   public int read(String pinName) {
     return read(getPin(pinName).getAddress());
-  }
-
-  int read8() {
-    int dataread = readRegister();
-    return dataread;
   }
 
   /**
@@ -691,7 +686,7 @@ public class Pcf8574 extends Service
       int value = (data >> i) & 1;
       getPin(i).setState(value);
     }
-    read8();
+    readRegister();
     broadcastState();
   }
 
