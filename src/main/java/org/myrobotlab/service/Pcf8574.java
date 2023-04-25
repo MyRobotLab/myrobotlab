@@ -54,10 +54,9 @@ public class Pcf8574 extends Service
   public class Publisher extends Thread {
 
     public Publisher(String name) {
-      super(String.format("%s.publisher", name));
+      super(String.format("%s.poller", name));
     }
 
-    // FIXME - have a read "rate" in Hz
     void publishPinData() {
       // Read a single byte containing all 8 pins
       read8();
@@ -71,27 +70,25 @@ public class Pcf8574 extends Service
           pinArray.add(pinData);
         }
         
-      } // for
+      }
       
-      // publish array
       invoke("publishPinArray", new Object[] {pinArray.toArray(new PinData[0])});
     }
 
-    // FIXME - have a read "rate" in Hz
     @Override
     public void run() {
       Pcf8574Config c = (Pcf8574Config) config;
       log.info("New publisher instance started at a sample frequency of {} Hz", c.rateHz);
       long sleepTime = 1000 / (long) c.rateHz;
-      isPublishing = true;
+      isPolling = true;
       try {
-        while (isPublishing) {
+        while (isPolling) {
           Thread.sleep(sleepTime);
           publishPinData();
         }
 
       } catch (Exception e) {
-          isPublishing = false;
+          isPolling = false;
           log.error("publisher threw", e);
       }
     }
@@ -105,16 +102,10 @@ public class Pcf8574 extends Service
 
   private static final long serialVersionUID = 1L;
 
+  // FIXME - remove this at some point ... publishing only needs name
   protected transient I2CController controller;
 
-  protected String controllerName;
-
   protected List<String> controllers;
-
-  /**
-   * I2C buss address. Default of "0x38"
-   */
-  protected String deviceAddress = "0x20";
 
   /**
    * 0x20 - 0x27 for PCF8574 0c38 - 0x3F for PCF8574A Only difference between to
@@ -123,16 +114,13 @@ public class Pcf8574 extends Service
   protected List<String> deviceAddressList = Arrays.asList("0x20", "0x21", "0x22", "0x23", "0x24", "0x25", "0x26", "0x27", "0x38", "0x39", "0x3A", "0x3B", "0x3C", "0x3D", "0x3E",
       "0x3F", "0x49", "0x4A", "0x4B"); // Max9744
 
-  protected String deviceBus = "0";
-
   protected List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7");
 
   protected int directionRegister = 0xff; // byte
 
   protected boolean isAttached = false;
 
-  // Publisher
-  protected boolean isPublishing = false;
+  protected boolean isPolling = false;
 
   protected transient Map<String, PinArrayListener> pinArrayListeners = new HashMap<String, PinArrayListener>();
 
@@ -159,7 +147,7 @@ public class Pcf8574 extends Service
    */
   protected Map<String, Set<Integer>> pinSets = new HashMap<String, Set<Integer>>();
 
-  protected transient Thread publisher = null;
+  protected transient Thread polling = null;
 
   /**
    * The writeRegister is what was last sent to the PCF8574. By default on power
@@ -263,17 +251,23 @@ public class Pcf8574 extends Service
 
   @Override
   public void attachI2CController(I2CController controller) {
-
-    if (this.controllerName == controller.getName()) {
-      log.info("already attached to {}, use detach({}) first", controllerName, controllerName);
+    Pcf8574Config c = (Pcf8574Config)config;
+    
+    if (c.controller == controller.getName()) {
+      log.info("already attached to {}, use detach({}) first", c.controller, c.controller);
       return;
     }
 
     this.controller = controller;
-    controllerName = controller.getName();
+    c.controller = controller.getName();
     isAttached = true;
     controller.attachI2CControl(this);
-    log.info("attached {} device on bus: {} address {}", controllerName, deviceBus, deviceAddress);
+    log.info("attached {} device on bus: {} address {}", c.controller, c.bus, c.address);
+    
+    log.info("Starting a new publisher instance");
+    polling = new Publisher(getName());
+    polling.start();
+    
     broadcastState();
   }
 
@@ -326,12 +320,15 @@ public class Pcf8574 extends Service
 
   @Override
   public void detachI2CController(I2CController controller) {
-
+    Pcf8574Config c = (Pcf8574Config)config;
+    isPolling = false;    
+    disablePins();
+    
     if (!isAttached(controller))
       return;
 
     controller.detachI2CControl(this);
-    controllerName = null;
+    c.controller = null;
     isAttached = false;
     broadcastState();
   }
@@ -357,9 +354,6 @@ public class Pcf8574 extends Service
     for (int i = 0; i < pinDataCnt; i++) {
       disablePin(i);
     }
-    if (isPublishing) {
-      isPublishing = false;
-    }
   }
 
   @Override
@@ -373,12 +367,6 @@ public class Pcf8574 extends Service
     PinDefinition pin = getPin(address);
     pin.setEnabled(true);
     invoke("publishPinDefinition", pin);
-
-    if (!isPublishing) {
-      log.info("Starting a new publisher instance");
-      publisher = new Publisher(getName());
-      publisher.start();
-    }
     broadcastState();
   }
 
@@ -410,7 +398,8 @@ public class Pcf8574 extends Service
 
   @Override
   public String getAddress() {
-    return deviceAddress;
+    Pcf8574Config c = (Pcf8574Config)config;
+    return c.address;
   }
 
   @Override
@@ -439,17 +428,22 @@ public class Pcf8574 extends Service
 
   @Override
   public String getBus() {
-    return deviceBus;
+    Pcf8574Config c = (Pcf8574Config)config;
+    return c.bus;
   }
 
   @Override
+  @Deprecated /* use getAddress */
   public String getDeviceAddress() {
-    return this.deviceAddress;
+    Pcf8574Config c = (Pcf8574Config)config;
+    return c.address;
   }
 
   @Override
+  @Deprecated /* use getBus */
   public String getDeviceBus() {
-    return this.deviceBus;
+    Pcf8574Config c = (Pcf8574Config)config;
+    return c.bus;
   }
 
   @Override
@@ -577,7 +571,8 @@ public class Pcf8574 extends Service
    */
   public int readRegister() {
     byte[] readbuffer = new byte[1];
-    controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);    
+    Pcf8574Config c = (Pcf8574Config)config;
+    controller.i2cRead(this, Integer.parseInt(c.bus), Integer.decode(c.address), readbuffer, readbuffer.length);    
     return (readbuffer[0]) & 0xff;
   }
 
@@ -627,7 +622,8 @@ public class Pcf8574 extends Service
    */
   @Override
   public void setDeviceAddress(String deviceAddress) {
-    this.deviceAddress = deviceAddress;
+    Pcf8574Config c = (Pcf8574Config)config;
+    c.address = deviceAddress;
     broadcastState();
   }
 
@@ -637,7 +633,8 @@ public class Pcf8574 extends Service
    */
   @Override
   public void setDeviceBus(String deviceBus) {
-    this.deviceBus = deviceBus;
+    Pcf8574Config c = (Pcf8574Config)config;
+    c.bus = deviceBus;
     broadcastState();
   }
 
@@ -682,8 +679,9 @@ public class Pcf8574 extends Service
   }
 
   public void writeRegister(int data) {
+    Pcf8574Config c = (Pcf8574Config) config;
     byte[] writebuffer = { (byte) data };
-    controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
+    controller.i2cWrite(this, Integer.parseInt(c.bus), Integer.decode(c.address), writebuffer, writebuffer.length);
     writeRegister = data; // good idea to save the current state of the output
                           // register when we write out the register to the
                           // PCF8574.
@@ -730,18 +728,12 @@ public class Pcf8574 extends Service
   @Override
   public void stopService() {
     super.stopService();
-    isPublishing = false;
+    isPolling = false;
   }
 
   @Override
   public ServiceConfig getConfig() {
     Pcf8574Config config = (Pcf8574Config) super.getConfig();
-    // FIXME - remove local fields in favor of config only
-    config.address = deviceAddress;
-    config.bus = deviceBus;
-    if (controller != null) {
-      config.controller = controllerName;
-    }
     return config;
   }
 

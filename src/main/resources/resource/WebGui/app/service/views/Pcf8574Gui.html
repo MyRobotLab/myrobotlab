@@ -9,11 +9,11 @@
             <form class="form-inline">
                 <attach options='options'/>
                 bus
-                <select class="form-control" ng-model="service.deviceBus" ng-change="setBus()" ng-options="bus for bus in service.deviceBusList">
+                <select class="form-control" ng-model="service.config.bus" ng-change="setBus()" ng-options="bus for bus in service.deviceBusList">
                     <option>{{bus}}</option>
                 </select>
                 address
-                <select class="form-control" ng-model="service.deviceAddress" ng-change="setAddress()" ng-options="address for address in service.deviceAddressList">
+                <select class="form-control" ng-model="service.config.address" ng-change="setAddress()" ng-options="address for address in service.deviceAddressList">
                     <option>{{address}}</option>
                 </select>
             </form>
@@ -22,7 +22,7 @@
     <tr>
         <td>
             <button class="btn btn-default" ng-show="!service.isAttached" ng-click="attach()">attach</button>
-            <button class="btn btn-default" ng-show="service.isAttached" ng-click="msg.detach(service.controllerName)">detach</button>
+            <button class="btn btn-default" ng-show="service.isAttached" ng-click="msg.detach(service.config.controller)">detach</button>
         </td>
         <td>
         <!-- <button class="btn btn-default" ng-show="service.isAttached" ng-click="startReading()">start reading</button> -->

@@ -3,8 +3,6 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
     var _self = this
     var msg = this.msg
 
-    // init
-    $scope.controllerName = ''
     $scope.controllers = []
 
     // GOOD TEMPLATE TO FOLLOW
@@ -38,22 +36,22 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
     }
 
     $scope.setBus = function() {
-        msg.send('setBus', $scope.service.deviceBus)
+        msg.send('setBus', $scope.service.config.bus)
     }
 
     $scope.setAddress = function() {
-        msg.send('setAddress', $scope.service.deviceAddress)
+        msg.send('setAddress', $scope.service.config.address)
     }
 
-    _self.setControllerName = function() {// $scope.service.controllerName = controller
-    // msg.send('attach', $scope.service.deviceAddress)
+    _self.setControllerName = function() {// $scope.service.config.controller = controller
+    // msg.send('attach', $scope.service.config.address)
     }
 
     $scope.options = {
         interface: 'I2CController',
         attach: _self.setControllerName,
         // callback: function...
-        attachName: $scope.service.controllerName
+        attachName: $scope.service.config.controller
     }
 
     $scope.changed = function(pinDef, toggleValue) {
