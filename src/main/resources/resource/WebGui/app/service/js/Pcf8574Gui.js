@@ -74,7 +74,12 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
             }
 
     $scope.attach = function() {
-        msg.send('attach', $scope.options.attachName)
+        if ($scope.options.attachName){
+            msg.send('attach', $scope.options.attachName)    
+        } else {
+            msg.send('warn', 'you must select an I2C controller to attach')
+        }
+        
     }
 
     // FIXME - which i could get rid of this
