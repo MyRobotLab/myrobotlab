@@ -689,7 +689,7 @@ public class Pcf8574 extends Service
                           // PCF8574.
     for (int i = 0; i < pinDataCnt; ++i) {
       int value = (data >> i) & 1;
-      getPin(i).setValue(value);
+      getPin(i).setState(value);
     }
     read8();
     broadcastState();

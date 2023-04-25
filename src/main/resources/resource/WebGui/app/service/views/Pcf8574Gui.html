@@ -25,20 +25,19 @@
             <button class="btn btn-default" ng-show="service.isAttached" ng-click="msg.detach(service.controllerName)">detach</button>
         </td>
         <td>
-           <!-- <button class="btn btn-default" ng-show="service.isAttached" ng-click="startReading()">start reading</button> -->
-            <!-- input type="text" class="form-control small-text-form" ng-model="service.config.rateHz" ng-change="setRate()"/ -->          
-        
+        <!-- <button class="btn btn-default" ng-show="service.isAttached" ng-click="startReading()">start reading</button> -->
+        <!-- input type="text" class="form-control small-text-form" ng-model="service.config.rateHz" ng-change="setRate()"/ -->
         </td>
         <td></td>
     </tr>
     <tr>
         <td>Output</td>
         <td>Value</td>
-        <td> {{service.config.rateHz}} hz </td>
+        <td>{{service.config.rateHz}} hz </td>
     </tr>
     <tr ng-show="service.isAttached" data-ng-repeat="(pinKey, pinDef) in service.pinMap">
         <td>
-            {{ pinDef.pin }} 
+            {{pinDef.pin}} 
             <button ng-show="!pinDef.state" ng-click="changed(pinDef, !pinDef.state)" size="btn-sm" class="btn btn-danger">0</button>
             <button ng-show="pinDef.state" ng-click="changed(pinDef, !pinDef.state)" size="btn-sm" class="btn btn-success">1</button>
         </td>
