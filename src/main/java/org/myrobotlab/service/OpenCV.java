@@ -758,7 +758,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
     return cameraIndexes;
   }
-
+  
   public int getCameraIndex() {
     return this.cameraIndex;
   }
