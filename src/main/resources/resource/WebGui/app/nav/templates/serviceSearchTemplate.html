@@ -1,4 +1,10 @@
 <a>
-    <img ng-src="/{{match.model.simpleName + '.png'}}" width="16">
-    <span ng-bind-html="match.label | uibTypeaheadHighlight:query"></span>
+    <span ng-show="{{!match.model.installed}}" class="not-installed"><s>
+    <img ng-src="/{{match.model.simpleName + '.png'}}" width="16"/>
+    {{match.model.simpleName}}</s></span>
+
+    <span ng-show="{{match.model.installed}}">
+    <img ng-src="/{{match.model.simpleName + '.png'}}" width="16"/>
+    {{match.model.simpleName}}</span>
+    
 </a>
