@@ -760,6 +760,44 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     return cameraIndexes;
   }
 
+  /**
+   * Gets valid camera indexes by iterating through 8
+   * 
+   * @return
+   */
+  public List<Integer> getCameraIndexes() {
+    List<Integer> cameraIndexes = new ArrayList<>();
+    if (isCapturing()) {
+      error("cannot get indexes when capturing");
+      return cameraIndexes;
+    }
+
+    // preserving original state
+    String previousType = grabberType;
+    Integer previousIndex = cameraIndex;
+
+    for (int i = 0; i < 8; i++) {
+      try {
+        FrameGrabber grabber = new OpenCVFrameGrabber(i);
+        grabber.start();
+        Frame frame = grabber.grab();
+        if (frame != null) {
+          cameraIndexes.add(i);
+        }
+        grabber.stop();
+        grabber = null;
+      } catch (Exception e) {
+        log.info(String.format("not able to camera grab a frame from camera %d", i));
+      }
+    }
+
+    // resetting to original type
+    grabberType = previousType;
+    cameraIndex = previousIndex;
+
+    return cameraIndexes;
+  }
+
   public int getCameraIndex() {
     return this.cameraIndex;
   }
