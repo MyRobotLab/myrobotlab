@@ -365,20 +365,20 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     // the i2c bus here and in MrlComm
     // This will only handle the creation of i2cBus.
     if (i2cBus == null) {
-      i2cBus = new I2CBus(String.format("I2CBus%s", control.getBus()));
-      i2cBusAttach(i2cBus, Integer.parseInt(control.getBus()));
+      i2cBus = new I2CBus(String.format("I2CBus%s", control.getDeviceBus()));
+      i2cBusAttach(i2cBus, Integer.parseInt(control.getDeviceBus()));
     }
 
     // This part adds the service to the mapping between
     // busAddress||DeviceAddress
     // and the service name to be able to send data back to the invoker
-    String key = String.format("%s.%s", control.getBus(), control.getAddress());
+    String key = String.format("%s.%s", control.getDeviceBus(), control.getDeviceAddress());
     I2CDeviceMap devicedata = new I2CDeviceMap();
     if (i2cDevices.containsKey(key)) {
-      log.error("Device {} {} {} already exists.", control.getBus(), control.getAddress(), control.getName());
+      log.error("Device {} {} {} already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName());
     } else {
-      devicedata.busAddress = control.getBus();
-      devicedata.deviceAddress = control.getAddress();
+      devicedata.busAddress = control.getDeviceBus();
+      devicedata.deviceAddress = control.getDeviceAddress();
       devicedata.control = control;
       i2cDevices.put(key, devicedata);
       control.attachI2CController(this);

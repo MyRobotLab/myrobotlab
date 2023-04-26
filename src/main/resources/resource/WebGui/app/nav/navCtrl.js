@@ -6,10 +6,6 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$timeout', '$stat
     $scope.warningStatus = null
     $scope.infoStatus = null
 
-    $scope.lastStatusName = null
-    $scope.lastStatusLevel = null
-    $scope.lastStatusDetail = null
-
     $scope.mrl = mrl
 
     $scope.errorCount = 0
@@ -61,12 +57,7 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$timeout', '$stat
     // status info warn error
     $scope.statusList = statusSvc.getStatuses()
     statusSvc.subscribeToUpdates(function(status) {
-        $timeout(function() {
             
-            $scope.lastStatusName = status.name
-            $scope.lastStatusLevel = status.name
-            $scope.lastStatusDetail = status.name
-
             if (status.level == "error") {
                 $scope.errorStatus = status
                 $scope.errorCount += 1
@@ -77,10 +68,7 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$timeout', '$stat
                 $scope.infoStatus = status
                 $scope.infoCount += 1
             }
-        })
     })
-
-    $scope.showAll = true
 
     var panelsUpdated = function(panels) {
         $scope.panels = panels

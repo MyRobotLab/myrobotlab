@@ -503,7 +503,7 @@ public abstract class Repo {
       log.error("loading threw", e);
     }
 
-    log.info("loaded {}", getRepoPath());
+    log.info("finished processing {}", getRepoPath());
   }
 
   /**

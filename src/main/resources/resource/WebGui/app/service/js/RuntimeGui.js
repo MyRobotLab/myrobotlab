@@ -186,8 +186,8 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             break
 
         case 'onServiceTypes':
-            $scope.possibleServices = data
-            mrl.setPossibleServices($scope.possibleServices)
+            $scope.serviceTypes = data
+            mrl.setPossibleServices($scope.serviceTypes)
             break
 
         case 'onRegistered':
@@ -364,7 +364,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         return $scope.service.configName
     }
 
-    // $scope.possibleServices = Object.values(mrl.getPossibleServices())
+    // $scope.serviceTypes = Object.values(mrl.getPossibleServices())
     msg.subscribe("saveDefaults")
     msg.subscribe("getConfigName")
     msg.subscribe("getServiceTypes")

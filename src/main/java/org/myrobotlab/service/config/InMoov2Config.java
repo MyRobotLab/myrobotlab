@@ -14,36 +14,38 @@ import org.myrobotlab.service.config.RandomConfig.RandomMessageConfig;
 
 public class InMoov2Config extends ServiceConfig {
 
-  public boolean pirWakeUp = false;
-
-  public boolean pirEnableTracking = false;
-
-  public boolean loadGestures = true;
-
-  public boolean virtual = false;
-
-  /**
-   * default to null - allow the OS to set it, unless explicilty set
-   */
-  public String locale = null; // = "en-US";
+  public int analogPinFromSoundCard = 53;
   
-  // using ProgramAB predicates
-  // public Map<String, Object> data = new TreeMap<>();
-
-  /**
-   * startup and shutdown will pause inmoov - set the speed to this value then
-   * attempt to move to rest
-   */
-  public double shutdownStartupSpeed = 50;
-
+  public int audioPollsBySeconds = 2;
+  
+  public boolean audioSignalProcessing=false;
+  
+  public boolean batteryInSystem = false;
+  
+  public boolean customSound=false;
+  
+  public boolean forceMicroOnIfSleeping = true;
+  
+  public boolean healthCheckActivated = false;
+  
+  public int healthCheckTimerMs = 60000;
+  
   public boolean heartbeat = false;
   
-  public boolean startMouthOnBoot = true;
 
   /**
    * idle time measures the time the fsm is in an idle state
    */
   public boolean idleTimer = true;
+
+  public boolean loadGestures = true;
+
+  /**
+   * default to null - allow the OS to set it, unless explicilty set
+   */
+  public String locale = null; // = "en-US";
+
+  public boolean pirEnableTracking = false;
 
   /**
    * play pir sounds when pir switching states
@@ -52,7 +54,45 @@ public class InMoov2Config extends ServiceConfig {
    */
   public boolean pirPlaySounds = true;
 
+  public boolean pirWakeUp = true;
+  
+  public boolean neoPixelBootGreen=true;
+  
+  public boolean neoPixelDownloadBlue = true;
+  
+  public boolean neoPixelErrorRed = true;
+  
+  public boolean neoPixelFlashWhenSpeaking = true;
+  
+  public boolean openCVFlipPicture=false;
+  
+  public boolean openCVFaceRecognizerActivated=true;
+    
+  public boolean robotCanMoveHeadWhileSpeaking = true;
+  
+  
+  /**
+   * startup and shutdown will pause inmoov - set the speed to this value then
+   * attempt to move to rest
+   */
+  public double shutdownStartupSpeed = 50;
+  
+  /**
+   * Sleep 5 minutes after last presence detected 
+   */
+  public int sleepTimeoutMs=300000;
+
   public boolean startBrainOnBoot = true;
+  
+  public boolean startMouthOnBoot = true;
+  
+  public boolean startupSound = true;
+
+  public int trackingTimeoutMs=10000;
+  
+  public String unlockInsult = "forgive me";
+  
+  public boolean virtual = false;
 
   public InMoov2Config() {
   }
