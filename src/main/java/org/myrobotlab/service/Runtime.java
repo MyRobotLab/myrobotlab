@@ -62,6 +62,7 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.IvyWrapper;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
+import org.myrobotlab.framework.repo.ServiceDependency;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.AppenderType;
 import org.myrobotlab.logging.LoggerFactory;
@@ -78,7 +79,6 @@ import org.myrobotlab.process.InProcessCli;
 import org.myrobotlab.process.Launcher;
 import org.myrobotlab.service.config.RuntimeConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.config.ServiceConfig.Listener;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.ServiceTypeNameResults;
@@ -230,8 +230,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   protected Integer creationCount = 0;
 
   /**
-   * the local repo of this machine - it should not be static as other foreign
-   * repos will come in with other Runtimes from other machines.
+   * the local repo.json manifest of this machine, which is a list of all libraries ivy installed
    */
   transient private IvyWrapper repo = null; // was transient abstract Repo
 
@@ -2686,6 +2685,21 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         // fist and only time....
         runtime = this;
         repo = (IvyWrapper) Repo.getInstance(LIBRARIES, "IvyWrapper");
+        
+        // resolve serviceData MetaTypes for the repo
+        
+        for (MetaData metaData : serviceData.getServiceTypes()) {
+          if (metaData.getSimpleName().equals("OpenCV")) {
+            log.warn("here");
+          }
+          Set<ServiceDependency> deps = repo.getUnfulfilledDependencies(metaData.getType());
+          if (deps.size() == 0) {
+            metaData.installed = true;
+          } else {
+            log.warn("{} not installed", metaData.getSimpleName());
+          }
+        }
+        
       }
     }
 
