@@ -2,8 +2,7 @@
     &nbsp;&nbsp;&nbsp;{{platform.arch}}.{{platform.jvmBitness}}.{{platform.os}} {{platform.mrlVersion}} &nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-repeat" ng-click="shutdown('restart')"></span>
     <span class="glyphicon glyphicon-off" ng-click="shutdown('shutdown')"></span>
 </h3>
-locale
-{{service.locale.displayLanguage}} {{service.locale.displayCountry}}
+
     <br/>
 <!-- {{locale}} -->
 <ui-select ng-model="localeTag.selected" ng-change="msg.setAllLocales($select.selected.tag)" theme="bootstrap" style="width: 25em">
@@ -26,21 +25,51 @@ locale
 </table>
 
 <br/>
-create a new service
+
+<a ng-show="!showInstalledServices" href="" ng-click="showInstalledServices=true"><span class="glyphicon glyphicon-plus"/> installed services</a>
+<a ng-show="showInstalledServices" href="" ng-click="showInstalledServices=false"><span class="glyphicon glyphicon-minus"/> installed services</a>
+<div ng-show="showInstalledServices">
+<button class="btn btn-default" ng-click="msg.install()">install all services</button>    
+<table class="table">
+    <tr>
+        <th>Type</th>
+        <th></th>
+        <th>Installed</th>
+        <th></th>
+    </tr>
+    <tr ng-repeat="serviceType in serviceTypes" ng-class="!serviceType.installed?'not-installed':''">
+        <td><a href="https://myrobotlab.org/service/{{serviceType.simpleName}}"><img ng-src="/{{serviceType.simpleName + '.png'}}" width="16"> {{serviceType.simpleName}}</a></td>
+        <td>{{serviceType.description}}</td>
+        <td><span ng-show="serviceType.installed"class="glyphicon glyphicon-check" ></span> 
+            </span><button ng-show="!serviceType.installed" class="btn btn-default" ng-click="msg.install(serviceType.simpleName)">install</button>            
+        </td>
+        <td>
+            <span ng-show="serviceType.isCloudService"class="glyphicon glyphicon-cloud" ></span>
+        </td>
+    </tr>
+</table>
+</div>    
+
+<br/>
+
+<a ng-show="!showCreateService" href="" ng-click="showCreateService=true"><span class="glyphicon glyphicon-plus"/> create a service</a>
+<a ng-show="showCreateService" href="" ng-click="showCreateService=false"><span class="glyphicon glyphicon-minus"/> create a service</a>
+<div ng-show="showCreateService">
 <br/>
 <div class="form-inline">
     <input class="form-control" type="text" ng-model="newName" placeholder="name" title="name of new service to be created" press-enter="start(newName, newType)">
     <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" press-enter="start(newName, newType)" title="service type of the new instance to be created" uib-typeahead="service as service.simpleName for service in serviceTypes | filter:{simpleName:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html"/>
     <button class="btn btn-default" title="press to create a new service, you must give the new service a name and type" ng-click="start(newName, newType)">start service</button>
     <button class="btn btn-default" ng-click="saveDefaults()">save defaults</button>
-    <button class="btn btn-default" ng-click="msg.install()">install all services</button>
     <br/>{{defaultsSaved}}
 </div>
+</div>
+<br/>
 <br/>
 <div class="row">
     <div class="form-group col-md-6">
         <div>
-            configurations <a href="" ng-click="msg.publishConfigList()"> <span class="glyphicon glyphicon-refresh" ></span></a> <b>{{getConfigName()}}</b>
+            <b>Configurations</b> <a href="" ng-click="msg.publishConfigList()"> <span class="glyphicon glyphicon-refresh" ></span></a> <b>{{getConfigName()}}</b>
             <br/>
             <select multiple class="form-control width100pct" ng-change="setConfig()" ng-model="selectedConfig" id="selectedConfig-id" title="configurations">
                 <option ng-repeat="config in service.configList">{{config}}</option>
@@ -48,7 +77,6 @@ create a new service
         </div>
     </div>
 </div>
-<br/>
 <div class="form-inline">
     <button class="btn btn-default" title="This will save a config module to data/config" ng-click="saveConfig()">save config</button>
     <!-- <button class="btn btn-default" title="This will load a config module" ng-click="loadConfig()">load</button>
@@ -57,10 +85,8 @@ create a new service
     -->
     <button class="btn btn-default" title="This will start a config set" ng-click="startConfig()">start</button>
     <button class="btn btn-default" title="This will release a config module" ng-click="releaseConfig()">release</button>
-    <!--
-    <button class="btn btn-default" title="This will clear current config set" ng-click="msg.clear();msg.releaseAllServicesExcept(['runtime', 'python', 'security', 'webgui'])">clear</button>
-    -->
-</div>
+    <button class="btn btn-default" title="This will release a config module" ng-click="setAutoStart(false)">auto start on</button></div>
+    <button class="btn btn-default" title="This will release a config module" ng-click="setAutoStart(false)">auto start off</button></div>
 <div class="row">&nbsp;</div>
 <div class="row">
     <form ng-submit="sendToCli(cmd);cmd=null">

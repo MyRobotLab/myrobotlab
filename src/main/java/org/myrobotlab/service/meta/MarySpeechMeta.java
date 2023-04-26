@@ -46,6 +46,7 @@ public class MarySpeechMeta extends AbstractSpeechSynthesisMeta {
     exclude("commons-lang", "commons-lang");
     exclude("com.google.guava", "guava");
     exclude("org.apache.opennlp", "opennlp-tools");
+    exclude("org.apache.opennlp", "opennlp-maxent");
     exclude("org.slf4j", "slf4j-log4j12");
 
     addDependency("org.apache.logging.log4j", "log4j-1.2-api", "2.12.1");

@@ -175,13 +175,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * name. It cannot be null, it cannot have "/" or "\" in the name - it has to
    * be a valid file name for the OS. It's defaulted to "default". Changed often
    */
+  @Deprecated /* use startyml.config */
   protected String configName = "default";
 
   /**
    * default parent path of configPath - rarely changed FIXME - don't make it
    * static !
    */
-  static final protected String CONFIG_ROOT = "data" + fs + "config";
+  @Deprecated /* use startYml.configRoot */
+  static protected String CONFIG_ROOT = "data" + fs + "config";
 
   /**
    * State variable reporting if runtime is currently starting services from
@@ -244,7 +246,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * command line configuration
    */
-  static CmdConfig startYml = null;
+  static CmdConfig startYml = new CmdConfig();
 
   /**
    * the platform (local instance) for this runtime. It must be a non-static as
@@ -343,10 +345,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * Create which only has name (no type).  This is only possible, if there is an
-   * appropriately named service config in the Plan (in memory) or (more commonly) on
-   * the filesystem.  Since ServiceConfig comes with type information, a name is 
-   * all that is needed to start the service.
+   * Create which only has name (no type). This is only possible, if there is an
+   * appropriately named service config in the Plan (in memory) or (more
+   * commonly) on the filesystem. Since ServiceConfig comes with type
+   * information, a name is all that is needed to start the service.
    * 
    * @param name
    * @return
@@ -364,8 +366,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * check - checking all planned service have met appropriate licensing and dependency checks create -
    * </pre>
    * 
-   * @param name - Required, cannot be null
-   * @param type - Can be null if a service file exists for named service
+   * @param name
+   *          - Required, cannot be null
+   * @param type
+   *          - Can be null if a service file exists for named service
    * @return the service
    */
   static public synchronized ServiceInterface create(String name, String type) {
@@ -589,6 +593,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     Runtime.getInstance().isVirtual = b;
     Runtime.getInstance().broadcastState();
     return b;
+  }
+  
+  /**
+   * start
+   * @param b
+   */
+  static void setAutoStart(boolean b) {
+    startYml.enable = b;
   }
 
   /**
@@ -3075,6 +3087,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return status;
   }
 
+  // FIXME - create interface for this
   public String publishMessage(String msg) {
     return msg;
   }
@@ -3858,7 +3871,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @see ServiceData#getServiceTypes()
    */
   public List<MetaData> getServiceTypes() {
-    return serviceData.getServiceTypes();
+    List<MetaData> filteredTypes = new ArrayList<>();
+    for (MetaData metaData : serviceData.getServiceTypes()) {
+      if (metaData.isAvailable()) {
+        filteredTypes.add(metaData);
+      }
+    }    
+    return filteredTypes;
   }
 
   /**
@@ -3898,15 +3917,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     return msg;
   }
-  
+
   @Override
   public ServiceConfig getFilteredConfig() {
     RuntimeConfig sc = (RuntimeConfig) super.getFilteredConfig();
     Set<Listener> removeList = new HashSet<>();
     for (Listener listener : sc.listeners) {
-      if (listener.callback.equals("onReleased") || listener.callback.equals("onStarted")
-          || listener.callback.equals("onRegistered") || listener.callback.equals("onStopped") || listener.callback.equals("onCreated")
-          ) {
+      if (listener.callback.equals("onReleased") || listener.callback.equals("onStarted") || listener.callback.equals("onRegistered") || listener.callback.equals("onStopped")
+          || listener.callback.equals("onCreated")) {
         removeList.add(listener);
       }
     }
@@ -3915,7 +3933,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
     return sc;
   }
-
 
   /**
    * Unregister all connections that a specified client has made.
@@ -4099,7 +4116,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // get a connection from the route
     Connection conn = getRoute(remoteId);
     if (conn == null) {
-      log.error("no connection for id {}", remoteId);
+      log.debug("no connection for id {}", remoteId);
       return null;
     }
     // find the gateway managing the connection
@@ -4475,7 +4492,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         return;
       }
 
-      startYml = null;
       File checkStart = new File("start.yml");
       if (checkStart.exists()) {
         String yml = FileIO.toString("start.yml");
@@ -4488,7 +4504,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // if supplied by the command line it will be used
       // command line has the highest precedence
       if (options.id == null) {
-        if (startYml == null || startYml.id == null) {
+        if (startYml == null || startYml.id == null || !startYml.enable) {
           options.id = NameGenerator.getName();
         } else {
           options.id = startYml.id;
@@ -4513,7 +4529,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       if (!configRoot.exists()) {
         configRoot.mkdirs();
       }
-            
+
       if (options.virtual) {
         Platform.setVirtual(true);
       }
@@ -4534,14 +4550,18 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         return;
       }
 
-      createAndStartServices(options.services);
+      if (options.configRoot != null || (startYml != null && startYml.configRoot != null && startYml.enable)) {
+        CONFIG_ROOT = (startYml != null && startYml.configRoot != null) ? startYml.configRoot : options.configRoot;
+      }
 
       // if a you specify a config file it becomes the "base" of configuration
       // inline flags will still override values
-      if (options.config != null || (startYml != null && startYml.config != null)) {
+      if (options.config != null || (startYml != null && startYml.config != null && startYml.enable)) {
         // if this is a valid config, it will load
         Runtime.getInstance();
       }
+
+      createAndStartServices(options.services);
 
       if (options.invoke != null) {
         invokeCommands(options.invoke);
@@ -4936,10 +4956,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       Set<String> servicesToSave = new HashSet<>();
 
       // conditional boolean to flip and save a config name to start.yml ?
-      startYml = new CmdConfig();
-      startYml.id = getId();
-      startYml.config = configName;
-      FileIO.toFile("start.yml", CodecUtils.toYaml(startYml));
+      if (startYml.enable) {      
+        startYml.id = getId();
+        startYml.config = configName;
+        startYml.configRoot = CONFIG_ROOT;
+        FileIO.toFile("start.yml", CodecUtils.toYaml(startYml));
+      }
 
       if (serviceName == null) {
         // all services
@@ -5003,6 +5025,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     Runtime runtime = Runtime.getInstance();
     runtime.setConfigName(configName);
     return configName;
+  }
+
+  /**
+   * sets the root of all config, where root + fs + configName exists
+   * 
+   * @param root
+   * @return
+   */
+  public static String setConfigRoot(String root) {
+    CONFIG_ROOT = root;
+    return root;
   }
 
   // FIXME - move this to service and add default (no servicename) method

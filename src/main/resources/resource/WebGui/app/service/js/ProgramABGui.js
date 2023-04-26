@@ -94,6 +94,11 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
             $scope.$apply()
             break
 
+        case 'onPredicates':
+            $scope.predicates = data
+            $scope.$apply()
+            break
+
         case 'onRequest':
             var textData = data
             $scope.chatLog.unshift({
@@ -279,6 +284,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     // msg.subscribe('publishText')
     msg.subscribe('publishLog')
     msg.subscribe('publishOOBText')
+    msg.subscribe('getPredicates')
     msg.subscribe('getAimlFile')
     msg.subscribe(this)
 }
