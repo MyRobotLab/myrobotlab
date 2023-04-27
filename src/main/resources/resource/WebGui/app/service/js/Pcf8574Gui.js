@@ -4,6 +4,11 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
     var msg = this.msg
 
     $scope.controllers = []
+    $scope.service = {
+        config:{
+            controller: null
+        }
+    }
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
