@@ -9,21 +9,6 @@
     <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;locale&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{$select.selected.tag}}</ui-select-match>
     <ui-select-choices repeat="(tag, localeData) in locales | filter: $select.search">&nbsp;&nbsp;&nbsp;&nbsp;{{localeData.tag}} {{localeData.value.displayLanguage}} {{localeData.value.displayCountry}} &nbsp;&nbsp;&nbsp;&nbsp;</ui-select-choices>
 </ui-select>
-
-<br/>
-<table class="table table-striped">
-    <tr>
-        <td>type</td>
-        <td>installed</td>
-        <td>actions</td>
-    </tr>
-    <tr ng-repeat="serviceType in serviceTypes">
-        <td><img ng-src="/{{match.model.simpleName + '.png'}}" width="16"></td>
-        <td>{{serviceType.simpleName}}</td>
-        <td>{{serviceType.available}}</td>
-    </tr>
-</table>
-
 <br/>
 
 <a ng-show="!showInstalledServices" href="" ng-click="showInstalledServices=true"><span class="glyphicon glyphicon-plus"/> installed services</a>
