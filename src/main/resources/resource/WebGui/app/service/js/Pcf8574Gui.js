@@ -27,6 +27,14 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
             $scope.service.pinMap[data.pin].value = data.value
             $scope.$apply()
             break
+        case 'onPinArray':
+            for (i = 0; i < 8; ++i){
+                let pinData = data[i] 
+                $scope.service.pinMap[pinData.pin].value = pinData.value
+            }
+            $scope.service.pinMap[data.pin].value = data.value
+            $scope.$apply()
+            break
         case 'onPinDefinition':
             $scope.service.pinMap[data.pin] = data
             $scope.$apply()
@@ -99,6 +107,7 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
 
     
     msg.subscribe('publishPin')
+    msg.subscribe('publishPinArray')
     msg.subscribe('publishPinDefinition')
     msg.subscribe(this)
 }
