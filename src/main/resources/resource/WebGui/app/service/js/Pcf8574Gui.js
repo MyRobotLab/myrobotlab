@@ -62,9 +62,9 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
     $scope.changed = function(pinDef, toggleValue) {
         console.info('write ', pinDef.pin, toggleValue)
         if (toggleValue) {
-            msg.send('write', pinDef.pin, 0)
-        } else {
             msg.send('write', pinDef.pin, 1)
+        } else {
+            msg.send('write', pinDef.pin, 0)
 
         }
 
