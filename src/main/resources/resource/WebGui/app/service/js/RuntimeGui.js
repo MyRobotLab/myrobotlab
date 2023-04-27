@@ -170,6 +170,11 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             }
             break
 
+        case 'onStartYml':
+            $scope.startYml = data
+            $scope.$apply()
+            break
+
         case 'onSaveDefaults':
             if (data.length > 0) {
                 $scope.defaultsSaved = 'saved defaults to ' + data
@@ -364,7 +369,13 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         return $scope.service.configName
     }
 
+    $scope.setAutoStart = function(b) {
+        console.info('setAutoStart')
+        msg.send('setAutoStart', b)
+    }
+    
     // $scope.serviceTypes = Object.values(mrl.getPossibleServices())
+    msg.subscribe("getStartYml")
     msg.subscribe("saveDefaults")
     msg.subscribe("getConfigName")
     msg.subscribe("getServiceTypes")
@@ -379,6 +390,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.subscribe('publishInterfaceToNames')
 
     //msg.send("getLocalServices")
+    msg.send("getStartYml")
     msg.send("getConnections")
     msg.send("getServiceTypes")
     msg.send("getLocale")

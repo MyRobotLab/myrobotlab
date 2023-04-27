@@ -598,9 +598,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * start
    * @param b
+   * @throws IOException 
    */
-  static void setAutoStart(boolean b) {
+  public void setAutoStart(boolean b) throws IOException {
+    log.error("setAutoStart {}", b);
+    startYml.id = getId();
     startYml.enable = b;
+    startYml.config = configName;
+    startYml.configRoot = CONFIG_ROOT;
+    FileIO.toFile("start.yml", CodecUtils.toYaml(startYml));
+    invoke("getStartYml");
   }
 
   /**
@@ -870,7 +877,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           // a bit backwards - it loads after it been created
           // but its necessary because you need an runtime instance before you
           // load
-          Runtime.load("runtime", "Runtime");
+          if (startYml.enable) {
+            Runtime.load("runtime", "Runtime");
+          }
           ((RuntimeConfig) runtime.config).add("runtime");
 
           runtime.startService();
@@ -892,7 +901,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           try {
             if (options.config != null) {
               Runtime.startConfig(options.config);
-            } else if (startYml != null && startYml.config != null) {
+            } else if (startYml != null && startYml.config != null && startYml.enable) {
               Runtime.startConfig(startYml.config);
             }
           } catch (Exception e) {
@@ -1340,6 +1349,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
     }
     return ret;
+  }
+  
+  /**
+   * Because startYml is required to be a static variable, since it's needed "before"
+   * a runtime instance exists it will be null in json serialization.  This method is needed
+   * so we can serialize the data appropriately.
+   * @return
+   */
+  static public CmdConfig getStartYml() {
+    return startYml;
   }
 
   /**
