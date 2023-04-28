@@ -596,14 +596,18 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
   
   /**
-   * start
-   * @param b
-   * @throws IOException 
+   * Sets the enable value in start.yml.  start.yml is a file which can control the automatic
+   * loading of config.  In general when its on, and a config is selected and saved, the next
+   * time Runtime starts it will attempt to load the last saved config and get the user back to 
+   * their last state.
+   * 
+   * @param autoStart
+   * @throws IOException - thrown if cannot write file to filesystem
    */
-  public void setAutoStart(boolean b) throws IOException {
-    log.error("setAutoStart {}", b);
+  public void setAutoStart(boolean autoStart) throws IOException {
+    log.debug("setAutoStart {}", autoStart);
     startYml.id = getId();
-    startYml.enable = b;
+    startYml.enable = autoStart;
     startYml.config = configName;
     startYml.configRoot = CONFIG_ROOT;
     FileIO.toFile("start.yml", CodecUtils.toYaml(startYml));
