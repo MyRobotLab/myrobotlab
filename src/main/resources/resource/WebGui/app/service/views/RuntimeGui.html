@@ -11,6 +11,7 @@
 </ui-select>
 <br/>
 
+
 <a ng-show="!showInstalledServices" href="" ng-click="showInstalledServices=true"><span class="glyphicon glyphicon-plus"/> installed services</a>
 <a ng-show="showInstalledServices" href="" ng-click="showInstalledServices=false"><span class="glyphicon glyphicon-minus"/> installed services</a>
 <div ng-show="showInstalledServices">
@@ -69,9 +70,15 @@
     <button class="btn btn-default" title="This will unset current config set" ng-click="unsetConfig()">unset</button>
     -->
     <button class="btn btn-default" title="This will start a config set" ng-click="startConfig()">start</button>
-    <button class="btn btn-default" title="This will release a config module" ng-click="releaseConfig()">release</button>
-    <button class="btn btn-default" title="This will release a config module" ng-click="setAutoStart(false)">auto start on</button></div>
-    <button class="btn btn-default" title="This will release a config module" ng-click="setAutoStart(false)">auto start off</button></div>
+    <button class="btn btn-default" title="This will release a config module" ng-click="releaseConfig()">release</button><br/>
+<br/>
+<span> Auto Start
+        <button class="btn btn-default" ng-show="!startYml.enable" title="This will auto start config on next start"
+            ng-click="setAutoStart(true)">off</button>
+        <button class="btn btn-info" ng-show="startYml.enable" title="This will auto start config on next start"
+            ng-click="setAutoStart(false)">on</button>
+</span>                                    
+    
 <div class="row">&nbsp;</div>
 <div class="row">
     <form ng-submit="sendToCli(cmd);cmd=null">
