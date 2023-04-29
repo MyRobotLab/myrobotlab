@@ -94,9 +94,5 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
     return ret;
   }
 
-//  @Override
-//  public void attachTextListener(String name) {
-//    addListener("publishText", name);
-//  }
 
 }
