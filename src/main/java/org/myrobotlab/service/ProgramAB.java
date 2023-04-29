@@ -610,12 +610,20 @@ public class ProgramAB extends Service
   }
 
   /**
+   * Get the current session predicates
+   * @return
+   */
+  public Map<String, String> getPredicates() {
+    return getPredicates(currentUserName, currentBotName);
+  }
+  
+  /**
    * Get all current predicates names and their values
    * for the current session
    * @return
    */
-  public Map<String, String> getPredicates() {
-    Session session = getSession();
+  public Map<String, String> getPredicates(String userName, String botName) {
+    Session session = getSession(userName, botName);    
     if (session != null) {
       return session.getPredicates();
     }
