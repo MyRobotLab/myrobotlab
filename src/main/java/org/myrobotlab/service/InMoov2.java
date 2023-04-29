@@ -102,6 +102,14 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       // Runtime.start("intro", "Intro");
 
       // Runtime.startConfig("pr-1213-1");
+      
+      Runtime.main(new String[] {"--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python"});
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
@@ -112,18 +120,14 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       Runtime.start("python", "Python");
       // Runtime.start("ros", "Ros");
       Runtime.start("intro", "Intro");
-      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+      // InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
       // i01.startPeer("simulator");
       // Runtime.startConfig("i01-05");
       // Runtime.startConfig("pir-01");
 
       // Polly polly = (Polly)Runtime.start("i01.mouth", "Polly");
-      i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+      // i01 = (InMoov2) Runtime.start("i01", "InMoov2");
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       // polly.speakBlocking("Hi, to be or not to be that is the question,
       // wheather to take arms against a see of trouble, and by aposing them end
@@ -135,7 +139,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
       Runtime.start("python", "Python");
 
-      i01.startSimulator();
+      // i01.startSimulator();
       Plan plan = Runtime.load("webgui", "WebGui");
       // WebGuiConfig webgui = (WebGuiConfig) plan.get("webgui");
       // webgui.autoStartBrowser = false;
@@ -164,9 +168,9 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
       random.save();
 
-      i01.startChatBot();
-
-      i01.startAll("COM3", "COM4");
+//      i01.startChatBot();
+//
+//      i01.startAll("COM3", "COM4");
       Runtime.start("python", "Python");
 
     } catch (Exception e) {
@@ -1082,9 +1086,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       Runtime runtime = Runtime.getInstance();
       log.info("onStarted {}", name);
 
-      if (runtime.isProcessingConfig()) {
-        invoke("publishEvent", "CONFIG STARTED");
-      }
+//    BAD IDEA - better to ask for a system report or an error report
+//      if (runtime.isProcessingConfig()) {
+//        invoke("publishEvent", "CONFIG STARTED");
+//      }
 
       String peerKey = getPeerKey(name);
       if (peerKey != null) {
