@@ -42,6 +42,7 @@ import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
+import org.myrobotlab.service.interfaces.Translator;
 import org.myrobotlab.service.interfaces.UtteranceListener;
 import org.myrobotlab.service.interfaces.UtterancePublisher;
 import org.slf4j.Logger;
@@ -60,7 +61,7 @@ import org.slf4j.Logger;
  *
  */
 public class ProgramAB extends Service
-    implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener, UtterancePublisher, UtteranceListener, ResponsePublisher {
+    implements Translator, TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener, UtterancePublisher, UtteranceListener, ResponsePublisher {
 
   /**
    * default file name that aiml categories comfing from matching a learnf tag
@@ -131,38 +132,38 @@ public class ProgramAB extends Service
     // 1. scan resources .. either "resource/ProgramAB" or
     // ../ProgramAB/resource/ProgramAB (for dev) for valid bot directories
 
-//    List<File> resourceBots = scanForBots(getResourceDir());
-//
-//    if (isDev()) {
-//      // 2. dev loading "only" dev bots - from dev location
-//      for (File file : resourceBots) {
-//        addBotPath(file.getAbsolutePath());
-//      }
-//    } else {
-//      // 2. runtime loading
-//      // copy any bot in "resource/ProgramAB/{botName}" not found in
-//      // "data/ProgramAB/{botName}"
-//      for (File file : resourceBots) {
-//        String botName = getBotName(file);
-//        File dataBotDir = new File(FileIO.gluePaths("data/ProgramAB", botName));
-//        if (dataBotDir.exists()) {
-//          log.info("found data/ProgramAB/{} not copying", botName);
-//        } else {
-//          log.info("will copy new data/ProgramAB/{}", botName);
-//          try {
-//            FileIO.copy(file, dataBotDir);
-//          } catch (Exception e) {
-//            error(e);
-//          }
-//        }
-//      }
-//
-//      // 3. addPath for all bots found in "data/ProgramAB/"
-//      List<File> dataBots = scanForBots("data/ProgramAB");
-//      for (File file : dataBots) {
-//        addBotPath(file.getAbsolutePath());
-//      }
-//    }
+    // List<File> resourceBots = scanForBots(getResourceDir());
+    //
+    // if (isDev()) {
+    // // 2. dev loading "only" dev bots - from dev location
+    // for (File file : resourceBots) {
+    // addBotPath(file.getAbsolutePath());
+    // }
+    // } else {
+    // // 2. runtime loading
+    // // copy any bot in "resource/ProgramAB/{botName}" not found in
+    // // "data/ProgramAB/{botName}"
+    // for (File file : resourceBots) {
+    // String botName = getBotName(file);
+    // File dataBotDir = new File(FileIO.gluePaths("data/ProgramAB", botName));
+    // if (dataBotDir.exists()) {
+    // log.info("found data/ProgramAB/{} not copying", botName);
+    // } else {
+    // log.info("will copy new data/ProgramAB/{}", botName);
+    // try {
+    // FileIO.copy(file, dataBotDir);
+    // } catch (Exception e) {
+    // error(e);
+    // }
+    // }
+    // }
+    //
+    // // 3. addPath for all bots found in "data/ProgramAB/"
+    // List<File> dataBots = scanForBots("data/ProgramAB");
+    // for (File file : dataBots) {
+    // addBotPath(file.getAbsolutePath());
+    // }
+    // }
 
   }
 
@@ -606,6 +607,19 @@ public class ProgramAB extends Service
       session.reload();
       info("reloaded session %s <-> %s ", userName, botName);
     }
+  }
+
+  /**
+   * Get all current predicates names and their values
+   * for the current session
+   * @return
+   */
+  public Map<String, String> getPredicates() {
+    Session session = getSession();
+    if (session != null) {
+      return session.getPredicates();
+    }
+    return new TreeMap<>();
   }
 
   /**
@@ -1159,7 +1173,7 @@ public class ProgramAB extends Service
     if (config.bots == null) {
       config.bots = new ArrayList<>();
     }
-    
+
     config.bots.clear();
     for (BotInfo bot : bots.values()) {
 
@@ -1185,7 +1199,7 @@ public class ProgramAB extends Service
         addBotPath(botPath);
       }
     }
-    
+
     if (config.botDir != null) {
       List<File> botsFromScanning = scanForBots(config.botDir);
       for (File file : botsFromScanning) {
@@ -1305,7 +1319,7 @@ public class ProgramAB extends Service
     }
     error("could not find session to save predicates");
   }
-  
+
   public PredicateEvent publishChangePredicate(Session session, Chat chat, String name, String value) {
     PredicateEvent event = new PredicateEvent();
     event.id = String.format("%s<->%s", session.userName, session.botInfo.name);
@@ -1450,6 +1464,21 @@ public class ProgramAB extends Service
   @Override
   public Utterance publishUtterance(Utterance utterance) {
     return utterance;
+  }
+
+  @Override
+  public String translate(String text) {
+    Response response = getResponse(text);
+    return response.msg;
+  }
+
+  @Override
+  public String translate(String text, String fromLang, String toLang) {
+    // FIXME implement - same mapping that current inmoov has ? en-US etc ..
+    // although all of those are localizations
+    // not languages only the 1st part is "en" in en-US
+    // return getResponse(text)
+    return null;
   }
 
 }

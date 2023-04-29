@@ -57,7 +57,6 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Broadcaster;
 import org.myrobotlab.framework.interfaces.FutureInvoker;
-import org.myrobotlab.framework.interfaces.MessageInvoker;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.image.Util;
@@ -72,7 +71,7 @@ import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.QueueReporter;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
- 
+
 /**
  * 
  * Service is the base of the MyRobotLab Service Oriented Architecture. All
@@ -664,7 +663,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     this.inbox = new Inbox(getFullName());
     this.outbox = new Outbox(this);
-    
+
     File versionFile = new File(getResourceDir() + fs + "version.txt");
     if (versionFile.exists()) {
       try {
@@ -1412,9 +1411,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public ServiceConfig getConfig() {
-    
+
     boolean filterWeb = true;
-    
+
     Map<String, List<MRLListener>> listeners = getOutbox().notifyList;
     List<Listener> newListeners = new ArrayList<>();
 
@@ -1422,12 +1421,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     if (filterWeb) {
       for (String method : listeners.keySet()) {
         List<MRLListener> list = listeners.get(method);
-        for (MRLListener listener : list)
+        for (MRLListener listener : list) {
           if (!listener.callbackName.endsWith("@webgui-client")) {
 
             Listener newConfigListener = new Listener(listener.topicMethod, listener.callbackName, listener.callbackMethod);
             newListeners.add(newConfigListener);
           }
+        }
       }
     }
 
@@ -1436,12 +1436,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return config;
   }
-  
+
   @Override
   public ServiceConfig getFilteredConfig() {
     ServiceConfig sc = getConfig();
     // deep clone
-    sc = (ServiceConfig)CodecUtils.fromYaml(CodecUtils.toYaml(sc), sc.getClass());
+    sc = (ServiceConfig) CodecUtils.fromYaml(CodecUtils.toYaml(sc), sc.getClass());
     return sc;
   }
 
@@ -1862,9 +1862,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       log.warn("peerKey is null");
       return null;
     }
-    
+
     peerKey = peerKey.trim();
-       
+
     // get current definition of config and peer
     Peer peer = config.getPeer(peerKey);
 
@@ -1892,18 +1892,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       sc = plan.get(peer.name);
     }
 
-    // // recursive - start peers of peers of peers ...
-    // Map<String, Peer> subPeers = sc.getPeers();
-    // if (sc != null && subPeers != null) {
-    // for (String subPeerKey : subPeers.keySet()) {
-    // // IF AUTOSTART !!!
-    // Peer subPeer = subPeers.get(subPeerKey);
-    // if (subPeer.autoStart) {
-    // Runtime.start(sc.getPeerName(subPeerKey), subPeer.type);
-    // }
-    // }
-    // }
-
     // start peer requested
     Runtime.start(peer.name, sc.type);
     broadcastState();
@@ -1911,11 +1899,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
-   * Release a peer by peerKey.
-   * There can be advantages to refer to a peer with a peer key instead of a typed
-   * reference. This allows more modularity and the ability to plug in different types of peers,
-   * even with different instance names.  The peerKey is an internal key the service uses to 
-   * perform operations on its peers.  This one will release a peer.
+   * Release a peer by peerKey. There can be advantages to refer to a peer with
+   * a peer key instead of a typed reference. This allows more modularity and
+   * the ability to plug in different types of peers, even with different
+   * instance names. The peerKey is an internal key the service uses to perform
+   * operations on its peers. This one will release a peer.
+   * 
    * @param peerKey
    */
   synchronized public void releasePeer(String peerKey) {
@@ -2780,7 +2769,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     String configPath = runtime.getConfigPath();
     // Seems a bit invasive - but yml file overrides everything
     // if one exists we need to replace it with the new peer type
-    if (configPath != null) {      
+    if (configPath != null) {
       String configFile = configPath + fs + peer.name + ".yml";
       File staleFile = new File(configFile);
       if (staleFile.exists()) {
