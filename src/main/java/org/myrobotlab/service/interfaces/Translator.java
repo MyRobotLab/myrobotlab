@@ -31,12 +31,12 @@ public interface Translator {
    * Set the source language type en, es, fr...
    * @param toLang
    */
-  public void setToLang(String toLang);
+  public void setToLanguage(String toLang);
 
   /**
    * Set the target language type en, es, fr...
    * @param fromLang
    */
-  public void setFromLang(String fromLang);
+  public void setFromLanguage(String fromLang);
   
 }

@@ -210,4 +210,14 @@ public class AzureTranslator extends Service implements Translator, TextListener
     }
   }
 
+  @Override
+  public void setToLanguage(String to) {
+    this.to = to;
+  }
+
+  @Override
+  public void setFromLanguage(String from) {
+    this.from = from;
+  }
+
 }
