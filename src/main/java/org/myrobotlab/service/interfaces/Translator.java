@@ -26,4 +26,17 @@ public interface Translator {
    * @return
    */
   public String translate(String text, String fromLang, String toLang);
+  
+  /**
+   * Set the source language type en, es, fr...
+   * @param toLang
+   */
+  public void setToLanguage(String toLang);
+
+  /**
+   * Set the target language type en, es, fr...
+   * @param fromLang
+   */
+  public void setFromLanguage(String fromLang);
+  
 }
