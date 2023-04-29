@@ -42,7 +42,6 @@ import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
-import org.myrobotlab.service.interfaces.Translator;
 import org.myrobotlab.service.interfaces.UtteranceListener;
 import org.myrobotlab.service.interfaces.UtterancePublisher;
 import org.slf4j.Logger;
@@ -61,7 +60,7 @@ import org.slf4j.Logger;
  *
  */
 public class ProgramAB extends Service
-    implements Translator, TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener, UtterancePublisher, UtteranceListener, ResponsePublisher {
+    implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener, UtterancePublisher, UtteranceListener, ResponsePublisher {
 
   /**
    * default file name that aiml categories comfing from matching a learnf tag
@@ -611,19 +610,20 @@ public class ProgramAB extends Service
 
   /**
    * Get the current session predicates
+   * 
    * @return
    */
   public Map<String, String> getPredicates() {
     return getPredicates(currentUserName, currentBotName);
   }
-  
+
   /**
-   * Get all current predicates names and their values
-   * for the current session
+   * Get all current predicates names and their values for the current session
+   * 
    * @return
    */
   public Map<String, String> getPredicates(String userName, String botName) {
-    Session session = getSession(userName, botName);    
+    Session session = getSession(userName, botName);
     if (session != null) {
       return session.getPredicates();
     }
@@ -1472,21 +1472,6 @@ public class ProgramAB extends Service
   @Override
   public Utterance publishUtterance(Utterance utterance) {
     return utterance;
-  }
-
-  @Override
-  public String translate(String text) {
-    Response response = getResponse(text);
-    return response.msg;
-  }
-
-  @Override
-  public String translate(String text, String fromLang, String toLang) {
-    // FIXME implement - same mapping that current inmoov has ? en-US etc ..
-    // although all of those are localizations
-    // not languages only the 1st part is "en" in en-US
-    // return getResponse(text)
-    return null;
   }
 
 }
