@@ -61,15 +61,14 @@ public class Pcf8574 extends Service
       // read a single byte containing all 8 pins
       readRegister();
       List<PinData> pinArray = new ArrayList<>();
-      for (int address = 0; address < 8; ++address) {
+      for (int address = 0; address < pinDataCnt; ++address) {
         PinData pinData = new PinData(getPin(address).getPin(), getPin(address).getValue());
         PinDefinition pindef = getPin(address);
         
         if (pindef.isEnabled()) {
           invoke("publishPin", pinData);
-          pinArray.add(pinData);
         }
-        
+        pinArray.add(pinData);        
       }
       
       invoke("publishPinArray", new Object[] {pinArray.toArray(new PinData[0])});
