@@ -284,8 +284,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return c;
   }
 
-  // FIXME FIXME !!! THIS IS A MESS !!
-  // TODO - STILL WORTH HAVING AN EVENT - ALERT USER NEW CONFIG IS BEING APPLIED ?
+  // TODO- Hook to get config event published
   // public void applyConfig() {
   //   super.apply();
   //   log.error("applyConfig()");
