@@ -34,6 +34,7 @@ import org.myrobotlab.programab.Session;
 import org.myrobotlab.service.config.ProgramABConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
+import org.myrobotlab.service.data.TopicChange;
 import org.myrobotlab.service.data.Utterance;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.LogPublisher;
@@ -1320,7 +1321,7 @@ public class ProgramAB extends Service
     for (Session s : sessions.values()) {
       if (s.chat == chat) {
         // found session saving predicates
-        invoke("publishChangePredicate", s, chat, predicateName, result);
+        invoke("publishPredicate", s, chat, predicateName, result);
         s.savePredicates();
         return;
       }
@@ -1328,13 +1329,19 @@ public class ProgramAB extends Service
     error("could not find session to save predicates");
   }
 
-  public PredicateEvent publishChangePredicate(Session session, Chat chat, String name, String value) {
+  public PredicateEvent publishPredicate(Session session, Chat chat, String name, String value) {
     PredicateEvent event = new PredicateEvent();
     event.id = String.format("%s<->%s", session.userName, session.botInfo.name);
     event.userName = session.userName;
     event.botName = session.botInfo.name;
     event.name = name;
     event.value = value;
+    
+    if (name.equals("topic")) {
+      invoke("publishTopic", new TopicChange(session.userName, session.botInfo.name, value, session.currentTopic));
+      session.currentTopic = value;
+    }
+    
     return event;
   }
 
@@ -1473,5 +1480,12 @@ public class ProgramAB extends Service
   public Utterance publishUtterance(Utterance utterance) {
     return utterance;
   }
+  
+  
+  public TopicChange publishTopic(TopicChange topicChange) {
+    return topicChange;
+  }
+  
+  
 
 }
