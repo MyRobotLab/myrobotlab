@@ -284,6 +284,14 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return c;
   }
 
+  // TODO- Hook to get config event published
+  // public void applyConfig() {
+  //   super.apply();
+  //   log.error("applyConfig()");
+  //   // always getResponse !
+  //   speak("InMoov apply config");
+  // }
+
   @Override
   public void attachTextListener(String name) {
     addListener("publishText", name);
