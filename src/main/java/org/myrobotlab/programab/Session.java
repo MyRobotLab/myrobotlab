@@ -44,6 +44,9 @@ public class Session {
   // public Map<String,String> predicates = new TreeMap<>();
   public Predicates predicates = null;
 
+  // current topic of this session
+  public String currentTopic = null;
+
   /**
    * Session for a user and bot
    * 
