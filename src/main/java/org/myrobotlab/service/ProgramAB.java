@@ -1345,7 +1345,7 @@ public class ProgramAB extends Service
     event.name = name;
     event.value = value;
     
-    if ("topic".equals(name)) {
+    if ("topic".equals(name) && value != null && !value.equals(session.currentTopic)) {
       invoke("publishTopic", new TopicChange(session.userName, session.botInfo.name, value, session.currentTopic));
       session.currentTopic = value;
     }
