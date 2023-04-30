@@ -12,7 +12,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     $scope.utterance = ''
     $scope.currentSessionKey = null
     $scope.status = null
-
+    $scope.predicates = []
     $scope.currentBotImage = null
 
     $scope.aimlEditor = null
@@ -80,12 +80,17 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
             break
 
         case 'onBotImage':
-            $scope.currentBotImage = data;
+            $scope.currentBotImage = data
             $scope.$apply()
             break
 
         case 'onState':
             _self.updateState(data)
+            $scope.$apply()
+            break
+
+        case 'onTopic':
+            $scope.service.currentTopic = data
             $scope.$apply()
             break
 
@@ -98,6 +103,12 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
             $scope.predicates = data
             $scope.$apply()
             break
+
+        case 'onPredicate':
+            $scope.predicates[data.name] = data.value
+            $scope.$apply()
+            break
+                
 
         case 'onRequest':
             var textData = data
@@ -278,14 +289,18 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     }
 
     // subscribe to the response from programab.
+    msg.subscribe('publishTopic')
     msg.subscribe('publishRequest')
     msg.subscribe('publishResponse')
-    // msg.subscribe('publishRaw')
-    // msg.subscribe('publishText')
     msg.subscribe('publishLog')
     msg.subscribe('publishOOBText')
     msg.subscribe('getPredicates')
+    msg.subscribe('publishPredicate')
     msg.subscribe('getAimlFile')
+
+
+    msg.send('getPredicates')
+    
     msg.subscribe(this)
 }
 ])

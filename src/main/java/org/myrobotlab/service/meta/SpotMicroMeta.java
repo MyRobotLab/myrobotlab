@@ -18,20 +18,10 @@ public class SpotMicroMeta extends MetaData {
     // add a cool description
     addDescription("used as a general template");
 
-    // false will prevent it being seen in the ui
-    setAvailable(true);
-
-    // add dependencies if necessary
-    // addDependency("com.twelvemonkeys.common", "common-lang", "3.1.1");
-
-    setAvailable(false);
-
     // add it to one or many categories
-    addCategory("general");
+    addCategory("robot");
 
-    // add a sponsor to this service
-    // the person who will do maintenance
-    // setSponsor("GroG");
+    setSponsor("Cyber_One");
 
   }
 

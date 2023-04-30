@@ -102,6 +102,14 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       // Runtime.start("intro", "Intro");
 
       // Runtime.startConfig("pr-1213-1");
+      
+      Runtime.main(new String[] {"--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python"});
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
@@ -112,18 +120,14 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       Runtime.start("python", "Python");
       // Runtime.start("ros", "Ros");
       Runtime.start("intro", "Intro");
-      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+      // InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
       // i01.startPeer("simulator");
       // Runtime.startConfig("i01-05");
       // Runtime.startConfig("pir-01");
 
       // Polly polly = (Polly)Runtime.start("i01.mouth", "Polly");
-      i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+      // i01 = (InMoov2) Runtime.start("i01", "InMoov2");
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       // polly.speakBlocking("Hi, to be or not to be that is the question,
       // wheather to take arms against a see of trouble, and by aposing them end
@@ -135,7 +139,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
       Runtime.start("python", "Python");
 
-      i01.startSimulator();
+      // i01.startSimulator();
       Plan plan = Runtime.load("webgui", "WebGui");
       // WebGuiConfig webgui = (WebGuiConfig) plan.get("webgui");
       // webgui.autoStartBrowser = false;
@@ -164,9 +168,9 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
       random.save();
 
-      i01.startChatBot();
-
-      i01.startAll("COM3", "COM4");
+//      i01.startChatBot();
+//
+//      i01.startAll("COM3", "COM4");
       Runtime.start("python", "Python");
 
     } catch (Exception e) {
@@ -278,50 +282,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       error(e);
     }
     return c;
-  }
-
-  /**
-   * execute python scripts in the init directory on startup of the service
-   * 
-   * @throws IOException
-   */
-  public void init() throws IOException {
-    invoke("publishEvent", "INIT");
-    loadScripts(getResourceDir() + fs + "init");
-  }
-
-  /**
-   * Generalized directory python script loading method
-   * 
-   * @param directory
-   * @throws IOException
-   */
-  public void loadScripts(String directory) throws IOException {
-    File dir = new File(directory);
-
-    if (!dir.exists() || !dir.isDirectory()) {
-      invoke("publishEvent", "LOAD SCRIPTS ERROR");
-      return;
-    }
-
-    String[] extensions = { "py" };
-
-    for (String extension : extensions) {
-      File[] files = dir.listFiles(new FilenameFilter() {
-        public boolean accept(File dir, String name) {
-          return name.toLowerCase().endsWith("." + extension);
-        }
-      });
-
-      if (files != null) {
-        for (File file : files) {
-          Python p = (Python) Runtime.start("python", "Python");
-          if (p != null) {
-            p.execFile(file.getAbsolutePath());
-          }
-        }
-      }
-    }
   }
 
   // FIXME FIXME !!! THIS IS A MESS !!
@@ -773,6 +733,16 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     sendToPeer("torso", "setSpeed", 20.0, 20.0, 20.0);
   }
 
+  /**
+   * execute python scripts in the init directory on startup of the service
+   * 
+   * @throws IOException
+   */
+  public void init() throws IOException {
+    invoke("publishEvent", "INIT");
+    loadScripts(getResourceDir() + fs + "init");
+  }
+
   public boolean isCameraOn() {
     if (opencv != null) {
       if (opencv.isCapturing()) {
@@ -834,6 +804,40 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       return false;
     }
     return true;
+  }
+
+  /**
+   * Generalized directory python script loading method
+   * 
+   * @param directory
+   * @throws IOException
+   */
+  public void loadScripts(String directory) throws IOException {
+    File dir = new File(directory);
+
+    if (!dir.exists() || !dir.isDirectory()) {
+      invoke("publishEvent", "LOAD SCRIPTS ERROR");
+      return;
+    }
+
+    String[] extensions = { "py" };
+
+    for (String extension : extensions) {
+      File[] files = dir.listFiles(new FilenameFilter() {
+        public boolean accept(File dir, String name) {
+          return name.toLowerCase().endsWith("." + extension);
+        }
+      });
+
+      if (files != null) {
+        for (File file : files) {
+          Python p = (Python) Runtime.start("python", "Python");
+          if (p != null) {
+            p.execFile(file.getAbsolutePath());
+          }
+        }
+      }
+    }
   }
 
   public void moveArm(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
@@ -1082,9 +1086,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       Runtime runtime = Runtime.getInstance();
       log.info("onStarted {}", name);
 
-      if (runtime.isProcessingConfig()) {
-        invoke("publishEvent", "CONFIG STARTED");
-      }
+//    BAD IDEA - better to ask for a system report or an error report
+//      if (runtime.isProcessingConfig()) {
+//        invoke("publishEvent", "CONFIG STARTED");
+//      }
 
       String peerKey = getPeerKey(name);
       if (peerKey != null) {
@@ -1218,6 +1223,18 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   /**
+   * easy utility to publishMessage
+   * 
+   * @param name
+   * @param method
+   * @param data
+   */
+  public void publish(String name, String method, Object... data) {
+    Message msg = Message.createMessage(getName(), name, method, data);
+    invoke("publishMessage", msg);
+  }
+
+  /**
    * "re"-publishing runtime config list, because I don't want to fix the js
    * subscribeTo :P
    * 
@@ -1239,28 +1256,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   /**
-   * A more extensible interface point than publishEvent
-   * 
-   * @param msg
-   * @return
-   */
-  public Message publishMessage(Message msg) {
-    return msg;
-  }
-
-  /**
-   * easy utility to publishMessage
-   * 
-   * @param name
-   * @param method
-   * @param data
-   */
-  public void publish(String name, String method, Object... data) {
-    Message msg = Message.createMessage(getName(), name, method, data);
-    invoke("publishMessage", msg);
-  }
-
-  /**
    * used to configure a flashing event - could use configuration to signal
    * different colors and states
    * 
@@ -1279,6 +1274,16 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     led.interval = 50;
     invoke("publishFlash");
     return getName();
+  }
+
+  /**
+   * A more extensible interface point than publishEvent
+   * 
+   * @param msg
+   * @return
+   */
+  public Message publishMessage(Message msg) {
+    return msg;
   }
 
   public HashMap<String, Double> publishMoveArm(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
