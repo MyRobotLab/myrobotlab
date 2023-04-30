@@ -1321,7 +1321,7 @@ public class ProgramAB extends Service
     for (Session s : sessions.values()) {
       if (s.chat == chat) {
         // found session saving predicates
-        invoke("publishPredicate", s, chat, predicateName, result);
+        invoke("publishPredicate", s, predicateName, result);
         s.savePredicates();
         return;
       }
@@ -1329,7 +1329,15 @@ public class ProgramAB extends Service
     error("could not find session to save predicates");
   }
 
-  public PredicateEvent publishPredicate(Session session, Chat chat, String name, String value) {
+  /**
+   * Predicate updates are published here.  Topic (one of the most important predicate change) is also published
+   * when it changes. Session is needed to extract current user and bot this is relevant to.
+   * @param session - session where the predicate change occurred
+   * @param name - name of predicate
+   * @param value - new value of predicate
+   * @return
+   */
+  public PredicateEvent publishPredicate(Session session, String name, String value) {
     PredicateEvent event = new PredicateEvent();
     event.id = String.format("%s<->%s", session.userName, session.botInfo.name);
     event.userName = session.userName;
@@ -1337,7 +1345,7 @@ public class ProgramAB extends Service
     event.name = name;
     event.value = value;
     
-    if (name.equals("topic")) {
+    if ("topic".equals(name)) {
       invoke("publishTopic", new TopicChange(session.userName, session.botInfo.name, value, session.currentTopic));
       session.currentTopic = value;
     }
