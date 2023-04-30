@@ -22,10 +22,12 @@ public class TensorflowMeta extends MetaData {
     addCategory("ai");
     // TODO: what happens when you try to install this on an ARM processor like
     // RasPI or the Jetson TX2 ?
-    addDependency("org.tensorflow", "tensorflow", "1.8.0");
+    // Needed to update because conflicts with BERT.
+    // FIXME our POM generation is still putting two artifacts with same ID but diff version in pom
+    addDependency("org.tensorflow", "tensorflow", "1.15.0");
 
     // enable GPU support ?
-    boolean gpu = Boolean.valueOf(System.getProperty("gpu.enabled", "false"));
+    boolean gpu = Boolean.parseBoolean(System.getProperty("gpu.enabled", "false"));
     if (gpu) {
       // Currently only supported on Linux. 64 bit.
       addDependency("org.tensorflow", "libtensorflow", "1.8.0");

@@ -9,27 +9,35 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.imageio.ImageIO;
 
+import com.robrua.nlp.bert.Bert;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.lucene.analysis.core.KeywordTokenizerFactory;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrQuery.SortClause;
+import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
 import org.apache.solr.core.CoreContainer;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
@@ -139,6 +147,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     // FileIO.extract(Util.getResourceDir() , "Solr/solr.xml", path +
     // File.separator + "solr.xml");
     // load up the solr core container and start solr
+
+//    System.setProperty("solr.modules", "scripting");
+//    System.setProperty("solr.install.dir", ".");
 
     // FIXME - a bit unsatisfactory
     File f = new File(getDataInstanceDir());
@@ -994,38 +1005,68 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
        * index solr.commit();
        */
 
-      doc = new SolrInputDocument();
-      doc.setField("id", "Doc3");
-      doc.setField("title", "My title 3");
-      doc.setField("content", "This is the text field, for a sample document in myrobotlab. 2 ");
-      doc.setField("annoyance", 1);
-      // add the document to the index
-      solr.addDocument(doc);
-      // commit the index
-      solr.commit();
+      // Loading a BERT model that is stored in one of our Maven dependencies
+      try (Bert bert = Bert.load("com/robrua/nlp/easy-bert/bert-uncased-L-12-H-768-A-12")) {
+        String sentence = "Hello, my name is AP.";
+        doc.addField("id", "doc1");
+        doc.addField("text_field", sentence);
+        // I don't know what I should be doing here, I need a dense vector field but can't figure out the type
+        doc.addField("vector_field", bert.embedSequence(sentence));
+        solr.addDocument(doc);
+        solr.commit();
+        SolrQuery query = new SolrQuery();
+        float[] embeddings = bert.embedSequence("What is my name?");
 
-      // search for the word myrobotlab
-      String queryString = "myrobotlab";
-      QueryResponse resp = solr.search(queryString);
-      for (int i = 0; i < resp.getResults().size(); i++) {
-        System.out.println("---------------------------------");
-        System.out.println("-- Printing Result number :" + i);
-        // grab a document out of the result set.
-        SolrDocument d = resp.getResults().get(i);
-        // iterate over the fields on the returned document
-        for (String fieldName : d.getFieldNames()) {
+        query.setQuery("*:*");
+        query.setParam("rq", "{!knn f=vector topK=3}" + Arrays.toString(embeddings));
+        query.setParam("q1", "vector_field:[0 TO *]");
+        query.setParam("fl", "*,score");
 
-          System.out.print(fieldName + "\t");
-          // fields can be multi-valued
-          for (Object value : d.getFieldValues(fieldName)) {
-            System.out.print(value);
-            System.out.print("\t");
-          }
-          System.out.println("");
+        String vector = IntStream.range(0, embeddings.length)
+                .mapToObj(i -> String.valueOf(embeddings[i]))
+                .collect(Collectors.joining(","));
+        query.setParam("vector", String.join(",", vector));
+        QueryResponse response = solr.search(query);
+        SolrDocumentList results = response.getResults();
+        for (SolrDocument docResult : results) {
+          String textData = (String) docResult.getFieldValue("text_field");
+          System.out.println(textData);
         }
+
       }
-      System.out.println("---------------------------------");
-      System.out.println("Done.");
+
+//      doc = new SolrInputDocument();
+//      doc.setField("id", "Doc3");
+//      doc.setField("title", "My title 3");
+//      doc.setField("content", "This is the text field, for a sample document in myrobotlab. 2 ");
+//      doc.setField("annoyance", 1);
+//      // add the document to the index
+//      solr.addDocument(doc);
+//      // commit the index
+//      solr.commit();
+//
+//      // search for the word myrobotlab
+//      String queryString = "myrobotlab";
+//      QueryResponse resp = solr.search(queryString);
+//      for (int i = 0; i < resp.getResults().size(); i++) {
+//        System.out.println("---------------------------------");
+//        System.out.println("-- Printing Result number :" + i);
+//        // grab a document out of the result set.
+//        SolrDocument d = resp.getResults().get(i);
+//        // iterate over the fields on the returned document
+//        for (String fieldName : d.getFieldNames()) {
+//
+//          System.out.print(fieldName + "\t");
+//          // fields can be multi-valued
+//          for (Object value : d.getFieldValues(fieldName)) {
+//            System.out.print(value);
+//            System.out.print("\t");
+//          }
+//          System.out.println("");
+//        }
+//      }
+//      System.out.println("---------------------------------");
+//      System.out.println("Done.");
 
     } catch (Exception e) {
       Logging.logError(e);

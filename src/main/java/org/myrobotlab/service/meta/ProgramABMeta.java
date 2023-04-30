@@ -21,6 +21,9 @@ public class ProgramABMeta extends MetaData {
     
     addDependency("program-ab", "program-ab-data", null, "zip");
     addDependency("program-ab", "program-ab-kw", "0.0.8.9");
+    // For now we ignore Lucene deps from program AB because they conflict with Solr
+    // We should update ProgramAB pom
+    exclude("org.apache.lucene", "*");
     exclude("ch.qos.logback", "logback-classic");
     exclude("ch.qos.logback", "logback-core");
     
@@ -31,8 +34,9 @@ public class ProgramABMeta extends MetaData {
     addDependency("commons-io", "commons-io", "2.7");
     // TODO: This is for CJK support in ProgramAB move this into the published
     // POM for ProgramAB so they are pulled in transiently.
-    addDependency("org.apache.lucene", "lucene-analyzers-common", "8.11.2");
-    addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "8.11.2");
+    // For version 9 the coordinates were changed from *-analyzers-* to *-analysis-*
+    addDependency("org.apache.lucene", "lucene-analysis-common", "9.0.0");
+    addDependency("org.apache.lucene", "lucene-analysis-kuromoji", "9.0.0");
     addCategory("ai", "control");
 
   }

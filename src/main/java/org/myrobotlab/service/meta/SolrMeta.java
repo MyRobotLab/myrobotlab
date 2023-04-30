@@ -16,14 +16,21 @@ public class SolrMeta extends MetaData {
 
     addDescription("Solr Service - Open source search engine");
     addCategory("search");
-    String solrVersion = "8.11.2";
+    // Solr version 9.1.* requires us to set solr.install.dir sys property
+    // for some reason, this one does not. Probably should investigate further
+    String solrVersion = "9.0.0";
     String luceneVersion = solrVersion;
     addDependency("org.apache.lucene", "lucene-core", luceneVersion);
+    addDependency("org.apache.lucene", "lucene-codecs", luceneVersion);
     addDependency("org.apache.solr", "solr-core", solrVersion);
     exclude("log4j", "*");
     exclude("org.apache.logging.log4j", "*");
     exclude("com.fasterxml.jackson.core", "*");
     exclude("io.netty", "*"); // prevent it from bringing in an old version of netty
+
+    // Some parts of Solr 8 were factored out into modules it seems
+    addDependency("org.apache.solr", "solr-scripting", solrVersion);
+    exclude("com.google.guava", "*");
 
     addDependency("org.apache.solr", "solr-test-framework", solrVersion);
     exclude("log4j", "*");
@@ -44,6 +51,11 @@ public class SolrMeta extends MetaData {
     
     // force correct version of netty
     addDependency("io.netty", "netty-all", "4.1.82.Final");
+
+    // BERT embeddings. Could be moved to diff service
+    addDependency("com.robrua.nlp", "easy-bert", "1.0.3");
+    addDependency("com.robrua.nlp.models", "easy-bert-uncased-L-12-H-768-A-12", "1.0.0");
+    addDependency("org.tensorflow", "tensorflow", "1.15.0");
 
     // Dependencies issue
     setAvailable(true);

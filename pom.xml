@@ -1186,6 +1186,10 @@
     <scope>provided</scope>
       <exclusions>
         <exclusion>
+          <groupId>org.apache.lucene</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>ch.qos.logback</groupId>
           <artifactId>logback-classic</artifactId>
         </exclusion>
@@ -1205,14 +1209,14 @@
 <!-- Duplicate entry for commons-io-commons-io-2.7 skipping -->
   <dependency>
     <groupId>org.apache.lucene</groupId>
-    <artifactId>lucene-analyzers-common</artifactId>
-    <version>8.11.2</version>
+    <artifactId>lucene-analysis-common</artifactId>
+    <version>9.0.0</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.apache.lucene</groupId>
-    <artifactId>lucene-analyzers-kuromoji</artifactId>
-    <version>8.11.2</version>
+    <artifactId>lucene-analysis-kuromoji</artifactId>
+    <version>9.0.0</version>
     <scope>provided</scope>
   </dependency>
 <!-- ProgramAB end -->
@@ -1372,13 +1376,19 @@
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-core</artifactId>
-    <version>8.11.2</version>
+    <version>9.0.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.lucene</groupId>
+    <artifactId>lucene-codecs</artifactId>
+    <version>9.0.0</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-core</artifactId>
-    <version>8.11.2</version>
+    <version>9.0.0</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1401,8 +1411,20 @@
   </dependency>
   <dependency>
     <groupId>org.apache.solr</groupId>
+    <artifactId>solr-scripting</artifactId>
+    <version>9.0.0</version>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.solr</groupId>
     <artifactId>solr-test-framework</artifactId>
-    <version>8.11.2</version>
+    <version>9.0.0</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1426,7 +1448,7 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-solrj</artifactId>
-    <version>8.11.2</version>
+    <version>9.0.0</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1452,6 +1474,24 @@
       </exclusions>
   </dependency>
 <!-- Duplicate entry for io.netty-netty-all-4.1.82.Final skipping -->
+  <dependency>
+    <groupId>com.robrua.nlp</groupId>
+    <artifactId>easy-bert</artifactId>
+    <version>1.0.3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.robrua.nlp.models</groupId>
+    <artifactId>easy-bert-uncased-L-12-H-768-A-12</artifactId>
+    <version>1.0.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.tensorflow</groupId>
+    <artifactId>tensorflow</artifactId>
+    <version>1.15.0</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Solr end -->
 
 <!-- Sphinx begin -->
@@ -1470,12 +1510,7 @@
 <!-- Sphinx end -->
 
 <!-- Tensorflow begin -->
-  <dependency>
-    <groupId>org.tensorflow</groupId>
-    <artifactId>tensorflow</artifactId>
-    <version>1.8.0</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for org.tensorflow-tensorflow-1.15.0 skipping -->
 <!-- Tensorflow end -->
 
 <!-- TesseractOcr begin -->
