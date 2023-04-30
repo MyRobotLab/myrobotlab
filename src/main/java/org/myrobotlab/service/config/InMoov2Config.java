@@ -103,7 +103,7 @@ public class InMoov2Config extends ServiceConfig {
 
     // peers FIXME global opencv
     addDefaultPeerConfig(plan, name, "audioPlayer", "AudioFile", true);
-    addDefaultPeerConfig(plan, name, "chatBot", "ProgramAB", false);
+    addDefaultPeerConfig(plan, name, "chatBot", "ProgramAB", true);
     addDefaultPeerConfig(plan, name, "controller3", "Arduino", false);
     addDefaultPeerConfig(plan, name, "controller4", "Arduino", false);
     addDefaultPeerConfig(plan, name, "ear", "WebkitSpeechRecognition", false);
