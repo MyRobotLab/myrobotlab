@@ -284,50 +284,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return c;
   }
 
-  /**
-   * execute python scripts in the init directory on startup of the service
-   * 
-   * @throws IOException
-   */
-  public void init() throws IOException {
-    invoke("publishEvent", "INIT");
-    loadScripts(getResourceDir() + fs + "init");
-  }
-
-  /**
-   * Generalized directory python script loading method
-   * 
-   * @param directory
-   * @throws IOException
-   */
-  public void loadScripts(String directory) throws IOException {
-    File dir = new File(directory);
-
-    if (!dir.exists() || !dir.isDirectory()) {
-      invoke("publishEvent", "LOAD SCRIPTS ERROR");
-      return;
-    }
-
-    String[] extensions = { "py" };
-
-    for (String extension : extensions) {
-      File[] files = dir.listFiles(new FilenameFilter() {
-        public boolean accept(File dir, String name) {
-          return name.toLowerCase().endsWith("." + extension);
-        }
-      });
-
-      if (files != null) {
-        for (File file : files) {
-          Python p = (Python) Runtime.start("python", "Python");
-          if (p != null) {
-            p.execFile(file.getAbsolutePath());
-          }
-        }
-      }
-    }
-  }
-
   // FIXME FIXME !!! THIS IS A MESS !!
   public void applyConfig() {
     super.apply();
@@ -777,6 +733,16 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     sendToPeer("torso", "setSpeed", 20.0, 20.0, 20.0);
   }
 
+  /**
+   * execute python scripts in the init directory on startup of the service
+   * 
+   * @throws IOException
+   */
+  public void init() throws IOException {
+    invoke("publishEvent", "INIT");
+    loadScripts(getResourceDir() + fs + "init");
+  }
+
   public boolean isCameraOn() {
     if (opencv != null) {
       if (opencv.isCapturing()) {
@@ -838,6 +804,40 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       return false;
     }
     return true;
+  }
+
+  /**
+   * Generalized directory python script loading method
+   * 
+   * @param directory
+   * @throws IOException
+   */
+  public void loadScripts(String directory) throws IOException {
+    File dir = new File(directory);
+
+    if (!dir.exists() || !dir.isDirectory()) {
+      invoke("publishEvent", "LOAD SCRIPTS ERROR");
+      return;
+    }
+
+    String[] extensions = { "py" };
+
+    for (String extension : extensions) {
+      File[] files = dir.listFiles(new FilenameFilter() {
+        public boolean accept(File dir, String name) {
+          return name.toLowerCase().endsWith("." + extension);
+        }
+      });
+
+      if (files != null) {
+        for (File file : files) {
+          Python p = (Python) Runtime.start("python", "Python");
+          if (p != null) {
+            p.execFile(file.getAbsolutePath());
+          }
+        }
+      }
+    }
   }
 
   public void moveArm(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
@@ -1223,6 +1223,18 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   /**
+   * easy utility to publishMessage
+   * 
+   * @param name
+   * @param method
+   * @param data
+   */
+  public void publish(String name, String method, Object... data) {
+    Message msg = Message.createMessage(getName(), name, method, data);
+    invoke("publishMessage", msg);
+  }
+
+  /**
    * "re"-publishing runtime config list, because I don't want to fix the js
    * subscribeTo :P
    * 
@@ -1244,28 +1256,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   /**
-   * A more extensible interface point than publishEvent
-   * 
-   * @param msg
-   * @return
-   */
-  public Message publishMessage(Message msg) {
-    return msg;
-  }
-
-  /**
-   * easy utility to publishMessage
-   * 
-   * @param name
-   * @param method
-   * @param data
-   */
-  public void publish(String name, String method, Object... data) {
-    Message msg = Message.createMessage(getName(), name, method, data);
-    invoke("publishMessage", msg);
-  }
-
-  /**
    * used to configure a flashing event - could use configuration to signal
    * different colors and states
    * 
@@ -1284,6 +1274,16 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     led.interval = 50;
     invoke("publishFlash");
     return getName();
+  }
+
+  /**
+   * A more extensible interface point than publishEvent
+   * 
+   * @param msg
+   * @return
+   */
+  public Message publishMessage(Message msg) {
+    return msg;
   }
 
   public HashMap<String, Double> publishMoveArm(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
