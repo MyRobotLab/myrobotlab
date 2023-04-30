@@ -45,28 +45,28 @@ public class InMoov2Config extends ServiceConfig {
    */
   public String locale = null; // = "en-US";
 
-  public boolean pirEnableTracking = false;
+  public boolean neoPixelBootGreen=true;
 
+  public boolean neoPixelDownloadBlue = true;
+
+  public boolean neoPixelErrorRed = true;
+  
+  public boolean neoPixelFlashWhenSpeaking = true;
+  
+  public boolean openCVFaceRecognizerActivated=true;
+  
+  public boolean openCVFlipPicture=false;
+  
+  public boolean pirEnableTracking = false;
+  
   /**
    * play pir sounds when pir switching states
    * sound located in data/InMoov2/sounds/pir-activated.mp3
    * sound located in data/InMoov2/sounds/pir-deactivated.mp3
    */
   public boolean pirPlaySounds = true;
-
+  
   public boolean pirWakeUp = true;
-  
-  public boolean neoPixelBootGreen=true;
-  
-  public boolean neoPixelDownloadBlue = true;
-  
-  public boolean neoPixelErrorRed = true;
-  
-  public boolean neoPixelFlashWhenSpeaking = true;
-  
-  public boolean openCVFlipPicture=false;
-  
-  public boolean openCVFaceRecognizerActivated=true;
     
   public boolean robotCanMoveHeadWhileSpeaking = true;
   
