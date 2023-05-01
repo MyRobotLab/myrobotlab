@@ -349,17 +349,17 @@ public class Esp8266_01 extends Service implements I2CController {
     // This part adds the service to the mapping between
     // busAddress||DeviceAddress
     // and the service name to be able to send data back to the invoker
-    String key = String.format("%s.%s", control.getDeviceBus(), control.getDeviceAddress());
+    String key = String.format("%s.%s", control.getBus(), control.getAddress());
     I2CDeviceMap devicedata = new I2CDeviceMap();
     if (i2cDevices.containsKey(key)) {
       devicedata = i2cDevices.get(key);
       if (control.getName() != devicedata.serviceName) {
-        log.error("Attach of {} failed: {} already exists on bus %s address {}", control.getName(), devicedata.serviceName, control.getDeviceBus(), control.getDeviceAddress());
+        log.error("Attach of {} failed: {} already exists on bus %s address {}", control.getName(), devicedata.serviceName, control.getBus(), control.getAddress());
       }
     } else {
       devicedata.serviceName = control.getName();
-      devicedata.busAddress = control.getDeviceBus();
-      devicedata.deviceAddress = control.getDeviceAddress();
+      devicedata.busAddress = control.getBus();
+      devicedata.deviceAddress = control.getAddress();
       devicedata.control = control;
       i2cDevices.put(key, devicedata);
       control.attachI2CController(this);
@@ -373,7 +373,7 @@ public class Esp8266_01 extends Service implements I2CController {
     // The order of the detach is important because the higher level service may
     // want to execute something that
     // needs this service to still be availabe
-    String key = String.format("%s.%s", control.getDeviceBus(), control.getDeviceAddress());
+    String key = String.format("%s.%s", control.getBus(), control.getAddress());
     if (i2cDevices.containsKey(key)) {
       log.info("detach : " + control.getName());
       i2cDevices.remove(key);
