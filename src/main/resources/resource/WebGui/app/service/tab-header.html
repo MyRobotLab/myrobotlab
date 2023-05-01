@@ -21,7 +21,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="" ng-click="servicemenuDropdownOpen = false;msg.releaseService()">
+                            <a href="" ng-click="servicemenuDropdownOpen = false;release()">
                                 <i class="glyphicon glyphicon-remove"></i>
                                 &nbsp;&nbsp;release
                             </a>
@@ -47,7 +47,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="" target="_blank" ng-click="export()">
+                            <a href="" target="_blank" ng-click="save()">
                                 <i class="glyphicon glyphicon-save-file"></i>
                                 &nbsp;&nbsp;save service
                             
@@ -93,13 +93,18 @@
                 </div>
             </td>
             <td>
-                <button class="btn btn-default" ng-click="export()" title="save service configuration">
-                    <span class="glyphicon glyphicon-save-file"></span>
+                <button class="btn btn-default" ng-click="release()" title="stops and releases a service">
+                    release <span class="glyphicon glyphicon-remove"></span>
+                </button>
+            </td>
+            <td>
+                <button class="btn btn-default" ng-click="save()" title="save service configuration">
+                    save <span class="glyphicon glyphicon-save-file"></span>
                 </button>
             </td>
             <td>
                 <button class="btn btn-default" ng-click="apply()" title="load and apply configuration">
-                    <span class="glyphicon glyphicon-open-file"></span>
+                    load <span class="glyphicon glyphicon-open-file"></span>
                 </button>
             </td>
 
@@ -119,12 +124,7 @@
                 <tr ng-repeat="(key, value) in service.serviceType.peers">
                     <td>
                         <span>
-                            {{peer.getActualName(service, key)}}xxx
-                        
-                        
-                            
-                            
-                        
+                            {{peer.getActualName(service, key)}}xxx                        
                             <a href="" ng-click="mrl.changeTab(peer.getActualName(service, key))">
                                 <img ng-src="/{{value.type + '.png'}}" width="48">
                             </a>
@@ -132,12 +132,6 @@
                     </td>
                     <td>
                         {{value.key}}<br/>{{value.type}}
-    
-                
-                
-                    
-                    
-                
                     </td>
                     <td>{{value.state}}</td>
                     <td>

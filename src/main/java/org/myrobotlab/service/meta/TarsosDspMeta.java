@@ -16,8 +16,7 @@ public class TarsosDspMeta extends MetaData {
 
     addDescription("digital signal processing - used for audio effects, although it could have many other uses");
     setAvailable(true); // false if you do not want it viewable in a gui
-    // add dependency if necessary
-    // addDependency("org.coolproject", "1.0.0");
+    // addDependency("com.github.axet", "TarsosDSP", "2.4-1");
     addCategory("general");
 
   }

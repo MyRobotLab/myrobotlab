@@ -25,7 +25,7 @@ public class OpenWeatherMap extends HttpClient {
   private String units = "imperial"; // or metric
   private String localUnits = "fahrenheit"; // or celcius
   private String lang = "en";
-  private String location = "Paris,FR";
+  private String location = null;// "Paris,FR";
   private Integer period = 1; // next 3 hours by default
 
   // OWM objects
@@ -53,7 +53,7 @@ public class OpenWeatherMap extends HttpClient {
     JSONObject obj = null;
     try {
       apiUrl = apiForecast + URLEncoder.encode(location, "utf-8") + "&appid=" + getKey() + "&mode=json&units=" + units + "&lang=" + lang + "&cnt=" + hourPeriod;
-      String response = this.get(apiUrl);
+      String response = get(apiUrl);
       log.info("apiUrl: {}", apiUrl);
       log.info("Response: {}", response);
       obj = new JSONObject(response);
@@ -253,8 +253,8 @@ public class OpenWeatherMap extends HttpClient {
 
   @Override
   public ServiceConfig getConfig() {
-
-    OpenWeatherMapConfig config = new OpenWeatherMapConfig();
+    OpenWeatherMapConfig config = (OpenWeatherMapConfig)super.getConfig();
+    // FIXME - remove local fields in favor of only config
     config.currentUnits = units;
     config.currentTown = location;
     return config;
@@ -262,21 +262,26 @@ public class OpenWeatherMap extends HttpClient {
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    OpenWeatherMapConfig config = (OpenWeatherMapConfig) c;
-    setUnits(config.currentUnits);
-    setLocation(config.currentTown);
+    OpenWeatherMapConfig config = (OpenWeatherMapConfig) super.apply(c);
+    // FIXME - remove local fields in favor of only config
+    if (config.currentUnits != null) {
+      setUnits(config.currentUnits);
+    }
+    if (config.currentTown != null) {
+      setLocation(config.currentTown);
+    }
     return c;
   }
 
   public static void main(String[] args) {
     OpenWeatherMap owm = (OpenWeatherMap) Runtime.start("weather", "OpenWeatherMap");
     // owm.setKey("XXX");
-    owm.setLocation("Paris,FR");
-    owm.setPeriod(1);
-    owm.startService();
+    // owm.setLocation("Paris,FR");
+    owm.setLocation("Portland,US");
+    // owm.setPeriod(1);
 
     // tomorrow is 8 ( 3 * 8 )
-    owm.setUnits("metric");
+    // owm.setUnits("metric");
     String sentence = "( Raw code : " + owm.getWeatherCode() + "), In " + owm.getLocation() + " the weather is " + owm.getWeatherDescription() + ".  " + owm.getDegrees()
         + " degrees " + owm.getLocalUnits() + " humidity " + owm.getHumidity() + " Min Degrees " + owm.getMinDegrees() + " max Degrees " + owm.getMaxDegrees() + " pressure "
         + owm.getPressure() + " Wind Speed " + owm.getWindSpeed() + " Wind Orientation " + owm.getWindOrientation();

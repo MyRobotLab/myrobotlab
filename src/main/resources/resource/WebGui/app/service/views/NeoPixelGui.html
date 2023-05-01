@@ -6,21 +6,22 @@
         <table>
             <tr>
                 <td><attach options='controllerOptions'/></td>
+                <td>&nbsp;</td>
                 <td>pixel count </td>
                 <td>&nbsp;</td>
                 <td>
-                    <input type="text" class="form-control" ng-readonly="service.controller" id="pixelCount" ng-model="service.pixelCount"/>
+                    <input type="text" class="form-control" ng-readonly="service.config.controller" id="pixelCount" ng-model="pixelCount"/>
                 </td>
             </tr>
         </table>
         <div class="btn-group" uib-dropdown>
-            <button type="button" class="btn btn-default">pin {{service.pin}}</button>
+            <button type="button" class="btn btn-default">pin {{pin}}</button>
             <button id="single-button" ng-disabled="service.controller != null" type="button" class="btn btn-default" uib-dropdown-toggle>
                 <span class="caret"></span>
             </button>
-            <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
-                <li ng-repeat="c in pins">
-                    <a href="" ng-click="msg.setPin(c)">{{c}}</a>
+            <ul uib-dropdown-menu role="menu" aria-labelledby="single-button" ng-model="pin">
+                <li ng-repeat="p in pins">
+                    <a href="" ng-click="setPin(p)">{{p}}</a>
                 </li>
             </ul>
         </div>

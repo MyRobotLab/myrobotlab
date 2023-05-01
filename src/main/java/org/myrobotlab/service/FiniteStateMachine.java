@@ -1,355 +1,340 @@
 package org.myrobotlab.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.fsm.api.Event;
-import org.myrobotlab.fsm.api.EventHandler;
-import org.myrobotlab.fsm.api.FiniteStateMachineException;
-import org.myrobotlab.fsm.api.SimpleEvent;
-import org.myrobotlab.fsm.api.State;
-import org.myrobotlab.fsm.api.StateHandler;
-import org.myrobotlab.fsm.api.Transition;
-import org.myrobotlab.fsm.core.SimpleTransition;
+import org.myrobotlab.framework.interfaces.MessageListener;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.FiniteStateMachineConfig;
+import org.myrobotlab.service.config.FiniteStateMachineConfig.Transition;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
-public class FiniteStateMachine extends Service implements EventHandler, StateHandler, org.myrobotlab.fsm.api.FiniteStateMachine {
+import com.github.pnavais.machine.StateMachine;
+import com.github.pnavais.machine.api.message.Message;
+import com.github.pnavais.machine.model.State;
+import com.github.pnavais.machine.model.StateTransition;
+import com.github.pnavais.machine.model.StringMessage;
+
+/**
+ * Utilizing the excellent FSM implementation here
+ * https://github.com/pnavais/state-machine
+ * 
+ * @author GroG
+ */
+public class FiniteStateMachine extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(FiniteStateMachine.class);
 
   private static final long serialVersionUID = 1L;
 
-  ArrayList<String> currentStates = new ArrayList<>();;
-  Set<State> finalStates = new HashSet<>();
-  Set<EventHandler> handlers = new HashSet<>();
-  State lastChangedState;
-  Event lastEvent;
-  Transition lastTransition;
-  Set<State> states = new HashSet<>();
-  Set<Transition> transitions = new HashSet<>();
+  protected StateMachine stateMachine = StateMachine.newBuilder().build();
 
-  // FIXME - have "default" state !!!
-  // FIXME emotionalState.addTransition("emotional-state", "ill", "ill-event",
-  // "ill") EXPLODES !!!
+  protected State last = null;
+
+  protected State current = null;
+
+  protected String lastEvent = null;
+
+  protected Set<String> messageListeners = new HashSet<>();
+
+  // TODO - .from("A").to("B").on(Messages.ANY)
+  // TODO - .from("A").to("B").on(Messages.EMPTY)
+
+  // must be transient since StateTransition is non serializable
+  protected transient Map<String, Tuple> map = new HashMap<>();
+
+  public class Tuple {
+    public Transition transition;
+    public StateTransition stateTransition;
+  }
+
+  private static Transition toFsmTransition(StateTransition state) {
+    Transition transition = new Transition();
+    com.github.pnavais.machine.model.State origin = state.getOrigin();
+    Message message = state.getMessage();
+    com.github.pnavais.machine.model.State target = state.getTarget();
+    transition.from = origin.getName();
+    // transition.id = state.getMessage().getMessageId();
+    transition.event = message.getPayload().get().toString();
+    transition.to = target.getName();
+    return transition;
+  }
+
   public FiniteStateMachine(String n, String id) {
     super(n, id);
   }
 
   public void clear() {
-    currentStates.clear();
-    finalStates.clear();
-    handlers.clear();
-    states.clear();
-    transitions.clear();
+    ((FiniteStateMachineConfig) config).transitions.clear();
+    map.clear();
+    stateMachine.clear();
   }
 
-  public void addScheduledEvent(String eventId, int millis) {
-    addTask(millis, "fire", new Object[] { eventId });
-  }
-
-  public void addState(String state) {
-    State s = new State(state);
-    if (states.size() == 0) {
-      currentStates.add(s.getName());
+  public String getNext(String key) {
+    StringMessage msg = new StringMessage(key);
+    Optional<State> s = stateMachine.getNext(msg);
+    if (s.get() != null) {
+      return s.get().getName();
     }
-    states.add(s);
+    return null;
   }
 
-  public void addTransition(String state0, String eventType, String state1) {
-    log.info("adding transition {}-({})->{}", state0, eventType, state1);
-    // SimpleTransition transition = (SimpleTransition) new
-    // SimpleTransitionBuilder().name(String.format("%s-%s->%s", state0,
-    // eventType,
-    // state1)).sourceState(state0).targetState(state1).eventHandler(this).build();
-    SimpleTransition transition = new SimpleTransition();
-    State sourceState = new State(state0);
-    State targetState = new State(state1);
-    transition.setId(eventType);
-    transition.setSourceState(sourceState);
-    transition.setTargetState(targetState);
-    transition.setEventHandler(this);
-    transition.setNewStateHandler(this);
-
-    registerTransition(transition);
+  public void init() {
+    stateMachine.init();
   }
 
-  @Override
-  public void attach(Attachable service) throws Exception {
-    if (service instanceof EventHandler) {
-      if (service.isLocal()) {
-        handlers.add((EventHandler) service);
-      } else {
-        addListener("publishEvent", service.getName(), "onEvent");
-      }
-    } else {
-      info(String.format("Service.attach does not know how to attach %s to a %s", service.getClass().getSimpleName(), this.getClass().getSimpleName()));
+  private String makeKey(String state0, String msgType, String state1) {
+    return String.format("%s->%s->%s", state0, msgType, state1);
+  }
+
+  public boolean addTransition(String state0, String msgType, String state1) {
+    String key = makeKey(state0, msgType, state1);
+
+    if (map.containsKey(key)) {
+      log.info("transition {} already exists", key);
+      return false;
     }
+    Tuple tuple = new Tuple();
+    tuple.stateTransition = new StateTransition(state0, msgType, state1);
+    tuple.transition = toFsmTransition(tuple.stateTransition);
+
+    FiniteStateMachineConfig c = (FiniteStateMachineConfig) config;
+    c.transitions.add(tuple.transition);
+    stateMachine.add(tuple.stateTransition);
+    map.put(key, tuple);
+    return true;
   }
 
-  @Override
-  public List<String> fire(Event inEvent) throws FiniteStateMachineException {
-
-    // for (String currentState : currentStates) {
-    for (int i = 0; i < currentStates.size(); ++i) {
-      String currentState = currentStates.get(i);
-
-      // FIXME !! CURRENTSTATE & FINALSTATES (MEBBE ALL NEEDS TO BE A MAP NOT A
-      // SET !!!)
-      if (!finalStates.isEmpty() && finalStates.contains(currentState)) {
-        log.warn("FSM is in final state '" + currentState + "', event " + inEvent + " is ignored.");
-      }
-
-      if (inEvent == null) {
-        log.warn("Null event fired, FSM state unchanged");
-      }
-
-      for (Transition transition : transitions) { // FIXME - shouldn't have to
-                                                  // iterate - just use a Map
-                                                  // !!!
-        if (currentState.equals(transition.getSourceState().getName()) && // fsm
-        // is in
-        // the
-        // right state as
-        // expected by
-        // transition
-        // definition
-            transition.getId().equals(inEvent.getId()) && // fired event
-            // type is as
-            // expected by
-            // transition
-            // definition
-            states.contains(transition.getTargetState()) // target state is
-                                                         // defined
-        ) {
-          try {
-            SimpleEvent event = (SimpleEvent) inEvent;
-            // event.setLastState(currentState);
-            event.setTransition(transition);
-            // perform action, if any on a transistion state handler
-            if (transition.getEventHandler() != null) {
-              transition.getEventHandler().handleEvent(event);
-            }
-
-            // FIXME - have transition return code e.g.
-            // transition.execute(currentState, event, targetState) influence
-            // transition
-            // FIXME - registerTransitionExcecuteHandler
-
-            // transition to target state
-            State newState = transition.getTargetState();
-            currentStates.set(i, newState.getName());
-            /*
-             * currentState.setId(newState.getId());
-             * currentState.setLastTransition(transition);
-             */
-            lastChangedState = transition.getTargetState();
-
-            if (transition.getNewStateHandler() != null) {
-              transition.getNewStateHandler().handleState(transition.getTargetState());
-            }
-
-            // save last triggered event and transition
-            lastEvent = event;
-            lastTransition = transition;
-
-            break;
-          } catch (Exception e) {
-            log.error("An exception occurred during handling event {} of transition {} ", inEvent, transition, e);
-            throw new FiniteStateMachineException(transition, inEvent, e);
-          }
-        }
-      }
+  public boolean removeTransition(String state0, String msgType, String state1) {
+    String key = makeKey(state0, msgType, state1);
+    if (!map.containsKey(key)) {
+      log.info("transition %s does not exist", key);
+      return false;
     }
-    return currentStates;
+    Tuple tuple = map.get(key);
+    stateMachine.remove(tuple.stateTransition);
+    stateMachine.prune();
+
+    FiniteStateMachineConfig c = (FiniteStateMachineConfig) config;
+    c.transitions.remove(tuple.transition);
+    map.remove(key);
+
+    return true;
   }
 
-  public void fire(String eventName) {
+  /**
+   * remove all orphaned states
+   */
+  public void prune() {
+    stateMachine.prune();
+  }
+
+  /**
+   * for fsm event publishers
+   * 
+   * @param event
+   * @return
+   */
+  public String onEvent(String event) {
+    log.error("{} event arrived", event);
+    fire(event);
+    return event;
+  }
+
+  /**
+   * fires a message type
+   * 
+   * @param event
+   */
+  public void fire(String event) {
     try {
-      log.info("firing event ({})", eventName);
-      fire(new SimpleEvent(eventName));
+
+      last = stateMachine.getCurrent();
+      stateMachine.send(event);
+      current = stateMachine.getCurrent();
+
+      log.info("fired event ({}) -> ({}) moves to ({})", event, last == null ? null : last.getName(), current == null ? null : current.getName());
+
+      if (last != null && !last.equals(current)) {
+        invoke("publishNewState", current.getName());
+      }
     } catch (Exception e) {
       log.error("fire threw", e);
     }
   }
 
-  @Override
-  public State getCurrentState() {
-    return lastChangedState;
-  }
-
-  public List<String> getCurrentStates() {
-    return currentStates;
-  }
-
-  @Override
-  public Set<State> getFinalStates() {
-    return finalStates;
-  }
-
-  public String getFsmMap() {
-    Set<Transition> transitions = getTransitions();
-    Set<String> sort = new TreeSet<String>();
-    StringBuilder sb = new StringBuilder();
-    sb.append(getName() + ":\n");
-    for (Transition transition : transitions) {
-      sort.add(String.format("%s-(%s)->%s\n", transition.getSourceState(), transition.getId(), transition.getTargetState()));
-    }
-    for (String t : sort) {
-      sb.append(t);
-    }
-    return sb.toString();
-  }
-
-  @Override
-  public Event getLastEvent() {
-    return lastEvent;
-  }
-
-  @Override
-  public Transition getLastTransition() {
-    return lastTransition;
-  }
-
-  @Override
-  public Set<State> getStates() {
-    return states;
-  }
-
-  @Override
-  public Set<Transition> getTransitions() {
-    return transitions;
-  }
-
-  // FIXME - have other event handlers - this one is "ONLY" for publishing new
-  // States
-  @Override
-  public void handleEvent(Event event) throws Exception {
-    SimpleEvent se = (SimpleEvent) event;
-    log.info("{} recieved fired event {} and is transitioning", se.getSource(), event);
-
-    // for subscribers ...
-    invoke("publishEvent", event);
-
-    // for local attachers
-    for (EventHandler eh : handlers) {
-      eh.handleEvent(event);
-    }
-
+  public String firedEvent(String event) {
+    lastEvent = event;
+    return event;
   }
 
   /**
-   * FIXME - do we want to publish 2 channels ? events and states ? - states has
-   * a superset of info, state not as much state change - new state is published
+   * gets the current state of this state machine
+   * 
+   * @return
+   */
+  public String getCurrent() {
+    if (current != null) {
+      return current.getName();
+    }
+    return null;
+  }
+
+  /**
+   * get the previous state of this state machine
+   * 
+   * @return
+   */
+  public String getLast() {
+    if (last != null) {
+      return last.getName();
+    }
+    return null;
+  }
+
+  public List<Transition> getTransitions() {
+    FiniteStateMachineConfig c = (FiniteStateMachineConfig) config;
+    return c.transitions;
+  }
+
+  /**
+   * publishes state if changed here
    * 
    * @param state
-   *          - incoming state to handle
-   * @throws Exception
-   *           - possible state exception
+   * @return
    */
-  @Override
-  public void handleState(State state) throws Exception {
-    // log.info("state {}-({})-> {}",
-    // state.getLastTransition().getSourceState(), state.getId(),
-    // state.getLastTransition().getId(), state.getId());
-    log.info("handleState {} from {}", state.getName(), state.getLastTransition());
-    invoke("publishState", state);
-  }
-
-  public void onState(State state) {
-    log.info("onState {}", state);
-  }
-
-  public State publishState(State state) {
-    log.info("publishState {}", state);
-    return state;
-  }
-
-  void registerFinalState(final State finalState) {
-    finalStates.add(finalState);
-  }
-
-  public void registerTransition(final Transition transition) {
-    transitions.add(transition);
-  }
-
-  public void removeScheduledEvents() {
-    purgeTasks();
-  }
-
-  public void setStates(String... stateNames) {
-    Set<State> states = new HashSet<>();
-    State initialState = null;
-    for (int i = 0; i < stateNames.length; ++i) {
-      State state = new State(stateNames[i]);
-      states.add(state);
-      if (i == 0) {
-        initialState = state;
+  public String publishNewState(String state) {
+    log.error("publishNewState {}", state);
+    for (String listener : messageListeners) {
+      ServiceInterface service = Runtime.getService(listener);
+      if (service != null) {
+        org.myrobotlab.framework.Message msg = org.myrobotlab.framework.Message.createMessage(getName(), listener, CodecUtils.getCallbackTopicName(state), null);
+        service.in(msg);
       }
     }
-
-    this.states = states;
-    currentStates.add(initialState.getName());
+    return state;
   }
 
   @Override
   public ServiceConfig getConfig() {
-
-    FiniteStateMachineConfig c = (FiniteStateMachineConfig) config;
-    c.states.clear();
-    for (State s : states) {
-      c.states.add(s.getName());
-    }
-    for (Transition t : transitions) {
-      FiniteStateMachineConfig.Transition transition = new FiniteStateMachineConfig.Transition();
-      transition.begin = t.getSourceState().getName();
-      transition.end = t.getTargetState().getName();
-      transition.event = t.getId();
-      c.transitions.add(transition);
-    }
+    FiniteStateMachineConfig c = (FiniteStateMachineConfig) super.getConfig();
+    c.current = getCurrent();
+    c.messageListeners = new ArrayList<>();
+    c.messageListeners.addAll(messageListeners);
     return c;
   }
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    FiniteStateMachineConfig config = (FiniteStateMachineConfig) c;
-    states.clear();
-    for (String s : config.states) {
-      states.add(new State(s));
+    FiniteStateMachineConfig config = (FiniteStateMachineConfig) super.apply(c);
+
+    if (config.transitions != null) {
+
+      // since this service operates directly from config
+      // when config is "applied" we need to copy out and
+      // re-apply the config using addTransition
+      List<Transition> newTransistions = new ArrayList<>();
+      newTransistions.addAll(config.transitions);
+      clear();
+      for (Transition t : newTransistions) {
+        addTransition(t.from, t.event, t.to);
+      }
+
+      messageListeners = new HashSet<>();
+      messageListeners.addAll(config.messageListeners);
+      broadcastState();
     }
-    transitions.clear();
-    for (FiniteStateMachineConfig.Transition transition : config.transitions) {
-      addTransition(transition.begin, transition.event, transition.end);
+
+    // setCurrent
+    if (config.current != null) {
+      setCurrent(config.current);
     }
+
     return c;
   }
 
-  public SimpleEvent publishEvent(SimpleEvent event) {
-    return event;
+  public void attach(String name) {
+    attachMessageListener(name);
+  }
+
+  public void attach(MessageListener listener) {
+    attachMessageListener(listener.getName());
+  }
+
+  public void attachMessageListener(String listener) {
+    messageListeners.add(listener);
+  }
+
+  public void detachMessageListener(String listener) {
+    messageListeners.remove(listener);
   }
 
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init(Level.INFO);
+      LoggingFactory.init(Level.WARN);
 
-      FiniteStateMachine fsm = (FiniteStateMachine) Runtime.start("fsm", "FiniteStateMachine");
+      // Runtime.startConfig("sub-04");
+
+      // WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      // // webgui.setSsl(true);
+      // webgui.autoStartBrowser(false);
+      // webgui.startService();
+      // FIXME !!! - setConfig and it operates on that config ... is that really
+      // desired ?
+      // Runtime.setConfig("fsm-test-01");
+      // Runtime.startConfig("dewey-2");
+
+      // Runtime.startConfig("worky");
+
+      // YAMLImporter.builder().build().parseFile("docker-machine.yml");
+
+      FiniteStateMachine fsm = (FiniteStateMachine) Runtime.start("i01.fsm", "FiniteStateMachine");
       // Runtime.start("servo", "Servo");
-      // Runtime.start("gui", "SwingGui");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+
+      Runtime.start("python", "Python");
+
+      // TODO - need properties for each state ?
+
+      fsm.addTransition("start", "starting", "initialize");
+
+      fsm.addTransition("initialize", "initialized", "idle");
+
+      fsm.addTransition("idle", "random", "random");
+      fsm.addTransition("idle", "report", "report");
+      fsm.addTransition("idle", "searching", "searching");
+      fsm.addTransition("idle", "sleeping", "sleeping");
+      fsm.addTransition("idle", "tracking", "tracking");
+
+      fsm.addTransition("random", "idle", "idle");
+      fsm.addTransition("report", "idle", "idle");
+      fsm.addTransition("searching", "idle", "idle");
+      fsm.addTransition("sleeping", "wake", "waking");
+      fsm.addTransition("sleeping", "idle", "idle");
+      fsm.addTransition("tracking", "idle", "idle");
+
+      fsm.setCurrent("start");
+
+      Runtime.start("i01", "InMoov2");
 
       // fsm.createFsm("emotional-state");
 
       // create a new fsm with 4 states
-      fsm.setStates("neutral", "ill", "sick", "vomiting");
+      // fsm.setStates("neutral", "ill", "sick", "vomiting");
 
       // add the ill-event transitions
       fsm.addTransition("neutral", "ill-event", "ill");
@@ -361,9 +346,18 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
       fsm.addTransition("sick", "clear-event", "ill");
       fsm.addTransition("vomiting", "clear-event", "sick");
 
-      fsm.subscribe("fsm", "publishState");
+      // fsm.subscribe("fsm", "publishState");
+
+      log.info("state - {}", fsm.getCurrent());
+
+      fsm.setCurrent("neutral");
+
+      log.info("state - {}", fsm.getCurrent());
 
       fsm.fire("ill-event");
+
+      log.info("state - {}", fsm.getCurrent());
+
       fsm.fire("ill-event");
       fsm.fire("ill-event");
       fsm.fire("ill-event");
@@ -371,15 +365,37 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
 
       fsm.save();
 
-      fsm.addScheduledEvent("clear-event", 1000);
+      boolean done = true;
+      if (done) {
+        return;
+      }
 
-      fsm.removeScheduledEvents();
+      // fsm.send("clear-event", 1000);
 
-      fsm.getCurrentState();
-      fsm.getCurrentStates();
+      // fsm.removeScheduledEvents();
+
+      log.info("state - {}", fsm.getCurrent());
 
     } catch (Exception e) {
       log.error("main threw", e);
+    }
+  }
+
+  public void setCurrent(String state) {
+    try {
+      if (state == null) {
+        warn("attempting to set state to null");
+        return;
+      }
+      last = stateMachine.getCurrent();
+      stateMachine.setCurrent(state);
+      current = stateMachine.getCurrent();
+      if (last != null && !last.equals(current)) {
+        invoke("publishNewState", current.getName());
+      }
+    } catch (Exception e) {
+      log.error("setCurrent threw", e);
+      error(e.getMessage());
     }
   }
 

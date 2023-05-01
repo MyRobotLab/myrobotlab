@@ -16,14 +16,7 @@ public class ChassisMeta extends MetaData {
   public ChassisMeta() {
 
     addDescription("control platform");
-    // add dependency if necessary
-    // addDependency("org.coolproject", "1.0.0");
     addCategory("general");
-    addPeer("left", "Motor", "left drive motor");
-    addPeer("right", "Motor", "right drive motor");
-    addPeer("joystick", "Joystick", "joystick control");
-    addPeer("controller", "Sabertooth", "serial controller");
-
   }
 
 }

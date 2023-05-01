@@ -9,6 +9,7 @@ public class DiscordBotConfig extends ServiceConfig {
 
   public boolean connect = true;
   public String token;
-  public String[] utteranceListeners;
+  // REMOVED BECAUSE OVERLAP WITH SUBSCRIPTIONS
+  // public String[] utteranceListeners;
 
 }

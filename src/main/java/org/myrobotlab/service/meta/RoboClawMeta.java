@@ -13,11 +13,8 @@ public class RoboClawMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    */
   public RoboClawMeta() {
-
     addDescription("interface for the powerful RoboClaw motor controller");
     addCategory("motor", "control");
-    addPeer("serial", "Serial", "Serial Port");
-
   }
 
 }

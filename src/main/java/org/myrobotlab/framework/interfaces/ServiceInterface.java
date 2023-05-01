@@ -4,19 +4,21 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
+import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher,
-    ServiceStatus, TaskManager, Attachable, Comparable<ServiceInterface> {
+public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher, 
+    ServiceStatus, TaskManager, Attachable, MessageInvoker, Comparable<ServiceInterface> {
 
   // does this work ?
   public final static Logger log = LoggerFactory.getLogger(Service.class);
@@ -70,11 +72,30 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
   public String getType();
 
   /**
-   * Does the meta data of this service define peers
+   * Keys to Peers - the keys are string constants the service uses to refer to a
+   * Peer service. The key never changes. However, the Peer's name and type can.
+   * This returns all peers for a service.
    * 
    * @return
    */
-  public boolean hasPeers();
+  public Map<String, Peer> getPeers();
+
+  /**
+   * Returns peers keys. Peer key is the hardcoded key a composite service
+   * references its peers with - actual name may vary
+   * 
+   * @return
+   */
+  public Set<String> getPeerKeys();
+
+  /**
+   * Returns the peer key if a name is supplied and matches a peer name
+   * 
+   * @param name
+   *          - service name
+   * @return - coorisponding peer key if it exists
+   */
+  public String getPeerKey(String name);
 
   /**
    * Service life-cycle method: releaseService will call stopService, release
@@ -127,11 +148,6 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
   public ServiceConfig apply(ServiceConfig config);
 
   /**
-   * loads json config and starts the service
-   */
-  public void loadAndStart();
-
-  /**
    * Service life-cycle method, stops the inbox and outbox threads - typically
    * does not release "custom" resources. It's purpose primarily is to stop
    * messaging from flowing in or out of this service - which is handled in the
@@ -172,25 +188,28 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
 
   public int getCreationOrder();
 
-  /***
-   * When this service is started and has peers auto started peers are added on
-   * starting. Shared peers will be already started and not added to this set.
-   * When the service is released, peers are automatically released, except for
-   * the ones not started by this service.
-   * 
-   * @param actualPeerName
-   */
-  public void addAutoStartedPeer(String actualPeerName);
+  public MetaData getMetaData();
 
   /**
-   * When this service is releasing it will only remove the peers it started
-   * this method allows that check.
+   * start a peer using a peerKey E.g. inside InMoov service startPeer("head")
    * 
-   * @param actualPeerName
+   * @param peerKey
    * @return
    */
-  public boolean autoStartedPeersContains(String actualPeerName);
+  public ServiceInterface startPeer(String peerKey);
 
-  public MetaData getMetaData();
+  /**
+   * setting an instance id on the service - this represents the running
+   * instance's identifier which would be the service's home
+   * 
+   * @param id
+   */
+  public void setId(String id);
+
+  /**
+   * Get a clone of config that is filtered based on service preference
+   * @return
+   */
+  public ServiceConfig getFilteredConfig();
 
 }

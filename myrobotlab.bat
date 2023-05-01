@@ -18,16 +18,16 @@ set JAVA_OPTIONS=-Djava.library.path=libraries/native -Djna.library.path=librari
 
 IF NOT "%*"=="" (
     echo "USER SUPPLIED ARGS"
-    "%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime --from-launcher %*
+    "%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime %*
 ) ELSE (
 
     IF EXIST "libraries/repo.json" (
         echo "libraries/repo.json exists."
     ) ELSE (
         echo "libraries/repo.json does not exist."
-        "%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime --from-launcher --install --log-file myrobotlab-install.log
+        "%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime --install --log-file myrobotlab-install.log
     )
 
-    "%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime --from-launcher --log-level info -s webgui WebGui intro Intro python Python
+    "%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime --log-level info -s webgui WebGui intro Intro python Python
 
 )

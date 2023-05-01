@@ -66,6 +66,8 @@ public interface NeoPixelControl extends NameProvider {
    */
   public void writeMatrix();
 
+  public void setPin(String pin);
+  
   public void setPin(int pin);
 
   public Integer getPin();

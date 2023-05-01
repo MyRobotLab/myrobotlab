@@ -13,11 +13,8 @@ public class GoProMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    */
   public GoProMeta() {
-
     addCategory("video");
-    addPeer("http", "HttpClient", "Http for GoPro control");
     addDescription("Go pro camera support");
-
   }
 
 }

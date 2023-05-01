@@ -18,10 +18,9 @@ public class WikiDataFetcherMeta extends MetaData {
     addCategory("ai");
     setSponsor("beetlejuice");
     addDependency("org.wikidata.wdtk", "wdtk-client", "0.8.0");
-    exclude("org.slf4j", "slf4j-log4j12");
+    exclude("org.slf4j", "*");
     // force using httpClient service httpcomponents version
-    exclude("org.apache.httpcomponents", "httpcore");
-    exclude("org.apache.httpcomponents", "httpclient");
+    exclude("org.apache.httpcomponents", "*");
 
     addDependency("com.fasterxml.jackson.core", "jackson-core", "2.14.0");
     addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.14.0");

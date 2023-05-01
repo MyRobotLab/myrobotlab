@@ -1,0 +1,52 @@
+<div class="row">
+    How to obtain an OpenAi api key
+    <a href="" ng-show="!showInstructions" ng-click="showInstructions=true">show</a>
+    <a href="" ng-show="showInstructions" ng-click="showInstructions=false">hide</a>
+</div>
+<div class="row" ng-show="showInstructions">
+
+    <ul>
+        <li>Go to <a href="https://beta.openai.com/account/api-keys">https://beta.openai.com/account/api-keys</a></li>
+        <li>Sign up</li>        
+        <li>Create a new key by clicking the "Create new secret key" button</li>
+    </ul>
+
+    Official Documentation : <a href="https://beta.openai.com/account/api-keys">OpenAi Api Keys</a>
+    <br/>
+</div>
+<div class="row">
+    <img ng-show="service.config.token" src="/connected.png"/>
+    <img ng-show="!service.config.token" src="/disconnected.png"/>
+</div>
+<div class="row">
+    <form class="form-inline">
+        token<br/>
+        <input class="form-control" type="password" ng-model="service.config.token" placeholder="bot token" title="token">
+        <button class="btn btn-default" ng-click="msg.setToken(service.config.token);msg.save()">set token</button>
+    </form>
+</div>
+<div class="row" ng-show="service.config.token">
+    <form class="form-inline">
+        text<br/>
+        <input class="form-control" type="text" ng-model="text" placeholder="send text" title="send text">
+        <button class="btn btn-default" ng-click="msg.getResponse(text)">send text</button><br/>
+    </form>
+</div>
+
+<div class="row">
+    <table class="table table-hover">
+        <tbody>
+            <tr ng-repeat="e in utterances" >
+                <td>
+                    <small>{{e.username}}</small>
+                </td>
+                <td>
+                    <small>{{e.channel}}</small>
+                </td>
+                <td>
+                    <small>[{{e.text}}]</small>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

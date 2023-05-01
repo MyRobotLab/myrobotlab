@@ -17,14 +17,6 @@ public class EddieControlBoardMeta extends MetaData {
     addCategory("microcontroller");
     // John Harland no longer uses this hardware
     setAvailable(false);
-
-    // put peer definitions in
-    addPeer("serial", "Serial", "serial");
-    addPeer("keyboard", "Keyboard", "serial");
-    addPeer("webgui", "WebGui", "webgui");
-    // meta.addPeer("remote", "RemoteAdapter", "remote interface");
-    addPeer("joystick", "Joystick", "joystick");
-
   }
 
 }
