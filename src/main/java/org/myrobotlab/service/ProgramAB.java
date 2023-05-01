@@ -62,7 +62,7 @@ import org.slf4j.Logger;
  *
  */
 public class ProgramAB extends Service
-    implements Translator, TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener, UtterancePublisher, UtteranceListener, ResponsePublisher {
+    implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener, UtterancePublisher, UtteranceListener, ResponsePublisher {
 
   /**
    * default file name that aiml categories comfing from matching a learnf tag
@@ -1495,21 +1495,6 @@ public class ProgramAB extends Service
     return topicChange;
   }
   
-  
-
-  @Override
-  public String translate(String text) {
-    Response response = getResponse(text);
-    return response.msg;
-  }
-
-  @Override
-  public String translate(String text, String fromLang, String toLang) {
-    // FIXME implement - same mapping that current inmoov has ? en-US etc ..
-    // although all of those are localizations
-    // not languages only the 1st part is "en" in en-US
-    // return getResponse(text)
-    return null;
-  }
+ 
 
 }
