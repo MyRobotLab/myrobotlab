@@ -53,7 +53,7 @@ public class ServiceData implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  static private String serviceDataCacheFileName = FileIO.getCfgDir() + File.separator + "serviceData.json";
+  static private String serviceDataCacheFileName = "libraries" + File.separator + "serviceData.json";
 
   /**
    * clears all overrides. All services shall be using the standard hard co
@@ -166,11 +166,11 @@ public class ServiceData implements Serializable {
       // step 3 - if 1 & 2 fail - then we can 'assume' were in develop
       // time (we'll isJar check and error if not)
       // - generate it and put it in
-      // getRoot()/resource/framework/serviceData.json
+      // libraries/serviceData.json
 
       // if we're not in a jar we are in an IDE.
 
-      // First check the .myrobotlab/serviceData.json dir.
+      // First check the libraries/serviceData.json dir.
       File jsonFile = new File(serviceDataCacheFileName);
       if (jsonFile.exists()) {
         // load it and return!
@@ -427,9 +427,8 @@ public class ServiceData implements Serializable {
       File removeExisting = new File(filename);
       removeExisting.delete();
 
-      // remove .myrobotlab/serviceData.json
-      // 20190630 - GroG changed uses FileIO.getCfgDir()
-      removeExisting = new File(FileIO.getCfgDir() + File.separatorChar + "serviceData.json");
+      // remove libraries/serviceData.json
+      removeExisting = new File("libraries" + File.separatorChar + "serviceData.json");
       removeExisting.delete();
 
       // THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - BEGIN ----
