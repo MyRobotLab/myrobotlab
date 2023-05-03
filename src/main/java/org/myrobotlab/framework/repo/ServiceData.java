@@ -32,12 +32,16 @@ import org.slf4j.Logger;
  * .myrobotlab directory.
  * 
  * @author GroG
+ * 
+ * FIXME - this is really just something that manages MetaData ... should make it the same both for clarity and
+ * transparency 
  *
  */
-@Deprecated /* at some point this should all move over to MetaData */
 public class ServiceData implements Serializable {
 
   static private ServiceData localInstance = null;
+  
+  static final public String LIBRARIES = "libraries";
 
   transient public final static Logger log = LoggerFactory.getLogger(ServiceData.class);
 
@@ -53,7 +57,7 @@ public class ServiceData implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  static private String serviceDataCacheFileName = "libraries" + File.separator + "serviceData.json";
+  static private String serviceDataCacheFileName = LIBRARIES + File.separator + "serviceData.json";
 
   /**
    * clears all overrides. All services shall be using the standard hard co
