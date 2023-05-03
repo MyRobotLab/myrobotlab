@@ -281,9 +281,9 @@ public class MavenWrapper extends Repo implements Serializable {
 
       LoggingFactory.init(Level.INFO);
       
-      File libraries = new File("libraries");
+      File libraries = new File(ServiceData.LIBRARIES);
       libraries.mkdir();
-      File cache = new File("libraries/serviceData.json");
+      File cache = new File(ServiceData.LIBRARIES + File.separator + "serviceData.json");
       if (cache.exists()) {
         log.info("removing servicData.json cache");
         cache.delete();
