@@ -21,6 +21,11 @@
      this file, see http://wiki.apache.org/solr/SolrConfigXml.
 -->
 <config>
+<schemaFactory class="ManagedIndexSchemaFactory">
+ <bool name="mutable">true</bool>
+ <str name="managedSchemaResourceName">managed-schema.xml</str>
+</schemaFactory>
+
   <!-- In all configuration below, a prefix of "solr." for class names
        is an alias that causes solr to search appropriate packages,
        including org.apache.solr.(search|update|request|core|analysis)
@@ -410,7 +415,7 @@
                       to occupy. Note that when this option is specified, the size
                       and initialSize parameters are ignored.
       -->
-    <filterCache class="solr.FastLRUCache"
+    <filterCache class="solr.CaffeineCache"
                  size="512"
                  initialSize="512"
                  autowarmCount="0"/>
@@ -423,7 +428,7 @@
             maxRamMB - the maximum amount of RAM (in MB) that this cache is allowed
                        to occupy
       -->
-    <queryResultCache class="solr.LRUCache"
+    <queryResultCache class="solr.CaffeineCache"
                       size="512"
                       initialSize="512"
                       autowarmCount="0"/>
@@ -434,14 +439,14 @@
          document).  Since Lucene internal document ids are transient,
          this cache will not be autowarmed.
       -->
-    <documentCache class="solr.LRUCache"
+    <documentCache class="solr.CaffeineCache"
                    size="512"
                    initialSize="512"
                    autowarmCount="0"/>
 
     <!-- custom cache currently used by block join -->
     <cache name="perSegFilter"
-           class="solr.search.LRUCache"
+           class="solr.CaffeineCache"
            size="10"
            initialSize="0"
            autowarmCount="10"
@@ -454,7 +459,7 @@
          even if not configured here.
       -->
     <!--
-       <fieldValueCache class="solr.FastLRUCache"
+       <fieldValueCache class="solr.CaffeineCache"
                         size="512"
                         autowarmCount="128"
                         showItems="32" />
@@ -471,7 +476,7 @@
       -->
     <!--
        <cache name="myUserCache"
-              class="solr.LRUCache"
+              class="solr.CaffeineCache"
               size="4096"
               initialSize="1024"
               autowarmCount="1024"
@@ -1188,6 +1193,12 @@
       <str name="valueClass">java.lang.Number</str>
       <str name="fieldType">pdoubles</str>
     </lst>
+    <lst name="typeMapping">
+      <str name="valueClass">java.util.List</str>
+      <str name="fieldType">knn_vector</str>
+    </lst>
+    
+
   </updateProcessor>
 
   <!-- The update.autoCreateFields property can be turned to false to disable schemaless mode -->
