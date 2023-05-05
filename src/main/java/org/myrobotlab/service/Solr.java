@@ -21,15 +21,14 @@ import java.util.stream.IntStream;
 
 import javax.imageio.ImageIO;
 
+import com.google.common.primitives.Floats;
 import com.robrua.nlp.bert.Bert;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.lucene.analysis.core.KeywordTokenizerFactory;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrQuery.SortClause;
-import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -37,7 +36,6 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.SolrInputField;
 import org.apache.solr.core.CoreContainer;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
@@ -1008,28 +1006,45 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       // Loading a BERT model that is stored in one of our Maven dependencies
       try (Bert bert = Bert.load("com/robrua/nlp/easy-bert/bert-uncased-L-12-H-768-A-12")) {
         String sentence = "Hello, my name is AP.";
+        solr.deleteEmbeddedIndex();
+        solr.deleteDocument("doc1");
+        solr.deleteDocument("doc2");
         doc.addField("id", "doc1");
         doc.addField("text_field", sentence);
         // I don't know what I should be doing here, I need a dense vector field but can't figure out the type
-        doc.addField("vector_field", bert.embedSequence(sentence));
+        doc.addField("test_vector", Floats.asList(bert.embedSequence(sentence)));
+
+
         solr.addDocument(doc);
+
+        for (int i = 0; i < 1000; i++) {
+          SolrInputDocument doc2 = new SolrInputDocument();
+          doc2.addField("id", "doc2" + i);
+          doc2.addField("text_field", "Make a Python program: " + i * i);
+          doc2.addField("test_vector", Floats.asList(bert.embedSequence("Make a Python program: " + i * i)));
+          solr.deleteDocument("doc2" + i);
+//          solr.addDocument(doc2);
+
+        }
+
         solr.commit();
         SolrQuery query = new SolrQuery();
         float[] embeddings = bert.embedSequence("What is my name?");
 
         query.setQuery("*:*");
-        query.setParam("rq", "{!knn f=vector topK=3}" + Arrays.toString(embeddings));
-        query.setParam("q1", "vector_field:[0 TO *]");
+        query.setParam("q", "{!knn f=test_vector topK=3}" + Arrays.toString(embeddings));
         query.setParam("fl", "*,score");
+
 
         String vector = IntStream.range(0, embeddings.length)
                 .mapToObj(i -> String.valueOf(embeddings[i]))
                 .collect(Collectors.joining(","));
-        query.setParam("vector", String.join(",", vector));
+//        query.setParam("vector", String.join(",", vector));
         QueryResponse response = solr.search(query);
         SolrDocumentList results = response.getResults();
         for (SolrDocument docResult : results) {
-          String textData = (String) docResult.getFieldValue("text_field");
+          String textData = ((ArrayList<?>) docResult.getFieldValue("text_field")).toString();
+          System.out.println(docResult.getFieldValue("score"));
           System.out.println(textData);
         }
 
