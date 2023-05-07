@@ -270,7 +270,7 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
   Map<String, String> exampleFiles = new TreeMap<String, String>();
 
   transient LinkedBlockingQueue<Message> inputQueue = new LinkedBlockingQueue<Message>();
-  final transient InputQueue inputQueueThread;
+  transient InputQueue inputQueueThread;
   transient PythonInterpreter interp = null;
   transient Map<String, PIThread> interpThreads = new HashMap<String, PIThread>();
 
@@ -296,52 +296,6 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
 
   public Python(String n, String id) {
     super(n, id);
-
-    log.info("created python {}", getName());
-
-    log.info("creating module directory pythonModules");
-    new File("pythonModules").mkdir();
-    
-    createPythonInterpreter();
-    sleep(250);
-    
-    inputQueueThread = new InputQueue(this);
-
-    // I love ServiceData !
-    ServiceData sd = ServiceData.getLocalInstance();
-    List<MetaData> sdt = sd.getAvailableServiceTypes();
-    for (int i = 0; i < sdt.size(); ++i) {
-      MetaData st = sdt.get(i);
-      // FIXME - cache in "data" dir Or perhaps it should be pulled into
-      // resource directory during build time and packaged with jar
-      String file = String.format("%s/%s.py", st.getSimpleName(), st.getSimpleName());
-      exampleFiles.put(st.getSimpleName(), file);
-    }
-
-    localPythonFiles = getFileListing();
-
-    attachPythonConsole();
-
-    String selfReferenceScript = "from time import sleep\nfrom org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
-        + "from org.myrobotlab.framework import Service\n" + "from org.myrobotlab.service import Python\n"
-        + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
-        + String.format("runtime = Runtime.getInstance()\n") + String.format("myService = Runtime.getService(\"%s\")\n", getName());
-    // FIXME !!! myService is SO WRONG it will collide on more than 1 python
-    // service :(
-    PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
-    interp.exec(compiled);
-
-    // initialize all the pre-existing service before python was created
-    Map<String, ServiceInterface> services = Runtime.getLocalServices();
-    for (ServiceInterface service : services.values()) {
-      if (service.isRunning()) {
-        onStarted(service.getName());
-      }
-    }
-
-    log.info("starting python {}", getName());
-    inputQueueThread.start();
-    log.info("started python {}", getName());
   }
 
   public void newScript() {
@@ -427,20 +381,24 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
     Properties preprops = System.getProperties();
 
     PythonInterpreter.initialize(preprops, props, new String[0]);
-
+    
     interp = new PythonInterpreter();
+    
+    addModulePath(getResourceDir() + fs + "modules");
+
   }
 
   public void addModulePath(String path) {
     PythonConfig c = (PythonConfig) config;
     if (c.modulePaths != null) {
       c.modulePaths.add(path);
-      if (interp != null) {
-        PySystemState sys = Py.getSystemState();
-        sys.path.append(new PyString(path));
-        log.info("Python System Path: {}", sys.path);
-      }
     }
+    
+    if (interp != null) {
+      PySystemState sys = Py.getSystemState();
+      sys.path.append(new PyString(path));
+      log.info("Python System Path: {}", sys.path);
+    }    
   }
 
   public String eval(String method) {
@@ -871,6 +829,51 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
     // release the interpeter
     stop();
   }
+  
+  public void init() {
+    
+    log.info("created python {}", getName());
+    createPythonInterpreter();
+    sleep(250);
+    
+    inputQueueThread = new InputQueue(this);
+
+    // I love ServiceData !
+    ServiceData sd = ServiceData.getLocalInstance();
+    List<MetaData> sdt = sd.getAvailableServiceTypes();
+    for (int i = 0; i < sdt.size(); ++i) {
+      MetaData st = sdt.get(i);
+      // FIXME - cache in "data" dir Or perhaps it should be pulled into
+      // resource directory during build time and packaged with jar
+      String file = String.format("%s/%s.py", st.getSimpleName(), st.getSimpleName());
+      exampleFiles.put(st.getSimpleName(), file);
+    }
+
+    localPythonFiles = getFileListing();
+
+    attachPythonConsole();
+
+    String selfReferenceScript = "from time import sleep\nfrom org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
+        + "from org.myrobotlab.framework import Service\n" + "from org.myrobotlab.service import Python\n"
+        + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
+        + String.format("runtime = Runtime.getInstance()\n") + String.format("myService = Runtime.getService(\"%s\")\n", getName());
+    // FIXME !!! myService is SO WRONG it will collide on more than 1 python
+    // service :(
+    PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
+    interp.exec(compiled);
+
+    // initialize all the pre-existing service before python was created
+    Map<String, ServiceInterface> services = Runtime.getLocalServices();
+    for (ServiceInterface service : services.values()) {
+      if (service.isRunning()) {
+        onStarted(service.getName());
+      }
+    }
+
+    log.info("starting python {}", getName());
+    inputQueueThread.start();
+    log.info("started python {}", getName());
+  }
 
   public boolean isOpenOnExecute() {
     return openOnExecute;
@@ -919,6 +922,12 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
   @Override
   public ServiceConfig apply(ServiceConfig c) {
     PythonConfig config = (PythonConfig) super.apply(c);
+    
+    // apply is the first method called after construction,
+    // since we offer the capability of executing scripts specified in config
+    // the interpreter must be configured and created here
+    init();
+    
     if (config.startScripts != null && config.startScripts.size() > 0) {
 
       if (isRunning()) {

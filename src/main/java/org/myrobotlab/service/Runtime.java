@@ -90,6 +90,7 @@ import org.myrobotlab.service.interfaces.ServiceLifeCyclePublisher;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
+import org.yaml.snakeyaml.constructor.ConstructorException;
 
 import picocli.CommandLine;
 
@@ -4814,6 +4815,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     if (check.exists()) {
       try {
         sc = CodecUtils.readServiceConfig(filename);
+      } catch (ConstructorException e) {
+        error("%s invalid %s %s. Please remove it from the file.", name, filename, e.getCause().getMessage());
       } catch (IOException e) {
         error(e);
       }

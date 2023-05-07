@@ -27,6 +27,6 @@ public class CmdConfig {
   /**
    * if this startup is enabled
    */
-  public boolean enable = true;
+  public boolean enable = false;
 
 }

@@ -1,3 +1,31 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# IDEs and editors
+.idea/
+.vscode/
+*.pyc
+
+# Local development settings
+.env
+.env.local
+.env.*.local
+
+# Logs and other generated files
+*.log
+*.out
+*.pid
+*.sock
+
+
 # TODO clean this up !
 /.project
 /.classpath
