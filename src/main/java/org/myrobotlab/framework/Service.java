@@ -1379,6 +1379,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * Default load config method, subclasses should override this to support
    * service specific configuration in the service yaml files.
    * 
+   * apply is the  first function to be called after construction of a service, then startService will be called
+   * 
+   * construct -&gt; apply -&gt; startService 
+   * 
    */
   @Override
   public ServiceConfig apply(ServiceConfig inConfig) {
@@ -1940,11 +1944,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       }
       thisThread.start();
       isRunning = true;
-      Runtime runtime = Runtime.getInstance();
-      if (runtime != null) {
-        runtime.invoke("started", getName()); // getFullName()); - removed
-                                              // fullname
-      }
+      send("runtime", "started", getName());
 
     } else {
       log.debug("startService request: service {} is already running", name);
