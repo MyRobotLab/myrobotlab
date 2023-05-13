@@ -17,7 +17,7 @@ import java.util.Objects;
  *
  * @author AutonomicPerfectionist
  */
-public class ConversationTurn {
+public class ChatMessage {
 
     /**
      * When an AI / Chatbot is speaking during
@@ -38,21 +38,33 @@ public class ConversationTurn {
      * What the {@link #speaker} said during
      * their turn.
      */
-    public final String turnContents;
+    public final String message;
 
     /**
-     * The ID of the conversation this turn was a part of.
+     * The ID of the conversation this message was a part of.
      * This ID can be generated through a number of ways, a simple
      * way would be to add the hashcodes of the participants' names.
      */
     public final long conversationId;
 
-    public ConversationTurn(String speaker, String turnContents, long conversationId) {
+    public ChatMessage(String speaker, String message, long conversationId) {
         Objects.requireNonNull(speaker, "Speaker may not be null");
-        Objects.requireNonNull(turnContents, "Turn contents may not be null");
+        Objects.requireNonNull(message, "Turn contents may not be null");
         this.speaker = speaker;
-        this.turnContents = turnContents;
+        this.message = message;
         this.conversationId = conversationId;
+    }
+
+    public String getSpeaker() {
+        return speaker;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public long getConversationId() {
+        return conversationId;
     }
 
     @Override
@@ -60,16 +72,25 @@ public class ConversationTurn {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ConversationTurn that = (ConversationTurn) o;
+        ChatMessage that = (ChatMessage) o;
 
         if (!speaker.equals(that.speaker)) return false;
-        return turnContents.equals(that.turnContents);
+        return message.equals(that.message);
     }
 
     @Override
     public int hashCode() {
         int result = speaker.hashCode();
-        result = 31 * result + turnContents.hashCode();
+        result = 31 * result + message.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ChatMessage{" +
+                "speaker='" + speaker + '\'' +
+                ", turnContents='" + message + '\'' +
+                ", conversationId=" + conversationId +
+                '}';
     }
 }
