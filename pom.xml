@@ -343,6 +343,12 @@
   </dependency>
 <!-- DocumentPipeline end -->
 
+<!-- EasyBert begin -->
+<!-- Duplicate entry for com.robrua.nlp-easy-bert-1.0.3 skipping -->
+<!-- Duplicate entry for com.robrua.nlp.models-easy-bert-uncased-L-12-H-768-A-12-1.0.0 skipping -->
+<!-- Duplicate entry for org.tensorflow-tensorflow-1.15.0 skipping -->
+<!-- EasyBert end -->
+
 <!-- Elasticsearch begin -->
   <dependency>
     <groupId>pl.allegro.tech</groupId>
