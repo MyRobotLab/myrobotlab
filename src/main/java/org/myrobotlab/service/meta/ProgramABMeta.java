@@ -20,7 +20,7 @@ public class ProgramABMeta extends MetaData {
     addCategory("ai");
     
     addDependency("program-ab", "program-ab-data", null, "zip");
-    addDependency("program-ab", "program-ab-kw", "0.0.8.9");
+    addDependency("program-ab", "program-ab-kw", "0.0.8.10");
     exclude("ch.qos.logback", "logback-classic");
     exclude("ch.qos.logback", "logback-core");
     
