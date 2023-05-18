@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Timer;
@@ -1552,13 +1553,19 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public void removeListener(String outMethod, String serviceName, String inMethod) {
     if (outbox.notifyList.containsKey(outMethod)) {
       List<MRLListener> nel = outbox.notifyList.get(outMethod);
-      for (int i = 0; i < nel.size(); ++i) {
-        MRLListener target = nel.get(i);
-        if (target.callbackName.compareTo(serviceName) == 0) {
-          nel.remove(i);
-          log.info("removeListener requested {}.{} to be removed", serviceName, outMethod);
+      nel.removeIf(listener -> {
+        if (listener == null) {
+          log.info("Removing null listener for method {}", outMethod);
+          return true;
         }
-      }
+
+        // FIXME do we need to check inMethod too?
+        if (CodecUtils.checkServiceNameEquality(listener.callbackName, serviceName)) {
+          log.info("removeListener requested {}.{} to be removed", serviceName, outMethod);
+          return true;
+        }
+        return false;
+      });
     } else {
       log.info("removeListener requested {}.{} to be removed - but does not exist", serviceName, outMethod);
     }
