@@ -53,6 +53,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Broadcaster;
@@ -1412,24 +1413,30 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public ServiceConfig getConfig() {
 
-    boolean filterWeb = true;
-
     Map<String, List<MRLListener>> listeners = getOutbox().notifyList;
     List<Listener> newListeners = new ArrayList<>();
 
     // TODO - perhaps a switch for "remote" things ?
-    if (filterWeb) {
-      for (String method : listeners.keySet()) {
-        List<MRLListener> list = listeners.get(method);
-        for (MRLListener listener : list) {
-          if (!listener.callbackName.endsWith("@webgui-client")) {
-
-            Listener newConfigListener = new Listener(listener.topicMethod, listener.callbackName, listener.callbackMethod);
-            newListeners.add(newConfigListener);
-          }
+    for (String method : listeners.keySet()) {
+      List<MRLListener> list = listeners.get(method);
+      for (MRLListener listener : list) {
+        if (!listener.callbackName.endsWith("@webgui-client")) {
+          // Removes the `@runtime-id` so configs still work with local IDs
+          // The StringUtils.removeEnd() call is a no-op when the ID is not our local ID,
+          // so doesn't conflict with remote routes
+          Listener newConfigListener = new Listener(
+                  listener.topicMethod,
+                  StringUtils.removeEnd(
+                          listener.callbackName,
+                          Platform.getLocalInstance().getId()
+                  ),
+                  listener.callbackMethod
+          );
+          newListeners.add(newConfigListener);
         }
       }
     }
+
 
     if (newListeners.size() > 0) {
       config.listeners = newListeners;
@@ -1441,7 +1448,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public ServiceConfig getFilteredConfig() {
     ServiceConfig sc = getConfig();
     // deep clone
-    sc = (ServiceConfig) CodecUtils.fromYaml(CodecUtils.toYaml(sc), sc.getClass());
+    sc = CodecUtils.fromYaml(CodecUtils.toYaml(sc), sc.getClass());
     return sc;
   }
 
