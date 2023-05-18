@@ -125,7 +125,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * full class name used in serialization
    */
-  protected String serviceClass;
+  protected String typeKey;
 
   private boolean isRunning = false;
 
@@ -633,7 +633,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       log.debug("creating remote proxy service for id {}", id);
     }
 
-    serviceClass = this.getClass().getCanonicalName();
+    typeKey = this.getClass().getCanonicalName();
     simpleName = this.getClass().getSimpleName();
     MethodCache cache = MethodCache.getInstance();
     cache.cacheMethodEntries(this.getClass());
@@ -1098,19 +1098,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   @Override
-  public String getType() {
-    return getClass().getCanonicalName();
-  }
-
-  /**
-   * Equivalent to {@link #getType()} but required
-   * because the WebGui relies on this field.
-   *
-   * @return The fully qualified class name of this service.
-   */
-  @Override
-  public String getServiceClass() {
-    return serviceClass;
+  public String getTypeKey() {
+    return typeKey;
   }
 
   @Override
@@ -1393,7 +1382,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public ServiceConfig apply(ServiceConfig inConfig) {
-    log.info("Default service config loading for service: {} type: {}", getName(), getType());
+    log.info("Default service config loading for service: {} type: {}", getName(), getTypeKey());
     /*
      * We clone/serialize here because we don't want to use the same reference
      * of of config in the plan. If configuration is applied through the plan,
@@ -2657,7 +2646,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     if (!clazz.contains(".")) {
       clazz = String.format("org.myrobotlab.service.%s", clazz);
     }
-    return serviceClass.equals(clazz);
+    return typeKey.equals(clazz);
   }
 
   @Override

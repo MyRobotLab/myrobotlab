@@ -950,7 +950,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     SolrInputDocument doc = new SolrInputDocument();
     doc.setField("id", docId);
     // TODO: consider a cache of this to make this faster
-    doc.setField("sender_type", Runtime.getService(message.sender).getType());
+    doc.setField("sender_type", Runtime.getService(message.sender).getTypeKey());
     doc.setField("sender", message.sender);
     doc.setField("method", message.method);
     // TODO: this is actually the timestamp of the message.. not an id.
