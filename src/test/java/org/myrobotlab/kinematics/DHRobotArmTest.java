@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 
 public class DHRobotArmTest extends AbstractTest {
   public final static Logger log = LoggerFactory.getLogger(DHRobotArmTest.class);
-
+  
   public DHRobotArm createArm() {
     log.info("createArm");
 

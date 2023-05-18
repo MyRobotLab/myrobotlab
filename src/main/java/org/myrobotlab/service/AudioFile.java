@@ -51,6 +51,7 @@ import org.myrobotlab.net.Http;
 import org.myrobotlab.service.config.AudioFileConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
+import org.myrobotlab.service.interfaces.AudioControl;
 import org.myrobotlab.service.interfaces.AudioPublisher;
 import org.slf4j.Logger;
 
@@ -61,7 +62,7 @@ import org.slf4j.Logger;
  * TODO - publishPeak interface
  *
  */
-public class AudioFile extends Service implements AudioPublisher {
+public class AudioFile extends Service implements AudioPublisher, AudioControl {
   static final long serialVersionUID = 1L;
   static final Logger log = LoggerFactory.getLogger(AudioFile.class);
 
@@ -127,14 +128,10 @@ public class AudioFile extends Service implements AudioPublisher {
 
   final private transient PlaylistPlayer playlistPlayer = new PlaylistPlayer(this);
 
-  protected double peakMultiplier = 1.0;
-
-  public double getPeakMultiplier() {
-    return peakMultiplier;
-  }
 
   public void setPeakMultiplier(double peakMultiplier) {
-    this.peakMultiplier = peakMultiplier;
+    AudioFileConfig c = (AudioFileConfig)config;
+    c.peakMultiplier = peakMultiplier;
   }
 
   public AudioFile(String n, String id) {
@@ -522,16 +519,16 @@ public class AudioFile extends Service implements AudioPublisher {
   @Override
   public ServiceConfig getConfig() {
 
-    AudioFileConfig c = (AudioFileConfig) config;
+    AudioFileConfig c = (AudioFileConfig) super.getConfig();
     // FIXME - remove members keep data in config !
     // FIXME - the following is not needed nor desired
     // useless self assignment
     c.mute = mute;
     c.currentTrack = currentTrack;
     c.currentPlaylist = currentPlaylist;
+    // c.peakMultiplier = peakMultiplier;
     c.volume = volume;
     c.playlists = playlists;
-    c.peakMultiplier = peakMultiplier;
     // config.peakSampleInterval <- this one is done correctly no maintenance
     c.audioListeners = getAttached("publishAudio").toArray(new String[0]);
 
@@ -540,7 +537,7 @@ public class AudioFile extends Service implements AudioPublisher {
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    AudioFileConfig config = (AudioFileConfig) c;
+    AudioFileConfig config = (AudioFileConfig) super.apply(c);
     setMute(config.mute);
     setTrack(config.currentTrack);
     setVolume(config.volume);
@@ -562,10 +559,10 @@ public class AudioFile extends Service implements AudioPublisher {
     return c;
   }
 
-  public double publishPeak(float peak) {
+  public double publishPeak(double peak) {
     return peak;
   }
-
+  
   public static void main(String[] args) {
 
     try {
@@ -577,6 +574,9 @@ public class AudioFile extends Service implements AudioPublisher {
       Runtime.start("python", "Python");
 
       AudioFile player = (AudioFile) Runtime.start("player", "AudioFile");
+      
+      // Audio stream
+      // player.play("http://icecast.radiofrance.fr/fip-midfi.mp3");
       player.play("https://upload.wikimedia.org/wikipedia/commons/1/1f/Bach_-_Brandenburg_Concerto.No.1_in_F_Major-_II._Adagio.ogg");
 
       boolean done = true;
@@ -598,6 +598,15 @@ public class AudioFile extends Service implements AudioPublisher {
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  @Override
+  public void onPlayAudioFile(String file) {
+    play(file);
+  }
+
+  public double getPeakMultiplier() {
+    return ((AudioFileConfig)config).peakMultiplier;
   }
 
 }

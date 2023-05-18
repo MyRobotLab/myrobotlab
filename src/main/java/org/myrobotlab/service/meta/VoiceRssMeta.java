@@ -1,8 +1,6 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Plan;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.config.VoiceRssConfig;
 import org.myrobotlab.service.meta.abstracts.AbstractSpeechSynthesisMeta;
 import org.slf4j.Logger;
 
@@ -21,22 +19,8 @@ public class VoiceRssMeta extends AbstractSpeechSynthesisMeta {
     addCategory("speech", "cloud");
     addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
     setCloudService(true);
+    setRequiresKeys(true);
     addDependency("com.voicerss", "tts", "1.0");
-  }
-
-  @Override
-  public Plan getDefault(String name) {
-
-    Plan plan = new Plan(name);
-    plan.putPeers(name, peers);
-
-    VoiceRssConfig config = new VoiceRssConfig();
-    config.audioFile = name + ".audioFile";
-
-    // add self last - desired order or construction
-    plan.addConfig(config);
-
-    return plan;
   }
 
 }

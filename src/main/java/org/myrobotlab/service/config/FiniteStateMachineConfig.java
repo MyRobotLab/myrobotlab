@@ -6,22 +6,26 @@ import java.util.List;
 public class FiniteStateMachineConfig extends ServiceConfig {
 
   public static class Transition {
+    
     public Transition() {
-
     }
-
-    public Transition(String begin, String event, String end) {
-      this.begin = begin;
+    
+    public Transition(String from, String event, String to) {
+      this.from = from;
       this.event = event;
-      this.end = end;
+      this.to = to;
     }
 
-    public String begin;
+    public String from;
     public String event;
-    public String end;
+    public String to;
   }
 
-  public List<String> states = new ArrayList<>();
   public List<Transition> transitions = new ArrayList<>();
+
+  public String current = null;
+  
+  // FIXME - deprecate in favor of listener subscriptions ??? overlapp problems if not
+  public List<String> messageListeners = new ArrayList<>();
 
 }

@@ -26,7 +26,7 @@ import picocli.CommandLine.Option;
  * </pre>
  */
 @Command(name = "java -jar myrobotlab.jar ")
-public class CmdOptions {
+public class CmdOptions {  
 
   public final String DEFAULT_CONNECT = "http://localhost:8888";
 
@@ -39,19 +39,13 @@ public class CmdOptions {
     return false;
   }
 
-  // FIXME - should work with a startup ...
-  @Option(names = { "-k", "--add-key" }, arity = "2..*", description = "adds a key to the key store\n"
-      + "@bold,italic java -jar myrobotlab.jar -k amazon.polly.user.key ABCDEFGHIJKLM amazon.polly.user.secret Fidj93e9d9fd88gsakjg9d93")
-  public String addKeys[];
-
   // launcher ??
   @Option(names = { "-a", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
   public boolean autoUpdate = false;
 
   // launcher
-  @Option(names = { "-c", "--config" }, description = "Configuration file. If specified all configuration from the file will be used as a \"base\" of configuration. "
-      + "All configuration of last run is saved to {data-dir}/lastjson. This file can be used as a starter config for subsequent --cfg config.json. "
-      + "If this value is set, all other configuration flags are ignored.")
+  @Option(names = { "-c",
+      "--config" }, description = "Specify a configuration set to start. The config set is a directory which has all the necessary configuration files. It loads runtime.yml first, and subsequent service configuration files will then load. \n example: --config data/config/my-config-dir")
   public String config = null;
 
   @Option(names = {
@@ -60,17 +54,12 @@ public class CmdOptions {
                                       */ fallbackValue = DEFAULT_CONNECT, description = "connects this mrl instance to another mrl instance - default is " + DEFAULT_CONNECT)
   public String connect = null;
 
-  // TODO - daemon / fork
-  @Option(names = { "-d", "--daemon" }, description = "daemon - fork process from current process - no inherited io no cli")
-  public boolean daemon = false;
-
-  // if --from-launcher knows to createAndStart service on -s
-  @Option(names = { "--from-launcher" }, description = "prevents starting in interactive mode - reading from stdin")
-  @Deprecated /* no more java launcher - we use scripts now */
-  public boolean fromLauncher = true; // from launcher meaningless now
-
   @Option(names = { "-h", "-?", "--help" }, description = "shows help")
   public boolean help = false;
+  
+  @Option(names = { "-r", "--config-root" }, description = "sets configuration root, the root for which all config directories are in")
+  public String configRoot = null;
+
 
   @Option(names = { "--id" }, description = "process identifier to be mdns or network overlay name for this instance - one is created at random if not assigned")
   public String id;
@@ -151,13 +140,6 @@ public class CmdOptions {
 
     List<String> cmd = new ArrayList<>();
 
-    if (addKeys != null) {
-      cmd.add("-k");
-      for (int i = 0; i < addKeys.length; ++i) {
-        cmd.add(addKeys[i]);
-      }
-    }
-
     if (autoUpdate) {
       cmd.add("-a");
     }
@@ -170,10 +152,6 @@ public class CmdOptions {
     if (connect != null) {
       cmd.add("-c");
       cmd.add(connect);
-    }
-
-    if (daemon) {
-      cmd.add("-d");
     }
 
     if (invoke != null) {

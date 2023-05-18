@@ -55,17 +55,18 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    DiscordBotConfig config = (DiscordBotConfig) c;
+    DiscordBotConfig config = (DiscordBotConfig) super.apply(c);
 
     if (config.token != null) {
       setToken(config.token);
     }
 
-    if (config.utteranceListeners != null) {
-      for (String name : config.utteranceListeners) {
-        attachUtteranceListener(name);
-      }
-    }
+    // REMOVED - OVERLAP WITH SUBSCRIPTIONS
+//    if (config.utteranceListeners != null) {
+//      for (String name : config.utteranceListeners) {
+//        attachUtteranceListener(name);
+//      }
+//    }
 
     if (config.connect && config.token != null && !config.token.isEmpty()) {
       connect();
@@ -109,11 +110,12 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     // TODO: is this unsafe?
     // TODO: what sets the type of this config?
     /// TODO: this isn't good OO programming to have to do it this way.
-    DiscordBotConfig config = new DiscordBotConfig();
-    config.token = token;
+    DiscordBotConfig c = (DiscordBotConfig) super.getConfig();
+    c.token = token;
 
-    Set<String> listeners = getAttached("publishUtterance");
-    config.utteranceListeners = listeners.toArray(new String[listeners.size()]);
+    // REMOVED BECAUSE OVERLAP WITH SUBSCRIPTION
+//    Set<String> listeners = getAttached("publishUtterance");
+//    c.utteranceListeners = listeners.toArray(new String[listeners.size()]);
 
     return config;
   }
@@ -174,6 +176,16 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
     // Ok.. we need the bot to send a message back to the right channel here.
     // TODO: the idea is if we receive an utterance (from ProgramAB..
     // we should publish it to the proper channel..
+
+    if (utterance == null || utterance.channel == null) {
+      error("cannot send utterance channel id unknown");
+      return;
+    }
+
+    if (utterance.text == null || utterance.text.strip().length() == 0) {
+      log.info("no response");
+      return;
+    }
 
     if ("PRIVATE".equals(utterance.channelType)) {
       // Private message channel.

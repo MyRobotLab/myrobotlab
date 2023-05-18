@@ -1,9 +1,13 @@
 package org.myrobotlab.programab;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.alicebot.ab.Chat;
 import org.alicebot.ab.Predicates;
@@ -39,6 +43,9 @@ public class Session {
 
   // public Map<String,String> predicates = new TreeMap<>();
   public Predicates predicates = null;
+
+  // current topic of this session
+  public String currentTopic = null;
 
   /**
    * Session for a user and bot
@@ -82,20 +89,36 @@ public class Session {
 
   public void savePredicates() {
     StringBuilder sb = new StringBuilder();
-    for (String predicate : getChat().predicates.keySet()) {
+    TreeSet<String> sort = new TreeSet<>();
+    sort.addAll(getChat().predicates.keySet());
+    for (String predicate : sort) {
       String value = getChat().predicates.get(predicate);
+      if (predicate.equals("test")) {
+        log.info("here");
+      }
       sb.append(predicate + ":" + value + "\n");
     }
     File predicates = new File(FileIO.gluePaths(botInfo.path.getAbsolutePath(), String.format("config/%s.predicates.txt", userName)));
     predicates.getParentFile().mkdirs();
     log.info("Bot : {} User : {} Predicates Filename : {} ", botInfo.name, userName, predicates);
     try {
-      FileOutputStream fos = new FileOutputStream(predicates);
-      fos.write(sb.toString().getBytes());
-      fos.close();
+      FileWriter writer = new FileWriter(predicates, StandardCharsets.UTF_8);
+      writer.write(sb.toString());
+      writer.close();
+
     } catch (Exception e) {
       log.error("writing predicates threw", e);
     }
+  }
+
+  /**
+   * Get all current predicate names and values
+   * @return
+   */
+  public Map<String, String> getPredicates() {
+    TreeMap<String, String> sort = new TreeMap<>();
+    sort.putAll(getChat().predicates);
+    return sort;
   }
 
   public Response getResponse(String inText) {

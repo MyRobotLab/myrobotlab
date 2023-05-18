@@ -496,7 +496,7 @@ public class ServoMixer extends Service {
   public static void main(String[] args) throws Exception {
 
     try {
-      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
+      Runtime.main(new String[] { "--id", "admin"});
       LoggingFactory.init("INFO");
 
       Runtime.start("i01.head.rothead", "Servo");

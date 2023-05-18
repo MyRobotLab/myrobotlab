@@ -43,6 +43,7 @@ import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinListener;
+import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoEvent;
 import org.slf4j.Logger;
@@ -74,7 +75,7 @@ import org.slf4j.Logger;
  *         TODO : move is not accurate ( 1° step seem not possible )
  */
 
-public class DiyServo extends AbstractServo implements ServoControl, PinListener {
+public class DiyServo extends AbstractServo implements PinListener, ServiceLifeCycleListener {
 
   double lastOutput = 0.0;
   /**
@@ -192,9 +193,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    */
   public DiyServo(String n, String id) {
     super(n, id);
-    refreshPinArrayControls();
-    motorControl = (MotorControl) startPeer("motor");
-    initPid();
     subscribeToRuntime("registered");
     lastActivityTimeTs = System.currentTimeMillis();
   }
@@ -225,6 +223,15 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     pid.setSetpoint(pidKey, setPoint);
     pid.startService();
   }
+  
+  @Override
+  public void startService() {
+    super.startService();
+    refreshPinArrayControls();
+    motorControl = (MotorControl) startPeer("motor");
+    initPid();
+  }
+  
 
   /**
    * Equivalent to Arduino's Servo.detach() it de-energizes the servo
@@ -685,7 +692,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     LoggingFactory.getInstance().setLevel(Level.INFO);
     try {
       // Runtime.start("webgui", "WebGui");
-      Runtime.start("gui", "SwingGui");
+      // Runtime.start("gui", "SwingGui");
       // VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual",
       // "VirtualArduino");
       // virtual.connect("COM3");
@@ -693,6 +700,19 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
       // if (done) {
       // return;
       // }
+      
+      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+      
+      Runtime.start("diy", "DiyServo");
+      
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+      
 
       String port = "COM4";
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
@@ -772,6 +792,21 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   protected boolean processMove(Double newPos, boolean blocking, Long timeoutMs) {
     // TODO Auto-generated method stub
     return false;
+  }
+
+  @Override
+  public void onCreated(String name) {
+    log.info("created {}", name);
+  }
+
+  @Override
+  public void onStopped(String name) {
+    log.info("stopped {}", name);
+  }
+
+  @Override
+  public void onReleased(String name) {
+    log.info("released {}", name);
   }
 
 }

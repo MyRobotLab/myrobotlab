@@ -4436,7 +4436,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 
   @Override
   public ServiceConfig getConfig() {
-    Mpu6050Config config = new Mpu6050Config();
+    Mpu6050Config config = (Mpu6050Config)super.getConfig();
+    // FIXME remove local fields in favor or config
     config.start = publisher.isRunning;
     config.sampleRate = sampleRateHz;
     config.bus = deviceBus;
@@ -4447,7 +4448,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    Mpu6050Config config = (Mpu6050Config) c;
+    Mpu6050Config config = (Mpu6050Config) super.apply(c);
+    // FIXME remove local fields in favor or config
     if (config.start) {
       publisher.start();
     }
@@ -4483,7 +4485,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   public static void main(String[] args) {
     try {
 
-      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
+      Runtime.main(new String[] { "--id", "admin"});
       LoggingFactory.init(Level.INFO);
 
       // Runtime.setAllVirtual(true);

@@ -16,12 +16,13 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.StatusPublisher;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
@@ -323,12 +324,15 @@ public abstract class Repo {
           }
         }
       }
-
-      Map<String, ServiceReservation> peers = st.getPeers();
+      
+      // Plan plan = ServiceConfig.getDefault(type.toLowerCase(), type);
+      ServiceConfig sc = ServiceConfig.getDefaultServiceConfig(type);
+      
+      Map<String, Peer> peers = sc.getPeers();
       if (peers != null) {
         for (String key : peers.keySet()) {
-          ServiceReservation sr = peers.get(key);
-          ret.addAll(getUnfulfilledDependencies(CodecUtils.makeFullTypeName(sr.type)));
+          Peer peer = peers.get(key);
+          ret.addAll(getUnfulfilledDependencies(CodecUtils.makeFullTypeName(peer.type)));
         }
       }
     }
@@ -499,7 +503,7 @@ public abstract class Repo {
       log.error("loading threw", e);
     }
 
-    log.info("loaded {}", getRepoPath());
+    log.info("finished processing {}", getRepoPath());
   }
 
   /**

@@ -22,9 +22,9 @@ public class PollyMeta extends AbstractSpeechSynthesisMeta {
     // add dependency if necessary
     addCategory("speech", "sound");
 
-    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.13.3");
-    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.13.3");
-    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.13.3");
+    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.14.0");
+    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.14.0");
+    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.14.0");
 
     addDependency("com.amazonaws", "aws-java-sdk-polly", "1.12.253");
 
@@ -42,21 +42,6 @@ public class PollyMeta extends AbstractSpeechSynthesisMeta {
     setCloudService(true);
     setRequiresKeys(true);
 
-  }
-
-  @Override
-  public Plan getDefault(String name) {
-
-    Plan plan = new Plan(name);
-    plan.putPeers(name, peers);
-
-    PollyConfig config = new PollyConfig();
-    config.audioFile = name + ".audioFile";
-
-    // add self last - desired order or construction
-    plan.addConfig(config);
-
-    return plan;
   }
 
 }

@@ -520,7 +520,7 @@ public class Pid extends Service implements PidControl {
 
   @Override
   public ServiceConfig getConfig() {
-    PidConfig config = new PidConfig();
+    PidConfig config = (PidConfig)super.getConfig();
     config.data = data;
     return config;
   }
@@ -534,7 +534,7 @@ public class Pid extends Service implements PidControl {
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    PidConfig config = (PidConfig) c;
+    PidConfig config = (PidConfig) super.apply(c);
     if (config.data != null) {
       data = config.data;
       for (String key : config.data.keySet()) {

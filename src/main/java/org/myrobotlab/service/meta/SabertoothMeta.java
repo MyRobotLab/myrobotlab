@@ -16,7 +16,6 @@ public class SabertoothMeta extends MetaData {
 
     addDescription("interface for the powerful Sabertooth motor controller");
     addCategory("motor", "control");
-    addPeer("serial", "Serial", "Serial Port");
 
   }
 

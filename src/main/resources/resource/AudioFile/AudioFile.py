@@ -42,12 +42,10 @@ sleep(5)
 print('resetting to full volume')
 player.setVolume(1.0)
 
-
 # now we can play them just as we can play 
 # any file on the file system
 # e.g. audiofile.playFile("c:/sounds/beep.mp3")
 print('start playing a new file')
-
 audioPlayer.play("resource/AudioFile/well.wav")
 sleep(1)
 
@@ -92,7 +90,6 @@ player.silence()
 
 # add a named playlist
 # in this case we add a directory or file to our list
-
 audioPlayer.addPlaylist('my list', 'resource/AudioFile')
 
 # then we can play the list - it will default to play on its own track

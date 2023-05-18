@@ -23,16 +23,9 @@ public class Jme3App extends SimpleApplication {
 
   public final static Logger log = LoggerFactory.getLogger(Jme3App.class);
   protected transient JMonkeyEngine jme = null;
-  MainMenuState menu;
 
   public Jme3App(JMonkeyEngine jme) {
-    super(new StatsAppState(), new DebugKeysAppState(), new BasicProfilerState(false),
-        // new OptionPanelState(), // from Lemur
-        // menu = new MainMenuState(jme),
-        new ScreenshotAppState("", System.currentTimeMillis()));
-    menu = new MainMenuState(jme);
-    // REMOVED THE MENU ! GroG 20210424
-    // stateManager.attach(menu);
+    super(new StatsAppState(), new DebugKeysAppState(), new BasicProfilerState(false), new ScreenshotAppState("", System.currentTimeMillis()));
     this.jme = jme;
     // setShowSettings(true);
   }
@@ -65,10 +58,6 @@ public class Jme3App extends SimpleApplication {
     // different
     // you should derive from this class and write your own simpleUpdate...
     jme.simpleUpdate(tpf);
-  }
-
-  public MainMenuState getMainMenu() {
-    return menu;
   }
 
 }

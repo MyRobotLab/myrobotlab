@@ -26,10 +26,9 @@
 package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.sensor.EncoderPublisher;
 
-public interface MotorControl extends NameProvider, RelativePositionControl, AnalogListener, Attachable {
+public interface MotorControl extends RelativePositionControl, AnalogListener, Attachable {
 
   void attachMotorController(MotorController controller) throws Exception;
 

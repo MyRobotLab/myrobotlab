@@ -35,7 +35,7 @@ import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.math.MapperSimple;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
@@ -64,8 +64,6 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(AbstractMotor.class);
-
-  protected transient MotorController controller = null;
 
   /**
    * list of names of possible controllers
@@ -101,27 +99,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   protected Double positionCurrent; // aka currentPos
 
-  /**
-   * a new "un-set" mapper for merging with default motorcontroller
-   */
-  protected MapperLinear mapper = new MapperLinear();
-
-  /**
-   * name of the currently attached motor controller
-   */
-  protected String controllerName;
-
-  /**
-   * min - defaults to -1.0 equivalent of 100% power rotation ccw
-   */
-  protected double min = -1.0;
-
-  /**
-   * max - defaults to 1.0 equivalent of 100% power cw rotation
-   */
-  protected double max = 1.0;
-
-  private String axisName;
+  // private String axisName;
 
   public AbstractMotor(String n, String id) {
     super(n, id);
@@ -130,7 +108,8 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     // so that we "try" to maintain a standard default of -1.0 <=> 1.0 with same
     // input limits
     // "bottom" half of the mapper will be set by the controller
-    mapper.map(min, max, -1.0, 1.0);
+    registerForInterfaceChange(MotorController.class);
+    // mapper.map(min, max, -1.0, 1.0);
     // Runtime.getInstance().attachServiceLifeCycleListener(getName());
     refreshControllers();
   }
@@ -152,12 +131,12 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   public Set<String> refreshControllers() {
     controllers.clear();
     controllers.addAll(Runtime.getServiceNamesFromInterface(MotorController.class));
-    broadcastState();
     return controllers;
   }
 
   public MotorController getController() {
-    return controller;
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    return (MotorController) Runtime.getService(c.controller);
   }
 
   // FIXME - repair input/output
@@ -168,12 +147,14 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public boolean isAttached(MotorController controller) {
-    return this.controller == controller;
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    return controller.getName().equals(c.controller);
   }
 
   @Override
   public boolean isInverted() {
-    return mapper.isInverted();
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    return c.mapper.maxIn < c.mapper.minOut;
   }
 
   @Override
@@ -188,54 +169,74 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
       info("%s is locked - will not move");
       return;
     }
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    // FIXME make mapper.isInInputRange(x)
+    double min = (c.mapper.minIn < c.mapper.maxIn) ? c.mapper.minIn : c.mapper.maxIn;
+    double max = (c.mapper.minIn < c.mapper.maxIn) ? c.mapper.maxIn : c.mapper.minIn;
 
     if (powerInput < min) {
-      warn("requested power %.2f is under minimum %.2f", powerInput, min);
+      warn("requested power %.2f is under minimum %.2f", powerInput, c.mapper.minIn);
       return;
     }
 
     if (powerInput > max) {
-      warn("requested power %.2f is over maximum %.2f", powerInput, max);
+      warn("requested power %.2f is over maximum %.2f", powerInput, c.mapper.maxIn);
       return;
     }
 
     log.info("{}.move({})", getName(), powerInput);
     this.powerInput = powerInput;
+    MotorController controller = getController();
     if (controller != null) {
       invoke("publishPowerChange", powerInput);
+      invoke("publishPowerOutputChange", c.mapper.calcOutput(powerInput));
       controller.motorMove(this);
     }
-    broadcastState();
+    // broadcastState();
   }
 
   @Override
   public double publishPowerChange(double powerInput) {
     return powerInput;
   }
+  
+  /**
+   * the published output of this motor control
+   */
+  public double publishPowerOutputChange(double output) {
+    return output;
+  }
+  
 
   @Override
   public void setInverted(boolean invert) {
     log.warn("setting {} inverted = {}", getName(), invert);
-    mapper.setInverted(invert);
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    double temp = c.mapper.minIn;
+    c.mapper.minIn = c.mapper.maxIn;
+    c.mapper.maxIn = temp;
     broadcastState();
   }
 
   @Override
   public void setMinMax(double min, double max) {
-    this.min = min;
-    this.max = max;
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    c.mapper.minIn = min;
+    c.mapper.maxIn = max;
     info("updated min %.2f max %.2f", min, max);
     broadcastState();
   }
 
   public void map(double minX, double maxX, double minY, double maxY) {
-    mapper.map(minX, maxX, minY, maxY);
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    c.mapper.map(minX, maxX, minY, maxY);
     broadcastState();
   }
 
   @Override
   public void stop() {
     // log.info("{}.stop()", getName());
+    MotorController controller = getController();
     powerInput = 0.0;
     if (controller != null) {
       controller.motorStop(this);
@@ -267,6 +268,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   @Override
   public void stopService() {
     super.stopService();
+    MotorController controller = getController();
     if (controller != null) {
       stopAndLock();
     }
@@ -302,9 +304,10 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public void detachMotorController(MotorController controller) {
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
     controller.detach(this);
     controller = null;
-    controllerName = null;
+    c.controller = null;
     broadcastState();
   }
 
@@ -351,9 +354,8 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     }
 
     log.info("attachMotorController {}", controller.getName());
-
-    this.controller = controller;
-    controllerName = controller.getName();
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    c.controller = controller.getName();
     motorPorts = controller.getPorts();
     // TODO: KW: set a reasonable mapper. for pwm motor it's probable -1 to 1 to
     // 0 to 255 ? not sure.
@@ -374,7 +376,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
      * </pre>
      */
     Mapper defaultControllerMapper = controller.getDefaultMapper();
-    mapper.map(mapper.getMinX(), mapper.getMaxX(), defaultControllerMapper.getMinY(), defaultControllerMapper.getMaxY());
+    c.mapper.map(c.mapper.minIn, c.mapper.maxIn, defaultControllerMapper.getMinY(), defaultControllerMapper.getMaxY());
 
     broadcastState();
     controller.attach(this);
@@ -382,39 +384,50 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public boolean isAttached() {
-    return controller != null;
+    return getController() != null;
   }
 
   @Override
   public void detach() {
-    // super.detach(); BAD NOT DESIRED !
-    if (controller != null) {
-      detach(controller.getName());
-    }
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    c.controller = null;
+    // MAKE NOTE!: don't want to do this anymore for fear of infinit detach loop
+    // just detach this service
+//    if (controller != null) {
+//      detach(controller.getName());
+//    }
   }
 
   // FIXME - clean up the attach/detach
   // TODO - this could be Java 8 default interface implementation
   @Override
   public void detach(String name) {
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    MotorController controller = getController();
+
     if (controller == null || !name.equals(controller.getName())) {
       return;
     }
-    controller.detach(this); // FIXME - call
-                             // detachMotorController(MotorController
-    controllerName = null;
-    controller = null;
+    // MAKE NOTE !: mutual detach - this is dangerous, because of potential
+    // cycliclal detaching for dependencies 
+    // its safer only to detach this service from the other service, vs call its detach
+    // but i think currently motorcontroller just remove notifylists (equivalent of unsubscribe)
+    // however if any of those call this detach - it will go infinite loop :(
+    // controller.detach(this); 
+    c.controller = null;
     broadcastState();
   }
 
   @Override
   public boolean isAttached(String name) {
+    MotorController controller = getController();
     return (controller != null && controller.getName().equals(name));
   }
 
   @Override
   public Set<String> getAttached() {
     HashSet<String> ret = new HashSet<String>();
+    MotorController controller = getController();
     if (controller != null) {
       ret.add(controller.getName());
     }
@@ -423,28 +436,34 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   // FIXME promote to interface
   public Mapper getMapper() {
-    return mapper;
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    return c.mapper;
   }
 
   // FIXME promote to interface
-  public void setMapper(MapperLinear mapper) {
-    this.mapper = mapper;
+  public void setMapper(MapperSimple mapper) {
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    c.mapper = mapper;
   }
 
   // FIXME promote to interface
   @Override
   public double calcControllerOutput() {
-    return mapper.calcOutput(getPowerLevel());
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    return c.mapper.calcOutput(getPowerLevel());
   }
 
   @Override
-  public void setAnalogId(String name) {
-    axisName = name;
+  public void setAxis(String name) {
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    c.axis = name;
+    broadcastState();
   }
 
   @Override
-  public String getAnalogId() {
-    return axisName;
+  public String getAxis() {
+    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    return c.axis;
   }
 
   @Override
@@ -454,15 +473,21 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    GeneralMotorConfig config = (GeneralMotorConfig) c;
+    GeneralMotorConfig config = (GeneralMotorConfig) super.apply(c);
 
-    if (config.minIn != null) {
-      mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
-    } else {
-      mapper = new MapperLinear();
+    // config.mapper = new MapperLinear(config.minIn, config.maxIn,
+    // config.minOut, config.maxOut);
+    // mapper.setInverted(config.inverted);
+    // mapper.setClip(config.clip);
+
+    // FIXME ?? future use only ServiceConfig.listeners ?
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch (Exception e) {
+        error(e);
+      }
     }
-    mapper.setInverted(config.inverted);
-    mapper.setClip(config.clip);
 
     if (locked) {
       lock();

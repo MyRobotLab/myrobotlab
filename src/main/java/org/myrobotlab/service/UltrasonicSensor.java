@@ -162,8 +162,8 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
   @Override
   public UltrasonicSensorConfig getConfig() {
 
-    UltrasonicSensorConfig config = new UltrasonicSensorConfig();
-
+    UltrasonicSensorConfig config = (UltrasonicSensorConfig)super.getConfig();
+    // FIXME - remove member variables use config directly
     config.controller = controllerName;
     config.triggerPin = trigPin;
     config.echoPin = echoPin;
@@ -235,7 +235,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    UltrasonicSensorConfig config = (UltrasonicSensorConfig) c;
+    UltrasonicSensorConfig config = (UltrasonicSensorConfig) super.apply(c);
 
     if (config.triggerPin != null)
       setTriggerPin(config.triggerPin);

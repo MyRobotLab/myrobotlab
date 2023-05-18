@@ -9,7 +9,9 @@
 
 package org.myrobotlab.service;
 
+
 import java.util.List;
+import java.util.Map;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
@@ -18,9 +20,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
+import org.myrobotlab.service.interfaces.Translator;
 import org.slf4j.Logger;
-
-import com.google.gson.internal.LinkedTreeMap;
 
 import okhttp3.HttpUrl;
 import okhttp3.HttpUrl.Builder;
@@ -30,7 +31,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class AzureTranslator extends Service implements TextListener, TextPublisher {
+public class AzureTranslator extends Service implements Translator, TextListener, TextPublisher {
 
   private static final long serialVersionUID = 1L;
 
@@ -169,14 +170,14 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
       Response response = client.newCall(request).execute();
       String resp = response.body().string();
       // if ()
-      List<LinkedTreeMap> list = CodecUtils.fromJson(resp, List.class);
-      for (LinkedTreeMap t : list) {
-        LinkedTreeMap detected = (LinkedTreeMap) t.get("detectedLanguage");
+      List<Map> list = CodecUtils.fromJson(resp, List.class);
+      for (Map t : list) {
+        Map detected = (Map) t.get("detectedLanguage");
         if (detected != null) {
           invoke("publishDetectedLanguage", detected.get("language"));
         }
-        List<LinkedTreeMap> translations = (List<LinkedTreeMap>) t.get("translations");
-        for (LinkedTreeMap trans : translations) {
+        List<Map> translations = (List<Map>) t.get("translations");
+        for (Map trans : translations) {
           sb.append(trans.get("text"));
         }
       }
@@ -207,6 +208,16 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  @Override
+  public void setToLanguage(String to) {
+    this.to = to;
+  }
+
+  @Override
+  public void setFromLanguage(String from) {
+    this.from = from;
   }
 
 }

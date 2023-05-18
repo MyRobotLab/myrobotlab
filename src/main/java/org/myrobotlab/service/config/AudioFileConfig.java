@@ -10,11 +10,15 @@ public class AudioFileConfig extends ServiceConfig {
   public double volume = 1.0;
   public String currentPlaylist = "default";
   public Map<String, List<String>> playlists;
-  public double peakMultiplier = 1.0;
+  public double peakMultiplier = 100.0;
   public String[] audioListeners;
 
   /**
    * sample interval for peak
    */
   public double peakSampleInterval = 15;
+  /**
+   * delay to synchronize publishing of peak with actual sound in milliseconds
+   */
+  public Long peakDelayMs = null;
 }

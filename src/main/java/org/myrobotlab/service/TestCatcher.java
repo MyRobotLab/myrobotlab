@@ -30,9 +30,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -92,6 +94,8 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   public Set<String> onStopped = new HashSet<>();
 
+  public List<Long> longs = new ArrayList<>();
+
   public Set<PinData[]> pinSet = new HashSet<>();
 
   public String[] activePins = null;
@@ -99,6 +103,10 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   public PinData pinData = null;
 
   public String pin;
+
+  public BlockingQueue<Integer> integers = new LinkedBlockingDeque<>();
+
+  public BlockingQueue<String> strings = new LinkedBlockingDeque<>();
 
   /**
    * awesome override to simulate remote services - e.g. in
@@ -159,6 +167,7 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     pinData = null;
     pinSet.clear();
     methodsCalled.clear();
+    longs.clear();
   }
 
   public Message getMsg(long timeout) throws InterruptedException {
@@ -296,6 +305,19 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   public Integer onInteger(Integer data) {
     log.info("onInteger {}", data);
+    integers.add(data);
+    return data;
+  }
+
+  public String onString(String data) {
+    log.info("onString {}", data);
+    strings.add(data);
+    return data;
+  }
+
+  public Long onLong(Long data) {
+    log.info("onInteger {}", data);
+    longs.add(data);
     return data;
   }
 

@@ -3,24 +3,17 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
     var _self = this
     var msg = this.msg
 
-    // init
-    $scope.controllerName = ''
     $scope.controllers = []
+    $scope.service = {
+        config:{
+            controller: null
+        }
+    }
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
 
-        for (var key in service.pinMap) {
-            if (service.pinMap.hasOwnProperty(key)) {
-                console.log(key, service.pinMap[key]);
-
-                service.pinMap[key].value = 0
-                if (key == 'D3') {
-                    service.pinMap[key].value = 1
-                }
-            }
-        }
     }
 
     this.onMsg = function(inMsg) {
@@ -28,6 +21,22 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
         switch (inMsg.method) {
         case 'onState':
             _self.updateState(data)
+            $scope.$apply()
+            break
+        case 'onPin':
+            $scope.service.pinMap[data.pin].value = data.value
+            $scope.$apply()
+            break
+        case 'onPinArray':
+            for (i = 0; i < 8; ++i){
+                let pinData = data[i] 
+                $scope.service.pinMap[pinData.pin].value = pinData.value
+            }
+            $scope.service.pinMap[data.pin].value = data.value
+            $scope.$apply()
+            break
+        case 'onPinDefinition':
+            $scope.service.pinMap[data.pin] = data
             $scope.$apply()
             break
         case 'onPinArray':
@@ -40,37 +49,50 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
     }
 
     $scope.setBus = function() {
-        msg.send('setBus', $scope.service.deviceBus)
+        msg.send('setBus', $scope.service.config.bus)
     }
 
     $scope.setAddress = function() {
-        msg.send('setAddress', $scope.service.deviceAddress)
+        msg.send('setAddress', $scope.service.config.address)
     }
 
-    _self.setControllerName = function() {// $scope.service.controllerName = controller
-    // msg.send('attach', $scope.service.deviceAddress)
+    _self.setControllerName = function() {// $scope.service.config.controller = controller
+    // msg.send('attach', $scope.service.config.address)
     }
 
     $scope.options = {
         interface: 'I2CController',
         attach: _self.setControllerName,
         // callback: function...
-        attachName: $scope.service.controllerName
+        attachName: $scope.service.config.controller
     }
 
     $scope.changed = function(pinDef, toggleValue) {
-        console.info($scope.toggleValue)
-        if (toggleValue = false) {
-            msg.send('write', pinDef.address, 0)
+        console.info('write ', pinDef.pin, toggleValue)
+        if (toggleValue) {
+            msg.send('write', pinDef.pin, 1)
         } else {
-            msg.send('write', pinDef.address, 1)
+            msg.send('write', pinDef.pin, 0)
 
         }
 
     }
 
+    $scope.enablePin = function(pin, enable) {
+        if (enable) {
+            msg.send('enablePin', pin)
+        } else {
+            msg.send('disablePin', pin)
+        }
+            }
+
     $scope.attach = function() {
-        msg.send('attach', $scope.options.attachName)
+        if ($scope.options.attachName){
+            msg.send('attach', $scope.options.attachName)    
+        } else {
+            msg.send('warn', 'you must select an I2C controller to attach')
+        }
+        
     }
 
     // FIXME - which i could get rid of this
@@ -82,6 +104,11 @@ angular.module('mrlapp.service.Pcf8574Gui', []).controller('Pcf8574GuiCtrl', ['$
     // Java service - although msg.sweep() was tried for ng-click
     // for some reason Js resolved msg.sweep(null, null, null, null) :P
 
+
+    
+    msg.subscribe('publishPin')
+    msg.subscribe('publishPinArray')
+    msg.subscribe('publishPinDefinition')
     msg.subscribe(this)
 }
 ])
