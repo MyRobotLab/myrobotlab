@@ -596,7 +596,7 @@ public class CodecUtils {
      */
     public static /*@Nullable*/ Message jsonToMessage(/*@Nonnull*/ String jsonData) {
       if (log.isDebugEnabled()) {
-        log.debug("Deserializing message: %s",jsonData);
+        log.debug("Deserializing message: {}",jsonData);
       }
         Message msg = fromJson(jsonData, Message.class);
 
@@ -1561,7 +1561,7 @@ public class CodecUtils {
    * @return
    */
   public static Object fromJson(String json) {
-    return fromJson(json, (StaticType)null);
+    return fromJson(json, (Class<Object>) null);
   }
 
 }
