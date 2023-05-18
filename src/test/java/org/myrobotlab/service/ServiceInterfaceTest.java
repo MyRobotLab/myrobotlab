@@ -56,6 +56,9 @@ public class ServiceInterfaceTest extends AbstractTest {
 
   private boolean serviceInterfaceTest(String service) throws IOException {
     // see if we can start/stop and release the service.
+    
+    // set a configuration path
+    Runtime.setConfig("serviceInterfaceTest");
 
     ServiceInterface foo = Runtime.create(service.toLowerCase(), service);
     if (foo == null) {
@@ -104,10 +107,12 @@ public class ServiceInterfaceTest extends AbstractTest {
     blacklist.add("As5048AEncoder");    
     blacklist.add("IntegratedMovement");    
     blacklist.add("VirtualDevice");
+    blacklist.add("Joystick");
     blacklist.add("GoogleAssistant");
     blacklist.add("LeapMotion");
     blacklist.add("Python"); // python's interpreter cannot be restarted cleanly
     blacklist.add("Runtime");
+    blacklist.add("OpenCV");
     blacklist.add("InMoov2");
     blacklist.add("WorkE");
     blacklist.add("JMonkeyEngine");
@@ -250,7 +255,7 @@ public class ServiceInterfaceTest extends AbstractTest {
   public final void testInstallAllServices() throws ClassNotFoundException, ParseException, IOException {
     // TODO: this probably is going to take longer but it's worth while!
     ServiceData sd = ServiceData.getLocalInstance();// CodecUtils.fromJson(FileUtils.readFileToString(new
-                                                    // File("../repo/serviceData.json")),
+                                                    // File("../libraries/serviceData.json")),
                                                     // ServiceData.class);
     for (MetaData st : sd.getServiceTypes()) {
       if (!st.isAvailable()) {

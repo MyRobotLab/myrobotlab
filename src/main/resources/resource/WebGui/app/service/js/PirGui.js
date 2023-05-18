@@ -12,9 +12,8 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
-        // initialize attach directive (one time ???)
-        $scope.options.attachName = service.controllerName
-        $scope.options.isAttached = service.controllerName?true:false
+        $scope.options.attachName = service.config.controller        
+        $scope.options.isAttached = service.attached
     }
 
     // init scope variables
@@ -41,26 +40,24 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
 
     _self.selectController = function(controller) {
         //$scope.service.controllerName = controller
-        $scope.controllerName = controller
+        $scope.service.config.controller = controller
     }
 
     $scope.options = {
         interface: 'PinArrayControl',
         attach: _self.selectController,
-        isAttached: $scope.service.controllerName // callback: function...
+        // isAttached: $scope.service.config.controller // callback: function...
         // attachName: $scope.controllerName
     }
 
     $scope.attach = function() {
-        msg.send('setPin', $scope.service.pin)
-        msg.send('attach', $scope.controllerName)
+        msg.send('setPin', $scope.service.config.pin)
+        msg.send('attach', $scope.service.config.controller)
     }
 
     $scope.detach = function() {
-        // FIXME - fix this in the mrl framework
-        // so I can call msg.send('detach')
-        if ($scope.service.controllerName) {
-            msg.send('detach', $scope.service.controllerName)
+        if ($scope.service.config.controller) {
+            msg.send('detach', $scope.service.config.controller)
         }
     }
 
@@ -69,13 +66,16 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
         msg.send('broadcastState')
     }
 
+    $scope.setPin = function() {
+        msg.send('setPin', $scope.service.config.pin)
+        msg.send('broadcastState')
+    }
+
     $scope.disable = function() {
         msg.send('disable')
         msg.send('broadcastState')
     }
 
-    // FIXME - which i could get rid of this
-    // makes attach directive worky on first load   
     msg.subscribe('publishSense')
     msg.subscribe(this)
 }

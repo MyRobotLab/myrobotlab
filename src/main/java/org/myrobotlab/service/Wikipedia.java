@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
@@ -16,7 +16,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Http;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.WikipediaConfig;
 import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.data.Locale;
@@ -27,7 +26,6 @@ import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-import com.google.gson.internal.LinkedHashTreeMap;
 
 /**
  * Wikipedia via the official rest api docs here:
@@ -165,9 +163,19 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
       if (bytes != null) {
         String response = new String(bytes, StandardCharsets.UTF_8);
         @SuppressWarnings("unchecked")
-        LinkedHashTreeMap<String, Object> json = CodecUtils.fromJson(response, LinkedHashTreeMap.class);
+        Map<String, Object> json = CodecUtils.fromJson(response, Map.class);
         String extract = (String) json.get("extract");
         if (extract != null) {
+          
+          if (c.maxSentencesReturned != null) {
+            String[] sentences = extract.split("\\.");
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < c.maxSentencesReturned && i < sentences.length; ++i) {
+              sb.append(sentences[i] + ". ");
+            }
+            extract = sb.toString().trim();
+          }
+          
           results.text.add(extract);
           invoke("publishText", extract);
         }
@@ -187,7 +195,7 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
         }
 
       } else {
-        error("no response for %s", searchText);
+        log.info("no response for %s", searchText);
       }
       invoke("publishResults", results);
 
@@ -202,36 +210,6 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
   @Override
   public int setMaxImages(int cnt) {
     return cnt;
-  }
-
-  @Override
-  public ServiceConfig getConfig() {
-    WikipediaConfig config = (WikipediaConfig) this.config;
-
-    Set<String> imagePublishers = getOutbox().getAttached("publishImage");
-    if (imagePublishers != null) {
-      config.imagePublishers = new String[imagePublishers.size()];
-      int i = 0;
-      for (String publisher : imagePublishers) {
-        config.imagePublishers[i] = publisher;
-        ++i;
-      }
-    }
-
-    return config;
-  }
-
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    WikipediaConfig config = (WikipediaConfig) c;
-
-    if (config.imagePublishers != null) {
-      for (String publisher : config.imagePublishers) {
-        attachImageListener(publisher);
-      }
-    }
-
-    return config;
   }
 
   @Override

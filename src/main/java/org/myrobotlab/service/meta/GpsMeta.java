@@ -15,7 +15,6 @@ public class GpsMeta extends MetaData {
   public GpsMeta() {
     addDescription("parses NMEA sentences coming in over a Serial service");
     addCategory("location", "sensors");
-    addPeer("serial", "Serial", "serial port for GPS");
     setLicenseApache();
   }
 

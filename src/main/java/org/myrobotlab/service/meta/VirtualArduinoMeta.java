@@ -16,7 +16,6 @@ public class VirtualArduinoMeta extends MetaData {
 
     addDescription("virtual hardware of for the Arduino!");
     setAvailable(true);
-    addPeer("uart", "Serial", "serial device for this Arduino");
     addCategory("simulator");
 
   }

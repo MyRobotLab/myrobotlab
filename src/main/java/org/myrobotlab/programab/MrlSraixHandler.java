@@ -7,6 +7,8 @@ import java.util.regex.Matcher;
 import org.alicebot.ab.Chat;
 import org.alicebot.ab.Sraix;
 import org.alicebot.ab.SraixHandler;
+import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.ProgramAB;
@@ -14,7 +16,11 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.data.SearchResults;
 import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.string.StringUtil;
+// import org.nd4j.shade.jackson.dataformat.xml.XmlMapper;
 import org.slf4j.Logger;
+
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+
 
 public class MrlSraixHandler implements SraixHandler {
   transient public final static Logger log = LoggerFactory.getLogger(MrlSraixHandler.class);
@@ -31,7 +37,35 @@ public class MrlSraixHandler implements SraixHandler {
 
   @Override
   public String sraix(Chat chatSession, String input, String defaultResponse, String hint, String host, String botid, String apiKey, String limit, Locale locale) {
-    log.debug("MRL Sraix handler! Input {}");
+    log.debug("MRL Sraix handler! Input {}", input);
+    
+    // FIXME - "list of AIs in priority order to attempt to handle request
+    // best synopsis of sraix I've found - https://gist.github.com/onlurking/f6431e672cfa202c09a7c7cf92ac8a8b
+    try {
+      XmlMapper xmlMapper = new XmlMapper();
+      Oob oob = xmlMapper.readValue(input, Oob.class);
+      StringBuilder responseText = new StringBuilder();
+      if (oob.mrljson != null) {
+        Message[] msgs = CodecUtils.fromJson(oob.mrljson, Message[].class);
+        for (Message msg: msgs) {
+          msg.sender = programab.getName();
+          msg.sendingMethod = "sraix";
+          // buffered asynchronous - use invoke synchronous
+          // programab.in(msg);
+          // invoking to keep it synchronous
+          ServiceInterface si = Runtime.getService(msg.getName());
+          Object ret = si.invoke(msg.method, msg.data);
+          if (ret != null) {
+            responseText.append(ret.toString());
+          }
+        }
+        return responseText.toString();
+      }
+      log.info("found oob {}", oob);
+    } catch (Exception e) {
+      // programab.error("threw on input %s", input);
+    }
+
     // the INPUT has the string we care about. if this is an OOB tag, let's
     // evaluate it and return the result.
     if (containsOOB(input)) {
@@ -41,10 +75,23 @@ public class MrlSraixHandler implements SraixHandler {
       try {
         SearchPublisher search = (SearchPublisher) programab.getPeer("search");
         if (search != null) {
-          SearchResults results = search.search(input);
-          return results.getTextAndImages();
+          SearchResults results = search.search(input);  
+          String searchResponse = results.getTextAndImages();
+          
+          if (searchResponse == null || searchResponse.length() == 0) {
+            Session session = programab.getSession();
+            // TODO - perhaps more rich codes for details of failure
+            // Response r = session.getResponse("SRAIXFAILED_WIKIPEDIA " + input);
+            Response r = session.getResponse("SRAIXFAILED " + input);
+            return r.msg;
+          }
+          return searchResponse;
         } else {
-          return null;
+          // TODO - perhaps more rich codes for details of failure
+          // Response r = programab.getResponse("SRAIXFAILED_WIKIPEDIA_NOT_AVAILABLE");
+          Session session = programab.getSession();
+          Response r = session.getResponse("SRAIXFAILED " + input);
+          return r.msg;
         }
 
       } catch (Exception e) {

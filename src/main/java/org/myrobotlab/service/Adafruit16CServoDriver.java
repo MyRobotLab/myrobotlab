@@ -1022,26 +1022,21 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   public String publishServoStopped(String name) {
     return name;
   }
-
+  
   @Override
   public ServiceConfig getConfig() {
 
-    Adafruit16CServoDriverConfig config = new Adafruit16CServoDriverConfig();
+    Adafruit16CServoDriverConfig config = (Adafruit16CServoDriverConfig)super.getConfig();
+    // FIXME remove member vars use config directly
     config.controller = controllerName;
     config.deviceBus = deviceBus;
     config.deviceAddress = deviceAddress;
     return config;
   }
-
+  
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    Adafruit16CServoDriverConfig config = (Adafruit16CServoDriverConfig) c;
-    if (config.deviceBus != null) {
-      deviceBus = config.deviceBus;
-    }
-    if (config.deviceAddress != null) {
-      deviceAddress = config.deviceAddress;
-    }
+    Adafruit16CServoDriverConfig config = (Adafruit16CServoDriverConfig)super.apply(c);
     if (config.controller != null) {
       try {
         attach(config.controller);

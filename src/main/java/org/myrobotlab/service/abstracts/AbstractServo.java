@@ -715,7 +715,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   public void onRegistered(Registration s) {
     refreshControllers();
-    // broadcastState();
   }
 
   /**

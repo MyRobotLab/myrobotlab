@@ -13,18 +13,15 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.MrlException;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**
  * ServiceData class contains all of the Services meta data. This includes : 1.
  * Dependency information - what libraries are needed to run the class 2.
- * Categories of the service 3. Peers of the service
  * 
  * All this information is Service "type" related - non of it is instance
  * specific. ServiceData has to be created during "build" time since most of the
@@ -35,11 +32,16 @@ import org.slf4j.Logger;
  * .myrobotlab directory.
  * 
  * @author GroG
+ * 
+ * FIXME - this is really just something that manages MetaData ... should make it the same both for clarity and
+ * transparency 
  *
  */
 public class ServiceData implements Serializable {
 
   static private ServiceData localInstance = null;
+  
+  static final public String LIBRARIES = "libraries";
 
   transient public final static Logger log = LoggerFactory.getLogger(ServiceData.class);
 
@@ -55,7 +57,7 @@ public class ServiceData implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  static private String serviceDataCacheFileName = FileIO.getCfgDir() + File.separator + "serviceData.json";
+  static private String serviceDataCacheFileName = LIBRARIES + File.separator + "serviceData.json";
 
   /**
    * clears all overrides. All services shall be using the standard hard co
@@ -168,11 +170,11 @@ public class ServiceData implements Serializable {
       // step 3 - if 1 & 2 fail - then we can 'assume' were in develop
       // time (we'll isJar check and error if not)
       // - generate it and put it in
-      // getRoot()/resource/framework/serviceData.json
+      // libraries/serviceData.json
 
       // if we're not in a jar we are in an IDE.
 
-      // First check the .myrobotlab/serviceData.json dir.
+      // First check the libraries/serviceData.json dir.
       File jsonFile = new File(serviceDataCacheFileName);
       if (jsonFile.exists()) {
         // load it and return!
@@ -226,9 +228,6 @@ public class ServiceData implements Serializable {
    * instance specific (ie if the service has a name) it will return that
    * instance's meta data, which can contain overrides.
    * 
-   * This allows the user an opportunity to change the creation details (actual
-   * names and types) of peer services before all the peers are created
-   * 
    * If a name/instance is not supplied the default meta data is supplied
    * 
    * @param serviceName
@@ -266,42 +265,6 @@ public class ServiceData implements Serializable {
 
       MetaData metaData = MetaData.get(type);
 
-      if (metaData == null) {
-        log.info("here");
-      }
-
-      Map<String, ServiceReservation> peers = metaData.getPeers();
-      for (ServiceReservation sr : peers.values()) {
-
-        // handle overrides !
-        String fullkey = ServiceData.getPeerKey(serviceName, sr.key);
-        // return override if exists
-        ServiceReservation override = ServiceData.planStore.get(fullkey);
-        if (override != null) {
-          if (override.actualName != null) {
-            sr.actualName = override.actualName;
-          }
-          if (override.type != null) {
-            sr.type = override.type;
-          }
-
-          if (override.comment != null) {
-            sr.comment = override.comment;
-          }
-        } else {
-          // if actual name wasn't set in the getMetaData - assign it as
-          // {parentName}.{peerKey}
-          if (sr.actualName == null) {
-            sr.actualName = ServiceData.getPeerKey(serviceName, sr.key);
-          }
-        }
-
-        if (cyclicalCheck.contains(sr.type)) {
-          throw new MrlException("cyclical type error %s is of type %s has a parent of the same type - please adjust your meta data", serviceName, type);
-        }
-
-      }
-      // }
 
       return metaData;
 
@@ -313,14 +276,6 @@ public class ServiceData implements Serializable {
 
   static public Map<String, ServiceReservation> getOverrides() {
     return planStore;
-  }
-
-  public static String getPeerKey(String name, String key) {
-    return String.format("%s.%s", name, key);
-  }
-
-  public static void setPeer(String key, String actualName, String serviceType) {
-    planStore.put(key, new ServiceReservation(key, actualName, serviceType, serviceType));
   }
 
   /**
@@ -476,9 +431,8 @@ public class ServiceData implements Serializable {
       File removeExisting = new File(filename);
       removeExisting.delete();
 
-      // remove .myrobotlab/serviceData.json
-      // 20190630 - GroG changed uses FileIO.getCfgDir()
-      removeExisting = new File(FileIO.getCfgDir() + File.separatorChar + "serviceData.json");
+      // remove libraries/serviceData.json
+      removeExisting = new File("libraries" + File.separatorChar + "serviceData.json");
       removeExisting.delete();
 
       // THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - BEGIN ----
@@ -489,7 +443,7 @@ public class ServiceData implements Serializable {
       sd.save();
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
       System.exit(-1);
     }
 
@@ -497,84 +451,5 @@ public class ServiceData implements Serializable {
 
   }
 
-  /**
-   * Recursively pushes meta data from a service into the planStore - so that
-   * retrieval of meta data getMetaData(name, type) - will be able to pick up
-   * the definition.
-   * 
-   * This is done because services may have complex definitions of meta data
-   * that affect the tree of references to other peer services.
-   * 
-   * force will over write any pre-existing ServiceReservations in the planStore
-   * if force == false it will leave any pre-existing ServiceReservations and
-   * only add ServiceReservations that did not exist
-   * 
-   * its an important detail that this has to be a breadth level push of config
-   * into the planStore rather than a depth first, since upper/root peers can
-   * dictate changes on sub-peers, their "mods" must be pushed first
-   * 
-   * @param name
-   *          the name
-   * @param type
-   *          the type
-   * @param force
-   *          true/false
-   * @param cyclicalCheck
-   *          cycle checks
-   * @return the metadata
-   * @throws MrlException
-   *           boom
-   * 
-   */
-  public static MetaData setMetaData(String name, String type, boolean force, Set<String> cyclicalCheck) throws MrlException {
-    MetaData metaData = getMetaData(name, type);
 
-    if (cyclicalCheck != null && cyclicalCheck.contains(type)) {
-      throw new MrlException("cyclical type error %s is of type %s has a parent of the same type - please adjust your meta data", name, type);
-    }
-    // push the configuration into the static store
-    Map<String, ServiceReservation> peers = metaData.getPeers();
-    for (Map.Entry<String, ServiceReservation> entry : peers.entrySet()) {
-
-      // name is actual name - peer.getKey() is key of peer
-      // peerKey is actualParent + . + peer.getKey()
-      // this peerKey is used to look up "actual" name of peer
-      String peerKey = getPeerKey(name, entry.getKey());
-      ServiceReservation peer = entry.getValue();
-
-      log.info("pk {} => {}", peerKey, peer);
-
-      if (!force && planStore.containsKey(peerKey)) {
-        continue;
-      }
-      planStore.put(peerKey, entry.getValue());
-
-    }
-
-    // breadth first recursion
-    for (ServiceReservation peer : peers.values()) {
-      // for all children do the same ..
-      // String peerKey = "something";
-      if (cyclicalCheck == null) {
-        // root level - create a set to check
-        cyclicalCheck = new HashSet<>();
-        cyclicalCheck.add(type);
-      }
-      setMetaData(peer.actualName, peer.type, force, cyclicalCheck);
-    }
-
-    // get the meta data again with overrides ???
-    // metaData = getMetaData(name, type);
-
-    return null;
-  }
-
-  public static MetaData setMetaData(String name, String type) {
-    try {
-      return setMetaData(name, type, false, null);
-    } catch (Exception e) {
-      log.error("setMetaData threw", e);
-    }
-    return null;
-  }
 }

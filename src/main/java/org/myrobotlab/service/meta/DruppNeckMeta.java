@@ -13,16 +13,9 @@ public class DruppNeckMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    */
   public DruppNeckMeta() {
-
     addDescription("InMoov Drupp Neck Service");
     addCategory("robot");
-
-    addPeer("up", "Servo", "Up servo");
-    addPeer("middle", "Servo", "Middle servo");
-    addPeer("down", "Servo", "Down servo");
-
     setAvailable(true);
-
   }
 
 }

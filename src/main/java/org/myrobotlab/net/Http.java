@@ -22,6 +22,7 @@ import org.apache.http.util.EntityUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
+// FIXME - replace apache with okhttp
 public class Http {
 
   private static volatile CloseableHttpClient httpclient = null;
@@ -107,7 +108,7 @@ public class Http {
     }
 
     try {
-      httpclient.close();
+      // httpclient.close(); NEED TO DO THIS ON A SHUTDOWN HOOK !!!
     } catch (Exception e) {
       /* don't care */}
 

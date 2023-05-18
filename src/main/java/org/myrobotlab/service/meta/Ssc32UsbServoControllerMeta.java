@@ -16,7 +16,6 @@ public class Ssc32UsbServoControllerMeta extends MetaData {
 
     addDescription("Lynxmotion usb 32 servo controller");
     addCategory("servo", "control");
-    addPeer("serial", "Serial");
 
   }
 

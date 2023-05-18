@@ -1,4 +1,5 @@
 !!org.myrobotlab.service.config.PingdarConfig
+listeners: null
 peers:
   controller:
     autoStart: true

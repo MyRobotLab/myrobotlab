@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Locale;
 
 import org.myrobotlab.framework.Service;
@@ -34,9 +35,10 @@ public class InMoov2Torso extends Service {
   @Override
   public void startService() {
     super.startService();
-    topStom = (ServoControl) startPeer("topStom");
-    midStom = (ServoControl) startPeer("midStom");
-    lowStom = (ServoControl) startPeer("lowStom");
+    
+    topStom = (ServoControl) getPeer("topStom");
+    midStom = (ServoControl) getPeer("midStom");
+    lowStom = (ServoControl) getPeer("lowStom");
   }
 
   @Override
@@ -44,9 +46,6 @@ public class InMoov2Torso extends Service {
     try {
       disable();
 
-      // releasePeer("topStom");
-      // releasePeer("midStom");
-      // releasePeer("lowStom");
       topStom = null;
       midStom = null;
       lowStom = null;
@@ -93,6 +92,11 @@ public class InMoov2Torso extends Service {
     if (lowStom != null)
       lowStom.disable();
   }
+  
+  public void onMoveTorso(HashMap<String, Double> map) {
+    moveTo(map.get("topStom"), map.get("midStom"), map.get("lowStom"));
+  }
+
 
   public long getLastActivityTime() {
     long minLastActivity = Math.max(topStom.getLastActivityTime(), midStom.getLastActivityTime());
@@ -100,9 +104,8 @@ public class InMoov2Torso extends Service {
     return minLastActivity;
   }
 
-  @Deprecated /* use LangUtils */
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH, "%s.moveTorso(%.2f,%.2f,%.2f)\n", inMoovServiceName, topStom.getCurrentInputPos(), midStom.getCurrentInputPos(),
+    return String.format("%s.moveTorso(%.0f,%.0f,%.0f)\n", inMoovServiceName, topStom.getCurrentInputPos(), midStom.getCurrentInputPos(),
         lowStom.getCurrentInputPos());
   }
 
