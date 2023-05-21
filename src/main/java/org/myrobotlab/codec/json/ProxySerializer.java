@@ -5,7 +5,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.TimeoutException;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.service.Runtime;
 
 import java.io.IOException;
 import java.lang.reflect.Proxy;
@@ -31,7 +33,11 @@ public class ProxySerializer extends StdSerializer<Proxy> {
             jgen.writeStringField("name", si.getName());
             jgen.writeStringField("type", si.getType());
             jgen.writeStringField("id", si.getId());
-            jgen.writeStringField("serviceClass", si.getServiceClass());
+            try {
+                jgen.writeStringField("serviceClass", (String) Runtime.get().sendBlocking(si.getName(), "getServiceClass"));
+            } catch (InterruptedException | TimeoutException e) {
+                throw new RuntimeException(e);
+            }
             jgen.writeEndObject();
         }
     }

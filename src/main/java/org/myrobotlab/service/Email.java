@@ -1,9 +1,12 @@
 package org.myrobotlab.service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.EmailConfig;
+import org.myrobotlab.service.data.ImageData;
+import org.slf4j.Logger;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -16,15 +19,10 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-
-import org.myrobotlab.framework.Service;
-import org.myrobotlab.logging.Level;
-import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.EmailConfig;
-import org.slf4j.Logger;
-
-import com.sun.scenario.effect.ImageData;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 /**
  * 
  * Basic smtp at the moment. It can send a email with image through gmail.
