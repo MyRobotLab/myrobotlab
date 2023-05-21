@@ -807,7 +807,7 @@ public class FileIO {
     List<File> fileList = getFileList("InMoov", true);
     log.info("found {} files", fileList.size());
 
-    FileIO.extract("/C:/mrl.test/current/myrobotlab.jar", "/resource/framework/serviceData.json", "C:\\mrl.test\\current\\.myrobotlab\\serviceData.json");
+    FileIO.extract("/C:/mrl.test/current/myrobotlab.jar", "/resource/framework/serviceData.json", "C:\\mrl.test\\libraries\\serviceData.json");
 
     copy("dir1", "dir2");
 

@@ -515,6 +515,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       return filename;
 
     } else {
+      error("could not get voice");
       return null;
     }
   }

@@ -1188,7 +1188,7 @@
   <dependency>
     <groupId>program-ab</groupId>
     <artifactId>program-ab-kw</artifactId>
-    <version>0.0.8.9</version>
+    <version>0.0.8.10</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1216,13 +1216,13 @@
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-analysis-common</artifactId>
-    <version>9.0.0</version>
+    <version>9.4.2</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-analysis-kuromoji</artifactId>
-    <version>9.0.0</version>
+    <version>9.4.2</version>
     <scope>provided</scope>
   </dependency>
 <!-- ProgramAB end -->
@@ -1382,19 +1382,13 @@
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-core</artifactId>
-    <version>9.0.0</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.apache.lucene</groupId>
-    <artifactId>lucene-codecs</artifactId>
-    <version>9.0.0</version>
+    <version>9.4.2</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-core</artifactId>
-    <version>9.0.0</version>
+    <version>9.2.0</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1430,7 +1424,7 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-test-framework</artifactId>
-    <version>9.0.0</version>
+    <version>9.2.0</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1454,7 +1448,7 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-solrj</artifactId>
-    <version>9.0.0</version>
+    <version>9.2.0</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>

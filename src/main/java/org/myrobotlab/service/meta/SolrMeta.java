@@ -16,10 +16,8 @@ public class SolrMeta extends MetaData {
 
     addDescription("Solr Service - Open source search engine");
     addCategory("search");
-    // Solr version 9.1.* requires us to set solr.install.dir sys property
-    // for some reason, this one does not. Probably should investigate further
-    String solrVersion = "9.0.0";
-    String luceneVersion = solrVersion;
+    String solrVersion = "9.2.0";
+    String luceneVersion = "9.4.2";
     addDependency("org.apache.lucene", "lucene-core", luceneVersion);
     addDependency("org.apache.lucene", "lucene-codecs", luceneVersion);
     addDependency("org.apache.solr", "solr-core", solrVersion);
