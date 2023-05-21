@@ -64,11 +64,16 @@ public class Email extends Service {
   
 
   /**
-   * TODO - auto send email with attached image
+   * Sends an email of an image. To, From ect are required to 
+   * be setup in config, designed to be the recipient of subscribed
+   * image publisher. Must be non encoded filesystem image file.
+   * 
+   * TODO - implemented encoded images to be sent, base64 or url references.
+   * 
    * @param img
    */
   public void onImage(ImageData img) {
-
+    sendHtmlMail(null, null, img.src, null, img.src);
   }
 
   public void sendImage(String to, String imageFile) {
