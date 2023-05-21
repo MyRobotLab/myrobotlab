@@ -11,7 +11,7 @@ import java.util.List;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
-public class ProxyTest extends AbstractTest {
+public class ProxyFactoryTest extends AbstractTest {
 
     @BeforeClass
     public static void setup() {
