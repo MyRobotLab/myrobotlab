@@ -1201,7 +1201,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     memoryDoc.setField("text_field", memory.message);
     memoryDoc.setField("speaker_field", memory.speaker);
     memoryDoc.setField("conversation_id", memory.conversationId);
-    memoryDoc.setField("test_vector", embeddings);
+    memoryDoc.setField("vector", embeddings);
     addDocument(memoryDoc);
 
 
@@ -1234,7 +1234,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   public List<ChatMessage> recallMemories(List<Float> embeddings) {
     SolrQuery query = new SolrQuery();
     query.setQuery("*:*");
-    query.setParam("q", "{!knn f=test_vector topK=3}" + embeddings.toString());
+    query.setParam("q", "{!knn f=vector topK=3}" + embeddings.toString());
     query.setParam("fl", "*,score");
     QueryResponse response = search(query);
     List<ChatMessage> turns = new ArrayList<>();
