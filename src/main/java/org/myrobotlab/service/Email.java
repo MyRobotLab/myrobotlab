@@ -63,18 +63,10 @@ public class Email extends Service {
   }
   
 
-
-  // @Override
-  // public ServiceConfig apply(ServiceConfig c) {
-  // ServoConfig config = (ServoConfig) c;
-  // return c;
-  // }
-  //
-  // @Override
-  // public ServiceConfig getConfig() {
-  // return config;
-  // }
-
+  /**
+   * TODO - auto send email with attached image
+   * @param img
+   */
   public void onImage(ImageData img) {
 
   }
