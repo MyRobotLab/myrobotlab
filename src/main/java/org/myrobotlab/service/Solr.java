@@ -151,7 +151,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     Path solrHome = Paths.get(path);
     log.info(solrHome.toFile().getAbsolutePath());
     Path solrXml = solrHome.resolve("solr.xml");
-    CoreContainer cores = CoreContainer.createAndLoad(solrHome, solrXml);
+    
+    String absolueHome = solrHome.toFile().getAbsolutePath();
+    CoreContainer cores = CoreContainer.createAndLoad(Paths.get(absolueHome), solrXml);
     for (String coreName : cores.getAllCoreNames()) {
       log.info("Found core core {}", coreName);
     }
@@ -979,7 +981,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   public static void main(String[] args) {
-    LoggingFactory.init(Level.DEBUG);
+    LoggingFactory.init(Level.INFO);
     try {
       Solr solr = (Solr) Runtime.start("solr", "Solr");
       solr.startEmbedded();
@@ -1005,7 +1007,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       solr.commit();
 
       // search for the word myrobotlab
-      String queryString = "myrobotlab";
+      String queryString = "content:myrobotlab";
       QueryResponse resp = solr.search(queryString);
       for (int i = 0; i < resp.getResults().size(); i++) {
         System.out.println("---------------------------------");
