@@ -22,9 +22,10 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.EmailConfig;
+import org.myrobotlab.service.data.ImageData;
 import org.slf4j.Logger;
 
-import com.sun.scenario.effect.ImageData;
+
 /**
  * 
  * Basic smtp at the moment. It can send a email with image through gmail.
