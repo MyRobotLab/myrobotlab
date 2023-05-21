@@ -18,48 +18,25 @@ public class ProgramABMeta extends MetaData {
 
     addDescription("AIML 2.0 Reference interpreter based on Program AB");
     addCategory("ai");
-
-    // add Wikipedia local search !!
-    addPeer("search", "Wikipedia", "replacement for handling pannous sriax requests");
-
-    // addPeer("htmlFilter", "HtmlFilter");
-
-    // TODO: renamed the bots in the program-ab-data folder to prefix them so we
-    // know they are different than the inmoov bots.
-    // each bot should have their own name, it's confusing that the inmoov bots
-    // are named en-US and so are the program ab bots.
-
-    // addDependency("program-ab", "program-ab-data", "1.2", "zip");
-    // addDependency("program-ab", "program-ab-kw", "0.0.8.5");
-
+    
     addDependency("program-ab", "program-ab-data", null, "zip");
-    addDependency("program-ab", "program-ab-kw", "0.0.8.9");
+    addDependency("program-ab", "program-ab-kw", "0.0.8.10");
     exclude("ch.qos.logback", "logback-classic");
     exclude("ch.qos.logback", "logback-core");
+    
+    addDependency("com.fasterxml.jackson.dataformat", "jackson-dataformat-xml", "2.14.0");
 
     addDependency("org.json", "json", "20090211");
     // used by FileIO
     addDependency("commons-io", "commons-io", "2.7");
     // TODO: This is for CJK support in ProgramAB move this into the published
     // POM for ProgramAB so they are pulled in transiently.
-    addDependency("org.apache.lucene", "lucene-analyzers-common", "8.11.2");
-    addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "8.11.2");
+    addDependency("org.apache.lucene", "lucene-analysis-common", "9.4.2");
+    addDependency("org.apache.lucene", "lucene-analysis-kuromoji", "9.4.2");
     addCategory("ai", "control");
 
   }
 
-  @Override
-  public Plan getDefault(String name) {
 
-    ProgramABConfig programAb = new ProgramABConfig();
-
-    Plan plan = new Plan(name);
-    // load default peers from meta here
-    plan.putPeers(name, peers);
-    // programAb.textFilters = new String[] {name + ".htmlFilter"};
-    plan.addConfig(programAb);
-    return plan;
-
-  }
 
 }

@@ -33,6 +33,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.config.VoiceRssConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
@@ -51,7 +52,6 @@ public class VoiceRss extends AbstractSpeechSynthesis {
 
   public VoiceRss(String n, String id) {
     super(n, id);
-    setReady(getKey(VOICERSS_API_KEY) != null);
   }
 
   public Integer getRate() {
@@ -89,6 +89,29 @@ public class VoiceRss extends AbstractSpeechSynthesis {
       setReady(false);
     }
     return null;
+  }
+  
+  @Override
+  public void startService() {
+    super.startService();
+    setReady(getKey(VOICERSS_API_KEY) != null);
+  }
+  
+  @Override
+  public void setKey(String name, String value) {
+    super.setKey(name, value);
+    VoiceRssConfig c = (VoiceRssConfig)config;
+    c.key = value;
+    setReady(true);
+  }
+  
+  @Override
+  public String getKey(String name) {
+//    VoiceRssConfig c = (VoiceRssConfig)config;
+//    if (c != null && c.key != null) {
+//      super.setKey(VOICERSS_API_KEY, c.key);
+//    }
+    return super.getKey(name);
   }
 
   @Override

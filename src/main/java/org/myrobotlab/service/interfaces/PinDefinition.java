@@ -6,8 +6,14 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  /**
+   * label or name of the pin e.g. P0 D1 D2 etc...
+   */
   String pin;
 
+  /**
+   * the address of the pin
+   */
   Integer address;
 
   /**
@@ -28,8 +34,14 @@ public class PinDefinition extends SensorDefinition implements Serializable {
   int max;
   int avg;
 
+  /**
+   * if the pin is capable of analog values
+   */
   boolean isAnalog = false;
 
+  /**
+   * if the pin is capable of pwm
+   */
   boolean isPwm = false;
 
   boolean isDigital = true;
@@ -62,7 +74,15 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 
   boolean canWrite = true;
 
+  /**
+   * the last read value of the pin
+   */
   Integer value;
+
+  /**
+   * the last written value of the pin
+   */
+  Integer state;
 
   transient Object pinImpl;
 
@@ -87,6 +107,14 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 
   public void setValue(int value) {
     this.value = value;
+  }
+
+  public Integer getState() {
+    return state.intValue();
+  }
+
+  public void setState(int value) {
+    this.state = value;
   }
 
   public String getPinName() {
@@ -226,6 +254,14 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 
   public int getPollRate() {
     return pollRateHz;
+  }
+
+  public String getPin() {
+    return pin;
+  }
+  
+  public void setPin(String pin) {
+    this.pin = pin;
   }
 
 }

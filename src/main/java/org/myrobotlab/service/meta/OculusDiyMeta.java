@@ -13,12 +13,8 @@ public class OculusDiyMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    */
   public OculusDiyMeta() {
-
     addDescription("Service to receive and compute data from a DIY Oculus");
     addCategory("video", "control", "sensors", "telerobotics");
-    addPeer("arduino", "Arduino", "Arduino for DIYOculus and Myo");
-    addPeer("mpu6050", "Mpu6050", "mpu6050");
-
   }
 
 }

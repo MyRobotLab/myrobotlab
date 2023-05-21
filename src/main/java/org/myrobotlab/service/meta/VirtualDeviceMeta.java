@@ -16,9 +16,6 @@ public class VirtualDeviceMeta extends MetaData {
 
     addDescription("a service which can create virtual serial ports and behaviors implemented in python for them");
     addCategory("testing");
-    // put peer definitions in
-    addPeer("uart", "Serial", "uart");
-    addPeer("logic", "Python", "logic to implement");
 
     // this is used for testing, and does not need to be tested
     setAvailable(false);

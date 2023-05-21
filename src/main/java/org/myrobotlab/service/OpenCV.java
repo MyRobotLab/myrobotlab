@@ -62,6 +62,7 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameGrabber.ImageMode;
 import org.bytedeco.javacv.FrameRecorder;
+import org.bytedeco.javacv.OpenCVFrameGrabber;
 import org.bytedeco.javacv.OpenKinectFrameGrabber;
 import org.bytedeco.opencv.opencv_core.AbstractCvScalar;
 /*
@@ -152,9 +153,11 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   class VideoProcessor implements Runnable {
 
+    transient Thread videoThread = null;
+
     @Override
     synchronized public void run() {
-      // create a closeable frame converter
+      // create a closeable frame converter     
       CloseableFrameConverter converter = new CloseableFrameConverter();
 
       try {
@@ -216,11 +219,10 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
         } // end of while - no longer capturing
 
       } catch (Exception e) {
-        log.error("getting grabber failed", e);
+        log.error("failed getting frame", e);
       }
       // begin capturing ...
 
-      videoThread = null;
       frameIndex = 0;
 
       // attempt to close the grabber
@@ -242,6 +244,37 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
       // sleep(1000);
       broadcastState();
       log.info("run - stopped capture");
+    }
+
+    public void stop() {
+      log.info("request to stop");
+      if (!capturing) {
+        log.info("processor already stopped");
+        return;
+      }
+
+      // begin stopping
+      stopping = true;
+      videoThread.interrupt();
+      int waitTime = 0;
+      while (capturing && waitTime < 1000) {
+        ++waitTime;
+        sleep(10);
+      }
+      broadcastState();
+      log.info("stopCapture waited {} times - done now", waitTime);
+    }
+
+    public void start() {
+      log.info("request to start");
+      if (!capturing) {
+        videoThread = new Thread(vp, String.format("%s-video-processor-%d", getName(), ++vpId));
+        videoThread.start();
+        broadcastState();
+        log.info("capture - started");
+      } else {
+        log.info("capture - already capturing - leaving");
+      }
     }
   }
 
@@ -277,11 +310,16 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   transient final static public String PART = "part";
   static final String TEST_LOCAL_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg";
 
-  public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BlurDetector", "BoundingBoxToFile", "Canny", "ColorTrack", "Copy",
-      "CreateHistogram", "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetectDNN", "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip",
-      "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "ImageSegmenter", "Input", "InRange", "Invert", "KinectDepth",
-      "KinectDepthMask", "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "MiniXception", "MotionDetect", "Mouse", "Output", "Overlay", "PyramidDown",
-      "PyramidUp", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "TextDetector",
+  public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BlurDetector",
+      "BoundingBoxToFile", "Canny", "ColorTrack", "Copy",
+      "CreateHistogram", "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetectDNN",
+      "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip",
+      "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "ImageSegmenter",
+      "Input", "InRange", "Invert", "KinectDepth",
+      "KinectDepthMask", "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "MiniXception",
+      "MotionDetect", "Mouse", "Output", "Overlay", "PyramidDown",
+      "PyramidUp", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector",
+      "Smooth", "Solr", "Split", "SURF", "Tesseract", "TextDetector",
       "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
 
   static final long serialVersionUID = 1L;
@@ -513,8 +551,6 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   boolean undockDisplay = false;
 
-  transient Thread videoThread = null;
-
   final private VideoProcessor vp = new VideoProcessor();
 
   Integer width = null;
@@ -614,7 +650,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    * add filter by type e.g. addFilter("Canny","Canny")
    * 
    * @param filterName
-   *          - name of filter
+   *                   - name of filter
    * @return the filter
    */
   public CvFilter addFilter(String filterName) {
@@ -636,26 +672,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   @Override
   synchronized public void capture() {
     log.info("capture()");
-
-    if (capturing) {
-      log.info("capture - already capturing - leaving");
-      return;
-    } else { // thread should be dead
-      log.info("capture - starting thread");
-
-      if (videoThread == null) {
-        videoThread = new Thread(vp, String.format("%s-video-processor-%d", getName(), ++vpId));
-        videoThread.start();
-      }
-      // block until in started state ?
-      int waitTime = 0;
-      while (!capturing && waitTime < 1000) {
-        ++waitTime;
-        sleep(10);
-      }
-      log.info("capture - waited {} times", waitTime);
-      broadcastState();
-    }
+    vp.start();
   }
 
   public void capture(FrameGrabber grabber) throws org.bytedeco.javacv.FrameGrabber.Exception {
@@ -669,7 +686,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    * capture from a camera
    * 
    * @param cameraIndex
-   *          the camera index to capture from
+   *                    the camera index to capture from
    */
   public void capture(Integer cameraIndex) {
     if (cameraIndex == null) {
@@ -690,7 +707,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    * its the most capable of decoding different filetypes.
    * 
    * @param filename
-   *          the file to use as the input filename.
+   *                 the file to use as the input filename.
    * 
    */
   public void capture(String filename) {
@@ -703,7 +720,45 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   public void captureFromResourceFile(String filename) throws IOException {
     capture(filename);
   }
+  
+  /**
+   * Gets valid camera indexes by iterating through 8
+   * 
+   * @return
+   */
+  public List<Integer> getCameraIndexes() {
+    List<Integer> cameraIndexes = new ArrayList<>();
+    if (isCapturing()) {
+      error("cannot get indexes when capturing");
+      return cameraIndexes;
+    }
 
+    // preserving original state
+    String previousType = grabberType;
+    Integer previousIndex = cameraIndex;
+
+    for (int i = 0; i < 8; i++) {
+      try {
+        FrameGrabber grabber = new OpenCVFrameGrabber(i);
+        grabber.start();
+        Frame frame = grabber.grab();
+        if (frame != null) {
+          cameraIndexes.add(i);
+        }
+        grabber.stop();
+        grabber = null;
+      } catch (Exception e) {
+        log.info(String.format("not able to camera grab a frame from camera %d", i));
+      }
+    }
+
+    // resetting to original type
+    grabberType = previousType;
+    cameraIndex = previousIndex;
+
+    return cameraIndexes;
+  }
+  
   public int getCameraIndex() {
     return this.cameraIndex;
   }
@@ -790,7 +845,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    * get a filter by name
    * 
    * @param name
-   *          filter name to lookup
+   *             filter name to lookup
    * @return the filter by name o/w null
    * 
    */
@@ -820,7 +875,8 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   }
 
   public FrameGrabber getGrabber()
-      throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException, org.bytedeco.javacv.FrameGrabber.Exception {
+      throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException,
+      InvocationTargetException, org.bytedeco.javacv.FrameGrabber.Exception {
 
     if (grabber != null) {
       return grabber;
@@ -845,7 +901,8 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
       // get and cache image file
       // FIXME - perhaps "test" stream to try to determine what "type" it is -
       // mjpeg/jpg/gif/ octet-stream :( ???
-      if (grabberType == null || (grabberType != null && (!grabberType.equals("MJpeg") && !grabberType.equals("IPCamera")))) {
+      if (grabberType == null
+          || (grabberType != null && (!grabberType.equals("MJpeg") && !grabberType.equals("IPCamera")))) {
         inputFile = getImageFromUrl(inputFile);
       }
     }
@@ -857,7 +914,8 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
         ext = inputFile.substring(pos + 1).toLowerCase();
       }
     }
-    if (grabberType != null && (grabberType.equals("FFmpeg") || grabberType.equals("ImageFile")) && inputSource.equals(INPUT_SOURCE_CAMERA)) {
+    if (grabberType != null && (grabberType.equals("FFmpeg") || grabberType.equals("ImageFile"))
+        && inputSource.equals(INPUT_SOURCE_CAMERA)) {
       log.info("invalid state of ffmpeg and input source camera - setting to OpenCV frame grabber");
       grabberType = "OpenCV";
     }
@@ -912,7 +970,8 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     }
 
     String prefixPath;
-    if (/* "IPCamera".equals(grabberType) || */ "Pipeline".equals(grabberType) || "ImageFile".equals(grabberType) || "Sarxos".equals(grabberType) || "MJpeg".equals(grabberType)) {
+    if (/* "IPCamera".equals(grabberType) || */ "Pipeline".equals(grabberType) || "ImageFile".equals(grabberType)
+        || "Sarxos".equals(grabberType) || "MJpeg".equals(grabberType)) {
       prefixPath = "org.myrobotlab.opencv.";
     } else {
       prefixPath = "org.bytedeco.javacv.";
@@ -1048,11 +1107,11 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    * appropriate filter through this method.
    * 
    * @param filterName
-   *          the name of the fitler
+   *                   the name of the fitler
    * @param method
-   *          the method to invoke
+   *                   the method to invoke
    * @param params
-   *          the params to pass
+   *                   the params to pass
    */
   public void invokeFilterMethod(String filterName, String method, Object... params) {
     OpenCVFilter filter = getFilter(filterName);
@@ -1071,10 +1130,12 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     return recording;
   }
 
+  @Deprecated /* was used in SwingGui - nice feature through .. ability to undock displays */
   public boolean isUndocked() {
     return undockDisplay;
   }
 
+  @Deprecated /* not implemented remove */
   synchronized public void pauseCapture() {
     // FIXME !!!
     // capturing = false; NOT SURE WHAT TO DO ... PROBABLY stopCapture without
@@ -1086,7 +1147,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    * conversion from buffered image to base64 encoded jpg
    * 
    * @param img
-   *          the image to convert
+   *            the image to convert
    * @return base64jpeg version of buffered image
    */
   public String toBase64Jpg(BufferedImage img) {
@@ -1104,10 +1165,15 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   private void processVideo(OpenCVData data) throws org.bytedeco.javacv.FrameGrabber.Exception, InterruptedException {
 
+    if (stopping) {
+      log.warn("stopping processing of image capture is stopping");
+      return;
+    }
+
     // process each filter
     // for (String filterName : filters.keySet()) {
     for (OpenCVFilter filter : filters.values()) {
-      if (filter.isEnabled()) {
+      if (filter.isEnabled() & !stopping) {
         IplImage input = filter.setData(data);
         if (input == null) {
           log.error("could not get setData image");
@@ -1137,21 +1203,9 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
           if (overlay.color != null) {
             g2d.setColor(overlay.color);
           }
-          // TODO - handle drawImage overlay !
           g2d.drawString(overlay.text, overlay.x, overlay.y);
         }
 
-        /**
-         * <pre>
-         * // FIXME - publishDisplay is "NOT" used by the OpenCVGui ! -
-         * // publishDisplay is more transportable - and potentially could be
-         * // "standard"
-         * // since BufferedImage is a standard Java Object (contents of
-         * // OpenCVData are not)
-         * // it has a nice standard name too, but OpenCVData has "way" more
-         * // data ... what to do ?
-         * </pre>
-         */
         BufferedImage b = data.getDisplay();
         SerializableImage si = new SerializableImage(b, displayFilter, frameIndex);
         invoke("publishDisplay", si);
@@ -1166,21 +1220,6 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
         }
 
         if (!isHeadless() && nativeViewer) {
-          /*
-           * if (canvasFrame == null) { // FIXME - strange canvaFrame's
-           * fullscreen mode is not exposed :( // ProjectorDevice pd = new
-           * ProjectorDevice("display 2"); // canvasFrame =
-           * pd.createCanvasFrame();
-           * 
-           * canvasFrame = new CanvasFrame(displayFilter,
-           * CanvasFrame.getDefaultGamma()/grabber.getGamma());
-           * canvasFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); //
-           * canvasFrame.setAlwaysOnTop(true); //
-           * canvasFrame.setResizable(false); canvasFrame.setVisible(true);
-           * canvasFrame.showImage(b); canvasFrame.invalidate();
-           * canvasFrame.setSize(600, 480); canvasFrame.pack(); }
-           * canvasFrame.showImage(b);
-           */
 
           if (canvasFrame == null) {
             canvasFrame = new CanvasFrame(String.format("%s - %s", getName(), displayFilter));
@@ -1195,41 +1234,19 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
               canvasFrame.showImage(frame);
             }
           }
-          /*
-           * if (videoWidget == null) { videoWidget = new
-           * VideoWidget2(getName()); }
-           * 
-           * videoWidget.setVisible(true); videoWidget.displayFrame(si);
-           */
-
         } else if (canvasFrame != null && !nativeViewer) {
           canvasFrame.dispose();
           canvasFrame = null;
-          // videoWidget.dispose();
-          // videoWidget = null;
         }
 
       }
     }
 
-    // useful but chatty debug statement - dumps opencvdata
-    // log.debug("data -> {}", data);
-
-    // FIXME - should have had it
-
-    // FIXME - deprecate it
     invoke("publishOpenCVData", data);
 
-    // future publishing (same as BoofCv !)
+    // standard generic CvData publish
     invoke("publishCvData", data);
 
-    // FIXME - TODO
-    // data.prepareToSerialize();
-    // invoke("publishVideoData", data);
-
-    // this has to be before record as
-    // record uses the queue - this has the "issue" if
-    // the consumer does not pickup-it will get stale
     if (blockingData.size() == 0) {
       blockingData.add(data);
     }
@@ -1281,13 +1298,15 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    * base 64 jpg frame image
    * 
    * @param data
-   *          webimage data
+   *             webimage data
    * @return the web image data
    */
   public WebImage publishWebDisplay(WebImage data) {
     return data;
   }
 
+  // FIXME - this is good in it has a bunch of publish points, but there is no
+  // POJO Classification publish point .. yet
   // when containers are published the <T>ypes are unknown to the publishing
   // function
   public ArrayList<?> publish(ArrayList<?> polygons) {
@@ -1329,6 +1348,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     return rects;
   }
 
+  // FIXME - POJO classification :( not doc
   public Map<String, List<Classification>> publishClassification(Map<String, List<Classification>> data) {
     // log.info("Publish Classification in opencv!");
     // aggregate locally for fun - "better" is to send it to a search engine
@@ -1361,7 +1381,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    * Publishing method for filters - used internally
    * 
    * @param filterWrapper
-   *          wraps a filter
+   *                      wraps a filter
    * 
    * @return FilterWrapper solves the problem of multiple types being resolved
    *         in the setFilterState(FilterWrapper data) method
@@ -1374,7 +1394,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    * Publishing method for filters - uses string parameter for remote invocation
    * 
    * @param name
-   *          name of filter to publish state for
+   *             name of filter to publish state for
    * 
    * @return FilterWrapper solves the problem of multiple types being resolved
    *         in the setFilterState(FilterWrapper data) method
@@ -1410,7 +1430,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    * until asked for - then its cached SMART ! :)
    * 
    * @param data
-   *          the opencv data
+   *             the opencv data
    * @return cvdata
    * 
    */
@@ -1443,13 +1463,13 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    * creates a new overlay of text
    * 
    * @param x
-   *          coordinate
+   *               coordinate
    * @param y
-   *          coordinate
+   *               coordinate
    * @param format
-   *          format string
+   *               format string
    * @param color
-   *          color
+   *               color
    * 
    */
   public void putText(int x, int y, String format, String color) {
@@ -1461,9 +1481,9 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    * the "light weight" put - it does not create any new cv objects
    * 
    * @param format
-   *          format for the text
+   *               format for the text
    * @param args
-   *          args to format into the text
+   *               args to format into the text
    * 
    */
   public void putText(String format, Object... args) {
@@ -1524,7 +1544,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    * key- input, filter, or display
    * 
    * @param data
-   *          data
+   *             data
    */
   public void record(OpenCVData data) {
     try {
@@ -1546,7 +1566,8 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
          */
         FrameRecorder recorder = null;
         if (!recordingFrames) {
-          recordingFilename = String.format(getDataDir() + File.separator + "%s-%d.flv", recordingSource, System.currentTimeMillis());
+          recordingFilename = String.format(getDataDir() + File.separator + "%s-%d.flv", recordingSource,
+              System.currentTimeMillis());
           info("recording %s", recordingFilename);
           recorder = new FFmpegFrameRecorder(recordingFilename, frame.imageWidth, frame.imageHeight, 0);
           recorder.setFormat("flv");
@@ -1612,7 +1633,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   /**
    * @param name
-   *          remove a filter by name
+   *             remove a filter by name
    */
   @Override
   synchronized public void removeFilter(String name) {
@@ -1694,7 +1715,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    * enable() and setDisplayFilter() needed filter
    * 
    * @param name
-   *          name of the filter to set active
+   *             name of the filter to set active
    *
    */
   public void setActiveFilter(String name) {
@@ -1733,12 +1754,15 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   /**
    * @param otherFilter
-   *          - data from remote source
+   *                    - data from remote source
    * 
-   *          This updates the filter with all the non-transient data in a
-   *          remote copy through a reflective field update. If your filter has
-   *          JNI members or pointer references it will break, mark all of
-   *          these.
+   *                    This updates the filter with all the non-transient data in
+   *                    a
+   *                    remote copy through a reflective field update. If your
+   *                    filter has
+   *                    JNI members or pointer references it will break, mark all
+   *                    of
+   *                    these.
    */
   public void setFilterState(FilterWrapper otherFilter) {
     OpenCVFilter filter = getFilter(otherFilter.name);
@@ -1756,9 +1780,9 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    * filter
    * 
    * @param name
-   *          name of the filter
+   *             name of the filter
    * @param data
-   *          state date to set.
+   *             state date to set.
    */
   public void setFilterState(String name, String data) {
     OpenCVFilter filter = getFilter(name);
@@ -1827,20 +1851,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   @Override
   synchronized public void stopCapture() {
     log.info("stopCapture");
-    if (!capturing) {
-      log.info("stopCapture !capturing - returning");
-      return;
-    }
-
-    log.info("stopCapture stopping = true");
-    stopping = true;
-    // block until in started state ?
-    int waitTime = 0;
-    while (capturing && waitTime < 1000) {
-      ++waitTime;
-      sleep(10);
-    }
-    log.info("stopCapture waited {} times - done now", waitTime);
+    vp.stop();
   }
 
   public void stopRecording() {
@@ -1891,7 +1902,8 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   private boolean isSingleFrame() {
     if (inputSource.equals(INPUT_SOURCE_FILE) && inputFile != null) {
       String testExt = inputFile.toLowerCase();
-      if (testExt.endsWith(".jpg") || testExt.endsWith(".jpeg") || testExt.endsWith(".png") || testExt.endsWith(".gif") || testExt.endsWith(".tiff") || testExt.endsWith(".tif")) {
+      if (testExt.endsWith(".jpg") || testExt.endsWith(".jpeg") || testExt.endsWith(".png") || testExt.endsWith(".gif")
+          || testExt.endsWith(".tiff") || testExt.endsWith(".tif")) {
         return true;
       }
     }
@@ -1944,7 +1956,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   @Override
   public void enableFilter(String name) {
     OpenCVFilter f = filters.get(name);
-    if (!f.isEnabled()) {
+    if (f != null && !f.isEnabled()) {
       f.enable();
       broadcastState();
     }
@@ -1953,7 +1965,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   @Override
   public void disableFilter(String name) {
     OpenCVFilter f = filters.get(name);
-    if (f.isEnabled()) {
+    if (f != null && f.isEnabled()) {
       f.disable();
       broadcastState();
     }
@@ -1961,11 +1973,13 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   public void toggleFilter(String name) {
     OpenCVFilter f = filters.get(name);
-    if (f.isEnabled())
-      f.disable();
-    else
-      f.enable();
-    broadcastState();
+    if (f != null) {
+      if (f.isEnabled())
+        f.disable();
+      else
+        f.enable();
+      broadcastState();
+    }
   }
 
   public void setDisplay(boolean b) {
@@ -2008,7 +2022,8 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   @Override
   public ServiceConfig getConfig() {
-    OpenCVConfig config = new OpenCVConfig();
+    OpenCVConfig config = (OpenCVConfig) super.getConfig();
+    // FIXME - remove member vars use config only
     config.capturing = capturing;
     config.cameraIndex = cameraIndex;
     // TODO: make the grabber config a nested object to clean this up..
@@ -2025,7 +2040,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    OpenCVConfig config = (OpenCVConfig) c;
+    OpenCVConfig config = (OpenCVConfig) super.apply(c);
     setCameraIndex(config.cameraIndex);
     setGrabberType(config.grabberType);
     setInputFileName(config.inputFile);
@@ -2057,7 +2072,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   public static void main(String[] args) throws Exception {
 
     try {
-      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
+      Runtime.main(new String[] { "--id", "admin" });
       LoggingFactory.init("INFO");
 
       // Runtime.getInstance().load();
@@ -2092,7 +2107,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
       // Runtime.start("gui", "SwingGui");
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(true);
+      webgui.autoStartBrowser(false);
       webgui.startService();
 
       // FFmpegFrameRecorder test = new

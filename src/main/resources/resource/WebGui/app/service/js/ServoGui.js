@@ -5,6 +5,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
 
     $scope.disableServicePosUpdates = false
 
+    $scope.minView = true
+
     // mode is either "status" or "control"
     // in status mode we take updates by the servo and its events
     // in control mode we take updates by the user

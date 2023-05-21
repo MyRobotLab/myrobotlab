@@ -1,8 +1,10 @@
+# TODO clean this up !
 /.project
 /.classpath
 /*.iml
 /.settings
 /src/main/resources/resource/WebGui/react
+/src/main/resources/resource/Vertx/app
 /data
 /resource
 /bin
@@ -80,3 +82,4 @@
 /copyToRaspi.sh
 /lastRestart.py
 /.factorypath
+start.yml
