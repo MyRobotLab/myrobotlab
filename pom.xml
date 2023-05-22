@@ -352,6 +352,15 @@
   </dependency>
 <!-- Elasticsearch end -->
 
+<!-- Email begin -->
+  <dependency>
+    <groupId>javax.mail</groupId>
+    <artifactId>mail</artifactId>
+    <version>1.4.7</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Email end -->
+
 <!-- FiniteStateMachine begin -->
   <dependency>
     <groupId>com.github.pnavais</groupId>
@@ -418,12 +427,7 @@
 <!-- HtmlParser end -->
 
 <!-- ImapEmailConnector begin -->
-  <dependency>
-    <groupId>javax.mail</groupId>
-    <artifactId>mail</artifactId>
-    <version>1.4.7</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for javax.mail-mail-1.4.7 skipping -->
 <!-- ImapEmailConnector end -->
 
 <!-- InMoov2 begin -->
@@ -1382,6 +1386,10 @@
     <scope>provided</scope>
       <exclusions>
         <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>log4j</groupId>
           <artifactId>*</artifactId>
         </exclusion>
@@ -1406,6 +1414,10 @@
     <scope>provided</scope>
       <exclusions>
         <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>log4j</groupId>
           <artifactId>*</artifactId>
         </exclusion>
@@ -1429,6 +1441,18 @@
     <version>9.2.0</version>
     <scope>provided</scope>
       <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
         <exclusion>
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>*</artifactId>
