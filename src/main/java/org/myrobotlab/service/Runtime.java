@@ -1811,7 +1811,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // TODO - remove ? already get state from registration
       if (!registration.isLocal(Platform.getLocalInstance().getId())) {
-        runtime.subscribe(registration.getName(), "publishState");
+        runtime.subscribe(registration.getFullName(), "publishState");
       }
 
     } catch (Exception e) {
