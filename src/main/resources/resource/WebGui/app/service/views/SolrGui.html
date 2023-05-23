@@ -1,13 +1,26 @@
 <div>
-    HEY!!! - SolrGUI here!<br>
     <!-- for debugging  Data: {{service}} <br/>  -->
     <form novalidate class="search-form">
-     QueryString: <input type="text" ng-model="querystring"  /><br/>
-     <input type="submit" ng-click="search(querystring)" value="Search" />
+     QueryString: <input type="text" ng-model="queryString" /><input type="submit" ng-click="search(queryString)" value="Search" />
+     <br/>
     </form>
     
-    Query String: {{querystring}} <br/>
-    Query Results: {{service.solrResults}} <br/>
+    Query String: {{queryString}} <br/>
+    Query Results: {{solrResults}} <br/>
+    <br/>
+    <br/>
+    Solr Results Below
+    <br/>
+    
+    <table class="searchResults">
+      <tr ng-repeat="result in solrResults._results track by $index">
+      <td>
+      Hello world. {{result}}
+         <!--  <div class="chatBalloon{{chatContent.type}}"><div class="chatContent" ng-bind-html="chatContent.text"></div></div>  -->
+      </td>
+      </tr>
+    </table>
+    
     
     <div ng-switch on="size">
         <div class="animate-switch" ng-switch-when="small">Small view</div>
