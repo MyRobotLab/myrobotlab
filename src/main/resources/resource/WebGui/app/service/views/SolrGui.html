@@ -5,8 +5,8 @@
      <br/>
     </form>
     
-    Query String: {{queryString}} <br/>
-    Query Results: {{solrResults}} <br/>
+    <!-- Query String: {{queryString}} <br/>   -->
+    Query Search took {{solrResults.elapsedTime}} ms.<br/>
     <br/>
     <br/>
     Solr Results Below
@@ -14,9 +14,14 @@
     
     <table class="searchResults">
       <tr ng-repeat="result in solrResults._results track by $index">
+      <td>{{$index}} : {{result.id}}</td>
       <td>
-      Hello world. {{result}}
-         <!--  <div class="chatBalloon{{chatContent.type}}"><div class="chatContent" ng-bind-html="chatContent.text"></div></div>  -->
+        <table class="searchResult">
+          <tr ng-repeat="(key, value) in result">
+            <td>{{key}}</td><td>{{value}}</td> 
+          </tr>
+        </table>
+       <!--  <div class="chatBalloon{{chatContent.type}}"><div class="chatContent" ng-bind-html="chatContent.text"></div></div>  -->
       </td>
       </tr>
     </table>
