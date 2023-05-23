@@ -1559,8 +1559,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
           return true;
         }
 
-        // FIXME do we need to check inMethod too?
-        if (CodecUtils.checkServiceNameEquality(listener.callbackName, serviceName)) {
+        // Previously we were not checking inMethod, which meant if a service had multiple
+        // subscriptions to the same topic (one to many mapping), the first in the list would be removed
+        // instead of the requested one.
+        if (listener.callbackMethod.equals(inMethod)
+                && CodecUtils.checkServiceNameEquality(listener.callbackName, serviceName)) {
           log.info("removeListener requested {}.{} to be removed", serviceName, outMethod);
           return true;
         }
