@@ -12,6 +12,13 @@ import org.myrobotlab.service.Runtime;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
 
+/**
+ * This class serializes proxies made with {@code java.lang.reflect.Proxy}.
+ * Such proxies are no longer in use, so this class may be modified to
+ * to support ByteBuddy proxies in the future.
+ *
+ * @author AutonomicPerfectionist
+ */
 public class ProxySerializer extends StdSerializer<Proxy> {
 
     public ProxySerializer() {
