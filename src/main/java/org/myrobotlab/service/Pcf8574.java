@@ -156,9 +156,9 @@ public class Pcf8574 extends Service
 
   public Pcf8574(String n, String id) {
     super(n, id);
-    registerForInterfaceChange(I2CController.class);
+    // registerForInterfaceChange(I2CController.class);
     createPinList();
-    refreshControllers();
+    // refreshControllers();
     for (int i = 0; i < pinDataCnt; ++i) {
       int value = (writeRegister >> i) & 1;
       getPin(i).setValue(value);

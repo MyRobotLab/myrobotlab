@@ -31,11 +31,13 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.myrobotlab.codec.ClassUtil;
 import org.myrobotlab.codec.CodecUtils;
@@ -58,6 +60,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.MessageListener;
+import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.IvyWrapper;
 import org.myrobotlab.framework.repo.Repo;
@@ -464,7 +467,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       for (Field f : fs) {
         if (peerKey.equals(f.getName())) {
           if (f.canAccess(config)) {
-            Object o = null;
+            Object o;
             try {
               o = f.get(config);
 
@@ -479,8 +482,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
               }
 
               if (o instanceof String) {
-                String actualName = (String) o;
-                return actualName;
+                return (String) o;
               } else {
                 log.error("config has field named {} but it is not a string", peerKey);
                 break;
@@ -1132,14 +1134,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @return list of registrations
    */
   synchronized public List<Registration> getServiceList() {
-    List<Registration> ret = new ArrayList<>();
-    for (ServiceInterface si : registry.values()) {
-      // problem with
-      // ret.add(new NameAndType(si.getId(), si.getName(), si.getType(),
-      // CodecUtils.toJson(si)));
-      ret.add(new Registration(si.getId(), si.getName(), si.getTypeKey()));
-    }
-    return ret;
+    return registry.values().stream()
+            .map(si -> new Registration(si.getId(), si.getName(), si.getTypeKey()))
+            .collect(Collectors.toList());
   }
 
   // FIXME - scary function - returns private data
@@ -1180,7 +1177,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     for (int i = 0; i < ret.length; ++i) {
       ServiceInterface s = si.get(i);
 
-      if (s.getId().contentEquals(Platform.getLocalInstance().getId())) {
+      if (isLocal(s.getFullName())) {
         ret[i] = s.getName();
       } else {
         ret[i] = s.getFullName();
@@ -1200,17 +1197,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   public static List<String> getServiceNames(String pattern) {
-    List<ServiceInterface> sis = getServices();
-    List<String> ret = new ArrayList<String>();
-    for (ServiceInterface si : sis) {
-      String serviceName = si.getName();
-
-      if (match(serviceName, pattern)) {
-        ret.add(serviceName);
-      }
-
-    }
-    return ret;
+    return getServices().stream()
+            .map(NameProvider::getName)
+            .filter(serviceName -> match(serviceName, pattern))
+            .collect(Collectors.toList());
   }
 
   /**
@@ -1234,14 +1224,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    *          interface
    * @return list of service names
    * 
-   */ // FIXME !!! NOT RETURNING FULL NAMES !!!
+   */
   public static List<String> getServiceNamesFromInterface(Class<?> interfaze) {
-    List<String> ret = new ArrayList<String>();
-    List<ServiceInterface> services = getServicesFromInterface(interfaze);
-    for (int i = 0; i < services.size(); ++i) {
-      ret.add(services.get(i).getName());
-    }
-    return ret;
+    return getServicesFromInterface(interfaze).stream()
+            .map(ServiceInterface::getFullName)
+            .collect(Collectors.toList());
   }
 
   /**
@@ -1297,7 +1284,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       for (MetaData st : sts) {
 
-        Set<Class<?>> ancestry = new HashSet<Class<?>>();
+        Set<Class<?>> ancestry = new HashSet<>();
         Class<?> targetClass = Class.forName(st.getType()); // this.getClass();
 
         while (targetClass.getCanonicalName().startsWith("org.myrobotlab") && !targetClass.getCanonicalName().startsWith("org.myrobotlab.framework")) {
@@ -1716,7 +1703,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @return registration
    * 
    */
-  public final static synchronized Registration register(Registration registration) {
+  public static synchronized Registration register(Registration registration) {
 
     try {
 
@@ -1753,11 +1740,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       if (runtime != null) {
 
         String type = registration.getTypeKey();
-        Set<String> names = runtime.typeToNames.get(type);
-        if (names == null) {
-          names = new HashSet<>();
-          runtime.typeToNames.put(type, names);
-        }
+        Set<String> names = runtime.typeToNames.computeIfAbsent(type, k -> new HashSet<>());
         names.add(fullname);
 
         // FIXME - most of this could be static as it represents meta data of
@@ -1812,7 +1795,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // TODO - remove ? already get state from registration
       if (!registration.isLocal(Platform.getLocalInstance().getId())) {
-        runtime.subscribe(registration.getName(), "publishState");
+        runtime.subscribe(registration.getFullName(), "publishState");
       }
 
     } catch (Exception e) {
@@ -2055,7 +2038,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // reverse release to order of creation
     Collection<ServiceInterface> local = getLocalServices().values();
     List<ServiceInterface> ordered = new ArrayList<>(local);
-
+    ordered.removeIf(Objects::isNull);
     Collections.sort(ordered);
     Collections.reverse(ordered);
 
@@ -2070,12 +2053,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       log.info("releasing service {}", sw.getName());
 
       try {
-        if (sw != null) {
-          sw.releaseService();
-        }
+        sw.releaseService();
       } catch (Exception e) {
         runtime.error("%s threw while releasing", e);
-        log.error("rease", e);
+        log.error("release", e);
       }
     }
 
@@ -2157,6 +2138,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
 
     File[] files = configDirFile.listFiles();
+    if (files == null) {
+      // We checked for if directory earlier, so can only be null for IO error
+      error("IO error occurred while listing config directory files");
+      return configList;
+    }
     for (File file : files) {
       String n = file.getName();
 
@@ -2181,11 +2167,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public static void releaseAllServicesExcept(HashSet<String> saveMe) {
     log.info("releaseAllServicesExcept");
     List<ServiceInterface> list = Runtime.getServices();
-    for (int i = 0; i < list.size(); ++i) {
-      ServiceInterface si = list.get(i);
+    for (ServiceInterface si : list) {
       if (saveMe != null && saveMe.contains(si.getName())) {
         log.info("leaving {}", si.getName());
-        continue;
       } else {
         si.releaseService();
       }
@@ -3926,10 +3910,9 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
     // FIXME !!! - msg.name is wrong with only "runtime" it should be
     // "runtime@id"
     // TODO - lots of options for a default "describe"
-    Message msg = Message.createMessage(String.format("%s@%s", getName(), getId()), "runtime", "describe",
-        new Object[] { "fill-uuid", CodecUtils.toJson(new DescribeQuery(Platform.getLocalInstance().getId(), connId)) });
 
-    return msg;
+    return Message.createMessage(getFullName(), "runtime", "describe",
+        new Object[] { "fill-uuid", CodecUtils.toJson(new DescribeQuery(Platform.getLocalInstance().getId(), connId)) });
   }
 
   @Override
@@ -5206,7 +5189,6 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
     for (File f : configFiles) {
       if (!f.getName().toLowerCase().endsWith(".yml")) {
         log.info("{} - none yml file found in config set", f.getAbsolutePath());
-        continue;
       } else {
         runtime.loadFile(f.getAbsolutePath());
       }
@@ -5219,9 +5201,6 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
    * @param path
    *          The full path of the file to load - this DOES NOT set the
    *          configPath
-   * @param overwrite
-   *          loading the file should overwrite any current service in the plan
-   *          - but not change the global configPath
    */
   public void loadFile(String path) {
     try {

@@ -1,6 +1,8 @@
 package org.myrobotlab.codec;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -8,6 +10,7 @@ import java.util.Map;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.test.AbstractTest;
 
@@ -98,6 +101,25 @@ public class CodecUtilsTest extends AbstractTest {
     assertEquals(test.getClass(), LinkedHashMap.class);
     
     
+  }
+
+  @Test
+  public void testNormalizeServiceName() {
+    Platform.getLocalInstance().setId("test-id");
+    assertEquals("runtime@test-id", CodecUtils.normalizeServiceName("runtime"));
+    assertEquals("runtime@test-id", CodecUtils.normalizeServiceName("runtime@test-id"));
+  }
+
+  @Test
+  public void testCheckServiceNameEqual() {
+    Platform.getLocalInstance().setId("test-id");
+    assertTrue(CodecUtils.checkServiceNameEquality("runtime", "runtime"));
+    assertTrue(CodecUtils.checkServiceNameEquality("runtime", "runtime@test-id"));
+    assertTrue(CodecUtils.checkServiceNameEquality("runtime@test-id", "runtime"));
+    assertTrue(CodecUtils.checkServiceNameEquality("runtime@test-id", "runtime@test-id"));
+    assertFalse(CodecUtils.checkServiceNameEquality("runtime", "runtime@not-corr-id"));
+    assertFalse(CodecUtils.checkServiceNameEquality("runtime@not-corr-id", "runtime"));
+
   }
 
 }
