@@ -1423,7 +1423,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
                   listener.topicMethod,
                   StringUtils.removeEnd(
                           listener.callbackName,
-                          Platform.getLocalInstance().getId()
+                          '@' + Platform.getLocalInstance().getId()
                   ),
                   listener.callbackMethod
           );
