@@ -1586,7 +1586,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   public static boolean isLocal(String serviceName) {
     ServiceInterface sw = getService(serviceName);
-    return sw.isLocal();
+    return Objects.equals(sw.getId(), Platform.getLocalInstance().getId());
   }
 
   /*
