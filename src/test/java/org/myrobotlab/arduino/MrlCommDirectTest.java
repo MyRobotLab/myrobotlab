@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 import org.myrobotlab.framework.QueueStats;
+import org.myrobotlab.framework.StaticType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.serial.PortJSSC;
@@ -361,7 +362,7 @@ public class MrlCommDirectTest implements SerialDataListener, MrlCommPublisher, 
   }
 
   @Override
-  public Object invoke(String method, Object... params) {
+  public <R> R invoke(String method, StaticType<R> returnType, Object... params) {
     log.warn("Dont invoke in a unit test!!!!!!!!!!!!!!!!!!!!!!");
     return null;
   }

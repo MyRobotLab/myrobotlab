@@ -17,10 +17,12 @@ import org.junit.Test;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.StaticType;
 import org.myrobotlab.framework.TimeoutException;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.net.Http;
 import org.myrobotlab.test.AbstractTest;
+import org.myrobotlab.utils.ObjectTypePair;
 import org.slf4j.Logger;
 
 public class WebGuiTest extends AbstractTest {
@@ -147,8 +149,11 @@ public class WebGuiTest extends AbstractTest {
   public void sendBlockingTest() throws InterruptedException, TimeoutException {
     String retVal = "retVal";
     // Put directly in blocking list because sendBlocking() won't use it for local services
-    Runtime.getInstance().getInbox().blockingList.put("runtime.onBlocking", new Object[1]);
-    Object[] blockingListRet = Runtime.getInstance().getInbox().blockingList.get("runtime.onBlocking");
+    Runtime.getInstance().getInbox().blockingList.put(
+            "runtime.onBlocking",
+                    new ObjectTypePair<>(null, new StaticType<String>(){})
+    );
+    ObjectTypePair<?> blockingListRet = Runtime.getInstance().getInbox().blockingList.get("runtime.onBlocking");
 
     // Delay in a new thread so we can get our wait() call in first
     new Thread(() -> {
@@ -167,7 +172,7 @@ public class WebGuiTest extends AbstractTest {
       }
     }
 
-    assertEquals(retVal, blockingListRet[0]);
+    assertEquals(retVal, blockingListRet.first);
   }
   
   

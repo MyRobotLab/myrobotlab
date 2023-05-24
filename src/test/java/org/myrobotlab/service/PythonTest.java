@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Map;
 
+import org.junit.Test;
 import org.myrobotlab.framework.Service;
 import org.python.core.PyInteger;
 
