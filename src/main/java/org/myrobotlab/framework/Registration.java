@@ -49,10 +49,10 @@ public class Registration {
   }
 
   public Registration(ServiceInterface service) {
-    log.info("creating registration for {}@{} - {}", service.getName(), service.getId(), service.getType());
+    log.info("creating registration for {}@{} - {}", service.getName(), service.getId(), service.getTypeKey());
     this.id = service.getId();
     this.name = service.getName();
-    this.typeKey = service.getType();
+    this.typeKey = service.getTypeKey();
     // when this registration is re-broadcasted to remotes it will use this
     // serialization to init state
     this.state = CodecUtils.toJson(service);

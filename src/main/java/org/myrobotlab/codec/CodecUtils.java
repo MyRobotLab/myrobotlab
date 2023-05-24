@@ -38,6 +38,7 @@ import org.myrobotlab.codec.json.ProxySerializer;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.StaticType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -498,6 +499,44 @@ public class CodecUtils {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Normalizes a service name to its full
+     * name, if not already. A full name consists of
+     * two parts: the short name that identifies the service
+     * in the context of its own runtime, and the Runtime ID,
+     * that identifies the service's runtime from others in the network.
+     * The two parts are separated by an {@code @} symbol.
+     * <p>
+     * If this method is given a short name, it is assumed to be local
+     * to this runtime, and it is normalized with the ID of this runtime.
+     * If the name is already a full name, then it is returned unmodified.
+     * @param name The service name to normalize
+     * @return The normalized (full) name, or null if name is null
+     */
+    public static String normalizeServiceName(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        if (getId(name) == null) {
+            return name + '@' + Platform.getLocalInstance().getId();
+        } else {
+            return name;
+        }
+    }
+
+    /**
+     * Checks whether two service names are equal by first normalizing
+     * each. If a name does not have a runtime ID, it is assumed to be
+     * a local service.
+     * @param name1 The first service name
+     * @param name2 The second service name
+     * @return Whether the two names are effectively equal
+     */
+    public static boolean checkServiceNameEquality(String name1, String name2) {
+        return Objects.equals(normalizeServiceName(name1), normalizeServiceName(name2));
     }
 
     /**

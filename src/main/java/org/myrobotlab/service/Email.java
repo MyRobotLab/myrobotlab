@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
 /**
  * 
  * Basic smtp at the moment. It can send a email with image through gmail.
@@ -60,20 +61,17 @@ public class Email extends Service {
   }
   
 
-
-  // @Override
-  // public ServiceConfig apply(ServiceConfig c) {
-  // ServoConfig config = (ServoConfig) c;
-  // return c;
-  // }
-  //
-  // @Override
-  // public ServiceConfig getConfig() {
-  // return config;
-  // }
-
+  /**
+   * Sends an email of an image. To, From ect are required to 
+   * be setup in config, designed to be the recipient of subscribed
+   * image publisher. Must be non encoded filesystem image file.
+   * 
+   * TODO - implemented encoded images to be sent, base64 or url references.
+   * 
+   * @param img
+   */
   public void onImage(ImageData img) {
-
+    sendHtmlMail(null, null, img.src, null, img.src);
   }
 
   public void sendImage(String to, String imageFile) {
