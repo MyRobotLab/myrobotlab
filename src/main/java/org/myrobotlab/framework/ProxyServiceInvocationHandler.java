@@ -9,6 +9,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Arrays;
 
+/**
+ * This class serves as an alternative interception handler,
+ * for proxies made with {@code java.lang.reflect.Proxy}. Such a proxy
+ * is not currently used, it was replaced with ByteBuddy.
+ *
+ * @author AutonomicPerfectionist
+ */
 public class ProxyServiceInvocationHandler implements InvocationHandler {
 
     protected static Logger log = LoggerFactory.getLogger(ProxyServiceInvocationHandler.class);
