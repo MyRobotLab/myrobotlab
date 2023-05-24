@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,10 +32,13 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
+import org.apache.solr.response.JSONResponseWriter;
+import org.apache.solr.response.SolrQueryResponse;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter.ToIplImage;
 import org.bytedeco.opencv.opencv_core.IplImage;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
 import org.myrobotlab.framework.Inbox;
@@ -57,6 +61,8 @@ import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
+
+import com.google.gson.Gson;
 
 /**
  * SolrService - MyRobotLab This is an integration of Solr into MyRobotLab. Solr
@@ -512,6 +518,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    */
   public QueryResponse search(String queryString) {
     // default to 10 hits returned.
+    System.err.println("Here...");
     return search(queryString, 10, 0, true);
   }
 
@@ -551,8 +558,61 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     return resp;
   }
 
-  public QueryResponse publishResults(QueryResponse resp) {
+  
+  /**
+   * Default query to fetch the top 10 documents that match the query request.
+   * 
+   * @param queryString
+   *          query string
+   * @param rows
+   *          number of rows to return
+   * @param start
+   *          offset into the restult
+   * @param facetFields
+   *          a list of fields in which to return facets for
+   * @return the response
+   */
+  public QueryResponse searchWithFacets(String queryString, int rows, int start, String[] facetFields) {
+    log.info("Searching for (with facets): {}", queryString);
+    SolrQuery query = new SolrQuery();
+    query.set("q", queryString);
+    query.setRows(rows);
+    query.setStart(start);
+    query.setFacet(true);
+    for (String field : facetFields) {
+      query.addFacetField(field);
+    }
+    
+    QueryResponse resp = null;
+    try {
+      if (embeddedSolrServer != null) {
+        resp = embeddedSolrServer.query(query);
+      } else {
+        resp = solrServer.query(query);
+      }
+    } catch (SolrServerException | IOException e) {
+      log.warn("Search failed with exception", e);
+    }
+    invoke("publishResults", resp);
+    // invoke("publishResults");
     return resp;
+  }
+  
+  public String publishResults(QueryResponse resp) {
+	  // TODO: this doesn't serialize properly..
+	  // Gson gson = new Gson(); 
+	  // String json = gson.toJson(resp);
+	  // System.out.println("\nGSON\n" +json);
+	  // String serialized = CodecUtils.toJson(resp);
+	  // System.out.println("\n"+serialized+"\n");
+	  //  System.err.println(resp);
+	  // System.out.println(resp.jsonStr());
+	  // System.err.println(resp.jsonStr());
+	  // what about using the writer template to render the json of the query response
+	  // JSONResponseWriter writer = new JSONResponseWriter();
+	  // writer.write(writer, null, resp);
+	  
+	  return resp.jsonStr();
   };
 
   /**
@@ -983,9 +1043,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
     try {
+      Python python = (Python) Runtime.start("python", "Python");
       Solr solr = (Solr) Runtime.start("solr", "Solr");
       solr.startEmbedded();
-      // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
+      WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
       // Create a test document
       SolrInputDocument doc = new SolrInputDocument();
       /*

@@ -12,8 +12,15 @@
     Solr Results Below
     <br/>
     
+    <table class="facetResults">
+      <tr ng-repeat="facet in solrResults.facet_counts track by $index">
+      <td>{{facet}}</td>
+      </tr>
+    </table>
+    
+    
     <table class="searchResults">
-      <tr ng-repeat="result in solrResults._results track by $index">
+      <tr ng-repeat="result in solrResults.response track by $index">
       <td>{{$index}} : {{result.id}}</td>
       <td>
         <table class="searchResult">

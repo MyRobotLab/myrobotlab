@@ -17,7 +17,7 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
         case 'onResults': 
     	  var solrResults = data;
     	  console.info("On Results!");
-          $scope.solrResults = solrResults;
+          $scope.solrResults = JSON.parse(data);
           $scope.$apply();
           break
         case 'onState':
@@ -37,7 +37,9 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
     
     $scope.search = function(querystring) {
       console.info('SolrGuiCtrl - Search Clicked!' + querystring);
-      mrl.sendTo($scope.service.name, "search", querystring);
+      // TODO: add the facets
+       
+      mrl.sendTo($scope.service.name, "searchWithFacets", querystring, 10, 0, ['type']);
     };
     
     msg.subscribe('publishResults');
