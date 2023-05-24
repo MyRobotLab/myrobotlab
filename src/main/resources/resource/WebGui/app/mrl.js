@@ -1369,11 +1369,11 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                                 //                                console.log("here")
                                 // expected 'framework' level subscriptions - we should at a minimum
                                 // be interested in state and status changes of the services
-                                _self.sendTo(name, "addListener", "publishStatus", 'runtime@' + _self.id)
-                                _self.sendTo(name, "addListener", "publishState", 'runtime@' + _self.id)
-                                _self.sendTo(name, "addListener", "getMethodMap", 'runtime@' + _self.id)
+                                _self.sendTo(_self.getFullName(name), "addListener", "publishStatus", 'runtime@' + _self.id)
+                                _self.sendTo(_self.getFullName(name), "addListener", "publishState", 'runtime@' + _self.id)
+                                _self.sendTo(_self.getFullName(name), "addListener", "getMethodMap", 'runtime@' + _self.id)
 
-                                _self.sendTo(name, "broadcastState")
+                                _self.sendTo(_self.getFullName(name), "broadcastState")
                                 // below we subscribe to the Angular callbacks - where anything sent
                                 // back from the webgui with our service's name on the message - send
                                 // it to our onMsg method
