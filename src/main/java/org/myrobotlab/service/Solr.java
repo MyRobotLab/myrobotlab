@@ -18,6 +18,8 @@ import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
+import com.google.common.primitives.Floats;
+import com.robrua.nlp.bert.Bert;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
@@ -52,6 +54,8 @@ import org.myrobotlab.opencv.CloseableFrameConverter;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.programab.Response;
+import org.myrobotlab.service.data.ChatMessage;
+import org.myrobotlab.service.interfaces.ChatMessageVectorStore;
 import org.myrobotlab.service.interfaces.DocumentListener;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -71,7 +75,7 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class Solr extends Service implements DocumentListener, TextListener, MessageListener {
+public class Solr extends Service implements DocumentListener, TextListener, MessageListener, ChatMessageVectorStore {
 
   private static final String CORE_NAME = "core1";
   public final static Logger log = LoggerFactory.getLogger(Solr.class);
@@ -91,6 +95,15 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   public int openCvTrainingCount = 0;
   public int yoloPersonTrainingCount = 0;
   public String yoloPersonLabel = null;
+
+  /**
+   * The maximum number of memories that can be recalled
+   * at once via {@link ChatMessageVectorStore#recallMemories(List)}.
+   */
+  private int maxNumRecalledMemories = 3;
+
+  private final String CONVERSATION_DOC_ID_TEMPLATE = "conversation_%d";
+  private final Bert bert = Bert.load("com/robrua/nlp/easy-bert/bert-uncased-L-12-H-768-A-12");
 
   public Solr(String n, String id) {
     super(n, id);
@@ -139,6 +152,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     // FileIO.extract(Util.getResourceDir() , "Solr/solr.xml", path +
     // File.separator + "solr.xml");
     // load up the solr core container and start solr
+
+//    System.setProperty("solr.modules", "scripting");
+//    System.setProperty("solr.install.dir", ".");
 
     // FIXME - a bit unsatisfactory
     File f = new File(getDataInstanceDir());
@@ -247,6 +263,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   /**
    * Returns a document given the doc id from the index if it exists otherwise
+   * null.
    *
    * @param docId
    *          - the doc id
@@ -985,9 +1002,17 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     try {
       Solr solr = (Solr) Runtime.start("solr", "Solr");
       solr.startEmbedded();
+      solr.deleteEmbeddedIndex();
+
       // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
       // Create a test document
       SolrInputDocument doc = new SolrInputDocument();
+      solr.memorize(new ChatMessage("AP", "I have a cat named Sunny", 1234));
+      solr.memorize(new ChatMessage(ChatMessage.AI, "Hello AP, I am Hugo. How may I help you?", 1234));
+      solr.memorize(new ChatMessage("AP", "Write a Python program for me.", 1234));
+      solr.memorize(new ChatMessage(ChatMessage.AI, "Certainly, here is a hello world program:\n```python\nprint(\"hello world\")\n```", 1234));
+
+      System.out.println(solr.recallMemories(new ChatMessage("AP", "What is my cat's name?", 1234)));
       /*
        * doc.setField("id", "Doc1"); doc.setField("title", "My title");
        * doc.setField("content",
@@ -996,38 +1021,94 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
        * index solr.commit();
        */
 
-      doc = new SolrInputDocument();
-      doc.setField("id", "Doc3");
-      doc.setField("title", "My title 3");
-      doc.setField("content", "This is the text field, for a sample document in myrobotlab. 2 ");
-      doc.setField("annoyance", 1);
-      // add the document to the index
-      solr.addDocument(doc);
-      // commit the index
-      solr.commit();
+//      // Loading a BERT model that is stored in one of our Maven dependencies
+//      try (Bert bert = Bert.load("com/robrua/nlp/easy-bert/bert-uncased-L-12-H-768-A-12")) {
+//        String sentence = "Hello, my name is AP.";
+////        solr.deleteDocument("doc1");
+////        solr.deleteDocument("doc2");
+//        doc.addField("id", "doc1");
+//        doc.addField("text_field", sentence);
+//        // I don't know what I should be doing here, I need a dense vector field but can't figure out the type
+//        doc.addField("test_vector", Floats.asList(bert.embedSequence(sentence)));
+//
+//
+////        solr.addDocument(doc);
+//
+//        for (int i = 0; i < 1; i++) {
+//          SolrInputDocument doc2 = new SolrInputDocument();
+//          doc2.addField("id", "doc2" + i);
+//          doc2.addField("text_field", "Make a Python program: " + i * i);
+//          doc2.addField("test_vector", Floats.asList(bert.embedSequence("Make a Python program: " + i * i)));
+////          solr.deleteDocument("doc2" + i);
+////          solr.addDocument(doc2);
+//
+//        }
+//
+//        solr.commit();
+//        SolrQuery query = new SolrQuery();
+//        float[] embeddings = bert.embedSequence("What is my name.");
+//
+//        query.setQuery("*:*");
+//        query.setParam("q", "{!knn f=test_vector topK=3}" + Arrays.toString(embeddings));
+//        query.setParam("fl", "*,score");
+//
+//
+//        String vector = IntStream.range(0, embeddings.length)
+//                .mapToObj(i -> String.valueOf(embeddings[i]))
+//                .collect(Collectors.joining(","));
+////        query.setParam("vector", String.join(",", vector));
+//        QueryResponse response = solr.search(query);
+//        SolrDocumentList results = response.getResults();
+//        for (SolrDocument docResult : results) {
+//          String textData = ((ArrayList<?>) docResult.getFieldValue("text_field")).toString();
+//          System.out.println(docResult.getFieldValue("score"));
+//          System.out.println(textData);
+//        }
 
+//      }
       // search for the word myrobotlab
-      String queryString = "content:myrobotlab";
-      QueryResponse resp = solr.search(queryString);
-      for (int i = 0; i < resp.getResults().size(); i++) {
-        System.out.println("---------------------------------");
-        System.out.println("-- Printing Result number :" + i);
-        // grab a document out of the result set.
-        SolrDocument d = resp.getResults().get(i);
-        // iterate over the fields on the returned document
-        for (String fieldName : d.getFieldNames()) {
+//      String queryString = "content:myrobotlab";
+//      QueryResponse resp = solr.search(queryString);
+//      for (int i = 0; i < resp.getResults().size(); i++) {
+//        System.out.println("---------------------------------");
+//        System.out.println("-- Printing Result number :" + i);
+//        // grab a document out of the result set.
+//        SolrDocument d = resp.getResults().get(i);
+//        // iterate over the fields on the returned document
+//        for (String fieldName : d.getFieldNames()) {
 
-          System.out.print(fieldName + "\t");
-          // fields can be multi-valued
-          for (Object value : d.getFieldValues(fieldName)) {
-            System.out.print(value);
-            System.out.print("\t");
-          }
-          System.out.println("");
-        }
-      }
-      System.out.println("---------------------------------");
-      System.out.println("Done.");
+//      doc = new SolrInputDocument();
+//      doc.setField("id", "Doc3");
+//      doc.setField("title", "My title 3");
+//      doc.setField("content", "This is the text field, for a sample document in myrobotlab. 2 ");
+//      doc.setField("annoyance", 1);
+//      // add the document to the index
+//      solr.addDocument(doc);
+//      // commit the index
+//      solr.commit();
+//
+//      // search for the word myrobotlab
+//      String queryString = "myrobotlab";
+//      QueryResponse resp = solr.search(queryString);
+//      for (int i = 0; i < resp.getResults().size(); i++) {
+//        System.out.println("---------------------------------");
+//        System.out.println("-- Printing Result number :" + i);
+//        // grab a document out of the result set.
+//        SolrDocument d = resp.getResults().get(i);
+//        // iterate over the fields on the returned document
+//        for (String fieldName : d.getFieldNames()) {
+//
+//          System.out.print(fieldName + "\t");
+//          // fields can be multi-valued
+//          for (Object value : d.getFieldValues(fieldName)) {
+//            System.out.print(value);
+//            System.out.print("\t");
+//          }
+//          System.out.println("");
+//        }
+//      }
+//      System.out.println("---------------------------------");
+//      System.out.println("Done.");
 
     } catch (Exception e) {
       Logging.logError(e);
@@ -1099,4 +1180,129 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     super.releaseService();
   }
 
+
+  public void memorize(ChatMessage memory) {
+    memorize(memory, Floats.asList(bert.embedSequence(memory.message)));
+  }
+
+  /**
+   * Commit a piece of the conversation to memory.
+   * Once memorized, the memory can be recalled if a request
+   * has high enough similarity to the memory.
+   *
+   * @param memory     The turn to be remembered.
+   * @param embeddings
+   */
+  @Override
+  public void memorize(ChatMessage memory, List<Float> embeddings) {
+    SolrInputDocument memoryDoc = new SolrInputDocument();
+
+    memoryDoc.setField("id", String.format(CONVERSATION_DOC_ID_TEMPLATE, memory.conversationId) + memory.message.hashCode());
+    memoryDoc.setField("text_field", memory.message);
+    memoryDoc.setField("speaker_field", memory.speaker);
+    memoryDoc.setField("conversation_id", memory.conversationId);
+    memoryDoc.setField("vector", embeddings);
+    addDocument(memoryDoc);
+
+
+    SolrInputDocument newConversationDoc = new SolrInputDocument();
+    newConversationDoc.addField("id", String.format(CONVERSATION_DOC_ID_TEMPLATE, memory.conversationId));
+    newConversationDoc.addChildDocument(memoryDoc);
+//      addDocument(newConversationDoc);
+    commit();
+  }
+
+
+  public List<ChatMessage> recallMemories(ChatMessage request) {
+
+
+      float[] embeddings = bert.embedSequence(request.message);
+      return recallMemories(Floats.asList(embeddings));
+
+
+  }
+
+  /**
+   * Recall a number of memorized conversation turns
+   * that have similarity to the request. The maximum number
+   * of memories recalled is set via {@link #setMaxNumMemoriesRecalled(int)}.
+   * This usually corresponds to the {@code top_k} parameter in vector stores.
+   *
+   * @param embeddings@return Recalled memories
+   */
+  @Override
+  public List<ChatMessage> recallMemories(List<Float> embeddings) {
+    SolrQuery query = new SolrQuery();
+    query.setQuery("*:*");
+    query.setParam("q", "{!knn f=vector topK=3}" + embeddings.toString());
+    query.setParam("fl", "*,score");
+    QueryResponse response = search(query);
+    List<ChatMessage> turns = new ArrayList<>();
+    for (SolrDocument result : response.getResults()) {
+      System.out.println("Score: " + result.getFieldValue("score"));
+      turns.add(
+              new ChatMessage(
+                      ((ArrayList<String>) result.getFieldValue("speaker_field")).get(0),
+                      ((ArrayList<String>) result.getFieldValue("text_field")).get(0),
+                      Long.parseLong(((ArrayList<String>) result.getFieldValue("conversation_id")).get(0))
+              )
+      );
+    }
+    return turns;
+  }
+
+  /**
+   * Upon recalling memories, they are published through this method.
+   * Services that are interested in recalled memories should subscribe to this method.
+   *
+   * @param memories The memories that have been recalled.
+   * @return The recalled memories.
+   */
+  @Override
+  public List<ChatMessage> publishMemories(List<ChatMessage> memories) {
+    return memories;
+  }
+
+  /**
+   * Sets the maximum number of memories to be recalled
+   * via {@link ChatMessageVectorStore#recallMemories(List)}.
+   *
+   * @param number The maximum number of memories that can be recalled at once
+   */
+  @Override
+  public void setMaxNumMemoriesRecalled(int number) {
+    maxNumRecalledMemories = number;
+  }
+
+  /**
+   * Gets the maximum number of memories to be recalled
+   * via {@link ChatMessageVectorStore#recallMemories(List)}.
+   *
+   * @return The maximum number of memories that can be recalled at once.
+   */
+  @Override
+  public int getMaxNumMemoriesRecalled() {
+    return maxNumRecalledMemories;
+  }
+
+  @Override
+  public int getEmbeddingDimensions() {
+    return 786;
+  }
+
+  @Override
+  public void setEmbeddingDimensions(int dimensions) {
+    throw new UnsupportedOperationException(
+            "Cannot change embedding dimensions with Solr, manually modify the schema instead."
+    );
+  }
+
+  @Override
+  public void clearStore() {
+    try {
+      deleteEmbeddedIndex();
+    } catch (SolrServerException | IOException e) {
+      error("Caught exception while trying to delete embedded index.", e);
+    }
+  }
 }

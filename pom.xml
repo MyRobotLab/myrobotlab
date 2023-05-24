@@ -343,6 +343,12 @@
   </dependency>
 <!-- DocumentPipeline end -->
 
+<!-- EasyBert begin -->
+<!-- Duplicate entry for com.robrua.nlp-easy-bert-1.0.3 skipping -->
+<!-- Duplicate entry for com.robrua.nlp.models-easy-bert-uncased-L-12-H-768-A-12-1.0.0 skipping -->
+<!-- Duplicate entry for org.tensorflow-tensorflow-1.15.0 skipping -->
+<!-- EasyBert end -->
+
 <!-- Elasticsearch begin -->
   <dependency>
     <groupId>pl.allegro.tech</groupId>
@@ -1190,6 +1196,10 @@
     <scope>provided</scope>
       <exclusions>
         <exclusion>
+          <groupId>org.apache.lucene</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>ch.qos.logback</groupId>
           <artifactId>logback-classic</artifactId>
         </exclusion>
@@ -1409,6 +1419,18 @@
   </dependency>
   <dependency>
     <groupId>org.apache.solr</groupId>
+    <artifactId>solr-scripting</artifactId>
+    <version>9.0.0</version>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.solr</groupId>
     <artifactId>solr-test-framework</artifactId>
     <version>9.2.0</version>
     <scope>provided</scope>
@@ -1476,6 +1498,24 @@
       </exclusions>
   </dependency>
 <!-- Duplicate entry for io.netty-netty-all-4.1.82.Final skipping -->
+  <dependency>
+    <groupId>com.robrua.nlp</groupId>
+    <artifactId>easy-bert</artifactId>
+    <version>1.0.3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.robrua.nlp.models</groupId>
+    <artifactId>easy-bert-uncased-L-12-H-768-A-12</artifactId>
+    <version>1.0.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.tensorflow</groupId>
+    <artifactId>tensorflow</artifactId>
+    <version>1.15.0</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Solr end -->
 
 <!-- Sphinx begin -->
@@ -1494,12 +1534,7 @@
 <!-- Sphinx end -->
 
 <!-- Tensorflow begin -->
-  <dependency>
-    <groupId>org.tensorflow</groupId>
-    <artifactId>tensorflow</artifactId>
-    <version>1.8.0</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for org.tensorflow-tensorflow-1.15.0 skipping -->
 <!-- Tensorflow end -->
 
 <!-- TesseractOcr begin -->

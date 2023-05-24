@@ -17,7 +17,7 @@ import java.util.Set;
 public class Document {
 
   private String id;
-  private HashMap<String, ArrayList<Object>> data;
+  private final HashMap<String, ArrayList<Object>> data;
   private ProcessingStatus status;
 
   public Document(String id) {
@@ -27,11 +27,7 @@ public class Document {
   }
 
   public ArrayList<Object> getField(String fieldName) {
-    if (data.containsKey(fieldName)) {
-      return data.get(fieldName);
-    } else {
-      return null;
-    }
+    return data.getOrDefault(fieldName, null);
   }
 
   public void setField(String fieldName, ArrayList<Object> value) {
@@ -151,9 +147,7 @@ public class Document {
         return false;
     } else if (!id.equals(other.id))
       return false;
-    if (status != other.status)
-      return false;
-    return true;
+    return status == other.status;
   }
 
   @Override

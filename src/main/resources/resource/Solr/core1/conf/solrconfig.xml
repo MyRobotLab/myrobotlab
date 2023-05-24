@@ -21,6 +21,11 @@
      this file, see https://solr.apache.org/guide/solr/latest/configuration-guide/configuring-solrconfig-xml.html.
 -->
 <config>
+<schemaFactory class="ManagedIndexSchemaFactory">
+ <bool name="mutable">true</bool>
+ <str name="managedSchemaResourceName">managed-schema.xml</str>
+</schemaFactory>
+
   <!-- In all configuration below, a prefix of "solr." for class names
        is an alias that causes solr to search appropriate packages,
        including org.apache.solr.(search|update|request|core|analysis)
@@ -1007,6 +1012,12 @@
       <str name="valueClass">java.lang.Number</str>
       <str name="fieldType">pdoubles</str>
     </lst>
+    <lst name="typeMapping">
+      <str name="valueClass">java.util.List</str>
+      <str name="fieldType">knn_vector</str>
+    </lst>
+    
+
   </updateProcessor>
 
   <!-- The update.autoCreateFields property can be turned to false to disable schemaless mode -->
