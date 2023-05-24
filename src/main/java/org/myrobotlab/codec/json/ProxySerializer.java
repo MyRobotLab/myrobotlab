@@ -31,10 +31,10 @@ public class ProxySerializer extends StdSerializer<Proxy> {
             ServiceInterface si = (ServiceInterface) value;
             jgen.writeStartObject();
             jgen.writeStringField("name", si.getName());
-            jgen.writeStringField("type", si.getType());
+            jgen.writeStringField("type", si.getTypeKey());
             jgen.writeStringField("id", si.getId());
             try {
-                jgen.writeStringField("serviceClass", (String) Runtime.get().sendBlocking(si.getName(), "getServiceClass"));
+                jgen.writeStringField("typeKey", (String) Runtime.get().sendBlocking(si.getName(), "getTypeKey"));
             } catch (InterruptedException | TimeoutException e) {
                 throw new RuntimeException(e);
             }
