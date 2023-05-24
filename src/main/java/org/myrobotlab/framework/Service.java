@@ -1295,6 +1295,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       }
       retobj = method.invoke(obj, params);
       if (blockLocally) {
+        Outbox outbox = null;
+        if (obj instanceof ServiceInterface) {
+          outbox = ((ServiceInterface)obj).getOutbox();
+        } else {
+          return retobj;
+        }
+        
+        
         List<MRLListener> subList = outbox.notifyList.get(methodName);
         // correct? get local (default?) gateway
         Runtime runtime = Runtime.getInstance();
@@ -1379,9 +1387,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * Default load config method, subclasses should override this to support
    * service specific configuration in the service yaml files.
    * 
-   * apply is the  first function to be called after construction of a service, then startService will be called
+   * apply is the first function to be called after construction of a service,
+   * then startService will be called
    * 
-   * construct -&gt; apply -&gt; startService 
+   * construct -&gt; apply -&gt; startService
    * 
    */
   @Override
@@ -1450,8 +1459,23 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   @Override
-  public void setConfig(ServiceConfig config) {
+  public ServiceConfig setConfig(ServiceConfig config) {
     this.config = config;
+    return config;
+  }
+
+  @Override
+  public ServiceConfig setConfigValue(String fieldname, Object value) {
+    try {
+      log.info("setting field name fieldname {} to {}", fieldname, value);
+
+      Field field = config.getClass().getDeclaredField(fieldname);
+      // field.setAccessible(true); should not need this - it "should" be public
+      field.set(config, value);
+    } catch (Exception e) {
+      error(e);
+    }
+    return config;
   }
 
   @Override

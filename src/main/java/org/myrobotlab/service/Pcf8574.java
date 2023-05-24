@@ -355,7 +355,7 @@ public class Pcf8574 extends Service
     }
   }
 
-  @Override
+  @Deprecated /* use enablePin(String pin) */
   public void enablePin(int address) {
     if (controller == null) {
       error("must be connected to enable pins");
@@ -504,7 +504,7 @@ public class Pcf8574 extends Service
     invoke("publishPinDefinition", pinDef);
   }
 
-  @Override
+  @Deprecated /* use pinMode(String, String */
   public void pinMode(int address, String mode) {
     PinDefinition pinDef = getPin(address);
     // There is no direction register in the PCF8574 it is always BIDRECTIONAL.
@@ -647,7 +647,7 @@ public class Pcf8574 extends Service
     return rate;
   }
 
-  @Override
+  @Deprecated /* use write(String, int value) */
   public void write(int address, int value) {
     log.info("Write Pin int {} with {}", address, value);
     // PinDefinition pinDef = getPin(address); // this doesn't get used at all
