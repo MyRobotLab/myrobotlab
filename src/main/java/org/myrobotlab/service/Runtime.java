@@ -690,8 +690,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     ServiceInterface si = Runtime.getService(fullName);
     if (si != null) {
-      if (!si.getType().equals(fullTypeName)) {
-        runtime.error("Service with name {} already exists but is of type {} while requested type is ", name, si.getType(), type);
+      if (!si.getTypeKey().equals(fullTypeName)) {
+        runtime.error("Service with name {} already exists but is of type {} while requested type is ", name, si.getTypeKey(), type);
         return null;
       }
       return si;
@@ -1134,7 +1134,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   synchronized public List<Registration> getServiceList() {
     return registry.values().stream()
-            .map(si -> new Registration(si.getId(), si.getName(), si.getType()))
+            .map(si -> new Registration(si.getId(), si.getName(), si.getTypeKey()))
             .collect(Collectors.toList());
   }
 
@@ -1914,7 +1914,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // !!
       // it should be FULLNAME !
       // runtime.broadcast("released", inName);
-      String type = sw.getType();
+      String type = sw.getTypeKey();
 
       boolean updatedServiceLists = false;
 
@@ -2974,7 +2974,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     } else if (parts.length == 3) {
       ServiceInterface si = Runtime.getService(parts[1]);
       MethodCache cache = MethodCache.getInstance();
-      List<MethodEntry> me = cache.query(si.getType(), parts[2]);
+      List<MethodEntry> me = cache.query(si.getTypeKey(), parts[2]);
       return me; // si.getMethodMap().get(parts[2]);
     }
     return ret;

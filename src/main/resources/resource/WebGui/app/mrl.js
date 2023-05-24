@@ -872,7 +872,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
             let properties = []
 
-            let exclude = ['serviceType', 'id', 'simpleName', 'interfaceSet', 'serviceClass', 'statusBroadcastLimitMs', 'isRunning', 'name', 'creationOrder', 'serviceType']
+            let exclude = ['serviceType', 'id', 'simpleName', 'interfaceSet', 'typeKey', 'statusBroadcastLimitMs', 'isRunning', 'name', 'creationOrder', 'serviceType']
 
             // FIXME - extract from javadoc !
             let info = {
@@ -943,7 +943,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             lastPosY += 40
             zIndex++
             //construct panel & add it to dictionary
-            panels[fullname] = createPanel(fullname, service.serviceClass, 15, lastPosY, 800, 0, zIndex)
+            panels[fullname] = createPanel(fullname, service.typeKey, 15, lastPosY, 800, 0, zIndex)
             return panels[fullname]
         }
 
@@ -1570,7 +1570,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             "name": "runtime",
             "id": "webgui-client-1234-5678",
             "simpleName": "Runtime",
-            "serviceClass": "org.myrobotlab.service.Runtime",
+            "typeKey": "org.myrobotlab.service.Runtime",
             "isRunning": true,
             "interfaceSet": {
                 "org.myrobotlab.client.Client$RemoteMessageHandler": "org.myrobotlab.client.Client$RemoteMessageHandler",
