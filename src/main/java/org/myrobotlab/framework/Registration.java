@@ -28,6 +28,12 @@ public class Registration {
   protected String name;
   protected String typeKey;
 
+  /**
+   * The list of interfaces that a service being registered implements.
+   * This list must contain the fully qualified names of Java interfaces,
+   * and is only used for proxy generation. When generating proxies,
+   * this list must contain at least the fully qualified name of ServiceInterface.
+   */
   public List<String> interfaces = List.of();
 
   /**
