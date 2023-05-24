@@ -35,6 +35,7 @@ import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.StaticType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -654,11 +655,18 @@ public class CodecUtils {
     static /*@Nonnull*/ Message decodeMessageParams(/*@Nonnull*/ Message msg) {
         String serviceName = msg.getFullName();
         Class<?> clazz = Runtime.getClass(serviceName);
+        ServiceInterface si = Runtime.getService(serviceName);
 
         //Nullability of clazz is checked with this, if null
         //falls back to virt class field
         boolean useVirtClassField = clazz == null;
         if (!useVirtClassField) {
+            String blockingKey = String.format("%s.%s", msg.getFullName(), msg.getMethod());
+            if (si != null && Message.MSG_TYPE_RETURN.equals(msg.msgType) && si.getInbox().blockingList.containsKey(blockingKey)) {
+                msg.data[0] = fromJson((String) msg.data[0], si.getInbox().blockingList.get(blockingKey).second);
+                msg.encoding = null;
+                return msg;
+            }
             try {
                 Object[] params = MethodCache.getInstance().getDecodedJsonParameters(clazz, msg.method, msg.data);
                 if (params == null)

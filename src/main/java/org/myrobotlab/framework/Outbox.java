@@ -206,8 +206,7 @@ public class Outbox implements Runnable, Serializable {
           continue;
         }
 
-        for (int i = 0; i < subList.size(); ++i) {
-          MRLListener listener = subList.get(i);
+        for (MRLListener listener : subList) {
           msg.setName(listener.callbackName);
           msg.method = listener.callbackMethod;
           send(msg);

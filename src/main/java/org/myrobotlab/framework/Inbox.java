@@ -30,9 +30,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.utils.ObjectTypePair;
 import org.slf4j.Logger;
 
 public class Inbox implements Serializable {
@@ -50,9 +52,16 @@ public class Inbox implements Serializable {
   // value
 
   // support remote blocking... in-process blocking uses invoke
-  public HashMap<String, Object[]> blockingList = new HashMap<>();
+  /**
+   * Maps blocking keys ("fullName.method") to an
+   * ObjectTypePair that is used to store the return
+   * type and return value. DO NOT SET THE VALUE
+   * TO A NEW OBJECT, we are synchronizing on the values,
+   * doing so will result in the threads never waking up.
+   */
+  public Map<String, ObjectTypePair<?>> blockingList = new HashMap<>();
 
-  List<MessageListener> listeners = new ArrayList<MessageListener>();
+  List<MessageListener> listeners = new ArrayList<>();
 
   public Inbox() {
     this("Inbox");
@@ -62,6 +71,7 @@ public class Inbox implements Serializable {
     this.name = name;
   }
 
+  @SuppressWarnings("unchecked")
   public void add(Message msg) {
     /**
      * <pre>
@@ -74,16 +84,17 @@ public class Inbox implements Serializable {
      */
 
     // --- sendBlocking support begin --------------------
-    // TODO - possible safety check msg.status == Message.RETURN
-    // &&
     String blockingKey = String.format("%s.%s", msg.getFullName(), msg.getMethod());
     if (blockingList.containsKey(blockingKey)) {
-      Object[] returnContainer = blockingList.get(blockingKey);
+      // Generates an unchecked warning because of generic invariance, but we don't care
+      ObjectTypePair<Object> returnContainer = (ObjectTypePair<Object>) blockingList.get(blockingKey);
       if (msg.data == null) {
-        returnContainer[0] = null;
+        returnContainer.first = null;
       } else {
         // transferring data
-        returnContainer[0] = msg.data[0];
+        // Would not be able to do this if returnContainer had wildcard generic type,
+        // which is why it's Object
+        returnContainer.first = msg.data[0];
       }
 
       synchronized (returnContainer) {

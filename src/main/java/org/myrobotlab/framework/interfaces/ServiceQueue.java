@@ -19,11 +19,6 @@ public interface ServiceQueue {
 
   public void out(Message msg);
 
-  // TODO - put in seperate Invoking interface
-  public Object invoke(String method);
-
-  public Object invoke(String method, Object... params);
-
   // public boolean isLocal();
 
 }

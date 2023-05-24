@@ -47,6 +47,23 @@ public class Message implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  /**
+   * A message has this type if it is sent with the expectation that a return
+   * message will be received. Services should always respond
+   * with a return message after invoking the blocking message.
+   *
+   * @see #MSG_TYPE_RETURN
+   */
+  public static final String MSG_TYPE_BLOCKING = "BLOCKING";
+
+  /**
+   * A message has this type when it contains a single data
+   * element meant to represent a service method return value.
+   * The type of the return value is not explicitly carried with the message,
+   * since it can cross language boundaries.
+   */
+  public static final String MSG_TYPE_RETURN = "RETURN";
+
   // FIXME msgId should be a String encoded value of src and an atomic increment
   // ROS comes with a seq Id, a timestamp, and a frame Id
   /**
@@ -74,8 +91,7 @@ public class Message implements Serializable {
    * history of the message, its routing stops and Services it passed through.
    * This is important to prevent endless looping of messages. Turns out
    * ArrayList is quicker than HashSet on small sets
-   * http://www.javacodegeeks.com
-   * /2010/08/java-best-practices-vector-arraylist.html
+   * <a href="http://www.javacodegeeks.com/2010/08/java-best-practices-vector-arraylist.html">Java Best Practices</a>
    */
   protected List<String> historyList;
 
@@ -88,11 +104,12 @@ public class Message implements Serializable {
 
   /**
    * status is currently used for BLOCKING message calls the current valid state
-   * it can be in is null | BLOCKING | RETURN FIXME - this should be msgType not
-   * status
+   * it can be in is null | BLOCKING | RETURN
+   *
+   * @see #MSG_TYPE_BLOCKING
+   * @see #MSG_TYPE_RETURN
    */
-
-  public String status;
+  public String msgType;
 
   public String encoding; // null == none |json|cli|xml|stream ...
 
@@ -151,7 +168,7 @@ public class Message implements Serializable {
     historyList = new ArrayList<String>();
     historyList.addAll(other.historyList);
 
-    status = other.status;
+    msgType = other.msgType;
     encoding = other.encoding;
     method = other.method;
     // you know the dangers of reference copy
@@ -299,7 +316,7 @@ public class Message implements Serializable {
             && Objects.equals(sendingMethod, message.sendingMethod)
             && Objects.equals(historyList, message.historyList)
             && Objects.equals(properties, message.properties)
-            && Objects.equals(status, message.status)
+            && Objects.equals(msgType, message.msgType)
             && Objects.equals(encoding, message.encoding)
             && Objects.equals(method, message.method)
             && Arrays.deepEquals(data, message.data);
@@ -310,7 +327,7 @@ public class Message implements Serializable {
     int result = Objects.hash(
                     msgId, name, sender,
                     sendingMethod, historyList,
-                    properties, status, encoding,
+                    properties, msgType, encoding,
                     method
     );
     result = 31 * result + Arrays.hashCode(data);

@@ -6,7 +6,7 @@ package org.myrobotlab.utils;
  * of potentially different types. Allows
  * generics to be leveraged for type constraining
  * or more compiler-friendly collections operations.
- * 
+ *
  * @param <A> The type of {@link #first}
  * @param <B> The type of {@link #second}
  * @author AutonomicPerfectionist
