@@ -84,6 +84,19 @@ public class WebGuiTest extends AbstractTest {
     assertTrue(ret.contains("@"));
     
     
+    // second post - simple input (including array of strings) - complex return
+    // FIXME uncomment when ready - callbacks are not possible through the rest api
+    // org.myrobotlab.framework.TimeoutException: timeout of 3000 for proxyName@remoteId.toString exceeded
+    // org.myrobotlab.framework.TimeoutException: timeout of 3000 for proxyName@remoteId.getFullName exceeded
+//    postBody = "[\"remoteId\", \"proxyName\", \"py:myService\",[\"org.myrobotlab.framework.interfaces.ServiceInterface\"]]";
+//    bytes = Http.post("http://localhost:8889/api/service/runtime/register", postBody);
+//    sleep(200);
+//    assertNotNull(bytes);
+//    ret = new String(bytes);
+//    assertTrue(ret.contains("remoteId"));
+    
+    
+    
     // post non primitive non string object
     MRLListener listener = new MRLListener("getRegistry", "runtime@webguittest", "onRegistry");
     postBody = "[" + CodecUtils.toJson(listener) + "]";    
