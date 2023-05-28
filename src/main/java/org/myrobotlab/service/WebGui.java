@@ -476,6 +476,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       if (!CodecUtils.API_SERVICE.equals(apiKey) && !CodecUtils.API_MESSAGES.equals(apiKey)) {
         // NOT A VALID API - send what we support - we're done...
         OutputStream out = r.getResponse().getOutputStream();
+        r.getResponse().addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
         out.write(CodecUtils.toJson(CodecUtils.getApis()).getBytes());
         return;
       }

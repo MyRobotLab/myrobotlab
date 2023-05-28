@@ -1,5 +1,6 @@
 package org.myrobotlab.codec;
 
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -11,6 +12,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -31,6 +33,7 @@ import org.myrobotlab.codec.json.JacksonPolymorphicModule;
 import org.myrobotlab.codec.json.JacksonPrettyPrinter;
 import org.myrobotlab.codec.json.JsonDeserializationException;
 import org.myrobotlab.codec.json.JsonSerializationException;
+import org.myrobotlab.codec.json.ProxySerializer;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
@@ -55,6 +58,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.noctordeser.NoCtorDeserModule;
 import com.google.gson.Gson;
@@ -234,6 +238,10 @@ public class CodecUtils {
     static {
         //This allows Jackson to work just like GSON when no default constructor is available
         mapper.registerModule(new NoCtorDeserModule());
+
+        SimpleModule proxySerializerModule = new SimpleModule();
+        proxySerializerModule.addSerializer(Proxy.class, new ProxySerializer());
+        mapper.registerModule(proxySerializerModule);
 
         //Actually add our polymorphic support
         mapper.registerModule(JacksonPolymorphicModule.getPolymorphicModule());
