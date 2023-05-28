@@ -1,12 +1,14 @@
 package org.myrobotlab.framework;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
-
-import java.util.List;
-import java.util.Objects;
 
 /**
  * 
@@ -47,11 +49,20 @@ public class Registration {
    * remote
    */
   transient public ServiceInterface service = null;
-
-  public Registration(String id, String name, String typeKey) {
+  
+  
+  public Registration(String id, String name, String typeKey) {    
     this.id = id;
     this.name = name;
     this.typeKey = typeKey;
+  }
+  
+
+  public Registration(String id, String name, String typeKey, ArrayList<String> interfaces) {
+    this.id = id;
+    this.name = name;
+    this.typeKey = typeKey;
+    this.interfaces = interfaces;
   }
 
   public Registration(ServiceInterface service) {
