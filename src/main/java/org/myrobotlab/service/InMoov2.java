@@ -1284,12 +1284,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return filepath;
   }
 
-  public String publishFinishedConfig(String configName) {
-    info("config %s finished", configName);
-    invoke("publishSystemEvent", "CONFIG LOADED " + configName);
-
-    return configName;
-  }
   
   /**
    * plays random file on certain notifications
@@ -1304,6 +1298,13 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   public String publishStartConfig(String configName) {
     info("config %s started", configName);
     invoke("publishSystemEvent", "CONFIG STARTED " + configName);
+    return configName;
+  }
+
+  public String publishFinishedConfig(String configName) {
+    info("config %s finished", configName);
+    invoke("publishSystemEvent", "CONFIG LOADED " + configName);
+
     return configName;
   }
 

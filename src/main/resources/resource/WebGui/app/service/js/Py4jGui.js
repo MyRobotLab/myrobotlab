@@ -118,29 +118,6 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
         msg.send('saveScript', activeScript.file, activeScript.code)
     }
 
-    $scope.downloadScript = function() {
-        var textFileAsBlob = new Blob([$scope.activeScript.code],{
-            type: 'text/plain'
-        })
-        var downloadLink = document.createElement("a")
-        downloadLink.download = $scope.getName($scope.activeScript.file)
-        downloadLink.innerHTML = "Download File"
-        if (window.webkitURL != null) {
-            // Chrome allows the link to be clicked
-            // without actually adding it to the DOM.
-            downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob)
-        } else {
-            // Firefox requires the link to be added to the DOM
-            // before it can be clicked.
-            downloadLink.href = window.URL.createObjectURL(textFileAsBlob)
-            downloadLink.onclick = destroyClickedElement
-            downloadLink.style.display = "none"
-            document.body.appendChild(downloadLink)
-        }
-
-        downloadLink.click()
-    }
-
     $scope.getPossibleServices = function(item) {
         ret = Object.values(mrl.getPossibleServices())
         return ret
