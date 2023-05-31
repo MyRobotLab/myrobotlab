@@ -19,20 +19,11 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
     // 2 dialogs 
     $scope.loadFile = false
     $scope.newFile = false
+    // this UI's currently active script
+    $scope.activeKey = null
 
     _self.updateState = function(service) {
         $scope.service = service
-        $scope.scriptCount = 0
-
-        angular.forEach(service.openedScripts, function(value, key) {
-            if (!angular.isDefined($scope.scripts[key])) {
-                $scope.scripts[key] = value
-            }
-            $scope.scriptCount++
-        })
-        // this doesn't work - its the ace-ui callback that 
-        // changes the activeTabIndex
-        $scope.activeTabIndex = $scope.scriptCount
     }
 
     this.onMsg = function(msg) {
@@ -101,16 +92,8 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
 
     $scope.aceChanged = function(e) {
         console.info("ace changed")
-    }
-    //----- ace editors related callbacks end -----//
-    $scope.addScript = function() {
-        let scriptName = 'Untitled-' + $scope.scriptCount + 1
-        var newScript = {
-            name: scriptName,
-            code: ''
-        }
-        $scope.scripts[scriptName] = newScript
-        console.log($scope.activeTabIndex)
+        activeScript = $scope.service.openedScripts[$scope.activeKey]
+        msg.send('updateScript', activeScript.file, activeScript.code)
     }
 
     $scope.closeScript = function(scriptName) {
@@ -122,23 +105,17 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
     }
 
     $scope.exec = function() {
-        // non-blocking exec
-        msg.send('exec', $scope.activeScript.code)
+        activeScript = $scope.service.openedScripts[$scope.activeKey]
+        msg.send('exec', activeScript.code)
     }
     $scope.tabSelected = function(script) {
         console.info('here')
-        $scope.activeScript = script
-        // need to get a handle on hte tab's ui / text
-        // $scope.editors.setValue(script.code)
-    }
-
-    $scope.getTabHeader = function(key) {
-        return $scope.getName(key)
-        //return key.substr(key.lastIndexOf('/') + 1)
+        $scope.activeKey = script.file
     }
 
     $scope.saveScript = function() {
-        msg.send('saveScript', $scope.activeScript.file, $scope.activeScript.code)
+        activeScript = $scope.service.openedScripts[$scope.activeKey]
+        msg.send('saveScript', activeScript.file, activeScript.code)
     }
 
     $scope.downloadScript = function() {

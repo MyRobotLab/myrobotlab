@@ -51,9 +51,10 @@
     </div>
 </div>
 <div class="row">
-    <!-- Active index: {{ activeTabIndex  }}  script count: {{scriptCount}} <br/ -->
-    <uib-tabset active="activeTabIndex">
-        <uib-tab ng-repeat="(key, value) in scripts" index="$index + 1" select="tabSelected(value)">
+	<!--
+    Active key: {{ activeKey  }}  activeScript: {{service.openedScripts[activeKey]}} <br/> -->
+    <uib-tabset>
+        <uib-tab ng-repeat="(key, value) in service.openedScripts" index="$index + 1" select="tabSelected(value)">
             <uib-tab-heading>
                 <span>
                     {{getTabHeader(key)}}&nbsp;&nbsp;&nbsp;
