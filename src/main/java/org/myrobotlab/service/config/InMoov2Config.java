@@ -17,17 +17,29 @@ public class InMoov2Config extends ServiceConfig {
   @Deprecated /* no implementation */
   public int analogPinFromSoundCard = 53;
 
+  @Deprecated /* no implementation */
   public int audioPollsBySeconds = 2;
 
+  @Deprecated /* no implementation */
   public boolean audioSignalProcessing = false;
 
   public boolean batteryInSystem = false;
 
-  public boolean bootUpPlaySound = true;
-
+  /**
+   * start sound for when service starts
+   */
   public boolean bootUpSound = true;
 
+  /**
+   * produces random sound on wake and other events
+   * TODO - make this not random
+   */
   public boolean customSound = false;
+  
+  /**
+   *  sound for when the topic/state switches
+   */
+  public boolean topicSound = false;
 
   public boolean forceMicroOnIfSleeping = true;
 
@@ -103,7 +115,7 @@ public class InMoov2Config extends ServiceConfig {
     // peers which autostart by default
     addDefaultPeerConfig(plan, name, "audioPlayer", "AudioFile", true);
     addDefaultPeerConfig(plan, name, "htmlFilter", "HtmlFilter", true);
-    addDefaultPeerConfig(plan, name, "mouth", "MarySpeech", true);
+    addDefaultPeerConfig(plan, name, "mouth", "MarySpeech", false);
 
     addDefaultPeerConfig(plan, name, "chatBot", "ProgramAB", true);
 
@@ -168,6 +180,9 @@ public class InMoov2Config extends ServiceConfig {
       chatBot.listeners = new ArrayList<>();
     }
     chatBot.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));
+    chatBot.listeners.add(new Listener("publishTopic", name, "onTopic"));
+    chatBot.listeners.add(new Listener("publishTopic", "python", "onTopic"));
+    
     chatBot.startTopic = "BootUp";
     chatBot.bots.add("data/ProgramAB/brain");
     chatBot.bots.add("data/ProgramAB/cn-ZH");
@@ -405,7 +420,15 @@ public class InMoov2Config extends ServiceConfig {
 
     listeners.add(new Listener("publishEvent", name + ".fsm"));
 
+    listeners.add(new Listener("publishPython", "python"));
+
     listeners.add(new Listener("publishPlayAudioFile", name + ".audioPlayer"));
+    listeners.add(new Listener("publishPlayRandomAudioFile", name + ".audioPlayer"));
+
+    
+    listeners.add(new Listener("setConfig", name + ".chatBot"));
+    listeners.add(new Listener("getConfig", name + ".chatBot"));
+    listeners.add(new Listener("setConfigValue", name + ".chatBot", "onConfig"));
 
     // remove the auto-added starts in the plan's runtime RuntimConfig.registry
     plan.removeStartsWith(name + ".");

@@ -66,7 +66,6 @@ angular.module('mrlapp.service.IntroGui', []).controller('IntroGuiCtrl', ['$scop
 
     $scope.start = function(name, type) {
         msg.sendTo('runtime', 'start', name, type)
-        return ret
     }
 
 

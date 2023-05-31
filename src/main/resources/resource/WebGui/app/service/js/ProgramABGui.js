@@ -277,7 +277,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     }
 
     $scope.getBotPath = function(e) {
-        if ($scope.service?.bots[$scope.service?.config?.currentBotName]?.path){
+        if ($scope.service?.bots && $scope.service?.bots[$scope.service?.config?.currentBotName]?.path){
             return $scope.service?.bots[$scope.service?.config.currentBotName].path
         }
         return null

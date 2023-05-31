@@ -99,10 +99,7 @@ public class Session {
     sort.addAll(getChat().predicates.keySet());
     for (String predicate : sort) {
       String value = getChat().predicates.get(predicate);
-      if (predicate.equals("test")) {
-        log.info("here");
-      }
-      if (predicate.startsWith("cfg_")) {
+      if (!predicate.startsWith("cfg_")) {
         sb.append(predicate + ":" + value + "\n");
       }
     }

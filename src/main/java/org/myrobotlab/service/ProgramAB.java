@@ -1405,6 +1405,8 @@ public class ProgramAB extends Service
         setPredicate("cfg_" + entry.getKey(), entry.getValue().toString());
       }
     }
+    
+    invoke("getPredicates");
   }
 
   @Override

@@ -103,6 +103,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return true;
   }
 
+  @Deprecated /* avoid direct references */
   transient ProgramAB chatBot;
 
   protected List<String> configList;
@@ -118,6 +119,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   @Deprecated /* avoid direct references */
   transient SpeechRecognizer ear;
 
+  @Deprecated /* avoid direct references */
   transient Tracking eyesTracking;
 
   // waiting controable threaded gestures we warn user
@@ -156,11 +158,13 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   transient SpeechSynthesis mouth;
 
   boolean mute = false;
-
+  
+  @Deprecated /* avoid direct references */
   transient OpenCV opencv;
 
   // transient JMonkeyEngine simulator;
 
+  @Deprecated /* avoid direct references */
   transient Pir pir;
 
   @Deprecated /* avoid direct references */
@@ -197,7 +201,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
   
   public void syncConfigToPredicates() {
-    
+
   }
 
   public InMoov2Config publishConfig() {
@@ -234,19 +238,11 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     } catch (Exception e) {
       error(e);
     }
-    
-    invoke("publishConfig", c);
-    
-    return c;    
-  }
 
-  // TODO- Hook to get config event published
-  // public void applyConfig() {
-  // super.apply();
-  // log.error("applyConfig()");
-  // // always getResponse !
-  // speak("InMoov apply config");
-  // }
+    invoke("publishConfig", c);
+
+    return c;
+  }
 
   @Override
   public void attachTextListener(String name) {
@@ -1072,7 +1068,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
           break;
         case "chatBot":
           ProgramAB chatBot = (ProgramAB) Runtime.getService(name);
-          chatBot.attachTextListener(getPeerName("htmlFilter"));
           ProgramABConfig cfg = (ProgramABConfig) chatBot.getConfig();
           if (cfg.currentBotName == null || cfg.currentBotName.isEmpty()) {
             String locale = getLocale().getTag();
@@ -1080,13 +1075,11 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
               cfg.currentBotName = locale;
             }
           }
-          
-          // synching predicates - is a session available ?
-          // do you need switch session from ProgramAB ??
-          chatBot.onConfig(config);
-          
-          // FIXME !!! Do not startPeers !! there is no reason, this is controlled by Config !!!
-          // startPeer("htmlFilter");
+
+          // initial load via subscription into chatbot cfg_
+          // send to self - not using invoke, because want this to be in our
+          // inbox after start
+          send(getName(), "getConfig");
           break;
         case "controller3":
           break;
@@ -1126,8 +1119,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
         case "mouth":
           mouth = (AbstractSpeechSynthesis) Runtime.getService(name);
           mouth.attachSpeechListener(getPeerName("ear"));
-          break;
-        case "mouthControl":
           break;
         case "neoPixel":
           break;
@@ -1293,16 +1284,26 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return filepath;
   }
 
-  public String publishStartConfig(String configName) {
-    info("config %s started", configName);
-    invoke("publishSystemEvent", "CONFIG STARTED " + configName);
-    return configName;
-  }
-
   public String publishFinishedConfig(String configName) {
     info("config %s finished", configName);
     invoke("publishSystemEvent", "CONFIG LOADED " + configName);
 
+    return configName;
+  }
+  
+  /**
+   * plays random file on certain notifications
+   * 
+   * @param dirpath
+   * @return
+   */
+  public String publishPlayRandomAudioFile(String dirpath) {
+    return dirpath;
+  }
+
+  public String publishStartConfig(String configName) {
+    info("config %s started", configName);
+    invoke("publishSystemEvent", "CONFIG STARTED " + configName);
     return configName;
   }
 
@@ -1324,6 +1325,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
    * @return
    */
   public String publishSystemEvent(String event) {
+    InMoov2Config c = (InMoov2Config) config;
+    if (c.customSound) {
+      invoke("publishPlayRandomAudioFile", getResourceDir() + fs + "system" + fs + "sounds" + fs + "Notifications");
+    }
     return String.format("SYSTEMEVENT %s", event);
   }
 
@@ -1764,67 +1769,71 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   // startChatBot();
   // }
 
-  public ProgramAB startChatBot() {
-
-    try {
-      chatBot = (ProgramAB) startPeer("chatBot");
-
-      if (locale != null) {
-        chatBot.setCurrentBotName(locale.getTag());
-      }
-
-      // FIXME remove get en.properties stuff
-      speakBlocking(get("CHATBOTACTIVATED"));
-
-      chatBot.attachTextPublisher(ear);
-
-      // this.attach(chatBot); FIXME - attach as a TextPublisher - then
-      // re-publish
-      // FIXME - deal with language
-      // speakBlocking(get("CHATBOTACTIVATED"));
-      chatBot.repetitionCount(10);
-      // chatBot.setPath(getResourceDir() + fs + "chatbot");
-      // chatBot.setPath(getDataDir() + "ProgramAB");
-      chatBot.startSession("default", locale.getTag());
-      // reset some parameters to default...
-      chatBot.setPredicate("topic", "default");
-      chatBot.setPredicate("questionfirstinit", "");
-      chatBot.setPredicate("tmpname", "");
-      chatBot.setPredicate("null", "");
-      // load last user session
-      if (!chatBot.getPredicate("name").isEmpty()) {
-        if (chatBot.getPredicate("lastUsername").isEmpty() || chatBot.getPredicate("lastUsername").equals("unknown") || chatBot.getPredicate("lastUsername").equals("default")) {
-          chatBot.setPredicate("lastUsername", chatBot.getPredicate("name"));
-        }
-      }
-      chatBot.setPredicate("parameterHowDoYouDo", "");
-      chatBot.savePredicates();
-      htmlFilter = (HtmlFilter) startPeer("htmlFilter");// Runtime.start("htmlFilter",
-      // "HtmlFilter");
-      chatBot.attachTextListener(htmlFilter);
-      htmlFilter.attachTextListener((TextListener) getPeer("mouth"));
-      chatBot.attachTextListener(this);
-      // start session based on last recognized person
-      // if (!chatBot.getPredicate("default", "lastUsername").isEmpty() &&
-      // !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
-      // chatBot.startSession(chatBot.getPredicate("lastUsername"));
-      // }
-      if (chatBot.getPredicate("default", "firstinit").isEmpty() || chatBot.getPredicate("default", "firstinit").equals("unknown")
-          || chatBot.getPredicate("default", "firstinit").equals("started")) {
-        chatBot.startSession(chatBot.getPredicate("default", "lastUsername"));
-        invoke("publishSystemEvent", "FIRST INIT");
-      } else {
-        chatBot.startSession(chatBot.getPredicate("default", "lastUsername"));
-        invoke("publishSystemEvent", "WAKE UP");
-      }
-    } catch (Exception e) {
-      speak("could not load chatBot");
-      error(e.getMessage());
-      speak(e.getMessage());
-    }
-    broadcastState();
-    return chatBot;
-  }
+  // public ProgramAB startChatBot() {
+  //
+  // try {
+  // chatBot = (ProgramAB) startPeer("chatBot");
+  //
+  // if (locale != null) {
+  // chatBot.setCurrentBotName(locale.getTag());
+  // }
+  //
+  // // FIXME remove get en.properties stuff
+  // speakBlocking(get("CHATBOTACTIVATED"));
+  //
+  // chatBot.attachTextPublisher(ear);
+  //
+  // // this.attach(chatBot); FIXME - attach as a TextPublisher - then
+  // // re-publish
+  // // FIXME - deal with language
+  // // speakBlocking(get("CHATBOTACTIVATED"));
+  // chatBot.repetitionCount(10);
+  // // chatBot.setPath(getResourceDir() + fs + "chatbot");
+  // // chatBot.setPath(getDataDir() + "ProgramAB");
+  // chatBot.startSession("default", locale.getTag());
+  // // reset some parameters to default...
+  // chatBot.setPredicate("topic", "default");
+  // chatBot.setPredicate("questionfirstinit", "");
+  // chatBot.setPredicate("tmpname", "");
+  // chatBot.setPredicate("null", "");
+  // // load last user session
+  // if (!chatBot.getPredicate("name").isEmpty()) {
+  // if (chatBot.getPredicate("lastUsername").isEmpty() ||
+  // chatBot.getPredicate("lastUsername").equals("unknown") ||
+  // chatBot.getPredicate("lastUsername").equals("default")) {
+  // chatBot.setPredicate("lastUsername", chatBot.getPredicate("name"));
+  // }
+  // }
+  // chatBot.setPredicate("parameterHowDoYouDo", "");
+  // chatBot.savePredicates();
+  // htmlFilter = (HtmlFilter) startPeer("htmlFilter");//
+  // Runtime.start("htmlFilter",
+  // // "HtmlFilter");
+  // chatBot.attachTextListener(htmlFilter);
+  // htmlFilter.attachTextListener((TextListener) getPeer("mouth"));
+  // chatBot.attachTextListener(this);
+  // // start session based on last recognized person
+  // // if (!chatBot.getPredicate("default", "lastUsername").isEmpty() &&
+  // // !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
+  // // chatBot.startSession(chatBot.getPredicate("lastUsername"));
+  // // }
+  // if (chatBot.getPredicate("default", "firstinit").isEmpty() ||
+  // chatBot.getPredicate("default", "firstinit").equals("unknown")
+  // || chatBot.getPredicate("default", "firstinit").equals("started")) {
+  // chatBot.startSession(chatBot.getPredicate("default", "lastUsername"));
+  // invoke("publishSystemEvent", "FIRST INIT");
+  // } else {
+  // chatBot.startSession(chatBot.getPredicate("default", "lastUsername"));
+  // invoke("publishSystemEvent", "WAKE UP");
+  // }
+  // } catch (Exception e) {
+  // speak("could not load chatBot");
+  // error(e.getMessage());
+  // speak(e.getMessage());
+  // }
+  // broadcastState();
+  // return chatBot;
+  // }
 
   public SpeechRecognizer startEar() {
 
@@ -1941,7 +1950,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     // chatbot getresponse attached to publishEvent
     addListener("publishEvent", getPeerName("chatBot"), "getResponse");
 
-
     try {
       // copy config if it doesn't already exist
       String resourceBotDir = FileIO.gluePaths(getResourceDir(), "config");
@@ -1983,10 +1991,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     }
     runtime.invoke("publishConfigList");
 
-    if (c.bootUpPlaySound) {
+    if (c.bootUpSound) {
       invoke("publishPlayAudioFile", getResourceDir() + fs + "system" + fs + "sounds" + fs + "startupsound.mp3");
     }
-    
+
     invoke("publishFlash");
 
     // process all currently running services
@@ -2070,6 +2078,20 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     sendToPeer("rightArm", "waitTargetPos");
     sendToPeer("leftArm", "waitTargetPos");
     sendToPeer("torso", "waitTargetPos");
+  }
+
+  public Health getHealth() {
+    health.batteryLevel = Runtime.getBatteryLevel();
+    return health;
+  }
+
+  public void startHealthCheck() {
+    InMoov2Config c = (InMoov2Config) config;
+    addTask(c.healthCheckTimerMs, "getHealth");
+  }
+
+  public void stopHealthCheck() {
+    purgeTask("getHealth");
   }
 
   public static void main(String[] args) {

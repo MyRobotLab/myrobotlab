@@ -296,6 +296,8 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
 
   public Python(String n, String id) {
     super(n, id);
+    // for scripts saved or opened by the user
+    new File(getDataDir()).mkdirs();    
   }
 
   /**
