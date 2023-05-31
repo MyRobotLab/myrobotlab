@@ -168,6 +168,15 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
   Object setConfigValue(String fieldname, Object value);
 
   /**
+   * reflectively sets a part of config
+   *  
+   * @param fieldname - the name of the config field
+   * @param value - the value
+   * @return - returns the value
+   */
+  Object setConfigValue(String fieldname, Object value);
+
+  /**
    * Configure a service by merging in configuration
    * 
    * @param config
