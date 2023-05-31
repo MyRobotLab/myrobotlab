@@ -298,21 +298,36 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
     super(n, id);
   }
 
-  public void newScript() {
-    if (!openedScripts.containsKey("script.py")) {
-      openScript("script.py", "");
+  /**
+   * Instead of dumping scripts in the root - the root directory for this will
+   * be data/Python.  The user directory.
+   * @param file
+   * @param code
+   */
+  public void openScript(String file, String code) {
+    try {
+    activeScript = file;
+    File exists = new File(file);
+    if (exists.exists()) {
+        if (code == null || code.isEmpty()) {
+          code = FileIO.toString(file);
+        }
     }
+    openedScripts.put(exists.getAbsolutePath(), new Script(exists.getAbsolutePath(), code));
+    broadcastState();
+    
+    } catch (IOException e) {
+      error("could not open %s", file);
+    }
+
   }
 
-  public void openScript(String scriptName, String code) {
-    activeScript = scriptName;
-    openedScripts.put(scriptName, new Script(scriptName, code));
-    broadcastState();
-  }
-
-  public void closeScript(String scriptName) {
-    openedScripts.remove(scriptName);
-    broadcastState();
+  public void closeScript(String file) {
+    PythonConfig c = (PythonConfig) config;
+    if (openedScripts.containsKey(file)) {
+      openedScripts.remove(file);
+      broadcastState();
+    }
   }
 
   /**
@@ -722,22 +737,45 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
   /**
    * Save a script
    * 
-   * @param scriptName
+   * @param file
    *          - path and name of script
    * @param code
    *          - content
    * @return true if successful
    */
-  public boolean saveScript(String scriptName, String code) {
+  public boolean saveScript(String f, String code) {
+    File file = new File(f);
     try {
-      FileIO.toFile(scriptName, code.getBytes());
-      info("saved script %s", scriptName);
+      
+//      Path pathAbsolute = Paths.get(file.getAbsolutePath());
+//      Path pathBase = Paths.get(getDataDir());
+//      Path pathRelative = pathBase.relativize(pathAbsolute);
+      
+      FileIO.toFile(file, code.getBytes());
+      info("saved script %s", file);
       return true;
     } catch (Exception e) {
-      error("%s could not save script %s", getName(), scriptName);
+      error("%s could not save script %s", getName(), file);
     }
     return false;
   }
+  
+  /**
+   * upserts a script in memory
+   * @param file
+   * @param code
+   * @return
+   */
+  public void updateScript(String file, String code) {
+      if (openedScripts.containsKey(file)) {
+        Script script = openedScripts.get(file);
+        script.setCode(code);
+      } else {
+        openedScripts.put(file, new Script(file, code));
+        broadcastState();
+      }
+  }
+
 
   // @Override /* FIXME - make interface for it */
   public void defaultInvokeMethod(String method, Object... params) {
@@ -761,7 +799,6 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
     }
     // register runtime life cycle events for other services
     Runtime.getInstance().attachServiceLifeCycleListener(getName());
-
     PythonConfig c = (PythonConfig) config;
     // run start scripts if there are any
     if (c.startScripts != null) {
@@ -893,6 +930,8 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
       webgui.autoStartBrowser(false);
       webgui.startService();
       Python python = (Python) Runtime.start("python", "Python");
+      
+      Py4j py4j = (Py4j) Runtime.start("py4j", "Py4j");
       // python.execFile("data/adafruit.py");
 
       // Runtime.start("i01", "InMoov2");
@@ -905,17 +944,23 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
 
   @Override
   public void onCreated(String name) {
-
+    log.info("onCreated {}", name);
   }
+  
+  public void onPython(String code) {
+    log.info("onPython {}", code);
+    exec(code);
+  }
+  
 
   @Override
   public void onRegistered(Registration registration) {
-
+    log.info("onCreated {}", registration);
   }
 
   @Override
   public void onStopped(String fullname) {
-
+    log.info("onCreated {}", fullname);
   }
 
 

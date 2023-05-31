@@ -73,7 +73,9 @@ htmlfilter.addTextListener(mouth)
 i01 = runtime.start("i01", "InMoov2")
 i01.setMute(True)
 if startInMoov:
-  i01.startAll(leftPort, rightPort)
+  # use config to start
+  # i01.startAll(leftPort, rightPort)
+  pass
 else:
   i01.mouth = mouth
     

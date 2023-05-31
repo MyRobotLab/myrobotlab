@@ -339,7 +339,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   public void attach(ButtonDefinition buttondef) {
-    subscribe(buttondef.getName(), "publishButton", getName(), "move");
+    subscribe(buttondef.serviceName, "publishButton", getName(), "move");
   }
 
   @Override

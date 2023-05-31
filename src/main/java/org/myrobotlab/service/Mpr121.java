@@ -544,7 +544,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     return read(pinNameToAddress(pinName));
   }
 
-  @Override
+  @Deprecated /* use pinMode(String, String */
   public void pinMode(int address, String mode) {
     if (mode != null && mode.equalsIgnoreCase("INPUT")) {
     } else {
@@ -601,7 +601,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
 
   }
 
-  @Override
+  @Deprecated /* use enablePin(String pin) */
   public void enablePin(int address) {
     if (controller == null) {
       error("must be connected to enable pins");
@@ -858,7 +858,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     write(getPin(pin).getAddress(), value);
   }
 
-  @Override
+  @Deprecated /* use write(String, int value) */
   public void write(int address, int value) {
     log.error("Mpr121 does not support writing");
   }

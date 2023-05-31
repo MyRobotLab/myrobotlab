@@ -19,27 +19,33 @@ public interface PinArrayControl extends PinArrayPublisher {
 
   public void disablePin(String pin);
 
+  @Deprecated /* use disablePin(String pin) */
   public void disablePin(int address);
 
   public void disablePins();
 
   public void enablePin(String pin);
 
-  public void enablePin(int address);
+  /* use enablePin(String pin) */
+  // public void enablePin(int address);
 
   public void enablePin(String pin, int rate);
 
+  @Deprecated /* use enablePin(String pin, int rate) */
   public void enablePin(int address, int rate);
 
   public PinDefinition getPin(String pin);
 
+  @Deprecated /* use getPin(String pin) */
   public PinDefinition getPin(int address);
 
   public List<PinDefinition> getPinList();
 
   public void pinMode(String pin, String mode);
 
-  public void pinMode(int address, String mode);
+  /* use pinMode(String pin, String mode)  "pins are not addresses handle the details internally,
+  don't expose this confusion to the user */
+  // public void pinMode(int address, String mode);
 
   public PinData publishPin(PinData pinData);
 
@@ -57,6 +63,7 @@ public interface PinArrayControl extends PinArrayPublisher {
    * @param address
    * @return
    */
+  @Deprecated /* use read(String pin) */  
   public int read(int address);
 
   /**
@@ -71,7 +78,7 @@ public interface PinArrayControl extends PinArrayPublisher {
    * @param address
    * @param state
    */
-  public void write(int address, int state);
+  // public void write(int address, int state);
 
   Integer getAddress(String pin);
 

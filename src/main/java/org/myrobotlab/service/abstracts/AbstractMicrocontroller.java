@@ -51,6 +51,7 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
    * whatever its documented to people e.g. "A5" or "D7", it comes down to a
    * unique address
    */
+  @Deprecated /* use pinIndex only */
   protected Map<Integer, PinDefinition> addressIndex = new TreeMap<>();
 
   /**
@@ -118,6 +119,7 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
   }
 
   @Override
+  @Deprecated /* use disablePin(String pin) */
   abstract public void disablePin(int address);
 
   @Override
@@ -132,7 +134,7 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
     enablePin(getPin(pin).getAddress());
   }
 
-  @Override
+  @Deprecated /*use enablePin(String)*/
   abstract public void enablePin(int address);
 
   @Override
@@ -141,17 +143,19 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
   }
 
   @Override
+  @Deprecated /* enablePin(String, int) */
   abstract public void enablePin(int address, int rate);
 
   @Override
-  public PinDefinition getPin(String pinName) {
-    if (pinIndex.containsKey(pinName)) {
-      return pinIndex.get(pinName);
+  public PinDefinition getPin(String pin) {
+    if (pinIndex.containsKey(pin)) {
+      return pinIndex.get(pin);
     }
 
     // another attempt - if user used address instead of pin
+    // FIXME - remove this
     try {
-      int address = Integer.parseInt(pinName);
+      int address = Integer.parseInt(pin);
       return addressIndex.get(address);
     } catch (Exception e) {
     }
@@ -161,6 +165,7 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
   }
 
   @Override
+  @Deprecated /* use getPin(String pin) */
   public PinDefinition getPin(int address) {
     if (addressIndex.containsKey(address)) {
       return addressIndex.get(address);
@@ -171,14 +176,6 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
 
   @Override
   abstract public List<PinDefinition> getPinList();
-
-  @Override
-  public void pinMode(String pin, String mode) {
-    pinMode(getPin(pin).getAddress(), mode);
-  }
-
-  @Override
-  abstract public void pinMode(int address, String mode);
 
   @Override
   public PinData publishPin(PinData pinData) {
@@ -202,6 +199,7 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
   }
 
   @Override
+  @Deprecated /* use read(String pin) */
   public int read(int address) {
     // FIXME - this would be "last" read
     return addressIndex.get(address).getValue();
@@ -222,8 +220,10 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
     write(pinDef.getAddress(), value);
   }
 
-  @Override
-  abstract public void write(int address, int value);
+  @Deprecated /* don't expose the complexity of address to the user, use only "pin" write(String, int) */
+  public void write(int address, int value) {
+    log.error("do not use write(int address, int value) use write(String pin, int)");
+  }
 
   /**
    * Identifier of "board type" from the possible set in boardTypes

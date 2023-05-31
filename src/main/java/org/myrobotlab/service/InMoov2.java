@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.LedDisplayData;
 import org.myrobotlab.service.data.Locale;
+import org.myrobotlab.service.data.TopicChange;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.LocaleProvider;
@@ -55,6 +57,12 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   private static final long serialVersionUID = 1L;
 
   static String speechRecognizer = "WebkitSpeechRecognition";
+  
+  /**
+   * Health pojo for health checking and reporting
+   */
+  final protected Health health = new Health();
+
 
   /**
    * This method will load a python file into the python interpreter.
@@ -107,6 +115,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   String currentConfigurationName = "default";
 
+  @Deprecated /* avoid direct references */
   transient SpeechRecognizer ear;
 
   transient Tracking eyesTracking;
@@ -116,10 +125,13 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   Set<String> gestures = new TreeSet<String>();
 
+  @Deprecated /* avoid direct references */
   transient Tracking headTracking;
 
+  @Deprecated /* avoid direct references */
   transient HtmlFilter htmlFilter;
 
+  @Deprecated /* avoid direct references */
   transient ImageDisplay imageDisplay;
 
   String lastGestureExecuted;
@@ -143,9 +155,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   transient SpeechSynthesis mouth;
 
-  // FIXME ugh - new MouthControl service that uses AudioFile output
-  transient public MouthControl mouthControl;
-
   boolean mute = false;
 
   transient OpenCV opencv;
@@ -154,17 +163,29 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   transient Pir pir;
 
+  @Deprecated /* avoid direct references */
   transient Python python;
 
+  @Deprecated /* avoid direct references */
   transient ServoMixer servoMixer;
 
+  @Deprecated /* avoid direct references */
   transient UltrasonicSensor ultrasonicLeft;
 
+  @Deprecated /* avoid direct references */
   transient UltrasonicSensor ultrasonicRight;
 
   protected String voiceSelected;
 
+  @Deprecated /* avoid direct references */
   transient WebGui webgui;
+
+  private boolean pythonLibsInitialized = false;
+
+  public static class Health {
+    double batteryLevel = 0;
+    List<Status> errors = new ArrayList<>();
+  }
 
   public InMoov2(String n, String id) {
     super(n, id);
@@ -940,6 +961,14 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return state;
   }
 
+  @Override
+  public Status publishStatus(Status status) {
+    if (status.isError()) {
+      health.errors.add(status);
+    }
+    return status;
+  }
+
   public OpenCVData onOpenCVData(OpenCVData data) {
     // FIXME - publish event with or without data ? String file reference
     return data;
@@ -1164,8 +1193,50 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     // different sources
     // some might be coming from the ear - some from the mouth ... - there has
     // to be a distinction
-    log.info("onText - {}", text);
+    log.info("onText({})", text);
     invoke("publishText", text);
+  }
+
+  /**
+   * FIXME - this is wrong .. it should be "in python"
+   * 
+   * Callback from the chatbot which in turn are relayed to a publishPython
+   * method that python will subscribe to, in order to process user code in
+   * state callbacks
+   * 
+   * @param topic
+   * @return
+   */
+  public TopicChange onTopic(TopicChange topic) {
+    log.info("onTopic({})", topic);
+    String callback = "on" + topic.newTopic.substring(0, 1).toUpperCase() + topic.newTopic.substring(1) + "(runtime.getService('" + getName() + "'))";
+
+    if (!pythonLibsInitialized) {
+      StringBuilder init_myrobotlab = new StringBuilder("import myrobotlab\n");
+      init_myrobotlab.append("myrobotlab.connect()\n");
+      invoke("publishPython", init_myrobotlab.toString());
+
+      StringBuilder init_inmoov2 = new StringBuilder("import inmoov2\n");
+      init_inmoov2.append("inmoov2.start('" + getName() + "')\n");
+      invoke("publishPython", init_inmoov2.toString());
+
+      pythonLibsInitialized = false;
+    }
+
+    // not sure about publishPython ...
+    // do want an onState( name
+    // StateChange publishState( getName(), topic, ....)
+    // public MrlJson ( getName(), Message msg) ??? sender
+
+    invoke("publishPython", callback);
+    // changes of topic from the chatbot are relayed to callbacks in python
+
+    return topic;
+  }
+
+  public String publishPython(String code) {
+    log.info("publishPython({})", code);
+    return code;
   }
 
   // TODO FIX/CHECK this, migrate from python land
@@ -1210,19 +1281,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   public void publish(String name, String method, Object... data) {
     Message msg = Message.createMessage(getName(), name, method, data);
     invoke("publishMessage", msg);
-  }
-
-  public String publishStartConfig(String configName) {
-    info("config %s started", configName);
-    invoke("publishEvent", "CONFIG STARTED " + configName);
-    return configName;
-  }
-
-  public String publishFinishedConfig(String configName) {
-    info("config %s finished", configName);
-    invoke("publishEvent", "CONFIG LOADED " + configName);
-
-    return configName;
   }
 
   /**
@@ -1681,13 +1739,15 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     }
   }
 
+  @Deprecated /* use config to start appropriate components */
   public void startAll() throws Exception {
     startAll(null, null);
   }
 
+  @Deprecated /* use config to start appropriate components */
   public void startAll(String leftPort, String rightPort) throws Exception {
     startMouth();
-    startChatBot();
+    // startChatBot();
 
     // startHeadTracking();
     // startEyesTracking();
@@ -1700,9 +1760,9 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     speakBlocking(get("STARTINGSEQUENCE"));
   }
 
-  public void startBrain() {
-    startChatBot();
-  }
+  // public void startBrain() {
+  // startChatBot();
+  // }
 
   public ProgramAB startChatBot() {
 

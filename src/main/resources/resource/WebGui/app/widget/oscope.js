@@ -82,6 +82,9 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
 
                         // adding style
                         var color = colorsHsv[pinDef.address];
+                        if (!color){
+                          continue
+                        }
                         trace.readStyle = {
                             'background-color': color.toHexString()
                         };

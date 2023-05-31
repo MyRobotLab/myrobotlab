@@ -224,7 +224,7 @@ public class HarryTest extends AbstractTest {
 
     InMoov2 i01 = (InMoov2) Runtime.createAndStart("i01", "InMoov2");
     i01.setMute(true);
-    i01.startAll();
+    // i01.startAll();
     // if startInMoov:
     // i01.startAll(leftPort, rightPort)
     // else:

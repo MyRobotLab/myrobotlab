@@ -2,12 +2,22 @@ package org.myrobotlab.service.interfaces;
 
 import java.io.Serializable;
 
-public class PinDefinition extends SensorDefinition implements Serializable {
+import org.myrobotlab.framework.interfaces.NameProvider;
+
+/**
+ * The purpose of this class is to provide a POJO representation of a pin and its capabilities.
+ * 
+ * FIXME ! - this should just be a POJO with public members and zero complexity
+ * 
+ * @author GroG
+ *
+ */
+public class PinDefinition  implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
   /**
-   * label or name of the pin e.g. P0 D1 D2 etc...
+   * label or name of the pin e.g. P0, A5, D1, D2, GPIO 2, etc...
    */
   String pin;
 
@@ -25,6 +35,8 @@ public class PinDefinition extends SensorDefinition implements Serializable {
    * pin mode INPUT or OUTPUT, other...
    */
   String mode;
+  
+  public String serviceName;
 
   /**
    * statistics
@@ -90,9 +102,13 @@ public class PinDefinition extends SensorDefinition implements Serializable {
    * rate in Hz for which the pin will be polled 0 == no rate imposed
    */
   int pollRateHz = 0;
+  
+  public PinDefinition() {
+  }
+  
 
   public PinDefinition(String serviceName, int address, String pin) {
-    super(serviceName);
+    this.serviceName = serviceName;
     this.address = address;
     this.pin = pin;
   }

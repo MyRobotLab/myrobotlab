@@ -589,7 +589,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
     }
   }
 
-  @Override
+  @Deprecated /* use enablePin(String pin) */
   public void enablePin(int address) {
     if (controller == null) {
       error("must be connected to enable pins");
@@ -769,7 +769,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
   }
 
-  @Override
+  @Deprecated /* use pinMode(String, String */
   public void pinMode(int address, String mode) {
     if (mode != null && mode.equalsIgnoreCase("INPUT")) {
     } else {
@@ -780,7 +780,10 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
   @Override
   public void pinMode(String pin, String mode) {
-    pinMode(getPin(pin).getAddress(), mode);
+    if (mode != null && mode.equalsIgnoreCase("INPUT")) {
+    } else {
+      log.error("Ads1115 only supports INPUT mode");
+    }
   }
 
   public Integer pinNameToAddress(String pinName) {
@@ -1110,7 +1113,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
     writeRegister(ADS1015_REG_POINTER_CONFIG, config);
   }
 
-  @Override
+  @Deprecated /* use write(String, int value) */
   public void write(int address, int value) {
     log.error("Ads1115 only supports read, not write");
 

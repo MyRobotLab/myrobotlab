@@ -1,16 +1,15 @@
-angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$scope', 'mrl', '$uibModal', '$timeout', function($scope, mrl, $uibModal, $timeout) {
+angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$scope', 'mrl', '$uibModal', function($scope, mrl, $uibModal) {
     console.info('PythonGuiCtrl')
     var _self = this
     var msg = this.msg
+    var firstTime = true
     var name = $scope.name
-    // init scope values
-    // $scope.service = mrl.getService(name)
+    var newFileDialog = null
     $scope.output = ''
     $scope.activeTabIndex = 0
     $scope.scriptCount = 0
     $scope.activeScript = null
     $scope.scripts = {}
-    $scope.test = null
     $scope.openingScript = true
     $scope.dropdownIsOpen = true
     $scope.lastStatus = null
@@ -18,9 +17,9 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
 
     // 2 dialogs 
     $scope.loadFile = false
-    $scope.newFile = false
 
     _self.updateState = function(service) {
+        
         $scope.service = service
         $scope.scriptCount = 0
 
@@ -36,18 +35,18 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
         // this doesn't work - its the ace-ui callback that 
         // changes the activeTabIndex
         $scope.activeTabIndex = $scope.scriptCount
+
+        // create a new script if no scripts are currently opened
+        if (Object.keys(service.openedScripts).length == 0){
+            // msg.send('openScript', 'script-' + $scope.getFormattedDataTime() + '.py', '# new cool robot script\n')
+            firstTime = false
+        }
     }
 
     this.onMsg = function(msg) {
         let data = msg.data[0]
         switch (msg.method) {
-            // FIXME - bury it ?
         case 'onState':
-            // its important to externalize the updating
-            // of the service body in a method rather than doing the 
-            // updates inline here - because when things are first initialized
-            // we want to call the same method - and if it was inline that
-            // would make a mess
             _self.updateState(data)
             $scope.$apply()
             break
@@ -73,17 +72,6 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
         }
     }
 
-    $scope.newScript = function(filename, script) {
-        if (!script) {
-            script = '# new awesome robot script\n'
-        }
-        msg.send('openScript', filename, script)
-        $scope.newName = ''
-        // clear input text
-        $scope.newFile = false
-        // close dialog
-    }
-
     // utility methods //
     // gets script name from full path name
     $scope.getName = function(path) {
@@ -104,7 +92,9 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
 
     $scope.aceChanged = function(e) {
         console.info("ace changed")
+        msg.send('updateScript', $scope.activeScript.file, $scope.activeScript.code)
     }
+    
     //----- ace editors related callbacks end -----//
     $scope.addScript = function() {
         let scriptName = 'Untitled-' + $scope.scriptCount + 1
@@ -117,7 +107,6 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
     }
 
     $scope.closeScript = function(scriptName) {
-        // FIXME - save first ?
         msg.send('closeScript', scriptName)
         msg.broadcastState()
         // console.log("removed " + scriptName)
@@ -171,6 +160,18 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
         return ret
     }
 
+    $scope.getFormattedDataTime = function(){
+
+        const currentDate = new Date();        
+        const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Add leading zero if necessary
+        const day = String(currentDate.getDate()).padStart(2, '0'); // Add leading zero if necessary
+        const hour = String(currentDate.getHours()).padStart(2, '0'); // Add leading zero if necessary
+        const minute = String(currentDate.getMinutes()).padStart(2, '0'); // Add leading zero if necessary
+        const formattedDateTime = `${month}-${day}-${hour}-${minute}`;        
+        console.log("Formatted Date and Time:", formattedDateTime); 
+        return formattedDateTime
+    }
+
 
     $scope.uploadFile = function() {
 
@@ -189,17 +190,34 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
         console.info('readAsBinaryString')
     }
 
-    // $scope.possibleServices = Object.values(mrl.getPossibleServices())
     msg.subscribe('publishStdOut')
     msg.subscribe('publishAppend')
     msg.subscribe(this)
-    msg.send('newScript')
+
+    $scope.openScript = function(filename, code){
+        msg.send('openScript', filename, code)
+    }
+
+
+     $scope.newFile = function() {
+        newFileDialog = $uibModal.open({
+            // template: '<h3 class="modal-title">New File</h3>',
+            templateUrl: "newFile.html",
+            scope: $scope,
+            controller: function($scope) {
+                $scope.cancel = function() {
+                    newFileDialog.dismiss()
+                }
+            }
+        })        
+     }
+    
 }
 ]).directive('fileModel', ['$parse', function($parse) {
     return {
         restrict: 'A',
         link: function(scope, element, attrs) {
-            var model = $parse(attrs.fileModel);
+            var model = $parse(attrs.fileModel)
             var modelSetter = model.assign;
 
             element.bind('change', function() {

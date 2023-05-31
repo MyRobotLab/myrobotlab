@@ -1534,10 +1534,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     return null;
   }
 
-  @Override
   /**
    * // > pinMode/pin/mode
    */
+  @Deprecated /* use pinMode(String, String */
   public void pinMode(int address, String modeStr) {
     if (modeStr.equalsIgnoreCase("OUTPUT")) {
       pinMode(address, Arduino.OUTPUT);

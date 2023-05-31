@@ -2,14 +2,15 @@ package org.myrobotlab.service.interfaces;
 
 import java.io.Serializable;
 
-public class ButtonDefinition extends SensorDefinition implements Serializable {
+public class ButtonDefinition implements Serializable {
 
   private static final long serialVersionUID = 1L;
-  String axisName;
-  Double value;
+  public String axisName;
+  public Double value;
+  public String serviceName;
 
   public ButtonDefinition(String serviceName, String axisName) {
-    super(serviceName);
+    this.serviceName = serviceName;
     this.axisName = axisName;
   }
 }

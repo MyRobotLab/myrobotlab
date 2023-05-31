@@ -247,6 +247,7 @@ public class AudioProcessor extends Thread {
 
         // System.gc();
 
+        audioFile.invoke("publishPeak", 0);
         audioFile.invoke("publishAudioEnd", data);
 
         synchronized (data) {

@@ -299,7 +299,7 @@ public class ProgramABTest extends AbstractServiceTest {
   public void testTopicCategories() throws IOException {
     // Top level definition
     Response resp = testService.getResponse(username, "TESTTOPICTEST");
-    assertEquals("TOPIC IS unknown", resp.msg);
+    assertEquals("TOPIC IS default", resp.msg);
     resp = testService.getResponse(username, "SET TOPIC TEST");
     resp = testService.getResponse(username, "TESTTOPICTEST");
     assertEquals("TEST TOPIC RESPONSE", resp.msg);

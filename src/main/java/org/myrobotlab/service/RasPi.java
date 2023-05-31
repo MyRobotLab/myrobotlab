@@ -15,11 +15,9 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.i2c.I2CFactory;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMicrocontroller;
 import org.myrobotlab.service.config.RasPiConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -31,7 +29,7 @@ import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalMultipurpose;
 import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.PinMode;
-import com.pi4j.io.gpio.PinPullResistance;
+import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
@@ -55,6 +53,14 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
     // display pin state on console
     log.info(" --> GPIO PIN STATE CHANGE: {} = {}", event.getPin(), event.getState());
+    PinDefinition pindef = pinIndex.get(wiringToBcm.get(event.getPin().getName()));
+    if (pindef == null){
+      log.error("pindef is null for pin {}", event.getPin().getName());
+    } else {
+      pindef.setValue(event.getState().getValue());
+      invoke("publishPinDefinition", pindef);
+    }
+
   }
 
   public static class I2CDeviceMap {
@@ -79,7 +85,13 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
 
   transient GpioController gpio;
 
-  protected Map<Integer, Set<String>> validAddresses = new HashMap<>();
+  protected Map<Integer, Set<String>> validI2CAddresses = new HashMap<>();
+
+  public final static Map<String, String> bcmToWiring = new HashMap<>();
+
+  public final static Map<String, String> wiringToBcm = new HashMap<>();
+
+  protected String wrongPlatformError = null;
 
   /**
    * for attached devices
@@ -90,40 +102,54 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
    * "quick fix" - no subscriptions nor listeners are made with other services,
    * so I created this to show the references to i2c device services
    */
+  @Deprecated /*
+               * the Outbox and notifyEntries are the normalized source for
+               * "attached" services
+               */
   protected Set<String> attachedServices = new HashSet<>();
 
   protected String boardType = null;
 
-  public RasPi(String n, String id) {
-    super(n, id);
+  static {
 
-    Platform platform = Platform.getLocalInstance();
-    log.info("platform is {}", platform);
-    log.info("architecture is {}", platform.getArch());
+    bcmToWiring.put("GPIO 0", "GPIO 27");
+    bcmToWiring.put("GPIO 1", "GPIO 31");
+    bcmToWiring.put("GPIO 2", "GPIO 8");
+    bcmToWiring.put("GPIO 3", "GPIO 9");
+    bcmToWiring.put("GPIO 4", "GPIO 7");
+    bcmToWiring.put("GPIO 5", "GPIO 21");
+    bcmToWiring.put("GPIO 6", "GPIO 22");
+    bcmToWiring.put("GPIO 7", "GPIO 11");
+    bcmToWiring.put("GPIO 8", "GPIO 10");
+    bcmToWiring.put("GPIO 9", "GPIO 13");
+    bcmToWiring.put("GPIO 10", "GPIO 12");
+    bcmToWiring.put("GPIO 11", "GPIO 14");
+    bcmToWiring.put("GPIO 12", "GPIO 27");
+    bcmToWiring.put("GPIO 13", "GPIO 26");
+    bcmToWiring.put("GPIO 14", "GPIO 15");
+    bcmToWiring.put("GPIO 15", "GPIO 16");
+    bcmToWiring.put("GPIO 16", "GPIO 25");
+    bcmToWiring.put("GPIO 17", "GPIO 0");
+    bcmToWiring.put("GPIO 18", "GPIO 1");
+    bcmToWiring.put("GPIO 19", "GPIO 23");
+    bcmToWiring.put("GPIO 20", "GPIO 28");
+    bcmToWiring.put("GPIO 21", "GPIO 29");
+    bcmToWiring.put("GPIO 22", "GPIO 3");
+    bcmToWiring.put("GPIO 23", "GPIO 4");
+    bcmToWiring.put("GPIO 24", "GPIO 5");
+    bcmToWiring.put("GPIO 25", "GPIO 6");
+    bcmToWiring.put("GPIO 26", "GPIO 24");
+    bcmToWiring.put("GPIO 27", "GPIO 2");
 
-    try {
-      boardType = SystemInfo.getBoardType().toString();
-      gpio = GpioFactory.getInstance();
-      log.info("Executing on Raspberry PI");
-      getPinList();
-    } catch (Exception e) {
-      // an error in the constructor won't get broadcast - so we need Runtime to
-      // do it
-      Runtime.getInstance().error("raspi service requires arm %s is not arm - %s", getName(), e.getMessage());
+    for (String pin : bcmToWiring.keySet()) {
+      String wiring = bcmToWiring.get(pin);
+      wiringToBcm.put(wiring, pin);
     }
   }
 
-  /*
-   * @Override public void attach(String name) { ServiceInterface si =
-   * Runtime.getService(name); if
-   * (I2CControl.class.isAssignableFrom(si.getClass())) {
-   * attachI2CControl((I2CControl) si); return; } }
-   * 
-   * @Override public void detach(String name) { ServiceInterface si =
-   * Runtime.getService(name); if
-   * (I2CControl.class.isAssignableFrom(si.getClass())) {
-   * detachI2CControl((I2CControl) si); return; } }
-   */
+  public RasPi(String n, String id) {
+    super(n, id);
+  }
 
   @Override
   public void attach(Attachable service) throws Exception {
@@ -194,82 +220,108 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     attachedServices.remove(control.getName());
   }
 
-  public void digitalWrite(int pin, int value) {
-    log.info("digitalWrite {} {}", pin, value);
-    // msg.digitalWrite(pin, value);
-    PinDefinition pinDef = addressIndex.get(pin);
-    GpioPinDigitalMultipurpose gpio = ((GpioPinDigitalMultipurpose) pinDef.getPinImpl());
-    if (value == 0) {
-      gpio.low();
-    } else {
-      gpio.high();
+  @Override
+  public void disablePin(String pin) {
+    if (!pinIndex.containsKey(pin)) {
+      error("Pin %s not found", pin);
+      return;
     }
+    PinDefinition pinDef = pinIndex.get(pin);
+    pinDef.setEnabled(false);
+    getGPIO(pin).removeListener(this);
     invoke("publishPinDefinition", pinDef);
   }
 
   @Override
+  @Deprecated /* use disablePin(String) */
   public void disablePin(int address) {
-    PinDefinition pin = addressIndex.get(address);
-    pin.setEnabled(false);
-    ((GpioPinDigitalMultipurpose) pin.getPinImpl()).removeListener();
-    PinDefinition pinDef = addressIndex.get(address);
-    invoke("publishPinDefinition", pinDef);
+    error("disablePin(int) not supported use disablePin(String)");
   }
 
   @Override
+  public void enablePin(String pin) {
+    if (!pinIndex.containsKey(pin)) {
+      error("Pin %s not found", pin);
+      return;
+    }
+    RasPiConfig c = (RasPiConfig) config;
+    enablePin(pin, c.pollRateHz);
+  }
+
+  @Override
+  @Deprecated /* use enablePin(String pin) */
   public void enablePin(int address) {
-    enablePin(address, 0);
+    error("enablePin(int address) not supoprted use enablePin(String pin)");
   }
 
   @Override
-  public void enablePin(int address, int rate) {
-    PinDefinition pinDef = addressIndex.get(address);
-    GpioPinDigitalMultipurpose gpio = ((GpioPinDigitalMultipurpose) pinDef.getPinImpl());
-    gpio.addListener(this);
+  public void enablePin(String pin, int rate) {
+    if (!pinIndex.containsKey(pin)) {
+      error("Pin %s not found", pin);
+      return;
+    }
+
+    PinDefinition pinDef = pinIndex.get(pin);
+    pinMode(pin, "INPUT");
+    getGPIO(pin).addListener(this);
     pinDef.setEnabled(true);
     invoke("publishPinDefinition", pinDef); // broadcast pin change
   }
 
   @Override /* services attached - not i2c devices */
   public Set<String> getAttached() {
-    // return i2cDevices.keySet();
     return attachedServices;
   }
 
   @Override
   public List<PinDefinition> getPinList() {
+    List<PinDefinition> pinList = new ArrayList<>();
 
-    for (Pin pin : RaspiPin.allPins()) {
-
-      // pin.getSupportedPinModes()
-      PinDefinition pindef = new PinDefinition(getName(), pin.getAddress());
-      pindef.setPinName(pin.getName());
-      EnumSet<PinMode> modes = pin.getSupportedPinModes();
-      // FIXME - the raspi definitions are "better" they have input & ouput
-      // FIXME - reconcile rxtx
-      // FIXME - get pull up resistance
-      if (modes.contains(PinMode.DIGITAL_OUTPUT)) {
-        pindef.setDigital(true);
-      }
-      if (modes.contains(PinMode.ANALOG_OUTPUT)) {
-        pindef.setAnalog(true);
-      }
-      if (modes.contains(PinMode.PWM_OUTPUT)) {
-        pindef.setAnalog(true);
-      }
-
-      addressIndex.put(pin.getAddress(), pindef);
-      pinIndex.put(pin.getName(), pindef);
-
-      // GpioPinDigitalInput provisionedPin = gpio.provisionDigitalInputPin(pin,
-      // pull);
-      // provisionedPin.setShutdownOptions(true); // unexport pin on program
-      // shutdown
-      // provisionedPins.add(provisionedPin); // add provisioned pin to
-      // collection
+    if (!pinIndex.isEmpty()) {
+      pinList.addAll(pinIndex.values());
+      return pinList;
     }
 
-    return new ArrayList<PinDefinition>(addressIndex.values());
+    for (Pin wiringPin : RaspiPin.allPins()) {
+
+      // RaspiPin.allPins() RETURNS WIRING NUMBERS !!!!
+
+      // if (wiringPin.getName().equals("GPIO 2") ||
+      // wiringPin.getName().equals("GPIO 3") ||
+      // wiringPin.getName().equals("GPIO 8") ||
+      // wiringPin.getName().equals("GPIO 9")) {
+      // log.info("filtering out pin {} from gpio provisioning", wiringPin);
+      // continue;
+      // }
+
+      String wPinName = wiringPin.getName();
+
+      if (!wiringToBcm.containsKey(wPinName)) {
+        log.info("skipping wiring pin {} - no gpio definition", wPinName);
+        continue;
+      }
+
+      String bcmPinName = wiringToBcm.get(wPinName);
+
+      PinDefinition pindef = new PinDefinition();
+      // set to output for starting
+      pindef.setMode("OUTPUT");
+      pindef.setPinName(bcmPinName);
+      EnumSet<PinMode> modes = wiringPin.getSupportedPinModes();
+
+      pindef.setDigital(modes.contains(PinMode.DIGITAL_OUTPUT));
+      pindef.setAnalog(modes.contains(PinMode.ANALOG_OUTPUT));
+      pindef.setPwm(modes.contains(PinMode.PWM_OUTPUT));
+
+      // FIXME - remove this, do not support address only pin
+      String lastPart = bcmPinName.trim().split(" ")[1];
+      pindef.setAddress(Integer.parseInt(lastPart));
+
+      pinIndex.put(bcmPinName, pindef);
+      pinList.add(pindef);
+    }
+
+    return pinList;
   }
 
   @Override // FIXME - I2CControl has bus why is it supplied here as a
@@ -332,7 +384,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     try {
       devicedata.device.read(writeBuffer, 0, writeBuffer.length, readBuffer, 0, readBuffer.length);
     } catch (IOException e) {
-      Logging.logError(e);
+      error(e);
     }
     return readBuffer.length;
   }
@@ -346,25 +398,35 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
    * @param mode
    *          INPUT = 0x0. Output = 0x1.
    */
-  public void pinMode(int pin, int mode) {
-
-    PinDefinition pinDef = addressIndex.get(pin);
-    if (mode == INPUT) {
-      pinDef.setPinImpl(gpio.provisionDigitalMultipurposePin(RaspiPin.getPinByAddress(pin), PinMode.DIGITAL_INPUT));
-    } else {
-      pinDef.setPinImpl(gpio.provisionDigitalMultipurposePin(RaspiPin.getPinByAddress(pin), PinMode.DIGITAL_OUTPUT));
+  public void pinMode(String pin, String mode) {    
+    log.info("pinMode {}, mode {}", pin, mode);
+    
+    if (mode == null) {
+      error("Pin mode cannot be null");
+      return;
     }
+
+    mode = mode.trim().toUpperCase();
+        
+    if (!pinIndex.containsKey(pin)) {
+      error("Pin %s not found", pin);
+      return;
+    }
+
+    PinDefinition pinDef = pinIndex.get(pin);
+    // this will provision the pin if it is not already provisioned
+    GpioPinDigitalMultipurpose gpio = getGPIO(pin);
+    if (mode.equals("INPUT")) {
+      pinDef.setMode("INPUT");
+      gpio.setMode(PinMode.DIGITAL_INPUT);
+    } else if (mode.equals("OUTPUT")) {
+      pinDef.setMode("OUTPUT");
+      gpio.setMode(PinMode.DIGITAL_OUTPUT);
+    } else {
+      error("mode %s is not valid", mode);
+    }
+    log.info("pinDef {}",pinDef);
     invoke("publishPinDefinition", pinDef);
-  }
-
-  @Override
-  public void pinMode(int address, String mode) {
-
-    if (mode != null && mode.equalsIgnoreCase("INPUT")) {
-      pinMode(address, INPUT);
-    } else {
-      pinMode(address, OUTPUT);
-    }
   }
 
   @Override
@@ -375,6 +437,36 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     PinDefinition pinDef = getPin(pinData.pin);
     pinDef.setValue(pinData.value);
     return pinData;
+  }
+
+  /**
+   * Gets the multipurpose implementation of a pin, if it doesn't currently
+   * exists, it will provision it.
+   * 
+   * @param pin
+   * @return
+   */
+  private GpioPinDigitalMultipurpose getGPIO(String pin) {
+    log.info("getGPIO {}", pin);
+    if (!pinIndex.containsKey(pin)) {
+      error("Pin %s not found", pin);
+      return null;
+    }
+
+    PinDefinition pindef = getPin(pin);
+    if (pindef == null) {
+      error("No pin definition exists for %s", pin);
+      return null;
+    }
+
+    GpioPinDigitalMultipurpose gpioPin = (GpioPinDigitalMultipurpose) pindef.getPinImpl();
+    if (gpioPin == null) {
+      log.info("provisioning gpio {}", pin);
+      gpioPin = gpio.provisionDigitalMultipurposePin(RaspiPin.getPinByName(bcmToWiring.get(pin)), PinMode.DIGITAL_OUTPUT);
+      pindef.setPinImpl(gpioPin);
+    }
+
+    return gpioPin;
   }
 
   // FIXME - return array
@@ -418,7 +510,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
         }
       }
     } catch (Exception e) {
-      Logging.logError(e);
+      error(e);
     }
 
     Integer[] ret = list.toArray(new Integer[list.size()]);
@@ -429,18 +521,37 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   public void startService() {
     super.startService();
     try {
+
+      Platform platform = Platform.getLocalInstance();
+      log.info("platform is {}", platform);
+      log.info("architecture is {}", platform.getArch());
+
+      boardType = SystemInfo.getBoardType().toString();
+      gpio = GpioFactory.getInstance();
+      log.info("Executing on Raspberry PI");
+      getPinList();
+
       log.info("Initiating i2c");
       I2CFactory.getInstance(Integer.parseInt(bus));
       log.info("i2c initiated on bus {}", bus);
-      // scan(); takes too long
+      addTask(1000, "scan");
+
+      log.info("read task initialized");
+      addTask(1000, "read");
+
+      // TODO - config which starts all pins in input or output mode
+
     } catch (IOException e) {
       log.error("i2c initiation failed", e);
+    } catch (Exception e) {
+      // an error in the constructor won't get broadcast - so we need Runtime to
+      // do it
+      Runtime.getInstance().error("raspi service requires arm %s is not arm - %s", getName(), e.getMessage());
+      log.error("RasPi init failed", e);
+      wrongPlatformError = "The RasPi service requires raspberry pi hardware";
+      broadcastState();
     }
-  }
 
-  public void testGPIOOutput() {
-    GpioPinDigitalMultipurpose pin = gpio.provisionDigitalMultipurposePin(RaspiPin.GPIO_02, PinMode.DIGITAL_INPUT, PinPullResistance.PULL_DOWN);
-    log.info("Pin: {}", pin);
   }
 
   public void testPWM() {
@@ -467,17 +578,25 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
         }
       }
     } catch (Exception e) {
-
+      error(e);
     }
   }
 
   @Override
-  public void write(int address, int value) {
+  public void write(String pin, int value) {
+    log.info("write {} {}", pin, value);
+    if (!pinIndex.containsKey(pin)) {
+      error("Pin %s not found", pin);
+      return;
+    }
 
-    PinDefinition pinDef = addressIndex.get(address);
-    pinMode(address, Arduino.OUTPUT);
-    digitalWrite(address, value);
-    // cache value
+    PinDefinition pinDef = pinIndex.get(pin);
+    pinMode(pin, "OUTPUT");
+
+    GpioPinDigitalMultipurpose gpio = getGPIO(pin);
+    gpio.setState(value == 0 ? PinState.LOW : PinState.HIGH);
+
+    invoke("publishPinDefinition", pinDef);
     pinDef.setValue(value);
   }
 
@@ -507,6 +626,49 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     webgui.startService();
 
   }
+  
+  public void read() {
+    log.debug("read task invoked");
+    List<PinData> pinArray = new ArrayList<>();
+    // load pin array
+    for (String pin : pinIndex.keySet()) {
+      PinDefinition pindef = pinIndex.get(pin);
+      if (pindef.isEnabled()) {
+        log.info("pin {} enabled {}", pin, pindef.isEnabled());
+        int value = read(pin);
+        pindef.setValue(value);
+        PinData pd = new PinData(pin, value);
+        log.info("pin data {}", pd);
+        pinArray.add(pd);
+      }
+    }
+    
+    if (pinArray.size() > 0) {
+      PinData[] array = pinArray.toArray(new PinData[0]);
+      invoke("publishPinArray", new Object[]{array});
+    }
+  }
+  
+  @Override
+  public int read(String pin) {
+    
+    if (!pinIndex.containsKey(pin)) {
+      error("Pin %s not found", pin);
+      return -1;
+    }
+    PinDefinition pindef = pinIndex.get(pin);
+    GpioPinDigitalMultipurpose gpioPin = getGPIO(pin);
+    if (!gpioPin.isMode(PinMode.DIGITAL_INPUT)){
+      pinMode(pin, "INPUT");
+    }
+    if (gpioPin.isLow()) {
+      pindef.setValue(0);
+      return 0;
+    } else {
+      pindef.setValue(1);
+      return 1;
+    }
+  }
 
   @Override
   public void reset() {
@@ -516,6 +678,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
 
   @Override
   public BoardInfo getBoardInfo() {
+
     RaspiPin.allPins();
     // FIXME - this needs more work .. BoardInfo needs to be an interface where
     // RasPiInfo is derived
@@ -549,34 +712,47 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
 
       I2CBus bus = I2CFactory.getInstance(busNumber);
 
-      validAddresses = new HashMap<>();
-
-      if (!validAddresses.containsKey(busNumber)) {
-        validAddresses.put(busNumber, new HashSet<>());
+      if (!validI2CAddresses.containsKey(busNumber)) {
+        validI2CAddresses.put(busNumber, new HashSet<>());
       }
 
-      Set<String> addresses = validAddresses.get(busNumber);
+      Set<String> addresses = validI2CAddresses.get(busNumber);
 
       for (int i = 1; i < 128; i++) {
+        String hex = Integer.toHexString(i);
         try {
           I2CDevice device = bus.getDevice(i);
-          device.write((byte) 0);
-          addresses.add(Integer.toHexString(i));
+          device.read();
+          if (!addresses.contains(hex)) {
+            addresses.add(hex);
+            info("found new i2c device %s", hex);
+          }
         } catch (Exception ignore) {
+          if (addresses.contains(hex)) {
+            info("removing i2c device %s", hex);
+            addresses.remove(hex);
+          }
         }
       }
 
-      log.info("scanning bus {} found: ---", busNumber);
+      log.debug("scanning bus {} found: ---", busNumber);
       for (String a : addresses) {
-        log.info("address: " + a);
+        log.debug("address: " + a);
       }
-      log.info("----------");
+      log.debug("----------");
+
     } catch (Exception e) {
       error("cannot access i2c bus %d", busNumber);
       log.error("scan threw", e);
     }
 
     broadcastState();
+  }
+
+  @Override
+  @Deprecated /* use enablePin(String, int) */
+  public void enablePin(int address, int rate) {
+    error("use enablePin(String, int)");
   }
 
 }

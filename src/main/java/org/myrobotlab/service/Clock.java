@@ -74,7 +74,7 @@ public class Clock extends Service {
         thread.interrupt();
         broadcastState();
       } else {
-        log.info("{} already stopped");
+        log.info("{} already stopped", getName());
       }
       c.running = false;
       Service.sleep(20);

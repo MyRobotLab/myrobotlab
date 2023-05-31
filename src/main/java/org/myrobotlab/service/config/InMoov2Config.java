@@ -14,6 +14,7 @@ import org.myrobotlab.service.config.RandomConfig.RandomMessageConfig;
 
 public class InMoov2Config extends ServiceConfig {
 
+  @Deprecated /* no implementation */
   public int analogPinFromSoundCard = 53;
 
   public int audioPollsBySeconds = 2;
@@ -140,17 +141,13 @@ public class InMoov2Config extends ServiceConfig {
 
     // setup name references to different services
     mouthControl.jaw = name + ".head.jaw";
-    String i01Name = name;
-    int index = name.indexOf(".");
-    if (index > 0) {
-      i01Name = name.substring(0, name.indexOf("."));
-    }
+    mouthControl.mouth = name + ".mouth";
 
-    mouthControl.mouth = i01Name + ".mouth";
 
-    // FIXME ! - look at this !!! I've made austartPeers = false !
-    // by just sending a runtime that starts only i01
-    RuntimeConfig rtConfig = (RuntimeConfig) plan.get("runtime");
+
+    // WOW ! so good .. "default" config setting bot name based on language tag from runtime !!!
+    // LocalSpeech & RasPi both could be auto configured more based on system ino
+
 
     ProgramABConfig chatBot = (ProgramABConfig) plan.get(getPeerName("chatBot"));
     Runtime runtime = Runtime.getInstance();

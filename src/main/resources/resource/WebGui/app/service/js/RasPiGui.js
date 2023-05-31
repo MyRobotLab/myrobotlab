@@ -15,13 +15,18 @@ angular.module('mrlapp.service.RasPiGui', []).controller('RasPiGuiCtrl', ['$scop
             _self.updateState(data)
             $scope.$apply()
             break
-        case 'XXXonPinDefinition':
+        case 'onPinDefinition':
             $scope.service.pinIndex[data.pin] = data
-            $scope.service.addressIndex[data.address] = data
+            $scope.$apply()
+            break
+        case 'onPinArray':
+            for (const pd of data){
+                $scope.service.pinIndex[pd.pin].value = pd.value
+            }            
             $scope.$apply()
             break
         default:
-            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
+            console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
         }
     }
@@ -31,16 +36,28 @@ angular.module('mrlapp.service.RasPiGui', []).controller('RasPiGuiCtrl', ['$scop
     }
 
     $scope.write = function(pinDef){
-        msg.send('write', pinDef.address, pinDef.valueDisplay?1:0)
+        msg.send('write', pinDef.pin, pinDef.valueDisplay?1:0)
     }
 
-    $scope.readWrite = function(pinDef) {
+    $scope.pinMode = function(pinDef) {
         console.info(pinDef)
         // FIXME - standardize interface with Arduino :(
-        msg.send('pinMode', pinDef.pin, pinDef.readWrite?1:0)
+        msg.send('pinMode', pinDef.pin, pinDef.mode)
     }
 
     msg.subscribe('publishPinDefinition')
+    msg.subscribe('publishPinArray')
     msg.subscribe(this)
 }
 ])
+.filter('toArray', function() {
+    return function(obj) {
+      if (obj instanceof Object) {
+        return Object.keys(obj).map(function(key) {
+          return obj[key];
+        });
+      } else {
+        return obj;
+      }
+    };
+  });

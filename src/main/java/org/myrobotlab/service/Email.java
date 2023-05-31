@@ -255,7 +255,8 @@ public class Email extends Service {
       Email email = (Email) Runtime.start("email", "Email");
 
       email.setGmailProps("myuser@gmail.com", "xxxxxxxxx");
-      email.sendImage("some-email@email.com", "data/OpenCV/cv-00573.png");
+      // email.sendImage("some-email@email.com", "data/OpenCV/cv-00573.png");
+      email.save();
 
     } catch (Exception e) {
       log.error("main threw", e);
