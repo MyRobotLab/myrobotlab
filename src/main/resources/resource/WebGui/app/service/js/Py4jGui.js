@@ -8,8 +8,8 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
     // because its non serializable
     var clients = []
 
-    $scope.scriptCount = 0
-    $scope.lastStatus = null
+    // filesystem list of scripts
+    $scope.scriptList = []
     $scope.log = ''
 
     // this UI's currently active script
@@ -40,12 +40,15 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
             $scope.log = data + $scope.log
             $scope.$apply()
             break
+        case 'onScriptList':
+            $scope.scriptList = data
+            $scope.$apply()
+            break
         case 'onClients':
             $scope.clients = data
             $scope.$apply()
             break
         case 'onStatus':
-            $scope.lastStatus = data
             if (data.level == 'error') {
                 $scope.log = data.detail + '\n' + $scope.log
             }
@@ -56,10 +59,6 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
             console.error("ERROR - unhandled method " + msg.method)
             break
         }
-    }
-
-    $scope.openScript = function(filename) {
-        msg.send('openScript', filename)
     }
 
     //----- ace editors related callbacks begin -----//
@@ -75,8 +74,7 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
 
     $scope.closeScript = function(scriptName) {
         // FIXME - save first ?
-        msg.send('closing script', scriptName)
-        $scope.scriptCount--
+        msg.send('closeScript', scriptName)
     }
 
     $scope.exec = function() {
@@ -84,7 +82,7 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
         msg.send('exec', activeScript.code)
     }
     $scope.tabSelected = function(script) {
-        console.info('here')
+        console.info('tabSelected')
         $scope.activeKey = script.file
     }
 
@@ -100,7 +98,7 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
 
     $scope.addScript = function() {
         var modalInstance = $uibModal.open({
-            templateUrl: 'py4jFilename.html',
+            templateUrl: 'addScript.html',
             controller: function($scope, $uibModalInstance) {
                 $scope.ok = function() {
                     msg.send('addScript', $scope.filename, '# new awesome robot script\n')
@@ -130,10 +128,50 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
         })
     }
 
+
+    $scope.openScript = function() {
+        
+        msg.send('getScriptList')
+        
+        var modalInstance = $uibModal.open({
+            templateUrl: 'openScript.html',
+            scope: $scope,
+            controller: function($scope, $uibModalInstance) {
+                $scope.ok = function(file) {
+                    msg.send('openScript', file)
+                    $uibModalInstance.close()
+                }
+
+                $scope.cancel = function() {
+                    $uibModalInstance.dismiss('cancel')
+                }
+
+                $scope.checkEnterKey = function(event) {
+                    if (event.keyCode === 13) {
+                        $scope.ok()
+                    }
+                }
+
+            },
+            size: 'sm'
+        })
+
+        modalInstance.result.then(function(filename) {
+            // Do something with the filename
+            console.log("Filename: ", filename)
+        }, function() {
+            // Modal dismissed
+            console.log("Modal dismissed")
+        })
+    }
+    
+
     msg.subscribe('publishStdOut')
     msg.subscribe('publishAppend')
     msg.subscribe('getClients')
+    msg.subscribe('getScriptList')
     msg.send('getClients')
+    msg.send('getScriptList')
     msg.subscribe(this)
 }
 ])

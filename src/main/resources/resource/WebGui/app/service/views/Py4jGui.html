@@ -4,21 +4,19 @@
         <tr>
             <td colspan="5">
                 <img ng-src="{{ clients.length === 0 ? 'disconnected.png' : 'connected.png' }}" alt="Connected clients" width="16"/>&nbsp;{{clients.length}} {{service.scriptRootDir}}
+            
             </td>
         </tr>
         <tr>
             <td>
                 <button ng-click="addScript()" class="btn btn-default">
                     <span class="glyphicon glyphicon-file"/>new
-                
                 </button>
-                <button class="btn btn-default" ng-click="openScriptList()">
+                <button class="btn btn-default" ng-click="openScript()">
                     <span class="glyphicon glyphicon-open-file"/>open
-                
                 </button>
                 <button class="btn btn-default" ng-click="saveScript()">
                     <span class="glyphicon glyphicon-save-file"/>save 
-                
                 </button>
             </td>
             <td>&nbsp;&nbsp;&nbsp;</td>
@@ -32,26 +30,23 @@
                     stop
                 </button>
             </td>
-			<td>&nbsp;&nbsp;&nbsp;</td>
-			<td>
-
-        <div class="btn-group" uib-dropdown is-open="status.isopen">
-            <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">examples</button>
-            <ul uib-dropdown-menu>
-                <li id="newService">
-                    <form class="navbar-form">
-                        <div class="input-group">
-                            <div class="input-group-btn">
-                                <input class="form-control" type="text" ng-model="newType" press-enter="msg.openExampleScript(newType.simpleName);newType=''" placeholder="Service Type" title="service type example" uib-typeahead="service as service.simpleName for service in getPossibleServices() | filter:{simpleName:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html">
-                            </div>
-                        </div>
-                    </form>
-                </li>
-            </ul>
-        </div>
-				
-			</td>
-
+            <td>&nbsp;&nbsp;&nbsp;</td>
+            <td>
+                <div class="btn-group" uib-dropdown is-open="status.isopen">
+                    <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">examples</button>
+                    <ul uib-dropdown-menu>
+                        <li id="newService">
+                            <form class="navbar-form">
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <input class="form-control" type="text" ng-model="newType" press-enter="msg.openExampleScript(newType.simpleName);newType=''" placeholder="Service Type" title="service type example" uib-typeahead="service as service.simpleName for service in getPossibleServices() | filter:{simpleName:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html">
+                                    </div>
+                                </div>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </td>
         </tr>
     </table>
 </div>
@@ -65,7 +60,7 @@
     <!--
     Active key: {{ activeKey  }}  activeScript: {{service.openedScripts[activeKey]}} <br/> -->
     <uib-tabset>
-        <uib-tab ng-repeat="(key, value) in service.openedScripts" index="$index + 1" select="tabSelected(value)">
+        <uib-tab ng-repeat="(key, value) in service.openedScripts" select="tabSelected(value)">
             <uib-tab-heading>
                 <span>
                     {{key}}&nbsp;&nbsp;&nbsp;
@@ -88,19 +83,14 @@
 <div class="row">
     <span>
         console 
-        
-        
-        
-        
-        
-        <button ng-click="log = '';$apply()" class="btn btn-default">
+         <button ng-click="log = '';$apply()" class="btn btn-default">
             <span class="glyphicon glyphicon-remove"/>
         </button>
     </span>
     <br/>
     <pre>{{log}}</pre>
 </div>
-<script type="text/ng-template" id="py4jFilename.html">
+<script type="text/ng-template" id="addScript.html">
     <div class="modal-header">
       Enter Filename
     </div>
@@ -111,5 +101,28 @@
       <button class="btn btn-primary" ng-click="ok()">OK</button>
       <button class="btn btn-default" ng-click="cancel()">Cancel</button>
     </div>
-  
+</script>
+
+<script type="text/ng-template" id="openScript.html">
+    <div class="modal-header">
+    </div>
+    <div class="modal-body">
+	 <div class="dropdown">
+    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Select a file
+      <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      <li>
+        <input type="text" ng-model="filter" placeholder="Filter" class="form-control">
+      </li>
+	<li ng-repeat="filename in scriptList | filter:filter">
+        <a ng-click="ok(filename)">{{ filename }}</a>
+      </li>
+    </ul>
+  </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+    </div>
 </script>
