@@ -80,28 +80,58 @@ public class Py4j extends Service implements GatewayServerListener {
   }
 
   /**
-   * Opens a new or existing script. All file operations will be relative to the
-   * data/Py4j/{serviceName} directory.
+   * Add a new script to Py4j default location will be in
+   * data/Py4j/{serviceName}
    * 
    * @param scriptName
-   *          - name of the script file relatie to scriptRootDir
-   *          data/Py4j/{serviceName}/
+   *          - name of the script
    * @param code
-   *          - code in that file
+   *          - code block
    * @throws IOException
    */
-  public void openScript(String scriptName, String code) throws IOException {
+  public void addScript(String scriptName, String code) throws IOException {
 
     File script = new File(scriptRootDir + fs + scriptName);
 
     if (script.exists()) {
-      code = FileIO.toString(script);
+      error("script %s already exists", scriptName);
+      return;
     }
 
     openedScripts.put(scriptName, new Script2(scriptName, code));
     broadcastState();
   }
 
+  /**
+   * Opens an existing script. All file operations will be relative to the
+   * data/Py4j/{serviceName} directory.
+   * 
+   * @param scriptName
+   *          - name of the script file relatie to scriptRootDir
+   *          data/Py4j/{serviceName}/
+   * @throws IOException
+   */
+  public void openScript(String scriptName) throws IOException {
+
+    File script = new File(scriptRootDir + fs + scriptName);
+
+    if (!script.exists()) {
+      error("file %s not found", script.getAbsolutePath());
+      return;
+    }
+
+    openedScripts.put(scriptName, new Script2(scriptName, FileIO.toString(script.getAbsoluteFile())));
+    broadcastState();
+  }
+
+  /**
+   * Saves a script to the file system default will be in
+   * data/Py4j/{serviceName}/{scriptName}
+   * 
+   * @param scriptName
+   * @param code
+   * @throws IOException
+   */
   public void saveScript(String scriptName, String code) throws IOException {
     FileIO.toFile(scriptRootDir + fs + scriptName, code);
     info("saved file %s", scriptName);
@@ -159,17 +189,43 @@ public class Py4j extends Service implements GatewayServerListener {
       log.info("Py4j gateway server already stopped");
     }
   }
-  
-  public class WaitForProcess extends Thread{
+
+  /**
+   * Opens an example "service" script maintained in myrobotlab
+   * 
+   * @param serviceType
+   *          the type of service
+   * @throws IOException
+   */
+  public void openExampleScript(String serviceType) throws IOException {
+    String filename = getResourceRoot() + fs + serviceType + fs + String.format("%s.py", serviceType);
+    String serviceScript = null;
+    try {
+      serviceScript = FileIO.toString(filename);
+    } catch (Exception e) {
+      error("%s.py not  found", serviceType);
+      log.error("getting service file script example threw {}", e);
+    }
+    addScript(serviceType + ".py", serviceScript);
+  }
+
+  /**
+   * A class to wait on a process signal and notify client is disconnected
+   * 
+   * @author GroG
+   *
+   */
+  public class WaitForProcess extends Thread {
     public Process process;
-    public Integer exitCode; 
+    public Integer exitCode;
     public Py4j py4j;
-    
+
     public WaitForProcess(Py4j py4j, Process process) {
       super(String.format("%s-process-signal", py4j.getName()));
       this.process = process;
       this.py4j = py4j;
     }
+
     public void run() {
       try {
         exitCode = process.waitFor();
@@ -200,7 +256,7 @@ public class Py4j extends Service implements GatewayServerListener {
     }
 
     public Py4jClient(Py4j py4j, Process process) {
-      this.process = process; 
+      this.process = process;
       this.py4j = py4j;
       this.gobbler = new StreamGobbler(String.format("%s-gobbler", getName()), process.getInputStream());
       this.gobbler.start();
@@ -251,7 +307,7 @@ public class Py4j extends Service implements GatewayServerListener {
 
   @Override
   public void connectionStarted(Py4JServerConnection gatewayConnection) {
-    log.info("connectionStarted {}",gatewayConnection.toString());
+    log.info("connectionStarted {}", gatewayConnection.toString());
     clients.put(getClientKey(gatewayConnection), new Py4jClient());
     info("connection started");
     invoke("getClients");

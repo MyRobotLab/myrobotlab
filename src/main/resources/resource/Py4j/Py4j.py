@@ -38,25 +38,32 @@ class MessageHandler(object):
         self.stderr = sys.stderr
         sys.stdout = self
         sys.stderr = self
-
+        self.gateway = JavaGateway(callback_server_parameters=CallbackServerParameters(), python_server_entry_point=self)
+        self.runtime = self.gateway.jvm.org.myrobotlab.service.Runtime.getInstance()
     def write(self,string):
-        # TODO find out how to do service binding with name
+        # FIXME find out how to do service binding with name
         global py4j, runtime
         py4j = runtime.getService('py4j')
         # py4j.invoke('publishStdOut', string)
         py4j.handleStdOut(string)
-        # py4j.info(string)
-        # runtime.send('py4j', 'publishStdOut', string)
-        # runtime.info(string)
-
-        
+    def exec(self, code):
+        try:
+            exec(code)
+        except Exception as e:
+            print(e)            
     def invoke(self, method, data=None):
         # convert to list
         params = list(data)
         eval(method)(*params)
 
     def flush(self):
-        pass        
+        pass
+
+    def shutdown(self):
+        self.gateway.shutdown()
+    
+    def getInstance(self):
+        return self.runtime
 
     def convert_array(self, array):
         result = []
@@ -89,20 +96,16 @@ class MessageHandler(object):
         implements = ['org.myrobotlab.framework.interfaces.Invoker']
 
 handler = MessageHandler()
-gateway = JavaGateway(callback_server_parameters=CallbackServerParameters(), python_server_entry_point=handler)
-
-runtime = gateway.jvm.org.myrobotlab.service.Runtime.getInstance()
-py4j = runtime.start("py4j","Py4j")
-
+runtime = handler.getInstance()
 print(runtime.getUptime())
 
-# example callback methods
-# def test(text):
-#     print('onTest', text)
+import sys
+from time import sleep
+print("python started", sys.version)
+print("runtime attached", runtime.getVersion())
+# TODO env vars
 
-# def test2(text, value):
-#     print('onTest2', text, value)
 
-# TODO spin    
-
-sleep(1000)
+for i in range(0,10):
+    print('hello', i)
+    sleep(1)

@@ -2,23 +2,16 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
     console.info('Py4jGuiCtrl')
     var _self = this
     var msg = this.msg
-    var name = $scope.name
-    // init scope values
-    // $scope.service = mrl.getService(name)
-    $scope.output = ''
-    $scope.activeTabIndex = 0
+
+    // list of client keys
+    // cant come from service.clients 
+    // because its non serializable
+    var clients = []
+
     $scope.scriptCount = 0
-    $scope.activeScript = null
-    $scope.scripts = {}
-    $scope.test = null
-    $scope.openingScript = true
-    $scope.dropdownIsOpen = true
     $scope.lastStatus = null
     $scope.log = ''
 
-    // 2 dialogs 
-    $scope.loadFile = false
-    $scope.newFile = false
     // this UI's currently active script
     $scope.activeKey = null
 
@@ -46,11 +39,15 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
         case 'onAppend':
             $scope.log = data + $scope.log
             $scope.$apply()
-            break                
+            break
+        case 'onClients':
+            $scope.clients = data
+            $scope.$apply()
+            break
         case 'onStatus':
             $scope.lastStatus = data
-            if (data.level == 'error'){
-                $scope.log = data.detail + '\n' + $scope.log    
+            if (data.level == 'error') {
+                $scope.log = data.detail + '\n' + $scope.log
             }
             console.info("onStatus ", data)
             $scope.$apply()
@@ -61,33 +58,13 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
         }
     }
 
-    $scope.newScript = function(filename, script) {
-        if (!script) {
-            script = '# new awesome robot script\n'
-        }
-        msg.send('openScript', filename, script)
-        $scope.newName = ''
-        // clear input text
-        $scope.newFile = false
-        // close dialog
-    }
-
-    // utility methods //
-    // gets script name from full path name
-    $scope.getName = function(path) {
-        if (path.indexOf("/") >= 0) {
-            return (path.split("/").pop())
-        }
-        if (path.indexOf("\\") >= 0) {
-            return (path.split("\\").pop())
-        }
-        return path
+    $scope.openScript = function(filename) {
+        msg.send('openScript', filename)
     }
 
     //----- ace editors related callbacks begin -----//
     $scope.aceLoaded = function(e) {
         console.info("ace loaded")
-        $scope.activeTabIndex = $scope.scriptCount
     }
 
     $scope.aceChanged = function(e) {
@@ -98,10 +75,8 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
 
     $scope.closeScript = function(scriptName) {
         // FIXME - save first ?
-        msg.send('closeScript', scriptName)
+        msg.send('closing script', scriptName)
         $scope.scriptCount--
-        delete $scope.scripts[scriptName]
-        console.log("removed " + scriptName)
     }
 
     $scope.exec = function() {
@@ -123,43 +98,42 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
         return ret
     }
 
+    $scope.addScript = function() {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'py4jFilename.html',
+            controller: function($scope, $uibModalInstance) {
+                $scope.ok = function() {
+                    msg.send('addScript', $scope.filename, '# new awesome robot script\n')
+                    $uibModalInstance.close($scope.filename)
+                }
 
-    $scope.uploadFile = function() {
+                $scope.cancel = function() {
+                    $uibModalInstance.dismiss('cancel')
+                }
 
-        var f = $scope.myFile;
-        var r = new FileReader();
+                $scope.checkEnterKey = function(event) {
+                    if (event.keyCode === 13) {
+                        $scope.ok()
+                    }
+                }
 
-        r.onloadend = function(e) {
-            var data = e.target.result;
-            console.info('onloadend')
-            $scope.newScript(f.name, data)
-            $scope.loadFile = false
-            // close dialog
-        }
+            },
+            size: 'sm'
+        })
 
-        r.readAsBinaryString(f);
-        console.info('readAsBinaryString')
+        modalInstance.result.then(function(filename) {
+            // Do something with the filename
+            console.log("Filename: ", filename)
+        }, function() {
+            // Modal dismissed
+            console.log("Modal dismissed")
+        })
     }
 
-    // $scope.possibleServices = Object.values(mrl.getPossibleServices())
     msg.subscribe('publishStdOut')
     msg.subscribe('publishAppend')
+    msg.subscribe('getClients')
+    msg.send('getClients')
     msg.subscribe(this)
-    msg.send('newScript')
 }
-]).directive('fileModel', ['$parse', function($parse) {
-    return {
-        restrict: 'A',
-        link: function(scope, element, attrs) {
-            var model = $parse(attrs.fileModel);
-            var modelSetter = model.assign;
-
-            element.bind('change', function() {
-                scope.$apply(function() {
-                    modelSetter(scope, element[0].files[0]);
-                });
-            });
-        }
-    };
-}
-]);
+])
