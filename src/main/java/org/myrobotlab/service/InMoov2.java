@@ -687,7 +687,9 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
    * @throws IOException
    */
   public void loadInitScripts() throws IOException {
+    // FIXME !!! THIS SHOULD BE DATADIR !!!!
     loadScripts(getResourceDir() + fs + "init");
+    loadScripts(getDataDir() + fs + "init");
   }
 
   public boolean isCameraOn() {
