@@ -101,6 +101,11 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
             templateUrl: 'addScript.html',
             controller: function($scope, $uibModalInstance) {
                 $scope.ok = function() {
+                    if (!$scope.filename){
+                        console.error('filename cannot be null')
+                        return
+                    }
+                    
                     msg.send('addScript', $scope.filename, '# new awesome robot script\n')
                     $uibModalInstance.close($scope.filename)
                 }
