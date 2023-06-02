@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -87,10 +88,19 @@ public class Gpt3 extends Service implements TextListener, TextPublisher, Uttera
 
       if (!c.sleeping) {
 
-        String json =
+        // chat completions
+        String json =        
+        "{\r\n"
+        + "     \"model\": \""+ c.engine +"\",\r\n"
+        + "     \"messages\": [{\"role\": \"user\", \"content\": \""+ text +"\"}],\r\n"
+        + "     \"temperature\": 0.7\r\n"
+        + "   }";
 
-            "{\r\n" + "  \"model\": \"" + c.engine + "\",\r\n" + "  \"prompt\": \"" + text + "\",\r\n" + "  \"temperature\": " + c.temperature + ",\r\n" + "  \"max_tokens\": "
-                + c.maxTokens + ",\r\n" + "  \"top_p\": 1,\r\n" + "  \"frequency_penalty\": 0,\r\n" + "  \"presence_penalty\": 0\r\n" + "}";
+//      completions
+//      String json =        
+//      "{\r\n" + "  \"model\": \"" + c.engine + "\",\r\n" + "  \"prompt\": \"" + text + "\",\r\n" + "  \"temperature\": " + c.temperature + ",\r\n" + "  \"max_tokens\": "
+//      + c.maxTokens + ",\r\n" + "  \"top_p\": 1,\r\n" + "  \"frequency_penalty\": 0,\r\n" + "  \"presence_penalty\": 0\r\n" + "}";
+
 
         HttpClient http = (HttpClient) startPeer("http");
 
@@ -99,12 +109,28 @@ public class Gpt3 extends Service implements TextListener, TextPublisher, Uttera
         @SuppressWarnings({ "unchecked", "rawtypes" })
         Map<String, Object> payload = (Map) CodecUtils.fromJson(msg, LinkedHashMap.class);
         @SuppressWarnings({ "unchecked", "rawtypes" })
+        
+        Map<String,Object> errors = (Map)payload.get("error");
+        if (errors != null) {          
+          error((String)errors.get("message"));          
+        }        
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         List<Object> choices = (List) payload.get("choices");
         if (choices != null && choices.size() > 0) {
           @SuppressWarnings({ "unchecked", "rawtypes" })
           Map<String, Object> textObject = (Map) choices.get(0);
           responseText = (String) textObject.get("text");
-          invoke("publishText", responseText);
+          if (responseText != null) {
+            // /completions
+            invoke("publishText", responseText);
+          } else {
+            // /chat/completions
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            Map<String, Object> content = (Map)textObject.get("message"); 
+            // role=assistant
+            responseText = (String)content.get("content");
+          }
+          
 
         } else {
           warn("no response for %s", text);
@@ -139,6 +165,22 @@ public class Gpt3 extends Service implements TextListener, TextPublisher, Uttera
       error(e);
     }
     return null;
+  }
+  
+  /**
+   * Overriden error to also publish the errors
+   * probably would be a better solution to self subscibe to errors and 
+   * have the subscriptions publish utterances/responses/text
+   */
+  public Status error(String error) {
+    Status status = super.error(error);
+    invoke("publishText", error);    
+    Response response = new Response("friend", getName(), error, null);
+    Utterance utterance = new Utterance();
+    utterance.text = error;
+    invoke("publishUtterance", utterance);
+    invoke("publishResponse", response);
+    return status;
   }
   
   public String publishRequest(String text) {
