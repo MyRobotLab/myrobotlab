@@ -469,6 +469,7 @@ public class Py4j extends Service implements GatewayServerListener {
   /**
    * shutdown cleanly
    */
+  @Override
   public void stopService() {
     super.stopService();
     stop();
