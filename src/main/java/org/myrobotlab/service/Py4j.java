@@ -11,13 +11,13 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.interfaces.Executor;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.StreamGobbler;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Script2;
+import org.myrobotlab.service.interfaces.Executor;
 import org.slf4j.Logger;
 
 import py4j.GatewayServer;
@@ -26,12 +26,10 @@ import py4j.Py4JServerConnection;
 
 /**
  * 
- * @author GroG
  * 
- *         <pre>
  * A bridge between a native proces of Python running and MRL.
  * Should support any version of Python. 
- * 
+ * <pre>
  *  requirements: 
  * 
  *  1.  some version of python is installed and the python
@@ -45,7 +43,9 @@ import py4j.Py4JServerConnection;
  *  of the service ports
  *  2. Perhaps asynchronous calling of handler ?
  *
- *         </pre>
+ * </pre>
+ * 
+ * @author GroG
  */
 public class Py4j extends Service implements GatewayServerListener {
 
@@ -98,6 +98,7 @@ public class Py4j extends Service implements GatewayServerListener {
       this.py4j = py4j;
     }
 
+    @Override
     public void run() {
       try {
         exitCode = process.waitFor();
@@ -432,6 +433,7 @@ public class Py4j extends Service implements GatewayServerListener {
     }
   }
 
+  @Override
   public void startService() {
     super.startService();
     scriptRootDir = new File(getDataInstanceDir()).getAbsolutePath();
