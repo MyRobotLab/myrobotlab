@@ -1,6 +1,5 @@
 package org.myrobotlab.service.data;
 
-import java.io.File;
 import java.io.Serializable;
 
 public class Script implements Serializable {
@@ -8,51 +7,15 @@ public class Script implements Serializable {
   /**
    * unique location &amp; key of the script e.g. /mrl/scripts/myScript.py
    */
-  File file;
+  public String file;
   /**
    * actual code/contents of the script
    */
-  String code;
+  public String code;
 
-  public Script(String name, String script) {
-    this.file = new File(name);
-    // DOS2UNIX line endings.
-    // This seems to get triggered when people use editors that don't do
-    // the cr/lf thing very well..
-    // TODO:This will break python quoted text with the """ syntax in
-    // python.
-    if (script != null) {
-      script = script.replaceAll("(\r)+\n", "\n");
-    }
+  public Script(String file, String script) {
+    this.file = file;
     this.code = script;
   }
 
-  public String getCode() {
-    return code;
-  }
-
-  public String getName() {
-    if (file == null) {
-      return null;
-    }
-    // FIXME - display name
-    return file.getName();
-  }
-
-  public String getDisplayName() {
-    if (file == null) {
-      return null;
-    }
-    // FIXME - display name
-    return file.getName();
-  }
-
-  public void setCode(String code) {
-    this.code = code;
-  }
-
-  public void setName(String name) {
-    // FIXME - logic for setting file ?
-    this.file = new File(name);
-  }
 }

@@ -1,9 +1,11 @@
 package org.myrobotlab.service.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Py4jConfig extends ServiceConfig {
 
+  /**
+   * root of python scripts - if not specified by user it will be
+   *  /data/Py4j/{serviceName}
+   */
+  public String scriptRootDir;
   
 }
