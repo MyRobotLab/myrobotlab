@@ -2107,6 +2107,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         log.error("release", e);
       }
     }
+    
+    // clean up remote ... the contract should 
+    // probably be just remove their references - do not
+    // ask for them to be released remotely ..
+    for(String remoteService: registry.keySet()) {
+      registry.remove(remoteService);
+    }
 
     if (runtime != null && releaseRuntime) {
       runtime.releaseService();
@@ -3954,18 +3961,6 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
   }
 
   @Override
-  public Message getDescribeMsg(String connId) {
-    // TODO support queries
-    // FIXME !!! - msg.name is wrong with only "runtime" it should be
-    // "runtime@id"
-    // TODO - lots of options for a default "describe"
-
-
-    return Message.createMessage(getFullName(), "runtime", "describe",
-        new Object[] { "fill-uuid", CodecUtils.toJson(new DescribeQuery(Platform.getLocalInstance().getId(), connId)) });
-  }
-
-  @Override
   public ServiceConfig getFilteredConfig() {
     RuntimeConfig sc = (RuntimeConfig) super.getFilteredConfig();
     Set<Listener> removeList = new HashSet<>();
@@ -3980,6 +3975,7 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
     }
     return sc;
   }
+
 
   /**
    * Unregister all connections that a specified client has made.
