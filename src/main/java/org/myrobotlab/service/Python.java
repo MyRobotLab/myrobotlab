@@ -272,10 +272,10 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
    */
   Map<String, String> exampleFiles = new TreeMap<String, String>();
 
-  transient LinkedBlockingQueue<Message> inputQueue = new LinkedBlockingQueue<Message>();
-  transient InputQueue inputQueueThread;
+  final transient LinkedBlockingQueue<Message> inputQueue = new LinkedBlockingQueue<Message>();
+  final transient InputQueue inputQueueThread = new InputQueue(this);
   transient PythonInterpreter interp = null;
-  transient Map<String, PIThread> interpThreads = new HashMap<String, PIThread>();
+  final transient Map<String, PIThread> interpThreads = new HashMap<String, PIThread>();
 
   int interpreterThreadCount = 0;
 
@@ -872,14 +872,16 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
     stop();
   }
   
+  /**
+   * Initialize the Jython interpreter including all the jython/python which needs to
+   * run in order to interface correctly with mrl. 
+   */
   public void init() {
     
     log.info("created python {}", getName());
     createPythonInterpreter();
     sleep(250);
-    
-    inputQueueThread = new InputQueue(this);
-
+   
     // I love ServiceData !
     ServiceData sd = ServiceData.getLocalInstance();
     List<MetaData> sdt = sd.getAvailableServiceTypes();
