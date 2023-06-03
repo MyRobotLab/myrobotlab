@@ -2112,7 +2112,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // probably be just remove their references - do not
     // ask for them to be released remotely ..
     for(String remoteService: registry.keySet()) {
-      registry.remove(remoteService);
+      if (!remoteService.equals(runtime.getFullName())) {
+        registry.remove(remoteService);
+      }
     }
 
     if (runtime != null && releaseRuntime) {
