@@ -25,16 +25,21 @@
 
 package org.myrobotlab.service;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServiceConfig.Listener;
 import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.data.ServoMove;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
-import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
 /**
@@ -60,7 +65,7 @@ import org.slf4j.Logger;
  * 
  */
 
-public class Servo extends AbstractServo implements ServoControl, ServiceLifeCycleListener {
+public class Servo extends AbstractServo implements ServiceLifeCycleListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -200,7 +205,7 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
   @Override
   public ServiceConfig getConfig() {
 
-    ServoConfig config = new ServoConfig();
+    ServoConfig config = (ServoConfig) super.getConfig();
 
     config.autoDisable = autoDisable;
     config.enabled = enabled;
@@ -214,8 +219,7 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
       config.inverted = mapper.isInverted();
     }
 
-    // config.controller = controller;
-
+    // FIXME remove members and use config only
     config.idleTimeout = idleTimeout;
     config.pin = pin;
     config.rest = rest;
@@ -239,7 +243,7 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    ServoConfig config = (ServoConfig) c;
+    ServoConfig config = (ServoConfig) super.apply(c);
 
     autoDisable = config.autoDisable;
 
@@ -292,12 +296,30 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
     return c;
   }
 
+  @Override
+  public ServiceConfig getFilteredConfig() {
+    ServoConfig sc = (ServoConfig) super.getFilteredConfig();
+    Set<String> removeList = Set.of(
+            "onServoEnable",
+            "onServoDisable",
+            "onEncoderData",
+            "onServoSetSpeed",
+            "onServoWriteMicroseconds",
+            "onServoMoveTo",
+            "onServoStop"
+    );
+    if (sc.listeners != null) {
+      sc.listeners.removeIf(listener -> removeList.contains(listener.callback));
+    }
+    return sc;
+  }
+
   public static void main(String[] args) throws InterruptedException {
     try {
 
       // log.info("{}","blah$Blah".contains("$"));
 
-      // LoggingFactory.init(Level.INFO);
+      LoggingFactory.init(Level.INFO);
       // Platform.setVirtual(true);
 
       // Runtime.start("python", "Python");
@@ -305,12 +327,7 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
 
       Runtime.start("clock", "Servo");
       Runtime runtime = Runtime.getInstance();
-      runtime.connect("http://localhost:8888");
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
+      // runtime.connect("http://localhost:8888");
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
@@ -331,6 +348,11 @@ public class Servo extends AbstractServo implements ServoControl, ServiceLifeCyc
 
       mega.attach(tilt);
       mega.attach(pan);
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
 
       // runtime.save();
 

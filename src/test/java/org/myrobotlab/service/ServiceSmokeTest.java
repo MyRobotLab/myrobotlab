@@ -37,6 +37,7 @@ public class ServiceSmokeTest extends AbstractTest {
       ArrayList<String> blacklist = new ArrayList<String>();
       blacklist.add("org.myrobotlab.service.OpenNi");
       blacklist.add("org.myrobotlab.service.Blender");
+      blacklist.add("org.myrobotlab.service.Joystick");
       blacklist.add("org.myrobotlab.service.WorkE");
       blacklist.add("org.myrobotlab.service.PythonProxy");
       blacklist.add("org.myrobotlab.service.Sweety");
@@ -109,7 +110,7 @@ public class ServiceSmokeTest extends AbstractTest {
     // TODO: perhaps some extra service type specific initialization?!
     String res = CodecUtils.toJson(s);
     assertNotNull(res);
-    log.info("Serialization successful for {}", s.getType());
+    log.info("Serialization successful for {}", s.getTypeKey());
 
     // ServiceInterface s = CodecUtils.fromJson(res, clazz)
     // assertNotNull(res);

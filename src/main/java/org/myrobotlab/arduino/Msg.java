@@ -48,6 +48,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import java.io.FileOutputStream;
 import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
@@ -2911,6 +2912,10 @@ public class Msg {
   
   public void setInvoke(boolean b){	
     invoke = b;	
+  }
+
+  public void setSerial(Serial serial) {
+    this.serial = serial;
   }
 
 }

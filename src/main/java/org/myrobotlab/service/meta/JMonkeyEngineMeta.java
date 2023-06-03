@@ -24,10 +24,6 @@ public class JMonkeyEngineMeta extends MetaData {
     addDependency("org.jmonkeyengine", "jme3-lwjgl3", jmeVersion);
     addDependency("org.jmonkeyengine", "jme3-jogg", jmeVersion);
 
-    // addDependency("org.jmonkeyengine", "jme3-test-data", jmeVersion);
-    addDependency("com.simsilica", "lemur", "1.11.0");
-    addDependency("com.simsilica", "lemur-proto", "1.10.0");
-
     addDependency("org.jmonkeyengine", "jme3-bullet", jmeVersion);
     addDependency("org.jmonkeyengine", "jme3-bullet-native", jmeVersion);
 

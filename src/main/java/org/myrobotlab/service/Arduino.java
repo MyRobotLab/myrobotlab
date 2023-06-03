@@ -166,7 +166,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   transient Mapper motorPowerMapper = new MapperLinear(-1.0, 1.0, -255.0, 255.0);
 
-  public transient Msg msg;
+  // make final - if not "connected" log error but don't allow Arduino NPEs
+  public final transient Msg msg = new Msg(this, null);
 
   Integer nextDeviceId = 0;
 
@@ -364,20 +365,20 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     // the i2c bus here and in MrlComm
     // This will only handle the creation of i2cBus.
     if (i2cBus == null) {
-      i2cBus = new I2CBus(String.format("I2CBus%s", control.getDeviceBus()));
-      i2cBusAttach(i2cBus, Integer.parseInt(control.getDeviceBus()));
+      i2cBus = new I2CBus(String.format("I2CBus%s", control.getBus()));
+      i2cBusAttach(i2cBus, Integer.parseInt(control.getBus()));
     }
 
     // This part adds the service to the mapping between
     // busAddress||DeviceAddress
     // and the service name to be able to send data back to the invoker
-    String key = String.format("%s.%s", control.getDeviceBus(), control.getDeviceAddress());
+    String key = String.format("%s.%s", control.getBus(), control.getAddress());
     I2CDeviceMap devicedata = new I2CDeviceMap();
     if (i2cDevices.containsKey(key)) {
-      log.error("Device {} {} {} already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName());
+      log.error("Device {} {} {} already exists.", control.getBus(), control.getAddress(), control.getName());
     } else {
-      devicedata.busAddress = control.getDeviceBus();
-      devicedata.deviceAddress = control.getDeviceAddress();
+      devicedata.busAddress = control.getBus();
+      devicedata.deviceAddress = control.getAddress();
       devicedata.control = control;
       i2cDevices.put(key, devicedata);
       control.attachI2CController(this);
@@ -452,6 +453,21 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   /**
+   * attach a pin listener who listens to a specific pin
+   */
+  public void attachPinListener(PinListener listener) {
+    if (listener == null) {
+      error("attachPinListener(null)");
+      return;
+    }
+    super.attachPinListener(listener);
+    // add a device to our deviceList
+    // DeviceMapping dm =
+    attachDevice((Attachable) listener, new Object[] { listener.getPin() });
+
+  }
+
+  /**
    * reattach - if the serial connection breaks or gets disconnected and we have
    * a device list - when the serial connection is established again we go
    * through all the devices and make sure any initialization communication to
@@ -521,18 +537,14 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   public void connect(String port, int rate, int databits, int stopbits, int parity) {
 
-    ArduinoConfig c = (ArduinoConfig) config;
-
     if (port == null) {
       warn("%s attempted to connect with a null port", getName());
       return;
     }
 
-    if (serial == null) {
-      serial = (Serial) startPeer(c.serial);
-      msg = new Msg(this, serial);
-      serial.addByteListener(this);
-    }
+    serial = (Serial) startPeer("serial");
+    msg.setSerial(serial);
+    serial.addByteListener(this);
 
     // test to see if we've been started. the serial might be null
     this.port = port;
@@ -686,7 +698,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
     log.info("detaching device {}", device.getName());
     Integer id = getDeviceId(device);
-    if (id != null) {
+    if (id != null && msg != null) {
       msg.deviceDetach(id);
       deviceIndex.remove(id);
     }
@@ -771,6 +783,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public void disablePin(String pinName) {
     // PinDefinition pinDef = getPin(address);
     PinDefinition pinDef = getPin(pinName);
+    if (pinDef == null) {
+      warn("pin definition %s does not exist", pinName);
+      return;
+    }
+    
     pinDef.setEnabled(false);
     msg.disablePin(pinDef.getAddress());
   }
@@ -870,12 +887,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    */
   @Override
   public void enablePin(String pin, int rate) {
-    // no longer a hard requirement
-    // if (!isConnected()) {
-    // error("must be connected to enable pins");
-    // return;
-    // }
-
     if (isConnected()) {
       PinDefinition pinDef = getPin(pin);
       enablePin(pinDef.getAddress(), rate);
@@ -1896,14 +1907,24 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   // > servoDetachPin/deviceId
   @Override
   public void onServoDisable(String servoName) {
+    if (!isConnected()) {
+      warn("Arduino cannot set speed when not connected - connected %b", isConnected());
+      return;
+    }
+
     Integer id = getDeviceId(servoName);
-    if (id != null && msg != null) {
+    if (id != null) {
       msg.servoDetachPin(id);
     }
   }
 
   @Override
   public void onServoEnable(String servoName) {
+    if (!isConnected()) {
+      warn("Arduino cannot set speed when not connected - connected %b", isConnected());
+      return;
+    }
+
     Integer deviceId = getDeviceId(servoName);
     if (deviceId == null) {
       log.warn("servoEnable servo {} does not have a corresponding device currently - did you attach?", servoName);
@@ -1926,7 +1947,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   // > servoWrite/deviceId/target
   public void onServoMoveTo(ServoMove move) {
-    // ServoControl s = (ServoControl)Runtime.getService(move.name);
+    if (!isConnected()) {
+      warn("Arduino cannot set speed when not connected - connected %b", isConnected());
+      return;
+    }
+
     Integer deviceId = getDeviceId(move.name);
     if (deviceId == null) {
       log.warn("servoMoveTo servo {} does not have a corresponding device currently - did you attach?", move.name);
@@ -1946,7 +1971,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     // FIXME - FIND OTHER FUNCTIONS THAT CANNOT BE SET WHEN NOT CONNECTED
     // AND HANDLE THE SAME AS BELOW !!!
     if (!isConnected()) {
-      error("Arduino cannot set speed when not connected");
+      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected());
       return;
     }
 
@@ -1955,7 +1980,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     if (servoSpeed.speed != null) {
       speed = servoSpeed.speed.intValue();
     }
-    log.info("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo), speed);
+    log.debug("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo), speed);
     Integer id = getDeviceId(servo);
     if (id == null) {
       log.error("{} has null deviceId", servo);
@@ -1971,12 +1996,21 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   // > servoWriteMicroseconds/deviceId/b16 ms
   public void onServoWriteMicroseconds(ServoControl servo, int uS) {
+    if (!isConnected()) {
+      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected());
+      return;
+    }
+
     int deviceId = getDeviceId(servo);
     log.debug("writeMicroseconds {} {} id {}", servo.getName(), uS, deviceId);
     msg.servoMoveToMicroseconds(deviceId, uS);
   }
 
   public void setAref(String aref) {
+    if (!isConnected()) {
+      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected());
+      return;
+    }
     aref = aref.toUpperCase();
     if (this.getBoard().contains("mega")) {
       if (aref == "INTERNAL") {
@@ -2219,8 +2253,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    */
   @Override
   public void onServoStop(ServoControl servo) {
+    log.debug("servo {}", servo.getName());
     Integer id = getDeviceId(servo);
-    if (id != null) {
+    if (id != null && msg != null) {
       msg.servoStop(id);
     }
   }
@@ -2282,55 +2317,36 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   @Override
   public ServiceConfig getConfig() {
-    ArduinoConfig config = new ArduinoConfig();
+    ArduinoConfig c = (ArduinoConfig) super.getConfig();
 
-    // FIXME - shouldn't need the this copying to local fields
-    // config is already set by the framework as part of an apply
-    // so the super.getConfig should be sufficient if
-    // the state of the config is updated during runtime
-
-    config.port = port;
-    config.connect = isConnected();
-    if (serial != null) {
-      config.serial = serial.getName();
-    }
-
-    return config;
-  }
-
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    ArduinoConfig arduinoConfig = (ArduinoConfig) c;
-
-    if (isRunning() && arduinoConfig.connect) {
-      connect(arduinoConfig.port);
-    }
+    // FIXME "port" shouldn't exist only config.port !
+    c.port = port;
+    c.connect = isConnected();
 
     return c;
   }
 
   @Override
-  public void startService() {
-    super.startService();
+  public ServiceConfig apply(ServiceConfig c) {
+    ArduinoConfig config = (ArduinoConfig) super.apply(c);
 
     if (msg == null) {
       serial = (Serial) startPeer("serial");
       if (serial == null) {
         log.error("serial is null");
-      }
-      msg = new Msg(this, serial);
+      }      
+      msg.setSerial(serial);
       serial.addByteListener(this);
     } else {
       // TODO: figure out why this gets called so often.
       log.info("Init serial we already have a msg class.");
     }
 
-    ArduinoConfig c = (ArduinoConfig) config;
-
-    if (c.connect && c.port != null) {
-      connect(c.port);
+    if (config.connect && config.port != null) {
+      connect(config.port);
     }
 
+    return config;
   }
 
   /**
@@ -2350,6 +2366,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
       LoggingFactory.init(Level.INFO);
 
+      Runtime runtime = Runtime.getInstance();
+      runtime.saveAllDefaults();
+
+      Runtime.start("arduino", "Arduino");
       Runtime.start("webgui", "WebGui");
 
       boolean isDone = true;

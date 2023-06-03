@@ -27,9 +27,7 @@ public class Clock extends Service {
   public class ClockThread implements Runnable {
 
     private transient Thread thread = null;
-
-    public ClockThread() {
-    }
+    
 
     @Override
     public void run() {
@@ -38,6 +36,7 @@ public class Clock extends Service {
       try {
 
         c.running = true;
+        invoke("publishClockStarted");
         while (c.running) {
           Thread.sleep(c.interval);
           Date now = new Date();
@@ -62,8 +61,7 @@ public class Clock extends Service {
     synchronized public void start() {
       if (thread == null) {
         thread = new Thread(this, getName() + "_ticking_thread");
-        thread.start();
-        invoke("publishClockStarted");
+        thread.start();                
       } else {
         log.info("{} already started", getName());
       }
@@ -71,19 +69,15 @@ public class Clock extends Service {
 
     synchronized public void stop() {
       ClockConfig c = (ClockConfig) config;
+
       if (thread != null) {
         thread.interrupt();
+        broadcastState();
       } else {
         log.info("{} already stopped");
       }
-
-      // change state - broadcast it
-      if (c.running == true) {
-        broadcastState();
-      }
-
       c.running = false;
-      thread = null;
+      Service.sleep(20);
     }
   }
 
@@ -213,9 +207,8 @@ public class Clock extends Service {
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    super.apply(c);
-    ClockConfig config = (ClockConfig) c;
+  public ServiceConfig apply(ServiceConfig c) {    
+    ClockConfig config = (ClockConfig) super.apply(c);
     if (config.running != null) {
       if (config.running) {
         startClock();
@@ -234,12 +227,17 @@ public class Clock extends Service {
   public static void main(String[] args) throws Exception {
     try {
 
-      Runtime.start("webgui", "WebGui");
+      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.setPort(8887);
+      webgui.startService();
 
       Clock c1 = (Clock) Runtime.start("c1", "Clock");
       c1.startClock();
+      Runtime.getInstance().connect("ws://localhost:8888");
       c1.stopClock();
 
+      Runtime.start("servo", "Servo");
     } catch (Exception e) {
       log.error("main threw", e);
     }

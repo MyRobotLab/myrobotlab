@@ -1,5 +1,4 @@
 !!org.myrobotlab.service.config.LeapMotionConfig
-autoStartPeers: true
 # mappings for all fingers
 leftIndex:
   maxIn: 180

@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.framework.DescribeQuery;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.data.Locale;
@@ -52,6 +53,21 @@ public class RuntimeTest extends AbstractTest {
     List<String> addresses = Runtime.getLocalHardwareAddresses();
     Assert.assertNotNull(addresses);
   }
+  
+  @Test
+  public void registerRemoteService() {
+    
+    Registration registration = new Registration("remoteId", "clock", "Clock");
+    Runtime.register(registration);
+    
+    Clock clock = (Clock)Runtime.getService("clock@remoteId");
+    Assert.assertNotNull(clock);
+    
+    // cleanup
+    Runtime.release("clock@remoteId");
+  }
+  
+  
 
   @Test
   public void testGetLocalServices() {

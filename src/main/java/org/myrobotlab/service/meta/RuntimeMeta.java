@@ -26,6 +26,9 @@ public class RuntimeMeta extends MetaData {
     // apache 2.0 license
     addDependency("com.google.code.gson", "gson", "2.8.5");
 
+    // for proxy generation
+    addDependency("net.bytebuddy", "byte-buddy", "1.12.16");
+
     addDependency("com.fasterxml.jackson.core", "jackson-core", "2.14.0");
     addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.14.0");
     addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.14.0");
@@ -34,10 +37,10 @@ public class RuntimeMeta extends MetaData {
     // addDependency("org.apache.ivy", "ivy", "2.4.0-5");
     addDependency("org.apache.ivy", "ivy", IvyWrapper.IVY_VERSION);
 
-    // apache 2.0 license
+    // apache 2.0 license - REMOVE in favor of okhttp
+    // FIXME - replace apache with okhttp
     addDependency("org.apache.httpcomponents", "httpclient", "4.5.13");
-    // apache 2.0 license
-    addDependency("org.atmosphere", "wasync", "2.1.5");
+    
     // apache 2.0 license
     addDependency("info.picocli", "picocli", "4.4.0");
     // all your logging needs
@@ -46,9 +49,11 @@ public class RuntimeMeta extends MetaData {
     // for config file support.
     addDependency("org.yaml", "snakeyaml", "1.32");
 
-    // ws client sockets
-    addDependency("org.asynchttpclient", "async-http-client", "2.12.3");
-    
+    // ws best client websockets with Apache license
+    addDependency("com.squareup.okhttp3", "okhttp", "3.9.0");
+        
+    // force correct version of netty - needed for Vertx but not for Runtime ?
+    addDependency("io.netty", "netty-all", "4.1.82.Final");    
 
   }
 

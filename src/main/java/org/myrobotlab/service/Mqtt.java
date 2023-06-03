@@ -845,7 +845,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
   public static void main(String[] args) {
     try {
       LoggingFactory.init("info");
-      Runtime.main(new String[] { "--id", "m1", "--from-launcher" });
+      Runtime.main(new String[] { "--id", "m1"});
       /*
        * WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
        * webgui.setPort(8888); webgui.autoStartBrowser(false);

@@ -1,34 +1,22 @@
 package org.myrobotlab.service;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyStore;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 
@@ -43,8 +31,6 @@ import org.atmosphere.cpr.BroadcasterFactory;
 import org.atmosphere.nettosphere.Config;
 import org.atmosphere.nettosphere.Handler;
 import org.atmosphere.nettosphere.Nettosphere;
-//import org.jboss.netty.handler.ssl.SslContext;
-//import org.jboss.netty.handler.ssl.util.SelfSignedCertificate;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
@@ -66,7 +52,10 @@ import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.slf4j.Logger;
 
-import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.ClientAuth;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 
 /**
@@ -130,30 +119,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
 
-  // FIXME - move to security !
-  transient private static final TrustManager DUMMY_TRUST_MANAGER = new X509TrustManager() {
-    @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-    }
-
-    @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-      if (!TRUST_SERVER_CERT.get()) {
-        throw new CertificateException("Server certificate not trusted.");
-      }
-    }
-
-    @Override
-    public X509Certificate[] getAcceptedIssuers() {
-      return new X509Certificate[0];
-    }
-  };
-
   public final static Logger log = LoggerFactory.getLogger(WebGui.class);
 
   private static final long serialVersionUID = 1L;
 
-  transient private static final AtomicBoolean TRUST_SERVER_CERT = new AtomicBoolean(true);
 
   transient protected JmDNS jmdns = null;
 
@@ -177,34 +146,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       }
     }
     return null;
-  }
-
-  // FIXME - move to security
-  private static SSLContext createSSLContext2() {
-    try {
-      InputStream keyStoreStream = new FileInputStream(getResourceDir(Security.class, "/keys/myrobotlab-keystore.jks"));
-      char[] keyStorePassword = "changeit".toCharArray();
-      KeyStore ks = KeyStore.getInstance("JKS");
-      ks.load(keyStoreStream, keyStorePassword);
-
-      // Set up key manager factory to use our key store
-      char[] certificatePassword = "changeit".toCharArray();
-      KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-      kmf.init(ks, certificatePassword);
-
-      // Initialize the SSLContext to work with our key managers.
-      KeyManager[] keyManagers = kmf.getKeyManagers();
-      TrustManager[] trustManagers = new TrustManager[] { DUMMY_TRUST_MANAGER };
-      SecureRandom secureRandom = new SecureRandom();
-
-      // SSLContext sslContext = SSLContext.getInstance("TLS");
-      // SSLContext sslContext = SSLContext.getInstance("TLSv1");
-      SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-      sslContext.init(keyManagers, trustManagers, secureRandom);
-      return sslContext;
-    } catch (Exception e) {
-      throw new Error("Failed to initialize SSLContext", e);
-    }
   }
 
   String address = "0.0.0.0";
@@ -376,32 +317,17 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     Config.Builder configBuilder = new Config.Builder();
     try {
       if (isSsl) {
-        // String cipherSuite = "TLS_ECDH_anon_WITH_AES_128_CBC_SHA";
-        // String cipherSuite = "TLS_RSA_WITH_AES_256_CBC_SHA256";
-        String[] cipherSuite = { "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
-            "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_DHE_DSS_WITH_AES_128_GCM_SHA256", "TLS_DHE_DSS_WITH_AES_256_GCM_SHA384",
-            "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
-            "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
-            "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA", "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256",
-            "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256", "TLS_DHE_DSS_WITH_AES_256_CBC_SHA", "TLS_DHE_RSA_WITH_AES_256_CBC_SHA", "TLS_RSA_WITH_AES_128_GCM_SHA256",
-            "TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_CBC_SHA256", "TLS_RSA_WITH_AES_256_CBC_SHA256", "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA",
-            "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256", "TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA", "TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA", "TLS_SRP_SHA_WITH_AES_128_CBC_SHA",
-            "TLS_DHE_DSS_WITH_AES_128_CBC_SHA", "TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA", "TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA", "TLS_RSA_WITH_CAMELLIA_256_CBC_SHA",
-            "TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA", "TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA", "TLS_RSA_WITH_CAMELLIA_128_CBC_SHA" };
-
-        cipherSuite = new String[] { "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA", "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256" };
-        SelfSignedCertificate ssc = new SelfSignedCertificate();
-        // deprecated -> SslContext sslCtx =
-        // SslContext.newServerContext(ssc.certificate(), ssc.privateKey());
-        SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey());
-        // SslContextBuilder.forServer(keyManager).clientAuth(ClientAuth.REQUIRE).trustManager(trustManager).build();
-        configBuilder.sslContext(createSSLContext2());// .sslContext(sslCtx);
-        // ssl.setEnabledProtocols(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2",
-        // "SSLv3"});
-
-        // configBuilder.subProtocols("TLSv1.2");
-        // configBuilder.enabledCipherSuites(cipherSuite);
-        configBuilder.enabledCipherSuites(cipherSuite);
+//        SelfSignedCertificate cert = new SelfSignedCertificate();        
+//        SslContext context = SslContextBuilder.forServer(cert.certificate(), cert.privateKey()).build();    
+        
+        
+        SelfSignedCertificate selfSignedCertificate = new SelfSignedCertificate();
+        SslContext context =  SslContextBuilder
+                .forServer(selfSignedCertificate.certificate(), selfSignedCertificate.privateKey())
+                .sslProvider(SslProvider.JDK).clientAuth(ClientAuth.NONE).build();        
+        
+        
+        configBuilder.sslContext(context);
       }
     } catch (Exception e) {
       log.error("certificate creation threw", e);
@@ -550,6 +476,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       if (!CodecUtils.API_SERVICE.equals(apiKey) && !CodecUtils.API_MESSAGES.equals(apiKey)) {
         // NOT A VALID API - send what we support - we're done...
         OutputStream out = r.getResponse().getOutputStream();
+        r.getResponse().addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
         out.write(CodecUtils.toJson(CodecUtils.getApis()).getBytes());
         return;
       }
@@ -696,7 +623,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
             log.debug("invoking local msg {}", msg);
 
             serviceName = msg.getFullName();
+            Class<?> clazz = Runtime.getClass(serviceName);
+            if (clazz == null) {
+              log.error("cannot derive local type from service {}", serviceName);
+            }
 
+            // do not decode unless needed
+            // Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
 
             ServiceInterface si = Runtime.getService(serviceName);
 
@@ -1251,16 +1184,16 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   @Override
   public ServiceConfig getConfig() {
-    WebGuiConfig config = new WebGuiConfig();
+    WebGuiConfig config = (WebGuiConfig)super.getConfig();
+    // FIXME - remove member variables use config only
     config.port = port;
     config.autoStartBrowser = autoStartBrowser;
-
     return config;
   }
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    WebGuiConfig config = (WebGuiConfig) c;
+    WebGuiConfig config = (WebGuiConfig) super.apply(c);
 
     if (config.port != null && (port != null && config.port.intValue() != port.intValue())) {
       setPort(config.port);
@@ -1273,29 +1206,52 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   public static void main(String[] args) {
-    LoggingFactory.init(Level.WARN);
+    LoggingFactory.init(Level.INFO);
 
     try {
 
       // Platform.setVirtual(true);
 
-      /// Runtime.main(new String[] { "--id", "w1", "--from-launcher", "--log-level", "WARN", "-c", "test-01" });
       // Runtime.start("python", "Python");
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
       webgui.setPort(8888);
+      // webgui.setSsl(true);
       webgui.startService();
 
       Runtime.start("python", "Python");
-      Runtime.start("intro", "Intro");
-      Runtime.start("i01", "InMoov2");
+      // Runtime.start("intro", "Intro");
+      // Runtime.start("i01", "InMoov2");
 
       boolean done = true;
       if (done) {
         return;
-      }
+      }      
+
+
+      
+      // Runtime.start("i01", "InMoov2");
+      // Runtime.start("python", "Python");
+      // Runtime.start("i01", "InMoov2");
+      
+      // Runtime.start("i01", "InMoov2");
+      Runtime.start("track", "Tracking");
+      // Runtime.startConfig("worky");
+      // Runtime.startConfig("InMoov2Head");
+      // Runtime.startConfig("Tracking");
+
+
+      // Runtime.start("i01", "InMoov2");
+      // Runtime.start("python", "Python");
+      // Runtime.start("i01", "InMoov2");
+
+      // Runtime.start("i01", "InMoov2");
+      Runtime.start("track", "Tracking");
+      // Runtime.startConfig("worky");
+      // Runtime.startConfig("InMoov2Head");
+      // Runtime.startConfig("Tracking");
 
       MqttBroker broker = (MqttBroker) Runtime.start("broker", "MqttBroker");
       broker.listen();

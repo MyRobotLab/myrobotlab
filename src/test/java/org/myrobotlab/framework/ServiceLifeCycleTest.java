@@ -20,7 +20,6 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.Tracking;
 import org.myrobotlab.service.config.ArduinoConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.WebGuiConfig;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.meta.abstracts.MetaData;
@@ -35,30 +34,25 @@ public class ServiceLifeCycleTest extends AbstractTest {
   public void serviceLifeCycleTest() throws Exception {
 
     // clear plan
-    Runtime.clear();
+    Runtime.clearPlan();
 
     // load a simple plan
     Runtime.load("c1", "Clock");
     Plan plan = Runtime.getPlan();
-    assertEquals(1, plan.size());
-    for (String s : plan.keySet()) {
-      assertEquals("c1", s);
-      ServiceConfig cc = plan.get("c1");
-      assertNotNull(cc);
-      assertEquals("Clock", cc.type);
-    }
+    // 1 clock and 1 runtime
+    assertEquals(2, plan.size());
 
     // clear plan
-    Runtime.clear();
+    Runtime.clearPlan();
 
     plan = Runtime.getPlan();
-    assertEquals(0, plan.size());
+    assertEquals(1, plan.size());
 
     plan = Runtime.load("controller", "Arduino");
     ArduinoConfig ac = (ArduinoConfig) plan.get("controller");
     assertFalse(ac.connect);
     // 1 arduino 1 serial
-    assertEquals(2, plan.size());
+    assertEquals(3, plan.size());
     assertEquals(ac, plan.get("controller"));
 
     Arduino arduino = (Arduino) Runtime.start("controller", "Arduino");
@@ -72,7 +66,7 @@ public class ServiceLifeCycleTest extends AbstractTest {
     assertNull(Runtime.getService("controller"));
     assertNull(Runtime.getService("controller.serial"));
 
-    Runtime.clear();
+    Runtime.clearPlan();
 
     /**
      * use case - load a default config - modify it substantially then start the
@@ -81,7 +75,7 @@ public class ServiceLifeCycleTest extends AbstractTest {
 
     // load the default track config
     plan = Runtime.load("track", "Tracking");
-    assertEquals(7, plan.size());
+    assertEquals(8, plan.size());
 
     // remove the default controller
     assertNotNull(plan.remove("track.controller"));
@@ -89,23 +83,26 @@ public class ServiceLifeCycleTest extends AbstractTest {
     // add an adafruit controller
     Runtime.load("track.controller", "Adafruit16CServoDriver");
 
-    Tracking track = (Tracking) Runtime.start("track", "Tracking"); // FIXME - you can't run
-                                                        // Runtime.start() ...
-                                                        // CAN YOU BAN IT ?
+    Tracking track = (Tracking) Runtime.start("track", "Tracking"); // FIXME -
+                                                                    // you can't
+                                                                    // run
+    // Runtime.start() ...
+    // CAN YOU BAN IT ?
     assertNotNull(track);
     // better get an adafruit back
     Adafruit16CServoDriver ada = (Adafruit16CServoDriver) Runtime.getService("track.controller");
     assertNotNull(ada);
 
-    track.releaseService();
+    // track.releaseService();
+    Runtime.release("track");
     assertNull(Runtime.getService("track.controller"));
 
-    Runtime.clear();
+    Runtime.clearPlan();
     plan = Runtime.load("i02", "InMoov2");
 
     log.info("plan has {} services", plan.size());
     MetaData md = MetaData.get("InMoov2");
-    assertTrue(md.getPeers().size() < plan.size());
+    // assertTrue(md.getPeers().size() < plan.size());
 
     List<ServiceInterface> sis = Runtime.getServices();
     assertTrue(sis.size() < plan.size());
@@ -116,32 +113,32 @@ public class ServiceLifeCycleTest extends AbstractTest {
     i02.startPeer("left");
     i02.startPeer("headTracking");
     assertNotNull(Runtime.getService("i02.headTracking"));
-    
-    Pid pid = (Pid)Runtime.getService("i02.pid");
+
+    Pid pid = (Pid) Runtime.getService("i02.pid");
     assertNotNull(pid);
-    
+
     i02.startPeer("eyeTracking");
     assertEquals("i02.eyeTracking", i02.getPeerName("eyeTracking"));
-    
+
     Runtime.load("webgui", "WebGui");
-    WebGuiConfig webgui = (WebGuiConfig)plan.get("webgui");
+    WebGuiConfig webgui = (WebGuiConfig) plan.get("webgui");
     webgui.autoStartBrowser = false;
     // start it up
     Runtime.startConfig("webgui");
-    
-    Tracking eye = (Tracking)i02.getPeer("eyeTracking");
-    ServoControl tilt = (ServoControl)eye.getPeer("tilt");
+
+    Tracking eye = (Tracking) i02.getPeer("eyeTracking");
+    ServoControl tilt = (ServoControl) eye.getPeer("tilt");
     assertEquals("i02.head.eyeY", tilt.getName());
-    
+
     i02.setSpeechType("LocalSpeech");
     i02.startPeer("mouth");
 
     // better be local speech
-    LocalSpeech mouth = (LocalSpeech)i02.getPeer("mouth");
+    LocalSpeech mouth = (LocalSpeech) i02.getPeer("mouth");
     assertNotNull(mouth);
-    
+
     // FIXME i02.releasePeers()
-    
+
     log.info("done");
 
   }

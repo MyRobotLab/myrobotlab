@@ -433,14 +433,14 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                     if (s) {
                         let service = msg.data[0]
                         registry[senderFullName] = service
-                        for ([key,value] of Object.entries(service.serviceType.peers)) {
-                            peerKey = key[0].toUpperCase() + key.substring(1)
-                            if (value.state == 'STARTED') {
-                                service['is' + peerKey + 'Started'] = true
-                            } else {
-                                service['is' + peerKey + 'Started'] = false
-                            }
-                        }
+                        // for ([key,value] of Object.entries(service.serviceType.peers)) {
+                        //     peerKey = key[0].toUpperCase() + key.substring(1)
+                        //     if (value.state == 'STARTED') {
+                        //         service['is' + peerKey + 'Started'] = true
+                        //     } else {
+                        //         service['is' + peerKey + 'Started'] = false
+                        //     }
+                        // }
 
                     }
                 }
@@ -872,7 +872,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
             let properties = []
 
-            let exclude = ['serviceType', 'id', 'simpleName', 'interfaceSet', 'serviceClass', 'statusBroadcastLimitMs', 'isRunning', 'name', 'creationOrder', 'serviceType']
+            let exclude = ['serviceType', 'id', 'simpleName', 'interfaceSet', 'typeKey', 'statusBroadcastLimitMs', 'isRunning', 'name', 'creationOrder', 'serviceType']
 
             // FIXME - extract from javadoc !
             let info = {
@@ -943,7 +943,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             lastPosY += 40
             zIndex++
             //construct panel & add it to dictionary
-            panels[fullname] = createPanel(fullname, service.serviceClass, 15, lastPosY, 800, 0, zIndex)
+            panels[fullname] = createPanel(fullname, service.typeKey, 15, lastPosY, 800, 0, zIndex)
             return panels[fullname]
         }
 
@@ -1193,7 +1193,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         }
 
         _self.changeTab = function(serviceName) {
-            if (!tabsViewCtrl) {
+            if (!tabsViewCtrl || !_self.getService(serviceName)) {
                 console.error('tabsViewCtrl is null - cannot changeTab')
             } else {
                 tabsViewCtrl.changeTab(serviceName)
@@ -1369,11 +1369,11 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                                 //                                console.log("here")
                                 // expected 'framework' level subscriptions - we should at a minimum
                                 // be interested in state and status changes of the services
-                                _self.sendTo(name, "addListener", "publishStatus", 'runtime@' + _self.id)
-                                _self.sendTo(name, "addListener", "publishState", 'runtime@' + _self.id)
-                                _self.sendTo(name, "addListener", "getMethodMap", 'runtime@' + _self.id)
+                                _self.sendTo(_self.getFullName(name), "addListener", "publishStatus", 'runtime@' + _self.id)
+                                _self.sendTo(_self.getFullName(name), "addListener", "publishState", 'runtime@' + _self.id)
+                                _self.sendTo(_self.getFullName(name), "addListener", "getMethodMap", 'runtime@' + _self.id)
 
-                                _self.sendTo(name, "broadcastState")
+                                _self.sendTo(_self.getFullName(name), "broadcastState")
                                 // below we subscribe to the Angular callbacks - where anything sent
                                 // back from the webgui with our service's name on the message - send
                                 // it to our onMsg method
@@ -1570,7 +1570,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             "name": "runtime",
             "id": "webgui-client-1234-5678",
             "simpleName": "Runtime",
-            "serviceClass": "org.myrobotlab.service.Runtime",
+            "typeKey": "org.myrobotlab.service.Runtime",
             "isRunning": true,
             "interfaceSet": {
                 "org.myrobotlab.client.Client$RemoteMessageHandler": "org.myrobotlab.client.Client$RemoteMessageHandler",

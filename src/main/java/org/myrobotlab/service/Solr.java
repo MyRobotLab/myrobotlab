@@ -151,7 +151,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     Path solrHome = Paths.get(path);
     log.info(solrHome.toFile().getAbsolutePath());
     Path solrXml = solrHome.resolve("solr.xml");
-    CoreContainer cores = CoreContainer.createAndLoad(solrHome, solrXml);
+    
+    String absolueHome = solrHome.toFile().getAbsolutePath();
+    CoreContainer cores = CoreContainer.createAndLoad(Paths.get(absolueHome), solrXml);
     for (String coreName : cores.getAllCoreNames()) {
       log.info("Found core core {}", coreName);
     }
@@ -950,7 +952,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     SolrInputDocument doc = new SolrInputDocument();
     doc.setField("id", docId);
     // TODO: consider a cache of this to make this faster
-    doc.setField("sender_type", Runtime.getService(message.sender).getType());
+    doc.setField("sender_type", Runtime.getService(message.sender).getTypeKey());
     doc.setField("sender", message.sender);
     doc.setField("method", message.method);
     // TODO: this is actually the timestamp of the message.. not an id.
@@ -979,11 +981,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   public static void main(String[] args) {
-    LoggingFactory.init(Level.DEBUG);
+    LoggingFactory.init(Level.INFO);
     try {
       Solr solr = (Solr) Runtime.start("solr", "Solr");
       solr.startEmbedded();
-      SwingGui gui = (SwingGui) Runtime.start("gui", "SwingGui");
       // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
       // Create a test document
       SolrInputDocument doc = new SolrInputDocument();
@@ -1006,7 +1007,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       solr.commit();
 
       // search for the word myrobotlab
-      String queryString = "myrobotlab";
+      String queryString = "content:myrobotlab";
       QueryResponse resp = solr.search(queryString);
       for (int i = 0; i < resp.getResults().size(); i++) {
         System.out.println("---------------------------------");

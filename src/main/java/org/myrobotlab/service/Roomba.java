@@ -35,11 +35,11 @@ import org.myrobotlab.roomba.RoombaCommPort;
 import org.slf4j.Logger;
 
 /**
- * 
+ *
  * Roomba - This service allows MRL to connect to a Roomba. The GUI Service
  * provides the RoombaComm for manual control and testing.
- * 
- * More Info: http://hackingroomba.com/code/roombacomm/
+ *
+ * More Info: <a href="http://hackingroomba.com/code/roombacomm/">RoombaComm</a>
  */
 public class Roomba extends Service {
 
@@ -108,9 +108,7 @@ public class Roomba extends Service {
        * 
        * roomba.setHardwareHandshake(false);
        */
-      SwingGui gui = (SwingGui) Runtime.start("gui", "SwingGui");
 
-      gui.startService();
 
     } catch (Exception e) {
       Logging.logError(e);
@@ -207,7 +205,7 @@ public class Roomba extends Service {
   // RoombaComm passthrough end ----------------------
 
   public void createTribblePurrSong() {
-    int song[] = { 68, 4, 67, 4, 66, 4, 65, 4, 64, 4, 63, 4, 62, 4, 61, 4, 60, 4, 59, 4, 60, 4, 61, 4, };
+    int[] song = { 68, 4, 67, 4, 66, 4, 65, 4, 64, 4, 63, 4, 62, 4, 61, 4, 60, 4, 59, 4, 60, 4, 61, 4, };
     roombacomm.createSong(5, song);
   }
 
@@ -502,12 +500,13 @@ public class Roomba extends Service {
     int dr = -10;
 
     boolean done = false;
+    // FIXME INFINITE LOOP
     while (!done) {
       roombacomm.drive(v, r);
       roombacomm.pause(waittime);
       roombacomm.drive(v, r / Math.abs(dr));
       roombacomm.pause(waittime);
-      r += -10;
+      r -= 10;
       // done = keyIsPressed();
     }
   }
@@ -516,6 +515,7 @@ public class Roomba extends Service {
     int w, dr;
 
     boolean done = false;
+    // FIXME INFINITE LOOP
     while (!done) {
       roombacomm.drive(velocity, radius);
       // roombacomm.pause( waittime );
@@ -563,7 +563,7 @@ public class Roomba extends Service {
           System.out.println("key pressed");
           running = false;
         }
-      } catch (IOException ioe) {
+      } catch (IOException ignored) {
       }
 
       boolean rc = roombacomm.updateSensors();
@@ -596,7 +596,7 @@ public class Roomba extends Service {
           System.out.println("key pressed");
           running = false;
         }
-      } catch (IOException ioe) {
+      } catch (IOException ignored) {
       }
 
       roombacomm.pause(pausetime);
@@ -606,6 +606,7 @@ public class Roomba extends Service {
   public void spySimple() {
     int pausetime = 500;
     boolean done = false;
+    // FIXME INFINITE LOOP
     while (!done) {
       roombacomm.updateSensors();
       printSensors();
@@ -656,6 +657,7 @@ public class Roomba extends Service {
 
     System.out.println("Press return to exit.");
     boolean done = false;
+    // FIXME INFINITE LOOP
     while (!done) {
 
       purr();

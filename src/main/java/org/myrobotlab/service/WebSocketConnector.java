@@ -1,24 +1,16 @@
 package org.myrobotlab.service;
 
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
 import java.net.URISyntaxException;
 
-import org.atmosphere.wasync.Client;
-import org.atmosphere.wasync.ClientFactory;
-import org.atmosphere.wasync.Decoder;
-import org.atmosphere.wasync.Encoder;
-import org.atmosphere.wasync.Event;
-import org.atmosphere.wasync.Function;
-import org.atmosphere.wasync.Request;
-import org.atmosphere.wasync.RequestBuilder;
-import org.atmosphere.wasync.Socket;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.TextListener;
+import org.myrobotlab.net.Connection;
+import org.myrobotlab.net.WsClient;
+import org.myrobotlab.service.interfaces.ConnectionManager;
+import org.myrobotlab.service.interfaces.RemoteMessageHandler;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
@@ -26,20 +18,14 @@ import org.slf4j.Logger;
  * @author MaVo (MyRobotLab) / LunDev (GitHub)
  */
 
-public class WebSocketConnector extends Service implements TextPublisher {
+public class WebSocketConnector extends Service implements RemoteMessageHandler, ConnectionManager, TextPublisher {
   static final long serialVersionUID = 1L;
   static final Logger log = LoggerFactory.getLogger(WebSocketConnector.class);
 
-  private Client client;
-  private Socket socket;
+  transient private WsClient client;
 
   public WebSocketConnector(String n, String id) {
     super(n, id);
-  }
-
-  @Deprecated /* use attachTextListener */
-  public void addTextListener(TextListener service) {
-    addListener("publishText", service.getName(), "onText");
   }
 
   @Override
@@ -59,39 +45,9 @@ public class WebSocketConnector extends Service implements TextPublisher {
    */
   public void connect(String url) throws URISyntaxException, IOException {
 
-    client = ClientFactory.getDefault().newClient();
-    socket = null;
+    client = new WsClient();
+    client.connect(this, url);
 
-    RequestBuilder request = client.newRequestBuilder().method(Request.METHOD.GET).uri(url).encoder(new Encoder<String, Reader>() { // Stream
-                                                                                                                                    // the
-                                                                                                                                    // request
-                                                                                                                                    // body
-      @Override
-      public Reader encode(String s) {
-        return new StringReader(s);
-      }
-    }).decoder(new Decoder<String, Reader>() {
-      @Override
-      public Reader decode(Event type, String s) {
-        return new StringReader(s);
-      }
-    }).transport(Request.TRANSPORT.WEBSOCKET) // Try WebSocket
-        .transport(Request.TRANSPORT.LONG_POLLING); // Fallback to Long-Polling
-
-    Socket socket = client.create();
-    socket.on(new Function<Reader>() {
-      @Override
-      public void on(Reader r) {
-        // Read the response
-      }
-    }).on(new Function<IOException>() {
-
-      @Override
-      public void on(IOException ioe) {
-        // Some IOException occurred
-      }
-
-    }).open(request.build()).fire("echo").fire("bong");
   }
 
   /**
@@ -104,7 +60,11 @@ public class WebSocketConnector extends Service implements TextPublisher {
    * 
    */
   public void send(String message) throws IOException {
-    socket.fire(message);
+    if (client != null) {
+      client.send(message);
+    } else {
+      error("client not ready - connect first");
+    }
   }
 
   public static void main(String[] args) {
@@ -116,13 +76,20 @@ public class WebSocketConnector extends Service implements TextPublisher {
   }
 
   @Override
-  public void attachTextListener(TextListener service) {
-    addListener("publishText", service.getName());
+  public void addConnection(String uuid, String id, Connection attributes) {
+    // TODO - use if you want to add to runtime routing table and use this
+    // service as a gateway
   }
 
   @Override
-  public void attachTextListener(String name) {
-    addListener("publishText", name);
+  public void removeConnection(String uuid) {
+    // TODO - use if you want to add to runtime routing table and use this
+    // service as a gateway
+  }
+
+  @Override
+  public void onRemoteMessage(String uuid, String data) {
+    invoke("publishText", data);
   }
 
 }

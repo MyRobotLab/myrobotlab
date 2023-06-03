@@ -169,7 +169,7 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
     return build(a);
   }
 
-  public final ResultType add(@Nonnull float s) {
+  public final ResultType add(float s) {
     float[] a = toArray();
     for (int i = 0; i < a.length; ++i) {
       a[i] += s;
@@ -177,7 +177,7 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
     return build(a);
   }
 
-  public final ResultType subtract(@Nonnull float s) {
+  public final ResultType subtract(float s) {
     return add(-s);
   }
 

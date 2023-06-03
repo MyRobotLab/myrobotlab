@@ -16,9 +16,6 @@ public class UpdaterMeta extends MetaData {
 
     addDescription("used to manage updates");
     addCategory("system");
-
-    addPeer("git", "Git", "git source control");
-    addPeer("builder", "Maven", "mvn build");
   }
 
 }

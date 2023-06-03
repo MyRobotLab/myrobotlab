@@ -15,8 +15,6 @@ public class DiyServoMeta extends MetaData {
   public DiyServoMeta() {
     addDescription("Controls a motor so that it can be used as a Servo");
     addCategory("control", "servo");
-    addPeer("motor", "MotorDualPwm", "MotorControl service");
-    addPeer("pid", "Pid", "PID service");
   }
 
 }

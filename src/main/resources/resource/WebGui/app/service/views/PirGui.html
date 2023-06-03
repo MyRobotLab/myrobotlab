@@ -1,20 +1,20 @@
 <div class="row">
     <div class="col-md-6">
         <br/>
-        <img ng-src="{{(service.active)?'../../green.png':'../../grey.png'}}"/> poll rate {{service.rateHz}} hz
+        <img ng-src="{{(service.active)?'../../green.png':'../../grey.png'}}"/> poll rate {{service.config.rate}} hz
         <br/>
         <br/>
         <form class="form-inline" role="forms">
             <div class="row">
                 <attach options='options'/>
                 pin
-                <select class="form-control" ng-model="service.pin" ng-change="setPin()" ng-options="item for item in pinList">
+                <select ng-disabled="service.attached" class="form-control" ng-model="service.config.pin" ng-change="setPin()" ng-options="item for item in pinList">
                     <option>{{item}}</option>
                 </select>
-                <button ng-show="!service.controllerName" type="button" class="btn btn-default" ng-click="attach()">attach</button>
-                <button ng-show="service.controllerName" type="button" class="btn btn-default" ng-click="detach()">detach</button>
-                <button class="form-control" ng-show="service.controllerName && !service.isEnabled" ng-click="enable()">enable</button>
-                <button class="form-control" ng-show="service.controllerName && service.isEnabled" ng-click="disable()">disable</button>
+                <button ng-show="!service.attached" type="button" class="btn btn-default" ng-click="attach()">attach</button>
+                <button ng-show="service.attached" type="button" class="btn btn-default" ng-click="detach()">detach</button>
+                <button class="form-control" ng-show="service.config.controller && !service.config.enable" ng-click="enable()">enable</button>
+                <button class="form-control" ng-show="service.config.controller && service.config.enable" ng-click="disable()">disable</button>
             </div>
         </form>
     </div>

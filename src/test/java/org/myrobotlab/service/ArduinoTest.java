@@ -290,6 +290,7 @@ public class ArduinoTest extends AbstractTest {
     assertTrue("arduino is attached and contains a servo in device list", arduino01.getAttached().contains(servo.getName()));
 
     if (arduino01.isVirtual()) {
+      assertNotNull(mrlservo);
       assertTrue("verifty virtual mrlservo is enabled", mrlservo.enabled);
     }
 
@@ -298,12 +299,14 @@ public class ArduinoTest extends AbstractTest {
     if (arduino01.isVirtual()) {
       // FIXME -- fix blocking fix encoders
       sleep(500);
+      assertNotNull(mrlservo);
       assertTrue("virtual servo moved blocking to 30", mrlservo.targetPosUs == Arduino.degreeToMicroseconds(30));
     }
 
     servo.moveTo(100.0);
     sleep(100);
     if (arduino01.isVirtual()) {
+      assertNotNull(mrlservo);
       assertTrue("virtual servo moved to 100", mrlservo.targetPosUs == Arduino.degreeToMicroseconds(100));
     }
 
@@ -357,9 +360,10 @@ public class ArduinoTest extends AbstractTest {
 
     double velocity = 50;
     // degree per second
-    servo.setVelocity(velocity);
+    servo.setSpeed(velocity);
     if (arduino01.isVirtual()) {
       sleep(100);
+      assertNotNull(mrlServo);
       assertTrue(mrlServo.velocity == velocity);
     }
 
@@ -466,8 +470,8 @@ public class ArduinoTest extends AbstractTest {
     assertTrue("did not receive pin data int", catcher.pinData.pin.equals(analogPin));
 
     catcher.pinData = null;
-
-    arduino01.attach((PinListener) catcher, analogPin);
+    catcher.setPin(analogPin);
+    arduino01.attachPinListener(catcher);
     arduino01.enablePin(analogPin);
     sleep(100);
     assertTrue("did not receive pin data from pin", catcher.pinData.pin.equals(analogPin));
