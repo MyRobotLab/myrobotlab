@@ -16,7 +16,8 @@ import org.myrobotlab.io.StreamGobbler;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.data.Script2;
+import org.myrobotlab.service.config.Py4jConfig;
+import org.myrobotlab.service.data.Script;
 import org.myrobotlab.service.interfaces.Executor;
 import org.slf4j.Logger;
 
@@ -134,17 +135,12 @@ public class Py4j extends Service implements GatewayServerListener {
    * executed or saved to the file system, or updatd in memory which the js
    * client does
    */
-  protected HashMap<String, Script2> openedScripts = new HashMap<String, Script2>();
+  protected HashMap<String, Script> openedScripts = new HashMap<String, Script>();
 
   /**
    * client process and connectivity reference
    */
   protected Py4jClient pythonProcess = null;
-
-  /**
-   * script root directory - all script filenames will be relative to this
-   */
-  protected String scriptRootDir = null;
 
   public Py4j(String n, String id) {
     super(n, id);
@@ -161,15 +157,15 @@ public class Py4j extends Service implements GatewayServerListener {
    * @throws IOException
    */
   public void addScript(String scriptName, String code) throws IOException {
-
-    File script = new File(scriptRootDir + fs + scriptName);
+    Py4jConfig c = (Py4jConfig)config;
+    File script = new File(c.scriptRootDir + fs + scriptName);
 
     if (script.exists()) {
       error("script %s already exists", scriptName);
       return;
     }
 
-    openedScripts.put(scriptName, new Script2(scriptName, code));
+    openedScripts.put(scriptName, new Script(scriptName, code));
     broadcastState();
   }
 
@@ -247,10 +243,11 @@ public class Py4j extends Service implements GatewayServerListener {
    */
   public List<String> getScriptList() throws IOException {
     List<String> sorted = new ArrayList<>();
-    List<File> files = FileIO.getFileList(scriptRootDir, true);
+    Py4jConfig c = (Py4jConfig)config;
+    List<File> files = FileIO.getFileList(c.scriptRootDir, true);
     for (File file : files) {
       if (file.toString().endsWith(".py")) {
-        sorted.add(file.toString().substring(scriptRootDir.length() + 1));
+        sorted.add(file.toString().substring(c.scriptRootDir.length() + 1));
       }
     }
     Collections.sort(sorted);
@@ -300,15 +297,15 @@ public class Py4j extends Service implements GatewayServerListener {
    * @throws IOException
    */
   public void openScript(String scriptName) throws IOException {
-
-    File script = new File(scriptRootDir + fs + scriptName);
+    Py4jConfig c = (Py4jConfig)config;
+    File script = new File(c.scriptRootDir + fs + scriptName);
 
     if (!script.exists()) {
       error("file %s not found", script.getAbsolutePath());
       return;
     }
 
-    openedScripts.put(scriptName, new Script2(scriptName, FileIO.toString(script.getAbsoluteFile())));
+    openedScripts.put(scriptName, new Script(scriptName, FileIO.toString(script.getAbsoluteFile())));
     broadcastState();
   }
 
@@ -346,7 +343,8 @@ public class Py4j extends Service implements GatewayServerListener {
    * @throws IOException
    */
   public void saveScript(String scriptName, String code) throws IOException {
-    FileIO.toFile(scriptRootDir + fs + scriptName, code);
+    Py4jConfig c = (Py4jConfig)config;
+    FileIO.toFile(c.scriptRootDir + fs + scriptName, code);
     info("saved file %s", scriptName);
   }
 
@@ -436,8 +434,11 @@ public class Py4j extends Service implements GatewayServerListener {
   @Override
   public void startService() {
     super.startService();
-    scriptRootDir = new File(getDataInstanceDir()).getAbsolutePath();
-    File dataDir = new File(scriptRootDir);
+    Py4jConfig c = (Py4jConfig)config;
+    if (c.scriptRootDir == null) {
+        c.scriptRootDir = new File(getDataInstanceDir()).getAbsolutePath();
+    }
+    File dataDir = new File(c.scriptRootDir);
     dataDir.mkdirs();
     // start the py4j socket server
     start();
@@ -484,7 +485,7 @@ public class Py4j extends Service implements GatewayServerListener {
    */
   public void updateScript(String scriptName, String code) {
     if (openedScripts.containsKey(scriptName)) {
-      Script2 script = openedScripts.get(scriptName);
+      Script script = openedScripts.get(scriptName);
       script.code = code;
     } else {
       error("cannot find script %s to update", scriptName);
