@@ -19,12 +19,25 @@ public class StreamGobbler extends Thread {
   protected String name;
   public final static Logger log = LoggerFactory.getLogger(StreamGobbler.class);
 
+  /**
+   * When we do not need to redirect the stream to another stream. E.g.
+   * when we create a process, and are already redirecting std:out and std:err
+   * 
+   * @param name
+   * @param processOut
+   */
   public StreamGobbler(String name, InputStream processOut) {
-    super(name);
-    this.processOut = processOut;
-    this.name = name;
+    this(name, processOut, null);
   }
 
+  /**
+   * This is a general stream gobbler that will consume and input stream and move 
+   * the data to an output stream.
+   * 
+   * @param name
+   * @param processOut
+   * @param processIn
+   */
   public StreamGobbler(String name, InputStream processOut, OutputStream processIn) {
     super(name);
     this.processOut = processOut;
