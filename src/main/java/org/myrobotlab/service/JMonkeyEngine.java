@@ -878,11 +878,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     return String.format("_axis-%s-%s", getType(spatial), spatial.getName());
   }
 
-  @Override
-  public Message getDescribeMsg(String connId) {
-    // TODO Auto-generated method stub
-    return null;
-  }
 
   private String getExt(String name) {
     int pos = name.lastIndexOf(".");

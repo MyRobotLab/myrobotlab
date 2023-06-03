@@ -3963,18 +3963,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   @Override
-  public Message getDescribeMsg(String connId) {
-    // TODO support queries
-    // FIXME !!! - msg.name is wrong with only "runtime" it should be
-    // "runtime@id"
-    // TODO - lots of options for a default "describe"
-
-
-    return Message.createMessage(getFullName(), "runtime", "describe",
-        new Object[] { "fill-uuid", CodecUtils.toJson(new DescribeQuery(Platform.getLocalInstance().getId(), connId)) });
-  }
-
-  @Override
   public ServiceConfig getFilteredConfig() {
     RuntimeConfig sc = (RuntimeConfig) super.getFilteredConfig();
     Set<Listener> removeList = new HashSet<>();
@@ -3989,6 +3977,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
     return sc;
   }
+
 
   /**
    * Unregister all connections that a specified client has made.
