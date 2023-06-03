@@ -346,7 +346,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
      */
     this.describe = function(request) {
         console.log('--> got describe: and set jsRuntimeMethodCallbackMap')
-        let hello = JSON.parse(request.data[1])
+        hello = request.data[1]
 
         remotePlatform = hello.platform
         // FIXME - remove this - there aren't 1 remoteId there are many !
@@ -603,7 +603,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
 
     this.getService = function(name) {
-
+        id = _self.remoteId
         if (registry[_self.getFullName(name)] == null) {
             return null
         }
