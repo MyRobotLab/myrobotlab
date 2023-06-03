@@ -431,6 +431,7 @@ public class Py4j extends Service implements GatewayServerListener {
     }
   }
 
+  @Override
   public void startService() {
     super.startService();
     Py4jConfig c = (Py4jConfig)config;
