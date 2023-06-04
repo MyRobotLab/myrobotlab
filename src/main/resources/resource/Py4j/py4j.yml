@@ -1,4 +1,5 @@
-!!org.myrobotlab.service.config.ServiceConfig
+!!org.myrobotlab.service.config.Py4jConfig
 listeners: null
 peers: null
+scriptRootDir: null
 type: Py4j

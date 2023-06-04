@@ -1,11 +1,29 @@
 !!org.myrobotlab.service.config.InMoov2Config
-data: {
-  }
-heartbeat: true
+analogPinFromSoundCard: 53
+audioPollsBySeconds: 2
+audioSignalProcessing: false
+batteryInSystem: false
+customSound: false
+forceMicroOnIfSleeping: true
+healthCheckActivated: false
+healthCheckTimerMs: 60000
+heartbeat: false
 idleTimer: true
-listeners: null
+listeners:
+- callback: onLedDisplay
+  listener: inmoov2.neoPixel
+  method: publishFlash
+- callback: onEvent
+  listener: inmoov2.fsm
+  method: publishEvent
 loadGestures: true
-locale: en-US
+locale: null
+neoPixelBootGreen: true
+neoPixelDownloadBlue: true
+neoPixelErrorRed: true
+neoPixelFlashWhenSpeaking: true
+openCVFaceRecognizerActivated: true
+openCVFlipPicture: false
 peers:
   audioPlayer:
     autoStart: true
@@ -35,6 +53,10 @@ peers:
     autoStart: false
     name: inmoov2.fsm
     type: FiniteStateMachine
+  gpt3:
+    autoStart: false
+    name: inmoov2.gpt3
+    type: Gpt3
   head:
     autoStart: false
     name: inmoov2.head
@@ -137,7 +159,14 @@ peers:
     type: UltrasonicSensor
 pirEnableTracking: false
 pirPlaySounds: true
-pirWakeUp: false
+pirWakeUp: true
+robotCanMoveHeadWhileSpeaking: true
 shutdownStartupSpeed: 50.0
+sleepTimeoutMs: 300000
+startBrainOnBoot: true
+startMouthOnBoot: true
+startupSound: true
+trackingTimeoutMs: 10000
 type: InMoov2
+unlockInsult: forgive me
 virtual: false

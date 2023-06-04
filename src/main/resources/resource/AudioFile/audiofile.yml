@@ -5,7 +5,7 @@ currentTrack: default
 listeners: null
 mute: false
 peakDelayMs: null
-peakMultiplier: 1.0
+peakMultiplier: 100.0
 peakSampleInterval: 15.0
 peers: null
 playlists: null
