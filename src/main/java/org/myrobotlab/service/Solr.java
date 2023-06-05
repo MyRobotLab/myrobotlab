@@ -30,6 +30,7 @@ import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.response.JSONResponseWriter;
@@ -599,20 +600,25 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
   
   public String publishResults(QueryResponse resp) {
-	  // TODO: this doesn't serialize properly..
-	  // Gson gson = new Gson(); 
-	  // String json = gson.toJson(resp);
-	  // System.out.println("\nGSON\n" +json);
-	  // String serialized = CodecUtils.toJson(resp);
-	  // System.out.println("\n"+serialized+"\n");
-	  //  System.err.println(resp);
-	  // System.out.println(resp.jsonStr());
-	  // System.err.println(resp.jsonStr());
-	  // what about using the writer template to render the json of the query response
-	  // JSONResponseWriter writer = new JSONResponseWriter();
-	  // writer.write(writer, null, resp);
+	  // The QueryResponse object doesn't properly serialize some useful info
+	  // from the results  ( SolrDocumentList ) object, like the number found, the start offset
+	  // So we manually copy that info to top level items in the response so the webgui
+	  // can get at it.
+	  long numFound = resp.getResults().getNumFound();
+	  long start = resp.getResults().getStart();
+	  Float maxScore = resp.getResults().getMaxScore();
+	  Boolean numFoundExact = resp.getResults().getNumFoundExact();
+	  // this is lame but we have to copy some metadata around on the response
+	  // because it doesn't serialize properly.
+	  resp.getResponse().add("numFound", numFound);
+	  resp.getResponse().add("start", start);
+	  resp.getResponse().add("maxScore", maxScore);
+	  resp.getResponse().add("numFoundExact", numFoundExact);
+	  resp.getResponse().add("size", resp.getResults().size());
 	  
-	  return resp.jsonStr();
+	  String jsonResponse = resp.jsonStr(); 
+	  // publish the json string of the response.
+	  return jsonResponse;
   };
 
   /**

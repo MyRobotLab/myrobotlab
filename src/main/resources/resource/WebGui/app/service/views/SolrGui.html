@@ -6,33 +6,45 @@
     </form>
     
     <!-- Query String: {{queryString}} <br/>   -->
-    Query Search took {{solrResults.elapsedTime}} ms.<br/>
-    <br/>
-    <br/>
-    Solr Results Below
+    Displaying search results {{startOffset}} to {{endOffset}} of {{numFound}} in {{solrResults.responseHeader.QTime}} milliseconds. 
     <br/>
     
-    <table class="facetResults">
-      <tr ng-repeat="facet in solrResults.facet_counts track by $index">
-      <td>{{facet}}</td>
-      </tr>
-    </table>
-    
-    
+    <table class="facetAndSearchResults">
+    <tr VALIGN=TOP>
+    <td width=20%>
+      <table class="facetResults">
+        <tr ng-repeat="(field, buckets) in solrResults.facet_counts.facet_fields track by $index">
+          <td >
+            <table class="facetResult">
+              <tr>
+                <th>{{field}}</th>
+              </tr>
+              <tr>
+                <td><li ng-repeat="(bucket, count) in buckets">{{bucket}} ({{count}})</li></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+    <td>
     <table class="searchResults">
       <tr ng-repeat="result in solrResults.response track by $index">
-      <td>{{$index}} : {{result.id}}</td>
-      <td>
-        <table class="searchResult">
-          <tr ng-repeat="(key, value) in result">
-            <td>{{key}}</td><td>{{value}}</td> 
-          </tr>
-        </table>
-       <!--  <div class="chatBalloon{{chatContent.type}}"><div class="chatContent" ng-bind-html="chatContent.text"></div></div>  -->
-      </td>
+        <td>
+          <br/>
+          <b>Doc: {{$index}}</b>
+          <table class="searchResult">
+            <tr ng-repeat="(key, value) in result">
+              <td><strong>{{key}}</strong></td><td>{{value}}</td> 
+            </tr>
+          </table>
+         <!--  <div class="chatBalloon{{chatContent.type}}"><div class="chatContent" ng-bind-html="chatContent.text"></div></div>  -->
+        </td>
       </tr>
     </table>
-    
+    </td>
+    </tr>
+    </table>
     
     <div ng-switch on="size">
         <div class="animate-switch" ng-switch-when="small">Small view</div>

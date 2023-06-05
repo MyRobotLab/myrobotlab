@@ -5,6 +5,9 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
     // TODO: something useful?!
     $scope.solrResults = '';
     $scope.queryString = '*:*';
+    $scope.startOffset = 0;
+    $scope.endOffset = 0;
+    $scope.numFound = 0;
     	
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
@@ -15,9 +18,14 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
       let data = inMsg.data[0]
       switch (inMsg.method) {
         case 'onResults': 
-    	  var solrResults = data;
+    	  var solrResults = JSON.parse(data);
     	  console.info("On Results!");
-          $scope.solrResults = JSON.parse(data);
+    	  console.info(solrResults);
+          $scope.solrResults = solrResults;
+          // set the start/end offsets perhaps?
+          $scope.numFound = solrResults.numFound;
+          $scope.startOffset = solrResults.start+1
+          $scope.endOffset = solrResults.size + $scope.startOffset 
           $scope.$apply();
           break
         case 'onState':
@@ -39,7 +47,7 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
       console.info('SolrGuiCtrl - Search Clicked!' + querystring);
       // TODO: add the facets
        
-      mrl.sendTo($scope.service.name, "searchWithFacets", querystring, 10, 0, ['type']);
+      mrl.sendTo($scope.service.name, "searchWithFacets", querystring, 10, 0, ['type', 'sender','method']);
     };
     
     msg.subscribe('publishResults');
