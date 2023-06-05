@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -386,12 +385,12 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // this is to support future (non-Java) classes that cannot be instantiated
     // and
     // are subclassed in a proxy class with getType() overloaded for to identify
-    if (service.getType().equals("org.myrobotlab.service.OpenCV")) {
+    if (service.getTypeKey().equals("org.myrobotlab.service.OpenCV")) {
       AbstractComputerVision cv = (AbstractComputerVision) service;
       subscribe(service.getName(), "publishCvData");
     }
 
-    if (service.getType().equals("org.myrobotlab.service.Servo")) {
+    if (service.getTypeKey().equals("org.myrobotlab.service.Servo")) {
       // non-batched - "instantaneous" move data subscription
       subscribe(service.getName(), "publishEncoderData", getName(), "onEncoderData");
     }
@@ -879,11 +878,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     return String.format("_axis-%s-%s", getType(spatial), spatial.getName());
   }
 
-  @Override
-  public Message getDescribeMsg(String connId) {
-    // TODO Auto-generated method stub
-    return null;
-  }
 
   private String getExt(String name) {
     int pos = name.lastIndexOf(".");

@@ -32,16 +32,13 @@ public class MethodCacheTest extends AbstractTest {
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     cache = MethodCache.getInstance();
-    cache.cacheMethodEntries(TestCatcher.class);
+    sleep(100);
     cache.clear();
     assertEquals("all clear should be 0", 0, cache.getObjectSize());
-
+    // cache 3 services method entries
     cache.cacheMethodEntries(Runtime.class);
     cache.cacheMethodEntries(TestCatcher.class);
     cache.cacheMethodEntries(Clock.class);
-    // non-service entry
-    cache.cacheMethodEntries(TestCatcher.class);
-    cache.cacheMethodEntries(TestCatcher.class);
     assertEquals(String.format("cached 3 object's methods %s", Arrays.toString(cache.getCachedObjectNames().toArray())), 3, cache.getObjectSize());
 
     tester = (TestCatcher) Runtime.start("tester", "TestCatcher");

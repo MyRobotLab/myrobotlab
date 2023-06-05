@@ -30,7 +30,7 @@ public class RuntimeProcessTest extends AbstractTest {
   @Test
   public void cliTest() throws Exception {
 
-    // from ,to null=runtime, data
+    // from ,to null=runtime, data  
     String cwd = null;
     Message msg = CodecUtils.cliToMsg(cwd, getName(), null, "ls");
     assertEquals("runtime", msg.getName());
