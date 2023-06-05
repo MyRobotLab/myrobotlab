@@ -32,7 +32,7 @@
       <tr ng-repeat="result in solrResults.response track by $index">
         <td>
           <br/>
-          <b>Doc: {{$index}}</b>
+          <b>Doc: {{$index + startOffset}}</b>
           <table class="searchResult">
             <tr ng-repeat="(key, value) in result">
               <td><strong>{{key}}</strong></td><td>{{value}}</td> 

@@ -25,7 +25,7 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
           // set the start/end offsets perhaps?
           $scope.numFound = solrResults.numFound;
           $scope.startOffset = solrResults.start+1
-          $scope.endOffset = solrResults.size + $scope.startOffset 
+          $scope.endOffset = solrResults.size + solrResults.start 
           $scope.$apply();
           break
         case 'onState':
