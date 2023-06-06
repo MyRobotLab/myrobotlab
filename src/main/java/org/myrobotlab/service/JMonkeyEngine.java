@@ -174,8 +174,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   transient List<Jme3Msg> history = new ArrayList<Jme3Msg>();
 
-  transient AtomicInteger id = new AtomicInteger();
-
   transient InputManager inputManager;
 
   transient Interpolator interpolator;
@@ -2359,10 +2357,17 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       // FIXME - make "load" work ..
 
       LoggingFactory.init("WARN");
+      Runtime.start("sim", "JMonkeyEngine");
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
 
       boolean worky = false;
       if (worky) {
@@ -2376,10 +2381,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
         i01.startPeer("simulator");
       }
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       Platform.setVirtual(true);
       // Runtime.main(new String[] { "--interactive", "--id", "admin" });
