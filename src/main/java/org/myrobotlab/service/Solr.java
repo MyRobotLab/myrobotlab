@@ -432,7 +432,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
     try {
       // TODO: expose the format here.
-      String format = "png";
+      String format = "jpg";
       //ImageIO.write
       ImageIO.write(buffImage, format, stream);
     } catch (IOException e) {
@@ -544,7 +544,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    */
   public QueryResponse search(String queryString) {
     // default to 10 hits returned.
-    System.err.println("Here...");
+    // System.err.println("Here...");
     return search(queryString, 10, 0, true);
   }
 
@@ -605,6 +605,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     query.setRows(rows);
     query.setStart(start);
     query.setFacet(true);
+    query.setSort("date", ORDER.desc);
     for (String field : facetFields) {
       query.addFacetField(field);
     }
@@ -869,7 +870,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   // when attached to an opencv instance this will return images and save them
   // to solr if there is a label / count specified
   public OpenCVData onOpenCVData(OpenCVData data) {
-    System.err.println("Open CV Data..");
+    // System.err.println("Open CV Data..");
     // Only record if we are training.
     // TODO: unroll this use case.. we'd like to just blindly index all the frames here.
     if (false) {

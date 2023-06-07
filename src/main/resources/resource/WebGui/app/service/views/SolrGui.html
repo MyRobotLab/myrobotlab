@@ -36,7 +36,7 @@
           <table class="searchResult">
             <tr ng-repeat="(key, value) in result">
               <td><strong>{{key}}</strong></td>
-              <td ng-if="key == 'bytes'">Image Data: <img ng-src="{{value}}"/>  Nice huh?</td>
+              <td ng-if="key == 'bytes'"><img height="100" ng-src="{{value}}"/></td>
               <td ng-if="key != 'bytes'">{{value}}</td> 
             </tr>
           </table>
