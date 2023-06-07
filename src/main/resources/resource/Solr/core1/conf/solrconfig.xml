@@ -290,7 +290,8 @@
          have some sort of hard autoCommit to limit the log size.
       -->
     <autoCommit>
-      <maxTime>${solr.autoCommit.maxTime:5000}</maxTime>
+      <!-- auto commit the index every second -->
+      <maxTime>${solr.autoCommit.maxTime:1000}</maxTime>
       <openSearcher>true</openSearcher>
     </autoCommit>
 

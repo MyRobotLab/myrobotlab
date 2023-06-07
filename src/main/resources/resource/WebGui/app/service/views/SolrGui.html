@@ -35,7 +35,9 @@
           <b>Doc: {{$index + startOffset}}</b>
           <table class="searchResult">
             <tr ng-repeat="(key, value) in result">
-              <td><strong>{{key}}</strong></td><td>{{value}}</td> 
+              <td><strong>{{key}}</strong></td>
+              <td ng-if="key == 'bytes'">Image Data: <img ng-src="{{value}}"/>  Nice huh?</td>
+              <td ng-if="key != 'bytes'">{{value}}</td> 
             </tr>
           </table>
          <!--  <div class="chatBalloon{{chatContent.type}}"><div class="chatContent" ng-bind-html="chatContent.text"></div></div>  -->

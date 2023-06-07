@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,7 +18,7 @@ import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.codec.binary.Base64;
+import java.util.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -30,16 +29,12 @@ import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
-import org.apache.solr.response.JSONResponseWriter;
-import org.apache.solr.response.SolrQueryResponse;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter.ToIplImage;
 import org.bytedeco.opencv.opencv_core.IplImage;
-import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
 import org.myrobotlab.framework.Inbox;
@@ -62,8 +57,6 @@ import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
-
-import com.google.gson.Gson;
 
 /**
  * SolrService - MyRobotLab This is an integration of Solr into MyRobotLab. Solr
@@ -158,12 +151,13 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     Path solrHome = Paths.get(path);
     log.info(solrHome.toFile().getAbsolutePath());
     Path solrXml = solrHome.resolve("solr.xml");
-    
+
     String absolueHome = solrHome.toFile().getAbsolutePath();
     CoreContainer cores = CoreContainer.createAndLoad(Paths.get(absolueHome), solrXml);
     for (String coreName : cores.getAllCoreNames()) {
       log.info("Found core core {}", coreName);
     }
+
     // create the actual solr instance with core1
     embeddedSolrServer = new EmbeddedSolrServer(cores, CORE_NAME);
     // TODO: verify when the embedded solr server has fully started.
@@ -437,7 +431,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     BufferedImage buffImage = converter.toBufferedImage(image);
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
     try {
-      ImageIO.write(buffImage, "png", stream);
+      // TODO: expose the format here.
+      String format = "png";
+      //ImageIO.write
+      ImageIO.write(buffImage, format, stream);
     } catch (IOException e) {
       // This *shouldn't* happen with a ByteArrayOutputStream, but if it
       // somehow does happen, then we don't want to just ignore it
@@ -468,6 +465,34 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     return iplImage;
     // Again this could be try with resources but the original example was in
     // Scala
+  }
+
+  /**
+   * deserialize from a png byte array to a base64 encoded string
+   * for display inline in html.
+   * 
+   * @param bytes
+   *          input bytes
+   * @return a string
+   * @throws IOException
+   *           boom
+   * 
+   */
+  public String bytesToBase64Jpg(byte[] bytes) {
+    //
+    // let's assume we're a buffered image .. those are serializable :)
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    try {
+      BufferedImage bufImage = ImageIO.read(new ByteArrayInputStream(bytes));
+      ImageIO.write(bufImage, "jpg", os);
+      os.close();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      return "ERROR converting image to jpg base64.";
+    }
+
+    String data = String.format("data:image/%s;base64,%s", "jpg", Base64.getEncoder().encodeToString(os.toByteArray()));
+    return data;
   }
 
   /**
@@ -559,7 +584,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     return resp;
   }
 
-  
+
   /**
    * Default query to fetch the top 10 documents that match the query request.
    * 
@@ -583,7 +608,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     for (String field : facetFields) {
       query.addFacetField(field);
     }
-    
+
     QueryResponse resp = null;
     try {
       if (embeddedSolrServer != null) {
@@ -598,27 +623,56 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     // invoke("publishResults");
     return resp;
   }
-  
+
   public String publishResults(QueryResponse resp) {
-	  // The QueryResponse object doesn't properly serialize some useful info
-	  // from the results  ( SolrDocumentList ) object, like the number found, the start offset
-	  // So we manually copy that info to top level items in the response so the webgui
-	  // can get at it.
-	  long numFound = resp.getResults().getNumFound();
-	  long start = resp.getResults().getStart();
-	  Float maxScore = resp.getResults().getMaxScore();
-	  Boolean numFoundExact = resp.getResults().getNumFoundExact();
-	  // this is lame but we have to copy some metadata around on the response
-	  // because it doesn't serialize properly.
-	  resp.getResponse().add("numFound", numFound);
-	  resp.getResponse().add("start", start);
-	  resp.getResponse().add("maxScore", maxScore);
-	  resp.getResponse().add("numFoundExact", numFoundExact);
-	  resp.getResponse().add("size", resp.getResults().size());
-	  
-	  String jsonResponse = resp.jsonStr(); 
-	  // publish the json string of the response.
-	  return jsonResponse;
+    // The QueryResponse object doesn't properly serialize some useful info
+    // from the results  ( SolrDocumentList ) object, like the number found, the start offset
+    // So we manually copy that info to top level items in the response so the webgui
+    // can get at it.
+    long numFound = resp.getResults().getNumFound();
+    long start = resp.getResults().getStart();
+    Float maxScore = resp.getResults().getMaxScore();
+    Boolean numFoundExact = resp.getResults().getNumFoundExact();
+    // this is lame but we have to copy some metadata around on the response
+    // because it doesn't serialize properly.
+    resp.getResponse().add("numFound", numFound);
+    resp.getResponse().add("start", start);
+    resp.getResponse().add("maxScore", maxScore);
+    resp.getResponse().add("numFoundExact", numFoundExact);
+    resp.getResponse().add("size", resp.getResults().size());
+
+
+    // Now, let's convert the byte arrays to base64 image strings.
+
+    for (SolrDocument d : resp.getResults()) {
+
+      if (d.containsKey("bytes")) {
+        // encode this as base 64 image data.
+
+        byte[] bytes = (byte[])(d.getFirstValue("bytes"));
+        //			  int size = bytes.size();
+        //			  byte[] data = new byte[size];
+        //			  for (int i = 0 ; i < size; i++) {
+        //				  data[i] = (byte)bytes.get(i);
+        //			  }
+
+        // WTF.. this is an arrayList of bytes ?!  that seems so incredibly ineffectient!!
+
+
+        String base64jpg = bytesToBase64Jpg(bytes);
+        d.setField("bytes", base64jpg);
+
+      }
+
+
+
+
+    }
+
+
+    String jsonResponse = resp.jsonStr(); 
+    // publish the json string of the response.
+    return jsonResponse;
   };
 
   /**
@@ -716,9 +770,11 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   // Attach Pattern stuff!
   public void attach(OpenCV opencv) {
-    opencv.addListener("publishOpenCVData", getName(), "onOpenCVData");
-    opencv.addListener("publishClassification", getName(), "onClassification");
-    opencv.addListener("publishYoloClassification", getName(), "onYoloClassification");
+    opencv.addListener("publishOpenCVData", getName());
+    //subscribe(opencv.getName(), "publishOpenCVData");
+    //opencv.addListener("publishOpenCVData", getName(), "onOpenCVData");
+    //opencv.addListener("publishClassification", getName(), "onClassification");
+    //opencv.addListener("publishYoloClassification", getName(), "onYoloClassification");
   }
 
   // to make it easier to call from aiml
@@ -770,7 +826,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
           byte[] bytes = null;
           try {
             bytes = imageToBytes(yolo.image);
-            String encoded = Base64.encodeBase64String(bytes);
+            String encoded = Base64.getEncoder().encodeToString(bytes);
             // bytes field contains bindary data (sent as base64)
             doc.addField("bytes", encoded);
             doc.addField("has_bytes", true);
@@ -813,21 +869,25 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   // when attached to an opencv instance this will return images and save them
   // to solr if there is a label / count specified
   public OpenCVData onOpenCVData(OpenCVData data) {
+    System.err.println("Open CV Data..");
     // Only record if we are training.
-    if (openCvLabel == null) {
-      // we're not training just return
-      return data;
-    }
-    // we are training.
-    if (openCvTrainingCount == 0) {
-      // we're done recording our training data for this one.
-      openCvLabel = null;
-      return data;
-    } else {
-      // decrement the count
-      openCvTrainingCount--;
+    // TODO: unroll this use case.. we'd like to just blindly index all the frames here.
+    if (false) {
+      if (openCvLabel == null) {
+        // we're not training just return
+        return data;
+      }
+      // we are training.
       if (openCvTrainingCount == 0) {
-        invoke("publishDoneLabeling", openCvLabel);
+        // we're done recording our training data for this one.
+        openCvLabel = null;
+        return data;
+      } else {
+        // decrement the count
+        openCvTrainingCount--;
+        if (openCvTrainingCount == 0) {
+          invoke("publishDoneLabeling", openCvLabel);
+        }
       }
     }
     // ok.. here we are, create a "memory" out of the opencv data.
@@ -848,8 +908,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     IplImage img = data.getImage();
     byte[] bytes = null;
     try {
+      // Let's compress the raw image.. o/w it'll just likely be much too large.
       bytes = imageToBytes(img);
-      String encoded = Base64.encodeBase64String(bytes);
+      String encoded = Base64.getEncoder().encodeToString(bytes);
       // bytes field contains bindary data (sent as base64)
       doc.addField("bytes", encoded);
       doc.addField("has_bytes", true);
@@ -1053,49 +1114,57 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       Solr solr = (Solr) Runtime.start("solr", "Solr");
       solr.startEmbedded();
       WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
+      OpenCV cv = (OpenCV)Runtime.start("cv", "OpenCV");
+
+      // lets start indexing frames!
+      solr.attach(cv);
+      // and, go!
+      //cv.capture();
+
       // Create a test document
-      SolrInputDocument doc = new SolrInputDocument();
-      /*
-       * doc.setField("id", "Doc1"); doc.setField("title", "My title");
-       * doc.setField("content",
-       * "This is the text field, for a sample document in myrobotlab.  "); //
-       * add the document to the index solr.addDocument(doc); // commit the
-       * index solr.commit();
-       */
+      boolean testIndex = false;
+      if (testIndex) {
+        SolrInputDocument doc = new SolrInputDocument();
+        /*
+         * doc.setField("id", "Doc1"); doc.setField("title", "My title");
+         * doc.setField("content",
+         * "This is the text field, for a sample document in myrobotlab.  "); //
+         * add the document to the index solr.addDocument(doc); // commit the
+         * index solr.commit();
+         */
+        doc = new SolrInputDocument();
+        doc.setField("id", "Doc3");
+        doc.setField("title", "My title 3");
+        doc.setField("content", "This is the text field, for a sample document in myrobotlab. 2 ");
+        doc.setField("annoyance", 1);
+        // add the document to the index
+        solr.addDocument(doc);
+        // commit the index
+        solr.commit();
 
-      doc = new SolrInputDocument();
-      doc.setField("id", "Doc3");
-      doc.setField("title", "My title 3");
-      doc.setField("content", "This is the text field, for a sample document in myrobotlab. 2 ");
-      doc.setField("annoyance", 1);
-      // add the document to the index
-      solr.addDocument(doc);
-      // commit the index
-      solr.commit();
+        // search for the word myrobotlab
+        String queryString = "content:myrobotlab";
+        QueryResponse resp = solr.search(queryString);
+        for (int i = 0; i < resp.getResults().size(); i++) {
+          System.out.println("---------------------------------");
+          System.out.println("-- Printing Result number :" + i);
+          // grab a document out of the result set.
+          SolrDocument d = resp.getResults().get(i);
+          // iterate over the fields on the returned document
+          for (String fieldName : d.getFieldNames()) {
 
-      // search for the word myrobotlab
-      String queryString = "content:myrobotlab";
-      QueryResponse resp = solr.search(queryString);
-      for (int i = 0; i < resp.getResults().size(); i++) {
-        System.out.println("---------------------------------");
-        System.out.println("-- Printing Result number :" + i);
-        // grab a document out of the result set.
-        SolrDocument d = resp.getResults().get(i);
-        // iterate over the fields on the returned document
-        for (String fieldName : d.getFieldNames()) {
-
-          System.out.print(fieldName + "\t");
-          // fields can be multi-valued
-          for (Object value : d.getFieldValues(fieldName)) {
-            System.out.print(value);
-            System.out.print("\t");
+            System.out.print(fieldName + "\t");
+            // fields can be multi-valued
+            for (Object value : d.getFieldValues(fieldName)) {
+              System.out.print(value);
+              System.out.print("\t");
+            }
+            System.out.println("");
           }
-          System.out.println("");
         }
+        System.out.println("---------------------------------");
+        System.out.println("Done.");
       }
-      System.out.println("---------------------------------");
-      System.out.println("Done.");
-
     } catch (Exception e) {
       Logging.logError(e);
     }

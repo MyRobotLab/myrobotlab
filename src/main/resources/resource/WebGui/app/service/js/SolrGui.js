@@ -47,7 +47,7 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
       console.info('SolrGuiCtrl - Search Clicked!' + querystring);
       // TODO: add the facets
        
-      mrl.sendTo($scope.service.name, "searchWithFacets", querystring, 10, 0, ['type', 'sender','method']);
+      mrl.sendTo($scope.service.name, "searchWithFacets", querystring, 10, 0, ['sender_type', 'sender','method']);
     };
     
     msg.subscribe('publishResults');
