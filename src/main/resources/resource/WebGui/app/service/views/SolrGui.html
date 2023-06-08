@@ -20,7 +20,7 @@
                 <th>{{field}}</th>
               </tr>
               <tr>
-                <td><li ng-repeat="(bucket, count) in buckets">{{bucket}} ({{count}})</li></td>
+                <td><li ng-repeat="(bucket, count) in buckets"><a ng-click="filter(field, bucket)">{{bucket}}</a> ({{count}})</li></td>
               </tr>
             </table>
           </td>

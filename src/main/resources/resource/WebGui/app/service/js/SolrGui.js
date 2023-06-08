@@ -8,7 +8,8 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
     $scope.startOffset = 0;
     $scope.endOffset = 0;
     $scope.numFound = 0;
-    	
+    
+    $scope.filters = [];
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
       $scope.service = service
@@ -44,11 +45,18 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
     };
     
     $scope.search = function(querystring) {
+	      
       console.info('SolrGuiCtrl - Search Clicked!' + querystring);
-      // TODO: add the facets
-       
+      // TODO: add the filters
+      $scope.queryString = querystring;
       mrl.sendTo($scope.service.name, "searchWithFacets", querystring, 10, 0, ['sender_type', 'sender','method']);
     };
+    
+    $scope.filter = function(field, value) {
+    	// $scope.filters.add(field + ":" + value);
+    	querystring = $scope.querystring + " +" +field + ":" + value;
+    	mrl.sendTo($scope.service.name, "searchWithFacets", querystring, 10, 0, ['sender_type', 'sender','method']);
+    }
     
     msg.subscribe('publishResults');
     msg.subscribe(this);

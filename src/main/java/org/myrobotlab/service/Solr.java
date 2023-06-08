@@ -605,6 +605,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     query.setRows(rows);
     query.setStart(start);
     query.setFacet(true);
+    query.setFacetMinCount(1);
+    // TODO: expose sorting in a fancier search method signature
+    // Alternatively, pass the list of parameters and their values into a generic search method instead.
     query.setSort("date", ORDER.desc);
     for (String field : facetFields) {
       query.addFacetField(field);
@@ -895,7 +898,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     SolrInputDocument doc = new SolrInputDocument();
     // create a document id for this document
     // TODO: make this something much more deterministic!!
-    String type = "opencvdata";
+    String type = "opencvdata"; 
     String id = type + "_" + UUID.randomUUID().toString();
     doc.setField("id", id);
     doc.setField("type", type);
