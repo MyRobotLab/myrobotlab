@@ -1,12 +1,17 @@
 <div>
     <!-- for debugging  Data: {{service}} <br/>  -->
     <form novalidate class="search-form">
-     QueryString: <input type="text" ng-model="queryString" /><input type="submit" ng-click="search(queryString)" value="Search" />
+     QueryString: <input type="text" ng-model="queryString" /><input type="submit" ng-click="execNewSearch()" value="Search" />
      <br/>
     </form>
     
+    Filters Applied: 
+    <div ng-repeat="filter in filters">Filter: {{filter}} <br/> </div>
+    
     <!-- Query String: {{queryString}} <br/>   -->
-    Displaying search results {{startOffset}} to {{endOffset}} of {{numFound}} in {{solrResults.responseHeader.QTime}} milliseconds. 
+    Displaying search results {{startOffset+1}} to {{endOffset}} of {{numFound}} in {{solrResults.responseHeader.QTime}} milliseconds.
+    
+     <a ng-click="prevPage()">Previous Page</a> <a ng-click="nextPage()">Next Page</a> 
     <br/>
     
     <table class="facetAndSearchResults">

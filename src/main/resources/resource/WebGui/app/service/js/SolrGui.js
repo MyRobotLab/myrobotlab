@@ -8,8 +8,11 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
     $scope.startOffset = 0;
     $scope.endOffset = 0;
     $scope.numFound = 0;
-    
+    $scope.pageSize = 20;
     $scope.filters = [];
+    // TODO: maybe some other fields..
+    // TODO: support range facets
+    $scope.facetFields = ['sender_type', 'sender','method'];
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
       $scope.service = service
@@ -25,7 +28,8 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
           $scope.solrResults = solrResults;
           // set the start/end offsets perhaps?
           $scope.numFound = solrResults.numFound;
-          $scope.startOffset = solrResults.start+1
+          // TODO: this is conflated logic.
+          // $scope.startOffset = solrResults.start
           $scope.endOffset = solrResults.size + solrResults.start 
           $scope.$apply();
           break
@@ -44,18 +48,38 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
     
     };
     
-    $scope.search = function(querystring) {
-	      
-      console.info('SolrGuiCtrl - Search Clicked!' + querystring);
-      // TODO: add the filters
-      $scope.queryString = querystring;
-      mrl.sendTo($scope.service.name, "searchWithFacets", querystring, 10, 0, ['sender_type', 'sender','method']);
+    // start a new search
+    $scope.execNewSearch = function() {
+      console.info('SolrGuiCtrl - Search Clicked!' + $scope.querystring);
+      // this is someone clicking the search button.. we should clear the filters and reset pagination
+      $scope.filters = [];
+      $scope.startOffset = 0;
+      $scope.execSearch();
     };
     
+    // run the search based on the current query params selected.
+    $scope.execSearch = function() {
+      mrl.sendTo($scope.service.name, "searchWithFacets", $scope.queryString, 10, $scope.startOffset, $scope.facetFields, $scope.filters);
+    }
+    
     $scope.filter = function(field, value) {
-    	// $scope.filters.add(field + ":" + value);
-    	querystring = $scope.querystring + " +" +field + ":" + value;
-    	mrl.sendTo($scope.service.name, "searchWithFacets", querystring, 10, 0, ['sender_type', 'sender','method']);
+    	// add the filter and run the search
+    	$scope.filters.push(field + ":\"" + value + "\"");
+    	// reset to first page when adding a new filter
+    	$scope.startOffset = 0;
+    	$scope.execSearch();
+    }
+    
+    $scope.prevPage = function() {
+    	// update the start offset and run the search
+    	$scope.startOffset -= $scope.pageSize;
+    	$scope.execSearch();
+    }
+    
+    $scope.nextPage = function() {
+    	// update the start offset and run the search
+    	$scope.startOffset += $scope.pageSize;
+    	$scope.execSearch();
     }
     
     msg.subscribe('publishResults');

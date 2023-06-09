@@ -598,7 +598,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    *          a list of fields in which to return facets for
    * @return the response
    */
-  public QueryResponse searchWithFacets(String queryString, int rows, int start, String[] facetFields) {
+  public QueryResponse searchWithFacets(String queryString, int rows, int start, String[] facetFields, String[] filters) {
     log.info("Searching for (with facets): {}", queryString);
     SolrQuery query = new SolrQuery();
     query.set("q", queryString);
@@ -611,6 +611,11 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     query.setSort("date", ORDER.desc);
     for (String field : facetFields) {
       query.addFacetField(field);
+    }
+
+    for (String filter : (String[])filters) {
+      query.addFilterQuery(filter);
+      
     }
 
     QueryResponse resp = null;
