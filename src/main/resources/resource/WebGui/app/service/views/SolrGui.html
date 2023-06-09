@@ -1,21 +1,23 @@
 <div>
     <!-- for debugging  Data: {{service}} <br/>  -->
-    <form novalidate class="search-form">
-     QueryString: <input type="text" ng-model="queryString" /><input type="submit" ng-click="execNewSearch()" value="Search" />
-     <br/>
-    </form>
-    
-    <div ng-repeat="filter in filters">{{filter}} <a ng-click="removeFilter(filter)">[x]</a> </div>
+    <div class="form-group">
+     <label>QueryString</label>
+     <input type="text" ng-model="queryString" class="form-control typeHereField ng-pristine ng-valid ng-empty ng-touched"/>
+     <input type="submit" ng-click="execNewSearch()" value="Search" />
+    </div>
+    <br/>
+    <span ng-repeat="filter in filters">{{filter}} <a ng-click="removeFilter(filter)">[x]</a> </span>
+    <br/>
     
     <!-- Query String: {{queryString}} <br/>   -->
     Displaying search results {{startOffset+1}} to {{endOffset}} of {{numFound}} in {{solrResults.responseHeader.QTime}} milliseconds.
     
-     <a ng-click="prevPage()">Previous Page</a> <a ng-click="nextPage()">Next Page</a> 
+     <a ng-click="prevPage()">Previous</a> <a ng-click="nextPage()">Next</a> 
     <br/>
     
     <table class="facetAndSearchResults">
     <tr VALIGN=TOP>
-    <td width=20%>
+    <td>
       <table class="facetResults">
         <tr ng-repeat="(field, buckets) in solrResults.facet_counts.facet_fields track by $index">
           <td >
@@ -32,12 +34,12 @@
       </table>
     </td>
     <td>
-    <table class="searchResults">
-      <tr ng-repeat="result in solrResults.response track by $index">
+    <table class="table table-striped">
+      <tr ng-repeat="result in solrResults.response track by $index" class="ng-scope">
         <td>
           <br/>
           <b>Doc: {{$index + startOffset}}</b>
-          <table class="searchResult">
+          <table class="searchResult" class>
             <tr ng-repeat="(key, value) in result">
               <td><strong>{{key}}</strong></td>
               <td ng-if="key == 'bytes'"><img height="100" ng-src="{{value}}"/></td>

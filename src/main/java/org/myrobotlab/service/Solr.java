@@ -608,7 +608,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     query.setFacetMinCount(1);
     // TODO: expose sorting in a fancier search method signature
     // Alternatively, pass the list of parameters and their values into a generic search method instead.
-    query.setSort("date", ORDER.desc);
+    query.setSort("index_date", ORDER.desc);
     for (String field : facetFields) {
       query.addFacetField(field);
     }
@@ -780,10 +780,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   // Attach Pattern stuff!
   public void attach(OpenCV opencv) {
     opencv.addListener("publishOpenCVData", getName());
-    //subscribe(opencv.getName(), "publishOpenCVData");
-    //opencv.addListener("publishOpenCVData", getName(), "onOpenCVData");
-    //opencv.addListener("publishClassification", getName(), "onClassification");
-    //opencv.addListener("publishYoloClassification", getName(), "onYoloClassification");
+    opencv.addListener("publishClassification", getName());
+    opencv.addListener("publishYoloClassification", getName());
   }
 
   // to make it easier to call from aiml
@@ -938,7 +936,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   // attach pattern stuff
   public void attach(Deeplearning4j dl4j) {
-    dl4j.addListener("publishClassification", getName(), "onClassification");
+    dl4j.addListener("publishClassification", getName());
   }
 
   // TODO: index the classifications with the cvdata. not separately..
@@ -1088,6 +1086,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     SolrInputDocument doc = new SolrInputDocument();
     doc.setField("id", docId);
     // TODO: consider a cache of this to make this faster
+    doc.setField("type", "message");
     doc.setField("sender_type", Runtime.getService(message.sender).getTypeKey());
     doc.setField("sender", message.sender);
     doc.setField("method", message.method);
@@ -1125,6 +1124,12 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
       OpenCV cv = (OpenCV)Runtime.start("cv", "OpenCV");
 
+      Runtime.start("programab", "ProgramAB");
+      Runtime.start("clock", "Clock");
+      Runtime.start("ard", "Arduino");
+      
+      solr.attachAllInboxes();
+      solr.attachAllOutboxes();
       // lets start indexing frames!
       solr.attach(cv);
       // and, go!
