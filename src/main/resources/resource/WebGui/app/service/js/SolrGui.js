@@ -70,15 +70,27 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
     	$scope.execSearch();
     }
     
+    $scope.removeFilter = function(filter) {
+    	// remove the filter that was passed in.
+    	$scope.filters = $scope.filters.filter(e => e !== filter); 
+    	$scope.execSearch();
+    }
+    
     $scope.prevPage = function() {
     	// update the start offset and run the search
     	$scope.startOffset -= $scope.pageSize;
+    	if ($scope.startOffset < 0) {
+    		$scope.startOffset = 0;
+    	}
     	$scope.execSearch();
     }
     
     $scope.nextPage = function() {
     	// update the start offset and run the search
     	$scope.startOffset += $scope.pageSize;
+    	if ($scope.startOffset > $scope.numFound) {
+    		$scope.startOffset -= $scope.pageSize;
+    	}
     	$scope.execSearch();
     }
     

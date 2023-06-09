@@ -5,8 +5,7 @@
      <br/>
     </form>
     
-    Filters Applied: 
-    <div ng-repeat="filter in filters">Filter: {{filter}} <br/> </div>
+    <div ng-repeat="filter in filters">{{filter}} <a ng-click="removeFilter(filter)">[x]</a> </div>
     
     <!-- Query String: {{queryString}} <br/>   -->
     Displaying search results {{startOffset+1}} to {{endOffset}} of {{numFound}} in {{solrResults.responseHeader.QTime}} milliseconds.
