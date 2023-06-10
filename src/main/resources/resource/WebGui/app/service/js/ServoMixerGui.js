@@ -4,6 +4,11 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
     var msg = this.msg
 
     $scope.minView = true
+    $scope.delay = 3 // initial
+
+    $scope.searchServo = {
+        displayName: null
+    }
     
     $scope.servos = []
     $scope.sliders = []
@@ -12,12 +17,14 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
     $scope.sequenceFiles = []
 
     $scope.state = {
+        // sequenceIndex is a string representation from $index :( dumb
+        'sequenceIndex': "0",
         'selectedPose': null,
         'selectedSequenceFile': null,
         'selectedSequence': null,
         'currentRunningPose': null,
         'currentSequence':{
-            'poses':[]
+            'parts':[]
         }
     }
 
@@ -62,6 +69,11 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
             _self.updateState(data)
             $scope.$apply()
             break
+        case 'onSearch':
+            $scope.searchServo.displayName = data
+            $scope.searchServos(data)
+            $scope.$apply()
+            break                
         case 'onPlayingPose':
             $scope.state.currentRunningPose = data
             $scope.$apply()
@@ -80,7 +92,6 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
             if (data && data.length > 0) {
                 $scope.state.selectedPose = data[data.length - 1]
             }
-
             break
         case 'onSequence':
             $scope.state.currentSequence = data
@@ -88,6 +99,9 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
             break
         case 'onSequenceFiles':
             $scope.sequenceFiles = data
+            if (!$scope.state.selectedSequenceFile && $scope.sequenceFiles && $scope.sequenceFiles.length > 0){
+                $scope.state.selectedSequenceFile = $scope.sequenceFiles[0]
+            }
             $scope.$apply()
             break
         case 'onListAllServos':
@@ -136,60 +150,36 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
         }
     }
 
-    getIndexOfSelectedPoseInSequence = function() {
-        if (!$scope.state.selectedSequence) {
-            return 0
-        }
-
-        // change the selected sequence back into an object
-        let ssId = JSON.parse($scope.state.selectedSequence).id
-
-        let index = 0
-        for (var p of $scope.state.currentSequence.poses) {
-            posId = $scope.state.currentSequence.poses[index].id
-            if (ssId == posId) {
-                return index
-            }
-            index++
-        }
-        return index
-    }
 
     $scope.addPoseToSequence = function() {
         // get pos entry
         let pose = {
-            'id': id,
             'name': $scope.state.selectedPose,
-            'waitTimeMs': 3000
+            'type': 'Pose',
+            'blocking': false
         }
 
-        // maintain unique id
-        ++id
-
-        let currentIndex = getIndexOfSelectedPoseInSequence()
-        currentIndex++
-        $scope.state.currentSequence.poses.splice(currentIndex, 0, pose)
+        $scope.state.currentSequence.parts.splice(parseInt($scope.state.sequenceIndex) + 1, 0, pose)
     }
 
     $scope.removePoseFromSequence = function() {
-        let currentIndex = getIndexOfSelectedPoseInSequence()
-        $scope.state.currentSequence.poses.splice(currentIndex, 1)
+        $scope.state.currentSequence.parts.splice($scope.state.sequenceIndex, 1)
     }
 
     move = function(arr, fromIndex, toIndex) {
         var element = arr[fromIndex];
         arr.splice(fromIndex, 1);
         arr.splice(toIndex, 0, element);
+        // stupid ass conversion back to string for list 'select'
+        $scope.state.sequenceIndex = toIndex + ''
     }
 
     $scope.moveUpPoseInSequence = function() {
-        let currentIndex = getIndexOfSelectedPoseInSequence()
-        move($scope.state.currentSequence.poses, currentIndex, currentIndex - 1)
+        move($scope.state.currentSequence.parts, $scope.state.sequenceIndex, parseInt($scope.state.sequenceIndex) - 1)
     }
 
     $scope.moveDownPoseInSequence = function() {
-        let currentIndex = getIndexOfSelectedPoseInSequence()
-        move($scope.state.currentSequence.poses, currentIndex, currentIndex + 1)
+        move($scope.state.currentSequence.parts, $scope.state.sequenceIndex, parseInt($scope.state.sequenceIndex) + 1)
     }
 
     $scope.searchServos = function(searchText) {
@@ -219,15 +209,12 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
         console.info('here')
     }
 
-    $scope.setSequence = function() {
-        let seq = JSON.parse($scope.state.selectedSequence)
-        $scope.delay = seq.waitTimeMs/1000
-        console.info($scope.state.selectedSequence)
-    }
-
-    $scope.moveSequenceContent = function(seqstr){
-        let seq = JSON.parse(seqstr)
-        msg.send('moveToPose', seq.name)
+    $scope.step = function(){
+        let index = parseInt($scope.state.sequenceIndex)
+        let part = $scope.state.currentSequence.parts[index]
+        if (part.type === 'Pose'){
+            part.send('moveToPose', part)    
+        }        
     }
 
     // initialize all services which have panel references in Intro    
@@ -238,24 +225,41 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
 
     $scope.saveSequence = function(name) {
         $scope.state.currentSequence.name = name
-        /*
-        $scope.state.currentSequence.poses = []
-        for (var p of $scope.state.currentSequence.poses) {
-            $scope.state.currentSequence.poses.push(p.name)
-        }*/
-
-        // because angular adds crap to identify select options :(
-        // let json = JSON.stringify($scope.state.currentSequence)
-        let json = angular.toJson($scope.state.currentSequence)
-        msg.send('saveSequence', name, json)
+        msg.send('saveSequence', name, $scope.state.currentSequence)
     }
 
-    $scope.addSequenceDelay = function(delay){
-        let index = getIndexOfSelectedPoseInSequence()
-        if (delay == ""){
-            $scope.state.currentSequence.poses[index].waitTimeMs = null
+    $scope.addDelay = function(seconds){
+
+        let value = parseFloat(seconds)
+        
+        if (Number.isNaN(value)){
+            console.error(seconds, "is not a valid number for delay")
+            return
+        }
+        
+        let delay = {
+            'name': 'delay',
+            'type': 'Delay',
+            'value': value * 1000,
+            'blocking': true
+        }
+        
+        $scope.state.currentSequence.parts.splice(parseInt($scope.state.sequenceIndex) + 1, 0, delay)
+    }
+
+    $scope.playSequence = function(sequence) {
+        if (sequence){
+            msg.send('playSequence', sequence)    
         } else {
-            $scope.state.currentSequence.poses[index].waitTimeMs = delay * 1000
+            console.warn('sequence empty')
+        }
+    }
+
+    $scope.removeSequence = function(sequence) {
+        if (sequence){
+            msg.send('removeSequence', sequence)    
+        } else {
+            console.warn('removeSequence empty')
         }
     }
 
@@ -263,13 +267,14 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
     msg.subscribe('getSequence')
     msg.subscribe('getSequenceFiles')
     msg.subscribe('listAllServos')
+    msg.subscribe('search')
+    
     msg.send('listAllServos')
     msg.send('getPoseFiles');
     msg.send('getSequenceFiles');
 
     msg.subscribe("publishPlayingPose")
     msg.subscribe("publishStopPose")
-
 
     mrl.subscribeToRegistered(this.onRegistered)
     mrl.subscribeToReleased(this.onReleased)

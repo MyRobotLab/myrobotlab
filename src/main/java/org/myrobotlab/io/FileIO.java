@@ -1574,6 +1574,21 @@ public class FileIO {
     }
     return null;
   }
+  
+  /**
+   * validate a directory exists
+   * @param dir
+   * @return
+   */
+  public static boolean checkDir(String dir) {
+    try {
+      File check = new File(dir);
+      return check.exists() && check.isDirectory();
+    } catch (Exception e) {
+      log.error("checkDir threw", e);
+    }
+    return false;
+  }
 
   /**
    * flips all \ to / or / to \ depending on OS

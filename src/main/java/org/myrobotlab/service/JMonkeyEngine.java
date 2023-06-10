@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -68,6 +69,7 @@ import com.jme3.collision.CollisionResults;
 import com.jme3.export.binary.BinaryExporter;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
+import com.jme3.input.ChaseCamera;
 import com.jme3.input.FlyByCamera;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
@@ -127,7 +129,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   private static final long serialVersionUID = 1L;
 
-  boolean altLeftPressed = false;
+  boolean altLeft = false;
 
   transient AnalogListener analog = null;
 
@@ -156,14 +158,14 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   transient DisplayMode displayMode = null;
 
   transient FlyByCamera flyCam;
+  
+  public  ChaseCamera chaseCamera;
 
   String fontColor = "#66ff66"; // green
 
   int fontSize = 14;
 
   boolean fullscreen = false;
-
-  private String guiId;
 
   transient Node guiNode;
 
@@ -181,11 +183,9 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   final public String KEY_SEPERATOR = "/";
 
-  transient DisplayMode lastDisplayMode = null;
-
   String modelsDir = assetsDir + File.separator + "Models";
 
-  boolean mouseLeftPressed = false;
+  boolean mouseLeft = false;
 
   boolean mouseRightPressed = false;
 
@@ -208,12 +208,9 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   int selectIndex = 0;
 
-  @Deprecated /* came from jme3ServoController... */
-  transient Map<String, ServoControl> servos = new TreeMap<>();
-
   transient AppSettings settings;
 
-  boolean shiftLeftPressed = false;
+  boolean shiftLeft = false;
 
   long sleepMs;
 
@@ -231,6 +228,12 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   protected Map<String, UserData> nodes = new LinkedHashMap<>();
 
+  /**
+   * current selected path
+   */
+  protected String selectedPath = null;
+
+  protected boolean mouseMiddle = false;
 
   public JMonkeyEngine(String n, String id) {
     super(n, id);
@@ -239,8 +242,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     util = new Jme3Util(this);
     analog = new AnalogHandler(this);
     interpolator = new Interpolator(this, util);
-
-    guiId = "jme-" + getName() + "-" + getId();
 
     // setup the virtual reflection
     // this will "connect" to our mrl instance
@@ -481,7 +482,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   public void cameraLookAt(String name) {
-    JMonkeyEngineConfig c = (JMonkeyEngineConfig)config;
+    JMonkeyEngineConfig c = (JMonkeyEngineConfig) config;
     Spatial s = get(name);
     if (s == null) {
       log.error("cameraLookAt - cannot find {}", name);
@@ -568,7 +569,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
     List<Spatial> siblings = parent.getChildren();
 
-    if (shiftLeftPressed) {
+    if (shiftLeft) {
       --selectIndex;
     } else {
       ++selectIndex;
@@ -875,7 +876,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     return String.format("_axis-%s-%s", getType(spatial), spatial.getName());
   }
 
-
   private String getExt(String name) {
     int pos = name.lastIndexOf(".");
     String ext = null;
@@ -984,6 +984,21 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   public Spatial getSelected() {
     return selectedForView;
   }
+  
+  public String setSelectedPath(String path) {
+    selectedPath = path;
+    invoke("getSelectedPath");
+    return path;
+  }
+
+  /**
+   * selected path is the ORIGINAL_PATH of the selected node 
+   * @return
+   */
+  public String getSelectedPath() {
+    return selectedPath;
+  }
+  
 
   public AppSettings getSettings() {
     return settings;
@@ -1191,12 +1206,12 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   public void loadModels(String dirPath) {
-    JMonkeyEngineConfig c = (JMonkeyEngineConfig)config;
+    JMonkeyEngineConfig c = (JMonkeyEngineConfig) config;
     // FIXME - must be unique AND AND ... only loaded once !
-//    if (c.modelPaths.contains(dirPath)) {
-//      info("already loaded %s", dirPath);
-//      return;
-//    }
+    // if (c.modelPaths.contains(dirPath)) {
+    // info("already loaded %s", dirPath);
+    // return;
+    // }
     c.addModelPath(dirPath);
     traverseLoadModels(dirPath);
   }
@@ -1330,10 +1345,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
     if (name.equals("mouse-click-right")) {
       mouseRightPressed = keyPressed;
-      if (mouseRightPressed) {
-        Geometry target = checkCollision();
-        setSelected(target);
-      }
     }
 
     if ("full-screen".equals(name)) {
@@ -1347,15 +1358,24 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     } else if ("cycle".equals(name) && keyPressed) {
       cycle();
     } else if (name.equals("shift-left")) {
-      shiftLeftPressed = keyPressed;
+      shiftLeft = keyPressed;
     } else if (name.equals("ctrl-left")) {
       ctrlLeftPressed = keyPressed;
     } else if (name.equals("alt-left")) {
-      altLeftPressed = keyPressed;
+      altLeft = keyPressed;
     } else if ("export".equals(name) && keyPressed) {
       saveSpatial(selectedForView.getName());
     } else if ("mouse-click-left".equals(name)) {
-      mouseLeftPressed = keyPressed;
+      mouseLeft = keyPressed;
+      if (mouseLeft) {
+        Geometry target = checkCollision();
+        setSelected(target);
+      }
+    } else if ("mouse-click-middle".equals(name)) {
+      mouseMiddle = keyPressed;
+      if (mouseMiddle && selectedForView != null) {
+        cameraLookAt(selectedForView.getName());
+      }
     } else {
       warn("%s - key %b %f not found", name, keyPressed, tpf);
     }
@@ -1392,8 +1412,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // FIXME - do jme.rotateTo or "new" jme.rotate for all these input driven
     // controls
 
-    // ROTATE
-    if (mouseLeftPressed && altLeftPressed && !shiftLeftPressed) {
+    // ROTATE ORBIT (should be middle button / mouse wheel button)
+    if (mouseLeft && altLeft && !shiftLeft) {
       switch (name) {
         case "mouse-axis-x":
           selectedForMovement.rotate(0, -keyPressed, 0);
@@ -1411,7 +1431,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     }
 
     // PAN
-    if (mouseLeftPressed && altLeftPressed && shiftLeftPressed) {
+    if (mouseLeft && altLeft && shiftLeft) {
       switch (name) {
         case "mouse-axis-x":
           selectedForMovement.move(keyPressed * 3, 0, 0);
@@ -1429,7 +1449,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     }
 
     // ZOOM
-    if (mouseLeftPressed && altLeftPressed && ctrlLeftPressed) {
+    if (mouseLeft && altLeft && ctrlLeftPressed) {
 
       // FIXME - zoom where cursor is :P - it becomes a rotate and zoom
       log.info("zoom - cursor is currently {}", inputManager.getCursorPosition());
@@ -1902,12 +1922,21 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     o.rotationMask = axis;
   }
 
+  @Deprecated
+  public String publishSelected(String data) {
+    return data;
+  }
+
+  // xxx
   public void setSelected(Spatial newSelected) {
 
     // turn off old
     if (selectedForView != null) {
-      enableBoundingBox(selectedForView, false);
-      enableAxes(selectedForView, false);
+      // enableBoundingBox(selectedForView, false);
+      // enableAxes(selectedForView, false);
+
+      // try to publish "quality" data
+      // String[] parts = newSelected.getUserData("ORIGINAL_PATH");
     }
 
     // set selected
@@ -1921,9 +1950,54 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
     // turn on new
     if (newSelected != null) {
-      enableBoundingBox(newSelected, true);
-      enableAxes(newSelected, true);
+      // enableBoundingBox(newSelected, true);
+      // enableAxes(newSelected, true);
+
+      String originalPath = newSelected.getUserData("ORIGINAL_PATH");
+      // invoke("publishSelected", originalPath);
+
+      // invoke("getSelected");
+      if (originalPath != null) {
+        selectedPath = originalPath;
+
+        // Kludge ... this should be structured and set directly on the data
+        // when building the inmoov model
+        // but in an attempt to improve data quality we got to do this matching
+        // thing ..
+        String normalizedPath = findCommonPrefix(originalPath);
+
+        if (normalizedPath != null) {
+          invoke("setSelectedPath", normalizedPath);
+        }
+      }
+
     }
+
+  }
+
+  /**
+   * horrific function to calculate hits on path parts :/ to improve path
+   * selection
+   * 
+   * @param path
+   * @return
+   */
+  public String findCommonPrefix(String path) {
+    // found in nodes
+    ArrayList<String> pathParts = new ArrayList<>(Arrays.asList(path.split("/")));
+    Collections.reverse(pathParts);
+    for (String part : pathParts) {
+      if (nodes.containsKey(part)) {
+
+        // i01.leftHand.index3
+        if (Character.isDigit(part.charAt(part.length() - 1))) {
+          part = part.substring(0, part.length() - 1);
+        }
+
+        return part;
+      }
+    }
+    return null;
   }
 
   public void setSelected(String name) {
@@ -1994,13 +2068,15 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     inputManager = app.getInputManager();
 
     guiNode = app.getGuiNode();
-
+    
     // disable flycam we are going to use our
     // own camera
     flyCam = app.getFlyByCamera();
     if (flyCam != null) {
       flyCam.setEnabled(false);
     }
+    
+    
 
     cameraSettings = app.getCamera();
     rootNode = app.getRootNode();
@@ -2092,6 +2168,9 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
     inputManager.addMapping("mouse-click-right", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
     inputManager.addListener(this, "mouse-click-right");
+    
+    inputManager.addMapping("mouse-click-middle", new MouseButtonTrigger(MouseInput.BUTTON_MIDDLE));
+    inputManager.addListener(this, "mouse-click-middle");
 
     inputManager.addMapping("mouse-wheel-up", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false));
     inputManager.addListener(analog, "mouse-wheel-up");
@@ -2361,12 +2440,11 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
-      
+
       boolean done = true;
       if (done) {
         return;
       }
-
 
       boolean worky = false;
       if (worky) {
@@ -2379,7 +2457,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
         InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
         i01.startPeer("simulator");
       }
-
 
       Platform.setVirtual(true);
       // Runtime.main(new String[] { "--interactive", "--id", "admin" });
@@ -2556,29 +2633,31 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       rotateOnAxis(name, null, servo.getTargetPos(), velocity);
     }
   }
-  
+
   public UserDataConfig toUserDataConfig(UserData userData) {
     UserDataConfig udc = new UserDataConfig(userData.mapper, userData.rotationMask);
     return udc;
   }
-  
+
   @Override
   public ServiceConfig getConfig() {
-    JMonkeyEngineConfig config = (JMonkeyEngineConfig)super.getConfig();
+    JMonkeyEngineConfig config = (JMonkeyEngineConfig) super.getConfig();
 
     if (config.modelPaths != null) {
       Collections.sort(config.modelPaths);
     }
-    
+
     // WARNING - getConfig is "used" before the delayed apply is processed
-    // so if you detroy things here - ie clear nodes, you will be unable to load them appropriately
+    // so if you detroy things here - ie clear nodes, you will be unable to load
+    // them appropriately
     // you need to guard with null checking
     for (String key : nodes.keySet()) {
       config.nodes.put(key, toUserDataConfig(nodes.get(key)));
     }
-    
+
     if (multiMapped != null && multiMapped.size() > 0) {
-      // FIXME - FIXED ! config.multiMapped = multiMapped; <- MUST DO NON DESTRUCTIVE ADDITION
+      // FIXME - FIXED ! config.multiMapped = multiMapped; <- MUST DO NON
+      // DESTRUCTIVE ADDITION
       config.multiMapped.putAll(multiMapped);
     }
 
@@ -2603,16 +2682,16 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
         UserData ud = getUserData(path);
         UserDataConfig udc = config.nodes.get(path);
         // UserData ud = new UserData(config.nodes.get(path));
-//        if (ud == null) {
-//          addNode(path);
-//          ud = nodes.get(path); // new UserData(config.nodes.get(path));
-//        }
-        
+        // if (ud == null) {
+        // addNode(path);
+        // ud = nodes.get(path); // new UserData(config.nodes.get(path));
+        // }
+
         if (ud == null) {
           log.error("could not find node for {}", path);
           continue;
         }
-        
+
         if (udc.mapper != null) {
           MapperLinear m = udc.mapper;
           setMapper(path, m.minX, m.maxX, m.minY, m.maxY);
@@ -2636,17 +2715,15 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     return c;
   }
 
-
-
-//  @Override
-//  public ServiceConfig apply(ServiceConfig c) {
-//    JMonkeyEngineConfig config = (JMonkeyEngineConfig) super.apply(c);
-//    if (app != null) {
-//      // if there is an app we can load immediately
-//      loadDelayed(config);
-//    }
-//    return config;
-//  }
+  // @Override
+  // public ServiceConfig apply(ServiceConfig c) {
+  // JMonkeyEngineConfig config = (JMonkeyEngineConfig) super.apply(c);
+  // if (app != null) {
+  // // if there is an app we can load immediately
+  // loadDelayed(config);
+  // }
+  // return config;
+  // }
 
   public void multiMap(String name, String... nodeNames) {
     if (nodeNames != null) {
