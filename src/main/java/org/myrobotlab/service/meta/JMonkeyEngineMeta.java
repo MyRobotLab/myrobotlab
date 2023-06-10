@@ -27,6 +27,8 @@ public class JMonkeyEngineMeta extends MetaData {
     addDependency("org.jmonkeyengine", "jme3-bullet", jmeVersion);
     addDependency("org.jmonkeyengine", "jme3-bullet-native", jmeVersion);
 
+    addDependency("org.jmonkeyengine", "jme3-plugins", jmeVersion);
+
     // addDependency("jme3utilities", "Minie", "0.6.2");
     // "new" physics - ik forward kinematics ...
 
