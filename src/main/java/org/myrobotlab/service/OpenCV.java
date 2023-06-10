@@ -2003,7 +2003,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     try {
       String path = FileIO.gluePaths(getDataDir(), filename);
       fos = new FileOutputStream(path);
-      byte[] decoded = Base64.getDecoder().decode(data);
+      byte[] decoded = CodecUtils.fromBase64(data);
       fos.write(decoded);
       fos.close();
       setInputFileName(path);
