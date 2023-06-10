@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +22,7 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -1511,7 +1511,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   public String getBase64ZippedMrlComm() {
-    return Base64.getEncoder().encodeToString((getZippedMrlComm()));
+    return CodecUtils.toBase64(getZippedMrlComm());
   }
 
   public byte[] getZippedMrlComm() {

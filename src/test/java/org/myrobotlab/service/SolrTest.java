@@ -18,6 +18,7 @@ import org.junit.Assert;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.programab.Response;
 
 // @Ignore
@@ -49,7 +50,7 @@ public class SolrTest extends AbstractServiceTest {
     SolrInputDocument doc = new SolrInputDocument();
     doc.setField("id", docId);
     // load an image from file/resource
-    byte[] bytes = solr.imageToBytes(image);
+    byte[] bytes = Util.imageToBytes(image);
     doc.setField("bytes", bytes);
     return doc;
   }
