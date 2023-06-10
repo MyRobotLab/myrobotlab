@@ -1,8 +1,5 @@
 package org.myrobotlab.service;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,9 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.imageio.ImageIO;
-
-import java.util.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -31,10 +25,8 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
-import org.bytedeco.javacv.Java2DFrameConverter;
-import org.bytedeco.javacv.OpenCVFrameConverter;
-import org.bytedeco.javacv.OpenCVFrameConverter.ToIplImage;
 import org.bytedeco.opencv.opencv_core.IplImage;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
 import org.myrobotlab.framework.Inbox;
@@ -43,12 +35,12 @@ import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.opencv.CloseableFrameConverter;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.programab.Response;
@@ -344,7 +336,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       // TODO: this is a byte array or is it base64?
       // byte[] decoded = Base64.decodeBase64((byte[])result);
       // read these bytes as an image.
-      IplImage image = bytesToImage((byte[]) result);
+      IplImage image = Util.bytesToImage((byte[]) result);
       String docId = qr.getResults().get(0).getFirstValue("id").toString();
       // show(image, docId);
       return image;
@@ -411,88 +403,6 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
         stream.close();
       }
     }
-  }
-
-  /**
-   * Helper method to serialize an IplImage into a byte array. returns a png
-   * version of the original image
-   * 
-   * @param image
-   *          input iage
-   * @return byte array of image
-   * @throws IOException
-   *           boom
-   * 
-   */
-  public byte[] imageToBytes(IplImage image) throws IOException {
-
-    // lets make a buffered image
-    CloseableFrameConverter converter = new CloseableFrameConverter();
-    BufferedImage buffImage = converter.toBufferedImage(image);
-    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    try {
-      // TODO: expose the format here.
-      String format = "jpg";
-      //ImageIO.write
-      ImageIO.write(buffImage, format, stream);
-    } catch (IOException e) {
-      // This *shouldn't* happen with a ByteArrayOutputStream, but if it
-      // somehow does happen, then we don't want to just ignore it
-      throw new RuntimeException(e);
-    }
-    converter.close();
-    return stream.toByteArray();
-  }
-
-  /**
-   * deserialize from a png byte array to an IplImage
-   * 
-   * @param bytes
-   *          input bytes
-   * @return an iplimage
-   * @throws IOException
-   *           boom
-   * 
-   */
-  public IplImage bytesToImage(byte[] bytes) throws IOException {
-    //
-    // let's assume we're a buffered image .. those are serializable :)
-    BufferedImage bufImage = ImageIO.read(new ByteArrayInputStream(bytes));
-    ToIplImage iplConverter = new OpenCVFrameConverter.ToIplImage();
-    Java2DFrameConverter java2dConverter = new Java2DFrameConverter();
-    IplImage iplImage = iplConverter.convert(java2dConverter.convert(bufImage));
-    // now convert the buffered image to ipl image
-    return iplImage;
-    // Again this could be try with resources but the original example was in
-    // Scala
-  }
-
-  /**
-   * deserialize from a png byte array to a base64 encoded string
-   * for display inline in html.
-   * 
-   * @param bytes
-   *          input bytes
-   * @return a string
-   * @throws IOException
-   *           boom
-   * 
-   */
-  public String bytesToBase64Jpg(byte[] bytes) {
-    //
-    // let's assume we're a buffered image .. those are serializable :)
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    try {
-      BufferedImage bufImage = ImageIO.read(new ByteArrayInputStream(bytes));
-      ImageIO.write(bufImage, "jpg", os);
-      os.close();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      return "ERROR converting image to jpg base64.";
-    }
-
-    String data = String.format("data:image/%s;base64,%s", "jpg", Base64.getEncoder().encodeToString(os.toByteArray()));
-    return data;
   }
 
   /**
@@ -649,33 +559,15 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     resp.getResponse().add("maxScore", maxScore);
     resp.getResponse().add("numFoundExact", numFoundExact);
     resp.getResponse().add("size", resp.getResults().size());
-
-
     // Now, let's convert the byte arrays to base64 image strings.
-
     for (SolrDocument d : resp.getResults()) {
-
       if (d.containsKey("bytes")) {
         // encode this as base 64 image data.
-
+        // TODO: support multiple byte arrays.
         byte[] bytes = (byte[])(d.getFirstValue("bytes"));
-        //			  int size = bytes.size();
-        //			  byte[] data = new byte[size];
-        //			  for (int i = 0 ; i < size; i++) {
-        //				  data[i] = (byte)bytes.get(i);
-        //			  }
-
-        // WTF.. this is an arrayList of bytes ?!  that seems so incredibly ineffectient!!
-
-
-        String base64jpg = bytesToBase64Jpg(bytes);
+        String base64jpg = Util.bytesToBase64Jpg(bytes);
         d.setField("bytes", base64jpg);
-
       }
-
-
-
-
     }
 
 
@@ -832,8 +724,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
           doc.setField("person_label", yoloPersonLabel);
           byte[] bytes = null;
           try {
-            bytes = imageToBytes(yolo.image);
-            String encoded = Base64.getEncoder().encodeToString(bytes);
+            bytes = Util.imageToBytes(yolo.image);
+            String encoded = CodecUtils.toBase64(bytes);
             // bytes field contains bindary data (sent as base64)
             doc.addField("bytes", encoded);
             doc.addField("has_bytes", true);
@@ -916,9 +808,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     byte[] bytes = null;
     try {
       // Let's compress the raw image.. o/w it'll just likely be much too large.
-      bytes = imageToBytes(img);
-      String encoded = Base64.getEncoder().encodeToString(bytes);
-      // bytes field contains bindary data (sent as base64)
+      bytes = Util.imageToBytes(img);
+      String encoded = CodecUtils.toBase64(bytes);
+      // bytes field contains binary data (sent as base64)
       doc.addField("bytes", encoded);
       doc.addField("has_bytes", true);
       log.warn("Image Size:{}", encoded.length());
