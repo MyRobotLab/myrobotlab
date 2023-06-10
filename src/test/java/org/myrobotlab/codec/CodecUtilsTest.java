@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.bouncycastle.util.Strings;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.framework.Platform;
@@ -121,5 +122,18 @@ public class CodecUtilsTest extends AbstractTest {
     assertFalse(CodecUtils.checkServiceNameEquality("runtime@not-corr-id", "runtime"));
 
   }
+  
+  @Test
+  public void testBase64() {
+    // not a very comprehensive test, but a sanity check none the less.
+    String input = "input string.";
+    String output = CodecUtils.toBase64(input.getBytes());
+    assertEquals(output.length(), 20);
+    byte[] covertedBack = CodecUtils.fromBase64(output);
+    String result = Strings.fromByteArray(covertedBack);
+    assertEquals(input, result);
+
+  }
+  
 
 }

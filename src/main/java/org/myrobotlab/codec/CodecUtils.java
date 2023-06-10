@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1609,6 +1610,14 @@ public class CodecUtils {
    */
   public static Object fromJson(String json) {
     return fromJson(json, (Class<Object>) null);
+  }
+
+  public static String toBase64(byte[] bytes) {
+    return Base64.getEncoder().encodeToString(bytes);
+  }
+  
+  public static byte[] fromBase64(String input) {
+    return Base64.getDecoder().decode(input);
   }
 
 }
