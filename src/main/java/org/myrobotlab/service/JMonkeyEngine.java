@@ -1395,25 +1395,14 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   public void onAnalog(String name, float keyPressed, float tpf) {
     // log.info("onAnalog [{} {} {}]", name, keyPressed, tpf);
 
+    // selectedForMovement invariably is the camera
     if (selectedForMovement == null) {
       selectedForMovement = camera;// FIXME "new" selectedMove vs selected
     }
 
-    // wheelmouse zoom (done)
-    // alt+ctrl+lmb - zoom <br> (done)
-    // alt+lmb - rotate<br> (done)
-    // alt+shft+lmb - pan (done)
-    // rotate around selection -
-    // https://www.youtube.com/watch?v=IVZPm9HAMD4&feature=youtu.be
-    // wrap text of breadcrumbs
-    // draggable - resize for menu - what you set is how it stays
-    // when menu active - inputs(hotkey when non-menu) should be deactive
-
-    // FIXME - do jme.rotateTo or "new" jme.rotate for all these input driven
-    // controls
-
     // ROTATE ORBIT (should be middle button / mouse wheel button)
-    if (mouseLeft && altLeft && !shiftLeft) {
+    // currently wrong :P its rotating in place - you want to orbit on a selection at 10 pts out
+    if (mouseMiddle && !shiftLeft) {
       switch (name) {
         case "mouse-axis-x":
           selectedForMovement.rotate(0, -keyPressed, 0);
@@ -1430,8 +1419,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       }
     }
 
-    // PAN
-    if (mouseLeft && altLeft && shiftLeft) {
+    // PAN -- works(ish)
+    if (mouseMiddle && shiftLeft) {
       switch (name) {
         case "mouse-axis-x":
           selectedForMovement.move(keyPressed * 3, 0, 0);
@@ -1449,18 +1438,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     }
 
     // ZOOM
-    if (mouseLeft && altLeft && ctrlLeftPressed) {
-
-      // FIXME - zoom where cursor is :P - it becomes a rotate and zoom
-      log.info("zoom - cursor is currently {}", inputManager.getCursorPosition());
-
-      if (name.equals("mouse-axis-y")) {
-        selectedForMovement.move(0, 0, keyPressed * 10);
-      } else if (name.equals("mouse-axis-y-negative")) {
-        selectedForMovement.move(0, 0, -keyPressed * 10);
-      }
-    }
-
     if (name.equals("mouse-wheel-up") || name.equals("forward")) {
       // selected.setLocalScale(selected.getLocalScale().mult(1.0f));
       selectedForMovement.move(0, 0, keyPressed * -1);
