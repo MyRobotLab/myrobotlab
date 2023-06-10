@@ -2,13 +2,12 @@ package org.myrobotlab.image;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.util.Base64;
-
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -57,7 +56,7 @@ public class WebImage {
       if (quality == null) {
         ImageIO.write(img, imgType, os);
         os.close();
-        data = String.format("data:image/%s;base64,%s", type, Base64.getEncoder().encodeToString(os.toByteArray()));
+        data = String.format("data:image/%s;base64,%s", type,CodecUtils.toBase64(os.toByteArray()));
       } else {
 
         // save jpeg image with specific quality. "1f" corresponds to 100% ,
@@ -76,7 +75,7 @@ public class WebImage {
         writer.dispose();
         os.close();
 
-        data = String.format("data:image/jpeg;base64,%s", Base64.getEncoder().encodeToString(os.toByteArray()));
+        data = String.format("data:image/jpeg;base64,%s", CodecUtils.toBase64(os.toByteArray()));
       }
     } catch (Exception e) {
       log.error("could not create WebImage", e);
