@@ -21,7 +21,7 @@ import org.alicebot.ab.ProgramABListener;
 import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.image.Util;
+import org.myrobotlab.image.ImageUtils;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -1120,7 +1120,7 @@ public class ProgramAB extends Service
         path = FileIO.gluePaths(botInfo.path.getAbsolutePath(), "bot.png");
         File check = new File(path);
         if (check.exists()) {
-          return Util.getImageAsBase64(path);
+          return ImageUtils.getImageAsBase64(path);
         }
       }
 

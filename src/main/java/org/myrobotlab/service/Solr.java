@@ -35,7 +35,7 @@ import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.image.Util;
+import org.myrobotlab.image.ImageUtils;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -336,7 +336,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       // TODO: this is a byte array or is it base64?
       // byte[] decoded = Base64.decodeBase64((byte[])result);
       // read these bytes as an image.
-      IplImage image = Util.bytesToImage((byte[]) result);
+      IplImage image = ImageUtils.bytesToImage((byte[]) result);
       String docId = qr.getResults().get(0).getFirstValue("id").toString();
       // show(image, docId);
       return image;
@@ -565,7 +565,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
         // encode this as base 64 image data.
         // TODO: support multiple byte arrays.
         byte[] bytes = (byte[])(d.getFirstValue("bytes"));
-        String base64jpg = Util.bytesToBase64Jpg(bytes);
+        String base64jpg = ImageUtils.bytesToBase64Jpg(bytes);
         d.setField("bytes", base64jpg);
       }
     }
@@ -724,7 +724,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
           doc.setField("person_label", yoloPersonLabel);
           byte[] bytes = null;
           try {
-            bytes = Util.imageToBytes(yolo.image);
+            bytes = ImageUtils.imageToBytes(yolo.image);
             String encoded = CodecUtils.toBase64(bytes);
             // bytes field contains bindary data (sent as base64)
             doc.addField("bytes", encoded);
@@ -808,7 +808,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     byte[] bytes = null;
     try {
       // Let's compress the raw image.. o/w it'll just likely be much too large.
-      bytes = Util.imageToBytes(img);
+      bytes = ImageUtils.imageToBytes(img);
       String encoded = CodecUtils.toBase64(bytes);
       // bytes field contains binary data (sent as base64)
       doc.addField("bytes", encoded);

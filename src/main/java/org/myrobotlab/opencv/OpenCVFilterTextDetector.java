@@ -31,7 +31,7 @@ import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_core.Size2f;
 import org.bytedeco.opencv.opencv_core.StringVector;
 import org.bytedeco.opencv.opencv_dnn.Net;
-import org.myrobotlab.image.Util;
+import org.myrobotlab.image.ImageUtils;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TesseractOcr;
 import org.opencv.imgproc.Imgproc;
@@ -153,7 +153,7 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
       Size2f origPaddedSize = new Size2f(dt.box.size().width() + xPadding, dt.box.size().height() + yPadding);
       RotatedRect largerBox = new RotatedRect(dt.box.center(), origPaddedSize, dt.box.angle());
       // crop and rotate based on the updated padded box.
-      Mat cropped = Util.cropAndRotate(originalImageMat, largerBox, outputSizeInt, ratio);
+      Mat cropped = ImageUtils.cropAndRotate(originalImageMat, largerBox, outputSizeInt, ratio);
       // Some thresholding on the cropped image.
       Mat ocrInputMat = cropped;
       if (thresholdEnabled) {
@@ -270,7 +270,7 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
       }
     }
     // Apply non-maximum suppression to filter down boxes that mostly overlap
-    ArrayList<DetectedText> maxRects = Util.applyNMSBoxes(threshold, boxes, confidences, nmsThreshold);
+    ArrayList<DetectedText> maxRects = ImageUtils.applyNMSBoxes(threshold, boxes, confidences, nmsThreshold);
     // This is the filtered list of rects that matched our threshold.
     classifications = orderRects(maxRects, frame.cols());
     return maxRects;

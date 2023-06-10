@@ -80,7 +80,7 @@ import org.slf4j.Logger;
  * 
  */
 
-public class Util {
+public class ImageUtils {
 
   /*
    * Integer.toHexString( color.getRGB() & 0x00ffffff ) public String
@@ -89,7 +89,7 @@ public class Util {
    * 0xff; System.out.println("argb: " + alpha + ", " + red + ", " + green +
    * ", " + blue); }
    */
-  public final static Logger log = LoggerFactory.getLogger(Util.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(ImageUtils.class.getCanonicalName());
 
   // static HashMap <int,>
   // array [r][g][b]
@@ -317,7 +317,7 @@ public class Util {
 
     String imgURL = path;
     if (isExistRessourceElement(path)) {
-      icon = new ImageIcon(Util.getResourceDir() + File.separator + imgURL);
+      icon = new ImageIcon(ImageUtils.getResourceDir() + File.separator + imgURL);
       return icon;
     } else {
       log.error("Get Resource Icon - Couldn't find file: {}", path);
@@ -431,7 +431,7 @@ public class Util {
   {
     BufferedImage bi;
     try {
-      bi = ImageIO.read(new File(Util.getResourceDir() + File.separator + path));
+      bi = ImageIO.read(new File(ImageUtils.getResourceDir() + File.separator + path));
     } catch (IOException e) {
       log.error("could not find image " + path);
       return null;
@@ -524,7 +524,7 @@ public class Util {
   @Deprecated /* expect full path - don't use getResourceDir */
   public static ImageIcon getImageIcon(String path, String description) {
     ImageIcon icon = null;
-    String resourcePath = Util.getResourceDir() + File.separator + path;
+    String resourcePath = ImageUtils.getResourceDir() + File.separator + path;
     // ImageIcon requires forward slash in the filename (unix/internet style
     // convention)
     resourcePath = resourcePath.replaceAll("\\\\", "/");
@@ -567,12 +567,12 @@ public class Util {
   public static Mat cropAndRotate(Mat frame, RotatedRect largerBox, Size outputSize, Point2f ratio) {
     // Input rotatedRect is on the neural network scaled image
     // this needs to be scaled up to the original resolution by the ratio.
-    Point2f vertices = Util.scaleVertices(largerBox, ratio);
+    Point2f vertices = ImageUtils.scaleVertices(largerBox, ratio);
     // a target for the cropped image
     Mat cropped = new Mat();
     // do the cropping of the original image, scaled vertices and a target
     // output size
-    Util.fourPointsTransform(frame, vertices, cropped, outputSize);
+    ImageUtils.fourPointsTransform(frame, vertices, cropped, outputSize);
     // return the cropped mat that is populated with the cropped image from the
     // original input image.
     return cropped;
@@ -684,7 +684,7 @@ public class Util {
    * 
    */
   public static byte[] imageToBytes(IplImage image) throws IOException {
-    return Util.imageToBytes(image, "jpg");
+    return ImageUtils.imageToBytes(image, "jpg");
   }
 
   /**
