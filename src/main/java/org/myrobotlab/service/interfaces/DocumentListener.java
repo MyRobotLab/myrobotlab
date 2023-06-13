@@ -13,6 +13,7 @@ public interface DocumentListener {
 
   public ProcessingStatus onDocuments(List<Document> docs);
 
+  // TODO: maybe remove this from the interface.
   public boolean onFlush();
 
 }

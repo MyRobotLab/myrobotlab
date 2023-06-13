@@ -5,6 +5,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.transformer.WorkflowConfiguration;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.DocumentPipeline;
 import org.slf4j.Logger;
 
 /**
@@ -41,18 +42,18 @@ public class Workflow {
   }
 
   // initialize the workflow
-  public void initialize() {
+  public void initialize(DocumentPipeline pipeline) {
     workers = new WorkflowWorker[numWorkerThreads];
     for (int i = 0; i < numWorkerThreads; i++) {
-      initializeWorkerThread(i);
+      initializeWorkerThread(i, pipeline);
     }
   }
 
   // init the worker threads
-  private void initializeWorkerThread(int threadNum) {
+  private void initializeWorkerThread(int threadNum, DocumentPipeline pipeline) {
     WorkflowWorker worker = null;
     try {
-      worker = new WorkflowWorker(workflowConfig, queue, Integer.toString(threadNum));
+      worker = new WorkflowWorker(workflowConfig, queue, Integer.toString(threadNum), pipeline);
     } catch (ClassNotFoundException e) {
       // TODO: better handling?
       log.warn("Error starting the worker thread. {}", e.getLocalizedMessage());

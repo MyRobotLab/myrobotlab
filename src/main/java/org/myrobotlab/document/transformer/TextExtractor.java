@@ -16,7 +16,6 @@ import org.apache.tika.sax.BodyContentHandler;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
-import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
 /**
@@ -85,16 +84,16 @@ public class TextExtractor extends AbstractStage {
 
       Metadata metadata = new Metadata();
       StringWriter textData = new StringWriter();
-      ContentHandler bch = new BodyContentHandler(textData);
+      BodyContentHandler bch = new BodyContentHandler(textData);
       try {
         parser.parse(binaryData, bch, metadata, parseCtx);
       } catch (IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
-      } catch (SAXException e) {
+      } catch (TikaException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
-      } catch (TikaException e) {
+      } catch (SAXException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }

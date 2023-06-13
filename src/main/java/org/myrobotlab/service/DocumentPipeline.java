@@ -10,6 +10,8 @@ import org.myrobotlab.document.transformer.WorkflowConfiguration;
 import org.myrobotlab.document.workflow.WorkflowMessage;
 import org.myrobotlab.document.workflow.WorkflowServer;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.DocumentListener;
 import org.myrobotlab.service.interfaces.DocumentPublisher;
 
@@ -38,14 +40,6 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
   public Document publishDocument(Document doc) {
     // publish the document to the framework
     return doc;
-  }
-
-  @Override
-  public void addDocumentListener(DocumentListener listener) {
-    // TODO Auto-generated method stub
-    // ??
-    // subscribe("publishDocument", topicMethod, callbackName, callbackMethod);
-
   }
 
   @Override
@@ -101,9 +95,16 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
 
   public static void main(String[] args) throws Exception {
 
-    // create the pipeline service in MRL
-    DocumentPipeline pipeline = (DocumentPipeline) Runtime.start("docproc", "DocumentPipeline");
+    LoggingFactory.init(Level.INFO);
+    
+    WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
 
+    // start embedded solr
+    Solr solr = (Solr)Runtime.start("solr","Solr");
+    solr.startEmbedded();
+    
+    // start the pipeline to process the files from the file system
+    DocumentPipeline pipeline = (DocumentPipeline) Runtime.start("docproc", "DocumentPipeline");
     // pipeline.workflowName = "default";
     // create a workflow to load into that pipeline service
     WorkflowConfiguration workflowConfig = new WorkflowConfiguration("default");
@@ -111,22 +112,36 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     StageConfiguration stage1Config = new StageConfiguration();
     stage1Config.setStageClass("org.myrobotlab.document.transformer.SetStaticFieldValue");
     stage1Config.setStageName("SetTableField");
-    stage1Config.setStringParam("table", "MRL");
+    stage1Config.setStringParam("type", "file");
     workflowConfig.addStage(stage1Config);
 
     StageConfiguration stage2Config = new StageConfiguration();
-    stage2Config.setStageClass("org.myrobotlab.document.transformer.SendToSolr");
-    stage2Config.setStageName("SendToSolr");
-    stage2Config.setStringParam("solrUrl", "http://phobos:8983/solr/graph");
+    stage2Config.setStageClass("org.myrobotlab.document.transformer.TextExtractor");
+    stage2Config.setStageName("TextExtractor");
     workflowConfig.addStage(stage2Config);
 
+    
+    //    StageConfiguration stage2Config = new StageConfiguration();
+    //    stage2Config.setStageClass("org.myrobotlab.document.transformer.SendToSolr");
+    //    stage2Config.setStageName("SendToSolr");
+    //    stage2Config.setStringParam("solrUrl", "http://phobos:8983/solr/graph");
+    //    workflowConfig.addStage(stage2Config);
     pipeline.setConfig(workflowConfig);
     pipeline.initalize();
 
-    RSSConnector connector = (RSSConnector) Runtime.start("rss", "RSSConnector");
-    connector.addDocumentListener(pipeline);
-    connector.startCrawling();
+    // attach the pipeline to solr.
+    pipeline.attachDocumentListener(solr.getName());
+    
+    // start the file connector to scan the file system.
+    // RSSConnector connector = (RSSConnector) Runtime.start("rss", "RSSConnector");
+    FileConnector connector = (FileConnector) Runtime.start("fileconnector", "FileConnector");
+    connector.setDirectory("D:\\Music");
 
+    // connector to pipeline connection
+    connector.attachDocumentListener(pipeline.getName());
+
+    // start the crawl!
+    connector.startCrawling();
     // TODO: make sure we flush the pending batches!
     // connector.flush();
     // poll to make sure the connector is still running./
@@ -137,14 +152,14 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     // when the connector is done, tell the pipeline to flush/
     pipeline.flush();
 
-    // wee! news!
+    // 
 
   }
 
   public void initalize() throws ClassNotFoundException {
     // init the workflow server and load the pipeline config.
     if (workflowServer == null) {
-      workflowServer = WorkflowServer.getInstance();
+      workflowServer = WorkflowServer.getInstance(this);
     }
     workflowServer.addWorkflow(workFlowConfig);
     workflowName = workFlowConfig.getName();

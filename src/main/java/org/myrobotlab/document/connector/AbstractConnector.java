@@ -127,13 +127,6 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
   }
 
   @Override
-  public void addDocumentListener(DocumentListener listener) {
-    addListener("publishDocument", listener.getName(), "onDocument");
-    addListener("publishDocuments", listener.getName(), "onDocuments");
-    addListener("publishFlush", listener.getName(), "onFlush");
-  }
-
-  @Override
   public ConnectorState getConnectorState() {
     return state;
   }

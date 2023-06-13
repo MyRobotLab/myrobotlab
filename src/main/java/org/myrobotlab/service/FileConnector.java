@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Date;
 
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
@@ -69,10 +70,11 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
     }
     String docId = getDocIdPrefix() + file.toFile().getAbsolutePath();
     Document doc = new Document(docId);
-    doc.setField("last_modified", attrs.lastModifiedTime());
-    doc.setField("created_date", attrs.creationTime());
-    doc.setField("filename", file.toFile().getAbsolutePath());
+    doc.setField("last_modified", new Date(attrs.lastModifiedTime().toMillis()));
+    doc.setField("created_date", new Date(attrs.creationTime().toMillis()));
+    doc.setField("filepath", file.toFile().getAbsolutePath());
     doc.setField("size", attrs.size());
+    doc.setField("type", "file");
     // TODO: potentially add a byte array of the file
     // or maybe an input stream or other handle to the file.
     feed(doc);

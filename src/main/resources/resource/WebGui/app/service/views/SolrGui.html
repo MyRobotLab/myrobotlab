@@ -38,7 +38,7 @@
       <tr ng-repeat="result in solrResults.response track by $index" class="ng-scope">
         <td>
           <br/>
-          <b>Doc: {{$index + startOffset}}</b>
+          <b>Doc: {{$index + startOffset + 1}}</b>
           <table class="searchResult" class>
             <tr ng-repeat="(key, value) in result">
               <td><strong>{{key}}</strong></td>

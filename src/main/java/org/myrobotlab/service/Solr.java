@@ -515,6 +515,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     query.setRows(rows);
     query.setStart(start);
     query.setFacet(true);
+    query.setFacetLimit(10);
     query.setFacetMinCount(1);
     // TODO: expose sorting in a fancier search method signature
     // Alternatively, pass the list of parameters and their values into a generic search method instead.

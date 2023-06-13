@@ -16,7 +16,9 @@ public class DocumentPipelineMeta extends MetaData {
 
     addDescription("This service will pass a document through a document processing pipeline made up of transformers");
     addCategory("ingest");
-    addDependency("org.apache.tika", "tika-core", "1.22");
+    addDependency("org.apache.tika", "tika-core", "2.8.0");
+    addDependency("org.apache.tika", "tika-parser-audiovideo-module", "2.8.0");
+    
     addDependency("org.apache.opennlp", "opennlp-tools", "1.6.0");
     addDependency("net.objecthunter", "exp4j", "0.4.8");
     // for parsing wikitext

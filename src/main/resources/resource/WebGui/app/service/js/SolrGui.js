@@ -12,7 +12,7 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
     $scope.filters = [];
     // TODO: maybe some other fields..
     // TODO: support range facets
-    $scope.facetFields = ['type', 'sender_type', 'sender','method'];
+    $scope.facetFields = ['type', 'xmpdm_artist', 'xmpdm_releasedate', 'xmpdm_genre','sender_type', 'sender','method'];
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
       $scope.service = service
