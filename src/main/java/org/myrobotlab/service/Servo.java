@@ -96,7 +96,7 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
     newPos = (newPos < minLimit) ? minLimit : newPos;
     newPos = (newPos > maxLimit) ? maxLimit : newPos;
     
-    log.error("============== newPos {} ====", newPos);
+    log.debug("{} processMove {}", getName(), newPos);
 
     // This is to allow attaching disabled
     // then delay enabling until the first moveTo command
