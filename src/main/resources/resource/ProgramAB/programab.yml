@@ -1,9 +1,8 @@
 !!org.myrobotlab.service.config.ProgramABConfig
-botDir: null
 bots: [
   ]
 currentBotName: Alice
-currentUserName: null
+currentUserName: human
 listeners: null
 peers:
   search:
@@ -11,5 +10,5 @@ peers:
     name: programab.search
     type: Wikipedia
 sleep: false
-textFilters: null
+startTopic: default
 type: ProgramAB

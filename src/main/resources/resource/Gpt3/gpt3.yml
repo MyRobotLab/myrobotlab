@@ -1,6 +1,6 @@
 !!org.myrobotlab.service.config.Gpt3Config
 currentUserName: null
-engine: text-davinci-003
+engine: gpt-3.5-turbo
 listeners: null
 maxTokens: 256
 peers:
@@ -13,5 +13,5 @@ sleeping: false
 temperature: 0.7
 token: null
 type: Gpt3
-url: https://api.openai.com/v1/completions
+url: https://api.openai.com/v1/chat/completions
 wakeWord: wake
