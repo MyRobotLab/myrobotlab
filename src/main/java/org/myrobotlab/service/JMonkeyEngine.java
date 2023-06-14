@@ -70,7 +70,6 @@ import com.jme3.export.binary.BinaryExporter;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
 import com.jme3.input.ChaseCamera;
-import com.jme3.input.FlyByCamera;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
@@ -86,6 +85,7 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
@@ -143,7 +143,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   transient Node camera = new Node(CAMERA);
 
-  transient Camera cameraSettings;
+  transient Camera cam;
 
   transient CameraNode camNode;
 
@@ -156,8 +156,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   long deltaMs;
 
   transient DisplayMode displayMode = null;
-
-  transient FlyByCamera flyCam;
   
   public  ChaseCamera chaseCamera;
 
@@ -223,6 +221,14 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   transient ViewPort viewPort;
 
   int width = 1024;
+  
+  float orbitRadius = 10f;
+  
+  float orbitSpeed = 0.5f;
+  
+  float mouseX = 0f;
+  
+  float mouseY = 0f;
 
   // protected Set<String> modelPaths = new LinkedHashSet<>();
 
@@ -467,6 +473,14 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     }
     return tree;
   }
+  
+  public void resetView() {
+    // cam.setLocation(new Vector3f(0, 1, 2));
+    camera.setLocalTransform(new Transform(new Vector3f(0, 3, 5)));
+//    camera.setLocalTransform(null);
+//    camera.move(0, 1, 2);;
+    cameraLookAt("root");
+  }
 
   public void cameraLookAt(Spatial spatial) {
 
@@ -503,8 +517,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     CollisionResults results = new CollisionResults();
     // Convert screen click to 3d position
     Vector2f click2d = inputManager.getCursorPosition();
-    Vector3f click3d = cameraSettings.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
-    Vector3f dir = cameraSettings.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
+    Vector3f click3d = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
+    Vector3f dir = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
     // Aim the ray from the clicked spot forwards.
     Ray ray = new Ray(click3d, dir);
     // Collect intersections between ray and all nodes in results list.
@@ -694,10 +708,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     enableBoundingBox(get(name), b, null);
   }
 
-  public void enableFlyCam(boolean b) {
-    flyCam.setEnabled(b);
-  }
-
+  // FIXME  -  use ctrl space like blender ...
   public void enableFullScreen(boolean fullscreen) {
     this.fullscreen = fullscreen;
 
@@ -987,7 +998,9 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   
   public String setSelectedPath(String path) {
     selectedPath = path;
-    invoke("getSelectedPath");
+    if (path != null) {
+      invoke("getSelectedPath");
+    }
     return path;
   }
 
@@ -1371,12 +1384,18 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
         Geometry target = checkCollision();
         setSelected(target);
       }
-    } else if ("mouse-click-middle".equals(name)) {
+    } 
+
+    else if ("mouse-click-middle".equals(name)) {
       mouseMiddle = keyPressed;
-      if (mouseMiddle && selectedForView != null) {
-        cameraLookAt(selectedForView.getName());
-      }
-    } else {
+      // USEFUL - but need a different key combo
+//      if (mouseMiddle && selectedForView != null) {
+//        cameraLookAt(selectedForView.getName());
+//      }
+    } 
+    
+    
+    else {
       warn("%s - key %b %f not found", name, keyPressed, tpf);
     }
   }
@@ -1393,7 +1412,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    *
    */
   public void onAnalog(String name, float keyPressed, float tpf) {
-    // log.info("onAnalog [{} {} {}]", name, keyPressed, tpf);
+    log.info("onAnalog [{} {} {}]", name, keyPressed, tpf);
 
     // selectedForMovement invariably is the camera
     if (selectedForMovement == null) {
@@ -1403,6 +1422,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // ROTATE ORBIT (should be middle button / mouse wheel button)
     // currently wrong :P its rotating in place - you want to orbit on a selection at 10 pts out
     if (mouseMiddle && !shiftLeft) {
+      
       switch (name) {
         case "mouse-axis-x":
           selectedForMovement.rotate(0, -keyPressed, 0);
@@ -1417,16 +1437,45 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
           selectedForMovement.rotate(keyPressed, 0, 0);
           break;
       }
+      
+      
+      if (name.equals("mouse-axis-x")) {
+        mouseX = inputManager.getCursorPosition().x;
+    } else if (name.equals("mouse-axis-y")) {
+        mouseY = inputManager.getCursorPosition().y;
+    }
+ 
+      
+      
     }
 
     // PAN -- works(ish)
     if (mouseMiddle && shiftLeft) {
+      log.info("PAN !!!!");
       switch (name) {
         case "mouse-axis-x":
-          selectedForMovement.move(keyPressed * 3, 0, 0);
-          break;
         case "mouse-axis-x-negative":
-          selectedForMovement.move(-keyPressed * 3, 0, 0);
+          
+       // Get the local rotation of the camera
+          Quaternion rotation = selectedForMovement.getLocalRotation();
+
+          // Extract the X-axis rotation column from the quaternion
+          Vector3f rotationAxis = rotation.getRotationColumn(0);
+
+          // Define the direction and distance to pan
+          float direction = name.equals("mouse-axis-x") ? -0.13f : 0.13f;
+          float distance = 0.3f;
+
+          // Calculate the translation vector by multiplying the rotation axis with the direction and distance
+          Vector3f translation = rotationAxis.mult(direction).mult(distance);
+
+          // Move the camera by the translation vector
+          // camera.setLocation(camera.getLocation().add(translation));
+          // selectedForMovement.move(translation);
+          
+          // needs to be on the normal
+          // selectedForMovement.move(direction, 0, direction);
+          selectedForMovement.move(translation);
           break;
         case "mouse-axis-y":
           selectedForMovement.move(0, keyPressed * 3, 0);
@@ -1438,12 +1487,13 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     }
 
     // ZOOM
-    if (name.equals("mouse-wheel-up") || name.equals("forward")) {
-      // selected.setLocalScale(selected.getLocalScale().mult(1.0f));
-      selectedForMovement.move(0, 0, keyPressed * -1);
-    } else if (name.equals("mouse-wheel-down") || name.equals("backward")) {
-      // selected.setLocalScale(selected.getLocalScale().mult(1.0f));
-      selectedForMovement.move(0, 0, keyPressed * 1);
+    if (name.equals("mouse-wheel-up") || name.equals("mouse-wheel-down")) {
+
+      Quaternion normal = camera.getLocalRotation();
+      Vector3f rotationAxis = normal.getRotationColumn(2);
+      float direction = name.equals("mouse-wheel-up")?0.3f:-0.3f;
+      Vector3f translation = rotationAxis.mult(direction);
+      camera.move(translation);
     }
   }
 
@@ -2046,16 +2096,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
     guiNode = app.getGuiNode();
     
-    // disable flycam we are going to use our
-    // own camera
-    flyCam = app.getFlyByCamera();
-    if (flyCam != null) {
-      flyCam.setEnabled(false);
-    }
-    
-    
-
-    cameraSettings = app.getCamera();
+    cam = app.getCamera();
     rootNode = app.getRootNode();
     rootNode.setName(ROOT);
     rootNode.attachChild(camera);
@@ -2063,7 +2104,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     viewPort = app.getViewPort();
     // Setting the direction to Spatial to camera, this means the camera will
     // copy the movements of the Node
-    camNode = new CameraNode("cam", cameraSettings);
+    camNode = new CameraNode("cam", cam);
     camNode.setControlDir(ControlDirection.SpatialToCamera);
     // camNode.setControlDir(ControlDirection.CameraToSpatial);
     // rootNode.attachChild(camNode);
@@ -2411,17 +2452,20 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       // reservedRotations from different controllers
       // FIXME - make "load" work ..
 
+
       LoggingFactory.init("WARN");
-      Runtime.start("sim", "JMonkeyEngine");
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
-
+      
+      
       boolean done = true;
       if (done) {
         return;
       }
+
+      Runtime.start("sim", "JMonkeyEngine");
 
       boolean worky = false;
       if (worky) {

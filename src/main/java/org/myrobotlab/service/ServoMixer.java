@@ -16,8 +16,8 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.kinematics.Pose;
 import org.myrobotlab.kinematics.PoseMove;
-import org.myrobotlab.kinematics.SequencePart;
-import org.myrobotlab.kinematics.Sequence;
+import org.myrobotlab.kinematics.GesturePart;
+import org.myrobotlab.kinematics.Gesture;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.ServoMixerConfig;
@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 /**
  * ServoMixer - a service which can control multiple servos. The position of the
  * servos can be saved into multiple poses, and the poses in turn can be saved
- * in a sequence file to play back later.
+ * in a gesture file to play back later.
  * 
  * TODO: refresh button
  * 
@@ -39,31 +39,38 @@ public class ServoMixer extends Service implements ServiceLifeCycleListener {
 
   public class Player implements Runnable {
     boolean running = false;
-    Sequence runningSeq = null;
+    Gesture runningSeq = null;
     int seqCnt = 0;
     Thread thread = null;
 
     private void play() {
       if (runningSeq.parts != null) {
-        for (SequencePart ps : runningSeq.parts) {
-          switch(ps.type) {
+        for (int i = 0; i < runningSeq.parts.size(); ++i) {
+          GesturePart sp = runningSeq.parts.get(i);
+          invoke("publishPlayingGesturePart", sp);
+          invoke("publishPlayingGesturePartIndex", i);
+          switch(sp.type) {
             case "Pose":{
-              Pose pose = getPose(ps.name);
+              Pose pose = getPose(sp.name);
               if (pose == null) {
-                warn("Pose %s not found", ps.name);
+                warn("Pose %s not found", sp.name);
                 continue;
               }          
               // move to positions
-              moveToPose(ps.name, pose, ps.blocking);
+              moveToPose(sp.name, pose, sp.blocking);
 
             }
             break;
             case "Delay":{
-                sleep((Long)ps.value);
+                sleep((Integer)sp.value);
             }
             break;
+            case "Speech":{
+              invoke("publishText", (String)sp.value);
+            }
+          break;            
             default:{
-              error("do not know how to handle sequence part of type %s", ps.type);
+              error("do not know how to handle gesture part of type %s", sp.type);
             }
           }
         } // poses
@@ -82,11 +89,12 @@ public class ServoMixer extends Service implements ServiceLifeCycleListener {
           play();
         }
       } catch (Exception e) {
+        error(e);
       }
       running = false;
     }
 
-    public void start(Sequence seq) {
+    public void start(Gesture seq) {
       runningSeq = seq;
       seqCnt++;
       thread = new Thread(this, String.format("%s-player-%d", getName(), seqCnt));
@@ -97,7 +105,36 @@ public class ServoMixer extends Service implements ServiceLifeCycleListener {
       running = false;
     }
   }
+  
+  /**
+   * Speech publishes here - a SpeechSynthesis service could subscribe,
+   * or ProgramAB
+   * @param text
+   * @return
+   */
+  public String publishText(String text) {
+    return text;
+  }
 
+  /**
+   * Current index of gesture being played
+   * @param i
+   * @return
+   */
+  public int publishPlayingGesturePartIndex(int i) {
+    return i;
+  }
+
+  /**
+   * Current gesture part being processed by player 
+   * @param sp
+   * @return
+   */
+  public GesturePart publishPlayingGesturePart(GesturePart sp) {
+    return sp;
+  }
+
+  
   public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
 
   private static final long serialVersionUID = 1L;
@@ -108,18 +145,18 @@ public class ServoMixer extends Service implements ServiceLifeCycleListener {
   protected Set<String> allServos = new TreeSet<>();;
 
   /**
-   * sequence player
+   * gesture player
    */
   protected transient Player player = new Player();
 
   protected String posesDir = getDataDir() + fs + "poses";
 
-  protected String sequencesDir = getDataDir() + fs + "sequences";
+  protected String gesturesDir = getDataDir() + fs + "gestures";
 
   public ServoMixer(String n, String id) {
     super(n, id);
     new File(posesDir).mkdirs();
-    new File(sequencesDir).mkdirs();
+    new File(gesturesDir).mkdirs();
   }
 
   /**
@@ -219,32 +256,32 @@ public class ServoMixer extends Service implements ServiceLifeCycleListener {
     return posesDir;
   }
 
-  public Sequence getSequence(String name) {
-    Sequence sequence = null;
+  public Gesture getGesture(String name) {
+    Gesture gesture = null;
     try {
-      if (!FileIO.checkDir(sequencesDir)) {
-        error("invalid poses directory %s", sequencesDir);
+      if (!FileIO.checkDir(gesturesDir)) {
+        error("invalid poses directory %s", gesturesDir);
         return null;
       }
-      String filename = new File(sequencesDir).getAbsolutePath() + File.separator + name + ".yml";
+      String filename = new File(gesturesDir).getAbsolutePath() + File.separator + name + ".yml";
       log.info("Loading Pose name {}", filename);
-      sequence = CodecUtils.fromYaml(FileIO.toString(filename), Sequence.class);
-      return sequence;
+      gesture = CodecUtils.fromYaml(FileIO.toString(filename), Gesture.class);
+      return gesture;
     } catch (Exception e) {
       error(e);
     }
-    return sequence;
+    return gesture;
   }
 
-  public List<String> getSequenceFiles() {
+  public List<String> getGestureFiles() {
 
     List<String> files = new ArrayList<>();
-    if (!FileIO.checkDir(sequencesDir)) {
-      error("sequences %s directory does not exist", sequencesDir);
+    if (!FileIO.checkDir(gesturesDir)) {
+      error("gestures %s directory does not exist", gesturesDir);
       return files;
     }
 
-    File dir = new File(sequencesDir);
+    File dir = new File(gesturesDir);
     File[] all = dir.listFiles();
     Set<String> sorted = new TreeSet<>();
     for (File f : all) {
@@ -348,8 +385,8 @@ public class ServoMixer extends Service implements ServiceLifeCycleListener {
   public void onStopped(String name) {
   }
 
-  public void playSequence(String name) {
-    Sequence seq = (Sequence) broadcast("getSequence", name);
+  public void playGesture(String name) {
+    Gesture seq = (Gesture) broadcast("getGesture", name);
     player.start(seq);
   }
 
@@ -380,18 +417,18 @@ public class ServoMixer extends Service implements ServiceLifeCycleListener {
     }
   }
 
-  public void removeSequence(String name) {
+  public void removeGesture(String name) {
     try {
-      if (!FileIO.checkDir(sequencesDir)) {
-        error("invalid poses directory %s", sequencesDir);
+      if (!FileIO.checkDir(gesturesDir)) {
+        error("invalid poses directory %s", gesturesDir);
         return;
       }
-      String filename = new File(sequencesDir).getAbsolutePath() + File.separator + name + ".yml";
+      String filename = new File(gesturesDir).getAbsolutePath() + File.separator + name + ".yml";
       File del = new File(filename);
       if (del.exists()) {
         del.delete();
       }
-      invoke("getSequenceFiles");
+      invoke("getGestureFiles");
     } catch (Exception e) {
       error(e);
     }
@@ -444,24 +481,45 @@ public class ServoMixer extends Service implements ServiceLifeCycleListener {
   }
   
   /**
-   * Takes name of a file and a json encoded string of a sequence, saves it to
-   * file and sets the "current" sequence to the data
+   * Explicitly saving a new gesture file. This will error if the
+   * file already exists. The gesture part moves will be empty.
+   * @param filename
+   * @return
+   */
+  public String addNewGestureFile(String filename) {
+    if (filename == null) {
+      error("filename cannot be null");
+      return null;
+    }
+    if (!filename.toLowerCase().endsWith(".yml")) {
+      filename += ".yml"; 
+    }
+    if (FileIO.checkFile(filename)) {
+      error("file %s already exists", filename);
+      return null;
+    }
+    saveGesture(filename, new Gesture());    
+    return filename;
+  }
+  
+  /**
+   * Takes name of a file and a json encoded string of a gesture, saves it to
+   * file and sets the "current" gesture to the data
    * 
    * @param filename
-   *          the filename to save the sequence as
+   *          the filename to save the gesture as
    * @param json
    *          the json to save
-   * xxx
    */
-  public void saveSequence(String filename, Sequence sequence) {
+  public void saveGesture(String filename, Gesture gesture) {
     try {
       if (filename == null) {
-        error("save sequence file name cannot be null");
+        error("save gesture file name cannot be null");
         return;
       }
 
-      if (sequence == null) {
-        error("sequence json cannot be null");
+      if (gesture == null) {
+        error("gesture json cannot be null");
         return;
       }
 
@@ -469,14 +527,14 @@ public class ServoMixer extends Service implements ServiceLifeCycleListener {
         filename += ".yml";
       }
 
-      // Sequence seq = CodecUtils.fromJson(json, Sequence.class);
-      if (sequence != null) {
-        String path = sequencesDir + fs + filename;
+      // Gesture seq = CodecUtils.fromJson(json, Gesture.class);
+      if (gesture != null) {
+        String path = gesturesDir + fs + filename;
         FileOutputStream fos = new FileOutputStream(path);
-        fos.write(CodecUtils.toYaml(sequence).getBytes());
+        fos.write(CodecUtils.toYaml(gesture).getBytes());
         fos.close();
       } 
-      invoke("getSequenceFiles");
+      invoke("getGestureFiles");
     } catch (Exception e) {
       error(e);
     }

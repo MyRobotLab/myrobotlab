@@ -1,6 +1,6 @@
 package org.myrobotlab.kinematics;
 
-public class SequencePart {
+public class GesturePart {
 
   /**
    * name of pose

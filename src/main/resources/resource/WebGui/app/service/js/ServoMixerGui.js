@@ -14,21 +14,30 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
     $scope.sliders = []
     // list of current pose files
     $scope.poseFiles = []
-    $scope.sequenceFiles = []
+    $scope.gestureFiles = []
 
     $scope.state = {
-        // sequenceIndex is a string representation from $index :( dumb
-        'sequenceIndex': "0",
+        // gestureIndex is a string representation from $index :( dumb
+        'gestureIndex': "0",
         'selectedPose': null,
-        'selectedSequenceFile': null,
-        'selectedSequence': null,
-        'currentRunningPose': null,
-        'currentSequence':{
+        'selectedGestureFile': null,
+        'selectedGesture': null,
+        'playingPose': null,
+        'currentGesture':{
             'parts':[]
         }
     }
 
-    // unique id for new poses added to sequence
+    $scope.options = [];
+  angular.forEach("a:alpha,b:beta,d:delta,g:gamma,e:eta,E:epsilon,o:omega,z:zeta".split(','), function(val) {
+    var parts = val.split(":");
+    $scope.options.push({
+      name: parts[0],
+      value: parts[1]
+    });
+  });
+
+    // unique id for new poses added to gesture
     let id = 0
 
     // FIXME - this should be done in a base class or in framework
@@ -74,12 +83,23 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
             $scope.searchServos(data)
             $scope.$apply()
             break                
-        case 'onPlayingPose':
-            $scope.state.currentRunningPose = data
+        case 'onPlayingGesturePart':
+            // FIXME rename
+            if (data.type != 'Delay'){
+                $scope.state.playingPose = data    
+            } else {
+                $scope.state.playingPose.value = data.value/1000
+            }
+            $scope.$apply()
+            break
+        case 'onPlayingGesturePartIndex':
+            // FIXME rename
+            $scope.state.gestureIndex = data + ""
+            $scope.state.playingPoseIndex = data
             $scope.$apply()
             break
         case 'onStopPose':
-            $scope.state.currentRunningPose = ' '
+            // $scope.state.playingPose = ' '
             $scope.$apply()
             break
         case 'onServoEvent':
@@ -93,14 +113,14 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
                 $scope.state.selectedPose = data[data.length - 1]
             }
             break
-        case 'onSequence':
-            $scope.state.currentSequence = data
+        case 'onGesture':
+            $scope.state.currentGesture = data
             $scope.$apply()
             break
-        case 'onSequenceFiles':
-            $scope.sequenceFiles = data
-            if (!$scope.state.selectedSequenceFile && $scope.sequenceFiles && $scope.sequenceFiles.length > 0){
-                $scope.state.selectedSequenceFile = $scope.sequenceFiles[0]
+        case 'onGestureFiles':
+            $scope.gestureFiles = data
+            if (!$scope.state.selectedGestureFile && $scope.gestureFiles && $scope.gestureFiles.length > 0){
+                $scope.state.selectedGestureFile = $scope.gestureFiles[0]
             }
             $scope.$apply()
             break
@@ -151,7 +171,7 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
     }
 
 
-    $scope.addPoseToSequence = function() {
+    $scope.addPoseToGesture = function() {
         // get pos entry
         let pose = {
             'name': $scope.state.selectedPose,
@@ -159,11 +179,11 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
             'blocking': false
         }
 
-        $scope.state.currentSequence.parts.splice(parseInt($scope.state.sequenceIndex) + 1, 0, pose)
+        $scope.state.currentGesture.parts.splice(parseInt($scope.state.gestureIndex) + 1, 0, pose)
     }
 
-    $scope.removePoseFromSequence = function() {
-        $scope.state.currentSequence.parts.splice($scope.state.sequenceIndex, 1)
+    $scope.removePoseFromGesture = function() {
+        $scope.state.currentGesture.parts.splice($scope.state.gestureIndex, 1)
     }
 
     move = function(arr, fromIndex, toIndex) {
@@ -171,15 +191,15 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
         arr.splice(fromIndex, 1);
         arr.splice(toIndex, 0, element);
         // stupid ass conversion back to string for list 'select'
-        $scope.state.sequenceIndex = toIndex + ''
+        $scope.state.gestureIndex = toIndex + ''
     }
 
-    $scope.moveUpPoseInSequence = function() {
-        move($scope.state.currentSequence.parts, $scope.state.sequenceIndex, parseInt($scope.state.sequenceIndex) - 1)
+    $scope.moveUpPoseInGesture = function() {
+        move($scope.state.currentGesture.parts, $scope.state.gestureIndex, parseInt($scope.state.gestureIndex) - 1)
     }
 
-    $scope.moveDownPoseInSequence = function() {
-        move($scope.state.currentSequence.parts, $scope.state.sequenceIndex, parseInt($scope.state.sequenceIndex) + 1)
+    $scope.moveDownPoseInGesture = function() {
+        move($scope.state.currentGesture.parts, $scope.state.gestureIndex, parseInt($scope.state.gestureIndex) + 1)
     }
 
     $scope.searchServos = function(searchText) {
@@ -210,8 +230,8 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
     }
 
     $scope.step = function(){
-        let index = parseInt($scope.state.sequenceIndex)
-        let part = $scope.state.currentSequence.parts[index]
+        let index = parseInt($scope.state.gestureIndex)
+        let part = $scope.state.currentGesture.parts[index]
         if (part.type === 'Pose'){
             part.send('moveToPose', part)    
         }        
@@ -223,9 +243,9 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
         this.onRegistered(servicePanelList[index])
     }
 
-    $scope.saveSequence = function(name) {
-        $scope.state.currentSequence.name = name
-        msg.send('saveSequence', name, $scope.state.currentSequence)
+    $scope.saveGesture = function(name) {
+        $scope.state.currentGesture.name = name
+        msg.send('saveGesture', name, $scope.state.currentGesture)
     }
 
     $scope.addDelay = function(seconds){
@@ -244,36 +264,58 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
             'blocking': true
         }
         
-        $scope.state.currentSequence.parts.splice(parseInt($scope.state.sequenceIndex) + 1, 0, delay)
+        $scope.state.currentGesture.parts.splice(parseInt($scope.state.gestureIndex) + 1, 0, delay)
     }
 
-    $scope.playSequence = function(sequence) {
-        if (sequence){
-            msg.send('playSequence', sequence)    
+    $scope.playGesture = function(gesture) {
+        if (gesture){
+            msg.send('playGesture', gesture)    
         } else {
-            console.warn('sequence empty')
+            console.warn('gesture empty')
         }
     }
 
-    $scope.removeSequence = function(sequence) {
-        if (sequence){
-            msg.send('removeSequence', sequence)    
+    $scope.removeGesture = function(gesture) {
+        if (gesture){
+            msg.send('removeGesture', gesture)    
         } else {
-            console.warn('removeSequence empty')
+            console.warn('removeGesture empty')
         }
+    }
+
+    $scope.displayValue = function(pose) {
+        // !pose.value || Number.isNaN(pose.value)?'':pose.value/1000
+        if (pose.type == 'Delay'){
+            return pose.value/1000
+        } else {
+            return pose.value
+        }
+    }
+
+    $scope.speak = function() {
+        
+        let delay = {
+            'name': 'speech',
+            'type': 'Speech',
+            'value': $scope.text,
+            'blocking': true
+        }
+        
+        $scope.state.currentGesture.parts.splice(parseInt($scope.state.gestureIndex) + 1, 0, delay)
     }
 
     msg.subscribe('getPoseFiles')
-    msg.subscribe('getSequence')
-    msg.subscribe('getSequenceFiles')
+    msg.subscribe('getGesture')
+    msg.subscribe('getGestureFiles')
     msg.subscribe('listAllServos')
     msg.subscribe('search')
     
     msg.send('listAllServos')
     msg.send('getPoseFiles');
-    msg.send('getSequenceFiles');
+    msg.send('getGestureFiles');
 
-    msg.subscribe("publishPlayingPose")
+    msg.subscribe("publishPlayingGesturePart")
+    msg.subscribe("publishPlayingGesturePartIndex")
     msg.subscribe("publishStopPose")
 
     mrl.subscribeToRegistered(this.onRegistered)

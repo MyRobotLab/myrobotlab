@@ -32,7 +32,6 @@ angular.module('mrlapp.service.JMonkeyEngineGui', []).controller('JMonkeyEngineG
 
     msg.subscribe('getSelectedPath')
     msg.subscribe('publishSelected')
-    msg.send('getSelectedPath')
     msg.subscribe(this)
 
 }
