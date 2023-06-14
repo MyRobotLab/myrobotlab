@@ -1589,6 +1589,22 @@ public class FileIO {
     }
     return false;
   }
+  
+  /**
+   * validate a file exists
+   * @param filename
+   * @return
+   */
+  public static boolean checkFile(String filename) {
+    try {
+      File check = new File(filename);
+      return check.exists() && !check.isDirectory();
+    } catch (Exception e) {
+      log.error("checkDir threw", e);
+    }
+    return false;
+  }
+
 
   /**
    * flips all \ to / or / to \ depending on OS
@@ -1608,5 +1624,6 @@ public class FileIO {
       return dirPath.replace("\\", "/");
     }
   }
+
 
 }
