@@ -1071,7 +1071,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public ServoEvent publishServoStopped(String name, Double position) {
-    log.error("{} publishServoStopped({}, {})", System.currentTimeMillis(), name, position);
+    log.debug("{} publishServoStopped({}, {})", System.currentTimeMillis(), name, position);
 
     // log.info("TIME-ENCODER SERVO_STOPPED - {}", name);
     // if currently configured to autoDisable - the timer starts now
