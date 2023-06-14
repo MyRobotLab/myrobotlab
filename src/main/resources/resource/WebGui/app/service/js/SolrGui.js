@@ -94,6 +94,16 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
     	$scope.execSearch();
     }
     
+    $scope.playFile = function(filepath) {
+    	// stop the audiofile if it's currently playing.
+    	mrl.sendTo("audiofile", "stop");
+    	// start the new song.
+    	mrl.sendTo("audiofile", "play", filepath[0]);
+    	
+    //	mrl.sendTo("foobar", "play", filepath[0]);
+    //	mrl.sendTo("solr", "play", filepath[0]);
+    }
+    
     msg.subscribe('publishResults');
     msg.subscribe(this);
     // mrl.subscribe($scope.service.name, 'publishResults', $scope.service.results);

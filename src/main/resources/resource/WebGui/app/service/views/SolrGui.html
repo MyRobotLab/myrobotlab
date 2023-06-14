@@ -43,7 +43,8 @@
             <tr ng-repeat="(key, value) in result">
               <td><strong>{{key}}</strong></td>
               <td ng-if="key == 'bytes'"><img height="100" ng-src="{{value}}"/></td>
-              <td ng-if="key != 'bytes'">{{value}}</td> 
+              <td ng-if="key == 'filepath'"><a ng-click="playFile(value)">{{value}}</a></td>
+              <td ng-if="key != 'bytes' && key != 'filepath'">{{value}}</td> 
             </tr>
           </table>
          <!--  <div class="chatBalloon{{chatContent.type}}"><div class="chatContent" ng-bind-html="chatContent.text"></div></div>  -->

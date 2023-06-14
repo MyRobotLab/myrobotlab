@@ -97,6 +97,9 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
 
     LoggingFactory.init(Level.INFO);
     
+    
+    AudioFile audiofile = (AudioFile)Runtime.start("audiofile", "AudioFile");
+    
     WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
 
     // start embedded solr
@@ -144,7 +147,10 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     connector.attachDocumentListener(pipeline.getName());
 
     // start the crawl!
-    connector.startCrawling();
+    boolean doCrawl = false;
+    if (doCrawl) {
+      connector.startCrawling();
+    }
     // TODO: make sure we flush the pending batches!
     // connector.flush();
     // poll to make sure the connector is still running./

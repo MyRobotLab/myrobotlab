@@ -510,12 +510,13 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    */
   public QueryResponse searchWithFacets(String queryString, int rows, int start, String[] facetFields, String[] filters) {
     log.info("Searching for (with facets): {}", queryString);
+    int numFacetBuckets = 20;
     SolrQuery query = new SolrQuery();
     query.set("q", queryString);
     query.setRows(rows);
     query.setStart(start);
     query.setFacet(true);
-    query.setFacetLimit(10);
+    query.setFacetLimit(numFacetBuckets);
     query.setFacetMinCount(1);
     // TODO: expose sorting in a fancier search method signature
     // Alternatively, pass the list of parameters and their values into a generic search method instead.
