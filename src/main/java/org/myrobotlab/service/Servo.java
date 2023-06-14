@@ -91,8 +91,8 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
       return false;
     }
 
-    double minLimit = (mapper.minX < mapper.maxX) ? mapper.minX : mapper.maxX;
-    double maxLimit = (mapper.maxX > mapper.minX) ? mapper.maxX : mapper.minX;
+    double minLimit = Math.min(mapper.minX, mapper.maxX);
+    double maxLimit = Math.min(mapper.minX, mapper.maxX);
     newPos = (newPos < minLimit) ? minLimit : newPos;
     newPos = (newPos > maxLimit) ? maxLimit : newPos;
 
