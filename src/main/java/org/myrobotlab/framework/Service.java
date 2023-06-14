@@ -2011,6 +2011,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     subscribe(topicName, topicMethod, getFullName(), callbackMethod);
   }
+  
+  @Override
+  public void subscribe(String service, String method, String callback) {
+    subscribe(service, method, getFullName(), callback);
+  }
 
   public void subscribeTo(String service, String method) {
     subscribe(service, method, getFullName(), CodecUtils.getCallbackTopicName(method));
@@ -2028,7 +2033,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     unsubscribe(Runtime.getInstance().getFullName(), method, getFullName(), CodecUtils.getCallbackTopicName(method));
   }
 
-  @Override
+  // TODO make protected or private
   public void subscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
     log.info("subscribe [{}/{} ---> {}/{}]", topicName, topicMethod, callbackName, callbackMethod);
     // TODO - do regex matching
@@ -2063,8 +2068,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     unsubscribe(topicName, topicMethod, getFullName(), callbackMethod);
   }
-
+  
   @Override
+  public void unsubscribe(String topicName, String topicMethod, String callback) {
+    unsubscribe(topicName, topicMethod, getFullName(), callback);
+  }
+
+  // TODO make protected or private
   public void unsubscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
     log.info("unsubscribe [{}/{} ---> {}/{}]", topicName, topicMethod, callbackName, callbackMethod);
     send(Message.createMessage(getFullName(), topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
