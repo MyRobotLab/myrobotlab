@@ -284,7 +284,7 @@ public class ServoTest extends AbstractTest {
     start = System.currentTimeMillis();
 
     new Thread(() -> {
-        log.error("starting at {}", System.currentTimeMillis());
+        log.info("starting at {}", System.currentTimeMillis());
         servo01.moveTo(0);
         moveLatch.countDown();
     }).start();
@@ -300,12 +300,12 @@ public class ServoTest extends AbstractTest {
 
     // wait for the move to complete
     targetLatch.await();
-    log.error("finished at {}", System.currentTimeMillis());
+    log.info("finished at {}", System.currentTimeMillis());
 
     delta = System.currentTimeMillis() - start;
     assertTrue("Move to blocking should have taken 3 seconds or more. Time was " + delta, delta >= 3000);
 
-    log.error("Move to blocking took {} milliseconds", delta);
+    log.info("Move to blocking took {} milliseconds", delta);
     assertTrue("Servo should be enabled", servo01.isEnabled());
 
     // wait for the servo to stop moving
