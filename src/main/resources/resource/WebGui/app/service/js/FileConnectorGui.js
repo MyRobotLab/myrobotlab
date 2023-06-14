@@ -3,19 +3,9 @@ angular.module('mrlapp.service.FileConnectorGui', []).controller('FileConnectorG
     var _self = this
     var msg = this.msg
     
-    $scope.filepath = 'Z:\\Music'
-    $scope.document = '';	
-//    // TODO: something useful?!
-//    $scope.solrResults = '';
-//    $scope.queryString = '*:*';
-//    $scope.startOffset = 0;
-//    $scope.endOffset = 0;
-//    $scope.numFound = 0;
-//    $scope.pageSize = 20;
-//    $scope.filters = [];
-//    // TODO: maybe some other fields..
-//    // TODO: support range facets
-//    $scope.facetFields = ['type', 'xmpdm_artist', 'xmpdm_releasedate', 'xmpdm_genre','sender_type', 'sender','method'];
+    $scope.filepath = '';
+    $scope.document = '';
+    
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
       $scope.service = service
@@ -25,16 +15,8 @@ angular.module('mrlapp.service.FileConnectorGui', []).controller('FileConnectorG
       let data = inMsg.data[0]
       switch (inMsg.method) {
         case 'onDocument': 
-    	  //var solrResults = JSON.parse(data);
     	  console.info("On Document!");
     	  $scope.document = data;
-    	  //console.info(solrResults);
-          //$scope.solrResults = solrResults;
-          // set the start/end offsets perhaps?
-          //$scope.numFound = solrResults.numFound;
-          // TODO: this is conflated logic.
-          // $scope.startOffset = solrResults.start
-          //$scope.endOffset = solrResults.size + solrResults.start 
           $scope.$apply();
           break
         case 'onState':
@@ -53,13 +35,12 @@ angular.module('mrlapp.service.FileConnectorGui', []).controller('FileConnectorG
     };
     
     $scope.startCrawling = function(filepath) {
+    	mrl.sendTo($scope.service.name, "setDirectory", $scope.filepath)
     	mrl.sendTo($scope.service.name, "startCrawling");
     }
     
-    // TODO ?  I don't think we want to subscribe to publishDocument..
+    // This could result in a lot of data getting returned to the webgui.. we'll see.
     msg.subscribe('publishDocument');
     msg.subscribe(this);
-    // mrl.subscribe($scope.service.name, 'publishResults', $scope.service.results);
-    // $scope.panel.initDone();
                 
   }]);
