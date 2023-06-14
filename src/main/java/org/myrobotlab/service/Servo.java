@@ -92,9 +92,11 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
     }
 
     double minLimit = Math.min(mapper.minX, mapper.maxX);
-    double maxLimit = Math.min(mapper.minX, mapper.maxX);
+    double maxLimit = Math.max(mapper.minX, mapper.maxX);
     newPos = (newPos < minLimit) ? minLimit : newPos;
     newPos = (newPos > maxLimit) ? maxLimit : newPos;
+    
+    log.error("============== newPos {} ====", newPos);
 
     // This is to allow attaching disabled
     // then delay enabling until the first moveTo command
