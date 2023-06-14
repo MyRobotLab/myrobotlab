@@ -109,6 +109,8 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     // create a workflow to load into that pipeline service
     WorkflowConfiguration workflowConfig = new WorkflowConfiguration("default");
     workflowConfig.setName("default");
+    workflowConfig.setNumWorkerThreads(8);
+    
     StageConfiguration stage1Config = new StageConfiguration();
     stage1Config.setStageClass("org.myrobotlab.document.transformer.SetStaticFieldValue");
     stage1Config.setStageName("SetTableField");
@@ -130,12 +132,13 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     pipeline.initalize();
 
     // attach the pipeline to solr.
+    // 
     pipeline.attachDocumentListener(solr.getName());
     
     // start the file connector to scan the file system.
     // RSSConnector connector = (RSSConnector) Runtime.start("rss", "RSSConnector");
     FileConnector connector = (FileConnector) Runtime.start("fileconnector", "FileConnector");
-    connector.setDirectory("D:\\Music");
+    connector.setDirectory("Z:\\Music");
 
     // connector to pipeline connection
     connector.attachDocumentListener(pipeline.getName());

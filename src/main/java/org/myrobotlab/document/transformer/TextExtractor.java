@@ -8,6 +8,7 @@ import java.io.StringWriter;
 import java.util.List;
 
 import org.apache.tika.exception.TikaException;
+import org.apache.tika.exception.ZeroByteFileException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
@@ -75,9 +76,8 @@ public class TextExtractor extends AbstractStage {
       try {
         binaryData = new FileInputStream(f);
       } catch (FileNotFoundException e1) {
-        // TODO Auto-generated catch block
-        e1.printStackTrace();
         // This should never happen.
+        log.warn("Document {} not found.", doc.getId(), e1);
         continue;
       }
       // InputStream binaryData = null;

@@ -83,7 +83,18 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
 
   @Override
   public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-    throw exc;
+    // throw exc;
+    String docId = getDocIdPrefix() + file.toFile().getAbsolutePath();
+    Document doc = new Document(docId);
+    doc.setField("type", "file");
+    // TODO: how does this serialize?
+    doc.setField("error", exc);
+    // doc.setField("timestamp", new Date());
+    feed(doc);
+    log.warn("Exception processing {}", file, exc);
+
+    // Keep going!!!
+    return FileVisitResult.CONTINUE;
   }
 
   @Override
