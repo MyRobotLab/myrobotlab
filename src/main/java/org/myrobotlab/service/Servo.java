@@ -91,19 +91,10 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
       return false;
     }
     
-    double minLimit = (mapper.minX < mapper.maxX)?mapper.minX:mapper.maxX;
-    double maxLimit = (mapper.maxX > mapper.minX)?mapper.maxX:mapper.minX;
-    
-    if (newPos < minLimit) {
-      log.warn("requested position {} is less than minimum {}", newPos, minLimit);
-      return false;
-    }
-    
-    if (newPos > maxLimit) {
-      log.warn("requested position {} is more than maximum {}", newPos, maxLimit);
-      return false;
-    }
-
+    double minLimit = (mapper.minX < mapper.maxX) ? mapper.minX : mapper.maxX;
+    double maxLimit = (mapper.maxX > mapper.minX) ? mapper.maxX : mapper.minX;
+    newPos = (newPos < minLimit) ? minLimit : newPos;
+    newPos = (newPos > maxLimit) ? maxLimit : newPos;
 
     // This is to allow attaching disabled
     // then delay enabling until the first moveTo command
@@ -200,7 +191,8 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
 
     if (isBlocking) {
       // our thread did a blocking call - we will wait until encoder notifies us
-      // to continue or timeout (if supplied) has been reached - "cheesy" need to
+      // to continue or timeout (if supplied) has been reached - "cheesy" need
+      // to
       // re-work for real monitor callbacks from real encoders
       sleep(blockingTimeMs);
       isBlocking = false;
@@ -315,15 +307,7 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
   @Override
   public ServiceConfig getFilteredConfig() {
     ServoConfig sc = (ServoConfig) super.getFilteredConfig();
-    Set<String> removeList = Set.of(
-            "onServoEnable",
-            "onServoDisable",
-            "onEncoderData",
-            "onServoSetSpeed",
-            "onServoWriteMicroseconds",
-            "onServoMoveTo",
-            "onServoStop"
-    );
+    Set<String> removeList = Set.of("onServoEnable", "onServoDisable", "onEncoderData", "onServoSetSpeed", "onServoWriteMicroseconds", "onServoMoveTo", "onServoStop");
     if (sc.listeners != null) {
       sc.listeners.removeIf(listener -> removeList.contains(listener.callback));
     }
