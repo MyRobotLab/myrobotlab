@@ -624,9 +624,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
      * weather a move request was successful. The cases it would be false is no
      * controller or calling moveTo when blocking is in process
      */
-
     if (newPos == null) {
-      log.info("will not move to null position - not moving");
+      log.info("{} will not move to null position - not moving", getName());
       return newPos;
     }
 
@@ -1031,17 +1030,16 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   public void unsync(ServoControl sc) {
     if (sc == null) {
       log.error("{}.unsync(null)", getName());
+      return;
     }
     unsync(sc.getName());
   }
 
   @Override
   public void waitTargetPos() {
-    //
-    // while (this.pos != this.targetPos) {
-    // Some sleep perhaps?
-    // TODO:
-    // }
+     while (this.getCurrentInputPos() != this.targetPos) {
+       sleep(30);
+     }
   }
 
   @Override
@@ -1073,7 +1071,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public ServoEvent publishServoStopped(String name, Double position) {
-    log.debug("publishServoStopped({}, {})", name, position);
+    log.error("{} publishServoStopped({}, {})", System.currentTimeMillis(), name, position);
 
     // log.info("TIME-ENCODER SERVO_STOPPED - {}", name);
     // if currently configured to autoDisable - the timer starts now
