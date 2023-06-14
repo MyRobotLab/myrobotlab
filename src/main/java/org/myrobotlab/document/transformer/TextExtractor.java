@@ -87,15 +87,14 @@ public class TextExtractor extends AbstractStage {
       BodyContentHandler bch = new BodyContentHandler(textData);
       try {
         parser.parse(binaryData, bch, metadata, parseCtx);
-      } catch (IOException e) {
+      //} catch (IOException e) {
+        // TODO Auto-generated catch block
+       // e.printStackTrace();
+      } catch (TikaException|IOException|SAXException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
-      } catch (TikaException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (SAXException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        log.warn("Error processing {} :", doc.getId(), e);
+        doc.setField("error", e);
       }
 
       doc.addToField(textField, textData.toString());
