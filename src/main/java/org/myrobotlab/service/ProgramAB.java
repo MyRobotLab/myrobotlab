@@ -1418,4 +1418,20 @@ public class ProgramAB extends Service
     return topicChange;
   }
 
+  public String getTopic() {    
+    return getPredicate(getCurrentUserName(), "topic");
+  }
+  
+  public String getTopic(String username) {    
+    return getPredicate(username, "topic");
+  }
+  
+  public void setTopic(String username, String topic) {    
+    setPredicate(username, "topic", topic);
+  }
+  
+  public void setTopic(String topic) {    
+    setPredicate(getCurrentUserName(), "topic", topic);
+  }
+
 }
