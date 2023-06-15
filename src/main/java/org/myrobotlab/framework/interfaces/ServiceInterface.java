@@ -138,16 +138,15 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    * 
    * @param config
    */
-  ServiceConfig setConfig(ServiceConfig config);
+  void setConfig(ServiceConfig config);
 
   /**
    * reflectively sets a part of config
    *  
    * @param fieldname - the name of the config field
    * @param value - the value
-   * @return - returns the value
    */
-  Object setConfigValue(String fieldname, Object value);
+  void setConfigValue(String fieldname, Object value)  throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException;
 
 
   /**

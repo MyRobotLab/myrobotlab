@@ -1461,23 +1461,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   @Override
-  public ServiceConfig setConfig(ServiceConfig config) {
+  public void setConfig(ServiceConfig config) {
     this.config = config;
-    return config;
   }
 
   @Override
-  public ServiceConfig setConfigValue(String fieldname, Object value) {
-    try {
+  public void setConfigValue(String fieldname, Object value) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
       log.info("setting field name fieldname {} to {}", fieldname, value);
 
       Field field = config.getClass().getDeclaredField(fieldname);
       // field.setAccessible(true); should not need this - it "should" be public
       field.set(config, value);
-    } catch (Exception e) {
-      error(e);
-    }
-    return config;
   }
 
   @Override
