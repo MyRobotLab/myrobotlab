@@ -524,6 +524,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     query.add("qf", "xmpdm_releasedate");
     query.add("qf", "filepath_txt_en");
     query.add("qf", "xmpdm_album_txt_en");
+    query.add("qf", "xmpdm_genre_txt_en");
     query.setParam("defType", "edismax");
     query.setParam("q.op", "AND");
     // TODO: expose sorting in a fancier search method signature
