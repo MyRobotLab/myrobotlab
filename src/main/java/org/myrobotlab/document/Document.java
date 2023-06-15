@@ -35,6 +35,9 @@ public class Document {
   }
 
   public void setField(String fieldName, ArrayList<Object> value) {
+    if (fieldName == null) {
+      return;
+    }
     if (value == null) {
       data.remove(fieldName);
     } else {
@@ -43,6 +46,9 @@ public class Document {
   }
 
   public void setField(String fieldName, Object value) {
+    if (fieldName == null) {
+      return;
+    }
     // set field overwrites existing values in the field.
     if (value == null) {
       data.remove(fieldName);
@@ -77,6 +83,9 @@ public class Document {
   }
 
   public void addToField(String fieldName, Object value) {
+    if (fieldName == null) {
+      return;
+    }
     if (data.containsKey(fieldName) && (data.get(fieldName) != null)) {
       data.get(fieldName).add(value);
     } else {

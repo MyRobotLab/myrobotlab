@@ -1,9 +1,8 @@
-angular.module('mrlapp.service.FileConnectorGui', []).controller('FileConnectorGuiCtrl', ['$scope', 'mrl', function($scope, mrl) {
+angular.module('mrlapp.service.DocumentPipelineGui', []).controller('DocumentPipelineGuiCtrl', ['$scope', 'mrl', function($scope, mrl) {
     console.info('FileConnectorGuiCtrl');
     var _self = this
     var msg = this.msg
-    
-    $scope.filepath = '';
+  
     $scope.document = '';
     
     // GOOD TEMPLATE TO FOLLOW
@@ -33,16 +32,6 @@ angular.module('mrlapp.service.FileConnectorGui', []).controller('FileConnectorG
       }
     
     };
-    
-    $scope.startCrawling = function(filepath) {
-    	mrl.sendTo($scope.service.name, "setDirectory", $scope.filepath)
-    	mrl.sendTo($scope.service.name, "startCrawling");
-    }
-
-    $scope.stopCrawling = function(filepath) {
-    	// TODO: this doesn't seem to work.
-    	mrl.sendTo($scope.service.name, "stopCrawling");
-    }
     
     // This could result in a lot of data getting returned to the webgui.. we'll see.
     // msg.subscribe('publishDocument');

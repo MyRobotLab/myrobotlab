@@ -24,7 +24,7 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
   private String directory;
   // TODO: add wildcard includes/excludes
   // TODO: add file path includes/excludes
-  private boolean interrupted = false;
+  private volatile boolean interrupted = false;
 
   public FileConnector(String name, String id) {
     super(name, id);

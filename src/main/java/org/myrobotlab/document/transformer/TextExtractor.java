@@ -72,6 +72,12 @@ public class TextExtractor extends AbstractStage {
         continue;
       }
 
+      if (f.length() == 0) {
+        // TODO: this is a zero byte file.  
+        log.info("zero byte file {}", f.getAbsolutePath());
+        continue;
+      }
+      
       FileInputStream binaryData = null;
       try {
         binaryData = new FileInputStream(f);
@@ -101,8 +107,10 @@ public class TextExtractor extends AbstractStage {
       for (String name : metadata.names()) {
         // clean the field name first.
         String cleanName = cleanFieldName(name);
-        for (String value : metadata.getValues(name)) {
-          doc.addToField(cleanName, value);
+        if (cleanName != null) {
+          for (String value : metadata.getValues(name)) {
+            doc.addToField(cleanName, value);
+          }
         }
       }
     }

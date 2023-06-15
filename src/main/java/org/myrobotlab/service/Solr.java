@@ -518,6 +518,14 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     query.setFacet(true);
     query.setFacetLimit(numFacetBuckets);
     query.setFacetMinCount(1);
+    
+    query.add("qf", "dc_title");
+    query.add("qf", "xmpdm_artist_txt_en");
+    query.add("qf", "xmpdm_releasedate");
+    query.add("qf", "filepath_txt_en");
+    query.add("qf", "xmpdm_album_txt_en");
+    query.setParam("defType", "edismax");
+    query.setParam("q.op", "AND");
     // TODO: expose sorting in a fancier search method signature
     // Alternatively, pass the list of parameters and their values into a generic search method instead.
     query.setSort("index_date", ORDER.desc);
@@ -647,6 +655,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     // always be batching when sending docs.
     ArrayList<Document> docs = new ArrayList<Document>();
     docs.add(doc);
+    // TODO: we want to add to the current batch to send..  
+    // and make sure we have a thread flushing the batch if it gets too old.
     return onDocuments(docs);
   }
 
