@@ -2,16 +2,54 @@ package org.myrobotlab.framework.interfaces;
 
 public interface MessageSubscriber {
 
-  public void subscribe(NameProvider topicName, String topicKey);
+  /**
+   * This will subscribe to a NameProviders method. The callback will be
+   * automatically generated.  Rules are publish{Method} or get{Method} will
+   * callback with on{Method}.
+   * 
+   * @param service
+   * @param method
+   */
+  public void subscribe(NameProvider service, String method);
 
-  public void subscribe(String topicName, String topicKey);
+  /**
+   * Service name is supplied and method to subscribe to.  The callback will be
+   * automatically generated.  Rules are publish{Method} or get{Method} 
+   * will callback with on{Method}.
+   * 
+   * @param service
+   * @param method
+   */
+  public void subscribe(String service, String method);
 
-  public void subscribe(String topicName, String topicMethod, String callbackName, String callbackMethod);
+  /**
+   * Subscribe with callback.  The callback is explicitly set.
+   * @param service
+   * @param method
+   * @param callback
+   */
+  public void subscribe(String service, String method, String callback);
 
-  public void unsubscribe(NameProvider topicName, String topicKey);
+  /***
+   * Unsubscribe from a NameProviders method. 
+   * @param service
+   * @param method
+   */
+  public void unsubscribe(NameProvider service, String method);
 
-  public void unsubscribe(String topicName, String topicKey);
+  /**
+   * Unsubscribe from a service method.
+   * @param service
+   * @param method
+   */
+  public void unsubscribe(String service, String method);
 
-  public void unsubscribe(String topicName, String topicMethod, String callbackName, String callbackMethod);
+  /**
+   * Unsubscribe from a service method with an explicit callback.
+   * @param service
+   * @param method
+   * @param callback
+   */
+  public void unsubscribe(String service, String method, String callback);
 
 }
