@@ -5,6 +5,7 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
 
     $scope.minView = true
     $scope.delay = 3 // initial
+    $scope.showGestureSave = false
 
     $scope.searchServo = {
         displayName: null
@@ -121,6 +122,7 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
             $scope.gestureFiles = data
             if (!$scope.state.selectedGestureFile && $scope.gestureFiles && $scope.gestureFiles.length > 0){
                 $scope.state.selectedGestureFile = $scope.gestureFiles[0]
+                msg.send('getGesture', $scope.state.selectedGestureFile)
             }
             $scope.$apply()
             break
@@ -233,8 +235,11 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
         let index = parseInt($scope.state.gestureIndex)
         let part = $scope.state.currentGesture.parts[index]
         if (part.type === 'Pose'){
-            part.send('moveToPose', part)    
-        }        
+            msg.send('moveToPose', part.name)    
+        }
+        index++
+        $scope.state.gestureIndex =  index + ""
+        
     }
 
     // initialize all services which have panel references in Intro    
@@ -245,7 +250,18 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
 
     $scope.saveGesture = function(name) {
         $scope.state.currentGesture.name = name
-        msg.send('saveGesture', name, $scope.state.currentGesture)
+        if ($scope.gestureFiles.includes(name)){
+            // saving current file
+            msg.send('saveGesture', name, $scope.state.currentGesture)
+        } else {
+            // saving new file
+            blankGesture = {
+                parts:[],
+                repeat: false
+            }
+            msg.send('saveGesture', name, blankGesture)
+        }
+        
     }
 
     $scope.addDelay = function(seconds){
@@ -303,6 +319,7 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
         
         $scope.state.currentGesture.parts.splice(parseInt($scope.state.gestureIndex) + 1, 0, delay)
     }
+
 
     msg.subscribe('getPoseFiles')
     msg.subscribe('getGesture')

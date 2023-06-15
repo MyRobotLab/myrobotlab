@@ -1354,7 +1354,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   @Override
   public void onAction(String name, boolean keyPressed, float tpf) {
-    log.info("onAction {} {} {}", name, keyPressed, tpf);
+    log.debug("onAction {} {} {}", name, keyPressed, tpf);
 
     if (name.equals("mouse-click-right")) {
       mouseRightPressed = keyPressed;
@@ -1412,7 +1412,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    *
    */
   public void onAnalog(String name, float keyPressed, float tpf) {
-    log.info("onAnalog [{} {} {}]", name, keyPressed, tpf);
+    log.debug("onAnalog [{} {} {}]", name, keyPressed, tpf);
 
     // selectedForMovement invariably is the camera
     if (selectedForMovement == null) {
