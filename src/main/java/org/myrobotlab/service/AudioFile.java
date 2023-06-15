@@ -165,6 +165,7 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
   }
 
   public AudioData play(String filename) {
+    log.info("Audio file playing {}", filename);
     return play(filename, false);
   }
 
