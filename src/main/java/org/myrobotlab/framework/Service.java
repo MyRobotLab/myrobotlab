@@ -1476,6 +1476,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   @Override
+  public void setConfigValue(String fieldname, Object value) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+      log.info("setting field name fieldname {} to {}", fieldname, value);
+
+      Field field = config.getClass().getDeclaredField(fieldname);
+      // field.setAccessible(true); should not need this - it "should" be public
+      field.set(config, value);
+  }
+
+  @Override
   @Deprecated /*
                * this is being used wrongly - Runtime knows how to load services
                * don't - what is desired here is apply()

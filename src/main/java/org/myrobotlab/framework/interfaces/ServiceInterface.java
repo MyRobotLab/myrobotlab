@@ -154,6 +154,15 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
 
 
   /**
+   * reflectively sets a part of config
+   *  
+   * @param fieldname - the name of the config field
+   * @param value - the value
+   */
+  void setConfigValue(String fieldname, Object value)  throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException;
+
+
+  /**
    * Configure a service by merging in configuration
    * 
    * @param config
