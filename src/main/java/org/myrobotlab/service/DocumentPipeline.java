@@ -139,20 +139,21 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
 
     // attach the pipeline to solr.
     // 
-    // pipeline.attachDocumentListener(solr.getName());
+    pipeline.attachDocumentListener(solr.getName());
     
     // start the file connector to scan the file system.
     // RSSConnector connector = (RSSConnector) Runtime.start("rss", "RSSConnector");
     FileConnector connector = (FileConnector) Runtime.start("fileconnector", "FileConnector");
-    
+    connector.setDirectory("Z:\\Movies");
 
     // connector to pipeline connection
     connector.attachDocumentListener(pipeline.getName());
 
+    Runtime.saveConfig("musicsearch");
     // start the crawl!
     boolean doCrawl = false;
     if (doCrawl) {
-      connector.setDirectory("Z:\\Movies");
+      
       connector.startCrawling();
     }
     // TODO: make sure we flush the pending batches!
@@ -214,6 +215,8 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
   @Override
   public ServiceConfig getConfig() {
     // return the config
+    DocumentPipelineConfig config = (DocumentPipelineConfig)super.getConfig();
+    config.workFlowConfig = this.workFlowConfig;
     return config;
   }
 

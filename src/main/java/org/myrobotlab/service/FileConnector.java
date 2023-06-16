@@ -24,7 +24,7 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
   public final static Logger log = LoggerFactory.getLogger(FileConnector.class.getCanonicalName());
   private static final long serialVersionUID = 1L;
   // private String directory;
-  private FileConnectorConfig config;
+  private FileConnectorConfig config = new FileConnectorConfig();
   // TODO: add wildcard includes/excludes
   // TODO: add file path includes/excludes
   private volatile boolean interrupted = false;
@@ -42,7 +42,7 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
   @Override
   public void startCrawling() {
     state = ConnectorState.RUNNING;
-    Path startPath = Paths.get(config.directory);
+    Path startPath = Paths.get(((FileConnectorConfig)config).directory);
     try {
       Files.walkFileTree(startPath, this);
     } catch (IOException e) {
@@ -121,13 +121,17 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
   public ServiceConfig apply(ServiceConfig inConfig) {
     // 
     FileConnectorConfig config = (FileConnectorConfig)super.apply(inConfig);
-    config.directory = config.directory;
+    // anything else?
     return config;
   }
 
   @Override
   public ServiceConfig getConfig() {
     // return the config
+    // we need the super stuff here.
+    FileConnectorConfig config = (FileConnectorConfig)super.getConfig();
+    // this is goofy..
+    config.directory = this.config.directory;
     return config;
   }
 }

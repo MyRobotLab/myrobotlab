@@ -1,5 +1,6 @@
 package org.myrobotlab.document.transformer;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,7 +8,7 @@ import java.util.Map;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
 
-public class Configuration {
+public class Configuration implements Serializable {
 
   // TODO: add a map type.
   // TODO: push the name/class onto this ?
@@ -17,7 +18,11 @@ public class Configuration {
   // workflow /pipeline config
   // connector config
 
-  protected HashMap<String, Object> config = null;
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+  public HashMap<String, Object> config = null;
   // private XStream xstream = null;
 
   public Configuration() {
