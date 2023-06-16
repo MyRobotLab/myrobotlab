@@ -14,6 +14,8 @@ import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
 import org.myrobotlab.document.transformer.ConnectorConfig;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.FileConnectorConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.DocumentPublisher;
 import org.slf4j.Logger;
 
@@ -21,7 +23,8 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
 
   public final static Logger log = LoggerFactory.getLogger(FileConnector.class.getCanonicalName());
   private static final long serialVersionUID = 1L;
-  private String directory;
+  // private String directory;
+  private FileConnectorConfig config;
   // TODO: add wildcard includes/excludes
   // TODO: add file path includes/excludes
   private volatile boolean interrupted = false;
@@ -39,7 +42,7 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
   @Override
   public void startCrawling() {
     state = ConnectorState.RUNNING;
-    Path startPath = Paths.get(directory);
+    Path startPath = Paths.get(config.directory);
     try {
       Files.walkFileTree(startPath, this);
     } catch (IOException e) {
@@ -107,11 +110,24 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
   }
 
   public String getDirectory() {
-    return directory;
+    return config.directory;
   }
 
   public void setDirectory(String directory) {
-    this.directory = directory;
+    config.directory = directory;
   }
 
+  @Override
+  public ServiceConfig apply(ServiceConfig inConfig) {
+    // 
+    FileConnectorConfig config = (FileConnectorConfig)super.apply(inConfig);
+    config.directory = config.directory;
+    return config;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    // return the config
+    return config;
+  }
 }

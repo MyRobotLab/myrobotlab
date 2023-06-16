@@ -12,6 +12,8 @@ import org.myrobotlab.document.workflow.WorkflowServer;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.DocumentPipelineConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.DocumentListener;
 import org.myrobotlab.service.interfaces.DocumentPublisher;
 
@@ -99,7 +101,6 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     
     
     AudioFile audiofile = (AudioFile)Runtime.start("audiofile", "AudioFile");
-    
     WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
 
     // start embedded solr
@@ -112,11 +113,11 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     // create a workflow to load into that pipeline service
     WorkflowConfiguration workflowConfig = new WorkflowConfiguration("default");
     workflowConfig.setName("default");
-    workflowConfig.setNumWorkerThreads(8);
+    workflowConfig.setNumWorkerThreads(16);
     
     StageConfiguration stage1Config = new StageConfiguration();
     stage1Config.setStageClass("org.myrobotlab.document.transformer.SetStaticFieldValue");
-    stage1Config.setStageName("SetTableField");
+    stage1Config.setStageName("SetTypeField");
     stage1Config.setStringParam("type", "file");
     workflowConfig.addStage(stage1Config);
 
@@ -125,23 +126,25 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     stage2Config.setStageName("TextExtractor");
     workflowConfig.addStage(stage2Config);
 
-    
+    // TODO: rename fields..
+    // TODO: delete unnecessary fields.
     //    StageConfiguration stage2Config = new StageConfiguration();
     //    stage2Config.setStageClass("org.myrobotlab.document.transformer.SendToSolr");
     //    stage2Config.setStageName("SendToSolr");
     //    stage2Config.setStringParam("solrUrl", "http://phobos:8983/solr/graph");
     //    workflowConfig.addStage(stage2Config);
+    
     pipeline.setConfig(workflowConfig);
     pipeline.initalize();
 
     // attach the pipeline to solr.
     // 
-    pipeline.attachDocumentListener(solr.getName());
+    // pipeline.attachDocumentListener(solr.getName());
     
     // start the file connector to scan the file system.
     // RSSConnector connector = (RSSConnector) Runtime.start("rss", "RSSConnector");
     FileConnector connector = (FileConnector) Runtime.start("fileconnector", "FileConnector");
-    connector.setDirectory("Z:\\Music");
+    
 
     // connector to pipeline connection
     connector.attachDocumentListener(pipeline.getName());
@@ -149,6 +152,7 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     // start the crawl!
     boolean doCrawl = false;
     if (doCrawl) {
+      connector.setDirectory("Z:\\Movies");
       connector.startCrawling();
     }
     // TODO: make sure we flush the pending batches!
@@ -197,6 +201,20 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     // here we need to pass a flush message to the workflow server
     workflowServer.flush(workflowName);
     return true;
+  }
+
+  @Override
+  public ServiceConfig apply(ServiceConfig inConfig) {
+    DocumentPipelineConfig config = (DocumentPipelineConfig)super.apply(inConfig);
+    // TODO Auto-generated method stub
+    this.workFlowConfig = config.workFlowConfig;
+    return config;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    // return the config
+    return config;
   }
 
 }

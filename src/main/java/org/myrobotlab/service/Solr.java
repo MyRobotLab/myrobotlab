@@ -25,6 +25,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
+
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.document.Document;
@@ -44,6 +45,8 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.programab.Response;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.SolrConfig;
 import org.myrobotlab.service.interfaces.DocumentListener;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -65,6 +68,7 @@ import org.slf4j.Logger;
  */
 public class Solr extends Service implements DocumentListener, TextListener, MessageListener {
 
+  private SolrConfig config;
   private static final String CORE_NAME = "core1";
   public final static Logger log = LoggerFactory.getLogger(Solr.class);
   private static final long serialVersionUID = 1L;
@@ -1154,4 +1158,21 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     super.releaseService();
   }
 
+  @Override
+  public ServiceConfig apply(ServiceConfig inConfig) {
+    // 
+    this.config = (SolrConfig)super.apply(inConfig);
+    
+    return config;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    // return our config
+    return config;
+  }
+
+  
+  // Config support
+  
 }
