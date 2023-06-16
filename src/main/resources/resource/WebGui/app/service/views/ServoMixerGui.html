@@ -1,5 +1,5 @@
 
-<!-- <pre>{{ state | json: 2 }}</pre> -->
+<pre>{{ state | json: 2 }}</pre>
 <div class="col-md-8">
   <h3>{{state.selectedGestureFile}} {{state.playingPose.name}} </h3>
   <table class="tableController table-striped table-bordered">
@@ -56,6 +56,8 @@
             {{$index}} {{pose.name}} {{displayValue(pose)}}
           </option>
         </select>
+
+        <span class="input-group-btn">
         <button class="btn btn-default" ng-click="addPoseToGesture()">
           <span class="glyphicon glyphicon-plus" />
           {{state.selectedPose}}
@@ -66,21 +68,28 @@
         <button class="btn btn-default" title="Move Down" ng-click="moveDownPoseInGesture()">
           <span class="glyphicon glyphicon-triangle-bottom"></span>
         </button>
-            <button class="btn btn-default" ng-click="step()" title="Step">
-          <span class="glyphicon glyphicon-play"></span>
-        </button>
-
+        <button class="btn btn-default" title="Remove Pose" ng-click="removePoseFromGesture()" title="Delete">
+          <span class="glyphicon glyphicon-remove red"></span>
+        </button>              
+        </span>
+            <br/>
+        <span class="input-group-btn">
         <button class="btn btn-default" title="Stop" ng-click="msg.stop()">
           stop
           <span class="glyphicon glyphicon-stop red"></span>
+        </button>
+            <button class="btn btn-default" ng-click="step()" title="Step">
+          <span class="glyphicon glyphicon-play"></span>
         </button>
         <button class="btn btn-default" title="Play" ng-click="saveGesture(gestureName);playGesture(state.selectedGestureFile)">
           play
           <span class="glyphicon glyphicon-play text-success"></span>
         </button>
-        <button class="btn btn-default" title="Remove Pose" ng-click="removePoseFromGesture()" title="Delete">
-          <span class="glyphicon glyphicon-remove red"></span>
-        </button>
+        </span>
+
+      <button class="btn btn-default" ng-click="saveGesture(gestureName)">Save</button>
+
+            
       </td>
       <td>
         Pose
@@ -100,17 +109,6 @@
         <span class="input-group-btn">
           <button class="btn btn-default" ng-click="msg.savePose(state.selectedPose)">Save</button>
         </span>
-            <!--
-        Blocking
-        <toggle
-          ng-model="toggleBlocking"
-          class="miniBTN"
-          title="Servo will block until the current moveTo is finished"
-          ng-change="!service.isBlocking?msg.isBlocking(false):msg.isBlocking(true)"
-          on=""
-          off=""
-          size="btn-lg"
-        /> -->
       </td>
     </tr>
   </table>
