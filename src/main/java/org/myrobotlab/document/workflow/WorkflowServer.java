@@ -50,10 +50,11 @@ public class WorkflowServer {
   }
 
   public void flush(String workflow) {
-    // TODO Auto-generated method stub
+    // flush the workflow/pipeline
     Workflow w = workflowMap.get(workflow);
     w.flush();
-
+    // publish that we have flushed (a workflow, pass the flush down the line?) 
+    pipeline.invoke("publishFlush");
   }
 
   public String[] listWorkflows() {

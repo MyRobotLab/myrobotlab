@@ -1162,13 +1162,33 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   public ServiceConfig apply(ServiceConfig inConfig) {
     // 
     this.config = (SolrConfig)super.apply(inConfig);
-    
+    if (config.embedded) {
+      // 
+      try {
+        startEmbedded();
+      } catch (SolrServerException | IOException e) {
+        // TODO: how should we handle this?
+        log.warn("Error starting embedded solr instance.", e);
+        e.printStackTrace();
+      };
+    }
     return config;
   }
 
   @Override
   public ServiceConfig getConfig() {
     // return our config
+    // we need to create 
+    SolrConfig config = (SolrConfig)super.getConfig();
+    // config.embedded = this.embedded
+    if (this.embeddedSolrServer != null) {
+      config.embedded = true;
+    }
+    
+    if (this.solrUrl != null) {
+      config.solrUrl = this.solrUrl;
+    }
+    
     return config;
   }
 

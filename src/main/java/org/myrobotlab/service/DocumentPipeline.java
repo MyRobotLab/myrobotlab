@@ -205,6 +205,11 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
   }
 
   @Override
+  public void publishFlush() {
+    // publish the flush event..
+  }
+  
+  @Override
   public ServiceConfig apply(ServiceConfig inConfig) {
     DocumentPipelineConfig config = (DocumentPipelineConfig)super.apply(inConfig);
     // TODO Auto-generated method stub
