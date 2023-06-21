@@ -752,6 +752,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public void addListener(String topicMethod, String callbackName, String callbackMethod) {
+    callbackName = CodecUtils.getFullName(callbackName);
     MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
     if (outbox.notifyList.containsKey(listener.topicMethod)) {
       // iterate through all looking for duplicate
@@ -1567,6 +1568,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   public void removeListener(String outMethod, String serviceName, String inMethod) {
+    String fullName = CodecUtils.getFullName(serviceName);
     if (outbox.notifyList.containsKey(outMethod)) {
       List<MRLListener> nel = outbox.notifyList.get(outMethod);
       nel.removeIf(listener -> {
@@ -1579,14 +1581,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         // subscriptions to the same topic (one to many mapping), the first in the list would be removed
         // instead of the requested one.
         if (listener.callbackMethod.equals(inMethod)
-                && CodecUtils.checkServiceNameEquality(listener.callbackName, serviceName)) {
-          log.info("removeListener requested {}.{} to be removed", serviceName, outMethod);
+                && CodecUtils.checkServiceNameEquality(listener.callbackName, fullName)) {
+          log.info("removeListener requested {}.{} to be removed", fullName, outMethod);
           return true;
         }
         return false;
       });
     } else {
-      log.info("removeListener requested {}.{} to be removed - but does not exist", serviceName, outMethod);
+      log.info("removeListener requested {}.{} to be removed - but does not exist", fullName, outMethod);
     }
   }
 
@@ -2029,6 +2031,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   // TODO make protected or private
   public void subscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
+    topicName = CodecUtils.getFullName(topicName);
+    callbackName = CodecUtils.getFullName(callbackName);
     log.info("subscribe [{}/{} ---> {}/{}]", topicName, topicMethod, callbackName, callbackMethod);
     // TODO - do regex matching
     if (topicName.contains("*")) { // FIXME "any regex expression
@@ -2070,6 +2074,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   // TODO make protected or private
   public void unsubscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
+    topicName = CodecUtils.getFullName(topicName);
+    callbackName = CodecUtils.getFullName(callbackName);
     log.info("unsubscribe [{}/{} ---> {}/{}]", topicName, topicMethod, callbackName, callbackMethod);
     send(Message.createMessage(getFullName(), topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
   }
@@ -2232,7 +2238,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public boolean isAttached(String serviceName) {
-    return getAttached().contains(serviceName);
+    return getAttached().contains(CodecUtils.getFullName(serviceName));
   }
 
   /**
