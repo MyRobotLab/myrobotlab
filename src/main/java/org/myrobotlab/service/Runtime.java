@@ -1990,7 +1990,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     registry.remove(name);
     // and config
     RuntimeConfig c = (RuntimeConfig)Runtime.getInstance().config;
-    c.registry.remove(CodecUtils.shortName(name));
+    c.registry.remove(CodecUtils.getShortName(name));
     
     log.info("released {}", name);
   }
@@ -5019,7 +5019,7 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
       }
 
       for (String s : servicesToSave) {
-        if (CodecUtils.shortName(s).equals("i01")) {
+        if (CodecUtils.getShortName(s).equals("i01")) {
           log.info("here");
         }
         ServiceInterface si = getService(s);
@@ -5027,7 +5027,7 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
         // get filtered clone of config for saving
         ServiceConfig config = si.getFilteredConfig();
         String data = CodecUtils.toYaml(config);
-        String ymlFileName = configPath + fs + CodecUtils.shortName(s) + ".yml";
+        String ymlFileName = configPath + fs + CodecUtils.getShortName(s) + ".yml";
         FileIO.toFile(ymlFileName, data.getBytes());
         info("saved %s", ymlFileName);
       }
