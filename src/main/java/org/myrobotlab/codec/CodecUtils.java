@@ -1471,6 +1471,20 @@ public class CodecUtils {
         return (T) yaml.load(data);
     }
 
+
+    /**
+     * Checks if the service name is local to the current process instance
+     * @param name The service name to be checked
+     * @return Whether the service name is local to the given ID
+     */
+    public static boolean isLocal(String name) {
+      if (!name.contains("@")) {
+          return true;
+      }
+      return name.substring(name.indexOf("@") + 1).equals(Platform.getLocalInstance().getId());
+  }
+    
+    
     /**
      * Checks if the service name given by name is local,
      * i.e. it has no remote ID (has no '@' symbol), or
