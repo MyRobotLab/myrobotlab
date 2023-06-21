@@ -107,8 +107,8 @@ public class CodecUtilsTest extends AbstractTest {
   @Test
   public void testNormalizeServiceName() {
     Platform.getLocalInstance().setId("test-id");
-    assertEquals("runtime@test-id", CodecUtils.normalizeServiceName("runtime"));
-    assertEquals("runtime@test-id", CodecUtils.normalizeServiceName("runtime@test-id"));
+    assertEquals("runtime@test-id", CodecUtils.getFullName("runtime"));
+    assertEquals("runtime@test-id", CodecUtils.getFullName("runtime@test-id"));
   }
 
   @Test
