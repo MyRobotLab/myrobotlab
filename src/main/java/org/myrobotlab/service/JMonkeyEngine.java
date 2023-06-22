@@ -53,6 +53,7 @@ import org.myrobotlab.service.config.JMonkeyEngineConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
+import org.myrobotlab.service.interfaces.SelectListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoControlListener;
 import org.myrobotlab.service.interfaces.ServoStatusListener;
@@ -125,110 +126,110 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   public final static Logger log = LoggerFactory.getLogger(JMonkeyEngine.class);
 
-  final static String ROOT = "root";
+  protected final static String ROOT = "root";
 
   private static final long serialVersionUID = 1L;
 
-  boolean altLeft = false;
+  protected boolean altLeft = false;
 
-  transient AnalogListener analog = null;
+  protected transient AnalogListener analog = null;
 
-  transient Jme3App app;
+  protected transient Jme3App app;
 
-  transient AssetManager assetManager;
+  protected transient AssetManager assetManager;
 
-  String assetsDir = getDataDir() + File.separator + "assets";
+  protected String assetsDir = getDataDir() + File.separator + "assets";
 
-  boolean autoAttach = true;
+  protected boolean autoAttach = true;
 
-  transient Node camera = new Node(CAMERA);
+  protected transient Node camera = new Node(CAMERA);
 
-  transient Camera cam;
+  protected transient Camera cam;
 
-  transient CameraNode camNode;
+  protected transient CameraNode camNode;
 
-  boolean ctrlLeftPressed = false;
+  protected boolean ctrlLeftPressed = false;
 
-  String defaultAppType = "Jme3App";
+  protected String defaultAppType = "Jme3App";
 
-  double defaultServoSpeed = 500;
+  protected double defaultServoSpeed = 500;
 
-  long deltaMs;
+  protected long deltaMs;
 
-  transient DisplayMode displayMode = null;
+  protected transient DisplayMode displayMode = null;
   
-  public  ChaseCamera chaseCamera;
+  protected ChaseCamera chaseCamera;
 
-  String fontColor = "#66ff66"; // green
+  protected String fontColor = "#66ff66"; // green
 
-  int fontSize = 14;
+  protected int fontSize = 14;
 
-  boolean fullscreen = false;
+  protected boolean fullscreen = false;
 
-  transient Node guiNode;
+  protected transient Node guiNode;
 
-  transient Map<String, HudText> guiText = new TreeMap<>();
+  protected transient Map<String, HudText> guiText = new TreeMap<>();
 
-  int height = 768;
+  protected int height = 768;
 
-  transient List<Jme3Msg> history = new ArrayList<Jme3Msg>();
+  protected transient List<Jme3Msg> history = new ArrayList<Jme3Msg>();
 
-  transient InputManager inputManager;
+  protected transient InputManager inputManager;
 
-  transient Interpolator interpolator;
+  protected transient Interpolator interpolator;
 
-  transient protected Queue<Jme3Msg> jme3MsgQueue = new ConcurrentLinkedQueue<Jme3Msg>();
+  protected transient Queue<Jme3Msg> jme3MsgQueue = new ConcurrentLinkedQueue<Jme3Msg>();
 
   final public String KEY_SEPERATOR = "/";
 
-  String modelsDir = assetsDir + File.separator + "Models";
+  protected String modelsDir = assetsDir + File.separator + "Models";
 
-  boolean mouseLeft = false;
+  protected boolean mouseLeft = false;
 
-  boolean mouseRightPressed = false;
+  protected boolean mouseRightPressed = false;
 
-  Map<String, String[]> multiMapped = new TreeMap<>();
+  protected Map<String, String[]> multiMapped = new TreeMap<>();
 
   // https://stackoverflow.com/questions/16861727/jmonkey-engine-3-0-drawing-points
-  transient FloatBuffer pointCloudBuffer = null;
+  protected transient FloatBuffer pointCloudBuffer = null;
 
-  transient Material pointCloudMat = null;
+  protected transient Material pointCloudMat = null;
 
-  transient Mesh pointCloudMesh = new Mesh();
+  protected transient Mesh pointCloudMesh = new Mesh();
 
-  transient Node rootNode;
+  protected transient Node rootNode;
 
-  boolean saveHistory = false;
+  protected boolean saveHistory = false;
 
-  transient Spatial selectedForMovement = null;
+  protected transient Spatial selectedForMovement = null;
 
-  transient Spatial selectedForView = null;
+  protected transient Spatial selectedForView = null;
 
-  int selectIndex = 0;
+  protected int selectIndex = 0;
 
-  transient AppSettings settings;
+  protected transient AppSettings settings;
 
-  boolean shiftLeft = false;
+  protected boolean shiftLeft = false;
 
-  long sleepMs;
+  protected long sleepMs;
 
-  long startUpdateTs;
+  protected long startUpdateTs;
 
-  transient AppStateManager stateManager;
+  protected transient AppStateManager stateManager;
 
-  transient Jme3Util util;
+  protected transient Jme3Util util;
 
-  transient ViewPort viewPort;
+  protected transient ViewPort viewPort;
 
-  int width = 1024;
+  protected int width = 1024;
   
-  float orbitRadius = 10f;
+  protected float orbitRadius = 10f;
   
-  float orbitSpeed = 0.5f;
+  protected float orbitSpeed = 0.5f;
   
-  float mouseX = 0f;
+  protected float mouseX = 0f;
   
-  float mouseY = 0f;
+  protected float mouseY = 0f;
 
   // protected Set<String> modelPaths = new LinkedHashSet<>();
 
@@ -383,7 +384,15 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       log.error("{} not found in registry", name);
       return;
     }
+    
+    if (service instanceof SelectListener) {
+      addListener("getSelectedPath", service.getName(), "onSelected");
+    }
 
+    // FIXME 2023-06-21 GroG: interested services SHOULD NOT evaluate by type, they
+    // should evaluate how to attach by INTERFACE - the following should be refactored
+    // to subscribe based on interface not type
+    
     // We do type evaluation and routing based on string values vs instance
     // values
     // this is to support future (non-Java) classes that cannot be instantiated
@@ -996,6 +1005,17 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     return selectedForView;
   }
   
+  /**
+   * Set selected path updates the current selectedPath to from a ray
+   * collision in the scene graph. The collision is currently implemented
+   * as a mouse click.  The point at where the mouse is clicked a "path" to
+   * an object collision is created and set an published through getSelectedPath.
+   * This publication can be picked up by other services if they need such 
+   * events.
+   *  
+   * @param path
+   * @return
+   */
   public String setSelectedPath(String path) {
     selectedPath = path;
     if (path != null) {
