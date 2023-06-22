@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Registration;
@@ -14,10 +16,10 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
+import org.myrobotlab.kinematics.Gesture;
+import org.myrobotlab.kinematics.GesturePart;
 import org.myrobotlab.kinematics.Pose;
 import org.myrobotlab.kinematics.PoseMove;
-import org.myrobotlab.kinematics.GesturePart;
-import org.myrobotlab.kinematics.Gesture;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.ServoMixerConfig;
@@ -35,21 +37,30 @@ import org.slf4j.Logger;
  */
 public class ServoMixer extends Service implements ServiceLifeCycleListener {
 
+  /**
+   * The Player plays a requested gesture, which is a sequence of Poses. 
+   * Poses can be positions, delays, or speech.  It publishes when it
+   * starts a gesture and when its finished with a gesture.  All
+   * poses within the gesture are published as well.  This potentially will
+   * provide some measure of safety if servos should not accept other input
+   * when doing a gesture.
+   *
+   */
   public class Player implements Runnable {
-    String gestureName = null;
-    int poseIndex = 0;
-    boolean running = false;
-    Gesture runningGesture = null;
-    Thread thread = null;
+    protected String gestureName = null;
+    protected int poseIndex = 0;
+    protected boolean running = false;
+    protected Gesture runningGesture = null;
+    transient private ExecutorService executor;
 
     private void play() {
-      if (runningGesture.parts != null) {
+      if (runningGesture.getParts() != null) {
         invoke("publishGestureStarted", gestureName);
-        for (int i = 0; i < runningGesture.parts.size(); ++i) {
+        for (int i = 0; i < runningGesture.getParts().size(); ++i) {
           if (!running) {
             break;
           }
-          GesturePart sp = runningGesture.parts.get(i);
+          GesturePart sp = runningGesture.getParts().get(i);
           invoke("publishPlayingGesturePart", sp);
           invoke("publishPlayingGesturePartIndex", i);
           switch(sp.type) {
@@ -89,7 +100,7 @@ public class ServoMixer extends Service implements ServiceLifeCycleListener {
     public void run() {
       try {
         running = true;
-        if (runningGesture.repeat) {
+        if (runningGesture.getRepeat()) {
           while (running) {
             play();
           }
@@ -106,13 +117,13 @@ public class ServoMixer extends Service implements ServiceLifeCycleListener {
       gestureName = name;
       runningGesture = seq;
       poseIndex++;
-      thread = new Thread(this, String.format("%s-player-%d", getName(), poseIndex));
-      thread.start();
+      executor = Executors.newSingleThreadExecutor();
+      executor.execute(this::run);
     }
 
     public void stop() {
-      if (thread != null) {
-        thread.interrupt();
+      if (executor != null) {
+        executor.shutdownNow();
       }
       running = false;
       invoke("publishGestureStopped", gestureName);
@@ -325,13 +336,13 @@ public class ServoMixer extends Service implements ServiceLifeCycleListener {
   public void moveToPose(String name, Pose p, boolean blocking) {
     try {
       
-      if (p.moves == null) {
+      if (p.getMoves() == null) {
         error("no moves within pose file %s", name);
         return;
       }
       
-      for (String sc : p.moves.keySet()) {
-        PoseMove pm = p.moves.get(sc);
+      for (String sc : p.getMoves().keySet()) {
+        PoseMove pm = p.getMoves().get(sc);
         ServoControl servo = (ServoControl) Runtime.getService(sc);
         if (servo == null) {
           warn("servo (%s) cannot move to pose because it does not exist", sc);
@@ -571,7 +582,7 @@ public class ServoMixer extends Service implements ServiceLifeCycleListener {
         error("servo %s null", name);
         continue;
       } else {
-        pose.moves.put(CodecUtils.shortName(servo), new PoseMove(sc.getCurrentInputPos(), sc.getSpeed()));
+        pose.getMoves().put(CodecUtils.getShortName(servo), new PoseMove(sc.getCurrentInputPos(), sc.getSpeed()));
       }
     }
 
