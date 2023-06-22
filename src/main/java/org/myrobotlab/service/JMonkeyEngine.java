@@ -53,6 +53,7 @@ import org.myrobotlab.service.config.JMonkeyEngineConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
+import org.myrobotlab.service.interfaces.SelectListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoControlListener;
 import org.myrobotlab.service.interfaces.ServoStatusListener;
@@ -383,7 +384,15 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       log.error("{} not found in registry", name);
       return;
     }
+    
+    if (service instanceof SelectListener) {
+      addListener("getSelectedPath", service.getName(), "onSelected");
+    }
 
+    // FIXME 2023-06-21 GroG: interested services SHOULD NOT evaluate by type, they
+    // should evaluate how to attach by INTERFACE - the following should be refactored
+    // to subscribe based on interface not type
+    
     // We do type evaluation and routing based on string values vs instance
     // values
     // this is to support future (non-Java) classes that cannot be instantiated

@@ -23,6 +23,7 @@ import org.myrobotlab.kinematics.PoseMove;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.ServoMixerConfig;
+import org.myrobotlab.service.interfaces.SelectListener;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ import org.slf4j.Logger;
  * @author GroG, kwatters, others...
  * 
  */
-public class ServoMixer extends Service implements ServiceLifeCycleListener {
+public class ServoMixer extends Service implements ServiceLifeCycleListener, SelectListener {
 
   /**
    * The Player plays a requested gesture, which is a sequence of Poses. 
@@ -384,6 +385,7 @@ public class ServoMixer extends Service implements ServiceLifeCycleListener {
    * search events
    * @param selected
    */
+  @Override
   public void onSelected(String selected) {
     invoke("search", selected);
   }
