@@ -26,6 +26,8 @@ public class JMonkeyEngineMeta extends MetaData {
 
     addDependency("org.jmonkeyengine", "jme3-bullet", jmeVersion);
     addDependency("org.jmonkeyengine", "jme3-bullet-native", jmeVersion);
+    
+    
 
     addDependency("org.jmonkeyengine", "jme3-plugins", jmeVersion);
 
