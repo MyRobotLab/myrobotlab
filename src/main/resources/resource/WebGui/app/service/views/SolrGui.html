@@ -1,9 +1,11 @@
 <div>
     <!-- for debugging  Data: {{service}} <br/>  -->
     <div class="form-group">
+    <form>
      <label>QueryString</label>
-     <input type="text" ng-model="queryString" class="form-control typeHereField ng-pristine ng-valid ng-empty ng-touched"/>
+     <input type="text" ng-model="queryString" class="form-control typeHereField ng-pristine ng-valid ng-empty ng-touched" ng-submit="execNewSearch()"/>
      <input type="submit" ng-click="execNewSearch()" value="Search" />
+     </form>
     </div>
     <br/>
     <span ng-repeat="filter in filters">{{filter}} <a ng-click="removeFilter(filter)">[x]</a> </span>

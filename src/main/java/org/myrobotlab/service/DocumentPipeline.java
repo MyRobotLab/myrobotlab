@@ -1,6 +1,8 @@
 package org.myrobotlab.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
@@ -105,7 +107,7 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
 
     // start embedded solr
     Solr solr = (Solr)Runtime.start("solr","Solr");
-    solr.startEmbedded();
+    // solr.startEmbedded();
     
     // start the pipeline to process the files from the file system
     DocumentPipeline pipeline = (DocumentPipeline) Runtime.start("docproc", "DocumentPipeline");
@@ -126,6 +128,23 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     stage2Config.setStageName("TextExtractor");
     workflowConfig.addStage(stage2Config);
 
+    StageConfiguration stage3Config = new StageConfiguration();
+    stage3Config.setStageClass("org.myrobotlab.document.transformer.RenameFields");
+    stage3Config.setStageName("RenameFields");
+    Map<String,String> fieldNameMap = new HashMap<String,String>();
+    fieldNameMap.put("xmpdm_tracknumber", "tracknumber");
+    fieldNameMap.put("xmpdm_releasedate", "year");
+    fieldNameMap.put("xmpdm_duration", "duration");
+    fieldNameMap.put("xmpdm_genre", "genre");
+    fieldNameMap.put("xmpdm_artist", "artist");
+    fieldNameMap.put("dc_title", "title");
+    fieldNameMap.put("xmpdm_album", "album");
+    
+    stage3Config.setMapProperty("fieldNameMap", fieldNameMap);
+    workflowConfig.addStage(stage3Config);;
+    
+    //stage3Config.
+    
     // TODO: rename fields..
     // TODO: delete unnecessary fields.
     //    StageConfiguration stage2Config = new StageConfiguration();
@@ -153,7 +172,6 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     // start the crawl!
     boolean doCrawl = false;
     if (doCrawl) {
-      
       connector.startCrawling();
     }
     // TODO: make sure we flush the pending batches!

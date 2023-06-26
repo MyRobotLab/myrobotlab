@@ -137,6 +137,12 @@ public class Configuration implements Serializable {
     return null;
   }
 
+  public void setMapProperty(String name, Map map) {
+    // TODO type safety?!
+    config.put(name, map);
+    return;
+  }
+  
   public Map<String, String> getMapProperty(String name) {
     // TODO type safety?!
     return (Map<String, String>) config.get(name);
