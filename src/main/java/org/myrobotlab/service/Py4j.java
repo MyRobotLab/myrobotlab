@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bytedeco.javacpp.Loader;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
@@ -243,6 +245,7 @@ public class Py4j extends Service implements GatewayServerListener {
    */
   public List<String> getScriptList() throws IOException {
     List<String> sorted = new ArrayList<>();
+    System.out.println(CodecUtils.toJson(config));
     Py4jConfig c = (Py4jConfig)config;
     List<File> files = FileIO.getFileList(c.scriptRootDir, true);
     for (File file : files) {
@@ -402,29 +405,34 @@ public class Py4j extends Service implements GatewayServerListener {
 
       // Specify the Python script path and arguments
       String pythonScript = new File(getResourceDir() + fs + "Py4j.py").getAbsolutePath();
-      String[] pythonArgs = {};
+
+      // Script requires full name as first command line argument
+      String[] pythonArgs = {getFullName()};
 
       // Build the command to start the Python process
-      ProcessBuilder processBuilder = new ProcessBuilder("python", pythonScript);
+      ProcessBuilder processBuilder;
+      if (((Py4jConfig) config).useBundledPython) {
+        String venv = getDataDir() + fs + "venv";
+        if (!FileIO.checkDir(venv)) {
+          // We don't have an initialized virtual environment, so lets make one
+          // and install our required packages
+          String python = Loader.load(org.bytedeco.cpython.python.class);
+          ProcessBuilder installProcess = new ProcessBuilder(python, "-m", "venv", venv);
+          installProcess.start().waitFor();
+          installProcess = new ProcessBuilder(venv + fs + "bin" + fs + "pip", "install", "py4j");
+          installProcess.start().waitFor();
+        }
+        // Virtual environment should exist, so lets use that python
+        processBuilder = new ProcessBuilder(venv + fs + "bin" + fs + "python", pythonScript);
+      } else {
+        // Just use the system python
+        processBuilder = new ProcessBuilder("python", pythonScript);
+      }
       processBuilder.redirectErrorStream(true);
       processBuilder.command().addAll(List.of(pythonArgs));
 
       // Start the Python process
       pythonProcess = new Py4jClient(this, processBuilder.start());
-
-      // CRITICAL SLEEP ! - next call will be a handler method
-      // it will take a little time for the python interpreter to start
-      // the MessageHandler() code to execute and the python
-      // client establish a connection ... TODO: better solution would probably
-      // to be
-      // do a "one shot addTask" to connection started .. it CANNOT be called
-      // directly in the onConnection event
-      // otherwise it will deadlock
-      sleep(1500);
-
-      // sets the name of the message handler
-      // calling the handler when the connection is not established
-      handler.setName(getName());
 
     } catch (Exception e) {
       error(e);
