@@ -18,6 +18,10 @@ public class Py4jMeta extends MetaData {
     addCategory("programming");
     setSponsor("GroG");
     addDependency("net.sf.py4j", "py4j", "0.10.9.7");
+
+    // Used just as a Python exe redistributable.
+    // ABSOLUTELY NO JNI/JNA IS USED
+    addDependency("org.bytedeco", "cpython-platform", "3.11.3-1.5.9");
   }
 
 }
