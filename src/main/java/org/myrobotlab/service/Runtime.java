@@ -891,6 +891,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           // a bit backwards - it loads after it been created
           // but its necessary because you need an runtime instance before you
           // load
+          
+          File cfgRoot = new File(CONFIG_ROOT);
+          cfgRoot.mkdirs();
           if (startYml.enable) {
             Runtime.load("runtime", "Runtime");
           }
