@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -79,6 +80,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   public String solrHome = "Solr";
   // EmbeddedSolrServer embeddedSolrServer = null;
   transient private EmbeddedSolrServer embeddedSolrServer = null;
+  
+  Collection<SolrInputDocument> documentBatch = Collections.synchronizedCollection(new ArrayList<>());
+  // The batch size of documents to accumulate before flushing the batch to solr.
+  public transient int batchSize = 100;
   // TODO: consider moving this tagging logic into opencv..
   // for now, we'll just set a counter that will count down how many opencv
   // frames
@@ -163,43 +168,51 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * Add a single document at a time to the solr server.
    * 
    * @param doc
-   *          the input doc to send to solr
-   * 
+   *          the input doc to send to solr (prefer to send batches with addDocuments instead)
+   *   
    */
   public void addDocument(SolrInputDocument doc) {
-    try {
-      if (embeddedSolrServer != null) {
-        embeddedSolrServer.add(doc);
-      } else {
-        solrServer.add(doc);
-      }
-    } catch (SolrServerException e) {
-      // TODO : retry?
-      log.warn("An exception occurred when trying to add document to the index.", e);
-    } catch (IOException e) {
-      // TODO : maybe retry?
-      log.warn("A network exception occurred when trying to add document to the index.", e);
-    }
+    // Always batch!
+    ArrayList<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
+    docs.add(doc);
+    addDocuments(docs);
   }
 
   /**
-   * Add a batch of documents (this is more effecient than adding one at a time.
+   * Add a batch of documents (this is more efficient than adding one at a time.)
    * 
    * @param docs
    *          a collection of solr input docs to add to solr.
    */
   public void addDocuments(Collection<SolrInputDocument> docs) {
-    try {
-      if (embeddedSolrServer != null) {
-        embeddedSolrServer.add(docs);
-      } else {
-        solrServer.add(docs);
+    // TODO: setup a thread to flush this batch
+    // performance optimization.. always batch updates to solr.
+    documentBatch.addAll(docs);
+    flushDocumentBatch(false);
+  }
+
+  private ProcessingStatus flushDocumentBatch(boolean forceFlush) {
+    synchronized (documentBatch) {
+      if (documentBatch.size() >= batchSize || forceFlush) {
+        try {
+          if (embeddedSolrServer != null) {
+            embeddedSolrServer.add(documentBatch);
+          } else {
+            solrServer.add(documentBatch);
+          }
+          // we sent the batch, so let's clear it up.
+          documentBatch.clear();
+        } catch (SolrServerException e) {
+          log.warn("An exception occurred when trying to add documents to the index.", e);
+          // ??
+          return ProcessingStatus.ERROR;
+        } catch (IOException e) {
+          log.warn("A network exception occurred when trying to add documents to the index.", e);
+          return ProcessingStatus.ERROR;
+        }
       }
-    } catch (SolrServerException e) {
-      log.warn("An exception occurred when trying to add documents to the index.", e);
-    } catch (IOException e) {
-      log.warn("A network exception occurred when trying to add documents to the index.", e);
     }
+    return ProcessingStatus.OK;
   }
 
   /**
@@ -615,6 +628,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   @Override
+  // TODO: why do we return ProcessingStatus here?! 
   public ProcessingStatus onDocuments(List<Document> docs) {
     // Convert the input document to a solr input docs and send it!
     if (docs.size() == 0) {
@@ -623,19 +637,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     }
     ArrayList<SolrInputDocument> docsToSend = new ArrayList<SolrInputDocument>();
     for (Document d : docs) {
-      docsToSend.add(convertDocument(d));
+      documentBatch.add(convertDocument(d));
     }
-    try {
-      if (embeddedSolrServer != null) {
-        embeddedSolrServer.add(docsToSend);
-      } else {
-        solrServer.add(docsToSend);
-      }
-      return ProcessingStatus.OK;
-    } catch (Exception e) {
-      log.warn("Exception in Solr onDocuments.", e);
-      return ProcessingStatus.DROP;
-    }
+    return flushDocumentBatch(false);
   }
 
   private SolrInputDocument convertDocument(Document doc) {
@@ -667,11 +671,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   @Override
   public boolean onFlush() {
-    // NoOp currently, but at some point if we change how this service batches
-    // it's
-    // add messages to solr, we could revisit this.
-    // or maybe issue a commit here? I hate committing the index so frequently,
-    // but maybe it's ok.
+    // if we got a flush call, let's flush any partial batch.
+    flushDocumentBatch(true);
     if (commitOnFlush) {
       commit();
     }

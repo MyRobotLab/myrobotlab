@@ -9,31 +9,46 @@
   <field name="index_date" type="pdates" indexed="true" stored="true" multiValued="false" default="NOW"/>
 
   <!-- Generic file specific attributes -->
-  
   <field name="filepath" type="text_general"/>
-  <field name="last_modified" type="text_general"/>
-  <field name="size" type="text_general"/>
-  <field name="content_type" type="text_general"/>
-  <field name="created_date" type="text_general"/>
+  <field name="last_modified" type="pdate"/>
+  <field name="size" type="plong"/>
+  <field name="content_type" type="text_general" />
+  <field name="content_type_facet" type="string" />
+  
+  <copyField source="content_type" dest="content_type_facet" maxChars="256"/>
+  
+  <field name="created_date" type="pdate"/>
 
   <!-- Media / Music search specific fields -->
   <field name="title" type="text_general"/>
+  
   <field name="artist" type="text_general"/>
+  <field name="artist_facet" type="string" />
+  <copyField source="artist" dest="artist_facet" maxChars="256"/>
+  
   <field name="album" type="text_general"/>
+  <field name="album_facet" type="string" />
+  <copyField source="album" dest="album_facet" maxChars="256"/>
+  
   <field name="genre" type="text_general"/>
+  <field name="genre_facet" type="string" />
+  <copyField source="genre" dest="genre_facet" maxChars="256"/>
+  
   <field name="year" type="text_general"/>
-  
+  <field name="year_facet" type="string" />
+  <copyField source="year" dest="year_facet" maxChars="256"/>
+
   <field name="tracknumber" type="text_general"/>
-  <field name="samplerate" type="text_general"/>
-  <field name="duration" type="text_general"/>
-  <field name="channels" type="text_general"/>
-  
+  <field name="samplerate" type="pint"/>
+  <field name="duration" type="pdouble"/>
+  <field name="channels" type="pint"/>
   
   <field name="_text_" type="text_general" multiValued="true" indexed="true" stored="false"/>
   <field name="content" type="text_general"/>
   <field name="date" type="pdates" indexed="true" stored="true" multiValued="false"/>
   
   <field name="text" type="text_general"/>
+  
   <field name="type" type="string" indexed="true" stored="true" multiValued="false" />
   <!--  we'll add 1 field for storing binary data on this document.  use with caution
         This field type contains base64 encoded binary data
