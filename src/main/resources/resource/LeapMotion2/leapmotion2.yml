@@ -1,4 +1,4 @@
-!!org.myrobotlab.service.config.LeapMotionConfig
+!!org.myrobotlab.service.config.LeapMotion2Config
 leftIndex:
   maxIn: 180
   maxOut: 180
@@ -51,4 +51,6 @@ rightThumb:
   maxOut: 180
   minIn: 0
   minOut: 0
-type: LeapMotion
+tracking: true
+type: LeapMotion2
+websocketUrl: ws://127.0.0.1:6437

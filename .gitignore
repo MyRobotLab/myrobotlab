@@ -1,7 +1,6 @@
 # TODO clean this up !
 /.project
 /.classpath
-/*.iml
 /.settings
 /src/main/resources/resource/WebGui/react
 /src/main/resources/resource/Vertx/app
@@ -83,3 +82,4 @@
 /lastRestart.py
 /.factorypath
 start.yml
+*.iml

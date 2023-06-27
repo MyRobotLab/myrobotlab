@@ -17,7 +17,7 @@ import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher, 
+public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher,
     ServiceStatus, TaskManager, Attachable, MessageInvoker, Comparable<ServiceInterface> {
 
   // does this work ?
@@ -141,6 +141,15 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
   void setConfig(ServiceConfig config);
 
   /**
+   * reflectively sets a part of config
+   *  
+   * @param fieldname - the name of the config field
+   * @param value - the value
+   */
+  void setConfigValue(String fieldname, Object value)  throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException;
+
+
+  /**
    * Configure a service by merging in configuration
    * 
    * @param config
@@ -210,6 +219,7 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
 
   /**
    * Get a clone of config that is filtered based on service preference
+   * 
    * @return
    */
   ServiceConfig getFilteredConfig();

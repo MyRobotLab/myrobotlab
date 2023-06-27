@@ -272,7 +272,7 @@
 #startButton{
     position:absolute;
     width:83px;
-    left: 216px;
+    left: 152px;
     top: 528px;
 }
 
@@ -299,7 +299,7 @@
 #gesturesButton{
     position:absolute;
     width:122px;
-    left: 314px;
+    left: 246px;
     top: 528px;
 }
 
@@ -320,3 +320,30 @@
     box-shadow: 0 0px 5px 2px rgb(218, 94, 94);
     cursor:default;
 } 
+
+/* -------------------    gestures position --------------------*/
+
+#simulatorButton{
+    position:absolute;
+    width:122px;
+    left: 380px;
+    top: 528px;
+}
+
+.rectangleSimulator{
+    position:absolute;
+    display: table-cell;
+    border-radius: 5px;
+    background: #73AD21;
+    font-family: helvetica,sans-serif;
+    font-size: 18px;
+    font-weight: normal;
+    color: #feb331;
+    line-height: 40px;
+    background-image: linear-gradient(#001720, #01424c);
+    text-align: center;
+    vertical-align: middle;
+    text-shadow: 0 0 3px #3e2e2e, 0 0 20px #fff, 0 0 30px #00a5cb, 0 0 40px #74ace6, 0 0 50px #0042a4, 0 0 60px #3582f5, 0 0 70px #4954ff;
+    box-shadow: 0 0px 5px 2px rgb(218, 94, 94);
+    cursor:default;
+}

@@ -752,6 +752,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public void addListener(String topicMethod, String callbackName, String callbackMethod) {
+    callbackName = CodecUtils.getFullName(callbackName);
     MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
     if (outbox.notifyList.containsKey(listener.topicMethod)) {
       // iterate through all looking for duplicate
@@ -1294,6 +1295,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       }
       retobj = method.invoke(obj, params);
       if (blockLocally) {
+        Outbox outbox = null;
+        if (obj instanceof ServiceInterface) {
+          outbox = ((ServiceInterface)obj).getOutbox();
+        } else {
+          return retobj;
+        }
+        
+        
         List<MRLListener> subList = outbox.notifyList.get(methodName);
         // correct? get local (default?) gateway
         Runtime runtime = Runtime.getInstance();
@@ -1375,6 +1384,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * Default load config method, subclasses should override this to support
    * service specific configuration in the service yaml files.
    * 
+   * apply is the first function to be called after construction of a service,
+   * then startService will be called
+   * 
+   * construct -&gt; apply -&gt; startService
+   * 
    */
   @Override
   public ServiceConfig apply(ServiceConfig inConfig) {
@@ -1450,6 +1464,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public void setConfig(ServiceConfig config) {
     this.config = config;
+  }
+
+  @Override
+  public void setConfigValue(String fieldname, Object value) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+      log.info("setting field name fieldname {} to {}", fieldname, value);
+
+      Field field = config.getClass().getDeclaredField(fieldname);
+      // field.setAccessible(true); should not need this - it "should" be public
+      field.set(config, value);
   }
 
   @Override
@@ -1545,6 +1568,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   public void removeListener(String outMethod, String serviceName, String inMethod) {
+    String fullName = CodecUtils.getFullName(serviceName);
     if (outbox.notifyList.containsKey(outMethod)) {
       List<MRLListener> nel = outbox.notifyList.get(outMethod);
       nel.removeIf(listener -> {
@@ -1557,14 +1581,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         // subscriptions to the same topic (one to many mapping), the first in the list would be removed
         // instead of the requested one.
         if (listener.callbackMethod.equals(inMethod)
-                && CodecUtils.checkServiceNameEquality(listener.callbackName, serviceName)) {
-          log.info("removeListener requested {}.{} to be removed", serviceName, outMethod);
+                && CodecUtils.checkServiceNameEquality(listener.callbackName, fullName)) {
+          log.info("removeListener requested {}.{} to be removed", fullName, outMethod);
           return true;
         }
         return false;
       });
     } else {
-      log.info("removeListener requested {}.{} to be removed - but does not exist", serviceName, outMethod);
+      log.info("removeListener requested {}.{} to be removed - but does not exist", fullName, outMethod);
     }
   }
 
@@ -1948,11 +1972,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       }
       thisThread.start();
       isRunning = true;
-      Runtime runtime = Runtime.getInstance();
-      if (runtime != null) {
-        runtime.invoke("started", getName()); // getFullName()); - removed
-                                              // fullname
-      }
+      send("runtime", "started", getName());
 
     } else {
       log.debug("startService request: service {} is already running", name);
@@ -1987,6 +2007,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     subscribe(topicName, topicMethod, getFullName(), callbackMethod);
   }
+  
+  @Override
+  public void subscribe(String service, String method, String callback) {
+    subscribe(service, method, getFullName(), callback);
+  }
 
   public void subscribeTo(String service, String method) {
     subscribe(service, method, getFullName(), CodecUtils.getCallbackTopicName(method));
@@ -2004,8 +2029,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     unsubscribe(Runtime.getInstance().getFullName(), method, getFullName(), CodecUtils.getCallbackTopicName(method));
   }
 
-  @Override
+  // TODO make protected or private
   public void subscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
+    topicName = CodecUtils.getFullName(topicName);
+    callbackName = CodecUtils.getFullName(callbackName);
     log.info("subscribe [{}/{} ---> {}/{}]", topicName, topicMethod, callbackName, callbackMethod);
     // TODO - do regex matching
     if (topicName.contains("*")) { // FIXME "any regex expression
@@ -2039,9 +2066,16 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     unsubscribe(topicName, topicMethod, getFullName(), callbackMethod);
   }
-
+  
   @Override
+  public void unsubscribe(String topicName, String topicMethod, String callback) {
+    unsubscribe(topicName, topicMethod, getFullName(), callback);
+  }
+
+  // TODO make protected or private
   public void unsubscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
+    topicName = CodecUtils.getFullName(topicName);
+    callbackName = CodecUtils.getFullName(callbackName);
     log.info("unsubscribe [{}/{} ---> {}/{}]", topicName, topicMethod, callbackName, callbackMethod);
     send(Message.createMessage(getFullName(), topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
   }
@@ -2204,7 +2238,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public boolean isAttached(String serviceName) {
-    return getAttached().contains(serviceName);
+    return getAttached().contains(CodecUtils.getFullName(serviceName));
   }
 
   /**

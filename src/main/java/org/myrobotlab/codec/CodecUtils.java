@@ -469,8 +469,8 @@ public class CodecUtils {
      * @return The simple name of the service. If null,
      * will return null, and if already a simple name
      * then will return name
-     */
-    static public String shortName(String name) {
+     */    
+    static public String getShortName(String name) {
         if (name == null) {
             return null;
         }
@@ -480,6 +480,7 @@ public class CodecUtils {
             return name;
         }
     }
+        
 
     // TODO
     // public static Object encode(Object, encoding) - dispatches appropriately
@@ -516,7 +517,7 @@ public class CodecUtils {
      * @param name The service name to normalize
      * @return The normalized (full) name, or null if name is null
      */
-    public static String normalizeServiceName(String name) {
+    public static String getFullName(String name) {
         if (name == null) {
             return null;
         }
@@ -537,7 +538,7 @@ public class CodecUtils {
      * @return Whether the two names are effectively equal
      */
     public static boolean checkServiceNameEquality(String name1, String name2) {
-        return Objects.equals(normalizeServiceName(name1), normalizeServiceName(name2));
+        return Objects.equals(getFullName(name1), getFullName(name2));
     }
 
     /**
@@ -1470,6 +1471,20 @@ public class CodecUtils {
         return (T) yaml.load(data);
     }
 
+
+    /**
+     * Checks if the service name is local to the current process instance
+     * @param name The service name to be checked
+     * @return Whether the service name is local to the given ID
+     */
+    public static boolean isLocal(String name) {
+      if (!name.contains("@")) {
+          return true;
+      }
+      return name.substring(name.indexOf("@") + 1).equals(Platform.getLocalInstance().getId());
+  }
+    
+    
     /**
      * Checks if the service name given by name is local,
      * i.e. it has no remote ID (has no '@' symbol), or
