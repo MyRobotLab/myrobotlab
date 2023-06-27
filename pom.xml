@@ -1240,6 +1240,12 @@
     <version>3.11.3-1.5.9</version>
     <scope>provided</scope>
   </dependency>
+  <dependency>
+    <groupId>org.bytedeco</groupId>
+    <artifactId>cpython</artifactId>
+    <version>3.11.3-1.5.9</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Py4j end -->
 
 <!-- Python begin -->
