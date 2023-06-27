@@ -276,7 +276,7 @@ public class OpenCVTest extends AbstractTest {
     log.warn("=======OpenCVTest testGetClassifications - 4 {} =======", classifications);
     assertNotNull(classifications);
     log.warn("=======OpenCVTest testGetClassifications - 5 =======");
-    assertTrue(classifications.containsKey("person") || classifications.containsKey("PERSON"));
+    assertTrue(classifications.containsKey("person"));
     log.warn("=======OpenCVTest testGetClassifications - 6 =======");
   }
 }
