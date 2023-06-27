@@ -2,4 +2,5 @@
 listeners: null
 peers: null
 scriptRootDir: null
+useBundledPython: true
 type: Py4j
