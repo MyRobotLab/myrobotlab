@@ -5,7 +5,7 @@
 # Java objects in a Java Virtual Machine. 
 # Methods are called as if the Java objects resided in the Python interpreter and 
 # Java collections can be accessed through standard Python collection methods. 
-# Py4J also enables Java programs to call back Python objects. Py4J is distributed under the BSD
+# Py4J also enables Java programs to call back Python objects. Py4J is distributed under the BSD license
 # Python 2.7 -to- 3.x is supported
 # In your python 3.x project
 # pip install py4j
@@ -13,16 +13,20 @@
 # the gateway
 
 import sys
-from time import sleep
-from py4j.clientserver import ClientServer, JavaParameters, PythonParameters
-from py4j.java_collections import JavaList
 
+from py4j.java_collections import JavaObject, JavaClass
 from py4j.java_gateway import JavaGateway, CallbackServerParameters
-from py4j.java_collections import JavaArray, JavaObject, JavaClass
 
 runtime = None
 
+
 class MessageHandler(object):
+    """
+    The class responsible for receiving and processing Py4j messages,
+    including handling `invoke()` and `exec()` requests. Class
+    must be initialized and then the `setName()` method must be invoked before
+    the Java and Python sides can talk correctly.
+    """
 
     def __init__(self):
         global runtime
@@ -32,21 +36,27 @@ class MessageHandler(object):
         self.stderr = sys.stderr
         sys.stdout = self
         sys.stderr = self
-        self.gateway = JavaGateway(callback_server_parameters=CallbackServerParameters(), python_server_entry_point=self)
+        self.gateway = JavaGateway(callback_server_parameters=CallbackServerParameters(),
+                                   python_server_entry_point=self)
         self.runtime = self.gateway.jvm.org.myrobotlab.service.Runtime.getInstance()
         runtime = self.runtime
-        self.py4j = None # need to wait until name is set
+        self.py4j = None  # need to wait until name is set
 
-    def write(self,string):
-        if (self.py4j):
+    def write(self, string):
+        if self.py4j:
             self.py4j.handleStdOut(string)
 
-    def setName(self, name):
-        """Method called right after initialization from MRL
-        responsible for 'naming' the MessageHandler
+    def flush(self):
+        pass
 
-        Args:
-            name (string): sets the name of the MessageHandler
+    def setName(self, name):
+        """
+        Called after initialization completed in order
+        for this Python side handler to know how to contact the Java-side
+        service.
+
+        :param name: Name of the Java-side Py4j service this script is linked to, preferably as a full name.
+        :type name: str
         """
         self.name = name
         self.py4j = self.runtime.getService(name)
@@ -57,35 +67,52 @@ class MessageHandler(object):
         # TODO print env vars PYTHONPATH etc
         return name
 
-    def get_name(self):
-        return self.name
-    
     def exec(self, code):
-        """executes python script
+        """
+        Executes Python code in the global namespace.
+        All exceptions are caught and printed so that the Python subprocess doesn't crash.
 
-        Args:
-            code (_type_): code to execute
+        :param code: The Python code to execute.
+        :type code: str
         """
         try:
-            exec(code)
+            # Restricts the exec() to the global namespace,
+            # so the code is executed as if it were the top level of a module
+            exec(code, globals())
         except Exception as e:
             print(e)
 
-    def invoke(self, method, data=None):
+    def invoke(self, method, data=()):
+        """
+        Invoke a function from the global namespace with the given parameters.
+
+        :param method: The name of the function to invoke.
+        :type method: str
+        :param data: The parameters to pass to the function, defaulting to no parameters.
+        :type data: Iterable
+        """
+
         # convert to list
         params = list(data)
-        eval(method)(*params)
 
-    def flush(self):
-        pass
+        # Lookup the method in the global namespace
+        # Much much faster than using eval()
+        globals()[method](*params)
 
     def shutdown(self):
+        """
+        Shutdown the Py4j gateway
+        :return:
+        """
         self.gateway.shutdown()
-    
-    def getInstance(self):
-        return self.runtime
 
     def convert_array(self, array):
+        """
+        Utility method used by Py4j to convert arrays of Java objects
+        into equivalent Python lists.
+        :param array: The array to convert
+        :return: The converted array
+        """
         result = []
         for item in array:
             if isinstance(item, JavaObject):
@@ -115,5 +142,9 @@ class MessageHandler(object):
     class Java:
         implements = ['org.myrobotlab.framework.interfaces.Invoker']
 
+
 handler = MessageHandler()
-runtime = handler.getInstance()
+if len(sys.argv) > 1:
+    handler.setName(sys.argv[1])
+else:
+    raise RuntimeError("This script requires the full name of the Py4j service as its first command-line argument")

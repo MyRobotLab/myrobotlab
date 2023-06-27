@@ -7,5 +7,11 @@ public class Py4jConfig extends ServiceConfig {
    *  /data/Py4j/{serviceName}
    */
   public String scriptRootDir;
+
+  /**
+   * Whether to use the bundled Python executable
+   * or invoke the system Python.
+   */
+  public boolean useBundledPython = true;
   
 }
