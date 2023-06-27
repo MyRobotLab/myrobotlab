@@ -36,14 +36,21 @@ class MessageHandler(object):
         self.stderr = sys.stderr
         sys.stdout = self
         sys.stderr = self
-        self.gateway = JavaGateway(callback_server_parameters=CallbackServerParameters(),
-                                   python_server_entry_point=self)
+        self.gateway = JavaGateway(callback_server_parameters=CallbackServerParameters(), python_server_entry_point=self)
+        # self.gateway = JavaGateway(callback_server_parameters=CallbackServerParameters(connection_callback=self.handle_connection_break), python_server_entry_point=self)
         self.runtime = self.gateway.jvm.org.myrobotlab.service.Runtime.getInstance()
         runtime = self.runtime
         self.py4j = None  # need to wait until name is set
 
-    def write(self, string):
-        if self.py4j:
+    # Define the callback function
+    def handle_connection_break(self):
+        # Add your custom logic here to handle the connection break
+        print("Connection with Java gateway was lost or terminated.")        
+        print("goodbye.")
+        sys.exit(1)
+
+    def write(self,string):
+        if (self.py4j):
             self.py4j.handleStdOut(string)
 
     def flush(self):

@@ -504,13 +504,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   static public String getResourceRoot() {
     // setting resource root details
-    String resourceRootDir = "resource";
-    // allow default to be overriden by src if it exists
-    File src = new File("src");
-    if (src.exists()) {
-      resourceRootDir = "src" + fs + "main" + fs + "resources" + fs + "resource";
-    }
-    return resourceRootDir;
+    return "resource";
   }
 
   /**
