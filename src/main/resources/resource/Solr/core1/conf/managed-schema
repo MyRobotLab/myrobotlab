@@ -39,7 +39,7 @@
   <copyField source="year" dest="year_facet" maxChars="256"/>
 
   <field name="tracknumber" type="text_general"/>
-  <field name="samplerate" type="pint"/>
+  <field name="samplerate" type="pdouble"/>
   <field name="duration" type="pdouble"/>
   <field name="channels" type="pint"/>
   
