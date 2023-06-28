@@ -432,25 +432,28 @@ public class Py4j extends Service implements GatewayServerListener {
           // We don't have an initialized virtual environment, so lets make one
           // and install our required packages
           String python = Loader.load(org.bytedeco.cpython.python.class);
+          String venvLib = new File(python).getParent() + fs + "lib" + fs + "venv" + fs + "scripts" + fs + "nt";
           if (Platform.getLocalInstance().isWindows()) {
-            String venvLib = new File(python).getParent() + fs + "lib" + fs + "venv" + fs + "scripts" + fs + "nt";
+            // Super hacky workaround, venv works differently on Windows and requires these two
+            // files, but they are not distributed in bare-bones Python or in any pip packages.
+            // So we copy them where it expects, and it seems to work now
             FileIO.copy(getResourceDir() + fs + "python.exe", venvLib + fs + "python.exe");
             FileIO.copy(getResourceDir() + fs + "pythonw.exe", venvLib + fs + "pythonw.exe");
           }
           ProcessBuilder installProcess = new ProcessBuilder(python, "-m", "venv", venv);
           int ret = installProcess.inheritIO().start().waitFor();
           if (ret != 0) {
-            error("Could not create virtual environment, subprocess returned " + ret);
-            pythonCommand = "python";
-          } else {
-
-            installProcess = new ProcessBuilder(pythonCommand, "-m", "pip", "install", "py4j");
-            ret = installProcess.inheritIO().start().waitFor();
-            if (ret != 0) {
-              error("Could not install package, subprocess returned " + ret);
-              pythonCommand = "python";
-            }
+            error("Could not create virtual environment, subprocess returned {}. If on Windows, make sure there is a python.exe file in {}", ret, venvLib);
+            return;
           }
+
+          installProcess = new ProcessBuilder(pythonCommand, "-m", "pip", "install", "py4j");
+          ret = installProcess.inheritIO().start().waitFor();
+          if (ret != 0) {
+            error("Could not install package, subprocess returned " + ret);
+            return;
+          }
+
         }
 
         // Virtual environment should exist, so lets use that python
