@@ -168,10 +168,11 @@ public class Gpt3 extends Service implements TextListener, TextPublisher, Uttera
   }
   
   /**
-   * Overriden error to also publish the errors
-   * probably would be a better solution to self subscibe to errors and 
+   * Overridden error to also publish the errors
+   * probably would be a better solution to self subscribe to errors and 
    * have the subscriptions publish utterances/responses/text
    */
+  @Override
   public Status error(String error) {
     Status status = super.error(error);
     invoke("publishText", error);    
