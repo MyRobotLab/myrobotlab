@@ -436,7 +436,6 @@ public class Py4j extends Service implements GatewayServerListener {
             String venvLib = new File(python).getParent() + fs + "lib" + fs + "venv" + fs + "scripts" + fs + "nt";
             FileIO.copy(getResourceDir() + fs + "python.exe", venvLib + fs + "python.exe");
             FileIO.copy(getResourceDir() + fs + "pythonw.exe", venvLib + fs + "pythonw.exe");
-            copyResource();
           }
           ProcessBuilder installProcess = new ProcessBuilder(python, "-m", "venv", venv);
           int ret = installProcess.inheritIO().start().waitFor();
