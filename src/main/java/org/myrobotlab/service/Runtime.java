@@ -4752,10 +4752,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     log.info("loading - {} {} {}", name, type, level);
 
-    if (name.equals("i01.simulator")) {
-      log.info("here");
-    }
-
     if (plan == null) {
       log.error("plan required to load a system");
       return null;
