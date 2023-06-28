@@ -15,6 +15,7 @@ import java.util.Set;
 import org.bytedeco.javacpp.Loader;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.StreamGobbler;
@@ -426,24 +427,33 @@ public class Py4j extends Service implements GatewayServerListener {
       ProcessBuilder processBuilder;
       if (((Py4jConfig) config).useBundledPython) {
         String venv = getDataDir() + fs + "venv";
+        pythonCommand = (Platform.getLocalInstance().isWindows()) ? venv + fs + "Scripts" + fs + "python.exe" : venv + fs + "bin" + fs + "python";
         if (!FileIO.checkDir(venv)) {
           // We don't have an initialized virtual environment, so lets make one
           // and install our required packages
           String python = Loader.load(org.bytedeco.cpython.python.class);
+          if (Platform.getLocalInstance().isWindows()) {
+            String venvLib = new File(python).getParent() + fs + "lib" + fs + "venv" + fs + "scripts" + fs + "nt";
+            FileIO.copy(getResourceDir() + fs + "python.exe", venvLib + fs + "python.exe");
+            FileIO.copy(getResourceDir() + fs + "pythonw.exe", venvLib + fs + "pythonw.exe");
+            copyResource();
+          }
           ProcessBuilder installProcess = new ProcessBuilder(python, "-m", "venv", venv);
           int ret = installProcess.inheritIO().start().waitFor();
           if (ret != 0) {
             error("Could not create virtual environment, subprocess returned " + ret);
-            return;
-          }
-          installProcess = new ProcessBuilder(venv + fs + "bin" + fs + "pip", "install", "py4j");
-          ret = installProcess.inheritIO().start().waitFor();
-          if (ret != 0) {
-            error("Could not install package, subprocess returned " + ret);
-            return;
+            pythonCommand = "python";
+          } else {
+
+            installProcess = new ProcessBuilder(pythonCommand, "-m", "pip", "install", "py4j");
+            ret = installProcess.inheritIO().start().waitFor();
+            if (ret != 0) {
+              error("Could not install package, subprocess returned " + ret);
+              pythonCommand = "python";
+            }
           }
         }
-        pythonCommand = venv + fs + "bin" + fs + "python";
+
         // Virtual environment should exist, so lets use that python
       } else {
         // Just use the system python
