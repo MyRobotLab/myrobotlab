@@ -147,6 +147,9 @@ public class Py4j extends Service implements GatewayServerListener {
    */
   protected Py4jClient pythonProcess = null;
 
+  /**
+   * The base command to launch the Python interpreter without any arguments.
+   */
   protected transient String pythonCommand = "python";
 
   public Py4j(String n, String id) {
@@ -161,9 +164,8 @@ public class Py4j extends Service implements GatewayServerListener {
    *          - name of the script
    * @param code
    *          - code block
-   * @throws IOException
    */
-  public void addScript(String scriptName, String code) throws IOException {
+  public void addScript(String scriptName, String code) {
     Py4jConfig c = (Py4jConfig)config;
     File script = new File(c.scriptRootDir + fs + scriptName);
 
@@ -179,7 +181,7 @@ public class Py4j extends Service implements GatewayServerListener {
   /**
    * removes script from memory of openScripts
    * 
-   * @param scriptName
+   * @param scriptName The name of the script to close.
    */
   public void closeScript(String scriptName) {
     openedScripts.remove(scriptName);
@@ -191,7 +193,7 @@ public class Py4j extends Service implements GatewayServerListener {
     error(e);
   }
 
-  @Override /** TODO add a one shot addTask to call handler.setName(name) */
+  @Override /* TODO add a one shot addTask to call handler.setName(name) */
   public void connectionStarted(Py4JServerConnection gatewayConnection) {
     try {
       log.info("connectionStarted {}", gatewayConnection.toString());
@@ -214,7 +216,7 @@ public class Py4j extends Service implements GatewayServerListener {
   /**
    * One of 3 methods supported on the MessageHandler() callbacks
    * 
-   * @param code
+   * @param code The Python code to execute in the interpreter.
    */
   public void exec(String code) {
     try {
@@ -262,6 +264,12 @@ public class Py4j extends Service implements GatewayServerListener {
     return sorted;
   }
 
+  /**
+   * Sink for standard output from Py4j-related subprocesses.
+   * This method immediately publishes the output on {@link #publishStdOut(String)}.
+   *
+   * @param msg The output from a py4j related subprocess.
+   */
   public void handleStdOut(String msg) {
     invoke("publishStdOut", msg);
   }
@@ -290,7 +298,7 @@ public class Py4j extends Service implements GatewayServerListener {
       serviceScript = FileIO.toString(filename);
     } catch (Exception e) {
       error("%s.py not  found", serviceType);
-      log.error("getting service file script example threw {}", e);
+      log.error("getting service file script example threw", e);
     }
     addScript(serviceType + ".py", serviceScript);
   }
@@ -453,7 +461,16 @@ public class Py4j extends Service implements GatewayServerListener {
     }
   }
 
-  public void installPipPackages(List<String> packages) throws IOException, InterruptedException {
+  /**
+   * Install a list of packages into the environment Py4j is running in.
+   * Py4j does not need to be running/connected to call this method as it
+   * spawns a new subprocess to invoke Pip. Output from pip is echoed
+   * via {@link #handleStdOut(String)}.
+   * 
+   * @param packages The list of packages to install. Must be findable by Pip
+   * @throws IOException If an I/O error occurs running Pip.
+   */
+  public void installPipPackages(List<String> packages) throws IOException {
     List<String> commandArgs = new ArrayList<>(List.of("-m", "pip", "install"));
     commandArgs.addAll(packages);
     ProcessBuilder pipProcess = new ProcessBuilder(pythonCommand);
@@ -471,7 +488,12 @@ public class Py4j extends Service implements GatewayServerListener {
         error(e);
       }
     }).start();
-    int ret = proc.waitFor();
+    int ret = 0;
+    try {
+      ret = proc.waitFor();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
     if (ret != 0) {
       error("Could not install packages, subprocess returned " + ret);
     }
