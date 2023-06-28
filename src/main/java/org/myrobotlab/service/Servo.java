@@ -25,7 +25,6 @@
 
 package org.myrobotlab.service;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.myrobotlab.logging.Level;
@@ -36,7 +35,6 @@ import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServiceConfig.Listener;
 import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.data.ServoMove;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
@@ -87,6 +85,18 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
    */
   @Override
   protected boolean processMove(Double newPos, boolean blocking, Long timeoutMs) {
+
+    if (newPos == null) {
+      log.info("servo processMove(null) not valid position");
+      return false;
+    }
+
+    double minLimit = Math.min(mapper.minX, mapper.maxX);
+    double maxLimit = Math.max(mapper.minX, mapper.maxX);
+    newPos = (newPos < minLimit) ? minLimit : newPos;
+    newPos = (newPos > maxLimit) ? maxLimit : newPos;
+    
+    log.debug("{} processMove {}", getName(), newPos);
 
     // This is to allow attaching disabled
     // then delay enabling until the first moveTo command
@@ -174,18 +184,18 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
     // movement
     // usually knowing about encoder type is "bad" but the timer encoder is the
     // default native encoder
-    Long blockingTimeMs = null;
+    long blockingTimeMs = 0;
     if (encoder != null && encoder instanceof TimeEncoder) {
       TimeEncoder timeEncoder = (TimeEncoder) encoder;
       // calculate trajectory calculates and processes this move
-      // blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentOutputPos(),
-      // getTargetOutput(), getSpeed());
       blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentInputPos(), getTargetPos(), getSpeed());
     }
 
     if (isBlocking) {
       // our thread did a blocking call - we will wait until encoder notifies us
-      // to continue or timeout (if supplied) has been reached
+      // to continue or timeout (if supplied) has been reached - "cheesy" need
+      // to
+      // re-work for real monitor callbacks from real encoders
       sleep(blockingTimeMs);
       isBlocking = false;
       isMoving = false;
@@ -299,18 +309,9 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
   @Override
   public ServiceConfig getFilteredConfig() {
     ServoConfig sc = (ServoConfig) super.getFilteredConfig();
-    Set<Listener> removeList = new HashSet<>();
+    Set<String> removeList = Set.of("onServoEnable", "onServoDisable", "onEncoderData", "onServoSetSpeed", "onServoWriteMicroseconds", "onServoMoveTo", "onServoStop");
     if (sc.listeners != null) {
-      for (Listener listener : sc.listeners) {
-        if (listener.callback.equals("onServoEnable") || listener.callback.equals("onServoDisable") || listener.callback.equals("onEncoderData")
-            || listener.callback.equals("onServoSetSpeed") || listener.callback.equals("onServoWriteMicroseconds") || listener.callback.equals("onServoMoveTo")
-            || listener.callback.equals("onServoStop")) {
-          removeList.add(listener);
-        }
-      }
-      for (Listener remove : removeList) {
-        sc.listeners.remove(remove);
-      }
+      sc.listeners.removeIf(listener -> removeList.contains(listener.callback));
     }
     return sc;
   }

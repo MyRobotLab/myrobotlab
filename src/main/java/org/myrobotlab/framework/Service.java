@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Timer;
@@ -53,6 +54,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Broadcaster;
@@ -125,7 +127,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * full class name used in serialization
    */
-  protected String serviceClass;
+  protected String typeKey;
 
   private boolean isRunning = false;
 
@@ -253,12 +255,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     for (Class<?> sourceClass : ancestry) {
 
-      Field fields[] = sourceClass.getDeclaredFields();
-      for (int j = 0, m = fields.length; j < m; j++) {
+      Field[] fields = sourceClass.getDeclaredFields();
+      for (Field field : fields) {
         try {
-          Field f = fields[j];
 
-          int modifiers = f.getModifiers();
+          int modifiers = field.getModifiers();
 
           // if (Modifier.isPublic(mod)
           // !(Modifier.isPublic(f.getModifiers())
@@ -268,19 +269,23 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
           // GROG - recent change from this
           // if ((!Modifier.isPublic(modifiers)
           // to this
-          String fname = f.getName();
+          String fname = field.getName();
           /*
            * if (fname.equals("desktops") || fname.equals("useLocalResources")
            * ){ log.info("here"); }
            */
 
-          if (Modifier.isPrivate(modifiers) || fname.equals("log") || Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
-            log.debug("skipping {}", f.getName());
+          if (Modifier.isPrivate(modifiers)
+                  || fname.equals("log")
+                  || Modifier.isTransient(modifiers)
+                  || Modifier.isStatic(modifiers)
+                  || Modifier.isFinal(modifiers)) {
+            log.debug("skipping {}", field.getName());
             continue;
           } else {
-            log.debug("copying {}", f.getName());
+            log.debug("copying {}", field.getName());
           }
-          Type t = f.getType();
+          Type t = field.getType();
 
           // log.info(String.format("setting %s", f.getName()));
           /*
@@ -290,30 +295,30 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
           // GroG - this is new 1/26/2017 - needed to get webgui data to
           // load
-          f.setAccessible(true);
-          Field targetField = sourceClass.getDeclaredField(f.getName());
+          field.setAccessible(true);
+          Field targetField = sourceClass.getDeclaredField(field.getName());
           targetField.setAccessible(true);
 
-          if (t.equals(java.lang.Boolean.TYPE)) {
-            targetField.setBoolean(target, f.getBoolean(source));
-          } else if (t.equals(java.lang.Character.TYPE)) {
-            targetField.setChar(target, f.getChar(source));
-          } else if (t.equals(java.lang.Byte.TYPE)) {
-            targetField.setByte(target, f.getByte(source));
-          } else if (t.equals(java.lang.Short.TYPE)) {
-            targetField.setShort(target, f.getShort(source));
-          } else if (t.equals(java.lang.Integer.TYPE)) {
-            targetField.setInt(target, f.getInt(source));
-          } else if (t.equals(java.lang.Long.TYPE)) {
-            targetField.setLong(target, f.getLong(source));
-          } else if (t.equals(java.lang.Float.TYPE)) {
-            targetField.setFloat(target, f.getFloat(source));
-          } else if (t.equals(java.lang.Double.TYPE)) {
-            targetField.setDouble(target, f.getDouble(source));
+          if (t.equals(Boolean.TYPE)) {
+            targetField.setBoolean(target, field.getBoolean(source));
+          } else if (t.equals(Character.TYPE)) {
+            targetField.setChar(target, field.getChar(source));
+          } else if (t.equals(Byte.TYPE)) {
+            targetField.setByte(target, field.getByte(source));
+          } else if (t.equals(Short.TYPE)) {
+            targetField.setShort(target, field.getShort(source));
+          } else if (t.equals(Integer.TYPE)) {
+            targetField.setInt(target, field.getInt(source));
+          } else if (t.equals(Long.TYPE)) {
+            targetField.setLong(target, field.getLong(source));
+          } else if (t.equals(Float.TYPE)) {
+            targetField.setFloat(target, field.getFloat(source));
+          } else if (t.equals(Double.TYPE)) {
+            targetField.setDouble(target, field.getDouble(source));
           } else {
             // log.debug(String.format("setting reference to remote
             // object %s", f.getName()));
-            targetField.set(target, f.get(source));
+            targetField.set(target, field.get(source));
           }
         } catch (Exception e) {
           log.error("copy failed source {} to a {}", source, target, e);
@@ -368,7 +373,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
   }
 
-  public final static String stackToString(final Throwable e) {
+  public static String stackToString(final Throwable e) {
     StringWriter sw;
     try {
       sw = new StringWriter();
@@ -392,9 +397,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     String dataDir = Runtime.DATA_DIR + fs + typeName;
     File f = new File(dataDir);
     if (!f.exists()) {
-      f.mkdirs();
+      if (!f.mkdirs()) {
+        log.error("Cannot create data directory: {}", dataDir);
+      }
     }
-    return Runtime.DATA_DIR + fs + typeName;
+    return dataDir;
   }
 
   public String getDataDir() {
@@ -405,9 +412,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     String dataDir = Runtime.DATA_DIR + fs + getClass().getSimpleName() + fs + getName();
     File f = new File(dataDir);
     if (!f.exists()) {
-      f.mkdirs();
+      if (!f.mkdirs()) {
+        error("Cannot create data directory: {}", dataDir);
+      }
     }
-    return Runtime.DATA_DIR + fs + getClass().getSimpleName() + fs + getName();
+    return dataDir;
   }
 
   // ============== resources begin ======================================
@@ -633,7 +642,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       log.debug("creating remote proxy service for id {}", id);
     }
 
-    serviceClass = this.getClass().getCanonicalName();
+    typeKey = this.getClass().getCanonicalName();
     simpleName = this.getClass().getSimpleName();
     MethodCache cache = MethodCache.getInstance();
     cache.cacheMethodEntries(this.getClass());
@@ -743,6 +752,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public void addListener(String topicMethod, String callbackName, String callbackMethod) {
+    callbackName = CodecUtils.getFullName(callbackName);
     MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
     if (outbox.notifyList.containsKey(listener.topicMethod)) {
       // iterate through all looking for duplicate
@@ -819,7 +829,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       return;
     }
     Timer timer = new Timer(String.format("%s.timer", String.format("%s.%s", getName(), taskName)));
-    Message msg = Message.createMessage(getName(), getName(), method, params);
+    Message msg = Message.createMessage(getFullName(), getFullName(), method, params);
     Task task = new Task(this, oneShot, taskName, intervalMs, msg);
     timer.schedule(task, delayMs);
     tasks.put(taskName, timer);
@@ -981,11 +991,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   // FIXME - use the method cache
   public Set<String> getMessageSet() {
-    Set<String> ret = new TreeSet<String>();
+    Set<String> ret = new TreeSet<>();
     Method[] methods = getMethods();
     log.debug("getMessageSet loading {} non-sub-routable methods", methods.length);
-    for (int i = 0; i < methods.length; ++i) {
-      ret.add(methods[i].getName());
+    for (Method method : methods) {
+      ret.add(method.getName());
     }
     return ret;
   }
@@ -1015,13 +1025,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public Map<String, String> getInterfaceSet() {
-    Map<String, String> ret = new TreeMap<String, String>();
+    Map<String, String> ret = new TreeMap<>();
     Class<?> c = getClass();
     while (c != Object.class) {
 
       Class<?>[] interfaces = c.getInterfaces();
-      for (int i = 0; i < interfaces.length; ++i) {
-        Class<?> interfaze = interfaces[i];
+      for (Class<?> interfaze : interfaces) {
         // ya silly :P - but gson's default conversion of a HashSet is an
         // array
         ret.put(interfaze.getName(), interfaze.getName());
@@ -1046,14 +1055,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       // and your in a skeleton
       // use the runtime to send a message
       // FIXME - parameters !
-      ArrayList<MRLListener> remote = null;
       try {
-        remote = (ArrayList<MRLListener>) Runtime.getInstance().sendBlocking(getName(), "getNotifyList", new Object[] { key });
+        return (ArrayList<MRLListener>) Runtime.getInstance().sendBlocking(getName(), "getNotifyList", new Object[] { key });
       } catch (Exception e) {
         log.error("remote getNotifyList threw", e);
+        return null;
       }
-
-      return remote;
 
     } else {
       return getOutbox().notifyList.get(key);
@@ -1062,25 +1069,22 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   public ArrayList<String> getNotifyListKeySet() {
-    ArrayList<String> ret = new ArrayList<String>();
     if (getOutbox() == null) {
       // this is remote system - it has a null outbox, because its
       // been serialized with a transient outbox
       // and your in a skeleton
       // use the runtime to send a message
 
-      ArrayList<String> remote = null;
       try {
-        remote = (ArrayList<String>) Runtime.getInstance().sendBlocking(getName(), "getNotifyListKeySet");
+        return (ArrayList<String>) Runtime.getInstance().sendBlocking(getFullName(), "getNotifyListKeySet");
       } catch (Exception e) {
         log.error("remote getNotifyList threw", e);
+        return null;
       }
 
-      return remote;
     } else {
-      ret.addAll(getOutbox().notifyList.keySet());
+      return new ArrayList<>(getOutbox().notifyList.keySet());
     }
-    return ret;
   }
 
   @Override
@@ -1098,8 +1102,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   @Override
-  public String getType() {
-    return getClass().getCanonicalName();
+  public String getTypeKey() {
+    return typeKey;
   }
 
   @Override
@@ -1138,29 +1142,25 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public Set<String> getPeerKeys() {
     if (config == null || config.peers == null) {
-      return new HashSet<String>();
+      return new HashSet<>();
     }
     return config.peers.keySet();
   }
 
   public String help(String format, String level) {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     Method[] methods = this.getClass().getDeclaredMethods();
-    TreeMap<String, Method> sorted = new TreeMap<String, Method>();
+    TreeMap<String, Method> sorted = new TreeMap<>();
 
-    for (int i = 0; i < methods.length; ++i) {
-      Method m = methods[i];
+    for (Method m : methods) {
       sorted.put(m.getName(), m);
     }
     for (String key : sorted.keySet()) {
       Method m = sorted.get(key);
       sb.append("/").append(getName()).append("/").append(m.getName());
       Class<?>[] types = m.getParameterTypes();
-      if (types != null) {
-        for (int j = 0; j < types.length; ++j) {
-          Class<?> c = types[j];
-          sb.append("/").append(c.getSimpleName());
-        }
+      for (Class<?> c : types) {
+        sb.append("/").append(c.getSimpleName());
       }
       sb.append("\n");
     }
@@ -1295,15 +1295,20 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       }
       retobj = method.invoke(obj, params);
       if (blockLocally) {
+        Outbox outbox = null;
+        if (obj instanceof ServiceInterface) {
+          outbox = ((ServiceInterface)obj).getOutbox();
+        } else {
+          return retobj;
+        }
+        
+        
         List<MRLListener> subList = outbox.notifyList.get(methodName);
         // correct? get local (default?) gateway
         Runtime runtime = Runtime.getInstance();
         if (subList != null) {
           for (MRLListener listener : subList) {
             Message msg = Message.createMessage(getFullName(), listener.callbackName, listener.callbackMethod, retobj);
-            if (msg == null) {
-              log.error("Unable to create message.. null message created");
-            }
             msg.sendingMethod = methodName;
             if (runtime.isLocal(msg)) {
               ServiceInterface si = Runtime.getService(listener.callbackName);
@@ -1327,7 +1332,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
                     // we attempted to invoke this , it blew up. Catch it here,
                     // continue
                     // through the rest of the listeners instead of bombing out.
-                    log.error("Invoke blew up! on: {} calling method {} ", si.getName(), m.toString(), e);
+                    log.error("Invoke blew up! on: {} calling method {} ", si.getName(), m, e);
                   }
                 }
               }
@@ -1379,14 +1384,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * Default load config method, subclasses should override this to support
    * service specific configuration in the service yaml files.
    * 
-   * apply is the  first function to be called after construction of a service, then startService will be called
+   * apply is the first function to be called after construction of a service,
+   * then startService will be called
    * 
-   * construct -&gt; apply -&gt; startService 
+   * construct -&gt; apply -&gt; startService
    * 
    */
   @Override
   public ServiceConfig apply(ServiceConfig inConfig) {
-    log.info("Default service config loading for service: {} type: {}", getName(), getType());
+    log.info("Default service config loading for service: {} type: {}", getName(), getTypeKey());
     /*
      * We clone/serialize here because we don't want to use the same reference
      * of of config in the plan. If configuration is applied through the plan,
@@ -1416,24 +1422,30 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public ServiceConfig getConfig() {
 
-    boolean filterWeb = true;
-
     Map<String, List<MRLListener>> listeners = getOutbox().notifyList;
     List<Listener> newListeners = new ArrayList<>();
 
     // TODO - perhaps a switch for "remote" things ?
-    if (filterWeb) {
-      for (String method : listeners.keySet()) {
-        List<MRLListener> list = listeners.get(method);
-        for (MRLListener listener : list) {
-          if (!listener.callbackName.endsWith("@webgui-client")) {
-
-            Listener newConfigListener = new Listener(listener.topicMethod, listener.callbackName, listener.callbackMethod);
-            newListeners.add(newConfigListener);
-          }
+    for (String method : listeners.keySet()) {
+      List<MRLListener> list = listeners.get(method);
+      for (MRLListener listener : list) {
+        if (!listener.callbackName.endsWith("@webgui-client")) {
+          // Removes the `@runtime-id` so configs still work with local IDs
+          // The StringUtils.removeEnd() call is a no-op when the ID is not our local ID,
+          // so doesn't conflict with remote routes
+          Listener newConfigListener = new Listener(
+                  listener.topicMethod,
+                  StringUtils.removeEnd(
+                          listener.callbackName,
+                          '@' + Platform.getLocalInstance().getId()
+                  ),
+                  listener.callbackMethod
+          );
+          newListeners.add(newConfigListener);
         }
       }
     }
+
 
     if (newListeners.size() > 0) {
       config.listeners = newListeners;
@@ -1445,13 +1457,22 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public ServiceConfig getFilteredConfig() {
     ServiceConfig sc = getConfig();
     // deep clone
-    sc = (ServiceConfig) CodecUtils.fromYaml(CodecUtils.toYaml(sc), sc.getClass());
+    sc = CodecUtils.fromYaml(CodecUtils.toYaml(sc), sc.getClass());
     return sc;
   }
 
   @Override
   public void setConfig(ServiceConfig config) {
     this.config = config;
+  }
+
+  @Override
+  public void setConfigValue(String fieldname, Object value) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+      log.info("setting field name fieldname {} to {}", fieldname, value);
+
+      Field field = config.getClass().getDeclaredField(fieldname);
+      // field.setAccessible(true); should not need this - it "should" be public
+      field.set(config, value);
   }
 
   @Override
@@ -1547,17 +1568,27 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   public void removeListener(String outMethod, String serviceName, String inMethod) {
+    String fullName = CodecUtils.getFullName(serviceName);
     if (outbox.notifyList.containsKey(outMethod)) {
       List<MRLListener> nel = outbox.notifyList.get(outMethod);
-      for (int i = 0; i < nel.size(); ++i) {
-        MRLListener target = nel.get(i);
-        if (target.callbackName.compareTo(serviceName) == 0) {
-          nel.remove(i);
-          log.info("removeListener requested {}.{} to be removed", serviceName, outMethod);
+      nel.removeIf(listener -> {
+        if (listener == null) {
+          log.info("Removing null listener for method {}", outMethod);
+          return true;
         }
-      }
+
+        // Previously we were not checking inMethod, which meant if a service had multiple
+        // subscriptions to the same topic (one to many mapping), the first in the list would be removed
+        // instead of the requested one.
+        if (listener.callbackMethod.equals(inMethod)
+                && CodecUtils.checkServiceNameEquality(listener.callbackName, fullName)) {
+          log.info("removeListener requested {}.{} to be removed", fullName, outMethod);
+          return true;
+        }
+        return false;
+      });
     } else {
-      log.info("removeListener requested {}.{} to be removed - but does not exist", serviceName, outMethod);
+      log.info("removeListener requested {}.{} to be removed - but does not exist", fullName, outMethod);
     }
   }
 
@@ -1655,7 +1686,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public void sendToPeer(String peerName, String method, Object... data) {
     String name = getPeerName(peerName);
-    Message msg = Message.createMessage(getName(), name, method, data);
+    Message msg = Message.createMessage(getFullName(), name, method, data);
     send(msg);
   }
 
@@ -1678,8 +1709,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
 
     // if unknown assume remote - fire and forget on outbox
-    Message msg = Message.createMessage(getName(), name, method, data);
-    msg.sender = this.getFullName();
+    Message msg = Message.createMessage(getFullName(), name, method, data);
     // All methods which are invoked will
     // get the correct sendingMethod
     // here its hardcoded
@@ -1695,8 +1725,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public void sendAsync(String name, String method, Object... data) {
     // if unknown assume remote - fire and forget on outbox
-    Message msg = Message.createMessage(getName(), name, method, data);
-    msg.sender = this.getFullName();
+    Message msg = Message.createMessage(getFullName(), name, method, data);
     // All methods which are invoked will
     // get the correct sendingMethod
     // here its hardcoded
@@ -1709,8 +1738,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   public Object sendBlocking(String name, Integer timeout, String method, Object... data) throws InterruptedException, TimeoutException {
-    Message msg = Message.createMessage(getName(), name, method, data);
-    msg.sender = this.getFullName();
+    Message msg = Message.createMessage(getFullName(), name, method, data);
     msg.msgId = Runtime.getUniqueID();
 
     return sendBlocking(msg, timeout);
@@ -1945,10 +1973,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       thisThread.start();
       isRunning = true;
       send("runtime", "started", getName());
-//      Runtime runtime = Runtime.getInstance();
-//      if (runtime != null) {
-//        runtime.invoke("started", getName()); 
-//      }
 
     } else {
       log.debug("startService request: service {} is already running", name);
@@ -1975,51 +1999,58 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public void subscribe(NameProvider topicName, String topicMethod) {
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
-    subscribe(topicName.getName(), topicMethod, getName(), callbackMethod);
+    subscribe(topicName.getName(), topicMethod, getFullName(), callbackMethod);
   }
 
   @Override
   public void subscribe(String topicName, String topicMethod) {
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
-    subscribe(topicName, topicMethod, getName(), callbackMethod);
+    subscribe(topicName, topicMethod, getFullName(), callbackMethod);
+  }
+  
+  @Override
+  public void subscribe(String service, String method, String callback) {
+    subscribe(service, method, getFullName(), callback);
   }
 
   public void subscribeTo(String service, String method) {
-    subscribe(service, method, getName(), CodecUtils.getCallbackTopicName(method));
+    subscribe(service, method, getFullName(), CodecUtils.getCallbackTopicName(method));
   }
 
   public void subscribeToRuntime(String method) {
-    subscribe(Runtime.getInstance().getName(), method, getName(), CodecUtils.getCallbackTopicName(method));
+    subscribe(Runtime.getInstance().getFullName(), method, getFullName(), CodecUtils.getCallbackTopicName(method));
   }
 
   public void unsubscribeTo(String service, String method) {
-    unsubscribe(service, method, getName(), CodecUtils.getCallbackTopicName(method));
+    unsubscribe(service, method, getFullName(), CodecUtils.getCallbackTopicName(method));
   }
 
   public void unsubscribeToRuntime(String method) {
-    unsubscribe(Runtime.getInstance().getName(), method, getName(), CodecUtils.getCallbackTopicName(method));
+    unsubscribe(Runtime.getInstance().getFullName(), method, getFullName(), CodecUtils.getCallbackTopicName(method));
   }
 
-  @Override
+  // TODO make protected or private
   public void subscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
+    topicName = CodecUtils.getFullName(topicName);
+    callbackName = CodecUtils.getFullName(callbackName);
     log.info("subscribe [{}/{} ---> {}/{}]", topicName, topicMethod, callbackName, callbackMethod);
     // TODO - do regex matching
     if (topicName.contains("*")) { // FIXME "any regex expression
       List<String> tnames = Runtime.getServiceNames(topicName);
       for (String serviceName : tnames) {
         MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-        send(Message.createMessage(getName(), serviceName, "addListener", listener));
+        send(Message.createMessage(getFullName(), serviceName, "addListener", listener));
       }
     } else {
       if (topicMethod.contains("*")) { // FIXME "any regex expression
         Set<String> tnames = Runtime.getMethodMap(topicName).keySet();
         for (String method : tnames) {
           MRLListener listener = new MRLListener(method, callbackName, callbackMethod);
-          send(Message.createMessage(getName(), topicName, "addListener", listener));
+          send(Message.createMessage(getFullName(), topicName, "addListener", listener));
         }
       } else {
         MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-        send(Message.createMessage(getName(), topicName, "addListener", listener));
+        send(Message.createMessage(getFullName(), topicName, "addListener", listener));
       }
     }
   }
@@ -2027,19 +2058,26 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public void unsubscribe(NameProvider topicName, String topicMethod) {
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
-    unsubscribe(topicName.getName(), topicMethod, getName(), callbackMethod);
+    unsubscribe(topicName.getName(), topicMethod, getFullName(), callbackMethod);
   }
 
   @Override
   public void unsubscribe(String topicName, String topicMethod) {
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
-    unsubscribe(topicName, topicMethod, getName(), callbackMethod);
+    unsubscribe(topicName, topicMethod, getFullName(), callbackMethod);
+  }
+  
+  @Override
+  public void unsubscribe(String topicName, String topicMethod, String callback) {
+    unsubscribe(topicName, topicMethod, getFullName(), callback);
   }
 
-  @Override
+  // TODO make protected or private
   public void unsubscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
+    topicName = CodecUtils.getFullName(topicName);
+    callbackName = CodecUtils.getFullName(callbackName);
     log.info("unsubscribe [{}/{} ---> {}/{}]", topicName, topicMethod, callbackName, callbackMethod);
-    send(Message.createMessage(getName(), topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
+    send(Message.createMessage(getFullName(), topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
   }
 
   // -------------- Messaging Ends -----------------------
@@ -2056,12 +2094,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   public Status error(String format, Object... args) {
-    Status ret = null;
-    if (format != null) {
-      ret = Status.error(String.format(format, args));
-    } else {
-      ret = Status.error(String.format("", args));
-    }
+    Status ret;
+    ret = Status.error(
+            String.format(
+                    Objects.requireNonNullElse(format, ""),
+                    args
+            )
+    );
     ret.name = getName();
     log.error(ret.toString());
     lastError = ret;
@@ -2199,7 +2238,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public boolean isAttached(String serviceName) {
-    return getAttached().contains(serviceName);
+    return getAttached().contains(CodecUtils.getFullName(serviceName));
   }
 
   /**
@@ -2526,7 +2565,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       if (this != runtime) {
         // if we are not runtime - we ask runtime
         prop = runtime.localize(key, args);
-      } else if (this == runtime) {
+      } else {
         // if we are runtime - we try default en
         prop = runtime.localizeDefault(key);
       }
@@ -2650,7 +2689,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     if (!clazz.contains(".")) {
       clazz = String.format("org.myrobotlab.service.%s", clazz);
     }
-    return serviceClass.equals(clazz);
+    return typeKey.equals(clazz);
   }
 
   @Override

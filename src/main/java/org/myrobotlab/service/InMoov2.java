@@ -442,13 +442,16 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
    */
   public String execGesture(String gesture) {
 
+    // FIXME PUB SUB - THIS SHOULD JUST PUBLISH TO publishPython
+    // although its problematic if this call is to be synchronous ...
+    subscribe("python", "publishStatus", this.getName(), "onGestureStatus");
+    startedGesture(gesture);
     lastGestureExecuted = gesture;
+    Python python = (Python)Runtime.getService("python");
     if (python == null) {
-      log.warn("execGesture : No jython engine...");
+      error("python service not started");
       return null;
     }
-    subscribe(python.getName(), "publishStatus", this.getName(), "onGestureStatus");
-    startedGesture(lastGestureExecuted);
     return python.evalAndWait(gesture);
   }
 
@@ -903,7 +906,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       error("I cannot execute %s, please check logs", lastGestureExecuted);
     }
     finishedGesture(lastGestureExecuted);
-    unsubscribe(python.getName(), "publishStatus", this.getName(), "onGestureStatus");
+    
+    unsubscribe("python", "publishStatus", this.getName(), "onGestureStatus");
   }
 
   @Override

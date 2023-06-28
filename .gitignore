@@ -110,3 +110,4 @@ build/
 /lastRestart.py
 /.factorypath
 start.yml
+*.iml

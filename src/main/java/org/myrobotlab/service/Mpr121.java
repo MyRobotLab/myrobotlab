@@ -14,6 +14,8 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.Mpr121Config;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -43,9 +45,10 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
 
     @Override
     public void run() {
-
+      Mpr121Config c = (Mpr121Config) config;
       log.info("New publisher instance started at a sample frequency of {} Hz", sampleFreq);
-      long sleepTime = 1000 / (long) sampleFreq;
+      //long sleepTime = 1000 / (long) sampleFreq;
+      long sleepTime = 1000 / (long) c.rateHz;
       isPublishing = true;
       try {
         while (isPublishing) {
@@ -300,15 +303,14 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     LoggingFactory.init("info");
 
     try {
-      Mpr121 mpr121 = (Mpr121) Runtime.start("mpr121", "Mpr121");
-      Runtime.start("gui", "SwingGui");
-      Esp8266_01 esp = (Esp8266_01) Runtime.start("esp", "Esp8266_01");
+      Runtime.start("nano", "Arduino");
+      Runtime.start("webgui", "WebGui");
+      Runtime.start("mpr121", "Mpr121");
+      //Mpr121 mpr121 = (Mpr121) Runtime.start("mpr121", "Mpr121");
+      //mpr121.attach("nano", "0", "0x5A");
 
-      esp.setHost("esp8266-02.local");
-      mpr121.attach("esp", "0", "0x5A");
-
-      mpr121.begin();
-      log.info("Reading touch sensor, {}", mpr121.touched());
+      //mpr121.begin();
+      //log.info("Reading touch sensor, {}", mpr121.touched());
 
     } catch (Exception e) {
       Logging.logError(e);
@@ -346,26 +348,6 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     }
 
     return controlerName;
-  }
-
-  @Override
-  public void setDeviceBus(String deviceBus) {
-    if (isAttached) {
-      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
-      return;
-    }
-    this.deviceBus = deviceBus;
-    broadcastState();
-  }
-
-  @Override
-  public void setDeviceAddress(String deviceAddress) {
-    if (isAttached) {
-      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
-      return;
-    }
-    this.deviceAddress = deviceAddress;
-    broadcastState();
   }
 
   /**
@@ -494,42 +476,46 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   void i2cWrite(int reg) {
+    Mpr121Config c = (Mpr121Config) config;
     if (!isAttached) {
       log.error("Must be attached to an i2c controller before writing");
       return;
-    }
+    } //Integer.parseInt(c.bus)
     byte[] writebuffer = { (byte) reg };
-    controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
+    controller.i2cWrite(this, Integer.parseInt(c.bus), Integer.decode(c.address), writebuffer, writebuffer.length);
   }
 
   void writeRegister(int reg, int value) {
+    Mpr121Config c = (Mpr121Config) config;
     if (!isAttached) {
       log.error("Must be attached to an i2c controller before writing");
       return;
     }
     byte[] writebuffer = { (byte) reg, (byte) (value & 0xff) };
-    controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
+    controller.i2cWrite(this, Integer.parseInt(c.bus), Integer.decode(c.address), writebuffer, writebuffer.length);
   }
 
   int readRegister8(int reg) {
+    Mpr121Config c = (Mpr121Config) config;
     if (!isAttached) {
       log.error("Must be attached to an i2c controller before reading");
       return 0;
     }
     byte[] writebuffer = { (byte) reg };
     byte[] readbuffer = new byte[1];
-    controller.i2cWriteRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length, readbuffer, readbuffer.length);
+    controller.i2cWriteRead(this, Integer.parseInt(c.bus), Integer.decode(c.address), writebuffer, writebuffer.length, readbuffer, readbuffer.length);
     return (readbuffer[0] & 0xff);
   }
 
   int readRegister16(int reg) {
+    Mpr121Config c = (Mpr121Config) config;
     if (!isAttached) {
       log.error("Must be attached to an i2c controller before reading");
       return 0;
     }
     byte[] writebuffer = { (byte) reg };
     byte[] readbuffer = new byte[2];
-    controller.i2cWriteRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length, readbuffer, readbuffer.length);
+    controller.i2cWriteRead(this, Integer.parseInt(c.bus), Integer.decode(c.address), writebuffer, writebuffer.length, readbuffer, readbuffer.length);
     return (readbuffer[0]) << 8 | readbuffer[1] & 0xff;
   }
 
@@ -562,7 +548,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   public void pinMode(int address, String mode) {
     if (mode != null && mode.equalsIgnoreCase("INPUT")) {
     } else {
-      log.error("Ads1115 only supports INPUT mode");
+      log.error("Mpr121 only supports INPUT mode");// TODO: Need to fix the error message
     }
 
   }
@@ -760,11 +746,11 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
 
   @Override
   public void attachI2CController(I2CController controller) {
-
+    Mpr121Config c = (Mpr121Config) config;
     if (isAttached(controller))
       return;
 
-    if (this.controllerName != controller.getName()) {
+    if (isAttached && this.controllerName != controller.getName()) {
       log.error("Trying to attached to {}, but already attached to ({})", controller.getName(), this.controllerName);
       return;
     }
@@ -772,7 +758,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     this.controller = controller;
     isAttached = true;
     controller.attachI2CControl(this);
-    log.info("Attached {} device on bus: {} address {}", controllerName, deviceBus, deviceAddress);
+    log.info("Attached {} device on bus: {} address {}", controllerName, c.bus, c.address);
     broadcastState();
   }
 
@@ -815,16 +801,6 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
       ret.add(controller.getName());
     }
     return ret;
-  }
-
-  @Override
-  public String getDeviceBus() {
-    return this.deviceBus;
-  }
-
-  @Override
-  public String getDeviceAddress() {
-    return this.deviceAddress;
   }
 
   @Override
@@ -894,6 +870,16 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   @Override
+  public String getDeviceBus() {
+    return this.deviceBus;
+  }
+
+  @Override
+  public String getDeviceAddress() {
+    return this.deviceAddress;
+  }
+
+  @Override
   public void setBus(String bus) {
     setDeviceBus(bus);
   }
@@ -905,12 +891,65 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
 
   @Override
   public String getBus() {
-    return deviceBus;
+    Mpr121Config c = (Mpr121Config)config;
+    return c.bus;
   }
 
   @Override
   public String getAddress() {
-    return deviceAddress;
+    Mpr121Config c = (Mpr121Config)config;
+    return c.address;
+  }
+
+  @Override
+  public void setDeviceBus(String deviceBus) {
+    if (isAttached) {
+      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
+      return;
+    }
+    this.deviceBus = deviceBus;
+    Mpr121Config c = (Mpr121Config)config;
+    c.bus = deviceBus;
+    broadcastState();
+  }
+
+  @Override
+  public void setDeviceAddress(String deviceAddress) {
+    if (isAttached) {
+      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
+      return;
+    }
+    Mpr121Config c = (Mpr121Config)config;
+    this.deviceAddress = deviceAddress;
+    c.address = deviceAddress;
+    broadcastState();
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    Mpr121Config config = (Mpr121Config) super.getConfig();
+    return config;
+  }
+
+  @Override
+  public ServiceConfig apply(ServiceConfig c) {
+    Mpr121Config config = (Mpr121Config) super.apply(c);
+    // FIXME remove local fields in favor of config only
+    if (config.address != null) {
+      setAddress(config.address);
+    }
+    if (config.bus != null) {
+      setBus(config.bus);
+    }
+
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+    return c;
   }
 
 }

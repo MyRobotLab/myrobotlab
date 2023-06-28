@@ -385,11 +385,6 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
     return Runtime.getInstance().getConnections(getName());
   }
 
-  @Override
-  public Message getDescribeMsg(String connId) {
-    return Runtime.getInstance().getDescribeMsg(connId);
-  }
-
   public String getPassword() {
     return password;
   }
@@ -572,8 +567,9 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
           sendRemote(subscribe);
 
           // 4. describe new instance for me
+          // FIXME why isn't this using Gateway.getDescribeMessage()?
           Message describe = Message.createMessage(String.format("%s@%s", getName(), getId()), "runtime@" + remoteId, "describe",
-              new Object[] { "fill-uuid", new DescribeQuery(Platform.getLocalInstance().getId(), uuid) });
+              new Object[] { Gateway.FILL_UUID_MAGIC_VAL, new DescribeQuery(Platform.getLocalInstance().getId(), uuid) });
           describe.sendingMethod = "onConnect";
           sendRemote(describe);
 

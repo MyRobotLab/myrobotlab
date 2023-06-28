@@ -1,58 +1,46 @@
 package org.myrobotlab.service.data;
 
-import java.io.File;
 import java.io.Serializable;
+import java.util.Objects;
 
+/**
+ * A very basic POJO to transport scripts. Used in Python and Py4j and their
+ * front ends, and for saving or updating scripts.
+ * 
+ * @author GroG
+ *
+ */
 public class Script implements Serializable {
+
   static final long serialVersionUID = 1L;
   /**
    * unique location &amp; key of the script e.g. /mrl/scripts/myScript.py
    */
-  File file;
+  public String file;
   /**
    * actual code/contents of the script
    */
-  String code;
+  public String code;
 
-  public Script(String name, String script) {
-    this.file = new File(name);
-    // DOS2UNIX line endings.
-    // This seems to get triggered when people use editors that don't do
-    // the cr/lf thing very well..
-    // TODO:This will break python quoted text with the """ syntax in
-    // python.
-    if (script != null) {
-      script = script.replaceAll("(\r)+\n", "\n");
-    }
+  /**
+   * Convenient constructor
+   * 
+   * @param file
+   * @param script
+   */
+  public Script(String file, String script) {
+    this.file = file;
     this.code = script;
   }
 
-  public String getCode() {
-    return code;
+  @Override
+  public int hashCode() {
+    return Objects.hash(file, code);
   }
 
-  public String getName() {
-    if (file == null) {
-      return null;
-    }
-    // FIXME - display name
-    return file.getName();
+  @Override
+  public String toString() {
+    return "Script{" + "file='" + file + '\'' + ", code='" + code + '\'' + '}';
   }
 
-  public String getDisplayName() {
-    if (file == null) {
-      return null;
-    }
-    // FIXME - display name
-    return file.getName();
-  }
-
-  public void setCode(String code) {
-    this.code = code;
-  }
-
-  public void setName(String name) {
-    // FIXME - logic for setting file ?
-    this.file = new File(name);
-  }
 }

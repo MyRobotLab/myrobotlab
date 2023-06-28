@@ -8,4 +8,6 @@ multiMapped: {
 nodes: {
   }
 peers: null
+test: !!set {
+  }
 type: JMonkeyEngine
