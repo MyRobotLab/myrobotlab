@@ -473,22 +473,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     // setting resource directory
     String resourceDir = "resource" + fs + serviceType;
-
-    // overriden by src
-    String override = "src" + fs + "main" + fs + "resources" + fs + "resource" + fs + serviceType;
-    File test = new File(override);
-    if (test.exists()) {
-      log.info("found override resource dir {}", override);
-      resourceDir = override;
-    }
-
-    override = ".." + fs + serviceType + fs + "resource" + fs + serviceType;
-    test = new File(override);
-    if (test.exists()) {
-      log.info("found override repo dir {}", override);
-      resourceDir = override;
-    }
-
     if (additionalPath != null) {
       resourceDir = FileIO.gluePaths(resourceDir, additionalPath);
     }
@@ -520,13 +504,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   static public String getResourceRoot() {
     // setting resource root details
-    String resourceRootDir = "resource";
-    // allow default to be overriden by src if it exists
-    File src = new File("src");
-    if (src.exists()) {
-      resourceRootDir = "src" + fs + "main" + fs + "resources" + fs + "resource";
-    }
-    return resourceRootDir;
+    return "resource";
   }
 
   /**
@@ -2751,7 +2729,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   public void apply() {
     Runtime runtime = Runtime.getInstance();
-    ServiceConfig sc = runtime.readServiceConfig(null, name);
+    String configName = runtime.getConfigName();
+    ServiceConfig sc = runtime.readServiceConfig(configName, name);
+    
+    if (sc == null) {
+      error("config file %s not found", Runtime.getConfigRoot() + fs + configName + fs + name + ".yml");
+      return;
+    }
+    
     // updating plan
     Runtime.getPlan().put(getName(), sc);
     // applying config to self
@@ -2809,17 +2794,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // FIXME - rename putDefault
     ServiceConfig.getDefault(Runtime.getPlan(), peer.name, peerType);
     Runtime runtime = Runtime.getInstance();
-    String configPath = runtime.getConfigPath();
+    String configName = runtime.getConfigName();
     // Seems a bit invasive - but yml file overrides everything
     // if one exists we need to replace it with the new peer type
-    if (configPath != null) {
-      String configFile = configPath + fs + peer.name + ".yml";
+    if (configName != null) {
+      String configFile = configName + fs + peer.name + ".yml";
       File staleFile = new File(configFile);
       if (staleFile.exists()) {
         log.info("removing old config file {}", configFile);
         staleFile.delete();
         // save new default in its place
-        runtime.saveDefault(configPath, peer.name, peer.type, false);
+        runtime.saveDefault(configName, peer.name, peer.type, false);
       }
     }
     info("updated %s to type %s", peer.name, peerType);
