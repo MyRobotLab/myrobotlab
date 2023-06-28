@@ -15,7 +15,7 @@
 import sys
 
 from py4j.java_collections import JavaObject, JavaClass
-from py4j.java_gateway import JavaGateway, CallbackServerParameters
+from py4j.java_gateway import JavaGateway, CallbackServerParameters, GatewayParameters
 
 runtime = None
 
@@ -37,7 +37,8 @@ class MessageHandler(object):
         sys.stdout = self
         sys.stderr = self
         self.gateway = JavaGateway(callback_server_parameters=CallbackServerParameters(),
-                                   python_server_entry_point=self)
+                                   python_server_entry_point=self,
+                                   gateway_parameters=GatewayParameters(auto_convert=True))
         self.runtime = self.gateway.jvm.org.myrobotlab.service.Runtime.getInstance()
         runtime = self.runtime
         self.py4j = None  # need to wait until name is set
