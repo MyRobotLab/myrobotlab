@@ -383,7 +383,11 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             console.log('Selected Option: ' + $scope.service.selectedOption)
             console.log('includePeers Option: ' + $scope.service.includePeers)
             console.log('configType Option: ' + $scope.service.configType)
-            msg.send('saveDefault', $scope.service.configName, $scope.service.defaultServiceName, $scope.service.configType, $scope.service.includePeers)
+            if ($scope.service.selectedOption == 'default'){
+                msg.send('saveDefault', $scope.service.configName, $scope.service.defaultServiceName, $scope.service.configType, $scope.service.includePeers)
+            } else {
+                msg.sendTo('runtime', 'saveConfig', $scope.service.configName)
+            }
           }, function() {
             // Handle 'Cancel' button click or modal dismissal
             console.log('Modal dismissed')
