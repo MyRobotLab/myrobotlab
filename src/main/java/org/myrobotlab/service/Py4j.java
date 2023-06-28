@@ -1,7 +1,10 @@
 package org.myrobotlab.service;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -143,6 +146,8 @@ public class Py4j extends Service implements GatewayServerListener {
    * client process and connectivity reference
    */
   protected Py4jClient pythonProcess = null;
+
+  protected transient String pythonCommand = "python";
 
   public Py4j(String n, String id) {
     super(n, id);
@@ -418,16 +423,25 @@ public class Py4j extends Service implements GatewayServerListener {
           // and install our required packages
           String python = Loader.load(org.bytedeco.cpython.python.class);
           ProcessBuilder installProcess = new ProcessBuilder(python, "-m", "venv", venv);
-          installProcess.start().waitFor();
+          int ret = installProcess.inheritIO().start().waitFor();
+          if (ret != 0) {
+            error("Could not create virtual environment, subprocess returned " + ret);
+            return;
+          }
           installProcess = new ProcessBuilder(venv + fs + "bin" + fs + "pip", "install", "py4j");
-          installProcess.start().waitFor();
+          ret = installProcess.inheritIO().start().waitFor();
+          if (ret != 0) {
+            error("Could not install package, subprocess returned " + ret);
+            return;
+          }
         }
+        pythonCommand = venv + fs + "bin" + fs + "python";
         // Virtual environment should exist, so lets use that python
-        processBuilder = new ProcessBuilder(venv + fs + "bin" + fs + "python", pythonScript);
       } else {
         // Just use the system python
-        processBuilder = new ProcessBuilder("python", pythonScript);
+        pythonCommand = "python";
       }
+      processBuilder = new ProcessBuilder(pythonCommand, pythonScript);
       processBuilder.redirectErrorStream(true);
       processBuilder.command().addAll(List.of(pythonArgs));
 
@@ -436,6 +450,30 @@ public class Py4j extends Service implements GatewayServerListener {
 
     } catch (Exception e) {
       error(e);
+    }
+  }
+
+  public void installPipPackages(List<String> packages) throws IOException, InterruptedException {
+    List<String> commandArgs = new ArrayList<>(List.of("-m", "pip", "install"));
+    commandArgs.addAll(packages);
+    ProcessBuilder pipProcess = new ProcessBuilder(pythonCommand);
+    pipProcess.command().addAll(commandArgs);
+    Process proc = pipProcess.redirectErrorStream(true).start();
+    new Thread(() -> {
+      BufferedReader stdOutput = new BufferedReader(new
+              InputStreamReader(proc.getInputStream()));
+      String s;
+      try {
+        while ((s = stdOutput.readLine()) != null) {
+          handleStdOut(s + '\n');
+        }
+      } catch (IOException e) {
+        error(e);
+      }
+    }).start();
+    int ret = proc.waitFor();
+    if (ret != 0) {
+      error("Could not install packages, subprocess returned " + ret);
     }
   }
 

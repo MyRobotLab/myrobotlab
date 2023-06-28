@@ -47,6 +47,13 @@
                     </ul>
                 </div>
             </td>
+            <td>&nbsp;&nbsp;&nbsp;</td>
+            <td>
+                <button ng-click="installPackage()" class="btn btn-default">
+                    <span class="glyphicon glyphicon-file"/>Install new package
+                </button>
+            </td>
+
         </tr>
     </table>
 </div>
@@ -90,6 +97,20 @@
     <br/>
     <pre>{{log}}</pre>
 </div>
+
+<script type="text/ng-template" id="installPackage.html">
+    <div class="modal-header">
+        Enter Package Name
+    </div>
+    <div class="modal-body">
+        <input type="text" ng-keyup="checkEnterKey($event)" ng-model="packageName" class="form-control" placeholder="Package Name" autofocus>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="ok()">OK</button>
+        <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+    </div>
+</script>
+
 <script type="text/ng-template" id="addScript.html">
     <div class="modal-header">
       Enter Filename
