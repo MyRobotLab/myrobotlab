@@ -135,7 +135,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   transient protected Inbox inbox = null;
 
-  transient protected Outbox outbox = null;
+  protected Outbox outbox = null;
 
   protected String serviceVersion = null;
 
@@ -190,6 +190,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * a definition. However, since gson will not process statics - we are making
    * it a member variable
    */
+  // FIXME - this should be a map
   protected Map<String, String> interfaceSet;
 
   /**
@@ -671,7 +672,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     loadLocalizations();
 
     this.inbox = new Inbox(getFullName());
-    this.outbox = new Outbox(this);
+    this.outbox = new Outbox(getFullName());
 
     File versionFile = new File(getResourceDir() + fs + "version.txt");
     if (versionFile.exists()) {
@@ -1465,15 +1466,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public ServiceConfig setConfig(ServiceConfig config) {
     this.config = config;
     return config;
-  }
-
-  @Override
-  public void setConfigValue(String fieldname, Object value) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-      log.info("setting field name fieldname {} to {}", fieldname, value);
-
-      Field field = config.getClass().getDeclaredField(fieldname);
-      // field.setAccessible(true); should not need this - it "should" be public
-      field.set(config, value);
   }
 
   @Override
@@ -2785,6 +2777,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // FIXME - determine if only updating the Plan in memory is enough,
     // should we also make or update a config file - if the config path is set?
     info("updated %s name to %s", oldName, peer.name);
+  }
+  
+  /**
+   * get all the subscriptions to this service
+   */
+  public Map<String, List<MRLListener>>  getNotifyList(){
+    return getOutbox().getNotifyList();
   }
 
   /**
