@@ -47,7 +47,7 @@ angular.module('mrlapp.service').directive('serviceBody', ['peer', '$compile', '
                     newscope.toggleVirtual = function(virtual) {
                         var service = mrl.getService(scope.panel.name)
                         //service.isVirtual = !service.isVirtual
-                        mrl.sendTo(scope.panel.name, 'setVirtual', virtual)
+                        mrl.sendTo(scope.panel.name, 'setVirtual', !service.isVirtual)
                     }
 
                     newscope.showPeers = function(show) {
