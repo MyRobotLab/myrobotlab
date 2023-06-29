@@ -401,7 +401,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void writeMicroseconds(int uS);
 
   // for instance attachment
-  void attachServoController(String sc, Integer pin, Double pos, Double speed);
+  void attachServoController(String sc);
 
   /**
    * disable speed control and move the servos at full speed.

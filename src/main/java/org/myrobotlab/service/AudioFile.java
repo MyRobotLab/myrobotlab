@@ -560,6 +560,7 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
   }
 
   public double publishPeak(double peak) {
+    log.error("publishPeak {}", peak);
     return peak;
   }
   

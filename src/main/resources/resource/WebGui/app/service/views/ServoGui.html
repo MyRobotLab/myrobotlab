@@ -1,3 +1,4 @@
+
 <!-- ServoGui.html -->
 <div class="col-md-12">
     <uib-tabset class="max-view" active="activeTabIndex">
@@ -29,10 +30,7 @@
                         </tr>
                         <tr>
                             <td>
-                                <!-- controller FIXME - replace with attach directive -->
-                                <select ng-disabled="service.controller != null" class="form-control" ng-model="state.controller">
-                                    <option ng-repeat="controller in possibleControllers" value="{{controller}}">{{controller}} </option>
-                                </select>
+                               <attach options='servoOptions'/>          
                             </td>
                             <td>
                                 <!-- pin -->
@@ -42,8 +40,8 @@
                             </td>
                             <td>
                                 <!-- TODO - send pos ! ??? -->
-                                <button ng-show="!state.attached" class="btn btn-default" ng-click="attachController()">attach</button>
-                                <button ng-show="state.attached" class="btn btn-default" ng-click="msg.detach()">detach</button>
+                                <button ng-show="!service.isAttached" class="btn btn-default" ng-click="attachController()">attach</button>
+                                <button ng-show="service.isAttached" class="btn btn-default" ng-click="msg.detach()">detach</button>
                             </td>
                             <td>
                                 <toggle ng-model="service.enabled" class="miniBTN" title="Energize the servo" ng-change="service.enabled?msg.enable():msg.disable()" on="" off="" size="btn-lg"/></toggle>
@@ -203,3 +201,5 @@
         <input class="base-slider slider-width100" type="range" name="targetPos" ng-model="service.targetPos" min="0" max="180" ng-change="moveTo(service.targetPos)" ng-mousedown="disableUpdates()" ng-mouseup="enableUpdates()">
     </span>
 </div>
+
+

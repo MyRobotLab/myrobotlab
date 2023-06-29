@@ -3429,7 +3429,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     for (ServiceInterface si : getLocalServices().values()) {
       List<String> nlks = si.getNotifyListKeySet();
       for (int i = 0; i < nlks.size(); ++i) {
-        si.getOutbox().notifyList.clear();
+        si.getNotifyList().clear();
       }
     }
   }
@@ -4202,10 +4202,7 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
    *         name
    */
   static public String getFullName(String shortname) {
-    if (shortname == null) {
-      return null;
-    }
-    if (shortname.contains("@")) {
+    if (shortname == null || shortname.contains("@")) {
       // already long form
       return shortname;
     }

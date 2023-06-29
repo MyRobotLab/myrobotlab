@@ -560,12 +560,6 @@ public class DiyServo extends AbstractServo implements PinListener, ServiceLifeC
     this.encoderControl = encoder;
   }
 
-  @Override
-  public void attach(String pinArrayControlName, Integer pin) {
-    // myServo = (DiyServo) Runtime.getService(boundServiceName);
-    attach((PinArrayControl) Runtime.getService(pinArrayControlName), (int) pin);
-  }
-
   public void attach(PinArrayControl pinArrayControl, int pin) {
     this.pinArrayControl = pinArrayControl;
     if (pinArrayControl != null) {
@@ -586,8 +580,8 @@ public class DiyServo extends AbstractServo implements PinListener, ServiceLifeC
     // %s",pinArrayControl.getClass(), pinArrayControl.getName(),resolution));
 
     int rate = 1000 / sampleTime;
-    pinArrayControl.attachPinListener(this, pin);
-    pinArrayControl.enablePin(pin, rate);
+    pinArrayControl.attachPinListener(this);
+    pinArrayControl.enablePin(this.pin, rate);
     broadcastState();
   }
 

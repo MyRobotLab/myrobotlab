@@ -9,7 +9,7 @@
     <tr valign="top">
       <td style="width: 33.33%">
         Gesture
-        <br />
+        <br/>
         <select
           ng-model="state.selectedGestureFile"
           ng-change="msg.getGesture(state.selectedGestureFile);gestureName = state.selectedGestureFile"
@@ -58,6 +58,8 @@
           </option>
         </select>
 
+        <table>
+              <tr><td>
         <span class="input-group-btn">
         <button class="btn btn-default" ng-click="addPoseToGesture()">
           <span class="glyphicon glyphicon-plus" />
@@ -73,7 +75,8 @@
           <span class="glyphicon glyphicon-remove red"></span>
         </button>              
         </span>
-            <br/>
+              </td></tr>
+      <tr><td>
         <span class="input-group-btn">
         <button class="btn btn-default" title="Stop" ng-click="msg.stop()">
           stop
@@ -87,9 +90,9 @@
           <span class="glyphicon glyphicon-play text-success"></span>
         </button>
         </span>
-<!--
+      </td></tr>
+        </table>
       <button class="btn btn-default" ng-click="saveGesture(gestureName)">Save</button>
--->
             
       </td>
       <td>

@@ -381,6 +381,33 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     imageDisplay = (ImageDisplay) startPeer("imageDisplay");
     imageDisplay.closeAll();
   }
+  
+  public void closeHands() {
+    invoke("publishMoveLeftHand", 180.0, 180.0, 180.0, 180.0, 180.0, null);
+    invoke("publishMoveRightHand", 180.0, 180.0, 180.0, 180.0, 180.0, null);
+  }
+  
+  public void closeLeftHand() {
+    invoke("publishMoveLeftHand", 180, 180, 180, 180, 180, null);
+  }
+
+  public void closeRightHand() {
+    invoke("publishMoveRightHand", 180, 180, 180, 180, 180, null);    
+  }
+  
+  public void openHands() {
+    invoke("publishMoveLeftHand", 0.0, 0.0, 0.0, 0.0, 0.0, null);
+    invoke("publishMoveRightHand", 0.0, 0.0, 0.0, 0.0, 0.0, null);
+  }
+  
+  public void openLeftHand() {
+    invoke("publishMoveLeftHand", 0.0, 0.0, 0.0, 0.0, 0.0, null);
+  }
+
+  public void openRightHand() {
+    invoke("publishMoveRightHand", 0.0, 0.0, 0.0, 0.0, 0.0, null);    
+  }
+  
 
   public void cycleGestures() {
     // if not loaded load -
@@ -983,7 +1010,12 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   public void onPirOn() {
     invoke("publishFlash", new LedDisplayData(0, 0, 220));
     // pirOn event vs wake event
-    invoke("publishSystemEvent", "WAKE");
+    ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
+    chatBot.getTopic();
+    String topic = chatBot.getPredicate("topic");
+    if (!"WAKE".equals(topic)) {
+      invoke("publishSystemEvent", "WAKE");
+    }
   }
 
   // GOOD GOOD GOOD - LOOPBACK - flexible and replacable by python
@@ -1116,10 +1148,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
           break;
         case "left":
           break;
-        case "leftArm":
+        case "leftArm": // FIXME - put in config
           addListener("publishMoveLeftArm", name, "onMoveArm");
           break;
-        case "leftHand":
+        case "leftHand": // FIXME - put in config
           addListener("publishMoveLeftHand", name, "onMoveHand");
           break;
         case "mouth":

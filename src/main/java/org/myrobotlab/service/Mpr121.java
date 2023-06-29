@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.abstracts.AbstractMicrocontroller.PinListenerFilter;
 import org.myrobotlab.service.config.Mpr121Config;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.PinData;
@@ -534,7 +536,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     return list;
   }
 
-  @Override
+  @Deprecated
   public int read(int address) {
     return pinIndex.get(address).getValue();
   }
@@ -566,35 +568,6 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     return pinData;
   }
 
-  public void attach(String listener, int pinAddress) {
-    attachPinListener((PinListener) Runtime.getService(listener), pinAddress);
-  }
-
-  @Override
-  public void attachPinListener(PinListener listener, int pinAddress) {
-    String name = listener.getName();
-
-    if (listener.isLocal()) {
-      List<PinListener> list = null;
-      if (pinListeners.containsKey(pinAddress)) {
-        list = pinListeners.get(pinAddress);
-      } else {
-        list = new ArrayList<PinListener>();
-      }
-      list.add(listener);
-      pinListeners.put(pinAddress, list);
-
-    } else {
-      // setup for pub sub
-      // FIXME - there is an architectual problem here
-      // locally it works - but remotely - outbox would need to know
-      // specifics of
-      // the data its sending
-      addListener("publishPin", name, "onPin");
-    }
-
-  }
-
   @Override
   public void attachPinArrayListener(PinArrayListener listener) {
     pinArrayListeners.put(listener.getName(), listener);
@@ -603,21 +576,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
 
   @Deprecated /* use enablePin(String pin) */
   public void enablePin(int address) {
-    if (controller == null) {
-      error("must be connected to enable pins");
-      return;
-    }
-
-    log.info("enablePin {}", address);
-    PinDefinition pin = pinIndex.get(address);
-    pin.setEnabled(true);
-    invoke("publishPinDefinition", pin);
-
-    if (!isPublishing) {
-      log.info("Starting a new publisher instance");
-      publisher = new Publisher(getName());
-      publisher.start();
-    }
+    enablePin(address + "", 1);
   }
 
   @Override
@@ -700,11 +659,9 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     return pinDef;
   }
 
-  @Override
-  // TODO Implement individula sample rates per pin
+  @Deprecated
   public void enablePin(int address, int rate) {
-    setSampleRate(rate);
-    enablePin(address);
+    enablePin(address + "", rate);
   }
 
   // This section contains all the new attach logic
@@ -820,7 +777,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     return null;
   }
 
-  @Override
+  @Deprecated
   public PinDefinition getPin(int address) {
     if (pinIndex.containsKey(address)) {
       return pinIndex.get(address);
@@ -829,8 +786,18 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   @Override
-  public void attach(PinListener listener, String pin) {
-    attachPinListener(listener, getPin(pin).getAddress());
+  public void attachPinListener(PinListener listener) {
+    String name = listener.getName();
+    addListener("publishPin", name);
+    PinListenerFilter filter = new PinListenerFilter(listener);
+    outbox.addFilter(name, CodecUtils.getCallbackTopicName("publishPin"), filter);
+  }
+  
+  @Override
+  public void detachPinListener(PinListener listener) {
+    String name = listener.getName();
+    removeListener("publishPin", name);
+    outbox.removeFilter(name, CodecUtils.getCallbackTopicName("publishPin"));
   }
 
   @Override
@@ -845,7 +812,23 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
 
   @Override
   public void enablePin(String pin, int rate) {
-    enablePin(getPin(pin).getAddress(), rate);
+    setSampleRate(rate);
+    
+    if (controller == null) {
+      error("must be connected to enable pins");
+      return;
+    }
+
+    log.info("enablePin {}", pin);
+    PinDefinition pinDef = pinMap.get(pin);
+    pinDef.setEnabled(true);
+    invoke("publishPinDefinition", pinDef);
+
+    if (!isPublishing) {
+      log.info("Starting a new publisher instance");
+      publisher = new Publisher(getName());
+      publisher.start();
+    }
   }
 
   @Override

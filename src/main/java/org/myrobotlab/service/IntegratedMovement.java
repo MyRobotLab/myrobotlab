@@ -223,7 +223,9 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     // they need to go so that their part they where attach to
     // move by the input degree
     Servo mtorso = (Servo) Runtime.start("mtorso", "Servo");
-    mtorso.attach(arduino, 26, 90.0);
+    mtorso.setPin(26);
+    mtorso.setPosition(90);
+    mtorso.attach(arduino);
     mtorso.map(15.0, 165.0, 148.0, 38.0);
     // mtorso.map(89.9,90.1,93.1,92.9);
     mtorso.setRest(90.0);
@@ -231,69 +233,91 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     mtorso.setVelocity(13.0);
     mtorso.moveTo(90.0);
     Servo ttorso = (Servo) Runtime.start("ttorso", "Servo");
-    ttorso.attach(arduino, 7, 90.0);
+    ttorso.setPin(7);
+    ttorso.setPosition(90);
+    ttorso.attach(arduino);
     ttorso.map(80.0, 100.0, 92.0, 118.0);
     // ttorso.setInverted(False)
     // #ttorso.setMinMax(85,125)
     ttorso.setVelocity(13.0);
     ttorso.moveTo(90.0);
     Servo omoplate = (Servo) Runtime.start("omoplate", "Servo");
-    omoplate.attach(arduino, 11, 10.0);
+    omoplate.setPin(11);
+    omoplate.setPosition(10);
+    omoplate.attach(arduino);
     omoplate.map(10.0, 70.0, 10.0, 70.0);
     omoplate.setVelocity(15.0);
     // #omoplate.setMinMax(10,70)
     omoplate.moveTo(10.0);
     Servo Romoplate = (Servo) Runtime.start("Romoplate", "Servo");
-    Romoplate.attach(arduino, 31, 10.0);
+    Romoplate.setPin(31);
+    Romoplate.setPosition(10);
+    Romoplate.attach(arduino);
     Romoplate.map(10.0, 70.0, 10.0, 70.0);
     Romoplate.setVelocity(15.0);
     // #omoplate.setMinMax(10,70)
     Romoplate.moveTo(10.0);
     Servo shoulder = (Servo) Runtime.start("shoulder", "Servo");
-    shoulder.attach(arduino, 26, 30.0);
+    shoulder.setPin(26);
+    shoulder.setPosition(30);
+    shoulder.attach(arduino);
     shoulder.map(0.0, 180.0, 0.0, 180.0);
     // #shoulder.setMinMax(0,180)
     shoulder.setVelocity(14.0);
     shoulder.moveTo(30.0);
     Servo Rshoulder = (Servo) Runtime.start("Rshoulder", "Servo");
-    Rshoulder.attach(arduino, 6, 30.0);
+    Rshoulder.setPin(6);
+    Rshoulder.setPosition(30);
+    Rshoulder.attach(arduino);
     Rshoulder.map(0.0, 180.0, 0.0, 180.0);
     // #shoulder.setMinMax(0,180)
     Rshoulder.setVelocity(14.0);
     Rshoulder.moveTo(30.0);
     Servo rotate = (Servo) Runtime.start("rotate", "Servo");
-    rotate.attach(arduino, 9, 90.0);
+    rotate.setPin(9);
+    rotate.setPosition(90);
+    rotate.attach(arduino);
     rotate.map(46.0, 160.0, 46.0, 160.0);
     // #rotate.setMinMax(46,180)
     rotate.setVelocity(18.0);
     rotate.moveTo(90.0);
     Servo Rrotate = (Servo) Runtime.start("Rrotate", "Servo");
-    Rrotate.attach(arduino, 29, 90.0);
+    Rrotate.setPin(29);
+    Rrotate.setPosition(90);
+    Rrotate.attach(arduino);
     Rrotate.map(46.0, 160.0, 46.0, 160.0);
     // #rotate.setMinMax(46,180)
     Rrotate.setVelocity(18.0);
     Rrotate.moveTo(90.0);
     Servo bicep = (Servo) Runtime.start("bicep", "Servo");
-    bicep.attach(arduino, 8, 10.0);
+    bicep.setPin(8);
+    bicep.setPosition(10);
+    bicep.attach(arduino);
     bicep.map(5.0, 60.0, 5.0, 80.0);
     bicep.setVelocity(26.0);
     // #bicep.setMinMax(5,90)
     bicep.moveTo(10.0);
     Servo Rbicep = (Servo) Runtime.start("Rbicep", "Servo");
-    Rbicep.attach(arduino, 28, 10.0);
+    Rbicep.setPin(28);
+    Rbicep.setPosition(10);
+    Rbicep.attach(arduino);
     Rbicep.map(5.0, 60.0, 5.0, 80.0);
     Rbicep.setVelocity(26.0);
     // #bicep.setMinMax(5,90)
     Rbicep.moveTo(10.0);
     Servo wrist = (Servo) Runtime.start("wrist", "Servo");
-    wrist.attach(arduino, 7, 90.0);
+    wrist.setPin(7);
+    wrist.setPosition(90);
+    wrist.attach(arduino);
     // #wrist.map(45,135,45,135)
     wrist.map(0.0, 180.0, 0.0, 180.0);
     wrist.setVelocity(26.0);
     // #bicep.setMinMax(5,90)
     wrist.moveTo(90.0);
     Servo Rwrist = (Servo) Runtime.start("Rwrist", "Servo");
-    Rwrist.attach(arduino, 27, 90.0);
+    Rwrist.setPin(27);
+    Rwrist.setPosition(90);
+    Rwrist.attach(arduino);
     // #wrist.map(45,135,45,135)
     wrist.map(0.0, 180.0, 0.0, 180.0);
     Rwrist.setVelocity(26.0);

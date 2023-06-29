@@ -1,10 +1,11 @@
+
 <div class="btn-group" uib-dropdown>
     <button type="button" class="btn btn-default">{{options.controllerTitle}} <b>{{mrl.getShortName(options.attachName)}}</b></button>
-    <button id="single-button" ng-disabled="options.isAttached" type="button" class="btn btn-default" uib-dropdown-toggle>
+    <button id="single-button" ng-click="loadServices()"  type="button" class="btn btn-default" uib-dropdown-toggle>
         <span class="caret"></span>
     </button>
     <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
-        <li ng-repeat="c in mrl.interfaceToPossibleServices[interfaceName]">
+        <li ng-repeat="c in possibleServices">
             <a href="" ng-click="attach(c)">{{mrl.getShortName(c)}}</a>
         </li>
     </ul>

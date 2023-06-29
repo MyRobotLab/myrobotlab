@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -54,8 +53,8 @@ import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.myrobotlab.service.interfaces.NeoPixelController;
+import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinArrayListener;
-import org.myrobotlab.service.interfaces.PinArrayPublisher;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.PortConnector;
@@ -72,7 +71,7 @@ import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 import org.slf4j.Logger;
 
 public class Arduino extends AbstractMicrocontroller implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController,
-    UltrasonicSensorController, PortConnector, RecordControl, PortListener, PortPublisher, EncoderController, PinArrayPublisher, MrlCommPublisher, ServoStatusPublisher {
+    UltrasonicSensorController, PortConnector, RecordControl, PortListener, PortPublisher, EncoderController, PinArrayControl, MrlCommPublisher, ServoStatusPublisher {
 
   transient public final static Logger log = LoggerFactory.getLogger(Arduino.class);
 
@@ -234,13 +233,20 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * Routing Attach - routes ServiceInterface.attach(service) to appropriate
    * methods for this class
+   * 
+   * FIXME - each one of these typed functions could simply provide the name of the
+   * interface that desires to attach.  Then routing would be done easily by
+   * invoke("attach" + InterfaceName, name)
+   * 
+   * If further refactored, the interface might be able to provide the implementation of
+   * setting up pub/sub/listeners
+   * 
    */
   @Override
   public void attach(String name) throws Exception {
     ServiceInterface service = Runtime.getService(name);
     if (ServoControl.class.isAssignableFrom(service.getClass())) {
       attachServoControl((ServoControl) service);
-      ((ServoControl) service).attach(this);
       return;
     } else if (MotorControl.class.isAssignableFrom(service.getClass())) {
       attachMotorControl((MotorControl) service);
@@ -265,20 +271,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public void attach(ServoControl servo, int pin) throws Exception {
     servo.setPin(pin);
     attachServoControl(servo);
-  }
-
-  /**
-   * String interface - this allows you to easily use url api requests like
-   * /attach/nameOfListener/3
-   * 
-   * @param listener
-   *          the listener
-   * @param address
-   *          the address
-   */
-  @Deprecated /* using single attach parameter attach(String) */
-  public void attach(String listener, int address) {
-    attachPinListener((PinListener) Runtime.getService(listener), address);
   }
 
   @Override
@@ -449,7 +441,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       msg.servoAttach(dm.getId(), pin, uS, (int) speed, servo.getName());
       msg.servoAttachPin(dm.getId(), pin);
     }
-    servo.attach(this);
+    if (!servo.isAttached(getName())) {
+      send(servo.getName(), "attach", getName());
+    }
   }
 
   /**
@@ -678,6 +672,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   // > deviceDetach/deviceId
   @Override
   public void detach(Attachable device) {
+    super.detach(device);
     if (device == null) {
       return;
     }
@@ -687,13 +682,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     if (!isAttached(device)) {
       log.info("device {} not attached", device.getName());
       return;
-    }
-
-    // when a Servo detaches it wants to send a "disable()"
-    // so the Servo needs to detach first - and send that disable,
-    // before we detach it from this arduino
-    if (device instanceof ServoControl && device.isAttached(this)) {
-      device.detach(this);
     }
 
     log.info("detaching device {}", device.getName());
@@ -787,7 +775,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       warn("pin definition %s does not exist", pinName);
       return;
     }
-    
+
     pinDef.setEnabled(false);
     msg.disablePin(pinDef.getAddress());
   }
@@ -867,19 +855,24 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     boardInfoEnabled = enabled;
   }
 
+  public void enablePin(String pin) {
+    PinDefinition pinDef = getPin(pin);
+    enablePin(pinDef.getPin(), 10);
+  }
+
   @Override
+  @Deprecated /* use enablePin(String) */
   public void enablePin(int address) {
-    enablePin(address, 0);
+    PinDefinition pinDef = getPin(address);
+    enablePin(pinDef.getPin(), 1);
   }
 
   // > enablePin/address/type/b16 rate
   @Override
+  @Deprecated /* use enablePin(String, int) */
   public void enablePin(int address, int rate) {
     PinDefinition pinDef = getPin(address);
-    msg.enablePin(address, getMrlPinType(pinDef), rate);
-    pinDef.setEnabled(true);
-    pinDef.setPollRate(rate);
-    invoke("publishPinDefinition", pinDef); // broadcast pin change
+    enablePin(pinDef.getPin(), rate);
   }
 
   /**
@@ -889,7 +882,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public void enablePin(String pin, int rate) {
     if (isConnected()) {
       PinDefinition pinDef = getPin(pin);
-      enablePin(pinDef.getAddress(), rate);
+      msg.enablePin(pinDef.getAddress(), getMrlPinType(pinDef), rate);
+      pinDef.setEnabled(true);
+      pinDef.setPollRate(rate);
+      invoke("publishPinDefinition", pinDef); // broadcast pin change
     }
   }
 
@@ -1751,42 +1747,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       // update def with last value
       pinDef.setValue(value);
       pinArray[i] = pinData;
-
-      // handle individual pins
-      broadcast("publishPin", pinData);
-
-    }
-
-    // TODO: improve this logic so it doesn't something more effecient.
-    HashMap<String, PinData> pinDataMap = new HashMap<String, PinData>();
-    for (int i = 0; i < pinArray.length; i++) {
-      if (pinArray[i] != null && pinArray[i].pin != null) {
-        pinDataMap.put(pinArray[i].pin, pinArray[i]);
-      }
-    }
-
-    // FIXME !!! - simple pub/sub with broadcast like PinListener
-
-    for (String name : pinArrayListeners.keySet()) {
-      // put the pin data into a map for quick lookup
-      PinArrayListener pal = pinArrayListeners.get(name);
-      if (pal.getActivePins() != null && pal.getActivePins().length > 0) {
-        int numActive = pal.getActivePins().length;
-        PinData[] subArray = new PinData[numActive];
-        for (int i = 0; i < numActive; i++) {
-          String key = pal.getActivePins()[i];
-          if (pinDataMap.containsKey(key)) {
-            subArray[i] = pinDataMap.get(key);
-          } else {
-            subArray[i] = null;
-          }
-        }
-        // only the values that the listener is asking for.
-        pal.onPinArray(subArray);
-      } else {
-        // the full array
-        pal.onPinArray(pinArray);
-      }
+      invoke("publishPin", pinData);
     }
     return pinArray;
   }
@@ -2334,7 +2295,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       serial = (Serial) startPeer("serial");
       if (serial == null) {
         log.error("serial is null");
-      }      
+      }
       msg.setSerial(serial);
       serial.addByteListener(this);
     } else {
@@ -2366,11 +2327,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
       LoggingFactory.init(Level.INFO);
 
-      Runtime runtime = Runtime.getInstance();
-      runtime.saveAllDefaults();
-
       Runtime.start("arduino", "Arduino");
-      Runtime.start("webgui", "WebGui");
+      Runtime.start("python", "Python");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
 
       boolean isDone = true;
 
@@ -2447,8 +2408,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       // servo.load();
       log.info("rest is {}", servo.getRest());
       servo.save();
-      // servo.setPin(8);
-      servo.attach(mega, 13);
+      servo.setPin(13);
+      servo.attach(mega);
 
       servo.moveTo(90.0);
 

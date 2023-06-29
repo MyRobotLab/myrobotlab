@@ -27,6 +27,13 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
             _self.updateState(data)
             $scope.$apply()
             break
+        case 'onPinList':
+            $scope.pinList = []
+            for (var pinDef of data) {
+              $scope.pinList.push(pinDef.pin)
+            }
+            $scope.$apply()
+            break
         case 'onSense':
             console.info('onSense', data)
             $scope.service.active = data
@@ -41,6 +48,9 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
     _self.selectController = function(controller) {
         //$scope.service.controllerName = controller
         $scope.service.config.controller = controller
+        // get the pin list of the selected controller
+        msg.send('setPinArrayControl', controller)
+        msg.send('getPinList', controller)
     }
 
     $scope.options = {
@@ -53,6 +63,7 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
     $scope.attach = function() {
         msg.send('setPin', $scope.service.config.pin)
         msg.send('attach', $scope.service.config.controller)
+        msg.send('enable')
     }
 
     $scope.detach = function() {
@@ -76,7 +87,24 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
         msg.send('broadcastState')
     }
 
+    $scope.getActiveImage = function(){
+        if ($scope.service.active){
+            return '../../green.png'
+        } else if ($scope.service.active === false){
+            return '../../red.png'
+        } else{
+            // undefined / unknown
+            return '../../grey.png'
+        }
+    }
+
     msg.subscribe('publishSense')
+    msg.subscribe('getPinList')
+
+    if ($scope?.service?.config?.controller){
+        msg.send('getPinList', $scope.service.config.controller)
+    }
+    
     msg.subscribe(this)
 }
 ])

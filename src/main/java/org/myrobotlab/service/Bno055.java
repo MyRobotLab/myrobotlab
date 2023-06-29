@@ -1496,7 +1496,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   public void attachInterruptPin(PinArrayControl control, int pin) {
     pinControl = control;
     this.pin = String.format("%d", pin);
-    control.attachPinListener(this, pin);
+    control.attachPinListener(this);
   }
 
   @Override

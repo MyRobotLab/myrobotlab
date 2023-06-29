@@ -216,6 +216,8 @@ public class InMoov2Config extends ServiceConfig {
     // setup name references to different services
     WebkitSpeechRecognitionConfig ear = (WebkitSpeechRecognitionConfig) plan.get(getPeerName("ear"));
     ear.textListeners = new String[] { name + ".chatBot" };
+    ear.listening = true;
+    ear.recording = true;
 
     JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.get(getPeerName("simulator"));
     // FIXME - SHOULD USE RESOURCE DIR !
@@ -285,6 +287,10 @@ public class InMoov2Config extends ServiceConfig {
     simulator.nodes.put(name + ".rightHand.pinky2", new UserDataConfig(new MapperLinear(0.0, 180.0, 70.0, -10.0, true, false), "x"));
     simulator.nodes.put(name + ".rightHand.pinky3", new UserDataConfig(new MapperLinear(0.0, 180.0, 60.0, -10.0, true, false), "x"));
     simulator.cameraLookAt = name + ".torso.lowStom";
+    
+    simulator.listeners = new ArrayList<>();
+    simulator.listeners.add(new Listener("getSelectedPath", name + ".servoMixer", "onSelected"));
+
 
     FiniteStateMachineConfig fsm = (FiniteStateMachineConfig) plan.get(getPeerName("fsm"));
     // TODO - events easily gotten from InMoov data ?? auto callbacks in python
@@ -429,6 +435,10 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("setConfig", name + ".chatBot"));
     listeners.add(new Listener("getConfig", name + ".chatBot"));
     listeners.add(new Listener("setConfigValue", name + ".chatBot", "onConfig"));
+    
+    
+    // listeners.add(new Listener("publishLeftAr", name + ".audioPlayer"));
+    
 
     // remove the auto-added starts in the plan's runtime RuntimConfig.registry
     plan.removeStartsWith(name + ".");

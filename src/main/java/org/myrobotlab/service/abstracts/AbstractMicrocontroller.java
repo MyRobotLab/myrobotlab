@@ -8,6 +8,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
+import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.Microcontroller;
@@ -18,6 +21,33 @@ import org.myrobotlab.service.interfaces.PinListener;
 public abstract class AbstractMicrocontroller extends Service implements Microcontroller {
 
   private static final long serialVersionUID = 1L;
+  
+  /**
+   * A filter class. This class is used to provide a filter on a common publishing point.  In this case
+   * "publishPin".  The challenge with publishPin is all pins get published to all PinListeners, yet a
+   * PinListener typically only wants to listen to a single pin.  What this filter provides is a filter
+   * for that specific pin before the message gets enqueued on the outbox.  The filter is added when
+   * the subscription is processed, and its done in a general way that "any" filter could be provided to a subscription.
+   * This is a generalized and simple way to provide filtering on subscriptions.
+   * 
+   * @author GroG
+   *
+   */
+  public static class PinListenerFilter implements Outbox.FilterInterface{
+    PinListener listener = null;
+    
+    public PinListenerFilter(PinListener listener) {
+      this.listener = listener;
+    }
+
+    @Override
+    public boolean filter(Message msg) {
+      if ("onPin".equals(msg.method) && msg.data != null && msg.data.length > 0 && ((PinData)msg.data[0]).pin.equals(listener.getPin())) {
+        return false;
+      }
+      return true;
+    }
+  }
 
   /**
    * board type - UNO Mega etc..
@@ -89,28 +119,17 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
   }
 
   @Override
-  @Deprecated /*
-               * use attachPinListener(PinListener listener) GET RID OF THIS !
-               */
-  public void attachPinListener(PinListener listener, int address) {
-    PinDefinition pin = getPin(address);
-    listener.setPin(pin.getPinName());
-    attachPinListener(listener);
-  }
-
-  /**
-   * attach a pin listener who listens to a specific pin
-   */
   public void attachPinListener(PinListener listener) {
     String name = listener.getName();
     addListener("publishPin", name);
+    PinListenerFilter filter = new PinListenerFilter(listener);
+    outbox.addFilter(name, CodecUtils.getCallbackTopicName("publishPin"), filter);
   }
-
-  @Override
-  @Deprecated /* set pin then call attach(listener) */
-  public void attach(PinListener listener, String pin) {
-    PinDefinition pinDef = getPin(pin);
-    attachPinListener(listener, pinDef.getAddress());
+  
+  public void detachPinListener(PinListener listener) {
+    String name = listener.getName();
+    removeListener("publishPin", name);
+    outbox.removeFilter(name, CodecUtils.getCallbackTopicName("publishPin"));
   }
 
   @Override
@@ -142,8 +161,7 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
     enablePin(getPin(pin).getAddress(), rate);
   }
 
-  @Override
-  @Deprecated /* enablePin(String, int) */
+  @Deprecated /* use enablePin(String, int) */
   abstract public void enablePin(int address, int rate);
 
   @Override
@@ -164,7 +182,6 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
     return null;
   }
 
-  @Override
   @Deprecated /* use getPin(String pin) */
   public PinDefinition getPin(int address) {
     if (addressIndex.containsKey(address)) {
@@ -198,7 +215,6 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
     return pinDef;
   }
 
-  @Override
   @Deprecated /* use read(String pin) */
   public int read(int address) {
     // FIXME - this would be "last" read

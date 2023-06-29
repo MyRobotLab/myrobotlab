@@ -14,6 +14,7 @@ public class PirConfig extends ServiceConfig {
 
   /**
    * poll rate in Hz
+   * FIXME change to double or float to support 0.01 Hz
    */
   public int rate = 1;
   
