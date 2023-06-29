@@ -1,12 +1,12 @@
 package org.myrobotlab.service;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.StaticType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.Level;
@@ -106,10 +106,9 @@ public class Gpt3 extends Service implements TextListener, TextPublisher, Uttera
 
         String msg = http.postJson(c.token, c.url, json);
 
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        Map<String, Object> payload = (Map) CodecUtils.fromJson(msg, LinkedHashMap.class);
-        @SuppressWarnings({ "unchecked", "rawtypes" })
+        Map<String, Object> payload = CodecUtils.fromJson(msg, new StaticType<>() {});
         
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         Map<String,Object> errors = (Map)payload.get("error");
         if (errors != null) {          
           error((String)errors.get("message"));          
@@ -168,10 +167,11 @@ public class Gpt3 extends Service implements TextListener, TextPublisher, Uttera
   }
   
   /**
-   * Overriden error to also publish the errors
-   * probably would be a better solution to self subscibe to errors and 
+   * Overridden error to also publish the errors
+   * probably would be a better solution to self subscribe to errors and 
    * have the subscriptions publish utterances/responses/text
    */
+  @Override
   public Status error(String error) {
     Status status = super.error(error);
     invoke("publishText", error);    
