@@ -248,8 +248,8 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
         this.onRegistered(servicePanelList[index])
     }
 
-    $scope.saveGesture = function() {
-        gestureName = $scope.state.selectedGestureFile
+    $scope.saveGesture = function(gestureName) {
+        // gestureName = $scope.state.selectedGestureFile
         $scope.state.currentGesture.name = gestureName
         if ($scope.gestureFiles.includes(gestureName)){
             // saving current file

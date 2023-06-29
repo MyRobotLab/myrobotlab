@@ -1234,6 +1234,18 @@
     <version>0.10.9.7</version>
     <scope>provided</scope>
   </dependency>
+  <dependency>
+    <groupId>org.bytedeco</groupId>
+    <artifactId>cpython-platform</artifactId>
+    <version>3.11.3-1.5.9</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.bytedeco</groupId>
+    <artifactId>cpython</artifactId>
+    <version>3.11.3-1.5.9</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Py4j end -->
 
 <!-- Python begin -->
@@ -1733,6 +1745,10 @@
         <excludes>
           <exclude>**/*.java</exclude>
         </excludes>
+      </testResource>
+      <testResource>
+        <directory>src/main/resources</directory>
+        <targetPath>${project.basedir}</targetPath>
       </testResource>
     </testResources>
 

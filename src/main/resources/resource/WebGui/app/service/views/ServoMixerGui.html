@@ -1,5 +1,5 @@
 
-<pre>{{ state | json: 2 }}</pre>
+<!-- <pre>{{ state | json: 2 }}</pre> -->
 <div class="col-md-8">
   <h3>{{state.selectedGestureFile}} {{state.playingPose.name}} </h3>
   <table class="tableController table-striped table-bordered">
@@ -20,9 +20,10 @@
           <option ng-repeat="x in gestureFiles" ng-value="{{x}}">{{x}}</option>
         </select>
         <span class="input-group-btn">
+              <!--
         <button class="btn btn-default" ng-click="showGestureSave=!showGestureSave">
           <span class="glyphicon glyphicon-plus"></span>
-        </button>
+        </button> -->
         <button class="btn btn-default" ng-click="removeGesture(state.selectedGestureFile)" title="Delete" >
           <span class="glyphicon glyphicon-remove red"></span>
         </button>
@@ -32,8 +33,8 @@
           
         </span>
 
-      <input ng-show="showGestureSave" class="form-control" type="text" ng-model="gestureName" name="gestureName" id="gestureName" ng-init="" placeholder="Gesture Name" />
-      <button ng-show="showGestureSave" class="btn btn-default" ng-click="saveGesture(gestureName)">Save</button>
+      <input  class="form-control" type="text" ng-model="gestureName" name="gestureName" id="gestureName" ng-init="" placeholder="Gesture Name" />
+      <button  class="btn btn-default" ng-click="saveGesture(gestureName)">Save</button>
             <br/>
         Content
         <br />
@@ -86,9 +87,9 @@
           <span class="glyphicon glyphicon-play text-success"></span>
         </button>
         </span>
-
+<!--
       <button class="btn btn-default" ng-click="saveGesture(gestureName)">Save</button>
-
+-->
             
       </td>
       <td>

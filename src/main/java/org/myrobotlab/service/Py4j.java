@@ -1,7 +1,10 @@
 package org.myrobotlab.service;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,7 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bytedeco.javacpp.Loader;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.StreamGobbler;
@@ -142,6 +148,11 @@ public class Py4j extends Service implements GatewayServerListener {
    */
   protected Py4jClient pythonProcess = null;
 
+  /**
+   * The base command to launch the Python interpreter without any arguments.
+   */
+  protected transient String pythonCommand = "python";
+
   public Py4j(String n, String id) {
     super(n, id);
   }
@@ -154,9 +165,8 @@ public class Py4j extends Service implements GatewayServerListener {
    *          - name of the script
    * @param code
    *          - code block
-   * @throws IOException
    */
-  public void addScript(String scriptName, String code) throws IOException {
+  public void addScript(String scriptName, String code) {
     Py4jConfig c = (Py4jConfig)config;
     File script = new File(c.scriptRootDir + fs + scriptName);
 
@@ -172,7 +182,7 @@ public class Py4j extends Service implements GatewayServerListener {
   /**
    * removes script from memory of openScripts
    * 
-   * @param scriptName
+   * @param scriptName The name of the script to close.
    */
   public void closeScript(String scriptName) {
     openedScripts.remove(scriptName);
@@ -184,7 +194,7 @@ public class Py4j extends Service implements GatewayServerListener {
     error(e);
   }
 
-  @Override /** TODO add a one shot addTask to call handler.setName(name) */
+  @Override /* TODO add a one shot addTask to call handler.setName(name) */
   public void connectionStarted(Py4JServerConnection gatewayConnection) {
     try {
       log.info("connectionStarted {}", gatewayConnection.toString());
@@ -207,7 +217,7 @@ public class Py4j extends Service implements GatewayServerListener {
   /**
    * One of 3 methods supported on the MessageHandler() callbacks
    * 
-   * @param code
+   * @param code The Python code to execute in the interpreter.
    */
   public void exec(String code) {
     try {
@@ -243,6 +253,7 @@ public class Py4j extends Service implements GatewayServerListener {
    */
   public List<String> getScriptList() throws IOException {
     List<String> sorted = new ArrayList<>();
+    System.out.println(CodecUtils.toJson(config));
     Py4jConfig c = (Py4jConfig)config;
     List<File> files = FileIO.getFileList(c.scriptRootDir, true);
     for (File file : files) {
@@ -254,6 +265,12 @@ public class Py4j extends Service implements GatewayServerListener {
     return sorted;
   }
 
+  /**
+   * Sink for standard output from Py4j-related subprocesses.
+   * This method immediately publishes the output on {@link #publishStdOut(String)}.
+   *
+   * @param msg The output from a py4j related subprocess.
+   */
   public void handleStdOut(String msg) {
     invoke("publishStdOut", msg);
   }
@@ -282,7 +299,7 @@ public class Py4j extends Service implements GatewayServerListener {
       serviceScript = FileIO.toString(filename);
     } catch (Exception e) {
       error("%s.py not  found", serviceType);
-      log.error("getting service file script example threw {}", e);
+      log.error("getting service file script example threw", e);
     }
     addScript(serviceType + ".py", serviceScript);
   }
@@ -402,32 +419,95 @@ public class Py4j extends Service implements GatewayServerListener {
 
       // Specify the Python script path and arguments
       String pythonScript = new File(getResourceDir() + fs + "Py4j.py").getAbsolutePath();
-      String[] pythonArgs = {};
+
+      // Script requires full name as first command line argument
+      String[] pythonArgs = {getFullName()};
 
       // Build the command to start the Python process
-      ProcessBuilder processBuilder = new ProcessBuilder("python", pythonScript);
+      ProcessBuilder processBuilder;
+      if (((Py4jConfig) config).useBundledPython) {
+        String venv = getDataDir() + fs + "venv";
+        pythonCommand = (Platform.getLocalInstance().isWindows()) ? venv + fs + "Scripts" + fs + "python.exe" : venv + fs + "bin" + fs + "python";
+        if (!FileIO.checkDir(venv)) {
+          // We don't have an initialized virtual environment, so lets make one
+          // and install our required packages
+          String python = Loader.load(org.bytedeco.cpython.python.class);
+          String venvLib = new File(python).getParent() + fs + "lib" + fs + "venv" + fs + "scripts" + fs + "nt";
+          if (Platform.getLocalInstance().isWindows()) {
+            // Super hacky workaround, venv works differently on Windows and requires these two
+            // files, but they are not distributed in bare-bones Python or in any pip packages.
+            // So we copy them where it expects, and it seems to work now
+            FileIO.copy(getResourceDir() + fs + "python.exe", venvLib + fs + "python.exe");
+            FileIO.copy(getResourceDir() + fs + "pythonw.exe", venvLib + fs + "pythonw.exe");
+          }
+          ProcessBuilder installProcess = new ProcessBuilder(python, "-m", "venv", venv);
+          int ret = installProcess.inheritIO().start().waitFor();
+          if (ret != 0) {
+            error("Could not create virtual environment, subprocess returned {}. If on Windows, make sure there is a python.exe file in {}", ret, venvLib);
+            return;
+          }
+
+          installProcess = new ProcessBuilder(pythonCommand, "-m", "pip", "install", "py4j");
+          ret = installProcess.inheritIO().start().waitFor();
+          if (ret != 0) {
+            error("Could not install package, subprocess returned " + ret);
+            return;
+          }
+
+        }
+
+        // Virtual environment should exist, so lets use that python
+      } else {
+        // Just use the system python
+        pythonCommand = "python";
+      }
+      processBuilder = new ProcessBuilder(pythonCommand, pythonScript);
       processBuilder.redirectErrorStream(true);
       processBuilder.command().addAll(List.of(pythonArgs));
 
       // Start the Python process
       pythonProcess = new Py4jClient(this, processBuilder.start());
 
-      // CRITICAL SLEEP ! - next call will be a handler method
-      // it will take a little time for the python interpreter to start
-      // the MessageHandler() code to execute and the python
-      // client establish a connection ... TODO: better solution would probably
-      // to be
-      // do a "one shot addTask" to connection started .. it CANNOT be called
-      // directly in the onConnection event
-      // otherwise it will deadlock
-      sleep(1500);
-
-      // sets the name of the message handler
-      // calling the handler when the connection is not established
-      handler.setName(getName());
-
     } catch (Exception e) {
       error(e);
+    }
+  }
+
+  /**
+   * Install a list of packages into the environment Py4j is running in.
+   * Py4j does not need to be running/connected to call this method as it
+   * spawns a new subprocess to invoke Pip. Output from pip is echoed
+   * via {@link #handleStdOut(String)}.
+   * 
+   * @param packages The list of packages to install. Must be findable by Pip
+   * @throws IOException If an I/O error occurs running Pip.
+   */
+  public void installPipPackages(List<String> packages) throws IOException {
+    List<String> commandArgs = new ArrayList<>(List.of("-m", "pip", "install"));
+    commandArgs.addAll(packages);
+    ProcessBuilder pipProcess = new ProcessBuilder(pythonCommand);
+    pipProcess.command().addAll(commandArgs);
+    Process proc = pipProcess.redirectErrorStream(true).start();
+    new Thread(() -> {
+      BufferedReader stdOutput = new BufferedReader(new
+              InputStreamReader(proc.getInputStream()));
+      String s;
+      try {
+        while ((s = stdOutput.readLine()) != null) {
+          handleStdOut(s + '\n');
+        }
+      } catch (IOException e) {
+        error(e);
+      }
+    }).start();
+    int ret = 0;
+    try {
+      ret = proc.waitFor();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+    if (ret != 0) {
+      error("Could not install packages, subprocess returned " + ret);
     }
   }
 
