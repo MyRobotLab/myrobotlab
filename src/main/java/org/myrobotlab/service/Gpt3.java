@@ -114,12 +114,6 @@ public class Gpt3 extends Service implements TextListener, TextPublisher, Uttera
           error((String)errors.get("message"));          
         }        
         @SuppressWarnings({ "unchecked", "rawtypes" })
-        
-        Map<String,Object> errors = (Map)payload.get("error");
-        if (errors != null) {          
-          error((String)errors.get("message"));          
-        }        
-        @SuppressWarnings({ "unchecked", "rawtypes" })
         List<Object> choices = (List) payload.get("choices");
         if (choices != null && choices.size() > 0) {
           @SuppressWarnings({ "unchecked", "rawtypes" })
