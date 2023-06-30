@@ -832,7 +832,10 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
       // fd.enable();
       long startTs = System.currentTimeMillis();
       while (!ret.keySet().contains("face") && System.currentTimeMillis() - startTs < timeout) {
-        ret.putAll(blockingClassification.poll(timeout, TimeUnit.MILLISECONDS));
+        Map<String, List<Classification>> faces = blockingClassification.poll(timeout, TimeUnit.MILLISECONDS);
+        if (faces != null) {
+          ret.putAll(faces);
+        }
       }
     } catch (InterruptedException e) {
     }

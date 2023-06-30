@@ -886,29 +886,6 @@ public class ProgramAB extends Service
         }
       }
     }
-
-    // check for 'local' bots in /data/ProgramAB dir
-
-    // check for dev bots
-    if (getResourceDir().startsWith("src")) {
-      log.info("in dev mode resourceDir starts with src");
-      // automatically look in ../ProgramAB for the cloned repo
-      // look for dev paths in ../ProgramAB
-      File devRepoCheck = new File("../ProgramAB/resource/ProgramAB/bots");
-      if (devRepoCheck.exists() && devRepoCheck.isDirectory()) {
-        log.info("found repo {} adding bot paths", devRepoCheck.getAbsoluteFile());
-        File[] listOfFiles = devRepoCheck.listFiles();
-        for (int i = 0; i < listOfFiles.length; i++) {
-          if (listOfFiles[i].isFile()) {
-          } else if (listOfFiles[i].isDirectory()) {
-            paths.add(listOfFiles[i].getAbsolutePath());
-          }
-        }
-      } else {
-        log.error("ProgramAB is a service module clone it at the same level as myrobotlab");
-      }
-    }
-
     return paths;
   }
 

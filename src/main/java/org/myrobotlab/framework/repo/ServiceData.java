@@ -397,7 +397,8 @@ public class ServiceData implements Serializable {
 
   public boolean save(String filename) {
     try {
-
+      File dirs = new File(filename).getParentFile();
+      dirs.mkdirs();
       FileOutputStream fos = new FileOutputStream(filename);
       String json = CodecUtils.toJson(this);
       fos.write(json.getBytes());
