@@ -28,7 +28,6 @@ public class Jme3App extends SimpleApplication {
     super(new StatsAppState(), new DebugKeysAppState(), new BasicProfilerState(false), new ScreenshotAppState("", System.currentTimeMillis()));
     this.jme = jme;
     // setShowSettings(true);
-    this.cam = null;
   }
 
   // FIXME NECESSARY ?!!?
