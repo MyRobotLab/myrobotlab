@@ -1276,7 +1276,7 @@
     <groupId>com.pi4j</groupId>
     <artifactId>pi4j-native</artifactId>
     <version>1.4</version>
-    <scope>provided</scope> 
+    <scope>provided</scope>
     <type>pom</type>
   </dependency>
 <!-- RasPi end -->
