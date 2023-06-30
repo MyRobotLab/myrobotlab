@@ -2,7 +2,7 @@ package org.myrobotlab.service.interfaces;
 
 import java.io.Serializable;
 
-public class PinDefinition extends SensorDefinition implements Serializable {
+public class PinDefinition implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
@@ -92,7 +92,6 @@ public class PinDefinition extends SensorDefinition implements Serializable {
   int pollRateHz = 0;
 
   public PinDefinition(String serviceName, int address, String pin) {
-    super(serviceName);
     this.address = address;
     this.pin = pin;
   }

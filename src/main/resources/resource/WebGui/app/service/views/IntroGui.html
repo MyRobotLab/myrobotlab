@@ -27,7 +27,7 @@
                 <a id="arduinoButton" class="IntroButtons preventIntroDragSelect" title="A tutorial of how to start with Arduino and MRLComm.ino" ng-click="setPanel('arduino')">
                     <img src="../Intro/img/arduino.png"/>&nbsp;
                 </a>
-                <div id="inmoovButton" class="IntroButtons preventIntroDragSelect" title="Access and begin with InMoov" ng-click="msg.execScript('InMoov01_start.py');mrl.changeTab('i01')">
+                <div id="inmoovButton" class="IntroButtons preventIntroDragSelect" title="Access and begin with InMoov" ng-click="mrl.sendTo('runtime','start','i01','InMoov2');mrl.changeTab('i01')">
                     <img src="../Intro/img/inmoov.png"/>&nbsp;
                 </div>
                 <div id="serialButton" class="IntroButtons preventIntroDragSelect" title="Setup your serial devices" ng-click="setPanel('serial')">
