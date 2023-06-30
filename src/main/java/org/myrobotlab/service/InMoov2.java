@@ -124,7 +124,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   String lastGestureExecuted;
 
   Long lastPirActivityTime;
-  
+
   LedDisplayData ledBoot = new LedDisplayData(0, 220, 0);
 
   LedDisplayData ledPir = new LedDisplayData();
@@ -163,24 +163,26 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   transient WebGui webgui;
 
+  public boolean configStarted = false;
+
   public InMoov2(String n, String id) {
     super(n, id);
-    Runtime.getInstance().attachServiceLifeCycleListener(getName());    
+    Runtime.getInstance().attachServiceLifeCycleListener(getName());
   }
 
   public void addTextListener(TextListener service) {
     // CORRECT WAY ! - no direct reference - just use the name in a subscription
     addListener("publishText", service.getName());
   }
-  
+
   public void syncConfigToPredicates() {
-    
+
   }
 
   public InMoov2Config publishConfig() {
     return (InMoov2Config) config;
   }
-  
+
   @Override
   public ServiceConfig apply(ServiceConfig c) {
     InMoov2Config config = (InMoov2Config) super.apply(c);
@@ -211,19 +213,19 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     } catch (Exception e) {
       error(e);
     }
-    
+
     invoke("publishConfig", c);
-    
-    return c;    
+
+    return c;
   }
 
-  // TODO- Hook to get config event published
-  // public void applyConfig() {
-  // super.apply();
-  // log.error("applyConfig()");
-  // // always getResponse !
-  // speak("InMoov apply config");
-  // }
+  public void loadInitScripts() {
+    try {
+      loadScripts(getResourceDir() + fs + "init");
+    } catch (IOException e) {
+      error(e);
+    }
+  }
 
   @Override
   public void attachTextListener(String name) {
@@ -447,7 +449,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     subscribe("python", "publishStatus", this.getName(), "onGestureStatus");
     startedGesture(gesture);
     lastGestureExecuted = gesture;
-    Python python = (Python)Runtime.getService("python");
+    Python python = (Python) Runtime.getService("python");
     if (python == null) {
       error("python service not started");
       return null;
@@ -906,7 +908,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       error("I cannot execute %s, please check logs", lastGestureExecuted);
     }
     finishedGesture(lastGestureExecuted);
-    
+
     unsubscribe("python", "publishStatus", this.getName(), "onGestureStatus");
   }
 
@@ -1047,12 +1049,13 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
               cfg.currentBotName = locale;
             }
           }
-          
+
           // synching predicates - is a session available ?
           // do you need switch session from ProgramAB ??
           chatBot.onConfig(config);
-          
-          // FIXME !!! Do not startPeers !! there is no reason, this is controlled by Config !!!
+
+          // FIXME !!! Do not startPeers !! there is no reason, this is
+          // controlled by Config !!!
           // startPeer("htmlFilter");
           break;
         case "controller3":
@@ -1910,7 +1913,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     if (c.bootUpPlaySound) {
       invoke("publishPlayAudioFile", getResourceDir() + fs + "system" + fs + "sounds" + fs + "startupsound.mp3");
     }
-    
+
     invoke("publishFlash");
 
     // process all currently running services
