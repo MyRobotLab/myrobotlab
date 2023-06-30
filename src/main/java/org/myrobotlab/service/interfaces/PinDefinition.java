@@ -2,17 +2,7 @@ package org.myrobotlab.service.interfaces;
 
 import java.io.Serializable;
 
-import org.myrobotlab.framework.interfaces.NameProvider;
-
-/**
- * The purpose of this class is to provide a POJO representation of a pin and its capabilities.
- * 
- * FIXME ! - this should just be a POJO with public members and zero complexity
- * 
- * @author GroG
- *
- */
-public class PinDefinition  implements Serializable {
+public class PinDefinition implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
