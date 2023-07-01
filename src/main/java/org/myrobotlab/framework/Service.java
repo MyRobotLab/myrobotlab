@@ -493,7 +493,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return resourceDir;
   }
-
   /**
    * non static get resource path return the path to a resource - since the root
    * can change depending if in debug or runtime - it gets the appropriate root
