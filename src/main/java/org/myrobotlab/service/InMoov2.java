@@ -139,7 +139,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   String lastGestureExecuted;
 
   Long lastPirActivityTime;
-  
+
   LedDisplayData ledBoot = new LedDisplayData(0, 220, 0);
 
   LedDisplayData ledPir = new LedDisplayData();
@@ -193,13 +193,14 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   public InMoov2(String n, String id) {
     super(n, id);
+    Runtime.getInstance().attachServiceLifeCycleListener(getName());
   }
 
   public void addTextListener(TextListener service) {
     // CORRECT WAY ! - no direct reference - just use the name in a subscription
     addListener("publishText", service.getName());
   }
-  
+
   public void syncConfigToPredicates() {
 
   }
@@ -207,7 +208,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   public InMoov2Config publishConfig() {
     return (InMoov2Config) config;
   }
-  
+
   @Override
   public ServiceConfig apply(ServiceConfig c) {
     InMoov2Config config = (InMoov2Config) super.apply(c);
@@ -493,7 +494,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     subscribe("python", "publishStatus", this.getName(), "onGestureStatus");
     startedGesture(gesture);
     lastGestureExecuted = gesture;
-    Python python = (Python)Runtime.getService("python");
+    Python python = (Python) Runtime.getService("python");
     if (python == null) {
       error("python service not started");
       return null;
@@ -952,7 +953,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       error("I cannot execute %s, please check logs", lastGestureExecuted);
     }
     finishedGesture(lastGestureExecuted);
-    
+
     unsubscribe("python", "publishStatus", this.getName(), "onGestureStatus");
   }
 
@@ -1102,7 +1103,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
         configStarted = true;
       }
 
-      invoke("publishSystemEvent", "STARTED " + peerKey);
+      if (peerKey != null) {
+        // if not 1st level peer don't bother publishing a system event
+        invoke("publishSystemEvent", "STARTED " + peerKey);
+      }
 
       switch (peerKey) {
         case "audioPlayer":
