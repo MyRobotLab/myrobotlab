@@ -1034,7 +1034,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
         configStarted = true;
       }
 
-      invoke("publishSystemEvent", "STARTED " + peerKey);
+      if (peerKey != null) {
+        // if not 1st level peer don't bother publishing a system event
+        invoke("publishSystemEvent", "STARTED " + peerKey);
+      }
 
       switch (peerKey) {
         case "audioPlayer":
