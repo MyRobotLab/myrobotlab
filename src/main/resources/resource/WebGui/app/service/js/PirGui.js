@@ -78,8 +78,10 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
     }
 
     $scope.setPin = function() {
-        msg.send('setPin', $scope.service.config.pin)
-        msg.send('broadcastState')
+        if ($scope.service.config.pin){
+            msg.send('setPin', $scope.service.config.pin)
+            msg.send('broadcastState')
+        }
     }
 
     $scope.disable = function() {

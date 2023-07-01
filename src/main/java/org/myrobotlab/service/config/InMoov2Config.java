@@ -305,7 +305,7 @@ public class InMoov2Config extends ServiceConfig {
     fsm.transitions.add(new Transition("awake", "sleep", "sleeping"));
 
     PirConfig pir = (PirConfig) plan.get(getPeerName("pir"));
-    pir.pin = "23";
+    pir.pin = "D23";
     pir.controller = name + ".left";
     pir.listeners = new ArrayList<>();
     pir.listeners.add(new Listener("publishPirOn", name, "onPirOn"));

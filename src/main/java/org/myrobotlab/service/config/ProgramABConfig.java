@@ -37,7 +37,7 @@ public class ProgramABConfig extends ServiceConfig {
    * a new session if available, this means a config/{username}.predicates.txt 
    * will need to exist with a topic field
    */
-  public String startTopic = "default";
+  public String startTopic = "unknown";
 
   @Override
   public Plan getDefault(Plan plan, String name) {
