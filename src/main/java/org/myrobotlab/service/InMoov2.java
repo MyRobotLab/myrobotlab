@@ -859,21 +859,24 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     moveHead((double) neck, (double) rothead, null, null, null, (double) rollNeck);
   }
 
-  public void moveHeadBlocking(Double neck, Double rothead) throws InterruptedException, TimeoutException {
+  public void moveHeadBlocking(Double neck, Double rothead)  {
     moveHeadBlocking(neck, rothead, null);
   }
 
-  public void moveHeadBlocking(Double neck, Double rothead, Double rollNeck) throws InterruptedException, TimeoutException {
+  public void moveHeadBlocking(Double neck, Double rothead, Double rollNeck)  {
     moveHeadBlocking(neck, rothead, null, null, null, rollNeck);
   }
 
-  public void moveHeadBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw) throws InterruptedException, TimeoutException {
+  public void moveHeadBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw)  {
     moveHeadBlocking(neck, rothead, eyeX, eyeY, jaw, null);
   }
 
-  public void moveHeadBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) throws InterruptedException, TimeoutException {
-    sendBlocking(getPeerName("head"), "moveToBlocking", neck, rothead, eyeX, eyeY, jaw, rollNeck);
-    log.info("here");
+  public void moveHeadBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck)  {
+    try {
+      sendBlocking(getPeerName("head"), "moveToBlocking", neck, rothead, eyeX, eyeY, jaw, rollNeck);
+    } catch (Exception e) {
+      error(e);
+    }
   }
 
   public void moveLeftArm(Double bicep, Double rotate, Double shoulder, Double omoplate) {
