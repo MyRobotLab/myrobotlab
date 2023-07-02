@@ -50,18 +50,18 @@ import org.slf4j.Logger;
 
 public class InMoov2 extends Service implements ServiceLifeCycleListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
+  public static class Health {
+    double batteryLevel = 0;
+    List<Status> errors = new ArrayList<>();
+  }
+
   public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
 
   public static LinkedHashMap<String, String> lpVars = new LinkedHashMap<String, String>();
 
   private static final long serialVersionUID = 1L;
-
-  static String speechRecognizer = "WebkitSpeechRecognition";
   
-  /**
-   * Health pojo for health checking and reporting
-   */
-  final protected Health health = new Health();
+  static String speechRecognizer = "WebkitSpeechRecognition";
 
 
   /**
@@ -103,6 +103,13 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return true;
   }
 
+
+
+  /**
+   * Health pojo for health checking and reporting
+   */
+  final protected Health health = new Health();
+
   @Deprecated /* avoid direct references */
   transient ProgramAB chatBot;
 
@@ -138,8 +145,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   protected Long lastPirActivityTime;
 
-  Long lastPirActivityTime;
-
   LedDisplayData ledBoot = new LedDisplayData(0, 220, 0);
 
   LedDisplayData ledPir = new LedDisplayData();
@@ -154,15 +159,15 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   protected Map<String, Locale> locales = null;
 
   protected int maxInactivityTimeSeconds = 120;
-
+  
   protected transient SpeechSynthesis mouth;
 
+  // transient JMonkeyEngine simulator;
+
   boolean mute = false;
-  
+
   @Deprecated /* avoid direct references */
   transient OpenCV opencv;
-
-  // transient JMonkeyEngine simulator;
 
   @Deprecated /* avoid direct references */
   transient Pir pir;
@@ -186,10 +191,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   private boolean pythonLibsInitialized = false;
 
-  public static class Health {
-    double batteryLevel = 0;
-    List<Status> errors = new ArrayList<>();
-  }
+  protected String lastGestureExecuted;
 
   public InMoov2(String n, String id) {
     super(n, id);
@@ -199,14 +201,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   public void addTextListener(TextListener service) {
     // CORRECT WAY ! - no direct reference - just use the name in a subscription
     addListener("publishText", service.getName());
-  }
-
-  public void syncConfigToPredicates() {
-
-  }
-
-  public InMoov2Config publishConfig() {
-    return (InMoov2Config) config;
   }
 
   @Override
@@ -382,7 +376,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     imageDisplay = (ImageDisplay) startPeer("imageDisplay");
     imageDisplay.closeAll();
   }
-  
+
   public void closeHands() {
     invoke("publishMoveLeftHand", 180.0, 180.0, 180.0, 180.0, 180.0, null);
     invoke("publishMoveRightHand", 180.0, 180.0, 180.0, 180.0, 180.0, null);
@@ -391,24 +385,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   public void closeLeftHand() {
     invoke("publishMoveLeftHand", 180, 180, 180, 180, 180, null);
   }
-
+  
   public void closeRightHand() {
     invoke("publishMoveRightHand", 180, 180, 180, 180, 180, null);    
   }
-  
-  public void openHands() {
-    invoke("publishMoveLeftHand", 0.0, 0.0, 0.0, 0.0, 0.0, null);
-    invoke("publishMoveRightHand", 0.0, 0.0, 0.0, 0.0, 0.0, null);
-  }
-  
-  public void openLeftHand() {
-    invoke("publishMoveLeftHand", 0.0, 0.0, 0.0, 0.0, 0.0, null);
-  }
-
-  public void openRightHand() {
-    invoke("publishMoveRightHand", 0.0, 0.0, 0.0, 0.0, 0.0, null);    
-  }
-  
 
   public void cycleGestures() {
     // if not loaded load -
@@ -432,7 +412,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       }
     }
   }
-
+  
   public void disable() {
     sendToPeer("head", "disable");
     sendToPeer("rightHand", "disable");
@@ -441,7 +421,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     sendToPeer("leftArm", "disable");
     sendToPeer("torso", "disable");
   }
-
+  
   public void displayFullScreen(String src) {
     try {
       if (imageDisplay == null) {
@@ -462,6 +442,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     sendToPeer("leftArm", "enable");
     sendToPeer("torso", "enable");
   }
+  
 
   /**
    * Single place for InMoov2 service to execute arbitrary code - needed
@@ -581,6 +562,11 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   public InMoov2Head getHead() {
     return (InMoov2Head) getPeer("head");
+  }
+
+  public Health getHealth() {
+    health.batteryLevel = Runtime.getBatteryLevel();
+    return health;
   }
 
   /**
@@ -704,17 +690,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     sendToPeer("torso", "setSpeed", 20.0, 20.0, 20.0);
   }
 
-  /**
-   * execute python scripts in the init directory on startup of the service
-   * 
-   * @throws IOException
-   */
-  public void loadInitScripts() throws IOException {
-    // FIXME !!! THIS SHOULD BE DATADIR !!!!
-    loadScripts(getResourceDir() + fs + "init");
-    loadScripts(getDataDir() + fs + "init");
-  }
-
   public boolean isCameraOn() {
     if (opencv != null) {
       if (opencv.isCapturing()) {
@@ -776,6 +751,17 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       return false;
     }
     return true;
+  }
+
+  /**
+   * execute python scripts in the init directory on startup of the service
+   * 
+   * @throws IOException
+   */
+  public void loadInitScripts() throws IOException {
+    // FIXME !!! THIS SHOULD BE DATADIR !!!!
+    loadScripts(getResourceDir() + fs + "init");
+    loadScripts(getDataDir() + fs + "init");
   }
 
   /**
@@ -944,6 +930,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     if (!status.equals(Status.success()) && !status.equals(Status.warn("Python process killed !"))) {
       error("I cannot execute %s, please check logs", lastGestureExecuted);
     }
+    
     finishedGesture(lastGestureExecuted);
 
     unsubscribe("python", "publishStatus", this.getName(), "onGestureStatus");
@@ -984,14 +971,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     // fire fsm events ?
     // do defaults ?
     return state;
-  }
-
-  @Override
-  public Status publishStatus(Status status) {
-    if (status.isError()) {
-      health.errors.add(status);
-    }
-    return status;
   }
 
   public OpenCVData onOpenCVData(OpenCVData data) {
@@ -1262,9 +1241,17 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return topic;
   }
 
-  public String publishPython(String code) {
-    log.info("publishPython({})", code);
-    return code;
+  public void openHands() {
+    invoke("publishMoveLeftHand", 0.0, 0.0, 0.0, 0.0, 0.0, null);
+    invoke("publishMoveRightHand", 0.0, 0.0, 0.0, 0.0, 0.0, null);
+  }
+
+  public void openLeftHand() {
+    invoke("publishMoveLeftHand", 0.0, 0.0, 0.0, 0.0, 0.0, null);
+  }
+
+  public void openRightHand() {
+    invoke("publishMoveRightHand", 0.0, 0.0, 0.0, 0.0, 0.0, null);    
   }
 
   // TODO FIX/CHECK this, migrate from python land
@@ -1311,51 +1298,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     invoke("publishMessage", msg);
   }
 
-  public String publishStartConfig(String configName) {
-    info("config %s started", configName);
-    invoke("publishEvent", "CONFIG STARTED " + configName);
-    return configName;
-  }
-
-  public String publishFinishedConfig(String configName) {
-    info("config %s finished", configName);
-    invoke("publishEvent", "CONFIG LOADED " + configName);
-
-    return configName;
-  }
-
-  /**
-   * publishing point for desired sounds to be played
-   * 
-   * @param filepath
-   * @return
-   */
-  public String publishPlayAudioFile(String filepath) {
-    return filepath;
-  }
-
-  
-  /**
-   * plays random file on certain notifications
-   * 
-   * @param dirpath
-   * @return
-   */
-  public String publishPlayRandomAudioFile(String dirpath) {
-    return dirpath;
-  }
-
-  public String publishStartConfig(String configName) {
-    info("config %s started", configName);
-    invoke("publishSystemEvent", "CONFIG STARTED " + configName);
-    return configName;
-  }
-
-  public String publishFinishedConfig(String configName) {
-    info("config %s finished", configName);
-    invoke("publishSystemEvent", "CONFIG LOADED " + configName);
-
-    return configName;
+  public InMoov2Config publishConfig() {
+    return (InMoov2Config) config;
   }
 
   /**
@@ -1368,19 +1312,11 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return configList;
   }
 
-  /**
-   * event publisher for the fsm - although other services potentially can
-   * consume and filter this event channel
-   * 
-   * @param event
-   * @return
-   */
-  public String publishSystemEvent(String event) {
-    InMoov2Config c = (InMoov2Config) config;
-    if (c.customSound) {
-      invoke("publishPlayRandomAudioFile", getResourceDir() + fs + "system" + fs + "sounds" + fs + "Notifications");
-    }
-    return String.format("SYSTEMEVENT %s", event);
+  public String publishFinishedConfig(String configName) {
+    info("config %s finished", configName);
+    invoke("publishEvent", "CONFIG LOADED " + configName);
+
+    return configName;
   }
 
   /**
@@ -1393,6 +1329,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return led;
   }
 
+  
   public String publishHeartbeat() {
     invoke("publishFlash", new LedDisplayData(150, 0, 0));
     return getName();
@@ -1497,6 +1434,60 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     map.put("midStom", midStom);
     map.put("lowStom", lowStom);
     return map;
+  }
+
+  /**
+   * publishing point for desired sounds to be played
+   * 
+   * @param filepath
+   * @return
+   */
+  public String publishPlayAudioFile(String filepath) {
+    return filepath;
+  }
+
+  /**
+   * plays random file on certain notifications
+   * 
+   * @param dirpath
+   * @return
+   */
+  public String publishPlayRandomAudioFile(String dirpath) {
+    return dirpath;
+  }
+
+  public String publishPython(String code) {
+    log.info("publishPython({})", code);
+    return code;
+  }
+
+  public String publishStartConfig(String configName) {
+    info("config %s started", configName);
+    invoke("publishSystemEvent", "CONFIG STARTED " + configName);
+    return configName;
+  }
+
+  @Override
+  public Status publishStatus(Status status) {
+    if (status.isError()) {
+      health.errors.add(status);
+    }
+    return status;
+  }
+
+  /**
+   * event publisher for the fsm - although other services potentially can
+   * consume and filter this event channel
+   * 
+   * @param event
+   * @return
+   */
+  public String publishSystemEvent(String event) {
+    InMoov2Config c = (InMoov2Config) config;
+    if (c.customSound) {
+      invoke("publishPlayRandomAudioFile", getResourceDir() + fs + "system" + fs + "sounds" + fs + "Notifications");
+    }
+    return String.format("SYSTEMEVENT %s", event);
   }
 
   /**
@@ -1736,6 +1727,11 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     setTorsoSpeed(topStom, midStom, lowStom);
   }
 
+  // -----------------------------------------------------------------------------
+  // These are methods added that were in InMoov1 that we no longer had in
+  // InMoov2.
+  // From original InMoov1 so we don't loose the
+
   public void setVoice(String name) {
     if (mouth != null) {
       mouth.setVoice(name);
@@ -1743,11 +1739,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       speakBlocking(String.format("%s %s", get("SETLANG"), name));
     }
   }
-
-  // -----------------------------------------------------------------------------
-  // These are methods added that were in InMoov1 that we no longer had in
-  // InMoov2.
-  // From original InMoov1 so we don't loose the
 
   public void sleeping() {
     log.error("sleeping");
@@ -1798,22 +1789,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   @Deprecated /* use config to start appropriate components */
   public void startAll() throws Exception {
     startAll(null, null);
-  }
-
-  @Deprecated /* use config to start appropriate components */
-  public void startAll(String leftPort, String rightPort) throws Exception {
-    startMouth();
-    // startChatBot();
-
-    // startHeadTracking();
-    // startEyesTracking();
-    // startOpenCV();
-    startEar();
-
-    startServos();
-    // startMouthControl(head.jaw, mouth);
-
-    speakBlocking(get("STARTINGSEQUENCE"));
   }
 
   // public void startBrain() {
@@ -1886,6 +1861,22 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   // return chatBot;
   // }
 
+  @Deprecated /* use config to start appropriate components */
+  public void startAll(String leftPort, String rightPort) throws Exception {
+    startMouth();
+    // startChatBot();
+
+    // startHeadTracking();
+    // startEyesTracking();
+    // startOpenCV();
+    startEar();
+
+    startServos();
+    // startMouthControl(head.jaw, mouth);
+
+    speakBlocking(get("STARTINGSEQUENCE"));
+  }
+
   public SpeechRecognizer startEar() {
 
     ear = (SpeechRecognizer) startPeer("ear");
@@ -1907,6 +1898,11 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       gestureAlreadyStarted = true;
       // RobotCanMoveRandom = false;
     }
+  }
+
+  public void startHealthCheck() {
+    InMoov2Config c = (InMoov2Config) config;
+    addTask(c.healthCheckTimerMs, "getHealth");
   }
 
   public void startHeartbeat() {
@@ -2092,12 +2088,20 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     p.stop();
   }
 
+  public void stopHealthCheck() {
+    purgeTask("getHealth");
+  }
+
   public void stopHeartbeat() {
     purgeTask("publishHeartbeat");
   }
 
   public void stopNeopixelAnimation() {
     sendToPeer("neopixel", "clear");
+  }
+
+  public void syncConfigToPredicates() {
+
   }
 
   public void systemCheck() {
@@ -2134,21 +2138,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     sendToPeer("leftArm", "waitTargetPos");
     sendToPeer("torso", "waitTargetPos");
   }
-
-  public Health getHealth() {
-    health.batteryLevel = Runtime.getBatteryLevel();
-    return health;
-  }
-
-  public void startHealthCheck() {
-    InMoov2Config c = (InMoov2Config) config;
-    addTask(c.healthCheckTimerMs, "getHealth");
-  }
-
-  public void stopHealthCheck() {
-    purgeTask("getHealth");
-  }
-
+  
   public static void main(String[] args) {
     try {
 
@@ -2232,5 +2222,5 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     } catch (Exception e) {
       log.error("main threw", e);
     }
-  }
+  }  
 }
