@@ -32,6 +32,12 @@ build/
 /.settings
 /src/main/resources/resource/WebGui/react
 /src/main/resources/resource/Vertx/app
+
+# ignore all resources from seperate modular projects
+/src/main/resources/resource/ProgramAB
+/src/main/resources/resource/InMoov2
+/src/main/resources/resource/SpotMicro
+
 /data
 /resource
 /bin
