@@ -115,18 +115,6 @@ public class Vision {
     return false;
   }
 
-  /**
-   * @return check if robot do eyesTracking or headTracking
-   */
-  public boolean isTracking() {
-    if (instance.getEyesTracking() != null && !instance.getEyesTracking().isIdle()) {
-      return true;
-    }
-    if (instance.getHeadTracking() != null && !instance.getHeadTracking().isIdle()) {
-      return true;
-    }
-    return false;
-  }
 
   /**
    * used by gestures, to not block if using openCV...
