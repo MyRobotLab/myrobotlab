@@ -1247,17 +1247,17 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     log.info("onTopic({})", topic);
     String callback = "on" + topic.newTopic.substring(0, 1).toUpperCase() + topic.newTopic.substring(1) + "(runtime.getService('" + getName() + "'))";
 
-    if (!pythonLibsInitialized) {
-      StringBuilder init_myrobotlab = new StringBuilder("import myrobotlab\n");
-      init_myrobotlab.append("myrobotlab.connect()\n");
-      invoke("publishPython", init_myrobotlab.toString());
-
-      StringBuilder init_inmoov2 = new StringBuilder("import inmoov2\n");
-      init_inmoov2.append("inmoov2.start('" + getName() + "')\n");
-      invoke("publishPython", init_inmoov2.toString());
-
-      pythonLibsInitialized = false;
-    }
+//    if (!pythonLibsInitialized) {
+//      StringBuilder init_myrobotlab = new StringBuilder("import myrobotlab\n");
+//      init_myrobotlab.append("myrobotlab.connect()\n");
+//      invoke("publishPython", init_myrobotlab.toString());
+//
+//      StringBuilder init_inmoov2 = new StringBuilder("import inmoov2\n");
+//      init_inmoov2.append("inmoov2.start('" + getName() + "')\n");
+//      invoke("publishPython", init_inmoov2.toString());
+//
+//      pythonLibsInitialized = false;
+//    }
 
     // not sure about publishPython ...
     // do want an onState( name

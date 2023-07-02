@@ -1114,6 +1114,11 @@ public class ProgramAB extends Service
     if (c.currentUserName != null) {
       setCurrentUserName(c.currentUserName);
     }
+    
+    if (c.startTopic != null) {
+      setTopic(c.startTopic);  
+    }
+    
 
     return c;
   }
