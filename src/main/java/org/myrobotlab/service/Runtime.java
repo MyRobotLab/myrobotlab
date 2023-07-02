@@ -32,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
@@ -3940,6 +3941,15 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
       }
     }
     return filteredTypes;
+  }
+  
+  /**
+   * Returns current status list - which is a combination of the
+   * lastest errors, warns and infos
+   * @return
+   */
+  public Queue<Status> getStatusList(){
+    return statusList;
   }
 
   /**

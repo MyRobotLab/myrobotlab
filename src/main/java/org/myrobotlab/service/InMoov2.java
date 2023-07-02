@@ -1435,17 +1435,43 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     map.put("lowStom", lowStom);
     return map;
   }
-
+  
   /**
-   * publishing point for desired sounds to be played
+   * Play an audio resource - the only difference between this method
+   * and publishPlayAudioFile is this function adds the resource prefix to it.
+   * So, if the resource dir is changed to ../InMoov/resource ..
+   * then publishPlayAudioFile will be ../InMoov/resource/notifications/startupsound.mp3
+   * @param resource - resource to play
+   * @return
+   */
+  public String publishPlay(String resource) {
+    String ret = getResourceDir() + fs + resource;
+    invoke("publishPlayAudioFile", ret);
+    return ret;
+  }  
+  
+  /**
+   * publishing point for desired sounds to be played.
+   * Full "relative" path of file relative to cwd
    * 
-   * @param filepath
+   * @param filepath - relative path file to play
    * @return
    */
   public String publishPlayAudioFile(String filepath) {
     return filepath;
   }
 
+  /**
+   * 
+   * @param resource
+   * @return
+   */
+  public String publishPlayRandom(String resource) {
+    String ret = getResourceDir() + fs + resource;
+    invoke("publishPlayRandomAudioFile", ret);
+    return ret;
+  }
+  
   /**
    * plays random file on certain notifications
    * 
