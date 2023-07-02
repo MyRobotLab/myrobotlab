@@ -123,9 +123,9 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   transient Tracking eyesTracking;
 
   // waiting controable threaded gestures we warn user
-  boolean gestureAlreadyStarted = false;
+  protected boolean gestureAlreadyStarted = false;
 
-  Set<String> gestures = new TreeSet<String>();
+  protected Set<String> gestures = new TreeSet<String>();
 
   @Deprecated /* avoid direct references */
   transient Tracking headTracking;
@@ -136,7 +136,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   @Deprecated /* avoid direct references */
   transient ImageDisplay imageDisplay;
 
-  String lastGestureExecuted;
+  protected Long lastPirActivityTime;
 
   Long lastPirActivityTime;
 
@@ -151,11 +151,11 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   /**
    * supported locales
    */
-  Map<String, Locale> locales = null;
+  protected Map<String, Locale> locales = null;
 
-  int maxInactivityTimeSeconds = 120;
+  protected int maxInactivityTimeSeconds = 120;
 
-  transient SpeechSynthesis mouth;
+  protected transient SpeechSynthesis mouth;
 
   boolean mute = false;
   
@@ -571,10 +571,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return (InMoov2Arm) getPeer(side + "Arm");
   }
 
-  public Tracking getEyesTracking() {
-    return eyesTracking;
-  }
-
   public InMoov2Hand getHand(String side) {
     if (!"left".equals(side) && !"right".equals(side)) {
       error("side must be left or right - instead of %s", side);
@@ -585,10 +581,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   public InMoov2Head getHead() {
     return (InMoov2Head) getPeer("head");
-  }
-
-  public Tracking getHeadTracking() {
-    return headTracking;
   }
 
   /**
@@ -1319,6 +1311,19 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     invoke("publishMessage", msg);
   }
 
+  public String publishStartConfig(String configName) {
+    info("config %s started", configName);
+    invoke("publishEvent", "CONFIG STARTED " + configName);
+    return configName;
+  }
+
+  public String publishFinishedConfig(String configName) {
+    info("config %s finished", configName);
+    invoke("publishEvent", "CONFIG LOADED " + configName);
+
+    return configName;
+  }
+
   /**
    * publishing point for desired sounds to be played
    * 
@@ -1995,6 +2000,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
     // chatbot getresponse attached to publishEvent
     addListener("publishEvent", getPeerName("chatBot"), "getResponse");
+
+    // chatbot getresponse attached to publishEvent
+    addListener("publishEvent", getPeerName("chatBot"), "getResponse");
+
 
     try {
       // copy config if it doesn't already exist
