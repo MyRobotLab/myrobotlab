@@ -34,6 +34,7 @@ import org.myrobotlab.programab.Session;
 import org.myrobotlab.service.config.ProgramABConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
+import org.myrobotlab.service.data.TopicChange;
 import org.myrobotlab.service.data.Utterance;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.LogPublisher;
@@ -955,29 +956,6 @@ public class ProgramAB extends Service
         }
       }
     }
-
-    // check for 'local' bots in /data/ProgramAB dir
-
-    // check for dev bots
-    if (getResourceDir().startsWith("src")) {
-      log.info("in dev mode resourceDir starts with src");
-      // automatically look in ../ProgramAB for the cloned repo
-      // look for dev paths in ../ProgramAB
-      File devRepoCheck = new File("../ProgramAB/resource/ProgramAB/bots");
-      if (devRepoCheck.exists() && devRepoCheck.isDirectory()) {
-        log.info("found repo {} adding bot paths", devRepoCheck.getAbsoluteFile());
-        File[] listOfFiles = devRepoCheck.listFiles();
-        for (int i = 0; i < listOfFiles.length; i++) {
-          if (listOfFiles[i].isFile()) {
-          } else if (listOfFiles[i].isDirectory()) {
-            paths.add(listOfFiles[i].getAbsolutePath());
-          }
-        }
-      } else {
-        log.error("ProgramAB is a service module clone it at the same level as myrobotlab");
-      }
-    }
-
     return paths;
   }
 
@@ -1320,7 +1298,7 @@ public class ProgramAB extends Service
     for (Session s : sessions.values()) {
       if (s.chat == chat) {
         // found session saving predicates
-        invoke("publishChangePredicate", s, chat, predicateName, result);
+        invoke("publishPredicate", s, predicateName, result);
         s.savePredicates();
         return;
       }
@@ -1328,13 +1306,27 @@ public class ProgramAB extends Service
     error("could not find session to save predicates");
   }
 
-  public PredicateEvent publishChangePredicate(Session session, Chat chat, String name, String value) {
+  /**
+   * Predicate updates are published here.  Topic (one of the most important predicate change) is also published
+   * when it changes. Session is needed to extract current user and bot this is relevant to.
+   * @param session - session where the predicate change occurred
+   * @param name - name of predicate
+   * @param value - new value of predicate
+   * @return
+   */
+  public PredicateEvent publishPredicate(Session session, String name, String value) {
     PredicateEvent event = new PredicateEvent();
     event.id = String.format("%s<->%s", session.userName, session.botInfo.name);
     event.userName = session.userName;
     event.botName = session.botInfo.name;
     event.name = name;
     event.value = value;
+    
+    if ("topic".equals(name) && value != null && !value.equals(session.currentTopic)) {
+      invoke("publishTopic", new TopicChange(session.userName, session.botInfo.name, value, session.currentTopic));
+      session.currentTopic = value;
+    }
+    
     return event;
   }
 
@@ -1473,5 +1465,12 @@ public class ProgramAB extends Service
   public Utterance publishUtterance(Utterance utterance) {
     return utterance;
   }
+  
+  
+  public TopicChange publishTopic(TopicChange topicChange) {
+    return topicChange;
+  }
+  
+ 
 
 }

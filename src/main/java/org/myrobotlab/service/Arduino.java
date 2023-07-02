@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +22,7 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -365,20 +365,20 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     // the i2c bus here and in MrlComm
     // This will only handle the creation of i2cBus.
     if (i2cBus == null) {
-      i2cBus = new I2CBus(String.format("I2CBus%s", control.getDeviceBus()));
-      i2cBusAttach(i2cBus, Integer.parseInt(control.getDeviceBus()));
+      i2cBus = new I2CBus(String.format("I2CBus%s", control.getBus()));
+      i2cBusAttach(i2cBus, Integer.parseInt(control.getBus()));
     }
 
     // This part adds the service to the mapping between
     // busAddress||DeviceAddress
     // and the service name to be able to send data back to the invoker
-    String key = String.format("%s.%s", control.getDeviceBus(), control.getDeviceAddress());
+    String key = String.format("%s.%s", control.getBus(), control.getAddress());
     I2CDeviceMap devicedata = new I2CDeviceMap();
     if (i2cDevices.containsKey(key)) {
-      log.error("Device {} {} {} already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName());
+      log.error("Device {} {} {} already exists.", control.getBus(), control.getAddress(), control.getName());
     } else {
-      devicedata.busAddress = control.getDeviceBus();
-      devicedata.deviceAddress = control.getDeviceAddress();
+      devicedata.busAddress = control.getBus();
+      devicedata.deviceAddress = control.getAddress();
       devicedata.control = control;
       i2cDevices.put(key, devicedata);
       control.attachI2CController(this);
@@ -1511,7 +1511,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   public String getBase64ZippedMrlComm() {
-    return Base64.getEncoder().encodeToString((getZippedMrlComm()));
+    return CodecUtils.toBase64(getZippedMrlComm());
   }
 
   public byte[] getZippedMrlComm() {

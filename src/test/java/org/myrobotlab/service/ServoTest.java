@@ -5,6 +5,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -273,10 +276,43 @@ public class ServoTest extends AbstractTest {
     // log.info("Move to blocking took {} milliseconds", delta);
     assertTrue("Servo should be enabled", servo01.isEnabled());
     assertFalse("Servo should not be moving now.", servo01.isMoving());
-    // Now let's wait for the idle disable timer to kick off + 1000ms
-    // TODO: figure out why smaller values like 100ms cause this test to fail.
-    // there seems to be some lag
-    Thread.sleep(servo01.getIdleTimeout() + 1000);
+    
+    CountDownLatch moveLatch = new CountDownLatch(1);
+    CountDownLatch targetLatch = new CountDownLatch(1);
+    CountDownLatch disableLatch = new CountDownLatch(1);
+
+    start = System.currentTimeMillis();
+
+    new Thread(() -> {
+        log.info("starting at {}", System.currentTimeMillis());
+        servo01.moveTo(0);
+        moveLatch.countDown();
+    }).start();
+
+    // wait for the move to start
+    moveLatch.await();
+
+    // wait for the move to complete using waitTargetPos
+    new Thread(() -> {
+        servo01.waitTargetPos();
+        targetLatch.countDown();
+    }).start();
+
+    // wait for the move to complete
+    targetLatch.await();
+    log.info("finished at {}", System.currentTimeMillis());
+
+    delta = System.currentTimeMillis() - start;
+    assertTrue("Move to blocking should have taken 3 seconds or more. Time was " + delta, delta >= 3000);
+
+    log.info("Move to blocking took {} milliseconds", delta);
+    assertTrue("Servo should be enabled", servo01.isEnabled());
+
+    // wait for the servo to stop moving
+    disableLatch.await(servo01.getIdleTimeout() + 1000, TimeUnit.MILLISECONDS);
+    assertFalse("Servo should not be moving now.", servo01.isMoving());
+
+    // verify disabled after autoDisable time
     assertFalse("Servo should be disabled.", servo01.isEnabled());
 
   }

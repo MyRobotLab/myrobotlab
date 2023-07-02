@@ -21,6 +21,11 @@ public class RuntimeConfig extends ServiceConfig {
   
   // NEED THIS PRIVATE BUT CANNOT BE
   public List<String> registry = new ArrayList<>();
+    
+  /**
+   * Root of resource location
+   */
+  public String resource = "resource";
 
   /**
    * add and remove a service using these methods and the uniqueness will be

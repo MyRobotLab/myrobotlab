@@ -76,7 +76,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     Assert.assertNotNull(foo.getDescription());
     Assert.assertNotNull(foo.getName());
     Assert.assertNotNull(foo.getSimpleName());
-    Assert.assertNotNull(foo.getType());
+    Assert.assertNotNull(foo.getTypeKey());
 
     // TODO: add a bunch more tests here!
     foo.startService();
@@ -255,7 +255,7 @@ public class ServiceInterfaceTest extends AbstractTest {
   public final void testInstallAllServices() throws ClassNotFoundException, ParseException, IOException {
     // TODO: this probably is going to take longer but it's worth while!
     ServiceData sd = ServiceData.getLocalInstance();// CodecUtils.fromJson(FileUtils.readFileToString(new
-                                                    // File("../repo/serviceData.json")),
+                                                    // File("../libraries/serviceData.json")),
                                                     // ServiceData.class);
     for (MetaData st : sd.getServiceTypes()) {
       if (!st.isAvailable()) {

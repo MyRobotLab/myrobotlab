@@ -8,9 +8,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.i2c.I2CFactory;
@@ -18,8 +20,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMicrocontroller;
-import org.myrobotlab.service.config.RasPiConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -62,12 +62,16 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     transient public I2CDevice device;
     public int deviceHandle;
     public String serviceName;
+    
+    public String toString() {
+      return String.format("bus: %d deviceHandle: %d service: %s", bus.getBusNumber(), deviceHandle, serviceName);
+    }
   }
 
   /**
    * default bus current bus of raspi service
    */
-  String bus = "1";
+  protected String bus = "1";
 
   public static final int INPUT = 0x0;
 
@@ -77,20 +81,14 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
 
   private static final long serialVersionUID = 1L;
 
-  transient GpioController gpio;
+  protected transient GpioController gpio;
 
   protected Map<Integer, Set<String>> validAddresses = new HashMap<>();
 
   /**
    * for attached devices
    */
-  HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
-
-  /**
-   * "quick fix" - no subscriptions nor listeners are made with other services,
-   * so I created this to show the references to i2c device services
-   */
-  protected Set<String> attachedServices = new HashSet<>();
+  protected Map<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
   protected String boardType = null;
 
@@ -144,7 +142,6 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   @Override
   public void attachI2CControl(I2CControl control) {
 
-    attachedServices.add(control.getName());
     // This part adds the service to the mapping between
     // busAddress||DeviceAddress
     // and the service name to be able to send data back to the invoker
@@ -191,7 +188,6 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       i2cDevices.remove(key);
       control.detachI2CController(this);
     }
-    attachedServices.remove(control.getName());
   }
 
   public void digitalWrite(int pin, int value) {
@@ -232,8 +228,11 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
 
   @Override /* services attached - not i2c devices */
   public Set<String> getAttached() {
-    // return i2cDevices.keySet();
-    return attachedServices;
+    Set<String> ret = new TreeSet<>();
+    for (I2CDeviceMap i2c : i2cDevices.values()) {
+      ret.add(CodecUtils.getFullName(i2c.serviceName));
+    }
+    return ret;
   }
 
   @Override

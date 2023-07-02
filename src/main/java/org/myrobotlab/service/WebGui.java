@@ -215,9 +215,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public WebGui(String n, String id) {
     super(n, id);
 
-    // adding initial route
-    // Runtime.getInstance().addRoute(".*", getName(), 10);
-
     if (desktops == null) {
       desktops = new HashMap<String, Map<String, Panel>>();
     }
@@ -227,9 +224,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     } else {
       panels = desktops.get(currentDesktop);
     }
-
-    // subscribe("runtime", "registered");
-    // FIXME - "unregistered" / "released"
 
     onDisconnect = new AtmosphereResourceEventListenerAdapter() {
 
@@ -334,35 +328,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
 
     configBuilder.resource("/stream", stream);
-    // .resource("/video/ffmpeg.1443989700495.mp4", test)
 
-    // FIRST DEFINED HAS HIGHER PRIORITY !! no virtual mapping of resources
-    // for access after extracting :(
-
-    // configBuilder.resource("./src/main/resources/resource/InMoov2/resource/WebGui/app");
-    // clone InMoov2 at the same level as myrobotlab
-
-    // TODO - spin through dirs ? - look for any exact match for service file
-    // and add it as a resource ?
-    configBuilder.resource("../InMoov2/resource/WebGui/app");
-
-    // for debugging - has higher priority
-    // v- this makes http://localhost:8888/#/main worky
-    configBuilder.resource("./src/main/resources/resource/WebGui/app");
-    // allow sub components to be served
-    // v- this makes http://localhost:8888/react/index.html worky
-    configBuilder.resource("./src/main/resources/resource/WebGui");
-    // v- this makes http://localhost:8888/Runtime.png worky
-    configBuilder.resource("./src/main/resources/resource");
-
-    // for future references of resource - keep the html/js reference to
-    // "resource/x" not "/resource/x" which breaks moving the app
-    // FUTURE !!!
-    configBuilder.resource("./src/main/resources");
-
-    configBuilder.resource("./resource/WebGui/app");
-    configBuilder.resource("./resource");
-
+    WebGuiConfig c = (WebGuiConfig) config;
+    
+    // add all webgui resource directories
+    for (String resource: c.resources) {
+      configBuilder.resource(resource);
+    }
+    
     // can't seem to make this work .mappingPath("resource/")
 
     // TO SUPPORT LEGACY - BEGIN
@@ -476,6 +449,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       if (!CodecUtils.API_SERVICE.equals(apiKey) && !CodecUtils.API_MESSAGES.equals(apiKey)) {
         // NOT A VALID API - send what we support - we're done...
         OutputStream out = r.getResponse().getOutputStream();
+        r.getResponse().addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
         out.write(CodecUtils.toJson(CodecUtils.getApis()).getBytes());
         return;
       }
@@ -1136,11 +1110,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    */
   public void useLocalResources(boolean useLocalResources) {
     this.useLocalResources = useLocalResources;
-  }
-
-  @Override
-  public Message getDescribeMsg(String connId) {
-    return Runtime.getInstance().getDescribeMsg(connId);
   }
 
   public void display(String image) {

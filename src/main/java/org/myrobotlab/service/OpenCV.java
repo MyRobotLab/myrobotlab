@@ -41,7 +41,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -833,7 +832,10 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
       // fd.enable();
       long startTs = System.currentTimeMillis();
       while (!ret.keySet().contains("face") && System.currentTimeMillis() - startTs < timeout) {
-        ret.putAll(blockingClassification.poll(timeout, TimeUnit.MILLISECONDS));
+        Map<String, List<Classification>> faces = blockingClassification.poll(timeout, TimeUnit.MILLISECONDS);
+        if (faces != null) {
+          ret.putAll(faces);
+        }
       }
     } catch (InterruptedException e) {
     }
@@ -1155,7 +1157,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
       final ByteArrayOutputStream os = new ByteArrayOutputStream();
       ImageIO.write(img, "jpg", os);
       os.close();
-      String ret = Base64.getEncoder().encodeToString(os.toByteArray());
+      String ret = CodecUtils.toBase64(os.toByteArray());
       return ret;
     } catch (Exception e) {
       log.error("toBase64Jpg threw", e);
@@ -2004,7 +2006,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     try {
       String path = FileIO.gluePaths(getDataDir(), filename);
       fos = new FileOutputStream(path);
-      byte[] decoded = Base64.getDecoder().decode(data);
+      byte[] decoded = CodecUtils.fromBase64(data);
       fos.write(decoded);
       fos.close();
       setInputFileName(path);

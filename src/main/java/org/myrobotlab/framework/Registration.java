@@ -1,11 +1,14 @@
 package org.myrobotlab.framework;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
-
-import java.util.Objects;
 
 /**
  * 
@@ -28,6 +31,14 @@ public class Registration {
   protected String typeKey;
 
   /**
+   * The list of interfaces that a service being registered implements.
+   * This list must contain the fully qualified names of Java interfaces,
+   * and is only used for proxy generation. When generating proxies,
+   * this list must contain at least the fully qualified name of ServiceInterface.
+   */
+  public List<String> interfaces = List.of();
+
+  /**
    * current serialized state of the service - default encoding is json for all
    * remote registration
    */
@@ -38,18 +49,27 @@ public class Registration {
    * remote
    */
   transient public ServiceInterface service = null;
-
-  public Registration(String id, String name, String typeKey) {
+  
+  
+  public Registration(String id, String name, String typeKey) {    
     this.id = id;
     this.name = name;
     this.typeKey = typeKey;
   }
+  
+
+  public Registration(String id, String name, String typeKey, ArrayList<String> interfaces) {
+    this.id = id;
+    this.name = name;
+    this.typeKey = typeKey;
+    this.interfaces = interfaces;
+  }
 
   public Registration(ServiceInterface service) {
-    log.info("creating registration for {}@{} - {}", service.getName(), service.getId(), service.getType());
+    log.info("creating registration for {}@{} - {}", service.getName(), service.getId(), service.getTypeKey());
     this.id = service.getId();
     this.name = service.getName();
-    this.typeKey = service.getType();
+    this.typeKey = service.getTypeKey();
     // when this registration is re-broadcasted to remotes it will use this
     // serialization to init state
     this.state = CodecUtils.toJson(service);

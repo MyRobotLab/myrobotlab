@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -85,6 +86,27 @@ public class FileIOTest extends AbstractTest {
     String ret = FileIO.getRoot();
     assertNotNull(ret);
   }
+  
+  @Test
+  public void testCheckDir() throws IOException {
+    File check = new File("checkDir");
+    check.delete();
+    assertFalse(FileIO.checkDir(check.getName()));
+    check.mkdir();    
+    assertTrue(FileIO.checkDir(check.getName()));
+    check.delete();
+  }
+  
+  @Test
+  public void testCheckFile() throws IOException {
+    File check = new File("checkFile.txt");
+    check.delete();    
+    assertFalse(FileIO.checkFile(check.getName()));
+    FileIO.toFile(check, "check".getBytes());
+    assertTrue(FileIO.checkFile(check.getName()));
+    check.delete();
+  }
+
 
   @Test
   public void testGetServiceList() throws IOException {

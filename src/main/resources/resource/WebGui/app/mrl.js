@@ -346,7 +346,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
      */
     this.describe = function(request) {
         console.log('--> got describe: and set jsRuntimeMethodCallbackMap')
-        let hello = JSON.parse(request.data[1])
+        hello = request.data[1]
 
         remotePlatform = hello.platform
         // FIXME - remove this - there aren't 1 remoteId there are many !
@@ -603,7 +603,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
 
     this.getService = function(name) {
-
+        id = _self.remoteId
         if (registry[_self.getFullName(name)] == null) {
             return null
         }
@@ -872,7 +872,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
             let properties = []
 
-            let exclude = ['serviceType', 'id', 'simpleName', 'interfaceSet', 'serviceClass', 'statusBroadcastLimitMs', 'isRunning', 'name', 'creationOrder', 'serviceType']
+            let exclude = ['serviceType', 'id', 'simpleName', 'interfaceSet', 'typeKey', 'statusBroadcastLimitMs', 'isRunning', 'name', 'creationOrder', 'serviceType']
 
             // FIXME - extract from javadoc !
             let info = {
@@ -943,7 +943,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             lastPosY += 40
             zIndex++
             //construct panel & add it to dictionary
-            panels[fullname] = createPanel(fullname, service.serviceClass, 15, lastPosY, 800, 0, zIndex)
+            panels[fullname] = createPanel(fullname, service.typeKey, 15, lastPosY, 800, 0, zIndex)
             return panels[fullname]
         }
 
@@ -1369,11 +1369,11 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                                 //                                console.log("here")
                                 // expected 'framework' level subscriptions - we should at a minimum
                                 // be interested in state and status changes of the services
-                                _self.sendTo(name, "addListener", "publishStatus", 'runtime@' + _self.id)
-                                _self.sendTo(name, "addListener", "publishState", 'runtime@' + _self.id)
-                                _self.sendTo(name, "addListener", "getMethodMap", 'runtime@' + _self.id)
+                                _self.sendTo(_self.getFullName(name), "addListener", "publishStatus", 'runtime@' + _self.id)
+                                _self.sendTo(_self.getFullName(name), "addListener", "publishState", 'runtime@' + _self.id)
+                                _self.sendTo(_self.getFullName(name), "addListener", "getMethodMap", 'runtime@' + _self.id)
 
-                                _self.sendTo(name, "broadcastState")
+                                _self.sendTo(_self.getFullName(name), "broadcastState")
                                 // below we subscribe to the Angular callbacks - where anything sent
                                 // back from the webgui with our service's name on the message - send
                                 // it to our onMsg method
@@ -1570,7 +1570,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             "name": "runtime",
             "id": "webgui-client-1234-5678",
             "simpleName": "Runtime",
-            "serviceClass": "org.myrobotlab.service.Runtime",
+            "typeKey": "org.myrobotlab.service.Runtime",
             "isRunning": true,
             "interfaceSet": {
                 "org.myrobotlab.client.Client$RemoteMessageHandler": "org.myrobotlab.client.Client$RemoteMessageHandler",

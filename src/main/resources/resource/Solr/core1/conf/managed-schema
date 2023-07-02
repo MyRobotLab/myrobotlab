@@ -414,6 +414,10 @@
       <tokenizer class="solr.WhitespaceTokenizerFactory"/>
     </analyzer>
   </fieldType>
+  
+  <!-- Adding a dense vector field for knn search to do cosine similarity ( 384 dimensions and cosine similarity matches with al-->
+  <fieldType name="knn_vector" class="solr.DenseVectorField" vectorDimension="384" similarityFunction="cosine" knnAlgorithm="hnsw" hnswMaxConnections="10" hnswBeamWidth="40"/>
+  
   <field name="_root_" type="string" docValues="false" indexed="true" stored="false"/>
   <field name="_text_" type="text_general" multiValued="true" indexed="true" stored="false"/>
   <field name="_version_" type="plong" indexed="false" stored="false"/>
@@ -436,7 +440,7 @@
   <dynamicField name="*_phon_en" type="phonetic_en" indexed="true" stored="true"/>
   <dynamicField name="*_s_lower" type="lowercase" indexed="true" stored="true"/>
   <dynamicField name="*_txt_cjk" type="text_cjk" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_en" type="text_en" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_en" type="text_en" indexed="true" stored="true" multiValued="true"/>
   <dynamicField name="*_txt_ar" type="text_ar" indexed="true" stored="true"/>
   <dynamicField name="*_txt_bg" type="text_bg" indexed="true" stored="true"/>
   <dynamicField name="*_txt_ca" type="text_ca" indexed="true" stored="true"/>
@@ -490,6 +494,9 @@
   <dynamicField name="*_f" type="pfloat" indexed="true" stored="true"/>
   <dynamicField name="*_d" type="pdouble" indexed="true" stored="true"/>
   <dynamicField name="*_p" type="location" indexed="true" stored="true"/>
+  
+  <!-- the vector search field -->
+  <field name="vector" type="knn_vector" indexed="true" stored="true"/>
   
   <!-- the catch all field.. -->
   <dynamicField name="*" type="strings" indexed="true" stored="true"/>

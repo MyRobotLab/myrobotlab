@@ -44,26 +44,32 @@ import java.awt.image.ColorConvertOp;
 import java.awt.image.ColorModel;
 import java.awt.image.PixelGrabber;
 import java.awt.image.RescaleOp;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Base64;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacv.Java2DFrameConverter;
+import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.bytedeco.javacv.OpenCVFrameConverter.ToIplImage;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point2f;
 import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_core.RotatedRect;
 import org.bytedeco.opencv.opencv_core.Size;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.opencv.CloseableFrameConverter;
 import org.myrobotlab.opencv.DetectedText;
 import org.slf4j.Logger;
 
@@ -271,21 +277,11 @@ public class Util {
    * 
    * @return current resource directory
    */
-  @Deprecated
+  @Deprecated /*Resource references do not belong here - the ServiceType and
+  perhaps even the ServiceName are needed in order to provide context. This
+  method should be removed, or parameters provided for ServiceType or 
+  ServiceName */
   public static String getResourceDir() {
-    // first try for the resource.dir system property
-    /*
-     * THIS CANNOT BE DONE IN TWO PLACES - ONE WILL ALWAYS BE String resourceDir
-     * = System.getProperty("resource.dir"); if (resourceDir != null) { //
-     * log.info("Returning {}", resourceDir); return resourceDir; } if
-     * (!FileIO.isJar()) { //
-     * log.info("Not in a jar...you're running in an IDE likely."); resourceDir
-     * = System.getProperty("user.dir") + File.separator +
-     * "src"+File.separator+"main"+File.separator+"resources"+File.separator+
-     * "resource"; } else { resourceDir = System.getProperty("user.dir") +
-     * File.separator + "resource"; }
-     */
-    // log.info("Returning {}", resourceDir);
     return Service.getResourceRoot();
   }
 
@@ -453,7 +449,7 @@ public class Util {
       BufferedImage img = ImageIO.read(file);
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       ImageIO.write(img, "png", bos);
-      return String.format("data:image/%s;base64,%s", type, Base64.getEncoder().encodeToString(bos.toByteArray()));
+      return String.format("data:image/%s;base64,%s", type, CodecUtils.toBase64(bos.toByteArray()));
     } catch (IOException e) {
       return null;
     }
@@ -605,6 +601,104 @@ public class Util {
     // reset the pointer position back to the head.
     confidencesFV.position(0);
     return confidencesFV;
+  }
+
+  
+  /**
+   * deserialize from a png byte array to a base64 encoded string
+   * for display inline in html.
+   * 
+   * @param bytes
+   *          input bytes
+   * @return a string
+   * @throws IOException
+   *           boom
+   * 
+   */
+  public static String bytesToBase64Jpg(byte[] bytes) {
+    //
+    // let's assume we're a buffered image .. those are serializable :)
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    try {
+      BufferedImage bufImage = ImageIO.read(new ByteArrayInputStream(bytes));
+      ImageIO.write(bufImage, "jpg", os);
+      os.close();
+    } catch (IOException e) {
+      // TODO: we should probably just return null and let the caller figure this out.
+      return "ERROR converting image to jpg base64.";
+    }
+
+    String data = String.format("data:image/%s;base64,%s", "jpg", CodecUtils.toBase64(os.toByteArray()));
+    return data;
+  }
+
+  /**
+   * Helper method to serialize an IplImage into a byte array. returns the bytes
+   * of an image in for format specified, png, jpg, bmp,.etc...  
+   * 
+   * @param image
+   *          input iage
+   * @param format 
+   *          defaults to jpg.. 
+   * @return byte array of image
+   * @throws IOException
+   *           boom
+   * 
+   */
+  public static byte[] imageToBytes(IplImage image, String format) throws IOException {
+
+    // lets make a buffered image
+    CloseableFrameConverter converter = new CloseableFrameConverter();
+    BufferedImage buffImage = converter.toBufferedImage(image);
+    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    try {
+      ImageIO.write(buffImage, format, stream);
+    } catch (IOException e) {
+      // This *shouldn't* happen with a ByteArrayOutputStream, but if it
+      // somehow does happen, then we don't want to just ignore it
+      throw new RuntimeException(e);
+    }
+    converter.close();
+    return stream.toByteArray();
+  }
+  
+  /**
+   * Helper method to serialize an IplImage into a byte array. returns a jpg
+   * version of the original image
+   * 
+   * @param image
+   *          input iage
+   * @return byte array of image
+   * @throws IOException
+   *           boom
+   * 
+   */
+  public static byte[] imageToBytes(IplImage image) throws IOException {
+    return Util.imageToBytes(image, "jpg");
+  }
+
+  /**
+   * Uses ImageIO to read the byte array into a buffered image.
+   * It then converts it to an IplImage
+   * 
+   * @param bytes
+   *          input bytes
+   * @return an iplimage
+   * @throws IOException
+   *           boom
+   * 
+   */
+  public static IplImage bytesToImage(byte[] bytes) throws IOException {
+    //
+    // let's assume we're a buffered image .. those are serializable :)
+    BufferedImage bufImage = ImageIO.read(new ByteArrayInputStream(bytes));
+    ToIplImage iplConverter = new OpenCVFrameConverter.ToIplImage();
+    Java2DFrameConverter java2dConverter = new Java2DFrameConverter();
+    IplImage iplImage = iplConverter.convert(java2dConverter.convert(bufImage));
+    // now convert the buffered image to ipl image
+    return iplImage;
+    // Again this could be try with resources but the original example was in
+    // Scala
   }
 
 }
