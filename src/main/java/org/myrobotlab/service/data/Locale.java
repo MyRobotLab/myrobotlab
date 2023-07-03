@@ -161,6 +161,7 @@ public class Locale {
     // locales.put("en-GB", new Locale("en-GB"));
     locales.put("fi-FI", new Locale("fi-FI"));
     locales.put("fr-FR", new Locale("fr-FR"));
+    locales.put("es-ES", new Locale("es-ES"));
     locales.put("hi-IN", new Locale("hi-IN"));
     locales.put("it-IT", new Locale("it-IT"));
     locales.put("nl-NL", new Locale("nl-NL"));
