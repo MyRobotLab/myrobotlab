@@ -1185,12 +1185,14 @@ public class ProgramAB extends Service
         addBotPath(botPath);
       }
     }
+    
+    if (config.botDir == null) {
+      config.botDir = getResourceDir();
+    }
 
-    if (config.botDir != null) {
-      List<File> botsFromScanning = scanForBots(config.botDir);
-      for (File file : botsFromScanning) {
-        addBotPath(file.getAbsolutePath());
-      }
+    List<File> botsFromScanning = scanForBots(config.botDir);
+    for (File file : botsFromScanning) {
+      addBotPath(file.getAbsolutePath());
     }
 
     if (config.currentBotName != null) {

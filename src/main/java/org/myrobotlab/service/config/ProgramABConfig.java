@@ -7,12 +7,27 @@ import org.myrobotlab.framework.Plan;
 
 public class ProgramABConfig extends ServiceConfig {
 
+  /**
+   * current initial bot
+   */
   public String currentBotName = "Alice";
+  
+  /**
+   * current initial user
+   */
   public String currentUserName;
+  
+  @Deprecated /* unused text filters */
   public String[] textFilters;
-  // public String[] textListeners;
-  // public String[] utteranceListeners;
+  
+  /**
+   * a directory ProgramAB will scan for new bots
+   */
   public String botDir;
+
+  /**
+   * explicit bot directories
+   */
   public List<String> bots = new ArrayList<>();
 
   /**
