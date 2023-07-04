@@ -148,10 +148,6 @@ public class InMoov2Config extends ServiceConfig {
 
     mouthControl.mouth = i01Name + ".mouth";
 
-    // FIXME ! - look at this !!! I've made austartPeers = false !
-    // by just sending a runtime that starts only i01
-    RuntimeConfig rtConfig = (RuntimeConfig) plan.get("runtime");
-
     ProgramABConfig chatBot = (ProgramABConfig) plan.get(getPeerName("chatBot"));
     Runtime runtime = Runtime.getInstance();
     String[] bots = new String[] { "cn-ZH", "en-US", "fi-FI", "hi-IN", "nl-NL", "ru-RU", "de-DE", "es-ES", "fr-FR", "it-IT", "pt-PT", "tr-TR" };
