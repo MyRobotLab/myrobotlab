@@ -112,7 +112,7 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "gpt3", "Gpt3", false);
     addDefaultPeerConfig(plan, name, "head", "InMoov2Head", false);
     addDefaultPeerConfig(plan, name, "headTracking", "Tracking", false);
-    addDefaultPeerConfig(plan, name, "htmlFilter", "HtmlFilter", false);
+    addDefaultPeerConfig(plan, name, "htmlFilter", "HtmlFilter", true);
     addDefaultPeerConfig(plan, name, "imageDisplay", "ImageDisplay", false);
     addDefaultPeerConfig(plan, name, "leap", "LeapMotion", false);
     addDefaultPeerConfig(plan, name, "left", "Arduino", false);
@@ -186,9 +186,6 @@ public class InMoov2Config extends ServiceConfig {
     ear.textListeners = new String[] { name + ".chatBot" };
 
     JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.get(getPeerName("simulator"));
-    // FIXME - SHOULD USE RESOURCE DIR !
-    String assestsDir = Service.getResourceDir(InMoov2.class) + "/JMonkeyEngine";
-    simulator.addModelPath(assestsDir);
 
     simulator.multiMapped.put(name + ".leftHand.index", new String[] { name + ".leftHand.index", name + ".leftHand.index2", name + ".leftHand.index3" });
     simulator.multiMapped.put(name + ".leftHand.majeure", new String[] { name + ".leftHand.majeure", name + ".leftHand.majeure2", name + ".leftHand.majeure3" });

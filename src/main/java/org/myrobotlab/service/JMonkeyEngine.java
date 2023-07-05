@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,7 +16,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
@@ -138,7 +142,9 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   protected transient AssetManager assetManager;
 
-  protected String assetsDir = getDataDir() + File.separator + "assets";
+  protected String assetsDir = getResourceDir() + File.separator + "assets";
+
+  protected String modelsDir = assetsDir + File.separator + "Models";
 
   protected boolean autoAttach = true;
 
@@ -179,10 +185,13 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   protected transient Interpolator interpolator;
 
   protected transient Queue<Jme3Msg> jme3MsgQueue = new ConcurrentLinkedQueue<Jme3Msg>();
+  
+  /**
+   * currently loaded models, if JMonkey is asked to reload a model, it will explode
+   */
+  final protected Set<String> loadedModels = new TreeSet<>(); 
 
   final public String KEY_SEPERATOR = "/";
-
-  protected String modelsDir = assetsDir + File.separator + "Models";
 
   protected boolean mouseLeft = false;
 
@@ -244,8 +253,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   public JMonkeyEngine(String n, String id) {
     super(n, id);
-    File d = new File(modelsDir);
-    d.mkdirs();
     util = new Jme3Util(this);
     analog = new AnalogHandler(this);
     interpolator = new Interpolator(this, util);
@@ -1228,59 +1235,39 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     }
   }
 
+  /**
+   * Load a specific model file
+   * @param assetPath
+   * @return
+   */
   public Spatial loadModel(String assetPath) {
-    return assetManager.loadModel(assetPath);
-  }
-
-  public void loadModels() {
-    // load the root data dir
-    loadModels(modelsDir);
-    loadNodes(modelsDir);
-  }
-
-  public void loadModels(String dirPath) {
     JMonkeyEngineConfig c = (JMonkeyEngineConfig) config;
-    // FIXME - must be unique AND AND ... only loaded once !
-    // if (c.modelPaths.contains(dirPath)) {
-    // info("already loaded %s", dirPath);
-    // return;
-    // }
-    c.addModelPath(dirPath);
-    traverseLoadModels(dirPath);
+    Spatial model = null;
+    try {
+      if (loadedModels.contains(assetPath)) {
+        log.info("model {} already loaded");
+        return null;
+      }
+      log.info("loading {}", assetPath);
+      model = assetManager.loadModel(assetPath);
+      log.info("loaded {}", assetPath);
+      if (model != null) {
+        getRootNode().attachChild(model);
+      } else {
+        error("%s model null");
+      }
+      
+      if (c.models == null) {
+        c.models = new ArrayList<>();
+      }
+      
+      c.models.add(assetPath);
+    } catch(Exception e) {
+      error(e);
+    }
+    return model;
   }
 
-  public void traverseLoadModels(String dirPath) {
-    dirPath = FileIO.normalize(dirPath);
-    log.info("loading models from {}", dirPath);
-    File dir = new File(dirPath);
-    if (!dir.exists()) {
-      dir.mkdirs();
-    }
-    if (!dir.isDirectory()) {
-      error("%s is not a directory", dirPath);
-      return;
-    }
-    assetManager.registerLocator(dirPath, FileLocator.class);
-    // get list of files in dir ..
-    File[] files = dir.listFiles();
-
-    // scan for all non json files first ...
-    // initially set them invisible ...
-    for (File f : files) {
-      if (!f.isDirectory()) { // && !"json".equals(getExt(f.getName()))) {
-        loadResource(f.getAbsolutePath());
-      }
-    }
-
-    // process structure json files ..
-
-    // breadth first search ...
-    for (File f : files) {
-      if (f.isDirectory()) {
-        traverseLoadModels(f.getAbsolutePath());
-      }
-    }
-  }
 
   /**
    * load a node with all potential children
@@ -2159,15 +2146,11 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     new File(getDataDir()).mkdirs();
     new File(getResourceDir()).mkdirs();
 
-    assetManager.registerLocator("./", FileLocator.class);
+    // assetManager.registerLocator("./", FileLocator.class);
     assetManager.registerLocator(getDataDir(), FileLocator.class);
     assetManager.registerLocator(assetsDir, FileLocator.class);
+    assetManager.registerLocator(modelsDir, FileLocator.class);
     assetManager.registerLocator(getResourceDir(), FileLocator.class);
-    assetManager.registerLocator(getResourceDir() + "/Interface/Logo", FileLocator.class); // /Interface/Logo/Monkey.jpg
-
-    // FIXME - should be moved under ./data/JMonkeyEngine/
-    // assetManager.registerLocator("InMoov/jm3/assets", FileLocator.class);
-    assetManager.registerLocator(getDataDir(), FileLocator.class);
     assetManager.registerLoader(BlenderLoader.class, "blend");
 
     /**
@@ -2272,9 +2255,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       PhysicsTestHelper.createPhysicsTestWorld(rootNode, assetManager, bulletAppState.getPhysicsSpace());
       PhysicsTestHelper.createBallShooter(app, rootNode, bulletAppState.getPhysicsSpace());
     }
-
-    // load models in the default directory
-    // loadModels();
 
   }
 
@@ -2684,8 +2664,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   public ServiceConfig getConfig() {
     JMonkeyEngineConfig config = (JMonkeyEngineConfig) super.getConfig();
 
-    if (config.modelPaths != null) {
-      Collections.sort(config.modelPaths);
+    if (config.models != null) {
+      Collections.sort(config.models);
     }
 
     // WARNING - getConfig is "used" before the delayed apply is processed
@@ -2705,15 +2685,36 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // generate defaults end ---------
     return config;
   }
+  
+  /**
+   * Scans and loads the default resource location and loads any models not already loaded
+   */
+  public void loadDefaultModels() {
+    loadModels(modelsDir);
+  }
+  
+  /**
+   * Scans and loads all files from a modelPath directory
+   * @param modelPath
+   */
+  public void loadModels(String modelPath) {
+    List<String> models = scanForModels(modelPath);
+    for (String path : models) {
+      loadModel(path);
+    }
+  }
 
   public ServiceConfig loadDelayed(ServiceConfig c) {
     JMonkeyEngineConfig config = (JMonkeyEngineConfig) c;
 
-    if (config.modelPaths != null) {
-      List<String> tempList = new ArrayList<>(config.modelPaths);
+    if (config.models != null && config.models.size() > 0) {
+      List<String> tempList = new ArrayList<>(config.models);
       for (String modelPath : tempList) {
-        loadModels(modelPath);
+        loadModel(modelPath);
       }
+    } else {
+      // scan resource dir
+      loadDefaultModels();
     }
 
     if (config.nodes != null) {
@@ -2754,6 +2755,40 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     }
 
     return c;
+  }
+
+  /**
+   * Scan a directory for models, perhaps filtering should be done,
+   * but I don't know all the possible 3d model files JMonkeyEngine is 
+   * currently capable of rendering and don't want to prematurely limit
+   * it.
+   * @param modelDir
+   * @return
+   */
+  public List<String> scanForModels(String modelDir) {
+    List<String> models = new ArrayList<>();
+    
+    if (modelDir == null) {
+      error("models directory cannot be null");
+      return models;
+    }
+    
+    File dir = new File(modelDir);
+    if (!dir.exists() || !dir.isDirectory()) {
+      error("%s models directory is not valid");
+      return models;
+    }
+   
+    for(File file : dir.listFiles()) {
+      
+//      Path pathAbsolute = Paths.get(file.getAbsolutePath());
+//      Path pathBase = Paths.get(System.getProperty("user.dir"));
+//      Path pathRelative = pathBase.relativize(pathAbsolute);      
+//      models.add(pathRelative.toString());
+      models.add(file.getName());
+    }
+    
+    return models;
   }
 
   // @Override
