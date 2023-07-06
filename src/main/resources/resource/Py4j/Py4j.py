@@ -36,7 +36,8 @@ class MessageHandler(object):
         self.stderr = sys.stderr
         sys.stdout = self
         sys.stderr = self
-        self.gateway = JavaGateway(callback_server_parameters=CallbackServerParameters(connection_callback=self.handle_connection_break),
+        # self.gateway = JavaGateway(callback_server_parameters=CallbackServerParameters(connection_callback=self.handle_connection_break),
+        self.gateway = JavaGateway(callback_server_parameters=CallbackServerParameters(),
                                    python_server_entry_point=self,
                                    gateway_parameters=GatewayParameters(auto_convert=True))
         self.runtime = self.gateway.jvm.org.myrobotlab.service.Runtime.getInstance()
