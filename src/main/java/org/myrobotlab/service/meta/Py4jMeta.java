@@ -21,8 +21,8 @@ public class Py4jMeta extends MetaData {
 
     // Used just as a Python exe redistributable.
     // ABSOLUTELY NO JNI/JNA IS USED
-    addDependency("org.bytedeco", "cpython-platform", "3.11.3-1.5.9");
-    addDependency("org.bytedeco", "cpython", "3.11.3-1.5.9");
+    addDependency("org.bytedeco", "cpython-platform", "3.10.8-1.5.8");
+    addDependency("org.bytedeco", "cpython", "3.10.8-1.5.8");
   }
 
 }
