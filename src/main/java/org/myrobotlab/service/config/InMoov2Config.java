@@ -162,6 +162,9 @@ public class InMoov2Config extends ServiceConfig {
         }
       }
     }
+    
+    chatBot.currentUserName = "human";
+    
     // chatBot.textListeners = new String[] { name + ".htmlFilter" };
     if (chatBot.listeners == null) {
       chatBot.listeners = new ArrayList<>();
@@ -183,7 +186,11 @@ public class InMoov2Config extends ServiceConfig {
     // == Peer - ear =============================
     // setup name references to different services
     WebkitSpeechRecognitionConfig ear = (WebkitSpeechRecognitionConfig) plan.get(getPeerName("ear"));
-    ear.textListeners = new String[] { name + ".chatBot" };
+    ear.listeners = new ArrayList<>(); 
+    ear.listeners.add(new Listener("publishText", name + ".chatBot", "onText"));
+    ear.listening = true;
+    // remove, should only need ServiceConfig.listeners
+    ear.textListeners = new String[]{name + ".chatBot"};
 
     JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.get(getPeerName("simulator"));
 
