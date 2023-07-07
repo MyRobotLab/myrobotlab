@@ -24,9 +24,6 @@ public class Py4jMeta extends MetaData {
     // ABSOLUTELY NO JNI/JNA IS USED
     addDependency("org.bytedeco", "cpython-platform", "3.10.8-1.5.8");
     addDependency("org.bytedeco", "cpython", "3.10.8-1.5.8");
-    if (Platform.getLocalInstance().isArm()) {
-      addDependency("org.bytedeco", "cpython", "3.10.8-1.5.8-linux-armhf");
-    }
   }
 
 }
