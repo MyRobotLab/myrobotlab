@@ -1107,11 +1107,11 @@ public class ProgramAB extends Service
       }
     }
     
-    if (config.botDir == null) {
-      config.botDir = getResourceDir();
+    if (c.botDir == null) {
+      c.botDir = getResourceDir();
     }
 
-    List<File> botsFromScanning = scanForBots(config.botDir);
+    List<File> botsFromScanning = scanForBots(c.botDir);
     for (File file : botsFromScanning) {
       addBotPath(file.getAbsolutePath());
     }
