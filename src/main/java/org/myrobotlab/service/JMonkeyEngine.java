@@ -1248,6 +1248,17 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
         log.info("model {} already loaded");
         return null;
       }
+      
+      if (FileIO.checkDir(modelsDir + fs + assetPath)) {
+        log.info("skipping directory {}");
+        return null;        
+      }
+      
+      if (assetPath.toLowerCase().endsWith(".md") || assetPath.toLowerCase().endsWith(".txt") || assetPath.toLowerCase().endsWith(".bin")) {
+        log.info("skipping {} not and valid model type");
+        return null;
+      }
+      
       log.info("loading {}", assetPath);
       model = assetManager.loadModel(assetPath);
       log.info("loaded {}", assetPath);
