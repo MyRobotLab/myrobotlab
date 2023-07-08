@@ -202,7 +202,7 @@ public class ServoMixer extends Service implements ServiceLifeCycleListener, Sel
       }
       allServos.add(name);
     } else {
-      error("servo %s not found", name);
+      log.info("do not know how to attach {}", name);
     }
   }
 

@@ -66,8 +66,8 @@ public class RandomTest extends AbstractServiceTest {
 
     // disable all
     random.disable();
-    clock.setInterval(999999);
     sleep(200);
+    clock.setInterval(999999);
     assertTrue("clock should not be started", !clock.isClockRunning());   
     assertEquals(999999, (long)clock.getInterval());
 

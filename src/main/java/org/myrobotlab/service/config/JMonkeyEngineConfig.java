@@ -1,40 +1,28 @@
 package org.myrobotlab.service.config;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.myrobotlab.jme3.UserDataConfig;
 
 public class JMonkeyEngineConfig extends ServiceConfig {
 
   /**
-   * must be unique entries - use addModelPath(path) helper
+   * Models for JMonkeyEngine to load - can be of format
    */
-  public List<String> modelPaths = new ArrayList<>();
+  public List<String> models = new ArrayList<>();
+  
+  /**
+   * A spatial associated with some part of the scene graph
+   */
   public Map<String, UserDataConfig> nodes = new LinkedHashMap<>();
   public Map<String, String[]> multiMapped = new LinkedHashMap<>();
-  public String cameraLookAt;
-  public Set<String> test = new HashSet<>();
-
+  
   /**
-   * JMonkeyEngine requires model paths to be unique - they are not idempotent
-   * when adding to the graphtree - use this function to keep them unique, yet
-   * the yaml will still be a simple array. This is to avoid Yaml's !!set
-   * definition
-   * 
-   * @param path
+   * The name of the node which the camera should look at
    */
-  public void addModelPath(String path) {
-    for (String p : modelPaths) {
-      if (p.equals(path)) {
-        return;
-      }
-    }
-    modelPaths.add(path);
-  }
+  public String cameraLookAt;
 
 }

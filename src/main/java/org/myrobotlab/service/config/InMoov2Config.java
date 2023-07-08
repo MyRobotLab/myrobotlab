@@ -127,6 +127,7 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "gpt3", "Gpt3", false);
     addDefaultPeerConfig(plan, name, "head", "InMoov2Head", false);
     addDefaultPeerConfig(plan, name, "headTracking", "Tracking", false);
+    addDefaultPeerConfig(plan, name, "htmlFilter", "HtmlFilter", true);
     addDefaultPeerConfig(plan, name, "imageDisplay", "ImageDisplay", false);
     addDefaultPeerConfig(plan, name, "leap", "LeapMotion", false);
     addDefaultPeerConfig(plan, name, "left", "Arduino", false);
@@ -156,11 +157,6 @@ public class InMoov2Config extends ServiceConfig {
     mouthControl.mouth = name + ".mouth";
 
 
-
-    // WOW ! so good .. "default" config setting bot name based on language tag from runtime !!!
-    // LocalSpeech & RasPi both could be auto configured more based on system ino
-
-
     ProgramABConfig chatBot = (ProgramABConfig) plan.get(getPeerName("chatBot"));
     Runtime runtime = Runtime.getInstance();
     String[] bots = new String[] { "cn-ZH", "en-US", "fi-FI", "hi-IN", "nl-NL", "ru-RU", "de-DE", "es-ES", "fr-FR", "it-IT", "pt-PT", "tr-TR" };
@@ -175,28 +171,14 @@ public class InMoov2Config extends ServiceConfig {
         }
       }
     }
+    
+    chatBot.currentUserName = "human";
+    
     // chatBot.textListeners = new String[] { name + ".htmlFilter" };
     if (chatBot.listeners == null) {
       chatBot.listeners = new ArrayList<>();
     }
     chatBot.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));
-    chatBot.listeners.add(new Listener("publishTopic", name, "onTopic"));
-    chatBot.listeners.add(new Listener("publishTopic", "python", "onTopic"));
-    
-    chatBot.startTopic = "BootUp";
-    chatBot.bots.add("data/ProgramAB/brain");
-    chatBot.bots.add("data/ProgramAB/cn-ZH");
-    chatBot.bots.add("data/ProgramAB/de-DE");
-    chatBot.bots.add("data/ProgramAB/en-US");
-    chatBot.bots.add("data/ProgramAB/es-ES");
-    chatBot.bots.add("data/ProgramAB/fi-FI");
-    chatBot.bots.add("data/ProgramAB/fr-FR");
-    chatBot.bots.add("data/ProgramAB/hi-IN");
-    chatBot.bots.add("data/ProgramAB/it-IT");
-    chatBot.bots.add("data/ProgramAB/nl-NL");
-    chatBot.bots.add("data/ProgramAB/pt-PT");
-    chatBot.bots.add("data/ProgramAB/ru-RU");
-    chatBot.bots.add("data/ProgramAB/tr-TR");
 
     HtmlFilterConfig htmlFilter = (HtmlFilterConfig) plan.get(getPeerName("htmlFilter"));
     // htmlFilter.textListeners = new String[] { name + ".mouth" };
@@ -210,19 +192,19 @@ public class InMoov2Config extends ServiceConfig {
     // LocalSpeechConfig mouth = (LocalSpeechConfig)
     // plan.get(getPeerName("mouth"));
     MarySpeechConfig mouth = (MarySpeechConfig) plan.get(getPeerName("mouth"));
+    mouth.voice = "Mark";
     mouth.speechRecognizers = new String[] { name + ".ear" };
 
     // == Peer - ear =============================
     // setup name references to different services
     WebkitSpeechRecognitionConfig ear = (WebkitSpeechRecognitionConfig) plan.get(getPeerName("ear"));
-    ear.textListeners = new String[] { name + ".chatBot" };
+    ear.listeners = new ArrayList<>(); 
+    ear.listeners.add(new Listener("publishText", name + ".chatBot", "onText"));
     ear.listening = true;
-    ear.recording = true;
+    // remove, should only need ServiceConfig.listeners
+    ear.textListeners = new String[]{name + ".chatBot"};
 
     JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.get(getPeerName("simulator"));
-    // FIXME - SHOULD USE RESOURCE DIR !
-    String assestsDir = Service.getResourceDir(InMoov2.class) + "/JMonkeyEngine";
-    simulator.addModelPath(assestsDir);
 
     simulator.multiMapped.put(name + ".leftHand.index", new String[] { name + ".leftHand.index", name + ".leftHand.index2", name + ".leftHand.index3" });
     simulator.multiMapped.put(name + ".leftHand.majeure", new String[] { name + ".leftHand.majeure", name + ".leftHand.majeure2", name + ".leftHand.majeure3" });

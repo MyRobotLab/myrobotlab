@@ -2,6 +2,7 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
     console.info('ServoMixerGuiCtrl')
     var _self = this
     var msg = this.msg
+    var globalPoseIndex = 0
 
     $scope.minView = true
     $scope.delay = 3 // initial
@@ -82,6 +83,8 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
         case 'onSearch':
             $scope.searchServo.displayName = data
             $scope.searchServos(data)
+            // sets pose name from selected
+            $scope.state.selectedPose = data + "_" + globalPoseIndex++
             $scope.$apply()
             break                
         case 'onPlayingGesturePart':

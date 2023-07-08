@@ -6,9 +6,17 @@ import java.util.List;
 import org.myrobotlab.framework.Plan;
 
 public class ProgramABConfig extends ServiceConfig {
+  
+  @Deprecated /* unused text filters */
+  public String[] textFilters;
+  
+  /**
+   * a directory ProgramAB will scan for new bots
+   */
+  public String botDir;
 
   /**
-   * list of bot directories that will be available
+   * explicit bot directories
    */
   public List<String> bots = new ArrayList<>();
   
