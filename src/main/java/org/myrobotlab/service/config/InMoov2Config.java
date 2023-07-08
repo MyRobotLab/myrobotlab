@@ -3,10 +3,8 @@ package org.myrobotlab.service.config;
 import java.util.ArrayList;
 
 import org.myrobotlab.framework.Plan;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.jme3.UserDataConfig;
 import org.myrobotlab.math.MapperLinear;
-import org.myrobotlab.service.InMoov2;
 import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.FiniteStateMachineConfig.Transition;
@@ -97,9 +95,9 @@ public class InMoov2Config extends ServiceConfig {
   /**
    * Sleep 5 minutes after last presence detected
    */
-  public int sleepTimeoutMs = 300000;
-
-  public int trackingTimeoutMs = 10000;
+  public int sleepTimeoutMs=300000;
+  
+  public boolean startupSound = true;
 
   public String unlockInsult = "forgive me";
 
