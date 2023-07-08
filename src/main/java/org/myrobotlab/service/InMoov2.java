@@ -1823,6 +1823,29 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
     // chatbot getresponse attached to publishEvent
     addListener("publishEvent", getPeerName("chatBot"), "getResponse");
+
+    try {
+      // copy config if it doesn't already exist
+      String resourceBotDir = FileIO.gluePaths(getResourceDir(), "config");
+      List<File> files = FileIO.getFileList(resourceBotDir);
+      for (File f : files) {
+        String botDir = "data/config/" + f.getName();
+        File bDir = new File(botDir);
+        if (bDir.exists() || !f.isDirectory()) {
+          log.info("skipping data/config/{}", botDir);
+        } else {
+          log.info("will copy new data/config/{}", botDir);
+          try {
+            FileIO.copy(f.getAbsolutePath(), botDir);
+          } catch (Exception e) {
+            error(e);
+          }
+        }
+      }
+    } catch (Exception e) {
+      error(e);
+    }
+
     runtime.invoke("publishConfigList");
   }
 
