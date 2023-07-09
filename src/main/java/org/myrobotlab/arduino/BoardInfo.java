@@ -7,6 +7,9 @@ import org.slf4j.Logger;
 
 /**
  * BoardInfo is all info which needs to be published only once after connection
+ * 
+ * FIXME - make a BoardInfo that has more generic information in common with many board types
+ * 
  */
 public class BoardInfo implements Serializable {
 
