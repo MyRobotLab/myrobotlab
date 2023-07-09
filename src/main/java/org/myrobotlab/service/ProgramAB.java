@@ -46,6 +46,7 @@ import org.myrobotlab.service.interfaces.TextPublisher;
 import org.myrobotlab.service.interfaces.UtteranceListener;
 import org.myrobotlab.service.interfaces.UtterancePublisher;
 import org.slf4j.Logger;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * Program AB service for MyRobotLab Uses AIML 2.0 to create a ChatBot This is a
@@ -76,13 +77,6 @@ public class ProgramAB extends Service
    */
   protected boolean useGlobalSession = false;
 
-  /**
-   * sleep current state of the sleep if globalSession is used true : ProgramAB
-   * is sleeping and wont respond false : ProgramAB is not sleeping and any
-   * response requested will be processed
-   */
-  protected boolean sleep = false;
-
   transient public final static Logger log = LoggerFactory.getLogger(ProgramAB.class);
 
   /**
@@ -94,17 +88,6 @@ public class ProgramAB extends Service
    * Mapping a bot to a userName and chat session
    */
   Map<String, Session> sessions = new TreeMap<>();
-
-  /**
-   * initial bot name - this bot comes with ProgramAB this will be the result of
-   * whatever is scanned in the constructor
-   */
-  String currentBotName = null;
-
-  /**
-   * default user name chatting with the bot
-   */
-  String currentUserName = "human";
 
   /**
    * start GoogleSearch (a peer) instead of sraix web service which is down or
@@ -125,46 +108,6 @@ public class ProgramAB extends Service
    */
   public ProgramAB(String n, String id) {
     super(n, id);
-
-    // TODO - allow lazy selection of bot - even if it currently doesn't exist
-    // in the bot map - move scanning to start
-
-    // 1. scan resources .. either "resource/ProgramAB" or
-    // ../ProgramAB/resource/ProgramAB (for dev) for valid bot directories
-
-    // List<File> resourceBots = scanForBots(getResourceDir());
-    //
-    // if (isDev()) {
-    // // 2. dev loading "only" dev bots - from dev location
-    // for (File file : resourceBots) {
-    // addBotPath(file.getAbsolutePath());
-    // }
-    // } else {
-    // // 2. runtime loading
-    // // copy any bot in "resource/ProgramAB/{botName}" not found in
-    // // "data/ProgramAB/{botName}"
-    // for (File file : resourceBots) {
-    // String botName = getBotName(file);
-    // File dataBotDir = new File(FileIO.gluePaths("data/ProgramAB", botName));
-    // if (dataBotDir.exists()) {
-    // log.info("found data/ProgramAB/{} not copying", botName);
-    // } else {
-    // log.info("will copy new data/ProgramAB/{}", botName);
-    // try {
-    // FileIO.copy(file, dataBotDir);
-    // } catch (Exception e) {
-    // error(e);
-    // }
-    // }
-    // }
-    //
-    // // 3. addPath for all bots found in "data/ProgramAB/"
-    // List<File> dataBots = scanForBots("data/ProgramAB");
-    // for (File file : dataBots) {
-    // addBotPath(file.getAbsolutePath());
-    // }
-    // }
-
   }
 
   public String getBotName(File file) {
@@ -197,6 +140,7 @@ public class ProgramAB extends Service
       if (checkIfValid(file)) {
         info("found %s bot directory", file.getName());
         botDirs.add(file);
+        addBotPath(file.getAbsolutePath());
       }
     }
     return botDirs;
@@ -615,7 +559,8 @@ public class ProgramAB extends Service
    * @return
    */
   public Map<String, String> getPredicates() {
-    return getPredicates(currentUserName, currentBotName);
+    ProgramABConfig c = (ProgramABConfig) config;
+    return getPredicates(c.currentUserName, c.currentBotName);
   }
 
   /**
@@ -633,11 +578,8 @@ public class ProgramAB extends Service
 
   /**
    * Save all the predicates for all known sessions.
-   * 
-   * @throws IOException
-   *           boom
    */
-  public void savePredicates() throws IOException {
+  public void savePredicates() {
     for (Session session : sessions.values()) {
       session.savePredicates();
     }
@@ -696,7 +638,8 @@ public class ProgramAB extends Service
   }
 
   public Session startSession() throws IOException {
-    return startSession(currentUserName);
+    ProgramABConfig c = (ProgramABConfig) config;
+    return startSession(c.currentUserName);
   }
 
   // FIXME - it should just set the current userName only
@@ -817,25 +760,7 @@ public class ProgramAB extends Service
   public void addCategory(String pattern, String template) {
     addCategory(pattern, template, "*");
   }
-
-  /**
-   * writeAndQuit will write brain to disk For learn.aiml is concerned
-   */
-  public void writeAndQuit() {
-    // write out all bots aiml & save all predicates for all sessions?
-    for (BotInfo bot : bots.values()) {
-      if (bot.isActive()) {
-        try {
-          savePredicates();
-          // important to save learnf.aiml
-          // bot.writeQuit();
-        } catch (IOException e1) {
-          log.error("saving predicates threw", e1);
-        }
-      }
-    }
-  }
-
+  
   /**
    * Verifies and adds a new path to the search directories for bots
    * 
@@ -867,7 +792,6 @@ public class ProgramAB extends Service
       bots.put(botInfo.name, botInfo);
       botInfo.img = getBotImage(botInfo.name);
 
-      setCurrentBotName(botInfo.name);
       broadcastState();
     } else {
       error("invalid bot path - a bot must be a directory with a subdirectory named \"aiml\"");
@@ -887,13 +811,15 @@ public class ProgramAB extends Service
   }
 
   public void setCurrentBotName(String botName) {
-    this.currentBotName = botName;
+    ProgramABConfig c = (ProgramABConfig) config;
+    c.currentBotName = botName;
     invoke("getBotImage", botName);
     broadcastState();
   }
 
   public void setCurrentUserName(String currentUserName) {
-    this.currentUserName = currentUserName;
+    ProgramABConfig c = (ProgramABConfig) config;
+    c.currentUserName = currentUserName;
     broadcastState();
   }
 
@@ -906,11 +832,13 @@ public class ProgramAB extends Service
   }
 
   public String getCurrentUserName() {
-    return currentUserName;
+    ProgramABConfig c = (ProgramABConfig) config;
+    return c.currentUserName;
   }
 
   public String getCurrentBotName() {
-    return currentBotName;
+    ProgramABConfig c = (ProgramABConfig) config;
+    return c.currentBotName;
   }
 
   /**
@@ -998,7 +926,7 @@ public class ProgramAB extends Service
   @Override
   public void stopService() {
     super.stopService();
-    writeAndQuit();
+    savePredicates();
   }
 
   public boolean setPeerSearch(boolean b) {
@@ -1017,6 +945,8 @@ public class ProgramAB extends Service
     logging.setLevel("org.alicebot.ab.MagicBooleans", "DEBUG");
     logging.setLevel("class org.myrobotlab.programab.MrlSraixHandler", "DEBUG");
     logPublisher.start();
+
+    scanForBots(getResourceDir());
 
   }
 
@@ -1068,7 +998,8 @@ public class ProgramAB extends Service
   }
 
   public BotInfo getBotInfo() {
-    return getBotInfo(currentBotName);
+    ProgramABConfig c = (ProgramABConfig) config;
+    return getBotInfo(c.currentBotName);
   }
 
   /**
@@ -1148,81 +1079,53 @@ public class ProgramAB extends Service
 
   @Override
   public ServiceConfig getConfig() {
-    ProgramABConfig config = (ProgramABConfig) super.getConfig();
-    // REMOVED from overlap with subscriptions
-    // Set<String> listeners = getAttached("publishText");
-    // config.textListeners = listeners.toArray(new String[listeners.size()]);
-
-    // listeners = getAttached("publishUtterance");
-    // config.utteranceListeners = listeners.toArray(new
-    // String[listeners.size()]);
-    if (config.bots == null) {
-      config.bots = new ArrayList<>();
+    ProgramABConfig c = (ProgramABConfig) super.getConfig();
+    if (c.bots == null) {
+      c.bots = new ArrayList<>();
     }
 
-    config.bots.clear();
+    c.bots.clear();
     for (BotInfo bot : bots.values()) {
 
       Path pathAbsolute = Paths.get(bot.path.getAbsolutePath());
       Path pathBase = Paths.get(System.getProperty("user.dir"));
       Path pathRelative = pathBase.relativize(pathAbsolute);
-      config.bots.add(pathRelative.toString());
+      c.bots.add(pathRelative.toString());
 
     }
 
-    config.currentBotName = currentBotName;
-    config.currentUserName = currentUserName;
-
-    return config;
+    return c;
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    ProgramABConfig config = (ProgramABConfig) super.apply(c);
-    if (config.bots != null && config.bots.size() > 0) {
-      bots.clear();
-      for (String botPath : config.bots) {
+  public ServiceConfig apply(ServiceConfig config) {
+    ProgramABConfig c = (ProgramABConfig) super.apply(config);
+    if (c.bots != null && c.bots.size() > 0) {
+      // bots.clear();
+      for (String botPath : c.bots) {
         addBotPath(botPath);
       }
     }
     
-    if (config.botDir == null) {
-      config.botDir = getResourceDir();
+    if (c.botDir == null) {
+      c.botDir = getResourceDir();
     }
 
-    List<File> botsFromScanning = scanForBots(config.botDir);
+    List<File> botsFromScanning = scanForBots(c.botDir);
     for (File file : botsFromScanning) {
       addBotPath(file.getAbsolutePath());
     }
 
-    if (config.currentBotName != null) {
-      setCurrentBotName(config.currentBotName);
+    if (c.currentUserName != null) {
+      setCurrentUserName(c.currentUserName);
     }
-
-    if (config.currentUserName != null) {
-      setCurrentUserName(config.currentUserName);
+    
+    if (c.startTopic != null) {
+      setTopic(c.startTopic);  
     }
+    
 
-    // useGlobalSession = config.useGlobalSession;
-
-    sleep = config.sleep;
-
-    setCurrentSession(currentUserName, currentBotName);
-
-    // REMOVED because of overlap with subscriptions
-    // if (config.textListeners != null) {
-    // for (String local : config.textListeners) {
-    // attachTextListener(local);
-    // }
-    // }
-    //
-    // if (config.utteranceListeners != null) {
-    // for (String local : config.utteranceListeners) {
-    // attachUtteranceListener(local);
-    // }
-    // }
-
-    return config;
+    return c;
   }
 
   public static void main(String args[]) {
@@ -1309,11 +1212,16 @@ public class ProgramAB extends Service
   }
 
   /**
-   * Predicate updates are published here.  Topic (one of the most important predicate change) is also published
-   * when it changes. Session is needed to extract current user and bot this is relevant to.
-   * @param session - session where the predicate change occurred
-   * @param name - name of predicate
-   * @param value - new value of predicate
+   * Predicate updates are published here. Topic (one of the most important
+   * predicate change) is also published when it changes. Session is needed to
+   * extract current user and bot this is relevant to.
+   * 
+   * @param session
+   *          - session where the predicate change occurred
+   * @param name
+   *          - name of predicate
+   * @param value
+   *          - new value of predicate
    * @return
    */
   public PredicateEvent publishPredicate(Session session, String name, String value) {
@@ -1323,12 +1231,12 @@ public class ProgramAB extends Service
     event.botName = session.botInfo.name;
     event.name = name;
     event.value = value;
-    
+
     if ("topic".equals(name) && value != null && !value.equals(session.currentTopic)) {
       invoke("publishTopic", new TopicChange(session.userName, session.botInfo.name, value, session.currentTopic));
       session.currentTopic = value;
     }
-    
+
     return event;
   }
 
@@ -1385,18 +1293,22 @@ public class ProgramAB extends Service
    * wakes the global session up
    */
   public void wake() {
-    sleep = false;
+    ProgramABConfig c = (ProgramABConfig) super.getConfig();
+    c.sleep = false;
   }
 
   /**
    * sleeps the global session
    */
   public void sleep() {
-    sleep = true;
+    ProgramABConfig c = (ProgramABConfig) super.getConfig();
+    c.sleep = true;
   }
 
   @Override
   public void onUtterance(Utterance utterance) throws Exception {
+    
+    ProgramABConfig c = (ProgramABConfig) super.getConfig();
 
     log.info("Utterance Received " + utterance);
 
@@ -1427,8 +1339,8 @@ public class ProgramAB extends Service
         // TODO: don't talk to bots.. it won't go well..
         // TODO: the discord api can provide use the list of mentioned users.
         // for now.. we'll just see if we see Mr. Turing as a substring.
-        sleep = (sleep || utterance.text.contains("@")) && !utterance.text.contains(botName);
-        if (!sleep) {
+        c.sleep = (c.sleep || utterance.text.contains("@")) && !utterance.text.contains(botName);
+        if (!c.sleep) {
           shouldIRespond = true;
         }
       }
@@ -1462,17 +1374,51 @@ public class ProgramAB extends Service
       }
     }
   }
+  
+  /**
+   * This receiver can take a config published by another service and sync
+   * predicates from it
+   * @param cfg
+   */
+  public void onConfig(ServiceConfig cfg) {
+    Yaml yaml = new Yaml();    
+    String yml = yaml.dumpAsMap(cfg);
+    Map<String, Object> cfgMap = yaml.load(yml);
+    
+    for (Map.Entry<String, Object> entry : cfgMap.entrySet()) {
+      if (entry.getValue() == null) {
+        setPredicate("cfg_" + entry.getKey(), null);
+      } else {
+        setPredicate("cfg_" + entry.getKey(), entry.getValue().toString());
+      }
+    }
+    
+    invoke("getPredicates");
+  }
 
   @Override
   public Utterance publishUtterance(Utterance utterance) {
     return utterance;
   }
-  
-  
+
   public TopicChange publishTopic(TopicChange topicChange) {
     return topicChange;
   }
+
+  public String getTopic() {    
+    return getPredicate(getCurrentUserName(), "topic");
+  }
   
- 
+  public String getTopic(String username) {    
+    return getPredicate(username, "topic");
+  }
+  
+  public void setTopic(String username, String topic) {    
+    setPredicate(username, "topic", topic);
+  }
+  
+  public void setTopic(String topic) {    
+    setPredicate(getCurrentUserName(), "topic", topic);
+  }
 
 }
