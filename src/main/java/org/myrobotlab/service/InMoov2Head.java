@@ -304,7 +304,6 @@ public class InMoov2Head extends Service {
   public void moveToBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
     log.info("init {} moveToBlocking ", getName());
     moveTo(neck, rothead, eyeX, eyeY, jaw, rollNeck);
-    log.info("moveTo {} {} {} {} {} {}",  neck, rothead, eyeX, eyeY, jaw, rollNeck);
     waitTargetPos();
     log.info("end {} moveToBlocking ", getName());
   }
