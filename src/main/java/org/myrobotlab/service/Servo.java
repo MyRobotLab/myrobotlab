@@ -263,7 +263,9 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
     // a move to disable
     if (config.autoDisable) {
       disable();
+      addTaskOneShot(idleTimeout, "disable");
     }
+    
     if (config.minIn != null && config.maxIn != null && config.minOut != null && config.maxOut != null) {
       mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
     }
