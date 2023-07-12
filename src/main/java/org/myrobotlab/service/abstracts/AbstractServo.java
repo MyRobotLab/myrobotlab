@@ -405,7 +405,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   public void detach(String controllerName) {
     ServoConfig c = (ServoConfig) config;
 
-    if (c.controller == null) {
+    if (!isAttached) {
       log.info("already detached");
       return;
     }
