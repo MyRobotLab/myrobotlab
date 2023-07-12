@@ -560,13 +560,13 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   @Override
   public boolean isAttached(Attachable attachable) {
     ServoConfig c = (ServoConfig) config;
-    return c.controller != null && c.controller.equals(attachable.getName());
+    return isAttached && c.controller.equals(attachable.getName());
   }
 
   @Override
   public boolean isAttached(String name) {
     ServoConfig c = (ServoConfig) config;
-    return c.controller != null && CodecUtils.getFullName(c.controller).equals(CodecUtils.getFullName(name));
+    return isAttached && CodecUtils.getFullName(c.controller).equals(CodecUtils.getFullName(name));
   }
 
   @Override
