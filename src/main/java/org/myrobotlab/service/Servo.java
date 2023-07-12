@@ -85,7 +85,7 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
    */
   @Override
   protected boolean processMove(Double newPos, boolean blocking, Long timeoutMs) {
-
+    
     if (newPos == null) {
       log.info("servo processMove(null) not valid position");
       return false;
@@ -210,102 +210,6 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
   @Deprecated
   public void enableAutoDisable(boolean value) {
     setAutoDisable(value);
-  }
-
-  @Override
-  public ServiceConfig getConfig() {
-
-    ServoConfig config = (ServoConfig) super.getConfig();
-
-    config.autoDisable = autoDisable;
-    config.enabled = enabled;
-
-    if (mapper != null) {
-      config.clip = mapper.isClip();
-      config.maxIn = mapper.getMaxX();
-      config.maxOut = mapper.getMaxY();
-      config.minIn = mapper.getMinX();
-      config.minOut = mapper.getMinY();
-      config.inverted = mapper.isInverted();
-    }
-
-    // FIXME remove members and use config only
-    config.idleTimeout = idleTimeout;
-    config.pin = pin;
-    config.rest = rest;
-    config.speed = speed;
-    config.sweepMax = sweepMax;
-    config.sweepMin = sweepMin;
-
-    config.controller = this.controller;
-
-    if (syncedServos.size() > 0) {
-      config.synced = new String[syncedServos.size()];
-      int i = 0;
-      for (String s : syncedServos) {
-        config.synced[i] = s;
-        ++i;
-      }
-    }
-
-    return config;
-  }
-
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    ServoConfig config = (ServoConfig) super.apply(c);
-
-    autoDisable = config.autoDisable;
-
-    // important - if starting up
-    // and autoDisable - then the assumption at this point
-    // is it is currently disabled, otherwise it will take
-    // a move to disable
-    if (config.autoDisable) {
-      disable();
-      addTaskOneShot(idleTimeout, "disable");
-    }
-    
-    if (config.minIn != null && config.maxIn != null && config.minOut != null && config.maxOut != null) {
-      mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
-    }
-    mapper.setInverted(config.inverted);
-    mapper.setClip(config.clip);
-    enabled = config.enabled;
-    if (config.idleTimeout != null) {
-      idleTimeout = config.idleTimeout;
-    }
-    pin = config.pin;
-
-    speed = config.speed;
-    sweepMax = config.sweepMax;
-    sweepMin = config.sweepMin;
-
-    if (config.synced != null) {
-      syncedServos.clear();
-      for (String s : config.synced) {
-        syncedServos.add(s);
-      }
-    }
-
-    // rest = config.rest;
-    if (config.rest != null) {
-      rest = config.rest;
-      targetPos = config.rest;
-      // currentInputP = mapper.calcOutput(config.rest);
-      currentInputPos = config.rest;
-      broadcast("publishEncoderData", new EncoderData(getName(), pin, config.rest, config.rest));
-    }
-
-    if (config.controller != null) {
-      try {
-        attach(config.controller);
-      } catch (Exception e) {
-        error(e);
-      }
-    }
-
-    return c;
   }
 
   @Override

@@ -176,7 +176,9 @@ public class ServoTest extends AbstractTest {
     // to come to 'eventual' synchronized consistency
 
     Service.sleep(300);
-    s.attach(arduino01, 10, 1.0);
+    s.setPin(10);
+    s.setPosition(1);
+    s.attach(arduino01);
     Service.sleep(300);
     s.enable();
     assertTrue(s.isEnabled());
@@ -327,7 +329,11 @@ public class ServoTest extends AbstractTest {
     // 60 degrees per second.. move from 0 to 180 in 3 seconds
     servo01.setSpeed(60.0);
     servo01.setPin(7);
-    servo01.attach("arduino01", 8, 1.0, 360.0);
+    servo01.setPin(8);
+    servo01.setSpeed(1.0);
+    servo01.setController("blah");
+    assertEquals("blah", servo01.getController());
+    servo01.attach("arduino01");
     assertEquals("arduino01", servo01.getController());
     assertEquals(Integer.valueOf(8).toString(), servo01.getPin());
 
