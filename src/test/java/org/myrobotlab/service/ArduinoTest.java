@@ -391,7 +391,9 @@ public class ArduinoTest extends AbstractTest {
 
     // detach
     servo.detach();
-    assertNull("detach did not remove controller", servo.getController());
+    // assertNull("detach did not remove controller", servo.getController());
+    // does not need to be null
+    assertTrue(!servo.isAttached());
 
     // assertEquals("servoDetach/7/0\n", uart.decode());
     arduino01.attach(servo);

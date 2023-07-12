@@ -2408,7 +2408,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       // servo.load();
       log.info("rest is {}", servo.getRest());
       servo.save();
-      servo.setPin(13);
+      // servo.setPin(8);
       servo.attach(mega);
 
       servo.moveTo(90.0);

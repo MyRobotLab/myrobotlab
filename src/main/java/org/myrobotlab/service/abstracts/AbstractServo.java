@@ -372,6 +372,15 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // asynchronous - did we successfully attach ¯\_(ツ)_/¯ !
     send(service, "attach", getName());
     log.info("{} attached to {} on pin {}", getName(), service, pin);
+    
+    if (c.autoDisable) {
+      disable();
+      addTaskOneShot(idleTimeout, "disable");
+    }
+
+    // asynchronous - did we successfully attach ¯\_(ツ)_/¯ !
+    send(service, "attach", getName());
+    log.info("{} attached to {} on pin {}", getName(), service, pin);
     broadcastState();
   }
 
@@ -399,7 +408,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   public void detach(String controllerName) {
     ServoConfig c = (ServoConfig) config;
 
-    if (c.controller == null) {
+    if (!isAttached) {
       log.info("already detached");
       return;
     }
@@ -554,13 +563,13 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   @Override
   public boolean isAttached(Attachable attachable) {
     ServoConfig c = (ServoConfig) config;
-    return c.controller != null && c.controller.equals(attachable.getName());
+    return isAttached && c.controller.equals(attachable.getName());
   }
 
   @Override
   public boolean isAttached(String name) {
     ServoConfig c = (ServoConfig) config;
-    return c.controller != null && CodecUtils.getFullName(c.controller).equals(CodecUtils.getFullName(name));
+    return isAttached && CodecUtils.getFullName(c.controller).equals(CodecUtils.getFullName(name));
   }
 
   @Override
@@ -1186,6 +1195,13 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
       } catch (Exception e) {
         error(e);
       }
+    }
+
+    // connect and attach on an arduino can take considerable time
+    // so we'll add our id
+    if (config.autoDisable) {
+      disable();
+      addTaskOneShot(idleTimeout, "disable");
     }
 
     return c;

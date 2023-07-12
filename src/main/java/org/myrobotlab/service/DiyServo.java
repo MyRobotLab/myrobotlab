@@ -560,7 +560,11 @@ public class DiyServo extends AbstractServo implements PinListener, ServiceLifeC
     this.encoderControl = encoder;
   }
 
-  public void attach(PinArrayControl pinArrayControl, int pin) {
+  public void attach(PinArrayControl pinArrayControl, int pin) throws Exception {
+    if (pinArrayControl == null) {
+      error("pinArrayCOntrol cannot be null");
+      return;
+    }
     this.pinArrayControl = pinArrayControl;
     if (pinArrayControl != null) {
       pinControlName = pinArrayControl.getName();
@@ -580,7 +584,7 @@ public class DiyServo extends AbstractServo implements PinListener, ServiceLifeC
     // %s",pinArrayControl.getClass(), pinArrayControl.getName(),resolution));
 
     int rate = 1000 / sampleTime;
-    pinArrayControl.attachPinListener(this);
+    pinArrayControl.attach(getName());
     pinArrayControl.enablePin(this.pin, rate);
     broadcastState();
   }
