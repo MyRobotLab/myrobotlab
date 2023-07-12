@@ -56,6 +56,19 @@ public class ServoTest extends AbstractTest {
     servo.releaseService();
     arduino01.releaseService();
   }
+  
+  @Test
+  public void autoDisableAfterAttach() {
+    // enable servo
+    servo.moveTo(100);
+    servo.detach();
+    assertTrue(!servo.isAttached());
+    servo.setAutoDisable(true);
+    servo.attach("arduinoServoTest");
+    // after attach, must be disabled
+    sleep(servo.getIdleTimeout() + 1000);
+    assertTrue(!servo.isEnabled());
+  }
 
   @Test
   public void disabledMove() throws Exception {

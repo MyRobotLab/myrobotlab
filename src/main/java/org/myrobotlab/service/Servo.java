@@ -352,4 +352,8 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
   public void onReleased(String name) {
   }
 
+  public boolean isAttached() {
+    return isAttached;
+  }
+
 }
