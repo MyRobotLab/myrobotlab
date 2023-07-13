@@ -163,10 +163,6 @@
 <!-- Duplicate entry for com.squareup.okhttp3-okhttp-3.9.0 skipping -->
 <!-- AzureTranslator end -->
 
-<!-- BodyPart begin -->
-<!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
-<!-- BodyPart end -->
-
 <!-- BoofCv begin -->
   <dependency>
     <groupId>org.boofcv</groupId>
