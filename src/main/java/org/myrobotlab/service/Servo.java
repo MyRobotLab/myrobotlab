@@ -83,7 +83,7 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
    */
   @Override
   protected boolean processMove(Double newPos, boolean blocking, Long timeoutMs) {
-    
+    ServoConfig c = (ServoConfig) super.getFilteredConfig();
     if (newPos == null) {
       log.info("servo processMove(null) not valid position");
       return false;
@@ -104,7 +104,7 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
       firstMove = false;
     }
 
-    if (autoDisable && !enabled) {
+    if (c.autoDisable && !enabled) {
       // if the servo was disable with a timer - re-enable it
       enable();
     }
@@ -197,7 +197,7 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
       sleep(blockingTimeMs);
       isBlocking = false;
       isMoving = false;
-      if (autoDisable) {
+      if (c.autoDisable) {
         // and start our countdown
         addTaskOneShot(idleTimeout, "disable");
       }

@@ -60,13 +60,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   private static final long serialVersionUID = 1L;
 
   /**
-   * The automatic disabling of the servo in idleTimeout ms This de-energizes
-   * the servo. By default this is disabled.
-   * 
-   */
-  protected boolean autoDisable = false;
-
-  /**
    * The current servo controller that this servo is attached to. Although most
    * of the control events from ServoControl publish as desired, there is an
    * "optimization" of having a controller field. It represents a single
@@ -342,7 +335,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
       return;
     }
 
-    if (isAttached && !service.equals(c.controller)) {
+    if (isAttached && !CodecUtils.getFullName(service).equals(c.controller)) {
       warn("%s already attached to %s detach first", getName(), service);
       return;
     } else if (isAttached) {
@@ -463,8 +456,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public void enable() {
-
-    if (autoDisable) {
+    ServoConfig c = (ServoConfig) config;
+    if (c.autoDisable) {
       if (!isMoving) {
         // not moving - safe & expected to put in a disable
         purgeTask("disable");
@@ -484,7 +477,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public boolean isAutoDisable() {
-    return autoDisable;
+    ServoConfig c = (ServoConfig) config;
+    return c.autoDisable;
   }
 
   @Override
@@ -834,6 +828,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public void setAutoDisable(boolean autoDisable) {
+    ServoConfig c = (ServoConfig) config;
     if (autoDisable) {
       if (!isMoving) {
         // not moving - safe & expected to put in a disable
@@ -842,8 +837,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     } else {
       purgeTask("disable");
     }
-    boolean valueChanged = this.autoDisable != autoDisable;
-    this.autoDisable = autoDisable;
+    boolean valueChanged = c.autoDisable != autoDisable;
+    c.autoDisable = autoDisable;
     if (valueChanged) {
       broadcastState();
     }
@@ -1082,11 +1077,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   @Override
   public ServoEvent publishServoStopped(String name, Double position) {
     log.debug("{} publishServoStopped({}, {})", System.currentTimeMillis(), name, position);
-
+    ServoConfig c = (ServoConfig) config;
     // log.info("TIME-ENCODER SERVO_STOPPED - {}", name);
     // if currently configured to autoDisable - the timer starts now
     // if we are "stopping" going from moving to not moving
-    if (autoDisable && isMoving) {
+    if (c.autoDisable && isMoving) {
       // we cancel any pre-existing timer if it exists
       purgeTask("disable");
       // and start our countdown
@@ -1164,8 +1159,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   public ServiceConfig apply(ServiceConfig c) {
     ServoConfig config = (ServoConfig) super.apply(c);
 
-    autoDisable = config.autoDisable;
-
     // important - if starting up
     // and autoDisable - then the assumption at this point
     // is it is currently disabled, otherwise it will take
@@ -1227,7 +1220,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
     ServoConfig config = (ServoConfig) super.getConfig();
 
-    config.autoDisable = autoDisable;
     config.enabled = enabled;
 
     if (mapper != null) {

@@ -226,7 +226,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
 
     $scope.setAutoDisable = function() {
         msg.send("setIdleTimeout", $scope.service.idleTimeout)
-        msg.send("setAutoDisable", $scope.service.autoDisable)
+        msg.send("setAutoDisable", $scope.service.config.autoDisable)
     }
 
     $scope.sweep = function() {

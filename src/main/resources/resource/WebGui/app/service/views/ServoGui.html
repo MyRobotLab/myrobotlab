@@ -26,7 +26,7 @@
                             <td>Enable</td>
                             <td>&nbsp;Invert</td>
                             <td>&nbsp;&nbsp;AutoDisable</td>
-                            <td ng-show="service.autoDisable">TimeOut = {{service.idleTimeout/1000}} s</td>
+                            <td ng-show="service.config.autoDisable">TimeOut = {{service.idleTimeout/1000}} s</td>
                         </tr>
                         <tr>
                             <td>
@@ -49,11 +49,12 @@
                             <td>
                                 <toggle ng-model="service.mapper.inverted" class="miniBTN" title="Inverts servo direction" ng-change="msg.setInverted(service.mapper.inverted)" on="" off="" size="btn-lg"/>
                             </td>
-                            <td>
-                                &nbsp;&nbsp;<toggle ng-model="service.autoDisable" class="miniBTN" title="Stops energizing the servo after a given time but will energize again when moving the servo slider" ng-change="msg.setAutoDisable(service.autoDisable)" on="" off="" size="btn-lg"/>
+                            <td align="right">
+                               <button ng-show="service.config.autoDisable" class="btn btn-primary btn-sm" ng-click="msg.setAutoDisable(false)">on</button>
+                               <button ng-show="!service.config.autoDisable" class="btn btn-secondary btn-sm" ng-click="msg.setAutoDisable(true)">off</button>
                             </td>
                             <td>
-                                <input class="base-slider slider-width100" ng-show="service.autoDisable" type="range" name="idleSeconds" ng-model="idleSeconds" min="1" max="10" ng-change="setIdleTimeout(idleSeconds)">
+                                <input class="base-slider slider-width100" ng-show="service.config.autoDisable" type="range" name="idleSeconds" ng-model="idleSeconds" min="1" max="10" ng-change="setIdleTimeout(idleSeconds)">
                             </td>
                         </tr>
                     </table>
