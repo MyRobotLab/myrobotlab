@@ -335,7 +335,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
       return;
     }
 
-    if (isAttached && !service.equals(c.controller)) {
+    if (isAttached && !CodecUtils.getFullName(service).equals(c.controller)) {
       warn("%s already attached to %s detach first", getName(), service);
       return;
     } else if (isAttached) {
@@ -444,7 +444,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public void enable() {
-    ServoConfig c = (ServoConfig) super.getFilteredConfig();
+    ServoConfig c = (ServoConfig) config;
     if (c.autoDisable) {
       if (!isMoving) {
         // not moving - safe & expected to put in a disable
@@ -465,7 +465,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public boolean isAutoDisable() {
-    ServoConfig c = (ServoConfig) super.getFilteredConfig();
+    ServoConfig c = (ServoConfig) config;
     return c.autoDisable;
   }
 
@@ -816,7 +816,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public void setAutoDisable(boolean autoDisable) {
-    ServoConfig c = (ServoConfig) super.getFilteredConfig();
+    ServoConfig c = (ServoConfig) config;
     if (autoDisable) {
       if (!isMoving) {
         // not moving - safe & expected to put in a disable
@@ -1065,7 +1065,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   @Override
   public ServoEvent publishServoStopped(String name, Double position) {
     log.debug("{} publishServoStopped({}, {})", System.currentTimeMillis(), name, position);
-    ServoConfig c = (ServoConfig) super.getFilteredConfig();
+    ServoConfig c = (ServoConfig) config;
     // log.info("TIME-ENCODER SERVO_STOPPED - {}", name);
     // if currently configured to autoDisable - the timer starts now
     // if we are "stopping" going from moving to not moving

@@ -1442,6 +1442,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return config;
   }
 
+  // FIXME - NEED A BETTER SOLUTION !!!
   @Override
   public ServiceConfig getFilteredConfig() {
     ServiceConfig sc = getConfig();
