@@ -269,12 +269,13 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   public void attach(Attachable service) throws Exception {
     if (ServoController.class.isAssignableFrom(service.getClass())) {
       attachServoController(service.getName());
-    } 
+    }
     if (EncoderControl.class.isAssignableFrom(service.getClass())) {
-      
       attach((EncoderControl) service);
     }
+    if ((!EncoderControl.class.isAssignableFrom(service.getClass())) && (!ServoController.class.isAssignableFrom(service.getClass()))) {
       warn(String.format("%s.attach does not know how to attach to a %s", this.getClass().getSimpleName(), service.getClass().getSimpleName()));
+    }
   }
 
   /**
@@ -316,14 +317,13 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   }
 
   @Deprecated
-  /*
+  /**
    * Servos Do Not publish Joint Angles - they only publish their position !
    */
   public AngleData publishJointAngle(AngleData angle) {
     log.debug("{}.publishJointAngle({})", getName(), angle);
     return angle;
   }
-  
 
   /**
    * maximum complexity attach with reference to controller
@@ -342,7 +342,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
       return;
     }
 
-    if (isAttached && !service.equals(service)) {
+    if (isAttached && !service.equals(c.controller)) {
       warn("%s already attached to %s detach first", getName(), service);
       return;
     } else if (isAttached) {
@@ -372,7 +372,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // asynchronous - did we successfully attach ¯\_(ツ)_/¯ !
     send(service, "attach", getName());
     log.info("{} attached to {} on pin {}", getName(), service, pin);
-    
+
     if (c.autoDisable) {
       disable();
       addTaskOneShot(idleTimeout, "disable");
@@ -400,7 +400,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     detach(sc.getName());
   }
 
-  // AbstractServo -
+  /**
+   * detach this servo from the controller named controllerName
+   */
   @Override
   public void detach(String controllerName) {
     ServoConfig c = (ServoConfig) config;
@@ -555,6 +557,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   @Deprecated /* use getSpeed() */
   public Double getVelocity() {
     return speed;
+  }
+
+  public boolean isAttached() {
+    return isAttached;
   }
 
   @Override

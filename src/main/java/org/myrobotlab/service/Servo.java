@@ -30,8 +30,6 @@ import java.util.Set;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.MapperLinear;
-import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.config.ServiceConfig;
@@ -352,8 +350,5 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
   public void onReleased(String name) {
   }
 
-  public boolean isAttached() {
-    return isAttached;
-  }
 
 }
