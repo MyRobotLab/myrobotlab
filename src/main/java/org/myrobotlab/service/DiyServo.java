@@ -261,11 +261,6 @@ public class DiyServo extends AbstractServo implements PinListener, ServiceLifeC
     return lastActivityTimeTs;
   }
 
-  // FIXME - change to enabled()
-  public Boolean isAttached() {
-    return isAttached;
-  }
-
   public boolean isControllerSet() {
     return isControllerSet;
   }
