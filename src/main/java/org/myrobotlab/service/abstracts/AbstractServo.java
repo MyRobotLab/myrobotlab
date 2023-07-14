@@ -4,6 +4,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Config;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
@@ -15,6 +16,8 @@ import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderPublisher;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.data.AngleData;
 import org.myrobotlab.service.data.ServoMove;
 import org.myrobotlab.service.data.ServoSpeed;
@@ -48,9 +51,6 @@ import org.slf4j.Logger;
  *         The mapper accepts inputs, the controller needs mapper outputs.
  *         Nothing outside of the servo controller should need the mapper
  *         outputs.
- * 
- *         TODO - make a publishing interface which publishes "CONTROL" angles
- *         vs status of angles
  *
  */
 public abstract class AbstractServo extends Service implements ServoControl, ServoControlPublisher, ServoStatusPublisher, EncoderPublisher {
@@ -67,10 +67,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   protected boolean autoDisable = false;
 
   /**
-   * The current servo controller that this servo is attached to. TODO: move
-   * this to Servo.java , DiyServo doesn't care about this detail.
+   * The current servo controller that this servo is attached to. Although most
+   * of the control events from ServoControl publish as desired, there is an
+   * "optimization" of having a controller field. It represents a single
+   * controller, which in turn become a set of notifyEntries.
    */
-  protected String controller;
+  // protected String controller;
 
   /**
    * This allows the servo to attach disabled, and only energize after the first
@@ -115,6 +117,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * 
    */
   protected int idleTimeout = 3000;
+
+  /**
+   * status field if the currently set controller is attached
+   */
+  protected boolean isAttached = false;
 
   /**
    * if the servo is doing a blocking call - it will block other blocking calls
@@ -232,9 +239,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // we have no "historical" info - assume we are @ rest
     targetPos = rest;
 
-    // TODO: this value is default already.
-    // mapper.setMinMax(0, 180);
-    // create our default TimeEncoder
     if (encoder == null) {
       encoder = new TimeEncoder(this);
       // if the encoder has a current value - we initialize the
@@ -242,12 +246,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
       Double savedPos = encoder.getPos();
       if (savedPos != null && loadSavedPositions) {
         log.info("found previous values for {} setting initial position to {}", getName(), savedPos);
-        // TODO: kw: output position shouldn't be set to the targetPos..
         currentInputPos = targetPos = savedPos;
       }
     }
-    // currentInputP = mapper.calcOutput(targetPos); FIXME - FIXED - encoder now
-    // publishing input not output
   }
 
   /**
@@ -267,10 +268,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   @Override
   public void attach(Attachable service) throws Exception {
     if (ServoController.class.isAssignableFrom(service.getClass())) {
-      attach((ServoController) service, null, null, null);
-    } else if (EncoderControl.class.isAssignableFrom(service.getClass())) {
+      attachServoController(service.getName());
+    }
+    if (EncoderControl.class.isAssignableFrom(service.getClass())) {
       attach((EncoderControl) service);
-    } else {
+    }
+    if ((!EncoderControl.class.isAssignableFrom(service.getClass())) && (!ServoController.class.isAssignableFrom(service.getClass()))) {
       warn(String.format("%s.attach does not know how to attach to a %s", this.getClass().getSimpleName(), service.getClass().getSimpleName()));
     }
   }
@@ -297,42 +300,24 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     broadcastState();
   }
 
+  public void setController(String name) {
+    ServoConfig c = (ServoConfig) config;
+    c.controller = name;
+    broadcastState();
+  }
+
   @Override
   public void attach(ServoController sc) {
-    attach(sc, null, null, null);
-  }
-
-  @Deprecated /* setPin then attach(String) */
-  public void attach(ServoController sc, Integer pin) {
-    attachServoController(sc.getName(), pin, null, null);
-  }
-
-  public void attach(ServoController sc, Integer pin, Double pos) {
-    attachServoController(sc.getName(), pin, pos, null);
-  }
-
-  @Deprecated /* setPin setPos setSpeed then attach(String) */
-  public void attach(ServoController sc, Integer pin, Double pos, Double speed) {
-    attachServoController(sc.getName(), pin, pos, speed);
+    attach(sc.getName());
   }
 
   @Override
-  public void attach(String sc) throws Exception {
-    attachServoController(sc, null, null, null);
-  }
-
-  @Deprecated /* setPin then attach(String) */
-  public void attach(String controllerName, Integer pin) {
-    attach(controllerName, pin, null);
-  }
-
-  @Deprecated /* setPin setPos then attach(String) */
-  public void attach(String controllerName, Integer pin, Double pos) {
-    attach(controllerName, pin, pos, null);
+  public void attach(String sc) {
+    attachServoController(sc);
   }
 
   @Deprecated
-  /*
+  /**
    * Servos Do Not publish Joint Angles - they only publish their position !
    */
   public AngleData publishJointAngle(AngleData angle) {
@@ -340,67 +325,58 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     return angle;
   }
 
-  // @Override
-  // FIXME - decide how attach will work or wont with extra parameters
-  public void attach(String controllerName, Integer pin, Double pos, Double speed) {
-    try {
-      setPin(pin);
-      setPosition(pos);
-      setSpeed(speed);
-      attach(controllerName);
-    } catch (Exception e) {
-      error(e);
-    }
-  }
-
   /**
-   * maximum complexity attach with reference to controller FIXME - max
-   * complexity service should use NAME not a direct reference to
-   * ServoController !!!!
+   * maximum complexity attach with reference to controller
    */
   @Override
-  public void attachServoController(String sc, Integer pin, Double pos, Double speed) {
-    if (controller != null && controller.equals(sc)) {
-      log.info("{} already attached", sc);
+  public void attachServoController(String service) {
+    ServoConfig c = (ServoConfig) config;
+
+    if (service == null) {
+      error("attachServoController null");
       return;
     }
-    // update pin if non-null value supplied
-    if (pin != null) {
-      setPin(pin);
-    }
-    // update pos if non-null value supplied
-    if (pos != null) {
-      targetPos = pos;
-    }
-    // update speed if non-null value supplied
-    if (speed != null) {
-      setSpeed(speed);
-    }
-    // the subscribes .... or addListeners in this case ...
-    addListener("publishServoMoveTo", sc);
-    addListener("publishServoStop", sc);
-    addListener("publishServoWriteMicroseconds", sc);
-    addListener("publishServoSetSpeed", sc);
-    addListener("publishServoEnable", sc);
-    addListener("publishServoDisable", sc);
-    controller = sc;
 
-    ServoController servoController = (ServoController) Runtime.getService(sc);
-    if (servoController != null) {
-      servoController.attachServoControl(this);
+    if (getPin() == null) {
+      error("cannot attach servo if pin is null");
+      return;
     }
-    // FIXME - remove !!!
-    // FIXME change to broadcast ?
-    // TODO: there is a race condition here.. we need to know that
-    // the servo control ackowledged this.
-    // try {
-    // sendBlocking(sc, "attachServoControl", this); // <-- change to broadcast
-    // ?
-    // } catch (Exception e) {
-    // log.error("sendBlocking attachServoControl threw", e);
-    // }
-    // TOOD: we need to wait here for the servo controller to acknowledge that
-    // it was attached.
+
+    if (isAttached && !service.equals(c.controller)) {
+      warn("%s already attached to %s detach first", getName(), service);
+      return;
+    } else if (isAttached) {
+      log.info("is attached");
+      return;
+    }
+
+    // the subscribes .... or addListeners in this case ...
+    addListener("publishServoMoveTo", service);
+    addListener("publishServoStop", service);
+    addListener("publishServoWriteMicroseconds", service);
+    addListener("publishServoSetSpeed", service);
+    addListener("publishServoEnable", service);
+    addListener("publishServoDisable", service);
+
+    c.controller = service;
+
+    // "guessing" its ok if it exists ...
+    if (Runtime.getService(service) != null) {
+      isAttached = true;
+    } else {
+      // for at least arduino it must be started to attach a servo
+      warn("%s servo could not attach to controller %s not available", getName(), service);
+      isAttached = false;
+    }
+
+    // asynchronous - did we successfully attach ¯\_(ツ)_/¯ !
+    send(service, "attach", getName());
+    log.info("{} attached to {} on pin {}", getName(), service, pin);
+
+    if (c.autoDisable) {
+      disable();
+      addTaskOneShot(idleTimeout, "disable");
+    }
 
     broadcastState();
   }
@@ -410,7 +386,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public void detach() {
-    detach(controller);
+    ServoConfig c = (ServoConfig) config;
+    detach(c.controller);
   }
 
   @Override
@@ -423,19 +400,24 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     detach(sc.getName());
   }
 
-  // AbstractServo -
+  /**
+   * detach this servo from the controller named controllerName
+   */
   @Override
   public void detach(String controllerName) {
-    if (controller == null) {
+    ServoConfig c = (ServoConfig) config;
+
+    if (!isAttached) {
       log.info("already detached");
       return;
     }
 
-    if (controller != null && !controller.equals(controllerName)) {
+    if (c.controller != null && !c.controller.equals(controllerName)) {
       log.warn("{} not attached to {}", getName(), controllerName);
       return;
     }
 
+    // disable servo before detaching controller
     disable();
 
     // the subscribes .... or addListeners in this case ...
@@ -445,13 +427,18 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     removeListener("publishServoSetSpeed", controllerName);
     removeListener("publishServoEnable", controllerName);
     removeListener("publishServoDisable", controllerName);
-    controller = null;
-    // 20210703 - grog I don't know why a sleep was put here
-    // junit ServoTest will fail without this :P
-    // sleep(500);
+    // no need to nullify controller its useful data
+    // the servo can keep .. like "pin"
+    // controller = null;
     firstMove = true;
 
+    // assume successful
+    isAttached = false;
+
+    // fire and forget
     send(controllerName, "detach", getName());
+
+    log.info("{} detached from {}", getName(), controllerName);
     broadcastState();
   }
 
@@ -475,7 +462,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
     enabled = true;
     broadcast("publishServoEnable", this);
-    // broadcastState();
   }
 
   @Override
@@ -491,7 +477,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public String getController() {
-    return controller;
+    ServoConfig c = (ServoConfig) config;
+    return c.controller;
   }
 
   @Override
@@ -530,7 +517,15 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public double getCurrentInputPos() {
-    // return mapper.calcInput(currentInputP);
+    return currentInputPos;
+  }
+
+  /**
+   * for backward compatibility
+   * 
+   * @return
+   */
+  public double getPos() {
     return currentInputPos;
   }
 
@@ -564,14 +559,20 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     return speed;
   }
 
+  public boolean isAttached() {
+    return isAttached;
+  }
+
   @Override
   public boolean isAttached(Attachable attachable) {
-    return controller != null && controller.equals(attachable.getName());
+    ServoConfig c = (ServoConfig) config;
+    return isAttached && c.controller.equals(attachable.getName());
   }
 
   @Override
   public boolean isAttached(String name) {
-    return controller != null && controller.equals(name);
+    ServoConfig c = (ServoConfig) config;
+    return isAttached && CodecUtils.getFullName(c.controller).equals(CodecUtils.getFullName(name));
   }
 
   @Override
@@ -755,10 +756,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     return sc.getName();
   }
 
-  @Override /*
-             * FIXME these should be returning null - the event itself is enough
-             * info - sending whole servo is excessive
-             */
+  @Override
   public String publishServoEnable(ServoControl sc) {
     log.debug("{}.publishServoEnable()", getName());
     return sc.getName();
@@ -1037,9 +1035,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public void waitTargetPos() {
-     while (this.getCurrentInputPos() != this.targetPos) {
-       sleep(30);
-     }
+    while (this.getCurrentInputPos() != this.targetPos) {
+      sleep(30);
+    }
   }
 
   @Override
@@ -1150,4 +1148,102 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   }
 
+  @Override
+  public ServiceConfig apply(ServiceConfig c) {
+    ServoConfig config = (ServoConfig) super.apply(c);
+
+    autoDisable = config.autoDisable;
+
+    // important - if starting up
+    // and autoDisable - then the assumption at this point
+    // is it is currently disabled, otherwise it will take
+    // a move to disable
+    if (config.autoDisable) {
+      disable();
+    }
+    if (config.minIn != null && config.maxIn != null && config.minOut != null && config.maxOut != null) {
+      mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
+    }
+    mapper.setInverted(config.inverted);
+    mapper.setClip(config.clip);
+    enabled = config.enabled;
+    if (config.idleTimeout != null) {
+      idleTimeout = config.idleTimeout;
+    }
+    pin = config.pin;
+
+    speed = config.speed;
+    sweepMax = config.sweepMax;
+    sweepMin = config.sweepMin;
+
+    if (config.synced != null) {
+      syncedServos.clear();
+      for (String s : config.synced) {
+        syncedServos.add(s);
+      }
+    }
+
+    // rest = config.rest;
+    if (config.rest != null) {
+      rest = config.rest;
+      targetPos = config.rest;
+      // currentInputP = mapper.calcOutput(config.rest);
+      currentInputPos = config.rest;
+      broadcast("publishEncoderData", new EncoderData(getName(), pin, config.rest, config.rest));
+    }
+
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+
+    // connect and attach on an arduino can take considerable time
+    // so we'll add our id
+    if (config.autoDisable) {
+      disable();
+      addTaskOneShot(idleTimeout, "disable");
+    }
+
+    return c;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+
+    ServoConfig config = (ServoConfig) super.getConfig();
+
+    config.autoDisable = autoDisable;
+    config.enabled = enabled;
+
+    if (mapper != null) {
+      config.clip = mapper.isClip();
+      config.maxIn = mapper.getMaxX();
+      config.maxOut = mapper.getMaxY();
+      config.minIn = mapper.getMinX();
+      config.minOut = mapper.getMinY();
+      config.inverted = mapper.isInverted();
+    }
+
+    // FIXME remove members and use config only
+    config.idleTimeout = idleTimeout;
+    config.pin = pin;
+    config.rest = rest;
+    config.speed = speed;
+    config.sweepMax = sweepMax;
+    config.sweepMin = sweepMin;
+
+    if (syncedServos.size() > 0) {
+      config.synced = new String[syncedServos.size()];
+      int i = 0;
+      for (String s : syncedServos) {
+        config.synced[i] = s;
+        ++i;
+      }
+    }
+
+    return config;
+  }
 }
