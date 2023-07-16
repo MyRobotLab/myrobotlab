@@ -1929,10 +1929,13 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   // > servoSetVelocity/deviceId/b16 velocity
   public void onServoSetSpeed(ServoSpeed servoSpeed) {
 
-    // FIXME - FIND OTHER FUNCTIONS THAT CANNOT BE SET WHEN NOT CONNECTED
-    // AND HANDLE THE SAME AS BELOW !!!
+    if (servoSpeed == null) {
+      log.warn("servo speed cannot be null");
+      return;
+    }
+    
     if (!isConnected()) {
-      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected());
+      log.info("Arduino cannot set speed of %s when not connected", servoSpeed.name);
       return;
     }
 
