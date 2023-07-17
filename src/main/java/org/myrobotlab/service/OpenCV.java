@@ -95,7 +95,7 @@ import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.cv.CvData;
+import org.myrobotlab.cv.CVData;
 import org.myrobotlab.cv.CvFilter;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.document.Classifications;
@@ -1440,7 +1440,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     return data;
   }
 
-  public final CvData publishCvData(CvData data) {
+  public final CVData publishCvData(CVData data) {
     return data;
   }
 

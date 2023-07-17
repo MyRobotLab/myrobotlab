@@ -370,20 +370,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
       disable();
       addTaskOneShot(idleTimeout, "disable");
     }
-
-    // asynchronous - did we successfully attach ¯\_(ツ)_/¯ !
-    send(service, "attach", getName());
-    log.info("{} attached to {} on pin {}", getName(), service, pin);
-
-    if (c.autoDisable) {
-      disable();
-      addTaskOneShot(idleTimeout, "disable");
-    }
-
-    // asynchronous - did we successfully attach ¯\_(ツ)_/¯ !
-    send(service, "attach", getName());
-    log.info("{} attached to {} on pin {}", getName(), service, pin);
-    broadcastState();
+    
   }
 
   /**

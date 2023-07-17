@@ -27,7 +27,7 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.myrobotlab.cv.CvData;
+import org.myrobotlab.cv.CVData;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point2df;
@@ -81,7 +81,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class OpenCVData extends CvData {
+public class OpenCVData extends CVData {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVData.class);
   private static final long serialVersionUID = 1L;
@@ -542,7 +542,7 @@ public class OpenCVData extends CvData {
 
   @Override
   public List<PointCloud> getPointCloudList() {
-    return (List<PointCloud>) sources.get(CvData.POINT_CLOUDS);
+    return (List<PointCloud>) sources.get(CVData.POINT_CLOUDS);
   }
 
   @Override
@@ -560,12 +560,12 @@ public class OpenCVData extends CvData {
   }
 
   public void put(PointCloud pc) {
-    List<PointCloud> pcs = (List<PointCloud>) sources.get(CvData.POINT_CLOUDS);
+    List<PointCloud> pcs = (List<PointCloud>) sources.get(CVData.POINT_CLOUDS);
     if (pcs == null) {
       pcs = new ArrayList<PointCloud>();
     }
     pcs.add(pc);
-    sources.put(CvData.POINT_CLOUDS, pcs);
+    sources.put(CVData.POINT_CLOUDS, pcs);
   }
 
   public ArrayList<DetectedText> getDetectedText() {

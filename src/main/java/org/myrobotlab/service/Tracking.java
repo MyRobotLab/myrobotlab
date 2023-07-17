@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.myrobotlab.cv.ComputerVision;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -13,7 +14,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Pid.PidOutput;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.TrackingConfig;
-import org.myrobotlab.service.interfaces.ComputerVision;
 import org.myrobotlab.service.interfaces.PidControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;

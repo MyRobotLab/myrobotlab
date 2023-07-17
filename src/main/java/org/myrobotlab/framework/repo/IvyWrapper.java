@@ -137,7 +137,7 @@ public class IvyWrapper extends Repo implements Serializable {
         dependency.getVersion() == null ? "latest.integration" : dependency.getVersion()));
 
     List<ServiceExclude> excludes = dependency.getExcludes();
-    boolean twoTags = dependency.getExt() != null || excludes != null & excludes.size() > 0;
+    boolean twoTags = dependency.getExt() != null || excludes != null && excludes.size() > 0;
     if (twoTags) {
       // more stuffs ! - we have 2 tags - end this one without />
       sb.append(">\n");
@@ -152,7 +152,7 @@ public class IvyWrapper extends Repo implements Serializable {
     }
 
     // exclusions begin ---
-    if (excludes != null & excludes.size() > 0) {
+    if (excludes != null && excludes.size() > 0) {
       StringBuilder ex = new StringBuilder();
       for (ServiceExclude exclude : excludes) {
         ex.append("      <exclude ");

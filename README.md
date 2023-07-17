@@ -105,20 +105,16 @@ The following config should be useful to work directly on WebGui UI and
 InMoov2 UI if the repos are checked out at the same level
 ```yml
 !!org.myrobotlab.service.config.WebGuiConfig
-autoStartBrowser: true
+autoStartBrowser: false
 enableMdns: false
 listeners: null
 peers: null
 port: 8888
 resources:
-  # these are the only two in usual runtime
-- ./resource/WebGui/app
-- ./resource
-  # the rest are useful when doing dev
-- ../InMoov2/resource/WebGui/app
+# - ./resource/WebGui/app
+# - ./resource
 - ./src/main/resources/resource/WebGui/app
-- ./src/main/resources/resource/WebGui
 - ./src/main/resources/resource
-- ./src/main/resources
+- ./src/main/resources/resource/InMoov2/peers/WebGui/app
 type: WebGui
 ```

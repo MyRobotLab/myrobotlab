@@ -1,6 +1,6 @@
 package org.myrobotlab.service.abstracts;
 
-import org.myrobotlab.service.interfaces.ComputerVision;
+import org.myrobotlab.cv.ComputerVision;
 
 public abstract class AbstractComputerVision extends AbstractVideoSource implements ComputerVision {
 
