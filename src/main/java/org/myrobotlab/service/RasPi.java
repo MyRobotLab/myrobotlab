@@ -790,4 +790,14 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     invoke("publishPinDefinition", pinDef);
   }
 
+  @Override
+  public void pinMode(int address, String mode) {
+    pinMode(String.format("%d", address), mode);
+  }
+
+  @Override
+  public void write(int address, int value) {
+    write(String.format("%d", address), value);    
+  }
+
 }
