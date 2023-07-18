@@ -1,25 +1,30 @@
 <div class="row">
-    <div class="col-lg-8">
+    <div class="col-md-8">
         <div data-ng-repeat="(pinKey, pinDef) in pinIndex">
             <div ng-show="oscope.traces[pinKey].state">
-                <!-- TODO - this should become a 'trace' directive -->
-                <canvas width="800" height="100" id="{{ 'oscope-pin-' + pinKey}}"></canvas>
-                <!-- per screen buttons .. button type="button" class="btn btn-default" ng-click="zoomIn()">+</button -->
+                <canvas width="800" height="100" id="{{ serviceName + '-oscope-pin-' + pinKey}}"></canvas>
             </div>
         </div>
+
         <br/>
         <div class="btn-group" role="group" aria-label="...">
             <button type="button" class="btn btn-default" ng-click="clearScreen()" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">clear screen </button>
+            <!-- future stuff
             <button type="button" class="btn btn-default" ng-click="zoomIn()">+</button>
             <button type="button" class="btn btn-default">-</button>
             <button type="button" class="btn btn-default">rate</button>
             <button type="button" class="btn btn-default" ng-click="reset()">reset</button>
             <button class="btn btn-default" type="button" ng-click="toggleReadWrite()">{{readWrite}}</button>
+            -->
             <!-- TODO - read/write toggle -->
         </div>
+    </div></div>
+<div class="row">
+    <div class="col-md-5">
+        
         <div class="btn-group" role="group" aria-label="...">
-            <div class="btn-group" role="group" ng-show="readWrite == 'read'" data-ng-repeat="(pinKey, pinDef) in pinIndex">
-                <button class="btn btn-default" type="button" ng-click="activateTrace(pinDef)" ng-style="oscope.traces[pinKey].readStyle">{{ pinDef.pin }}</button>
+            <div class="btn-group" role="group" ng-show="readWrite == 'read'" data-ng-repeat="(pinKey, pinDef) in addressIndex">
+                <button class="btn btn-default" type="button" ng-click="activateTrace(pinDef)" ng-style="oscope.traces[pinDef.pin].readStyle">{{ pinDef.pin }}</button>
             </div>
             <div class="btn-group" role="group" ng-show="readWrite == 'write'" data-ng-repeat="(pinKey, pinDef) in pinIndex">
                 <button class="btn btn-default" type="button" ng-click="write(pinDef)" ng-style="oscope.traces[pinKey].writeStyle">{{ pinDef.pin }}</button>

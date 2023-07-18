@@ -28,25 +28,25 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
         },
         // scope: true,
         link: function(scope, element) {
-            var _self = this;
-            var name = scope.serviceName;
-            var service = mrl.getService(name);
-            var mode = 'read';
+            var _self = this
+            var name = scope.serviceName
+            var service = mrl.getService(name)
+            var mode = 'read'
             // 'read' || 'write'
-            var width = 800;
-            var height = 100;
-            var margin = 10;
-            var minY = margin;
-            var maxY = height - margin;
-            var scaleX = 1;
-            var scaleY = 1;
-            scope.readWrite = 'read';
+            var width = 800
+            var height = 100
+            var margin = 10
+            var minY = margin
+            var maxY = height - margin
+            var scaleX = 1
+            var scaleY = 1
+            scope.readWrite = 'read'
             // button toggle read/write
-            // scope.blah = {};
-            // scope.blah.display = false;
+            // scope.blah = {}
+            // scope.blah.display = false
+
             scope.pinIndex = service.pinIndex;
-            // scope.addressIndex = service.addressIndex;
-            var x = 0;
+            var x = 0
             var gradient = tinygradient([{
                 h: 0,
                 s: 0.4,
@@ -57,44 +57,47 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
                 s: 0.4,
                 v: 1,
                 a: 1
-            }]);
-            scope.oscope = {};
-            scope.oscope.traces = {};
-            scope.oscope.writeStates = {};
+            }])
+            scope.oscope = {}
+            scope.oscope.traces = {}
+            scope.oscope.writeStates = {}
             // display update interfaces
             // defintion stage
             var setTraceButtons = function(pinIndex) {
                 if (pinIndex == null) {
-                    return;
+                    return
                 }
+
+                scope.addressIndex = mrl.getService(name).addressIndex
+                        
                 var size = Object.keys(pinIndex).length
                 if (size && size > 0) {
-                    scope.pinIndex = pinIndex;
-                    var colorsHsv = gradient.hsv(size);
+                    scope.pinIndex = pinIndex
+                    var colorsHsv = gradient.hsv(size)
                     // pass over pinIndex add display data
-                    for (var key in pinIndex) {
-                        if (!pinIndex.hasOwnProperty(key)) {
-                            continue;
+                    for (var pin in pinIndex) {
+                        if (!pinIndex.hasOwnProperty(pin)) {
+                            continue
                         }
-                        scope.oscope.traces[key] = {};
-                        var trace = scope.oscope.traces[key];
-                        var pinDef = pinIndex[key];
+                        scope.oscope.traces[pin] = {}
+                        var trace = scope.oscope.traces[pin]
+                        var pinDef = pinIndex[pin]
 
                         // adding style
-                        var color = colorsHsv[pinDef.address];
+                        var color = colorsHsv[pinDef.address]
                         trace.readStyle = {
                             'background-color': color.toHexString()
-                        };
+                        }
                         trace.writeStyle = {
                             'background-color': '#eee'
-                        };
-                        trace.color = color;
-                        trace.state = false;
+                        }
+                        trace.color = color
+                        trace.state = false
                         // off
-                        trace.posX = 0;
-                        trace.posY = 0;
-                        trace.count = 0;
-                        trace.colorHexString = color.toHexString();
+                        trace.posX = 0
+                        trace.posY = 0
+                        trace.count = 0
+                        trace.colorHexString = color.toHexString()
                         trace.stats = {
                             min: 0,
                             max: 1,
@@ -106,213 +109,223 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
             }
             // FIXME this should be _self.onMsg = function(inMsg)
             this.onMsg = function(inMsg) {
-                //console.log('CALLBACK - ' + msg.method);
+                //console.log('CALLBACK - ' + msg.method)
                 switch (inMsg.method) {
                 case 'onState':
                     // backend update 
-                    setTraceButtons(inMsg.data[0].pinIndex);
-                    scope.$apply();
-                    break;
+                    setTraceButtons(inMsg.data[0].pinIndex)
+                    scope.$apply()
+                    break
                 case 'onPinArray':
-                    x++;
-                    pinArray = inMsg.data[0];
+                    x++
+                    pinArray = inMsg.data[0]
                     for (i = 0; i < pinArray.length; ++i) {
                         // get pin data & definition
-                        pinData = pinArray[i];
-                        pinDef = scope.pinIndex[pinData.pin];
+                        pinData = pinArray[i]
+                        pinDef = scope.pinIndex[pinData.pin]
                         // get correct screen and references
-                        var screen = document.getElementById('oscope-pin-' + pinData.pin);
+                        var screen = document.getElementById(scope.serviceName + '-oscope-pin-' + pinData.pin)
                         var ctx = screen.getContext('2d');
-                        var trace = scope.oscope.traces[pinData.pin];
-                        var stats = trace.stats;
+                        var trace = scope.oscope.traces[pinData.pin]
+                        var stats = trace.stats
                         // TODO - sample rate Hz
-                        trace.stats.totalSample++;
-                        trace.stats.totalValue += pinData.value;
+                        trace.stats.totalSample++
+                        trace.stats.totalValue += pinData.value
                         if (pinData.value < trace.stats.min) {
-                            trace.stats.min = pinData.value;
+                            trace.stats.min = pinData.value
                         }
                         if (pinData.value > trace.stats.max) {
-                            trace.stats.max = pinData.value;
+                            trace.stats.max = pinData.value
                         }
-                        var maxX = trace.stats.max;
-                        var minX = trace.stats.min;
-                        var c = minY + ((pinData.value - minX) * (maxY - minY)) / (maxX - minX);
-                        var y = height - c;
-                        ctx.beginPath();
+                        var maxX = trace.stats.max
+                        var minX = trace.stats.min
+                        var c = minY + ((pinData.value - minX) * (maxY - minY)) / (maxX - minX)
+                        var y = height - c
+                        ctx.beginPath()
                         // from
-                        ctx.moveTo(trace.posX, trace.posY);
+                        ctx.moveTo(trace.posX, trace.posY)
                         // to
-                        ctx.lineTo(x, y);
+                        ctx.lineTo(x, y)
                         // save current values
-                        trace.posX = x;
-                        trace.posY = y;
+                        trace.posX = x
+                        trace.posY = y
                         // color
-                        ctx.strokeStyle = trace.colorHexString;
+                        ctx.strokeStyle = trace.colorHexString
                         // blank screen
                         // TODO - continuous pan would be better
-                        ctx.stroke();
+                        ctx.stroke()
                         // blank screen if trace reaches end
                         if (x > width) {
-                            trace.state = true;
-                            scope.highlight(trace, true);
-                            //scope.toggleReadButton(pinDef);
-                            ctx.font = "10px Aria";
-                            ctx.rect(0, 0, width, height);
-                            ctx.fillStyle = "black";
-                            ctx.fill();
-                            var highlight = trace.color.getOriginalInput();
-                            highlight.s = "90%";
-                            var newColor = tinycolor(highlight);
-                            ctx.fillStyle = trace.colorHexString;
+                            trace.state = true
+                            scope.highlight(trace, true)
+                            //scope.toggleReadButton(pinDef)
+                            ctx.font = "10px Aria"
+                            ctx.rect(0, 0, width, height)
+                            ctx.fillStyle = "black"
+                            ctx.fill()
+                            var highlight = trace.color.getOriginalInput()
+                            highlight.s = "90%"
+                            var newColor = tinycolor(highlight)
+                            ctx.fillStyle = trace.colorHexString
                             // TODO - highlight saturtion of text
-                            ctx.fillText('MAX ' + stats.max + '   ' + pinDef.pin + ' ' + pinDef.address, 10, minY);
-                            ctx.fillText(('AVG ' + (stats.totalValue / stats.totalSample)).substring(0, 11), 10, height / 2);
-                            ctx.fillText('MIN ' + stats.min, 10, maxY);
-                            trace.posX = 0;
+                            ctx.fillText('MAX ' + stats.max + '   ' + pinDef.pin + ' ' + pinDef.address, 10, minY)
+                            ctx.fillText(('AVG ' + (stats.totalValue / stats.totalSample)).substring(0, 11), 10, height / 2)
+                            ctx.fillText('MIN ' + stats.min, 10, maxY)
+                            trace.posX = 0
                         }
                         // draw it
-                        ctx.closePath();
+                        ctx.closePath()
                     }
                     // for each pin
                     if (x > width) {
-                        x = 0;
+                        x = 0
                     }
-                    break;
+                    break
                 default:
                     // since we subscribed to "All" of Arduino's methods - most will escape here
                     // no reason to put an error .. however, it would be better to "Only" susbscribe to the ones
                     // we want
-                    // console.log("ERROR - unhandled method " + inMsg.method);
-                    break;
+                    // console.log("ERROR - unhandled method " + inMsg.method)
+                    break
                 }
             }
-            ;
+            
             scope.toggleReadWrite = function() {
-                scope.readWrite = (scope.readWrite == 'write') ? 'read' : 'write';
+                scope.readWrite = (scope.readWrite == 'write') ? 'read' : 'write'
             }
-            ;
+            
             scope.clearScreen = function(pinArray) {
                 for (i = 0; i < pinArray.length; ++i) {
-                    pinData = pinArray[i];
-                    pinDef = scope.pinIndex[pinData.pin];
-                    _self.ctx = screen.getContext('2d');
-                    // ctx.scale(1, -1); // flip y around for cartesian - bad idea :P
-                    // width = screen.width;
-                    //height = screen.height;
-                    _self.ctx.rect(0, 0, width, height);
-                    _self.ctx.fillStyle = "black";
-                    _self.ctx.fill();
-                    _self.ctx.fillStyle = "white";
-                    stats = pinDef.stats;
-                    _self.ctx.fillText(pinDef.name + (' AVG ' + (stats.totalValue / stats.totalSample)).substring(0, 11) + ' MIN ' + stats.min + ' MAX ' + stats.max, 10, 18);
+                    pinData = pinArray[i]
+                    pinDef = scope.pinIndex[pinData.pin]
+                    _self.ctx = screen.getContext('2d')
+                    // ctx.scale(1, -1) // flip y around for cartesian - bad idea :P
+                    // width = screen.width
+                    //height = screen.height
+                    _self.ctx.rect(0, 0, width, height)
+                    _self.ctx.fillStyle = "black"
+                    _self.ctx.fill()
+                    _self.ctx.fillStyle = "white"
+                    stats = pinDef.stats
+                    _self.ctx.fillText(pinDef.name + (' AVG ' + (stats.totalValue / stats.totalSample)).substring(0, 11) + ' MIN ' + stats.min + ' MAX ' + stats.max, 10, 18)
                 }
             }
             scope.zoomIn = function() {
-                scaleX += 1;
-                scaleY += 1;
-                _self.ctx.scale(scaleX, scaleY);
+                scaleX += 1
+                scaleY += 1
+                _self.ctx.scale(scaleX, scaleY)
             }
-            ;
+            
             // RENAME eanbleTrace - FIXME read values vs write values | ALL values from service not from ui !! - ui only sends commands
             scope.activateTrace = function(pinDef) {
-                var trace = scope.oscope.traces[pinDef.pin];
+                var trace = scope.oscope.traces[pinDef.pin]
                 if (trace.state) {
-                    toggleReadButton(trace);
-                    mrl.sendTo(name, 'disablePin', pinDef.pin);
-                    trace.state = false;
+                    toggleReadButton(trace)
+                    mrl.sendTo(name, 'disablePin', pinDef.pin)
+                    trace.state = false
                 } else {
-                    toggleReadButton(trace);
-                    mrl.sendTo(name, 'enablePin', pinDef.pin);
-                    trace.state = true;
+                    toggleReadButton(trace)
+                    // mrl.sendTo(name, 'enablePin', pinDef.pin)
+                    mrl.sendTo(name, 'enablePin', pinDef.pin, 1)
+                    trace.state = true
                 }
             }
-            ;
+            
             scope.reset = function() {
-                mrl.sendTo(name, 'disablePins');
+                mrl.sendTo(name, 'disablePins')
             }
-            ;
+            
             scope.write = function(pinDef) {
-                scope.toggleWriteButton(trace);
-                mrl.sendTo(name, 'digitalWrite', pinDef.pin, 1);
-                // trace.state = true;
+                scope.toggleWriteButton(trace)
+                mrl.sendTo(name, 'digitalWrite', pinDef.pin, 1)
+                // trace.state = true
 
                 /* 3 states READ/ENABLE | DIGITALWRITE | ANALOGWRITE
                 if (pinDef.pinName.charAt(0) == 'A') {
-                    _self.toggleWriteButton(trace);
-                    mrl.sendTo(name, 'analogWrite', 1);
-                    trace.state = false;
+                    _self.toggleWriteButton(trace)
+                    mrl.sendTo(name, 'analogWrite', 1)
+                    trace.state = false
                 } else {
-                    _self.toggleWriteButton(trace);
-                    mrl.sendTo(name, 'digitalWrite', pinDef.address);
-                    trace.state = true;
+                    _self.toggleWriteButton(trace)
+                    mrl.sendTo(name, 'digitalWrite', pinDef.address)
+                    trace.state = true
                 }
                 */
             }
-            ;
+            
             scope.reset = function() {
-                mrl.sendTo(name, 'disablePins');
+                mrl.sendTo(name, 'disablePins')
             }
-            ;
+            
             var toggleReadButton = function(trace) {
-                var highlight = trace.color.getOriginalInput();
+                var highlight = trace.color.getOriginalInput()
                 if (trace.state) {
-                    scope.highlight(trace, false);
+                    scope.highlight(trace, false)
                 } else {
-                    scope.highlight(trace, true);
+                    scope.highlight(trace, true)
                 }
-            };
+            }
             scope.highlight = function(trace, on) {
-                var highlight = trace.color.getOriginalInput();
+                var highlight = trace.color.getOriginalInput()
                 if (!on) {
-                    // scope.blah.display = false;
+                    // scope.blah.display = false
                     // on to off
-                    highlight.s = "40%";
-                    var newColor = color = tinycolor(highlight);
+                    highlight.s = "40%"
+                    var newColor = color = tinycolor(highlight)
                     trace.readStyle = {
                         'background-color': newColor.toHexString()
-                    };
+                    }
                 } else {
-                    // scope.blah.display = true;
+                    // scope.blah.display = true
                     // off to on
-                    highlight.s = "90%";
-                    var newColor = color = tinycolor(highlight);
+                    highlight.s = "90%"
+                    var newColor = color = tinycolor(highlight)
                     trace.readStyle = {
                         'background-color': newColor.toHexString()
-                    };
+                    }
                 }
             }
-            ;
+            
             scope.toggleWriteButton = function(pinDef) {
-                var highlight = trace.color.getOriginalInput();
+                var highlight = trace.color.getOriginalInput()
                 if (trace.state) {
-                    // scope.blah.display = false;
+                    // scope.blah.display = false
                     // on to off
-                    highlight.s = "40%";
-                    var newColor = color = tinycolor(highlight);
+                    highlight.s = "40%"
+                    var newColor = color = tinycolor(highlight)
                     trace.readStyle = {
                         'background-color': newColor.toHexString()
-                    };
+                    }
                 } else {
-                    // scope.blah.display = true;
+                    // scope.blah.display = true
                     // off to on
-                    highlight.s = "90%";
-                    var newColor = color = tinycolor(highlight);
+                    highlight.s = "90%"
+                    var newColor = color = tinycolor(highlight)
                     trace.readStyle = {
                         'background-color': newColor.toHexString()
-                    };
+                    }
                 }
             }
-            ;
+            
             // FIXME FIXME FIXME ->> THIS SHOULD WORK subscribeToServiceMethod  <- but doesnt
-            mrl.subscribeToService(_self.onMsg, name);
+            mrl.subscribeToService(_self.onMsg, name)
             // this siphons off a single subscribe to the webgui
             // so it will be broadcasted back to angular
-            mrl.subscribe(name, 'publishPinArray');
-            mrl.subscribeToServiceMethod(_self.onMsg, name, 'publishPinArray');
+            mrl.subscribe(name, 'publishPinArray')
+            mrl.subscribeToServiceMethod(_self.onMsg, name, 'publishPinArray')
             // initializing display data     
 
-            setTraceButtons(service.pinIndex);
+            setTraceButtons(service.pinIndex)
         }
-    };
+    }
 }
-]);
+]).filter('toArray', function() {
+  return function(obj) {
+    if (!angular.isObject(obj)) {
+      return obj;
+    }
+    return Object.keys(obj).map(function(key) {
+      return obj[key];
+    });
+  };
+});
