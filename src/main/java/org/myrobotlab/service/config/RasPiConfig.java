@@ -7,4 +7,7 @@ public class RasPiConfig extends ServiceConfig {
      * its better to follow the PinDefinition pollRateHz type
      */
     public int pollRateHz = 1;
+    
+    // TODO - config which starts pins in a mode (read/write) and if write a value 0/1
+
 }

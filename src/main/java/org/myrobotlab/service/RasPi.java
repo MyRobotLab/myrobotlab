@@ -702,16 +702,14 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       gpio = GpioFactory.getInstance();
       log.info("Executing on Raspberry PI");
       getPinList();
-      // FIXME - uncomment this
-      // log.info("Initiating i2c");
-      // I2CFactory.getInstance(Integer.parseInt(bus));
-      // log.info("i2c initiated on bus {}", bus);
-      // addTask(1000, "scan");
-      //
-      // log.info("read task initialized");
-      // addTask(1000, "read");
 
-      // TODO - config which starts all pins in input or output mode
+      log.info("Initiating i2c");
+      I2CFactory.getInstance(Integer.parseInt(bus));
+      log.info("i2c initiated on bus {}", bus);
+      addTask(1000, "scan");
+
+      log.info("read task initialized");
+      addTask(1000, "read");
 
     } catch (IOException e) {
       log.error("i2c initiation failed", e);
@@ -731,6 +729,9 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     // Create GPIO controller instance
     GpioController gpio = GpioFactory.getInstance();
 
+    // Provision GPIO pin 0 as a digital input/output pin
+    // GpioPinDigitalMultipurpose pin = gpio.provisionDigitalMultipurposePin(
+    // RaspiPin.GPIO_00, PinMode.DIGITAL_OUTPUT, PullUpResistance);
     GpioPinDigitalMultipurpose pin = gpio.provisionDigitalMultipurposePin(RaspiPin.GPIO_00, PinMode.DIGITAL_OUTPUT);
 
     // Set the pin mode to output
