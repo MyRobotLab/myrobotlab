@@ -541,6 +541,10 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     return pinData;
   }
 
+  public Map<Integer, Set<String>> publishScan() {
+    return validI2CAddresses;
+  }
+
   public void read() {
     log.debug("read task invoked");
     List<PinData> pinArray = new ArrayList<>();
@@ -638,7 +642,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       log.error("scan threw", e);
     }
 
-    broadcastState();
+    invoke("publishScan");
   }
 
   // FIXME - return array

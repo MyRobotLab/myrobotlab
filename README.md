@@ -122,3 +122,20 @@ resources:
 - ./src/main/resources
 type: WebGui
 ```
+```yml
+!!org.myrobotlab.service.config.RuntimeConfig
+enableCli: true
+id: null
+listeners:
+locale: null
+logLevel: info
+peers: null
+registry:
+- runtime
+- security
+- webgui
+- raspi
+resource: src/main/resources/resource
+type: Runtime
+virtual: false
+```
