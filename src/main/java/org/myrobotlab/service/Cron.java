@@ -48,6 +48,9 @@ public class Cron extends Service {
      */
     public String method;
 
+    /**
+     * reference to service
+     */
     transient Cron cron;
 
     /**
@@ -73,8 +76,12 @@ public class Cron extends Service {
 
     @Override
     public void run() {
-      log.info("{} Cron firing message {}->{}.{}", cron.getName(), name, method, data);
-      cron.send(name, method, data);
+      if (cron != null) {
+        log.info("{} Cron firing message {}->{}.{}", cron.getName(), name, method, data);
+        cron.send(name, method, data);
+      } else {
+        log.error("cron service is null");
+      }
     }
 
     @Override
@@ -227,6 +234,7 @@ public class Cron extends Service {
    * stop the schedular ad all associated tasks
    */
   public void stop() {
+    removeAllTasks();
     if (scheduler.isStarted()) {
       scheduler.stop();
     }
