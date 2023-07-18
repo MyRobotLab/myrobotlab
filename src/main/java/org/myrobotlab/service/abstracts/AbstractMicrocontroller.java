@@ -193,6 +193,14 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
 
   @Override
   abstract public List<PinDefinition> getPinList();
+  
+  @Override
+  public void pinMode(String pin, String mode) {
+    pinMode(getPin(pin).getAddress(), mode);
+  }
+
+  
+  abstract public void pinMode(int address, String mode);
 
   @Override
   public PinData publishPin(PinData pinData) {
