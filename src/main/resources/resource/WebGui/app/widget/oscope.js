@@ -31,7 +31,6 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
             var _self = this
             var name = scope.serviceName
             var service = mrl.getService(name)
-            scope.service = mrl.getService(name)
             var mode = 'read'
             // 'read' || 'write'
             var width = 800
@@ -39,14 +38,14 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
             var margin = 10
             var minY = margin
             var maxY = height - margin
-
+            var scaleX = 1
+            var scaleY = 1
             scope.readWrite = 'read'
             // button toggle read/write
             // scope.blah = {}
             // scope.blah.display = false
 
-            scope.pinIndex = service.pinIndex
-            scope.addressIndex = service.addressIndex
+            scope.pinIndex = service.pinIndex;
             var x = 0
             var gradient = tinygradient([{
                 h: 0,
@@ -62,7 +61,6 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
             scope.oscope = {}
             scope.oscope.traces = {}
             scope.oscope.writeStates = {}
-
             // display update interfaces
             // defintion stage
             var setTraceButtons = function(pinIndex) {
@@ -87,9 +85,6 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
 
                         // adding style
                         var color = colorsHsv[pinDef.address]
-                        if (!color) {
-                            continue
-                        }
                         trace.readStyle = {
                             'background-color': color.toHexString()
                         }
@@ -122,64 +117,70 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
                     scope.$apply()
                     break
                 case 'onPinArray':
+                    x++
                     pinArray = inMsg.data[0]
-
-                    pinArray.forEach(pinData=>{
-                        const pinDef = scope.pinIndex[pinData.pin]
-                        const screen = document.getElementById(scope.serviceName + '-oscope-pin-' + pinData.pin)
-                        const ctx = screen.getContext('2d')
-                        const trace = scope.oscope.traces[pinData.pin]
-                        const stats = trace.stats
-
-                        if (trace.posX == 0) {
-
+                    for (i = 0; i < pinArray.length; ++i) {
+                        // get pin data & definition
+                        pinData = pinArray[i]
+                        pinDef = scope.pinIndex[pinData.pin]
+                        // get correct screen and references
+                        var screen = document.getElementById(scope.serviceName + '-oscope-pin-' + pinData.pin)
+                        var ctx = screen.getContext('2d');
+                        var trace = scope.oscope.traces[pinData.pin]
+                        var stats = trace.stats
+                        // TODO - sample rate Hz
+                        trace.stats.totalSample++
+                        trace.stats.totalValue += pinData.value
+                        if (pinData.value < trace.stats.min) {
+                            trace.stats.min = pinData.value
+                        }
+                        if (pinData.value > trace.stats.max) {
+                            trace.stats.max = pinData.value
+                        }
+                        var maxX = trace.stats.max
+                        var minX = trace.stats.min
+                        var c = minY + ((pinData.value - minX) * (maxY - minY)) / (maxX - minX)
+                        var y = height - c
+                        ctx.beginPath()
+                        // from
+                        ctx.moveTo(trace.posX, trace.posY)
+                        // to
+                        ctx.lineTo(x, y)
+                        // save current values
+                        trace.posX = x
+                        trace.posY = y
+                        // color
+                        ctx.strokeStyle = trace.colorHexString
+                        // blank screen
+                        // TODO - continuous pan would be better
+                        ctx.stroke()
+                        // blank screen if trace reaches end
+                        if (x > width) {
                             trace.state = true
                             scope.highlight(trace, true)
-                            ctx.font = '10px Arial'
+                            //scope.toggleReadButton(pinDef)
+                            ctx.font = "10px Aria"
                             ctx.rect(0, 0, width, height)
-                            ctx.fillStyle = 'black'
+                            ctx.fillStyle = "black"
                             ctx.fill()
-
-                            const highlight = trace.color.getOriginalInput()
-                            highlight.s = '90%'
-                            const newColor = tinycolor(highlight)
+                            var highlight = trace.color.getOriginalInput()
+                            highlight.s = "90%"
+                            var newColor = tinycolor(highlight)
                             ctx.fillStyle = trace.colorHexString
-
+                            // TODO - highlight saturtion of text
                             ctx.fillText('MAX ' + stats.max + '   ' + pinDef.pin + ' ' + pinDef.address, 10, minY)
                             ctx.fillText(('AVG ' + (stats.totalValue / stats.totalSample)).substring(0, 11), 10, height / 2)
                             ctx.fillText('MIN ' + stats.min, 10, maxY)
                             trace.posX = 0
                         }
-
-                        // Update stats
-                        stats.totalSample++
-                        stats.totalValue += pinData.value
-                        stats.min = Math.min(stats.min, pinData.value)
-                        stats.max = Math.max(stats.max, pinData.value)
-
-                        const maxX = stats.max
-                        const minX = stats.min
-                        const c = minY + ((pinData.value - minX) * (maxY - minY)) / (maxX - minX)
-                        const y = height - c
-
-                        ctx.beginPath()
-                        ctx.moveTo(trace.posX, trace.posY)
-                        trace.posX++
-                        trace.posY = y
-                        ctx.lineTo(trace.posX, y)
-
-                        ctx.strokeStyle = trace.colorHexString
-                        ctx.stroke()
-                        // ctx.closePath()
-
-                        if (trace.posX > width) {
-                            trace.posX = 0
-                        }
+                        // draw it
+                        ctx.closePath()
                     }
-                    )
-
+                    // for each pin
+                    if (x > width) {
+                        x = 0
+                    }
                     break
-
                 default:
                     // since we subscribed to "All" of Arduino's methods - most will escape here
                     // no reason to put an error .. however, it would be better to "Only" susbscribe to the ones
@@ -188,19 +189,33 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
                     break
                 }
             }
-
+            
             scope.toggleReadWrite = function() {
                 scope.readWrite = (scope.readWrite == 'write') ? 'read' : 'write'
             }
-
-            scope.clearScreen = function() {
-                Object.keys(scope.oscope.traces).forEach(key=>{
-                    let trace = scope.oscope.traces[key]
-                    trace.posX = 0
+            
+            scope.clearScreen = function(pinArray) {
+                for (i = 0; i < pinArray.length; ++i) {
+                    pinData = pinArray[i]
+                    pinDef = scope.pinIndex[pinData.pin]
+                    _self.ctx = screen.getContext('2d')
+                    // ctx.scale(1, -1) // flip y around for cartesian - bad idea :P
+                    // width = screen.width
+                    //height = screen.height
+                    _self.ctx.rect(0, 0, width, height)
+                    _self.ctx.fillStyle = "black"
+                    _self.ctx.fill()
+                    _self.ctx.fillStyle = "white"
+                    stats = pinDef.stats
+                    _self.ctx.fillText(pinDef.name + (' AVG ' + (stats.totalValue / stats.totalSample)).substring(0, 11) + ' MIN ' + stats.min + ' MAX ' + stats.max, 10, 18)
                 }
-                )
             }
-
+            scope.zoomIn = function() {
+                scaleX += 1
+                scaleY += 1
+                _self.ctx.scale(scaleX, scaleY)
+            }
+            
             // RENAME eanbleTrace - FIXME read values vs write values | ALL values from service not from ui !! - ui only sends commands
             scope.activateTrace = function(pinDef) {
                 var trace = scope.oscope.traces[pinDef.pin]
@@ -211,15 +226,15 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
                 } else {
                     toggleReadButton(trace)
                     // mrl.sendTo(name, 'enablePin', pinDef.pin)
-                    mrl.sendTo(name, 'enablePin', pinDef.pin, 10)
+                    mrl.sendTo(name, 'enablePin', pinDef.pin, 1)
                     trace.state = true
                 }
             }
-
+            
             scope.reset = function() {
                 mrl.sendTo(name, 'disablePins')
             }
-
+            
             scope.write = function(pinDef) {
                 scope.toggleWriteButton(trace)
                 mrl.sendTo(name, 'digitalWrite', pinDef.pin, 1)
@@ -237,11 +252,11 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
                 }
                 */
             }
-
+            
             scope.reset = function() {
                 mrl.sendTo(name, 'disablePins')
             }
-
+            
             var toggleReadButton = function(trace) {
                 var highlight = trace.color.getOriginalInput()
                 if (trace.state) {
@@ -270,7 +285,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
                     }
                 }
             }
-
+            
             scope.toggleWriteButton = function(pinDef) {
                 var highlight = trace.color.getOriginalInput()
                 if (trace.state) {
@@ -291,7 +306,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
                     }
                 }
             }
-
+            
             // FIXME FIXME FIXME ->> THIS SHOULD WORK subscribeToServiceMethod  <- but doesnt
             mrl.subscribeToService(_self.onMsg, name)
             // this siphons off a single subscribe to the webgui
@@ -305,13 +320,12 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
     }
 }
 ]).filter('toArray', function() {
-    return function(obj) {
-        if (!angular.isObject(obj)) {
-            return obj
-        }
-        return Object.keys(obj).map(function(key) {
-            return obj[key]
-        })
+  return function(obj) {
+    if (!angular.isObject(obj)) {
+      return obj;
     }
-
-})
+    return Object.keys(obj).map(function(key) {
+      return obj[key];
+    });
+  };
+});
