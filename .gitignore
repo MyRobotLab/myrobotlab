@@ -82,3 +82,6 @@
 /lastRestart.py
 /.factorypath
 start.yml
+config
+src/main/resources/resource/InMoov2
+src/main/resources/resource/ProgramAB
