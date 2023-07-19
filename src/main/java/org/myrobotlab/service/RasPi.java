@@ -339,7 +339,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
    * @return
    */
   private GpioPinDigitalMultipurpose getGPIO(String pin) {
-    log.info("getGPIO {}", pin);
+    log.debug("getGPIO {}", pin);
     if (!pinIndex.containsKey(pin)) {
       error("Pin %s not found", pin);
       return null;
@@ -552,11 +552,11 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     for (String pin : pinIndex.keySet()) {
       PinDefinition pindef = pinIndex.get(pin);
       if (pindef.isEnabled()) {
-        log.info("pin {} enabled {}", pin, pindef.isEnabled());
+        log.debug("pin {} enabled {}", pin, pindef.isEnabled());
         int value = read(pin);
         pindef.setValue(value);
         PinData pd = new PinData(pin, value);
-        log.info("pin data {}", pd);
+        log.debug("pin data {}", pd);
         pinArray.add(pd);
       }
     }
