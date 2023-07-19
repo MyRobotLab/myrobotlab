@@ -3,10 +3,8 @@ package org.myrobotlab.service.config;
 import java.util.ArrayList;
 
 import org.myrobotlab.framework.Plan;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.jme3.UserDataConfig;
 import org.myrobotlab.math.MapperLinear;
-import org.myrobotlab.service.InMoov2;
 import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.FiniteStateMachineConfig.Transition;
@@ -14,45 +12,81 @@ import org.myrobotlab.service.config.RandomConfig.RandomMessageConfig;
 
 public class InMoov2Config extends ServiceConfig {
 
-  public boolean pirWakeUp = false;
-
-  public boolean pirEnableTracking = false;
-
-  public boolean loadGestures = true;
-
-  public boolean virtual = false;
-
-  /**
-   * default to null - allow the OS to set it, unless explicilty set
-   */
-  public String locale = null; // = "en-US";
+  public int analogPinFromSoundCard = 53;
   
-  // using ProgramAB predicates
-  // public Map<String, Object> data = new TreeMap<>();
-
-  /**
-   * startup and shutdown will pause inmoov - set the speed to this value then
-   * attempt to move to rest
-   */
-  public double shutdownStartupSpeed = 50;
-
+  public int audioPollsBySeconds = 2;
+  
+  public boolean audioSignalProcessing=false;
+  
+  public boolean batteryInSystem = false;
+  
+  public boolean customSound=false;
+  
+  public boolean forceMicroOnIfSleeping = true;
+  
+  public boolean healthCheckActivated = false;
+  
+  public int healthCheckTimerMs = 60000;
+  
   public boolean heartbeat = false;
   
-  public boolean startMouthOnBoot = true;
 
   /**
    * idle time measures the time the fsm is in an idle state
    */
   public boolean idleTimer = true;
 
+  public boolean loadGestures = true;
+
+  /**
+   * default to null - allow the OS to set it, unless explicilty set
+   */
+  public String locale = null; // = "en-US";
+
+  public boolean neoPixelBootGreen=true;
+
+  public boolean neoPixelDownloadBlue = true;
+
+  public boolean neoPixelErrorRed = true;
+  
+  public boolean neoPixelFlashWhenSpeaking = true;
+  
+  public boolean openCVFaceRecognizerActivated=true;
+  
+  public boolean openCVFlipPicture=false;
+  
+  public boolean pirEnableTracking = false;
+  
   /**
    * play pir sounds when pir switching states
    * sound located in data/InMoov2/sounds/pir-activated.mp3
    * sound located in data/InMoov2/sounds/pir-deactivated.mp3
    */
   public boolean pirPlaySounds = true;
+  
+  public boolean pirWakeUp = true;
+    
+  public boolean robotCanMoveHeadWhileSpeaking = true;
+  
+  
+  /**
+   * startup and shutdown will pause inmoov - set the speed to this value then
+   * attempt to move to rest
+   */
+  public double shutdownStartupSpeed = 50;
+  
+  /**
+   * Sleep 5 minutes after last presence detected 
+   */
+  public int sleepTimeoutMs=300000;
+  
+  public boolean startupSound = true;
 
-  public boolean startBrainOnBoot = true;
+  public int trackingTimeoutMs=10000;
+  
+  public String unlockInsult = "forgive me";
+  
+  public boolean virtual = false;
 
   public InMoov2Config() {
   }
@@ -63,15 +97,16 @@ public class InMoov2Config extends ServiceConfig {
 
     // peers FIXME global opencv
     addDefaultPeerConfig(plan, name, "audioPlayer", "AudioFile", true);
-    addDefaultPeerConfig(plan, name, "chatBot", "ProgramAB", false);
+    addDefaultPeerConfig(plan, name, "chatBot", "ProgramAB", true);
     addDefaultPeerConfig(plan, name, "controller3", "Arduino", false);
     addDefaultPeerConfig(plan, name, "controller4", "Arduino", false);
     addDefaultPeerConfig(plan, name, "ear", "WebkitSpeechRecognition", false);
     addDefaultPeerConfig(plan, name, "eyeTracking", "Tracking", false);
     addDefaultPeerConfig(plan, name, "fsm", "FiniteStateMachine", false);
+    addDefaultPeerConfig(plan, name, "gpt3", "Gpt3", false);
     addDefaultPeerConfig(plan, name, "head", "InMoov2Head", false);
     addDefaultPeerConfig(plan, name, "headTracking", "Tracking", false);
-    addDefaultPeerConfig(plan, name, "htmlFilter", "HtmlFilter", false);
+    addDefaultPeerConfig(plan, name, "htmlFilter", "HtmlFilter", true);
     addDefaultPeerConfig(plan, name, "imageDisplay", "ImageDisplay", false);
     addDefaultPeerConfig(plan, name, "leap", "LeapMotion", false);
     addDefaultPeerConfig(plan, name, "left", "Arduino", false);
@@ -98,7 +133,7 @@ public class InMoov2Config extends ServiceConfig {
     MouthControlConfig mouthControl = (MouthControlConfig) plan.get(getPeerName("mouthControl"));
 
     // setup name references to different services
-    mouthControl.jaw = name + "head.jaw";
+    mouthControl.jaw = name + ".head.jaw";
     String i01Name = name;
     int index = name.indexOf(".");
     if (index > 0) {
@@ -106,10 +141,6 @@ public class InMoov2Config extends ServiceConfig {
     }
 
     mouthControl.mouth = i01Name + ".mouth";
-
-    // FIXME ! - look at this !!! I've made austartPeers = false !
-    // by just sending a runtime that starts only i01
-    RuntimeConfig rtConfig = (RuntimeConfig) plan.get("runtime");
 
     ProgramABConfig chatBot = (ProgramABConfig) plan.get(getPeerName("chatBot"));
     Runtime runtime = Runtime.getInstance();
@@ -125,12 +156,14 @@ public class InMoov2Config extends ServiceConfig {
         }
       }
     }
+    
+    chatBot.currentUserName = "human";
+    
     // chatBot.textListeners = new String[] { name + ".htmlFilter" };
     if (chatBot.listeners == null) {
       chatBot.listeners = new ArrayList<>();
     }
     chatBot.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));
-    chatBot.botDir = "data/ProgramAB";
 
     HtmlFilterConfig htmlFilter = (HtmlFilterConfig) plan.get(getPeerName("htmlFilter"));
     // htmlFilter.textListeners = new String[] { name + ".mouth" };
@@ -142,17 +175,19 @@ public class InMoov2Config extends ServiceConfig {
     // == Peer - mouth =============================
     // setup name references to different services
     MarySpeechConfig mouth = (MarySpeechConfig) plan.get(getPeerName("mouth"));
+    mouth.voice = "Mark";
     mouth.speechRecognizers = new String[] { name + ".ear" };
 
     // == Peer - ear =============================
     // setup name references to different services
     WebkitSpeechRecognitionConfig ear = (WebkitSpeechRecognitionConfig) plan.get(getPeerName("ear"));
-    ear.textListeners = new String[] { name + ".chatBot" };
+    ear.listeners = new ArrayList<>(); 
+    ear.listeners.add(new Listener("publishText", name + ".chatBot", "onText"));
+    ear.listening = true;
+    // remove, should only need ServiceConfig.listeners
+    ear.textListeners = new String[]{name + ".chatBot"};
 
     JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.get(getPeerName("simulator"));
-    // FIXME - SHOULD USE RESOURCE DIR !
-    String assestsDir = Service.getResourceDir(InMoov2.class) + "/JMonkeyEngine";
-    simulator.addModelPath(assestsDir);
 
     simulator.multiMapped.put(name + ".leftHand.index", new String[] { name + ".leftHand.index", name + ".leftHand.index2", name + ".leftHand.index3" });
     simulator.multiMapped.put(name + ".leftHand.majeure", new String[] { name + ".leftHand.majeure", name + ".leftHand.majeure2", name + ".leftHand.majeure3" });

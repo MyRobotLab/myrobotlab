@@ -646,7 +646,7 @@ table, th, td {
 }
 
 .poseList {
-    height: 115px !important;
+    height: 300px !important;
 }
 
 .sequenceContentList {
@@ -3258,4 +3258,8 @@ https://toughengineer.github.io/demo/slider-styler*/
         background: #2f98f9;
         border-color: #c1c1c1;
     }
+
+.not-installed {
+    background: #f5f5f5
+}
 /* slider - end ------------------------------------- */

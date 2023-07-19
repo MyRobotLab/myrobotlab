@@ -1,0 +1,8 @@
+!!org.myrobotlab.service.config.Mpr121Config
+address: '0x5A'
+bus: '1'
+controller: null
+listeners: null
+peers: null
+rateHz: 1.0
+type: Mpr121

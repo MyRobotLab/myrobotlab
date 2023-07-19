@@ -182,7 +182,7 @@ public class Blender extends Service {
       Service.sleep(3000);
       // FIXME - more general case determined by "Type"
       ServiceInterface si = Runtime.getService(name);
-      if ("org.myrobotlab.service.Arduino".equals(si.getType())) {
+      if ("org.myrobotlab.service.Arduino".equals(si.getTypeKey())) {
         // FIXME - make more general - "any" Serial device !!!
         Arduino arduino = (Arduino) Runtime.getService(name);
         if (arduino != null) {

@@ -73,5 +73,15 @@ public interface TaskManager {
    *          - parameters to the method
    */
   public void addTask(String taskName, boolean oneShot, long intervalMs, long delayMs, String method, Object... params);
+  
+  /**
+   * checks if a named tasks exist
+   * 
+   * @param taskName
+   *          - name of task
+   * @return - returns task if defined
+   */
+  public boolean containsTask(String taskName);
+
 
 }

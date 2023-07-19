@@ -18,6 +18,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.LocalSpeechConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
 import org.slf4j.Logger;
@@ -66,7 +67,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
   protected boolean ttsHack = false;
 
-  protected Set<String> types = new HashSet<>(Arrays.asList("Espeak", "Festival", "Mimic", "MsSpeech", "Say", "Tts"));
+  protected Set<String> types = new HashSet<>(Arrays.asList("Espeak", "Festival", "Mimic", "MsSpeech", "Say", "Tts", "Pico2Wav"));
 
   protected String ttsPath = getResourceDir() + fs + "tts" + fs + "tts.exe";
 
@@ -77,8 +78,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException, InterruptedException {
 
-    LocalSpeechConfig c = (LocalSpeechConfig)config;
-    
+    LocalSpeechConfig c = (LocalSpeechConfig) config;
+
     // the actual filename on the file system
     String localFileName = getLocalFileName(toSpeak);
 
@@ -98,13 +99,12 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     // filter out breaking chars
     if (c.replaceChars == null) {
       // if not user defined - escape double quotes to not affect templates
-      c.replaceChars = new HashMap<>(); 
+      c.replaceChars = new HashMap<>();
       c.replaceChars.put("\'", "\'\'");
-    } 
-    for (String target: c.replaceChars.keySet()) {
+    }
+    for (String target : c.replaceChars.keySet()) {
       toSpeak = toSpeak.replace(target, c.replaceChars.get(target));
     }
-    
 
     Platform platform = Runtime.getPlatform();
     if (ttsCommand == null) {
@@ -164,7 +164,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   }
 
   public Map<String, String> getFilter() {
-    return ((LocalSpeechConfig)config).replaceChars;
+    return ((LocalSpeechConfig) config).replaceChars;
   }
 
   @Override
@@ -190,6 +190,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * Use protected addVoice(name, gender, lang, voiceProvider) to add voices
    * Voice.voiceProvider allows a serializable key to map MRL's Voice to a
    * implementation of a voice
+   * 
+   * FIXME create voices based on type, some types support different languages
+   * .. some do not
+   * 
    */
   @Override
   public void loadVoices() {
@@ -279,8 +283,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * @return setEspeak sets the Linux tts to espeak template
    */
   public boolean setEspeak() {
-    LocalSpeechConfig c = (LocalSpeechConfig)config;
+    LocalSpeechConfig c = (LocalSpeechConfig) config;
     c.speechType = "Espeak";
+    voices.clear();
+    addVoice("espeak", "male", "en-US", "espeak");
     removeExt(false);
     setTtsHack(false);
     setTtsCommand("espeak \"{text}\" -w {filename}");
@@ -291,7 +297,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * @return setFestival sets the Linux tts to festival template
    */
   public boolean setFestival() {
-    LocalSpeechConfig c = (LocalSpeechConfig)config;
+    LocalSpeechConfig c = (LocalSpeechConfig) config;
+    voices.clear();
+    addVoice("Linus", "male", "en-US", "festival");
     c.speechType = "Festival";
     removeExt(false);
     setTtsHack(false);
@@ -300,6 +308,34 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       error("festival only supported on Linux");
       return false;
     }
+    return true;
+  }
+
+  /**
+   * setPico2Wav attempts to switch the sub template of Local Speech
+   * 
+   * @return true if successfully switched
+   */
+  public boolean setPico2Wav() {
+    LocalSpeechConfig c = (LocalSpeechConfig) config;
+    c.speechType = "Pico2Wav";
+    removeExt(false);
+    setTtsHack(false);
+
+    voices.clear();
+    addVoice("de-DE", "female", "de-DE", "pico2wav");
+    addVoice("en-GB", "female", "en-GB", "pico2wav");
+    addVoice("en-US", "female", "en-US", "pico2wav");
+    addVoice("es-ES", "female", "es-ES", "pico2wav");
+    addVoice("fr-FR", "female", "fr-FR", "pico2wav");
+    addVoice("it-IT", "female", "it-IT", "pico2wav");
+
+    setTtsCommand("pico2wave -l {voice_name} -w {filename} \"{text}\" ");
+    if (!Runtime.getPlatform().isLinux()) {
+      error("pico2wave only supported on Linux");
+      return false;
+    }
+    broadcastState();
     return true;
   }
 
@@ -313,7 +349,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * 
    */
   public void addFilter(String target, String replace) {
-    LocalSpeechConfig c = (LocalSpeechConfig)config;
+    LocalSpeechConfig c = (LocalSpeechConfig) config;
     if (c.replaceChars == null) {
       c.replaceChars = new HashMap<>();
     }
@@ -324,7 +360,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * @return setMimic sets the Windows mimic template
    */
   public boolean setMimic() {
-    LocalSpeechConfig c = (LocalSpeechConfig)config;
+    LocalSpeechConfig c = (LocalSpeechConfig) config;
     c.speechType = "Mimic";
     removeExt(false);
     setTtsHack(false);
@@ -336,25 +372,28 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     return true;
   }
 
-  @Deprecated /* use appopriate named setSpeechType setter */
+  @Deprecated /*
+               * use appopriate named setSpeechType setter - use setSpeechType
+               */
   public String setType(String type) {
     return setSpeechType(type);
   }
 
   public String setSpeechType(String speechType) {
     if (types.contains(speechType)) {
+      // clever way to demux
       invoke("set" + speechType);
       return speechType;
     }
     error("%s is not a valid type, can be %s", speechType, types);
     return null;
   }
-  
+
   public String getSpeechType() {
-    LocalSpeechConfig c = (LocalSpeechConfig)config;
+    LocalSpeechConfig c = (LocalSpeechConfig) config;
     return c.speechType;
   }
-  
+
   /**
    * Microsoft Speech Synthesis template
    * 
@@ -365,7 +404,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       error("microsoft speech is only supported on Windows");
       return false;
     }
-    LocalSpeechConfig c = (LocalSpeechConfig)config;
+    LocalSpeechConfig c = (LocalSpeechConfig) config;
     c.speechType = "MsSpeech";
 
     removeExt(false);
@@ -385,7 +424,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * @return setSay sets the Mac say template
    */
   public boolean setSay() {
-    LocalSpeechConfig c = (LocalSpeechConfig)config;
+    LocalSpeechConfig c = (LocalSpeechConfig) config;
     c.speechType = "Say";
     removeExt(false);
     setTtsHack(false);
@@ -402,7 +441,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * 
    */
   public boolean setTts() {
-    LocalSpeechConfig c = (LocalSpeechConfig)config;
+    LocalSpeechConfig c = (LocalSpeechConfig) config;
     c.speechType = "Tts";
     removeExt(false);
     setTtsHack(true);
@@ -420,7 +459,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * 
    */
   public void setTtsCommand(String ttsCommand) {
-    LocalSpeechConfig c = (LocalSpeechConfig)config;
+    LocalSpeechConfig c = (LocalSpeechConfig) config;
     info("LocalSpeech speechType %s template is now: %s", c.speechType, ttsCommand);
     this.ttsCommand = ttsCommand;
   }
@@ -441,11 +480,11 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   }
 
   @Override
-  public void startService() {
-    super.startService();
+  public ServiceConfig apply(ServiceConfig config) {
+    LocalSpeechConfig c = (LocalSpeechConfig) super.apply(config);
+
     // setup the default tts per os
     Platform platform = Runtime.getPlatform();
-    LocalSpeechConfig c = (LocalSpeechConfig)config;
     if (c.speechType == null) {
       if (platform.isWindows()) {
         setTts();
@@ -459,6 +498,11 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     } else {
       setSpeechType(c.speechType);
     }
+
+    if (c.voice != null) {
+      setVoice(c.voice);
+    }
+    return c;
   }
 
   public static void main(String[] args) {
@@ -468,12 +512,12 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       LoggingFactory.init("INFO");
 
       // Runtime.startConfig("localspeech-01");
-      
+
       LocalSpeech mouth = (LocalSpeech) Runtime.start("mouth", "LocalSpeech");
       // mouth.setSay();
       // mouth.speakBlocking("test 1 2 3");
-      // mouth.speakBlocking("hello my name is sam, sam i am yet again, how \"are you? do you 'live in a zoo too? ");
-
+      // mouth.speakBlocking("hello my name is sam, sam i am yet again, how
+      // \"are you? do you 'live in a zoo too? ");
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
@@ -486,8 +530,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
       // mouth.setMimic();
 
-
-
       String program = "Add-Type -AssemblyName System.Speech";
       // String[] program = new
       // String[]{"powershell.exe","$PSVersionTable.PSVersion"};
@@ -499,7 +541,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       arguments.add("$speak.speak('HELLO !!!!');");
       Runtime.execute("powershell.exe", arguments, null, null, null);
       // log.info(ret);
-
 
       mouth.speakBlocking("hello my name is sam, sam i am yet again, how \"are you? do you 'live in a zoo too? ");
       mouth.setMimic();

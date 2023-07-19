@@ -80,7 +80,6 @@ public class ArduinoServoConfigTest {
     // Runtime.createAndStart("gui", "SwingGui");
     Python python = (Python) Runtime.createAndStart("python", "Python");
     python.execFile("resource/InMoov2/InMoov2.py");
-    python.exec("i01.startOpenCV()");
     System.out.println("Done loading script.");
     // waitOnAnyKey();
     // Save this config set as the default config set.

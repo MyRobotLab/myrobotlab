@@ -21,12 +21,6 @@
                             </a>
                         </li>
                         <li>
-                            <a href="" ng-click="servicemenuDropdownOpen = false;release()">
-                                <i class="glyphicon glyphicon-remove"></i>
-                                &nbsp;&nbsp;release
-                            </a>
-                        </li>
-                        <li>
                             <a href="" ng-click="servicemenuDropdownOpen = false;msg.broadcastState()">
                                 <i class="glyphicon glyphicon-refresh"></i>
                                 &nbsp;&nbsp;refresh
@@ -37,29 +31,6 @@
                                 <i class="glyphicon glyphicon-equalizer"></i>
                                 <span ng-show="!parentPanel.showPeerTable" ng-click="showPeers(true)">&nbsp;&nbsp;show peers</span>
                                 <span ng-show="parentPanel.showPeerTable" ng-click="showPeers(false)">&nbsp;&nbsp;hide peers</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="" target="_blank">
-                                <i class="glyphicon glyphicon-chevron-down"></i>
-                                <span ng-show="!service.isVirtual" ng-click="toggleVirtual(true)">&nbsp;&nbsp;virtualization on</span>
-                                <span ng-show="service.isVirtual" ng-click="toggleVirtual(false)">&nbsp;&nbsp;virtualization off</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="" target="_blank" ng-click="save()">
-                                <i class="glyphicon glyphicon-save-file"></i>
-                                &nbsp;&nbsp;save service
-                            
-                            
-                            </a>
-                        </li>
-                        <li>
-                            <a href="" target="_blank" ng-click="saveDefault()">
-                                <i class="glyphicon glyphicon-save-file"></i>
-                                &nbsp;&nbsp;save default
-                            
-                            
                             </a>
                         </li>
                         <li class="divider"></li>
@@ -93,7 +64,12 @@
                 </div>
             </td>
             <td>
-                <button class="btn btn-default" ng-click="save()" title="save service configuration">
+                <button class="btn btn-default" ng-click="release()" title="stops and releases a service">
+                    <span class="glyphicon glyphicon-remove red"></span>
+                </button>
+            </td>
+            <td>
+                <button class="btn btn-default" ng-click="save()" title="save current configuration">
                     <span class="glyphicon glyphicon-save-file"></span>
                 </button>
             </td>
@@ -116,13 +92,14 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="(key, value) in service.serviceType.peers">
+                <tr ng-repeat="(key, value) in service.config.peers">
                     <td>
                         <span>
-                            {{peer.getActualName(service, key)}}xxx                        
-                            <a href="" ng-click="mrl.changeTab(peer.getActualName(service, key))">
-                                <img ng-src="/{{value.type + '.png'}}" width="48">
+
+                            <a href=""  ng-click="mrl.changeTab(peer.getActualName(service, key))">
+                                <img width="32" ng-src="/{{value.type + '.png'}}" width="48">
                             </a>
+                                    {{peer.getActualName(service, key)}}
                         </span>
                     </td>
                     <td>

@@ -17,6 +17,7 @@ public class ClockMeta extends MetaData {
    */
   public ClockMeta() {
     addDescription("used to generate pulses and recurring messages");
+    // addDependency("groupid", "artifactId", "0.9"); good for testing a bad artifact ! :)
     addCategory("scheduling");
   }
 

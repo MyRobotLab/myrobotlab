@@ -3,6 +3,7 @@ package org.myrobotlab.framework.repo;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -435,22 +436,9 @@ public class IvyWrapper extends Repo implements Serializable {
 
       Platform platform = Platform.getLocalInstance();
 
-      // TODO - noterminate :P
-      // String[] cmd = new String[] { "-settings", location +
-      // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
-      // location + "/jar" + "/[originalname].[ext]", "-noterminate" };
-      // FIXME - javacpp deps throw because they have 2 jars colliding when
-      // native classifier exist
-      // String[] cmd = new String[] { "-settings", location +
-      // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
-      // location + "/jar" + "/[originalname]-[classifier].[ext]" };
+      // templates [originalname](-[classifier])(-[revision]).[ext]  parens are "optional"
       String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname].[ext]" };
-      // String[] cmd = new String[] { "-settings", location +
-      // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
-      // location + "/jar" + "/[artifact]-[revision].[ext]" };
 
-      // StringBuilder sb = new StringBuilder("java -jar
-      // ..\\..\\ivy-2.4.0-4.jar");
       StringBuilder sb = new StringBuilder();
       sb.append("wget https://repo1.maven.org/maven2/org/apache/ivy/ivy/" + IVY_VERSION + "/ivy-" + IVY_VERSION + ".jar\n");
       sb.append("java -jar ivy-" + IVY_VERSION + ".jar");
@@ -467,26 +455,28 @@ public class IvyWrapper extends Repo implements Serializable {
       Ivy ivy = Ivy.newInstance(); // <-- for future 2.5.x release
       ivy.getLoggerEngine().pushLogger(new IvyWrapperLogger(Message.MSG_INFO));
 
-      ResolveReport report = Main.run(cmd);
+      ResolveReport report = null;
+      List<String> err = new ArrayList<>();
+      try {
+         report = Main.run(cmd);
+      } catch(Exception e) {
+         err.add(e.toString());
+      }
 
       // if no errors -h
       // mark "service" as installed
       // mark all libraries as installed
 
-      List<?> err = report.getAllProblemMessages();
-
-      boolean error = false;
-      if (err.size() > 0) {
-        for (int i = 0; i < err.size(); ++i) {
-          String errStr = err.get(i).toString();
-          if (!errStr.startsWith("WARN:  symlinkmass")) {
-            error = true;
+      if (report != null) {
+        List<String> problems = report.getAllProblemMessages();
+        for (String problem : problems) {
+          if (!problem.startsWith("WARN:  symlinkmass")) {
+            err.add(problem);
           }
-          error(errStr);
         }
       }
 
-      if (error) {
+      if (err.size() > 0) {
         log.error("had errors - repo will not be updated");
       } else {
 

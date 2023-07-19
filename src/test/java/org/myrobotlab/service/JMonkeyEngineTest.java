@@ -16,7 +16,7 @@ public class JMonkeyEngineTest extends AbstractTest {
   static JMonkeyEngine jme = null;
 
   public final static Logger log = LoggerFactory.getLogger(JMonkeyEngineTest.class);
-  static SwingGui swing = null;
+//  static SwingGui swing = null;
 
   static final String TEST_DIR = "src/test/resources/JMonkeyEngine/";
   static final String TEST_FACE_FILE_JPEG = "src/test/resources/JMonkeyEngine/multipleFaces.jpg";
@@ -37,10 +37,6 @@ public class JMonkeyEngineTest extends AbstractTest {
 
       test.putTextTest();
 
-      boolean quitNow = true;
-      if (quitNow) {
-        return;
-      }
     } catch (Exception e) {
       log.error("main threw", e);
     }
@@ -49,18 +45,11 @@ public class JMonkeyEngineTest extends AbstractTest {
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
-    // Runtime.setLogLevel("info");
-    if (!isHeadless()) {
-      swing = (SwingGui) Runtime.start("gui", "SwingGui");
-    }
   }
 
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
     jme.releaseService();
-    if (!isHeadless()) {
-      // Runtime.release("gui");
-    }
   }
 
   @Test

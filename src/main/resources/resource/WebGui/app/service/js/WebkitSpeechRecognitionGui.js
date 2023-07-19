@@ -30,7 +30,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     // this is really a js service
     // and this is the initial service state we want
     $scope.service = {
-        isRecording: false,
+        config: {isRecording: false},
         status: null
     }
 
@@ -38,10 +38,10 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     $scope.changeListeningState = function() {
         if (!$scope.isRecording) {
             $scope.setState('start')
-            // msg.send('startListening') 
+            mrl.sendTo($scope.name,'startListening') 
         } else {
             $scope.setState('stop')
-            // msg.send('stopListening')
+            mrl.sendTo($scope.name,'stopListening') 
         }
     }
 
@@ -195,10 +195,10 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         // $scope.service is old data
         // service is new data
 
-        if ($scope.isRecording && !service.isRecording) {
+        if ($scope.isRecording && !service.config.recording) {
             $scope.setState('stop')
         }
-        if (!$scope.isRecording && service.isRecording) {
+        if (!$scope.isRecording && service.config.recording) {
             $scope.setState('start')
         }
 
@@ -236,13 +236,16 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             tag = 'tr-TR'
         }
 
-        $scope.selectedLanguage = tag
-        $scope.setLanguageFromService(tag)
+        if (tag != $scope.selectedLanguage){
+            $scope.selectedLanguage = tag
+            $scope.setLanguageFromService(tag)            
+        }
 
         // update en-mass
         $scope.service = service
-        if (service.wakeWord != null && $scope.wakeWord == null) {
-            $scope.wakeWord = service.wakeWord
+
+        if (service.config.wakeWord){
+            service.wakeWord = service.config.wakeWord
         }
 
     }

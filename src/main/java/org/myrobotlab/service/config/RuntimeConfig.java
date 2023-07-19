@@ -11,13 +11,21 @@ public class RuntimeConfig extends ServiceConfig {
    */
   public String id;
   
-  // public String id; Not ready to process this ... yet
-  public Boolean virtual = null;
+  /**
+   * virtual hardware if enabled all services created will enable virtualization if applicable
+   */
+  public Boolean virtual = false;
   public boolean enableCli = true;
-  public String logLevel;
+  public String logLevel = "info";
   public String locale;
+  
   // NEED THIS PRIVATE BUT CANNOT BE
   public List<String> registry = new ArrayList<>();
+    
+  /**
+   * Root of resource location
+   */
+  public String resource = "resource";
 
   /**
    * add and remove a service using these methods and the uniqueness will be

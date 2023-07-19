@@ -27,7 +27,9 @@ public class WsClient extends WebSocketListener {
 
   public final static Logger log = LoggerFactory.getLogger(WsClient.class);
 
-  transient private OkHttpClient client = null;
+  private final transient OkHttpClient client = new OkHttpClient.Builder()
+          .readTimeout(60000, TimeUnit.MILLISECONDS)
+          .build();
   /**
    * service if it exists
    */
@@ -38,14 +40,14 @@ public class WsClient extends WebSocketListener {
   /**
    * unique identifier for this client
    */
-  protected String uuid = null;
+  protected String uuid = java.util.UUID.randomUUID().toString();
   /**
    * callback handler if it exists
    */
   transient private RemoteMessageHandler handler = null;
 
   public WsClient() {
-    uuid = java.util.UUID.randomUUID().toString();
+    // Best to keep the default constructor for explicitness
   }
 
   /**
@@ -87,7 +89,6 @@ public class WsClient extends WebSocketListener {
       listener = (ConnectionEventListener) si;
     }
 
-    client = new OkHttpClient.Builder().readTimeout(60000, TimeUnit.MILLISECONDS).build();
     Request request = new Request.Builder().url(url).build();
     socket = client.newWebSocket(request, this);
 
@@ -120,6 +121,8 @@ public class WsClient extends WebSocketListener {
     }
     socket.send(bytes);
   }
+
+  // FIXME Need to add @NonNull to overriden method params once we standardize on an annotation lib
 
   @Override
   public void onOpen(WebSocket webSocket, Response response) {

@@ -16,7 +16,7 @@ public class Mpr121Meta extends MetaData {
     addDescription("MPR121 Touch sensor & LED Driver");
     addCategory("shield", "sensors", "i2c");
     setSponsor("Mats");
-    setAvailable(false);
+    setAvailable(true);
 
   }
 

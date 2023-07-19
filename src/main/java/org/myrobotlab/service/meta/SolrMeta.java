@@ -16,22 +16,27 @@ public class SolrMeta extends MetaData {
 
     addDescription("Solr Service - Open source search engine");
     addCategory("search");
-    String solrVersion = "8.11.2";
-    String luceneVersion = solrVersion;
+    String solrVersion = "9.2.0";
+    String luceneVersion = "9.4.2";
     addDependency("org.apache.lucene", "lucene-core", luceneVersion);
     addDependency("org.apache.solr", "solr-core", solrVersion);
+    exclude("org.slf4j", "*");
     exclude("log4j", "*");
     exclude("org.apache.logging.log4j", "*");
     exclude("com.fasterxml.jackson.core", "*");
     exclude("io.netty", "*"); // prevent it from bringing in an old version of netty
 
     addDependency("org.apache.solr", "solr-test-framework", solrVersion);
+    exclude("org.slf4j", "*");
     exclude("log4j", "*");
     exclude("org.apache.logging.log4j", "*");
     exclude("com.fasterxml.jackson.core", "*");
     exclude("io.netty", "*");
 
     addDependency("org.apache.solr", "solr-solrj", solrVersion);
+    exclude("org.slf4j", "*");
+    exclude("log4j", "*");
+    exclude("org.apache.logging.log4j", "*");
     exclude("com.fasterxml.jackson.core", "*");
     exclude("io.netty", "*");
 

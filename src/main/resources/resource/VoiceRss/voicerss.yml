@@ -1,5 +1,6 @@
 !!org.myrobotlab.service.config.VoiceRssConfig
 blocking: false
+key: null
 listeners: null
 mute: false
 peers:

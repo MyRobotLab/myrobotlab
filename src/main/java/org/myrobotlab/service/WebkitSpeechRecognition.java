@@ -32,7 +32,7 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
 
     // Runtime.start("gui", "SwingGui");
     Runtime runtime = Runtime.getInstance();
-    runtime.setLocale("de");
+    // runtime.setLocale("de");
 
     WebkitSpeechRecognition webkit = (WebkitSpeechRecognition) Runtime.start("webkit", "WebkitSpeechRecognition");
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
@@ -94,9 +94,5 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
     return ret;
   }
 
-//  @Override
-//  public void attachTextListener(String name) {
-//    addListener("publishText", name);
-//  }
 
 }

@@ -20,6 +20,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
+import org.myrobotlab.service.interfaces.Translator;
 import org.slf4j.Logger;
 
 import okhttp3.HttpUrl;
@@ -30,7 +31,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class AzureTranslator extends Service implements TextListener, TextPublisher {
+public class AzureTranslator extends Service implements Translator, TextListener, TextPublisher {
 
   private static final long serialVersionUID = 1L;
 
@@ -207,6 +208,16 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  @Override
+  public void setToLanguage(String to) {
+    this.to = to;
+  }
+
+  @Override
+  public void setFromLanguage(String from) {
+    this.from = from;
   }
 
 }

@@ -1,12 +1,12 @@
 package org.myrobotlab.programab;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.nio.charset.StandardCharsets;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.alicebot.ab.Chat;
@@ -43,6 +43,9 @@ public class Session {
 
   // public Map<String,String> predicates = new TreeMap<>();
   public Predicates predicates = null;
+
+  // current topic of this session
+  public String currentTopic = null;
 
   /**
    * Session for a user and bot
@@ -102,13 +105,20 @@ public class Session {
       FileWriter writer = new FileWriter(predicates, StandardCharsets.UTF_8);
       writer.write(sb.toString());
       writer.close();
-      
-//      FileOutputStream fos = new FileOutputStream(predicates);
-//      fos.write(sb.toString().getBytes(), StandardCharsets.UTF_8);
-//      fos.close();
+
     } catch (Exception e) {
       log.error("writing predicates threw", e);
     }
+  }
+
+  /**
+   * Get all current predicate names and values
+   * @return
+   */
+  public Map<String, String> getPredicates() {
+    TreeMap<String, String> sort = new TreeMap<>();
+    sort.putAll(getChat().predicates);
+    return sort;
   }
 
   public Response getResponse(String inText) {

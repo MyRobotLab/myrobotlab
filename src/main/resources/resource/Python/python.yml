@@ -3,6 +3,7 @@ listeners: null
 modulePaths: [
   ]
 peers: null
+scriptRootDir: null
 startScripts: [
   ]
 stopScripts: [

@@ -13,9 +13,11 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.programab.Response;
 
 // @Ignore
@@ -47,7 +49,7 @@ public class SolrTest extends AbstractServiceTest {
     SolrInputDocument doc = new SolrInputDocument();
     doc.setField("id", docId);
     // load an image from file/resource
-    byte[] bytes = solr.imageToBytes(image);
+    byte[] bytes = Util.imageToBytes(image);
     doc.setField("bytes", bytes);
     return doc;
   }
@@ -92,6 +94,9 @@ public class SolrTest extends AbstractServiceTest {
 
     Document mrlDoc = new Document("doc_3");
     mrlDoc.setField("title", "Mrl Rocks!");
+    // Object o = Arrays.asList(1.0f, 2.5f, 3.7f, 4.1f);
+    //Object o2 = Arrays.asList(makeVector(384));
+    mrlDoc.setField("vector", makeVector(384));
 
     solr.onDocument(mrlDoc);
     solr.commit();
@@ -123,9 +128,42 @@ public class SolrTest extends AbstractServiceTest {
     query = new SolrQuery("username:joe");
     resp = solr.search(query);
     Assert.assertEquals(1, resp.getResults().getNumFound());
+    
+    
+    // let's search for our vector
+    ArrayList<Float> v = makeVector(384);
+   String queryVec = vecToString(v);
+    
+    
+    query = new SolrQuery("{!knn f=vector topK=10}"+queryVec);
+    resp = solr.search(query);
+    
+    // System.out.println(resp);
+    Assert.assertEquals(1, resp.getResults().getNumFound());
 
   }
 
+  private String vecToString(ArrayList<Float> v) {
+    // TODO Auto-generated method stub
+    StringBuilder sb = new StringBuilder();
+    sb.append("[");
+    for (int i = 0 ; i < v.size(); i++) {
+      sb.append(v.get(i));
+      if (i != v.size()-1) {
+        sb.append(",");
+      }
+    }    
+    sb.append("]");
+    return sb.toString();
+  }
+
+  private ArrayList<Float> makeVector (int length) {
+    ArrayList<Float> result = new ArrayList<Float>();
+    for (int i = 0 ; i < length; i++) {
+      result.add( 0.5f );
+    }
+    return result;
+  }
   private SolrInputDocument makeTestDoc(String docId) {
     // TODO Auto-generated method stub
     SolrInputDocument doc = new SolrInputDocument();

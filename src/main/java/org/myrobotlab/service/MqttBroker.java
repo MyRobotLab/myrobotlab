@@ -190,11 +190,6 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
   }
 
   @Override
-  public Message getDescribeMsg(String connId) {
-    return Runtime.getInstance().getDescribeMsg(connId);
-  }
-
-  @Override
   public String getID() {
     return getName();
   }

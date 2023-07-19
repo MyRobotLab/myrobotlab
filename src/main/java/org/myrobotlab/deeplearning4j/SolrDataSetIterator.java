@@ -16,6 +16,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.params.FacetParams;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.datavec.image.loader.NativeImageLoader;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.opencv.CloseableFrameConverter;
 import org.myrobotlab.service.Solr;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -176,7 +177,7 @@ public class SolrDataSetIterator implements DataSetIterator {
     byte[] bytes = (byte[]) trainingDoc.getFirstValue("bytes");
     NativeImageLoader loader = new NativeImageLoader(height, width, channels);
     try {
-      IplImage iplImage = solr.bytesToImage(bytes);
+      IplImage iplImage = Util.bytesToImage(bytes);
       // solr.show(iplImage, label + " " + trainingDoc.getFirstValue("id"));
       // TODO: just get the buffered image directly.
 

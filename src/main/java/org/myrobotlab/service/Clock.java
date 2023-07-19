@@ -28,7 +28,6 @@ public class Clock extends Service {
 
     private transient Thread thread = null;
     
-    public boolean running = false;
 
     @Override
     public void run() {
@@ -36,11 +35,9 @@ public class Clock extends Service {
 
       try {
 
-        // c.running = true;
         c.running = true;
-        running = true;
         invoke("publishClockStarted");
-        while (running) {
+        while (c.running) {
           Thread.sleep(c.interval);
           Date now = new Date();
           for (Message msg : events) {
@@ -53,7 +50,6 @@ public class Clock extends Service {
       } catch (InterruptedException e) {
         log.info("ClockThread interrupt");
       }
-      running = false;
       c.running = false;
       thread = null;
     }
@@ -72,12 +68,15 @@ public class Clock extends Service {
     }
 
     synchronized public void stop() {
+      ClockConfig c = (ClockConfig) config;
+
       if (thread != null) {
         thread.interrupt();
+        broadcastState();
       } else {
         log.info("{} already stopped");
       }
-      running = false;
+      c.running = false;
       Service.sleep(20);
     }
   }

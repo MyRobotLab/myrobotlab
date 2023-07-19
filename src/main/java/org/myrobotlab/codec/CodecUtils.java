@@ -1,5 +1,6 @@
 package org.myrobotlab.codec;
 
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -11,11 +12,13 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,9 +34,12 @@ import org.myrobotlab.codec.json.JacksonPolymorphicModule;
 import org.myrobotlab.codec.json.JacksonPrettyPrinter;
 import org.myrobotlab.codec.json.JsonDeserializationException;
 import org.myrobotlab.codec.json.JsonSerializationException;
+import org.myrobotlab.codec.json.ProxySerializer;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
+import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.StaticType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -53,6 +59,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.noctordeser.NoCtorDeserModule;
 import com.google.gson.Gson;
@@ -233,6 +240,10 @@ public class CodecUtils {
         //This allows Jackson to work just like GSON when no default constructor is available
         mapper.registerModule(new NoCtorDeserModule());
 
+        SimpleModule proxySerializerModule = new SimpleModule();
+        proxySerializerModule.addSerializer(Proxy.class, new ProxySerializer());
+        mapper.registerModule(proxySerializerModule);
+
         //Actually add our polymorphic support
         mapper.registerModule(JacksonPolymorphicModule.getPolymorphicModule());
 
@@ -312,7 +323,9 @@ public class CodecUtils {
                   JsonNode node = mapper.readTree(json);
                   if (node.isInt()) {
                       return mapper.readValue(json, (Class<T>)Integer.class);
-                  } else if (node.isDouble()) {
+                  } else if (node.isBoolean()) {
+                    return mapper.readValue(json, (Class<T>)Boolean.class);
+                  } else if (node.isNumber()) {
                       return mapper.readValue(json, (Class<T>)Double.class);
                   } else if (node.isTextual()) {
                     return mapper.readValue(json, (Class<T>)String.class);
@@ -357,6 +370,21 @@ public class CodecUtils {
         } catch (Exception e) {
             throw new JsonDeserializationException(e);
         }
+    }
+
+    /**
+     * Deserializes a json string into the type represented by
+     * {@link T}. {@code type} must must match {@link T} exactly,
+     * otherwise the deserializers may not deserialize into T.
+     *
+     * @param json A string encoded in JSON
+     * @param type Reified type information to pass to the deserializers
+     * @return An instance of T decoded from the json
+     * @param <T> The type to deserialize into
+     * @throws JsonDeserializationException if the selected deserializer throws an exception
+     */
+    public static <T> /*@Nullable*/ T fromJson(/*@NonNull*/ String json, /*@NonNull*/ StaticType<T> type) {
+        return fromJson(json, type.getType());
     }
 
     /**
@@ -441,8 +469,8 @@ public class CodecUtils {
      * @return The simple name of the service. If null,
      * will return null, and if already a simple name
      * then will return name
-     */
-    static public String shortName(String name) {
+     */    
+    static public String getShortName(String name) {
         if (name == null) {
             return null;
         }
@@ -452,6 +480,7 @@ public class CodecUtils {
             return name;
         }
     }
+        
 
     // TODO
     // public static Object encode(Object, encoding) - dispatches appropriately
@@ -472,6 +501,44 @@ public class CodecUtils {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Normalizes a service name to its full
+     * name, if not already. A full name consists of
+     * two parts: the short name that identifies the service
+     * in the context of its own runtime, and the Runtime ID,
+     * that identifies the service's runtime from others in the network.
+     * The two parts are separated by an {@code @} symbol.
+     * <p>
+     * If this method is given a short name, it is assumed to be local
+     * to this runtime, and it is normalized with the ID of this runtime.
+     * If the name is already a full name, then it is returned unmodified.
+     * @param name The service name to normalize
+     * @return The normalized (full) name, or null if name is null
+     */
+    public static String getFullName(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        if (getId(name) == null) {
+            return name + '@' + Platform.getLocalInstance().getId();
+        } else {
+            return name;
+        }
+    }
+
+    /**
+     * Checks whether two service names are equal by first normalizing
+     * each. If a name does not have a runtime ID, it is assumed to be
+     * a local service.
+     * @param name1 The first service name
+     * @param name2 The second service name
+     * @return Whether the two names are effectively equal
+     */
+    public static boolean checkServiceNameEquality(String name1, String name2) {
+        return Objects.equals(getFullName(name1), getFullName(name2));
     }
 
     /**
@@ -578,7 +645,7 @@ public class CodecUtils {
      */
     public static /*@Nullable*/ Message jsonToMessage(/*@Nonnull*/ String jsonData) {
       if (log.isDebugEnabled()) {
-        log.debug("Deserializing message: %s",jsonData);
+        log.debug("Deserializing message: {}",jsonData);
       }
         Message msg = fromJson(jsonData, Message.class);
 
@@ -1404,6 +1471,20 @@ public class CodecUtils {
         return (T) yaml.load(data);
     }
 
+
+    /**
+     * Checks if the service name is local to the current process instance
+     * @param name The service name to be checked
+     * @return Whether the service name is local to the given ID
+     */
+    public static boolean isLocal(String name) {
+      if (!name.contains("@")) {
+          return true;
+      }
+      return name.substring(name.indexOf("@") + 1).equals(Platform.getLocalInstance().getId());
+  }
+    
+    
     /**
      * Checks if the service name given by name is local,
      * i.e. it has no remote ID (has no '@' symbol), or
@@ -1543,7 +1624,15 @@ public class CodecUtils {
    * @return
    */
   public static Object fromJson(String json) {
-    return fromJson(json, null);
+    return fromJson(json, (Class<Object>) null);
+  }
+
+  public static String toBase64(byte[] bytes) {
+    return Base64.getEncoder().encodeToString(bytes);
+  }
+  
+  public static byte[] fromBase64(String input) {
+    return Base64.getDecoder().decode(input);
   }
 
 }

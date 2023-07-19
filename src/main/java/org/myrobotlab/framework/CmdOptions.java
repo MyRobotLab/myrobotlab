@@ -56,6 +56,10 @@ public class CmdOptions {
 
   @Option(names = { "-h", "-?", "--help" }, description = "shows help")
   public boolean help = false;
+  
+  @Option(names = { "-r", "--config-root" }, description = "sets configuration root, the root for which all config directories are in")
+  public String configRoot = null;
+
 
   @Option(names = { "--id" }, description = "process identifier to be mdns or network overlay name for this instance - one is created at random if not assigned")
   public String id;

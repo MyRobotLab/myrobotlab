@@ -622,12 +622,11 @@ public class Lloyd extends Service {
     //
     LoggingFactory.init("INFO");
     Lloyd lloyd = (Lloyd) Runtime.start("lloyd", "Lloyd");
-    SwingGui gui = (SwingGui) Runtime.start("gui", "SwingGui");
     // start python
     Runtime.start("python", "Python");
-    gui.undockTab("memory");
-    gui.undockTab("brain");
-    gui.undockTab("leftEye");
+//    gui.undockTab("memory");
+//    gui.undockTab("brain");
+//    gui.undockTab("leftEye");
     // gui.undockTab("leftEye");
     // opencvdata_214c7381-ddfe-406a-adfa-f1bf9aebd367
     lloyd.initializeBrain();

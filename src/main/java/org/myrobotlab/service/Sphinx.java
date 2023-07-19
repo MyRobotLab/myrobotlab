@@ -50,6 +50,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
+import org.myrobotlab.service.config.SpeechRecognizerConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -110,22 +111,25 @@ public class Sphinx extends AbstractSpeechRecognizer {
           log.error("Cannot start microphone.");
           recognizer.deallocate();
         }
+        
+        SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+
 
         // loop the recognition until the program exits.
-        isListening = true;
+        c.listening = true;
         while (isRunning) {
 
-          info("listening: %b", isListening);
+          info("listening: %b", c.listening);
           invoke("listeningEvent", true);
           Result result = recognizer.recognize();
 
-          if (!isListening) {
+          if (!c.listening) {
             // we could have stopped listening
             Thread.sleep(250);
             continue;
           }
 
-          log.info("Recognized Loop: {}  Listening: {}", result, isListening);
+          log.info("Recognized Loop: {}  Listening: {}", result, c.listening);
           // log.error(result.getBestPronunciationResult());
 
           if (result != null) {
@@ -135,7 +139,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
               continue;
             }
             log.info("recognized: " + resultText + '\n');
-            if (resultText.length() > 0 && isListening) {
+            if (resultText.length() > 0 && c.listening) {
               if (lockPhrases.size() > 0 && !lockPhrases.contains(resultText) && !confirmations.containsKey(resultText)) {
                 log.info("but locked on {}", resultText);
                 continue;
@@ -430,12 +434,14 @@ public class Sphinx extends AbstractSpeechRecognizer {
    * 
    */
   public synchronized boolean onIsSpeaking(Boolean talking) {
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+
     if (talking) {
-      isListening = false;
+      c.listening = false;
       log.info("I'm talking so I'm not listening"); // Gawd, ain't that
       // the truth !
     } else {
-      isListening = true;
+      c.listening = true;
       log.info("I'm not talking so I'm listening"); // mebbe
     }
     return talking;
@@ -495,7 +501,9 @@ public class Sphinx extends AbstractSpeechRecognizer {
   @Override
   public synchronized void pauseListening() {
     log.info("Pausing Listening");
-    isListening = false;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+
+    c.listening = false;
     if (microphone != null && recognizer != null) {
       // TODO: what does reset monitors do? maybe clear the microphone?
       // maybe neither of these do anything useful
@@ -528,7 +536,9 @@ public class Sphinx extends AbstractSpeechRecognizer {
   @Override
   public void resumeListening() {
     log.info("resuming listening");
-    isListening = true;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+
+    c.listening = true;
     if (microphone != null) {
       // TODO: no idea if this does anything useful.
       microphone.clear();
@@ -592,7 +602,9 @@ public class Sphinx extends AbstractSpeechRecognizer {
       microphone.stopRecording();
       microphone.clear();
     }
-    isListening = false;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+
+    c.listening = false;
     if (speechProcessor != null) {
       speechProcessor.isRunning = false;
     }

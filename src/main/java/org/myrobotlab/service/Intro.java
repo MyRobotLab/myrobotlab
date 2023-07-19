@@ -36,7 +36,7 @@ public class Intro extends Service {
   }
 
   public String released(String fullName) {
-    String name = CodecUtils.shortName(fullName);
+    String name = CodecUtils.getShortName(fullName);
     set(name + "IsActive", false);
     return name;
   }

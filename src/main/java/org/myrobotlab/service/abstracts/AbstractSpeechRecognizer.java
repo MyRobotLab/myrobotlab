@@ -52,20 +52,14 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   protected HashMap<String, Message> commands = new HashMap<>();
 
-  /**
-   * status of listening
-   */
-  protected boolean isListening = false;
 
   /**
    * status when wake word is used and is ready to publish recognized events
    */
   protected boolean isAwake = true;
+  
+  public Long lastWakeWordTs = null;
 
-  /**
-   * status of publishing recognized text
-   */
-  protected boolean isRecording = false;
 
   @Deprecated /* remove ! - is from webkit - should be handled in js */
   protected long lastAutoListenEvent = System.currentTimeMillis();
@@ -94,30 +88,8 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   // and an end user affect listening ...
   // protected boolean speaking = false;
 
-  /**
-   * Wake word functionality is activated when it is set (ie not null) This
-   * means recognizing events will be processed "after" it hears the wake word.
-   * It will continue to publish events until a idle timeout period is reached.
-   * It can continue to listen after this, but it will not publish. It fact, it
-   * 'must' keep listening since in this idle state it needs to search for the
-   * wake word
-   */
-  protected String wakeWord = null;
-
-  /**
-   * number of seconds of silence after the initial wake word is used that it
-   * the wake word will be needed to activate again null == unlimited
-   */
-  protected Integer wakeWordIdleTimeoutSeconds = 10;
-
-  protected Long lastWakeWordTs = null;
 
   protected boolean isSpeaking = false;
-
-  /**
-   * wait for 1 sec after my speaking has ended
-   */
-  protected long afterSpeakingPauseMs = 2000;
 
   protected boolean normalize = true;
 
@@ -197,7 +169,8 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    */
   @Override
   public String getWakeWord() {
-    return wakeWord;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    return c.wakeWord;
   }
 
   /**
@@ -205,13 +178,15 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    */
   @Override
   public boolean isListening() {
-    return isListening;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    return c.listening;
   }
 
   @Override
   @Deprecated /* use publishListening(boolean event) */
   public void listeningEvent(Boolean event) {
-    isListening = event;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    c.listening = event;
     broadcastState();
     return;
   }
@@ -239,11 +214,13 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     // affect "recognizing"
     // FIXME - add a deta time after ...
 
-    if (afterSpeakingPauseMs > 0) {
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+
+    if (c.afterSpeakingPauseMs > 0) {
       // remove previous one shot - because we are "sliding" the window of
       // stopping the publishing of recognized words
-      addTaskOneShot(afterSpeakingPauseMs, "setSpeaking", new Object[] { false });
-      log.warn("isSpeaking = false will occur in {} ms", afterSpeakingPauseMs);
+      addTaskOneShot(c.afterSpeakingPauseMs, "setSpeaking", new Object[] { false });
+      log.warn("isSpeaking = false will occur in {} ms", c.afterSpeakingPauseMs);
     } else {
       setSpeaking(false, null);
     }
@@ -263,11 +240,12 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   @Override
   public void onAudioEnd(AudioData data) {
     log.info("sound stopped {}", data);
-    if (afterSpeakingPauseMs > 0) {
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    if (c.afterSpeakingPauseMs > 0) {
       // remove previous one shot - because we are "sliding" the window of
       // stopping the publishing of recognized words
-      addTaskOneShot(afterSpeakingPauseMs, "setSpeaking", new Object[] { false });
-      log.warn("isSpeaking = false will occur in {} ms", afterSpeakingPauseMs);
+      addTaskOneShot(c.afterSpeakingPauseMs, "setSpeaking", new Object[] { false });
+      log.warn("isSpeaking = false will occur in {} ms", c.afterSpeakingPauseMs);
     } else {
       setSpeaking(false, null);
     }
@@ -286,8 +264,10 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     isSpeaking = b;
 
     ListeningEvent event = new ListeningEvent();
-    event.isRecording = isRecording;
-    event.isListening = isListening;
+    
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    event.isRecording = c.recording;
+    event.isListening = c.listening;
     event.isAwake = isAwake;
     event.isSpeaking = isSpeaking;
 
@@ -325,11 +305,13 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   public ListeningEvent[] processResults(ListeningEvent[] results) {
     // at the moment its simply invoking other methods, but if a new speech
     // recognizer is created - it might need more processing
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+
 
     for (int i = 0; i < results.length; ++i) {
       ListeningEvent event = results[i];
-      event.isRecording = isRecording;
-      event.isListening = isListening;
+      event.isRecording = c.recording;
+      event.isListening = c.listening;
       event.isAwake = isAwake;
       event.isSpeaking = isSpeaking;
 
@@ -337,20 +319,20 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
         event.text = (event.text != null) ? event.text.trim().toLowerCase().replace("\\p{P}", "") : null;
       }
 
-      if (wakeWord != null && !isAwake) {
+      if (c.wakeWord != null && !isAwake) {
 
         // case : is asleep, and wake word matches in text
-        if (event.text != null && event.text.toLowerCase().contains(wakeWord.toLowerCase())) {
-          info("wake word match on %s in %s, idle timer starts to sleep in {} seconds", wakeWord, event.text, wakeWordIdleTimeoutSeconds);
+        if (event.text != null && event.text.toLowerCase().contains(c.wakeWord.toLowerCase())) {
+          info("wake word match on %s in %s, idle timer starts to sleep in {} seconds", c.wakeWord, event.text, c.wakeWordIdleTimeoutSeconds);
           String originalText = event.text;
           // if WakeWord is "robot" and you say "robot" got wash dishes - this
           // will remove the "robot" from the published text
           if (removeWakeWord) {
-            event.text = event.text.replace(wakeWord.toLowerCase(), "");
+            event.text = event.text.replace(c.wakeWord.toLowerCase(), "");
           }
 
           purgeTask("setAwake");
-          addTaskOneShot(wakeWordIdleTimeoutSeconds * 1000, "setAwake", false);
+          addTaskOneShot(c.wakeWordIdleTimeoutSeconds * 1000, "setAwake", false);
           lastWakeWordTs = System.currentTimeMillis();
 
           // setting awake
@@ -359,10 +341,10 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
         }
 
-      } else if (wakeWord != null && isAwake) {
+      } else if (c.wakeWord != null && isAwake) {
         // slide window of wake word idle time
         purgeTask("setAwake");
-        addTaskOneShot(wakeWordIdleTimeoutSeconds * 1000, "setAwake", false);
+        addTaskOneShot(c.wakeWordIdleTimeoutSeconds * 1000, "setAwake", false);
       }
 
       lastThingRecognized = event.text;
@@ -385,11 +367,12 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   public void setAwake(boolean b, String text) {
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
 
     if (!b && isSpeaking) {
       log.info("bot is speaking - bot doesn't get tired when talking about self sliding idle timeout");
       purgeTask("setAwake");
-      addTaskOneShot(wakeWordIdleTimeoutSeconds * 1000, "setAwake", false);
+      addTaskOneShot(c.wakeWordIdleTimeoutSeconds * 1000, "setAwake", false);
       return;
     }
     // don't go to sleep if speaking
@@ -398,8 +381,8 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     isAwake = b;
 
     ListeningEvent event = new ListeningEvent();
-    event.isRecording = isRecording;
-    event.isListening = isListening;
+    event.isRecording = c.recording;
+    event.isListening = c.listening;
     event.isAwake = isAwake;
     event.isSpeaking = isSpeaking;
     event.text = text;
@@ -409,7 +392,6 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   @Override
   public boolean publishListening(boolean listening) {
-    this.isListening = listening;
     return listening;
   }
 
@@ -482,15 +464,17 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    */
   @Override
   public void setWakeWord(String word) {
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+
     if (word == null || word.trim().length() == 0) {
       word = null;
-      wakeWord = null;
+      c.wakeWord = null;
       log.info("unsetting wake word");
       purgeTask("wakeWordIdleTimeoutSeconds");
       setAwake(true);
     } else {
       setAwake(false);
-      this.wakeWord = word.trim();
+      c.wakeWord = word.trim();
     }
     broadcastState();
   }
@@ -504,14 +488,18 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    * 
    */
   public void setWakeWordTimeout(Integer wakeWordTimeoutSeconds) {
-    wakeWordIdleTimeoutSeconds = wakeWordTimeoutSeconds;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    c.wakeWordIdleTimeoutSeconds = wakeWordTimeoutSeconds;
     broadcastState();
   }
+  
 
   @Override
   public void startListening() {
     log.debug("Start listening event seen.");
-    isListening = true;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    c.listening = true;
+    c.recording = true;
     broadcastState();
   }
 
@@ -531,7 +519,8 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    */
   @Override
   public void startRecording() {
-    isRecording = true;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    c.recording = true;
     broadcastState();
   }
 
@@ -543,7 +532,8 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   @Override
   public void stopListening() {
     log.debug("stopListening()");
-    isListening = false;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    c.listening = false;
     broadcastState();
   }
 
@@ -553,7 +543,8 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   @Override
   public void stopRecording() {
-    isRecording = false;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    c.recording = false;
     broadcastState();
   }
 
@@ -565,12 +556,14 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   public long setAfterSpeakingPause(long ms) {
-    afterSpeakingPauseMs = ms;
-    return afterSpeakingPauseMs;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    c.afterSpeakingPauseMs = ms;
+    return c.afterSpeakingPauseMs;
   }
 
   public long getAfterSpeakingPause() {
-    return afterSpeakingPauseMs;
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    return c.afterSpeakingPauseMs;
   }
 
   /**

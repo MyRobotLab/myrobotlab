@@ -1,0 +1,56 @@
+<table class="table-striped">
+    <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>The Arduino I2C bus is always 0 Raspi is usually 1</td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <form class="form-inline">
+                <attach options='options'/>
+                bus
+                <select class="form-control" ng-model="service.config.bus" ng-change="setBus()" ng-options="bus for bus in service.deviceBusList">
+                    <option>{{bus}}</option>
+                </select>
+                address
+                <select class="form-control" ng-model="service.config.address" ng-change="setAddress()" ng-options="address for address in service.deviceAddressList">
+                    <option>{{address}}</option>
+                </select>
+            </form>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <button class="btn btn-default" ng-show="!service.isAttached" ng-click="attach()">attach</button>
+            <button class="btn btn-default" ng-show="service.isAttached" ng-click="msg.detach(service.config.controller)">detach</button>
+        </td>
+        <td>
+        <!-- <button class="btn btn-default" ng-show="service.isAttached" ng-click="startReading()">start reading</button> -->
+        <!-- input type="text" class="form-control small-text-form" ng-model="service.config.rateHz" ng-change="setRate()"/ -->
+        </td>
+        <td></td>
+    </tr>
+    <!--
+    <tr>
+        <td>Output</td>
+        <td>Value</td>
+        <td>{{service.config.rateHz}} hz </td>
+    </tr>
+-->
+    <tr ng-show="service.isAttached" data-ng-repeat="(pinKey, pinDef) in service.pinMap">
+        <td>
+            {{pinDef.pin}} 
+            <button ng-show="!pinDef.state" ng-click="changed(pinDef,!pinDef.state)" size="btn-sm" class="btn btn-danger">0</button>
+            <button ng-show="pinDef.state" ng-click="changed(pinDef, !pinDef.state)" size="btn-sm" class="btn btn-success">1</button>
+        </td>
+        <td>
+            <span class="badge badge-secondary">{{pinDef.value}}</span>
+        </td>
+        <td>
+            <button ng-show="!pinDef.enabled" ng-click="enablePin(pinDef.pin, true)" size="btn-sm" class="btn btn-secondary">enable</button>
+            <button ng-show="pinDef.enabled" ng-click="enablePin(pinDef.pin, false)" size="btn-sm" class="btn btn-success">disable</button>
+        </td>
+    </tr>
+</table>

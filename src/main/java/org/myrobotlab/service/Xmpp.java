@@ -527,9 +527,4 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
     return Runtime.getInstance().isLocal(msg);
   }
 
-  @Override
-  public org.myrobotlab.framework.Message getDescribeMsg(String connId) {
-    return Runtime.getInstance().getDescribeMsg(connId);
-  }
-
 }

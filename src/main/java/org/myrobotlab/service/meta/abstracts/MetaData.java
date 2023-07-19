@@ -39,7 +39,10 @@ public class MetaData implements Serializable {
    */
   Boolean available = true; // why not ? :P
 
-  // final transient Plan plan;
+  /**
+   * if this service's dependencies are currently installed
+   */
+  public boolean installed = false;
 
   /**
    * Set of categories this service belongs to

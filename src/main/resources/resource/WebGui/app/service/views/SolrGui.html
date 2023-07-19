@@ -1,13 +1,58 @@
 <div>
-    HEY!!! - SolrGUI here!<br>
     <!-- for debugging  Data: {{service}} <br/>  -->
-    <form novalidate class="search-form">
-     QueryString: <input type="text" ng-model="querystring"  /><br/>
-     <input type="submit" ng-click="search(querystring)" value="Search" />
-    </form>
+    <div class="form-group">
+     <label>QueryString</label>
+     <input type="text" ng-model="queryString" class="form-control typeHereField ng-pristine ng-valid ng-empty ng-touched"/>
+     <input type="submit" ng-click="execNewSearch()" value="Search" />
+    </div>
+    <br/>
+    <span ng-repeat="filter in filters">{{filter}} <a ng-click="removeFilter(filter)">[x]</a> </span>
+    <br/>
     
-    Query String: {{querystring}} <br/>
-    Query Results: {{service.solrResults}} <br/>
+    <!-- Query String: {{queryString}} <br/>   -->
+    Displaying search results {{startOffset+1}} to {{endOffset}} of {{numFound}} in {{solrResults.responseHeader.QTime}} milliseconds.
+    
+     <a ng-click="prevPage()">Previous</a> <a ng-click="nextPage()">Next</a> 
+    <br/>
+    
+    <table class="facetAndSearchResults">
+    <tr VALIGN=TOP>
+    <td>
+      <table class="facetResults">
+        <tr ng-repeat="(field, buckets) in solrResults.facet_counts.facet_fields track by $index">
+          <td >
+            <table class="facetResult">
+              <tr>
+                <th>{{field}}</th>
+              </tr>
+              <tr>
+                <td><li ng-repeat="(bucket, count) in buckets"><a ng-click="filter(field, bucket)">{{bucket}}</a> ({{count}})</li></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+    <td>
+    <table class="table table-striped">
+      <tr ng-repeat="result in solrResults.response track by $index" class="ng-scope">
+        <td>
+          <br/>
+          <b>Doc: {{$index + startOffset}}</b>
+          <table class="searchResult" class>
+            <tr ng-repeat="(key, value) in result">
+              <td><strong>{{key}}</strong></td>
+              <td ng-if="key == 'bytes'"><img height="100" ng-src="{{value}}"/></td>
+              <td ng-if="key != 'bytes'">{{value}}</td> 
+            </tr>
+          </table>
+         <!--  <div class="chatBalloon{{chatContent.type}}"><div class="chatContent" ng-bind-html="chatContent.text"></div></div>  -->
+        </td>
+      </tr>
+    </table>
+    </td>
+    </tr>
+    </table>
     
     <div ng-switch on="size">
         <div class="animate-switch" ng-switch-when="small">Small view</div>

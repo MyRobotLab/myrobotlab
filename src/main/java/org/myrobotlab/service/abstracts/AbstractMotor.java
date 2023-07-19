@@ -338,10 +338,6 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     publisher.detachAnalogListener(this);
   }
 
-  public void attach(ButtonDefinition buttondef) {
-    subscribe(buttondef.getName(), "publishButton", getName(), "move");
-  }
-
   @Override
   public void attachMotorController(MotorController controller) throws Exception {
     if (controller == null) {

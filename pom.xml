@@ -352,6 +352,15 @@
   </dependency>
 <!-- Elasticsearch end -->
 
+<!-- Email begin -->
+  <dependency>
+    <groupId>javax.mail</groupId>
+    <artifactId>mail</artifactId>
+    <version>1.4.7</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Email end -->
+
 <!-- FiniteStateMachine begin -->
   <dependency>
     <groupId>com.github.pnavais</groupId>
@@ -383,6 +392,21 @@
 <!-- Duplicate entry for org.jsoup-jsoup-1.15.3 skipping -->
 <!-- GoogleSearch end -->
 
+<!-- GoogleTranslate begin -->
+  <dependency>
+    <groupId>com.google.cloud</groupId>
+    <artifactId>google-cloud-translate</artifactId>
+    <version>2.2.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.google.auth</groupId>
+    <artifactId>google-auth-library-credentials</artifactId>
+    <version>1.3.0</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- GoogleTranslate end -->
+
 <!-- HtmlFilter begin -->
   <dependency>
     <groupId>org.jsoup</groupId>
@@ -403,12 +427,7 @@
 <!-- HtmlParser end -->
 
 <!-- ImapEmailConnector begin -->
-  <dependency>
-    <groupId>javax.mail</groupId>
-    <artifactId>mail</artifactId>
-    <version>1.4.7</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for javax.mail-mail-1.4.7 skipping -->
 <!-- ImapEmailConnector end -->
 
 <!-- InMoov2 begin -->
@@ -466,6 +485,12 @@
   <dependency>
     <groupId>org.jmonkeyengine</groupId>
     <artifactId>jme3-bullet-native</artifactId>
+    <version>3.3.2-stable</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.jmonkeyengine</groupId>
+    <artifactId>jme3-plugins</artifactId>
     <version>3.3.2-stable</version>
     <scope>provided</scope>
   </dependency>
@@ -889,6 +914,10 @@
           <artifactId>opennlp-tools</artifactId>
         </exclusion>
         <exclusion>
+          <groupId>org.apache.opennlp</groupId>
+          <artifactId>opennlp-maxent</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
         </exclusion>
@@ -897,6 +926,12 @@
   <dependency>
     <groupId>org.apache.logging.log4j</groupId>
     <artifactId>log4j-1.2-api</artifactId>
+    <version>2.12.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-api</artifactId>
     <version>2.12.1</version>
     <scope>provided</scope>
   </dependency>
@@ -1157,7 +1192,7 @@
   <dependency>
     <groupId>program-ab</groupId>
     <artifactId>program-ab-kw</artifactId>
-    <version>0.0.8.9</version>
+    <version>0.0.8.10</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1180,14 +1215,14 @@
 <!-- Duplicate entry for commons-io-commons-io-2.7 skipping -->
   <dependency>
     <groupId>org.apache.lucene</groupId>
-    <artifactId>lucene-analyzers-common</artifactId>
-    <version>8.11.2</version>
+    <artifactId>lucene-analysis-common</artifactId>
+    <version>9.4.2</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.apache.lucene</groupId>
-    <artifactId>lucene-analyzers-kuromoji</artifactId>
-    <version>8.11.2</version>
+    <artifactId>lucene-analysis-kuromoji</artifactId>
+    <version>9.4.2</version>
     <scope>provided</scope>
   </dependency>
 <!-- ProgramAB end -->
@@ -1197,6 +1232,18 @@
     <groupId>net.sf.py4j</groupId>
     <artifactId>py4j</artifactId>
     <version>0.10.9.7</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.bytedeco</groupId>
+    <artifactId>cpython-platform</artifactId>
+    <version>3.11.3-1.5.9</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.bytedeco</groupId>
+    <artifactId>cpython</artifactId>
+    <version>3.11.3-1.5.9</version>
     <scope>provided</scope>
   </dependency>
 <!-- Py4j end -->
@@ -1253,6 +1300,11 @@
     <groupId>com.google.code.gson</groupId>
     <artifactId>gson</artifactId>
     <version>2.8.5</version>
+  </dependency>
+  <dependency>
+    <groupId>net.bytebuddy</groupId>
+    <artifactId>byte-buddy</artifactId>
+    <version>1.12.16</version>
   </dependency>
   <dependency>
     <groupId>com.fasterxml.jackson.core</groupId>
@@ -1347,15 +1399,19 @@
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-core</artifactId>
-    <version>8.11.2</version>
+    <version>9.4.2</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-core</artifactId>
-    <version>8.11.2</version>
+    <version>9.2.0</version>
     <scope>provided</scope>
       <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
         <exclusion>
           <groupId>log4j</groupId>
           <artifactId>*</artifactId>
@@ -1377,9 +1433,13 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-test-framework</artifactId>
-    <version>8.11.2</version>
+    <version>9.2.0</version>
     <scope>provided</scope>
       <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
         <exclusion>
           <groupId>log4j</groupId>
           <artifactId>*</artifactId>
@@ -1401,9 +1461,21 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-solrj</artifactId>
-    <version>8.11.2</version>
+    <version>9.2.0</version>
     <scope>provided</scope>
       <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
         <exclusion>
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>*</artifactId>
@@ -1443,29 +1515,6 @@
     <scope>provided</scope>
   </dependency>
 <!-- Sphinx end -->
-
-<!-- SwingGui begin -->
-  <dependency>
-    <groupId>com.fifesoft</groupId>
-    <artifactId>rsyntaxtextarea</artifactId>
-    <version>2.0.5.1</version>
-  </dependency>
-  <dependency>
-    <groupId>com.fifesoft</groupId>
-    <artifactId>autocomplete</artifactId>
-    <version>2.0.5.1</version>
-  </dependency>
-  <dependency>
-    <groupId>com.jidesoft</groupId>
-    <artifactId>jide-oss</artifactId>
-    <version>3.6.18</version>
-  </dependency>
-  <dependency>
-    <groupId>com.mxgraph</groupId>
-    <artifactId>jgraphx</artifactId>
-    <version>1.12.0.2</version>
-  </dependency>
-<!-- SwingGui end -->
 
 <!-- Tensorflow begin -->
   <dependency>
@@ -1697,6 +1746,10 @@
           <exclude>**/*.java</exclude>
         </excludes>
       </testResource>
+      <testResource>
+        <directory>src/main/resources</directory>
+        <targetPath>${project.basedir}</targetPath>
+      </testResource>
     </testResources>
 
     <!-- define the plugin -->
@@ -1926,7 +1979,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <version>2.22.2</version>
         <configuration>
-          <argLine>-Djava.library.path=libraries/native -Djna.library.path=libraries/native ${argLine}</argLine>
+          <argLine>-Djava.library.path=libraries/native -Djna.library.path=libraries/native</argLine>
           <includes>
             <include>**/*Test.java</include>
           </includes>
@@ -1934,12 +1987,6 @@
             <exclude>**/integration/*</exclude>
           </excludes>
              <systemPropertyVariables>
-                  <!-- 
-                  <propertyName>java.library.path</propertyName>
-                  <buildDirectory>libraries/native</buildDirectory>
-                  <propertyName>jna.library.path</propertyName>
-                  <buildDirectory>libraries/native</buildDirectory>
-                   -->
               </systemPropertyVariables>
         </configuration>
       </plugin>

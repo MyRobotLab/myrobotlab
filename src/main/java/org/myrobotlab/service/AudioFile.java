@@ -54,7 +54,7 @@ import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.AudioControl;
 import org.myrobotlab.service.interfaces.AudioPublisher;
 import org.slf4j.Logger;
-
+import java.util.Random;
 /**
  * 
  * AudioFile - This service can be used to play an audio file such as an mp3.
@@ -560,6 +560,7 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
   }
 
   public double publishPeak(double peak) {
+    log.info("publishPeak {}", peak);
     return peak;
   }
   
@@ -604,6 +605,28 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
   public void onPlayAudioFile(String file) {
     play(file);
   }
+  
+  @Override
+  public void onPlayRandomAudioFile(String dir) {
+    File test = new File(dir);
+    if (!test.exists() || !test.isDirectory()) {
+      error("%s is not a valid dir");
+      return;
+    }
+    
+    File[] files = test.listFiles();
+    
+    if (files.length == 0) {
+      error("%s contains no files", dir);
+      return;
+    }
+    
+    Random rand = new Random();
+    File randomFile = files[rand.nextInt(files.length-1)];
+    play(randomFile.getAbsolutePath());
+    
+  }
+
 
   public double getPeakMultiplier() {
     return ((AudioFileConfig)config).peakMultiplier;

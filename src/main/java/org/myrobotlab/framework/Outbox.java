@@ -99,7 +99,7 @@ public class Outbox implements Runnable, Serializable {
     Set<String> unique = new TreeSet<>();
     for (List<MRLListener> subcribers : notifyList.values()) {
       for (MRLListener listener : subcribers) {
-        if (localOnly && listener.callbackName.contains("@")) {
+        if (localOnly && !CodecUtils.isLocal(listener.callbackName)) {
           continue;
         }
         if (publishingPoint == null) {
@@ -337,7 +337,8 @@ public class Outbox implements Runnable, Serializable {
    *          the name of the listener to detach
    * 
    */
-  synchronized public void detach(String name) {
+  synchronized public void detach(String service) {
+    String name = CodecUtils.getFullName(service);
     for (String topic : notifyList.keySet()) {
       List<MRLListener> subscribers = notifyList.get(topic);
       ArrayList<MRLListener> smallerList = new ArrayList<>();

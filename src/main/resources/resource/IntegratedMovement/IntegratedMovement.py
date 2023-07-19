@@ -24,7 +24,7 @@ vright.connect(rightPort)
 
 i01 = runtime.start("i01","InMoov2")
 
-i01.startAll(leftPort,rightPort)
+# i01.startAll(leftPort,rightPort) # no longer a method
 
 #configure servo
 

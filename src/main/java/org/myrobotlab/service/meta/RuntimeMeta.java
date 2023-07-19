@@ -26,6 +26,9 @@ public class RuntimeMeta extends MetaData {
     // apache 2.0 license
     addDependency("com.google.code.gson", "gson", "2.8.5");
 
+    // for proxy generation
+    addDependency("net.bytebuddy", "byte-buddy", "1.12.16");
+
     addDependency("com.fasterxml.jackson.core", "jackson-core", "2.14.0");
     addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.14.0");
     addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.14.0");

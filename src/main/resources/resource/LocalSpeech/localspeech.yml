@@ -7,6 +7,7 @@ peers:
     autoStart: true
     name: localspeech.audioFile
     type: AudioFile
+replaceChars: null
 speechRecognizers: null
 speechType: null
 substitutions: null

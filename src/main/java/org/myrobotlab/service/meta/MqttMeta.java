@@ -23,7 +23,7 @@ public class MqttMeta extends MetaData {
      * name="org.eclipse.paho.client.mqttv3" rev="1.2.0"/>
      */
     addDependency("org.eclipse.paho", "org.eclipse.paho.client.mqttv3", "1.2.1");
-    setCloudService(true);
+    setCloudService(false);
 
   }
 

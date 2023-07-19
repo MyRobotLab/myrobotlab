@@ -807,7 +807,7 @@ public class FileIO {
     List<File> fileList = getFileList("InMoov", true);
     log.info("found {} files", fileList.size());
 
-    FileIO.extract("/C:/mrl.test/current/myrobotlab.jar", "/resource/framework/serviceData.json", "C:\\mrl.test\\current\\.myrobotlab\\serviceData.json");
+    FileIO.extract("/C:/mrl.test/current/myrobotlab.jar", "/resource/framework/serviceData.json", "C:\\mrl.test\\libraries\\serviceData.json");
 
     copy("dir1", "dir2");
 
@@ -1574,6 +1574,37 @@ public class FileIO {
     }
     return null;
   }
+  
+  /**
+   * validate a directory exists
+   * @param dir
+   * @return
+   */
+  public static boolean checkDir(String dir) {
+    try {
+      File check = new File(dir);
+      return check.exists() && check.isDirectory();
+    } catch (Exception e) {
+      log.error("checkDir threw", e);
+    }
+    return false;
+  }
+  
+  /**
+   * validate a file exists
+   * @param filename
+   * @return
+   */
+  public static boolean checkFile(String filename) {
+    try {
+      File check = new File(filename);
+      return check.exists() && !check.isDirectory();
+    } catch (Exception e) {
+      log.error("checkDir threw", e);
+    }
+    return false;
+  }
+
 
   /**
    * flips all \ to / or / to \ depending on OS
@@ -1593,5 +1624,6 @@ public class FileIO {
       return dirPath.replace("\\", "/");
     }
   }
+
 
 }

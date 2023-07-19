@@ -32,12 +32,16 @@ import org.slf4j.Logger;
  * .myrobotlab directory.
  * 
  * @author GroG
+ * 
+ * FIXME - this is really just something that manages MetaData ... should make it the same both for clarity and
+ * transparency 
  *
  */
-@Deprecated /* at some point this should all move over to MetaData */
 public class ServiceData implements Serializable {
 
   static private ServiceData localInstance = null;
+  
+  static final public String LIBRARIES = "libraries";
 
   transient public final static Logger log = LoggerFactory.getLogger(ServiceData.class);
 
@@ -53,7 +57,7 @@ public class ServiceData implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  static private String serviceDataCacheFileName = FileIO.getCfgDir() + File.separator + "serviceData.json";
+  static private String serviceDataCacheFileName = LIBRARIES + File.separator + "serviceData.json";
 
   /**
    * clears all overrides. All services shall be using the standard hard co
@@ -166,11 +170,11 @@ public class ServiceData implements Serializable {
       // step 3 - if 1 & 2 fail - then we can 'assume' were in develop
       // time (we'll isJar check and error if not)
       // - generate it and put it in
-      // getRoot()/resource/framework/serviceData.json
+      // libraries/serviceData.json
 
       // if we're not in a jar we are in an IDE.
 
-      // First check the .myrobotlab/serviceData.json dir.
+      // First check the libraries/serviceData.json dir.
       File jsonFile = new File(serviceDataCacheFileName);
       if (jsonFile.exists()) {
         // load it and return!
@@ -393,7 +397,8 @@ public class ServiceData implements Serializable {
 
   public boolean save(String filename) {
     try {
-
+      File dirs = new File(filename).getParentFile();
+      dirs.mkdirs();
       FileOutputStream fos = new FileOutputStream(filename);
       String json = CodecUtils.toJson(this);
       fos.write(json.getBytes());
@@ -427,9 +432,8 @@ public class ServiceData implements Serializable {
       File removeExisting = new File(filename);
       removeExisting.delete();
 
-      // remove .myrobotlab/serviceData.json
-      // 20190630 - GroG changed uses FileIO.getCfgDir()
-      removeExisting = new File(FileIO.getCfgDir() + File.separatorChar + "serviceData.json");
+      // remove libraries/serviceData.json
+      removeExisting = new File("libraries" + File.separatorChar + "serviceData.json");
       removeExisting.delete();
 
       // THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - BEGIN ----

@@ -15,7 +15,6 @@ import java.util.zip.ZipFile;
 
 // Do not pull in deps to this class !
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
