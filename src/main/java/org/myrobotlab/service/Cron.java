@@ -16,6 +16,11 @@ import it.sauronsoftware.cron4j.Scheduler;
 
 /**
  * Cron - This is a cron based service that can execute a "task".
+ * It does not need an operating system in order to run.  It is a
+ * pure java implementation of a cron service.  It accepts cron 
+ * patterns and will execute a task based on the pattern.  The
+ * task is a message that is sent to a service.  The message
+ * can be any message that the service accepts. 
  * 
  */
 public class Cron extends Service {
