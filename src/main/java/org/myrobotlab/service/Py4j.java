@@ -1,21 +1,8 @@
 package org.myrobotlab.service;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.bytedeco.javacpp.Loader;
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.ext.python.PythonUtils;
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.StreamGobbler;
@@ -26,10 +13,15 @@ import org.myrobotlab.service.config.Py4jConfig;
 import org.myrobotlab.service.data.Script;
 import org.myrobotlab.service.interfaces.Executor;
 import org.slf4j.Logger;
-
 import py4j.GatewayServer;
 import py4j.GatewayServerListener;
 import py4j.Py4JServerConnection;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
 
 /**
  * 
@@ -110,6 +102,7 @@ public class Py4j extends Service implements GatewayServerListener {
       try {
         exitCode = process.waitFor();
       } catch (InterruptedException e) {
+        warn("Waiting for process was interrupted. Exit code cannot be known");
       }
       warn("process %s terminated with exit code %d", process.toString(), exitCode);
     }
@@ -141,7 +134,7 @@ public class Py4j extends Service implements GatewayServerListener {
    * executed or saved to the file system, or updatd in memory which the js
    * client does
    */
-  protected HashMap<String, Script> openedScripts = new HashMap<String, Script>();
+  protected HashMap<String, Script> openedScripts = new HashMap<>();
 
   /**
    * client process and connectivity reference
@@ -423,45 +416,11 @@ public class Py4j extends Service implements GatewayServerListener {
       // Script requires full name as first command line argument
       String[] pythonArgs = {getFullName()};
 
-      // Build the command to start the Python process
-      ProcessBuilder processBuilder;
-      if (((Py4jConfig) config).useBundledPython) {
-        String venv = getDataDir() + fs + "venv";
-        pythonCommand = (Platform.getLocalInstance().isWindows()) ? venv + fs + "Scripts" + fs + "python.exe" : venv + fs + "bin" + fs + "python";
-        if (!FileIO.checkDir(venv)) {
-          // We don't have an initialized virtual environment, so lets make one
-          // and install our required packages
-          String python = Loader.load(org.bytedeco.cpython.python.class);
-          String venvLib = new File(python).getParent() + fs + "lib" + fs + "venv" + fs + "scripts" + fs + "nt";
-          if (Platform.getLocalInstance().isWindows()) {
-            // Super hacky workaround, venv works differently on Windows and requires these two
-            // files, but they are not distributed in bare-bones Python or in any pip packages.
-            // So we copy them where it expects, and it seems to work now
-            FileIO.copy(getResourceDir() + fs + "python.exe", venvLib + fs + "python.exe");
-            FileIO.copy(getResourceDir() + fs + "pythonw.exe", venvLib + fs + "pythonw.exe");
-          }
-          ProcessBuilder installProcess = new ProcessBuilder(python, "-m", "venv", venv);
-          int ret = installProcess.inheritIO().start().waitFor();
-          if (ret != 0) {
-            error("Could not create virtual environment, subprocess returned {}. If on Windows, make sure there is a python.exe file in {}", ret, venvLib);
-            return;
-          }
 
-          installProcess = new ProcessBuilder(pythonCommand, "-m", "pip", "install", "py4j");
-          ret = installProcess.inheritIO().start().waitFor();
-          if (ret != 0) {
-            error("Could not install package, subprocess returned " + ret);
-            return;
-          }
+      String venv = getDataDir() + fs + "venv";
+      pythonCommand = PythonUtils.setupVenv(venv, ((Py4jConfig) config).useBundledPython, List.of("py4j"));
 
-        }
-
-        // Virtual environment should exist, so lets use that python
-      } else {
-        // Just use the system python
-        pythonCommand = "python";
-      }
-      processBuilder = new ProcessBuilder(pythonCommand, pythonScript);
+      ProcessBuilder processBuilder = new ProcessBuilder(pythonCommand, pythonScript);
       processBuilder.redirectErrorStream(true);
       processBuilder.command().addAll(List.of(pythonArgs));
 

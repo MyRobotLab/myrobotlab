@@ -20,47 +20,17 @@ import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.Random;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+import boofcv.alg.fiducial.qrcode.PackedBits8;
 import org.myrobotlab.codec.ClassUtil;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.CodecUtils.ApiDescription;
 import org.myrobotlab.codec.ForeignProcessUtils;
-import org.myrobotlab.framework.CmdConfig;
-import org.myrobotlab.framework.CmdOptions;
-import org.myrobotlab.framework.DescribeQuery;
-import org.myrobotlab.framework.DescribeResults;
-import org.myrobotlab.framework.Instantiator;
-import org.myrobotlab.framework.MRLListener;
-import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.MethodCache;
-import org.myrobotlab.framework.MethodEntry;
-import org.myrobotlab.framework.NameGenerator;
-import org.myrobotlab.framework.Peer;
-import org.myrobotlab.framework.Plan;
-import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ProxyFactory;
-import org.myrobotlab.framework.Registration;
-import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceReservation;
-import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.*;
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -87,11 +57,7 @@ import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.ServiceConfig.Listener;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.ServiceTypeNameResults;
-import org.myrobotlab.service.interfaces.ConnectionManager;
-import org.myrobotlab.service.interfaces.Gateway;
-import org.myrobotlab.service.interfaces.LocaleProvider;
-import org.myrobotlab.service.interfaces.RemoteMessageHandler;
-import org.myrobotlab.service.interfaces.ServiceLifeCyclePublisher;
+import org.myrobotlab.service.interfaces.*;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
@@ -132,6 +98,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * each must have a unique name
    */
   static private final Map<String, ServiceInterface> registry = new TreeMap<>();
+
+  /**
+   * List of all services capable of running other services,
+   * even those outside of Java-land.
+   */
+  private static final List<ServiceRunner> serviceRunners = new CopyOnWriteArrayList<>();
 
   /**
    * A plan is a request to runtime to change the system. Typically its to ask
@@ -690,7 +662,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
 
     String fullTypeName;
-    if (type.contains(".")) {
+    if (ForeignProcessUtils.isForeignTypeKey(type) || type.contains(".")) {
       fullTypeName = type;
     } else {
       fullTypeName = String.format("org.myrobotlab.service.%s", type);
@@ -719,6 +691,32 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     if (sw != null) {
       log.info("service {} already exists", name);
       return sw;
+    }
+
+    if (ForeignProcessUtils.isForeignTypeKey(type)) {
+      String languageKey = ForeignProcessUtils.getLanguageId(type);
+      // Needed cause of lambda requiring effectively-final variables
+      String finalType = type;
+      List<ServiceRunner> possibleRunners = serviceRunners.stream()
+              .filter(runner -> runner.getSupportedLanguageKeys().contains(languageKey))
+              .filter(runner -> runner.getAvailableServiceTypes().contains(finalType))
+              .collect(Collectors.toList());
+      if (possibleRunners.isEmpty()) {
+        log.error("Cannot find a service runner to start service with type {}", type);
+        return null;
+      }
+
+      if (inId == null) {
+        return possibleRunners.get(0).createService(name, type, null);
+      } else {
+        Optional<ServiceRunner> maybeRunner = possibleRunners.stream().filter(runner -> inId.equals(runner.getId())).findFirst();
+        if (maybeRunner.isEmpty()) {
+          log.error("Cannot find compatible service runner with ID {}", inId);
+          return null;
+        }
+        return maybeRunner.get().createService(name, type, inId);
+
+      }
     }
 
     try {
@@ -907,6 +905,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           Security.getInstance();
           runtime.getRepo().addStatusPublisher(runtime);
           FileIO.extractResources();
+          FileIO.extractPythonServices();
           // protected services we don't want to remove when releasing a config
           runtime.startingServices.add("runtime");
           runtime.startingServices.add("security");
@@ -1788,6 +1787,48 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       registry.put(fullname, registration.service);
+      if (registration.interfaces.contains(ServiceRunner.class.getName())) {
+        if (Runtime.class.isAssignableFrom(registration.service.getClass())) {
+
+          // Might not be needed, I'm just not sure how calling these methods
+          // on an emulated Runtime like mrlpy's would work
+          serviceRunners.add(new ServiceRunner() {
+            @Override
+            public String getName() {
+              return null;
+            }
+
+            @Override
+            public String getId() {
+              return null;
+            }
+
+            @Override
+            public List<String> getSupportedLanguageKeys() {
+              try {
+                return (List<String>) Runtime.get().sendBlocking(registration.getFullName(), "getSupportedLanguageKeys");
+              } catch (TimeoutException | InterruptedException e) {
+                throw new RuntimeException(e);
+              }
+            }
+
+            @Override
+            public List<String> getAvailableServiceTypes() {
+              try {
+                return (List<String>) Runtime.get().sendBlocking(registration.getFullName(), "getAvailableServiceTypes");
+              } catch (TimeoutException | InterruptedException e) {
+                throw new RuntimeException(e);
+              }
+            }
+
+            @Override
+            public ServiceInterface createService(String name, String type, String inId) {
+              return null;
+            }
+          });
+        }
+        serviceRunners.add((ServiceRunner) registration.service);
+      }
 
       if (runtime != null) {
 
