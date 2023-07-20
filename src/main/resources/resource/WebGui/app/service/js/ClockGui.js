@@ -20,7 +20,8 @@ angular.module('mrlapp.service.ClockGui', []).controller('ClockGuiCtrl', ['$scop
             $scope.$apply()
             break
         case 'onTime':
-            $scope.onTime = data
+            const date = new Date(data);
+            $scope.onTime = date.toLocaleString(); 
             $scope.$apply()
             break
         case 'onEpoch':

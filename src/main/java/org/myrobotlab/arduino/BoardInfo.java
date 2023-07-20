@@ -16,17 +16,38 @@ public class BoardInfo implements Serializable {
   private static final long serialVersionUID = 1L;
   transient public final static Logger log = LoggerFactory.getLogger(BoardInfo.class);
 
-  Integer version;
-  Integer boardTypeId;
-  Integer microsPerLoop;
-  Integer sram;
-  Integer activePins;
-  DeviceSummary[] deviceSummary; // deviceList with types
+  /**
+   * version of firmware
+   */
+  public Integer version;
+  
+  /**
+   * id of board type - FIXME change to string
+   */
+  public Integer boardTypeId;
+  
+  /**
+   * Number of microseconds arduino uses to pass through a
+   * control loop in MrlComm - very Arduino/MrlComm specific
+   * FIXME - make generalized BoardType that can report useful information
+   * from any type of board with pins
+   */
+  public Integer microsPerLoop;
+  
+  /**
+   * 
+   */
+  public Integer sram;
+  public Integer activePins;
+  public DeviceSummary[] deviceSummary; // deviceList with types
 
-  String boardTypeName;
+  public String boardTypeName;
 
-  long heartbeatMs;
-  long receiveTs;
+  public long heartbeatMs;
+  public long receiveTs;
+  
+  public BoardInfo() {    
+  }
 
   public BoardInfo(Integer version, Integer boardTypeId, String boardTypeName, Integer microsPerLoop, Integer sram, Integer activePins, DeviceSummary[] deviceSummary,
       long boardInfoRequestTs) {

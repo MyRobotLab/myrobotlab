@@ -1495,6 +1495,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     info("%s connected to %s", getName(), portName);
     // chained...
     invoke("publishConnect", portName);
+    
+    broadcastState();
   }
 
   public void onCustomMsg(Integer ax, Integer ay, Integer az) {
