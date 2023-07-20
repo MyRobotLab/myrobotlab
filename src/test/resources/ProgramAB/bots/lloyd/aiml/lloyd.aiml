@@ -145,7 +145,7 @@
 <template>He's a character from Guitar Hero!</template>
 </category>
 <category><pattern>SHOW ME INMOOV</pattern>
-<template>Search of pannous returned this: <sraix default="PICFAILED" hint="pic" service="pannous">SHOW ME <star/></sraix></template>
+<template>Search of pannous returned this: <sraix default="PICFAILED" hint="pic">SHOW ME <star/></sraix></template>
 </category>
 <category><pattern>MRLSRAIX</pattern>
 <template><sraix>Claude Shannon</sraix></template>

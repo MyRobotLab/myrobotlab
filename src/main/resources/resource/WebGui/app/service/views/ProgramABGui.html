@@ -19,11 +19,11 @@
                         <button class="btn btn-default" ng-click="msg.reload()" title="Reload Bot">
                             <span class="glyphicon glyphicon-refresh"></span>
                         </button>
-                        <select class="btn btn-default dropdown-toggle" ng-model="service.currentBotName" ng-change="msg.setCurrentBotName(service.currentBotName)" ng-options="key as key for (key, value) in service.bots"></select>
+                        <select class="btn btn-default dropdown-toggle" ng-model="service.config.currentBotName" ng-change="msg.setCurrentBotName(service.config.currentBotName)" ng-options="key as key for (key, value) in service.bots"></select>
                         <div>
                 </td>
                 <td>
-                    <input class="form-control text-capitalize userField" tabindex="1" type="text" ng-model="service.currentUserName" placeholder="{{service.currentUserName}}" ng-blur="msg.setCurrentUserName(service.currentUserName)"/>
+                    <input class="form-control userField" tabindex="1" type="text" ng-model="service.config.currentUserName" placeholder="{{service.config.currentUserName}}" ng-blur="msg.setCurrentUserName(service.config.currentUserName)"/>
                 </td>
                 <td rowspan="3">
                     <span ng-show="getCurrentSession() != null">
@@ -48,8 +48,9 @@
             </tr>
             <tr>
                 <td>
+                        <!--
                     <span class="glyphicon glyphicon-folder-open"></span>
-                        {{service.config.botDir}}<br/>
+                        {{getBotPath()}}<br/> -->
                         <b>topic</b> {{predicates['topic']}}
                 
                 </td>
@@ -78,7 +79,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="2">{{service.config.botDir}}</td>
+                                <td colspan="2">{{getBotPath()}}</td>
                             </tr>
                             <tr>
                                 <td colspan="2">

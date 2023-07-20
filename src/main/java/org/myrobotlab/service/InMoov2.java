@@ -1676,11 +1676,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
         }
       }
       chatBot.setPredicate("parameterHowDoYouDo", "");
-      try {
-        chatBot.savePredicates();
-      } catch (IOException e) {
-        log.error("saving predicates threw", e);
-      }
+      chatBot.savePredicates();
       htmlFilter = (HtmlFilter) startPeer("htmlFilter");// Runtime.start("htmlFilter",
       // "HtmlFilter");
       chatBot.attachTextListener(htmlFilter);
