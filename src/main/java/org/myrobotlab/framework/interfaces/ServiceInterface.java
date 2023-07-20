@@ -189,8 +189,6 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    */
   void setOrder(int creationCount);
 
-  String getId();
-
   String getFullName();
 
   void loadLocalizations();
