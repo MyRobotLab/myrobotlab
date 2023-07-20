@@ -393,6 +393,23 @@ public class FileIO {
   }
 
   /**
+   * extractPythonServices extracts the entire python_services
+   * resource directory to the root directory, needed for all
+   * services written in Python.
+   *
+   * @return true if successful, false otherwise.
+   */
+  static public boolean extractPythonServices() {
+    try {
+      extract(getRoot(), "python_services", null, false);
+      return true;
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+    return false;
+  }
+
+  /**
    * get configuration directory
    * 
    * @return string
