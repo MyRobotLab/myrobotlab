@@ -134,7 +134,7 @@ registry:
 - runtime
 - security
 - webgui
-- raspi
+- python
 resource: src/main/resources/resource
 type: Runtime
 virtual: false
