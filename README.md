@@ -118,3 +118,20 @@ resources:
 - ./src/main/resources/resource/InMoov2/peers/WebGui/app
 type: WebGui
 ```
+```yml
+!!org.myrobotlab.service.config.RuntimeConfig
+enableCli: true
+id: null
+listeners:
+locale: null
+logLevel: info
+peers: null
+registry:
+- runtime
+- security
+- webgui
+- python
+resource: src/main/resources/resource
+type: Runtime
+virtual: false
+```
