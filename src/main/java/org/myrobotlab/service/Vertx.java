@@ -36,6 +36,9 @@ public class Vertx extends Service {
     super(n, id);
   }
 
+  /**
+   * deploys a http and websocket verticle on a secure TLS channel with self signed certificate
+   */
   public void start() {
     log.info("starting driver");
 
@@ -62,7 +65,23 @@ public class Vertx extends Service {
     vertx.deployVerticle(new ApiVerticle(this));
 
   }
+  
+  @Override
+  public void startService() {
+    super.startService();
+    start();
+  }
+  
+  @Override
+  public void stopService() {
+    super.stopService();
+    stop();
+  }
 
+
+  /**
+   * 
+   */
   public void stop() {
     log.info("stopping driver");
     Set<String> ids = vertx.deploymentIDs();

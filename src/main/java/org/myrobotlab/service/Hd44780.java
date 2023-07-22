@@ -13,6 +13,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.Hd44780Config;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.I2CControl;
+import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
 
 /**
@@ -24,7 +25,7 @@ import org.slf4j.Logger;
  * @author Moz4r modified by Ray Edgley.
  * 
  */
-public class Hd44780 extends Service {
+public class Hd44780 extends Service implements TextListener {
 
   public final static Logger log = LoggerFactory.getLogger(Hd44780.class);
 
@@ -204,6 +205,16 @@ public class Hd44780 extends Service {
         error("line %d is invalid, valid line values are 0 - 3");
     }
     lcdWriteDataString(string);
+  }
+  
+  /**
+   * display the text
+   * FIXME - should by default scroll if text is larger than the width of the hd
+   * @param text
+   */
+  public void display(String text) {
+    // FIXME - lame, but going to default this way
+    display(text, 0);
   }
 
   /**
@@ -710,4 +721,11 @@ public class Hd44780 extends Service {
     }
     return c;
   }
+  
+  
+  @Override
+  public void onText(String text) throws Exception {
+    display(text);
+  }
+  
 }
