@@ -56,10 +56,12 @@ public class WebXR extends Service {
         
     invoke("publishJointAngles", map);
     
+    // TODO - publishQuaternion
+    // invoke("publishQuaternion", map);
+    
     return pose;
   }
   
-  // TODO publishQuaternion
 
   public Map<String, Double> publishJointAngles(Map<String, Double> map){    
     return map;    
