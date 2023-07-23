@@ -30,14 +30,12 @@ import org.myrobotlab.codec.ClassUtil;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.CodecUtils.ApiDescription;
 import org.myrobotlab.codec.ForeignProcessUtils;
+import org.myrobotlab.ext.python.PythonUtils;
 import org.myrobotlab.framework.*;
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.framework.repo.IvyWrapper;
-import org.myrobotlab.framework.repo.Repo;
-import org.myrobotlab.framework.repo.ServiceData;
-import org.myrobotlab.framework.repo.ServiceDependency;
+import org.myrobotlab.framework.repo.*;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.AppenderType;
 import org.myrobotlab.logging.LoggerFactory;
@@ -214,7 +212,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   transient private IvyWrapper repo = null; // was transient abstract Repo
 
-  transient private ServiceData serviceData = ServiceData.getLocalInstance();
+  final transient private ServiceData serviceData = ServiceData.getLocalInstance();
 
   /**
    * command line options
@@ -284,6 +282,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * releasing config
    */
   protected Set<String> startingServices = new HashSet<>();
+
+  private static final String PYTHON_VENV_PATH ="python_services/venv";
+
+  private String pythonCommand;
 
   /**
    * Wraps {@link java.lang.Runtime#availableProcessors()}.
@@ -906,6 +908,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           runtime.getRepo().addStatusPublisher(runtime);
           FileIO.extractResources();
           FileIO.extractPythonServices();
+
+          runtime.pythonCommand = PythonUtils.setupVenv(PYTHON_VENV_PATH, true, List.of("mrlpy"));
+
           // protected services we don't want to remove when releasing a config
           runtime.startingServices.add("runtime");
           runtime.startingServices.add("security");
@@ -1515,7 +1520,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * License - should be appropriately accepted or rejected by user
    *
    * @param serviceType
-   *          the service tyype to install
+   *          the service type to install
    * @param blocking
    *          if this should block until done.
    *
@@ -1533,8 +1538,24 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         try {
           if (serviceType == null) {
             r.getRepo().install();
+            int returnCode = PythonUtils.runPythonScript(
+                    r.pythonCommand,
+                    new File("python_services"),
+                    "python_services" + fs + "setup.py",
+                    "install");
+            if (returnCode != 0) {
+              r.error("Cannot install Python services, subprocess returned " + returnCode);
+            }
           } else {
             r.getRepo().install(serviceType);
+            int returnCode = PythonUtils.runPythonScript(
+                    r.pythonCommand,
+                    new File("python_services"),
+                    "python_services" + fs + "setup.py",
+                    "install", serviceType);
+            if (returnCode != 0) {
+              r.error("Cannot install Python services, subprocess returned " + returnCode);
+            }
           }
         } catch (Exception e) {
           r.error(e);
@@ -1792,40 +1813,40 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
           // Might not be needed, I'm just not sure how calling these methods
           // on an emulated Runtime like mrlpy's would work
-          serviceRunners.add(new ServiceRunner() {
-            @Override
-            public String getName() {
-              return null;
-            }
-
-            @Override
-            public String getId() {
-              return null;
-            }
-
-            @Override
-            public List<String> getSupportedLanguageKeys() {
-              try {
-                return (List<String>) Runtime.get().sendBlocking(registration.getFullName(), "getSupportedLanguageKeys");
-              } catch (TimeoutException | InterruptedException e) {
-                throw new RuntimeException(e);
-              }
-            }
-
-            @Override
-            public List<String> getAvailableServiceTypes() {
-              try {
-                return (List<String>) Runtime.get().sendBlocking(registration.getFullName(), "getAvailableServiceTypes");
-              } catch (TimeoutException | InterruptedException e) {
-                throw new RuntimeException(e);
-              }
-            }
-
-            @Override
-            public ServiceInterface createService(String name, String type, String inId) {
-              return null;
-            }
-          });
+//          serviceRunners.add(new ServiceRunner() {
+//            @Override
+//            public String getName() {
+//              return null;
+//            }
+//
+//            @Override
+//            public String getId() {
+//              return null;
+//            }
+//
+//            @Override
+//            public List<String> getSupportedLanguageKeys() {
+//              try {
+//                return (List<String>) Runtime.get().sendBlocking(registration.getFullName(), "getSupportedLanguageKeys");
+//              } catch (TimeoutException | InterruptedException e) {
+//                throw new RuntimeException(e);
+//              }
+//            }
+//
+//            @Override
+//            public List<String> getAvailableServiceTypes() {
+//              try {
+//                return (List<String>) Runtime.get().sendBlocking(registration.getFullName(), "getAvailableServiceTypes");
+//              } catch (TimeoutException | InterruptedException e) {
+//                throw new RuntimeException(e);
+//              }
+//            }
+//
+//            @Override
+//            public ServiceInterface createService(String name, String type, String inId) {
+//              return null;
+//            }
+//          });
         }
         serviceRunners.add((ServiceRunner) registration.service);
       }

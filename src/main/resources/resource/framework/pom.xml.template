@@ -125,6 +125,13 @@
           <exclude>**/*.java</exclude>
         </excludes>
       </resource>
+      <resource>
+              <filtering>false</filtering>
+              <directory>src/main/python</directory>
+              <includes>
+                <include>**</include>
+              </includes>
+            </resource>
     </resources>
     <testResources>
       <testResource>
