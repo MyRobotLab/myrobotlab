@@ -13,6 +13,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.Hd44780Config;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.I2CControl;
+import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
 
 /**
@@ -24,7 +25,7 @@ import org.slf4j.Logger;
  * @author Moz4r modified by Ray Edgley.
  * 
  */
-public class Hd44780 extends Service {
+public class Hd44780 extends Service implements TextListener {
 
   public final static Logger log = LoggerFactory.getLogger(Hd44780.class);
 
@@ -182,10 +183,12 @@ public class Hd44780 extends Service {
    * 
    */
   public void display(String string, int line) {
+    log.info("display({},{})", string, line);
     if (!initialized) {
       init();
     }
     screenContent.put(line, string);
+    // FIXME a bit sloppy .. should publishText
     broadcastState();
     switch (line) {
       case 0:
@@ -198,12 +201,37 @@ public class Hd44780 extends Service {
         setDdramAddress((byte) 0x14);
         break;
       case 3:
-        setDdramAddress((byte) 0x3C);
+        setDdramAddress((byte) 0x54);
         break;
       default:
         error("line %d is invalid, valid line values are 0 - 3");
     }
     lcdWriteDataString(string);
+  }
+
+  /**
+   * Write text to the address at preferred location. Remember the line wrap is
+   * strange for this device.
+   * 
+   * @param address
+   *          - ddram address position
+   * @param text
+   *          - the text to write there
+   */
+  public void displayAt(int address, String text) {
+    setDdramAddress(address);
+    lcdWriteDataString(text);
+  }
+
+  /**
+   * display the text FIXME - should by default scroll if text is larger than
+   * the width of the hd
+   * 
+   * @param text
+   */
+  public void display(String text) {
+    // FIXME - lame, but going to default this way
+    display(text, 0);
   }
 
   /**
@@ -259,7 +287,8 @@ public class Hd44780 extends Service {
     } else {
       log.info("Init I2C Display");
 
-      setInterface(); // this commands ensures we are in 4 bit mode and our commands are in sync.
+      setInterface(); // this commands ensures we are in 4 bit mode and our
+                      // commands are in sync.
       setFunction(true, false); // Set the function Control.
       clearDisplay(); // Clear the Display and set DDRAM address 0.
       returnHome(); // Set DDRAM address 0 and return display home.
@@ -468,13 +497,14 @@ public class Hd44780 extends Service {
    * @param address
    */
   public void setDdramAddress(int address) {
-    if (address < 80) { // Make sure the address is in a valid range
-      lcdWriteCmd((byte) (address | 0b10000000));
-    } else {
-      error("%d Outside allowed DDRAM Address range 0 - 79", address);
+    if (address < 0 || (address > 40 && address < 63) || address > 108) { 
+      error("%d Outside allowed DDRAM Address range 0 - 108", address);
+      return;
     }
+    lcdWriteCmd((byte) (address | 0b10000000));
   }
-
+  
+  
   /**
    * Set the address to read or write data to the Caracter Generator RAM. The
    * HD44780 has a built in 205 charater generator rom as well as a 8 charater
@@ -553,29 +583,37 @@ public class Hd44780 extends Service {
   }
 
   /**
-   * This method will first make sure the HD44780 is in a known state
-   * and that we are syncrnised to the state.
-   * It does this by setting the module into 8 bit mode
-   * then setting it back to 4 bit mode.
+   * This method will first make sure the HD44780 is in a known state and that
+   * we are syncrnised to the state. It does this by setting the module into 8
+   * bit mode then setting it back to 4 bit mode.
    */
   private void setInterface() {
-    byte Blight = 0b00001000; // The backlight bit is not used by the HD44780 chip.
+    byte Blight = 0b00001000; // The backlight bit is not used by the HD44780
+                              // chip.
     if (!backLight) {
       Blight = 0;
     }
     pcf.writeRegister((byte) (0b00110000 | En | Blight)); // Set to 8 bit mode
-    pcf.writeRegister((byte) (0b00110000 | Blight));      // Strobe in command
+    pcf.writeRegister((byte) (0b00110000 | Blight)); // Strobe in command
     sleep(10);
-    pcf.writeRegister((byte) (0b00110000 | En | Blight)); // Repeat the set to 8 bit command
-    pcf.writeRegister((byte) (0b00110000 | Blight));      // Strobe in command
+    pcf.writeRegister((byte) (0b00110000 | En | Blight)); // Repeat the set to 8
+                                                          // bit command
+    pcf.writeRegister((byte) (0b00110000 | Blight)); // Strobe in command
     sleep(10);
-    pcf.writeRegister((byte) (0b00110000 | En | Blight)); // Repeat the set to 8 bit command
-    pcf.writeRegister((byte) (0b00110000 | Blight));      // Strobe in command . We should now be in 8 bit mode and in sync
+    pcf.writeRegister((byte) (0b00110000 | En | Blight)); // Repeat the set to 8
+                                                          // bit command
+    pcf.writeRegister((byte) (0b00110000 | Blight)); // Strobe in command . We
+                                                     // should now be in 8 bit
+                                                     // mode and in sync
     sleep(10);
-    pcf.writeRegister((byte) (0b00100000 | En | Blight)); // Now set for 4 bit mode.
-    pcf.writeRegister((byte) (0b00100000 | Blight));      // Strobe in command. In theory, we should now be in 4 bit mode.
+    pcf.writeRegister((byte) (0b00100000 | En | Blight)); // Now set for 4 bit
+                                                          // mode.
+    pcf.writeRegister((byte) (0b00100000 | Blight)); // Strobe in command. In
+                                                     // theory, we should now be
+                                                     // in 4 bit mode.
     sleep(10);
   }
+
   /**
    * This method will write the cmd value to the instruction register then wait
    * until it is ready for the next instruction. Most commands are pretty quick
@@ -682,7 +720,7 @@ public class Hd44780 extends Service {
    */
   @Override
   public ServiceConfig getConfig() {
-    Hd44780Config config = (Hd44780Config)super.getConfig();
+    Hd44780Config config = (Hd44780Config) super.getConfig();
     if (pcfName != null) {
       config.controller = pcfName;
     }
@@ -710,4 +748,10 @@ public class Hd44780 extends Service {
     }
     return c;
   }
+
+  @Override
+  public void onText(String text) throws Exception {
+    display(text);
+  }
+
 }
