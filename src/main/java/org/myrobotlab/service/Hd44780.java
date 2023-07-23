@@ -164,7 +164,7 @@ public class Hd44780 extends Service implements TextListener {
     pcf = pcf8574;
     isAttached = true;
     pcfName = pcf.getName();
-    pcf.writeRegister((byte) 0b11110000); // Make sure we initilise the PCF8574
+    pcf.writeRegister((byte) 0b11110000); // Make sure we initialize the PCF8574
                                           // output state
     broadcastState();
   }
@@ -177,7 +177,8 @@ public class Hd44780 extends Service implements TextListener {
    *          display, only the first 16 characters will be used On the 4 line x
    *          20 display, when writing to Line 0, the 21st character will appear
    *          on line 2 When writing to line 1, the 21st character will appear
-   *          on line 3
+   *          on line 3. There is a gap in line 2, the setDramAddress method will 
+   *          check for valid addresses
    * @param line
    *          l
    * 
@@ -195,7 +196,7 @@ public class Hd44780 extends Service implements TextListener {
         setDdramAddress((byte) 0x00);
         break;
       case 1:
-        setDdramAddress((byte) 0x28);
+        setDdramAddress((byte) 0x40);
         break;
       case 2:
         setDdramAddress((byte) 0x14);
@@ -408,9 +409,9 @@ public class Hd44780 extends Service implements TextListener {
   }
 
   /**
-   * Display on/off control. When the display os off, no charaters are displayed
-   * at all. The cursor is the line under the charater and may be on or off.
-   * Blink when set to on blinks the entire charater box where the cursor is.
+   * Display on/off control. When the display os off, no character are displayed
+   * at all. The cursor is the line under the character and may be on or off.
+   * Blink when set to on blinks the entire character box where the cursor is.
    * 
    * @param display
    *          true the display is on. false the display is off.
@@ -488,17 +489,17 @@ public class Hd44780 extends Service implements TextListener {
    * memory. Each memory location corresponds to a position on the display For
    * both 2 x 16 displays and the 4 x 20 displays: Address 0 is the left most
    * character on the first line. Address 40 is the left most character on the
-   * second line. For the 4 x 20 dispalys: Address 20 is the left most character
+   * second line. For the 4 x 20 display: Address 20 is the left most character
    * on the third line. Address 60 is the left most character on the fourth
-   * line. A continous series of writes to the DDRAM will wrap from the end of
-   * the first line to the start of the thrid line, then back to the second line
+   * line. A continuous series of writes to the DDRAM will wrap from the end of
+   * the first line to the start of the third line, then back to the second line
    * and finally the fourth line.
    * 
    * @param address
    */
   public void setDdramAddress(int address) {
     if (address < 0 || (address > 40 && address < 63) || address > 108) { 
-      error("%d Outside allowed DDRAM Address range 0 - 108", address);
+      error("%d Outside allowed DDRAM Address range must valid range is 0-40 and 63-108", address);
       return;
     }
     lcdWriteCmd((byte) (address | 0b10000000));
@@ -506,11 +507,11 @@ public class Hd44780 extends Service implements TextListener {
   
   
   /**
-   * Set the address to read or write data to the Caracter Generator RAM. The
-   * HD44780 has a built in 205 charater generator rom as well as a 8 charater
+   * Set the address to read or write data to the character Generator RAM. The
+   * HD44780 has a built in 205 character generator from as well as a 8 character
    * generator RAM. The only the lower 5 bits are used with 8 bytes allocated to
    * each of the 8 characters that may be used. Not that the last by of each
-   * charater is not used as this is where the cursor sits.
+   * character is not used as this is where the cursor sits.
    * 
    * @param address
    */
@@ -563,7 +564,7 @@ public class Hd44780 extends Service implements TextListener {
    * Set or clear the test busy flag in the HD44780. There are two ways of
    * ensuring the HD44780 is ready for the next instruction. You can either read
    * the instruction register until the MSB D7 is clear. Or you can wait a
-   * minimum time peiod that ensure the device is ready. The longest busy period
+   * minimum time period that ensure the device is ready. The longest busy period
    * is 10mS after a power reset.
    * 
    * @param setFlag
@@ -584,7 +585,7 @@ public class Hd44780 extends Service implements TextListener {
 
   /**
    * This method will first make sure the HD44780 is in a known state and that
-   * we are syncrnised to the state. It does this by setting the module into 8
+   * we are synchronized to the state. It does this by setting the module into 8
    * bit mode then setting it back to 4 bit mode.
    */
   private void setInterface() {
