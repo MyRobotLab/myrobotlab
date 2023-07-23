@@ -163,10 +163,6 @@
 <!-- Duplicate entry for com.squareup.okhttp3-okhttp-3.9.0 skipping -->
 <!-- AzureTranslator end -->
 
-<!-- BodyPart begin -->
-<!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
-<!-- BodyPart end -->
-
 <!-- BoofCv begin -->
   <dependency>
     <groupId>org.boofcv</groupId>
@@ -1225,13 +1221,13 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>cpython-platform</artifactId>
-    <version>3.11.3-1.5.9</version>
+    <version>3.10.8-1.5.8</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>cpython</artifactId>
-    <version>3.11.3-1.5.9</version>
+    <version>3.10.8-1.5.8</version>
     <scope>provided</scope>
   </dependency>
 <!-- Py4j end -->
@@ -1561,6 +1557,34 @@
     <scope>provided</scope>
   </dependency>
 <!-- Twitter end -->
+
+<!-- Vertx begin -->
+  <dependency>
+    <groupId>io.vertx</groupId>
+    <artifactId>vertx-core</artifactId>
+    <version>4.3.3</version>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+  </dependency>
+  <dependency>
+    <groupId>io.vertx</groupId>
+    <artifactId>vertx-web</artifactId>
+    <version>4.3.3</version>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+  </dependency>
+<!-- Duplicate entry for io.netty-netty-all-4.1.82.Final skipping -->
+<!-- Vertx end -->
 
 <!-- VoiceRss begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->

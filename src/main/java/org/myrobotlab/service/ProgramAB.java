@@ -794,7 +794,7 @@ public class ProgramAB extends Service
 
       broadcastState();
     } else {
-      error("invalid bot path - a bot must be a directory with a subdirectory named \"aiml\"");
+      error("invalid bot path %s - a bot must be a directory with a subdirectory named \"aiml\"", path);
       return null;
     }
     return path;

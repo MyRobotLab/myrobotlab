@@ -8,13 +8,13 @@
         <table class="table table-striped">
             <tr>
                 <th></th>
-                <th>name</th>
+                <th>id</th>
                 <th>cron</th>
                 <th>service</th>
                 <th>method</th>
                 <th>parameters</th>
             </tr>
-            <tr ng-repeat="(key, value) in service.config.tasks">
+            <tr ng-repeat="(key, value) in service.tasks">
                 <td>
                     <span ng-click="removeTask(value.id)" class="glyphicon glyphicon-remove red"></span>
                 </td>
@@ -51,6 +51,19 @@
                 <td>
                     <button class="btn btn-primary" ng-click="addNamedTask();">add task</button>
                 </td>
+            </tr>
+            <tr><td>History</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            
+            </tr>
+            <tr ng-repeat="history in service.history | orderBy: '-processedTime'">
+                <td></td>
+                <td>{{history.id}}</td>
+                <td colspan="4">{{ history.processedTime | epochToLocalDate }}</td>
             </tr>
         </table>
     </div>

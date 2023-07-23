@@ -12,7 +12,7 @@ angular.module('mrlapp.service.CronGui', []).controller('CronGuiCtrl', ['$scope'
         cronPattern: null,
         name: null,
         method: null,
-        data: null        
+        data: null
     }
 
     // GOOD TEMPLATE TO FOLLOW
@@ -34,20 +34,24 @@ angular.module('mrlapp.service.CronGui', []).controller('CronGuiCtrl', ['$scope'
     }
 
     $scope.addNamedTask = function() {
-        if ($scope.parameters && $scope.parameters.length > 0){
+        if ($scope.parameters && $scope.parameters.length > 0) {
             $scope.newTask.data = JSON.parse($scope.parameters)
         } else {
             $scope.newTask.data = null
         }
-        
-        msg.send('addNamedTask', $scope.newTask)
+
+        msg.send('addTask', $scope.newTask)
     }
-    
+
     $scope.removeTask = function(id) {
         msg.send('removeTask', id)
     }
 
-
     msg.subscribe(this)
 }
-])
+]).filter('epochToLocalDate', function() {
+    return function(epochTime) {
+        return new Date(epochTime).toLocaleString();
+    }
+    ;
+});
