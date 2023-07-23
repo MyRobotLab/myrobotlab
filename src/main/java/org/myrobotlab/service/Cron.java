@@ -132,7 +132,7 @@ public class Cron extends Service {
   /**
    * map of tasks organized by id
    */
-  public Map<String, Task> tasks = new LinkedHashMap<>();
+  protected Map<String, Task> tasks = new LinkedHashMap<>();
 
   public Cron(String n, String id) {
     super(n, id);
