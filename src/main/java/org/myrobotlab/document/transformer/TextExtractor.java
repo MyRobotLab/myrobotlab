@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.List;
 
@@ -73,34 +74,29 @@ public class TextExtractor extends AbstractStage {
       }
 
       if (f.length() == 0) {
-        // TODO: this is a zero byte file.  
+        // This is a zero byte file, there's no data to try to extract...  
         log.info("zero byte file {}", f.getAbsolutePath());
         continue;
       }
       
-      FileInputStream binaryData = null;
+      InputStream binaryData = null;
       try {
         binaryData = new FileInputStream(f);
-      } catch (FileNotFoundException e1) {
+      } catch (FileNotFoundException e) {
         // This should never happen.
-        log.warn("Document {} not found.", doc.getId(), e1);
+        log.warn("Document {} not found.", doc.getId(), e);
         continue;
       }
-      // InputStream binaryData = null;
 
       Metadata metadata = new Metadata();
       StringWriter textData = new StringWriter();
       BodyContentHandler bch = new BodyContentHandler(textData);
       try {
         parser.parse(binaryData, bch, metadata, parseCtx);
-      //} catch (IOException e) {
-        // TODO Auto-generated catch block
-       // e.printStackTrace();
       } catch (TikaException|IOException|SAXException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
         log.warn("Error processing {} :", doc.getId(), e);
-        doc.setField("error", e);
+        // Accumulate any errors on the document.
+        doc.addToField("error", e);
       }
 
       doc.addToField(textField, textData.toString());
