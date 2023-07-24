@@ -133,6 +133,43 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
         })
     }
 
+    $scope.installPackage = function() {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'installPackage.html',
+                controller: function($scope, $uibModalInstance) {
+                    $scope.ok = function() {
+                        if (!$scope.packageName){
+                            console.error('filename cannot be null')
+                            return
+                        }
+
+                        msg.send('installPipPackages', [$scope.packageName])
+                        $uibModalInstance.close($scope.packageName)
+                    }
+
+                    $scope.cancel = function() {
+                        $uibModalInstance.dismiss('cancel')
+                    }
+
+                    $scope.checkEnterKey = function(event) {
+                        if (event.keyCode === 13) {
+                            $scope.ok()
+                        }
+                    }
+
+                },
+                size: 'sm'
+            })
+
+            modalInstance.result.then(function(filename) {
+                // Do something with the filename
+                console.log("Filename: ", filename)
+            }, function() {
+                // Modal dismissed
+                console.log("Modal dismissed")
+            })
+        }
+
 
     $scope.openScript = function() {
         

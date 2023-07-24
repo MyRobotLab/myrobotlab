@@ -5,9 +5,7 @@ import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -15,6 +13,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;

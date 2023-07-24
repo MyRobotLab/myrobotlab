@@ -15,7 +15,7 @@
 import sys
 
 from py4j.java_collections import JavaObject, JavaClass
-from py4j.java_gateway import JavaGateway, CallbackServerParameters
+from py4j.java_gateway import JavaGateway, CallbackServerParameters, GatewayParameters
 
 runtime = None
 
@@ -31,19 +31,29 @@ class MessageHandler(object):
     def __init__(self):
         global runtime
         # initializing stdout and stderr
+        print("initializing")
         self.name = None
         self.stdout = sys.stdout
         self.stderr = sys.stderr
         sys.stdout = self
         sys.stderr = self
         self.gateway = JavaGateway(callback_server_parameters=CallbackServerParameters(),
-                                   python_server_entry_point=self)
+                                   python_server_entry_point=self,
+                                   gateway_parameters=GatewayParameters(auto_convert=True))
         self.runtime = self.gateway.jvm.org.myrobotlab.service.Runtime.getInstance()
         runtime = self.runtime
         self.py4j = None  # need to wait until name is set
+        print("initialized ... waiting for name to be set")
 
-    def write(self, string):
-        if self.py4j:
+    # Define the callback function
+    def handle_connection_break(self):
+        # Add your custom logic here to handle the connection break
+        print("Connection with Java gateway was lost or terminated.")        
+        print("goodbye.")
+        sys.exit(1)
+
+    def write(self,string):
+        if (self.py4j):
             self.py4j.handleStdOut(string)
 
     def flush(self):
@@ -58,12 +68,14 @@ class MessageHandler(object):
         :param name: Name of the Java-side Py4j service this script is linked to, preferably as a full name.
         :type name: str
         """
+        print("name set to", name)
         self.name = name
         self.py4j = self.runtime.getService(name)
         print(self.runtime.getUptime())
 
         print("python started", sys.version)
         print("runtime attached", self.runtime.getVersion())
+        print("reference to runtime")
         # TODO print env vars PYTHONPATH etc
         return name
 

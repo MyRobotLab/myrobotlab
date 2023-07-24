@@ -1015,15 +1015,6 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
    * @throws IOException
    */
   public void addScript(String scriptName, String code) throws IOException {
-    PythonConfig c = (PythonConfig)config;
-
-    File script = new File(c.scriptRootDir + fs + scriptName);
-
-    if (script.exists()) {
-      error("script %s already exists", scriptName);
-      return;
-    }
-
     openedScripts.put(scriptName, new Script(scriptName, code));
     broadcastState();
   }

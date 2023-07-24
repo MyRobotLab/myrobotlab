@@ -13,6 +13,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.Hd44780Config;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.I2CControl;
+import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
 
 /**
@@ -24,7 +25,7 @@ import org.slf4j.Logger;
  * @author Moz4r modified by Ray Edgley.
  * 
  */
-public class Hd44780 extends Service {
+public class Hd44780 extends Service implements TextListener {
 
   public final static Logger log = LoggerFactory.getLogger(Hd44780.class);
 
@@ -163,7 +164,7 @@ public class Hd44780 extends Service {
     pcf = pcf8574;
     isAttached = true;
     pcfName = pcf.getName();
-    pcf.writeRegister((byte) 0b11110000); // Make sure we initilise the PCF8574
+    pcf.writeRegister((byte) 0b11110000); // Make sure we initialize the PCF8574
                                           // output state
     broadcastState();
   }
@@ -176,34 +177,62 @@ public class Hd44780 extends Service {
    *          display, only the first 16 characters will be used On the 4 line x
    *          20 display, when writing to Line 0, the 21st character will appear
    *          on line 2 When writing to line 1, the 21st character will appear
-   *          on line 3
+   *          on line 3. There is a gap in line 2, the setDramAddress method will 
+   *          check for valid addresses
    * @param line
    *          l
    * 
    */
   public void display(String string, int line) {
+    log.info("display({},{})", string, line);
     if (!initialized) {
       init();
     }
     screenContent.put(line, string);
+    // FIXME a bit sloppy .. should publishText
     broadcastState();
     switch (line) {
       case 0:
         setDdramAddress((byte) 0x00);
         break;
       case 1:
-        setDdramAddress((byte) 0x28);
+        setDdramAddress((byte) 0x40);
         break;
       case 2:
         setDdramAddress((byte) 0x14);
         break;
       case 3:
-        setDdramAddress((byte) 0x3C);
+        setDdramAddress((byte) 0x54);
         break;
       default:
         error("line %d is invalid, valid line values are 0 - 3");
     }
     lcdWriteDataString(string);
+  }
+
+  /**
+   * Write text to the address at preferred location. Remember the line wrap is
+   * strange for this device.
+   * 
+   * @param address
+   *          - ddram address position
+   * @param text
+   *          - the text to write there
+   */
+  public void displayAt(int address, String text) {
+    setDdramAddress(address);
+    lcdWriteDataString(text);
+  }
+
+  /**
+   * display the text FIXME - should by default scroll if text is larger than
+   * the width of the hd
+   * 
+   * @param text
+   */
+  public void display(String text) {
+    // FIXME - lame, but going to default this way
+    display(text, 0);
   }
 
   /**
@@ -259,7 +288,8 @@ public class Hd44780 extends Service {
     } else {
       log.info("Init I2C Display");
 
-      setInterface(); // this commands ensures we are in 4 bit mode and our commands are in sync.
+      setInterface(); // this commands ensures we are in 4 bit mode and our
+                      // commands are in sync.
       setFunction(true, false); // Set the function Control.
       clearDisplay(); // Clear the Display and set DDRAM address 0.
       returnHome(); // Set DDRAM address 0 and return display home.
@@ -379,9 +409,9 @@ public class Hd44780 extends Service {
   }
 
   /**
-   * Display on/off control. When the display os off, no charaters are displayed
-   * at all. The cursor is the line under the charater and may be on or off.
-   * Blink when set to on blinks the entire charater box where the cursor is.
+   * Display on/off control. When the display os off, no character are displayed
+   * at all. The cursor is the line under the character and may be on or off.
+   * Blink when set to on blinks the entire character box where the cursor is.
    * 
    * @param display
    *          true the display is on. false the display is off.
@@ -459,28 +489,29 @@ public class Hd44780 extends Service {
    * memory. Each memory location corresponds to a position on the display For
    * both 2 x 16 displays and the 4 x 20 displays: Address 0 is the left most
    * character on the first line. Address 40 is the left most character on the
-   * second line. For the 4 x 20 dispalys: Address 20 is the left most character
+   * second line. For the 4 x 20 display: Address 20 is the left most character
    * on the third line. Address 60 is the left most character on the fourth
-   * line. A continous series of writes to the DDRAM will wrap from the end of
-   * the first line to the start of the thrid line, then back to the second line
+   * line. A continuous series of writes to the DDRAM will wrap from the end of
+   * the first line to the start of the third line, then back to the second line
    * and finally the fourth line.
    * 
    * @param address
    */
   public void setDdramAddress(int address) {
-    if (address < 80) { // Make sure the address is in a valid range
-      lcdWriteCmd((byte) (address | 0b10000000));
-    } else {
-      error("%d Outside allowed DDRAM Address range 0 - 79", address);
+    if (address < 0 || (address > 40 && address < 63) || address > 108) { 
+      error("%d Outside allowed DDRAM Address range must valid range is 0-40 and 63-108", address);
+      return;
     }
+    lcdWriteCmd((byte) (address | 0b10000000));
   }
-
+  
+  
   /**
-   * Set the address to read or write data to the Caracter Generator RAM. The
-   * HD44780 has a built in 205 charater generator rom as well as a 8 charater
+   * Set the address to read or write data to the character Generator RAM. The
+   * HD44780 has a built in 205 character generator from as well as a 8 character
    * generator RAM. The only the lower 5 bits are used with 8 bytes allocated to
    * each of the 8 characters that may be used. Not that the last by of each
-   * charater is not used as this is where the cursor sits.
+   * character is not used as this is where the cursor sits.
    * 
    * @param address
    */
@@ -533,7 +564,7 @@ public class Hd44780 extends Service {
    * Set or clear the test busy flag in the HD44780. There are two ways of
    * ensuring the HD44780 is ready for the next instruction. You can either read
    * the instruction register until the MSB D7 is clear. Or you can wait a
-   * minimum time peiod that ensure the device is ready. The longest busy period
+   * minimum time period that ensure the device is ready. The longest busy period
    * is 10mS after a power reset.
    * 
    * @param setFlag
@@ -553,29 +584,37 @@ public class Hd44780 extends Service {
   }
 
   /**
-   * This method will first make sure the HD44780 is in a known state
-   * and that we are syncrnised to the state.
-   * It does this by setting the module into 8 bit mode
-   * then setting it back to 4 bit mode.
+   * This method will first make sure the HD44780 is in a known state and that
+   * we are synchronized to the state. It does this by setting the module into 8
+   * bit mode then setting it back to 4 bit mode.
    */
   private void setInterface() {
-    byte Blight = 0b00001000; // The backlight bit is not used by the HD44780 chip.
+    byte Blight = 0b00001000; // The backlight bit is not used by the HD44780
+                              // chip.
     if (!backLight) {
       Blight = 0;
     }
     pcf.writeRegister((byte) (0b00110000 | En | Blight)); // Set to 8 bit mode
-    pcf.writeRegister((byte) (0b00110000 | Blight));      // Strobe in command
+    pcf.writeRegister((byte) (0b00110000 | Blight)); // Strobe in command
     sleep(10);
-    pcf.writeRegister((byte) (0b00110000 | En | Blight)); // Repeat the set to 8 bit command
-    pcf.writeRegister((byte) (0b00110000 | Blight));      // Strobe in command
+    pcf.writeRegister((byte) (0b00110000 | En | Blight)); // Repeat the set to 8
+                                                          // bit command
+    pcf.writeRegister((byte) (0b00110000 | Blight)); // Strobe in command
     sleep(10);
-    pcf.writeRegister((byte) (0b00110000 | En | Blight)); // Repeat the set to 8 bit command
-    pcf.writeRegister((byte) (0b00110000 | Blight));      // Strobe in command . We should now be in 8 bit mode and in sync
+    pcf.writeRegister((byte) (0b00110000 | En | Blight)); // Repeat the set to 8
+                                                          // bit command
+    pcf.writeRegister((byte) (0b00110000 | Blight)); // Strobe in command . We
+                                                     // should now be in 8 bit
+                                                     // mode and in sync
     sleep(10);
-    pcf.writeRegister((byte) (0b00100000 | En | Blight)); // Now set for 4 bit mode.
-    pcf.writeRegister((byte) (0b00100000 | Blight));      // Strobe in command. In theory, we should now be in 4 bit mode.
+    pcf.writeRegister((byte) (0b00100000 | En | Blight)); // Now set for 4 bit
+                                                          // mode.
+    pcf.writeRegister((byte) (0b00100000 | Blight)); // Strobe in command. In
+                                                     // theory, we should now be
+                                                     // in 4 bit mode.
     sleep(10);
   }
+
   /**
    * This method will write the cmd value to the instruction register then wait
    * until it is ready for the next instruction. Most commands are pretty quick
@@ -682,7 +721,7 @@ public class Hd44780 extends Service {
    */
   @Override
   public ServiceConfig getConfig() {
-    Hd44780Config config = (Hd44780Config)super.getConfig();
+    Hd44780Config config = (Hd44780Config) super.getConfig();
     if (pcfName != null) {
       config.controller = pcfName;
     }
@@ -710,4 +749,10 @@ public class Hd44780 extends Service {
     }
     return c;
   }
+
+  @Override
+  public void onText(String text) throws Exception {
+    display(text);
+  }
+
 }

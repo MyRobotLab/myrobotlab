@@ -277,21 +277,11 @@ public class Util {
    * 
    * @return current resource directory
    */
-  @Deprecated
+  @Deprecated /*Resource references do not belong here - the ServiceType and
+  perhaps even the ServiceName are needed in order to provide context. This
+  method should be removed, or parameters provided for ServiceType or 
+  ServiceName */
   public static String getResourceDir() {
-    // first try for the resource.dir system property
-    /*
-     * THIS CANNOT BE DONE IN TWO PLACES - ONE WILL ALWAYS BE String resourceDir
-     * = System.getProperty("resource.dir"); if (resourceDir != null) { //
-     * log.info("Returning {}", resourceDir); return resourceDir; } if
-     * (!FileIO.isJar()) { //
-     * log.info("Not in a jar...you're running in an IDE likely."); resourceDir
-     * = System.getProperty("user.dir") + File.separator +
-     * "src"+File.separator+"main"+File.separator+"resources"+File.separator+
-     * "resource"; } else { resourceDir = System.getProperty("user.dir") +
-     * File.separator + "resource"; }
-     */
-    // log.info("Returning {}", resourceDir);
     return Service.getResourceRoot();
   }
 

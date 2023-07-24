@@ -9,7 +9,8 @@
 */
 angular.module('mrlapp.service').directive('attach', ['mrl', function(mrl) {
     return {
-        restrict: "E", /* element only */
+        restrict: "E",
+        /* element only */
         templateUrl: 'widget/attach.html',
         scope: {
             options: '='/* 2 way binding - isolated scope */
@@ -19,10 +20,13 @@ angular.module('mrlapp.service').directive('attach', ['mrl', function(mrl) {
         link: function(scope, element) {
             var _self = this
             scope.mrl = mrl
-            if (!scope.options.controllerTitle){
+            scope.runtime = mrl.getPanel('runtime')
+            scope.possibleServices = []
+
+            if (!scope.options.controllerTitle) {
                 scope.options.controllerTitle = 'controller'
             }
-            
+
             // if this was full canonical name - would the msg.send be unusseary
             scope.interfaceName = scope.options.interface
             if (scope.interfaceName.indexOf('.') == -1) {
@@ -32,6 +36,21 @@ angular.module('mrlapp.service').directive('attach', ['mrl', function(mrl) {
             scope.attach = function(serviceName) {
                 scope.options.attach(serviceName)
                 scope.options.attachName = serviceName
+            }
+
+            scope.loadServices = function(serviceName) {
+                scope.possibleServices = []
+                let runtime = mrl.getPanel('runtime')
+                let registry = mrl.getRegistry()
+                for (var name in registry) {
+                    if (registry.hasOwnProperty(name)) {
+                        var service = registry[name]
+                        console.info(service.interfaceSet)
+                        if (service.interfaceSet?.hasOwnProperty(scope.interfaceName)) {
+                            scope.possibleServices.push(name)
+                        }
+                    }
+                }
             }
         }
     }

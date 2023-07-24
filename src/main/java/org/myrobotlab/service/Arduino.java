@@ -1495,6 +1495,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     info("%s connected to %s", getName(), portName);
     // chained...
     invoke("publishConnect", portName);
+    
+    broadcastState();
   }
 
   public void onCustomMsg(Integer ax, Integer ay, Integer az) {
@@ -1968,10 +1970,13 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   // > servoSetVelocity/deviceId/b16 velocity
   public void onServoSetSpeed(ServoSpeed servoSpeed) {
 
-    // FIXME - FIND OTHER FUNCTIONS THAT CANNOT BE SET WHEN NOT CONNECTED
-    // AND HANDLE THE SAME AS BELOW !!!
+    if (servoSpeed == null) {
+      log.warn("servo speed cannot be null");
+      return;
+    }
+    
     if (!isConnected()) {
-      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected());
+      log.info("Arduino cannot set speed of %s when not connected", servoSpeed.name);
       return;
     }
 
@@ -2448,7 +2453,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       log.info("rest is {}", servo.getRest());
       servo.save();
       // servo.setPin(8);
-      servo.attach(mega, 13);
+      servo.attach(mega);
 
       servo.moveTo(90.0);
 

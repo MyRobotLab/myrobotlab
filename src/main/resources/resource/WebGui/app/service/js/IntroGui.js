@@ -1,5 +1,5 @@
-angular.module('mrlapp.service.IntroGui', []).controller('IntroGuiCtrl', ['$scope', '$log', 'mrl', '$timeout', function($scope, $log, mrl, $timeout) {
-    $log.info('IntroGuiCtrl')
+angular.module('mrlapp.service.IntroGui', []).controller('IntroGuiCtrl', ['$scope', 'mrl', '$timeout', function($scope, mrl, $timeout) {
+    console.info('IntroGuiCtrl')
     var _self = this
     var msg = this.msg
     $scope.mrl = mrl

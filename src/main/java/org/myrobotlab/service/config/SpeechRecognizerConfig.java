@@ -13,6 +13,7 @@ public class SpeechRecognizerConfig extends ServiceConfig {
   public boolean recording = false;
   
   // probably should be removed as listeners[] already has this info
+  @Deprecated /* use ServiceConfig.listeners */
   public String[] textListeners;
 
   /**

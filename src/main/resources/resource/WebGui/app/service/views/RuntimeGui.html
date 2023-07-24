@@ -1,16 +1,22 @@
-<h3>
-    &nbsp;&nbsp;&nbsp;{{platform.arch}}.{{platform.jvmBitness}}.{{platform.os}} {{platform.mrlVersion}} &nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-repeat" ng-click="shutdown('restart')"></span>
-    <span class="glyphicon glyphicon-off" ng-click="shutdown('shutdown')"></span>
-</h3>
-
-    <br/>
+<h3> {{platform.arch}}.{{platform.jvmBitness}}.{{platform.os}} {{platform.mrlVersion}}</h3>
 <!-- {{locale}} -->
-<ui-select ng-model="localeTag.selected" ng-change="msg.setAllLocales($select.selected.tag)" theme="bootstrap" style="width: 25em">
-    <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;locale&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{$select.selected.tag}}</ui-select-match>
-    <ui-select-choices repeat="(tag, localeData) in locales | filter: $select.search">&nbsp;&nbsp;&nbsp;&nbsp;{{localeData.tag}} {{localeData.value.displayLanguage}} {{localeData.value.displayCountry}} &nbsp;&nbsp;&nbsp;&nbsp;</ui-select-choices>
-</ui-select>
-<br/>
-
+<label>Language</label>
+<table>
+    <tr>
+        <td>
+        <ui-select ng-model="localeTag.selected" ng-change="msg.setAllLocales($select.selected.tag)" theme="bootstrap" style="width: 25em">
+        <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;locale&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{$select.selected.tag}}</ui-select-match>
+        <ui-select-choices repeat="(tag, localeData) in locales | filter: $select.search">&nbsp;&nbsp;&nbsp;&nbsp;{{localeData.tag}} {{localeData.value.displayLanguage}} {{localeData.value.displayCountry}} &nbsp;&nbsp;&nbsp;&nbsp;</ui-select-choices>
+        </ui-select>            
+        </td>
+        <td>&nbsp;
+            <button class="btn btn-default" ng-show="!service.isVirtual" title="This will auto start config on next start"
+            ng-click="msg.setVirtual(true)">virtualization off</button>
+        <button class="btn btn-info" ng-show="service.isVirtual" title="This will auto start config on next start"
+            ng-click="msg.setVirtual(false)">virtualization on</button>
+        </td>
+    </tr>
+</table>
 
 <a ng-show="!showInstalledServices" href="" ng-click="showInstalledServices=true"><span class="glyphicon glyphicon-plus"/> installed services</a>
 <a ng-show="showInstalledServices" href="" ng-click="showInstalledServices=false"><span class="glyphicon glyphicon-minus"/> installed services</a>
@@ -38,20 +44,17 @@
 
 <br/>
 
-<a ng-show="!showCreateService" href="" ng-click="showCreateService=true"><span class="glyphicon glyphicon-plus"/> create a service</a>
-<a ng-show="showCreateService" href="" ng-click="showCreateService=false"><span class="glyphicon glyphicon-minus"/> create a service</a>
-<div ng-show="showCreateService">
+
+<label>Create a service</label>
 <br/>
 <div class="form-inline">
     <input class="form-control" type="text" ng-model="newName" placeholder="name" title="name of new service to be created" press-enter="start(newName, newType)">
     <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" press-enter="start(newName, newType)" title="service type of the new instance to be created" uib-typeahead="service as service.simpleName for service in serviceTypes | filter:{simpleName:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html"/>
     <button class="btn btn-default" title="press to create a new service, you must give the new service a name and type" ng-click="start(newName, newType)">start service</button>
-    <button class="btn btn-default" ng-click="saveDefaults()">save defaults</button>
-    <br/>{{defaultsSaved}}
+
 </div>
-</div>
-<br/>
-<br/>
+
+
 <div class="row">
     <div class="form-group col-md-6">
         <div>
@@ -70,35 +73,20 @@
     <button class="btn btn-default" title="This will unset current config set" ng-click="unsetConfig()">unset</button>
     -->
     <button class="btn btn-default" title="This will start a config set" ng-click="startConfig()">start</button>
-    <button class="btn btn-default" title="This will release a config module" ng-click="releaseConfig()">release</button><br/>
-<br/>
-<span> Auto Start
-        <button class="btn btn-default" ng-show="!startYml.enable" title="This will auto start config on next start"
-            ng-click="setAutoStart(true)">off</button>
-        <button class="btn btn-info" ng-show="startYml.enable" title="This will auto start config on next start"
-            ng-click="setAutoStart(false)">on</button>
-</span>                                    
+    <button class="btn btn-default" title="This will release a config module" ng-click="releaseConfig()">release</button>
+    <button class="btn btn-default" ng-show="!startYml.enable" title="This will auto start config on next start"
+        ng-click="setAutoStart(true)">auto start off</button>
+    <button class="btn btn-info" ng-show="startYml.enable" title="This will auto start config on next start"
+        ng-click="setAutoStart(false)">auto start on</button>
     
-<div class="row">&nbsp;</div>
-<div class="row">
-    <form ng-submit="sendToCli(cmd);cmd=null">
-        <div class="form-group col-md-6">
-            <input ng-model="cmd" class="form-control span6" placeholder="command" title="send commands to myrobotlab using the command box &#10;  /{name}/{method}/{parameter0}/{parameter1}/... &#10; ls - list &#10; pwd - print working directory"/>
-        </div>
-    </form>
-</div>
-<div class="row">
-    <div class="form-group col-md-6">
-        <textarea ng-model="status" class="form-control" placeholder="status display" rows="8" cols="100" readonly></textarea>
-    </div>
-</div>
-<div class="row">
-    <form ng-submit="connect(connectTo);connectTo=null">
-        <div class="form-group col-md-6">
-            <input ng-model="connectTo" class="form-control span6" placeholder="connect e.g. http://robot.local:8888" title="connect to another instance of mrl"/>
-        </div>
-    </form>
-</div>
+</div>                                    
+
+
+<a ng-show="!network" href="" ng-click="network=true"><span class="glyphicon glyphicon-plus"/> network</a>
+<a ng-show="network" href="" ng-click="network=false"><span class="glyphicon glyphicon-minus"/> network</a>
+<div ng-show="network">
+
+
 <div class="row">
     <div class="form-group col-md-6">
         route table default
@@ -153,3 +141,48 @@
         </table>
     </div>
 </div>
+</div>
+    
+ <!-- Modal template -->
+  <script type="text/ng-template" id="saveConfig.html">
+    <div class="modal-header">
+      <h4 class="modal-title">Save Configuration</h4>
+    </div>
+    <div class="modal-body">
+      <table>
+      <tr>
+        <td>
+          Save your current configuration in a directory named<br/>
+          <input type="text" ng-model="service.configName" class="form-control" placeholder="Configuration Name">
+          </td>
+          <td><br/><br/>
+            <input ng-show="service.selectedOption==='default'" type="text" ng-model="service.defaultServiceName" class="form-control" placeholder="Service Name">
+          </td>
+          <td><br/><br/>
+            <input ng-show="service.selectedOption==='default'" type="text" ng-model="service.configType" class="form-control" placeholder="Configuration Type">
+          </td>
+      </tr>
+      <tr>
+          <td>
+              <input type="radio" ng-model="service.selectedOption" value="current"/> Current
+              <input type="radio" ng-model="service.selectedOption" value="default"/> Default 
+          </td>
+          <td align="right">
+              <div ng-show="service.selectedOption==='default'">
+                 Include Peers 
+              </div>
+          </td>
+           <td><div ng-show="service.selectedOption==='default'">
+              &nbsp;&nbsp;<input ng-model="service.includePeers" class="form-check-input" type="checkbox" id="exampleCheckbox">
+              </div>
+          </td>
+  </tr>
+  </table>
+  </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-primary" ng-click="ok()">OK</button>
+      <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+    </div>
+
+  </script>

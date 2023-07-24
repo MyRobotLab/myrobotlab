@@ -178,7 +178,7 @@ public class Pingdar extends Service implements RangingControl, RangeListener, E
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.connect("COM5");
       sr04.attach(arduino, 12, 11);
-      servo.attach(arduino, 2);
+      servo.attach(arduino);
 
       Pingdar pingdar = (Pingdar) Runtime.start("pingdar", "Pingdar");
       sleep(1000);

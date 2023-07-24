@@ -1,3 +1,4 @@
+
 <!-- ServoGui.html -->
 <div class="col-md-12">
     <uib-tabset class="max-view" active="activeTabIndex">
@@ -22,17 +23,14 @@
                             <td>Controller</td>
                             <td>Pin</td>
                             <td>&nbsp;</td>
-                            <td>Enable</td>
                             <td>&nbsp;Invert</td>
                             <td>&nbsp;&nbsp;AutoDisable</td>
-                            <td ng-show="service.autoDisable">TimeOut = {{service.idleTimeout/1000}} s</td>
+                            <td ng-show="service.config.autoDisable">TimeOut = {{service.idleTimeout/1000}} s</td>
+                            <td ng-show="!service.config.autoDisable">Enable</td>
                         </tr>
                         <tr>
                             <td>
-                                <!-- controller FIXME - replace with attach directive -->
-                                <select ng-disabled="service.controller != null" class="form-control" ng-model="state.controller">
-                                    <option ng-repeat="controller in possibleControllers" value="{{controller}}">{{controller}} </option>
-                                </select>
+                               <attach options='servoOptions'/>          
                             </td>
                             <td>
                                 <!-- pin -->
@@ -42,20 +40,23 @@
                             </td>
                             <td>
                                 <!-- TODO - send pos ! ??? -->
-                                <button ng-show="!state.attached" class="btn btn-default" ng-click="attachController()">attach</button>
-                                <button ng-show="state.attached" class="btn btn-default" ng-click="msg.detach()">detach</button>
+                                <button ng-show="!service.isAttached" class="btn btn-default" ng-click="attachController()">attach</button>
+                                <button ng-show="service.isAttached" class="btn btn-default" ng-click="msg.detach()">detach</button>
                             </td>
-                            <td>
-                                <toggle ng-model="service.enabled" class="miniBTN" title="Energize the servo" ng-change="service.enabled?msg.enable():msg.disable()" on="" off="" size="btn-lg"/></toggle>
+                            <td align=right>
+                                <button ng-show="service.mapper.inverted" title="Inverts servo direction" class="btn btn-primary" ng-click="msg.setInverted(false)">on</button>
+                                <button ng-show="!service.mapper.inverted" title="Inverts servo direction" class="btn btn-default" ng-click="msg.setInverted(true)">off</button>
                             </td>
-                            <td>
-                                <toggle ng-model="service.mapper.inverted" class="miniBTN" title="Inverts servo direction" ng-change="msg.setInverted(service.mapper.inverted)" on="" off="" size="btn-lg"/>
+                            <td align=middle>
+                               <button ng-show="service.config.autoDisable" class="btn btn-primary" ng-click="msg.setAutoDisable(false)">on</button>
+                               <button ng-show="!service.config.autoDisable" class="btn btn-default" ng-click="msg.setAutoDisable(true)">off</button>
                             </td>
-                            <td>
-                                &nbsp;&nbsp;<toggle ng-model="service.autoDisable" class="miniBTN" title="Stops energizing the servo after a given time but will energize again when moving the servo slider" ng-change="msg.setAutoDisable(service.autoDisable)" on="" off="" size="btn-lg"/>
+                            <td ng-show="service.config.autoDisable">
+                                <input class="base-slider slider-width100" type="range" name="idleSeconds" ng-model="idleSeconds" min="1" max="10" ng-change="setIdleTimeout(idleSeconds)">
                             </td>
-                            <td>
-                                <input class="base-slider slider-width100" ng-show="service.autoDisable" type="range" name="idleSeconds" ng-model="idleSeconds" min="1" max="10" ng-change="setIdleTimeout(idleSeconds)">
+                            <td ng-show="!service.config.autoDisable" align=middle>
+                                <button ng-show="service.enabled" title="Energize the servo" class="btn btn-primary" ng-click="msg.disable()">on</button>
+                                <button ng-show="!service.enabled" title="Energize the servo" class="btn btn-default" ng-click="msg.enable()">off</button>
                             </td>
                         </tr>
                     </table>
@@ -203,3 +204,5 @@
         <input class="base-slider slider-width100" type="range" name="targetPos" ng-model="service.targetPos" min="0" max="180" ng-change="moveTo(service.targetPos)" ng-mousedown="disableUpdates()" ng-mouseup="enableUpdates()">
     </span>
 </div>
+
+

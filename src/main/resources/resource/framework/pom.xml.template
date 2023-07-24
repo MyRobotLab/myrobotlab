@@ -141,6 +141,10 @@
           <exclude>**/*.java</exclude>
         </excludes>
       </testResource>
+      <testResource>
+        <directory>src/main/resources</directory>
+        <targetPath>${project.basedir}</targetPath>
+      </testResource>
     </testResources>
 
     <!-- define the plugin -->

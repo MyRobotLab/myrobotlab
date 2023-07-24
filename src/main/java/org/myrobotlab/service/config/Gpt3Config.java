@@ -13,9 +13,9 @@ public class Gpt3Config extends ServiceConfig {
 
   public int maxTokens = 256;
   public float temperature = 0.7f;
-  public String url = "https://api.openai.com/v1/completions";
+  public String url = "https://api.openai.com/v1/chat/completions";
   public String token = null;
-  public String engine = "text-davinci-003";
+  public String engine = "gpt-3.5-turbo"; // "text-davinci-003"
   public String wakeWord = "wake";
   public String sleepWord = "sleep";
   

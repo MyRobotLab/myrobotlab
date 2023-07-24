@@ -93,159 +93,56 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return true;
   }
 
-  public static void main(String[] args) {
-    try {
-
-      LoggingFactory.init(Level.ERROR);
-      // Platform.setVirtual(true);
-      // Runtime.start("s01", "Servo");
-      // Runtime.start("intro", "Intro");
-
-      // Runtime.startConfig("pr-1213-1");
-      
-      Runtime.main(new String[] {"--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python"});
-      
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
-
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      // webgui.setSsl(true);
-      webgui.autoStartBrowser(false);
-      // webgui.setPort(8888);
-      webgui.startService();
-
-      Runtime.start("python", "Python");
-      // Runtime.start("ros", "Ros");
-      Runtime.start("intro", "Intro");
-      // InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
-      // i01.startPeer("simulator");
-      // Runtime.startConfig("i01-05");
-      // Runtime.startConfig("pir-01");
-
-      // Polly polly = (Polly)Runtime.start("i01.mouth", "Polly");
-      // i01 = (InMoov2) Runtime.start("i01", "InMoov2");
-
-
-      // polly.speakBlocking("Hi, to be or not to be that is the question,
-      // wheather to take arms against a see of trouble, and by aposing them end
-      // them, to sleep, to die");
-      // i01.startPeer("mouth");
-      // i01.speakBlocking("Hi, to be or not to be that is the question,
-      // wheather to take arms against a see of trouble, and by aposing them end
-      // them, to sleep, to die");
-
-      Runtime.start("python", "Python");
-
-      // i01.startSimulator();
-      Plan plan = Runtime.load("webgui", "WebGui");
-      // WebGuiConfig webgui = (WebGuiConfig) plan.get("webgui");
-      // webgui.autoStartBrowser = false;
-      Runtime.startConfig("webgui");
-      Runtime.start("webgui", "WebGui");
-
-      Random random = (Random) Runtime.start("random", "Random");
-
-      random.addRandom(3000, 8000, "i01", "setLeftArmSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
-      random.addRandom(3000, 8000, "i01", "setRightArmSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
-
-      random.addRandom(3000, 8000, "i01", "moveLeftArm", 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
-      random.addRandom(3000, 8000, "i01", "moveRightArm", 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
-
-      random.addRandom(3000, 8000, "i01", "setLeftHandSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
-      random.addRandom(3000, 8000, "i01", "setRightHandSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
-
-      random.addRandom(3000, 8000, "i01", "moveRightHand", 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 130.0, 175.0);
-      random.addRandom(3000, 8000, "i01", "moveLeftHand", 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 5.0, 40.0);
-
-      random.addRandom(200, 1000, "i01", "setHeadSpeed", 8.0, 20.0, 8.0, 20.0, 8.0, 20.0);
-      random.addRandom(200, 1000, "i01", "moveHead", 70.0, 110.0, 65.0, 115.0, 70.0, 110.0);
-
-      random.addRandom(200, 1000, "i01", "setTorsoSpeed", 2.0, 5.0, 2.0, 5.0, 2.0, 5.0);
-      random.addRandom(200, 1000, "i01", "moveTorso", 85.0, 95.0, 88.0, 93.0, 70.0, 110.0);
-
-      random.save();
-
-//      i01.startChatBot();
-//
-//      i01.startAll("COM3", "COM4");
-      Runtime.start("python", "Python");
-
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
-  }
-
-  transient ProgramAB chatBot;
+  protected transient ProgramAB chatBot;
 
   protected List<String> configList;
 
+  /**
+   * Configuration from runtime has started. This is when runtime starts
+   * processing a configuration set for the first time since inmoov was started
+   */
+  protected boolean configStarted = false;
+
   String currentConfigurationName = "default";
 
-  transient SpeechRecognizer ear;
+  protected transient SpeechRecognizer ear;
 
-  //
-  // public void onStartConfig(String configName) {
-  // log.info("onStartConfig");
-  //
-  // }
-
-  transient Tracking eyesTracking;
 
   // waiting controable threaded gestures we warn user
-  boolean gestureAlreadyStarted = false;
+  protected boolean gestureAlreadyStarted = false;
 
-  Set<String> gestures = new TreeSet<String>();
+  protected Set<String> gestures = new TreeSet<String>();
 
-  transient Tracking headTracking;
+  protected transient HtmlFilter htmlFilter;
 
-  transient HtmlFilter htmlFilter;
+  protected transient ImageDisplay imageDisplay;
 
-  transient ImageDisplay imageDisplay;
+  protected String lastGestureExecuted;
 
-  String lastGestureExecuted;
+  protected Long lastPirActivityTime;
 
-  Long lastPirActivityTime;
-
-  LedDisplayData led = new LedDisplayData();
+  protected LedDisplayData led = new LedDisplayData();
 
   /**
    * supported locales
    */
-  Map<String, Locale> locales = null;
+  protected Map<String, Locale> locales = null;
 
-  int maxInactivityTimeSeconds = 120;
+  protected int maxInactivityTimeSeconds = 120;
 
-  transient SpeechSynthesis mouth;
+  protected transient SpeechSynthesis mouth;
 
-  // FIXME ugh - new MouthControl service that uses AudioFile output
-  transient public MouthControl mouthControl;
+  protected boolean mute = false;
 
-  boolean mute = false;
+  protected transient OpenCV opencv;
 
-  // transient JMonkeyEngine simulator;
-
-  transient OpenCV opencv;
-
-  transient Pir pir;
-
-  transient Python python;
-
-  transient ServoMixer servoMixer;
-
-  transient UltrasonicSensor ultrasonicLeft;
-
-  transient UltrasonicSensor ultrasonicRight;
+  protected transient Python python;
 
   protected String voiceSelected;
 
-  transient WebGui webgui;
 
   public InMoov2(String n, String id) {
     super(n, id);
-    Runtime.getInstance().attachServiceLifeCycleListener(getName());    
   }
 
   public void addTextListener(TextListener service) {
@@ -266,7 +163,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
         setLocale(getSupportedLocale(Runtime.getInstance().getLocale().toString()));
       }
 
-      init();
+      loadInitScripts();
 
       if (config.loadGestures) {
         loadGestures();
@@ -284,13 +181,13 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return c;
   }
 
-  // FIXME FIXME !!! THIS IS A MESS !!
-  public void applyConfig() {
-    super.apply();
-    log.error("applyConfig()");
-    // always getResponse !
-    speak("InMoov apply config");
-  }
+  // TODO- Hook to get config event published
+  // public void applyConfig() {
+  //   super.apply();
+  //   log.error("applyConfig()");
+  //   // always getResponse !
+  //   speak("InMoov apply config");
+  // }
 
   @Override
   public void attachTextListener(String name) {
@@ -591,10 +488,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return (InMoov2Arm) getPeer(side + "Arm");
   }
 
-  public Tracking getEyesTracking() {
-    return eyesTracking;
-  }
-
   public InMoov2Hand getHand(String side) {
     if (!"left".equals(side) && !"right".equals(side)) {
       error("side must be left or right - instead of %s", side);
@@ -605,10 +498,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   public InMoov2Head getHead() {
     return (InMoov2Head) getPeer("head");
-  }
-
-  public Tracking getHeadTracking() {
-    return headTracking;
   }
 
   /**
@@ -689,10 +578,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return (InMoov2Hand) getPeer("rightHand");
   }
 
-  public Simulator getSimulator() {
-    return (Simulator) getPeer("simulator");
-  }
-
   /**
    * matches on language only not variant expands language match to full InMoov2
    * bot locale
@@ -741,8 +626,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
    * 
    * @throws IOException
    */
-  public void init() throws IOException {
-    invoke("publishEvent", "INIT");
+  public void loadInitScripts() throws IOException {
     loadScripts(getResourceDir() + fs + "init");
   }
 
@@ -883,21 +767,24 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     moveHead((double) neck, (double) rothead, null, null, null, (double) rollNeck);
   }
 
-  public void moveHeadBlocking(Double neck, Double rothead) {
+  public void moveHeadBlocking(Double neck, Double rothead)  {
     moveHeadBlocking(neck, rothead, null);
   }
 
-  public void moveHeadBlocking(Double neck, Double rothead, Double rollNeck) {
+  public void moveHeadBlocking(Double neck, Double rothead, Double rollNeck)  {
     moveHeadBlocking(neck, rothead, null, null, null, rollNeck);
   }
 
-  public void moveHeadBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw) {
+  public void moveHeadBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw)  {
     moveHeadBlocking(neck, rothead, eyeX, eyeY, jaw, null);
   }
 
-  public void moveHeadBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
-    // the "right" way
-    sendToPeer("head", "moveToBlocking", neck, rothead, eyeX, eyeY, jaw, rollNeck);
+  public void moveHeadBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck)  {
+    try {
+      sendBlocking(getPeerName("head"), "moveToBlocking", neck, rothead, eyeX, eyeY, jaw, rollNeck);
+    } catch (Exception e) {
+      error(e);
+    }
   }
 
   public void moveLeftArm(Double bicep, Double rotate, Double shoulder, Double omoplate) {
@@ -965,7 +852,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   public void onFinishedConfig(String configName) {
     log.info("onFinishedConfig");
     // invoke("publishEvent", "configFinished");
-    invoke("publishEvent", "CONFIG LOADED");
+    invoke("publishFinishedConfig", configName);
   }
 
   public void onGestureStatus(Status status) {
@@ -992,8 +879,9 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   @Override
   public void onJoystickInput(JoystickData input) throws Exception {
-    // TODO Auto-generated method stub
-
+    // TODO timer ? to test and not send an event
+    // switches to manual control ?
+    invoke("publishEvent", "joystick");
   }
 
   public String onNewState(String state) {
@@ -1014,6 +902,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   public OpenCVData onOpenCVData(OpenCVData data) {
+    // FIXME - publish event with or without data ? String file reference
     return data;
   }
 
@@ -1028,7 +917,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     led.blue = 150;
     led.count = 5;
     led.interval = 500;
-
+    // FIXME flash on config.flashOnBoot
     invoke("publishFlash");
     // pirOn event vs wake event
     invoke("publishEvent", "WAKE");
@@ -1057,8 +946,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   @Override
   public void onReleased(String name) {
-    // TODO Auto-generated method stub
-
   }
 
   // I THINK THIS IS GOOD (good simple one)- need more info though
@@ -1075,6 +962,16 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   /**
+   * runtime re-publish relay
+   * 
+   * @param configName
+   */
+  public void onStartConfig(String configName) {
+    log.info("onStartConfig");
+    invoke("publishStartConfig", configName);
+  }
+
+  /**
    * Part of service life cycle - a new servo has been started
    * 
    * need a directed message sent to a callback simlar to this except it should
@@ -1083,10 +980,11 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
    */
   @Override
   public void onStarted(String name) {
-    log.info("{} started", name);
+    InMoov2Config c = (InMoov2Config) config;
+
+    log.info("onStarted {}", name);
     try {
 
-      InMoov2Config c = (InMoov2Config) config;
       Runtime runtime = Runtime.getInstance();
       log.info("onStarted {}", name);
 
@@ -1096,83 +994,113 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 //      }
 
       String peerKey = getPeerKey(name);
-      if (peerKey != null) {
-        invoke("publishEvent", "STARTED " + peerKey);
+      if (peerKey == null) {
+        // service not a peer
+        return;
       }
 
-      String actualName = getPeerName("ear");
-      if (actualName.equals(name)) {
-        AbstractSpeechRecognizer ear = (AbstractSpeechRecognizer) Runtime.getService(actualName);
-        ear.attachTextListener(getPeerName("chatBot"));
+      if (runtime.isProcessingConfig() && !configStarted) {
+        invoke("publishEvent", "CONFIG STARTED " + runtime.getConfigName());
+        configStarted = true;
       }
 
-      actualName = getPeerName("mouth");
-      if (actualName.equals(name)) {
-        AbstractSpeechSynthesis mouth = (AbstractSpeechSynthesis) Runtime.getService(actualName);
-        mouth.attachSpeechListener(getPeerName("ear"));
+      invoke("publishEvent", "STARTED " + peerKey);
+
+      switch (peerKey) {
+        case "audioPlayer":
+          break;
+        case "chatBot":
+          ProgramAB chatBot = (ProgramAB) Runtime.getService(name);
+          chatBot.attachTextListener(getPeerName("htmlFilter"));
+          startPeer("htmlFilter");
+          break;
+        case "controller3":
+          break;
+        case "controller4":
+          break;
+        case "ear":
+          AbstractSpeechRecognizer ear = (AbstractSpeechRecognizer) Runtime.getService(name);
+          ear.attachTextListener(getPeerName("chatBot"));
+          break;
+        case "eyeTracking":
+          break;
+        case "fsm":
+          break;
+        case "gpt3":
+          break;
+        case "head":
+          addListener("publishMoveHead", name);
+          break;
+        case "headTracking":
+          break;
+        case "htmlFilter":
+          TextPublisher htmlFilter = (TextPublisher) Runtime.getService(name);
+          htmlFilter.attachTextListener(getPeerName("mouth"));
+          break;
+        case "imageDisplay":
+          break;
+        case "leap":
+          break;
+        case "left":
+          break;
+        case "leftArm":
+          addListener("publishMoveLeftArm", name, "onMoveArm");
+          break;
+        case "leftHand":
+          addListener("publishMoveLeftHand", name, "onMoveHand");
+          break;
+        case "mouth":
+          mouth = (AbstractSpeechSynthesis) Runtime.getService(name);
+          mouth.attachSpeechListener(getPeerName("ear"));
+          break;
+        case "mouthControl":
+          break;
+        case "neoPixel":
+          break;
+        case "opencv":
+          subscribeTo(name, "publishOpenCVData");
+          break;
+        case "openni":
+          break;
+        case "openWeatherMap":
+          break;
+        case "pid":
+          break;
+        case "pir":
+          break;
+        case "random":
+          break;
+        case "right":
+          break;
+        case "rightArm":
+          addListener("publishMoveRightArm", name, "onMoveArm");
+          break;
+        case "rightHand":
+          addListener("publishMoveRightHand", name, "onMoveHand");
+          break;
+        case "servoMixer":
+          break;
+        case "simulator":
+          break;
+        case "torso":
+          addListener("publishMoveTorso", name);
+          break;
+        case "ultrasonicRight":
+          break;
+        case "ultrasonicLeft":
+          break;
+        default:
+          log.warn("unknown peer %s not hanled in onStarted", peerKey);
+          break;
       }
 
-      actualName = getPeerName("chatBot");
-      if (actualName.equals(name)) {
-        ProgramAB chatBot = (ProgramAB) Runtime.getService(actualName);
-        chatBot.attachTextListener(getPeerName("htmlFilter"));
-        startPeer("htmlFilter");
-      }
-
-      actualName = getPeerName("htmlFilter");
-      if (actualName.equals(name)) {
-        TextPublisher htmlFilter = (TextPublisher) Runtime.getService(actualName);
-        htmlFilter.attachTextListener(getPeerName("mouth"));
-      }
-
-      // FIXME - this is a much better way to do it than the code above
-      // the types are not exposed, its not using a local reference of the
-      // service
-      // its remote compatible, and it uses the peers actual name - it does not
-      // break easily,
-      // allows user modification and subscribing to topics for extensibility,
-      // no NPEs uses messaging, and follows mrl pub/sub conventions - above
-      // code should be
-      // refactored accordingly.
-      actualName = getPeerName("head");
-      if (actualName.equals(name)) {
-        addListener("publishMoveHead", actualName);
-      }
-
-      actualName = getPeerName("torso");
-      if (actualName.equals(name)) {
-        addListener("publishMoveTorso", actualName);
-      }
-
-      // mapping a channel to a single end point depending on peer
-      actualName = getPeerName("leftHand");
-      if (actualName.equals(name)) {
-        addListener("publishMoveLeftHand", actualName, "onMoveHand");
-      }
-
-      // mapping a channel to a single end point depending on peer
-      actualName = getPeerName("rightHand");
-      if (actualName.equals(name)) {
-        addListener("publishMoveRightHand", actualName, "onMoveHand");
-      }
-
-      // mapping a channel to a single end point depending on peer
-      actualName = getPeerName("leftArm");
-      if (actualName.equals(name)) {
-        addListener("publishMoveLeftArm", actualName, "onMoveArm");
-      }
-
-      // mapping a channel to a single end point depending on peer
-      actualName = getPeerName("rightArm");
-      if (actualName.equals(name)) {
-        addListener("publishMoveRightArm", actualName, "onMoveArm");
-      }
-
+      // type processing for Servo
       ServiceInterface si = Runtime.getService(name);
       if ("Servo".equals(si.getSimpleName())) {
         log.info("sending setAutoDisable true to {}", name);
-        send(name, "setAutoDisable", true);
-        // ServoControl sc = (ServoControl)Runtime.getService(name);
+        // send(name, "setAutoDisable", true);
+        Servo servo = (Servo) Runtime.getService(name);
+        servo.setAutoDisable(true);
       }
     } catch (Exception e) {
       log.error("onStarted threw", e);
@@ -1182,6 +1110,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   @Override
   public void onStopped(String name) {
     // using release peer for peer releasing
+    // FIXME - auto remove subscriptions of peers?
   }
 
   @Override
@@ -1238,6 +1167,19 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     invoke("publishMessage", msg);
   }
 
+  public String publishStartConfig(String configName) {
+    info("config %s started", configName);
+    invoke("publishEvent", "CONFIG STARTED " + configName);
+    return configName;
+  }
+
+  public String publishFinishedConfig(String configName) {
+    info("config %s finished", configName);
+    invoke("publishEvent", "CONFIG LOADED " + configName);
+
+    return configName;
+  }
+
   /**
    * "re"-publishing runtime config list, because I don't want to fix the js
    * subscribeTo :P
@@ -1282,6 +1224,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
 
   /**
    * A more extensible interface point than publishEvent
+   * FIXME - create interface for this
    * 
    * @param msg
    * @return
@@ -1392,7 +1335,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   public void releasePeer(String peerKey) {
     super.releasePeer(peerKey);
     if (peerKey != null) {
-      invoke("publishEvent","STOPPED " + peerKey);
+      invoke("publishEvent", "STOPPED " + peerKey);
     }
   }
 
@@ -1733,11 +1676,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
         }
       }
       chatBot.setPredicate("parameterHowDoYouDo", "");
-      try {
-        chatBot.savePredicates();
-      } catch (IOException e) {
-        log.error("saving predicates threw", e);
-      }
+      chatBot.savePredicates();
       htmlFilter = (HtmlFilter) startPeer("htmlFilter");// Runtime.start("htmlFilter",
       // "HtmlFilter");
       chatBot.attachTextListener(htmlFilter);
@@ -1832,16 +1771,6 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return mouth;
   }
 
-  public void startMouthControl() {
-    speakBlocking(get("STARTINGMOUTHCONTROL"));
-    mouthControl = (MouthControl) startPeer("mouthControl");
-    InMoov2Head head = getHead();
-    if (head != null) {
-      mouthControl.attach(head.getPeer("jaw"));
-    }
-    mouthControl.attach(getPeer("mouth"));
-  }
-
   // FIXME - universal (good) way of handling all exceptions - ie - reporting
   // back to the user the problem in a short concise way but have
   // expandable detail in appropriate places
@@ -1861,19 +1790,13 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   @Override
   public void startService() {
     super.startService();
+
     InMoov2Config c = (InMoov2Config) config;
     Runtime runtime = Runtime.getInstance();
 
-    // InMoov2 has a huge amount of peers
+    // get service start and release life cycle events
+    runtime.attachServiceLifeCycleListener(getName());
 
-    // by default all servos will auto-disable
-    // Servo.setAutoDisableDefault(true); //until peer servo services for
-    // InMoov2 have the auto disable behavior, we should keep this
-
-    // same as created in runtime - send asyc message to all
-    // registered services, this service has started
-    // find all servos - set them all to autoDisable(true)
-    // onStarted(name) will handle all future created servos
     List<ServiceInterface> services = Runtime.getServices();
     for (ServiceInterface si : services) {
       if ("Servo".equals(si.getSimpleName())) {
@@ -1881,34 +1804,21 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
       }
     }
 
-    // REALLY NEEDS TO BE CLEANED UP - no direct references
-    // "publish" scripts which should be executed :(
-    // python = (Python) startPeer("python");
-    // python = (Python) Runtime.start("python", "Python"); <- BAD !!!!
-    // load(locale.getTag()); WTH ?
-
     // get events of new services and shutdown
-    Runtime r = Runtime.getInstance();
-    subscribe(r.getName(), "shutdown");
-    subscribe(r.getName(), "publishConfigList");
-
-    // FIXME - Framework should auto-magically auto-start peers AFTER
-    // construction - unless explicitly told not to
-    // peers to start on construction
-    // imageDisplay = (ImageDisplay) startPeer("imageDisplay");
-
+    subscribe("runtime", "shutdown");
+    // power up loopback subscription
+    addListener(getName(), "powerUp");
+    
+    
+    subscribe("runtime", "publishConfigList");
     if (runtime.isProcessingConfig()) {
       invoke("publishEvent", "configStarted");
     }
-
-    // power up loopback subscription
-    addListener(getName(), "powerUp");
-
-    addListener("publishEvent", getPeerName("chatBot"), "getResponse");
-    
-    // for begin and end of processing config ?
-    // subscribe("runtime", "publishStartConfig");
+    subscribe("runtime", "publishStartConfig");
     subscribe("runtime", "publishFinishedConfig");
+
+    // chatbot getresponse attached to publishEvent
+    addListener("publishEvent", getPeerName("chatBot"), "getResponse");
 
     try {
       // copy config if it doesn't already exist
@@ -1928,27 +1838,10 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
           }
         }
       }
-
-      // copy (if they don't already exist) the chatbots which came with InMoov2
-      resourceBotDir = FileIO.gluePaths(getResourceDir(), "chatbot/bots");
-      files = FileIO.getFileList(resourceBotDir);
-      for (File f : files) {
-        String botDir = "data/ProgramAB/" + f.getName();
-        if (new File(botDir).exists()) {
-          log.info("found data/ProgramAB/{} not copying", botDir);
-        } else {
-          log.info("will copy new data/ProgramAB/{}", botDir);
-          try {
-            FileIO.copy(f.getAbsolutePath(), botDir);
-          } catch (Exception e) {
-            error(e);
-          }
-        }
-      }
-
     } catch (Exception e) {
       error(e);
     }
+
     runtime.invoke("publishConfigList");
   }
 
@@ -2022,6 +1915,92 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     sendToPeer("rightArm", "waitTargetPos");
     sendToPeer("leftArm", "waitTargetPos");
     sendToPeer("torso", "waitTargetPos");
+  }
+
+
+  public static void main(String[] args) {
+    try {
+
+      LoggingFactory.init(Level.ERROR);
+      // Platform.setVirtual(true);
+      // Runtime.start("s01", "Servo");
+      // Runtime.start("intro", "Intro");
+
+      // Runtime.startConfig("pr-1213-1");
+      
+      Runtime.main(new String[] {"--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python"});
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      // webgui.setSsl(true);
+      webgui.autoStartBrowser(false);
+      // webgui.setPort(8888);
+      webgui.startService();
+
+      Runtime.start("python", "Python");
+      // Runtime.start("ros", "Ros");
+      Runtime.start("intro", "Intro");
+      // InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+      // i01.startPeer("simulator");
+      // Runtime.startConfig("i01-05");
+      // Runtime.startConfig("pir-01");
+
+      // Polly polly = (Polly)Runtime.start("i01.mouth", "Polly");
+      // i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+
+
+      // polly.speakBlocking("Hi, to be or not to be that is the question,
+      // wheather to take arms against a see of trouble, and by aposing them end
+      // them, to sleep, to die");
+      // i01.startPeer("mouth");
+      // i01.speakBlocking("Hi, to be or not to be that is the question,
+      // wheather to take arms against a see of trouble, and by aposing them end
+      // them, to sleep, to die");
+
+      Runtime.start("python", "Python");
+
+      // i01.startSimulator();
+      Plan plan = Runtime.load("webgui", "WebGui");
+      // WebGuiConfig webgui = (WebGuiConfig) plan.get("webgui");
+      // webgui.autoStartBrowser = false;
+      Runtime.startConfig("webgui");
+      Runtime.start("webgui", "WebGui");
+
+      Random random = (Random) Runtime.start("random", "Random");
+
+      random.addRandom(3000, 8000, "i01", "setLeftArmSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+      random.addRandom(3000, 8000, "i01", "setRightArmSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+
+      random.addRandom(3000, 8000, "i01", "moveLeftArm", 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
+      random.addRandom(3000, 8000, "i01", "moveRightArm", 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
+
+      random.addRandom(3000, 8000, "i01", "setLeftHandSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+      random.addRandom(3000, 8000, "i01", "setRightHandSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+
+      random.addRandom(3000, 8000, "i01", "moveRightHand", 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 130.0, 175.0);
+      random.addRandom(3000, 8000, "i01", "moveLeftHand", 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 5.0, 40.0);
+
+      random.addRandom(200, 1000, "i01", "setHeadSpeed", 8.0, 20.0, 8.0, 20.0, 8.0, 20.0);
+      random.addRandom(200, 1000, "i01", "moveHead", 70.0, 110.0, 65.0, 115.0, 70.0, 110.0);
+
+      random.addRandom(200, 1000, "i01", "setTorsoSpeed", 2.0, 5.0, 2.0, 5.0, 2.0, 5.0);
+      random.addRandom(200, 1000, "i01", "moveTorso", 85.0, 95.0, 88.0, 93.0, 70.0, 110.0);
+
+      random.save();
+
+//      i01.startChatBot();
+//
+//      i01.startAll("COM3", "COM4");
+      Runtime.start("python", "Python");
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
   }
 
 }

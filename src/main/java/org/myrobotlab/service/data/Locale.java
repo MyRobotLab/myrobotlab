@@ -143,15 +143,31 @@ public class Locale {
   }
 
   public static Map<String, Locale> getDefaults() {
-
+// Pulls all languages available from the OS, not useful to us
+//    Map<String, Locale> locales = new TreeMap<>();
+//    java.util.Locale[] ls = java.util.Locale.getAvailableLocales();
+//    for (java.util.Locale l : ls) {
+//      Locale newLocale = new Locale(l.toString());
+//      if (l.toString() != null && l.toString().length() != 0) {
+//        locales.put(newLocale.tag, newLocale);
+//      }
+//    }
+    // We really only support a few Locales dictated by ProgramAB, Polly,
+    // WebkitSpeechRecognition, & WebKitSpeechSynthesis
     Map<String, Locale> locales = new TreeMap<>();
-    java.util.Locale[] ls = java.util.Locale.getAvailableLocales();
-    for (java.util.Locale l : ls) {
-      Locale newLocale = new Locale(l.toString());
-      if (l.toString() != null && l.toString().length() != 0) {
-        locales.put(newLocale.tag, newLocale);
-      }
-    }
+    locales.put("cn-ZH", new Locale("cn-ZH"));
+    locales.put("de-DE", new Locale("de-DE"));
+    locales.put("en-US", new Locale("en-US"));
+    locales.put("es-ES", new Locale("es-ES"));
+    // locales.put("en-GB", new Locale("en-GB"));
+    locales.put("fi-FI", new Locale("fi-FI"));
+    locales.put("fr-FR", new Locale("fr-FR"));
+    locales.put("hi-IN", new Locale("hi-IN"));
+    locales.put("it-IT", new Locale("it-IT"));
+    locales.put("nl-NL", new Locale("nl-NL"));
+    locales.put("pt-PT", new Locale("pt-PT"));
+    locales.put("ru-RU", new Locale("ru-RU"));
+    locales.put("tr-TR", new Locale("tr-TR"));
     return locales;
   }
 

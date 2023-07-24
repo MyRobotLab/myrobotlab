@@ -2,8 +2,13 @@ package org.myrobotlab.service.config;
 
 public class ServoConfig extends ServiceConfig {
 
+  /**
+   * The automatic disabling of the servo in idleTimeout ms This de-energizes
+   * the servo. By default this is disabled.
+   * 
+   */
   public boolean autoDisable = false;
-  // public String controller;
+
   public boolean enabled = true;
   public Integer idleTimeout;
 

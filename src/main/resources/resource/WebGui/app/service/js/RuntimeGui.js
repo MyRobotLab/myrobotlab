@@ -12,7 +12,6 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     }
 
     $scope.locales = {}
-
     $scope.platform = $scope.service.platform
     $scope.status = ""
     $scope.cmd = ""
@@ -21,7 +20,8 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     $scope.newName = null
     $scope.newType = ""
     $scope.heartbeatTs = null
-    $scope.hosts = []
+    $scope.hosts = []    
+    // $scope.selectedOption = "current"
 
     $scope.languages = {
         'en': {
@@ -46,8 +46,8 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
     $scope.categoryServiceTypes = null
 
-    $scope.disabled = undefined;
-    $scope.person = {};
+    $scope.disabled = undefined
+    $scope.person = {}
 
     var msgKeys = {}
 
@@ -56,7 +56,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     // $scope.categoryServiceTypes = $scope.service.serviceData.categoryTypes[$scope.category.selected].serviceTypes
 
     $scope.filterServices = function() {
-        var result = {};
+        var result = {}
         // console.debug('$scope.category.selected is ' + $scope.category.selected)
         const entries = Object.entries($scope.service.serviceData.serviceTypes)
 
@@ -75,10 +75,10 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
             if (/*metaData.simpleName.toLowerCase().includes($scope.newType) && */
             categoryServiceTypes != null && categoryServiceTypes.includes(metaData.name)) {
-                result[fullTypeName] = metaData;
+                result[fullTypeName] = metaData
             }
         }
-        return result;
+        return result
     }
 
     // FIXME - maintain contextPath !!!
@@ -117,8 +117,8 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         }
         msg.send('start', $scope.newName, $scope.newType)
 
-        $scope.newName = null;
-        $scope.newType = null;
+        $scope.newName = null
+        $scope.newType = null
     }
 
     this.onMsg = function(inMsg) {
@@ -130,6 +130,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         switch (inMsg.method) {
         case 'onState':
             _self.updateState(data)
+            $scope.$apply()
             break
         case 'onLocalServices':
             $scope.registry = data
@@ -232,7 +233,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             break
         case 'onHeartbeat':
             let heartbeat = data
-            let hb = heartbeat.name + '@' + heartbeat.id + ' sent onHeartbeat - ';
+            let hb = heartbeat.name + '@' + heartbeat.id + ' sent onHeartbeat - '
             $scope.heartbeatTs = heartbeat.ts
             $scope.$apply()
 
@@ -247,7 +248,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
                 // its 'own' sub-registry ???
                 if (!serviceName in mrl.getRegistry()) {
                     // 
-                    console.warn(serviceName + ' not defined in registry - sending registration request');
+                    console.warn(serviceName + ' not defined in registry - sending registration request')
                 }
                 // else already registered
             }
@@ -329,21 +330,6 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         }
     }
 
-    $scope.saveConfig = function() {
-        console.info('saveConfig')
-
-        let onOK = function() {
-            msg.sendTo('runtime', 'saveConfig', $scope.service.configName)
-        }
-
-        let onCancel = function() {
-            console.info('save config cancelled')
-        }
-
-        let ret = modalService.openOkCancel('widget/modal-dialog.view.html', 'Save Configuration', 'Save your current configuration in a directory named', onOK, onCancel, $scope);
-        console.info('ret ' + ret);
-    }
-
     $scope.savePlan = function() {
         console.info('saveConfig')
 
@@ -356,8 +342,8 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             console.info('save config cancelled')
         }
 
-        let ret = modalService.openOkCancel('widget/modal-dialog.view.html', 'Save Plan Configuration', 'Save your current configuration in a directory named', onOK, onCancel, $scope);
-        console.info('ret ' + ret);
+        let ret = modalService.openOkCancel('widget/modal-dialog.view.html', 'Save Plan Configuration', 'Save your current configuration in a directory named', onOK, onCancel, $scope)
+        console.info('ret ' + ret)
     }
 
     $scope.saveDefaults = function() {
@@ -373,6 +359,40 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         console.info('setAutoStart')
         msg.send('setAutoStart', b)
     }
+
+     $scope.saveConfig = function() {
+          $scope.service.selectedOption = 'current'
+          var modalInstance = $uibModal.open({
+            templateUrl: 'saveConfig.html',
+            scope: $scope,
+            controller: function($scope, $uibModalInstance) {
+
+              $scope.ok = function() {
+                $uibModalInstance.close()
+              }
+
+              $scope.cancel = function() {
+                $uibModalInstance.dismiss('cancel')
+              }
+            }
+          })
+
+          modalInstance.result.then(function(result) {
+            // Handle 'OK' button click
+            console.log('Config Name: ' + $scope.service.configName)
+            console.log('Selected Option: ' + $scope.service.selectedOption)
+            console.log('includePeers Option: ' + $scope.service.includePeers)
+            console.log('configType Option: ' + $scope.service.configType)
+            if ($scope.service.selectedOption == 'default'){
+                msg.send('saveDefault', $scope.service.configName, $scope.service.defaultServiceName, $scope.service.configType, $scope.service.includePeers)
+            } else {
+                msg.sendTo('runtime', 'saveConfig', $scope.service.configName)
+            }
+          }, function() {
+            // Handle 'Cancel' button click or modal dismissal
+            console.log('Modal dismissed')
+          })
+        }
     
     // $scope.serviceTypes = Object.values(mrl.getPossibleServices())
     msg.subscribe("getStartYml")
