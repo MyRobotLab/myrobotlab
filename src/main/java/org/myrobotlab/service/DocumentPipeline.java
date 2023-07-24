@@ -99,35 +99,31 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
 
   public static void main(String[] args) throws Exception {
 
-    LoggingFactory.init(Level.INFO);
-    
-    
-    AudioFile audiofile = (AudioFile)Runtime.start("audiofile", "AudioFile");
+    LoggingFactory.init("info");
+    Python python = (Python)Runtime.start("python", "Python");
     WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
-
-    // start embedded solr
-    Solr solr = (Solr)Runtime.start("solr","Solr");
-    // solr.startEmbedded();
-    
-    // start the pipeline to process the files from the file system
+    // Solr 
+    Solr solr = (Solr)Runtime.start("solr", "Solr");
+    // the audio file service to play music
+    AudioFile audiofile = (AudioFile)Runtime.start("audiofile", "AudioFile");
+    // document pipeline to get metadata from the mp3s and other files.
     DocumentPipeline pipeline = (DocumentPipeline) Runtime.start("docproc", "DocumentPipeline");
-    // pipeline.workflowName = "default";
-    // create a workflow to load into that pipeline service
     WorkflowConfiguration workflowConfig = new WorkflowConfiguration("default");
     workflowConfig.setName("default");
-    workflowConfig.setNumWorkerThreads(16);
-    
+    // number of threads to extract metadata from the documents.
+    workflowConfig.setNumWorkerThreads(8);
+    // Some stages to get / stamp metadata on the documents being indexed.
     StageConfiguration stage1Config = new StageConfiguration();
     stage1Config.setStageClass("org.myrobotlab.document.transformer.SetStaticFieldValue");
     stage1Config.setStageName("SetTypeField");
     stage1Config.setStringParam("type", "file");
     workflowConfig.addStage(stage1Config);
-
+    // perform text extraction from the file using Apache Tika
     StageConfiguration stage2Config = new StageConfiguration();
     stage2Config.setStageClass("org.myrobotlab.document.transformer.TextExtractor");
     stage2Config.setStageName("TextExtractor");
     workflowConfig.addStage(stage2Config);
-
+    // rename some fields to be more human readable and to match the solr schema.
     StageConfiguration stage3Config = new StageConfiguration();
     stage3Config.setStageClass("org.myrobotlab.document.transformer.RenameFields");
     stage3Config.setStageName("RenameFields");
@@ -139,31 +135,19 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     fieldNameMap.put("xmpdm_artist", "artist");
     fieldNameMap.put("dc_title", "title");
     fieldNameMap.put("xmpdm_album", "album");
-    
     stage3Config.setMapProperty("fieldNameMap", fieldNameMap);
     workflowConfig.addStage(stage3Config);;
-    
-    //stage3Config.
-    
-    // TODO: rename fields..
+    // TODO: rename more fields..
     // TODO: delete unnecessary fields.
-    //    StageConfiguration stage2Config = new StageConfiguration();
-    //    stage2Config.setStageClass("org.myrobotlab.document.transformer.SendToSolr");
-    //    stage2Config.setStageName("SendToSolr");
-    //    stage2Config.setStringParam("solrUrl", "http://phobos:8983/solr/graph");
-    //    workflowConfig.addStage(stage2Config);
-    
     pipeline.setConfig(workflowConfig);
     pipeline.initalize();
-
     // attach the pipeline to solr.
     // 
     pipeline.attachDocumentListener(solr.getName());
-    
     // start the file connector to scan the file system.
     // RSSConnector connector = (RSSConnector) Runtime.start("rss", "RSSConnector");
     FileConnector connector = (FileConnector) Runtime.start("fileconnector", "FileConnector");
-    connector.setDirectory("Z:\\Movies");
+    connector.setDirectory("Z:\\Music");
 
     // connector to pipeline connection
     connector.attachDocumentListener(pipeline.getName());
@@ -230,7 +214,7 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
   @Override
   public ServiceConfig apply(ServiceConfig inConfig) {
     DocumentPipelineConfig config = (DocumentPipelineConfig)super.apply(inConfig);
-    // TODO Auto-generated method stub
+    // 
     this.workFlowConfig = config.workFlowConfig;
     return config;
   }

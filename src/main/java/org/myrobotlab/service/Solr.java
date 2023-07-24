@@ -535,13 +535,13 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     query.setFacet(true);
     query.setFacetLimit(numFacetBuckets);
     query.setFacetMinCount(1);
-    
-    query.add("qf", "dc_title");
-    query.add("qf", "xmpdm_artist_txt_en");
-    query.add("qf", "xmpdm_releasedate");
-    query.add("qf", "filepath_txt_en");
-    query.add("qf", "xmpdm_album_txt_en");
-    query.add("qf", "xmpdm_genre_txt_en");
+    // default search fields.
+    query.add("qf", "title^10");
+    query.add("qf", "artist^5");
+    query.add("qf", "album^2");
+    query.add("qf", "genre");
+    query.add("qf", "year");
+
     query.setParam("defType", "edismax");
     query.setParam("q.op", "AND");
     // TODO: expose sorting in a fancier search method signature
@@ -550,10 +550,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     for (String field : facetFields) {
       query.addFacetField(field);
     }
-
     for (String filter : (String[])filters) {
-      query.addFilterQuery(filter);
-      
+      query.addFilterQuery(filter);      
     }
 
     QueryResponse resp = null;
@@ -576,6 +574,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     // from the results  ( SolrDocumentList ) object, like the number found, the start offset
     // So we manually copy that info to top level items in the response so the webgui
     // can get at it.
+    // TODO: why are the facet buckets not ordered!!!
     long numFound = resp.getResults().getNumFound();
     long start = resp.getResults().getStart();
     Float maxScore = resp.getResults().getMaxScore();
@@ -589,6 +588,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     resp.getResponse().add("size", resp.getResults().size());
     // Now, let's convert the byte arrays to base64 image strings.
     for (SolrDocument d : resp.getResults()) {
+      // TODO: decide what to do based on the mime type...
       if (d.containsKey("bytes")) {
         // encode this as base 64 image data.
         // TODO: support multiple byte arrays.
@@ -598,9 +598,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       }
     }
 
-
     String jsonResponse = resp.jsonStr(); 
     // publish the json string of the response.
+    // System.err.println(jsonResponse);
+    
     return jsonResponse;
   };
 

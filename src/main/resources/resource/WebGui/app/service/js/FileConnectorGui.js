@@ -34,13 +34,15 @@ angular.module('mrlapp.service.FileConnectorGui', []).controller('FileConnectorG
     
     };
     
-    $scope.startCrawling = function(filepath) {
+    $scope.startCrawling = function() {		
+		console.info("Start crawling>" + $scope.filepath + "<")
     	mrl.sendTo($scope.service.name, "setDirectory", $scope.filepath)
     	mrl.sendTo($scope.service.name, "startCrawling");
     }
 
-    $scope.stopCrawling = function(filepath) {
+    $scope.stopCrawling = function() {
     	// TODO: this doesn't seem to work.
+    	console.info("Stop crawling")
     	mrl.sendTo($scope.service.name, "stopCrawling");
     }
     

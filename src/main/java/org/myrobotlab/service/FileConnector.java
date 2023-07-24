@@ -43,21 +43,27 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
   public void startCrawling() {
     state = ConnectorState.RUNNING;
     Path startPath = Paths.get(((FileConnectorConfig)config).directory);
+    log.info("Started Crawling {}", startPath);
     try {
       Files.walkFileTree(startPath, this);
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
+    // we're done.. publish a flush so other down stream components know to flush any partial batches they might have.
+    invoke("publishFlush");
     log.info("File Connector finished walking the tree.");
+    
     // TODO: should we flush here immediately?
     state = ConnectorState.STOPPED;
   }
 
   @Override
   public void stopCrawling() {
+    log.info("Stop crawling requested...");    
     interrupted = true;
     state = ConnectorState.INTERRUPTED;
+//    notify();
   }
 
   @Override
@@ -86,7 +92,10 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
 
   @Override
   public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-    // throw exc;
+    if (interrupted) {
+      state = ConnectorState.INTERRUPTED;
+      return FileVisitResult.TERMINATE;
+    }
     String docId = getDocIdPrefix() + file.toFile().getAbsolutePath();
     Document doc = new Document(docId);
     doc.setField("type", "file");
@@ -95,7 +104,6 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
     // doc.setField("timestamp", new Date());
     feed(doc);
     log.warn("Exception processing {}", file, exc);
-
     // Keep going!!!
     return FileVisitResult.CONTINUE;
   }
@@ -106,7 +114,6 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
       throw exc;
     }
     return FileVisitResult.CONTINUE;
-
   }
 
   public String getDirectory() {

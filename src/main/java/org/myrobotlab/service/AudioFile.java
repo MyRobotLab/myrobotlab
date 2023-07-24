@@ -175,6 +175,7 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
 
   public AudioData play(String filename, boolean blocking, Integer repeat, String track) {
 
+    log.info("Play called for Filename {}", filename);
     if (track == null || track.isEmpty()) {
       track = currentTrack;
     }
