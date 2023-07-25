@@ -346,7 +346,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
      */
     this.describe = function(request) {
         console.log('--> got describe: and set jsRuntimeMethodCallbackMap')
-        hello = request.data[1]
+        hello = JSON.parse(request.data[1])
 
         remotePlatform = hello.platform
         // FIXME - remove this - there aren't 1 remoteId there are many !
@@ -959,10 +959,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         let createPanel = function(fullname, type, x, y, width, height, zIndex, data) {
 
+            let displayName = fullname.endsWith(_self.remoteId)?_self.getShortName(fullname):fullname
+            
             let panel = {
                 simpleName: _self.getSimpleName(type),
                 name: fullname,
-                displayName: _self.getShortName(fullname),
+                displayName: displayName,
 
                 //the state the loading of the template is in (loading, loaded, notfound) - probably can be removed
                 templatestatus: null,
@@ -1107,7 +1109,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             }
 
             panels[newPanel.name].name = newPanel.name
-            panels[newPanel.name].displayName = _self.getShortName(newPanel.name)
+            panels[newPanel.name].displayName = _self.getShortName(newPanel.name) 
             if (newPanel.simpleName) {
                 panels[newPanel.name].simpleName = newPanel.simpleName
             }
