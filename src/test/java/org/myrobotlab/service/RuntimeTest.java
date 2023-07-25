@@ -10,10 +10,12 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.DescribeQuery;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.Gateway;
@@ -110,10 +112,12 @@ public class RuntimeTest extends AbstractTest {
   public void testGetDescribeMessage() {
     Message msg = Runtime.get().getDescribeMsg("testUUID");
     assertEquals("Incorrect method", "describe", msg.method);
-    assertEquals("Incorrect data length", 2, msg.data.length);
-    assertEquals("Incorrect UUID for describe message", Gateway.FILL_UUID_MAGIC_VAL, msg.data[0]);
-    assertTrue("Incorrect message second parameter type", DescribeQuery.class.isAssignableFrom(msg.data[1].getClass()));
-    assertEquals("Incorrect UUID in describe query", "testUUID", ((DescribeQuery)msg.data[1]).uuid);
+    assertEquals("Incorrect data length", 2, msg.data.length);    
+    String fillUuid = CodecUtils.fromJson((String)msg.data[0], String.class);
+    assertEquals("Incorrect UUID for describe message", Gateway.FILL_UUID_MAGIC_VAL, fillUuid);
+    DescribeQuery dq = CodecUtils.fromJson((String)msg.data[1], DescribeQuery.class);
+    assertTrue("Incorrect message second parameter type", DescribeQuery.class.isAssignableFrom(dq.getClass()));
+    assertEquals("Incorrect UUID in describe query", "testUUID", dq.uuid);
   }
 
 }
