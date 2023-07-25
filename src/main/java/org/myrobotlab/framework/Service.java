@@ -1693,7 +1693,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // if you know the service is local - use same thread
     // to call directly
     ServiceInterface si = Runtime.getService(name);
-    if (si != null) {
+    if (si != null && CodecUtils.isLocal(name)) {
       invokeOn(true, si, method, data);
       return;
     }
