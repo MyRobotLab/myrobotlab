@@ -38,9 +38,21 @@
     <td>
     <table class="table table-striped">
       <tr ng-repeat="result in solrResults.response track by $index" class="ng-scope">
-        <td>
-          <br/>
+		<td>
+	      <!-- we want to conditionally render a different template depending on the type of doc it is. -->
+	      <div ng-if="result.content_type == 'audio/mpeg'">
+			  <!-- here we can render specific fields like artist/album/song.. -->
+			  <a ng-click="playFile(result.filepath)">{{result.title[0]}}</a> <br/>
+			  Artist: {{result.artist[0]}} <br/>
+			  Album: {{result.album[0]}} Year: {{result.year[0]}} <br/> 
+			  Genre: {{result.genre[0]}} <br/>
+			  Filepath:  {{result.filepath[0]}}
+		  </div>
+		  <!-- unknown result type... render all fields. -->
+		  <div ng-if="result.content_type != 'audio/mpeg'">
+			  <!-- this is not a song.. -->
           <b>Doc: {{$index + startOffset + 1}}</b>
+          
           <table class="searchResult" class>
             <tr ng-repeat="(key, value) in result">
               <td><strong>{{key}}</strong></td>
@@ -49,7 +61,8 @@
               <td ng-if="key != 'bytes' && key != 'filepath'">{{value}}</td> 
             </tr>
           </table>
-         <!--  <div class="chatBalloon{{chatContent.type}}"><div class="chatContent" ng-bind-html="chatContent.text"></div></div>  -->
+         
+         </div>
         </td>
       </tr>
     </table>
