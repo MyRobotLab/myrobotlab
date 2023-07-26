@@ -2442,11 +2442,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // runtime@{id}
       // subscribe to "describe"
       MRLListener listener = new MRLListener("describe", getFullName(), "onDescribe");
-      Message msg = Message.createMessage(getFullName(), "runtime", "addListener", listener);
-      client2.send(CodecUtils.toJson(msg));
+      Message msg = Message.createMessage(getFullName(), "runtime", "addListener", listener);      
+      client2.send(CodecUtils.toJsonMsg(msg));
 
       // send describe
-      client2.send(CodecUtils.toJson(getDescribeMsg(null)));
+      client2.send(CodecUtils.toJsonMsg(getDescribeMsg(null)));
 
     } catch (Exception e) {
       log.error("connect to {} giving up {}", url, e.getMessage());
