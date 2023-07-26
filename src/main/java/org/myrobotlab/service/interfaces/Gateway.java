@@ -82,8 +82,8 @@ public interface Gateway extends NameProvider {
             "runtime",
             "describe",
             new Object[] {
-                    FILL_UUID_MAGIC_VAL,
-                    new DescribeQuery(Platform.getLocalInstance().getId(), connId)
+                FILL_UUID_MAGIC_VAL,
+                new DescribeQuery(Platform.getLocalInstance().getId(), connId)
             }
             );
   }
