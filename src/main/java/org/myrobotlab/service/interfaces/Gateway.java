@@ -28,7 +28,6 @@ package org.myrobotlab.service.interfaces;
 import java.util.List;
 import java.util.Map;
 
-import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.DescribeQuery;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
@@ -83,8 +82,8 @@ public interface Gateway extends NameProvider {
             "runtime",
             "describe",
             new Object[] {
-                    CodecUtils.toJson(FILL_UUID_MAGIC_VAL),
-                    CodecUtils.toJson(new DescribeQuery(Platform.getLocalInstance().getId(), connId))
+                FILL_UUID_MAGIC_VAL,
+                new DescribeQuery(Platform.getLocalInstance().getId(), connId)
             }
             );
   }
