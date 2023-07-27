@@ -134,13 +134,17 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * @throws IOException
    *           boom
    */
-  public void startEmbedded(String path) throws SolrServerException, IOException {
+  public synchronized void startEmbedded(String path) throws SolrServerException, IOException {
     // let's extract our default configs into the directory/
     // FileIO.extract(Util.getResourceDir() , "Solr/core1", path);
     // FileIO.extract(Util.getResourceDir() , "Solr/solr.xml", path +
     // File.separator + "solr.xml");
     // load up the solr core container and start solr
-
+    if (embeddedSolrServer != null) {
+      log.info("Embedded solr already running.");
+      return;
+    }
+    
     // FIXME - a bit unsatisfactory
     File f = new File(getDataInstanceDir());
     f.mkdirs();
@@ -222,6 +226,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * 
    */
   public void commit() {
+    // if we are explicitly calling a commit.. first flush any partial batch
+    // followed by the commit.
+    flushDocumentBatch(true);
     try {
       if (embeddedSolrServer != null) {
         embeddedSolrServer.commit();
