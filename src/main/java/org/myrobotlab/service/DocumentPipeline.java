@@ -152,7 +152,7 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     // connector to pipeline connection
     connector.attachDocumentListener(pipeline.getName());
 
-    Runtime.saveConfig("musicsearch");
+    Runtime.saveConfig("mediasearch");
     // start the crawl!
     boolean doCrawl = false;
     if (doCrawl) {
@@ -216,6 +216,12 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     DocumentPipelineConfig config = (DocumentPipelineConfig)super.apply(inConfig);
     // 
     this.workFlowConfig = config.workFlowConfig;
+    try {
+      initalize();
+    } catch (ClassNotFoundException e) {
+      log.error("Error initializing the document pipeline.", e);
+      // TODO: shoiuld we throw some runtime here?
+    }
     return config;
   }
 
