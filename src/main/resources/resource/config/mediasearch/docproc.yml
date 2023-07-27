@@ -1,0 +1,36 @@
+!!org.myrobotlab.service.config.DocumentPipelineConfig
+listeners:
+- callback: onFlush
+  listener: solr
+  method: publishFlush
+- callback: onDocument
+  listener: solr
+  method: publishDocument
+peers: null
+type: DocumentPipeline
+workFlowConfig:
+  config: {
+    }
+  name: default
+  numWorkerThreads: 8
+  queueLength: 50
+  stages:
+  - config:
+      type: file
+    stageClass: org.myrobotlab.document.transformer.SetStaticFieldValue
+    stageName: SetTypeField
+  - config: {
+      }
+    stageClass: org.myrobotlab.document.transformer.TextExtractor
+    stageName: TextExtractor
+  - config:
+      fieldNameMap:
+        xmpdm_duration: duration
+        xmpdm_genre: genre
+        dc_title: title
+        xmpdm_tracknumber: tracknumber
+        xmpdm_artist: artist
+        xmpdm_album: album
+        xmpdm_releasedate: year
+    stageClass: org.myrobotlab.document.transformer.RenameFields
+    stageName: RenameFields

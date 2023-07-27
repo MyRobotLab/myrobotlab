@@ -1,0 +1,11 @@
+!!org.myrobotlab.service.config.PythonConfig
+listeners: null
+modulePaths:
+- resource\Python\modules
+peers: null
+scriptRootDir: C:\dev\workspace.mrl4\myrobotlab\data\Python\python
+startScripts: [
+  ]
+stopScripts: [
+  ]
+type: Python
