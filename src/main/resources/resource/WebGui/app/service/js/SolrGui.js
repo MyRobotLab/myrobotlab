@@ -8,7 +8,7 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
     $scope.startOffset = 0;
     $scope.endOffset = 0;
     $scope.numFound = 0;
-    $scope.pageSize = 20;
+    $scope.pageSize = 50;
     $scope.filters = [];
     // TODO: maybe some other fields..
     // TODO: support range facets

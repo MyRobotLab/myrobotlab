@@ -42,7 +42,8 @@
 	      <!-- we want to conditionally render a different template depending on the type of doc it is. -->
 	      <div ng-if="result.content_type == 'audio/mpeg'">
 			  <!-- here we can render specific fields like artist/album/song.. -->
-			  <a ng-click="playFile(result.filepath)">{{result.title[0]}}</a> <br/>
+			  <div ng-if="result.title[0]"><a ng-click="playFile(result.filepath)">{{result.title[0]}}</a></div>
+			  <div ng-if="!result.title[0]"><a ng-click="playFile(result.filepath)">{{result.filepath[0]}}</a></div>
 			  Artist: {{result.artist[0]}} <br/>
 			  Album: {{result.album[0]}} Year: {{result.year[0]}} <br/> 
 			  Genre: {{result.genre[0]}} <br/>

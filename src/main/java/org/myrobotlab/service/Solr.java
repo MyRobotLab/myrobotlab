@@ -532,7 +532,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    */
   public QueryResponse searchWithFacets(String queryString, int rows, int start, String[] facetFields, String[] filters) {
     log.info("Searching for (with facets): {}", queryString);
-    int numFacetBuckets = 20;
+    int numFacetBuckets = 50;
     SolrQuery query = new SolrQuery();
     query.set("q", queryString);
     query.setRows(rows);
