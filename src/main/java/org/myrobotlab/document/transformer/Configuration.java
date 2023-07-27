@@ -8,7 +8,7 @@ import java.util.Map;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
 
-public class Configuration implements Serializable {
+public abstract class Configuration implements Serializable {
 
   // TODO: add a map type.
   // TODO: push the name/class onto this ?
@@ -22,14 +22,9 @@ public class Configuration implements Serializable {
    * 
    */
   private static final long serialVersionUID = 1L;
-  public HashMap<String, Object> config = null;
-  // private XStream xstream = null;
+  public HashMap<String, Object> config = new HashMap<String, Object>();
 
   public Configuration() {
-    config = new HashMap<String, Object>();
-    // figure that we need to be able to serialize / deserialize
-    // TODO: consider a faster driver / serializer
-    // xstream = new XStream(new StaxDriver());
   }
 
   public void setStringParam(String name, String value) {

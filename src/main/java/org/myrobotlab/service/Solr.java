@@ -177,9 +177,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    */
   public void addDocument(SolrInputDocument doc) {
     // Always batch!
-    ArrayList<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
-    docs.add(doc);
-    addDocuments(docs);
+    addDocuments(List.of(doc));
   }
 
   /**
@@ -670,11 +668,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   @Override
   public ProcessingStatus onDocument(Document doc) {
     // always be batching when sending docs.
-    ArrayList<Document> docs = new ArrayList<Document>();
-    docs.add(doc);
     // TODO: we want to add to the current batch to send..  
     // and make sure we have a thread flushing the batch if it gets too old.
-    return onDocuments(docs);
+    return onDocuments(List.of(doc));
   }
 
   @Override

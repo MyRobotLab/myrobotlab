@@ -9,7 +9,6 @@ peers: null
 registry:
 - runtime
 - security
-- python
 - webgui
 - solr
 - audiofile
