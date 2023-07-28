@@ -171,7 +171,7 @@
   <dependency>
     <groupId>org.boofcv</groupId>
     <artifactId>boofcv-core</artifactId>
-    <version>0.31</version>
+    <version>0.43.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
