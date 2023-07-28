@@ -69,7 +69,7 @@ import org.slf4j.Logger;
  */
 public class Solr extends Service implements DocumentListener, TextListener, MessageListener {
 
-  private SolrConfig config;
+
   private static final String CORE_NAME = "core1";
   public final static Logger log = LoggerFactory.getLogger(Solr.class);
   private static final long serialVersionUID = 1L;
@@ -1166,7 +1166,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   @Override
   public ServiceConfig apply(ServiceConfig inConfig) {
     // 
-    this.config = (SolrConfig)super.apply(inConfig);
+    SolrConfig config = (SolrConfig)super.apply(inConfig);
     if (config.embedded) {
       // 
       try {

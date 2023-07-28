@@ -44,9 +44,10 @@
 			  <!-- here we can render specific fields like artist/album/song.. -->
 			  <div ng-if="result.title[0]"><a ng-click="playFile(result.filepath)">{{result.title[0]}}</a></div>
 			  <div ng-if="!result.title[0]"><a ng-click="playFile(result.filepath)">{{result.filepath[0]}}</a></div>
-			  Artist: {{result.artist[0]}} <br/>
-			  Album: {{result.album[0]}} Year: {{result.year[0]}} <br/> 
-			  Genre: {{result.genre[0]}} <br/>
+			  <div ng-if="result.artist[0]">Artist: {{result.artist[0]}}</div>
+			  <div ng-if="result.album[0]">Album: {{result.album[0]}}</div> 
+			  <div ng-if="result.year[0]">Year: {{result.year[0]}}</div>
+			  <div ng-if="result.genre[0]">Genre: {{result.genre[0]}}</div>
 			  Filepath:  {{result.filepath[0]}}
 		  </div>
 		  <!-- unknown result type... render all fields. -->

@@ -60,7 +60,7 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
     
     // run the search based on the current query params selected.
     $scope.execSearch = function() {
-      mrl.sendTo($scope.service.name, "searchWithFacets", $scope.queryString, 10, $scope.startOffset, $scope.facetFields, $scope.filters);
+      mrl.sendTo($scope.service.name, "searchWithFacets", $scope.queryString, $scope.pageSize, $scope.startOffset, $scope.facetFields, $scope.filters);
     }
     
     $scope.filter = function(field, value) {
