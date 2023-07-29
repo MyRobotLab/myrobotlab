@@ -75,6 +75,7 @@ public class WebXR extends Service {
       Runtime.start("webxr", "WebXr");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
+      
       webgui.autoStartBrowser(false);
       webgui.startService();
       Runtime.start("vertx", "Vertx");
