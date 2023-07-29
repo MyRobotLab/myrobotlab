@@ -25,6 +25,7 @@
 
 package org.myrobotlab.framework;
 
+// java or mrl imports only - no dependencies !
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -56,7 +57,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Broadcaster;
@@ -1028,22 +1028,47 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public Method[] getMethods() {
     return this.getClass().getMethods();
   }
-
+  
+  /**
+   * Returns a map containing all interface names from the class hierarchy and the interface hierarchy of the
+   * current class.
+   *
+   * @return A map containing all interface names.
+   */
   public Map<String, String> getInterfaceSet() {
-    Map<String, String> ret = new TreeMap<>();
-    Class<?> c = getClass();
-    while (c != Object.class) {
-
-      Class<?>[] interfaces = c.getInterfaces();
-      for (Class<?> interfaze : interfaces) {
-        // ya silly :P - but gson's default conversion of a HashSet is an
-        // array
-        ret.put(interfaze.getName(), interfaze.getName());
-      }
-      c = c.getSuperclass();
-    }
-    return ret;
+      Map<String, String> ret = new TreeMap<>();
+      Set<Class<?>> visitedClasses = new HashSet<>();
+      getAllInterfacesHelper(getClass(), ret, visitedClasses);
+      return ret;
   }
+
+  /**
+   * Recursively traverses the class hierarchy and the interface hierarchy to add all interface names to the
+   * specified map.
+   *
+   * @param c              The class to start the traversal from.
+   * @param ret            The map to store the interface names.
+   * @param visitedClasses A set to keep track of visited classes to avoid infinite loops.
+   */
+  private void getAllInterfacesHelper(Class<?> c, Map<String, String> ret, Set<Class<?>> visitedClasses) {
+      if (c != null && !visitedClasses.contains(c)) {
+          // Add interfaces from the current class
+          Class<?>[] interfaces = c.getInterfaces();
+          for (Class<?> interfaze : interfaces) {
+              ret.put(interfaze.getName(), interfaze.getName());
+          }
+
+          // Add interfaces from interfaces implemented by the current class
+          for (Class<?> interfaze : interfaces) {
+              getAllInterfacesHelper(interfaze, ret, visitedClasses);
+          }
+
+          // Recursively traverse the superclass hierarchy
+          visitedClasses.add(c);
+          getAllInterfacesHelper(c.getSuperclass(), ret, visitedClasses);
+      }
+  }
+  
 
   public Message getMsg() throws InterruptedException {
     return inbox.getMsg();
@@ -1440,7 +1465,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
           // so doesn't conflict with remote routes
           Listener newConfigListener = new Listener(
                   listener.topicMethod,
-                  StringUtils.removeEnd(
+                  CodecUtils.removeEnd(
                           listener.callbackName,
                           '@' + Platform.getLocalInstance().getId()
                   ),

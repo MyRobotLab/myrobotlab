@@ -12,8 +12,14 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
-        $scope.options.attachName = service.config.controller        
+        $scope.options.attachName = service.config.controller
         $scope.options.isAttached = service.attached
+        $scope.options.interface = 'PinArrayControl'
+
+        // since attach broadcasts we'll get the pin list here
+        if ($scope?.service?.config?.controller) {
+            msg.send('getPinList', $scope.service.config.controller)
+        }
     }
 
     // init scope variables
@@ -30,7 +36,7 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
         case 'onPinList':
             $scope.pinList = []
             for (var pinDef of data) {
-              $scope.pinList.push(pinDef.pin)
+                $scope.pinList.push(pinDef.pin)
             }
             $scope.$apply()
             break
@@ -78,7 +84,7 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
     }
 
     $scope.setPin = function() {
-        if ($scope.service.config.pin){
+        if ($scope.service.config.pin) {
             msg.send('setPin', $scope.service.config.pin)
             msg.send('broadcastState')
         }
@@ -89,12 +95,12 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
         msg.send('broadcastState')
     }
 
-    $scope.getActiveImage = function(){
-        if ($scope.service.active){
+    $scope.getActiveImage = function() {
+        if ($scope.service.active) {
             return '../../green.png'
-        } else if ($scope.service.active === false){
+        } else if ($scope.service.active === false) {
             return '../../red.png'
-        } else{
+        } else {
             // undefined / unknown
             return '../../grey.png'
         }
@@ -103,10 +109,10 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
     msg.subscribe('publishSense')
     msg.subscribe('getPinList')
 
-    if ($scope?.service?.config?.controller){
+    if ($scope?.service?.config?.controller) {
         msg.send('getPinList', $scope.service.config.controller)
     }
-    
+
     msg.subscribe(this)
 }
 ])

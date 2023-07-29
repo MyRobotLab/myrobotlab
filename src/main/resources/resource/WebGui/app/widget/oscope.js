@@ -165,7 +165,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
                         // move to last position...
                         ctx.moveTo(trace.x0, trace.y0)
                         trace.x1++
-                        trace.y1 = c
+                        trace.y1 = y
                         // draw line to x1,y1 
                         ctx.lineTo(trace.x1, trace.y1)
                         // save current values

@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.TimeoutException;
 import org.myrobotlab.logging.LoggerFactory;
@@ -68,7 +69,7 @@ public class Pir extends Service implements PinListener {
       return;
     }
 
-    c.controller = control;
+    c.controller = CodecUtils.getShortName(control);
 
     // fire and forget
     send(c.controller, "attach", getName());
@@ -77,7 +78,7 @@ public class Pir extends Service implements PinListener {
     
     // enable if configured
     if (c.enable) {
-      send(c.controller, "enablePin", c.pin);
+        send(c.controller, "enablePin", c.pin, c.rate);
     }
     
     broadcastState();
@@ -230,6 +231,19 @@ public class Pir extends Service implements PinListener {
 
     return c;
   }
+  
+  @Override
+  public ServiceConfig getConfig() {
+    PirConfig c = (PirConfig)super.getConfig();
+    if (c.controller != null) {
+      // it makes sense that the controller should always be local for a PIR
+      // but in general this is bad practice on 2 levels
+      // 1. in some other context it might make sense not to be local
+      // 2. it should just be another listener on ServiceConfig.listener
+      c.controller=CodecUtils.getShortName(c.controller);
+    }
+    return c;
+  }
 
   @Override
   public void onPin(PinData pindata) {
@@ -334,17 +348,23 @@ public class Pir extends Service implements PinListener {
 
       LoggingFactory.init("info");
 
-      Pir pir = (Pir) Runtime.start("pir", "Pir");
-      pir.setPin("D6");
 
-      Runtime.start("webgui", "WebGui");
-      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-      mega.connect("/dev/ttyACM2");
+      // Runtime.start("webgui", "WebGui");
+      
+      // standard install - develop and debug using config
+      Runtime.main(new String[] {"--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python"});
+          
 
       boolean done = true;
       if (done) {
         return;
       }
+
+      Pir pir = (Pir) Runtime.start("pir", "Pir");
+      pir.setPin("D23");
+      
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      mega.connect("/dev/ttyACM71");
 
       mega.attach(pir);
 
