@@ -10,6 +10,7 @@ import org.myrobotlab.document.transformer.AbstractStage;
 import org.myrobotlab.document.transformer.StageConfiguration;
 import org.myrobotlab.document.transformer.WorkflowConfiguration;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.DocumentPipeline;
 import org.slf4j.Logger;
 
 /**
@@ -24,10 +25,12 @@ public class WorkflowWorker extends Thread {
 
   private final LinkedBlockingQueue<Document> queue;
 
-  WorkflowWorker(WorkflowConfiguration workflowConfig, LinkedBlockingQueue<Document> queue, String workerId) throws ClassNotFoundException {
+  private final DocumentPipeline pipeline;
+  WorkflowWorker(WorkflowConfiguration workflowConfig, LinkedBlockingQueue<Document> queue, String workerId, DocumentPipeline pipeline) throws ClassNotFoundException {
     // set the thread name
     this.setName("WorkflowWorker-" + workflowConfig.getName() + "-" + workerId);
     this.queue = queue;
+    this.pipeline = pipeline;
     stages = new ArrayList<AbstractStage>();
     for (StageConfiguration stageConf : workflowConfig.getStages()) {
       String stageClass = stageConf.getStageClass().trim();
@@ -63,6 +66,7 @@ public class WorkflowWorker extends Thread {
           processing = true;
           // process from the start of the workflow
           processDocumentInternal(doc, 0);
+          pipeline.invoke("publishDocument", doc);
           processing = false;
         }
       } catch (Exception e) {
