@@ -291,7 +291,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
         try {
           // org.myrobotlab.framework.Message msg =
           // CodecUri.decodePathInfo(pathInfo);
-          org.myrobotlab.framework.Message msg = CodecUtils.cliToMsg(null, getName(), null, pathInfo);
+          org.myrobotlab.framework.Message msg = CodecUtils.pathToMsg(getName(), pathInfo);
 
           // FIXME - do the same as InProcessCli & WebGui
           Object ret = null;

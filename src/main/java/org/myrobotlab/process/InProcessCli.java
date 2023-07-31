@@ -348,7 +348,13 @@ public class InProcessCli implements Runnable {
    * @return message
    */
   public Message cliToMsg(String data) {
-    return CodecUtils.cliToMsg(contextPath, "runtime@" + id, "runtime@" + remoteId, data);
+
+    if (contextPath != null) {
+      data = contextPath + data;
+    }
+
+    // FIXME - is this "blocking?"
+    return CodecUtils.pathToMsg("runtime@" + id, data);
   }
 
   public void writeToJson(Object o) {

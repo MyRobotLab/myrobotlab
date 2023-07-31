@@ -169,10 +169,11 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
     password = security.getKey(getName() + ".password");
   }
 
+  // FIXME - more than one type of gateway ... client gateway and server gateway  
   @Override
   public void connect(String uri) throws Exception {
-    // TODO Auto-generated method stub
-
+    // Mqtt Brokers do not "connect" to other instances
+    // NOOP
   }
 
   public String getAddress() {
@@ -339,7 +340,8 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
       // don't let broker process messages
       if (processApiMessages && topic.startsWith(serviceTopic)) {
         String mrlUri = "/" + topic.substring((serviceTopic).length());
-        Message msg = CodecUtils.cliToMsg(null, getFullName(), null, mrlUri);
+        // FIXME - should they all be full name ?
+        Message msg = CodecUtils.pathToMsg(getFullName(), mrlUri);
         String payload = m.getPayload();
         if (payload != null && payload.length() > 0) {
           msg.data = CodecUtils.decodeArray(payload);
@@ -583,6 +585,16 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
   public static void main(String[] args) {
     try {
       LoggingFactory.init("info");
+      
+      
+      Runtime.main(new String[] {"--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python"});
+      
+
+      boolean done = true;
+      if (done) {
+        return;
+      }      
+      
       Runtime.main(new String[] { "--id", "c2"});
       Python python = (Python) Runtime.start("python", "Python");
 
@@ -596,9 +608,13 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
 
       Clock clock01 = (Clock) Runtime.start("clock01", "Clock");
       // clock01.startClock();
+      
+ 
+
 
       Mqtt mqtt = (Mqtt) Runtime.start("mqtt02", "Mqtt");
       mqtt.setAutoConnect(false);
+            
       mqtt.connect("mqtt://localhost:1883");
       // mqtt.connect("mqtt://test.mosquitto.org:1883");
       // mqtt.publish("mrl/");

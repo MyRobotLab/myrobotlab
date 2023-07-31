@@ -537,10 +537,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       } else if (apiKey.equals(CodecUtils.API_SERVICE)) {
 
-        Message msg = CodecUtils.cliToMsg(
-                null,
+        Message msg = CodecUtils.pathToMsg(
                 getName(),
-                null,
                 URLDecoder.decode(r.getRequest().getPathInfo(), StandardCharsets.UTF_8));
         if (bodyData != null) {
           msg.data = CodecUtils.fromJson(bodyData, Object[].class);

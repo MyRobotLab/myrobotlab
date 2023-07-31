@@ -724,7 +724,7 @@ public class CodecUtils {
         }
 
         // Not an else since useVirtClassField can be set in the above if block
-        if (useVirtClassField) {
+        if (useVirtClassField && msg.data != null) {
             for (int i = 0; i < msg.data.length; i++) {
                 if (msg.data[i] instanceof String) {
                     // GSON ignores custom deserializers when going to Object
@@ -1101,11 +1101,17 @@ public class CodecUtils {
      * @param contextPath - prefix to be added if supplied
      * @param from        - sender
      * @param to          - target service
-     * @param cmd         - cli encoded msg
+     * @param path         - cli encoded msg
      * @return - a Message derived from cli
      */
-    static public Message cliToMsg(String contextPath, String from, String to, String cmd) {
-        Message msg = Message.createMessage(from, to, "ls", null);
+    static public Message pathToMsg(String from, String path) {
+        // Message msg = Message.createMessage(from,"ls", null);
+      Message msg = new Message();
+      msg.name = "runtime"; // default ?
+      msg.method = "ls";
+      
+      // not required unless asynchronous
+      msg.sender = from;
 
         /**
          * <pre>
@@ -1119,7 +1125,7 @@ public class CodecUtils {
          "/{serviceName}/" - list methods of service
          "/{serviceName}/{method}" - invoke method
          "/{serviceName}/{method}/" - list parameters of method
-         "/{serviceName}/{method}/p0/p1/p2" - invoke method with parameters
+         "/{serviceName}/{method}/jsonP0/jsonP1/jsonP2/..." - invoke method with parameters
 
          or runtime
          {method}
@@ -1130,35 +1136,33 @@ public class CodecUtils {
          * </pre>
          */
 
-        cmd = cmd.trim();
+        path = path.trim();
 
         // remove uninteresting api prefix
-        if (cmd.startsWith(API_SERVICE_PATH)) {
-            cmd = cmd.substring(API_SERVICE_PATH.length());
+        if (path.startsWith(API_SERVICE_PATH)) {
+            path = path.substring(API_SERVICE_PATH.length());
         }
 
-        if (contextPath != null) {
-            cmd = contextPath + cmd;
-        }
-
-        // assume runtime as 'default'
-        if (msg.name == null) {
-            // FIXME "runtime" really needs to be a constant at the very least
-            msg.name = "runtime";
-        }
 
         // two possibilities - either it begins with "/" or it does not
         // if it does begin with "/" its an absolute path to a dir, ls, or invoke
         // if not then its a runtime method
 
-        if (cmd.startsWith("/")) {
+        if (path.startsWith("/")) {
             // ABSOLUTE PATH !!!
-            String[] parts = cmd.split("/");
+            String[] parts = path.split("/"); // <- this breaks things ! e.g. /runtime/connect/"http://localhost:8888"
 
             if (parts.length < 3) {
                 msg.method = "ls";
-                msg.data = new Object[]{cmd};
+                msg.data = new Object[]{path};
                 return msg;
+            }
+            
+            // ["", "runtime", "shutdown"]
+            if (parts.length == 3) {
+              msg.name = parts[1];
+              msg.method = parts[2];
+              return msg;
             }
 
             // fix me diff from 2 & 3 "/"
@@ -1168,37 +1172,16 @@ public class CodecUtils {
                 msg.name = parts[1];
                 // prepare the method
                 msg.method = parts[2].trim();
-
-                // FIXME - to encode or not to encode that is the question ...
-                // This source comes from the cli - which is "all" strings
-                // in theory it needs to be decoded from an all strings interface
-                // json is an all string interface so we will decode from cli strings
-                // (not json)
-                // using a json decoder - cuz it will work :P - and string will decode
-                // to a string
-                Object[] payload = new Object[parts.length - 3];
-                for (int i = 3; i < parts.length; ++i) {
-                    if (isInteger(parts[i])) {
-                        payload[i - 3] = makeInteger(parts[i]);
-                    } else if (isDouble(parts[i])) {
-                        payload[i - 3] = makeDouble(parts[i]);
-                    } else if (parts[i].equals("true") || parts[i].equals("false")) {
-                        payload[i - 3] = makeBoolean(parts[i]);
-                    } else { // String
-                        // sloppy as the cli does not require quotes \" but json does
-                        // humans won't add quotes - but we will
-                        payload[i - 3] = parts[i];
-                    }
-                }
-
-                msg.data = payload;
+                
+                // remove the first 3 slashes 
+                String data = path.substring(("/" + msg.name +"/" + msg.method + "/").length());
+                msg.data = extractJsonMsgFromUriPath(data);
             }
             return msg;
         } else {
-            // NOT ABOSLUTE PATH - SIMILAR TO EXECUTING IN THE RUNTIME /usr/bin path
-            // (ie runtime methods!)
-            // spaces for parameter delimiters ?
-            String[] spaces = cmd.split(" ");
+            // e.g. ls /webgui/
+            // retrieves all webgui methods
+            String[] spaces = path.split(" ");
             // FIXME - need to deal with double quotes e.g. func A "B and C" D - p0 =
             // "A" p1 = "B and C" p3 = "D"
             msg.method = spaces[0];
@@ -1218,6 +1201,58 @@ public class CodecUtils {
         }
     }
 
+    /**
+     * extractJsonFromPath exects a forwad slash deliminated string
+     * <pre>
+     * json1/json2/json3
+     * </pre>
+     * It will return the json parts in a string array
+     *  
+     * @param input
+     * @return
+     */
+    public static Object[] extractJsonMsgFromUriPath(String input) {
+      List<Object> fromJson = new ArrayList<>();
+      StringBuilder currentJson = new StringBuilder();
+      boolean insideQuotes = false;
+
+      for (char c : input.toCharArray()) {
+          if (c == '"' && !insideQuotes) {
+              insideQuotes = true;
+          } else if (c == '"' && insideQuotes) {
+              insideQuotes = false;
+          } 
+
+          if (c == '/' && !insideQuotes) {
+              if (currentJson.length() > 0) {
+                try {
+                  fromJson.add(CodecUtils.fromJson(currentJson.toString()));
+                } catch(JsonDeserializationException e) {
+                  // for backwards compatibility we are going to accept strings without quotes :(
+                  log.warn("input string {} not valid json, assuming string", currentJson);
+                  fromJson.add(currentJson.toString());
+                }
+                  currentJson = new StringBuilder();
+              }
+          } else {
+              currentJson.append(c);
+          }
+      }
+
+      if (currentJson.length() > 0) {
+        try {
+          fromJson.add(CodecUtils.fromJson(currentJson.toString()));
+        } catch(JsonDeserializationException e) {
+          // for backwards compatibility we are going to accept strings without quotes :(
+          log.warn("param input string {} not valid json, assuming string", currentJson);
+          fromJson.add(currentJson.toString());
+        }
+
+      }
+
+      return fromJson.toArray(new Object[0]);
+  }
+    
     /**
      * Parse the specified data as an Integer. If parsing
      * fails, returns null
