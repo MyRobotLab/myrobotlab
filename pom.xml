@@ -163,10 +163,6 @@
 <!-- Duplicate entry for com.squareup.okhttp3-okhttp-3.9.0 skipping -->
 <!-- AzureTranslator end -->
 
-<!-- BodyPart begin -->
-<!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
-<!-- BodyPart end -->
-
 <!-- BoofCv begin -->
   <dependency>
     <groupId>org.boofcv</groupId>
@@ -305,18 +301,62 @@
 <!-- Docker end -->
 
 <!-- DocumentPipeline begin -->
-  <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-core -->
-<dependency>
+  <dependency>
     <groupId>org.apache.tika</groupId>
     <artifactId>tika-core</artifactId>
     <version>2.8.0</version>
-</dependency>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+  </dependency>
   <dependency>
     <groupId>org.apache.tika</groupId>
     <artifactId>tika-parser-audiovideo-module</artifactId>
     <version>2.8.0</version>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
-    
   <dependency>
     <groupId>org.apache.opennlp</groupId>
     <artifactId>opennlp-tools</artifactId>
@@ -1243,13 +1283,13 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>cpython-platform</artifactId>
-    <version>3.11.3-1.5.9</version>
+    <version>3.10.8-1.5.8</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>cpython</artifactId>
-    <version>3.11.3-1.5.9</version>
+    <version>3.10.8-1.5.8</version>
     <scope>provided</scope>
   </dependency>
 <!-- Py4j end -->
