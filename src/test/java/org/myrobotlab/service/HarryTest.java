@@ -62,7 +62,7 @@ public class HarryTest extends AbstractTest {
     String rssUrl = "http://feeds.reuters.com/reuters/scienceNews";
     RSSConnector rss = (RSSConnector) Runtime.start("rss", "RSSConnector");
     rss.setRssUrl(rssUrl);
-    rss.addDocumentListener(solr);
+    rss.attachDocumentListener(solr.getName());
 
     Thread.sleep(1000);
 

@@ -72,7 +72,7 @@ public class WikipediaIndexer {
     docproc.initalize();
     docproc.startService();
     // attach the doc proc to the connector
-    wikipediaConnector.addDocumentListener(docproc);
+    wikipediaConnector.attachDocumentListener(docproc.getName());
     wikipediaConnector.setBatchSize(500);
     // start crawling...
     wikipediaConnector.getOutbox().setMaxQueueSize(1);
