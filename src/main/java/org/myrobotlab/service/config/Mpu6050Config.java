@@ -5,12 +5,12 @@ public class Mpu6050Config extends ServiceConfig {
   /**
    * bus for this device String to support writing to hex
    */
-  public String bus;
+  public String bus = "1";
 
   /**
    * address for this device String to support writing to hex
    */
-  public String address;
+  public String address = "0x68";
 
   /**
    * auto start mpu 6050
@@ -20,7 +20,7 @@ public class Mpu6050Config extends ServiceConfig {
   /**
    * orientation sample rate in hz
    */
-  public Double sampleRate;
+  public Double sampleRate = 1.0;
 
   /**
    * I2C Controller

@@ -2649,10 +2649,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   synchronized static public ServiceInterface start(String name, String type) {
     try {
-      if (name.equals("proxy")) {
-        log.info("herex");
-      }
-
       ServiceInterface requestedService = Runtime.getService(name);
       if (requestedService != null) {
         log.info("requested service already exists");

@@ -164,7 +164,7 @@ public class Clock extends Service {
     broadcastState();
   }
 
-  @Deprecated /* use startClock skipFirst is default behavior */
+  @Deprecated /* use start skipFirst is default behavior */
   public void startClock(boolean skipFirst) {
     startClock();
   }
@@ -172,8 +172,23 @@ public class Clock extends Service {
   /**
    * start the clock
    */
+  @Deprecated /* use start */
   public void startClock() {
     myClock.start();
+  }
+  
+  /**
+   * start the clock
+   */
+  public void start() {
+    myClock.start();
+  }
+  
+  /**
+   * stop the clock
+   */
+  public void stop() {
+    myClock.stop();
   }
 
   /**
@@ -188,6 +203,7 @@ public class Clock extends Service {
   /**
    * stop a clock
    */
+  @Deprecated /* use stop */
   public void stopClock() {
     myClock.stop();
   }

@@ -149,6 +149,8 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "ultrasonicLeft", "UltrasonicSensor", false);
 
     MouthControlConfig mouthControl = (MouthControlConfig) plan.get(getPeerName("mouthControl"));
+    
+    
 
     // setup name references to different services
     mouthControl.jaw = name + ".head.jaw";
@@ -201,6 +203,12 @@ public class InMoov2Config extends ServiceConfig {
     ear.listening = true;
     // remove, should only need ServiceConfig.listeners
     ear.textListeners = new String[]{name + ".chatBot"};
+    
+    // for servo mixer speech
+    ServoMixerConfig servoMixer = (ServoMixerConfig) plan.get(getPeerName("servoMixer"));
+    servoMixer.listeners = new ArrayList<>();
+    servoMixer.listeners.add(new Listener("publishText", name + ".mouth", "onText"));
+    
 
     JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.get(getPeerName("simulator"));
 
