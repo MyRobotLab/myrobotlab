@@ -1,6 +1,8 @@
 package org.myrobotlab.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
@@ -10,6 +12,10 @@ import org.myrobotlab.document.transformer.WorkflowConfiguration;
 import org.myrobotlab.document.workflow.WorkflowMessage;
 import org.myrobotlab.document.workflow.WorkflowServer;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.DocumentPipelineConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.DocumentListener;
 import org.myrobotlab.service.interfaces.DocumentPublisher;
 
@@ -38,14 +44,6 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
   public Document publishDocument(Document doc) {
     // publish the document to the framework
     return doc;
-  }
-
-  @Override
-  public void addDocumentListener(DocumentListener listener) {
-    // TODO Auto-generated method stub
-    // ??
-    // subscribe("publishDocument", topicMethod, callbackName, callbackMethod);
-
   }
 
   @Override
@@ -101,32 +99,65 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
 
   public static void main(String[] args) throws Exception {
 
-    // create the pipeline service in MRL
+    LoggingFactory.init("info");
+    Python python = (Python)Runtime.start("python", "Python");
+    WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
+    // Solr 
+    Solr solr = (Solr)Runtime.start("solr", "Solr");
+    // the audio file service to play music
+    AudioFile audiofile = (AudioFile)Runtime.start("audiofile", "AudioFile");
+    // document pipeline to get metadata from the mp3s and other files.
     DocumentPipeline pipeline = (DocumentPipeline) Runtime.start("docproc", "DocumentPipeline");
-
-    // pipeline.workflowName = "default";
-    // create a workflow to load into that pipeline service
     WorkflowConfiguration workflowConfig = new WorkflowConfiguration("default");
     workflowConfig.setName("default");
+    // number of threads to extract metadata from the documents.
+    workflowConfig.setNumWorkerThreads(8);
+    // Some stages to get / stamp metadata on the documents being indexed.
     StageConfiguration stage1Config = new StageConfiguration();
     stage1Config.setStageClass("org.myrobotlab.document.transformer.SetStaticFieldValue");
-    stage1Config.setStageName("SetTableField");
-    stage1Config.setStringParam("table", "MRL");
+    stage1Config.setStageName("SetTypeField");
+    stage1Config.setStringParam("type", "file");
     workflowConfig.addStage(stage1Config);
-
+    // perform text extraction from the file using Apache Tika
     StageConfiguration stage2Config = new StageConfiguration();
-    stage2Config.setStageClass("org.myrobotlab.document.transformer.SendToSolr");
-    stage2Config.setStageName("SendToSolr");
-    stage2Config.setStringParam("solrUrl", "http://phobos:8983/solr/graph");
+    stage2Config.setStageClass("org.myrobotlab.document.transformer.TextExtractor");
+    stage2Config.setStageName("TextExtractor");
     workflowConfig.addStage(stage2Config);
-
+    // rename some fields to be more human readable and to match the solr schema.
+    StageConfiguration stage3Config = new StageConfiguration();
+    stage3Config.setStageClass("org.myrobotlab.document.transformer.RenameFields");
+    stage3Config.setStageName("RenameFields");
+    Map<String,String> fieldNameMap = new HashMap<String,String>();
+    fieldNameMap.put("xmpdm_tracknumber", "tracknumber");
+    fieldNameMap.put("xmpdm_releasedate", "year");
+    fieldNameMap.put("xmpdm_duration", "duration");
+    fieldNameMap.put("xmpdm_genre", "genre");
+    fieldNameMap.put("xmpdm_artist", "artist");
+    fieldNameMap.put("dc_title", "title");
+    fieldNameMap.put("xmpdm_album", "album");
+    stage3Config.setMapProperty("fieldNameMap", fieldNameMap);
+    workflowConfig.addStage(stage3Config);;
+    // TODO: rename more fields..
+    // TODO: delete unnecessary fields.
     pipeline.setConfig(workflowConfig);
     pipeline.initalize();
+    // attach the pipeline to solr.
+    // 
+    pipeline.attachDocumentListener(solr.getName());
+    // start the file connector to scan the file system.
+    // RSSConnector connector = (RSSConnector) Runtime.start("rss", "RSSConnector");
+    FileConnector connector = (FileConnector) Runtime.start("fileconnector", "FileConnector");
+    connector.setDirectory("Z:\\Music");
 
-    RSSConnector connector = (RSSConnector) Runtime.start("rss", "RSSConnector");
-    connector.addDocumentListener(pipeline);
-    connector.startCrawling();
+    // connector to pipeline connection
+    connector.attachDocumentListener(pipeline.getName());
 
+    Runtime.saveConfig("mediasearch");
+    // start the crawl!
+    boolean doCrawl = false;
+    if (doCrawl) {
+      connector.startCrawling();
+    }
     // TODO: make sure we flush the pending batches!
     // connector.flush();
     // poll to make sure the connector is still running./
@@ -137,14 +168,14 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     // when the connector is done, tell the pipeline to flush/
     pipeline.flush();
 
-    // wee! news!
+    // 
 
   }
 
   public void initalize() throws ClassNotFoundException {
     // init the workflow server and load the pipeline config.
     if (workflowServer == null) {
-      workflowServer = WorkflowServer.getInstance();
+      workflowServer = WorkflowServer.getInstance(this);
     }
     workflowServer.addWorkflow(workFlowConfig);
     workflowName = workFlowConfig.getName();
@@ -173,6 +204,33 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     // here we need to pass a flush message to the workflow server
     workflowServer.flush(workflowName);
     return true;
+  }
+
+  @Override
+  public void publishFlush() {
+    // publish the flush event..
+  }
+  
+  @Override
+  public ServiceConfig apply(ServiceConfig inConfig) {
+    DocumentPipelineConfig config = (DocumentPipelineConfig)super.apply(inConfig);
+    // 
+    this.workFlowConfig = config.workFlowConfig;
+    try {
+      initalize();
+    } catch (ClassNotFoundException e) {
+      log.error("Error initializing the document pipeline.", e);
+      // TODO: shoiuld we throw some runtime here?
+    }
+    return config;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    // return the config
+    DocumentPipelineConfig config = (DocumentPipelineConfig)super.getConfig();
+    config.workFlowConfig = this.workFlowConfig;
+    return config;
   }
 
 }

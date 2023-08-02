@@ -2,6 +2,7 @@ package org.myrobotlab.framework;
 
 import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.codec.json.JsonDeserializationException;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -502,6 +503,7 @@ public class MethodCache {
   public List<MethodEntry> getOrdinalMethods(Class<?> object, String methodName, int parameterSize) {
     if (object == null) {
       log.error("getOrdinalMethods on a null object ");
+      return null;
     }
     String objectKey = object.getTypeName();
 
@@ -575,20 +577,17 @@ public class MethodCache {
       Class<?>[] paramTypes = methodEntry.getParameterTypes();
       try {
         for (int i = 0; i < encodedParams.length; ++i) {
-          if (CodecUtils.JSON_DEFAULT_OBJECT_TYPE.equals(encodedParams[i].getClass())) {
-            // specific gson implementation
-            // rather than double encode everything - i have chosen
-            // to re-encode objects back to string since gson will decode them
-            // all ot linked tree maps - if the json decoder changes from gson
-            // this will probably need to change too
-            encodedParams[i] = CodecUtils.toJson(encodedParams[i]);
+          try {
+            params[i] = CodecUtils.fromJson((String) encodedParams[i], paramTypes[i]);
+          } catch(JsonDeserializationException e) {
+            log.info("could not decode threw {}.{}( ordinal[{}] {} {})- assuming String - missing quotes?", clazz.getSimpleName(), methodName, i, paramTypes[i].getSimpleName(), encodedParams[i]);
+            // load raw string on
+            params[i] = encodedParams[i];
           }
-          params[i] = CodecUtils.fromJson((String) encodedParams[i], paramTypes[i]);
         }
         // successfully decoded params
         return params;
       } catch (Exception e) {
-
         log.info("getDecodedParameters threw clazz {} method {} params {} Message: {}", clazz, methodName, encodedParams.length, e.getMessage());
       }
     }

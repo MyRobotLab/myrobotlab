@@ -21,7 +21,7 @@ public class I2CBus implements Attachable, I2CBusControl {
   transient public final static Logger log = LoggerFactory.getLogger(I2CBus.class);
 
   String name;
-  // transient too help prevent infinite recursion in gson
+  // transient too help prevent infinite recursion in serialization
   transient I2CBusController controller;
 
   public I2CBus(String Name) {

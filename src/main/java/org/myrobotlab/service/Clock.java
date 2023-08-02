@@ -243,13 +243,18 @@ public class Clock extends Service {
   public static void main(String[] args) throws Exception {
     try {
 
-      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.setPort(8887);
-      webgui.startService();
+//      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+//      webgui.autoStartBrowser(false);
+//      webgui.setPort(8887);
+//      webgui.startService();
 
       Clock c1 = (Clock) Runtime.start("c1", "Clock");
       c1.startClock();
+      
+      boolean done = true;
+      if (done) return;
+      
+      
       Runtime.getInstance().connect("ws://localhost:8888");
       c1.stopClock();
 

@@ -32,12 +32,12 @@ public class RuntimeProcessTest extends AbstractTest {
 
     // from ,to null=runtime, data  
     String cwd = null;
-    Message msg = CodecUtils.cliToMsg(cwd, getName(), null, "ls");
+    Message msg = CodecUtils.pathToMsg(getName(), "ls");
     assertEquals("runtime", msg.getName());
     assertEquals("ls", msg.method);
     assertEquals(getName(), msg.getSrcName());
 
-    msg = CodecUtils.cliToMsg(null, getName() + "@someWhere", null, "ls");
+    msg = CodecUtils.pathToMsg(getName() + "@someWhere", "ls");
     assertEquals(getName(), msg.getSrcName());
     assertEquals("someWhere", msg.getSrcId());
     assertEquals(getName() + "@someWhere", msg.getSrcFullName());
@@ -46,19 +46,19 @@ public class RuntimeProcessTest extends AbstractTest {
     // Message msg = CodecUtils.cliToMsg(null, getName(), null, "/ls /runtime");
     // FAILS
 
-    msg = CodecUtils.cliToMsg(cwd, getName() + "@someWhere", "blah@far", "ls");
+    msg = CodecUtils.pathToMsg(getName() + "@someWhere", "ls");
     assertEquals("blah", msg.getName());
     assertEquals("blah@far", msg.getFullName());
     assertEquals("far", msg.getId());
 
-    cwd = "/";
-    msg = CodecUtils.cliToMsg(cwd, getName(), null, "ls");
+    cwd = "/runtime/";
+    msg = CodecUtils.pathToMsg(getName(), cwd + "ls");
     assertEquals("runtime", msg.getName());
     assertEquals("ls", msg.method);
     assertEquals(getName(), msg.getSrcName());
 
-    cwd = "/blah";
-    msg = CodecUtils.cliToMsg(cwd, getName(), null, "method");
+    cwd = "/runtime/blah";
+    msg = CodecUtils.pathToMsg(getName(), cwd + "method");
     assertEquals("runtime", msg.getName());
     assertEquals("ls", msg.method);
     assertEquals(getName(), msg.getSrcName());

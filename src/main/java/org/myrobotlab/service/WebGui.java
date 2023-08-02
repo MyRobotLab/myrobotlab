@@ -123,7 +123,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   private static final long serialVersionUID = 1L;
 
-
   transient protected JmDNS jmdns = null;
 
   /**
@@ -311,16 +310,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     Config.Builder configBuilder = new Config.Builder();
     try {
       if (isSsl) {
-//        SelfSignedCertificate cert = new SelfSignedCertificate();        
-//        SslContext context = SslContextBuilder.forServer(cert.certificate(), cert.privateKey()).build();    
-        
-        
+        // SelfSignedCertificate cert = new SelfSignedCertificate();
+        // SslContext context = SslContextBuilder.forServer(cert.certificate(),
+        // cert.privateKey()).build();
+
         SelfSignedCertificate selfSignedCertificate = new SelfSignedCertificate();
-        SslContext context =  SslContextBuilder
-                .forServer(selfSignedCertificate.certificate(), selfSignedCertificate.privateKey())
-                .sslProvider(SslProvider.JDK).clientAuth(ClientAuth.NONE).build();        
-        
-        
+        SslContext context = SslContextBuilder.forServer(selfSignedCertificate.certificate(), selfSignedCertificate.privateKey()).sslProvider(SslProvider.JDK)
+            .clientAuth(ClientAuth.NONE).build();
+
         configBuilder.sslContext(context);
       }
     } catch (Exception e) {
@@ -330,12 +327,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     configBuilder.resource("/stream", stream);
 
     WebGuiConfig c = (WebGuiConfig) config;
-    
+
     // add all webgui resource directories
-    for (String resource: c.resources) {
+    for (String resource : c.resources) {
       configBuilder.resource(resource);
     }
-    
+
     // can't seem to make this work .mappingPath("resource/")
 
     // TO SUPPORT LEGACY - BEGIN
@@ -428,10 +425,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   /**
    * This method handles all http:// and ws:// requests. Depending on apiKey
    * which is part of initial GET
-   * <p></p>
+   * <p>
+   * </p>
    * messages api attempts to promote the connection to websocket and suspends
    * the connection for a 2 way channel
-   * <p></p>
+   * <p>
+   * </p>
    * id and session_id authentication should be required
    * 
    */
@@ -537,11 +536,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       } else if (apiKey.equals(CodecUtils.API_SERVICE)) {
 
-        Message msg = CodecUtils.cliToMsg(
-                null,
-                getName(),
-                null,
-                URLDecoder.decode(r.getRequest().getPathInfo(), StandardCharsets.UTF_8));
+        String path = URLDecoder.decode(r.getRequest().getPathInfo(), StandardCharsets.UTF_8);
+        Message msg = CodecUtils.pathToMsg(getName(), path);
+        // if body exists it overrides
         if (bodyData != null) {
           msg.data = CodecUtils.fromJson(bodyData, Object[].class);
         }
@@ -549,7 +546,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         if (isLocal(msg)) {
           // String serviceName = msg.getFullName();// getName();
           // Class<?> clazz = Runtime.getClass(serviceName);
-          // Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
+          // Object[] params = cache.getDecodedJsonParameters(clazz, msg.method,
+          // msg.data);
           // msg.data = params;
           Object ret = invoke(msg);
           OutputStream out = r.getResponse().getOutputStream();
@@ -602,7 +600,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
             }
 
             // do not decode unless needed
-            // Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
+            // Object[] params = cache.getDecodedJsonParameters(clazz,
+            // msg.method, msg.data);
 
             ServiceInterface si = Runtime.getService(serviceName);
 
@@ -1157,7 +1156,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   @Override
   public ServiceConfig getConfig() {
-    WebGuiConfig config = (WebGuiConfig)super.getConfig();
+    WebGuiConfig config = (WebGuiConfig) super.getConfig();
     // FIXME - remove member variables use config only
     config.port = port;
     config.autoStartBrowser = autoStartBrowser;
@@ -1201,20 +1200,17 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       boolean done = true;
       if (done) {
         return;
-      }      
+      }
 
-
-      
       // Runtime.start("i01", "InMoov2");
       // Runtime.start("python", "Python");
       // Runtime.start("i01", "InMoov2");
-      
+
       // Runtime.start("i01", "InMoov2");
       Runtime.start("track", "Tracking");
       // Runtime.startConfig("worky");
       // Runtime.startConfig("InMoov2Head");
       // Runtime.startConfig("Tracking");
-
 
       // Runtime.start("i01", "InMoov2");
       // Runtime.start("python", "Python");

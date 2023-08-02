@@ -190,7 +190,6 @@ public class GoogleSearch extends Service implements ImagePublisher, TextPublish
     return data;
   }
 
-  // FIXME - use gson not simpl json
   @Override
   public List<ImageData> imageSearch(String searchText) {
 
