@@ -154,7 +154,7 @@ public class InProcessCli implements Runnable {
           continue;
         }
 
-        log.info("c = {}", c);
+        log.debug("c = {}", c);
         // != 0x04 /* ctrl-d 0x04 ctrl-c 0x03 '\n' */
 
         readLine += (char) c;
@@ -304,17 +304,7 @@ public class InProcessCli implements Runnable {
         return;
       }
 
-      // subscribe - setup subscription
-      // MRLListener listener = new MRLListener(cliMsg.method, name + '@' + id,
-      // CodecUtils.getCallbackTopicName(cliMsg.method));
-      // Message subscription = Message.createMessage(name + '@' + id,
-      // cliMsg.getFullName(), "addListener", listener);
-
       String cliFullName = name + '@' + id;
-
-      /*
-       * if (srcFullName == null) { srcFullName = name + '@' + id; }
-       */
 
       // setup cli subscription
       MRLListener listener = new MRLListener(cliMsg.method, cliFullName, CodecUtils.getCallbackTopicName(cliMsg.method));
@@ -352,9 +342,8 @@ public class InProcessCli implements Runnable {
     if (contextPath != null) {
       data = contextPath + data;
     }
-
-    // FIXME - is this "blocking?"
-    return CodecUtils.pathToMsg("runtime@" + id, data);
+    Message msg = CodecUtils.pathToMsg("runtime@" + id, data);
+    return CodecUtils.decodeMessageParams(msg);
   }
 
   public void writeToJson(Object o) {

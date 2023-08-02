@@ -341,8 +341,11 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
       if (processApiMessages && topic.startsWith(serviceTopic)) {
         String mrlUri = "/" + topic.substring((serviceTopic).length());
         // FIXME - should they all be full name ?
+        // This will parse a topic into a json parameter message
+        // the message params can then be decoded with getDecodedJsonParameters
         Message msg = CodecUtils.pathToMsg(getFullName(), mrlUri);
         String payload = m.getPayload();
+        // payload takes precedence over path
         if (payload != null && payload.length() > 0) {
           msg.data = CodecUtils.decodeArray(payload);
         }

@@ -830,7 +830,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
   }
 
   String tokenToString(IMqttToken token) {
-    // FIXME - just gson encode it..
+
     StringBuffer sb = new StringBuffer();
     sb.append(" MessageId:").append(token.getMessageId());
     sb.append(" Response:").append(token.getResponse());
