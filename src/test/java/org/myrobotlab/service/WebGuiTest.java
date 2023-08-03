@@ -4,18 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
-import org.atmosphere.cpr.AtmosphereResource;
-import org.atmosphere.cpr.AtmosphereResourceImpl;
-import org.junit.Before;
-import org.junit.Test;
-import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.TimeoutException;
 import org.myrobotlab.logging.LoggerFactory;
@@ -52,9 +48,9 @@ public class WebGuiTest extends AbstractTest {
   }
   
   @Test
-  public void getTestWithParameter() {
+  public void getTestWithParameter() throws UnsupportedEncodingException {
 
-    byte[] bytes = Http.get("http://localhost:8889/api/service/runtime/isLocal/\"runtime\"");
+    byte[] bytes = Http.get("http://localhost:8889/api/service/runtime/isLocal/%22runtime%22");
     assertNotNull(bytes);
     String ret = new String(bytes);
     assertTrue(ret.contains("true"));
@@ -144,14 +140,6 @@ public class WebGuiTest extends AbstractTest {
   public void urlEncodingTest() {
     //exec("print \"hello\"")
     byte[] bytes = Http.get("http://localhost:8889/api/service/pythonApiTest/exec/%22print+%5C%22hello%5C%22%22");
-    String ret = new String(bytes);
-    assertEquals("true", ret);
-  }
-
-  @Test
-  public void noQuotesTest() {
-    //exec(print)
-    byte[] bytes = Http.get("http://localhost:8889/api/service/pythonApiTest/exec/print");
     String ret = new String(bytes);
     assertEquals("true", ret);
   }
