@@ -577,13 +577,13 @@ public class MethodCache {
       Class<?>[] paramTypes = methodEntry.getParameterTypes();
       try {
         for (int i = 0; i < encodedParams.length; ++i) {
-          try {
+//          try {
             params[i] = CodecUtils.fromJson((String) encodedParams[i], paramTypes[i]);
-          } catch(JsonDeserializationException e) {
-            log.info("could not decode threw {}.{}( ordinal[{}] {} {})- assuming String - missing quotes?", clazz.getSimpleName(), methodName, i, paramTypes[i].getSimpleName(), encodedParams[i]);
-            // load raw string on
-            params[i] = encodedParams[i];
-          }
+//          } catch(JsonDeserializationException e) {
+//            log.info("could not decode threw {}.{}( ordinal[{}] {} {})- assuming String - missing quotes?", clazz.getSimpleName(), methodName, i, paramTypes[i].getSimpleName(), encodedParams[i]);
+//            // load raw string on
+//            params[i] = encodedParams[i];
+//          }
         }
         // successfully decoded params
         return params;
