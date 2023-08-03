@@ -499,8 +499,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         log.debug("-->{} {} {} - [{}] from connection {}", (newPersistentConnection) ? "new" : "", request.getMethod(), request.getRequestURI(), logData, uuid);
       }
 
-      MethodCache cache = MethodCache.getInstance();
-
       // important persistent connections will have associated routes ...
       // http/api/service requests (not persistent connections) will not
       // (neither will udp)
@@ -537,7 +535,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       } else if (apiKey.equals(CodecUtils.API_SERVICE)) {
 
         String path = URLDecoder.decode(r.getRequest().getPathInfo(), StandardCharsets.UTF_8);
-        Message msg = CodecUtils.pathToMsg(getName(), path);
+        Message msg = CodecUtils.pathToMsg(getFullName(), path);
+        msg = CodecUtils.decodeMessageParams(msg);
         // if body exists it overrides
         if (bodyData != null) {
           msg.data = CodecUtils.fromJson(bodyData, Object[].class);

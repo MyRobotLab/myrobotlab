@@ -75,29 +75,33 @@ public class CodecUtilsTest extends AbstractTest {
     double delta = 0.0001;
     
     input = "\"http://blah:8888\"";
-    params = CodecUtils.extractJsonMsgFromUriPath(input);
-    assertEquals("http://blah:8888", params[0]);
+    params = CodecUtils.extractJsonParamsFromPath(input);
+    assertEquals("\"http://blah:8888\"", params[0]);
     
     input = "\"http://blah:8888/this/path/\"";
-    params = CodecUtils.extractJsonMsgFromUriPath(input);
-    assertEquals("http://blah:8888/this/path/", params[0]);
+    params = CodecUtils.extractJsonParamsFromPath(input);
+    assertEquals("\"http://blah:8888/this/path/\"", params[0]);
     
     input = "\"http://blah:8888/this/path/\"/5";
-    params = CodecUtils.extractJsonMsgFromUriPath(input);
-    assertEquals("http://blah:8888/this/path/", params[0]);
-    assertEquals(5, params[1]);
+    params = CodecUtils.extractJsonParamsFromPath(input);
+    assertEquals("\"http://blah:8888/this/path/\"", params[0]);
+    assertEquals("5", params[1]);
     
     input = "[3,5,7,8]/[1.0, 2.0, 3.0]/true";
-    params = CodecUtils.extractJsonMsgFromUriPath(input);
-    assertEquals(8,((List)params[0]).get(3));
-    assertEquals(3.0,(double)((List)params[1]).get(2), delta);
-    assertEquals(true, params[2]);
+    params = CodecUtils.extractJsonParamsFromPath(input);
+    List list = (List)CodecUtils.fromJson((String)params[0]);    
+    assertEquals(8, list.get(3));
+    list = (List)CodecUtils.fromJson((String)params[1]);
+    assertEquals(3.0,(double)list.get(2), delta);
+    assertEquals(true, (boolean)CodecUtils.fromJson((String)params[2]));
     
-    input = "[\"apple\",\"banana\",\"orange\"]/[\"a\",\"b\",\"c\"]/true";
-    params = CodecUtils.extractJsonMsgFromUriPath(input);
-    assertEquals("apple",((List)params[0]).get(0));
-    assertEquals("a",((List)params[1]).get(0));
-    assertEquals(true, params[2]);
+    input = "[\"apple\",\"banana\",\"orange\"]/[\"a\",\"b\",\"c\"]/true";    
+    params = CodecUtils.extractJsonParamsFromPath(input);
+    list = (List)CodecUtils.fromJson((String)params[0]);    
+    assertEquals("apple",list.get(0));
+    list = (List)CodecUtils.fromJson((String)params[1]);    
+    assertEquals("a", list.get(0));
+    assertEquals(true, (boolean)CodecUtils.fromJson((String)params[2]));
     
     String[] files =new String[] {"f:\\testdir\\blah","/root/","/home/mydir/blah"};
     String[] abc = new String[] {"a", "b", "c"};
@@ -105,10 +109,10 @@ public class CodecUtilsTest extends AbstractTest {
     input = CodecUtils.toJson(files) + "/" + CodecUtils.toJson(abc) + "/" + CodecUtils.toJson(true);
     
     // input = "\"[\"f:\\testdir\\blah\",\"/root/\",\"/home/mydir/blah\"]\"/\"[\"a\",\"b\",\"c\"]\"/true";
-    params = CodecUtils.extractJsonMsgFromUriPath(input);
+    params = CodecUtils.extractJsonParamsFromPath(input);
     assertEquals(3, params.length);
-    List testFiles = (List)params[0];
-    assertEquals("/root/", testFiles.get(1));
+    list = (List)CodecUtils.fromJson((String)params[0]); 
+    assertEquals("/root/", list.get(1));
     // String[] files = CodecUtils.fromJson(params[0], String[].class);
     // assertEquals("\"[\"apple\",\"banana\",\"orange\"]\"", CodecUtils.fromJson(params[0], String[].class));
     Orientation o = new Orientation();
@@ -117,17 +121,28 @@ public class CodecUtilsTest extends AbstractTest {
     o.roll = 0.343;
         
     input = CodecUtils.toJson(files) + "/" + CodecUtils.toJson(o) + "/" + CodecUtils.toJson(true);
-    params = CodecUtils.extractJsonMsgFromUriPath(input);
+    params = CodecUtils.extractJsonParamsFromPath(input);
     assertEquals(3, params.length);
-    Map t = (Map)params[1];
+    Map t = (Map)CodecUtils.fromJson((String)params[1]); 
     
     assertEquals(2.2342, (double)t.get("pitch"), delta);
-    
 
-    // bonus
-    input = "This is /a block of/ text between/double quotes/ and /a single character";
-    params = CodecUtils.extractJsonMsgFromUriPath(input);
+    input = "This is invalid json /and a block of/ text between/and/a single character/ .";
+    params = CodecUtils.extractJsonParamsFromPath(input);
     assertEquals(6, params.length);
+    boolean strict = false;
+    try {
+    CodecUtils.fromJson(input);
+    } catch(Exception e) {
+      // strict is required
+      strict = true;
+    }
+    assertTrue(strict);
+    
+    input = "\"This is valid json /and a block of\"/\" text between/and/a single character/ .\"";
+    params = CodecUtils.extractJsonParamsFromPath(input);
+    assertEquals(2, params.length);
+    assertEquals("This is valid json /and a block of", CodecUtils.fromJson((String)params[0])); 
 
     
   }
