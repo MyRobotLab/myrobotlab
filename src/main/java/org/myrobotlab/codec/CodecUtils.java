@@ -219,7 +219,8 @@ public class CodecUtils {
     mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
     // Make jackson behave such that unknown properties are ignored
-    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
+
   }
 
   /**
