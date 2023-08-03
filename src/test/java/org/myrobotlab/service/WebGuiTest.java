@@ -54,7 +54,7 @@ public class WebGuiTest extends AbstractTest {
   @Test
   public void getTestWithParameter() {
 
-    byte[] bytes = Http.get("http://localhost:8889/api/service/runtime/isLocal/runtime");
+    byte[] bytes = Http.get("http://localhost:8889/api/service/runtime/isLocal/\"runtime\"");
     assertNotNull(bytes);
     String ret = new String(bytes);
     assertTrue(ret.contains("true"));

@@ -1091,10 +1091,15 @@ public class CodecUtils {
       // ABSOLUTE PATH !!!
       String[] parts = path.split("/"); // <- this breaks things ! e.g.
                                         // /runtime/connect/"http://localhost:8888"
-
+      // path parts less than 3 is a dir or ls
       if (parts.length < 3) {
+        // this morphs a path which has less than 3 parts
+        // into a runtime "ls" method call to do reflection of services or service methods
+        // e.g. /clock -> /runtime/ls/"/clock"
+        // e.g. /clock/ -> /runtime/ls/"/clock/"
+
         msg.method = "ls";
-        msg.data = new Object[] { path };
+        msg.data = new Object[] { "\"" + path + "\""};
         return msg;
       }
 
@@ -1115,7 +1120,7 @@ public class CodecUtils {
 
         // remove the first 3 slashes
         String data = path.substring(("/" + msg.name + "/" + msg.method + "/").length());
-        msg.data = extractJsonMsgFromUriPath(data);
+        msg.data = extractJsonParamsFromPath(data);
       }
       return msg;
     } else {
@@ -1153,7 +1158,7 @@ public class CodecUtils {
    * @param input
    * @return
    */
-  public static Object[] extractJsonMsgFromUriPath(String input) {
+  public static Object[] extractJsonParamsFromPath(String input) {
     List<Object> fromJson = new ArrayList<>();
     StringBuilder currentJson = new StringBuilder();
     boolean insideQuotes = false;

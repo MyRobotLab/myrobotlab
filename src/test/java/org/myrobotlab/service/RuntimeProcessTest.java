@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -47,20 +48,23 @@ public class RuntimeProcessTest extends AbstractTest {
     // FAILS
 
     msg = CodecUtils.pathToMsg(getName() + "@someWhere", "ls");
-    assertEquals("blah", msg.getName());
-    assertEquals("blah@far", msg.getFullName());
-    assertEquals("far", msg.getId());
+    assertEquals("runtime", msg.getName());
+    assertEquals("runtime", msg.getFullName());
+    assertEquals(getName() + "@someWhere", msg.sender);
+    assertNull(msg.getId());
+    assertEquals(0, msg.data.length);
 
     cwd = "/runtime/";
     msg = CodecUtils.pathToMsg(getName(), cwd + "ls");
     assertEquals("runtime", msg.getName());
     assertEquals("ls", msg.method);
     assertEquals(getName(), msg.getSrcName());
+    assertNull(msg.data);
 
-    cwd = "/runtime/blah";
-    msg = CodecUtils.pathToMsg(getName(), cwd + "method");
+    cwd = "/runtime/blahmethod";
+    msg = CodecUtils.pathToMsg(getName(), cwd);
     assertEquals("runtime", msg.getName());
-    assertEquals("ls", msg.method);
+    assertEquals("blahmethod", msg.method);
     assertEquals(getName(), msg.getSrcName());
 
     // make sure runtime is running
