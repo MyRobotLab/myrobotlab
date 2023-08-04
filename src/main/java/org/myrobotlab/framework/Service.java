@@ -188,7 +188,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   /**
    * This is the map of interfaces - its really "static" information, since its
-   * a definition. However, since gson will not process statics - we are making
+   * a definition. However, since serialization will not process statics - we are making
    * it a member variable
    */
   protected Map<String, String> interfaceSet;
