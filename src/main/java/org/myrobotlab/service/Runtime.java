@@ -84,7 +84,6 @@ import org.myrobotlab.process.InProcessCli;
 import org.myrobotlab.process.Launcher;
 import org.myrobotlab.service.config.RuntimeConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServiceConfig.Listener;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.ServiceTypeNameResults;
 import org.myrobotlab.service.interfaces.ConnectionManager;
@@ -138,7 +137,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * to start and configure new services. The master plan is an accumulation of
    * all these requests.
    */
-  final Plan masterPlan = new Plan("runtime");
+  @Deprecated /* use the filesystem only no memory plan */
+  transient final Plan masterPlan = new Plan("runtime");
 
   /**
    * thread for non-blocking install of services
@@ -174,6 +174,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       "org.myrobotlab.service.interfaces.ServiceLifeCycleListener", "org.myrobotlab.framework.interfaces.StatePublisher"));
 
   protected final Set<String> serviceTypes = new HashSet<>();
+  
+  protected RuntimeConfig config;
 
   /**
    * The directory name currently being used for config. This is NOT full path
@@ -436,10 +438,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       sc.state = "CREATING";
       ServiceInterface si = createService(service, sc.type, null);
       sc.state = "CREATED";
-      si.setConfig(sc);
+      // process  the base listeners/subscription of ServiceConfig
+      si.addConfigListeners(sc);
       si.apply(sc);
       createdServices.put(service, si);
-      // si.startService(); bad idea
       currentConfig.add(service);
     }
 
@@ -2686,7 +2688,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       if (requestedService == null) {
-        log.error("here");
+        Runtime.getInstance().error("could not start %s of type %s", name, type);
+        return null;
       }
 
       // getConfig() was problematic here for JMonkeyEngine
@@ -3977,21 +3980,21 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     addRoute(id, uuid, 10);
   }
 
-  @Override
-  public ServiceConfig getFilteredConfig() {
-    RuntimeConfig sc = (RuntimeConfig) super.getFilteredConfig();
-    Set<Listener> removeList = new HashSet<>();
-    for (Listener listener : sc.listeners) {
-      if (listener.callback.equals("onReleased") || listener.callback.equals("onStarted") || listener.callback.equals("onRegistered") || listener.callback.equals("onStopped")
-          || listener.callback.equals("onCreated")) {
-        removeList.add(listener);
-      }
-    }
-    for (Listener remove : removeList) {
-      sc.listeners.remove(remove);
-    }
-    return sc;
-  }
+//  @Override
+//  public ServiceConfig getFilteredConfig() {
+//    RuntimeConfig sc = (RuntimeConfig) super.getFilteredConfig();
+//    Set<Listener> removeList = new HashSet<>();
+//    for (Listener listener : sc.listeners) {
+//      if (listener.callback.equals("onReleased") || listener.callback.equals("onStarted") || listener.callback.equals("onRegistered") || listener.callback.equals("onStopped")
+//          || listener.callback.equals("onCreated")) {
+//        removeList.add(listener);
+//      }
+//    }
+//    for (Listener remove : removeList) {
+//      sc.listeners.remove(remove);
+//    }
+//    return sc;
+//  }
 
   /**
    * Unregister all connections that a specified client has made.
@@ -4881,7 +4884,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    RuntimeConfig config = (RuntimeConfig) super.apply(c);
+    super.apply(c);
+    
     setLocale(config.locale);
 
     if (config.id != null) {
@@ -5027,13 +5031,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       for (String s : servicesToSave) {
-        if (CodecUtils.getShortName(s).equals("i01")) {
-          log.info("here");
-        }
         ServiceInterface si = getService(s);
         // TODO - switch to save "NON FILTERED" config !!!!
         // get filtered clone of config for saving
-        ServiceConfig config = si.getFilteredConfig();
+        ServiceConfig config = si.getFilteredConfig(si.getConfig());
         String data = CodecUtils.toYaml(config);
         String ymlFileName = configPath + fs + CodecUtils.getShortName(s) + ".yml";
         FileIO.toFile(ymlFileName, data.getBytes());
@@ -5340,6 +5341,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       return null;
     }
     return CONFIG_ROOT + fs + configName;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    return config;
   }
 
 }

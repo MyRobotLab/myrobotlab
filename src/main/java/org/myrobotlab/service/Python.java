@@ -177,6 +177,8 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
       }
     }
   }
+  
+  protected PythonConfig config;
 
   public final static transient Logger log = LoggerFactory.getLogger(Python.class);
   // TODO this needs to be moved into an actual cache if it is to be used
@@ -313,8 +315,7 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
    * @throws IOException
    */
   public void openScript(String scriptName) throws IOException {
-    PythonConfig c = (PythonConfig)config;
-    File script = new File(c.scriptRootDir + fs + scriptName);
+    File script = new File(config.scriptRootDir + fs + scriptName);
 
     if (!script.exists()) {
       error("file %s not found", script.getAbsolutePath());
@@ -327,7 +328,6 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
   
 
   public void closeScript(String file) {
-    PythonConfig c = (PythonConfig) config;
     if (openedScripts.containsKey(file)) {
       openedScripts.remove(file);
       broadcastState();
@@ -408,9 +408,8 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
   }
 
   public void addModulePath(String path) {
-    PythonConfig c = (PythonConfig) config;
-    if (c.modulePaths != null) {
-      c.modulePaths.add(path);
+    if (config.modulePaths != null) {
+      config.modulePaths.add(path);
     }
     
     if (interp != null) {
@@ -751,8 +750,7 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
    * @throws IOException
    */
   public void saveScript(String scriptName, String code) throws IOException {
-    PythonConfig c = (PythonConfig)config;
-    FileIO.toFile(c.scriptRootDir + fs + scriptName, code);
+    FileIO.toFile(config.scriptRootDir + fs + scriptName, code);
     info("saved file %s", scriptName);
   }
 
@@ -791,11 +789,10 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
   synchronized public void startService() {
     super.startService();
     
-    PythonConfig c = (PythonConfig) config;
-    if (c.scriptRootDir == null) {
-        c.scriptRootDir = new File(getDataInstanceDir()).getAbsolutePath();
+    if (config.scriptRootDir == null) {
+        config.scriptRootDir = new File(getDataInstanceDir()).getAbsolutePath();
     }
-    File dataDir = new File(c.scriptRootDir);
+    File dataDir = new File(config.scriptRootDir);
     dataDir.mkdirs();    
     
     Map<String, ServiceInterface> services = Runtime.getLocalServices();
@@ -806,8 +803,8 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
     Runtime.getInstance().attachServiceLifeCycleListener(getName());
     
     // run start scripts if there are any
-    if (c.startScripts != null) {
-      for (String script : c.startScripts) {
+    if (config.startScripts != null) {
+      for (String script : config.startScripts) {
         // i think in this context its safer to block
         try {
           execFile(script, true);
@@ -856,9 +853,7 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
   @Override
   public void stopService() {
     // run any stop scripts
-    PythonConfig c = (PythonConfig) config;
-
-    for (String script : c.stopScripts) {
+    for (String script : config.stopScripts) {
       // i think in this context its safer to block
       try {
         execFile(script, true);
@@ -951,7 +946,7 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
 
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    PythonConfig config = (PythonConfig) super.apply(c);
+    super.apply(c);
     
     // apply is the first method called after construction,
     // since we offer the capability of executing scripts specified in config
@@ -991,12 +986,11 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
    * @throws IOException
    */
   public List<String> getScriptList() throws IOException {
-    PythonConfig c = (PythonConfig)config;
     List<String> sorted = new ArrayList<>();
-    List<File> files = FileIO.getFileList(c.scriptRootDir, true);
+    List<File> files = FileIO.getFileList(config.scriptRootDir, true);
     for (File file : files) {
       if (file.toString().endsWith(".py")) {
-        sorted.add(file.toString().substring(c.scriptRootDir.length() + 1));
+        sorted.add(file.toString().substring(config.scriptRootDir.length() + 1));
       }
     }
     Collections.sort(sorted);

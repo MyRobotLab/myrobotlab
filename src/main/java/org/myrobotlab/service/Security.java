@@ -47,6 +47,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.KeyConsumer;
 import org.slf4j.Logger;
@@ -56,6 +57,8 @@ import org.slf4j.Logger;
 public class Security extends Service implements AuthorizationProvider {
 
   protected Set<String> serviceKeyNames = new HashSet<>();
+  
+  protected ServiceConfig config;
 
   public static class Group {
     public HashMap<String, Boolean> accessRules = new HashMap<String, Boolean>();

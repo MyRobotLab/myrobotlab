@@ -134,13 +134,6 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
   ServiceConfig getConfig();
 
   /**
-   * sets config - just before apply
-   * 
-   * @param config
-   */
-  void setConfig(ServiceConfig config);
-
-  /**
    * reflectively sets a part of config
    *  
    * @param fieldname - the name of the config field
@@ -222,6 +215,14 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    * 
    * @return
    */
-  ServiceConfig getFilteredConfig();
+  ServiceConfig getFilteredConfig(ServiceConfig config);
 
+  /**
+   * Adds the subscribers specified in the Service.listener as listeners to
+   * this service.
+   * 
+   * @param config
+   * @return
+   */
+  public ServiceConfig addConfigListeners(ServiceConfig config);
 }

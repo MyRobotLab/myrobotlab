@@ -148,7 +148,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * the last config applied to this service
    */
-  protected ServiceConfig config;
 
   /**
    * map of keys to localizations -
@@ -1127,10 +1126,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   public Map<String, Peer> getPeers() {
-    if (config == null) {
+    if (getConfig() == null) {
       return null;
     }
-    return config.getPeers();
+    return getConfig().getPeers();
   }
 
   /**
@@ -1155,10 +1154,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   public Set<String> getPeerKeys() {
-    if (config == null || config.peers == null) {
+    if (getConfig() == null || getConfig().peers == null) {
       return new HashSet<>();
     }
-    return config.peers.keySet();
+    return getConfig().peers.keySet();
   }
 
   public String help(String format, String level) {
@@ -1394,38 +1393,67 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return isRunning;
   }
 
-  /**
-   * Default load config method, subclasses should override this to support
-   * service specific configuration in the service yaml files.
-   * 
-   * apply is the first function to be called after construction of a service,
-   * then startService will be called
-   * 
-   * construct -&gt; apply -&gt; startService
-   * 
-   */
   @Override
-  public ServiceConfig apply(ServiceConfig inConfig) {
-    log.info("Default service config loading for service: {} type: {}", getName(), getTypeKey());
-    /*
-     * We clone/serialize here because we don't want to use the same reference
-     * of of config in the plan. If configuration is applied through the plan,
-     * "or from anywhere else" we make a copy of it here. And the copy is
-     * applied to the actual service. This keeps the plan safe to modify without
-     * the worry of modifying a running service config.
-     */
+  public ServiceConfig apply(ServiceConfig config) {
+    try {
+      
+      // process subscribers in config
+      addConfigListeners(config);
+      
+      
+      // Get the field for the protected member (config) using reflection
+      Field configField = this.getClass().getDeclaredField("config");
 
-    String yaml = CodecUtils.toYaml(inConfig);
-    ServiceConfig copyOfConfig = CodecUtils.fromYaml(yaml, inConfig.getClass());
+      // Set the field accessible to modify its value
+      configField.setAccessible(true);
 
-    // TODO - handle subscriptions / listeners
-    if (copyOfConfig.listeners != null) {
-      for (Listener listener : copyOfConfig.listeners) {
+      // Set the value of the protected member (config) using reflection
+      configField.set(this, config);
+
+    } catch (NoSuchFieldException e) {
+      warn("%s out of spec service does not have a config", getName());      
+    } catch(IllegalAccessException e) {
+      error(e);
+    }
+
+    return config;
+  }
+  
+  
+  @Override
+  public ServiceConfig getConfig() {
+    try {
+      // Get the field for the specified field name using reflection
+      Field field = this.getClass().getDeclaredField("config");
+
+      // Set the field accessible to access its value
+      field.setAccessible(true);
+
+      // Get the value of the field using reflection
+      return (ServiceConfig) field.get(this);
+
+    } catch (NoSuchFieldException e) {
+      warn("%s out of spec service does not have a config", getName());      
+    } catch(IllegalAccessException e) {
+      error(e);
+    }
+    
+  return null;
+  
+  }
+  
+
+  /**
+   * The basic ServiceConfig has a list of listeners. These are definitions of
+   * other subscribers subscribing for data from this service. This method
+   * processes those listeners and adds them to the outbox notifyList.
+   */
+  public ServiceConfig addConfigListeners(ServiceConfig config) {
+    if (config.listeners != null) {
+      for (Listener listener : config.listeners) {
         addListener(listener.method, listener.listener, listener.callback);
       }
     }
-
-    this.config = copyOfConfig;
     return config;
   }
 
@@ -1434,8 +1462,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * 
    */
   @Override
-  public ServiceConfig getConfig() {
-
+  public ServiceConfig getFilteredConfig(ServiceConfig inconfig) {
+    // Make a copy, because we don't want to modify the original
+    ServiceConfig sc = CodecUtils.fromYaml(CodecUtils.toYaml(inconfig), inconfig.getClass());
     Map<String, List<MRLListener>> listeners = getOutbox().notifyList;
     List<Listener> newListeners = new ArrayList<>();
 
@@ -1445,49 +1474,30 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       for (MRLListener listener : list) {
         if (!listener.callbackName.endsWith("@webgui-client")) {
           // Removes the `@runtime-id` so configs still work with local IDs
-          // The StringUtils.removeEnd() call is a no-op when the ID is not our local ID,
+          // The StringUtils.removeEnd() call is a no-op when the ID is not our
+          // local ID,
           // so doesn't conflict with remote routes
-          Listener newConfigListener = new Listener(
-                  listener.topicMethod,
-                  CodecUtils.removeEnd(
-                          listener.callbackName,
-                          '@' + Platform.getLocalInstance().getId()
-                  ),
-                  listener.callbackMethod
-          );
+          Listener newConfigListener = new Listener(listener.topicMethod, CodecUtils.removeEnd(listener.callbackName, '@' + Platform.getLocalInstance().getId()),
+              listener.callbackMethod);
           newListeners.add(newConfigListener);
         }
       }
     }
 
-
     if (newListeners.size() > 0) {
-      config.listeners = newListeners;
+      sc.listeners = newListeners;
     }
-    return config;
-  }
-
-  // FIXME - NEED A BETTER SOLUTION !!!
-  @Override
-  public ServiceConfig getFilteredConfig() {
-    ServiceConfig sc = getConfig();
-    // deep clone
-    sc = CodecUtils.fromYaml(CodecUtils.toYaml(sc), sc.getClass());
     return sc;
   }
 
-  @Override
-  public void setConfig(ServiceConfig config) {
-    this.config = config;
-  }
 
   @Override
   public void setConfigValue(String fieldname, Object value) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-      log.info("setting field name fieldname {} to {}", fieldname, value);
+    log.info("setting field name fieldname {} to {}", fieldname, value);
 
-      Field field = config.getClass().getDeclaredField(fieldname);
-      // field.setAccessible(true); should not need this - it "should" be public
-      field.set(config, value);
+    Field field = getConfig().getClass().getDeclaredField(fieldname);
+    // field.setAccessible(true); should not need this - it "should" be public
+    field.set(getConfig(), value);
   }
 
   @Override
@@ -1913,7 +1923,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     peerKey = peerKey.trim();
 
     // get current definition of config and peer
-    Peer peer = config.getPeer(peerKey);
+    Peer peer = getConfig().getPeer(peerKey);
 
     if (peer == null) {
       error("startPeer could not find peerKey of %s in %s", peerKey, getName());
@@ -1956,8 +1966,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   synchronized public void releasePeer(String peerKey) {
 
-    if (config != null && config.getPeer(peerKey) != null) {
-      Peer peer = config.getPeer(peerKey);
+    if (getConfig() != null && getConfig().getPeer(peerKey) != null) {
+      Peer peer = getConfig().getPeer(peerKey);
       ServiceConfig sc = Runtime.getPlan().get(peer.name);
       // peer recursive
       if (sc != null && sc.getPeers() != null) {
@@ -2732,10 +2742,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   public String getPeerName(String peerKey) {
 
-    if (config == null) {
+    if (getConfig() == null) {
       return null;
     }
-    return config.getPeerName(peerKey);
+    return getConfig().getPeerName(peerKey);
   }
 
   /**
@@ -2790,7 +2800,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @param fullName
    */
   public void setPeerName(String key, String fullName) {
-    Peer peer = config.getPeer(key);
+    Peer peer = getConfig().getPeer(key);
     String oldName = peer.name;
     peer.name = fullName;
     // update plan ?
@@ -2822,7 +2832,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       sc.putPeerType(key, String.format("%s.%s", getName(), key), peerType);
     }
 
-    Peer peer = config.getPeer(key);
+    Peer peer = getConfig().getPeer(key);
     peer.type = peerType;
 
     // not Needed
