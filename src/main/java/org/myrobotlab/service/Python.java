@@ -947,6 +947,7 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
   @Override
   public ServiceConfig apply(ServiceConfig c) {
     super.apply(c);
+    config = (PythonConfig)c;
     
     // apply is the first method called after construction,
     // since we offer the capability of executing scripts specified in config
@@ -1059,6 +1060,11 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
       log.error("main threw", e);
     }
 
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    return config;
   }
 
 }

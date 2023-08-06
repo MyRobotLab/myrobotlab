@@ -4885,6 +4885,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   @Override
   public ServiceConfig apply(ServiceConfig c) {
     super.apply(c);
+    config = (RuntimeConfig)c;
     
     setLocale(config.locale);
 

@@ -774,5 +774,17 @@ public class Security extends Service implements AuthorizationProvider {
       serviceKeyNames.add(keyName);
     }
   }
+  
+  @Override
+  public ServiceConfig apply(ServiceConfig c) {
+    super.apply(c);
+    config = c;
+    return config;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    return config;
+  }
 
 }

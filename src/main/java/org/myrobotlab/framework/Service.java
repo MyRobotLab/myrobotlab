@@ -1395,52 +1395,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   public ServiceConfig apply(ServiceConfig config) {
-    try {
-      
       // process subscribers in config
-      addConfigListeners(config);
-      
-      
-      // Get the field for the protected member (config) using reflection
-      Field configField = this.getClass().getDeclaredField("config");
-
-      // Set the field accessible to modify its value
-      configField.setAccessible(true);
-
-      // Set the value of the protected member (config) using reflection
-      configField.set(this, config);
-
-    } catch (NoSuchFieldException e) {
-      warn("%s out of spec service does not have a config", getName());      
-    } catch(IllegalAccessException e) {
-      error(e);
-    }
-
+      addConfigListeners(config);      
     return config;
   }
   
   
   @Override
-  public ServiceConfig getConfig() {
-    try {
-      // Get the field for the specified field name using reflection
-      Field field = this.getClass().getDeclaredField("config");
-
-      // Set the field accessible to access its value
-      field.setAccessible(true);
-
-      // Get the value of the field using reflection
-      return (ServiceConfig) field.get(this);
-
-    } catch (NoSuchFieldException e) {
-      warn("%s out of spec service does not have a config", getName());      
-    } catch(IllegalAccessException e) {
-      error(e);
-    }
-    
-  return null;
-  
-  }
+  abstract public ServiceConfig getConfig();
   
 
   /**

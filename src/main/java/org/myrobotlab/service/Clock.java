@@ -207,6 +207,7 @@ public class Clock extends Service {
   @Override
   public ServiceConfig apply(ServiceConfig c) {    
     super.apply(c);
+    config = (ClockConfig)c;
     if (config.running != null) {
       if (config.running) {
         startClock();
@@ -246,6 +247,11 @@ public class Clock extends Service {
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    return config;
   }
 
 }
