@@ -32,6 +32,41 @@ sequenceDiagram
 
 
 ```
+
+
+### Minimal Message API Definition
+
+```json
+{
+  "name": "runtime",
+  "method": "connect",
+  "data": [
+    "\"http://main.myrobotlab.org:8888\""
+  ],
+}
+
+```
+
+### Path API Definition
+```
+/{service-name}/{method-name}/{json-param1}/{json-param2}/{json-param3}...
+```
+The Path API definition is a simple way to define a RESTful API.  The path is parsed and the service name, method name, and parameters are extracted.  The parameters are json encoded and converted to the correct type when the method is invoked.  The response is returned as a JSON object. The REST and CLI both use this API definition.
+
+#### Examples
+```
+http://localhost:8888/runtime/getUptime
+http://localhost:8888/runtime/connect/"http://main.myrobotlab.org:8888"
+http://localhost:8888/arduino/connect/"COM3"
+```
+The exact same paths can be used in the CLI
+```
+/runtime/getUptime
+/runtime/connect/"http://main.myrobotlab.org:8888"
+/arduino/connect/"COM3"
+```
+
+
 ### 1 Connection
 A connection with a websocket starts with an HTTP GET 
 ```
