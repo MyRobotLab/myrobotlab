@@ -177,18 +177,17 @@ public class ServiceData implements Serializable {
       // First check the libraries/serviceData.json dir.
       File jsonFile = new File(serviceDataCacheFileName);
       if (jsonFile.exists()) {
-        // load it and return!
-        String data = null;
         try {
-          data = FileIO.toString(jsonFile);
-        } catch (IOException e) {
+        // load it and return!
+        localInstance = CodecUtils.fromJson(FileIO.toString(jsonFile), ServiceData.class);
+        log.info("returning cached serviceData.json from {}", jsonFile);
+        
+        } catch (Exception e) {
           log.warn("Error reading serviceData.json from location {}", jsonFile.getAbsolutePath());
-        }
-        localInstance = CodecUtils.fromJson(data, ServiceData.class);
-        log.info("Returning serviceData.json from {}", jsonFile);
-        return localInstance;
-      } else {
-
+        }        
+      } 
+      
+      if (localInstance == null){
         // we are running in an IDE and haven't generated/saved the
         // serviceData.json yet.
         try {
@@ -201,9 +200,10 @@ public class ServiceData implements Serializable {
           log.error("Unable to generate the serivceData.json file!!");
           // This is a fatal issue. I think we should exit the jvm here.
         }
-        return localInstance;
-
       }
+      
+      return localInstance;
+
     }
   }
 
