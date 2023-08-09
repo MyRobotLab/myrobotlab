@@ -50,7 +50,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class Python extends Service implements ServiceLifeCycleListener, MessageListener {
+public class Python extends Service<PythonConfig> implements ServiceLifeCycleListener, MessageListener {
   
   /**
    * this thread handles all callbacks to Python process all input and sets msg
@@ -178,8 +178,6 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
     }
   }
   
-  protected PythonConfig config;
-
   public final static transient Logger log = LoggerFactory.getLogger(Python.class);
   // TODO this needs to be moved into an actual cache if it is to be used
   // Cache of compile python code
@@ -944,8 +942,7 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
   }
 
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
+  public PythonConfig apply(PythonConfig c) {
     super.apply(c);
     config = (PythonConfig)c;
     
@@ -1063,7 +1060,7 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public PythonConfig getConfig() {
     return config;
   }
 

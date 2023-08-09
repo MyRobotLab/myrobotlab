@@ -34,7 +34,6 @@ import org.atmosphere.nettosphere.Nettosphere;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
@@ -45,7 +44,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.net.Connection;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.WebGuiConfig;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
@@ -64,7 +62,7 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
  * services are already APIs - perhaps a data API - same as service without the
  * message wrapper
  */
-public class WebGui extends Service implements AuthorizationProvider, Gateway, Handler, ServiceLifeCycleListener {
+public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvider, Gateway, Handler, ServiceLifeCycleListener {
 
   public static class LiveVideoStreamHandler implements Handler {
 
@@ -92,8 +90,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
   
-  protected WebGuiConfig config;
-
   private final transient IncomingMsgQueue inMsgQueue = new IncomingMsgQueue();
 
   public static class Panel {
@@ -1157,16 +1153,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   @Override
   // FIXME port and autoStartBrowser should just be part of config
   // then this override can be removed
-  public ServiceConfig getConfig() {
+  public WebGuiConfig getConfig() {
     config.port = port;
     config.autoStartBrowser = autoStartBrowser;
     return config;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
+  public WebGuiConfig apply(WebGuiConfig c) {
     super.apply(c);
-    config = (WebGuiConfig)c;
     
     if (config.port != null && (port != null && config.port.intValue() != port.intValue())) {
       setPort(config.port);

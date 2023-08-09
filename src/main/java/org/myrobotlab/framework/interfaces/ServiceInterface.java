@@ -18,7 +18,7 @@ import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher,
-    ServiceStatus, TaskManager, Attachable, MessageInvoker, Comparable<ServiceInterface> {
+    ServiceStatus, TaskManager, Attachable, MessageInvoker, Comparable<ServiceInterface>/*, ConfigurableService<ServiceConfig> */{
 
   // does this work ?
   Logger log = LoggerFactory.getLogger(Service.class);
@@ -143,15 +143,6 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
 
 
   /**
-   * Configure a service by merging in configuration
-   * 
-   * @param config
-   *          the config to load
-   * @return the loaded config.
-   */
-  ServiceConfig apply(ServiceConfig config);
-
-  /**
    * Service life-cycle method, stops the inbox and outbox threads - typically
    * does not release "custom" resources. It's purpose primarily is to stop
    * messaging from flowing in or out of this service - which is handled in the
@@ -215,7 +206,7 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    * 
    * @return
    */
-  ServiceConfig getFilteredConfig(ServiceConfig config);
+  ServiceConfig getFilteredConfig();
 
   /**
    * Adds the subscribers specified in the Service.listener as listeners to
@@ -225,4 +216,5 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    * @return
    */
   public ServiceConfig addConfigListeners(ServiceConfig config);
+  
 }

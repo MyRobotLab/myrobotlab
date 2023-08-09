@@ -54,11 +54,9 @@ import org.slf4j.Logger;
 
 // controlling export is "nice" but its control messages are the most important to mediate
 
-public class Security extends Service implements AuthorizationProvider {
+public class Security extends Service<ServiceConfig> implements AuthorizationProvider {
 
   protected Set<String> serviceKeyNames = new HashSet<>();
-  
-  protected ServiceConfig config;
 
   public static class Group {
     public HashMap<String, Boolean> accessRules = new HashMap<String, Boolean>();
@@ -774,7 +772,7 @@ public class Security extends Service implements AuthorizationProvider {
       serviceKeyNames.add(keyName);
     }
   }
-  
+
   @Override
   public ServiceConfig apply(ServiceConfig c) {
     super.apply(c);

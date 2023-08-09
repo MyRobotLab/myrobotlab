@@ -58,6 +58,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Broadcaster;
+import org.myrobotlab.framework.interfaces.ConfigurableService;
 import org.myrobotlab.framework.interfaces.FutureInvoker;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -86,7 +87,7 @@ import org.slf4j.Logger;
  * messages.
  * 
  */
-public abstract class Service implements Runnable, Serializable, ServiceInterface, Broadcaster, QueueReporter, FutureInvoker {
+public abstract class Service<T extends ServiceConfig> implements Runnable, Serializable, ServiceInterface, Broadcaster, QueueReporter, FutureInvoker, ConfigurableService<ServiceConfig> {
 
   // FIXME upgrade to ScheduledExecutorService
   // http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
@@ -99,6 +100,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   protected MetaData serviceType;
 
+  /**
+   * Config member - configuration of type {ServiceType}Config
+   * Runtime applys either the default config or a saved config during service creation
+   */
+  protected T config;
+  
   private static final long serialVersionUID = 1L;
 
   transient public final static Logger log = LoggerFactory.getLogger(Service.class);
@@ -1393,17 +1400,53 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return isRunning;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig config) {
-      // process subscribers in config
-      addConfigListeners(config);      
+  /**
+   * getConfig returns current config of the service. This default super method
+   * will also filter webgui subscriptions out, in addition for any local subscriptions it
+   * will remove the instance "id" from any service.  The reason it removes the webgui
+   * subscriptions is to avoid overwelming the user when modifying config.  UI subscriptions
+   * tend to be very numerous and not very useful to the user.  The reason it removes the
+   * instance id from local subscriptions is to allow the config to be used with any instance.
+   * Unless the user is controlling instance id, its random every restart.
+   */
+  public T getConfig() {
+
+    Map<String, List<MRLListener>> listeners = getOutbox().notifyList;
+    List<Listener> newListeners = new ArrayList<>();
+
+    // TODO - perhaps a switch for "remote" things ?
+    for (String method : listeners.keySet()) {
+      List<MRLListener> list = listeners.get(method);
+      for (MRLListener listener : list) {
+        if (!listener.callbackName.endsWith("@webgui-client")) {
+          // Removes the `@runtime-id` so configs still work with local IDs
+          // The StringUtils.removeEnd() call is a no-op when the ID is not our
+          // local ID,
+          // so doesn't conflict with remote routes
+          Listener newConfigListener = new Listener(listener.topicMethod, CodecUtils.removeEnd(listener.callbackName, '@' + Platform.getLocalInstance().getId()),
+              listener.callbackMethod);
+          newListeners.add(newConfigListener);
+        }
+      }
+    }
+
+    if (newListeners.size() > 0) {
+      config.listeners = newListeners;
+    }
+
     return config;
   }
-  
-  
-  @Override
-  abstract public ServiceConfig getConfig();
-  
+
+  /**
+   * Super class apply using template type. The default assigns config of the templated type, and also
+   * add listeners from subscriptions found on the base class ServiceConfig.listeners 
+   */
+  public ServiceConfig apply(ServiceConfig c) {
+      config = (T)c;
+      addConfigListeners(c);
+      return config;
+  }
+
 
   /**
    * The basic ServiceConfig has a list of listeners. These are definitions of
@@ -1420,13 +1463,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
-   * Default getConfig returns name and type with null service specific config
-   * 
+   * Default filtered config, used when saving, can be overriden by concrete class
    */
   @Override
-  public ServiceConfig getFilteredConfig(ServiceConfig inconfig) {
+  public ServiceConfig getFilteredConfig() {
     // Make a copy, because we don't want to modify the original
-    ServiceConfig sc = CodecUtils.fromYaml(CodecUtils.toYaml(inconfig), inconfig.getClass());
+    ServiceConfig sc = CodecUtils.fromYaml(CodecUtils.toYaml(config), config.getClass());
     Map<String, List<MRLListener>> listeners = getOutbox().notifyList;
     List<Listener> newListeners = new ArrayList<>();
 
@@ -2750,7 +2792,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // updating plan
     Runtime.getPlan().put(getName(), sc);
     // applying config to self
-    apply(sc);
+    // FIXME - MUST DO THIS ! apply(sc);
   }
 
   /**

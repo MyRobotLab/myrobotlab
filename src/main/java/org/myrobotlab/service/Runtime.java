@@ -61,6 +61,7 @@ import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.ConfigurableService;
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -121,7 +122,7 @@ import picocli.CommandLine;
  * VAR OF RUNTIME !
  *
  */
-public class Runtime extends Service implements MessageListener, ServiceLifeCyclePublisher, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider {
+public class Runtime extends Service<RuntimeConfig> implements MessageListener, ServiceLifeCyclePublisher, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider {
   final static private long serialVersionUID = 1L;
 
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
@@ -175,8 +176,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   protected final Set<String> serviceTypes = new HashSet<>();
   
-  protected RuntimeConfig config;
-
   /**
    * The directory name currently being used for config. This is NOT full path
    * name. It cannot be null, it cannot have "/" or "\" in the name - it has to
@@ -440,7 +439,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       sc.state = "CREATED";
       // process  the base listeners/subscription of ServiceConfig
       si.addConfigListeners(sc);
-      si.apply(sc);
+      if (si instanceof ConfigurableService) {
+        ((ConfigurableService)si).apply(sc);
+      }
       createdServices.put(service, si);
       currentConfig.add(service);
     }
@@ -2649,9 +2650,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   synchronized static public ServiceInterface start(String name, String type) {
     try {
-      if (name.equals("proxy")) {
-        log.info("herex");
-      }
+
 
       ServiceInterface requestedService = Runtime.getService(name);
       if (requestedService != null) {
@@ -4882,8 +4881,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return id;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
+  
+  public RuntimeConfig apply(RuntimeConfig c) {
     super.apply(c);
     config = (RuntimeConfig)c;
     
@@ -5035,7 +5034,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         ServiceInterface si = getService(s);
         // TODO - switch to save "NON FILTERED" config !!!!
         // get filtered clone of config for saving
-        ServiceConfig config = si.getFilteredConfig(si.getConfig());
+        ServiceConfig config = si.getFilteredConfig();
         String data = CodecUtils.toYaml(config);
         String ymlFileName = configPath + fs + CodecUtils.getShortName(s) + ".yml";
         FileIO.toFile(ymlFileName, data.getBytes());
@@ -5345,7 +5344,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public RuntimeConfig getConfig() {
     return config;
   }
 

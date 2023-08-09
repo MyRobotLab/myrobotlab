@@ -14,7 +14,6 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.ClockConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 /**
@@ -22,7 +21,7 @@ import org.slf4j.Logger;
  * generates a pulse with a timestamp on a regular interval defined by the
  * setInterval(Integer) method. Interval is in milliseconds.
  */
-public class Clock extends Service {
+public class Clock extends Service<ClockConfig> {
 
   public class ClockThread implements Runnable {
 
@@ -79,8 +78,6 @@ public class Clock extends Service {
     }
   }
   
-  protected ClockConfig config;
-
   private static final long serialVersionUID = 1L;
 
   final public static Logger log = LoggerFactory.getLogger(Clock.class);
@@ -204,8 +201,7 @@ public class Clock extends Service {
     return config.interval;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {    
+  public ClockConfig apply(ClockConfig c) {    
     super.apply(c);
     config = (ClockConfig)c;
     if (config.running != null) {
@@ -232,7 +228,7 @@ public class Clock extends Service {
 //      webgui.startService();
 
       Clock c1 = (Clock) Runtime.start("c1", "Clock");
-      Runtime.setLogLevel("WARN");
+      Runtime.setLogLevel("ERROR");
       // c1.startClock();
       Runtime.getInstance().connect("ws://localhost:8888");
       
@@ -249,9 +245,6 @@ public class Clock extends Service {
     }
   }
 
-  @Override
-  public ServiceConfig getConfig() {
-    return config;
-  }
+
 
 }
