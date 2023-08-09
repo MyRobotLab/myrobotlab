@@ -13,7 +13,6 @@ import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 public class Intro extends Service {
@@ -23,8 +22,6 @@ public class Intro extends Service {
   public final static Logger log = LoggerFactory.getLogger(Intro.class);
 
   protected Map<String, Object> props = new TreeMap<>();
-
-  protected ServiceConfig config;
 
   public Intro(String n, String id) {
     super(n, id);
