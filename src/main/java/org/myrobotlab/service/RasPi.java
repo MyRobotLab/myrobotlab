@@ -20,6 +20,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMicrocontroller;
 import org.myrobotlab.service.config.RasPiConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -49,7 +50,7 @@ import com.pi4j.wiringpi.SoftPwm;
  * More Info : http://pi4j.com/
  * 
  */
-public class RasPi extends AbstractMicrocontroller implements I2CController, GpioPinListenerDigital {
+public class RasPi extends AbstractMicrocontroller<ServiceConfig> implements I2CController, GpioPinListenerDigital {
 
   public static class I2CDeviceMap {
     transient public I2CBus bus;

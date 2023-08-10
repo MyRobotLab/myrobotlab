@@ -1,5 +1,6 @@
 package org.myrobotlab.service.abstracts;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -53,7 +54,7 @@ import org.slf4j.Logger;
  *         outputs.
  *
  */
-public abstract class AbstractServo extends Service implements ServoControl, ServoControlPublisher, ServoStatusPublisher, EncoderPublisher {
+public abstract class AbstractServo<C extends ServoConfig> extends Service<C> implements ServoControl, ServoControlPublisher, ServoStatusPublisher, EncoderPublisher {
 
   public final static Logger log = LoggerFactory.getLogger(AbstractServo.class);
 
@@ -1144,8 +1145,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    ServoConfig config = (ServoConfig) super.apply(c);
+  public C apply(C c) {
+    ServoConfig config = super.apply(c);
 
     // important - if starting up
     // and autoDisable - then the assumption at this point
@@ -1171,9 +1172,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
     if (config.synced != null) {
       syncedServos.clear();
-      for (String s : config.synced) {
-        syncedServos.add(s);
-      }
+        Collections.addAll(syncedServos, config.synced);
     }
 
     // rest = config.rest;
@@ -1204,9 +1203,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public C getConfig() {
 
-    ServoConfig config = (ServoConfig) super.getConfig();
+    C config = super.getConfig();
 
     config.enabled = enabled;
 
@@ -1227,7 +1226,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     config.sweepMax = sweepMax;
     config.sweepMin = sweepMin;
 
-    if (syncedServos.size() > 0) {
+    if (!syncedServos.isEmpty()) {
       config.synced = new String[syncedServos.size()];
       int i = 0;
       for (String s : syncedServos) {

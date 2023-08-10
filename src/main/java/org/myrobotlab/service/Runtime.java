@@ -421,7 +421,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     // Plan's config
     RuntimeConfig plansRtConfig = (RuntimeConfig) plan.get("runtime");
     // current Runtime config
-    RuntimeConfig currentConfig = (RuntimeConfig) Runtime.getInstance().config;
+    RuntimeConfig currentConfig = Runtime.getInstance().config;
 
     for (String service : plansRtConfig.getRegistry()) {
       // FIXME - determine if you want to return a complete merge of activated
@@ -4881,10 +4881,11 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     return id;
   }
 
-  
+
+  @Override
   public RuntimeConfig apply(RuntimeConfig c) {
     super.apply(c);
-    config = (RuntimeConfig)c;
+    config = c;
     
     setLocale(config.locale);
 
@@ -5345,6 +5346,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
   @Override
   public RuntimeConfig getConfig() {
+    config = super.getConfig();
     return config;
   }
 
