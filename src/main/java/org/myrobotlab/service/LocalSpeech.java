@@ -479,13 +479,12 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     this.ttsPath = ttsPath;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig config) {
-    LocalSpeechConfig c = (LocalSpeechConfig) super.apply(config);
+  public LocalSpeechConfig apply(LocalSpeechConfig config) {
+    super.apply(config);
 
     // setup the default tts per os
     Platform platform = Runtime.getPlatform();
-    if (c.speechType == null) {
+    if (config.speechType == null) {
       if (platform.isWindows()) {
         setTts();
       } else if (platform.isMac()) {
@@ -496,13 +495,13 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
         error("%s unknown platform %s", getName(), platform.getOS());
       }
     } else {
-      setSpeechType(c.speechType);
+      setSpeechType(config.speechType);
     }
 
-    if (c.voice != null) {
-      setVoice(c.voice);
+    if (config.voice != null) {
+      setVoice(config.voice);
     }
-    return c;
+    return config;
   }
 
   public static void main(String[] args) {

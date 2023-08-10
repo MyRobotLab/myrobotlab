@@ -78,9 +78,8 @@ public class MotorDualPwm extends AbstractMotor {
     return config;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    MotorDualPwmConfig config =  (MotorDualPwmConfig)super.apply(c);
+  public MotorDualPwmConfig apply(MotorDualPwmConfig config) {
+    super.apply(config);
     if (config.leftPwmPin != null) {
       setLeftPwmPin(config.leftPwmPin);
     }
@@ -90,7 +89,7 @@ public class MotorDualPwm extends AbstractMotor {
     if (config.pwmFreq != null) {
       setPwmFreq(config.pwmFreq);
     }
-    return c;
+    return config;
   }
 
   public static void main(String[] args) throws InterruptedException {

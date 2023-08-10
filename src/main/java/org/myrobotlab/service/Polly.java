@@ -253,8 +253,7 @@ public class Polly extends AbstractSpeechSynthesis {
     return ready;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
+  public PollyConfig apply(PollyConfig c) {
     super.apply(c);
     getVoices();
     return c;

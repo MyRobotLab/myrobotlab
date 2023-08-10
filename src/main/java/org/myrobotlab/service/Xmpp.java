@@ -42,6 +42,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Connection;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.slf4j.Logger;
 
@@ -99,9 +100,11 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   String serviceName = "myrobotlab.org"; // xmpp.myrobotlab.org
 
   int port = 5222;
-  transient XMPPTCPConnectionConfiguration config;
+  transient XMPPTCPConnectionConfiguration configx;
   transient XMPPTCPConnection connection;
   transient ChatManager chatManager;
+  
+  protected ServiceConfig config;
 
   transient Roster roster = null;
 
