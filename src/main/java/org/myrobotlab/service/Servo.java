@@ -61,7 +61,7 @@ import org.slf4j.Logger;
  * 
  */
 
-public class Servo extends AbstractServo implements ServiceLifeCycleListener {
+public class Servo extends AbstractServo<ServoConfig> implements ServiceLifeCycleListener {
 
   private static final long serialVersionUID = 1L;
 

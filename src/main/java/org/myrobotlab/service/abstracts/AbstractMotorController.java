@@ -8,10 +8,11 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 
-public abstract class AbstractMotorController extends Service implements MotorController {
+public abstract class AbstractMotorController<C extends ServiceConfig> extends Service<C> implements MotorController {
 
   /**
    * currently attached motors to this controller

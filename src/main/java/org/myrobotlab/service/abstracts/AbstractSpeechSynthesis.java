@@ -33,7 +33,7 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public abstract class AbstractSpeechSynthesis extends Service implements SpeechSynthesis, TextListener, KeyConsumer, AudioListener {
+public abstract class AbstractSpeechSynthesis<C extends SpeechSynthesisConfig> extends Service<C> implements SpeechSynthesis, TextListener, KeyConsumer, AudioListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -1112,8 +1112,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    SpeechSynthesisConfig config = (SpeechSynthesisConfig) super.apply(c);
+  public C apply(C c) {
+    C config = super.apply(c);
 
     setMute(config.mute);
 
@@ -1154,11 +1154,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    SpeechSynthesisConfig c = (SpeechSynthesisConfig) super.getConfig();
+  public C getConfig() {
+    C c = super.getConfig();
     c.mute = mute;
     c.blocking = blocking;
-    if (substitutions != null && substitutions.size() > 0) {
+    if (substitutions != null && !substitutions.isEmpty()) {
       c.substitutions = new HashMap<>();
       c.substitutions.putAll(substitutions);
     }
@@ -1166,7 +1166,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       c.voice = voice.name;
     }
     Set<String> listeners = getAttached("publishStartSpeaking");
-    c.speechRecognizers = listeners.toArray(new String[listeners.size()]);
+    c.speechRecognizers = listeners.toArray(new String[0]);
 
     return c;
   }

@@ -2,10 +2,11 @@ package org.myrobotlab.service.abstracts;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.sensor.EncoderData;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.EncoderController;
 
-public abstract class AbstractPinEncoder extends Service implements EncoderControl {
+public abstract class AbstractPinEncoder<C extends ServiceConfig> extends Service<C> implements EncoderControl {
 
   private static final long serialVersionUID = 1L;
   public String pin;

@@ -87,7 +87,7 @@ import org.slf4j.Logger;
  * messages.
  * 
  */
-public abstract class Service<T extends ServiceConfig> implements Runnable, Serializable, ServiceInterface, Broadcaster, QueueReporter, FutureInvoker, ConfigurableService<ServiceConfig> {
+public abstract class Service<T extends ServiceConfig> implements Runnable, Serializable, ServiceInterface, Broadcaster, QueueReporter, FutureInvoker, ConfigurableService<T> {
 
   // FIXME upgrade to ScheduledExecutorService
   // http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
@@ -489,7 +489,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     
     // stupid solution to get past static problem
     if (!"Runtime".equals(serviceType)) {
-      resourceDir = ((RuntimeConfig)Runtime.getInstance().getConfig()).resource + fs + serviceType;
+      resourceDir = Runtime.getInstance().getConfig().resource + fs + serviceType;
     } else {
       resourceDir = "resource";
     }
@@ -1441,8 +1441,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * Super class apply using template type. The default assigns config of the templated type, and also
    * add listeners from subscriptions found on the base class ServiceConfig.listeners 
    */
-  public ServiceConfig apply(ServiceConfig c) {
-      config = (T)c;
+  public T apply(T c) {
+      config = c;
       addConfigListeners(c);
       return config;
   }
