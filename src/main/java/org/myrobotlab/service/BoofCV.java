@@ -13,6 +13,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 //import boofcv.abst.video.VideoDisplay;
@@ -28,7 +29,7 @@ import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.ImageBase;
 import boofcv.struct.image.ImageType;
 
-public class BoofCV extends Service
+public class BoofCV extends Service<ServiceConfig>
     implements ComputerVision /* Point2DfPublisher, Point2DfListener */ {
 
   public class VideoProcessor implements Runnable {
