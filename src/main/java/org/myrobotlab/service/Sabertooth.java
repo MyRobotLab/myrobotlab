@@ -31,7 +31,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class Sabertooth<T> extends AbstractMotorController<SabertoothConfig> implements PortConnector {
+public class Sabertooth extends AbstractMotorController<SabertoothConfig> implements PortConnector {
 
   private static final long serialVersionUID = 1L;
 

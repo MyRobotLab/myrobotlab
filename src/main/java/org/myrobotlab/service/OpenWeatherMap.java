@@ -17,7 +17,7 @@ import org.slf4j.Logger;
  * ( 3 hours TO 5 days forecast )
  * 
  */
-  public class OpenWeatherMap<T> extends HttpClient<OpenWeatherMapConfig>  {
+  public class OpenWeatherMap extends HttpClient<OpenWeatherMapConfig>  {
 
   private static final long serialVersionUID = 1L;
   private String apiForecast = "http://api.openweathermap.org/data/2.5/forecast/?q=";

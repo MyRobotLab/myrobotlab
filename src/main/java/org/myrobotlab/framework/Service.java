@@ -1468,7 +1468,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   @Override
   public ServiceConfig getFilteredConfig() {
     // Make a copy, because we don't want to modify the original
-    ServiceConfig sc = CodecUtils.fromYaml(CodecUtils.toYaml(config), config.getClass());
+    ServiceConfig sc = CodecUtils.fromYaml(CodecUtils.toYaml(getConfig()), config.getClass());
     Map<String, List<MRLListener>> listeners = getOutbox().notifyList;
     List<Listener> newListeners = new ArrayList<>();
 

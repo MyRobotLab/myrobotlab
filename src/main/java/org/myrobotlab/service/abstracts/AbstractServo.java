@@ -336,7 +336,7 @@ public abstract class AbstractServo<C extends ServoConfig> extends Service<C> im
       return;
     }
 
-    if (isAttached && !CodecUtils.getFullName(service).equals(c.controller)) {
+    if (isAttached && !CodecUtils.getFullName(service).equals(CodecUtils.getFullName(c.controller))) {
       warn("%s already attached to %s detach first", getName(), service);
       return;
     } else if (isAttached) {
@@ -351,7 +351,9 @@ public abstract class AbstractServo<C extends ServoConfig> extends Service<C> im
     addListener("publishServoSetSpeed", service);
     addListener("publishServoEnable", service);
     addListener("publishServoDisable", service);
-
+    if (CodecUtils.isLocal(service)) {
+      service = CodecUtils.getShortName(service);
+    }
     c.controller = service;
 
     // "guessing" its ok if it exists ...

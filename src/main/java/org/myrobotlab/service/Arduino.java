@@ -2321,18 +2321,18 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
 
   @Override
   public ArduinoConfig getConfig() {
-    ArduinoConfig c = super.getConfig();
+    super.getConfig();
 
     // FIXME "port" shouldn't exist only config.port !
-    c.port = port;
-    c.connect = isConnected();
+    config.port = port;
+    config.connect = isConnected();
 
-    return c;
+    return config;
   }
 
   @Override
   public ArduinoConfig apply(ArduinoConfig c) {
-    ArduinoConfig config = (ArduinoConfig) super.apply(c);
+    super.apply(c);
 
     if (msg == null) {
       serial = (Serial) startPeer("serial");
