@@ -2792,7 +2792,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     // updating plan
     Runtime.getPlan().put(getName(), sc);
     // applying config to self
-    // FIXME - MUST DO THIS ! apply(sc);
+    apply((T)sc);
   }
 
   /**
