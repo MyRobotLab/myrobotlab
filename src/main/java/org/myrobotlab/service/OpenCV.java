@@ -125,7 +125,6 @@ import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
 import org.myrobotlab.service.config.OpenCVConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.interfaces.ImageListener;
 import org.myrobotlab.service.interfaces.ImagePublisher;
@@ -144,7 +143,7 @@ import org.slf4j.Logger;
  * Audet : https://github.com/bytedeco/javacv
  * 
  */
-public class OpenCV extends AbstractComputerVision implements ImagePublisher {
+public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements ImagePublisher {
 
   int vpId = 0;
 
@@ -2023,8 +2022,8 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    OpenCVConfig config = (OpenCVConfig) super.getConfig();
+  public OpenCVConfig getConfig() {
+    super.getConfig();
     // FIXME - remove member vars use config only
     config.capturing = capturing;
     config.cameraIndex = cameraIndex;
@@ -2041,8 +2040,8 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    OpenCVConfig config = (OpenCVConfig) super.apply(c);
+  public OpenCVConfig apply(OpenCVConfig c) {
+    super.apply(c);
     setCameraIndex(config.cameraIndex);
     setGrabberType(config.grabberType);
     setInputFileName(config.inputFile);

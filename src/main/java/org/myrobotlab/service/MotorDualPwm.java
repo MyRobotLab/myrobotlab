@@ -10,7 +10,7 @@ import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.config.MotorDualPwmConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 
-public class MotorDualPwm extends AbstractMotor {
+public class MotorDualPwm extends AbstractMotor<MotorDualPwmConfig> {
   private static final long serialVersionUID = 1L;
 
   protected String leftPwmPin;
@@ -69,17 +69,17 @@ public class MotorDualPwm extends AbstractMotor {
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public MotorDualPwmConfig getConfig() {
     // FIXME - may need to do call super.config for config that has parent :(
-    MotorDualPwmConfig config = (MotorDualPwmConfig)super.getConfig();
+    super.getConfig();
     config.leftPwmPin = leftPwmPin;
     config.rightPwmPin = rightPwmPin;
     config.pwmFreq = pwmFreq;
     return config;
   }
 
-  public MotorDualPwmConfig apply(MotorDualPwmConfig config) {
-    super.apply(config);
+  public MotorDualPwmConfig apply(MotorDualPwmConfig c) {
+    super.apply(c);
     if (config.leftPwmPin != null) {
       setLeftPwmPin(config.leftPwmPin);
     }

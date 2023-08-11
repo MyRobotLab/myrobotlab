@@ -29,6 +29,7 @@ import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.openni.OpenNiData;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoEvent;
@@ -51,7 +52,7 @@ import com.jme3.system.AppSettings;
  * @author Christian/Calamity
  * 
  */
-public class IntegratedMovement extends Service implements IKJointAnglePublisher {
+public class IntegratedMovement extends Service<ServiceConfig> implements IKJointAnglePublisher {
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(IntegratedMovement.class);

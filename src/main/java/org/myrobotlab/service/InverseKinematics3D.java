@@ -14,6 +14,7 @@ import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
@@ -34,7 +35,7 @@ import org.slf4j.Logger;
  * @author kwatters
  * 
  */
-public class InverseKinematics3D extends Service implements IKJointAnglePublisher, PointsListener {
+public class InverseKinematics3D extends Service<ServiceConfig> implements IKJointAnglePublisher, PointsListener {
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(InverseKinematics3D.class);

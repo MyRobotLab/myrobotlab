@@ -27,7 +27,7 @@ import it.sauronsoftware.cron4j.Scheduler;
  * can be any message that the service accepts. 
  * 
  */
-public class Cron extends Service {
+public class Cron extends Service<CronConfig> {
   
   public static class Task implements Serializable, Runnable {
 
@@ -187,7 +187,9 @@ public class Cron extends Service {
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
+  public CronConfig apply(CronConfig c) {
+    super.apply(config);
+    
     // deschedule current tasks
     removeAllTasks();
     
@@ -200,13 +202,13 @@ public class Cron extends Service {
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    CronConfig c = (CronConfig)config;
-    c.tasks = new ArrayList<>();
+  public CronConfig getConfig() {
+    super.getConfig();
+    config.tasks = new ArrayList<>();
     for (Task task: tasks.values()) {
-      c.tasks.add(task);
+      config.tasks.add(task);
     }
-    return c;
+    return config;
   }
 
   public Map<String, Task> getCronTasks() {

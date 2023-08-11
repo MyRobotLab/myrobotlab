@@ -1113,7 +1113,7 @@ public abstract class AbstractSpeechSynthesis<C extends SpeechSynthesisConfig> e
 
   @Override
   public C apply(C c) {
-    C config = super.apply(c);
+    super.apply(c);
 
     setMute(config.mute);
 

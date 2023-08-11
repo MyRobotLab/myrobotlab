@@ -20,6 +20,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ import org.slf4j.Logger;
  * 
  */
 // TODO Ensure that only one instance of RasPi can execute on each RaspBerry PI
-public class Esp8266_01 extends Service implements I2CController {
+public class Esp8266_01 extends Service<ServiceConfig> implements I2CController {
 
   public static class I2CDeviceMap {
     public transient I2CControl control;

@@ -7,8 +7,8 @@ import java.util.List;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.transformer.ConnectorConfig;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.DocumentConnector;
-import org.myrobotlab.service.interfaces.DocumentListener;
 import org.myrobotlab.service.interfaces.DocumentPublisher;
 
 /**
@@ -17,7 +17,7 @@ import org.myrobotlab.service.interfaces.DocumentPublisher;
  * service.
  * 
  */
-public abstract class AbstractConnector extends Service implements DocumentPublisher, DocumentConnector {
+public abstract class AbstractConnector extends Service<ServiceConfig> implements DocumentPublisher, DocumentConnector {
 
   private static final long serialVersionUID = 1L;
   protected ConnectorState state = ConnectorState.STOPPED;

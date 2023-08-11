@@ -7,9 +7,7 @@ import java.util.Set;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
-import org.myrobotlab.service.config.MotorConfig;
 import org.myrobotlab.service.config.MotorHat4PiConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 
 public class MotorHat4Pi extends AbstractMotor<MotorHat4PiConfig> {
   private static final long serialVersionUID = 1L;

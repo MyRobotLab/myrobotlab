@@ -7,7 +7,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.OpenWeatherMapConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 /**
@@ -18,7 +17,7 @@ import org.slf4j.Logger;
  * ( 3 hours TO 5 days forecast )
  * 
  */
-public class OpenWeatherMap extends HttpClient {
+  public class OpenWeatherMap<T> extends HttpClient<OpenWeatherMapConfig>  {
 
   private static final long serialVersionUID = 1L;
   private String apiForecast = "http://api.openweathermap.org/data/2.5/forecast/?q=";
@@ -252,8 +251,8 @@ public class OpenWeatherMap extends HttpClient {
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    OpenWeatherMapConfig config = (OpenWeatherMapConfig)super.getConfig();
+  public OpenWeatherMapConfig getConfig() {
+    super.getConfig();
     // FIXME - remove local fields in favor of only config
     config.currentUnits = units;
     config.currentTown = location;
@@ -261,8 +260,8 @@ public class OpenWeatherMap extends HttpClient {
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    OpenWeatherMapConfig config = (OpenWeatherMapConfig) super.apply(c);
+  public OpenWeatherMapConfig apply(OpenWeatherMapConfig c) {
+    super.apply(c);
     // FIXME - remove local fields in favor of only config
     if (config.currentUnits != null) {
       setUnits(config.currentUnits);

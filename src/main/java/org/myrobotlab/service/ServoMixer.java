@@ -36,7 +36,7 @@ import org.slf4j.Logger;
  * @author GroG, kwatters, others...
  * 
  */
-public class ServoMixer extends Service implements ServiceLifeCycleListener, SelectListener {
+public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLifeCycleListener, SelectListener {
 
   /**
    * The Player plays a requested gesture, which is a sequence of Poses. 

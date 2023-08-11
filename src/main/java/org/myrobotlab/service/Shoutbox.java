@@ -28,10 +28,11 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.Response;
 import org.myrobotlab.service.Xmpp.XmppMsg;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 // FIXME - use Peers !
-public class Shoutbox extends Service {
+public class Shoutbox extends Service<ServiceConfig> {
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(Shoutbox.class);

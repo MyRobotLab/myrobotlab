@@ -8,6 +8,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 import com.google.auth.oauth2.GoogleCredentials;
@@ -15,7 +16,7 @@ import com.google.cloud.translate.Translate;
 import com.google.cloud.translate.TranslateOptions;
 import com.google.cloud.translate.Translation;
 
-public class GoogleTranslate extends Service {
+public class GoogleTranslate extends Service<ServiceConfig> {
 
   private static final long serialVersionUID = 1L;
 

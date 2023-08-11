@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import okhttp3.Response;
 import okhttp3.WebSocket;
 
-public class LeapMotion2 extends Service implements LeapDataListener, LeapDataPublisher, PointPublisher, RemoteMessageHandler {
+public class LeapMotion2 extends Service<LeapMotion2Config> implements LeapDataListener, LeapDataPublisher, PointPublisher, RemoteMessageHandler {
 
   private static final long serialVersionUID = 1L;
 

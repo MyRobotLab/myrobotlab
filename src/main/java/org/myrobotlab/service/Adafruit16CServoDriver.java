@@ -45,7 +45,7 @@ import org.slf4j.Logger;
  *         https://learn.adafruit.com/16-channel-pwm-servo-driver
  */
 @Ignore
-public class Adafruit16CServoDriver extends Service implements I2CControl, ServoController,
+public class Adafruit16CServoDriver extends Service<Adafruit16CServoDriverConfig> implements I2CControl, ServoController,
     MotorController /* , ServoStatusPublisher */ {
 
   /**
@@ -1024,8 +1024,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
   
   @Override
-  public ServiceConfig getConfig() {
-
+  public Adafruit16CServoDriverConfig getConfig() {
+    super.getConfig();
     Adafruit16CServoDriverConfig config = (Adafruit16CServoDriverConfig)super.getConfig();
     // FIXME remove member vars use config directly
     config.controller = controllerName;
@@ -1035,8 +1035,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
   
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    Adafruit16CServoDriverConfig config = (Adafruit16CServoDriverConfig)super.apply(c);
+  public Adafruit16CServoDriverConfig apply(Adafruit16CServoDriverConfig c) {
+    super.apply(c);
     if (config.controller != null) {
       try {
         attach(config.controller);

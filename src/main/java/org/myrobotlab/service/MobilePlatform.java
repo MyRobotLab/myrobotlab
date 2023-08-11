@@ -30,6 +30,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.slf4j.Logger;
 
@@ -52,7 +53,7 @@ import org.slf4j.Logger;
  *         Differential_steer_drive_dead_reckoning
  */
 @Deprecated // use Chassis
-public class MobilePlatform extends Service {
+public class MobilePlatform extends Service<ServiceConfig> {
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(MobilePlatform.class);

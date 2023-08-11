@@ -31,6 +31,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 /**
@@ -38,7 +39,7 @@ import org.slf4j.Logger;
  * some sounds and music based on string patterns that define the beat.
  *
  */
-public class JFugue extends Service {
+public class JFugue extends Service<ServiceConfig> {
 
   private static final long serialVersionUID = 1L;
 

@@ -34,13 +34,12 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Http;
 import org.myrobotlab.service.config.ImageDisplayConfig;
 import org.myrobotlab.service.config.ImageDisplayConfig.Display;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.interfaces.ImageListener;
 import org.myrobotlab.service.interfaces.ImagePublisher;
 import org.slf4j.Logger;
 
-public class ImageDisplay extends Service implements ImageListener, MouseListener, ActionListener, MouseMotionListener {
+public class ImageDisplay extends Service<ImageDisplayConfig> implements ImageListener, MouseListener, ActionListener, MouseMotionListener {
 
   final static Logger log = LoggerFactory.getLogger(ImageDisplay.class);
 
@@ -80,8 +79,8 @@ public class ImageDisplay extends Service implements ImageListener, MouseListene
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    ImageDisplayConfig config = (ImageDisplayConfig) super.apply(c);
+  public ImageDisplayConfig apply(ImageDisplayConfig c) {
+    super.apply(c);
     if (config.displays != null) {
       for (String displayName : config.displays.keySet()) {
         close(displayName);

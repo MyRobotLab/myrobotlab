@@ -7,7 +7,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
-public class _TemplateService extends Service {
+public class _TemplateService extends Service<ServiceConfig> {
 
   private static final long serialVersionUID = 1L;
 
@@ -23,14 +23,13 @@ public class _TemplateService extends Service {
    * <pre>
   @Override
   public ServiceConfig apply(ServiceConfig c) {
-    // _TemplateServiceConfig config = (_TemplateService)super.apply(c);
-    // if more complex config handling is needed
+    super.apply(c)
     return c;
   }
 
   @Override
   public ServiceConfig getConfig() {
-    // _TemplateServiceConfig config = (_TemplateService)super.getConfig();
+    super.getConfig()
     return config;
   }
   </pre>

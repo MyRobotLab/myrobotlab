@@ -20,7 +20,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.GoogleSearchConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.SearchResults;
@@ -31,7 +30,7 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class GoogleSearch extends Service implements ImagePublisher, TextPublisher, SearchPublisher, LocaleProvider {
+public class GoogleSearch extends Service<GoogleSearchConfig> implements ImagePublisher, TextPublisher, SearchPublisher, LocaleProvider {
 
   private static final long serialVersionUID = 1L;
 

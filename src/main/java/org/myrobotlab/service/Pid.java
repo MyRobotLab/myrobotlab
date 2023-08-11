@@ -62,7 +62,7 @@ import org.slf4j.Logger;
  * https://en.wikipedia.org/wiki/PID_controller#Integral_windup
  * 
  */
-public class Pid extends Service implements PidControl {
+public class Pid extends Service<PidConfig> implements PidControl {
 
   public static class PidOutput {
     public long ts;
@@ -519,8 +519,8 @@ public class Pid extends Service implements PidControl {
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    PidConfig config = (PidConfig)super.getConfig();
+  public PidConfig getConfig() {
+    super.getConfig();
     config.data = data;
     return config;
   }
@@ -533,8 +533,8 @@ public class Pid extends Service implements PidControl {
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    PidConfig config = (PidConfig) super.apply(c);
+  public PidConfig apply(PidConfig c) {
+    super.apply(c);
     if (config.data != null) {
       data = config.data;
       for (String key : config.data.keySet()) {

@@ -439,6 +439,10 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       sc.state = "CREATED";
       // process  the base listeners/subscription of ServiceConfig
       si.addConfigListeners(sc);
+      if (si.getName().equals("mouth"))
+      {
+        log.info("here");
+      }
       if (si instanceof ConfigurableService) {
         ((ConfigurableService)si).apply(sc);
       }

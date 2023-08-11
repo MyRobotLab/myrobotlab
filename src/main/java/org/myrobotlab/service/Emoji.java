@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 // emotionListener
 // Links
 // - http://googleemotionalindex.com/
-public class Emoji extends Service implements TextListener, EventHandler, ImagePublisher {
+public class Emoji extends Service<EmojiConfig> implements TextListener, EventHandler, ImagePublisher {
 
   private static final long serialVersionUID = 1L;
 

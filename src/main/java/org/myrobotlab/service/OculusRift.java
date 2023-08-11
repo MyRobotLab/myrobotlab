@@ -13,6 +13,7 @@ import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
 import org.myrobotlab.opencv.OpenCVFilterUndistort;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Orientation;
 import org.myrobotlab.service.interfaces.PointPublisher;
 import org.slf4j.Logger;
@@ -36,7 +37,7 @@ import com.oculusvr.capi.TrackingState;
  *
  */
 // TODO: implement publishOculusRiftData ...
-public class OculusRift extends Service implements PointPublisher {
+public class OculusRift extends Service<ServiceConfig> implements PointPublisher {
 
   public static final int ABS_TIME_MS = 0;
   public static final boolean LATENCY_MARKER = false;

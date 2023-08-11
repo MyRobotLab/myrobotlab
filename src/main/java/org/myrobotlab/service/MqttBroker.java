@@ -60,7 +60,7 @@ import io.netty.handler.codec.mqtt.MqttQoS;
  * whole array is decoded - then each parameter is, similar to http form values
  *
  */
-public class MqttBroker extends Service implements InterceptHandler, Gateway, KeyConsumer {
+public class MqttBroker extends Service<MqttBrokerConfig> implements InterceptHandler, Gateway, KeyConsumer {
 
   public final static Logger log = LoggerFactory.getLogger(MqttBroker.class);
 
@@ -673,20 +673,20 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    MqttBrokerConfig c = (MqttBrokerConfig)super.getConfig();
+  public MqttBrokerConfig getConfig() {
+    super.getConfig();
     // FIXME - remove local fields in favor of just config
-    c.address = address;
-    c.mqttPort = mqttPort;
-    c.wsPort = wsPort;
-    c.username = username;
-    c.password = password;
-    return c;
+    config.address = address;
+    config.mqttPort = mqttPort;
+    config.wsPort = wsPort;
+    config.username = username;
+    config.password = password;
+    return config;
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    MqttBrokerConfig config = (MqttBrokerConfig) super.apply(c);
+  public MqttBrokerConfig apply(MqttBrokerConfig c) {
+    super.apply(c);
     // FIXME - remove local fields in favor of just config
     address = config.address;
     mqttPort = config.mqttPort;

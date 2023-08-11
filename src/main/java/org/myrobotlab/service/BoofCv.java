@@ -6,11 +6,12 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point2df;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.Point2DfListener;
 import org.myrobotlab.service.interfaces.Point2DfPublisher;
 import org.slf4j.Logger;
 
-public class BoofCv extends Service implements Point2DfPublisher, Point2DfListener {
+public class BoofCv extends Service<ServiceConfig> implements Point2DfPublisher, Point2DfListener {
 
   private static final long serialVersionUID = 1L;
 
