@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,7 +53,7 @@ import py4j.Py4JServerConnection;
  * 
  * @author GroG
  */
-public class Py4j extends Service implements GatewayServerListener {
+public class Py4j extends Service<Py4jConfig> implements GatewayServerListener {
 
   /**
    * POJO class to tie all the data elements of a external python process

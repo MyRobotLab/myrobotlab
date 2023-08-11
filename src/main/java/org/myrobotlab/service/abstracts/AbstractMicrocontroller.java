@@ -12,13 +12,14 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PinListener;
 
-public abstract class AbstractMicrocontroller extends Service implements Microcontroller {
+public abstract class AbstractMicrocontroller<C extends ServiceConfig> extends Service<C> implements Microcontroller {
 
   private static final long serialVersionUID = 1L;
   

@@ -34,7 +34,6 @@ import org.atmosphere.nettosphere.Nettosphere;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
@@ -45,7 +44,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.net.Connection;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.WebGuiConfig;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
@@ -64,7 +62,7 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
  * services are already APIs - perhaps a data API - same as service without the
  * message wrapper
  */
-public class WebGui extends Service implements AuthorizationProvider, Gateway, Handler, ServiceLifeCycleListener {
+public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvider, Gateway, Handler, ServiceLifeCycleListener {
 
   public static class LiveVideoStreamHandler implements Handler {
 
@@ -91,7 +89,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       }
     }
   }
-
+  
   private final transient IncomingMsgQueue inMsgQueue = new IncomingMsgQueue();
 
   public static class Panel {
@@ -174,6 +172,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   // just marking as transient to remove some of the data load 10240 max frame
   transient Map<String, Panel> panels = new HashMap<String, Panel>();
 
+  // FIXME - add as a config member
   public Integer port;
 
   public String root = "root";
@@ -326,10 +325,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     configBuilder.resource("/stream", stream);
 
-    WebGuiConfig c = (WebGuiConfig) config;
-
     // add all webgui resource directories
-    for (String resource : c.resources) {
+    for (String resource : config.resources) {
       configBuilder.resource(resource);
     }
 
@@ -1154,18 +1151,17 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    WebGuiConfig config = (WebGuiConfig) super.getConfig();
-    // FIXME - remove member variables use config only
+  // FIXME port and autoStartBrowser should just be part of config
+  // then this override can be removed
+  public WebGuiConfig getConfig() {
     config.port = port;
     config.autoStartBrowser = autoStartBrowser;
     return config;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    WebGuiConfig config = (WebGuiConfig) super.apply(c);
-
+  public WebGuiConfig apply(WebGuiConfig c) {
+    super.apply(c);
+    
     if (config.port != null && (port != null && config.port.intValue() != port.intValue())) {
       setPort(config.port);
     }
@@ -1302,4 +1298,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   @Override
   public void onReleased(String name) {
   }
+
+
 }

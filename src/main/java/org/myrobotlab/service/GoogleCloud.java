@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 import com.google.cloud.vision.v1.AnnotateImageRequest;
@@ -40,7 +41,7 @@ import com.google.protobuf.ByteString;
 
 //[END import_libraries]
 
-public class GoogleCloud extends Service {
+public class GoogleCloud extends Service<ServiceConfig> {
 
   private static final long serialVersionUID = 1L;
   final static Logger log = LoggerFactory.getLogger(GoogleCloud.class);

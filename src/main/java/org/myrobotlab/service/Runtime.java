@@ -62,6 +62,7 @@ import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.ConfigurableService;
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -85,7 +86,6 @@ import org.myrobotlab.process.InProcessCli;
 import org.myrobotlab.process.Launcher;
 import org.myrobotlab.service.config.RuntimeConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServiceConfig.Listener;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.ServiceTypeNameResults;
 import org.myrobotlab.service.interfaces.ConnectionManager;
@@ -124,7 +124,7 @@ import picocli.CommandLine;
  * VAR OF RUNTIME !
  *
  */
-public class Runtime extends Service implements MessageListener, ServiceLifeCyclePublisher, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider {
+public class Runtime extends Service<RuntimeConfig> implements MessageListener, ServiceLifeCyclePublisher, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider {
   final static private long serialVersionUID = 1L;
 
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
@@ -140,7 +140,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * to start and configure new services. The master plan is an accumulation of
    * all these requests.
    */
-  final Plan masterPlan = new Plan("runtime");
+  @Deprecated /* use the filesystem only no memory plan */
+  transient final Plan masterPlan = new Plan("runtime");
 
   /**
    * thread for non-blocking install of services
@@ -176,7 +177,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       "org.myrobotlab.service.interfaces.ServiceLifeCycleListener", "org.myrobotlab.framework.interfaces.StatePublisher"));
 
   protected final Set<String> serviceTypes = new HashSet<>();
-
+  
   /**
    * The directory name currently being used for config. This is NOT full path
    * name. It cannot be null, it cannot have "/" or "\" in the name - it has to
@@ -422,7 +423,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // Plan's config
     RuntimeConfig plansRtConfig = (RuntimeConfig) plan.get("runtime");
     // current Runtime config
-    RuntimeConfig currentConfig = (RuntimeConfig) Runtime.getInstance().config;
+    RuntimeConfig currentConfig = Runtime.getInstance().config;
 
     for (String service : plansRtConfig.getRegistry()) {
       // FIXME - determine if you want to return a complete merge of activated
@@ -438,10 +439,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       sc.state = "CREATING";
       ServiceInterface si = createService(service, sc.type, null);
       sc.state = "CREATED";
-      si.setConfig(sc);
-      si.apply(sc);
+      // process  the base listeners/subscription of ServiceConfig
+      si.addConfigListeners(sc);
+      if (si.getName().equals("mouth"))
+      {
+        log.info("here");
+      }
+      if (si instanceof ConfigurableService) {
+        ((ConfigurableService)si).apply(sc);
+      }
       createdServices.put(service, si);
-      // si.startService(); bad idea
       currentConfig.add(service);
     }
 
@@ -2649,6 +2656,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   synchronized static public ServiceInterface start(String name, String type) {
     try {
+
+
       ServiceInterface requestedService = Runtime.getService(name);
       if (requestedService != null) {
         log.info("requested service already exists");
@@ -2684,7 +2693,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       if (requestedService == null) {
-        log.error("here");
+        Runtime.getInstance().error("could not start %s of type %s", name, type);
+        return null;
       }
 
       // getConfig() was problematic here for JMonkeyEngine
@@ -3974,21 +3984,21 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
     addRoute(id, uuid, 10);
   }
 
-  @Override
-  public ServiceConfig getFilteredConfig() {
-    RuntimeConfig sc = (RuntimeConfig) super.getFilteredConfig();
-    Set<Listener> removeList = new HashSet<>();
-    for (Listener listener : sc.listeners) {
-      if (listener.callback.equals("onReleased") || listener.callback.equals("onStarted") || listener.callback.equals("onRegistered") || listener.callback.equals("onStopped")
-          || listener.callback.equals("onCreated")) {
-        removeList.add(listener);
-      }
-    }
-    for (Listener remove : removeList) {
-      sc.listeners.remove(remove);
-    }
-    return sc;
-  }
+//  @Override
+//  public ServiceConfig getFilteredConfig() {
+//    RuntimeConfig sc = (RuntimeConfig) super.getFilteredConfig();
+//    Set<Listener> removeList = new HashSet<>();
+//    for (Listener listener : sc.listeners) {
+//      if (listener.callback.equals("onReleased") || listener.callback.equals("onStarted") || listener.callback.equals("onRegistered") || listener.callback.equals("onStopped")
+//          || listener.callback.equals("onCreated")) {
+//        removeList.add(listener);
+//      }
+//    }
+//    for (Listener remove : removeList) {
+//      sc.listeners.remove(remove);
+//    }
+//    return sc;
+//  }
 
   /**
    * Unregister all connections that a specified client has made.
@@ -4875,9 +4885,12 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
     return id;
   }
 
+
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    RuntimeConfig config = (RuntimeConfig) super.apply(c);
+  public RuntimeConfig apply(RuntimeConfig c) {
+    super.apply(c);
+    config = c;
+    
     setLocale(config.locale);
 
     if (config.id != null) {
@@ -5023,9 +5036,6 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
       }
 
       for (String s : servicesToSave) {
-        if (CodecUtils.getShortName(s).equals("i01")) {
-          log.info("here");
-        }
         ServiceInterface si = getService(s);
         // TODO - switch to save "NON FILTERED" config !!!!
         // get filtered clone of config for saving
@@ -5336,6 +5346,12 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
       return null;
     }
     return CONFIG_ROOT + fs + configName;
+  }
+
+  @Override
+  public RuntimeConfig getConfig() {
+    config = super.getConfig();
+    return config;
   }
 
 }

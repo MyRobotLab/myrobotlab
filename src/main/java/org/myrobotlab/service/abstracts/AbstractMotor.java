@@ -59,7 +59,7 @@ import org.slf4j.Logger;
  * 
  */
 
-abstract public class AbstractMotor extends Service implements MotorControl, EncoderListener {
+abstract public class AbstractMotor<C extends GeneralMotorConfig> extends Service<C> implements MotorControl, EncoderListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -135,7 +135,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   public MotorController getController() {
-    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    GeneralMotorConfig c = config;
     return (MotorController) Runtime.getService(c.controller);
   }
 
@@ -147,13 +147,13 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public boolean isAttached(MotorController controller) {
-    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    GeneralMotorConfig c = config;
     return controller.getName().equals(c.controller);
   }
 
   @Override
   public boolean isInverted() {
-    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    GeneralMotorConfig c = config;
     return c.mapper.maxIn < c.mapper.minOut;
   }
 
@@ -169,10 +169,10 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
       info("%s is locked - will not move");
       return;
     }
-    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    GeneralMotorConfig c = config;
     // FIXME make mapper.isInInputRange(x)
-    double min = (c.mapper.minIn < c.mapper.maxIn) ? c.mapper.minIn : c.mapper.maxIn;
-    double max = (c.mapper.minIn < c.mapper.maxIn) ? c.mapper.maxIn : c.mapper.minIn;
+    double min = Math.min(c.mapper.minIn, c.mapper.maxIn);
+    double max = Math.max(c.mapper.minIn, c.mapper.maxIn);
 
     if (powerInput < min) {
       warn("requested power %.2f is under minimum %.2f", powerInput, c.mapper.minIn);
@@ -211,7 +211,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   @Override
   public void setInverted(boolean invert) {
     log.warn("setting {} inverted = {}", getName(), invert);
-    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    GeneralMotorConfig c = config;
     double temp = c.mapper.minIn;
     c.mapper.minIn = c.mapper.maxIn;
     c.mapper.maxIn = temp;
@@ -220,7 +220,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public void setMinMax(double min, double max) {
-    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    GeneralMotorConfig c = config;
     c.mapper.minIn = min;
     c.mapper.maxIn = max;
     info("updated min %.2f max %.2f", min, max);
@@ -228,7 +228,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   public void map(double minX, double maxX, double minY, double maxY) {
-    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    GeneralMotorConfig c = config;
     c.mapper.map(minX, maxX, minY, maxY);
     broadcastState();
   }
@@ -304,7 +304,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public void detachMotorController(MotorController controller) {
-    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    GeneralMotorConfig c = config;
     controller.detach(this);
     controller = null;
     c.controller = null;
@@ -350,7 +350,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     }
 
     log.info("attachMotorController {}", controller.getName());
-    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    GeneralMotorConfig c = config;
     c.controller = controller.getName();
     motorPorts = controller.getPorts();
     // TODO: KW: set a reasonable mapper. for pwm motor it's probable -1 to 1 to
@@ -385,7 +385,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public void detach() {
-    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    GeneralMotorConfig c = config;
     c.controller = null;
     // MAKE NOTE!: don't want to do this anymore for fear of infinit detach loop
     // just detach this service
@@ -398,7 +398,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   // TODO - this could be Java 8 default interface implementation
   @Override
   public void detach(String name) {
-    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    GeneralMotorConfig c = config;
     MotorController controller = getController();
 
     if (controller == null || !name.equals(controller.getName())) {
@@ -422,7 +422,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public Set<String> getAttached() {
-    HashSet<String> ret = new HashSet<String>();
+    HashSet<String> ret = new HashSet<>();
     MotorController controller = getController();
     if (controller != null) {
       ret.add(controller.getName());
@@ -432,33 +432,33 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   // FIXME promote to interface
   public Mapper getMapper() {
-    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    GeneralMotorConfig c = config;
     return c.mapper;
   }
 
   // FIXME promote to interface
   public void setMapper(MapperSimple mapper) {
-    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    GeneralMotorConfig c = config;
     c.mapper = mapper;
   }
 
   // FIXME promote to interface
   @Override
   public double calcControllerOutput() {
-    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    GeneralMotorConfig c = config;
     return c.mapper.calcOutput(getPowerLevel());
   }
 
   @Override
   public void setAxis(String name) {
-    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    GeneralMotorConfig c = config;
     c.axis = name;
     broadcastState();
   }
 
   @Override
   public String getAxis() {
-    GeneralMotorConfig c = (GeneralMotorConfig) config;
+    GeneralMotorConfig c = config;
     return c.axis;
   }
 
@@ -468,8 +468,8 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    GeneralMotorConfig config = (GeneralMotorConfig) super.apply(c);
+  public C apply(C c) {
+    GeneralMotorConfig config = super.apply(c);
 
     // config.mapper = new MapperLinear(config.minIn, config.maxIn,
     // config.minOut, config.maxOut);

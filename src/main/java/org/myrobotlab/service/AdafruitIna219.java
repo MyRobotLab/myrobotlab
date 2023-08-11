@@ -12,6 +12,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.VoltageSensorControl;
@@ -25,7 +26,7 @@ import org.slf4j.Logger;
  * 
  *         References : https://www.adafruit.com/products/904
  */
-public class AdafruitIna219 extends Service implements I2CControl, VoltageSensorControl {
+public class AdafruitIna219 extends Service<ServiceConfig> implements I2CControl, VoltageSensorControl {
 
   private static final long serialVersionUID = 1L;
 

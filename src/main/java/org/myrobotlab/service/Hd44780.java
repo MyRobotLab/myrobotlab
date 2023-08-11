@@ -25,7 +25,7 @@ import org.slf4j.Logger;
  * @author Moz4r modified by Ray Edgley.
  * 
  */
-public class Hd44780 extends Service implements TextListener {
+public class Hd44780 extends Service<Hd44780Config> implements TextListener {
 
   public final static Logger log = LoggerFactory.getLogger(Hd44780.class);
 
@@ -720,8 +720,8 @@ public class Hd44780 extends Service implements TextListener {
    * Load the config into memory
    */
   @Override
-  public ServiceConfig getConfig() {
-    Hd44780Config config = (Hd44780Config) super.getConfig();
+  public Hd44780Config getConfig() {
+    super.getConfig();
     if (pcfName != null) {
       config.controller = pcfName;
     }
@@ -733,8 +733,8 @@ public class Hd44780 extends Service implements TextListener {
    * Applies the config to the service attaching to the PCF8574 if it exists.
    */
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    Hd44780Config config = (Hd44780Config) super.apply(c);
+  public Hd44780Config apply(Hd44780Config c) {
+    super.apply(c);
 
     if (config.controller != null) {
       try {

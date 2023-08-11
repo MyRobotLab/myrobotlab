@@ -61,7 +61,7 @@ import org.yaml.snakeyaml.Yaml;
  * @author kwatters
  *
  */
-public class ProgramAB extends Service
+public class ProgramAB extends Service<ProgramABConfig>
     implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener, UtterancePublisher, UtteranceListener, ResponsePublisher {
 
   /**
@@ -559,8 +559,7 @@ public class ProgramAB extends Service
    * @return
    */
   public Map<String, String> getPredicates() {
-    ProgramABConfig c = (ProgramABConfig) config;
-    return getPredicates(c.currentUserName, c.currentBotName);
+    return getPredicates(config.currentUserName, config.currentBotName);
   }
 
   /**
@@ -638,8 +637,7 @@ public class ProgramAB extends Service
   }
 
   public Session startSession() throws IOException {
-    ProgramABConfig c = (ProgramABConfig) config;
-    return startSession(c.currentUserName);
+    return startSession(config.currentUserName);
   }
 
   // FIXME - it should just set the current userName only
@@ -811,15 +809,13 @@ public class ProgramAB extends Service
   }
 
   public void setCurrentBotName(String botName) {
-    ProgramABConfig c = (ProgramABConfig) config;
-    c.currentBotName = botName;
+    config.currentBotName = botName;
     invoke("getBotImage", botName);
     broadcastState();
   }
 
   public void setCurrentUserName(String currentUserName) {
-    ProgramABConfig c = (ProgramABConfig) config;
-    c.currentUserName = currentUserName;
+    config.currentUserName = currentUserName;
     broadcastState();
   }
 
@@ -832,13 +828,11 @@ public class ProgramAB extends Service
   }
 
   public String getCurrentUserName() {
-    ProgramABConfig c = (ProgramABConfig) config;
-    return c.currentUserName;
+    return config.currentUserName;
   }
 
   public String getCurrentBotName() {
-    ProgramABConfig c = (ProgramABConfig) config;
-    return c.currentBotName;
+    return config.currentBotName;
   }
 
   /**
@@ -998,8 +992,7 @@ public class ProgramAB extends Service
   }
 
   public BotInfo getBotInfo() {
-    ProgramABConfig c = (ProgramABConfig) config;
-    return getBotInfo(c.currentBotName);
+    return getBotInfo(config.currentBotName);
   }
 
   /**
@@ -1078,54 +1071,54 @@ public class ProgramAB extends Service
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    ProgramABConfig c = (ProgramABConfig) super.getConfig();
-    if (c.bots == null) {
-      c.bots = new ArrayList<>();
+  public ProgramABConfig getConfig() {
+    super.getConfig();
+    if (config.bots == null) {
+      config.bots = new ArrayList<>();
     }
 
-    c.bots.clear();
+    config.bots.clear();
     for (BotInfo bot : bots.values()) {
 
       Path pathAbsolute = Paths.get(bot.path.getAbsolutePath());
       Path pathBase = Paths.get(System.getProperty("user.dir"));
       Path pathRelative = pathBase.relativize(pathAbsolute);
-      c.bots.add(pathRelative.toString());
+      config.bots.add(pathRelative.toString());
 
     }
 
-    return c;
+    return config;
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig config) {
-    ProgramABConfig c = (ProgramABConfig) super.apply(config);
-    if (c.bots != null && c.bots.size() > 0) {
+  public ProgramABConfig apply(ProgramABConfig c) {
+    super.apply(c);
+    if (config.bots != null && config.bots.size() > 0) {
       // bots.clear();
-      for (String botPath : c.bots) {
+      for (String botPath : config.bots) {
         addBotPath(botPath);
       }
     }
     
-    if (c.botDir == null) {
-      c.botDir = getResourceDir();
+    if (config.botDir == null) {
+      config.botDir = getResourceDir();
     }
 
-    List<File> botsFromScanning = scanForBots(c.botDir);
+    List<File> botsFromScanning = scanForBots(config.botDir);
     for (File file : botsFromScanning) {
       addBotPath(file.getAbsolutePath());
     }
 
-    if (c.currentUserName != null) {
-      setCurrentUserName(c.currentUserName);
+    if (config.currentUserName != null) {
+      setCurrentUserName(config.currentUserName);
     }
     
-    if (c.currentBotName != null) {
-      setCurrentUserName(c.currentBotName);
+    if (config.currentBotName != null) {
+      setCurrentUserName(config.currentBotName);
     }    
     
-    if (c.startTopic != null) {
-      setTopic(c.startTopic);  
+    if (config.startTopic != null) {
+      setTopic(config.startTopic);  
     }
     
 
@@ -1297,23 +1290,19 @@ public class ProgramAB extends Service
    * wakes the global session up
    */
   public void wake() {
-    ProgramABConfig c = (ProgramABConfig) super.getConfig();
-    c.sleep = false;
+    config.sleep = false;
   }
 
   /**
    * sleeps the global session
    */
   public void sleep() {
-    ProgramABConfig c = (ProgramABConfig) super.getConfig();
-    c.sleep = true;
+    config.sleep = true;
   }
 
   @Override
   public void onUtterance(Utterance utterance) throws Exception {
     
-    ProgramABConfig c = (ProgramABConfig) super.getConfig();
-
     log.info("Utterance Received " + utterance);
 
     boolean talkToBots = false;
@@ -1343,8 +1332,8 @@ public class ProgramAB extends Service
         // TODO: don't talk to bots.. it won't go well..
         // TODO: the discord api can provide use the list of mentioned users.
         // for now.. we'll just see if we see Mr. Turing as a substring.
-        c.sleep = (c.sleep || utterance.text.contains("@")) && !utterance.text.contains(botName);
-        if (!c.sleep) {
+        config.sleep = (config.sleep || utterance.text.contains("@")) && !utterance.text.contains(botName);
+        if (!config.sleep) {
           shouldIRespond = true;
         }
       }

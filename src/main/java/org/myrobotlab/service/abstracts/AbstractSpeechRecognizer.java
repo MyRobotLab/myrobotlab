@@ -16,7 +16,7 @@ import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 
-public abstract class AbstractSpeechRecognizer extends Service implements SpeechRecognizer {
+public abstract class AbstractSpeechRecognizer<C extends SpeechRecognizerConfig> extends Service<C> implements SpeechRecognizer {
 
   /**
    * text and confidence (and any additional meta data) to be published
@@ -575,18 +575,18 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    SpeechRecognizerConfig c = (SpeechRecognizerConfig) super.getConfig();
+  public C getConfig() {
+    C c = super.getConfig();
     c.listening = isListening();
     c.wakeWord = getWakeWord();
     Set<String> listeners = getAttached("publishText");
-    c.textListeners = listeners.toArray(new String[listeners.size()]);
+    c.textListeners = listeners.toArray(new String[0]);
     return c;
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {    
-    SpeechRecognizerConfig config = (SpeechRecognizerConfig)super.apply(c);;
+  public C apply(C c) {
+    C config = super.apply(c);
     setWakeWord(config.wakeWord);
     if (config.listening) {
       startListening();

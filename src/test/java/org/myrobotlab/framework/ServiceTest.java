@@ -35,10 +35,11 @@ public class ServiceTest extends AbstractTest {
                 new MRLListener("meth", "random@test-id", "onMeth"),
                 new MRLListener("meth", "random2@test-2-id", "onMeth")
         );
-        t.setConfig(new ServiceConfig());
+        t.apply(new ServiceConfig());
         t.outbox.notifyList = Map.of("meth", listeners);
         List<ServiceConfig.Listener> filtered = t.getConfig().listeners;
         assertEquals("random", filtered.get(0).listener);
         assertEquals("random2@test-2-id", filtered.get(1).listener);
+        t.getFilteredConfig();
     }
 }

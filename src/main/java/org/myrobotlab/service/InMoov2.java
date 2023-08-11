@@ -48,7 +48,7 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class InMoov2 extends Service implements ServiceLifeCycleListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
+public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
   public static class Health {
     double batteryLevel = 0;
@@ -204,8 +204,8 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    InMoov2Config config = (InMoov2Config) super.apply(c);
+  public InMoov2Config apply(InMoov2Config c) {
+    super.apply(c);
     try {
 
       locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");

@@ -12,6 +12,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -47,7 +48,7 @@ import org.slf4j.Logger;
  * DEALINGS IN THE SOFTWARE. ===============================================
  */
 
-public class Bno055 extends Service implements I2CControl, PinListener {
+public class Bno055 extends Service<ServiceConfig> implements I2CControl, PinListener {
 
   private static final long serialVersionUID = 1L;
 

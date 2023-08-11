@@ -4,6 +4,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.kinematics.DruppIKSolver;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.ServoControl;
 
 /**
@@ -17,7 +18,7 @@ import org.myrobotlab.service.interfaces.ServoControl;
  * @author kwatters
  *
  */
-public class DruppNeck extends Service {
+public class DruppNeck extends Service<ServiceConfig> {
 
   private static final long serialVersionUID = 1L;
   // 3 servos for the drupp neck

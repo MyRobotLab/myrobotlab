@@ -32,7 +32,7 @@ import com.github.pnavais.machine.model.StringMessage;
  * 
  * @author GroG
  */
-public class FiniteStateMachine extends Service {
+public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
 
   public final static Logger log = LoggerFactory.getLogger(FiniteStateMachine.class);
 
@@ -227,17 +227,17 @@ public class FiniteStateMachine extends Service {
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    FiniteStateMachineConfig c = (FiniteStateMachineConfig) super.getConfig();
-    c.current = getCurrent();
-    c.messageListeners = new ArrayList<>();
-    c.messageListeners.addAll(messageListeners);
-    return c;
+  public FiniteStateMachineConfig getConfig() {
+    super.getConfig();
+    config.current = getCurrent();
+    config.messageListeners = new ArrayList<>();
+    config.messageListeners.addAll(messageListeners);
+    return config;
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    FiniteStateMachineConfig config = (FiniteStateMachineConfig) super.apply(c);
+  public FiniteStateMachineConfig apply(FiniteStateMachineConfig c) {
+    super.apply(c);
 
     if (config.transitions != null) {
 

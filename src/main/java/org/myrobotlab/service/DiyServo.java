@@ -38,6 +38,7 @@ import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.abstracts.AbstractServo;
+import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -75,7 +76,7 @@ import org.slf4j.Logger;
  *         TODO : move is not accurate ( 1° step seem not possible )
  */
 
-public class DiyServo extends AbstractServo implements PinListener, ServiceLifeCycleListener {
+public class DiyServo extends AbstractServo<ServoConfig> implements PinListener, ServiceLifeCycleListener {
 
   double lastOutput = 0.0;
   /**

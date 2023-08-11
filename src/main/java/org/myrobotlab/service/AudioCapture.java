@@ -50,13 +50,14 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 /**
  * AudioCapture - a service that can record and playback from a microphone.
  * 
  */
-public class AudioCapture extends Service {
+public class AudioCapture extends Service<ServiceConfig> {
   public final static Logger log = LoggerFactory.getLogger(AudioCapture.class.getCanonicalName());
 
   private static final long serialVersionUID = 1L;

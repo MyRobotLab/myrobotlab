@@ -35,7 +35,7 @@ import org.slf4j.Logger;
  *         https://www.sparkfun.com/datasheets/Components/MPR121.pdf
  * 
  */
-public class Mpr121 extends Service implements I2CControl, PinArrayControl {
+public class Mpr121 extends Service<Mpr121Config> implements I2CControl, PinArrayControl {
   /**
    * Publisher - Publishes pin data at a regular interval
    */
@@ -909,14 +909,8 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    Mpr121Config config = (Mpr121Config) super.getConfig();
-    return config;
-  }
-
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    Mpr121Config config = (Mpr121Config) super.apply(c);
+  public Mpr121Config apply(Mpr121Config c) {
+    super.apply(c);
     // FIXME remove local fields in favor of config only
     if (config.address != null) {
       setAddress(config.address);

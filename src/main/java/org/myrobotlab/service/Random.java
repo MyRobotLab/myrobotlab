@@ -18,7 +18,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.RandomConfig;
 import org.myrobotlab.service.config.RandomConfig.RandomMessageConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 /**
@@ -27,7 +26,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class Random extends Service {
+public class Random extends Service<RandomConfig> {
 
   private static final long serialVersionUID = 1L;
 
@@ -236,9 +235,8 @@ public class Random extends Service {
   }
 
   @Override
-  public ServiceConfig getConfig() {
-
-    RandomConfig config = (RandomConfig)super.getConfig();
+  public RandomConfig getConfig() {
+    super.getConfig();
 
     config.enabled = enabled;
 
@@ -256,8 +254,8 @@ public class Random extends Service {
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    RandomConfig config = (RandomConfig) c;
+  public RandomConfig apply(RandomConfig c) {
+    super.apply(c);
     enabled = config.enabled;
 
     try {
@@ -272,7 +270,7 @@ public class Random extends Service {
       error(e);
     }
 
-    return c;
+    return config;
   }
 
   public RandomMessage remove(String name, String method) {

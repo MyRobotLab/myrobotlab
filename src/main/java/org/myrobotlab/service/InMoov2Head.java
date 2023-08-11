@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.myrobotlab.framework.Service;
@@ -11,6 +10,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.InMoov2HeadConfig;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
@@ -19,7 +19,7 @@ import org.slf4j.Logger;
  * servos for the following: jaw, eyeX, eyeY, rothead and neck.
  * 
  */
-public class InMoov2Head extends Service {
+public class InMoov2Head extends Service<InMoov2HeadConfig> {
 
   private static final long serialVersionUID = 1L;
 

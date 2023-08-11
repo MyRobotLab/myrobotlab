@@ -62,7 +62,7 @@ import java.util.Random;
  * TODO - publishPeak interface
  *
  */
-public class AudioFile extends Service implements AudioPublisher, AudioControl {
+public class AudioFile extends Service<AudioFileConfig> implements AudioPublisher, AudioControl {
   static final long serialVersionUID = 1L;
   static final Logger log = LoggerFactory.getLogger(AudioFile.class);
 
@@ -519,7 +519,7 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public AudioFileConfig getConfig() {
 
     AudioFileConfig c = (AudioFileConfig) super.getConfig();
     // FIXME - remove members keep data in config !
@@ -537,9 +537,8 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
     return config;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    AudioFileConfig config = (AudioFileConfig) super.apply(c);
+  public AudioFileConfig apply(AudioFileConfig config) {
+    super.apply(config);
     setMute(config.mute);
     setTrack(config.currentTrack);
     setVolume(config.volume);
@@ -554,11 +553,7 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
       }
     }
     
-    // FIXME - THIS IS ALL THATS NEEDED AND IT CAN BE 
-    // DONE IN THE SERVICE LEVEL
-    // if services need "special" handling they can override
-    this.config = c;
-    return c;
+    return config;
   }
 
   public double publishPeak(double peak) {

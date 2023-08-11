@@ -5,6 +5,7 @@ import org.myrobotlab.kinematics.IKEngine;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 /**
@@ -13,7 +14,7 @@ import org.slf4j.Logger;
  * will be replaced with the DH parameter based InverseKinematics3D service.
  *
  */
-public class InverseKinematics extends Service {
+public class InverseKinematics extends Service<ServiceConfig> {
 
   protected IKEngine ikEngine;
 

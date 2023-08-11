@@ -26,7 +26,7 @@ import com.leapmotion.leap.Gesture;
 import com.leapmotion.leap.Hand;
 import com.leapmotion.leap.Vector;
 
-public class LeapMotion extends Service implements LeapDataListener, LeapDataPublisher, PointPublisher {
+public class LeapMotion extends Service<LeapMotionConfig> implements LeapDataListener, LeapDataPublisher, PointPublisher {
 
   private static final long serialVersionUID = 1L;
 
@@ -192,7 +192,6 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
   }
 
   private LeapHand mapLeapHandData(Hand lh) {
-    LeapMotionConfig c = (LeapMotionConfig) config;
     LeapHand mrlHand = new LeapHand();
     // process the normal
     Vector palmNormal = lh.palmNormal();
@@ -368,19 +367,19 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
   MapperLinear rightThumb = new MapperLinear();
 
   @Override
-  public ServiceConfig apply(ServiceConfig config) {
-    LeapMotionConfig c = (LeapMotionConfig) super.apply(config);
-    leftIndex = new MapperLinear(c.leftIndex.minIn, c.leftIndex.maxIn, c.leftIndex.minOut, c.leftIndex.maxOut);
-    leftMiddle = new MapperLinear(c.leftMiddle.minIn, c.leftMiddle.maxIn, c.leftMiddle.minOut, c.leftMiddle.maxOut);
-    leftRing = new MapperLinear(c.leftRing.minIn, c.leftRing.maxIn, c.leftRing.minOut, c.leftRing.maxOut);
-    leftPinky = new MapperLinear(c.leftPinky.minIn, c.leftPinky.maxIn, c.leftPinky.minOut, c.leftPinky.maxOut);
-    leftThumb = new MapperLinear(c.leftThumb.minIn, c.leftThumb.maxIn, c.leftThumb.minOut, c.leftThumb.maxOut);
+  public LeapMotionConfig apply(LeapMotionConfig config) {
+    super.apply(config);
+    leftIndex = new MapperLinear(config.leftIndex.minIn, config.leftIndex.maxIn, config.leftIndex.minOut, config.leftIndex.maxOut);
+    leftMiddle = new MapperLinear(config.leftMiddle.minIn, config.leftMiddle.maxIn, config.leftMiddle.minOut, config.leftMiddle.maxOut);
+    leftRing = new MapperLinear(config.leftRing.minIn, config.leftRing.maxIn, config.leftRing.minOut, config.leftRing.maxOut);
+    leftPinky = new MapperLinear(config.leftPinky.minIn, config.leftPinky.maxIn, config.leftPinky.minOut, config.leftPinky.maxOut);
+    leftThumb = new MapperLinear(config.leftThumb.minIn, config.leftThumb.maxIn, config.leftThumb.minOut, config.leftThumb.maxOut);
 
-    rightIndex = new MapperLinear(c.rightIndex.minIn, c.rightIndex.maxIn, c.rightIndex.minOut, c.rightIndex.maxOut);
-    rightMiddle = new MapperLinear(c.rightMiddle.minIn, c.rightMiddle.maxIn, c.rightMiddle.minOut, c.rightMiddle.maxOut);
-    rightRing = new MapperLinear(c.rightRing.minIn, c.rightRing.maxIn, c.rightRing.minOut, c.rightRing.maxOut);
-    rightPinky = new MapperLinear(c.rightPinky.minIn, c.rightPinky.maxIn, c.rightPinky.minOut, c.rightPinky.maxOut);
-    rightThumb = new MapperLinear(c.rightThumb.minIn, c.rightThumb.maxIn, c.rightThumb.minOut, c.rightThumb.maxOut);
+    rightIndex = new MapperLinear(config.rightIndex.minIn, config.rightIndex.maxIn, config.rightIndex.minOut, config.rightIndex.maxOut);
+    rightMiddle = new MapperLinear(config.rightMiddle.minIn, config.rightMiddle.maxIn, config.rightMiddle.minOut, config.rightMiddle.maxOut);
+    rightRing = new MapperLinear(config.rightRing.minIn, config.rightRing.maxIn, config.rightRing.minOut, config.rightRing.maxOut);
+    rightPinky = new MapperLinear(config.rightPinky.minIn, config.rightPinky.maxIn, config.rightPinky.minOut, config.rightPinky.maxOut);
+    rightThumb = new MapperLinear(config.rightThumb.minIn, config.rightThumb.maxIn, config.rightThumb.minOut, config.rightThumb.maxOut);
 
     return config;
   }

@@ -15,6 +15,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.config.MarySpeechConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 import org.xml.sax.SAXException;
@@ -35,7 +36,7 @@ import marytts.util.data.audio.MaryAudioUtils;
  * More info at : http://mary.dfki.de/
  * 
  */
-public class MarySpeech extends AbstractSpeechSynthesis {
+public class MarySpeech extends AbstractSpeechSynthesis<MarySpeechConfig> {
 
   public final static Logger log = LoggerFactory.getLogger(MarySpeech.class);
 

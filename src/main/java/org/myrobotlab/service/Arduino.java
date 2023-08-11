@@ -37,7 +37,6 @@ import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.abstracts.AbstractMicrocontroller;
 import org.myrobotlab.service.config.ArduinoConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
@@ -70,8 +69,8 @@ import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 import org.slf4j.Logger;
 
-public class Arduino extends AbstractMicrocontroller implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController,
-    UltrasonicSensorController, PortConnector, RecordControl, PortListener, PortPublisher, EncoderController, PinArrayControl, MrlCommPublisher, ServoStatusPublisher {
+public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController,
+    UltrasonicSensorController, PortConnector, RecordControl, PortListener, PortPublisher, EncoderController, PinArrayPublisher, MrlCommPublisher, ServoStatusPublisher {
 
   transient public final static Logger log = LoggerFactory.getLogger(Arduino.class);
 
@@ -2282,8 +2281,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    ArduinoConfig c = (ArduinoConfig) super.getConfig();
+  public ArduinoConfig getConfig() {
+    ArduinoConfig c = super.getConfig();
 
     // FIXME "port" shouldn't exist only config.port !
     c.port = port;
@@ -2293,7 +2292,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
+  public ArduinoConfig apply(ArduinoConfig c) {
     ArduinoConfig config = (ArduinoConfig) super.apply(c);
 
     if (msg == null) {

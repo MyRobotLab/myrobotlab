@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 import com.amazonaws.auth.AWSCredentials;
@@ -33,7 +34,7 @@ import com.amazonaws.services.rekognition.model.Image;
 import com.amazonaws.services.rekognition.model.Label;
 import com.amazonaws.util.IOUtils;
 
-public class Rekognition extends Service {
+public class Rekognition extends Service<ServiceConfig> {
 
   private static final long serialVersionUID = 1L;
 
