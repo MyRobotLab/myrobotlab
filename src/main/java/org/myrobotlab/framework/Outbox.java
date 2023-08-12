@@ -37,12 +37,12 @@ import java.util.TreeSet;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.MessageListener;
-import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.slf4j.Logger;
+
 
 /*
  * Outbox is a message based thread which sends messages based on addListener lists and current
@@ -62,18 +62,24 @@ public class Outbox implements Runnable, Serializable {
   static public final String BROADCAST = "BROADCAST";
   static public final String PROCESSANDBROADCAST = "PROCESSANDBROADCAST";
 
-  NameProvider myService = null;
-  LinkedList<Message> msgBox = new LinkedList<Message>();
+  protected String name = null;
+  private transient  LinkedList<Message> msgBox = new LinkedList<Message>();
   private boolean isRunning = false;
   private boolean blocking = false;
   int maxQueue = 1024;
   int initialThreadCount = 1;
   transient ArrayList<Thread> outboxThreadPool = new ArrayList<Thread>();
 
+  protected Map<String, FilterInterface> filters = new HashMap<>();
+
+  public interface FilterInterface {
+    public boolean filter(Message msg);
+  }
+
   /**
    * pub/sub listeners - HashMap &lt; {topic}, List {listeners} &gt;
    */
-  public Map<String, List<MRLListener>> notifyList = new HashMap<String, List<MRLListener>>();
+  protected Map<String, List<MRLListener>> notifyList = new HashMap<String, List<MRLListener>>();
 
   List<MessageListener> listeners = new ArrayList<MessageListener>();
 
@@ -87,8 +93,8 @@ public class Outbox implements Runnable, Serializable {
     this.autoClean = autoClean;
   }
 
-  public Outbox(NameProvider myService) {
-    this.myService = myService;
+  public Outbox(String myService) {
+    this.name = myService;
   }
 
   public Set<String> getAttached(String publishingPoint) {
@@ -135,7 +141,7 @@ public class Outbox implements Runnable, Serializable {
       if (msgBox.size() > maxQueue) {
         // log.warn("{} outbox BUFFER OVERRUN size {} Dropping message to
         // {}.{}", myService.getName(), msgBox.size(), msg.name, msg.method);
-        log.warn("{} outbox BUFFER OVERRUN size {} Dropping message to {}", myService.getName(), msgBox.size(), msg);
+        log.warn("{} outbox BUFFER OVERRUN size {} Dropping message to {}", name, msgBox.size(), msg);
       }
       msgBox.addFirst(msg);
 
@@ -210,7 +216,10 @@ public class Outbox implements Runnable, Serializable {
           MRLListener listener = subList.get(i);
           msg.setName(listener.callbackName);
           msg.method = listener.callbackMethod;
-          send(msg);
+          
+          if (!isFiltered(msg)) {
+            send(msg);  
+          }                    
 
           // must make new for internal queues
           // otherwise you'll change the name on
@@ -223,8 +232,23 @@ public class Outbox implements Runnable, Serializable {
         }
         continue;
       }
-
     } // while (isRunning)
+  }
+    
+  public FilterInterface addFilter(String name, String method, FilterInterface filter) {
+    return filters.put(String.format("%s.%s", CodecUtils.getFullName(name), method), filter);
+  }
+  
+  public FilterInterface removeFilter(String name, String method) {
+    return filters.remove(String.format("%s.%s", name, method));
+  }
+  
+  public boolean isFiltered(Message msg) {
+    if (filters.size() == 0 || !filters.containsKey(String.format("%s.%s", CodecUtils.getFullName(msg.name), msg.method))) {
+      return false;
+    } else {
+      return filters.get(String.format("%s.%s", msg.name, msg.method)).filter(msg);
+    }
   }
 
   public int size() {
@@ -233,7 +257,7 @@ public class Outbox implements Runnable, Serializable {
 
   public void start() {
     for (int i = outboxThreadPool.size(); i < initialThreadCount; ++i) {
-      Thread t = new Thread(this, myService.getName() + "_outbox_" + i);
+      Thread t = new Thread(this, name + "_outbox_" + i);
       outboxThreadPool.add(t);
       t.start();
     }
@@ -350,5 +374,11 @@ public class Outbox implements Runnable, Serializable {
       notifyList.put(topic, smallerList);
     }
   }
+
+  public Map<String, List<MRLListener>> getNotifyList() {
+    return notifyList;
+  }
+
+
 
 }
