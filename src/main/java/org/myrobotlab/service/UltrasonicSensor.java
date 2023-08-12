@@ -30,7 +30,7 @@ import org.slf4j.Logger;
  * UltrasonicSensor implements RangeListener just for testing purposes
  *
  */
-public class UltrasonicSensor extends Service implements RangeListener, RangePublisher, UltrasonicSensorControl {
+public class UltrasonicSensor extends Service<UltrasonicSensorConfig> implements RangeListener, RangePublisher, UltrasonicSensorControl {
 
   private final static Logger log = LoggerFactory.getLogger(UltrasonicSensor.class);
 
@@ -162,7 +162,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
   @Override
   public UltrasonicSensorConfig getConfig() {
 
-    UltrasonicSensorConfig config = (UltrasonicSensorConfig)super.getConfig();
+    super.getConfig();
     // FIXME - remove member variables use config directly
     config.controller = controllerName;
     config.triggerPin = trigPin;
@@ -234,8 +234,8 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    UltrasonicSensorConfig config = (UltrasonicSensorConfig) super.apply(c);
+  public UltrasonicSensorConfig apply(UltrasonicSensorConfig c) {
+    super.apply(c);
 
     if (config.triggerPin != null)
       setTriggerPin(config.triggerPin);

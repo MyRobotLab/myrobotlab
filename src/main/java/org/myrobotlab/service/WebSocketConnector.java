@@ -9,6 +9,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Connection;
 import org.myrobotlab.net.WsClient;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.ConnectionManager;
 import org.myrobotlab.service.interfaces.RemoteMessageHandler;
 import org.myrobotlab.service.interfaces.TextPublisher;
@@ -18,7 +19,7 @@ import org.slf4j.Logger;
  * @author MaVo (MyRobotLab) / LunDev (GitHub)
  */
 
-public class WebSocketConnector extends Service implements RemoteMessageHandler, ConnectionManager, TextPublisher {
+public class WebSocketConnector extends Service<ServiceConfig> implements RemoteMessageHandler, ConnectionManager, TextPublisher {
   static final long serialVersionUID = 1L;
   static final Logger log = LoggerFactory.getLogger(WebSocketConnector.class);
 

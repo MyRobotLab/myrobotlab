@@ -32,7 +32,7 @@ stateDiagram
 Creates and starts a service with the given name and type
 
 ### load
-Starts loading the heirarchy of configuration
+Starts loading the hierarchy of configuration
 FIXME - this should not be the memory plan, but should exist on the filesystem
 Default config is used if no config found ~~in memory~~ on filesystem
 

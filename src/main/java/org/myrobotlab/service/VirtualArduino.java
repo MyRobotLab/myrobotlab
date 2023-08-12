@@ -13,6 +13,7 @@ import org.myrobotlab.arduino.virtual.MrlCommIno;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.PortListener;
@@ -28,7 +29,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class VirtualArduino extends Service implements PortPublisher, PortListener, PortConnector, SerialDataListener {
+public class VirtualArduino extends Service<ServiceConfig> implements PortPublisher, PortListener, PortConnector, SerialDataListener {
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(VirtualArduino.class);

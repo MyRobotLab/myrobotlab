@@ -33,6 +33,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.process.GitHub;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.StatusListener;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -55,7 +56,7 @@ import org.slf4j.Logger;
  *         method appended is a callback
  *
  */
-public class Test extends Service implements StatusListener {
+public class Test extends Service<ServiceConfig> implements StatusListener {
 
   /**
    * filter services by availabilities

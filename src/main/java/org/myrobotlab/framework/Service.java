@@ -76,6 +76,7 @@ import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.QueueReporter;
 import org.myrobotlab.service.meta.abstracts.MetaData;
+import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
 /**
@@ -153,10 +154,6 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * default en.properties - if there is one
    */
   protected Properties defaultLocalization = null;
-
-  /**
-   * the last config applied to this service
-   */
 
   /**
    * map of keys to localizations -
@@ -1426,30 +1423,6 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * Unless the user is controlling instance id, its random every restart.
    */
   public T getConfig() {
-
-    Map<String, List<MRLListener>> listeners = getOutbox().notifyList;
-    List<Listener> newListeners = new ArrayList<>();
-
-    // TODO - perhaps a switch for "remote" things ?
-    for (String method : listeners.keySet()) {
-      List<MRLListener> list = listeners.get(method);
-      for (MRLListener listener : list) {
-        if (!listener.callbackName.endsWith("@webgui-client")) {
-          // Removes the `@runtime-id` so configs still work with local IDs
-          // The StringUtils.removeEnd() call is a no-op when the ID is not our
-          // local ID,
-          // so doesn't conflict with remote routes
-          Listener newConfigListener = new Listener(listener.topicMethod, CodecUtils.removeEnd(listener.callbackName, '@' + Platform.getLocalInstance().getId()),
-              listener.callbackMethod);
-          newListeners.add(newConfigListener);
-        }
-      }
-    }
-
-    if (newListeners.size() > 0) {
-      config.listeners = newListeners;
-    }
-
     return config;
   }
 
@@ -1484,7 +1457,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   @Override
   public ServiceConfig getFilteredConfig() {
     // Make a copy, because we don't want to modify the original
-    ServiceConfig sc = CodecUtils.fromYaml(CodecUtils.toYaml(config), config.getClass());
+    ServiceConfig sc = CodecUtils.fromYaml(CodecUtils.toYaml(getConfig()), config.getClass());
     Map<String, List<MRLListener>> listeners = getOutbox().notifyList;
     List<Listener> newListeners = new ArrayList<>();
 
@@ -1497,7 +1470,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
           // The StringUtils.removeEnd() call is a no-op when the ID is not our
           // local ID,
           // so doesn't conflict with remote routes
-          Listener newConfigListener = new Listener(listener.topicMethod, CodecUtils.removeEnd(listener.callbackName, '@' + Platform.getLocalInstance().getId()),
+          Listener newConfigListener = new Listener(listener.topicMethod, StringUtil.removeEnd(listener.callbackName, '@' + Platform.getLocalInstance().getId()),
               listener.callbackMethod);
           newListeners.add(newConfigListener);
         }
@@ -2820,7 +2793,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     // updating plan
     Runtime.getPlan().put(getName(), sc);
     // applying config to self
-    // FIXME - MUST DO THIS ! apply(sc);
+    apply((T)sc);
   }
 
   /**
