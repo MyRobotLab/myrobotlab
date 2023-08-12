@@ -16,7 +16,7 @@ import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PinListener;
 import org.slf4j.Logger;
 
-public class Pir extends Service implements PinListener {
+public class Pir extends Service<PirConfig> implements PinListener {
 
   public final static Logger log = LoggerFactory.getLogger(Pir.class);
 
@@ -216,8 +216,8 @@ public class Pir extends Service implements PinListener {
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    PirConfig config = (PirConfig) super.apply(c);
+  public PirConfig apply(PirConfig c) {
+    super.apply(c);
     
     if (config.controller != null) {
       attach(config.controller);;
@@ -233,16 +233,16 @@ public class Pir extends Service implements PinListener {
   }
   
   @Override
-  public ServiceConfig getConfig() {
-    PirConfig c = (PirConfig)super.getConfig();
-    if (c.controller != null) {
+  public PirConfig getConfig() {
+    super.getConfig();
+    if (config.controller != null) {
       // it makes sense that the controller should always be local for a PIR
       // but in general this is bad practice on 2 levels
       // 1. in some other context it might make sense not to be local
       // 2. it should just be another listener on ServiceConfig.listener
-      c.controller=CodecUtils.getShortName(c.controller);
+      config.controller=CodecUtils.getShortName(config.controller);
     }
-    return c;
+    return config;
   }
 
   @Override

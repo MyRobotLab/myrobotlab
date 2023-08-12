@@ -7,6 +7,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.service.config.OculusDiyConfig;
 import org.myrobotlab.service.data.Orientation;
 import org.myrobotlab.service.interfaces.OrientationListener;
 import org.myrobotlab.service.interfaces.PinArrayControl;
@@ -18,7 +19,7 @@ import org.slf4j.Logger;
  * build of MRLComm to work. Check with \@Alessandruino for questions.
  *
  */
-public class OculusDiy extends Service implements OrientationListener {
+public class OculusDiy extends Service<OculusDiyConfig> implements OrientationListener {
 
   private static final long serialVersionUID = 1L;
 

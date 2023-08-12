@@ -18,7 +18,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.LocalSpeechConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
 import org.slf4j.Logger;
@@ -53,7 +52,7 @@ import org.slf4j.Logger;
  *         https://github.com/espeak-ng/espeak-ng/blob/master/docs/mbrola.md#linux-installation
  * 
  */
-public class LocalSpeech extends AbstractSpeechSynthesis {
+public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
 
   public final static Logger log = LoggerFactory.getLogger(LocalSpeech.class);
 
@@ -479,13 +478,12 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     this.ttsPath = ttsPath;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig config) {
-    LocalSpeechConfig c = (LocalSpeechConfig) super.apply(config);
+  public LocalSpeechConfig apply(LocalSpeechConfig config) {
+    super.apply(config);
 
     // setup the default tts per os
     Platform platform = Runtime.getPlatform();
-    if (c.speechType == null) {
+    if (config.speechType == null) {
       if (platform.isWindows()) {
         setTts();
       } else if (platform.isMac()) {
@@ -496,13 +494,13 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
         error("%s unknown platform %s", getName(), platform.getOS());
       }
     } else {
-      setSpeechType(c.speechType);
+      setSpeechType(config.speechType);
     }
 
-    if (c.voice != null) {
-      setVoice(c.voice);
+    if (config.voice != null) {
+      setVoice(config.voice);
     }
-    return c;
+    return config;
   }
 
   public static void main(String[] args) {

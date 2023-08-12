@@ -26,7 +26,6 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
-
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.document.Document;
@@ -67,7 +66,7 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class Solr extends Service implements DocumentListener, TextListener, MessageListener {
+public class Solr extends Service<SolrConfig> implements DocumentListener, TextListener, MessageListener {
 
 
   private static final String CORE_NAME = "core1";
@@ -1164,9 +1163,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig inConfig) {
+  public SolrConfig apply(SolrConfig inConfig) {
     // 
-    SolrConfig config = (SolrConfig)super.apply(inConfig);
+    super.apply(inConfig);
     if (config.embedded) {
       // 
       try {
@@ -1181,11 +1180,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    // return our config
-    // we need to create 
-    SolrConfig config = (SolrConfig)super.getConfig();
-    // config.embedded = this.embedded
+  public SolrConfig getConfig() {
+    super.getConfig();
+
     if (this.embeddedSolrServer != null) {
       config.embedded = true;
     }
@@ -1196,8 +1193,5 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     
     return config;
   }
-
-  
-  // Config support
   
 }

@@ -32,6 +32,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.roomba.RoombaComm;
 import org.myrobotlab.roomba.RoombaCommPort;
+import org.myrobotlab.service.config.RoombaConfig;
 import org.slf4j.Logger;
 
 /**
@@ -41,7 +42,7 @@ import org.slf4j.Logger;
  *
  * More Info: <a href="http://hackingroomba.com/code/roombacomm/">RoombaComm</a>
  */
-public class Roomba extends Service {
+public class Roomba extends Service<RoombaConfig> {
 
   private static final long serialVersionUID = 1L;
 

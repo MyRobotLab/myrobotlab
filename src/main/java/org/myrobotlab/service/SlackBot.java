@@ -26,7 +26,7 @@ import com.slack.api.model.event.MessageEvent;
  * A slack bot gateway for utterance publishers and listeners.
  * 
  */
-public class SlackBot extends Service implements UtteranceListener, UtterancePublisher {
+public class SlackBot extends Service<SlackBotConfig> implements UtteranceListener, UtterancePublisher {
 
   public final static Logger log = LoggerFactory.getLogger(SlackBot.class);
 
@@ -43,8 +43,8 @@ public class SlackBot extends Service implements UtteranceListener, UtterancePub
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    SlackBotConfig config = (SlackBotConfig)super.getConfig();
+  public SlackBotConfig getConfig() {
+    super.getConfig();
     // FIXME remove members and use config only
     config.appToken = appToken;
     config.botToken = botToken;
@@ -52,7 +52,7 @@ public class SlackBot extends Service implements UtteranceListener, UtterancePub
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
+  public SlackBotConfig apply(SlackBotConfig c) {
     SlackBotConfig config = (SlackBotConfig) super.apply(c);
     appToken = config.appToken;
     botToken = config.botToken;

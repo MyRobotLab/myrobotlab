@@ -19,7 +19,7 @@ import org.slf4j.Logger;
  * It's peers are the jaw servo, speech service and an arduino.
  *
  */
-public class MouthControl extends Service implements SpeechListener {
+public class MouthControl extends Service<MouthControlConfig> implements SpeechListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -229,9 +229,9 @@ public class MouthControl extends Service implements SpeechListener {
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public MouthControlConfig getConfig() {
 
-    MouthControlConfig config = (MouthControlConfig)super.getConfig();
+    super.getConfig();
     // FIXME - remove local fields, use config only
     config.jaw = jaw;
     config.mouth = mouth;
@@ -246,8 +246,8 @@ public class MouthControl extends Service implements SpeechListener {
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    MouthControlConfig config = (MouthControlConfig) super.apply(c);
+  public MouthControlConfig apply(MouthControlConfig c) {
+    super.apply(c);
     // FIXME - remove local fields, use config only
     mouthClosedPos = config.mouthClosedPos;
     mouthOpenedPos = config.mouthOpenedPos;

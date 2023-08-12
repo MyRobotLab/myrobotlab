@@ -34,6 +34,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -43,7 +44,7 @@ import ch.qos.logback.core.LogbackException;
 import ch.qos.logback.core.spi.FilterReply;
 import ch.qos.logback.core.status.Status;
 
-public class Log extends Service implements Appender<ILoggingEvent> {
+public class Log extends Service<ServiceConfig> implements Appender<ILoggingEvent> {
 
   public static class LogEntry {
     public long ts;

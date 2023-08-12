@@ -29,7 +29,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
  * channels. The bot user also needs a token that is used to authenticate and
  * identify the bot.
  */
-public class DiscordBot extends Service implements UtterancePublisher, UtteranceListener, ImageListener {
+public class DiscordBot extends Service<DiscordBotConfig> implements UtterancePublisher, UtteranceListener, ImageListener {
 
   transient public final static Logger log = LoggerFactory.getLogger(DiscordBot.class);
 
@@ -54,8 +54,8 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    DiscordBotConfig config = (DiscordBotConfig) super.apply(c);
+  public DiscordBotConfig apply(DiscordBotConfig c) {
+    super.apply(c);
 
     if (config.token != null) {
       setToken(config.token);
@@ -103,20 +103,9 @@ public class DiscordBot extends Service implements UtterancePublisher, Utterance
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    // TODO: this is also an ugly pattern. you can't really call super get
-    // config here!
-    // ServiceConfig c = super.getConfig();
-    // TODO: is this unsafe?
-    // TODO: what sets the type of this config?
-    /// TODO: this isn't good OO programming to have to do it this way.
-    DiscordBotConfig c = (DiscordBotConfig) super.getConfig();
-    c.token = token;
-
-    // REMOVED BECAUSE OVERLAP WITH SUBSCRIPTION
-//    Set<String> listeners = getAttached("publishUtterance");
-//    c.utteranceListeners = listeners.toArray(new String[listeners.size()]);
-
+  public DiscordBotConfig getConfig() {
+    super.getConfig();
+    config.token = token;
     return config;
   }
 

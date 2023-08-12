@@ -39,7 +39,7 @@ import org.slf4j.Logger;
  * 
  */
 
-public class Mpu6050 extends Service implements I2CControl, OrientationPublisher {
+public class Mpu6050 extends Service<Mpu6050Config> implements I2CControl, OrientationPublisher {
 
   private static final long serialVersionUID = 1L;
 
@@ -4435,8 +4435,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    Mpu6050Config config = (Mpu6050Config)super.getConfig();
+  public Mpu6050Config getConfig() {
+    super.getConfig();
     // FIXME remove local fields in favor or config
     config.start = publisher.isRunning;
     config.sampleRate = sampleRateHz;
@@ -4447,7 +4447,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
+  public Mpu6050Config apply(Mpu6050Config c) {
     Mpu6050Config config = (Mpu6050Config) super.apply(c);
     // FIXME remove local fields in favor or config
     if (config.start) {

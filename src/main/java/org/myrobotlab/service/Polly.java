@@ -45,7 +45,7 @@ import com.amazonaws.services.polly.model.TextType;
  * @author GroG
  *
  */
-public class Polly extends AbstractSpeechSynthesis {
+public class Polly extends AbstractSpeechSynthesis<PollyConfig> {
 
   private static final long serialVersionUID = 1L;
 
@@ -253,8 +253,7 @@ public class Polly extends AbstractSpeechSynthesis {
     return ready;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
+  public PollyConfig apply(PollyConfig c) {
     super.apply(c);
     getVoices();
     return c;

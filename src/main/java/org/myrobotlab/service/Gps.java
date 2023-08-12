@@ -13,6 +13,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.GpsConfig;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ import org.slf4j.Logger;
  * wandered into our out of a fenced area.
  *
  */
-public class Gps extends Service implements SerialDataListener {
+public class Gps extends Service<GpsConfig> implements SerialDataListener {
 
   /***********************************************************************************
    * This block of methods will be used to GeoFencing This code is based on the

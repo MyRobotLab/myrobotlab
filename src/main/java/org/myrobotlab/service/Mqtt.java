@@ -32,6 +32,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.mqtt.MqttMsg;
 import org.myrobotlab.net.Connection;
 import org.myrobotlab.net.SslUtil;
+import org.myrobotlab.service.config.MqttConfig;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.KeyConsumer;
 import org.slf4j.Logger;
@@ -69,7 +70,7 @@ import org.slf4j.Logger;
  * &#64;author kmcgerald and GroG
  * </pre>
  */
-public class Mqtt extends Service implements MqttCallback, IMqttActionListener, Gateway, KeyConsumer {
+public class Mqtt extends Service<MqttConfig> implements MqttCallback, IMqttActionListener, Gateway, KeyConsumer {
 
   public final static Logger log = LoggerFactory.getLogger(Mqtt.class);
 

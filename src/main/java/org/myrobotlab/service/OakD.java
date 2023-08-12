@@ -5,7 +5,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServoConfig;
 import org.slf4j.Logger;
 /**
  * 
@@ -15,7 +14,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class OakD extends Service {
+public class OakD extends Service<ServiceConfig> {
 
   private static final long serialVersionUID = 1L;
 

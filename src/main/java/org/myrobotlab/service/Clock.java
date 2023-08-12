@@ -14,7 +14,6 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.ClockConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 /**
@@ -22,7 +21,7 @@ import org.slf4j.Logger;
  * generates a pulse with a timestamp on a regular interval defined by the
  * setInterval(Integer) method. Interval is in milliseconds.
  */
-public class Clock extends Service {
+public class Clock extends Service<ClockConfig> {
 
   public class ClockThread implements Runnable {
 
@@ -31,14 +30,13 @@ public class Clock extends Service {
 
     @Override
     public void run() {
-      ClockConfig c = (ClockConfig) config;
 
       try {
 
-        c.running = true;
+        config.running = true;
         invoke("publishClockStarted");
-        while (c.running) {
-          Thread.sleep(c.interval);
+        while (config.running) {
+          Thread.sleep(config.interval);
           Date now = new Date();
           for (Message msg : events) {
             send(msg);
@@ -50,7 +48,7 @@ public class Clock extends Service {
       } catch (InterruptedException e) {
         log.info("ClockThread interrupt");
       }
-      c.running = false;
+      config.running = false;
       thread = null;
     }
 
@@ -68,7 +66,6 @@ public class Clock extends Service {
     }
 
     synchronized public void stop() {
-      ClockConfig c = (ClockConfig) config;
 
       if (thread != null) {
         thread.interrupt();
@@ -76,11 +73,11 @@ public class Clock extends Service {
       } else {
         log.info("{} already stopped", getName());
       }
-      c.running = false;
+      config.running = false;
       Service.sleep(20);
     }
   }
-
+  
   private static final long serialVersionUID = 1L;
 
   final public static Logger log = LoggerFactory.getLogger(Clock.class);
@@ -159,8 +156,7 @@ public class Clock extends Service {
    * @param milliseconds
    */
   public void setInterval(Integer milliseconds) {
-    ClockConfig c = (ClockConfig) config;
-    c.interval = milliseconds;
+    config.interval = milliseconds;
     broadcastState();
   }
 
@@ -181,8 +177,7 @@ public class Clock extends Service {
    * @return
    */
   public boolean isClockRunning() {
-    ClockConfig c = (ClockConfig) config;
-    return c.running;
+    return config.running;
   }
 
   /**
@@ -203,12 +198,12 @@ public class Clock extends Service {
    * @return
    */
   public Integer getInterval() {
-    return ((ClockConfig) config).interval;
+    return config.interval;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {    
-    ClockConfig config = (ClockConfig) super.apply(c);
+  public ClockConfig apply(ClockConfig c) {    
+    super.apply(c);
+    config = (ClockConfig)c;
     if (config.running != null) {
       if (config.running) {
         startClock();
@@ -233,7 +228,9 @@ public class Clock extends Service {
 //      webgui.startService();
 
       Clock c1 = (Clock) Runtime.start("c1", "Clock");
-      c1.startClock();
+      Runtime.setLogLevel("ERROR");
+      // c1.startClock();
+      Runtime.getInstance().connect("ws://localhost:8888");
       
       boolean done = true;
       if (done) return;
@@ -247,5 +244,7 @@ public class Clock extends Service {
       log.error("main threw", e);
     }
   }
+
+
 
 }

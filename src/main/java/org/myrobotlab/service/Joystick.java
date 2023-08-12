@@ -67,7 +67,7 @@ import net.java.games.input.Rumbler;
  * To Test java -Djava.library.path="./" -cp "./*"
  * net.java.games.input.test.ControllerReadTest
  */
-public class Joystick extends Service implements AnalogPublisher {
+public class Joystick extends Service<JoystickConfig> implements AnalogPublisher {
 
   public final static Logger log = LoggerFactory.getLogger(Joystick.class);
   private static final long serialVersionUID = 1L;
@@ -695,8 +695,8 @@ public class Joystick extends Service implements AnalogPublisher {
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    JoystickConfig config = (JoystickConfig)super.getConfig();
+  public JoystickConfig getConfig() {
+    super.getConfig();
     config.controller = controller;
 
     if (analogListeners.size() > 0) {
@@ -716,9 +716,10 @@ public class Joystick extends Service implements AnalogPublisher {
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-
+  public JoystickConfig apply(JoystickConfig c) {
+    super.apply(c);
     // "special" needs native libs
+    // FIXME - should be done in startService
     initNativeLibs();
 
     // scan for hardware controllers

@@ -251,4 +251,14 @@ public class StringUtil {
     return builder.toString();
   }
 
+  public static String removeEnd(final String str, final String remove) {
+    if (str == null || str.length() == 0 || remove == null || remove.length() == 0) {
+      return str;
+    }
+    if (str.endsWith(remove)) {
+      return str.substring(0, str.length() - remove.length());
+    }
+    return str;
+  }
+
 }

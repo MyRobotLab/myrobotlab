@@ -12,14 +12,13 @@ import org.myrobotlab.document.transformer.WorkflowConfiguration;
 import org.myrobotlab.document.workflow.WorkflowMessage;
 import org.myrobotlab.document.workflow.WorkflowServer;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.DocumentPipelineConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.DocumentListener;
 import org.myrobotlab.service.interfaces.DocumentPublisher;
 
-public class DocumentPipeline extends Service implements DocumentListener, DocumentPublisher {
+public class DocumentPipeline extends Service<ServiceConfig> implements DocumentListener, DocumentPublisher {
 
   private static final long serialVersionUID = 1L;
 

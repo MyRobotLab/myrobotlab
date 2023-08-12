@@ -68,7 +68,7 @@ import edu.cmu.sphinx.util.props.ConfigurationManager;
  * 
  */
 @Deprecated /* we need another offline solution - one that doesn't suck */
-public class Sphinx extends AbstractSpeechRecognizer {
+public class Sphinx extends AbstractSpeechRecognizer<SpeechRecognizerConfig> {
 
   class SpeechProcessor extends Thread {
     Sphinx myService = null;

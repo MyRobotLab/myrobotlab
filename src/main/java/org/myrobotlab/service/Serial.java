@@ -47,7 +47,7 @@ import org.slf4j.Logger;
  * Serial - a service that allows reading and writing to a serial port device.
  *
  */
-public class Serial extends Service implements SerialControl, QueueSource, SerialDataListener, RecordControl, SerialDevice, PortPublisher, PortConnector {
+public class Serial extends Service<SerialConfig> implements SerialControl, QueueSource, SerialDataListener, RecordControl, SerialDevice, PortPublisher, PortConnector {
 
   /**
    * general read timeout - 0 is infinite &gt; 0 is number of milliseconds to
@@ -1294,16 +1294,16 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    SerialConfig config = (SerialConfig) super.getConfig();
+  public SerialConfig getConfig() {
+    super.getConfig();
     // FIXME remove fields and use config only
     config.port = lastPortName;
     return config;
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    SerialConfig config = (SerialConfig) super.apply(c);
+  public SerialConfig apply(SerialConfig c) {
+    super.apply(c);
 
     if (config.port != null) {
       try {

@@ -19,6 +19,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotorController;
+import org.myrobotlab.service.config.MotorConfig;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -33,7 +34,7 @@ import org.slf4j.Logger;
  *         https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/overview
  */
 
-public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CControl {
+public class AdafruitMotorHat4Pi extends AbstractMotorController<MotorConfig> implements I2CControl {
 
   /** version of the library */
   static public final String VERSION = "0.9";

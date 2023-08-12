@@ -124,7 +124,7 @@ import com.jme3.util.BufferUtils;
  * @author GroG, calamity, kwatters, moz4r and many others ...
  *
  */
-public class JMonkeyEngine extends Service implements Gateway, ActionListener, Simulator, EncoderListener, IKJointAngleListener, ServoStatusListener, ServoControlListener {
+public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gateway, ActionListener, Simulator, EncoderListener, IKJointAngleListener, ServoStatusListener, ServoControlListener {
 
   final static String CAMERA = "camera";
 
@@ -2672,8 +2672,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    JMonkeyEngineConfig config = (JMonkeyEngineConfig) super.getConfig();
+  public JMonkeyEngineConfig getConfig() {
+    super.getConfig();
 
     if (config.models != null) {
       Collections.sort(config.models);
