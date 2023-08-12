@@ -221,5 +221,9 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    * @return
    */
   public ServiceConfig addConfigListeners(ServiceConfig config);
-  
+
+  /**
+   * get all the subscriptions to this service
+   */
+  public Map<String, List<MRLListener>>  getNotifyList();
 }
