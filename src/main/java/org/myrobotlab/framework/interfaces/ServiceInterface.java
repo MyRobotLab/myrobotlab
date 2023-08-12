@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MRLListener;
+import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Peer;
@@ -135,9 +136,13 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
 
   /**
    * reflectively sets a part of config
-   *  
-   * @param fieldname - the name of the config field
-   * @param value - the value
+   *   
+   * @param fieldname
+   * @param value
+   * @throws IllegalArgumentException
+   * @throws IllegalAccessException
+   * @throws NoSuchFieldException
+   * @throws SecurityException
    */
   void setConfigValue(String fieldname, Object value)  throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException;
 
@@ -216,5 +221,9 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    * @return
    */
   public ServiceConfig addConfigListeners(ServiceConfig config);
-  
+
+  /**
+   * get all the subscriptions to this service
+   */
+  public Map<String, List<MRLListener>>  getNotifyList();
 }

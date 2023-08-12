@@ -32,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
@@ -95,6 +96,7 @@ import org.myrobotlab.service.interfaces.ServiceLifeCyclePublisher;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
+import org.yaml.snakeyaml.constructor.ConstructorException;
 
 import picocli.CommandLine;
 
@@ -3434,7 +3436,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     for (ServiceInterface si : getLocalServices().values()) {
       List<String> nlks = si.getNotifyListKeySet();
       for (int i = 0; i < nlks.size(); ++i) {
-        si.getOutbox().notifyList.clear();
+        si.getNotifyList().clear();
       }
     }
   }
@@ -3505,7 +3507,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       }
     }
 
-    return execute(program, list, null, null, null);
+    return execute(program, list, null, null, true);
   }
 
   /**
@@ -3527,79 +3529,69 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    *          Whether this method blocks for the program to execute
    * @return The programs stderr and stdout output
    */
-  static public String execute(String program, List<String> args, String workingDir, Map<String, String> additionalEnv, Boolean block) {
-
+  static public String execute(String program, List<String> args, String workingDir, Map<String, String> additionalEnv, boolean block) {
     log.info("execToString(\"{} {}\")", program, args);
 
-    ArrayList<String> command = new ArrayList<String>();
+    List<String> command = new ArrayList<>();
     command.add(program);
     if (args != null) {
-      for (String arg : args) {
-        command.add(arg);
-      }
+        command.addAll(args);
     }
 
-    Integer exitValue = null;
-
     ProcessBuilder builder = new ProcessBuilder(command);
+    if (workingDir != null) {
+        builder.directory(new File(workingDir));
+    }
 
     Map<String, String> environment = builder.environment();
     if (additionalEnv != null) {
-      environment.putAll(additionalEnv);
+        environment.putAll(additionalEnv);
     }
-    StringBuilder outputBuilder;
+
+    StringBuilder outputBuilder = new StringBuilder();
 
     try {
-      Process handle = builder.start();
+        Process handle = builder.start();
 
-      InputStream stdErr = handle.getErrorStream();
-      InputStream stdOut = handle.getInputStream();
+        InputStream stdErr = handle.getErrorStream();
+        InputStream stdOut = handle.getInputStream();
 
-      // TODO: we likely don't need this
-      // OutputStream stdIn = handle.getOutputStream();
+        // Read the output streams in separate threads to avoid potential blocking
+        Thread stdErrThread = new Thread(() -> readStream(stdErr, outputBuilder));
+        stdErrThread.start();
 
-      outputBuilder = new StringBuilder();
-      byte[] buff = new byte[32768];
+        Thread stdOutThread = new Thread(() -> readStream(stdOut, outputBuilder));
+        stdOutThread.start();
 
-      // TODO: should we read both of these streams?
-      // if we break out of the first loop is the process terminated?
+        if (block) {
+            int exitValue = handle.waitFor();
+            outputBuilder.append("Exit Value: ").append(exitValue);
+            log.info("Command exited with exit value: {}", exitValue);
+        } else {
+            log.info("Command started");
+        }
 
-      // read stdout
-      for (int n; (n = stdOut.read(buff)) != -1;) {
-        outputBuilder.append(new String(buff, 0, n));
-      }
-
-      // read stderr
-      for (int n; (n = stdErr.read(buff)) != -1;) {
-        outputBuilder.append(new String(buff, 0, n));
-      }
-
-      stdOut.close();
-      stdErr.close();
-
-      // TODO: stdin if we use it.
-      // stdIn.close();
-
-      // the process should be closed by now?
-
-      handle.waitFor();
-
-      handle.destroy();
-
-      exitValue = handle.exitValue();
-      // print the output from the command
-      // TODO replace with logging calls
-      System.out.println(outputBuilder.toString());
-      System.out.println("Exit Value : " + exitValue);
-      outputBuilder.append("Exit Value : " + exitValue);
-
-      return outputBuilder.toString();
-    } catch (Exception e) {
-      log.error("execute threw", e);
-      exitValue = 5;
-      return e.getMessage();
+        return outputBuilder.toString();
+    } catch (IOException e) {
+        log.error("Error executing command", e);
+        return e.getMessage();
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        log.error("Command execution interrupted", e);
+        return e.getMessage();
     }
-  }
+}
+
+private static void readStream(InputStream inputStream, StringBuilder outputBuilder) {
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            outputBuilder.append(line).append(System.lineSeparator());
+        }
+    } catch (IOException e) {
+        log.error("Error reading process output", e);
+    }
+}
 
   /**
    * Get the current battery level of the computer this MRL instance is running
@@ -3956,6 +3948,15 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     }
     return filteredTypes;
   }
+  
+  /**
+   * Returns current status list - which is a combination of the
+   * lastest errors, warns and infos
+   * @return
+   */
+  public Queue<Status> getStatusList(){
+    return statusList;
+  }
 
   /**
    * Register a connection route from one instance to this one.
@@ -4217,10 +4218,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    *         name
    */
   static public String getFullName(String shortname) {
-    if (shortname == null) {
-      return null;
-    }
-    if (shortname.contains("@")) {
+    if (shortname == null || shortname.contains("@")) {
       // already long form
       return shortname;
     }
@@ -4852,6 +4850,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     if (check.exists()) {
       try {
         sc = CodecUtils.readServiceConfig(filename);
+      } catch (ConstructorException e) {
+        error("%s invalid %s %s. Please remove it from the file.", name, filename, e.getCause().getMessage());
       } catch (IOException e) {
         error(e);
       }
