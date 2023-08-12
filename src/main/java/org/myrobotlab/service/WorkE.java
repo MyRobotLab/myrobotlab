@@ -13,6 +13,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.WordFilter;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -25,7 +26,7 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class WorkE extends Service implements StatusListener, TextPublisher, SpeechSynthesisControl, SpeechSynthesisControlPublisher, JoystickListener {
+public class WorkE extends Service<ServiceConfig> implements StatusListener, TextPublisher, SpeechSynthesisControl, SpeechSynthesisControlPublisher, JoystickListener {
 
   public final static Logger log = LoggerFactory.getLogger(WorkE.class);
 

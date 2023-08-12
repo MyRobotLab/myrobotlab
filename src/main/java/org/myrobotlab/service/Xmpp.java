@@ -55,7 +55,7 @@ import org.slf4j.Logger;
  * @author GROG
  *
  */
-public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatMessageListener, MessageListener, RosterListener, ConnectionListener {// ,
+public class Xmpp extends Service<ServiceConfig> implements Gateway, ChatManagerListener, ChatMessageListener, MessageListener, RosterListener, ConnectionListener {// ,
 
   public static class Contact {
     public String user;
