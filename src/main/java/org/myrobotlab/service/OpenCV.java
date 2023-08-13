@@ -96,7 +96,7 @@ import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.cv.CVData;
-import org.myrobotlab.cv.CvFilter;
+import org.myrobotlab.cv.CVFilter;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.document.Classifications;
 import org.myrobotlab.framework.Instantiator;
@@ -651,13 +651,13 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
    *                   - name of filter
    * @return the filter
    */
-  public CvFilter addFilter(String filterName) {
+  public CVFilter addFilter(String filterName) {
     String filterType = filterName.substring(0, 1).toUpperCase() + filterName.substring(1);
     return addFilter(filterName, filterType);
   }
 
   @Override
-  public CvFilter addFilter(String name, String filterType) {
+  public CVFilter addFilter(String name, String filterType) {
     String type = String.format("org.myrobotlab.opencv.OpenCVFilter%s", filterType);
     OpenCVFilter filter = (OpenCVFilter) Instantiator.getNewInstance(type, name);
     if (filter == null) {

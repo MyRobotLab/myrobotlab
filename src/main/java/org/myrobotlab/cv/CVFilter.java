@@ -1,6 +1,6 @@
 package org.myrobotlab.cv;
 
-public interface CvFilter {
+public interface CVFilter {
 
   public void enable();
 

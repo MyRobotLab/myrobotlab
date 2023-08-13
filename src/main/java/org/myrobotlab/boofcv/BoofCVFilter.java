@@ -1,11 +1,11 @@
 package org.myrobotlab.boofcv;
 
-import org.myrobotlab.cv.CvFilter;
+import org.myrobotlab.cv.CVFilter;
 import org.myrobotlab.service.BoofCV;
 
 import boofcv.struct.image.ImageBase;
 
-public abstract class BoofCVFilter implements CvFilter {
+public abstract class BoofCVFilter implements CVFilter {
 
   protected String name;
   public String getName() {
