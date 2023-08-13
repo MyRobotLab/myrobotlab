@@ -45,12 +45,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.Queue;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TreeMap;
@@ -177,19 +175,6 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * for promoting portability and good pathing
    */
   final transient protected String ps = File.pathSeparator;
-  
-  /**
-   * queue of recent broadcasted status - usually info, warn and error.
-   * the queue's max size is currently hardcoded to 10.  I waffled a bit on
-   * it being static or not. ie Should it be a global one managed by runtime,
-   * or individual ones for each service.  Since each status contains info
-   * from which service it came from, having them non-static seems redundant.
-   * From the UI perspective its more simple to manage a single one. So,
-   * for now we'll make it static. I chose the non thread safe LinkedList for
-   * performance, and currently there is no iteration over the queue, so 
-   * concurrent modification exceptions should not occur.
-   */
-  static final protected Queue<Status> statusList = new LinkedList<>();
 
   /**
    * a more capable task handler
@@ -2177,20 +2162,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     return status;
   }
 
-  /**
-   * All status are published through here error, warn and info.
-   * Usually these are events which are sent back to the user. 
-   * They are now available on th statusList queue with a buffer size of 20
-   */
   @Override
   public Status publishStatus(Status status) {
-    statusList.add(status);
-    int size = statusList.size();
-    if (size > 20) {
-      for (int i = 0; i < size - 20; ++i) {
-        statusList.poll();
-      }
-    }
     return status;
   }
 
