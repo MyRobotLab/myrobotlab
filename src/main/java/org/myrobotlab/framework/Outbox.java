@@ -240,14 +240,15 @@ public class Outbox implements Runnable, Serializable {
   }
   
   public FilterInterface removeFilter(String name, String method) {
-    return filters.remove(String.format("%s.%s", name, method));
+    return filters.remove(String.format("%s.%s", CodecUtils.getFullName(name), method));
   }
   
   public boolean isFiltered(Message msg) {
-    if (filters.size() == 0 || !filters.containsKey(String.format("%s.%s", CodecUtils.getFullName(msg.name), msg.method))) {
+    String fullname = CodecUtils.getFullName(msg.name);
+    if (filters.size() == 0 || !filters.containsKey(String.format("%s.%s", fullname, msg.method))) {
       return false;
     } else {
-      return filters.get(String.format("%s.%s", msg.name, msg.method)).filter(msg);
+      return filters.get(String.format("%s.%s", fullname, msg.method)).filter(msg);
     }
   }
 
