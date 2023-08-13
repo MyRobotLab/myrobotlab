@@ -163,14 +163,14 @@
 <!-- Duplicate entry for com.squareup.okhttp3-okhttp-3.9.0 skipping -->
 <!-- AzureTranslator end -->
 
-<!-- BoofCv begin -->
+<!-- BoofCV begin -->
   <dependency>
     <groupId>org.boofcv</groupId>
     <artifactId>boofcv-all</artifactId>
     <version>0.40.1</version>
     <scope>provided</scope>
   </dependency>
-<!-- BoofCv end -->
+<!-- BoofCV end -->
 
 <!-- ChessGame begin -->
   <dependency>

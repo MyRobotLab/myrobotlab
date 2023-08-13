@@ -12,7 +12,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Pid.PidOutput;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.TrackingConfig;
 import org.myrobotlab.service.interfaces.PidControl;
 import org.myrobotlab.service.interfaces.ServoControl;
