@@ -99,7 +99,7 @@ public class MotorHat4Pi extends AbstractMotor<MotorHat4PiConfig> {
 
   public MotorHat4PiConfig apply(MotorHat4PiConfig c) {
     super.apply(c);
-    setMotor(config.motorId);
+    setMotor(c.motorId);
     return c;
   }
 

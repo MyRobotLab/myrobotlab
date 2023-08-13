@@ -245,20 +245,20 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
       // when config is "applied" we need to copy out and
       // re-apply the config using addTransition
       List<Transition> newTransistions = new ArrayList<>();
-      newTransistions.addAll(config.transitions);
+      newTransistions.addAll(c.transitions);
       clear();
       for (Transition t : newTransistions) {
         addTransition(t.from, t.event, t.to);
       }
 
       messageListeners = new HashSet<>();
-      messageListeners.addAll(config.messageListeners);
+      messageListeners.addAll(c.messageListeners);
       broadcastState();
     }
 
     // setCurrent
-    if (config.current != null) {
-      setCurrent(config.current);
+    if (c.current != null) {
+      setCurrent(c.current);
     }
 
     return c;

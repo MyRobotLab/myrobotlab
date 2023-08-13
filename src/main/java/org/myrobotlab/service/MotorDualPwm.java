@@ -80,16 +80,16 @@ public class MotorDualPwm extends AbstractMotor<MotorDualPwmConfig> {
 
   public MotorDualPwmConfig apply(MotorDualPwmConfig c) {
     super.apply(c);
-    if (config.leftPwmPin != null) {
-      setLeftPwmPin(config.leftPwmPin);
+    if (c.leftPwmPin != null) {
+      setLeftPwmPin(c.leftPwmPin);
     }
-    if (config.rightPwmPin != null) {
-      setRightPwmPin(config.rightPwmPin);
+    if (c.rightPwmPin != null) {
+      setRightPwmPin(c.rightPwmPin);
     }
-    if (config.pwmFreq != null) {
-      setPwmFreq(config.pwmFreq);
+    if (c.pwmFreq != null) {
+      setPwmFreq(c.pwmFreq);
     }
-    return config;
+    return c;
   }
 
   public static void main(String[] args) throws InterruptedException {

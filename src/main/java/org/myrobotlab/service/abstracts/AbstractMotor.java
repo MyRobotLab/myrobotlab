@@ -477,9 +477,9 @@ abstract public class AbstractMotor<C extends GeneralMotorConfig> extends Servic
     // mapper.setClip(config.clip);
 
     // FIXME ?? future use only ServiceConfig.listeners ?
-    if (config.controller != null) {
+    if (c.controller != null) {
       try {
-        attach(config.controller);
+        attach(c.controller);
       } catch (Exception e) {
         error(e);
       }

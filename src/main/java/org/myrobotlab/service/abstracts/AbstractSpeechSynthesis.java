@@ -19,7 +19,6 @@ import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.AudioFile;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Security;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
@@ -1115,24 +1114,24 @@ public abstract class AbstractSpeechSynthesis<C extends SpeechSynthesisConfig> e
   public C apply(C c) {
     super.apply(c);
 
-    setMute(config.mute);
+    setMute(c.mute);
 
-    setBlocking(config.blocking);
+    setBlocking(c.blocking);
 
-    if (config.substitutions != null) {
-      for (String n : config.substitutions.keySet()) {
-        replaceWord(n, config.substitutions.get(n));
+    if (c.substitutions != null) {
+      for (String n : c.substitutions.keySet()) {
+        replaceWord(n, c.substitutions.get(n));
       }
     }
     // some systems require querying set of voices
     getVoices();
     
-    if (config.voice != null) {
-      setVoice(config.voice);
+    if (c.voice != null) {
+      setVoice(c.voice);
     }
 
-    if (config.speechRecognizers != null) {
-      for (String name : config.speechRecognizers) {
+    if (c.speechRecognizers != null) {
+      for (String name : c.speechRecognizers) {
         try {
           attachSpeechListener(name);
         } catch (Exception e) {

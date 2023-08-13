@@ -58,25 +58,6 @@ public class GoogleTranslate extends Service<ServiceConfig> {
   }
   
 
-  /**
-   * The methods apply and getConfig can be used, if more complex configuration handling is needed.
-   * By default, the framework takes care of most of it, including subscription handling.
-   * <pre>
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    // _TemplateServiceConfig config = (_TemplateService)super.apply(c);
-    // if more complex config handling is needed
-    return c;
-  }
-
-  @Override
-  public ServiceConfig getConfig() {
-    // _TemplateServiceConfig config = (_TemplateService)super.getConfig();
-    return config;
-  }
-  </pre>
-  **/
-
   public static void main(String[] args) {
     try {
 

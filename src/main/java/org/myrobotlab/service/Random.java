@@ -256,11 +256,11 @@ public class Random extends Service<RandomConfig> {
   @Override
   public RandomConfig apply(RandomConfig c) {
     super.apply(c);
-    enabled = config.enabled;
+    enabled = c.enabled;
 
     try {
-      for (String key : config.randomMessages.keySet()) {
-        RandomMessageConfig msgc = config.randomMessages.get(key);
+      for (String key : c.randomMessages.keySet()) {
+        RandomMessageConfig msgc = c.randomMessages.get(key);
         addRandom(msgc.minIntervalMs, msgc.maxIntervalMs, key.substring(0, key.lastIndexOf(".")), key.substring(key.lastIndexOf(".") + 1), msgc.data);
         if (!msgc.enabled) {
           disable(key);
@@ -270,7 +270,7 @@ public class Random extends Service<RandomConfig> {
       error(e);
     }
 
-    return config;
+    return c;
   }
 
   public RandomMessage remove(String name, String method) {

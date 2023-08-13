@@ -210,8 +210,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
       locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
 
-      if (config.locale != null) {
-        setLocale(config.locale);
+      if (c.locale != null) {
+        setLocale(c.locale);
       } else {
         setLocale(getSupportedLocale(Runtime.getInstance().getLocale().toString()));
       }
@@ -220,11 +220,11 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
         loadInitScripts();
       }
 
-      if (config.loadGestures) {
+      if (c.loadGestures) {
         loadGestures();
       }
 
-      if (config.heartbeat) {
+      if (c.heartbeat) {
         startHeartbeat();
       } else {
         stopHeartbeat();

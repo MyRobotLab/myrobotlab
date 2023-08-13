@@ -912,16 +912,16 @@ public class Mpr121 extends Service<Mpr121Config> implements I2CControl, PinArra
   public Mpr121Config apply(Mpr121Config c) {
     super.apply(c);
     // FIXME remove local fields in favor of config only
-    if (config.address != null) {
-      setAddress(config.address);
+    if (c.address != null) {
+      setAddress(c.address);
     }
-    if (config.bus != null) {
-      setBus(config.bus);
+    if (c.bus != null) {
+      setBus(c.bus);
     }
 
-    if (config.controller != null) {
+    if (c.controller != null) {
       try {
-        attach(config.controller);
+        attach(c.controller);
       } catch (Exception e) {
         error(e);
       }

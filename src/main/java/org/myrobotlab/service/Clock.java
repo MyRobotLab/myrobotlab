@@ -219,15 +219,14 @@ public class Clock extends Service<ClockConfig> {
 
   public ClockConfig apply(ClockConfig c) {    
     super.apply(c);
-    config = (ClockConfig)c;
-    if (config.running != null) {
-      if (config.running) {
+    if (c.running != null) {
+      if (c.running) {
         startClock();
       } else {
         stopClock();
       }
     }
-    return config;
+    return c;
   }
 
   public void restartClock() {
