@@ -3950,15 +3950,6 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
   }
   
   /**
-   * Returns current status list - which is a combination of the
-   * lastest errors, warns and infos
-   * @return
-   */
-  public Queue<Status> getStatusList(){
-    return statusList;
-  }
-
-  /**
    * Register a connection route from one instance to this one.
    *
    * @param uuid

@@ -69,7 +69,6 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.config.RuntimeConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.ServiceConfig.Listener;
 import org.myrobotlab.service.data.Locale;
