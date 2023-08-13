@@ -67,7 +67,6 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.config.RuntimeConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.ServiceConfig.Listener;
 import org.myrobotlab.service.data.Locale;
@@ -144,7 +143,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
 
   transient protected Inbox inbox = null;
 
-  transient protected Outbox outbox = null;
+  protected Outbox outbox = null;
 
   protected String serviceVersion = null;
 
@@ -194,6 +193,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * a definition. However, since serialization will not process statics - we are making
    * it a member variable
    */
+  // FIXME - this should be a map
   protected Map<String, String> interfaceSet;
 
   /**
@@ -663,7 +663,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     loadLocalizations();
 
     this.inbox = new Inbox(getFullName());
-    this.outbox = new Outbox(this);
+    this.outbox = new Outbox(getFullName());
 
     File versionFile = new File(getResourceDir() + fs + "version.txt");
     if (versionFile.exists()) {
@@ -2785,6 +2785,13 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     // FIXME - determine if only updating the Plan in memory is enough,
     // should we also make or update a config file - if the config path is set?
     info("updated %s name to %s", oldName, peer.name);
+  }
+  
+  /**
+   * get all the subscriptions to this service
+   */
+  public Map<String, List<MRLListener>>  getNotifyList(){
+    return getOutbox().getNotifyList();
   }
 
   /**
