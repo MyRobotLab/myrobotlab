@@ -79,12 +79,6 @@ public class ServiceConfig {
   // heh non transient makes it easy to debug !
   transient public String state = "INIT"; // INIT | LOADED | CREATED | STARTED |
                                           // STOPPED | RELEASED
-  // FIXME - SO IMPORTANT !
-
-  public String getx(String key) {
-    // FIXME - return reflected value
-    return null;
-  }
 
   public String getPath(String name, String peerKey) {
     if (name == null) {
