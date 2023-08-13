@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.cv.CvData;
+import org.myrobotlab.cv.CVData;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
@@ -1522,7 +1522,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
    * @param data
    *          cv data
    */
-  public void onCvData(CvData data) {
+  public void onCvData(CVData data) {
     // onPointCloud(data.getPointCloud()); FIXME - brittle and not correct
     // FIXME - do something interesting ... :)
   }

@@ -13,7 +13,7 @@ public interface ComputerVision extends NameProvider {
 
   void capture();
 
-  CvFilter addFilter(String name, String filterType);
+  CVFilter addFilter(String name, String filterType);
 
   void removeFilter(String name);
 

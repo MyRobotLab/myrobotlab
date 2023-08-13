@@ -10,7 +10,7 @@ import java.util.Map;
 import org.myrobotlab.boofcv.BoofCVFilter;
 import org.myrobotlab.boofcv.BoofCVFilterTrackerObjectQuad;
 import org.myrobotlab.cv.ComputerVision;
-import org.myrobotlab.cv.CvFilter;
+import org.myrobotlab.cv.CVFilter;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.WebImage;
@@ -144,7 +144,7 @@ public class BoofCV extends Service<BoofCVConfig>
   }
 
   @Override
-  public CvFilter addFilter(String name, String filterType) {
+  public CVFilter addFilter(String name, String filterType) {
     String type = String.format("org.myrobotlab.boofcv.BoofCVFilter%s", filterType);
     BoofCVFilter filter = (BoofCVFilter) Instantiator.getNewInstance(type, name);
     if (filter == null) {
