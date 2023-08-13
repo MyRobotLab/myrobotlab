@@ -1,6 +1,5 @@
-package org.myrobotlab.service.interfaces;
+package org.myrobotlab.cv;
 
-import org.myrobotlab.cv.CvFilter;
 import org.myrobotlab.framework.interfaces.NameProvider;
 
 /**
