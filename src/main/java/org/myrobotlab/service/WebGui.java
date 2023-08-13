@@ -1178,6 +1178,14 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
     try {
 
       // Platform.setVirtual(true);
+      
+      Runtime.startConfig("default");
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
 
       // Runtime.start("python", "Python");
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
@@ -1192,11 +1200,7 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
       // Runtime.start("intro", "Intro");
       // Runtime.start("i01", "InMoov2");
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
+    
       // Runtime.start("i01", "InMoov2");
       // Runtime.start("python", "Python");
       // Runtime.start("i01", "InMoov2");
