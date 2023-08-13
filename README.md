@@ -100,7 +100,6 @@ Enjoy the code review, address issues and concern in the code review
 Reviewer merges pull request to develop.
 Reviewer deletes branch.
 
-
 The following config should be useful to work directly on WebGui UI and
 InMoov2 UI if the repos are checked out at the same level
 ```yml
