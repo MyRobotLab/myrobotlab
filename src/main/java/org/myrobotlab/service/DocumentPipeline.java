@@ -18,7 +18,7 @@ import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.DocumentListener;
 import org.myrobotlab.service.interfaces.DocumentPublisher;
 
-public class DocumentPipeline extends Service<ServiceConfig> implements DocumentListener, DocumentPublisher {
+public class DocumentPipeline extends Service<DocumentPipelineConfig> implements DocumentListener, DocumentPublisher {
 
   private static final long serialVersionUID = 1L;
 
@@ -211,23 +211,22 @@ public class DocumentPipeline extends Service<ServiceConfig> implements Document
   }
   
   @Override
-  public ServiceConfig apply(ServiceConfig inConfig) {
-    DocumentPipelineConfig config = (DocumentPipelineConfig)super.apply(inConfig);
-    // 
-    this.workFlowConfig = config.workFlowConfig;
+  public DocumentPipelineConfig apply(DocumentPipelineConfig c) {
+    super.apply(c);
+
+    this.workFlowConfig = c.workFlowConfig;
     try {
       initalize();
     } catch (ClassNotFoundException e) {
       log.error("Error initializing the document pipeline.", e);
       // TODO: shoiuld we throw some runtime here?
     }
-    return config;
+    return c;
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    // return the config
-    DocumentPipelineConfig config = (DocumentPipelineConfig)super.getConfig();
+  public DocumentPipelineConfig getConfig() {
+    super.getConfig();
     config.workFlowConfig = this.workFlowConfig;
     return config;
   }

@@ -728,16 +728,15 @@ public class Joystick extends Service<JoystickConfig> implements AnalogPublisher
     getControllers();
 
     // get controller request from config
-    JoystickConfig config = (JoystickConfig)super.apply(c);
-    if (config.controller != null) {
+    if (c.controller != null) {
       setController(config.controller);
     }
 
     // stupid transform from array to set - yaml wants array, set prevents
     // duplicates :(
-    if (config.analogListeners != null) {
-      for (String id : config.analogListeners.keySet()) {
-        ArrayList<String> list = config.analogListeners.get(id);
+    if (c.analogListeners != null) {
+      for (String id : c.analogListeners.keySet()) {
+        ArrayList<String> list = c.analogListeners.get(id);
         Set<String> s = analogListeners.get(id);
         if (s == null) {
           s = new HashSet<>();

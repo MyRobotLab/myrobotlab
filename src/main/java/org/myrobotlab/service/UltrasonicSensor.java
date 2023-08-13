@@ -12,7 +12,6 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.UltrasonicSensorConfig;
 import org.myrobotlab.service.data.RangeData;
 import org.myrobotlab.service.interfaces.RangeListener;
@@ -237,18 +236,18 @@ public class UltrasonicSensor extends Service<UltrasonicSensorConfig> implements
   public UltrasonicSensorConfig apply(UltrasonicSensorConfig c) {
     super.apply(c);
 
-    if (config.triggerPin != null)
-      setTriggerPin(config.triggerPin);
+    if (c.triggerPin != null)
+      setTriggerPin(c.triggerPin);
 
-    if (config.echoPin != null)
-      setEchoPin(config.echoPin);
+    if (c.echoPin != null)
+      setEchoPin(c.echoPin);
 
-    if (config.timeout != null)
-      timeout = config.timeout;
+    if (c.timeout != null)
+      timeout = c.timeout;
 
-    if (config.controller != null) {
+    if (c.controller != null) {
       try {
-        attach(config.controller);
+        attach(c.controller);
       } catch (Exception e) {
         error(e);
       }

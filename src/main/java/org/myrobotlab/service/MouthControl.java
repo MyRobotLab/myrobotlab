@@ -249,20 +249,20 @@ public class MouthControl extends Service<MouthControlConfig> implements SpeechL
   public MouthControlConfig apply(MouthControlConfig c) {
     super.apply(c);
     // FIXME - remove local fields, use config only
-    mouthClosedPos = config.mouthClosedPos;
-    mouthOpenedPos = config.mouthOpenedPos;
-    delaytime = config.delaytime;
-    delaytimestop = config.delaytimestop;
-    delaytimeletter = config.delaytimeletter;
-    jaw = config.jaw;
-    neoPixel = config.neoPixel;
+    mouthClosedPos = c.mouthClosedPos;
+    mouthOpenedPos = c.mouthOpenedPos;
+    delaytime = c.delaytime;
+    delaytimestop = c.delaytimestop;
+    delaytimeletter = c.delaytimeletter;
+    jaw = c.jaw;
+    neoPixel = c.neoPixel;
 
     // mouth needs to attach to us
     // it needs to create notify entries
     // so we fire a message to attach to us
-    mouth = config.mouth;
-    if (config.mouth != null) {
-      mouth = config.mouth;
+    mouth = c.mouth;
+    if (c.mouth != null) {
+      mouth = c.mouth;
       send(mouth, "attach", getName());
     }
 

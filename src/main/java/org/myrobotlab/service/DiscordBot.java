@@ -57,24 +57,17 @@ public class DiscordBot extends Service<DiscordBotConfig> implements UtterancePu
   public DiscordBotConfig apply(DiscordBotConfig c) {
     super.apply(c);
 
-    if (config.token != null) {
-      setToken(config.token);
+    if (c.token != null) {
+      setToken(c.token);
     }
 
-    // REMOVED - OVERLAP WITH SUBSCRIPTIONS
-//    if (config.utteranceListeners != null) {
-//      for (String name : config.utteranceListeners) {
-//        attachUtteranceListener(name);
-//      }
-//    }
-
-    if (config.connect && config.token != null && !config.token.isEmpty()) {
+    if (c.connect && c.token != null && !c.token.isEmpty()) {
       connect();
-    } else if (config.token == null || config.token.isEmpty()) {
+    } else if (c.token == null || c.token.isEmpty()) {
       error("requires valid token to connect");
     }
 
-    return config;
+    return c;
   }
 
   public String getBotName() {

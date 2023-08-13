@@ -125,11 +125,10 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig inConfig) {
-    // 
-    FileConnectorConfig config = (FileConnectorConfig)super.apply(inConfig);
+  public ServiceConfig apply(ServiceConfig c) {
+    super.apply(c);
     // anything else?
-    return config;
+    return c;
   }
 
   @Override

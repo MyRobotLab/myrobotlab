@@ -81,13 +81,13 @@ public class ImageDisplay extends Service<ImageDisplayConfig> implements ImageLi
   @Override
   public ImageDisplayConfig apply(ImageDisplayConfig c) {
     super.apply(c);
-    if (config.displays != null) {
-      for (String displayName : config.displays.keySet()) {
+    if (c.displays != null) {
+      for (String displayName : c.displays.keySet()) {
         close(displayName);
         displayInternal(displayName);
       }
     }
-    return config;
+    return c;
   }
 
   @Override

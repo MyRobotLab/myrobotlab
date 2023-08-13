@@ -16,7 +16,6 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.Pcf8574Config;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -735,16 +734,16 @@ public class Pcf8574 extends Service<Pcf8574Config>
   public Pcf8574Config apply(Pcf8574Config c) {
     super.apply(c);
     // FIXME remove local fields in favor of config only
-    if (config.address != null) {
-      setAddress(config.address);
+    if (c.address != null) {
+      setAddress(c.address);
     }
-    if (config.bus != null) {
-      setBus(config.bus);
+    if (c.bus != null) {
+      setBus(c.bus);
     }
 
-    if (config.controller != null) {
+    if (c.controller != null) {
       try {
-        attach(config.controller);
+        attach(c.controller);
       } catch (Exception e) {
         error(e);
       }

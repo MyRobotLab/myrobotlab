@@ -8,7 +8,6 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.SpeechRecognizerConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
@@ -586,22 +585,22 @@ public abstract class AbstractSpeechRecognizer<C extends SpeechRecognizerConfig>
 
   @Override
   public C apply(C c) {
-    C config = super.apply(c);
-    setWakeWord(config.wakeWord);
-    if (config.listening) {
+    super.apply(c);
+    setWakeWord(c.wakeWord);
+    if (c.listening) {
       startListening();
     } else {
       stopListening();
     }
 
-    if (config.recording) {
+    if (c.recording) {
       startRecording();
     } else {
       stopRecording();
     }
 
-    if (config.textListeners != null) {
-      for (String listener : config.textListeners) {
+    if (c.textListeners != null) {
+      for (String listener : c.textListeners) {
         addListener("publishText", listener);
       }
     }

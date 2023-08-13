@@ -1163,10 +1163,10 @@ public class Solr extends Service<SolrConfig> implements DocumentListener, TextL
   }
 
   @Override
-  public SolrConfig apply(SolrConfig inConfig) {
+  public SolrConfig apply(SolrConfig c) {
     // 
-    super.apply(inConfig);
-    if (config.embedded) {
+    super.apply(c);
+    if (c.embedded) {
       // 
       try {
         startEmbedded();
@@ -1176,7 +1176,7 @@ public class Solr extends Service<SolrConfig> implements DocumentListener, TextL
         e.printStackTrace();
       };
     }
-    return config;
+    return c;
   }
 
   @Override

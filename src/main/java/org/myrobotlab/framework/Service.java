@@ -1427,7 +1427,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * processes those listeners and adds them to the outbox notifyList.
    */
   public ServiceConfig addConfigListeners(ServiceConfig config) {
-    if (config.listeners != null) {
+    if (config != null && config.listeners != null) {
       for (Listener listener : config.listeners) {
         addListener(listener.method, listener.listener, listener.callback);
       }

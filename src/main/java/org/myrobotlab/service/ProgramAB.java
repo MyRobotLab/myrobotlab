@@ -1093,32 +1093,32 @@ public class ProgramAB extends Service<ProgramABConfig>
   @Override
   public ProgramABConfig apply(ProgramABConfig c) {
     super.apply(c);
-    if (config.bots != null && config.bots.size() > 0) {
+    if (c.bots != null && c.bots.size() > 0) {
       // bots.clear();
-      for (String botPath : config.bots) {
+      for (String botPath : c.bots) {
         addBotPath(botPath);
       }
     }
     
-    if (config.botDir == null) {
-      config.botDir = getResourceDir();
+    if (c.botDir == null) {
+      c.botDir = getResourceDir();
     }
 
-    List<File> botsFromScanning = scanForBots(config.botDir);
+    List<File> botsFromScanning = scanForBots(c.botDir);
     for (File file : botsFromScanning) {
       addBotPath(file.getAbsolutePath());
     }
 
-    if (config.currentUserName != null) {
-      setCurrentUserName(config.currentUserName);
+    if (c.currentUserName != null) {
+      setCurrentUserName(c.currentUserName);
     }
     
-    if (config.currentBotName != null) {
-      setCurrentUserName(config.currentBotName);
+    if (c.currentBotName != null) {
+      setCurrentUserName(c.currentBotName);
     }    
     
-    if (config.startTopic != null) {
-      setTopic(config.startTopic);  
+    if (c.startTopic != null) {
+      setTopic(c.startTopic);  
     }
     
 

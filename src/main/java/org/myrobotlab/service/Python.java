@@ -944,17 +944,16 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
 
   public PythonConfig apply(PythonConfig c) {
     super.apply(c);
-    config = (PythonConfig)c;
     
     // apply is the first method called after construction,
     // since we offer the capability of executing scripts specified in config
     // the interpreter must be configured and created here
     init();
     
-    if (config.startScripts != null && config.startScripts.size() > 0) {
+    if (c.startScripts != null && c.startScripts.size() > 0) {
 
       if (isRunning()) {
-        for (String script : config.startScripts) {
+        for (String script : c.startScripts) {
           try {
             execFile(script);
           } catch (Exception e) {
@@ -966,8 +965,8 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
 
     PySystemState sys = Py.getSystemState();
 
-    if (config.modulePaths != null) {
-      for (String path : config.modulePaths) {
+    if (c.modulePaths != null) {
+      for (String path : c.modulePaths) {
         sys.path.append(new PyString(path));
       }
     }

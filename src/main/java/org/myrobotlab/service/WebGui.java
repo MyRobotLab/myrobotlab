@@ -1162,14 +1162,14 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
   public WebGuiConfig apply(WebGuiConfig c) {
     super.apply(c);
     
-    if (config.port != null && (port != null && config.port.intValue() != port.intValue())) {
-      setPort(config.port);
+    if (c.port != null && (port != null && c.port.intValue() != port.intValue())) {
+      setPort(c.port);
     }
-    autoStartBrowser(config.autoStartBrowser);
-    if (config.enableMdns) {
+    autoStartBrowser(c.autoStartBrowser);
+    if (c.enableMdns) {
       startMdns();
     }
-    return config;
+    return c;
   }
 
   public static void main(String[] args) {

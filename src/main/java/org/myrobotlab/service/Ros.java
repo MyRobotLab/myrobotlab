@@ -150,10 +150,10 @@ public class Ros extends Service<RosConfig> implements RemoteMessageHandler, Con
   @Override
   public RosConfig apply(RosConfig c) {
     super.apply(c);
-    if (config.connect) {
-      connect(config.bridgeUrl);
-      if (config.subscriptions != null) {
-        for (String topic : config.subscriptions) {
+    if (c.connect) {
+      connect(c.bridgeUrl);
+      if (c.subscriptions != null) {
+        for (String topic : c.subscriptions) {
           rosSubscribe(topic);
         }
       }

@@ -263,11 +263,11 @@ import org.slf4j.Logger;
   public OpenWeatherMapConfig apply(OpenWeatherMapConfig c) {
     super.apply(c);
     // FIXME - remove local fields in favor of only config
-    if (config.currentUnits != null) {
-      setUnits(config.currentUnits);
+    if (c.currentUnits != null) {
+      setUnits(c.currentUnits);
     }
-    if (config.currentTown != null) {
-      setLocation(config.currentTown);
+    if (c.currentTown != null) {
+      setLocation(c.currentTown);
     }
     return c;
   }

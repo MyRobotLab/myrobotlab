@@ -2042,24 +2042,24 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
   @Override
   public OpenCVConfig apply(OpenCVConfig c) {
     super.apply(c);
-    setCameraIndex(config.cameraIndex);
-    setGrabberType(config.grabberType);
-    setInputFileName(config.inputFile);
-    setInputSource(config.inputSource);
+    setCameraIndex(c.cameraIndex);
+    setGrabberType(c.grabberType);
+    setInputFileName(c.inputFile);
+    setInputSource(c.inputSource);
 
-    setNativeViewer(config.nativeViewer);
+    setNativeViewer(c.nativeViewer);
 
-    setWebViewer(config.webViewer);
+    setWebViewer(c.webViewer);
 
     filters.clear();
-    if (config.filters != null) {
-      for (OpenCVFilter f : config.filters.values()) {
+    if (c.filters != null) {
+      for (OpenCVFilter f : c.filters.values()) {
         addFilter(f);
         // TODO: better configuration of the filter when it's added.
       }
     }
 
-    if (config.capturing) {
+    if (c.capturing) {
       capture();
     }
 

@@ -27,7 +27,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class Tracking extends Service {
+public class Tracking extends Service<TrackingConfig> {
 
   private static final long serialVersionUID = 1L;
 
@@ -274,24 +274,24 @@ public class Tracking extends Service {
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    TrackingConfig config = (TrackingConfig) super.getConfig();
+  public TrackingConfig getConfig() {
+    super.getConfig();
     config.enabled = (state == TrackingState.IDLE) ? false : true;
     return config;
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    TrackingConfig config = (TrackingConfig) super.apply(c);
+  public TrackingConfig apply(TrackingConfig c) {
+    super.apply(c);
 
-    config.lostTrackingDelayMs = lostTrackingDelayMs;
+    c.lostTrackingDelayMs = lostTrackingDelayMs;
 
-    if (config.enabled) {
+    if (c.enabled) {
       // enable();
     } else {
       disable();
     }
-    return config;
+    return c;
   }
 
   public boolean isIdle() {

@@ -188,14 +188,13 @@ public class Cron extends Service<CronConfig> {
 
   @Override
   public CronConfig apply(CronConfig c) {
-    super.apply(config);
+    super.apply(c);
     
     // deschedule current tasks
     removeAllTasks();
     
     // add new tasks
-    CronConfig config = (CronConfig)c;
-    for (Task task : config.tasks) {
+    for (Task task : c.tasks) {
       addTask(task);
     }
     return c;

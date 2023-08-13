@@ -33,7 +33,6 @@ import org.myrobotlab.serial.PortQueue;
 import org.myrobotlab.serial.PortStream;
 import org.myrobotlab.serial.SerialControl;
 import org.myrobotlab.service.config.SerialConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.PortPublisher;
 import org.myrobotlab.service.interfaces.QueueSource;
@@ -1305,10 +1304,10 @@ public class Serial extends Service<SerialConfig> implements SerialControl, Queu
   public SerialConfig apply(SerialConfig c) {
     super.apply(c);
 
-    if (config.port != null) {
+    if (c.port != null) {
       try {
         if (isConnected()) {
-          connect(config.port);
+          connect(c.port);
         }
       } catch (Exception e) {
         log.error("load connecting threw", e);

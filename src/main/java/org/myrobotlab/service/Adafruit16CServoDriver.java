@@ -24,7 +24,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.config.Adafruit16CServoDriverConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.ServoMove;
 import org.myrobotlab.service.data.ServoSpeed;
 import org.myrobotlab.service.interfaces.I2CControl;

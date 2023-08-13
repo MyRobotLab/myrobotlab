@@ -22,10 +22,10 @@ public class JoystickMeta extends MetaData {
 
     log.info("Joystick.getMetaData {}  isArm() {}", platform, platform.isArm());
     if (platform.isArm()) {
-      log.info("loading arm binaries");
+      log.info("adding armv7 native dependencies");
       addDependency("jinput-natives", "jinput-natives-armv7.hfp", "2.0.7", "zip");
     } else {
-      log.info("loading non-arm binaries");
+      log.info("adding jinput native dependencies");
       addDependency("jinput-natives", "jinput-natives", "2.0.7", "zip");
     }
     // addDependency("net.java.jinput", "jinput-platform", "2.0.7");
