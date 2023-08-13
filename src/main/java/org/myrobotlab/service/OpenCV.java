@@ -660,6 +660,10 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
   public CvFilter addFilter(String name, String filterType) {
     String type = String.format("org.myrobotlab.opencv.OpenCVFilter%s", filterType);
     OpenCVFilter filter = (OpenCVFilter) Instantiator.getNewInstance(type, name);
+    if (filter == null) {
+      error("cannot create filter %s of type %s", name, type);
+      return null;
+    }
     addFilter(filter);
     return filter;
   }
