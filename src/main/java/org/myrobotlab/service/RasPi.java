@@ -509,6 +509,7 @@ public class RasPi extends AbstractMicrocontroller<RasPiConfig> implements I2CCo
     }
 
     mode = mode.trim().toUpperCase();
+
     if (!pinIndex.containsKey(pin)) {
       error("Pin %s not found", pin);
       return;
@@ -586,6 +587,7 @@ public class RasPi extends AbstractMicrocontroller<RasPiConfig> implements I2CCo
       return 1;
     }
   }
+
   @Override
   public void reset() {
     // TODO Auto-generated method stub
