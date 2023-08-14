@@ -26,9 +26,6 @@
         </div>
     </div>
 </form>
-<div class="row">
-    <label ng-show="isConnected" title="line speed - the data rate which this serial port is actually recieving,&#10; which can vary significantly from the data rate depending on the amount of data sampled">{{stats.lineSpeed}} Kbps</label>
-</div>
 <div class="col-md-12">
     {{service.boardType}} {{connectedStatus}} {{versionStatus}} <br>
     <span ng-show="boardInfo != null">version {{boardInfo.version}}</span>
@@ -71,6 +68,9 @@
         <uib-tab heading="Oscope">
             <!-- img src="{{image}}" width="500"/ -->
             <oscope id="{{service.name}}-oscope" service-name="{{service.name + '@' + service.id}}"></oscope>
+        </uib-tab>
+        <uib-tab heading="Board">
+            <img src="{{image}}" width="500"/>            
         </uib-tab>
         <!-- end -->
     </uib-tabset>
