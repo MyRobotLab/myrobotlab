@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.myrobotlab.arduino.ArduinoUtils;
 import org.myrobotlab.framework.MrlException;
 
-import com.pi4j.jni.Serial;
 
 @Ignore
 public class ArduinoChaosTest {
@@ -123,9 +122,9 @@ public class ArduinoChaosTest {
     // arduino.setDigitalTriggerOnly(false);
 
     Thread.sleep(1000);
-    arduino.setSerialRate(Serial.BAUD_RATE_57600);
+    arduino.setSerialRate(Serial.BAUD_115200);
     Thread.sleep(1000);
-    arduino.setSerialRate(Serial.BAUD_RATE_115200);
+    arduino.setSerialRate(Serial.BAUD_115200);
 
     Thread.sleep(1000);
     arduino.getBoardInfo();
