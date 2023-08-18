@@ -106,5 +106,3 @@ angular.module('mrlapp.service.AudioFileGui', []).controller('AudioFileGuiCtrl',
     msg.subscribe(this)
 }
 ])
-
-])
