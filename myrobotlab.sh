@@ -2,8 +2,7 @@
 
 REPO_FILE=libraries/repo.json
 
-# fancy way to get real cwd ?
-APPDIR="$(dirname -- "$(readlink -f -- "${0}")" )"
+APPDIR="$(dirname -- ${0})"
 
 echo APPDIR=${APPDIR}
 
