@@ -2,7 +2,7 @@
 
 REPO_FILE=libraries/repo.json
 
-APPDIR=$(pwd)
+APPDIR="$(dirname -- ${0})"
 
 echo APPDIR=${APPDIR}
 
