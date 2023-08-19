@@ -116,6 +116,4 @@ build/
 /lastRestart.py
 /.factorypath
 start.yml
-src/main/resources/resource/InMoov2
-src/main/resources/resource/ProgramAB
 *.iml
