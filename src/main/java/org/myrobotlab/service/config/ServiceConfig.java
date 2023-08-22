@@ -1,13 +1,19 @@
 package org.myrobotlab.service.config;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Plan;
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
@@ -209,6 +215,12 @@ public class ServiceConfig {
   }
 
   public static Plan getDefault(Plan plan, String name, String inType) {
+//    if ("Service".equals(inType) || Service.class.getCanonicalName().equals(inType)) {
+//      ServiceConfig sc = new ServiceConfig();
+//      sc.type = inType;
+//      plan.put(name, sc);
+//      return plan;
+//    }
     try {
 
       // if (type == null) {
@@ -227,11 +239,28 @@ public class ServiceConfig {
       // plan.merge();
       config.getDefault(plan, name);
 
-    } catch (ClassNotFoundException e) {
-      log.info("could not find {} loading generalized ServiceConfig", inType);
-      ServiceConfig sc = new ServiceConfig();
-      sc.type = inType;
-      plan.put(name, sc);
+    } catch (ClassNotFoundException cnfe) {
+      try {
+        Class<? extends Service> serviceClass = Class.forName(CodecUtils.makeFullTypeName(inType)).asSubclass(Service.class);
+        Type superClass = serviceClass.getGenericSuperclass();
+        if (superClass instanceof ParameterizedType) {
+          ParameterizedType genericSuperClass = (ParameterizedType) superClass;
+          System.out.println("Got generic superclass: " + genericSuperClass + " for service class " + serviceClass);
+          Class<? extends ServiceConfig> configClass = ((Class<?>) genericSuperClass.getActualTypeArguments()[0]).asSubclass(ServiceConfig.class);
+          ServiceConfig newConfig = configClass.getConstructor().newInstance();
+          newConfig.type = inType;
+          newConfig.getDefault(plan, name);
+        } else {
+          throw new NoSuchElementException("Superclass is not generic");
+        }
+
+      } catch (ClassNotFoundException | NoSuchElementException | NoSuchMethodException | InstantiationException |
+               IllegalAccessException | InvocationTargetException | ClassCastException ignored) {
+        log.info("could not find config class for {}, loading generalized ServiceConfig", inType);
+        ServiceConfig sc = new ServiceConfig();
+        sc.type = inType;
+        plan.put(name, sc);
+      }
     } catch (Exception e) {
       Runtime.getInstance().error(e);
     }
