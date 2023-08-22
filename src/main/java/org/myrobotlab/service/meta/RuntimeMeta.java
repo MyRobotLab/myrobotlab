@@ -59,6 +59,10 @@ public class RuntimeMeta extends MetaData {
     // ABSOLUTELY NO JNI/JNA IS USED
     addDependency("org.bytedeco", "cpython-platform", "3.10.8-1.5.8");
     addDependency("org.bytedeco", "cpython", "3.10.8-1.5.8");
+    addDependency("org.bytedeco", "javacpp", "1.5.8");
+    addDependency("org.bytedeco", "javacpp-platform", "1.5.8");
+
+//    addDependency("org.apache.commons", "commons-lang3", "3.3.2");
 
   }
 
