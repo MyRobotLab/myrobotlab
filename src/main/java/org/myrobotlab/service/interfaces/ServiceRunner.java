@@ -1,10 +1,9 @@
 package org.myrobotlab.service.interfaces;
-import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 
 import java.util.List;
 
-public interface ServiceRunner extends NameProvider {
+public interface ServiceRunner extends ServiceInterface {
 
     /**
      * Get the runner's supported service programming language
