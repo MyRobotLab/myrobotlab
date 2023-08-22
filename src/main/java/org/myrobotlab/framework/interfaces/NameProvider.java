@@ -4,6 +4,5 @@ public interface NameProvider {
 
   public String getName();
 
-  String getId();
 
 }

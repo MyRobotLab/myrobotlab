@@ -191,6 +191,8 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
 
   String getFullName();
 
+  String getId();
+
   void loadLocalizations();
 
   void setLocale(String code);
