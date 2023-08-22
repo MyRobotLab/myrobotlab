@@ -694,12 +694,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       return null;
     }
 
-    String fullTypeName;
-    if (type.contains(".")) {
-      fullTypeName = type;
-    } else {
-      fullTypeName = String.format("org.myrobotlab.service.%s", type);
-    }
+    String fullTypeName = CodecUtils.makeFullTypeName(type);
 
     ServiceInterface si = Runtime.getService(fullName);
     if (si != null) {
