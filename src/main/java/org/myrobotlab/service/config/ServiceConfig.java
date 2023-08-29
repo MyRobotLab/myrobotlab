@@ -254,7 +254,7 @@ public class ServiceConfig {
           throw new NoSuchElementException("Superclass is not generic");
         }
 
-      } catch (ClassNotFoundException | NoSuchElementException | NoSuchMethodException | InstantiationException |
+      } catch (NoClassDefFoundError | ClassNotFoundException | NoSuchElementException | NoSuchMethodException | InstantiationException |
                IllegalAccessException | InvocationTargetException | ClassCastException ignored) {
         log.info("could not find config class for {}, loading generalized ServiceConfig", inType);
         ServiceConfig sc = new ServiceConfig();

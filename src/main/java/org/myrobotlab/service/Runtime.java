@@ -897,7 +897,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
           if (startYml.enable) {
             Runtime.load("runtime", "Runtime");
           }
-          ((RuntimeConfig) runtime.config).add("runtime");
+          runtime.config.add("runtime");
 
           runtime.startService();
           // platform virtual is higher priority than service virtual
