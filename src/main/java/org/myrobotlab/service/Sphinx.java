@@ -41,6 +41,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import edu.cmu.sphinx.api.Configuration;
+import edu.cmu.sphinx.api.LiveSpeechRecognizer;
 import org.apache.commons.lang.StringUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
@@ -57,7 +59,6 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
 
 import edu.cmu.sphinx.frontend.util.Microphone;
-import edu.cmu.sphinx.recognizer.Recognizer;
 import edu.cmu.sphinx.result.Result;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 
@@ -90,29 +91,28 @@ public class Sphinx extends AbstractSpeechRecognizer<SpeechRecognizerConfig> {
         String newPath = FileIO.getCfgDir() + File.separator + myService.getName() + ".xml";
         File localGramFile = new File(newPath);
 
+        warn("CONFIG NOT IMPLEMENTED, ONLY SUPPORTS BASE EN-US");
+
         info("loading grammar file");
         if (localGramFile.exists()) {
           info(String.format("grammar config %s", newPath));
-          cm = new ConfigurationManager(newPath);
         } else {
           // resource in jar default
           info(String.format("grammar /resource/Sphinx/simple.xml"));
-          cm = new ConfigurationManager(this.getClass().getResource(FileIO.gluePaths(getResourceDir(), "/Sphinx/simple.xml")));
         }
 
         info("starting recognizer");
         // start the word recognizer
-        recognizer = (Recognizer) cm.lookup("recognizer");
-        recognizer.allocate();
+//        recognizer = cm.lookup("recognizer");
+        Configuration configuration = new Configuration();
 
-        info("starting microphone");
-        microphone = (Microphone) cm.lookup("microphone");
-        if (!microphone.startRecording()) {
-          log.error("Cannot start microphone.");
-          recognizer.deallocate();
-        }
+        configuration.setAcousticModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us");
+        configuration.setDictionaryPath("resource:/edu/cmu/sphinx/models/en-us/cmudict-en-us.dict");
+        configuration.setLanguageModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us.lm.bin");
+        recognizer = new LiveSpeechRecognizer(configuration);
+        recognizer.startRecognition(true);
         
-        SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+        SpeechRecognizerConfig c = config;
 
 
         // loop the recognition until the program exits.
@@ -121,7 +121,7 @@ public class Sphinx extends AbstractSpeechRecognizer<SpeechRecognizerConfig> {
 
           info("listening: %b", c.listening);
           invoke("listeningEvent", true);
-          Result result = recognizer.recognize();
+          Result result = recognizer.getResult().getResult();
 
           if (!c.listening) {
             // we could have stopped listening
@@ -220,7 +220,7 @@ public class Sphinx extends AbstractSpeechRecognizer<SpeechRecognizerConfig> {
   public final static Logger log = LoggerFactory.getLogger(Sphinx.class.getCanonicalName());
   transient Microphone microphone = null;
   transient ConfigurationManager cm = null;
-  transient Recognizer recognizer = null;
+  transient LiveSpeechRecognizer recognizer = null;
 
   transient SpeechProcessor speechProcessor = null;
 
@@ -434,7 +434,7 @@ public class Sphinx extends AbstractSpeechRecognizer<SpeechRecognizerConfig> {
    * 
    */
   public synchronized boolean onIsSpeaking(Boolean talking) {
-    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    SpeechRecognizerConfig c = config;
 
     if (talking) {
       c.listening = false;
@@ -501,7 +501,7 @@ public class Sphinx extends AbstractSpeechRecognizer<SpeechRecognizerConfig> {
   @Override
   public synchronized void pauseListening() {
     log.info("Pausing Listening");
-    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    SpeechRecognizerConfig c = config;
 
     c.listening = false;
     if (microphone != null && recognizer != null) {
@@ -539,11 +539,7 @@ public class Sphinx extends AbstractSpeechRecognizer<SpeechRecognizerConfig> {
     SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
 
     c.listening = true;
-    if (microphone != null) {
-      // TODO: no idea if this does anything useful.
-      microphone.clear();
-      microphone.startRecording();
-    }
+    recognizer.startRecognition(true);
   }
 
   // FYI - grammar must be created BEFORE we start to listen
@@ -587,8 +583,7 @@ public class Sphinx extends AbstractSpeechRecognizer<SpeechRecognizerConfig> {
   }
 
   public void startRecordingx() {
-    microphone.clear();
-    microphone.startRecording();
+    recognizer.startRecognition(true);
   }
 
   /**
@@ -598,13 +593,12 @@ public class Sphinx extends AbstractSpeechRecognizer<SpeechRecognizerConfig> {
    */
   @Override
   public void stopListening() {
-    if (microphone != null) {
-      microphone.stopRecording();
-      microphone.clear();
-    }
-    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+    SpeechRecognizerConfig c = config;
 
     c.listening = false;
+    if (recognizer != null) {
+      recognizer.stopRecognition();
+    }
     if (speechProcessor != null) {
       speechProcessor.isRunning = false;
     }
@@ -615,14 +609,6 @@ public class Sphinx extends AbstractSpeechRecognizer<SpeechRecognizerConfig> {
   public void stopService() {
     super.stopService();
     stopListening();
-    if (recognizer != null) {
-      recognizer.deallocate();
-      recognizer = null;
-    }
-    if (microphone != null) {
-      microphone.stopRecording();
-      microphone = null;
-    }
   }
 
   @Override
