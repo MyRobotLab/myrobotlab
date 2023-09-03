@@ -33,7 +33,8 @@ import org.slf4j.Logger;
 public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterYolo.class);
+  
+  public transient final static Logger log = LoggerFactory.getLogger(OpenCVFilterYolo.class);
 
   protected Boolean running;
 
@@ -43,7 +44,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   transient private final OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
 
-  private float confidenceThreshold = 0.25F;
+  protected float confidenceThreshold = 0.25F;
   // the column in the detection matrix that contains the confidence level. (I
   // think?)
   // int probability_index = 5;
@@ -64,10 +65,11 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 
-  boolean debug = false;
+  protected boolean debug = false;
   transient private Net net;
   ArrayList<String> classNames;
-  public ArrayList<Classification> lastResult = null;
+  // quick fix for exploding serialization of Classification
+  transient public ArrayList<Classification> lastResult = null;
   transient private volatile IplImage lastImage = null;
   private volatile boolean pending = false;
   transient private Thread classifier;
@@ -356,7 +358,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     // }
   }
 
-  volatile Object lock = new Object();
+  transient volatile Object lock = new Object();
 
   @Override
   public void enable() {

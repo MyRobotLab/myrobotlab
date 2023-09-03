@@ -73,12 +73,7 @@ public class ServiceConfig {
    * simple type name of service defined for this config
    */
   public String type;
-
-  // FIXME - change to enum ! 
-  // FIXME - remove this - its not used 
-  // heh non transient makes it easy to debug !
-  transient public String state = "INIT"; // INIT | LOADED | CREATED | STARTED |
-                                          // STOPPED | RELEASED
+  
 
   public String getPath(String name, String peerKey) {
     if (name == null) {

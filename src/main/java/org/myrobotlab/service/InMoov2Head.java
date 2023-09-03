@@ -2,7 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.myrobotlab.framework.Service;
@@ -199,7 +199,7 @@ public class InMoov2Head extends Service<InMoov2HeadConfig> {
     log.info("object distance is {},rothead servo {},neck servo {} ", distance, rotation, colatitude);
   }
 
-  public void onMoveHead(HashMap<String, Double> map) {
+  public void onMove(Map<String, Double> map) {
     moveTo(map.get("neck"), map.get("rothead"), map.get("eyeX"), map.get("eyeY"), map.get("jaw"), map.get("rollNeck"));
   }
 

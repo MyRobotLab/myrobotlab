@@ -17,7 +17,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.FiniteStateMachineConfig;
 import org.myrobotlab.service.config.FiniteStateMachineConfig.Transition;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 import com.github.pnavais.machine.StateMachine;
@@ -46,7 +45,13 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
 
   protected String lastEvent = null;
 
+  @Deprecated /* is this deprecated with ServiceConfig.listeners ? */
   protected Set<String> messageListeners = new HashSet<>();
+
+  /**
+   * state history of fsm
+   */
+  protected List<String> history = new ArrayList<>();
 
   // TODO - .from("A").to("B").on(Messages.ANY)
   // TODO - .from("A").to("B").on(Messages.EMPTY)
@@ -92,6 +97,13 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
 
   public void init() {
     stateMachine.init();
+    State state = stateMachine.getCurrent();
+    if (history.size() > 100) {
+      history.remove(0);
+    }
+    if (state != null) {
+      history.add(state.getName());
+    }
   }
 
   private String makeKey(String state0, String msgType, String state1) {
@@ -168,6 +180,7 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
 
       if (last != null && !last.equals(current)) {
         invoke("publishNewState", current.getName());
+        history.add(current.getName());
       }
     } catch (Exception e) {
       log.error("fire threw", e);

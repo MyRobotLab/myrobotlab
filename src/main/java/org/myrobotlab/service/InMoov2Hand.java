@@ -2,9 +2,9 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.myrobotlab.framework.Registration;
@@ -489,7 +489,7 @@ public class InMoov2Hand extends Service<InMoov2HandConfig> implements LeapDataL
     return data;
   }
 
-  public void onMoveHand(HashMap<String, Double> map) {
+  public void onMove(Map<String, Double> map) {
     moveTo(map.get("thumb"), map.get("index"), map.get("majeure"), map.get("majeure"), map.get("pinky"), map.get("wrist"));
   }
 
