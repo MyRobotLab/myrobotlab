@@ -386,7 +386,11 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
   }
 
   public void onLedDisplay(LedDisplayData data) {
-    displayQueue.add(data);
+    try {
+      displayQueue.add(data);
+    } catch(IllegalStateException e) {
+       log.info("queue full");
+    }
   }
 
   public void flash() {

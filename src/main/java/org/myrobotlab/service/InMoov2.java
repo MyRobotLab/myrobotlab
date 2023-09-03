@@ -30,7 +30,6 @@ import org.myrobotlab.programab.Response;
 import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.InMoov2Config;
-import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.LedDisplayData;
 import org.myrobotlab.service.data.Locale;
@@ -188,9 +187,9 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   protected String voiceSelected;
 
   /**
-   * prevents being booted more than once
+   * Prevents actions or events from happening when InMoov2 is first booted
    */
-  private boolean booted = false;
+  private boolean hasBooted = false;
 
   protected List<String> peersStarted = new ArrayList<>();
 
@@ -222,7 +221,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     ledDisplayMap.put("onPeakColor", new LedDisplayData(180, 53, 21, 3, 60, 30));
 
     customSoundMap.put("boot", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/confirmation.wav"));
-    customSoundMap.put("wake", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/sense.wav"));
+    customSoundMap.put("wake", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/ting.wav"));
     customSoundMap.put("firstInit", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/select.wav"));
     customSoundMap.put("idle", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/start.wav"));
     customSoundMap.put("random", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/reveal.wav"));
@@ -985,58 +984,64 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     unsubscribe("python", "publishStatus", this.getName(), "onGestureStatus");
   }
 
+  /**
+   * A generalized recurring event which can preform checks and various other
+   * methods or tasks. Heartbeats will not start until after boot stage.
+   */
   public void onHeartbeat() {
-    // heartbeats can start before config is
-    // done processing - so the following should
-    // not be dependent on config
+    try {
+      // heartbeats can start before config is
+      // done processing - so the following should
+      // not be dependent on config
 
-    if (config.heartbeatFlash) {
-      if (ledDisplayMap.get("heartbeat") != null) {
-        LedDisplayData heartbeat = ledDisplayMap.get("heartbeat");
-        invoke("publishFlash", heartbeat);
+      if (!hasBooted) {
+        log.info("boot hasn't completed, will not process heartbeat");
+        return;
       }
-    }
 
-    if (config.batteryLevelCheck) {
-      double batteryLevel = Runtime.getBatteryLevel();
-      invoke("publishBatteryLevel", batteryLevel);
-      // FIXME - thresholding should always have old value or state
-      // so we don't pump endless errors
-      if (batteryLevel < 5) {
-        error("battery level < 5 percent");
-      } else if (batteryLevel < 10) {
-        warn("battery level < 10 percent");
+      if (config.batteryLevelCheck) {
+        double batteryLevel = Runtime.getBatteryLevel();
+        invoke("publishBatteryLevel", batteryLevel);
+        // FIXME - thresholding should always have old value or state
+        // so we don't pump endless errors
+        if (batteryLevel < 5) {
+          error("battery level < 5 percent");
+          // systemEvent(BATTERY ERROR)
+        } else if (batteryLevel < 10) {
+          warn("battery level < 10 percent");
+          // systemEvent(BATTERY WARN)
+        }
       }
-    }
 
-    // flash error until errors are cleared
-    if (config.healthCheckFlash && errors.size() > 0) {
-      if (ledDisplayMap.containsKey("error")) {
-        invoke("publishFlash", ledDisplayMap.get("error"));
+      // flash error until errors are cleared
+      if (config.healthCheckFlash) {
+        if (errors.size() > 0 && ledDisplayMap.containsKey("error")) {
+          invoke("publishFlash", ledDisplayMap.get("error"));
+        } else if (ledDisplayMap.containsKey("heartbeat")) {
+          LedDisplayData heartbeat = ledDisplayMap.get("heartbeat");
+          invoke("publishFlash", heartbeat);
+        }
       }
-    }
 
-    // interval event firing ...
-    // sequence of these makes a difference and is hardcode fyi
+      Long lastActivityTime = getLastActivityTime();
 
-    // if there is activity in the idle time window - reset idle time to current
-    // time
-    // so idle event will not fire until at least inverval after activity
-    Long lastActivityTime = getLastActivityTime();
+      if (lastActivityTime != null && lastActivityTime + (config.stateIdleInterval * 1000) < System.currentTimeMillis()) {
+        stateLastIdleTime = lastActivityTime;
+      }
 
-    if (lastActivityTime != null && lastActivityTime + (config.stateIdleInterval * 1000) < System.currentTimeMillis()) {
-      stateLastIdleTime = lastActivityTime;
-    }
+      if (System.currentTimeMillis() > stateLastIdleTime + (config.stateIdleInterval * 1000)) {
+        fsm.fire("idle");
+        stateLastIdleTime = System.currentTimeMillis();
+      }
 
-    if (System.currentTimeMillis() > stateLastIdleTime + (config.stateIdleInterval * 1000)) {
-      fsm.fire("idle");
-      stateLastIdleTime = System.currentTimeMillis();
-    }
+      // interval event firing
+      if (System.currentTimeMillis() > stateLastRandomTime + (config.stateRandomInterval * 1000)) {
+        fsm.fire("random");
+        stateLastRandomTime = System.currentTimeMillis();
+      }
 
-    // interval event firing
-    if (System.currentTimeMillis() > stateLastRandomTime + (config.stateRandomInterval * 1000)) {
-      fsm.fire("random");
-      stateLastRandomTime = System.currentTimeMillis();
+    } catch (Exception e) {
+      error(e);
     }
 
   }
@@ -1121,44 +1126,46 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * Depending on config:
    * 
    * 
-   * @param state
+   * @param stateChange
    * @return
    */
-  public FiniteStateMachine.StateChange onStateChange(FiniteStateMachine.StateChange state) {
-    log.error("onStateChange {}", state);
+  public FiniteStateMachine.StateChange onStateChange(FiniteStateMachine.StateChange stateChange) {
+    try {
+      log.error("onStateChange {}", stateChange);
 
-    // if ("boot".equals(state.last) && config.stateBootIsMute &&
-    // getPeer("mouth") != null) {
-    // AbstractSpeechSynthesis<SpeechSynthesisConfig> mouth =
-    // (AbstractSpeechSynthesis) getPeer("mouth");
-    // mouth.setMute(wasMutedBeforeBoot);
-    // }
+      String state = stateChange.current;
+      systemEvent("ON STATE %s", state);
 
-    systemEvent("ON STATE %s", state.current);
+      if (config.customSounds && customSoundMap.containsKey(state)) {
+        invoke("publishPlayAudioFile", customSoundMap.get(state));
+      }
 
-    // TODO - only a few InMoov2 state defaults will be called here
-    if (stateDefaults.contains(state.current)) {
-      invoke(state.current);
+      // TODO - only a few InMoov2 state defaults will be called here
+      if (stateDefaults.contains(state)) {
+        invoke(state);
+      }
+
+      // FIXME add topic changes to AIML here !
+      // FIXME add clallbacks to inmmoov2 library
+
+      // put configurable filter here !
+
+      // state substitutions ?
+      // let python subscribe directly to fsm.publishStateChange
+
+      // if python && configured to do python inmoov2 library callbacks
+      // do a callback ... default NOOPs should be in library
+
+      // if
+      // invoke(state);
+      // depending on configuration ....
+      // call python ?
+      // fire fsm events ?
+      // do defaults ?
+    } catch (Exception e) {
+      error(e);
     }
-
-    // FIXME add topic changes to AIML here !
-    // FIXME add clallbacks to inmmoov2 library
-
-    // put configurable filter here !
-
-    // state substitutions ?
-    // let python subscribe directly to fsm.publishStateChange
-
-    // if python && configured to do python inmoov2 library callbacks
-    // do a callback ... default NOOPs should be in library
-
-    // if
-    // invoke(state);
-    // depending on configuration ....
-    // call python ?
-    // fire fsm events ?
-    // do defaults ?
-    return state;
+    return stateChange;
   }
 
   public OpenCVData onOpenCVData(OpenCVData data) {
@@ -1319,17 +1326,17 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   public List<String> publishConfigList() {
     return configList;
   }
-  
+
   public String systemEvent(String eventMsg) {
     invoke("publishSystemEvent", eventMsg);
-    return eventMsg;    
+    return eventMsg;
   }
 
-  public String systemEvent(String format, Object ...ags) {
+  public String systemEvent(String format, Object... ags) {
     String eventMsg = String.format(format, ags);
-    return systemEvent(eventMsg); 
+    return systemEvent(eventMsg);
   }
-  
+
   /**
    * event publisher for the fsm - although other services potentially can
    * consume and filter this event channel
@@ -1338,7 +1345,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * @return
    */
   public String publishSystemEvent(String event) {
-    // well, it turned out underscore was a goofy selection, as underscore in aiml is wildcard ... duh
+    // well, it turned out underscore was a goofy selection, as underscore in
+    // aiml is wildcard ... duh
     return String.format("SYSTEM_EVENT %s", event);
   }
 
@@ -1724,8 +1732,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
   }
 
-
-  @Deprecated /*This needs to be removed !*/
+  @Deprecated /* This needs to be removed ! */
   public ProgramAB startChatBot() {
 
     try {
@@ -1934,11 +1941,10 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   synchronized public void onBoot() {
 
     // thinking you shouldn't "boot" twice ?
-    if (booted) {
+    if (hasBooted) {
       log.warn("will not boot again");
       return;
     }
-    booted = true;
 
     List<ServiceInterface> services = Runtime.getServices();
     for (ServiceInterface si : services) {
@@ -2029,6 +2035,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     // mouth.setMute(wasMute);
     // }
 
+    hasBooted = true;
   }
 
   /**
