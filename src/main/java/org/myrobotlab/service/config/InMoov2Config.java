@@ -30,13 +30,11 @@ public class InMoov2Config extends ServiceConfig {
    */
   public boolean batteryLevelCheck = false;
 
-  // public boolean customSound = false;
-
   /**
-   * First Initialization occurs when the user starts the InMoov2 service for the 
-   * very first time, and ProgramAB can process learning about the user
+   * enable custom sound map for state changes
    */
-  public boolean firstInit = true;
+  public boolean customSound = false;
+
   
   public boolean forceMicroOnIfSleeping = true;
   
@@ -104,7 +102,7 @@ public class InMoov2Config extends ServiceConfig {
   public boolean pirWakeUp = true;
 
   public boolean robotCanMoveHeadWhileSpeaking = true;
-
+  
   /**
    * startup and shutdown will pause inmoov - set the speed to this value then
    * attempt to move to rest
@@ -118,6 +116,17 @@ public class InMoov2Config extends ServiceConfig {
 
   public boolean startupSound = true;
 
+  /**
+   * Determines if InMoov2 publish system events during boot state
+   */
+  public boolean systemEventsOnBoot = false;
+  
+  /**
+   * 
+   */
+  public boolean stateChangeIsMute = true;
+  
+  
   /**
    * Interval in seconds for a idle state event to fire off.
    * If the fsm is in a state which will allow transitioning, the InMoov2
@@ -450,7 +459,7 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishBoot", name));
     listeners.add(new Listener("publishHeartbeat", name));
     listeners.add(new Listener("publishConfigFinished", name));
-    listeners.add(new Listener("publishNewState", name));
+    listeners.add(new Listener("publishStateChange", name));
     
 //    listeners.add(new Listener("publishPowerUp", name));
 //    listeners.add(new Listener("publishPowerDown", name));
@@ -467,7 +476,7 @@ public class InMoov2Config extends ServiceConfig {
     AudioFileConfig mouth_audioFile = (AudioFileConfig) plan.get(getPeerName("mouth.audioFile"));
     mouth_audioFile.listeners = new ArrayList<>();
     mouth_audioFile.listeners.add(new Listener("publishPeak", name));
-    fsm.listeners.add(new Listener("publishNewState", name, "publishNewState"));
+    fsm.listeners.add(new Listener("publishStateChange", name, "publishStateChange"));
 //    mouth_audioFile.listeners.add(new Listener("publishAudioEnd", name));
 //    mouth_audioFile.listeners.add(new Listener("publishAudioStart", name));
     

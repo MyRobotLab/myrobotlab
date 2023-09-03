@@ -30,6 +30,7 @@ import org.myrobotlab.programab.Response;
 import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.InMoov2Config;
+import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.LedDisplayData;
 import org.myrobotlab.service.data.Locale;
@@ -141,6 +142,11 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   protected Map<String, LedDisplayData> ledDisplayMap = new TreeMap<>();
 
+  /**
+   * map of events or states to sounds
+   */
+  protected Map<String, String> customSoundMap = new TreeMap<>();
+
   protected List<Status> errors = new ArrayList<>();
 
   /**
@@ -198,7 +204,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     // consequence it this will need maintenance if there are new InMoov2 java
     // state handlers
     stateDefaults.add("wake");
-    stateDefaults.add("idle");
     stateDefaults.add("firstInit");
     stateDefaults.add("idle");
     stateDefaults.add("random");
@@ -215,6 +220,16 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     ledDisplayMap.put("heartbeat", new LedDisplayData(210, 110, 0, 2, 100, 30));
     ledDisplayMap.put("pirOn", new LedDisplayData(80, 200, 90, 3, 100, 30));
     ledDisplayMap.put("onPeakColor", new LedDisplayData(180, 53, 21, 3, 60, 30));
+
+    customSoundMap.put("boot", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/confirmation.wav"));
+    customSoundMap.put("wake", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/sense.wav"));
+    customSoundMap.put("firstInit", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/select.wav"));
+    customSoundMap.put("idle", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/start.wav"));
+    customSoundMap.put("random", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/reveal.wav"));
+    customSoundMap.put("sleep", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/back.wav"));
+    customSoundMap.put("powerDown", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/ting.wav"));
+    customSoundMap.put("shutdown", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/marimba.wav"));
+
   }
 
   /**
@@ -716,7 +731,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * @return true/false
    */
   public boolean loadGestures(String directory) {
-    invoke("publishEvent", "LOAD GESTURES");
+    systemEvent("LOAD GESTURES");
 
     // iterate over each of the python files in the directory
     // and load them into the python interpreter.
@@ -771,7 +786,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     File dir = new File(directory);
 
     if (!dir.exists() || !dir.isDirectory()) {
-      invoke("publishEvent", "LOAD SCRIPTS ERROR");
+      systemEvent("LOAD SCRIPTS ERROR");
       return;
     }
 
@@ -788,6 +803,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
         for (File file : files) {
           Python p = (Python) Runtime.start("python", "Python");
           if (p != null) {
+            // FIXME error("x") when an error occurs
             p.execFile(file.getAbsolutePath());
           }
         }
@@ -924,7 +940,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   public PredicateEvent onChangePredicate(PredicateEvent event) {
     log.error("onChangePredicate {}", event);
     if (event.name.equals("topic")) {
-      invoke("publishEvent", String.format("TOPIC CHANGED TO %s", event.value));
+      systemEvent("TOPIC CHANGED TO %s", event.value);
     }
     // depending on configuration ....
     // call python ?
@@ -1042,7 +1058,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   public void onJoystickInput(JoystickData input) throws Exception {
     // TODO timer ? to test and not send an event
     // switches to manual control ?
-    invoke("publishEvent", "joystick");
   }
 
   public void onMoveHead(Map<String, Double> map) {
@@ -1109,14 +1124,21 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * @param state
    * @return
    */
-  public String onNewState(String state) {
-    log.error("onNewState {}", state);
+  public FiniteStateMachine.StateChange onStateChange(FiniteStateMachine.StateChange state) {
+    log.error("onStateChange {}", state);
 
-    invoke("publishEvent", String.format("ON STATE %s", state));
+    // if ("boot".equals(state.last) && config.stateBootIsMute &&
+    // getPeer("mouth") != null) {
+    // AbstractSpeechSynthesis<SpeechSynthesisConfig> mouth =
+    // (AbstractSpeechSynthesis) getPeer("mouth");
+    // mouth.setMute(wasMutedBeforeBoot);
+    // }
+
+    systemEvent("ON STATE %s", state.current);
 
     // TODO - only a few InMoov2 state defaults will be called here
-    if (stateDefaults.contains(state)) {
-      invoke(state);
+    if (stateDefaults.contains(state.current)) {
+      invoke(state.current);
     }
 
     // FIXME add topic changes to AIML here !
@@ -1125,7 +1147,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     // put configurable filter here !
 
     // state substitutions ?
-    // let python subscribe directly to fsm.publishNewState
+    // let python subscribe directly to fsm.publishStateChange
 
     // if python && configured to do python inmoov2 library callbacks
     // do a callback ... default NOOPs should be in library
@@ -1146,6 +1168,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   /**
    * onPeak volume callback TODO - maybe make it variable with volume ?
+   * 
    * @param volume
    */
   public void onPeak(double volume) {
@@ -1171,14 +1194,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
         invoke("publishFlash", pirOn);
       }
     }
-    // pirOn event vs wake event
 
-    // FIXME - this is state related
-    String topic = chatBot.getPredicate("topic");
-    // if sleeping then publishe a wake event
-    if ("sleep".equals(topic)) {
-      invoke("publishEvent", "wake");
-    }
+    fsm.fire("wake");
   }
 
   public void powerDown() {
@@ -1218,9 +1235,9 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     // setEvent("pir-sense-on" .. also sets it in config ?
     // config.handledEvents["pir-sense-on"]
     if (b) {
-      invoke("publishEvent", "PIR ON");
+      systemEvent("PIR ON");
     } else {
-      invoke("publishEvent", "PIR OFF");
+      systemEvent("PIR OFF");
     }
     return b;
   }
@@ -1302,7 +1319,17 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   public List<String> publishConfigList() {
     return configList;
   }
+  
+  public String systemEvent(String eventMsg) {
+    invoke("publishSystemEvent", eventMsg);
+    return eventMsg;    
+  }
 
+  public String systemEvent(String format, Object ...ags) {
+    String eventMsg = String.format(format, ags);
+    return systemEvent(eventMsg); 
+  }
+  
   /**
    * event publisher for the fsm - although other services potentially can
    * consume and filter this event channel
@@ -1310,7 +1337,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * @param event
    * @return
    */
-  public String publishEvent(String event) {
+  public String publishSystemEvent(String event) {
+    // well, it turned out underscore was a goofy selection, as underscore in aiml is wildcard ... duh
     return String.format("SYSTEM_EVENT %s", event);
   }
 
@@ -1371,8 +1399,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return map;
   }
 
-  public String publishNewState(String state) {
-    log.info("publishNewState {}", state);
+  public FiniteStateMachine.StateChange publishStateChange(FiniteStateMachine.StateChange state) {
+    log.info("publishStateChange {}", state);
     return state;
   }
 
@@ -1412,7 +1440,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   public void releasePeer(String peerKey) {
     super.releasePeer(peerKey);
     if (peerKey != null) {
-      invoke("publishEvent", "STOPPED " + peerKey);
+      systemEvent("STOPPED %s", peerKey);
     }
   }
 
@@ -1696,29 +1724,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
   }
 
-  public void startAll() throws Exception {
-    startAll(null, null);
-  }
 
-  public void startAll(String leftPort, String rightPort) throws Exception {
-    startMouth();
-    startChatBot();
-
-    // startHeadTracking();
-    // startEyesTracking();
-    // startOpenCV();
-    startEar();
-
-    startServos();
-    // startMouthControl(head.jaw, mouth);
-
-    speakBlocking(get("STARTINGSEQUENCE"));
-  }
-
-  public void startBrain() {
-    startChatBot();
-  }
-
+  @Deprecated /*This needs to be removed !*/
   public ProgramAB startChatBot() {
 
     try {
@@ -1767,10 +1774,12 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       if (chatBot.getPredicate("default", "firstinit").isEmpty() || chatBot.getPredicate("default", "firstinit").equals("unknown")
           || chatBot.getPredicate("default", "firstinit").equals("started")) {
         chatBot.startSession(chatBot.getPredicate("default", "lastUsername"));
-        invoke("publishEvent", "FIRST INIT");
+        // probably not necessary - state change events should be enough
+        systemEvent("FIRST INIT");
       } else {
         chatBot.startSession(chatBot.getPredicate("default", "lastUsername"));
-        invoke("publishEvent", "WAKE UP");
+        // probably not necessary - state change events should be enough
+        systemEvent("WAKE UP");
       }
     } catch (Exception e) {
       speak("could not load chatBot");
@@ -1909,6 +1918,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     log.info("publishBoot");
   }
 
+  boolean wasMutedBeforeBoot = false;
+
   /**
    * At boot all services specified through configuration have started, or if no
    * configuration has started minimally the InMoov2 service has started. During
@@ -1961,6 +1972,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       error(e);
     }
 
+    // FIXME - find good way of running an animation "through" a state
     if (config.neoPixelBootGreen && getPeer("neoPixel") != null) {
       NeoPixel neoPixel = (NeoPixel) getPeer("neoPixel");
       if (neoPixel != null) {
@@ -1974,20 +1986,21 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       ((AudioFile) getPeer("audioPlayer")).playBlocking(FileIO.gluePaths(getResourceDir(), "/system/sounds/startupsound.mp3"));
     }
 
-    if (bootedConfig != null) {
-      // configuration was processed before booting
-      invoke("publishEvent", "CONFIG STARTED " + bootedConfig);
-    }
+    if (config.systemEventsOnBoot) {
+      // reporting on all services and config started
+      if (bootedConfig != null) {
+        // configuration was processed before booting
+        systemEvent("CONFIG STARTED %s", bootedConfig);
+      }
 
-    // publish config started
+      for (String peerKey : peersStarted) {
+        systemEvent("STARTED %s", peerKey);
+      }
 
-    for (String peerKey : peersStarted) {
-      invoke("publishEvent", "STARTED " + peerKey);
-    }
-
-    if (bootedConfig != null) {
-      // configuration was processed before booting
-      invoke("publishEvent", "CONFIG LOADED " + bootedConfig);
+      if (bootedConfig != null) {
+        // configuration was processed before booting
+        systemEvent("CONFIG LOADED %s", bootedConfig);
+      }
     }
 
     // FIXME - important to do invoke & fsm needs to be consistent order
@@ -2009,6 +2022,12 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     // say finished booting
 
     fsm.fire("wake");
+
+    // if (getPeer("mouth") != null) {
+    // AbstractSpeechSynthesis<SpeechSynthesisConfig> mouth =
+    // (AbstractSpeechSynthesis)getPeer("mouth");
+    // mouth.setMute(wasMute);
+    // }
 
   }
 
@@ -2101,6 +2120,11 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   public void firstInit() {
     log.info("firstInit");
+    // cheap way to prevent race condition
+    // of "wake" firing a state change .. which will spawn
+    // a system event of FIRST_INIT that will answer this
+    // question ...
+    sleep(2000);
     ProgramAB chatBot = (ProgramAB) getPeer("chatBot");
     if (chatBot != null) {
       chatBot.getResponse("FIRST_INIT");
@@ -2165,7 +2189,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     Platform platform = Runtime.getPlatform();
     setPredicate("system version", platform.getVersion());
     // ERROR buffer !!!
-    invoke("publishEvent", "systemCheckFinished");
+    systemEvent("SYSTEMCHECKFINISHED"); // wtf is this?
   }
 
   // FIXME - if this is really desired it will drive local references for all
