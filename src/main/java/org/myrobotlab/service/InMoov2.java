@@ -681,7 +681,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     info("%s Gestures loaded, %s Gestures with error", totalLoaded, totalError);
     broadcastState();
     if (totalError > 0) {
-      speakAlert(get("GESTURE_ERROR"));
+      invoke("publishEvent", "GESTURE_ERROR");
       return false;
     }
     return true;
@@ -1576,7 +1576,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   }
 
   public void speakAlert(String toSpeak) {
-    speakBlocking(get("ALERT"));
+    invoke("publishEvent", "ALERT");
     speakBlocking(toSpeak);
   }
 
