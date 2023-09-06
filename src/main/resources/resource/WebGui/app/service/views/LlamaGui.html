@@ -1,0 +1,25 @@
+<div class="row">
+    <form class="form-inline">
+        text<br/>
+        <input class="form-control" type="text" ng-model="text" placeholder="send text" title="send text">
+        <button class="btn btn-default" ng-click="msg.getResponse(text)">send text</button><br/>
+    </form>
+</div>
+
+<div class="row">
+    <table class="table table-hover">
+        <tbody>
+            <tr ng-repeat="e in utterances" >
+                <td>
+                    <small>{{e.username}}</small>
+                </td>
+                <td>
+                    <small>{{e.channel}}</small>
+                </td>
+                <td>
+                    <small style="white-space: pre-wrap">{{e.text}}</small>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
