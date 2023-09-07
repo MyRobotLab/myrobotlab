@@ -692,12 +692,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       return null;
     }
 
-    String fullTypeName;
-    if (type.contains(".")) {
-      fullTypeName = type;
-    } else {
-      fullTypeName = String.format("org.myrobotlab.service.%s", type);
-    }
+    String fullTypeName = CodecUtils.makeFullTypeName(type);
 
     ServiceInterface si = Runtime.getService(fullName);
     if (si != null) {
@@ -900,7 +895,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
           if (startYml.enable) {
             Runtime.load("runtime", "Runtime");
           }
-          ((RuntimeConfig) runtime.config).add("runtime");
+          runtime.config.add("runtime");
 
           runtime.startService();
           // platform virtual is higher priority than service virtual

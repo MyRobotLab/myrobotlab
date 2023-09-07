@@ -477,7 +477,7 @@ public class IvyWrapper extends Repo implements Serializable {
       }
 
       if (err.size() > 0) {
-        log.error("had errors - repo will not be updated");
+        log.error("had errors - repo will not be updated. Errors:\n{}", err);
       } else {
 
         // TODO - promote to Repo.setInstalled

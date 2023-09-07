@@ -155,11 +155,11 @@ public class MavenWrapper extends Repo implements Serializable {
 
           // If we haven't seen this dependency before, add it to our known
           // dependencies
-          if (!allDependencies.containsKey(serviceDependency.getKey()))
-            allDependencies.put(serviceDependency.getKey(), new ArrayList<>(List.of(serviceDependency)));
+          if (!allDependencies.containsKey(serviceDependency.getProjectCoordinates()))
+            allDependencies.put(serviceDependency.getProjectCoordinates(), new ArrayList<>(List.of(serviceDependency)));
           else {
             // We have seen it, so loop over all dependencies with matching keys
-            allDependencies.get(serviceDependency.getKey()).forEach(existingDependency -> {
+            allDependencies.get(serviceDependency.getProjectCoordinates()).forEach(existingDependency -> {
 
               // Check priority, if this dependency is higher priority than
               // existing,
@@ -173,7 +173,7 @@ public class MavenWrapper extends Repo implements Serializable {
                 serviceDependency.setSkipped(true);
             });
             // Add the dependency to the known dependencies
-            allDependencies.get(serviceDependency.getKey()).add(serviceDependency);
+            allDependencies.get(serviceDependency.getProjectCoordinates()).add(serviceDependency);
 
           }
         });

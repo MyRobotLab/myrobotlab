@@ -155,10 +155,7 @@ public class StringUtil {
 
   public static boolean isEmpty(String v) {
     // return true if the string is null or empty.
-    if (v == null || "".equals(v)) {
-      return true;
-    }
-    return false;
+    return v == null || v.isEmpty();
   }
 
   // split a string into sub strings that are a maxlength
@@ -220,11 +217,11 @@ public class StringUtil {
    * list of the integer values of the bytes. This ensures that the human
    * readable string values for the bytes are considered unsigned. (range 0-255)
    * not (-128 to 127)
-   * 
+   *
    * @param bytes
    *          input array to convert
    * @return string representing the bytes as integers
-   * 
+   *
    */
   public static String byteArrayToIntString(byte[] bytes) {
     if (bytes.length == 0) {
@@ -251,14 +248,23 @@ public class StringUtil {
     return builder.toString();
   }
 
-  public static String removeEnd(final String str, final String remove) {
-    if (str == null || str.length() == 0 || remove == null || remove.length() == 0) {
-      return str;
+
+  /**
+   * Removes a trailing substring from the given
+   * string if it exists as the last component
+   * of the given string.
+   *
+   * @param fullString The string to remove the end from
+   * @param toRemove The string to be removed if {@code fullString.endsWith(toRemove) == true}
+   * @return fullString with toRemove stripped from only the end.
+   */
+  public static String removeEnd(String fullString, String toRemove) {
+    if (isEmpty(fullString) || isEmpty(toRemove) || !fullString.endsWith(toRemove)) {
+      return fullString;
     }
-    if (str.endsWith(remove)) {
-      return str.substring(0, str.length() - remove.length());
-    }
-    return str;
+
+
+    return fullString.substring(0, fullString.length() - toRemove.length());
   }
 
 }
