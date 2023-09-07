@@ -232,7 +232,7 @@ public class InMoov2Config extends ServiceConfig {
     chatBot.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));
     
     
-    ProgramABConfig gpt3 = (ProgramABConfig) plan.get(getPeerName("gpt3"));
+    Gpt3Config gpt3 = (Gpt3Config) plan.get(getPeerName("gpt3"));
     gpt3.listeners = new ArrayList<>();
     gpt3.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));
     
