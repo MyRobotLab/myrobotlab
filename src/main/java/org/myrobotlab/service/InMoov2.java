@@ -1134,7 +1134,15 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       log.error("onStateChange {}", stateChange);
 
       String state = stateChange.current;
-      systemEvent("ON STATE %s", state);
+
+      // getPeer("py4j") ?
+      // Py4j py4j
+//      String code = getName()".onStateChange("
+//      invoke("publishPython", "onStateChange", stateChange );
+      
+      if (config.systemEventStateChange) {
+        systemEvent("ON STATE %s", state);
+      }
 
       if (config.customSounds && customSoundMap.containsKey(state)) {
         invoke("publishPlayAudioFile", customSoundMap.get(state));
@@ -1167,6 +1175,10 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
     return stateChange;
   }
+  
+//  public Message publishPython(String method, Object...data) {
+//    return Message.createMessage(getName(), getName(), method, data);
+//  }
 
   public OpenCVData onOpenCVData(OpenCVData data) {
     // FIXME - publish event with or without data ? String file reference

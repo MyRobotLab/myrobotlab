@@ -33,7 +33,7 @@ public class InMoov2Config extends ServiceConfig {
   /**
    * enable custom sound map for state changes
    */
-  public boolean customSound = false;
+  public boolean customSounds = false;
 
   
   public boolean forceMicroOnIfSleeping = true;
@@ -120,6 +120,11 @@ public class InMoov2Config extends ServiceConfig {
    * Determines if InMoov2 publish system events during boot state
    */
   public boolean systemEventsOnBoot = false;
+  
+  /**
+   * Publish system event when state changes
+   */
+  public boolean systemEventStateChange = true; 
   
   /**
    * 
@@ -225,6 +230,12 @@ public class InMoov2Config extends ServiceConfig {
       chatBot.listeners = new ArrayList<>();
     }
     chatBot.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));
+    
+    
+    ProgramABConfig gpt3 = (ProgramABConfig) plan.get(getPeerName("gpt3"));
+    gpt3.listeners = new ArrayList<>();
+    gpt3.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));
+    
 
     HtmlFilterConfig htmlFilter = (HtmlFilterConfig) plan.get(getPeerName("htmlFilter"));
     // htmlFilter.textListeners = new String[] { name + ".mouth" };

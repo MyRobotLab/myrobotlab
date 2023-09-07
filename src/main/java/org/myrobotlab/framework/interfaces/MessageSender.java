@@ -3,7 +3,7 @@ package org.myrobotlab.framework.interfaces;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.TimeoutException;
 
-public interface MessageSender extends NameProvider {
+public interface MessageSender extends NameProvider, SimpleMessageSender {
 
   /**
    * Send invoking messages to remote location to invoke {name} instance's

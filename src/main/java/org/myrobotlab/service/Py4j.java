@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.bytedeco.javacpp.Loader;
 import org.myrobotlab.codec.CodecUtils;
@@ -21,9 +20,11 @@ import org.myrobotlab.io.StreamGobbler;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.config.Py4jConfig;
 import org.myrobotlab.service.data.Script;
 import org.myrobotlab.service.interfaces.Executor;
+import org.myrobotlab.service.interfaces.Gateway;
 import org.slf4j.Logger;
 
 import py4j.GatewayServer;
@@ -53,7 +54,7 @@ import py4j.Py4JServerConnection;
  * 
  * @author GroG
  */
-public class Py4j extends Service<Py4jConfig> implements GatewayServerListener {
+public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, Gateway {
 
   /**
    * POJO class to tie all the data elements of a external python process
@@ -234,15 +235,6 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener {
     return String.format("%s:%d", gatewayConnection.getSocket().getInetAddress(), gatewayConnection.getSocket().getPort());
   }
 
-  /**
-   * return a set of client connections - probably could be deprecated to a
-   * single client, but was not sure
-   * 
-   * @return
-   */
-  public Set<String> getClients() {
-    return clients.keySet();
-  }
 
   /**
    * get listing of filesystem files location will be data/Py4j/{serviceName}
@@ -336,7 +328,19 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener {
     // TODO - determine clients are connected .. how many clients etc..
     try {
       if (handler != null) {
-        handler.invoke(msg.method, msg.data);
+        // afaik - Py4j does some kind of magical encoding to get a JavaObject
+        // back to the Python process, but:
+        // 1. its useless for users - no way to access the content ?
+        // 2. you can't do anything with it
+        // So, I've chosen to json encode it here, and the Py4j.py MessageHandler will
+        // decode it into a Python dictionary \o/
+        // we do single encoding including the parameter array - there is no header needed
+        // with method and other details, as the invoke here is invoking directly in the
+        // Py4j.py script
+                
+        String json = CodecUtils.toJson(msg);
+        // handler.invoke(msg.method, json);
+        handler.send(json);
       } else {
         error("preProcessHook handler is null");
       }
@@ -586,7 +590,37 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener {
       log.error("main threw", e);
     }
   }
-  
-  
+
+  @Override
+  public void connect(String uri) throws Exception {
+    // host:port of python process running py4j ???
+    
+  }
+
+  /**
+   * Remote in this context is the remote python process
+   */
+  @Override
+  public void sendRemote(Message msg) throws Exception {
+    log.info("sendRemote");
+    String jsonMsg = CodecUtils.toJson(msg);
+    handler.send(jsonMsg);
+  }
+
+  @Override
+  public boolean isLocal(Message msg) {
+    return Runtime.getInstance().isLocal(msg);
+  }
+
+  @Override
+  public List<String> getClientIds() {
+    return Runtime.getInstance().getConnectionUuids(getName());
+  }
+
+  @Override
+  public Map<String, Connection> getClients() {
+    return Runtime.getInstance().getConnections(getName());
+  }
+    
 }
 
