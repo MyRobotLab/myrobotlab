@@ -237,7 +237,7 @@ public class CodecUtils {
       return null;
     }
     if (!type.contains(".")) {
-      return String.format("org.myrobotlab.service.%s", type);
+      return ("Service".equals(type)) ? "org.myrobotlab.framework.Service" : String.format("org.myrobotlab.service.%s", type);
     }
     return type;
   }
