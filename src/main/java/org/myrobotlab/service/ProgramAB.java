@@ -1114,7 +1114,7 @@ public class ProgramAB extends Service<ProgramABConfig>
     }
     
     if (c.currentBotName != null) {
-      setCurrentUserName(c.currentBotName);
+      setCurrentBotName(c.currentBotName);
     }    
     
     if (c.startTopic != null) {
