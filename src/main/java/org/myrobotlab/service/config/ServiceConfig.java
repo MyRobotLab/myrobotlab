@@ -170,7 +170,7 @@ public class ServiceConfig {
    * @param plan
    * @param key
    * @param globalName
-   * @param peer
+   * @param peerType
    * @return
    */
   public ServiceConfig addDefaultGlobalConfig(Plan plan, String key, String globalName, String peerType, boolean autoStart) {
@@ -215,18 +215,7 @@ public class ServiceConfig {
   }
 
   public static Plan getDefault(Plan plan, String name, String inType) {
-//    if ("Service".equals(inType) || Service.class.getCanonicalName().equals(inType)) {
-//      ServiceConfig sc = new ServiceConfig();
-//      sc.type = inType;
-//      plan.put(name, sc);
-//      return plan;
-//    }
     try {
-
-      // if (type == null) {
-      // log.error("getDefault(null)");
-      // return null;
-      // }
 
       // FIXME - at some point setting, examining and changing
       // peer keys to actual names will need to be worky
@@ -240,12 +229,17 @@ public class ServiceConfig {
       config.getDefault(plan, name);
 
     } catch (ClassNotFoundException cnfe) {
+      // We could not find the config type with the simple {serviceType}Config pattern
+      // So now we look at its superclasses and try to find a config class in
+      // the generic type parameters
+      // FIXME should also perform the simple pattern check on superclasses
       try {
+        @SuppressWarnings("rawtypes")
         Class<? extends Service> serviceClass = Class.forName(CodecUtils.makeFullTypeName(inType)).asSubclass(Service.class);
         Type superClass = serviceClass.getGenericSuperclass();
         if (superClass instanceof ParameterizedType) {
           ParameterizedType genericSuperClass = (ParameterizedType) superClass;
-          System.out.println("Got generic superclass: " + genericSuperClass + " for service class " + serviceClass);
+          log.debug("Got generic superclass: " + genericSuperClass + " for service class " + serviceClass);
           Class<? extends ServiceConfig> configClass = ((Class<?>) genericSuperClass.getActualTypeArguments()[0]).asSubclass(ServiceConfig.class);
           ServiceConfig newConfig = configClass.getConstructor().newInstance();
           newConfig.type = inType;
@@ -256,6 +250,10 @@ public class ServiceConfig {
 
       } catch (NoClassDefFoundError | ClassNotFoundException | NoSuchElementException | NoSuchMethodException | InstantiationException |
                IllegalAccessException | InvocationTargetException | ClassCastException ignored) {
+        // Many ways for the generic inspection code to fail. NoClassDefFound is thrown when the service isn't installed
+        // We should probably only attempt to load configs for installed services
+        // NoSuchElementException is manually thrown when we can't find a generic superclass to inspect
+        // All others are checked exceptions thrown by the reflection utilities being used
         log.info("could not find config class for {}, loading generalized ServiceConfig", inType);
         ServiceConfig sc = new ServiceConfig();
         sc.type = inType;
