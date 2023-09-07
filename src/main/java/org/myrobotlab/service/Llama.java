@@ -37,6 +37,7 @@ public class Llama extends Service<LlamaConfig> implements UtterancePublisher, R
     public void loadModel(String modelPath) {
         Parameters params = new Parameters.Builder()
                 .setNGpuLayers(0)
+                .setNThreads(java.lang.Runtime.getRuntime().availableProcessors())
                 .setTemperature(0.7f)
                 .setPenalizeNl(true)
                 .setMirostat(Parameters.MiroStat.V2)
@@ -127,6 +128,11 @@ public class Llama extends Service<LlamaConfig> implements UtterancePublisher, R
     @Override
     public Response publishResponse(Response response) {
         return response;
+    }
+
+    public void reset() {
+        model.reset();
+
     }
 
     public static void main(String[] args) {
