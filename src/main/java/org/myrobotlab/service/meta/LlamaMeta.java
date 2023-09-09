@@ -10,6 +10,6 @@ public class LlamaMeta extends MetaData {
                         "llama.cpp project. Can run most GGUF models."
         );
 
-        addDependency("de.kherud", "llama", "1.1.0");
+        addDependency("de.kherud", "llama", "1.1.1");
     }
 }
