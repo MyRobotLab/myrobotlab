@@ -54,6 +54,10 @@ public class RuntimeMeta extends MetaData {
     // force correct version of netty - needed for Vertx but not for Runtime ?
     addDependency("io.netty", "netty-all", "4.1.82.Final");    
 
+
+    // Allows us to get much more detailed info about the system hardware
+    // MIT license
+    addDependency("com.github.oshi", "oshi-core", "6.4.5");
   }
 
 }
