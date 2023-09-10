@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import de.kherud.llama.LlamaModel;
 import de.kherud.llama.Parameters;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
@@ -37,7 +38,7 @@ public class Llama extends Service<LlamaConfig> implements UtterancePublisher, R
     public void loadModel(String modelPath) {
         Parameters params = new Parameters.Builder()
                 .setNGpuLayers(0)
-                .setNThreads(java.lang.Runtime.getRuntime().availableProcessors())
+                .setNThreads(Platform.getLocalInstance().getNumPhysicalProcessors())
                 .setTemperature(0.7f)
                 .setPenalizeNl(true)
                 .setMirostat(Parameters.MiroStat.V2)
