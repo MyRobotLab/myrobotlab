@@ -550,6 +550,22 @@
   </dependency>
 <!-- JMonkeyEngine end -->
 
+<!-- Joystick begin -->
+  <dependency>
+    <groupId>net.java.jinput</groupId>
+    <artifactId>jinput</artifactId>
+    <version>2.0.9</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>jinput-natives</groupId>
+    <artifactId>jinput-natives</artifactId>
+    <version>2.0.7</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
+<!-- Joystick end -->
+
 <!-- KafkaConnector begin -->
   <dependency>
     <groupId>org.apache.kafka</groupId>
@@ -1652,6 +1668,15 @@
 <!-- WebkitSpeechSynthesis begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
 <!-- WebkitSpeechSynthesis end -->
+
+<!-- Whisper begin -->
+  <dependency>
+    <groupId>io.github.givimad</groupId>
+    <artifactId>whisper-jni</artifactId>
+    <version>1.4.2-6</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Whisper end -->
 
 <!-- Wii begin -->
 <!-- Duplicate entry for wiiusej-wiiusej-wiiusej skipping -->
