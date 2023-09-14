@@ -1043,6 +1043,16 @@ public class Adafruit16CServoDriver extends Service<Adafruit16CServoDriverConfig
         log.error("attaching controller failed", e);
       }
     }
+    
+    // lame - this shouldn't be "copied" over - everything should just simply use config.deviceAddress
+    if (config.deviceAddress != null) {
+      deviceAddress = config.deviceAddress;
+    }
+
+    if (config.deviceBus != null) {
+      deviceBus = config.deviceBus;
+    }
+    
     return c;
   }
 
