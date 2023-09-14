@@ -123,7 +123,7 @@ import picocli.CommandLine;
  * VAR OF RUNTIME !
  *
  */
-public class Runtime extends Service<RuntimeConfig> implements MessageListener, ServiceLifeCyclePublisher, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider {
+public class Runtime extends Service<RuntimeConfig> implements MessageListener, ServiceLifeCyclePublisher, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider, ServiceRunner {
   final static private long serialVersionUID = 1L;
 
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
@@ -649,6 +649,21 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     );
   }
 
+  @Override
+  public List<String> getSupportedLanguageKeys() {
+    return null;
+  }
+
+  @Override
+  public List<String> getAvailableServiceTypes() {
+    return Arrays.asList(getServiceNames());
+  }
+
+  @Override
+  public ServiceInterface startService(String name, String type) {
+    return Runtime.start(name, type);
+  }
+
   /**
    * Framework owned method - core of creating a new service. This method will
    * create a service with the given name and of the given type. If the type
@@ -755,19 +770,19 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
               .filter(runner -> runner.getAvailableServiceTypes().contains(finalType))
               .collect(Collectors.toList());
       if (possibleRunners.isEmpty()) {
-        log.error("Cannot find a service runner to start service with type {}", type);
+        log.error("Cannot find a service runner to start service with type {}, all known runners: {}", type, serviceRunners);
         return null;
       }
 
       if (inId == null) {
-        return possibleRunners.get(0).createService(name, type, null);
+        return possibleRunners.get(0).startService(name, type);
       } else {
         Optional<ServiceRunner> maybeRunner = possibleRunners.stream().filter(runner -> inId.equals(runner.getId())).findFirst();
         if (maybeRunner.isEmpty()) {
           log.error("Cannot find compatible service runner with ID {}", inId);
           return null;
         }
-        return maybeRunner.get().createService(name, type, inId);
+        return maybeRunner.get().startService(name, type);
 
       }
     }
@@ -1199,7 +1214,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * @return list of registrations
    */
   synchronized public List<Registration> getServiceList() {
-    return registry.values().stream().map(si -> new Registration(si.getId(), si.getName(), si.getTypeKey())).collect(Collectors.toList());
+    return registry.values().stream().map(Registration::new).collect(Collectors.toList());
   }
 
   // FIXME - scary function - returns private data
@@ -1757,11 +1772,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     registry.put(String.format("%s@%s", updatedService.getName(), updatedService.getId()), updatedService);
   }
 
-  public static synchronized Registration register(String id, String name, String typeKey, ArrayList<String> interfaces) {
-    Registration proxy = new Registration(id, name, typeKey, interfaces);
-    register(proxy);
-    return proxy;
-  }
 
   /**
    * Registration is the process where a remote system sends detailed info

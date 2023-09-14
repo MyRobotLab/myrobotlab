@@ -23,5 +23,5 @@ public interface ServiceRunner extends ServiceInterface {
      */
     List<String> getAvailableServiceTypes();
 
-    ServiceInterface createService(String name, String type, String inId);
+    ServiceInterface startService(String name, String type);
 }
