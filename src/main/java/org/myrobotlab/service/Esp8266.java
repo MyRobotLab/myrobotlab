@@ -5,9 +5,10 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
-public class Esp8266 extends Service {
+public class Esp8266 extends Service<ServiceConfig> {
 
   private static final long serialVersionUID = 1L;
 

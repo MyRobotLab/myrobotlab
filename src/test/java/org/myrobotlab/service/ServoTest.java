@@ -5,6 +5,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,6 +55,19 @@ public class ServoTest extends AbstractTest {
   static public void afterClass() throws Exception {
     servo.releaseService();
     arduino01.releaseService();
+  }
+  
+  @Test
+  public void autoDisableAfterAttach() {
+    // enable servo
+    servo.moveTo(100);
+    servo.detach();
+    assertTrue(!servo.isAttached());
+    servo.setAutoDisable(true);
+    servo.attach("arduinoServoTest");
+    // after attach, must be disabled
+    sleep(servo.getIdleTimeout() + 1000);
+    assertTrue(!servo.isEnabled());
   }
 
   @Test
@@ -173,7 +189,9 @@ public class ServoTest extends AbstractTest {
     // to come to 'eventual' synchronized consistency
 
     Service.sleep(300);
-    s.attach(arduino01, 10, 1.0);
+    s.setPin(10);
+    s.setPosition(1);
+    s.attach(arduino01);
     Service.sleep(300);
     s.enable();
     assertTrue(s.isEnabled());
@@ -273,10 +291,43 @@ public class ServoTest extends AbstractTest {
     // log.info("Move to blocking took {} milliseconds", delta);
     assertTrue("Servo should be enabled", servo01.isEnabled());
     assertFalse("Servo should not be moving now.", servo01.isMoving());
-    // Now let's wait for the idle disable timer to kick off + 1000ms
-    // TODO: figure out why smaller values like 100ms cause this test to fail.
-    // there seems to be some lag
-    Thread.sleep(servo01.getIdleTimeout() + 1000);
+    
+    CountDownLatch moveLatch = new CountDownLatch(1);
+    CountDownLatch targetLatch = new CountDownLatch(1);
+    CountDownLatch disableLatch = new CountDownLatch(1);
+
+    start = System.currentTimeMillis();
+
+    new Thread(() -> {
+        log.info("starting at {}", System.currentTimeMillis());
+        servo01.moveTo(0);
+        moveLatch.countDown();
+    }).start();
+
+    // wait for the move to start
+    moveLatch.await();
+
+    // wait for the move to complete using waitTargetPos
+    new Thread(() -> {
+        servo01.waitTargetPos();
+        targetLatch.countDown();
+    }).start();
+
+    // wait for the move to complete
+    targetLatch.await();
+    log.info("finished at {}", System.currentTimeMillis());
+
+    delta = System.currentTimeMillis() - start;
+    assertTrue("Move to blocking should have taken 3 seconds or more. Time was " + delta, delta >= 3000);
+
+    log.info("Move to blocking took {} milliseconds", delta);
+    assertTrue("Servo should be enabled", servo01.isEnabled());
+
+    // wait for the servo to stop moving
+    disableLatch.await(servo01.getIdleTimeout() + 1000, TimeUnit.MILLISECONDS);
+    assertFalse("Servo should not be moving now.", servo01.isMoving());
+
+    // verify disabled after autoDisable time
     assertFalse("Servo should be disabled.", servo01.isEnabled());
 
   }
@@ -291,7 +342,12 @@ public class ServoTest extends AbstractTest {
     // 60 degrees per second.. move from 0 to 180 in 3 seconds
     servo01.setSpeed(60.0);
     servo01.setPin(7);
-    servo01.attach("arduino01", 8, 1.0, 360.0);
+    servo01.setPin(8);
+    servo01.setSpeed(1.0);
+    servo01.detach();
+    servo01.setController("blah");
+    assertEquals("blah", servo01.getController());
+    servo01.attach("arduino01");
     assertEquals("arduino01", servo01.getController());
     assertEquals(Integer.valueOf(8).toString(), servo01.getPin());
 

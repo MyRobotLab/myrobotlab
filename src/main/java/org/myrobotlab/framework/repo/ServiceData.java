@@ -39,6 +39,16 @@ import org.slf4j.Logger;
  */
 public class ServiceData implements Serializable {
 
+  /**
+   * the set of all categories
+   */
+  public TreeMap<String, Category> categoryTypes = new TreeMap<>();
+
+  /**
+   * all services meta data is contained here
+   */
+  public TreeMap<String, MetaData> serviceTypes = new TreeMap<>();
+
   static private ServiceData localInstance = null;
   
   static final public String LIBRARIES = "libraries";
@@ -57,7 +67,7 @@ public class ServiceData implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  static private String serviceDataCacheFileName = LIBRARIES + File.separator + "serviceData.json";
+  static private final String serviceDataCacheFileName = LIBRARIES + File.separator + "serviceData.json";
 
   /**
    * clears all overrides. All services shall be using the standard hard co
@@ -92,9 +102,8 @@ public class ServiceData implements Serializable {
     List<String> services = FileIO.getServiceList();
 
     log.info("found {} services", services.size());
-    for (int i = 0; i < services.size(); ++i) {
+    for (String fullClassName : services) {
 
-      String fullClassName = services.get(i);
       log.debug("querying {}", fullClassName);
       try {
 
@@ -112,7 +121,7 @@ public class ServiceData implements Serializable {
         sd.add(serviceType);
 
         for (String cat : serviceType.categories) {
-          Category category = null;
+          Category category;
           if (serviceType.isAvailable()) {
             if (sd.categoryTypes.containsKey(cat)) {
               category = sd.categoryTypes.get(cat);
@@ -135,10 +144,10 @@ public class ServiceData implements Serializable {
   }
 
   static public List<ServiceDependency> getDependencyKeys(String fullTypeName) {
-    List<ServiceDependency> keys = new ArrayList<ServiceDependency>();
+    List<ServiceDependency> keys = new ArrayList<>();
     ServiceData sd = getLocalInstance();
     if (!sd.serviceTypes.containsKey(fullTypeName)) {
-      log.error("{} not defined in service types");
+      log.error("{} not defined in service types", fullTypeName);
       return keys;
     }
 
@@ -177,18 +186,17 @@ public class ServiceData implements Serializable {
       // First check the libraries/serviceData.json dir.
       File jsonFile = new File(serviceDataCacheFileName);
       if (jsonFile.exists()) {
-        // load it and return!
-        String data = null;
         try {
-          data = FileIO.toString(jsonFile);
-        } catch (IOException e) {
+        // load it and return!
+        localInstance = CodecUtils.fromJson(FileIO.toString(jsonFile), ServiceData.class);
+        log.info("returning cached serviceData.json from {}", jsonFile);
+        
+        } catch (Exception e) {
           log.warn("Error reading serviceData.json from location {}", jsonFile.getAbsolutePath());
-        }
-        localInstance = CodecUtils.fromJson(data, ServiceData.class);
-        log.info("Returning serviceData.json from {}", jsonFile);
-        return localInstance;
-      } else {
-
+        }        
+      } 
+      
+      if (localInstance == null){
         // we are running in an IDE and haven't generated/saved the
         // serviceData.json yet.
         try {
@@ -201,9 +209,10 @@ public class ServiceData implements Serializable {
           log.error("Unable to generate the serivceData.json file!!");
           // This is a fatal issue. I think we should exit the jvm here.
         }
-        return localInstance;
-
       }
+      
+      return localInstance;
+
     }
   }
 
@@ -277,16 +286,6 @@ public class ServiceData implements Serializable {
   static public Map<String, ServiceReservation> getOverrides() {
     return planStore;
   }
-
-  /**
-   * the set of all categories
-   */
-  TreeMap<String, Category> categoryTypes = new TreeMap<String, Category>();
-
-  /**
-   * all services meta data is contained here
-   */
-  TreeMap<String, MetaData> serviceTypes = new TreeMap<String, MetaData>();
 
   public ServiceData() {
   }
@@ -397,7 +396,8 @@ public class ServiceData implements Serializable {
 
   public boolean save(String filename) {
     try {
-
+      File dirs = new File(filename).getParentFile();
+      dirs.mkdirs();
       FileOutputStream fos = new FileOutputStream(filename);
       String json = CodecUtils.toJson(this);
       fos.write(json.getBytes());

@@ -14,8 +14,8 @@
         </div>
 
         <button type="button" class="btn btn-default" ng-click='msg.detach(service.controllerName)' ng-show='service.controllerName != null'>detach</button>
-        <button type="button" class="btn btn-default" ng-click='msg.start()' ng-show='service.controllerName != null && service.publisher.isRunning == false'>start</button>
-        <button type="button" class="btn btn-default" ng-click='msg.stop()' ng-show='service.controllerName != null  && service.publisher.isRunning == true'>stop</button>
+        <button type="button" class="btn btn-default" ng-click='msg.start()' ng-show='service.controllerName != null && service.isPublishing == false'>start</button>
+        <button type="button" class="btn btn-default" ng-click='msg.stop()' ng-show='service.controllerName != null  && service.isPublishing == true'>stop</button>
         
         <div class="btn-group" uib-dropdown>
             <button type="button" class="btn btn-default">bus {{service.deviceBus}}</button>

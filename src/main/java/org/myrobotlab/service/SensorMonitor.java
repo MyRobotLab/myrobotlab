@@ -36,6 +36,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.Trigger;
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ import org.slf4j.Logger;
  * would be triggered if a sensor goes above or below some threshold.
  *
  */
-public class SensorMonitor extends Service {
+public class SensorMonitor extends Service<ServiceConfig> {
 
   private static final long serialVersionUID = 1L;
 

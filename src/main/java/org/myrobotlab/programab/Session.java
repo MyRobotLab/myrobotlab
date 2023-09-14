@@ -14,6 +14,7 @@ import org.alicebot.ab.Predicates;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.ProgramAB;
+import org.myrobotlab.service.config.ProgramABConfig;
 import org.slf4j.Logger;
 
 /**
@@ -82,6 +83,11 @@ public class Session {
         predicatesFile = userPredicates;
         chat.predicates.getPredicateDefaults(userPredicates.getAbsolutePath());
       }
+      
+      ProgramABConfig config = (ProgramABConfig)programab.getConfig();
+      if (config.startTopic != null){
+        chat.predicates.put("topic", config.startTopic);
+      }
     }
     predicates = chat.predicates;
     return chat;
@@ -93,10 +99,9 @@ public class Session {
     sort.addAll(getChat().predicates.keySet());
     for (String predicate : sort) {
       String value = getChat().predicates.get(predicate);
-      if (predicate.equals("test")) {
-        log.info("here");
+      if (!predicate.startsWith("cfg_")) {
+        sb.append(predicate + ":" + value + "\n");
       }
-      sb.append(predicate + ":" + value + "\n");
     }
     File predicates = new File(FileIO.gluePaths(botInfo.path.getAbsolutePath(), String.format("config/%s.predicates.txt", userName)));
     predicates.getParentFile().mkdirs();

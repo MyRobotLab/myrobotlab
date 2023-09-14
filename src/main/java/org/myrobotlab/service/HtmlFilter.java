@@ -21,7 +21,7 @@ import org.myrobotlab.service.interfaces.TextPublisher;
  * @author kwatters
  *
  */
-public class HtmlFilter extends Service implements TextListener, TextPublisher, TextFilter {
+public class HtmlFilter extends Service<HtmlFilterConfig> implements TextListener, TextPublisher, TextFilter {
 
   private static final long serialVersionUID = 1L;
 

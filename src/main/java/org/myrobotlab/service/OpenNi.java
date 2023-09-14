@@ -19,6 +19,7 @@ import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.PImage;
 import org.myrobotlab.openni.PVector;
 import org.myrobotlab.openni.Skeleton;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.VideoSink;
 import org.slf4j.Logger;
 
@@ -48,7 +49,7 @@ import SimpleOpenNI.SimpleOpenNIConstants;
  * 
  * 
  */
-public class OpenNi extends Service // implements
+public class OpenNi extends Service<ServiceConfig> // implements
 // UserTracker.NewFrameListener,
 // HandTracker.NewFrameListener
 {

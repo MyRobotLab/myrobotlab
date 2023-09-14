@@ -290,8 +290,9 @@
          have some sort of hard autoCommit to limit the log size.
       -->
     <autoCommit>
-      <maxTime>${solr.autoCommit.maxTime:15000}</maxTime>
-      <openSearcher>false</openSearcher>
+      <!-- auto commit the index every second -->
+      <maxTime>${solr.autoCommit.maxTime:1000}</maxTime>
+      <openSearcher>true</openSearcher>
     </autoCommit>
 
     <!-- softAutoCommit is like autoCommit except it causes a
@@ -387,7 +388,7 @@
       -->
     <filterCache size="512"
                  initialSize="512"
-                 autowarmCount="0"/>
+                 autowarmCount="32"/>
 
     <!-- Query Result Cache
 
@@ -399,7 +400,7 @@
       -->
     <queryResultCache size="512"
                       initialSize="512"
-                      autowarmCount="0"/>
+                      autowarmCount="32"/>
 
     <!-- Document Cache
 
@@ -409,7 +410,7 @@
       -->
     <documentCache size="512"
                    initialSize="512"
-                   autowarmCount="0"/>
+                   autowarmCount="32"/>
 
     <!-- custom cache currently used by block join -->
     <cache name="perSegFilter"

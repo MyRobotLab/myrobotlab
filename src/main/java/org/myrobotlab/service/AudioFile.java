@@ -54,7 +54,7 @@ import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.AudioControl;
 import org.myrobotlab.service.interfaces.AudioPublisher;
 import org.slf4j.Logger;
-
+import java.util.Random;
 /**
  * 
  * AudioFile - This service can be used to play an audio file such as an mp3.
@@ -62,7 +62,7 @@ import org.slf4j.Logger;
  * TODO - publishPeak interface
  *
  */
-public class AudioFile extends Service implements AudioPublisher, AudioControl {
+public class AudioFile extends Service<AudioFileConfig> implements AudioPublisher, AudioControl {
   static final long serialVersionUID = 1L;
   static final Logger log = LoggerFactory.getLogger(AudioFile.class);
 
@@ -165,6 +165,7 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
   }
 
   public AudioData play(String filename) {
+    log.info("Audio file playing {}", filename);
     return play(filename, false);
   }
 
@@ -174,6 +175,7 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
 
   public AudioData play(String filename, boolean blocking, Integer repeat, String track) {
 
+    log.info("Play called for Filename {}", filename);
     if (track == null || track.isEmpty()) {
       track = currentTrack;
     }
@@ -517,7 +519,7 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public AudioFileConfig getConfig() {
 
     AudioFileConfig c = (AudioFileConfig) super.getConfig();
     // FIXME - remove members keep data in config !
@@ -535,9 +537,8 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
     return config;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    AudioFileConfig config = (AudioFileConfig) super.apply(c);
+  public AudioFileConfig apply(AudioFileConfig config) {
+    super.apply(config);
     setMute(config.mute);
     setTrack(config.currentTrack);
     setVolume(config.volume);
@@ -552,14 +553,11 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
       }
     }
     
-    // FIXME - THIS IS ALL THATS NEEDED AND IT CAN BE 
-    // DONE IN THE SERVICE LEVEL
-    // if services need "special" handling they can override
-    this.config = c;
-    return c;
+    return config;
   }
 
   public double publishPeak(double peak) {
+    log.info("publishPeak {}", peak);
     return peak;
   }
   
@@ -604,6 +602,28 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
   public void onPlayAudioFile(String file) {
     play(file);
   }
+  
+  @Override
+  public void onPlayRandomAudioFile(String dir) {
+    File test = new File(dir);
+    if (!test.exists() || !test.isDirectory()) {
+      error("%s is not a valid dir");
+      return;
+    }
+    
+    File[] files = test.listFiles();
+    
+    if (files.length == 0) {
+      error("%s contains no files", dir);
+      return;
+    }
+    
+    Random rand = new Random();
+    File randomFile = files[rand.nextInt(files.length-1)];
+    play(randomFile.getAbsolutePath());
+    
+  }
+
 
   public double getPeakMultiplier() {
     return ((AudioFileConfig)config).peakMultiplier;

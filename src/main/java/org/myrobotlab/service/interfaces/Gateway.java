@@ -28,11 +28,20 @@ package org.myrobotlab.service.interfaces;
 import java.util.List;
 import java.util.Map;
 
+import org.myrobotlab.framework.DescribeQuery;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.net.Connection;
+import org.myrobotlab.service.Runtime;
 
 public interface Gateway extends NameProvider {
+
+  /**
+   * A constant used to determine whether a call to {@link Runtime#describe(String, DescribeQuery)}
+   * should fill the UUID field or not.
+   */
+  String FILL_UUID_MAGIC_VAL = "fill-uuid";
 
   public void connect(String uri) throws Exception; // <-- FIXME invalid I
                                                     // assume ?
@@ -52,6 +61,31 @@ public interface Gateway extends NameProvider {
 
   public boolean isLocal(Message msg);
 
-  public Message getDescribeMsg(String connId);
+  /**
+   * Generates a message to be sent to the runtime
+   * instance at the given MRL instance. This message
+   * invokes the runtime's {@link org.myrobotlab.service.Runtime#describe(String, DescribeQuery)}
+   * method with a "fill-uuid" uuid parameter and a {@link DescribeQuery}
+   * with the given connId.
+   *
+   * @param connId The UUID that is being connected to
+   * @return A generated message that calls the remote runtime's {@code describe()} method
+   */
+  default Message getDescribeMsg(String connId) {
+    // TODO support queries
+    // FIXME !!! - msg.name is wrong with only "runtime" it should be
+    // "runtime@id"
+    // TODO - lots of options for a default "describe"
+
+    return Message.createMessage(
+            String.format("%s@%s", getName(), Runtime.get().getId()),
+            "runtime",
+            "describe",
+            new Object[] {
+                FILL_UUID_MAGIC_VAL,
+                new DescribeQuery(Platform.getLocalInstance().getId(), connId)
+            }
+            );
+  }
 
 }

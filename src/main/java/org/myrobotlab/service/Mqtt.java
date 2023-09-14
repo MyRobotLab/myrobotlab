@@ -32,6 +32,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.mqtt.MqttMsg;
 import org.myrobotlab.net.Connection;
 import org.myrobotlab.net.SslUtil;
+import org.myrobotlab.service.config.MqttConfig;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.KeyConsumer;
 import org.slf4j.Logger;
@@ -69,7 +70,7 @@ import org.slf4j.Logger;
  * &#64;author kmcgerald and GroG
  * </pre>
  */
-public class Mqtt extends Service implements MqttCallback, IMqttActionListener, Gateway, KeyConsumer {
+public class Mqtt extends Service<MqttConfig> implements MqttCallback, IMqttActionListener, Gateway, KeyConsumer {
 
   public final static Logger log = LoggerFactory.getLogger(Mqtt.class);
 
@@ -385,11 +386,6 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
     return Runtime.getInstance().getConnections(getName());
   }
 
-  @Override
-  public Message getDescribeMsg(String connId) {
-    return Runtime.getInstance().getDescribeMsg(connId);
-  }
-
   public String getPassword() {
     return password;
   }
@@ -572,8 +568,9 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
           sendRemote(subscribe);
 
           // 4. describe new instance for me
+          // FIXME why isn't this using Gateway.getDescribeMessage()?
           Message describe = Message.createMessage(String.format("%s@%s", getName(), getId()), "runtime@" + remoteId, "describe",
-              new Object[] { "fill-uuid", new DescribeQuery(Platform.getLocalInstance().getId(), uuid) });
+              new Object[] { Gateway.FILL_UUID_MAGIC_VAL, new DescribeQuery(Platform.getLocalInstance().getId(), uuid) });
           describe.sendingMethod = "onConnect";
           sendRemote(describe);
 
@@ -834,7 +831,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
   }
 
   String tokenToString(IMqttToken token) {
-    // FIXME - just gson encode it..
+
     StringBuffer sb = new StringBuffer();
     sb.append(" MessageId:").append(token.getMessageId());
     sb.append(" Response:").append(token.getResponse());

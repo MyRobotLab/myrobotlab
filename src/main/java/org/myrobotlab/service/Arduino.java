@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +22,7 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -38,7 +38,6 @@ import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.abstracts.AbstractMicrocontroller;
 import org.myrobotlab.service.config.ArduinoConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
@@ -71,7 +70,7 @@ import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 import org.slf4j.Logger;
 
-public class Arduino extends AbstractMicrocontroller implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController,
+public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController,
     UltrasonicSensorController, PortConnector, RecordControl, PortListener, PortPublisher, EncoderController, PinArrayPublisher, MrlCommPublisher, ServoStatusPublisher {
 
   transient public final static Logger log = LoggerFactory.getLogger(Arduino.class);
@@ -1495,6 +1494,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     info("%s connected to %s", getName(), portName);
     // chained...
     invoke("publishConnect", portName);
+    
+    broadcastState();
   }
 
   public void onCustomMsg(Integer ax, Integer ay, Integer az) {
@@ -1511,7 +1512,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   public String getBase64ZippedMrlComm() {
-    return Base64.getEncoder().encodeToString((getZippedMrlComm()));
+    return CodecUtils.toBase64(getZippedMrlComm());
   }
 
   public byte[] getZippedMrlComm() {
@@ -1968,10 +1969,13 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   // > servoSetVelocity/deviceId/b16 velocity
   public void onServoSetSpeed(ServoSpeed servoSpeed) {
 
-    // FIXME - FIND OTHER FUNCTIONS THAT CANNOT BE SET WHEN NOT CONNECTED
-    // AND HANDLE THE SAME AS BELOW !!!
+    if (servoSpeed == null) {
+      log.warn("servo speed cannot be null");
+      return;
+    }
+    
     if (!isConnected()) {
-      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected());
+      log.info("Arduino cannot set speed of %s when not connected", servoSpeed.name);
       return;
     }
 
@@ -2316,19 +2320,19 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    ArduinoConfig c = (ArduinoConfig) super.getConfig();
+  public ArduinoConfig getConfig() {
+    super.getConfig();
 
     // FIXME "port" shouldn't exist only config.port !
-    c.port = port;
-    c.connect = isConnected();
+    config.port = port;
+    config.connect = isConnected();
 
-    return c;
+    return config;
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    ArduinoConfig config = (ArduinoConfig) super.apply(c);
+  public ArduinoConfig apply(ArduinoConfig c) {
+    super.apply(c);
 
     if (msg == null) {
       serial = (Serial) startPeer("serial");
@@ -2448,7 +2452,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       log.info("rest is {}", servo.getRest());
       servo.save();
       // servo.setPin(8);
-      servo.attach(mega, 13);
+      servo.attach(mega);
 
       servo.moveTo(90.0);
 

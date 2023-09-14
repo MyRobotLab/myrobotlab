@@ -2,43 +2,81 @@ package org.myrobotlab.service;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.CronConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 import it.sauronsoftware.cron4j.Scheduler;
 
 /**
- * Cron - This is a cron based service that can execute a "task" at some point
- * in the future such as "invoke this method on that service"
+ * Cron - This is a cron based service that can execute a "task".
+ * It does not need an operating system in order to run.  It is a
+ * pure java implementation of a cron service.  It accepts cron 
+ * patterns and will execute a task based on the pattern.  The
+ * task is a message that is sent to a service.  The message
+ * can be any message that the service accepts. 
  * 
- * FIXME - the common cron notation is kind of nice - but this thing doesn't do
- * more than Service.addTask
- * 
- * FIXME - make a purge &amp; delete DUH !
- *
  */
-public class Cron extends Service {
-
+public class Cron extends Service<CronConfig> {
+  
   public static class Task implements Serializable, Runnable {
+
     private static final long serialVersionUID = 1L;
-    transient Cron myService;
+    /**
+     * reference to service
+     */
+    transient Cron cron;
+
+    /**
+     * cron pattern for this task
+     */
     public String cronPattern;
-    public String name;
-    public String method;
+
+    /**
+     * data parameters to invoke
+     */
     public Object[] data;
 
-    public Task(Cron myService, String cronPattern, String name, String method) {
-      this(myService, cronPattern, name, method, (Object[]) null);
+    /**
+     * unique hash the scheduler uses (only)
+     */
+    transient public String hash;
+
+    /**
+     * id for the user to use
+     */
+    public String id;
+
+    /**
+     * method to invoke
+     */
+    public String method;
+
+    /**
+     * name of the target service
+     */
+    public String name;
+
+    public Task() {
     }
 
-    public Task(Cron myService, String cronPattern, String name, String method, Object... data) {
-      this.myService = myService;
+    public Task(Cron cron, String id, String cronPattern, String name, String method) {
+      this(cron, id, cronPattern, name, method, (Object[]) null);
+    }
+
+    public Task(Cron cron, String id, String cronPattern, String name, String method, Object... data) {
+      this.cron = cron;
+      this.id = id;
       this.cronPattern = cronPattern;
       this.name = name;
       this.method = method;
@@ -47,128 +85,228 @@ public class Cron extends Service {
 
     @Override
     public void run() {
-      log.info("{} Cron firing message {}->{}.{}", myService.getName(), name, method, data);
-      myService.send(name, method, data);
+        log.info("{} Cron firing message {}->{}.{}", cron.getName(), name, method, data);
+        cron.send(name, method, data);
+        cron.history.add(new TaskHistory(id, new Date()));
+        if (cron.history.size() > cron.HISTORY_SIZE) {
+          cron.history.remove(0);
+        }
+        cron.broadcastState();
+    }
+
+    @Override
+    public String toString() {
+      return String.format("%s, %s, %s, %s", id, cronPattern, name, method);
     }
   }
+  
+  public static class TaskHistory {
+    public String id;
+    public Date processedTime;
+    
+    public TaskHistory(String id, Date now) {
+      this.id = id;
+      this.processedTime = now;
+    }    
+  }
+
+  public final static Logger log = LoggerFactory.getLogger(Cron.class);
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(Cron.class.getCanonicalName());
+  /**
+   * history buffer of tasks that have been executed
+   */
+  final protected List<TaskHistory> history = new ArrayList<>();
 
+  /**
+   * max size of history buffer
+   */
+  final int HISTORY_SIZE = 30;
+  
+  /**
+   * the thing that translates all the cron pattern values and implements actual tasks
+   */
   transient private Scheduler scheduler = new Scheduler();
 
-  // Schedule a once-a-week task at 8am on Sunday.
-  // 0 8 * * 7
-  // Schedule a twice a day task at 7am and 6pm on weekdays
-  // 0 7 * * 1-5 |0 18 * * 1-5
-
-  public final static String EVERY_MINUTE = "* * * * *";
-
-  public ArrayList<Task> tasks = new ArrayList<Task>();
-
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-
-    try {
-      Cron cron = (Cron) Runtime.start("cron", "Cron");// new
-      // Cron("cron");
-      cron.startService();
-
-      /*
-       * cron.addScheduledEvent("0 6 * * 1,3,5","arduino","digitalWrite", 13,
-       * 1); cron.addScheduledEvent("0 7 * * 1,3,5","arduino","digitalWrite",
-       * 12, 1); cron.addScheduledEvent("0 8 * * 1,3,5"
-       * ,"arduino","digitalWrite", 11, 1);
-       * 
-       * cron.addScheduledEvent("59 * * * *","arduino","digitalWrite", 13, 0);
-       * cron.addScheduledEvent("59 * * * *","arduino","digitalWrite", 12, 0);
-       * cron.addScheduledEvent("59 * * * *","arduino","digitalWrite", 11, 0);
-       */
-      cron.addTask("* * * * *", "cron", "test", 7);
-
-      // cron.addScheduledEvent(EVERY_MINUTE, "log", "log");
-      // west wall | back | east wall
-
-      String json = CodecUtils.toJson(cron.getTasks());
-
-      log.info("here {}", json);
-
-      // Runtime.createAndStart("webgui", "WebGui");
-
-      // 1. doug - find location where checked in ----
-      // 2. take out security token from DL broker's response
-      // 3. Tony - status ? and generated xml responses - "update" looks
-      // ok
-
-      // Runtime.createAndStart("gui", "SwingGui");
-      /*
-       * SwingGui gui = new SwingGui("gui"); gui.startService();
-       */
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
+  /**
+   * map of tasks organized by id
+   */
+  protected Map<String, Task> tasks = new LinkedHashMap<>();
 
   public Cron(String n, String id) {
     super(n, id);
   }
 
-  /*
-   * addTask - Add a task to the cron service to invoke a method on a service on
-   * some schedule.
+  /**
+   * Add a named task with out parameters
    * 
-   * @param cron - The cron string to define the schedule
-   * 
-   * @param serviceName - The name of the service to invoke
-   * 
-   * @param method - the method on the service to invoke when the task starts.
+   * @param id
+   * @param cron
+   * @param serviceName
+   * @param method
+   * @return
    */
-  public String addTask(String cron, String serviceName, String method) {
-    return addTask(cron, serviceName, method, (Object[]) null);
+  public String addTask(String id, String cron, String serviceName, String method) {
+    return addTask(id, cron, serviceName, method, (Object[]) null);
   }
 
-  /*
-   * addTask - Add a task to the cron service to invoke a method on a service on
-   * some schedule.
+  /**
+   * Add a named task with parameters
    * 
-   * @param cron - The cron string to define the schedule
-   * 
-   * @param serviceName - The name of the service to invoke
-   * 
-   * @param method - the method on the service to invoke when the task starts.
-   * 
-   * @param data - additional objects/varags to pass to the method
+   * @param id
+   * @param cronPattern
+   * @param serviceName
+   * @param method
+   * @param data
+   * @return
    */
-  public String addTask(String cron, String serviceName, String method, Object... data) {
-    Task task = new Task(this, cron, serviceName, method, data);
-    tasks.add(task);
-    return scheduler.schedule(cron, task);
+  public String addTask(String id, String cronPattern, String serviceName, String method, Object... data) {    
+    Task task = new Task(this, id, cronPattern, serviceName, method, data);
+    addTask(task);
+    return id;
   }
 
-  public ArrayList<Task> getCronTasks() {
-    return tasks;
+
+  /**
+   * 
+   * @param task
+   * @return
+   */
+  public String addTask(Task task) {
+    if (tasks.containsKey(task.id)) {
+      log.info("descheduling prexisting task {} hash {}", task.id, task.hash);
+      scheduler.deschedule(task.id);
+    }
+    log.info("scheduling task {}", task.id);
+    task.hash = scheduler.schedule(task.cronPattern, task);
+    task.cron = this;
+    tasks.put(task.id, task);
+    broadcastState();
+    return task.id;
   }
 
   @Override
-  public void startService() {
-    super.startService();
+  public CronConfig apply(CronConfig c) {
+    super.apply(c);
+    
+    // deschedule current tasks
+    removeAllTasks();
+    
+    // add new tasks
+    for (Task task : c.tasks) {
+      addTask(task);
+    }
+    return c;
+  }
+
+  @Override
+  public CronConfig getConfig() {
+    super.getConfig();
+    config.tasks = new ArrayList<>();
+    for (Task task: tasks.values()) {
+      config.tasks.add(task);
+    }
+    return config;
+  }
+
+  public Map<String, Task> getCronTasks() {
+    return tasks;
+  }
+
+  /**
+   * get a task from id
+   * @param id
+   * @return
+   */
+  public Task getTask(String id) {
+    return tasks.get(id);
+  }
+
+  /**
+   * removes all the tasks without stopping the scheduler
+   */
+  public void removeAllTasks() {
+    for (Task t : tasks.values()) {
+      scheduler.deschedule(t.hash);
+    }
+    tasks.clear();
+  }
+
+  /**
+   * removes task by id
+   * @param id - id of the task to remove
+   * @return the removed task if it exists
+   */
+  public Task removeTask(String id) {
+    Task t = tasks.remove(id);
+    if (t != null) {
+      scheduler.deschedule(t.hash);
+    } else {
+      log.error("%s could not find task %s to remove", getName(), id);
+    }
+    broadcastState();
+    return t;
+  }
+  
+  /**
+   * start the schedular and all associated tasks
+   */
+  public void start() {
     if (!scheduler.isStarted()) {
       scheduler.start();
     }
   }
-
+  
   @Override
-  public void stopService() {
-    super.stopService();
+  public void startService() {
+    super.startService();
+    start();
+  }
+  
+  /**
+   * stop the schedular ad all associated tasks
+   */
+  public void stop() {
+    removeAllTasks();
     if (scheduler.isStarted()) {
       scheduler.stop();
     }
   }
+  
 
-  public int test(Integer data) {
-    log.info("data {}", data);
-    return data;
+  @Override
+  public void stopService() {
+    super.stopService();
+    stop();
   }
+  
+  public static void main(String[] args) {
+    LoggingFactory.init(Level.INFO);
 
+    try {
+      Cron cron = (Cron) Runtime.start("cron", "Cron");
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      mega.connect("/dev/ttyACM2");
+
+      Runtime.start("webgui", "WebGui");
+
+      /*
+       * 
+       * cron.addScheduledEvent("59 * * * *","arduino","digitalWrite", 13, 0);
+       * cron.addScheduledEvent("59 * * * *","arduino","digitalWrite", 12, 0);
+       * cron.addScheduledEvent("59 * * * *","arduino","digitalWrite", 11, 0);
+       */
+      // every odd minute
+      String id = cron.addTask("led on", "1-59/2 * * * *", "mega", "digitalWrite", 13, 1);
+      // every event minute
+      String id2 = cron.addTask("led off", "*/2 * * * *", "mega", "digitalWrite", 13, 0);
+
+      // Runtime.createAndStart("webgui", "WebGui");
+
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
+  
 }

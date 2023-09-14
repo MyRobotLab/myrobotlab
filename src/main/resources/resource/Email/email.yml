@@ -1,0 +1,13 @@
+!!org.myrobotlab.service.config.EmailConfig
+format: text/html
+from: null
+host: null
+listeners: null
+pass: null
+peers: null
+port: 25
+properties: {
+  }
+to: null
+type: Email
+user: null

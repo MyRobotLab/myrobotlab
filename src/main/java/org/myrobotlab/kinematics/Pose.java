@@ -1,89 +1,37 @@
 package org.myrobotlab.kinematics;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.Objects;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.io.FileIO;
-import org.myrobotlab.service.interfaces.ServoControl;
-
-/** represent a set of servo positions at a given point in time */
 public class Pose {
 
-  public String name;
-  public HashMap<String, Double> positions = new HashMap<String, Double>();
-  public HashMap<String, Double> speeds = new HashMap<String, Double>();
+    protected Map<String, PoseMove> moves = new TreeMap<>();
 
-  public Pose(String name, List<ServoControl> servos) {
-    this.name = name;
-    List<String> servoNames = new ArrayList<String>();
-    for (ServoControl sc : servos) {
-      positions.put(sc.getName(), sc.getCurrentInputPos());
-      speeds.put(sc.getName(), sc.getSpeed());
-      servoNames.add(sc.getName());
+    public Map<String, PoseMove> getMoves() {
+        return moves;
     }
-  }
 
-  public HashMap<String, Double> getSpeeds() {
-    return speeds;
-  }
+    public void setMoves(Map<String, PoseMove> moves) {
+        this.moves = moves;
+    }
 
-  public HashMap<String, Double> getPositions() {
-    return positions;
-  }
+    @Override
+    public String toString() {
+        return "Pose{" +
+                "moves=" + moves +
+                '}';
+    }
 
-  public void savePose(String filename) throws IOException {
-    String s = CodecUtils.toPrettyJson(this);
-    FileOutputStream out = new FileOutputStream(new File(filename));
-    out.write(s.getBytes());
-    out.close();
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Pose pose = (Pose) o;
+        return Objects.equals(moves, pose.moves);
+    }
 
-  public static Pose loadPose(String filename) throws IOException {
-    String json = FileIO.toString(filename);
-    Pose pose = CodecUtils.fromJson(json, Pose.class);
-    return pose;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((name == null) ? 0 : name.hashCode());
-    result = prime * result + ((positions == null) ? 0 : positions.hashCode());
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    Pose other = (Pose) obj;
-
-    if (name == null) {
-      if (other.name != null)
-        return false;
-    } else if (!name.equals(other.name))
-      return false;
-    if (positions == null) {
-      if (other.positions != null)
-        return false;
-    } else if (!positions.equals(other.positions))
-      return false;
-    return true;
-  }
-
-  @Override
-  public String toString() {
-    return "Pose [positions=" + positions + ", speeds=\" + speeds + \", name=" + name + "]";
-  }
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(moves);
+    }
 }

@@ -51,12 +51,14 @@
             <div id="startButton" ng-click="execScript('resource/SpotMicro/startScripts/start.py')" class="rectangleStart preventDragSelect">Start</div>
 
             <div id="gesturesButton" ng-click="setPanel('gestures')" class="rectangleGestures preventDragSelect">Gestures</div>
+
+            <div id="simulatorButton" ng-click="setPanel('simulator')" class="rectangleSimulator preventDragSelect">Simulator</div>
         </div>
     </td>
 <td>
 <!-- panels begin -->
 <!------------------------ spotmicro begin ------------------------------>
-<table ng-show="showPanel('spotmicro')" class="inmoov-sub-panel table table-striped">
+<table ng-show="showPanel('spotmicro')" class="spotmicro-sub-panel table table-striped">
 <tr>
     <td>
         <img src="../SpotMicro.png"/>
@@ -67,7 +69,7 @@
 </table>    
 <!------------------------ spotmicro end ------------------------------>
 <!------------------------ sensors begin ------------------------------>
-<table ng-show="showPanel('sensors')" class="inmoov-sub-panel table table-striped">
+<table ng-show="showPanel('sensors')" class="spotmicro-sub-panel table table-striped">
 <tr>
     <td>
         <img src="../SpotMicro.png"/>
@@ -115,7 +117,7 @@
 </table>
 <!------------------------ sensors end ------------------------------>
 <!------------------------ controller begin ------------------------------>
-<table ng-show="showPanel('controller')" class="inmoov-sub-panel table table-striped">
+<table ng-show="showPanel('controller')" class="spotmicro-sub-panel table table-striped">
 <tr>
     <td>
         <img src="../SpotMicro.png"/>
@@ -181,7 +183,7 @@
 </table>
 <!------------------------ controller end ------------------------------>
 <!------------------------ backLegs begin ------------------------------>
-<table ng-show="showPanel('backLegs')" class="inmoov-sub-panel table table-striped">
+<table ng-show="showPanel('backLegs')" class="spotmicro-sub-panel table table-striped">
 <tr>
     <td>
         <img src="../SpotMicro.png"/>
@@ -257,7 +259,7 @@
 </table>
 <!------------------------ backLegs end ------------------------------>
 <!------------------------ frontLegs begin ------------------------------>
-<table ng-show="showPanel('frontLegs')" class="inmoov-sub-panel table table-striped">
+<table ng-show="showPanel('frontLegs')" class="spotmicro-sub-panel table table-striped">
 <tr>
     <td>
         <img src="../SpotMicro.png"/>
@@ -318,7 +320,7 @@
 </table>
 <!------------------------ frontLegs end ------------------------------>
 <!------------------------ gestures begin ------------------------------>
-<table ng-show="showPanel('gestures')" class="inmoov-sub-panel table table-striped">
+<table ng-show="showPanel('gestures')" class="spotmicro-sub-panel table table-striped">
 <tr>
     <td>
         <img src="../SpotMicro.png"/>
@@ -368,5 +370,21 @@
 </tr>
 </table>
 <!------------------------ gestures end ------------------------------>
+<!------------------------ simulator begin ------------------------------>
+<table ng-show="showPanel('simulator')" class="spotmicro-sub-panel table table-striped">
+<tr>
+    <td>
+        <img src="../SpotMicro.png"/>
+        <label>Simulator:</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" ng-click="execScript('system/startScripts/sit.py')"></button>
+        <label>Start</label>
+    </td>
+</tr>
+</table>
+<!------------------------ simulator end ------------------------------>
 <!-- panels end -->
 </td></tr></table>

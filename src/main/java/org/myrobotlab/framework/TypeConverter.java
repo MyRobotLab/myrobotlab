@@ -22,8 +22,6 @@ public class TypeConverter {
 
   public final static Logger log = LoggerFactory.getLogger(TypeConverter.class);
 
-  // private static Gson gson = new Gson();
-
   // Possible Optimization -> pointers to known method signatures -
   // optimization so that once a
   // method's signature is processed and

@@ -25,7 +25,6 @@ import org.myrobotlab.service.config.EmailConfig;
 import org.myrobotlab.service.data.ImageData;
 import org.slf4j.Logger;
 
-
 /**
  * 
  * Basic smtp at the moment. It can send a email with image through gmail.
@@ -36,7 +35,7 @@ import org.slf4j.Logger;
  * @author grog
  *
  */
-public class Email extends Service {
+public class Email extends Service<EmailConfig> {
 
   private static final long serialVersionUID = 1L;
 

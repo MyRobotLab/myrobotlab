@@ -2,26 +2,44 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
     console.info('ServoMixerGuiCtrl')
     var _self = this
     var msg = this.msg
+    var globalPoseIndex = 0
 
     $scope.minView = true
+    $scope.delay = 3 // initial
+    $scope.showGestureSave = false
+
+    $scope.searchServo = {
+        displayName: null
+    }
     
     $scope.servos = []
     $scope.sliders = []
     // list of current pose files
     $scope.poseFiles = []
-    $scope.sequenceFiles = []
+    $scope.gestureFiles = []
 
     $scope.state = {
+        // gestureIndex is a string representation from $index :( dumb
+        'gestureIndex': "0",
         'selectedPose': null,
-        'selectedSequenceFile': null,
-        'selectedSequence': null,
-        'currentRunningPose': null,
-        'currentSequence':{
-            'poses':[]
+        'selectedGestureFile': null,
+        'selectedGesture': null,
+        'playingPose': null,
+        'currentGesture':{
+            'parts':[]
         }
     }
 
-    // unique id for new poses added to sequence
+    $scope.options = [];
+  angular.forEach("a:alpha,b:beta,d:delta,g:gamma,e:eta,E:epsilon,o:omega,z:zeta".split(','), function(val) {
+    var parts = val.split(":");
+    $scope.options.push({
+      name: parts[0],
+      value: parts[1]
+    });
+  });
+
+    // unique id for new poses added to gesture
     let id = 0
 
     // FIXME - this should be done in a base class or in framework
@@ -62,12 +80,30 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
             _self.updateState(data)
             $scope.$apply()
             break
-        case 'onPlayingPose':
-            $scope.state.currentRunningPose = data
+        case 'onSearch':
+            $scope.searchServo.displayName = data
+            $scope.searchServos(data)
+            // sets pose name from selected
+            $scope.state.selectedPose = data + "_" + globalPoseIndex++
+            $scope.$apply()
+            break                
+        case 'onPlayingGesturePart':
+            // FIXME rename
+            if (data.type != 'Delay'){
+                $scope.state.playingPose = data    
+            } else {
+                $scope.state.playingPose.value = data.value/1000
+            }
+            $scope.$apply()
+            break
+        case 'onPlayingGesturePartIndex':
+            // FIXME rename
+            $scope.state.gestureIndex = data + ""
+            $scope.state.playingPoseIndex = data
             $scope.$apply()
             break
         case 'onStopPose':
-            $scope.state.currentRunningPose = ' '
+            // $scope.state.playingPose = ' '
             $scope.$apply()
             break
         case 'onServoEvent':
@@ -80,14 +116,17 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
             if (data && data.length > 0) {
                 $scope.state.selectedPose = data[data.length - 1]
             }
-
             break
-        case 'onSequence':
-            $scope.state.currentSequence = data
+        case 'onGesture':
+            $scope.state.currentGesture = data
             $scope.$apply()
             break
-        case 'onSequenceFiles':
-            $scope.sequenceFiles = data
+        case 'onGestureFiles':
+            $scope.gestureFiles = data
+            if (!$scope.state.selectedGestureFile && $scope.gestureFiles && $scope.gestureFiles.length > 0){
+                $scope.state.selectedGestureFile = $scope.gestureFiles[0]
+                msg.send('getGesture', $scope.state.selectedGestureFile)
+            }
             $scope.$apply()
             break
         case 'onListAllServos':
@@ -136,60 +175,36 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
         }
     }
 
-    getIndexOfSelectedPoseInSequence = function() {
-        if (!$scope.state.selectedSequence) {
-            return 0
-        }
 
-        // change the selected sequence back into an object
-        let ssId = JSON.parse($scope.state.selectedSequence).id
-
-        let index = 0
-        for (var p of $scope.state.currentSequence.poses) {
-            posId = $scope.state.currentSequence.poses[index].id
-            if (ssId == posId) {
-                return index
-            }
-            index++
-        }
-        return index
-    }
-
-    $scope.addPoseToSequence = function() {
+    $scope.addPoseToGesture = function() {
         // get pos entry
         let pose = {
-            'id': id,
             'name': $scope.state.selectedPose,
-            'waitTimeMs': 3000
+            'type': 'Pose',
+            'blocking': false
         }
 
-        // maintain unique id
-        ++id
-
-        let currentIndex = getIndexOfSelectedPoseInSequence()
-        currentIndex++
-        $scope.state.currentSequence.poses.splice(currentIndex, 0, pose)
+        $scope.state.currentGesture.parts.splice(parseInt($scope.state.gestureIndex) + 1, 0, pose)
     }
 
-    $scope.removePoseFromSequence = function() {
-        let currentIndex = getIndexOfSelectedPoseInSequence()
-        $scope.state.currentSequence.poses.splice(currentIndex, 1)
+    $scope.removePoseFromGesture = function() {
+        $scope.state.currentGesture.parts.splice($scope.state.gestureIndex, 1)
     }
 
     move = function(arr, fromIndex, toIndex) {
         var element = arr[fromIndex];
         arr.splice(fromIndex, 1);
         arr.splice(toIndex, 0, element);
+        // stupid ass conversion back to string for list 'select'
+        $scope.state.gestureIndex = toIndex + ''
     }
 
-    $scope.moveUpPoseInSequence = function() {
-        let currentIndex = getIndexOfSelectedPoseInSequence()
-        move($scope.state.currentSequence.poses, currentIndex, currentIndex - 1)
+    $scope.moveUpPoseInGesture = function() {
+        move($scope.state.currentGesture.parts, $scope.state.gestureIndex, parseInt($scope.state.gestureIndex) - 1)
     }
 
-    $scope.moveDownPoseInSequence = function() {
-        let currentIndex = getIndexOfSelectedPoseInSequence()
-        move($scope.state.currentSequence.poses, currentIndex, currentIndex + 1)
+    $scope.moveDownPoseInGesture = function() {
+        move($scope.state.currentGesture.parts, $scope.state.gestureIndex, parseInt($scope.state.gestureIndex) + 1)
     }
 
     $scope.searchServos = function(searchText) {
@@ -219,15 +234,15 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
         console.info('here')
     }
 
-    $scope.setSequence = function() {
-        let seq = JSON.parse($scope.state.selectedSequence)
-        $scope.delay = seq.waitTimeMs/1000
-        console.info($scope.state.selectedSequence)
-    }
-
-    $scope.moveSequenceContent = function(seqstr){
-        let seq = JSON.parse(seqstr)
-        msg.send('moveToPose', seq.name)
+    $scope.step = function(){
+        let index = parseInt($scope.state.gestureIndex)
+        let part = $scope.state.currentGesture.parts[index]
+        if (part.type === 'Pose'){
+            msg.send('moveToPose', part.name)    
+        }
+        index++
+        $scope.state.gestureIndex =  index + ""
+        
     }
 
     // initialize all services which have panel references in Intro    
@@ -236,40 +251,93 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
         this.onRegistered(servicePanelList[index])
     }
 
-    $scope.saveSequence = function(name) {
-        $scope.state.currentSequence.name = name
-        /*
-        $scope.state.currentSequence.poses = []
-        for (var p of $scope.state.currentSequence.poses) {
-            $scope.state.currentSequence.poses.push(p.name)
-        }*/
-
-        // because angular adds crap to identify select options :(
-        // let json = JSON.stringify($scope.state.currentSequence)
-        let json = angular.toJson($scope.state.currentSequence)
-        msg.send('saveSequence', name, json)
+    $scope.saveGesture = function(gestureName) {
+        // gestureName = $scope.state.selectedGestureFile
+        $scope.state.currentGesture.name = gestureName
+        if ($scope.gestureFiles.includes(gestureName)){
+            // saving current file
+            msg.send('saveGesture', gestureName, $scope.state.currentGesture)
+        } else {
+            // saving new file
+            blankGesture = {
+                parts:[],
+                repeat: false
+            }
+            msg.send('saveGesture', gestureName, blankGesture)
+        }
+        
     }
 
-    $scope.addSequenceDelay = function(delay){
-        let index = getIndexOfSelectedPoseInSequence()
-        if (delay == ""){
-            $scope.state.currentSequence.poses[index].waitTimeMs = null
+    $scope.addDelay = function(seconds){
+
+        let value = parseFloat(seconds)
+        
+        if (Number.isNaN(value)){
+            console.error(seconds, "is not a valid number for delay")
+            return
+        }
+        
+        let delay = {
+            'name': 'delay',
+            'type': 'Delay',
+            'value': value * 1000,
+            'blocking': true
+        }
+        
+        $scope.state.currentGesture.parts.splice(parseInt($scope.state.gestureIndex) + 1, 0, delay)
+    }
+
+    $scope.playGesture = function(gesture) {
+        if (gesture){
+            msg.send('playGesture', gesture)    
         } else {
-            $scope.state.currentSequence.poses[index].waitTimeMs = delay * 1000
+            console.warn('gesture empty')
         }
     }
 
+    $scope.removeGesture = function(gesture) {
+        if (gesture){
+            msg.send('removeGesture', gesture)    
+        } else {
+            console.warn('removeGesture empty')
+        }
+    }
+
+    $scope.displayValue = function(pose) {
+        // !pose.value || Number.isNaN(pose.value)?'':pose.value/1000
+        if (pose.type == 'Delay'){
+            return pose.value/1000
+        } else {
+            return pose.value
+        }
+    }
+
+    $scope.speak = function() {
+        
+        let delay = {
+            'name': 'speech',
+            'type': 'Speech',
+            'value': $scope.text,
+            'blocking': true
+        }
+        
+        $scope.state.currentGesture.parts.splice(parseInt($scope.state.gestureIndex) + 1, 0, delay)
+    }
+
+
     msg.subscribe('getPoseFiles')
-    msg.subscribe('getSequence')
-    msg.subscribe('getSequenceFiles')
+    msg.subscribe('getGesture')
+    msg.subscribe('getGestureFiles')
     msg.subscribe('listAllServos')
+    msg.subscribe('search')
+    
     msg.send('listAllServos')
     msg.send('getPoseFiles');
-    msg.send('getSequenceFiles');
+    msg.send('getGestureFiles');
 
-    msg.subscribe("publishPlayingPose")
+    msg.subscribe("publishPlayingGesturePart")
+    msg.subscribe("publishPlayingGesturePartIndex")
     msg.subscribe("publishStopPose")
-
 
     mrl.subscribeToRegistered(this.onRegistered)
     mrl.subscribeToReleased(this.onReleased)

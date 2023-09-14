@@ -34,4 +34,10 @@ public class StringUtilTest extends AbstractTest {
     assertEquals(text, StringUtils.join(result, " "));
 
   }
+
+  @Test
+  public void testRemoveEnd() {
+    String testStr = "python@test_runtime";
+    assertEquals("python", StringUtil.removeEnd(testStr, "@test_runtime"));
+  }
 }

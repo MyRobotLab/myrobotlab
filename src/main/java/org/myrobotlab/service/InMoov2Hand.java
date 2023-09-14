@@ -13,6 +13,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.InMoov2HandConfig;
 import org.myrobotlab.service.data.LeapData;
 import org.myrobotlab.service.data.LeapHand;
 import org.myrobotlab.service.data.PinData;
@@ -29,7 +30,7 @@ import org.slf4j.Logger;
  * 
  * There is also leap motion support.
  */
-public class InMoov2Hand extends Service implements LeapDataListener, PinArrayListener {
+public class InMoov2Hand extends Service<InMoov2HandConfig> implements LeapDataListener, PinArrayListener {
 
   public final static Logger log = LoggerFactory.getLogger(InMoov2Hand.class);
 

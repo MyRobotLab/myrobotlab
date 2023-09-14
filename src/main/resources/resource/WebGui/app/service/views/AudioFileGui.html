@@ -11,17 +11,17 @@
                     <span class="glyphicon glyphicon-play" title="play track"/>
                 </button>
                 <button class="btn btn-default" ng-click="msg.pause()">
-                    <span class="glyphicon glyphicon-pause" title="pause"/>
+                    <span class="glyphicon glyphicon-pause" title="pause track"/>
                 </button>
                 <button class="btn btn-default" ng-click="msg.resume()">
-                    <span class="glyphicon glyphicon-step-forward" title="resume"/>
+                    <span class="glyphicon glyphicon-step-forward" title="resume track"/>
                 </button>
                 <!--button class="btn btn-default" ng-click="msg.random()"><span class="glyphicon glyphicon-random" title="random"/></button-->
                 <button class="btn btn-default" ng-click="msg.stop()">
-                    <span class="glyphicon glyphicon-stop" title="stop"/>
+                    <span class="glyphicon glyphicon-stop" title="stop track"/>
                 </button>
                 <button class="btn btn-default" ng-click="msg.setMute(!service.mute);msg.broadcastState()">
-                    <span class="glyphicon glyphicon-volume-off" title="mute"/>
+                    <span class="glyphicon glyphicon-volume-off" title="mute track"/>
                 </button>
                 <button class="btn btn-default" ng-click="msg.setVolume(service.volume - 0.01);msg.broadcastState()">
                     <span class="glyphicon glyphicon-volume-down" title="pump up the volume"/>
@@ -72,6 +72,9 @@
                 <button class="btn btn-default" ng-click="startPlaylist()">
                     <span class="glyphicon glyphicon-play" title="play list"/>
                 </button>
+                <button class="btn btn-default" ng-click="stopPlaylist()">
+                    <span class="glyphicon glyphicon-stop" title="stop play list"/>
+                </button>
                 <div ng-show="service.playlists" class="form-group">
                     <label>select file:</label>
                     <select multiple class="form-control vertical-menu" ng-model="selectedFiles" ng-change="setSelectedFileFromTrack(selectedFiles[0])" title="select your track">
@@ -88,3 +91,4 @@
         <div class="progress-bar" role="progressbar" style="width: {{peak}}%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
     </div>
 </div>
+

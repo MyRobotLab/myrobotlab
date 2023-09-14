@@ -44,7 +44,7 @@ import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.slf4j.Logger;
 
-public class NeoPixel extends Service implements NeoPixelControl {
+public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl {
 
   /**
    * Thread to do animations Java side and push the changing of pixels to the

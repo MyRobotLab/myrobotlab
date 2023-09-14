@@ -31,7 +31,7 @@ import org.slf4j.Logger;
  *         More Info : https://www.adafruit.com/product/2717
  * 
  */
-public class I2cMux extends Service implements I2CControl, I2CController {
+public class I2cMux extends Service<I2cMuxConfig> implements I2CControl, I2CController {
 
   private static final long serialVersionUID = 1L;
 
@@ -362,8 +362,8 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    I2cMuxConfig config = (I2cMuxConfig)super.getConfig();
+  public I2cMuxConfig getConfig() {
+    super.getConfig();
     // FIXME this should only be in config, no need for local fields
     config.bus = deviceBus;
     config.address = deviceAddress;
@@ -373,14 +373,14 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    I2cMuxConfig config = (I2cMuxConfig) super.apply(c);
+  public I2cMuxConfig apply(I2cMuxConfig c) {
+    super.apply(c);
     // FIXME - remove all this, it should "only" be in config
-    deviceBus = config.bus;
-    deviceAddress = config.address;
-    i2cDevices = config.i2cDevices;
-    if (config.controller != null) {
-      controllerName = config.controller;
+    deviceBus = c.bus;
+    deviceAddress = c.address;
+    i2cDevices = c.i2cDevices;
+    if (c.controller != null) {
+      controllerName = c.controller;
     }
     return c;
   }

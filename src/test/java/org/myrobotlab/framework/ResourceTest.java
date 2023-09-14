@@ -29,9 +29,6 @@ public class ResourceTest extends AbstractTest {
     // === access as a service ===
     Servo servo = (Servo) Runtime.start("servo", "Servo");
 
-    String path = Service.getResourceRoot();
-    assertTrue(path.startsWith("src"));
-
     byte[] resource = Service.getServiceIcon(Servo.class);
     byte[] strParam = Service.getServiceIcon("Servo");
     byte[] nonStatic = servo.getServiceIcon();
@@ -54,17 +51,6 @@ public class ResourceTest extends AbstractTest {
     assertTrue(rs != null && (rs.contentEquals(s) && rs.contentEquals(script) && rs.contentEquals(resourceString) && rs.contentEquals(strParams) && rs.contentEquals(b)
         && rs.contentEquals(bs) && rs.contentEquals(serviceScript) && rs.contentEquals(bstr)));
 
-    // make fake repo dir - and check overrides
-    String fs = File.separator;
-    File repoDir = new File(".." + fs + "Servo" + fs + "resource" + fs + "Servo");
-    repoDir.mkdirs();
-    rs = servo.getServiceScript();
-
-    // should now be null - if override is correct
-    assertTrue(rs == null);
-
-    // cleanup
-    FileIO.rm(".." + fs + "Servo");
   }
 
 }

@@ -16,7 +16,6 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.Pcf8574Config;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -45,7 +44,7 @@ import org.slf4j.Logger;
  * 
  */
 
-public class Pcf8574 extends Service
+public class Pcf8574 extends Service<Pcf8574Config>
     implements I2CControl, /* FIXME - add I2CController */ PinArrayControl {
   /**
    * Publisher - Publishes pin data at a regular interval
@@ -156,9 +155,9 @@ public class Pcf8574 extends Service
 
   public Pcf8574(String n, String id) {
     super(n, id);
-    registerForInterfaceChange(I2CController.class);
+    // registerForInterfaceChange(I2CController.class);
     createPinList();
-    refreshControllers();
+    // refreshControllers();
     for (int i = 0; i < pinDataCnt; ++i) {
       int value = (writeRegister >> i) & 1;
       getPin(i).setValue(value);
@@ -726,25 +725,25 @@ public class Pcf8574 extends Service
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    Pcf8574Config config = (Pcf8574Config) super.getConfig();
+  public Pcf8574Config getConfig() {
+    super.getConfig();
     return config;
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    Pcf8574Config config = (Pcf8574Config) super.apply(c);
+  public Pcf8574Config apply(Pcf8574Config c) {
+    super.apply(c);
     // FIXME remove local fields in favor of config only
-    if (config.address != null) {
-      setAddress(config.address);
+    if (c.address != null) {
+      setAddress(c.address);
     }
-    if (config.bus != null) {
-      setBus(config.bus);
+    if (c.bus != null) {
+      setBus(c.bus);
     }
 
-    if (config.controller != null) {
+    if (c.controller != null) {
       try {
-        attach(config.controller);
+        attach(c.controller);
       } catch (Exception e) {
         error(e);
       }

@@ -31,15 +31,19 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.myrobotlab.codec.ClassUtil;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.CodecUtils.ApiDescription;
+import org.myrobotlab.codec.ForeignProcessUtils;
 import org.myrobotlab.framework.CmdConfig;
 import org.myrobotlab.framework.CmdOptions;
 import org.myrobotlab.framework.DescribeQuery;
@@ -53,11 +57,14 @@ import org.myrobotlab.framework.NameGenerator;
 import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.ProxyFactory;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.ConfigurableService;
 import org.myrobotlab.framework.interfaces.MessageListener;
+import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.IvyWrapper;
 import org.myrobotlab.framework.repo.Repo;
@@ -79,7 +86,6 @@ import org.myrobotlab.process.InProcessCli;
 import org.myrobotlab.process.Launcher;
 import org.myrobotlab.service.config.RuntimeConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServiceConfig.Listener;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.ServiceTypeNameResults;
 import org.myrobotlab.service.interfaces.ConnectionManager;
@@ -90,6 +96,7 @@ import org.myrobotlab.service.interfaces.ServiceLifeCyclePublisher;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
+import org.yaml.snakeyaml.constructor.ConstructorException;
 
 import picocli.CommandLine;
 
@@ -117,7 +124,7 @@ import picocli.CommandLine;
  * VAR OF RUNTIME !
  *
  */
-public class Runtime extends Service implements MessageListener, ServiceLifeCyclePublisher, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider {
+public class Runtime extends Service<RuntimeConfig> implements MessageListener, ServiceLifeCyclePublisher, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider {
   final static private long serialVersionUID = 1L;
 
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
@@ -133,7 +140,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * to start and configure new services. The master plan is an accumulation of
    * all these requests.
    */
-  final Plan masterPlan = new Plan("runtime");
+  @Deprecated /* use the filesystem only no memory plan */
+  transient final Plan masterPlan = new Plan("runtime");
 
   /**
    * thread for non-blocking install of services
@@ -143,7 +151,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * services which want to know if another service with an interface they are
    * interested in registers or is released
-   * 
+   *
    * requestor type &gt; interface &gt; set of applicable service names
    */
   protected final Map<String, Set<String>> interfaceToNames = new HashMap<>();
@@ -169,7 +177,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       "org.myrobotlab.service.interfaces.ServiceLifeCycleListener", "org.myrobotlab.framework.interfaces.StatePublisher"));
 
   protected final Set<String> serviceTypes = new HashSet<>();
-
+  
   /**
    * The directory name currently being used for config. This is NOT full path
    * name. It cannot be null, it cannot have "/" or "\" in the name - it has to
@@ -205,7 +213,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * which connection a client is from) is in the Map &lt;String, Object&gt; information.
    * Since different connections have different requirements, and details regarding
    * clients the only "fixed" required info to add a client is :
-   * 
+   *
    * uuid - key unique identifier for the client
    * connection - name of the connection currently managing the clients connection
    * state - state of the client and/or connection
@@ -232,7 +240,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   protected Integer creationCount = 0;
 
   /**
-   * the local repo.json manifest of this machine, which is a list of all libraries ivy installed
+   * the local repo.json manifest of this machine, which is a list of all
+   * libraries ivy installed
    */
   transient private IvyWrapper repo = null; // was transient abstract Repo
 
@@ -312,7 +321,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    *
    * @return the number of processors available to the Java virtual machine.
    * @see java.lang.Runtime#availableProcessors()
-   * 
+   *
    */
   public static final int availableProcessors() {
     return java.lang.Runtime.getRuntime().availableProcessors();
@@ -359,13 +368,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * Create create(name, type) goes through the full service lifecycle of:
-   * 
+   *
    * <pre>
    * clear - clearing the plan for construction of service(s) needed 
    * load  - loading the plan for desired services 
    * check - checking all planned service have met appropriate licensing and dependency checks create -
    * </pre>
-   * 
+   *
    * @param name
    *          - Required, cannot be null
    * @param type
@@ -401,7 +410,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * should be defined in the plan.
    * 
    * FIXME - should Plan be passed in as param ?
-   * 
+   *
    * @param name
    * @return
    */
@@ -414,7 +423,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // Plan's config
     RuntimeConfig plansRtConfig = (RuntimeConfig) plan.get("runtime");
     // current Runtime config
-    RuntimeConfig currentConfig = (RuntimeConfig) Runtime.getInstance().config;
+    RuntimeConfig currentConfig = Runtime.getInstance().config;
 
     for (String service : plansRtConfig.getRegistry()) {
       // FIXME - determine if you want to return a complete merge of activated
@@ -430,10 +439,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       sc.state = "CREATING";
       ServiceInterface si = createService(service, sc.type, null);
       sc.state = "CREATED";
-      si.setConfig(sc);
-      si.apply(sc);
+      // process  the base listeners/subscription of ServiceConfig
+      si.addConfigListeners(sc);
+      if (si instanceof ConfigurableService) {
+        ((ConfigurableService)si).apply(sc);
+      }
       createdServices.put(service, si);
-      // si.startService(); bad idea
       currentConfig.add(service);
     }
 
@@ -463,7 +474,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       for (Field f : fs) {
         if (peerKey.equals(f.getName())) {
           if (f.canAccess(config)) {
-            Object o = null;
+            Object o;
             try {
               o = f.get(config);
 
@@ -478,8 +489,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
               }
 
               if (o instanceof String) {
-                String actualName = (String) o;
-                return actualName;
+                return (String) o;
               } else {
                 log.error("config has field named {} but it is not a string", peerKey);
                 break;
@@ -571,7 +581,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   @Override
   public boolean setVirtual(boolean b) {
+    boolean changed = isVirtual != b;
     setAllVirtual(b);
+    if (changed) {
+      broadcastState();
+    }
     return b;
   }
 
@@ -594,15 +608,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     Runtime.getInstance().broadcastState();
     return b;
   }
-  
+
   /**
-   * Sets the enable value in start.yml.  start.yml is a file which can control the automatic
-   * loading of config.  In general when its on, and a config is selected and saved, the next
-   * time Runtime starts it will attempt to load the last saved config and get the user back to 
-   * their last state.
+   * Sets the enable value in start.yml. start.yml is a file which can control
+   * the automatic loading of config. In general when its on, and a config is
+   * selected and saved, the next time Runtime starts it will attempt to load
+   * the last saved config and get the user back to their last state.
    * 
    * @param autoStart
-   * @throws IOException - thrown if cannot write file to filesystem
+   * @throws IOException
+   *           - thrown if cannot write file to filesystem
    */
   public void setAutoStart(boolean autoStart) throws IOException {
     log.debug("setAutoStart {}", autoStart);
@@ -679,17 +694,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       return null;
     }
 
-    String fullTypeName;
-    if (type.contains(".")) {
-      fullTypeName = type;
-    } else {
-      fullTypeName = String.format("org.myrobotlab.service.%s", type);
-    }
+    String fullTypeName = CodecUtils.makeFullTypeName(type);
 
     ServiceInterface si = Runtime.getService(fullName);
     if (si != null) {
-      if (!si.getType().equals(fullTypeName)) {
-        runtime.error("Service with name {} already exists but is of type {} while requested type is ", name, si.getType(), type);
+      if (!si.getTypeKey().equals(fullTypeName)) {
+        runtime.error("Service with name {} already exists but is of type {} while requested type is ", name, si.getTypeKey(), type);
         return null;
       }
       return si;
@@ -852,8 +862,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @return the amount of free memory in the Java Virtual Machine. Calling the
    *         gc method may result in increasing the value returned by
    *         freeMemory.
-   * 
-   * 
+   *
+   *
    */
   public static final long getFreeMemory() {
     return java.lang.Runtime.getRuntime().freeMemory();
@@ -881,10 +891,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           // a bit backwards - it loads after it been created
           // but its necessary because you need an runtime instance before you
           // load
+          
+          File cfgRoot = new File(CONFIG_ROOT);
+          cfgRoot.mkdirs();
           if (startYml.enable) {
             Runtime.load("runtime", "Runtime");
           }
-          ((RuntimeConfig) runtime.config).add("runtime");
+          runtime.config.add("runtime");
 
           runtime.startService();
           // platform virtual is higher priority than service virtual
@@ -924,7 +937,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * The jvm args which started this process
-   * 
+   *
    * @return all jvm args in a list
    */
   static public List<String> getJvmArgs() {
@@ -934,7 +947,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * gets all non-loopback, active, non-virtual ip addresses
-   * 
+   *
    * @return list of local ipv4 IP addresses
    */
   static public List<String> getIpAddresses() {
@@ -995,7 +1008,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     networkPeers = new TreeSet<>();
     // String myip = InetAddress.getLocalHost().getHostAddress();
     List<String> myips = getIpAddresses(); // TODO - if nothing else -
-                                           // 127.0.0.1
+    // 127.0.0.1
     for (String myip : myips) {
       if (myip.equals("127.0.0.1")) {
         log.info("This PC is not connected to any network!");
@@ -1089,7 +1102,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * FIXME - return
-   * 
+   *
    * @return filtering/query requests
    */
   public static Map<String, ServiceInterface> getLocalServicesForExport() {
@@ -1099,7 +1112,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /*
    * FIXME - DEPRECATE - THIS IS NOT "instance" specific info - its Class
    * definition info - Runtime should return based on ClassName
-   * 
+   *
    * FIXME - INPUT PARAMETER SHOULD BE TYPE NOT INSTANCE NAME !!!!
    */
   public static Map<String, MethodEntry> getMethodMap(String inName) {
@@ -1127,18 +1140,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * TODO - future work would be to supply a query to the getServiceList(query)
    * such that interfaces, types, or processes ids, can selectively be queried
    * out of it
-   * 
+   *
    * @return list of registrations
    */
   synchronized public List<Registration> getServiceList() {
-    List<Registration> ret = new ArrayList<>();
-    for (ServiceInterface si : registry.values()) {
-      // problem with
-      // ret.add(new NameAndType(si.getId(), si.getName(), si.getType(),
-      // CodecUtils.toJson(si)));
-      ret.add(new Registration(si.getId(), si.getName(), si.getType()));
-    }
-    return ret;
+    return registry.values().stream().map(si -> new Registration(si.getId(), si.getName(), si.getTypeKey())).collect(Collectors.toList());
   }
 
   // FIXME - scary function - returns private data
@@ -1171,7 +1177,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * @return all service names in an array form
    * 
-   * 
+   *
    */
   static public String[] getServiceNames() {
     List<ServiceInterface> si = getServices();
@@ -1179,7 +1185,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     for (int i = 0; i < ret.length; ++i) {
       ServiceInterface s = si.get(i);
 
-      if (s.getId().contentEquals(Platform.getLocalInstance().getId())) {
+      if (isLocal(s.getFullName())) {
         ret[i] = s.getName();
       } else {
         ret[i] = s.getFullName();
@@ -1199,17 +1205,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   public static List<String> getServiceNames(String pattern) {
-    List<ServiceInterface> sis = getServices();
-    List<String> ret = new ArrayList<String>();
-    for (ServiceInterface si : sis) {
-      String serviceName = si.getName();
-
-      if (match(serviceName, pattern)) {
-        ret.add(serviceName);
-      }
-
-    }
-    return ret;
+    return getServices().stream().map(NameProvider::getName).filter(serviceName -> match(serviceName, pattern)).collect(Collectors.toList());
   }
 
   /**
@@ -1218,7 +1214,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @return a list of service names that implement the interface
    * @throws ClassNotFoundException
    *           if the class for the requested interface is not found.
-   * 
+   *
    */
   public static List<String> getServiceNamesFromInterface(String interfaze) throws ClassNotFoundException {
     if (!interfaze.contains(".")) {
@@ -1233,14 +1229,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    *          interface
    * @return list of service names
    * 
-   */ // FIXME !!! NOT RETURNING FULL NAMES !!!
+   */
   public static List<String> getServiceNamesFromInterface(Class<?> interfaze) {
-    List<String> ret = new ArrayList<String>();
-    List<ServiceInterface> services = getServicesFromInterface(interfaze);
-    for (int i = 0; i < services.size(); ++i) {
-      ret.add(services.get(i).getName());
-    }
-    return ret;
+    return getServicesFromInterface(interfaze).stream().map(ServiceInterface::getFullName).collect(Collectors.toList());
   }
 
   /**
@@ -1280,7 +1271,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @param interfaze
    *          interface
    * @return results
-   * 
+   *
    */
   public ServiceTypeNameResults getServiceTypeNamesFromInterface(String interfaze) {
     ServiceTypeNameResults results = new ServiceTypeNameResults(interfaze);
@@ -1296,7 +1287,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       for (MetaData st : sts) {
 
-        Set<Class<?>> ancestry = new HashSet<Class<?>>();
+        Set<Class<?>> ancestry = new HashSet<>();
         Class<?> targetClass = Class.forName(st.getType()); // this.getClass();
 
         while (targetClass.getCanonicalName().startsWith("org.myrobotlab") && !targetClass.getCanonicalName().startsWith("org.myrobotlab.framework")) {
@@ -1326,11 +1317,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * return a list of services which are currently running and implement a
    * specific interface
-   * 
+   *
    * @param interfaze
    *          class
    * @return list of service interfaces
-   * 
+   *
    */
   // FIXME !!! - use single implementation that gets parents
   @Deprecated /*
@@ -1354,11 +1345,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
     return ret;
   }
-  
+
   /**
-   * Because startYml is required to be a static variable, since it's needed "before"
-   * a runtime instance exists it will be null in json serialization.  This method is needed
-   * so we can serialize the data appropriately.
+   * Because startYml is required to be a static variable, since it's needed
+   * "before" a runtime instance exists it will be null in json serialization.
+   * This method is needed so we can serialize the data appropriately.
+   * 
    * @return
    */
   static public CmdConfig getStartYml() {
@@ -1453,9 +1445,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * Get version returns the current version of mrl. It must be done this way,
    * because the version may be queried on the command line without the desire
    * to start a "Runtime"
-   * 
+   *
    * @return the version of the running platform instance
-   * 
+   *
    */
   public static String getVersion() {
     return Platform.getLocalInstance().getVersion();
@@ -1515,14 +1507,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * During typically runtime install of services - non blocking is desired,
    * otherwise status info from the install is blocked until installation is
    * completed. For command line installation "blocking" mode would be desired
-   * 
+   *
    * FIXME - problematic in that Runtime.create calls this directly, and this
    * should be stepped through, because: If we need to install new components, a
    * restart is likely needed ... we don't do custom dynamic classloaders ....
    * yet
-   * 
+   *
    * License - should be appropriately accepted or rejected by user
-   * 
+   *
    * @param serviceType
    *          the service tyype to install
    * @param blocking
@@ -1597,7 +1589,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   public static boolean isLocal(String serviceName) {
     ServiceInterface sw = getService(serviceName);
-    return sw.isLocal();
+    return Objects.equals(sw.getId(), Platform.getLocalInstance().getId());
   }
 
   /*
@@ -1694,28 +1686,34 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     registry.put(String.format("%s@%s", updatedService.getName(), updatedService.getId()), updatedService);
   }
 
+  public static synchronized Registration register(String id, String name, String typeKey, ArrayList<String> interfaces) {
+    Registration proxy = new Registration(id, name, typeKey, interfaces);
+    register(proxy);
+    return proxy;
+  }
+
   /**
    * Registration is the process where a remote system sends detailed info
    * related to its services. It will have details on each service type, state,
    * id, and other info. The registration is serializable, with state
    * information in a serialized for so that stateless processes or other
    * non-Java instances can register or be registered.
-   * 
+   *
    * Registration might setup subscriptions to support a UI.
-   * 
+   *
    * Additional info which will be added in the future is a method map (a
    * swagger concept) and a list of supported interfaces
-   * 
+   *
    * TODO - have rules on what registrations to accept - dependent on security,
    * desire, re-broadcasting configuration etc. TODO - determine rules on
    * re-broadcasting based on configuration
-   * 
+   *
    * @param registration
    *          registration
    * @return registration
-   * 
+   *
    */
-  public final static synchronized Registration register(Registration registration) {
+  public static synchronized Registration register(Registration registration) {
 
     try {
 
@@ -1728,22 +1726,64 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         return registration;
       }
 
-      // FIXME - make work for non-Java classes..
-      String fullTypeName;
-      if (registration.getTypeKey().contains(".")) {
-        fullTypeName = registration.getTypeKey();
-      } else {
-        fullTypeName = String.format("org.myrobotlab.service.%s", registration.getTypeKey());
+      if (!ForeignProcessUtils.isValidTypeKey(registration.getTypeKey())) {
+        log.error("Invalid type key being registered: " + registration.getTypeKey());
+        return null;
       }
 
       log.info("{}@{} registering at {} of type {}", registration.getName(), registration.getId(), Platform.getLocalInstance().getId(), registration.getTypeKey());
 
       if (!registration.isLocal(Platform.getLocalInstance().getId())) {
-        // de-serialize
-        registration.service = Runtime.createService(registration.getName(), registration.getTypeKey(), registration.getId());
 
-        if (registration.getState() != null) {
-          copyShallowFrom(registration.service, CodecUtils.fromJson(registration.getState(), Class.forName(fullTypeName)));
+        // Check if we're registering a java service
+        if (ForeignProcessUtils.isValidJavaClassName(registration.getTypeKey())) {
+
+          String fullTypeName;
+          if (registration.getTypeKey().contains(".")) {
+            fullTypeName = registration.getTypeKey();
+          } else {
+            fullTypeName = String.format("org.myrobotlab.service.%s", registration.getTypeKey());
+          }
+
+          try {
+            // de-serialize, class exists
+            registration.service = Runtime.createService(registration.getName(), fullTypeName, registration.getId());
+            if (registration.getState() != null) {
+              copyShallowFrom(registration.service, CodecUtils.fromJson(registration.getState(), Class.forName(fullTypeName)));
+            }
+          } catch (ClassNotFoundException classNotFoundException) {
+            log.error(String.format("Unknown service class for %s@%s: %s", registration.getName(), registration.getId(), registration.getTypeKey()), classNotFoundException);
+            return null;
+          }
+        } else {
+          // We're registering a foreign process service. We don't need to check
+          // ForeignProcessUtils.isForeignTypeKey() because the type key is
+          // valid
+          // but is not a java class name
+
+          // Class does not exist, check if registration has empty interfaces
+          // Interfaces should always include ServiceInterface if coming from
+          // remote client
+          if (registration.interfaces == null || registration.interfaces.isEmpty()) {
+            log.error("Unknown service type being registered, registration does not contain any " + "interfaces for proxy generation: " + registration.getTypeKey());
+            return null;
+          }
+
+          // Class<?>[] interfaces = registration.interfaces.stream().map(i -> {
+          // try {
+          // return Class.forName(i);
+          // } catch (ClassNotFoundException e) {
+          // throw new RuntimeException("Unable to load interface " + i + "
+          // defined in remote registration " + registration, e);
+          // }
+          // }).toArray(Class<?>[]::new);
+
+          // registration.service = (ServiceInterface)
+          // Proxy.newProxyInstance(Runtime.class.getClassLoader(), interfaces,
+          // new ProxyServiceInvocationHandler(registration.getName(),
+          // registration.getId()));
+          registration.service = ProxyFactory.createProxyService(registration);
+          log.info("Created proxy: " + registration.service);
         }
       }
 
@@ -1752,11 +1792,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       if (runtime != null) {
 
         String type = registration.getTypeKey();
-        Set<String> names = runtime.typeToNames.get(type);
-        if (names == null) {
-          names = new HashSet<>();
-          runtime.typeToNames.put(type, names);
-        }
+
+        // If type does not exist in typeToNames, make it an empty hash set and
+        // return it
+        Set<String> names = runtime.typeToNames.computeIfAbsent(type, k -> new HashSet<>());
         names.add(fullname);
 
         // FIXME - most of this could be static as it represents meta data of
@@ -1775,9 +1814,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         if (!runtime.serviceTypes.contains(type)) {
           // CHECK IF "CAN FULFILL"
           // add the interfaces of the new service type
-
-          // FIXME - make work for non Java
-          Set<String> interfaces = ClassUtil.getInterfaces(fullTypeName, FILTERED_INTERFACES);
+          Set<String> interfaces = ClassUtil.getInterfaces(registration.service.getClass(), FILTERED_INTERFACES);
           for (String interfaze : interfaces) {
             Set<String> types = runtime.interfaceToType.get(interfaze);
             if (types == null) {
@@ -1811,7 +1848,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // TODO - remove ? already get state from registration
       if (!registration.isLocal(Platform.getLocalInstance().getId())) {
-        runtime.subscribe(registration.getName(), "publishState");
+        runtime.subscribe(registration.getFullName(), "publishState");
       }
 
     } catch (Exception e) {
@@ -1827,11 +1864,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * resources, and removes registry entries
    *
    * FIXME - clean up subscriptions from released
-   * 
+   *
    * @param inName
    *          name to release
    * @return true/false
-   * 
+   *
    */
   public synchronized static boolean releaseService(String inName) {
     if (inName == null) {
@@ -1931,7 +1968,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // !!
       // it should be FULLNAME !
       // runtime.broadcast("released", inName);
-      String type = sw.getType();
+      String type = sw.getTypeKey();
 
       boolean updatedServiceLists = false;
 
@@ -1957,9 +1994,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // last step - remove from registry
     registry.remove(name);
     // and config
-    RuntimeConfig c = (RuntimeConfig)Runtime.getInstance().config;
-    c.registry.remove(CodecUtils.shortName(name));
-    
+    RuntimeConfig c = (RuntimeConfig) Runtime.getInstance().config;
+    c.registry.remove(CodecUtils.getShortName(name));
+
     log.info("released {}", name);
   }
 
@@ -2015,7 +2052,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * FIXME - send SHUTDOWN event to all running services with a timeout period -
    * end with System.exit() FIXME normalize with releaseAllLocal and
    * releaseAllExcept
-   * 
+   *
    * local only? YES !!! LOCAL ONLY !!
    * 
    * @param releaseRuntime
@@ -2054,7 +2091,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // reverse release to order of creation
     Collection<ServiceInterface> local = getLocalServices().values();
     List<ServiceInterface> ordered = new ArrayList<>(local);
-
+    ordered.removeIf(Objects::isNull);
     Collections.sort(ordered);
     Collections.reverse(ordered);
 
@@ -2069,12 +2106,19 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       log.info("releasing service {}", sw.getName());
 
       try {
-        if (sw != null) {
-          sw.releaseService();
-        }
+        sw.releaseService();
       } catch (Exception e) {
         runtime.error("%s threw while releasing", e);
-        log.error("rease", e);
+        log.error("release", e);
+      }
+    }
+
+    // clean up remote ... the contract should
+    // probably be just remove their references - do not
+    // ask for them to be released remotely ..
+    for (String remoteService : registry.keySet()) {
+      if (!remoteService.equals(runtime.getFullName())) {
+        registry.remove(remoteService);
       }
     }
 
@@ -2143,7 +2187,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * publish the folders of the parent directory of configPath if the configPath
    * is null then publish directory names of data/config
-   * 
+   *
    * @return list of configs
    */
   public List<String> publishConfigList() {
@@ -2156,6 +2200,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
 
     File[] files = configDirFile.listFiles();
+    if (files == null) {
+      // We checked for if directory earlier, so can only be null for IO error
+      error("IO error occurred while listing config directory files");
+      return configList;
+    }
     for (File file : files) {
       String n = file.getName();
 
@@ -2180,11 +2229,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public static void releaseAllServicesExcept(HashSet<String> saveMe) {
     log.info("releaseAllServicesExcept");
     List<ServiceInterface> list = Runtime.getServices();
-    for (int i = 0; i < list.size(); ++i) {
-      ServiceInterface si = list.get(i);
+    for (ServiceInterface si : list) {
       if (saveMe != null && saveMe.contains(si.getName())) {
         log.info("leaving {}", si.getName());
-        continue;
       } else {
         si.releaseService();
       }
@@ -2246,11 +2293,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * FIXME - can this be renamed back to attach ? jump to another process using
    * the cli
-   * 
+   *
    * @param id
    *          instance id.
    * @return string
-   * 
+   *
    */
   // FIXME - remove - the way to 'jump' is just to change
   // context to the correct mrl id e.g. cd /runtime@remote07
@@ -2395,11 +2442,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // runtime@{id}
       // subscribe to "describe"
       MRLListener listener = new MRLListener("describe", getFullName(), "onDescribe");
-      Message msg = Message.createMessage(getFullName(), "runtime", "addListener", listener);
-      client2.send(CodecUtils.toJson(msg));
+      Message msg = Message.createMessage(getFullName(), "runtime", "addListener", listener);      
+      client2.send(CodecUtils.toJsonMsg(msg));
 
       // send describe
-      client2.send(CodecUtils.toJson(getDescribeMsg(null)));
+      client2.send(CodecUtils.toJsonMsg(getDescribeMsg(null)));
 
     } catch (Exception e) {
       log.error("connect to {} giving up {}", url, e.getMessage());
@@ -2600,9 +2647,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   synchronized static public ServiceInterface start(String name, String type) {
     try {
-      if (name.equals("proxy")) {
-        log.info("herex");
-      }
+
 
       ServiceInterface requestedService = Runtime.getService(name);
       if (requestedService != null) {
@@ -2639,7 +2684,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       if (requestedService == null) {
-        log.error("here");
+        Runtime.getInstance().error("could not start %s of type %s", name, type);
+        return null;
       }
 
       // getConfig() was problematic here for JMonkeyEngine
@@ -2720,9 +2766,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         // fist and only time....
         runtime = this;
         repo = (IvyWrapper) Repo.getInstance(LIBRARIES, "IvyWrapper");
-        
+
         // resolve serviceData MetaTypes for the repo
-        
+
         for (MetaData metaData : serviceData.getServiceTypes()) {
           if (metaData.getSimpleName().equals("OpenCV")) {
             log.warn("here");
@@ -2734,7 +2780,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
             log.warn("{} not installed", metaData.getSimpleName());
           }
         }
-        
+
       }
     }
 
@@ -2920,7 +2966,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * list the contents of the current working directory
-   * 
+   *
    * @return object
    */
   public Object ls() {
@@ -2940,18 +2986,19 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * list the contents of a specific path
-   *
+   * <p>
+   * </p>
    * TODO It looks like this only returns Object because it wants to return
    * either a String array or a method entry list. It would probably be best to
    * just convert the method entry list to a string array using streams and
    * change the signature to match.
-   * 
+   *
    * @param contextPath
    *          c
    * @param path
    *          p
    * @return object
-   * 
+   *
    */
   public Object ls(String contextPath, String path) {
     String absPath = null;
@@ -2990,7 +3037,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     } else if (parts.length == 3) {
       ServiceInterface si = Runtime.getService(parts[1]);
       MethodCache cache = MethodCache.getInstance();
-      List<MethodEntry> me = cache.query(si.getType(), parts[2]);
+      List<MethodEntry> me = cache.query(si.getTypeKey(), parts[2]);
       return me; // si.getMethodMap().get(parts[2]);
     }
     return ret;
@@ -2998,9 +3045,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * serviceName at id
-   * 
+   *
    * @return runtime name with instance id.
-   * 
+   *
    */
   public String whoami() {
     return "runtime@" + getId();
@@ -3054,7 +3101,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * <p>
    * The serviceData.json lists all service types, dependencies, categories and
    * other relevant information regarding service creation
-   * 
+   *
    * @return list of all service type names
    */
   public String[] getServiceTypeNames() {
@@ -3064,11 +3111,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * getServiceTypeNames will publish service names based on some filter
    * criteria
-   * 
+   *
    * @param filter
    *          f
    * @return array of service types
-   * 
+   *
    */
   public String[] getServiceTypeNames(String filter) {
     return serviceData.getServiceTypeNames(filter);
@@ -3125,10 +3172,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * Publishing point when a service was successfully registered locally -
    * regardless if the service is local or not.
-   * 
+   *
    * TODO - more business logic can be created here to limit broadcasting or
    * re-broadcasting published registrations
-   * 
+   *
    * @param registration
    *          - contains all the information need for a registration to process
    */
@@ -3140,7 +3187,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * released event - when a service is successfully released from the registry
    * this event is triggered
-   * 
+   *
    */
   @Override
   public String released(String name) {
@@ -3150,13 +3197,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * A function for runtime to "save" a service - or if the service does not
    * exists save the "default" config of that type of service
-   * 
+   *
    * @param name
    *          name of service to export
    * @return true/false
    * @throws IOException
    *           boom
-   * 
+   *
    */
   @Deprecated /* use save(name) */
   public boolean export(String name /* , String type */) throws IOException {
@@ -3261,7 +3308,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * Runtime's setLogLevel will set the root log level if its called from a
    * service - it will only set that Service type's log level
-   * 
+   *
    * @param level
    *          - DEBUG | INFO | WARN | ERROR
    * @return the level which was set
@@ -3380,7 +3427,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     for (ServiceInterface si : getLocalServices().values()) {
       List<String> nlks = si.getNotifyListKeySet();
       for (int i = 0; i < nlks.size(); ++i) {
-        si.getOutbox().notifyList.clear();
+        si.getNotifyList().clear();
       }
     }
   }
@@ -3451,7 +3498,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
     }
 
-    return execute(program, list, null, null, null);
+    return execute(program, list, null, null, true);
   }
 
   /**
@@ -3473,79 +3520,69 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    *          Whether this method blocks for the program to execute
    * @return The programs stderr and stdout output
    */
-  static public String execute(String program, List<String> args, String workingDir, Map<String, String> additionalEnv, Boolean block) {
-
+  static public String execute(String program, List<String> args, String workingDir, Map<String, String> additionalEnv, boolean block) {
     log.info("execToString(\"{} {}\")", program, args);
 
-    ArrayList<String> command = new ArrayList<String>();
+    List<String> command = new ArrayList<>();
     command.add(program);
     if (args != null) {
-      for (String arg : args) {
-        command.add(arg);
-      }
+        command.addAll(args);
     }
 
-    Integer exitValue = null;
-
     ProcessBuilder builder = new ProcessBuilder(command);
+    if (workingDir != null) {
+        builder.directory(new File(workingDir));
+    }
 
     Map<String, String> environment = builder.environment();
     if (additionalEnv != null) {
-      environment.putAll(additionalEnv);
+        environment.putAll(additionalEnv);
     }
-    StringBuilder outputBuilder;
+
+    StringBuilder outputBuilder = new StringBuilder();
 
     try {
-      Process handle = builder.start();
+        Process handle = builder.start();
 
-      InputStream stdErr = handle.getErrorStream();
-      InputStream stdOut = handle.getInputStream();
+        InputStream stdErr = handle.getErrorStream();
+        InputStream stdOut = handle.getInputStream();
 
-      // TODO: we likely don't need this
-      // OutputStream stdIn = handle.getOutputStream();
+        // Read the output streams in separate threads to avoid potential blocking
+        Thread stdErrThread = new Thread(() -> readStream(stdErr, outputBuilder));
+        stdErrThread.start();
 
-      outputBuilder = new StringBuilder();
-      byte[] buff = new byte[32768];
+        Thread stdOutThread = new Thread(() -> readStream(stdOut, outputBuilder));
+        stdOutThread.start();
 
-      // TODO: should we read both of these streams?
-      // if we break out of the first loop is the process terminated?
+        if (block) {
+            int exitValue = handle.waitFor();
+            outputBuilder.append("Exit Value: ").append(exitValue);
+            log.info("Command exited with exit value: {}", exitValue);
+        } else {
+            log.info("Command started");
+        }
 
-      // read stdout
-      for (int n; (n = stdOut.read(buff)) != -1;) {
-        outputBuilder.append(new String(buff, 0, n));
-      }
-
-      // read stderr
-      for (int n; (n = stdErr.read(buff)) != -1;) {
-        outputBuilder.append(new String(buff, 0, n));
-      }
-
-      stdOut.close();
-      stdErr.close();
-
-      // TODO: stdin if we use it.
-      // stdIn.close();
-
-      // the process should be closed by now?
-
-      handle.waitFor();
-
-      handle.destroy();
-
-      exitValue = handle.exitValue();
-      // print the output from the command
-      // TODO replace with logging calls
-      System.out.println(outputBuilder.toString());
-      System.out.println("Exit Value : " + exitValue);
-      outputBuilder.append("Exit Value : " + exitValue);
-
-      return outputBuilder.toString();
-    } catch (Exception e) {
-      log.error("execute threw", e);
-      exitValue = 5;
-      return e.getMessage();
+        return outputBuilder.toString();
+    } catch (IOException e) {
+        log.error("Error executing command", e);
+        return e.getMessage();
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        log.error("Command execution interrupted", e);
+        return e.getMessage();
     }
-  }
+}
+
+private static void readStream(InputStream inputStream, StringBuilder outputBuilder) {
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            outputBuilder.append(line).append(System.lineSeparator());
+        }
+    } catch (IOException e) {
+        log.error("Error reading process output", e);
+    }
+}
 
   /**
    * Get the current battery level of the computer this MRL instance is running
@@ -3629,7 +3666,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * Return supported system languages
-   * 
+   *
    * @return map of languages to locales
    */
   public Map<String, Locale> getLanguages() {
@@ -3660,8 +3697,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * @return get the Security singleton
-   * 
-   * 
+   *
+   *
    */
   static public Security getSecurity() {
     return Security.getInstance();
@@ -3726,11 +3763,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * service data * service methods * details of a service method * help/javadoc
    * of a service method * list of other known instances * levels of detail, or
    * lists of fields to display * meaningful default
-   * 
+   *
    * FIXME - input parameters will need to change - at some point, a subscribe
    * to describe, and appropriate input parameters should replace the current
    * onRegistered system
-   * 
+   *
    * @param type
    *          t
    * @param id
@@ -3738,7 +3775,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @param remoteUuid
    *          remote id
    * @return describe results
-   * 
+   *
    */
   public DescribeResults describe(String type, String id, String remoteUuid) {
     DescribeQuery query = new DescribeQuery(type, remoteUuid);
@@ -3764,15 +3801,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * state, etc
    * <p>
    * FIXME uuid and query are unused
-   * 
+   *
    * @param uuid
    *          u
    * @param query
    *          q
    * @return describe results
-   * 
-   * 
-   * 
+   *
+   *
+   *
    */
   public DescribeResults describe(String uuid, DescribeQuery query) {
 
@@ -3812,11 +3849,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * Describe results from remote query to describe
-   * 
+   *
    * @param results
    *          describe results
-   * 
-   * 
+   *
+   *
    */
   public void onDescribe(DescribeResults results) {
     List<Registration> reservations = results.getReservations();
@@ -3841,13 +3878,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * registrations to the newly connected remote process. If the "registered"
    * event is subscribed, any newly created service will be broadcasted thorough
    * this publishing point as well.
-   * 
+   *
    * TODO - write filtering, configuration, or security which affects what can
    * be registered
-   * 
+   *
    * Primarily, this is where new services are registered from remote systems
-   * 
-   * 
+   *
+   *
    */
   public void onRegistered(Registration registration) {
     try {
@@ -3899,10 +3936,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       if (metaData.isAvailable()) {
         filteredTypes.add(metaData);
       }
-    }    
+    }
     return filteredTypes;
   }
-
+  
   /**
    * Register a connection route from one instance to this one.
    *
@@ -3929,33 +3966,21 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     addRoute(id, uuid, 10);
   }
 
-  @Override
-  public Message getDescribeMsg(String connId) {
-    // TODO support queries
-    // FIXME !!! - msg.name is wrong with only "runtime" it should be
-    // "runtime@id"
-    // TODO - lots of options for a default "describe"
-    Message msg = Message.createMessage(String.format("%s@%s", getName(), getId()), "runtime", "describe",
-        new Object[] { "fill-uuid", CodecUtils.toJson(new DescribeQuery(Platform.getLocalInstance().getId(), connId)) });
-
-    return msg;
-  }
-
-  @Override
-  public ServiceConfig getFilteredConfig() {
-    RuntimeConfig sc = (RuntimeConfig) super.getFilteredConfig();
-    Set<Listener> removeList = new HashSet<>();
-    for (Listener listener : sc.listeners) {
-      if (listener.callback.equals("onReleased") || listener.callback.equals("onStarted") || listener.callback.equals("onRegistered") || listener.callback.equals("onStopped")
-          || listener.callback.equals("onCreated")) {
-        removeList.add(listener);
-      }
-    }
-    for (Listener remove : removeList) {
-      sc.listeners.remove(remove);
-    }
-    return sc;
-  }
+//  @Override
+//  public ServiceConfig getFilteredConfig() {
+//    RuntimeConfig sc = (RuntimeConfig) super.getFilteredConfig();
+//    Set<Listener> removeList = new HashSet<>();
+//    for (Listener listener : sc.listeners) {
+//      if (listener.callback.equals("onReleased") || listener.callback.equals("onStarted") || listener.callback.equals("onRegistered") || listener.callback.equals("onStopped")
+//          || listener.callback.equals("onCreated")) {
+//        removeList.add(listener);
+//      }
+//    }
+//    for (Listener remove : removeList) {
+//      sc.listeners.remove(remove);
+//    }
+//    return sc;
+//  }
 
   /**
    * Unregister all connections that a specified client has made.
@@ -4006,7 +4031,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * globally get all client
-   * 
+   *
    * @return connection map
    */
   public Map<String, Connection> getConnections() {
@@ -4016,11 +4041,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * separated by connection - send connection name and get filter results back
    * for a specific connections connected clients
-   * 
+   *
    * @param gatwayName
    *          name
    * @return map of connections
-   * 
+   *
    */
   public Map<String, Connection> getConnections(String gatwayName) {
     Map<String, Connection> ret = new HashMap<>();
@@ -4036,7 +4061,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * @return list connections - current connection names to this mrl runtime
-   * 
+   *
    */
   public Map<String, Connection> lc() {
     return getConnections();
@@ -4044,11 +4069,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * get a specific clients data
-   * 
+   *
    * @param uuid
    *          uuid to get
    * @return connection for uuid
-   * 
+   *
    */
   public Connection getConnection(String uuid) {
     return connections.get(uuid);
@@ -4056,7 +4081,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * @return Globally get all connection uuids
-   * 
+   *
    */
   public List<String> getConnectionUuids() {
     return getConnectionUuids(null);
@@ -4076,11 +4101,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * Get connection ids that belong to a specific gateway
-   * 
+   *
    * @param name
    *          n
    * @return list of uuids
-   * 
+   *
    */
   public List<String> getConnectionUuids(String name) {
     List<String> ret = new ArrayList<>();
@@ -4113,11 +4138,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * takes an id returns a connection uuid
-   * 
+   *
    * @param id
    *          id
    * @return the connection
-   * 
+   *
    */
   public Connection getRoute(String id) {
     return connections.get(routeTable.getRoute(id));
@@ -4129,11 +4154,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * get gateway based on remote address of a msg e.g. msg.getRemoteId()
-   * 
+   *
    * @param remoteId
    *          remote
    * @return the gateway
-   * 
+   *
    */
   public Gateway getGatway(String remoteId) {
     // get a connection from the route
@@ -4175,10 +4200,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    *         name
    */
   static public String getFullName(String shortname) {
-    if (shortname == null) {
-      return null;
-    }
-    if (shortname.contains("@")) {
+    if (shortname == null || shortname.contains("@")) {
       // already long form
       return shortname;
     }
@@ -4257,10 +4279,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * DONT MODIFY NAME - JUST work on is Local - and InvokeOn should handle it
-   * 
+   *
    * if the incoming Message's remote Id is the (same as ours) OR (it can't be
    * found it our route table) - peel it off and treat it as local.
-   * 
+   *
    * if we have an @{id/connection} but do not have the connection - we'll peel
    * off the @{id/connection} and treat it as local if id is ours - peel it off
    * !
@@ -4361,9 +4383,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * Attempt to get the most likely valid address priority would be a lan
    * address - possibly the smallest class
-   * 
+   *
    * @return string address
-   * 
+   *
    */
   public String getAddress() {
     List<String> addresses = getIpAddresses();
@@ -4488,10 +4510,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * Main entry point for the MyRobotLab Runtime Check CmdOptions for list of
    * options -h help -v version -list jvm args -Dhttp.proxyHost=webproxy
    * f-Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
-   * 
+   *
    * @param args
    *          cmd line args from agent spawn
-   * 
+   *
    */
   public static void main(String[] args) {
 
@@ -4638,12 +4660,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * "Connection". This key should be retrievable, when a msg arrives at the
    * service which needs to be sent remotely. This key is used to get the
    * "Connection" to send the msg remotely
-   * 
+   *
    * @param string
    *          s
    * @param uuid
    *          u
-   * 
+   *
    */
   public void addLocalGatewayKey(String string, String uuid) {
     routeTable.addLocalGatewayKey(string, uuid);
@@ -4659,7 +4681,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * This helper method will create, load then start a service
-   * 
+   *
    * @param name
    *          - name of instance
    * @param type
@@ -4715,10 +4737,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   synchronized private Plan loadService(Plan plan, String name, String type, boolean start, int level) throws IOException {
 
     log.info("loading - {} {} {}", name, type, level);
-
-    if (name.equals("i01.controller3")) {
-      log.info("here");
-    }
 
     if (plan == null) {
       log.error("plan required to load a system");
@@ -4789,7 +4807,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * 
+   *
    * @param configName
    *          - filename or dir of config set
    * @param name
@@ -4814,6 +4832,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     if (check.exists()) {
       try {
         sc = CodecUtils.readServiceConfig(filename);
+      } catch (ConstructorException e) {
+        error("%s invalid %s %s. Please remove it from the file.", name, filename, e.getCause().getMessage());
       } catch (IOException e) {
         error(e);
       }
@@ -4847,9 +4867,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return id;
   }
 
+
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    RuntimeConfig config = (RuntimeConfig) super.apply(c);
+  public RuntimeConfig apply(RuntimeConfig c) {
+    super.apply(c);
+    config = c;
+    
     setLocale(config.locale);
 
     if (config.id != null) {
@@ -4905,7 +4928,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * 
    * @param configPath
    *          config set to release
-   * 
+   *
    */
   static public void releaseConfigPath(String configPath) {
     try {
@@ -4951,7 +4974,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * Saves the current runtime, all services and all configuration for each
    * service in the current "config path", if the config path does not exist
    * will error
-   * 
+   *
    * @param configName
    *          - config set name if null defaults to default
    * @param serviceName
@@ -4979,7 +5002,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       Set<String> servicesToSave = new HashSet<>();
 
       // conditional boolean to flip and save a config name to start.yml ?
-      if (startYml.enable) {      
+      if (startYml.enable) {
         startYml.id = getId();
         startYml.config = configName;
         startYml.configRoot = CONFIG_ROOT;
@@ -4995,15 +5018,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       for (String s : servicesToSave) {
-        if (CodecUtils.shortName(s).equals("i01")) {
-          log.info("here");
-        }
         ServiceInterface si = getService(s);
         // TODO - switch to save "NON FILTERED" config !!!!
         // get filtered clone of config for saving
         ServiceConfig config = si.getFilteredConfig();
         String data = CodecUtils.toYaml(config);
-        String ymlFileName = configPath + fs + CodecUtils.shortName(s) + ".yml";
+        String ymlFileName = configPath + fs + CodecUtils.getShortName(s) + ".yml";
         FileIO.toFile(ymlFileName, data.getBytes());
         info("saved %s", ymlFileName);
       }
@@ -5039,10 +5059,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * Sets the directory for the current config. This will be under configRoot +
-   * fs + configName Equivalent to setConfigName except its a static wrapper.
-   * 
+   * fs + configName. Static wrapper around setConfigName - so it can be used in
+   * the same way as all the other common static service methods
+   *
    * @param configName
-   * @return
+   *          - config dir name under data/config/{config}
+   * @return configName
    */
   public static String setConfig(String configName) {
     Runtime runtime = Runtime.getInstance();
@@ -5077,13 +5099,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * Builds the requestedAttachMatrix which is a mapping between new types and
    * their requested interfaces - interfaces they are interested in.
-   * 
+   *
    * This data should be published whenever new "Type" definitions are found
-   * 
+   *
    * @param targetedInterface
    *          - interface this add new interface to requested interfaces - add
    *          current names of services which fulfill that interface "IS ASKING"
-   * 
+   *
    */
   public void registerForInterfaceChange(String targetedInterface) {
     // boolean changed
@@ -5144,7 +5166,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * Published whenever a new service type definition if found
-   * 
+   *
    * @return
    */
   public Map<String, Set<String>> publishInterfaceTypeMatrix() {
@@ -5167,7 +5189,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * Helper method - returns if a service is started
-   * 
+   *
    * @param name
    *          - name of service
    * @return - true if started
@@ -5213,7 +5235,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     for (File f : configFiles) {
       if (!f.getName().toLowerCase().endsWith(".yml")) {
         log.info("{} - none yml file found in config set", f.getAbsolutePath());
-        continue;
       } else {
         runtime.loadFile(f.getAbsolutePath());
       }
@@ -5226,9 +5247,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @param path
    *          The full path of the file to load - this DOES NOT set the
    *          configPath
-   * @param overwrite
-   *          loading the file should overwrite any current service in the plan
-   *          - but not change the global configPath
    */
   public void loadFile(String path) {
     try {
@@ -5247,31 +5265,22 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   final public Plan getDefault(String name, String type) {
-    return ServiceConfig.getDefault(Runtime.getPlan(), name, type);
+    return ServiceConfig.getDefault(new Plan("runtime"), name, type);
   }
 
   final public Plan saveDefault(String name, String type) {
-    return saveDefault(CONFIG_ROOT + fs + name, name, type, false);
+    return saveDefault(name, name, type, false);
   }
 
   final public Plan saveDefault(String name, String type, boolean fullPlan) {
-    return saveDefault(CONFIG_ROOT + fs + name, name, type, fullPlan);
+    return saveDefault(name, name, type, fullPlan);
   }
 
-  final public Plan saveDefault(String configPath, String name, String type, boolean fullPlan) {
-    // Runtime.getPlan()
-    // File resourceDir = new File(configPath);
-    // try {
-    //// for (File file : resourceDir.listFiles()) {
-    //// if (file.getName().endsWith(".yml")) {
-    //// file.delete();
-    //// }
-    //// }
-    // } catch (Exception e) {
-    // log.error("here", e);
-    // }
+  final public Plan saveDefault(String configName, String name, String type, boolean fullPlan) {
+
     Plan plan = ServiceConfig.getDefault(new Plan(name), name, type);
-    // for (String service : plan.getConfig().keySet()) {
+    String configPath = CONFIG_ROOT + fs + configName;
+
     if (!fullPlan) {
       try {
         String filename = configPath + fs + name + ".yml";
@@ -5293,11 +5302,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         } catch (IOException e) {
           error(e);
         }
-
       }
-
     }
-    // }
     return plan;
   }
 
@@ -5322,6 +5328,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       return null;
     }
     return CONFIG_ROOT + fs + configName;
+  }
+
+  @Override
+  public RuntimeConfig getConfig() {
+    config = super.getConfig();
+    return config;
   }
 
 }

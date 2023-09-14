@@ -14,9 +14,10 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
-public class Blender extends Service {
+public class Blender extends Service<ServiceConfig> {
 
   /**
    * Control line - JSON over TCP/IP This is the single control communication
@@ -182,7 +183,7 @@ public class Blender extends Service {
       Service.sleep(3000);
       // FIXME - more general case determined by "Type"
       ServiceInterface si = Runtime.getService(name);
-      if ("org.myrobotlab.service.Arduino".equals(si.getType())) {
+      if ("org.myrobotlab.service.Arduino".equals(si.getTypeKey())) {
         // FIXME - make more general - "any" Serial device !!!
         Arduino arduino = (Arduino) Runtime.getService(name);
         if (arduino != null) {

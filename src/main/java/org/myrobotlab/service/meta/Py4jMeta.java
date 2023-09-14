@@ -1,5 +1,6 @@
 package org.myrobotlab.service.meta;
 
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -18,6 +19,11 @@ public class Py4jMeta extends MetaData {
     addCategory("programming");
     setSponsor("GroG");
     addDependency("net.sf.py4j", "py4j", "0.10.9.7");
+
+    // Used just as a Python exe redistributable.
+    // ABSOLUTELY NO JNI/JNA IS USED
+    addDependency("org.bytedeco", "cpython-platform", "3.10.8-1.5.8");
+    addDependency("org.bytedeco", "cpython", "3.10.8-1.5.8");
   }
 
 }

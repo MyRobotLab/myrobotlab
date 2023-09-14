@@ -16,12 +16,36 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
     var firstTime = true
 
     $scope.state = {
-        controller:null,
         useEncoderData: false,
-        attached: false,
         showLimits: false,
         rest: 90
     }
+
+    $scope.attachController = function(serviceName) {
+        console.info("attachController")
+        if ($scope.service.pin){
+            msg.send("setPin", $scope.service.pin)            
+        }
+        if ($scope.service.config.controller){
+            msg.send("attach", $scope.service.config.controller)
+        }
+        msg.send("broadcastState")
+    }
+
+    $scope.setController = function(serviceName) {
+        console.info("setController")
+        msg.send("setController", serviceName)
+    }
+    
+    $scope.servoOptions = {
+        interface: 'ServoController',
+        isAttached: $scope.service.isAttached,
+        // callback: function...
+        attach: $scope.setController,
+        attachName: $scope.service?.config?.controller,
+        controllerTitle: 'controller'
+    }
+
 
     // init
     $scope.min = 0
@@ -86,22 +110,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
 
-        if (service.controller){
-            // set the ui state - if it has a value
-            $scope.state.controller = service.controller
-        }
-
         $scope.service = service
-
-        // service.controller like many parts is overloaded status & control :(
-        // so the ui may change controller - but at that moment the service may not
-        // be attached - the "only" time its attached is when the service data comes
-        // directly from the service and service.controller != null
-        if (service.controller) {
-            $scope.state.attached = true
-        } else {
-            $scope.state.attached = false
-        }
 
         // done correctly - speedDisplay is a 'status' display !
         // its NOT used to set 'control' speed - control is sent
@@ -113,6 +122,10 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
             $scope.speedDisplay = 'Max'
             service.speed = 201
             // max range of slider bar
+        }
+
+        if (service?.config?.controller){
+            $scope.servoOptions.attachName = service?.config?.controller
         }
 
         $scope.idleSeconds = service.idleTimeout / 1000
@@ -131,7 +144,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
             // $scope.pos.value = service.currentInputPos
             $scope.sliderEnabled = true
 
-            // $scope.activeTabIndex = service.controller == null ? 0 : 1
+            $scope.activeTabIndex = service.isAttached?1:0
 
             $scope.state.inputMin = service.mapper.minX
             $scope.state.inputMax = service.mapper.maxX
@@ -217,14 +230,9 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
 
     $scope.setAutoDisable = function() {
         msg.send("setIdleTimeout", $scope.service.idleTimeout)
-        msg.send("setAutoDisable", $scope.service.autoDisable)
+        msg.send("setAutoDisable", $scope.service.config.autoDisable)
     }
 
-    // regrettably the onMethodMap dynamic
-    // generation of methods failed on this overloaded
-    // sweep method - there are several overloads in the
-    // Java service - although msg.sweep() was tried for ng-click
-    // for some reason Js resolved msg.sweep(null, null, null, null) :P
     $scope.sweep = function() {
         msg.send('sweep')
     }
@@ -235,13 +243,6 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
 
     $scope.setIdleTimeout = function(idleTime) {
         msg.send('setIdleTimeout', idleTime * 1000)
-    }
-
-    $scope.attachController = function() {
-        console.info("attachController")
-        msg.send("setPin", $scope.service.pin)
-        msg.send("attach", $scope.state.controller)
-        msg.send("broadcastState")
     }
 
     $scope.map = function() {

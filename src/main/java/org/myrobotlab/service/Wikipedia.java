@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.List;
 import java.util.Map;
 
@@ -59,7 +58,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class Wikipedia extends Service implements SearchPublisher, ImagePublisher, TextPublisher {
+public class Wikipedia extends Service<WikipediaConfig>  implements SearchPublisher, ImagePublisher, TextPublisher {
 
   public final static Logger log = LoggerFactory.getLogger(Wikipedia.class);
 
@@ -195,7 +194,7 @@ public class Wikipedia extends Service implements SearchPublisher, ImagePublishe
         }
 
       } else {
-        log.info("no response for %s", searchText);
+        log.info("no response for {}", searchText);
       }
       invoke("publishResults", results);
 

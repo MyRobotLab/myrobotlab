@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractPinEncoder;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.EncoderControl;
 
 /**
@@ -22,7 +23,7 @@ import org.myrobotlab.service.interfaces.EncoderControl;
  * @author kwatters
  *
  */
-public class Amt203Encoder extends AbstractPinEncoder implements EncoderControl {
+public class Amt203Encoder extends AbstractPinEncoder<ServiceConfig> implements EncoderControl {
 
   private static final long serialVersionUID = 1L;
 

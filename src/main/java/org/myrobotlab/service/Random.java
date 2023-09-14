@@ -18,7 +18,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.RandomConfig;
 import org.myrobotlab.service.config.RandomConfig.RandomMessageConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 /**
@@ -27,7 +26,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class Random extends Service {
+public class Random extends Service<RandomConfig> {
 
   private static final long serialVersionUID = 1L;
 
@@ -236,9 +235,8 @@ public class Random extends Service {
   }
 
   @Override
-  public ServiceConfig getConfig() {
-
-    RandomConfig config = (RandomConfig)super.getConfig();
+  public RandomConfig getConfig() {
+    super.getConfig();
 
     config.enabled = enabled;
 
@@ -256,13 +254,13 @@ public class Random extends Service {
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    RandomConfig config = (RandomConfig) c;
-    enabled = config.enabled;
+  public RandomConfig apply(RandomConfig c) {
+    super.apply(c);
+    enabled = c.enabled;
 
     try {
-      for (String key : config.randomMessages.keySet()) {
-        RandomMessageConfig msgc = config.randomMessages.get(key);
+      for (String key : c.randomMessages.keySet()) {
+        RandomMessageConfig msgc = c.randomMessages.get(key);
         addRandom(msgc.minIntervalMs, msgc.maxIntervalMs, key.substring(0, key.lastIndexOf(".")), key.substring(key.lastIndexOf(".") + 1), msgc.data);
         if (!msgc.enabled) {
           disable(key);

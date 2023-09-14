@@ -5,6 +5,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
@@ -16,7 +17,7 @@ import org.slf4j.Logger;
  * MultiWii is a general purpose software to control a multirotor RC model.
  * http://www.multiwii.com/
  */
-public class MultiWii extends Service {
+public class MultiWii extends Service<ServiceConfig> {
 
   transient public SerialDevice serial;
 

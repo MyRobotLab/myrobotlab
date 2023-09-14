@@ -1,4 +1,5 @@
 !!org.myrobotlab.service.config.WebkitSpeechRecognitionConfig
+afterSpeakingPauseMs: 2000
 listeners: null
 listening: false
 peers: null
@@ -6,3 +7,4 @@ recording: false
 textListeners: null
 type: WebkitSpeechRecognition
 wakeWord: null
+wakeWordIdleTimeoutSeconds: 10

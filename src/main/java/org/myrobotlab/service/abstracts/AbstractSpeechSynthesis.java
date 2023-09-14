@@ -19,7 +19,6 @@ import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.AudioFile;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Security;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
@@ -33,7 +32,7 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public abstract class AbstractSpeechSynthesis extends Service implements SpeechSynthesis, TextListener, KeyConsumer, AudioListener {
+public abstract class AbstractSpeechSynthesis<C extends SpeechSynthesisConfig> extends Service<C> implements SpeechSynthesis, TextListener, KeyConsumer, AudioListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -1112,27 +1111,27 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    SpeechSynthesisConfig config = (SpeechSynthesisConfig) super.apply(c);
+  public C apply(C c) {
+    super.apply(c);
 
-    setMute(config.mute);
+    setMute(c.mute);
 
-    setBlocking(config.blocking);
+    setBlocking(c.blocking);
 
-    if (config.substitutions != null) {
-      for (String n : config.substitutions.keySet()) {
-        replaceWord(n, config.substitutions.get(n));
+    if (c.substitutions != null) {
+      for (String n : c.substitutions.keySet()) {
+        replaceWord(n, c.substitutions.get(n));
       }
     }
     // some systems require querying set of voices
     getVoices();
     
-    if (config.voice != null) {
-      setVoice(config.voice);
+    if (c.voice != null) {
+      setVoice(c.voice);
     }
 
-    if (config.speechRecognizers != null) {
-      for (String name : config.speechRecognizers) {
+    if (c.speechRecognizers != null) {
+      for (String name : c.speechRecognizers) {
         try {
           attachSpeechListener(name);
         } catch (Exception e) {
@@ -1154,11 +1153,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    SpeechSynthesisConfig c = (SpeechSynthesisConfig) super.getConfig();
+  public C getConfig() {
+    C c = super.getConfig();
     c.mute = mute;
     c.blocking = blocking;
-    if (substitutions != null && substitutions.size() > 0) {
+    if (substitutions != null && !substitutions.isEmpty()) {
       c.substitutions = new HashMap<>();
       c.substitutions.putAll(substitutions);
     }
@@ -1166,7 +1165,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       c.voice = voice.name;
     }
     Set<String> listeners = getAttached("publishStartSpeaking");
-    c.speechRecognizers = listeners.toArray(new String[listeners.size()]);
+    c.speechRecognizers = listeners.toArray(new String[0]);
 
     return c;
   }

@@ -346,7 +346,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
      */
     this.describe = function(request) {
         console.log('--> got describe: and set jsRuntimeMethodCallbackMap')
-        let hello = JSON.parse(request.data[1])
+        hello = request.data[1]
 
         remotePlatform = hello.platform
         // FIXME - remove this - there aren't 1 remoteId there are many !
@@ -603,7 +603,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
 
     this.getService = function(name) {
-
+        id = _self.remoteId
         if (registry[_self.getFullName(name)] == null) {
             return null
         }
@@ -872,7 +872,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
             let properties = []
 
-            let exclude = ['serviceType', 'id', 'simpleName', 'interfaceSet', 'serviceClass', 'statusBroadcastLimitMs', 'isRunning', 'name', 'creationOrder', 'serviceType']
+            let exclude = ['serviceType', 'id', 'simpleName', 'interfaceSet', 'typeKey', 'statusBroadcastLimitMs', 'isRunning', 'name', 'creationOrder', 'serviceType']
 
             // FIXME - extract from javadoc !
             let info = {
@@ -943,7 +943,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             lastPosY += 40
             zIndex++
             //construct panel & add it to dictionary
-            panels[fullname] = createPanel(fullname, service.serviceClass, 15, lastPosY, 800, 0, zIndex)
+            panels[fullname] = createPanel(fullname, service.typeKey, 15, lastPosY, 800, 0, zIndex)
             return panels[fullname]
         }
 
@@ -959,10 +959,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         let createPanel = function(fullname, type, x, y, width, height, zIndex, data) {
 
+            let displayName = fullname.endsWith(_self.remoteId)?_self.getShortName(fullname):fullname
+            console.error('createPanel', _self.remoteId, displayName)
             let panel = {
                 simpleName: _self.getSimpleName(type),
                 name: fullname,
-                displayName: _self.getShortName(fullname),
+                displayName: displayName,
 
                 //the state the loading of the template is in (loading, loaded, notfound) - probably can be removed
                 templatestatus: null,
@@ -1107,7 +1109,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             }
 
             panels[newPanel.name].name = newPanel.name
-            panels[newPanel.name].displayName = _self.getShortName(newPanel.name)
+            panels[newPanel.name].displayName = _self.getShortName(newPanel.name) 
             if (newPanel.simpleName) {
                 panels[newPanel.name].simpleName = newPanel.simpleName
             }
@@ -1369,11 +1371,11 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                                 //                                console.log("here")
                                 // expected 'framework' level subscriptions - we should at a minimum
                                 // be interested in state and status changes of the services
-                                _self.sendTo(name, "addListener", "publishStatus", 'runtime@' + _self.id)
-                                _self.sendTo(name, "addListener", "publishState", 'runtime@' + _self.id)
-                                _self.sendTo(name, "addListener", "getMethodMap", 'runtime@' + _self.id)
+                                _self.sendTo(_self.getFullName(name), "addListener", "publishStatus", 'runtime@' + _self.id)
+                                _self.sendTo(_self.getFullName(name), "addListener", "publishState", 'runtime@' + _self.id)
+                                _self.sendTo(_self.getFullName(name), "addListener", "getMethodMap", 'runtime@' + _self.id)
 
-                                _self.sendTo(name, "broadcastState")
+                                _self.sendTo(_self.getFullName(name), "broadcastState")
                                 // below we subscribe to the Angular callbacks - where anything sent
                                 // back from the webgui with our service's name on the message - send
                                 // it to our onMsg method
@@ -1463,41 +1465,40 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 return arrayOfServices
             },
 
-            controllerscope: _self.controllerscope,
-            setSearchFunction: _self.setSearchFunction,
-            setNavCtrl: _self.setNavCtrl,
-            setTabsViewCtrl: _self.setTabsViewCtrl,
-            error: _self.error,
             changeTab: _self.changeTab,
-            goBack: _self.goBack,
-            search: _self.search,
+            controllerscope: _self.controllerscope,
             createMessage: _self.createMessage,
             display: _self.display,
+            error: _self.error,
+            getDisplayName: _self.getDisplayName,
             getDisplayImages: getDisplayImages,
-            setDisplayCallback: setDisplayCallback,
-            subscribeToUpdates: _self.subscribeToUpdates,
-            subscribeToRegistered: _self.subscribeToRegistered,
-            subscribeToReleased: _self.subscribeToReleased,
-            getPanelList: _self.getPanelList,
+            getFullName: _self.getFullName,
             getPanel: _self.getPanel,
-            sendTo: _self.sendTo,
+            getPanelList: _self.getPanelList,
+            getProperties: _self.getProperties,
             getShortName: _self.getShortName,
             getSimpleName: _self.getSimpleName,
             getStyle: _self.getStyle,
-            subscribe: _self.subscribe,
-            unsubscribe: _self.unsubscribe,
+            goBack: _self.goBack,
             isPeerStarted: _self.isPeerStarted,
-            subscribeToService: _self.subscribeToService,
-            getFullName: _self.getFullName,
-            sendBlockingMessage: _self.sendBlockingMessage,
-            subscribeConnected: _self.subscribeConnected,
-            subscribeToMethod: _self.subscribeToMethod,
-            subscribeToServiceMethod: _self.subscribeToServiceMethod,
-            subscribeTo: _self.subscribeTo,
-            // better name
-            getProperties: _self.getProperties,
+            search: _self.search,
             sendMessage: _self.sendMessage,
-            // setViewType: _self.setViewType,
+            sendBlockingMessage: _self.sendBlockingMessage,
+            sendTo: _self.sendTo,
+            setNavCtrl: _self.setNavCtrl,
+            setDisplayCallback: setDisplayCallback,
+            setSearchFunction: _self.setSearchFunction,
+            setTabsViewCtrl: _self.setTabsViewCtrl,
+            subscribe: _self.subscribe,
+            subscribeConnected: _self.subscribeConnected,
+            subscribeTo: _self.subscribeTo,
+            subscribeToMethod: _self.subscribeToMethod,
+            subscribeToReleased: _self.subscribeToReleased,
+            subscribeToRegistered: _self.subscribeToRegistered,
+            subscribeToService: _self.subscribeToService,
+            subscribeToServiceMethod: _self.subscribeToServiceMethod,
+            subscribeToUpdates: _self.subscribeToUpdates,
+            unsubscribe: _self.unsubscribe,
             interfaceToPossibleServices: _self.interfaceToPossibleServices
 
         }
@@ -1570,7 +1571,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             "name": "runtime",
             "id": "webgui-client-1234-5678",
             "simpleName": "Runtime",
-            "serviceClass": "org.myrobotlab.service.Runtime",
+            "typeKey": "org.myrobotlab.service.Runtime",
             "isRunning": true,
             "interfaceSet": {
                 "org.myrobotlab.client.Client$RemoteMessageHandler": "org.myrobotlab.client.Client$RemoteMessageHandler",

@@ -1,5 +1,4 @@
 !!org.myrobotlab.service.config.LeapMotionConfig
-# mappings for all fingers
 leftIndex:
   maxIn: 180
   maxOut: 180
@@ -25,29 +24,31 @@ leftThumb:
   maxOut: 180
   minIn: 0
   minOut: 0
-rightIndex: # minIn 10 maxIn 100 minOut 180 maxOut 0
-  maxIn: 100
-  maxOut: 0
-  minIn: 10
-  minOut: 180
+listeners: null
+peers: null
+rightIndex:
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
 rightMiddle:
-  maxIn: 100
-  maxOut: 0
-  minIn: 10
-  minOut: 180
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
 rightPinky:
-  maxIn: 100
-  maxOut: 0
-  minIn: 10
-  minOut: 180
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
 rightRing:
-  maxIn: 100
-  maxOut: 0
-  minIn: 10
-  minOut: 180
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
 rightThumb:
-  maxIn: 100
-  maxOut: 0
-  minIn: 10
-  minOut: 180
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
 type: LeapMotion

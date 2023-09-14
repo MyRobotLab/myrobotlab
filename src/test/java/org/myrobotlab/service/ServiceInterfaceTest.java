@@ -76,7 +76,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     Assert.assertNotNull(foo.getDescription());
     Assert.assertNotNull(foo.getName());
     Assert.assertNotNull(foo.getSimpleName());
-    Assert.assertNotNull(foo.getType());
+    Assert.assertNotNull(foo.getTypeKey());
 
     // TODO: add a bunch more tests here!
     foo.startService();

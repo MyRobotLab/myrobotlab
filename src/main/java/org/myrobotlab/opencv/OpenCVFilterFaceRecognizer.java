@@ -81,6 +81,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   transient private FaceRecognizer faceRecognizer;
   private boolean trained = false;
   // the directory to store the training images.
+  // FIXME - this is the wrong place it should be data/OpenCV/training
   private String trainingDir = "training";
   private int modelSizeX = 256;
   private int modelSizeY = 256;

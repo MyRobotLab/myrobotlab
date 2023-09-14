@@ -38,6 +38,7 @@ import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.abstracts.AbstractServo;
+import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -75,7 +76,7 @@ import org.slf4j.Logger;
  *         TODO : move is not accurate ( 1° step seem not possible )
  */
 
-public class DiyServo extends AbstractServo implements PinListener, ServiceLifeCycleListener {
+public class DiyServo extends AbstractServo<ServoConfig> implements PinListener, ServiceLifeCycleListener {
 
   double lastOutput = 0.0;
   /**
@@ -259,11 +260,6 @@ public class DiyServo extends AbstractServo implements PinListener, ServiceLifeC
   @Override
   public long getLastActivityTime() {
     return lastActivityTimeTs;
-  }
-
-  // FIXME - change to enabled()
-  public Boolean isAttached() {
-    return isAttached;
   }
 
   public boolean isControllerSet() {
@@ -560,13 +556,11 @@ public class DiyServo extends AbstractServo implements PinListener, ServiceLifeC
     this.encoderControl = encoder;
   }
 
-  @Override
-  public void attach(String pinArrayControlName, Integer pin) {
-    // myServo = (DiyServo) Runtime.getService(boundServiceName);
-    attach((PinArrayControl) Runtime.getService(pinArrayControlName), (int) pin);
-  }
-
-  public void attach(PinArrayControl pinArrayControl, int pin) {
+  public void attach(PinArrayControl pinArrayControl, int pin) throws Exception {
+    if (pinArrayControl == null) {
+      error("pinArrayCOntrol cannot be null");
+      return;
+    }
     this.pinArrayControl = pinArrayControl;
     if (pinArrayControl != null) {
       pinControlName = pinArrayControl.getName();
@@ -586,8 +580,8 @@ public class DiyServo extends AbstractServo implements PinListener, ServiceLifeC
     // %s",pinArrayControl.getClass(), pinArrayControl.getName(),resolution));
 
     int rate = 1000 / sampleTime;
-    pinArrayControl.attachPinListener(this, pin);
-    pinArrayControl.enablePin(pin, rate);
+    pinArrayControl.attach(getName());
+    pinArrayControl.enablePin(this.pin, rate);
     broadcastState();
   }
 

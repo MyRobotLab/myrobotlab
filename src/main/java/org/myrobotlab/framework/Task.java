@@ -64,7 +64,7 @@ public class Task extends TimerTask {
       Task t = new Task(this);
       // clear history list - becomes "new" message
       t.msg.historyList.clear();
-      Timer timer = myService.tasks.get(taskName);
+      Timer timer = (Timer) myService.tasks.get(taskName);
       if (timer != null) {
         // timer = new Timer(String.format("%s.timer", getName()));
         try {

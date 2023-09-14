@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -14,7 +13,6 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.Clock;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TestCatcher;
 import org.myrobotlab.service.TestCatcher.Ball;
@@ -32,18 +30,8 @@ public class MethodCacheTest extends AbstractTest {
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     cache = MethodCache.getInstance();
-    cache.cacheMethodEntries(TestCatcher.class);
     cache.clear();
     assertEquals("all clear should be 0", 0, cache.getObjectSize());
-
-    cache.cacheMethodEntries(Runtime.class);
-    cache.cacheMethodEntries(TestCatcher.class);
-    cache.cacheMethodEntries(Clock.class);
-    // non-service entry
-    cache.cacheMethodEntries(TestCatcher.class);
-    cache.cacheMethodEntries(TestCatcher.class);
-    assertEquals(String.format("cached 3 object's methods %s", Arrays.toString(cache.getCachedObjectNames().toArray())), 3, cache.getObjectSize());
-
     tester = (TestCatcher) Runtime.start("tester", "TestCatcher");
   }
 

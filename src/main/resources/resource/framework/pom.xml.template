@@ -141,6 +141,10 @@
           <exclude>**/*.java</exclude>
         </excludes>
       </testResource>
+      <testResource>
+        <directory>src/main/resources</directory>
+        <targetPath>${project.basedir}</targetPath>
+      </testResource>
     </testResources>
 
     <!-- define the plugin -->
@@ -370,7 +374,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <version>2.22.2</version>
         <configuration>
-          <argLine>-Djava.library.path=libraries/native -Djna.library.path=libraries/native ${argLine}</argLine>
+          <argLine>-Djava.library.path=libraries/native -Djna.library.path=libraries/native</argLine>
           <includes>
             <include>**/*Test.java</include>
           </includes>
@@ -378,12 +382,6 @@
             <exclude>**/integration/*</exclude>
           </excludes>
              <systemPropertyVariables>
-                  <!-- 
-                  <propertyName>java.library.path</propertyName>
-                  <buildDirectory>libraries/native</buildDirectory>
-                  <propertyName>jna.library.path</propertyName>
-                  <buildDirectory>libraries/native</buildDirectory>
-                   -->
               </systemPropertyVariables>
         </configuration>
       </plugin>

@@ -1,5 +1,5 @@
-angular.module('mrlapp.service.IntroGui', []).controller('IntroGuiCtrl', ['$scope', '$log', 'mrl', '$timeout', function($scope, $log, mrl, $timeout) {
-    $log.info('IntroGuiCtrl')
+angular.module('mrlapp.service.IntroGui', []).controller('IntroGuiCtrl', ['$scope', 'mrl', '$timeout', function($scope, mrl, $timeout) {
+    console.info('IntroGuiCtrl')
     var _self = this
     var msg = this.msg
     $scope.mrl = mrl
@@ -63,6 +63,11 @@ angular.module('mrlapp.service.IntroGui', []).controller('IntroGuiCtrl', ['$scop
         let ret = $scope.service.props[key]
         return ret
     }
+
+    $scope.start = function(name, type) {
+        msg.sendTo('runtime', 'start', name, type)
+    }
+
 
     // this method initializes subPanels when a new service becomes available
     this.onRegistered = function(panel) {

@@ -1,4 +1,4 @@
-name: myrobotlab ci/cd
+name: Java CI
 
 on: [push]
 
@@ -9,19 +9,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: setup jdk 11
+      - name: Set up JDK 11
         uses: actions/setup-java@v3
 
         with:
           java-version: '11'
           distribution: 'adopt'
-      # - name: Test with Maven
-      #   run: mvn test -Dtest=!org.myrobotlab.opencv.OpenCVFilterDL4JTest
-      # - name: build with maven
-      #   run: mvn --batch-mode --update-snapshots -DskipTests package
-          run: mvn -DskipTests package
-      - name: build with maven
-        # run: mvn --version
-        # run: mvn -Dtest=Service* package
-        # run: mvn --batch-mode --update-snapshots package
-          run: echo "I wish I could test here"
+      - name: Build with Maven
+        run: mvn --batch-mode -Dtest=!**/OpenCV* test -X

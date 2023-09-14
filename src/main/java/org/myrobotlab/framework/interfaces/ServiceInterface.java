@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MRLListener;
+import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Peer;
@@ -17,11 +18,11 @@ import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher, 
-    ServiceStatus, TaskManager, Attachable, MessageInvoker, Comparable<ServiceInterface> {
+public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher,
+    ServiceStatus, TaskManager, Attachable, MessageInvoker, Comparable<ServiceInterface>/*, ConfigurableService<ServiceConfig> */{
 
   // does this work ?
-  public final static Logger log = LoggerFactory.getLogger(Service.class);
+  Logger log = LoggerFactory.getLogger(Service.class);
 
   /**
    * When set service will attempt to provide services with no hardware
@@ -33,7 +34,7 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    * @return the value
    * 
    */
-  public boolean setVirtual(boolean b);
+  boolean setVirtual(boolean b);
 
   /**
    * check to see if the service is running in a virtual mode
@@ -41,44 +42,46 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    * @return true if in virtual mode.
    * 
    */
-  public boolean isVirtual();
+  boolean isVirtual();
 
-  public String[] getDeclaredMethodNames();
+  String[] getDeclaredMethodNames();
 
-  public Method[] getDeclaredMethods();
+  Method[] getDeclaredMethods();
 
-  public URI getInstanceId();
+  URI getInstanceId();
 
-  public String[] getMethodNames();
+  String[] getMethodNames();
 
-  public Method[] getMethods();
+  Method[] getMethods();
 
-  public List<MRLListener> getNotifyList(String key);
+  List<MRLListener> getNotifyList(String key);
 
-  public List<String> getNotifyListKeySet();
+  List<String> getNotifyListKeySet();
 
-  public Inbox getInbox();
+  Inbox getInbox();
 
-  public Outbox getOutbox();
+  Outbox getOutbox();
 
   @Override
-  public String getSimpleName();
+  String getSimpleName();
 
   /**
    * equivalent to getClass().getCanonicalName()
-   * 
+   *
    * @return
    */
-  public String getType();
+  String getTypeKey();
+
 
   /**
+   * Does the meta data of this service define peers
    * Keys to Peers - the keys are string constants the service uses to refer to a
    * Peer service. The key never changes. However, the Peer's name and type can.
    * This returns all peers for a service.
    * 
    * @return
    */
-  public Map<String, Peer> getPeers();
+  Map<String, Peer> getPeers();
 
   /**
    * Returns peers keys. Peer key is the hardcoded key a composite service
@@ -86,7 +89,7 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    * 
    * @return
    */
-  public Set<String> getPeerKeys();
+  Set<String> getPeerKeys();
 
   /**
    * Returns the peer key if a name is supplied and matches a peer name
@@ -95,57 +98,54 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    *          - service name
    * @return - coorisponding peer key if it exists
    */
-  public String getPeerKey(String name);
+  String getPeerKey(String name);
 
   /**
    * Service life-cycle method: releaseService will call stopService, release
    * its peers, do any derived business logic to release resources, then
    * un-register itself
    */
-  public void releaseService();
+  void releaseService();
 
   /**
    * called by runtime when system is shutting down a service can use this
    * method when it has to do some "ordered" cleanup
    */
-  public void preShutdown();
+  void preShutdown();
 
   /**
    * asked by the framework - to determine if the service needs to be secure
    * 
    * @return true/false
    */
-  public boolean requiresSecurity();
+  boolean requiresSecurity();
 
-  public void setInstanceId(URI uri);
+  void setInstanceId(URI uri);
 
   /**
    * Service life cycle method - calls create, and starts any necessary
    * resources to function
    */
-  public void startService();
+  void startService();
 
   /**
    * @return get a services current config
    *
    */
-  public ServiceConfig getConfig();
+  ServiceConfig getConfig();
 
   /**
-   * sets config - just before apply
-   * 
-   * @param config
+   * reflectively sets a part of config
+   *   
+   * @param fieldname
+   * @param value
+   * @throws IllegalArgumentException
+   * @throws IllegalAccessException
+   * @throws NoSuchFieldException
+   * @throws SecurityException
    */
-  public void setConfig(ServiceConfig config);
+  void setConfigValue(String fieldname, Object value)  throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException;
 
-  /**
-   * Configure a service by merging in configuration
-   * 
-   * @param config
-   *          the config to load
-   * @return the loaded config.
-   */
-  public ServiceConfig apply(ServiceConfig config);
 
   /**
    * Service life-cycle method, stops the inbox and outbox threads - typically
@@ -153,42 +153,42 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    * messaging from flowing in or out of this service - which is handled in the
    * base Service class. Most times this method will not need to be overriden
    */
-  public void stopService();
+  void stopService();
 
-  public String clearLastError();
+  String clearLastError();
 
-  public boolean hasError();
+  boolean hasError();
 
-  public void out(String method, Object retobj);
+  void out(String method, Object retobj);
 
-  public boolean isRuntime();
+  boolean isRuntime();
 
-  public String getDescription();
+  String getDescription();
 
-  public Map<String, MethodEntry> getMethodMap();
+  Map<String, MethodEntry> getMethodMap();
 
-  public boolean isReady();
+  boolean isReady();
 
-  public boolean isRunning();
+  boolean isRunning();
 
   /**
    * @param creationCount
    *          the order this service was created in relation to the other
    *          service
    */
-  public void setOrder(int creationCount);
+  void setOrder(int creationCount);
 
-  public String getId();
+  String getId();
 
-  public String getFullName();
+  String getFullName();
 
-  public void loadLocalizations();
+  void loadLocalizations();
 
-  public void setLocale(String code);
+  void setLocale(String code);
 
-  public int getCreationOrder();
+  int getCreationOrder();
 
-  public MetaData getMetaData();
+  MetaData getMetaData();
 
   /**
    * start a peer using a peerKey E.g. inside InMoov service startPeer("head")
@@ -196,7 +196,7 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    * @param peerKey
    * @return
    */
-  public ServiceInterface startPeer(String peerKey);
+  ServiceInterface startPeer(String peerKey);
 
   /**
    * setting an instance id on the service - this represents the running
@@ -204,12 +204,26 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    * 
    * @param id
    */
-  public void setId(String id);
+  void setId(String id);
 
   /**
    * Get a clone of config that is filtered based on service preference
+   * 
    * @return
    */
-  public ServiceConfig getFilteredConfig();
+  ServiceConfig getFilteredConfig();
 
+  /**
+   * Adds the subscribers specified in the Service.listener as listeners to
+   * this service.
+   * 
+   * @param config
+   * @return
+   */
+  public ServiceConfig addConfigListeners(ServiceConfig config);
+
+  /**
+   * get all the subscriptions to this service
+   */
+  public Map<String, List<MRLListener>>  getNotifyList();
 }

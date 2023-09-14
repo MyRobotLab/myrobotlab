@@ -41,9 +41,6 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
         properties: false
     }
 
-    // grab defaults.
-    $scope.newUserName = $scope.service.currentUserName
-
     $scope.chatLog = []
 
     // start info status
@@ -54,7 +51,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
         // use another scope var to transfer/merge selection
         // from user - service.currentSession is always read-only
         // all service data should never be written to, only read from
-        $scope.currentUserName = service.currentUserName
+        $scope.currentUserName = service.config.currentUserName
         $scope.service = service
         $scope.currentSessionKey = $scope.getCurrentSessionKey()
 
@@ -124,7 +121,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
             var textData = data
             $scope.chatLog.unshift({
                 type: 'Bot',
-                name: $scope.service.currentBotName,
+                name: $scope.service.config.currentBotName,
                 text: $sce.trustAsHtml(data.msg)
             })
             $scope.lastResponse = textData
@@ -169,22 +166,22 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     $scope.getAimlFile = function(filename) {
         $scope.aimlFile = filename
         console.log('getting aiml file ' + filename)
-        msg.send('getAimlFile', $scope.service.currentBotName, filename)
+        msg.send('getAimlFile', $scope.service.config.currentBotName, filename)
         $scope.tabs.selected = 2
     }
 
     $scope.saveAimlFile = function() {
-        msg.send("saveAimlFile", $scope.service.currentBotName, $scope.aimlFile, $scope.aimlFileData.data)
+        msg.send("saveAimlFile", $scope.service.config.currentBotName, $scope.aimlFile, $scope.aimlFileData.data)
     }
 
     $scope.setSessionKey = function() {
-        msg.send("setCurrentUserName", $scope.service.currentUserName)
-        msg.send("setCurrentBotName", $scope.service.currentBotName)
+        msg.send("setCurrentUserName", $scope.service.config.currentUserName)
+        msg.send("setCurrentBotName", $scope.service.config.currentBotName)
     }
 
     $scope.getBotInfo = function() {
         if ($scope.service && $scope.service.bots){
-            return $scope.service.bots[$scope.service.currentBotName]
+            return $scope.service.bots[$scope.service.config.currentBotName]
         }
         return null
     }
@@ -200,7 +197,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     }
 
     $scope.getCurrentSessionKey = function() {
-        return $scope.service.currentUserName + ' <-> ' + $scope.service.currentBotName
+        return $scope.service.config.currentUserName + ' <-> ' + $scope.service.config.currentBotName
     }
 
     $scope.test = function(session, utterance) {
@@ -208,8 +205,8 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     }
 
     $scope.getSessionResponse = function(utterance) {
-        console.info("SESSION GET RESPONSE (" + $scope.currentUserName + " " + $scope.service.currentBotName + ")")
-        $scope.getResponse($scope.currentUserName, $scope.service.currentBotName, utterance)
+        console.info("SESSION GET RESPONSE (" + $scope.currentUserName + " " + $scope.service.config.currentBotName + ")")
+        $scope.getResponse($scope.currentUserName, $scope.service.config.currentBotName, utterance)
     }
 
     $scope.getResponse = function(username, botname, utterance) {
@@ -254,7 +251,9 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
 
     $scope.getProperty = function(propName) {
         try {
-            return $scope.getBotInfo()['properties'][propName]
+            if ($scope.getBotInfo() && $scope.getBotInfo()['properties']){
+                return $scope.getBotInfo()['properties'][propName]                
+            }
         } catch (error){
             console.warn('getProperty(' + propName + ') not found')
             return null
@@ -277,6 +276,14 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
         console.log('aceChanged')
     }
 
+    $scope.getBotPath = function(e) {
+        if ($scope.service?.bots && $scope.service?.bots[$scope.service?.config?.currentBotName]?.path){
+            return $scope.service?.bots[$scope.service?.config.currentBotName].path
+        }
+        return null
+    }
+    
+    
     $scope.getStatusLabel = function(level) {
         if (level == 'error') {
             return 'row label col-md-12 label-danger'

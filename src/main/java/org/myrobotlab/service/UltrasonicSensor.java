@@ -12,7 +12,6 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.UltrasonicSensorConfig;
 import org.myrobotlab.service.data.RangeData;
 import org.myrobotlab.service.interfaces.RangeListener;
@@ -30,7 +29,7 @@ import org.slf4j.Logger;
  * UltrasonicSensor implements RangeListener just for testing purposes
  *
  */
-public class UltrasonicSensor extends Service implements RangeListener, RangePublisher, UltrasonicSensorControl {
+public class UltrasonicSensor extends Service<UltrasonicSensorConfig> implements RangeListener, RangePublisher, UltrasonicSensorControl {
 
   private final static Logger log = LoggerFactory.getLogger(UltrasonicSensor.class);
 
@@ -162,7 +161,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
   @Override
   public UltrasonicSensorConfig getConfig() {
 
-    UltrasonicSensorConfig config = (UltrasonicSensorConfig)super.getConfig();
+    super.getConfig();
     // FIXME - remove member variables use config directly
     config.controller = controllerName;
     config.triggerPin = trigPin;
@@ -234,21 +233,21 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    UltrasonicSensorConfig config = (UltrasonicSensorConfig) super.apply(c);
+  public UltrasonicSensorConfig apply(UltrasonicSensorConfig c) {
+    super.apply(c);
 
-    if (config.triggerPin != null)
-      setTriggerPin(config.triggerPin);
+    if (c.triggerPin != null)
+      setTriggerPin(c.triggerPin);
 
-    if (config.echoPin != null)
-      setEchoPin(config.echoPin);
+    if (c.echoPin != null)
+      setEchoPin(c.echoPin);
 
-    if (config.timeout != null)
-      timeout = config.timeout;
+    if (c.timeout != null)
+      timeout = c.timeout;
 
-    if (config.controller != null) {
+    if (c.controller != null) {
       try {
-        attach(config.controller);
+        attach(c.controller);
       } catch (Exception e) {
         error(e);
       }
