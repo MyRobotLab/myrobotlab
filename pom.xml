@@ -163,26 +163,14 @@
 <!-- Duplicate entry for com.squareup.okhttp3-okhttp-3.9.0 skipping -->
 <!-- AzureTranslator end -->
 
-<!-- BoofCv begin -->
+<!-- BoofCV begin -->
   <dependency>
     <groupId>org.boofcv</groupId>
-    <artifactId>boofcv-core</artifactId>
-    <version>0.31</version>
+    <artifactId>boofcv-all</artifactId>
+    <version>0.40.1</version>
     <scope>provided</scope>
   </dependency>
-  <dependency>
-    <groupId>org.boofcv</groupId>
-    <artifactId>boofcv-swing</artifactId>
-    <version>0.31</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.boofcv</groupId>
-    <artifactId>boofcv-openkinect</artifactId>
-    <version>0.31</version>
-    <scope>provided</scope>
-  </dependency>
-<!-- BoofCv end -->
+<!-- BoofCV end -->
 
 <!-- ChessGame begin -->
   <dependency>
@@ -299,8 +287,58 @@
   <dependency>
     <groupId>org.apache.tika</groupId>
     <artifactId>tika-core</artifactId>
-    <version>1.22</version>
+    <version>2.8.0</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.tika</groupId>
+    <artifactId>tika-parser-audiovideo-module</artifactId>
+    <version>2.8.0</version>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>org.apache.opennlp</groupId>
@@ -1603,6 +1641,7 @@
   </dependency>
 <!-- Duplicate entry for org.bytedeco-cpython-platform-3.10.8-1.5.8 skipping -->
 <!-- Duplicate entry for org.bytedeco-cpython-3.10.8-1.5.8 skipping -->
+
 <!-- Py4j end -->
 
 <!-- Python begin -->
@@ -1652,11 +1691,6 @@
     <groupId>ch.qos.logback</groupId>
     <artifactId>logback-classic</artifactId>
     <version>1.2.3</version>
-  </dependency>
-  <dependency>
-    <groupId>com.google.code.gson</groupId>
-    <artifactId>gson</artifactId>
-    <version>2.8.5</version>
   </dependency>
   <dependency>
     <groupId>net.bytebuddy</groupId>

@@ -165,7 +165,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
                         // move to last position...
                         ctx.moveTo(trace.x0, trace.y0)
                         trace.x1++
-                        trace.y1 = c
+                        trace.y1 = y
                         // draw line to x1,y1 
                         ctx.lineTo(trace.x1, trace.y1)
                         // save current values
@@ -201,7 +201,6 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
                     _self.ctx.fillText(pinDef.name + (' AVG ' + (stats.totalValue / stats.totalSample)).substring(0, 11) + ' MIN ' + stats.min + ' MAX ' + stats.max, 10, 18)
                 }
             }
-
             // RENAME eanbleTrace - FIXME read values vs write values | ALL values from service not from ui !! - ui only sends commands
             scope.activateTrace = function(pinDef) {
                 var trace = scope.oscope.traces[pinDef.pin]
@@ -253,7 +252,6 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
                     }
                 }
             }
-
             scope.toggleWriteButton = function(pinDef) {
                 var highlight = trace.color.getOriginalInput()
                 if (trace.state) {
@@ -274,7 +272,6 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', function(mrl) {
                     }
                 }
             }
-
             // FIXME FIXME FIXME ->> THIS SHOULD WORK subscribeToServiceMethod  <- but doesnt
             mrl.subscribeToService(_self.onMsg, name)
             // this siphons off a single subscribe to the webgui

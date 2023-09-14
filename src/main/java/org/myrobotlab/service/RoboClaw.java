@@ -16,6 +16,7 @@ import org.myrobotlab.sensor.EncoderPublisher;
 import org.myrobotlab.serial.CRC;
 import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.abstracts.AbstractMotorController;
+import org.myrobotlab.service.config.MotorConfig;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PortConnector;
@@ -54,7 +55,7 @@ import org.slf4j.Logger;
  *         this value IS correct
  * 
  */
-public class RoboClaw extends AbstractMotorController implements EncoderPublisher, PortConnector, MotorController, SerialDataListener {
+public class RoboClaw extends AbstractMotorController<MotorConfig> implements EncoderPublisher, PortConnector, MotorController, SerialDataListener {
 
   private static final long serialVersionUID = 1L;
 

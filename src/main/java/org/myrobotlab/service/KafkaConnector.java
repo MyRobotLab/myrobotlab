@@ -7,6 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.service.config.ServiceConfig;
 
 /**
  * A kafka connector that can subscribe to a string/string kafka stopic and
@@ -19,7 +20,7 @@ import org.myrobotlab.framework.Service;
  * @author kwatters
  *
  */
-public class KafkaConnector extends Service {
+public class KafkaConnector extends Service<ServiceConfig> {
 
   public String bootstrapServers = "localhost:9092";
   public String groupId = "test";

@@ -95,8 +95,8 @@ import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.cv.CvData;
-import org.myrobotlab.cv.CvFilter;
+import org.myrobotlab.cv.CVData;
+import org.myrobotlab.cv.CVFilter;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.document.Classifications;
 import org.myrobotlab.framework.Instantiator;
@@ -125,7 +125,6 @@ import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
 import org.myrobotlab.service.config.OpenCVConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.interfaces.ImageListener;
 import org.myrobotlab.service.interfaces.ImagePublisher;
@@ -144,7 +143,7 @@ import org.slf4j.Logger;
  * Audet : https://github.com/bytedeco/javacv
  * 
  */
-public class OpenCV extends AbstractComputerVision implements ImagePublisher {
+public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements ImagePublisher {
 
   int vpId = 0;
 
@@ -550,7 +549,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
 
   boolean undockDisplay = false;
 
-  final private VideoProcessor vp = new VideoProcessor();
+  final transient private VideoProcessor vp = new VideoProcessor();
 
   Integer width = null;
 
@@ -652,15 +651,19 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
    *                   - name of filter
    * @return the filter
    */
-  public CvFilter addFilter(String filterName) {
+  public CVFilter addFilter(String filterName) {
     String filterType = filterName.substring(0, 1).toUpperCase() + filterName.substring(1);
     return addFilter(filterName, filterType);
   }
 
   @Override
-  public CvFilter addFilter(String name, String filterType) {
+  public CVFilter addFilter(String name, String filterType) {
     String type = String.format("org.myrobotlab.opencv.OpenCVFilter%s", filterType);
     OpenCVFilter filter = (OpenCVFilter) Instantiator.getNewInstance(type, name);
+    if (filter == null) {
+      error("cannot create filter %s of type %s", name, type);
+      return null;
+    }
     addFilter(filter);
     return filter;
   }
@@ -1440,7 +1443,7 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
     return data;
   }
 
-  public final CvData publishCvData(CvData data) {
+  public final CVData publishCvData(CVData data) {
     return data;
   }
 
@@ -2023,8 +2026,8 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    OpenCVConfig config = (OpenCVConfig) super.getConfig();
+  public OpenCVConfig getConfig() {
+    super.getConfig();
     // FIXME - remove member vars use config only
     config.capturing = capturing;
     config.cameraIndex = cameraIndex;
@@ -2041,26 +2044,26 @@ public class OpenCV extends AbstractComputerVision implements ImagePublisher {
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    OpenCVConfig config = (OpenCVConfig) super.apply(c);
-    setCameraIndex(config.cameraIndex);
-    setGrabberType(config.grabberType);
-    setInputFileName(config.inputFile);
-    setInputSource(config.inputSource);
+  public OpenCVConfig apply(OpenCVConfig c) {
+    super.apply(c);
+    setCameraIndex(c.cameraIndex);
+    setGrabberType(c.grabberType);
+    setInputFileName(c.inputFile);
+    setInputSource(c.inputSource);
 
-    setNativeViewer(config.nativeViewer);
+    setNativeViewer(c.nativeViewer);
 
-    setWebViewer(config.webViewer);
+    setWebViewer(c.webViewer);
 
     filters.clear();
-    if (config.filters != null) {
-      for (OpenCVFilter f : config.filters.values()) {
+    if (c.filters != null) {
+      for (OpenCVFilter f : c.filters.values()) {
         addFilter(f);
         // TODO: better configuration of the filter when it's added.
       }
     }
 
-    if (config.capturing) {
+    if (c.capturing) {
       capture();
     }
 

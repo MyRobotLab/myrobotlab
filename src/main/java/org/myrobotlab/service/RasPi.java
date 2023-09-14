@@ -49,7 +49,7 @@ import com.pi4j.wiringpi.SoftPwm;
  * More Info : http://pi4j.com/
  * 
  */
-public class RasPi extends AbstractMicrocontroller implements I2CController, GpioPinListenerDigital {
+public class RasPi extends AbstractMicrocontroller<RasPiConfig> implements I2CController, GpioPinListenerDigital {
 
   public static class I2CDeviceMap {
     transient public I2CBus bus;

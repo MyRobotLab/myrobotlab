@@ -44,7 +44,7 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class InMoov2 extends Service implements ServiceLifeCycleListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
+public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
   public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
 
@@ -151,25 +151,25 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    InMoov2Config config = (InMoov2Config) super.apply(c);
+  public InMoov2Config apply(InMoov2Config c) {
+    super.apply(c);
     try {
 
       locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
 
-      if (config.locale != null) {
-        setLocale(config.locale);
+      if (c.locale != null) {
+        setLocale(c.locale);
       } else {
         setLocale(getSupportedLocale(Runtime.getInstance().getLocale().toString()));
       }
 
       loadInitScripts();
 
-      if (config.loadGestures) {
+      if (c.loadGestures) {
         loadGestures();
       }
 
-      if (config.heartbeat) {
+      if (c.heartbeat) {
         startHeartbeat();
       } else {
         stopHeartbeat();
@@ -181,13 +181,7 @@ public class InMoov2 extends Service implements ServiceLifeCycleListener, TextLi
     return c;
   }
 
-  // TODO- Hook to get config event published
-  // public void applyConfig() {
-  //   super.apply();
-  //   log.error("applyConfig()");
-  //   // always getResponse !
-  //   speak("InMoov apply config");
-  // }
+
 
   @Override
   public void attachTextListener(String name) {

@@ -15,7 +15,7 @@ import org.myrobotlab.service.config.MotorPortConfig;
  *         string value can handle either we use a String port.
  *
  */
-public class MotorPort extends AbstractMotor {
+public class MotorPort extends AbstractMotor<MotorPortConfig> {
   private static final long serialVersionUID = 1L;
 
   public MotorPort(String n, String id) {

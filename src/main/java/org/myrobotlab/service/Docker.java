@@ -6,19 +6,15 @@ import java.util.List;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.config.DockerConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.Container;
-import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
 
-public class Docker extends Service {
+public class Docker extends Service<DockerConfig> {
 
   private static final long serialVersionUID = 1L;
 

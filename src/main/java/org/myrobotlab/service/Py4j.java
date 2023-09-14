@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.ext.python.PythonUtils;
 import org.myrobotlab.framework.Message;
@@ -46,7 +47,7 @@ import java.util.*;
  * 
  * @author GroG
  */
-public class Py4j extends Service implements GatewayServerListener {
+public class Py4j extends Service<Py4jConfig> implements GatewayServerListener {
 
   /**
    * POJO class to tie all the data elements of a external python process
@@ -418,7 +419,7 @@ public class Py4j extends Service implements GatewayServerListener {
 
 
       String venv = getDataDir() + fs + "venv";
-      pythonCommand = PythonUtils.setupVenv(venv, ((Py4jConfig) config).useBundledPython, List.of("py4j"));
+      pythonCommand = PythonUtils.setupVenv(venv, config.useBundledPython, List.of("py4j"));
 
       ProcessBuilder processBuilder = new ProcessBuilder(pythonCommand, pythonScript);
       processBuilder.redirectErrorStream(true);
@@ -473,7 +474,7 @@ public class Py4j extends Service implements GatewayServerListener {
   @Override
   public void startService() {
     super.startService();
-    Py4jConfig c = (Py4jConfig)config;
+    Py4jConfig c = config;
     if (c.scriptRootDir == null) {
         c.scriptRootDir = new File(getDataInstanceDir()).getAbsolutePath();
     }

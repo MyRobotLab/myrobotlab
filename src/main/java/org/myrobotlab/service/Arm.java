@@ -28,13 +28,14 @@ package org.myrobotlab.service;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 /**
  * Arm
  * 
  */
-public class Arm extends Service {
+public class Arm extends Service<ServiceConfig> {
 
   public transient final static Logger log = LoggerFactory.getLogger(Arm.class.getCanonicalName());
 

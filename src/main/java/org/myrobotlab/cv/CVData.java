@@ -13,7 +13,7 @@ import org.myrobotlab.math.geometry.PointCloud;
  * @author GroG
  *
  */
-public abstract class CvData implements Serializable {
+public abstract class CVData implements Serializable {
 
   private static final long serialVersionUID = 1L;
   public static final String POINT_CLOUDS = "point.cloud";

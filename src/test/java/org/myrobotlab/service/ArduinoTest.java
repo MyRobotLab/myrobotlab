@@ -213,8 +213,12 @@ public class ArduinoTest extends AbstractTest {
     arduino01.enablePin(10);
     arduino01.enablePin(12);
     arduino01.enablePin(13);
-    sleep(100);
+
+    // Wait for pin enablement to complete
+    sleep(200);
     arduino01.reset();
+    // Wait for reset to complete
+    sleep(100);
 
     assertTrue("did not get pin array data D10", catcher.containsPinArrayFromPin(arduino01.getPin(10).getPinName()));
     assertTrue("did not get pin array data D12", catcher.containsPinArrayFromPin(arduino01.getPin(12).getPinName()));

@@ -3,7 +3,6 @@ package org.myrobotlab.service.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Plan;
 
 public class EmojiConfig extends ServiceConfig {

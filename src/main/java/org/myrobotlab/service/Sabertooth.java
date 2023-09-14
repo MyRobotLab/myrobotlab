@@ -9,7 +9,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.abstracts.AbstractMotorController;
 import org.myrobotlab.service.config.SabertoothConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.SerialDevice;
@@ -30,7 +29,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class Sabertooth extends AbstractMotorController implements PortConnector {
+public class Sabertooth extends AbstractMotorController<SabertoothConfig> implements PortConnector {
 
   private static final long serialVersionUID = 1L;
 
@@ -300,8 +299,8 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    SabertoothConfig config = (SabertoothConfig)super.getConfig();
+  public SabertoothConfig getConfig() {
+    super.getConfig();
     // FIXME - remove fields and use config only
     config.port = getSerialPort();
     config.connect = isConnected;
@@ -309,11 +308,11 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    SabertoothConfig config = (SabertoothConfig) super.apply(c);
-    if (config.connect) {
+  public SabertoothConfig apply(SabertoothConfig c) {
+    super.apply(c);
+    if (c.connect) {
       try {
-        connect(config.port);
+        connect(c.port);
       } catch (Exception e) {
         error(e);
       }

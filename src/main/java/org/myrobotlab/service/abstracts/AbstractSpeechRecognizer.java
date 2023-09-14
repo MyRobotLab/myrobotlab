@@ -8,7 +8,6 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.SpeechRecognizerConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
@@ -16,7 +15,7 @@ import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 
-public abstract class AbstractSpeechRecognizer extends Service implements SpeechRecognizer {
+public abstract class AbstractSpeechRecognizer<C extends SpeechRecognizerConfig> extends Service<C> implements SpeechRecognizer {
 
   /**
    * text and confidence (and any additional meta data) to be published
@@ -575,33 +574,33 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    SpeechRecognizerConfig c = (SpeechRecognizerConfig) super.getConfig();
+  public C getConfig() {
+    C c = super.getConfig();
     c.listening = isListening();
     c.wakeWord = getWakeWord();
     Set<String> listeners = getAttached("publishText");
-    c.textListeners = listeners.toArray(new String[listeners.size()]);
+    c.textListeners = listeners.toArray(new String[0]);
     return c;
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {    
-    SpeechRecognizerConfig config = (SpeechRecognizerConfig)super.apply(c);;
-    setWakeWord(config.wakeWord);
-    if (config.listening) {
+  public C apply(C c) {
+    super.apply(c);
+    setWakeWord(c.wakeWord);
+    if (c.listening) {
       startListening();
     } else {
       stopListening();
     }
 
-    if (config.recording) {
+    if (c.recording) {
       startRecording();
     } else {
       stopRecording();
     }
 
-    if (config.textListeners != null) {
-      for (String listener : config.textListeners) {
+    if (c.textListeners != null) {
+      for (String listener : c.textListeners) {
         addListener("publishText", listener);
       }
     }

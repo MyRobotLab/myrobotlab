@@ -8,13 +8,14 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 /**
  * @author MaVo (MyRobotLab) / LunDev (GitHub)
  */
 
-public class KeyboardSim extends Service {
+public class KeyboardSim extends Service<ServiceConfig> {
   static final long serialVersionUID = 1L;
   static final Logger log = LoggerFactory.getLogger(KeyboardSim.class);
 

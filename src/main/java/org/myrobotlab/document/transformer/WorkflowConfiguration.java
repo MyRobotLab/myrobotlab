@@ -7,11 +7,15 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 public class WorkflowConfiguration extends Configuration {
 
-  ArrayList<StageConfiguration> stages;
+  public ArrayList<StageConfiguration> stages;
   private String name = "default";
   private int numWorkerThreads = 1;
   private int queueLength = 50;
-
+  
+  public WorkflowConfiguration() {
+    // needed for yaml config serialization
+  }
+  
   public WorkflowConfiguration(String name) {
     this.name = name;
     stages = new ArrayList<StageConfiguration>();

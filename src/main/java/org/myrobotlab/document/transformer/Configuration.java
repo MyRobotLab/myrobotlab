@@ -1,5 +1,6 @@
 package org.myrobotlab.document.transformer;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,7 +8,7 @@ import java.util.Map;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
 
-public class Configuration {
+public abstract class Configuration implements Serializable {
 
   // TODO: add a map type.
   // TODO: push the name/class onto this ?
@@ -17,14 +18,13 @@ public class Configuration {
   // workflow /pipeline config
   // connector config
 
-  protected HashMap<String, Object> config = null;
-  // private XStream xstream = null;
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+  public HashMap<String, Object> config = new HashMap<String, Object>();
 
   public Configuration() {
-    config = new HashMap<String, Object>();
-    // figure that we need to be able to serialize / deserialize
-    // TODO: consider a faster driver / serializer
-    // xstream = new XStream(new StaxDriver());
   }
 
   public void setStringParam(String name, String value) {
@@ -132,6 +132,12 @@ public class Configuration {
     return null;
   }
 
+  public void setMapProperty(String name, Map map) {
+    // TODO type safety?!
+    config.put(name, map);
+    return;
+  }
+  
   public Map<String, String> getMapProperty(String name) {
     // TODO type safety?!
     return (Map<String, String>) config.get(name);

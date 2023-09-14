@@ -14,6 +14,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 /**
@@ -23,7 +24,7 @@ import org.slf4j.Logger;
  * <a href="http://stackoverflow.com/questions/8301543/android-bitmap-to-bufferedimage">Android bitmap to buffered image</a>
  * Bitmap to BufferedImage - conversion once Bitmap class is serialized
  */
-public class IpCamera extends Service {
+public class IpCamera extends Service<ServiceConfig> {
 
   public class VideoProcess implements Runnable {
     @Override

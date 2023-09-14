@@ -23,7 +23,7 @@ public abstract class AbstractConnectorTest extends AbstractTest {
     MockDocumentListener listener = createListener();
     connector.startService();
     listener.startService();
-    connector.addDocumentListener(listener);
+    connector.attachDocumentListener(listener.getName());
     connector.startCrawling();
     // flush any current batch and wait until the outbox is empty.
     connector.flush();

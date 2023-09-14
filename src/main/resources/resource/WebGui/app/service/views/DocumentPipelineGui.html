@@ -1,0 +1,35 @@
+<div class="row">
+    Document Pipeline!
+    
+    <h3>Workflow Config</h3>
+    <div>
+    Name : {{service.workFlowConfig.name}}
+    <br/>
+    Number of Threads : {{service.workFlowConfig.numWorkerThreads}}
+    <br/>
+    <h4>Stages</h4>
+    <table>
+      <tr ng-repeat="stage in service.workFlowConfig.stages">
+        <td>
+          <li>Stage {{stage.stageName}}</li>
+          <li>Class {{stage.stageClass}}</li>
+        </td>
+        <td>
+          <table>
+           <tr ng-repeat="(key, value) in stage.config">
+             <td>{{key}}</td><td>{{value}}</td>
+           </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    </div>
+
+    <br/>
+    <h3>Document!</h3>
+    <div>
+    {{document}}
+    </div>
+
+    
+</div>

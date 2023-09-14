@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +45,8 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.programab.Response;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.SolrConfig;
 import org.myrobotlab.service.interfaces.DocumentListener;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -63,7 +66,8 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class Solr extends Service implements DocumentListener, TextListener, MessageListener {
+public class Solr extends Service<SolrConfig> implements DocumentListener, TextListener, MessageListener {
+
 
   private static final String CORE_NAME = "core1";
   public final static Logger log = LoggerFactory.getLogger(Solr.class);
@@ -75,6 +79,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   public String solrHome = "Solr";
   // EmbeddedSolrServer embeddedSolrServer = null;
   transient private EmbeddedSolrServer embeddedSolrServer = null;
+  
+  Collection<SolrInputDocument> documentBatch = Collections.synchronizedCollection(new ArrayList<>());
+  // The batch size of documents to accumulate before flushing the batch to solr.
+  public transient int batchSize = 100;
   // TODO: consider moving this tagging logic into opencv..
   // for now, we'll just set a counter that will count down how many opencv
   // frames
@@ -125,13 +133,17 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * @throws IOException
    *           boom
    */
-  public void startEmbedded(String path) throws SolrServerException, IOException {
+  public synchronized void startEmbedded(String path) throws SolrServerException, IOException {
     // let's extract our default configs into the directory/
     // FileIO.extract(Util.getResourceDir() , "Solr/core1", path);
     // FileIO.extract(Util.getResourceDir() , "Solr/solr.xml", path +
     // File.separator + "solr.xml");
     // load up the solr core container and start solr
-
+    if (embeddedSolrServer != null) {
+      log.info("Embedded solr already running.");
+      return;
+    }
+    
     // FIXME - a bit unsatisfactory
     File f = new File(getDataInstanceDir());
     f.mkdirs();
@@ -159,43 +171,49 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * Add a single document at a time to the solr server.
    * 
    * @param doc
-   *          the input doc to send to solr
-   * 
+   *          the input doc to send to solr (prefer to send batches with addDocuments instead)
+   *   
    */
   public void addDocument(SolrInputDocument doc) {
-    try {
-      if (embeddedSolrServer != null) {
-        embeddedSolrServer.add(doc);
-      } else {
-        solrServer.add(doc);
-      }
-    } catch (SolrServerException e) {
-      // TODO : retry?
-      log.warn("An exception occurred when trying to add document to the index.", e);
-    } catch (IOException e) {
-      // TODO : maybe retry?
-      log.warn("A network exception occurred when trying to add document to the index.", e);
-    }
+    // Always batch!
+    addDocuments(List.of(doc));
   }
 
   /**
-   * Add a batch of documents (this is more effecient than adding one at a time.
+   * Add a batch of documents (this is more efficient than adding one at a time.)
    * 
    * @param docs
    *          a collection of solr input docs to add to solr.
    */
   public void addDocuments(Collection<SolrInputDocument> docs) {
-    try {
-      if (embeddedSolrServer != null) {
-        embeddedSolrServer.add(docs);
-      } else {
-        solrServer.add(docs);
+    // TODO: setup a thread to flush this batch
+    // performance optimization.. always batch updates to solr.
+    documentBatch.addAll(docs);
+    flushDocumentBatch(false);
+  }
+
+  private ProcessingStatus flushDocumentBatch(boolean forceFlush) {
+    synchronized (documentBatch) {
+      if (documentBatch.size() >= batchSize || forceFlush) {
+        try {
+          if (embeddedSolrServer != null) {
+            embeddedSolrServer.add(documentBatch);
+          } else {
+            solrServer.add(documentBatch);
+          }
+          // we sent the batch, so let's clear it up.
+          documentBatch.clear();
+        } catch (SolrServerException e) {
+          log.warn("An exception occurred when trying to add documents to the index.", e);
+          // ??
+          return ProcessingStatus.ERROR;
+        } catch (IOException e) {
+          log.warn("A network exception occurred when trying to add documents to the index.", e);
+          return ProcessingStatus.ERROR;
+        }
       }
-    } catch (SolrServerException e) {
-      log.warn("An exception occurred when trying to add documents to the index.", e);
-    } catch (IOException e) {
-      log.warn("A network exception occurred when trying to add documents to the index.", e);
     }
+    return ProcessingStatus.OK;
   }
 
   /**
@@ -205,6 +223,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * 
    */
   public void commit() {
+    // if we are explicitly calling a commit.. first flush any partial batch
+    // followed by the commit.
+    flushDocumentBatch(true);
     try {
       if (embeddedSolrServer != null) {
         embeddedSolrServer.commit();
@@ -510,22 +531,31 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    */
   public QueryResponse searchWithFacets(String queryString, int rows, int start, String[] facetFields, String[] filters) {
     log.info("Searching for (with facets): {}", queryString);
+    int numFacetBuckets = 50;
     SolrQuery query = new SolrQuery();
     query.set("q", queryString);
     query.setRows(rows);
     query.setStart(start);
     query.setFacet(true);
+    query.setFacetLimit(numFacetBuckets);
     query.setFacetMinCount(1);
+    // default search fields.
+    query.add("qf", "title^10");
+    query.add("qf", "artist^5");
+    query.add("qf", "album^2");
+    query.add("qf", "genre");
+    query.add("qf", "year");
+
+    query.setParam("defType", "edismax");
+    query.setParam("q.op", "AND");
     // TODO: expose sorting in a fancier search method signature
     // Alternatively, pass the list of parameters and their values into a generic search method instead.
     query.setSort("index_date", ORDER.desc);
     for (String field : facetFields) {
       query.addFacetField(field);
     }
-
     for (String filter : (String[])filters) {
-      query.addFilterQuery(filter);
-      
+      query.addFilterQuery(filter);      
     }
 
     QueryResponse resp = null;
@@ -548,6 +578,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     // from the results  ( SolrDocumentList ) object, like the number found, the start offset
     // So we manually copy that info to top level items in the response so the webgui
     // can get at it.
+    // TODO: why are the facet buckets not ordered!!!
     long numFound = resp.getResults().getNumFound();
     long start = resp.getResults().getStart();
     Float maxScore = resp.getResults().getMaxScore();
@@ -561,6 +592,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     resp.getResponse().add("size", resp.getResults().size());
     // Now, let's convert the byte arrays to base64 image strings.
     for (SolrDocument d : resp.getResults()) {
+      // TODO: decide what to do based on the mime type...
       if (d.containsKey("bytes")) {
         // encode this as base 64 image data.
         // TODO: support multiple byte arrays.
@@ -570,9 +602,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       }
     }
 
-
     String jsonResponse = resp.jsonStr(); 
     // publish the json string of the response.
+    // System.err.println(jsonResponse);
+    
     return jsonResponse;
   };
 
@@ -600,6 +633,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   @Override
+  // TODO: why do we return ProcessingStatus here?! 
   public ProcessingStatus onDocuments(List<Document> docs) {
     // Convert the input document to a solr input docs and send it!
     if (docs.size() == 0) {
@@ -608,19 +642,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     }
     ArrayList<SolrInputDocument> docsToSend = new ArrayList<SolrInputDocument>();
     for (Document d : docs) {
-      docsToSend.add(convertDocument(d));
+      documentBatch.add(convertDocument(d));
     }
-    try {
-      if (embeddedSolrServer != null) {
-        embeddedSolrServer.add(docsToSend);
-      } else {
-        solrServer.add(docsToSend);
-      }
-      return ProcessingStatus.OK;
-    } catch (Exception e) {
-      log.warn("Exception in Solr onDocuments.", e);
-      return ProcessingStatus.DROP;
-    }
+    return flushDocumentBatch(false);
   }
 
   private SolrInputDocument convertDocument(Document doc) {
@@ -643,18 +667,15 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   @Override
   public ProcessingStatus onDocument(Document doc) {
     // always be batching when sending docs.
-    ArrayList<Document> docs = new ArrayList<Document>();
-    docs.add(doc);
-    return onDocuments(docs);
+    // TODO: we want to add to the current batch to send..  
+    // and make sure we have a thread flushing the batch if it gets too old.
+    return onDocuments(List.of(doc));
   }
 
   @Override
   public boolean onFlush() {
-    // NoOp currently, but at some point if we change how this service batches
-    // it's
-    // add messages to solr, we could revisit this.
-    // or maybe issue a commit here? I hate committing the index so frequently,
-    // but maybe it's ok.
+    // if we got a flush call, let's flush any partial batch.
+    flushDocumentBatch(true);
     if (commitOnFlush) {
       commit();
     }
@@ -1141,4 +1162,36 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     super.releaseService();
   }
 
+  @Override
+  public SolrConfig apply(SolrConfig c) {
+    // 
+    super.apply(c);
+    if (c.embedded) {
+      // 
+      try {
+        startEmbedded();
+      } catch (SolrServerException | IOException e) {
+        // TODO: how should we handle this?
+        log.warn("Error starting embedded solr instance.", e);
+        e.printStackTrace();
+      };
+    }
+    return c;
+  }
+
+  @Override
+  public SolrConfig getConfig() {
+    super.getConfig();
+
+    if (this.embeddedSolrServer != null) {
+      config.embedded = true;
+    }
+    
+    if (this.solrUrl != null) {
+      config.solrUrl = this.solrUrl;
+    }
+    
+    return config;
+  }
+  
 }

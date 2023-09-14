@@ -20,8 +20,26 @@ import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -31,7 +49,26 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.CodecUtils.ApiDescription;
 import org.myrobotlab.codec.ForeignProcessUtils;
 import org.myrobotlab.ext.python.PythonUtils;
-import org.myrobotlab.framework.*;
+
+import org.myrobotlab.framework.CmdConfig;
+import org.myrobotlab.framework.CmdOptions;
+import org.myrobotlab.framework.DescribeQuery;
+import org.myrobotlab.framework.DescribeResults;
+import org.myrobotlab.framework.Instantiator;
+import org.myrobotlab.framework.MRLListener;
+import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.MethodCache;
+import org.myrobotlab.framework.MethodEntry;
+import org.myrobotlab.framework.NameGenerator;
+import org.myrobotlab.framework.Peer;
+import org.myrobotlab.framework.Plan;
+import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.ProxyFactory;
+import org.myrobotlab.framework.Registration;
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.ServiceReservation;
+import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.ConfigurableService;
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -52,13 +89,13 @@ import org.myrobotlab.process.InProcessCli;
 import org.myrobotlab.process.Launcher;
 import org.myrobotlab.service.config.RuntimeConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServiceConfig.Listener;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.ServiceTypeNameResults;
 import org.myrobotlab.service.interfaces.*;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
+import org.yaml.snakeyaml.constructor.ConstructorException;
 
 import picocli.CommandLine;
 
@@ -86,7 +123,7 @@ import picocli.CommandLine;
  * VAR OF RUNTIME !
  *
  */
-public class Runtime extends Service implements MessageListener, ServiceLifeCyclePublisher, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider {
+public class Runtime extends Service<RuntimeConfig> implements MessageListener, ServiceLifeCyclePublisher, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider {
   final static private long serialVersionUID = 1L;
 
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
@@ -108,7 +145,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * to start and configure new services. The master plan is an accumulation of
    * all these requests.
    */
-  final Plan masterPlan = new Plan("runtime");
+  @Deprecated /* use the filesystem only no memory plan */
+  transient final Plan masterPlan = new Plan("runtime");
 
   /**
    * thread for non-blocking install of services
@@ -144,7 +182,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       "org.myrobotlab.service.interfaces.ServiceLifeCycleListener", "org.myrobotlab.framework.interfaces.StatePublisher"));
 
   protected final Set<String> serviceTypes = new HashSet<>();
-
+  
   /**
    * The directory name currently being used for config. This is NOT full path
    * name. It cannot be null, it cannot have "/" or "\" in the name - it has to
@@ -394,7 +432,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // Plan's config
     RuntimeConfig plansRtConfig = (RuntimeConfig) plan.get("runtime");
     // current Runtime config
-    RuntimeConfig currentConfig = (RuntimeConfig) Runtime.getInstance().config;
+    RuntimeConfig currentConfig = Runtime.getInstance().config;
 
     for (String service : plansRtConfig.getRegistry()) {
       // FIXME - determine if you want to return a complete merge of activated
@@ -410,10 +448,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       sc.state = "CREATING";
       ServiceInterface si = createService(service, sc.type, null);
       sc.state = "CREATED";
-      si.setConfig(sc);
-      si.apply(sc);
+      // process  the base listeners/subscription of ServiceConfig
+      si.addConfigListeners(sc);
+      if (si instanceof ConfigurableService) {
+        ((ConfigurableService)si).apply(sc);
+      }
       createdServices.put(service, si);
-      // si.startService(); bad idea
       currentConfig.add(service);
     }
 
@@ -897,7 +937,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           if (startYml.enable) {
             Runtime.load("runtime", "Runtime");
           }
-          ((RuntimeConfig) runtime.config).add("runtime");
+          runtime.config.add("runtime");
 
           runtime.startService();
           // platform virtual is higher priority than service virtual
@@ -2504,11 +2544,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // runtime@{id}
       // subscribe to "describe"
       MRLListener listener = new MRLListener("describe", getFullName(), "onDescribe");
-      Message msg = Message.createMessage(getFullName(), "runtime", "addListener", listener);
-      client2.send(CodecUtils.toJson(msg));
+      Message msg = Message.createMessage(getFullName(), "runtime", "addListener", listener);      
+      client2.send(CodecUtils.toJsonMsg(msg));
 
       // send describe
-      client2.send(CodecUtils.toJson(getDescribeMsg(null)));
+      client2.send(CodecUtils.toJsonMsg(getDescribeMsg(null)));
 
     } catch (Exception e) {
       log.error("connect to {} giving up {}", url, e.getMessage());
@@ -2709,9 +2749,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   synchronized static public ServiceInterface start(String name, String type) {
     try {
-      if (name.equals("proxy")) {
-        log.info("herex");
-      }
+
 
       ServiceInterface requestedService = Runtime.getService(name);
       if (requestedService != null) {
@@ -2748,7 +2786,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       if (requestedService == null) {
-        log.error("here");
+        Runtime.getInstance().error("could not start %s of type %s", name, type);
+        return null;
       }
 
       // getConfig() was problematic here for JMonkeyEngine
@@ -3490,7 +3529,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     for (ServiceInterface si : getLocalServices().values()) {
       List<String> nlks = si.getNotifyListKeySet();
       for (int i = 0; i < nlks.size(); ++i) {
-        si.getOutbox().notifyList.clear();
+        si.getNotifyList().clear();
       }
     }
   }
@@ -3561,7 +3600,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
     }
 
-    return execute(program, list, null, null, null);
+    return execute(program, list, null, null, true);
   }
 
   /**
@@ -3583,79 +3622,69 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    *          Whether this method blocks for the program to execute
    * @return The programs stderr and stdout output
    */
-  static public String execute(String program, List<String> args, String workingDir, Map<String, String> additionalEnv, Boolean block) {
-
+  static public String execute(String program, List<String> args, String workingDir, Map<String, String> additionalEnv, boolean block) {
     log.info("execToString(\"{} {}\")", program, args);
 
-    ArrayList<String> command = new ArrayList<String>();
+    List<String> command = new ArrayList<>();
     command.add(program);
     if (args != null) {
-      for (String arg : args) {
-        command.add(arg);
-      }
+        command.addAll(args);
     }
 
-    Integer exitValue = null;
-
     ProcessBuilder builder = new ProcessBuilder(command);
+    if (workingDir != null) {
+        builder.directory(new File(workingDir));
+    }
 
     Map<String, String> environment = builder.environment();
     if (additionalEnv != null) {
-      environment.putAll(additionalEnv);
+        environment.putAll(additionalEnv);
     }
-    StringBuilder outputBuilder;
+
+    StringBuilder outputBuilder = new StringBuilder();
 
     try {
-      Process handle = builder.start();
+        Process handle = builder.start();
 
-      InputStream stdErr = handle.getErrorStream();
-      InputStream stdOut = handle.getInputStream();
+        InputStream stdErr = handle.getErrorStream();
+        InputStream stdOut = handle.getInputStream();
 
-      // TODO: we likely don't need this
-      // OutputStream stdIn = handle.getOutputStream();
+        // Read the output streams in separate threads to avoid potential blocking
+        Thread stdErrThread = new Thread(() -> readStream(stdErr, outputBuilder));
+        stdErrThread.start();
 
-      outputBuilder = new StringBuilder();
-      byte[] buff = new byte[32768];
+        Thread stdOutThread = new Thread(() -> readStream(stdOut, outputBuilder));
+        stdOutThread.start();
 
-      // TODO: should we read both of these streams?
-      // if we break out of the first loop is the process terminated?
+        if (block) {
+            int exitValue = handle.waitFor();
+            outputBuilder.append("Exit Value: ").append(exitValue);
+            log.info("Command exited with exit value: {}", exitValue);
+        } else {
+            log.info("Command started");
+        }
 
-      // read stdout
-      for (int n; (n = stdOut.read(buff)) != -1;) {
-        outputBuilder.append(new String(buff, 0, n));
-      }
-
-      // read stderr
-      for (int n; (n = stdErr.read(buff)) != -1;) {
-        outputBuilder.append(new String(buff, 0, n));
-      }
-
-      stdOut.close();
-      stdErr.close();
-
-      // TODO: stdin if we use it.
-      // stdIn.close();
-
-      // the process should be closed by now?
-
-      handle.waitFor();
-
-      handle.destroy();
-
-      exitValue = handle.exitValue();
-      // print the output from the command
-      // TODO replace with logging calls
-      System.out.println(outputBuilder.toString());
-      System.out.println("Exit Value : " + exitValue);
-      outputBuilder.append("Exit Value : " + exitValue);
-
-      return outputBuilder.toString();
-    } catch (Exception e) {
-      log.error("execute threw", e);
-      exitValue = 5;
-      return e.getMessage();
+        return outputBuilder.toString();
+    } catch (IOException e) {
+        log.error("Error executing command", e);
+        return e.getMessage();
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        log.error("Command execution interrupted", e);
+        return e.getMessage();
     }
-  }
+}
+
+private static void readStream(InputStream inputStream, StringBuilder outputBuilder) {
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            outputBuilder.append(line).append(System.lineSeparator());
+        }
+    } catch (IOException e) {
+        log.error("Error reading process output", e);
+    }
+}
 
   /**
    * Get the current battery level of the computer this MRL instance is running
@@ -4012,7 +4041,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
     return filteredTypes;
   }
-
+  
   /**
    * Register a connection route from one instance to this one.
    *
@@ -4039,21 +4068,21 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     addRoute(id, uuid, 10);
   }
 
-  @Override
-  public ServiceConfig getFilteredConfig() {
-    RuntimeConfig sc = (RuntimeConfig) super.getFilteredConfig();
-    Set<Listener> removeList = new HashSet<>();
-    for (Listener listener : sc.listeners) {
-      if (listener.callback.equals("onReleased") || listener.callback.equals("onStarted") || listener.callback.equals("onRegistered") || listener.callback.equals("onStopped")
-          || listener.callback.equals("onCreated")) {
-        removeList.add(listener);
-      }
-    }
-    for (Listener remove : removeList) {
-      sc.listeners.remove(remove);
-    }
-    return sc;
-  }
+//  @Override
+//  public ServiceConfig getFilteredConfig() {
+//    RuntimeConfig sc = (RuntimeConfig) super.getFilteredConfig();
+//    Set<Listener> removeList = new HashSet<>();
+//    for (Listener listener : sc.listeners) {
+//      if (listener.callback.equals("onReleased") || listener.callback.equals("onStarted") || listener.callback.equals("onRegistered") || listener.callback.equals("onStopped")
+//          || listener.callback.equals("onCreated")) {
+//        removeList.add(listener);
+//      }
+//    }
+//    for (Listener remove : removeList) {
+//      sc.listeners.remove(remove);
+//    }
+//    return sc;
+//  }
 
   /**
    * Unregister all connections that a specified client has made.
@@ -4273,10 +4302,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    *         name
    */
   static public String getFullName(String shortname) {
-    if (shortname == null) {
-      return null;
-    }
-    if (shortname.contains("@")) {
+    if (shortname == null || shortname.contains("@")) {
       // already long form
       return shortname;
     }
@@ -4908,6 +4934,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     if (check.exists()) {
       try {
         sc = CodecUtils.readServiceConfig(filename);
+      } catch (ConstructorException e) {
+        error("%s invalid %s %s. Please remove it from the file.", name, filename, e.getCause().getMessage());
       } catch (IOException e) {
         error(e);
       }
@@ -4941,9 +4969,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return id;
   }
 
+
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    RuntimeConfig config = (RuntimeConfig) super.apply(c);
+  public RuntimeConfig apply(RuntimeConfig c) {
+    super.apply(c);
+    config = c;
+    
     setLocale(config.locale);
 
     if (config.id != null) {
@@ -5089,9 +5120,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       for (String s : servicesToSave) {
-        if (CodecUtils.getShortName(s).equals("i01")) {
-          log.info("here");
-        }
         ServiceInterface si = getService(s);
         // TODO - switch to save "NON FILTERED" config !!!!
         // get filtered clone of config for saving
@@ -5402,6 +5430,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       return null;
     }
     return CONFIG_ROOT + fs + configName;
+  }
+
+  @Override
+  public RuntimeConfig getConfig() {
+    config = super.getConfig();
+    return config;
   }
 
 }

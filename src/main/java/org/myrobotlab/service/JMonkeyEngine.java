@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.cv.CvData;
+import org.myrobotlab.cv.CVData;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
@@ -124,7 +124,7 @@ import com.jme3.util.BufferUtils;
  * @author GroG, calamity, kwatters, moz4r and many others ...
  *
  */
-public class JMonkeyEngine extends Service implements Gateway, ActionListener, Simulator, EncoderListener, IKJointAngleListener, ServoStatusListener, ServoControlListener {
+public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gateway, ActionListener, Simulator, EncoderListener, IKJointAngleListener, ServoStatusListener, ServoControlListener {
 
   final static String CAMERA = "camera";
 
@@ -1522,7 +1522,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * @param data
    *          cv data
    */
-  public void onCvData(CvData data) {
+  public void onCvData(CVData data) {
     // onPointCloud(data.getPointCloud()); FIXME - brittle and not correct
     // FIXME - do something interesting ... :)
   }
@@ -2672,8 +2672,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    JMonkeyEngineConfig config = (JMonkeyEngineConfig) super.getConfig();
+  public JMonkeyEngineConfig getConfig() {
+    super.getConfig();
 
     if (config.models != null) {
       Collections.sort(config.models);

@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 /**
  * Goal is to have a very simple Pojo with only a few (native Java helper
  * methods) WARNING !!! - this class used to extend Exception or Throwable - but
- * the gson serializer would stack overflow with self reference issue
+ * the serializer would stack overflow with self reference issue
  * 
  * TODO - allow radix tree searches for "keys" ???
  * 

@@ -1,8 +1,7 @@
 package org.myrobotlab.service.data;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.junit.Test;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.test.AbstractTest;
 
 import java.util.HashMap;
@@ -128,20 +127,18 @@ public class LocaleTest extends AbstractTest {
       // java.util.Locale.setDefault(t);
 
       java.util.Locale[] locales = java.util.Locale.getAvailableLocales();
-      String[] isoLanguages = java.util.Locale.getISOLanguages();
-      String[] isoCountries = java.util.Locale.getISOCountries();
 
       // is java.util.Locale serializable
-      Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
-      String json = gson.toJson(locale);
-      java.util.Locale l = gson.fromJson(json, java.util.Locale.class);
+      String json = CodecUtils.toJson(locale);
+      
+      java.util.Locale l = CodecUtils.fromJson(json, java.util.Locale.class);
 
       java.util.Locale br = new java.util.Locale("en", "BR", "variant");
       log.info("br getLanguage - {}", br.getLanguage());
       log.info("br getDisplayLanguage - {}", br.getDisplayLanguage());
       br.toLanguageTag();
-      json = gson.toJson(br);
-      l = gson.fromJson(json, java.util.Locale.class);
+      json = CodecUtils.toJson(br);
+      l = CodecUtils.fromJson(json, java.util.Locale.class);
       br.equals(l);
 
       l = new java.util.Locale("en_BR_variant");

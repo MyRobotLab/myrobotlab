@@ -85,6 +85,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.CloseableFrameConverter;
 import org.myrobotlab.opencv.YoloDetectedObject;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
@@ -112,7 +113,7 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class Deeplearning4j extends Service {
+public class Deeplearning4j extends Service<ServiceConfig> {
 
   private static final long serialVersionUID = 1L;
   transient public final static Logger log = LoggerFactory.getLogger(Deeplearning4j.class);

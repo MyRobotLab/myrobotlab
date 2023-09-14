@@ -3,13 +3,13 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Locale;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.InMoov2TorsoConfig;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
@@ -18,7 +18,7 @@ import org.slf4j.Logger;
  * midStom, and lowStom servos.
  *
  */
-public class InMoov2Torso extends Service {
+public class InMoov2Torso extends Service<InMoov2TorsoConfig> {
 
   private static final long serialVersionUID = 1L;
 

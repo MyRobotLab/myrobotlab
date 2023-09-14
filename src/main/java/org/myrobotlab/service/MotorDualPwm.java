@@ -10,7 +10,7 @@ import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.config.MotorDualPwmConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 
-public class MotorDualPwm extends AbstractMotor {
+public class MotorDualPwm extends AbstractMotor<MotorDualPwmConfig> {
   private static final long serialVersionUID = 1L;
 
   protected String leftPwmPin;
@@ -69,26 +69,25 @@ public class MotorDualPwm extends AbstractMotor {
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public MotorDualPwmConfig getConfig() {
     // FIXME - may need to do call super.config for config that has parent :(
-    MotorDualPwmConfig config = (MotorDualPwmConfig)super.getConfig();
+    super.getConfig();
     config.leftPwmPin = leftPwmPin;
     config.rightPwmPin = rightPwmPin;
     config.pwmFreq = pwmFreq;
     return config;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    MotorDualPwmConfig config =  (MotorDualPwmConfig)super.apply(c);
-    if (config.leftPwmPin != null) {
-      setLeftPwmPin(config.leftPwmPin);
+  public MotorDualPwmConfig apply(MotorDualPwmConfig c) {
+    super.apply(c);
+    if (c.leftPwmPin != null) {
+      setLeftPwmPin(c.leftPwmPin);
     }
-    if (config.rightPwmPin != null) {
-      setRightPwmPin(config.rightPwmPin);
+    if (c.rightPwmPin != null) {
+      setRightPwmPin(c.rightPwmPin);
     }
-    if (config.pwmFreq != null) {
-      setPwmFreq(config.pwmFreq);
+    if (c.pwmFreq != null) {
+      setPwmFreq(c.pwmFreq);
     }
     return c;
   }

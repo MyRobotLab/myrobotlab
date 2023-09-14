@@ -38,7 +38,7 @@ import org.slf4j.Logger;
 public class OpenCVFilterSetImageROI extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
-  CvRect rect = null;
+  private transient CvRect rect = null;
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSetImageROI.class);
 
   public OpenCVFilterSetImageROI(String name) {

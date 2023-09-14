@@ -139,6 +139,11 @@ public class WsClient extends WebSocketListener {
       log.debug(String.format("MESSAGE: %s", text));
     }
     if (handler != null) {
+      if ("X".equals(text)) {
+        // ignore Atmosphere does a weird sending of X characters I assume
+        // to make sure the connection is unbroken
+        return;
+      } 
       handler.onRemoteMessage(uuid, text);
     }
   }
