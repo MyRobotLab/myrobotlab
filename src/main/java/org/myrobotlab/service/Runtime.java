@@ -643,8 +643,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   public void startPythonRuntime() {
     PythonUtils.runPythonScriptAsync(
             pythonCommand,
-            new File("."),
-            PYTHON_SERVICES_PATH + fs + "mrl" + fs + "bootstrap.py",
+            new File(PYTHON_SERVICES_PATH),
+            new File(PYTHON_SERVICES_PATH + fs + "mrl" + fs + "bootstrap.py").getAbsolutePath(),
             Platform.getLocalInstance().getId() + "-python"
     );
   }

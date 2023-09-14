@@ -71,7 +71,7 @@ public class PythonUtils {
             }
 
         }
-        return pythonCommand;
+        return new File(pythonCommand).getAbsolutePath();
     }
 
     /**
