@@ -321,7 +321,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    */
   protected Set<String> startingServices = new HashSet<>();
 
-  private static final String PYTHON_VENV_PATH ="python_services/venv";
+  private static final String PYTHON_SERVICES_PATH = "python_services";
+
+  private static final String PYTHON_VENV_PATH = PYTHON_SERVICES_PATH + fs + "venv";
 
   private String pythonCommand;
 
@@ -636,6 +638,15 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     startYml.configRoot = CONFIG_ROOT;
     FileIO.toFile("start.yml", CodecUtils.toYaml(startYml));
     invoke("getStartYml");
+  }
+
+  public void startPythonRuntime() {
+    PythonUtils.runPythonScriptAsync(
+            pythonCommand,
+            new File("."),
+            PYTHON_SERVICES_PATH + fs + "mrl" + fs + "bootstrap.py",
+            Platform.getLocalInstance().getId() + "-python"
+    );
   }
 
   /**

@@ -95,14 +95,22 @@ public class PythonUtils {
         }
 
     }
-
     public static int runPythonScript(String python, File workingDirectory, String script, String... args) {
+        try {
+            return runPythonScriptAsync(python, workingDirectory, script, args).waitFor();
+        } catch (InterruptedException e) {
+                throw new SubprocessException("Unable to run script " + script + " with Python command " + python, e);
+            }
+    }
+
+
+    public static Process runPythonScriptAsync(String python, File workingDirectory, String script, String... args) {
         ProcessBuilder builder = new ProcessBuilder(python, script);
         List<String> currCommand = builder.command();
         currCommand.addAll(List.of(args));
         try {
-            return builder.inheritIO().directory(workingDirectory).start().waitFor();
-        } catch (InterruptedException | IOException e) {
+            return builder.inheritIO().directory(workingDirectory).start();
+        } catch (IOException e) {
             throw new SubprocessException("Unable to run script " + script + " with Python command " + python, e);
         }
 
