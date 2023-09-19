@@ -245,7 +245,7 @@ public class InMoov2Head extends Service<InMoov2HeadConfig> {
     // In theory this could use mrl standard pub/sub by mapping different output
     // topics to ServoControl.onServoMoveTo
     // but I'm tired ... :)
-    ServoControl neck = (ServoControl) Runtime.getService(getPeerName("rothead"));
+    ServoControl neck = (ServoControl) Runtime.getService(getPeerName("neck"));
     if (neck != null) {
       neck.moveTo(neckPos);
     }
