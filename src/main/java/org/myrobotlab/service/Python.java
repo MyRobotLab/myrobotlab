@@ -24,7 +24,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.PythonConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Script;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.myrobotlab.service.meta.abstracts.MetaData;
@@ -748,6 +747,9 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
    * @throws IOException
    */
   public void saveScript(String scriptName, String code) throws IOException {
+    if (scriptName != null && !scriptName.toLowerCase().endsWith(".py")) {
+      scriptName = scriptName + ".py";
+    }
     FileIO.toFile(config.scriptRootDir + fs + scriptName, code);
     info("saved file %s", scriptName);
   }

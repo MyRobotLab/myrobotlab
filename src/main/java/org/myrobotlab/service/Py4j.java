@@ -359,8 +359,10 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener {
    * @throws IOException
    */
   public void saveScript(String scriptName, String code) throws IOException {
-    Py4jConfig c = (Py4jConfig)config;
-    FileIO.toFile(c.scriptRootDir + fs + scriptName, code);
+    if (scriptName != null && !scriptName.toLowerCase().endsWith(".py")) {
+      scriptName = scriptName + ".py";
+    }    
+    FileIO.toFile(config.scriptRootDir + fs + scriptName, code);
     info("saved file %s", scriptName);
   }
 
