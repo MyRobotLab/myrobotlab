@@ -1525,7 +1525,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * @return the service
    */
   @Override
-  public Service<?> publishState() {
+  public Service<T> publishState() {
     return this;
   }
 
