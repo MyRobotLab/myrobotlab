@@ -1536,7 +1536,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
             r.getRepo().install(serviceType);
           }
         } catch (Exception e) {
-          r.error(e);
+          r.error("dependencies failed - install error", e);
+          throw new RuntimeException(String.format("dependencies failed - install error %s", e.getMessage()));
         }
       }
     };

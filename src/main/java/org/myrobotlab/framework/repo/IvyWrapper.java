@@ -405,9 +405,9 @@ public class IvyWrapper extends Repo implements Serializable {
   }
 
   @Override
-  synchronized public void install(String location, String[] serviceTypes) {
+  synchronized public void install(String location, String[] serviceTypes) throws IOException {
 
-    try {
+    // try {
 
       Set<ServiceDependency> targetLibraries = getUnfulfilledDependencies(serviceTypes);
 
@@ -508,9 +508,11 @@ public class IvyWrapper extends Repo implements Serializable {
       }
 
       if (report == null) {
-        log.error("problems resolving dependencies");
+        String errorDetail = String.format("there was problems resolving dependencies %s", (Object[]) serviceTypes); 
+        log.error(errorDetail);
         publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.ERROR, Repo.INSTALL_FINISHED,
-            String.format("there was problems resolving dependencies %s", (Object[]) serviceTypes)));
+            errorDetail));
+        throw new RuntimeException(errorDetail);
       } else {
 
         ArtifactDownloadReport[] artifacts = report.getAllArtifactsReports();
@@ -538,10 +540,10 @@ public class IvyWrapper extends Repo implements Serializable {
 
         publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of %s", (Object[]) serviceTypes)));
       }
-    } catch (Exception e) {
-      error(e.getMessage());
-      log.error(e.getMessage(), e);
-    }
+//    } catch (Exception e) {
+//      error(e.getMessage());
+//      log.error(e.getMessage(), e);
+//    }
 
   }
 

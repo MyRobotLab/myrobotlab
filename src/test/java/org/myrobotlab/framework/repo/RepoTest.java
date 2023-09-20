@@ -4,8 +4,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -50,7 +48,7 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
   }
 
   @Test
-  public void testAddStatusListener() throws ParseException, IOException {
+  public void testAddStatusListener() throws Exception {
     Repo repo = Repo.getInstance();
     repo.addStatusPublisher(this);
     repo.install("Arduino");
@@ -81,7 +79,7 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
   }
 
   @Test
-  public void testIsInstalled() throws ParseException, IOException {
+  public void testIsInstalled() throws Exception {
     Repo repo = Repo.getInstance();
     repo.clear();
     repo.install("Arduino");
