@@ -27,9 +27,11 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.programab.PredicateEvent;
 import org.myrobotlab.programab.Response;
+import org.myrobotlab.service.Log.LogEntry;
 import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.InMoov2Config;
+import org.myrobotlab.service.data.Event;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.LedDisplayData;
 import org.myrobotlab.service.data.Locale;
@@ -54,16 +56,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   private static final long serialVersionUID = 1L;
 
   protected static final Set<String> stateDefaults = new TreeSet<>();
-
-  /**
-   * Setting the beginning time where events are initially set. If the time
-   * interval has been reached: {@code
-   *    System.currentTimeMillis() > lastFireRandomEvent - stateRandomEventTime
-   * } then a random event will be fired. If the fsm is in a state that can move
-   * on that event .. it will go to "random" state
-   * 
-   */
-  protected long stateLastRandomTime = System.currentTimeMillis();
 
   static String speechRecognizer = "WebkitSpeechRecognition";
 
@@ -118,6 +110,11 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
   }
 
+  /**
+   * the config that was processed before booting, if there was one.
+   */
+  String bootedConfig = null;
+
   protected transient ProgramAB chatBot;
 
   protected List<String> configList;
@@ -133,20 +130,13 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   protected boolean configStarted = false;
 
   /**
-   * the config that was processed before booting, if there was one.
-   */
-  String bootedConfig = null;
-
-  protected transient SpeechRecognizer ear;
-
-  protected Map<String, LedDisplayData> ledDisplayMap = new TreeMap<>();
-
-  /**
    * map of events or states to sounds
    */
   protected Map<String, String> customSoundMap = new TreeMap<>();
 
-  protected List<Status> errors = new ArrayList<>();
+  protected transient SpeechRecognizer ear;
+
+  protected List<LogEntry> errors = new ArrayList<>();
 
   /**
    * The finite state machine is core to managing state of InMoov2. There is
@@ -161,6 +151,13 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   protected Set<String> gestures = new TreeSet<String>();
 
+  /**
+   * Prevents actions or events from happening when InMoov2 is first booted
+   */
+  private boolean hasBooted = false;
+
+  protected boolean isPirOn = false;
+
   protected transient HtmlFilter htmlFilter;
 
   protected transient ImageDisplay imageDisplay;
@@ -169,12 +166,12 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   protected Long lastPirActivityTime;
 
+  protected Map<String, LedDisplayData> ledDisplayMap = new TreeMap<>();
+
   /**
    * supported locales
    */
   protected Map<String, Locale> locales = null;
-
-  protected long stateLastIdleTime = System.currentTimeMillis();
 
   protected transient SpeechSynthesis mouth;
 
@@ -182,16 +179,17 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   protected transient OpenCV opencv;
 
+  protected List<String> peersStarted = new ArrayList<>();
+
   protected transient Python python;
+
+  protected long stateLastIdleTime = System.currentTimeMillis();
+
+  protected long stateLastRandomTime = System.currentTimeMillis();
 
   protected String voiceSelected;
 
-  /**
-   * Prevents actions or events from happening when InMoov2 is first booted
-   */
-  private boolean hasBooted = false;
-
-  protected List<String> peersStarted = new ArrayList<>();
+  protected boolean wasMutedBeforeBoot = false;
 
   public InMoov2(String n, String id) {
     super(n, id);
@@ -216,8 +214,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     ledDisplayMap.put("success", new LedDisplayData(0, 0, 120, 2, 30, 30));
     ledDisplayMap.put("warn", new LedDisplayData(100, 100, 0, 3, 30, 30));
     ledDisplayMap.put("heartbeat", new LedDisplayData(210, 110, 0, 2, 100, 30));
-    ledDisplayMap.put("heartbeat", new LedDisplayData(210, 110, 0, 2, 100, 30));
-    ledDisplayMap.put("pirOn", new LedDisplayData(80, 200, 90, 3, 100, 30));
+    ledDisplayMap.put("pirOn", new LedDisplayData(60, 200, 90, 3, 100, 30));
     ledDisplayMap.put("onPeakColor", new LedDisplayData(180, 53, 21, 3, 60, 30));
 
     customSoundMap.put("boot", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/confirmation.wav"));
@@ -229,18 +226,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     customSoundMap.put("powerDown", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/ting.wav"));
     customSoundMap.put("shutdown", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/marimba.wav"));
 
-  }
-
-  /**
-   * pir active ear listening for wakeword
-   */
-  public void idle() {
-    log.info("idle");
-  }
-
-  public void shutdown() {
-    log.info("shutdown");
-    Runtime.shutdown();
   }
 
   public void addTextListener(TextListener service) {
@@ -520,6 +505,27 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
   }
 
+  public void firstInit() {
+    log.info("firstInit");
+    // cheap way to prevent race condition
+    // of "wake" firing a state change .. which will spawn
+    // a system event of FIRST_INIT that will answer this
+    // question ...
+    sleep(2000);
+    ProgramAB chatBot = (ProgramAB) getPeer("chatBot");
+    if (chatBot != null) {
+      chatBot.getResponse("FIRST_INIT");
+    }
+  }
+
+  public void flash(String name) {
+    LedDisplayData led = ledDisplayMap.get(name);
+    if (led == null) {
+      led = ledDisplayMap.get("default");
+    }
+    invoke("publishFlash", led.red, led.green, led.blue, led.count, led.timeOn, led.timeOff);
+  }
+
   /**
    * used to configure a flashing event - could use configuration to signal
    * different colors and states
@@ -527,22 +533,17 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * @return
    */
   public void flash() {
-    // FIXME - this should be checking a protected "state"
-    if (!configStarted) {
-      if (ledDisplayMap.get("default") != null) {
-        LedDisplayData led = ledDisplayMap.get("default");
-        invoke("publishFlash", led.red, led.green, led.blue, led.count, led.timeOn, led.timeOff);
-      }
+    if (ledDisplayMap.get("default") != null) {
+      LedDisplayData led = ledDisplayMap.get("default");
+      invoke("publishFlash", led.red, led.green, led.blue, led.count, led.timeOn, led.timeOff);
     }
   }
 
   public void flash(int r, int g, int b, int count) {
     // FIXME - this should be checking a protected "state"
-    if (!configStarted) {
-      if (ledDisplayMap.get("default") != null) {
-        LedDisplayData led = ledDisplayMap.get("default");
-        invoke("publishFlash", r, g, b, count, led.timeOn, led.timeOff);
-      }
+    if (ledDisplayMap.get("default") != null) {
+      LedDisplayData led = ledDisplayMap.get("default");
+      invoke("publishFlash", r, g, b, count, led.timeOn, led.timeOff);
     }
   }
 
@@ -664,6 +665,10 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return (InMoov2Hand) getPeer("rightHand");
   }
 
+  public String getState() {
+    return fsm.getCurrent();
+  }
+
   /**
    * matches on language only not variant expands language match to full InMoov2
    * bot locale
@@ -701,6 +706,13 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     sendToPeer("rightArm", "setSpeed", 25.0, 25.0, 25.0, 25.0);
     sendToPeer("leftArm", "setSpeed", 25.0, 25.0, 25.0, 25.0);
     sendToPeer("torso", "setSpeed", 20.0, 20.0, 20.0);
+  }
+
+  /**
+   * pir active ear listening for wakeword
+   */
+  public void idle() {
+    log.info("idle");
   }
 
   public boolean isCameraOn() {
@@ -936,6 +948,115 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     sendToPeer("torso", "moveToBlocking", topStom, midStom, lowStom);
   }
 
+  /**
+   * At boot all services specified through configuration have started, or if no
+   * configuration has started minimally the InMoov2 service has started. During
+   * the processing of config and starting other services data will have
+   * accumulated, and at boot, some of data may now be inspected and processed
+   * in a synchronous single threaded way. With reporting after startup, vs
+   * during, other peer services are not needed (e.g. audioPlayer is no longer
+   * needed to be started "before" InMoov2 because when boot is called
+   * everything that is wanted has been started.
+   *
+   */
+  synchronized public void onBoot() {
+
+    // thinking you shouldn't "boot" twice ?
+    if (hasBooted) {
+      log.warn("will not boot again");
+      return;
+    }
+
+    List<ServiceInterface> services = Runtime.getServices();
+    for (ServiceInterface si : services) {
+      if ("Servo".equals(si.getSimpleName())) {
+        send(si.getFullName(), "setAutoDisable", true);
+      }
+    }
+
+    // FIXME - standardize multi-config examples should be available
+    // moved from startService to allow more simple control
+    // FIXME standard FileIO copyIfNotExists(src, dst)
+    try {
+      // copy config if it doesn't already exist
+      String resourceBotDir = FileIO.gluePaths(getResourceDir(), "config");
+      List<File> files = FileIO.getFileList(resourceBotDir);
+      for (File f : files) {
+        String botDir = "data/config/" + f.getName();
+        File bDir = new File(botDir);
+        if (bDir.exists() || !f.isDirectory()) {
+          log.info("skipping data/config/{}", botDir);
+        } else {
+          log.info("will copy new data/config/{}", botDir);
+          try {
+            FileIO.copy(f.getAbsolutePath(), botDir);
+          } catch (Exception e) {
+            error(e);
+          }
+        }
+      }
+    } catch (Exception e) {
+      error(e);
+    }
+
+    // FIXME - find good way of running an animation "through" a state
+    if (config.neoPixelBootGreen && getPeer("neoPixel") != null) {
+      NeoPixel neoPixel = (NeoPixel) getPeer("neoPixel");
+      if (neoPixel != null) {
+        invoke("publishPlayAnimation", config.bootAnimation);
+      }
+    }
+
+    if (config.startupSound && getPeer("audioPlayer") != null) {
+      ((AudioFile) getPeer("audioPlayer")).playBlocking(FileIO.gluePaths(getResourceDir(), "/system/sounds/startupsound.mp3"));
+    }
+
+    if (config.systemEventsOnBoot) {
+      // reporting on all services and config started
+      if (bootedConfig != null) {
+        // configuration was processed before booting
+        systemEvent("CONFIG STARTED %s", bootedConfig);
+      }
+
+      for (String peerKey : peersStarted) {
+        systemEvent("STARTED %s", peerKey);
+      }
+
+      if (bootedConfig != null) {
+        // configuration was processed before booting
+        systemEvent("CONFIG LOADED %s", bootedConfig);
+      }
+    }
+
+    // FIXME - important to do invoke & fsm needs to be consistent order
+
+    // if speaking then turn off animation
+
+    // publish all the errors
+
+    // switch off animations
+
+    // start heartbeat
+    // say starting heartbeat
+    if (config.heartbeat) {
+      startHeartbeat();
+    } else {
+      stopHeartbeat();
+    }
+
+    // say finished booting
+
+    fsm.fire("wake");
+
+    // if (getPeer("mouth") != null) {
+    // AbstractSpeechSynthesis<SpeechSynthesisConfig> mouth =
+    // (AbstractSpeechSynthesis)getPeer("mouth");
+    // mouth.setMute(wasMute);
+    // }
+
+    hasBooted = true;
+  }
+
   public PredicateEvent onChangePredicate(PredicateEvent event) {
     log.error("onChangePredicate {}", event);
     if (event.name.equals("topic")) {
@@ -969,12 +1090,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     log.info("{} created", fullname);
   }
 
-  public void onError(Status status) {
-    if (errors.size() < 100) {
-      errors.add(status);
-    }
-  }
-
   public void onGestureStatus(Status status) {
     if (!status.equals(Status.success()) && !status.equals(Status.warn("Python process killed !"))) {
       error("I cannot execute %s, please check logs", lastGestureExecuted);
@@ -999,33 +1114,12 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
         return;
       }
 
-      if (config.batteryLevelCheck) {
-        double batteryLevel = Runtime.getBatteryLevel();
-        invoke("publishBatteryLevel", batteryLevel);
-        // FIXME - thresholding should always have old value or state
-        // so we don't pump endless errors
-        if (batteryLevel < 5) {
-          error("battery level < 5 percent");
-          // systemEvent(BATTERY ERROR)
-        } else if (batteryLevel < 10) {
-          warn("battery level < 10 percent");
-          // systemEvent(BATTERY WARN)
-        }
-      }
-
-      // flash error until errors are cleared
-      if (config.healthCheckFlash) {
-        if (errors.size() > 0 && ledDisplayMap.containsKey("error")) {
-          invoke("publishFlash", ledDisplayMap.get("error"));
-        } else if (ledDisplayMap.containsKey("heartbeat")) {
-          LedDisplayData heartbeat = ledDisplayMap.get("heartbeat");
-          invoke("publishFlash", heartbeat);
-        }
-      }
-
       Long lastActivityTime = getLastActivityTime();
 
-      if (lastActivityTime != null && lastActivityTime + (config.stateIdleInterval * 1000) < System.currentTimeMillis()) {
+      // FIXME lastActivityTime != 0 is bogus - the value should be null if
+      // never set
+      if (config.stateIdleInterval != null && lastActivityTime != null && lastActivityTime != 0
+          && lastActivityTime + (config.stateIdleInterval * 1000) < System.currentTimeMillis()) {
         stateLastIdleTime = lastActivityTime;
       }
 
@@ -1035,8 +1129,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       }
 
       // interval event firing
-      if (System.currentTimeMillis() > stateLastRandomTime + (config.stateRandomInterval * 1000)) {
-        fsm.fire("random");
+      if (config.stateRandomInterval != null && System.currentTimeMillis() > stateLastRandomTime + (config.stateRandomInterval * 1000)) {
+        // fsm.fire("random");
         stateLastRandomTime = System.currentTimeMillis();
       }
 
@@ -1044,8 +1138,48 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       error(e);
     }
 
+    if (config.pirOnFlash && isPeerStarted("pir") && isPirOn) {
+      flash("pirOn");
+    }
+
+    if (config.batteryLevelCheck) {
+      double batteryLevel = Runtime.getBatteryLevel();
+      invoke("publishBatteryLevel", batteryLevel);
+      // FIXME - thresholding should always have old value or state
+      // so we don't pump endless errors
+      if (batteryLevel < 5) {
+        error("battery level < 5 percent");
+        // systemEvent(BATTERY ERROR)
+      } else if (batteryLevel < 10) {
+        warn("battery level < 10 percent");
+        // systemEvent(BATTERY WARN)
+      }
+    }
+
+    // flash error until errors are cleared
+    if (config.healthCheckFlash) {
+      if (errors.size() > 0 && ledDisplayMap.containsKey("error")) {
+        invoke("publishFlash", ledDisplayMap.get("error"));
+      } else if (ledDisplayMap.containsKey("heartbeat")) {
+        LedDisplayData heartbeat = ledDisplayMap.get("heartbeat");
+        invoke("publishFlash", heartbeat);
+      }
+    }
+
   }
 
+  public void onInactivity() {
+    log.info("onInactivity");
+
+    // powerDown ?
+
+  }
+
+  /**
+   * Central hub of input motion control. Potentially, all input from
+   * joysticks, quest2 controllers and headset, or any IK service could
+   * be sent here
+   */
   @Override
   public void onJointAngles(Map<String, Double> angleMap) {
     log.debug("onJointAngles {}", angleMap);
@@ -1063,6 +1197,22 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   public void onJoystickInput(JoystickData input) throws Exception {
     // TODO timer ? to test and not send an event
     // switches to manual control ?
+  }
+
+  /**
+   * Centralized logging system will have all logging from all services,
+   * including lower level logs that do not propegate as statuses
+   * 
+   * @param log
+   *          - flushed log from Log service
+   */
+  public void onLogEvents(List<LogEntry> log) {
+    // scan for warn or errors
+    for (LogEntry entry : log) {
+      if ("ERROR".equals(entry.level) && errors.size() < 100) {
+        errors.add(entry);
+      }
+    }
   }
 
   public void onMoveHead(Map<String, Double> map) {
@@ -1086,6 +1236,10 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
   }
 
+  // public Message publishPython(String method, Object...data) {
+  // return Message.createMessage(getName(), getName(), method, data);
+  // }
+
   public void onMoveRightArm(Map<String, Double> map) {
     InMoov2Arm rightArm = (InMoov2Arm) getPeer("rightArm");
     if (rightArm != null) {
@@ -1107,74 +1261,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
   }
 
-  /**
-   * The integration between the FiniteStateMachine (fsm) and the InMoov2
-   * service and potentially other services (Python, ProgramAB) happens here.
-   * 
-   * After boot all state changes get published here.
-   * 
-   * Some InMoov2 service methods will be called here for "default
-   * implemenation" of states. If a user doesn't want to have that default
-   * implementation, they can change it by changing the definition of the state
-   * machine, and have a new state which will call a Python inmoov2 library
-   * callback. Overriding, appending, or completely transforming the behavior is
-   * all easily accomplished by managing the fsm and python inmoov2 library
-   * callbacks.
-   * 
-   * Python inmoov2 callbacks ProgramAB topic switching
-   * 
-   * Depending on config:
-   * 
-   * 
-   * @param stateChange
-   * @return
-   */
-  public FiniteStateMachine.StateChange onStateChange(FiniteStateMachine.StateChange stateChange) {
-    try {
-      log.error("onStateChange {}", stateChange);
 
-      String state = stateChange.current;
-
-      // getPeer("py4j") ?
-      // Py4j py4j
-//      String code = getName()".onStateChange("
-//      invoke("publishPython", "onStateChange", stateChange );
-      
-      if (config.systemEventStateChange) {
-        systemEvent("ON STATE %s", state);
-      }
-
-      if (config.customSounds && customSoundMap.containsKey(state)) {
-        invoke("publishPlayAudioFile", customSoundMap.get(state));
-      }
-
-      // TODO - only a few InMoov2 state defaults will be called here
-      if (stateDefaults.contains(state)) {
-        invoke(state);
-      }
-
-      // FIXME add topic changes to AIML here !
-      // FIXME add clallbacks to inmmoov2 library
-
-      // put configurable filter here !
-
-      // state substitutions ?
-      // let python subscribe directly to fsm.publishStateChange
-
-      // if python && configured to do python inmoov2 library callbacks
-      // do a callback ... default NOOPs should be in library
-
-      // if
-      // invoke(state);
-      // depending on configuration ....
-      // call python ?
-      // fire fsm events ?
-      // do defaults ?
-    } catch (Exception e) {
-      error(e);
-    }
-    return stateChange;
-  }
   
 //  public Message publishPython(String method, Object...data) {
 //    return Message.createMessage(getName(), getName(), method, data);
@@ -1202,40 +1289,19 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   }
 
   /**
-   * initial callback for Pir sensor Default behavior will be: send fsm event
-   * onPirOn flash neopixel
+   * Pir on callback
    */
   public void onPirOn() {
-    // FIXME - this should be checking a protected "state"
-    if (!configStarted) {
-      if (ledDisplayMap.get("pirOn") != null) {
-        LedDisplayData pirOn = ledDisplayMap.get("pirOn");
-        invoke("publishFlash", pirOn);
-      }
-    }
-
+    isPirOn = true;
     fsm.fire("wake");
   }
 
-  public void powerDown() {
-    // publishFlash(maxInactivityTimeSeconds, maxInactivityTimeSeconds,
-    // maxInactivityTimeSeconds, maxInactivityTimeSeconds,
-    // maxInactivityTimeSeconds, maxInactivityTimeSeconds)
-
-    rest();
-    purgeTasks(); // including heartbeat
-    disable();
-
-    if (chatBot != null) {
-      chatBot.sleep();
-    }
-
-    if (ear != null) {
-      // FIXME - bad remove it - what is needed ?
-      // i think this is legacy wake word
-      ear.lockOutAllGrammarExcept("power up");
-    }
-
+  /**
+   * Pir off callback
+   */
+  public void onPirOff() {
+    isPirOn = false;
+    fsm.fire("sleep");
   }
 
   @Override
@@ -1292,6 +1358,81 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
   }
 
+  /**
+   * The integration between the FiniteStateMachine (fsm) and the InMoov2
+   * service and potentially other services (Python, ProgramAB) happens here.
+   * 
+   * After boot all state changes get published here.
+   * 
+   * Some InMoov2 service methods will be called here for "default
+   * implemenation" of states. If a user doesn't want to have that default
+   * implementation, they can change it by changing the definition of the state
+   * machine, and have a new state which will call a Python inmoov2 library
+   * callback. Overriding, appending, or completely transforming the behavior is
+   * all easily accomplished by managing the fsm and python inmoov2 library
+   * callbacks.
+   * 
+   * Python inmoov2 callbacks ProgramAB topic switching
+   * 
+   * Depending on config:
+   * 
+   * 
+   * @param stateChange
+   * @return
+   */
+  public FiniteStateMachine.StateChange onStateChange(FiniteStateMachine.StateChange stateChange) {
+    try {
+      log.error("onStateChange {}", stateChange);
+
+      String current = stateChange.current;
+      String last = stateChange.last;
+
+      // leaving random state
+      if ("random".equals(last) && !"random".equals(current) && isPeerStarted("random")) {
+        Random random = (Random) getPeer("random");
+        random.disable();
+      }
+
+      if ("wake".equals(last)) {
+        invoke("publishStopAnimation");
+      }
+
+      if (config.systemEventStateChange) {
+        systemEvent("ON STATE %s", current);
+      }
+
+      if (config.customSounds && customSoundMap.containsKey(current)) {
+        invoke("publishPlayAudioFile", customSoundMap.get(current));
+      }
+
+      // TODO - only a few InMoov2 state defaults will be called here
+      if (stateDefaults.contains(current)) {
+        invoke(current);
+      }
+
+      // FIXME add topic changes to AIML here !
+      // FIXME add clallbacks to inmmoov2 library
+
+      // put configurable filter here !
+
+      // state substitutions ?
+      // let python subscribe directly to fsm.publishStateChange
+
+      // if python && configured to do python inmoov2 library callbacks
+      // do a callback ... default NOOPs should be in library
+
+      // if
+      // invoke(state);
+      // depending on configuration ....
+      // call python ?
+      // fire fsm events ?
+      // do defaults ?
+    } catch (Exception e) {
+      error(e);
+    }
+    return stateChange;
+  }
+
   @Override
   public void onStopped(String name) {
     log.info("service {} has stopped");
@@ -1307,6 +1448,27 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     // to be a distinction
     log.info("onText - {}", text);
     invoke("publishText", text);
+  }
+
+  public void powerDown() {
+    // publishFlash(maxInactivityTimeSeconds, maxInactivityTimeSeconds,
+    // maxInactivityTimeSeconds, maxInactivityTimeSeconds,
+    // maxInactivityTimeSeconds, maxInactivityTimeSeconds)
+
+    rest();
+    purgeTasks(); // including heartbeat
+    disable();
+
+    if (chatBot != null) {
+      chatBot.sleep();
+    }
+
+    if (ear != null) {
+      // FIXME - bad remove it - what is needed ?
+      // i think this is legacy wake word
+      ear.lockOutAllGrammarExcept("power up");
+    }
+
   }
 
   /**
@@ -1325,6 +1487,10 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return d;
   }
 
+  public void publishBoot() {
+    log.info("publishBoot");
+  }
+
   public String publishConfigFinished(String configName) {
     return configName;
   }
@@ -1339,29 +1505,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return configList;
   }
 
-  public String systemEvent(String eventMsg) {
-    invoke("publishSystemEvent", eventMsg);
-    return eventMsg;
-  }
-
-  public String systemEvent(String format, Object... ags) {
-    String eventMsg = String.format(format, ags);
-    return systemEvent(eventMsg);
-  }
-
-  /**
-   * event publisher for the fsm - although other services potentially can
-   * consume and filter this event channel
-   * 
-   * @param event
-   * @return
-   */
-  public String publishSystemEvent(String event) {
-    // well, it turned out underscore was a goofy selection, as underscore in
-    // aiml is wildcard ... duh
-    return String.format("SYSTEM_EVENT %s", event);
-  }
-
   public LedDisplayData publishFlash(int r, int g, int b, int count, long timeOn, long timeOff) {
     LedDisplayData data = new LedDisplayData();
     data.red = r;
@@ -1373,6 +1516,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return data;
   }
 
+  
   public LedDisplayData publishFlash(LedDisplayData data) {
     return data;
   }
@@ -1382,6 +1526,15 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    */
   public void publishHeartbeat() {
     log.debug("publishHeartbeat");
+  }
+
+  /**
+   * if inactivityTime configured, this event is published after there has not
+   * been in activity since.
+   */
+  public void publishInactivity() {
+    log.info("publishInactivity");
+    fsm.fire("inactvity");
   }
 
   /**
@@ -1419,33 +1572,36 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return map;
   }
 
+  public String publishPlayAudioFile(String filename) {
+    return filename;
+  }
+
+  public String publishPlayAnimation(String animation) {
+    return animation;
+  }
+
+  /**
+   * stop animation event
+   */
+  public void publishStopAnimation() {
+  }
+
   public FiniteStateMachine.StateChange publishStateChange(FiniteStateMachine.StateChange state) {
     log.info("publishStateChange {}", state);
     return state;
   }
 
-  public String publishPlayAudioFile(String filename) {
-    return filename;
-  }
-
   /**
-   * if inactivityTime configured, this event is published after there has not
-   * been in activity since.
+   * event publisher for the fsm - although other services potentially can
+   * consume and filter this event channel
+   * 
+   * @param event
+   * @return
    */
-  public void publishInactivity() {
-    log.info("publishInactivity");
-    fsm.fire("inactvity");
-  }
-
-  public void onInactivity() {
-    log.info("onInactivity");
-
-    // powerDown ?
-
-  }
-
-  public String getState() {
-    return fsm.getCurrent();
+  public String publishSystemEvent(String event) {
+    // well, it turned out underscore was a goofy selection, as underscore in
+    // aiml is wildcard ... duh
+    return String.format("SYSTEM_EVENT %s", event);
   }
 
   /**
@@ -1454,6 +1610,16 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   @Override
   public String publishText(String text) {
     return text;
+  }
+
+  /**
+   * default this will come from idle after some configurable time period
+   */
+  public void random() {
+    Random random = (Random) getPeer("random");
+    if (random != null) {
+      random.enable();
+    }
   }
 
   @Override
@@ -1663,6 +1829,11 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     setHandSpeed("right", thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
+  // -----------------------------------------------------------------------------
+  // These are methods added that were in InMoov1 that we no longer had in
+  // InMoov2.
+  // From original InMoov1 so we don't loose the
+
   public void setRightHandSpeed(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
     setHandSpeed("right", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
   }
@@ -1696,6 +1867,18 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       voiceSelected = name;
       speakBlocking(String.format("%s %s", get("SETLANG"), name));
     }
+  }
+
+  public void shutdown() {
+    log.info("shutdown");
+    Runtime.shutdown();
+  }
+
+  /**
+   * ear still listening pir still active
+   */
+  public void sleep() {
+    log.info("sleep");
   }
 
   public void sleeping() {
@@ -1933,140 +2116,172 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
   }
 
-  public void publishBoot() {
-    log.info("publishBoot");
+  public void startServos() {
+    startPeer("head");
+    startPeer("leftArm");
+    startPeer("leftHand");
+    startPeer("rightArm");
+    startPeer("rightHand");
+    startPeer("torso");
   }
 
-  boolean wasMutedBeforeBoot = false;
+  // FIXME .. externalize in a json file included in InMoov2
+  public Simulator startSimulator() throws Exception {
+    Simulator si = (Simulator) startPeer("simulator");
+    return si;
+  }
 
-  /**
-   * At boot all services specified through configuration have started, or if no
-   * configuration has started minimally the InMoov2 service has started. During
-   * the processing of config and starting other services data will have
-   * accumulated, and at boot, some of data may now be inspected and processed
-   * in a synchronous single threaded way. With reporting after startup, vs
-   * during, other peer services are not needed (e.g. audioPlayer is no longer
-   * needed to be started "before" InMoov2 because when boot is called
-   * everything that is wanted has been started.
-   *
-   */
-  synchronized public void onBoot() {
+  public void stop() {
+    sendToPeer("head", "stop");
+    sendToPeer("rightHand", "stop");
+    sendToPeer("leftHand", "stop");
+    sendToPeer("rightArm", "stop");
+    sendToPeer("leftArm", "stop");
+    sendToPeer("torso", "stop");
+  }
 
-    // thinking you shouldn't "boot" twice ?
-    if (hasBooted) {
-      log.warn("will not boot again");
-      return;
-    }
+  public void stopGesture() {
+    Python p = (Python) Runtime.getService("python");
+    p.stop();
+  }
 
-    List<ServiceInterface> services = Runtime.getServices();
-    for (ServiceInterface si : services) {
-      if ("Servo".equals(si.getSimpleName())) {
-        send(si.getFullName(), "setAutoDisable", true);
-      }
-    }
+  public void stopHeartbeat() {
+    purgeTask("publishHeartbeat");
+    config.heartbeat = false;
+  }
 
-    // FIXME - standardize multi-config examples should be available
-    // moved from startService to allow more simple control
-    // FIXME standard FileIO copyIfNotExists(src, dst)
-    try {
-      // copy config if it doesn't already exist
-      String resourceBotDir = FileIO.gluePaths(getResourceDir(), "config");
-      List<File> files = FileIO.getFileList(resourceBotDir);
-      for (File f : files) {
-        String botDir = "data/config/" + f.getName();
-        File bDir = new File(botDir);
-        if (bDir.exists() || !f.isDirectory()) {
-          log.info("skipping data/config/{}", botDir);
-        } else {
-          log.info("will copy new data/config/{}", botDir);
-          try {
-            FileIO.copy(f.getAbsolutePath(), botDir);
-          } catch (Exception e) {
-            error(e);
-          }
+  public void stopNeopixelAnimation() {
+    sendToPeer("neopixel", "clear");
+  }
+
+  public void systemCheck() {
+    log.error("systemCheck()");
+    Runtime runtime = Runtime.getInstance();
+    int servoCount = 0;
+    int servoAttachedCount = 0;
+    for (ServiceInterface si : Runtime.getServices()) {
+      if (si.getClass().getSimpleName().equals("Servo")) {
+        servoCount++;
+        if (((Servo) si).getController() != null) {
+          servoAttachedCount++;
         }
       }
-    } catch (Exception e) {
-      error(e);
     }
 
-    // FIXME - find good way of running an animation "through" a state
-    if (config.neoPixelBootGreen && getPeer("neoPixel") != null) {
-      NeoPixel neoPixel = (NeoPixel) getPeer("neoPixel");
-      if (neoPixel != null) {
-        neoPixel.clear();
-        neoPixel.setColor(0, 130, 0);
-        neoPixel.playAnimation("Larson Scanner");
-      }
-    }
-
-    if (config.startupSound && getPeer("audioPlayer") != null) {
-      ((AudioFile) getPeer("audioPlayer")).playBlocking(FileIO.gluePaths(getResourceDir(), "/system/sounds/startupsound.mp3"));
-    }
-
-    if (config.systemEventsOnBoot) {
-      // reporting on all services and config started
-      if (bootedConfig != null) {
-        // configuration was processed before booting
-        systemEvent("CONFIG STARTED %s", bootedConfig);
-      }
-
-      for (String peerKey : peersStarted) {
-        systemEvent("STARTED %s", peerKey);
-      }
-
-      if (bootedConfig != null) {
-        // configuration was processed before booting
-        systemEvent("CONFIG LOADED %s", bootedConfig);
-      }
-    }
-
-    // FIXME - important to do invoke & fsm needs to be consistent order
-
-    // if speaking then turn off animation
-
-    // publish all the errors
-
-    // switch off animations
-
-    // start heartbeat
-    // say starting heartbeat
-    if (config.heartbeat) {
-      startHeartbeat();
-    } else {
-      stopHeartbeat();
-    }
-
-    // say finished booting
-
-    fsm.fire("wake");
-
-    // if (getPeer("mouth") != null) {
-    // AbstractSpeechSynthesis<SpeechSynthesisConfig> mouth =
-    // (AbstractSpeechSynthesis)getPeer("mouth");
-    // mouth.setMute(wasMute);
-    // }
-
-    hasBooted = true;
+    setPredicate("systemServoCount", servoCount);
+    setPredicate("systemAttachedServoCount", servoAttachedCount);
+    setPredicate("systemFreeMemory", Runtime.getFreeMemory());
+    Platform platform = Runtime.getPlatform();
+    setPredicate("system version", platform.getVersion());
+    // ERROR buffer !!!
+    systemEvent("SYSTEMCHECKFINISHED"); // wtf is this?
   }
 
-  /**
-   * default this will come from idle after some configurable time period
-   */
-  public void random() {
-    Random random = (Random) getPeer("random");
-    if (random != null) {
-      random.enable();
-    }
+  public String systemEvent(String eventMsg) {
+    invoke("publishSystemEvent", eventMsg);
+    return eventMsg;
   }
 
-  /**
-   * ear still listening pir still active
-   */
-  public void sleep() {
-    log.info("sleep");
+  public String systemEvent(String format, Object... ags) {
+    String eventMsg = String.format(format, ags);
+    return systemEvent(eventMsg);
   }
 
+  // FIXME - if this is really desired it will drive local references for all
+  // servos
+  public void waitTargetPos() {
+    // FIXME - consider actual reference for this
+    sendToPeer("head", "waitTargetPos");
+    sendToPeer("rightHand", "waitTargetPos");
+    sendToPeer("leftHand", "waitTargetPos");
+    sendToPeer("rightArm", "waitTargetPos");
+    sendToPeer("leftArm", "waitTargetPos");
+    sendToPeer("torso", "waitTargetPos");
+  }
+
+  public void closeRightHand() {
+
+    // if InMoov2Hand.close/open is used directly
+    // it prevents user's interception of the data
+    // and forces InMoov2Hand type to be used :(
+    // pub/sub is the way
+
+    // hardcoded, but if necessary can be put in config
+    HashMap<String, Double> map = new HashMap<>();
+    map.put("thumb", 130.0);
+    map.put("index", 180.0);
+    map.put("majeure", 180.0);
+    map.put("ringFinger", 180.0);
+    map.put("pinky", 180.0);
+    invoke("publishMoveRightHand", map);
+
+  }
+
+  public void openRightHand() {
+    // if InMoov2Hand.close/open is used directly
+    // it prevents user's interception of the data
+    // and forces InMoov2Hand type to be used :(
+    // pub/sub is the way
+
+    // hardcoded, but if necessary can be put in config
+    HashMap<String, Double> map = new HashMap<>();
+    map.put("thumb", 0.0);
+    map.put("index", 0.0);
+    map.put("majeure", 0.0);
+    map.put("ringFinger", 0.0);
+    map.put("pinky", 0.0);
+    invoke("publishMoveRightHand", map);
+  }
+  
+  public void closeLeftHand() {
+
+    // if InMoov2Hand.close/open is used directly
+    // it prevents user's interception of the data
+    // and forces InMoov2Hand type to be used :(
+    // pub/sub is the way
+
+    // hardcoded, but if necessary can be put in config
+    HashMap<String, Double> map = new HashMap<>();
+    map.put("thumb", 130.0);
+    map.put("index", 180.0);
+    map.put("majeure", 180.0);
+    map.put("ringFinger", 180.0);
+    map.put("pinky", 180.0);
+    invoke("publishMoveLeftHand", map);
+
+  }
+
+  public void openLeftHand() {
+    // if InMoov2Hand.close/open is used directly
+    // it prevents user's interception of the data
+    // and forces InMoov2Hand type to be used :(
+    // pub/sub is the way
+
+    // hardcoded, but if necessary can be put in config
+    HashMap<String, Double> map = new HashMap<>();
+    map.put("thumb", 0.0);
+    map.put("index", 0.0);
+    map.put("majeure", 0.0);
+    map.put("ringFinger", 0.0);
+    map.put("pinky", 0.0);
+    invoke("publishMoveLeftHand", map);
+  }
+
+  public void openHands() {
+    openLeftHand();
+    openRightHand();
+  }
+
+  public void closeHands() {
+    closeLeftHand();
+    closeRightHand();
+  }
+  
+  public Event onEvent(Event event) {
+    
+    return event;
+  }
+  
   public void wake() {
     log.info("wake");
     // do waking things - based on config
@@ -2135,92 +2350,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
         fsm.fire("firstInit");
       }
     }
-  }
-
-  public void firstInit() {
-    log.info("firstInit");
-    // cheap way to prevent race condition
-    // of "wake" firing a state change .. which will spawn
-    // a system event of FIRST_INIT that will answer this
-    // question ...
-    sleep(2000);
-    ProgramAB chatBot = (ProgramAB) getPeer("chatBot");
-    if (chatBot != null) {
-      chatBot.getResponse("FIRST_INIT");
-    }
-  }
-
-  public void startServos() {
-    startPeer("head");
-    startPeer("leftArm");
-    startPeer("leftHand");
-    startPeer("rightArm");
-    startPeer("rightHand");
-    startPeer("torso");
-  }
-
-  // FIXME .. externalize in a json file included in InMoov2
-  public Simulator startSimulator() throws Exception {
-    Simulator si = (Simulator) startPeer("simulator");
-    return si;
-  }
-
-  public void stop() {
-    sendToPeer("head", "stop");
-    sendToPeer("rightHand", "stop");
-    sendToPeer("leftHand", "stop");
-    sendToPeer("rightArm", "stop");
-    sendToPeer("leftArm", "stop");
-    sendToPeer("torso", "stop");
-  }
-
-  public void stopGesture() {
-    Python p = (Python) Runtime.getService("python");
-    p.stop();
-  }
-
-  public void stopHeartbeat() {
-    purgeTask("publishHeartbeat");
-    config.heartbeat = false;
-  }
-
-  public void stopNeopixelAnimation() {
-    sendToPeer("neopixel", "clear");
-  }
-
-  public void systemCheck() {
-    log.error("systemCheck()");
-    Runtime runtime = Runtime.getInstance();
-    int servoCount = 0;
-    int servoAttachedCount = 0;
-    for (ServiceInterface si : Runtime.getServices()) {
-      if (si.getClass().getSimpleName().equals("Servo")) {
-        servoCount++;
-        if (((Servo) si).getController() != null) {
-          servoAttachedCount++;
-        }
-      }
-    }
-
-    setPredicate("systemServoCount", servoCount);
-    setPredicate("systemAttachedServoCount", servoAttachedCount);
-    setPredicate("systemFreeMemory", Runtime.getFreeMemory());
-    Platform platform = Runtime.getPlatform();
-    setPredicate("system version", platform.getVersion());
-    // ERROR buffer !!!
-    systemEvent("SYSTEMCHECKFINISHED"); // wtf is this?
-  }
-
-  // FIXME - if this is really desired it will drive local references for all
-  // servos
-  public void waitTargetPos() {
-    // FIXME - consider actual reference for this
-    sendToPeer("head", "waitTargetPos");
-    sendToPeer("rightHand", "waitTargetPos");
-    sendToPeer("leftHand", "waitTargetPos");
-    sendToPeer("rightArm", "waitTargetPos");
-    sendToPeer("leftArm", "waitTargetPos");
-    sendToPeer("torso", "waitTargetPos");
   }
 
 }
