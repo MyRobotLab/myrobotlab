@@ -837,8 +837,7 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
 
   @Override
   public NeoPixelConfig getConfig() {
-
-    NeoPixelConfig config = (NeoPixelConfig) super.getConfig();
+    super.getConfig();
     // FIXME - remove local fields in favor of config
     config.pin = pin;
     config.pixelCount = pixelCount;
