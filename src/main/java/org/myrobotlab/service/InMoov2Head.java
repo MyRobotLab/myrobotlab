@@ -142,15 +142,34 @@ public class InMoov2Head extends Service<InMoov2HeadConfig> {
       eyelidRight.disable();
   }
 
-  public long getLastActivityTime() {
+  public Long getLastActivityTime() {
 
-    long lastActivityTime = Math.max(rothead.getLastActivityTime(), neck.getLastActivityTime());
-    lastActivityTime = Math.max(lastActivityTime, eyeX.getLastActivityTime());
-    lastActivityTime = Math.max(lastActivityTime, eyeY.getLastActivityTime());
-    lastActivityTime = Math.max(lastActivityTime, jaw.getLastActivityTime());
-    lastActivityTime = Math.max(lastActivityTime, rollNeck.getLastActivityTime());
-    lastActivityTime = Math.max(lastActivityTime, eyelidLeft.getLastActivityTime());
-    lastActivityTime = Math.max(lastActivityTime, eyelidRight.getLastActivityTime());
+    Long lastActivityTime = Math.max(rothead.getLastActivityTime(), neck.getLastActivityTime());
+    if (getPeer("eyeX") != null) {
+      lastActivityTime = Math.max(lastActivityTime, eyeX.getLastActivityTime());
+    }
+    if (getPeer("eyeY") != null) {
+      lastActivityTime = Math.max(lastActivityTime, eyeY.getLastActivityTime());
+    }
+    if (getPeer("jaw") != null) {
+      lastActivityTime = Math.max(lastActivityTime, jaw.getLastActivityTime());
+    }
+    if (getPeer("rollNeck") != null) {
+      lastActivityTime = Math.max(lastActivityTime, rollNeck.getLastActivityTime());
+    }
+    if (getPeer("rollNeck") != null) {
+      lastActivityTime = Math.max(lastActivityTime, rothead.getLastActivityTime());
+    }
+    if (getPeer("rollNeck") != null) {
+      lastActivityTime = Math.max(lastActivityTime, neck.getLastActivityTime());
+    }
+
+    if (getPeer("eyelidLeft") != null) {
+      lastActivityTime = Math.max(lastActivityTime, eyelidLeft.getLastActivityTime());
+    }
+    if (getPeer("eyelidRight") != null) {
+      lastActivityTime = Math.max(lastActivityTime, eyelidRight.getLastActivityTime());
+    }
     return lastActivityTime;
   }
 

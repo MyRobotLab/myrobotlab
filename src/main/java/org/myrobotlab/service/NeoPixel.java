@@ -60,6 +60,12 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
     public void run() {
       try {
         running = true;
+        while (running) {
+          LedDisplayData led = displayQueue.take();
+          // save existing state if necessary ..
+          // stop animations if running
+          // String lastAnimation = currentAnimation;
+          if ((led.count > 0)  && (currentAnimation == null)){
 
         while (running) {
           equalizer();
@@ -430,6 +436,33 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
   }
 
   
+  public void flash(int r, int g, int b, int count) {
+    flash(r, g, b, count, flashTimeOn, flashTimeOff);
+  }
+
+  public void flash(int r, int g, int b, int count, long timeOn, long timeOff) {
+    LedDisplayData data = new LedDisplayData();
+    data.red = r;
+    data.green = g;
+    data.blue = b;
+    data.count = count;
+    data.timeOn = timeOn;
+    data.timeOff = timeOff;
+    displayQueue.add(data);
+  }
+  
+  public void onPlayAnimation(String animation) {
+    playAnimation(animation);
+  }
+
+  public void onStopAnimation() {
+    stopAnimation();
+  }
+
+  public void onFlash(LedDisplayData data) {
+    displayQueue.add(data);
+  }
+
   public void flashBrightness(double brightNess) {
     NeoPixelConfig c = (NeoPixelConfig)config;
 
@@ -580,6 +613,23 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
 
   @Override
   public void playAnimation(String animation) {
+    if (animation == null) {
+      log.info("playAnimation null");
+      return;
+    }
+    
+    if (animation.equals(currentAnimation)) {
+      log.info("already playing {}", currentAnimation);
+      return;
+    }
+    
+//    if ("Snake".equals(animation)){
+//      LedDisplayData snake = new LedDisplayData();
+//      snake.red = red;
+//      snake.green = green;
+//      snake.blue = blue;
+//      displayQueue.add(null);
+//    } else
 
     if (animations.containsKey(animation)) {
       currentAnimation = animation;

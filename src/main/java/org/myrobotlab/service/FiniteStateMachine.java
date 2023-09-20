@@ -58,6 +58,21 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
     public Transition transition;
     public StateTransition stateTransition;
   }
+  
+  public class StateChange {
+    public String last;
+    public String current;
+    public String event;
+    public StateChange(String last, String current, String event) {
+      this.last = last;
+      this.current = current;
+      this.event = event;
+    }
+    
+    public String toString() {
+      return String.format("%s --%s--> %s", last, event, current);
+    }
+  }
 
   private static Transition toFsmTransition(StateTransition state) {
     Transition transition = new Transition();

@@ -34,7 +34,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.LogConfig;
 import org.slf4j.Logger;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -44,7 +44,7 @@ import ch.qos.logback.core.LogbackException;
 import ch.qos.logback.core.spi.FilterReply;
 import ch.qos.logback.core.status.Status;
 
-public class Log extends Service<ServiceConfig> implements Appender<ILoggingEvent> {
+public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
 
   public static class LogEntry {
     public long ts;
@@ -81,7 +81,7 @@ public class Log extends Service<ServiceConfig> implements Appender<ILoggingEven
    * broadcast logging is through publishLogEvent (not broadcastState)
    */
   transient List<LogEntry> buffer = new ArrayList<>();
-
+  
   /**
    * logging state
    */
@@ -192,6 +192,7 @@ public class Log extends Service<ServiceConfig> implements Appender<ILoggingEven
   synchronized public void flush() {
     if (buffer.size() > 0) {
       invoke("publishLogEvents", buffer);
+      
       buffer = new ArrayList<>(maxSize);
       lastPublishLogTimeTs = System.currentTimeMillis();
     }
@@ -224,6 +225,11 @@ public class Log extends Service<ServiceConfig> implements Appender<ILoggingEven
     return entries;
   }
 
+  public List<LogEntry> publishErrors(List<LogEntry> entries) {
+    return entries;
+  }
+
+  
   @Override
   public void setContext(Context arg0) {
     // TODO Auto-generated method stub
