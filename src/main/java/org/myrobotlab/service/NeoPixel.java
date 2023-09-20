@@ -45,7 +45,7 @@ import org.myrobotlab.service.interfaces.NeoPixelControl;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.slf4j.Logger;
 
-public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl {
+public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl {
 
   private BlockingQueue<LedDisplayData> displayQueue = new ArrayBlockingQueue<>(200); 
 
@@ -836,7 +836,7 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public NeoPixelConfig getConfig() {
 
     NeoPixelConfig config = (NeoPixelConfig) super.getConfig();
     // FIXME - remove local fields in favor of config
@@ -855,8 +855,8 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    NeoPixelConfig config = (NeoPixelConfig) super.apply(c);
+  public NeoPixelConfig apply(NeoPixelConfig c) {
+    super.apply(c);
     // FIXME - remove local fields in favor of config
     setPixelDepth(config.pixelDepth);
 
