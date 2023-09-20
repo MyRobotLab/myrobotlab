@@ -68,13 +68,6 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
           // save existing state if necessary ..
           // stop animations if running
           // String lastAnimation = currentAnimation;
-          if ((led.count > 0)  && (currentAnimation == null)){
-
-        while (running) {
-          LedDisplayData led = displayQueue.take();
-          // save existing state if necessary ..
-          // stop animations if running
-          // String lastAnimation = currentAnimation;
           if (led.count > 0) {
 
             clear();
@@ -411,32 +404,10 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
   public void flash(int r, int g, int b, int count) {
     flash(r, g, b, count, flashTimeOn, flashTimeOff);
   }
-
-  public void flash(int r, int g, int b, int count, long timeOn, long timeOff) {
-    LedDisplayData data = new LedDisplayData();
-    data.red = r;
-    data.green = g;
-    data.blue = b;
-    data.count = count;
-    data.timeOn = timeOn;
-    data.timeOff = timeOff;
-    displayQueue.add(data);
-  }
   
   public void onPlayAnimation(String animation) {
     playAnimation(animation);
   }
-
-  public void onStopAnimation() {
-    stopAnimation();
-  }
-
-  public void onFlash(LedDisplayData data) {
-    displayQueue.add(data);
-  }
-
-  public void flashBrightness(double brightNess) {
-    NeoPixelConfig c = (NeoPixelConfig)config;
 
   public void onStopAnimation() {
     stopAnimation();

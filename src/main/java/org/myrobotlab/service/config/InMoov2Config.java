@@ -122,14 +122,7 @@ public class InMoov2Config extends ServiceConfig {
    * 
    */
   public boolean stateChangeIsMute = true; 
-  
-  public boolean startupSound = true;
-  
-  /**
-   * 
-   */
-  public boolean stateChangeIsMute = true; 
-  
+    
   /**
    * Interval in seconds for a idle state event to fire off.
    * If the fsm is in a state which will allow transitioning, the InMoov2
@@ -497,12 +490,7 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishMoveLeftHand", name));
     listeners.add(new Listener("publishMoveTorso", name));
 
-    // service --to--> InMoov2
-    AudioFileConfig mouth_audioFile = (AudioFileConfig) plan.get(getPeerName("mouth.audioFile"));
-    mouth_audioFile.listeners = new ArrayList<>();
-    mouth_audioFile.listeners.add(new Listener("publishPeak", name));
-    fsm.listeners.add(new Listener("publishStateChange", name, "publishStateChange"));
-    
+
     
     LogConfig log = (LogConfig) plan.get(getPeerName("log"));
     log.listeners = new ArrayList<>();
@@ -519,9 +507,6 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishPlayAnimation", getPeerName("neoPixel")));
     listeners.add(new Listener("publishStopAnimation", getPeerName("neoPixel")));
     
-    // remove the auto-added starts in the plan's runtime RuntimConfig.registry
-    plan.removeStartsWith(name + ".");
-    
 //    listeners.add(new Listener("publishPowerUp", name));
 //    listeners.add(new Listener("publishPowerDown", name));
 //    listeners.add(new Listener("publishError", name));
@@ -533,6 +518,7 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishMoveLeftHand", name));
     listeners.add(new Listener("publishMoveTorso", name));
 
+   
     // service --to--> InMoov2
     AudioFileConfig mouth_audioFile = (AudioFileConfig) plan.get(getPeerName("mouth.audioFile"));
     mouth_audioFile.listeners = new ArrayList<>();

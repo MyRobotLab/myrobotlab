@@ -59,8 +59,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   static String speechRecognizer = "WebkitSpeechRecognition";
 
-  protected static final Set<String> stateDefaults = new TreeSet<>();
-
   /**
    * This method will load a python file into the python interpreter.
    * 
@@ -1238,97 +1236,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
   }
 
-  // public Message publishPython(String method, Object...data) {
-  // return Message.createMessage(getName(), getName(), method, data);
-  // }
-
-  public void onMoveRightArm(Map<String, Double> map) {
-    InMoov2Arm rightArm = (InMoov2Arm) getPeer("rightArm");
-    if (rightArm != null) {
-      rightArm.onMove(map);
-    }
-  }
-
-  public void onMoveRightHand(Map<String, Double> map) {
-    InMoov2Hand rightHand = (InMoov2Hand) getPeer("rightHand");
-    if (rightHand != null) {
-      rightHand.onMove(map);
-    }
-  }
-
-  public void onMoveTorso(Map<String, Double> map) {
-    InMoov2Torso torso = (InMoov2Torso) getPeer("torso");
-    if (torso != null) {
-      torso.onMove(map);
-    }
-  }
-
-  public void onMoveHead(Map<String, Double> map) {
-    InMoov2Head head = (InMoov2Head) getPeer("head");
-    if (head != null) {
-      head.onMove(map);
-    }
-  }
-
-  public void onMoveLeftArm(Map<String, Double> map) {
-    InMoov2Arm leftArm = (InMoov2Arm) getPeer("leftArm");
-    if (leftArm != null) {
-      leftArm.onMove(map);
-    }
-  }
-
-  public void onMoveLeftHand(Map<String, Double> map) {
-    InMoov2Hand leftHand = (InMoov2Hand) getPeer("leftHand");
-    if (leftHand != null) {
-      leftHand.onMove(map);
-    }
-  }
-
-  // public Message publishPython(String method, Object...data) {
-  // return Message.createMessage(getName(), getName(), method, data);
-  // }
-
-  public void onMoveRightArm(Map<String, Double> map) {
-    InMoov2Arm rightArm = (InMoov2Arm) getPeer("rightArm");
-    if (rightArm != null) {
-      rightArm.onMove(map);
-    }
-  }
-
-  public void onMoveRightHand(Map<String, Double> map) {
-    InMoov2Hand rightHand = (InMoov2Hand) getPeer("rightHand");
-    if (rightHand != null) {
-      rightHand.onMove(map);
-    }
-  }
-
-  public void onMoveTorso(Map<String, Double> map) {
-    InMoov2Torso torso = (InMoov2Torso) getPeer("torso");
-    if (torso != null) {
-      torso.onMove(map);
-    }
-  }
-
-  public void onMoveHead(Map<String, Double> map) {
-    InMoov2Head head = (InMoov2Head) getPeer("head");
-    if (head != null) {
-      head.onMove(map);
-    }
-  }
-
-  public void onMoveLeftArm(Map<String, Double> map) {
-    InMoov2Arm leftArm = (InMoov2Arm) getPeer("leftArm");
-    if (leftArm != null) {
-      leftArm.onMove(map);
-    }
-  }
-
-  public void onMoveLeftHand(Map<String, Double> map) {
-    InMoov2Hand leftHand = (InMoov2Hand) getPeer("leftHand");
-    if (leftHand != null) {
-      leftHand.onMove(map);
-    }
-  }
 
   // public Message publishPython(String method, Object...data) {
   // return Message.createMessage(getName(), getName(), method, data);
@@ -1612,15 +1519,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   public LedDisplayData publishFlash(LedDisplayData data) {
     return data;
-  }
-
-  /**
-   * if inactivityTime configured, this event is published after there has not
-   * been in activity since.
-   */
-  public void publishInactivity() {
-    log.info("publishInactivity");
-    fsm.fire("inactvity");
   }
 
   /**
