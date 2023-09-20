@@ -59,6 +59,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   static String speechRecognizer = "WebkitSpeechRecognition";
 
+  protected static final Set<String> stateDefaults = new TreeSet<>();
+
   /**
    * This method will load a python file into the python interpreter.
    * 

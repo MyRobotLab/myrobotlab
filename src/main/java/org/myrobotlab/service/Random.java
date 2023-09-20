@@ -191,9 +191,9 @@ public class Random extends Service<RandomConfig> {
   }
 
   public void process(String key) {
-    if (!enabled) {
-      return;
-    }
+    // if (!enabled) {
+    // return;
+    // }
 
     RandomMessage msg = randomData.get(key);
     if (msg == null || !msg.enabled) {
