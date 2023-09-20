@@ -27,7 +27,7 @@ public class CalikoMeta extends MetaData {
 
     // for the ui
     addDependency("au.edu.federation.caliko.visualisation", "caliko-visualisation", "1.3.8");
-    addDependency("au.edu.federation.caliko.visualisation", "caliko-demo", "1.3.8");
+    addDependency("au.edu.federation.caliko.demo", "caliko-demo", "1.3.8");
       
     // add it to one or many categories
     addCategory("ik", "inverse kinematics");
