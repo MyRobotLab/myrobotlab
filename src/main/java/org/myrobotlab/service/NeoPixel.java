@@ -404,6 +404,14 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
   public void flash(int r, int g, int b, int count) {
     flash(r, g, b, count, flashTimeOn, flashTimeOff);
   }
+  
+  public void onPlayAnimation(String animation) {
+    playAnimation(animation);
+  }
+
+  public void onStopAnimation() {
+    stopAnimation();
+  }
 
   public void flash(int r, int g, int b, int count, long timeOn, long timeOff) {
     LedDisplayData data = new LedDisplayData();
@@ -567,6 +575,14 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
       log.info("already playing {}", currentAnimation);
       return;
     }
+    
+//    if ("Snake".equals(animation)){
+//      LedDisplayData snake = new LedDisplayData();
+//      snake.red = red;
+//      snake.green = green;
+//      snake.blue = blue;
+//      displayQueue.add(null);
+//    } else
 
     if (animations.containsKey(animation)) {
       currentAnimation = animation;

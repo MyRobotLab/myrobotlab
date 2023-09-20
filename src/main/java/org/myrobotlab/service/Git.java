@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -31,6 +30,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.TextProgressMonitor;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.submodule.SubmoduleWalk;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
@@ -45,7 +45,7 @@ public class Git extends Service<ServiceConfig> {
 
   public final static Logger log = LoggerFactory.getLogger(Git.class);
 
-  transient static TextProgressMonitor monitor = new TextProgressMonitor();
+  transient ProgressMonitor monitor = new ProgressMonitor();
 
   Map<String, RepoData> repos = new TreeMap<>();
 
@@ -56,76 +56,43 @@ public class Git extends Service<ServiceConfig> {
     String branch;
     String location;
     String url;
-    List<String> branches;
     String checkout;
     transient org.eclipse.jgit.api.Git git;
 
-    public RepoData(String location, String url, List<String> branches, String checkout, org.eclipse.jgit.api.Git git) {
+    public RepoData(String location, String url, String checkout, org.eclipse.jgit.api.Git git) {
       this.location = location;
       this.url = url;
-      this.branches = branches;
       this.checkout = checkout;
       this.git = git;
     }
 
   }
 
+  // TODO - overload updates to publish
+  public class ProgressMonitor extends TextProgressMonitor {
+
+  }
+
   public Git(String n, String id) {
     super(n, id);
   }
-
-  // max complexity clone
-  public void clone(String location, String url, List<String> inbranches, String incheckout) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
-
-    File repoLocation = new File(location);
-    org.eclipse.jgit.api.Git git = null;
-    Repository repo = null;
-
-    List<String> branches = new ArrayList<>();
-    for (String b : inbranches) {
-      if (!b.contains("refs")) {
-        branches.add("refs/heads/" + b);
-      }
-    }
-
-    String checkout = (incheckout.contains("refs")) ? incheckout : "refs/heads/" + incheckout;
-
-    if (!repoLocation.exists()) {
-      // clone
-      log.info("cloning {} {} into {}", url, incheckout, location);
-      git = org.eclipse.jgit.api.Git.cloneRepository().setProgressMonitor(monitor).setURI(url).setDirectory(repoLocation).setBranchesToClone(branches).setBranch(checkout).call();
-
-    } else {
-      // Open an existing repository
-      String gitDir = repoLocation.getAbsolutePath() + File.separator + ".git";
-      log.info("opening repo {} from {}", gitDir, url);
-      repo = new FileRepositoryBuilder().setGitDir(new File(gitDir)).build();
-      git = new org.eclipse.jgit.api.Git(repo);
-    }
-
-    repo = git.getRepository();
-
-    // checkout
-    log.info("checking out {}", incheckout);
-    // git.branchCreate().setForce(true).setName(incheckout).setStartPoint("origin/"
-    // + incheckout).call();
-    git.branchCreate().setForce(true).setName(incheckout).setStartPoint(incheckout).call();
-    git.checkout().setName(incheckout).call();
-
-    repos.put(location, new RepoData(location, url, inbranches, incheckout, git));
-
+  
+  public void clone(String location, String url, String branch, String checkout) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+    clone(location, url, branch, checkout, false);
   }
 
+ 
+
   // max complexity sync
-  public void sync(String location, String url, List<String> branches, String checkout) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+  public void sync(String location, String url, String branch, String checkout) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
     // initial clone
-    clone(location, url, branches, checkout);
+    clone(location, url, branch, checkout);
 
     addTask(checkStatusIntervalMs, "checkStatus");
   }
 
   public void sync(String location, String url, String checkout) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
-    sync(location, url, Arrays.asList(checkout), checkout);
+    sync(location, url, checkout, checkout);
   }
 
   public RevCommit checkStatus() throws WrongRepositoryStateException, InvalidConfigurationException, InvalidRemoteException, CanceledException, RefNotFoundException,
@@ -167,7 +134,7 @@ public class Git extends Service<ServiceConfig> {
     return commit;
   }
 
-  private static List<RevCommit> getLogs(org.eclipse.jgit.api.Git git, String ref, int maxCount)
+  private List<RevCommit> getLogs(org.eclipse.jgit.api.Git git, String ref, int maxCount)
       throws RevisionSyntaxException, NoHeadException, MissingObjectException, IncorrectObjectTypeException, AmbiguousObjectException, GitAPIException, IOException {
     List<RevCommit> ret = new ArrayList<>();
     Repository repository = git.getRepository();
@@ -193,17 +160,17 @@ public class Git extends Service<ServiceConfig> {
     purgeTasks();
   }
 
-  static public int pull() throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException,
-      RefNotFoundException, NoHeadException, TransportException, IOException, GitAPIException {
+  public int pull() throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException, RefNotFoundException,
+      NoHeadException, TransportException, IOException, GitAPIException {
     return pull(null, null);
   }
 
-  static public int pull(String branch) throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException,
+  public int pull(String branch) throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException,
       RefNotFoundException, NoHeadException, TransportException, IOException, GitAPIException {
     return pull(null, branch);
   }
 
-  static org.eclipse.jgit.api.Git getGit(String rootFolder) throws IOException {
+  org.eclipse.jgit.api.Git getGit(String rootFolder) throws IOException {
     if (rootFolder == null) {
       rootFolder = System.getProperty("user.dir");
     }
@@ -224,7 +191,7 @@ public class Git extends Service<ServiceConfig> {
     return git;
   }
 
-  static public int pull(String src, String branch) throws IOException, WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException,
+  public int pull(String src, String branch) throws IOException, WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException,
       CanceledException, RefNotFoundException, NoHeadException, TransportException, GitAPIException {
 
     if (src == null) {
@@ -278,11 +245,11 @@ public class Git extends Service<ServiceConfig> {
     return 0;
   }
 
-  static public void init() throws IllegalStateException, GitAPIException {
+  public void init() throws IllegalStateException, GitAPIException {
     init(null);
   }
 
-  static public void init(String directory) throws IllegalStateException, GitAPIException {
+  public void init(String directory) throws IllegalStateException, GitAPIException {
     if (directory == null) {
       directory = System.getProperty("user.dir");
     }
@@ -291,55 +258,30 @@ public class Git extends Service<ServiceConfig> {
     org.eclipse.jgit.api.Git git = org.eclipse.jgit.api.Git.init().setDirectory(dir).call();
   }
 
-  public static void main(String[] args) {
-    try {
-
-      LoggingFactory.init(Level.INFO);
-
-      Properties properties = Platform.gitProperties();
-      Git.removeProps();
-      log.info("{}", properties);
-
-      /*
-       * // start the service Git git = (Git) Runtime.start("git", "Git");
-       * 
-       * // check out and sync every minute // git.sync("test",
-       * "https://github.com/MyRobotLab/WorkE.git", "master"); //
-       * git.sync("/lhome/grperry/github/mrl/myrobotlab", //
-       * "https://github.com/MyRobotLab/myrobotlab.git", "agent-removal");
-       * git.gitPull("agent-removal"); //
-       * git.sync(System.getProperty("user.dir"), //
-       * "https://github.com/MyRobotLab/myrobotlab.git", "agent-removal");
-       */
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
-  }
-
-  public static String getBranch() throws IOException {
+  public String getBranch() throws IOException {
     return getBranch(null);
   }
 
-  public static String getBranch(String src) throws IOException {
+  public String getBranch(String src) throws IOException {
     org.eclipse.jgit.api.Git git = getGit(src);
     return git.getRepository().getBranch();
   }
 
-  public static Status status() throws NoWorkTreeException, IOException, GitAPIException {
+  public Status status() throws NoWorkTreeException, IOException, GitAPIException {
     return status(null);
   }
 
-  public static Status status(String src) throws IOException, NoWorkTreeException, GitAPIException {
+  public Status status(String src) throws IOException, NoWorkTreeException, GitAPIException {
     org.eclipse.jgit.api.Git git = getGit(src);
     Status status = git.status().call();
     return status;
   }
 
-  public static void removeProps() {
+  public void removeProps() {
     removeProps(null);
   }
 
-  public static void removeProps(String rootFolder) {
+  public void removeProps(String rootFolder) {
     if (rootFolder == null) {
       rootFolder = System.getProperty("user.dir");
     }
@@ -349,4 +291,89 @@ public class Git extends Service<ServiceConfig> {
 
   }
 
+  public static void main(String[] args) {
+    try {
+
+      LoggingFactory.init(Level.INFO);
+
+      Properties properties = Platform.gitProperties();
+      // Git.removeProps();
+      log.info("{}", properties);
+      Git git = (Git) Runtime.start("git", "Git");
+      git.clone("./depthai", "https://github.com/luxonis/depthai.git", "main", "refs/tags/v1.13.1-sdk", true);
+      log.info("here");
+
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
+  // max complexity clone and checkout
+  public void clone(String location, String url, String branch, String checkout, boolean recursive) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+
+    File repoLocation = new File(location);
+    org.eclipse.jgit.api.Git git = null;
+    Repository repo = null;
+
+    // git clone
+
+    if (!repoLocation.exists()) {
+      // clone
+      log.info("cloning {} {} checking out {} into {}", url, branch, checkout, location);
+      git = org.eclipse.jgit.api.Git.cloneRepository().setProgressMonitor(monitor).setURI(url).setDirectory(repoLocation).setBranch(branch).call();
+
+    } else {
+      // Open an existing repository
+      String gitDir = repoLocation.getAbsolutePath() + File.separator + ".git";
+      log.info("opening repo {} from {}", gitDir, url);
+      repo = new FileRepositoryBuilder().setGitDir(new File(gitDir)).build();
+      git = new org.eclipse.jgit.api.Git(repo);
+    }
+
+    repo = git.getRepository();
+    
+    // git pull
+
+    PullCommand pullCmd = git.pull()
+        // .setRemote(remoteName)
+        // .setCredentialsProvider(new
+        // UsernamePasswordCredentialsProvider(username, password))
+        .setRemoteBranchName(branch);
+
+    // Perform the pull operation
+    pullCmd.call();
+    
+    
+    // recursive
+    if (recursive) {
+      
+      // Recursively fetch and checkout submodules if they exist
+      SubmoduleWalk submoduleWalk = SubmoduleWalk.forIndex(repo);
+      while (submoduleWalk.next()) {
+          String submodulePath = submoduleWalk.getPath();
+          org.eclipse.jgit.api.Git submoduleGit = org.eclipse.jgit.api.Git.open(new File(location, submodulePath));
+          submoduleGit.fetch()
+                  .setRemote("origin")
+                  .call();
+          submoduleGit.checkout()
+                  .setName(branch) // Replace with the desired branch name
+                  .call();
+      }
+      
+    }    
+
+    if (checkout != null) {
+      // checkout
+      log.info("checking out {}", checkout);
+      // git.branchCreate().setForce(true).setName(incheckout).setStartPoint("origin/"
+      // + incheckout).call();
+      git.branchCreate().setForce(true).setName(branch).setStartPoint(checkout).call();
+      git.checkout().setName(checkout).call();
+    }
+
+    repos.put(location, new RepoData(location, url, checkout, git));
+
+  }
+  
 }

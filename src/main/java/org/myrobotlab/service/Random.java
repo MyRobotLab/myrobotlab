@@ -183,7 +183,10 @@ public class Random extends Service<RandomConfig> {
 
     msg.interval = getRandom(minIntervalMs, maxIntervalMs);
     log.info("add random message {} in {} ms", key, msg.interval);
-    addTask(key, 0, msg.interval, "process", key);
+    if (enabled) {
+      // only if global enabled is enabled do we start the task
+      addTask(key, 0, msg.interval, "process", key);
+    }
     broadcastState();
   }
 
@@ -230,7 +233,11 @@ public class Random extends Service<RandomConfig> {
     purgeTask(key);
     if (!msg.oneShot) {
       msg.interval = getRandom(msg.minIntervalMs, msg.maxIntervalMs);
-      addTask(key, 0, msg.interval, "process", key);
+      // must re-schedule unless one shot
+      if (enabled) {
+        // only if global enabled is enabled do we start the task
+        addTask(key, 0, msg.interval, "process", key);
+      }
     }
   }
 
@@ -316,7 +323,10 @@ public class Random extends Service<RandomConfig> {
         return;
       }
       randomData.get(key).enabled = true;
-      addTask(key, 0, msg.interval, "process", key);
+      if (enabled) {
+        // only if global enabled is enabled do we start the task
+        addTask(key, 0, msg.interval, "process", key);
+      }
       return;
     }
     // must be name - disable "all" for this service
@@ -325,7 +335,10 @@ public class Random extends Service<RandomConfig> {
       if (msg.name.equals(name)) {
         msg.enabled = true;
         String fullKey = String.format("%s.%s", msg.name, msg.method);
-        addTask(fullKey, 0, msg.interval, "process", fullKey);
+        if (enabled) {
+          // only if global enabled is enabled do we start the task
+          addTask(fullKey, 0, msg.interval, "process", fullKey);
+        }
       }
     }
   }
@@ -335,6 +348,7 @@ public class Random extends Service<RandomConfig> {
     // events
     purgeTasks();
     enabled = false;
+    broadcastState();
   }
 
   public void enable() {
@@ -345,7 +359,9 @@ public class Random extends Service<RandomConfig> {
         addTask(fullKey, 0, msg.interval, "process", fullKey);
       }
     }
+
     enabled = true;
+    broadcastState();
   }
 
   public void purge() {
@@ -392,9 +408,10 @@ public class Random extends Service<RandomConfig> {
       List<String> ret = random.getServiceList();
       Set<String> mi = random.getMethodsFromName("c1");
       List<MethodEntry> mes = MethodCache.getInstance().query("Clock", "setInterval");
-
+      random.disable();
       random.addRandom(200, 1000, "i01", "setHeadSpeed", 8, 20, 8, 20, 8, 20);
       random.addRandom(200, 1000, "i01", "moveHead", 65, 115, 65, 115, 65, 115);
+      random.enable();
 
       // Python python = (Python) Runtime.start("python", "Python");
 

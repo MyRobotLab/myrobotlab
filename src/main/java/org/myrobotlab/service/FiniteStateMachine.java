@@ -73,6 +73,10 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
       this.current = current;
       this.event = event;
     }
+    
+    public String toString() {
+      return String.format("%s --%s--> %s", last, event, current);
+    }
   }
 
   private static Transition toFsmTransition(StateTransition state) {

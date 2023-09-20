@@ -9,7 +9,6 @@ import org.myrobotlab.framework.TimeoutException;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.PirConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinDefinition;
@@ -52,33 +51,31 @@ public class Pir extends Service<PirConfig> implements PinListener {
   }
 
   public void setPinArrayControl(String control) {
-    PirConfig c = (PirConfig) config;
-    c.controller = control;
+    config.controller = control;
   }
 
   public void attachPinArrayControl(String control) {
-    PirConfig c = (PirConfig) config;
 
     if (control == null) {
       error("controller cannot be null");
       return;
     }
 
-    if (c.pin == null) {
+    if (config.pin == null) {
       error("pin should be set before attaching");
       return;
     }
 
-    c.controller = CodecUtils.getShortName(control);
+    config.controller = CodecUtils.getShortName(control);
 
     // fire and forget
-    send(c.controller, "attach", getName());
+    send(config.controller, "attach", getName());
     // assume worky
     isAttached = true;
     
     // enable if configured
-    if (c.enable) {
-        send(c.controller, "enablePin", c.pin, c.rate);
+    if (config.enable) {
+        send(config.controller, "enablePin", config.pin, config.rate);
     }
     
     broadcastState();
@@ -95,16 +92,15 @@ public class Pir extends Service<PirConfig> implements PinListener {
    * @param control
    */
   public void detachPinArrayControl(String control) {
-    PirConfig c = (PirConfig) config;
 
       if (control == null) {
         log.info("detaching null");
         return;
       }
 
-      if (c.controller != null) {
-        if (!c.controller.equals(control)) {
-          log.warn("attempting to detach {} but this pir is attached to {}", control, c.controller);
+      if (config.controller != null) {
+        if (!config.controller.equals(control)) {
+          log.warn("attempting to detach {} but this pir is attached to {}", control, config.controller);
           return;
         }
       }
@@ -112,8 +108,8 @@ public class Pir extends Service<PirConfig> implements PinListener {
       // disable
       disable();
 
-      send(c.controller, "detach", getName());
-      // c.controller = null; left as configuration .. "last controller"
+      send(config.controller, "detach", getName());
+      // config.controller = null; left as configuration .. "last controller"
 
       // detached
       isAttached = false;
@@ -128,13 +124,12 @@ public class Pir extends Service<PirConfig> implements PinListener {
    * 
    */
   public void disable() {
-    PirConfig c = (PirConfig) config;
 
-    if (c.controller != null && c.pin != null) {
-      send(c.controller, "disablePin", c.pin);
+    if (config.controller != null && config.pin != null) {
+      send(config.controller, "disablePin", config.pin);
     }
 
-    c.enable = false;
+    config.enable = false;
     active = null;
     broadcastState();
   }
@@ -143,8 +138,7 @@ public class Pir extends Service<PirConfig> implements PinListener {
    * Enables polling at the preset poll rate.
    */
   public void enable() {
-    PirConfig c = (PirConfig) config;
-    enable(c.rate);
+    enable(config.rate);
   }
 
   /**
@@ -154,14 +148,13 @@ public class Pir extends Service<PirConfig> implements PinListener {
    * 
    */
   public void enable(int rateHz) {
-    PirConfig c = (PirConfig) config;
 
-    if (c.controller == null) {
+    if (config.controller == null) {
       error("pin control not set");
       return;
     }
 
-    if (c.pin == null) {
+    if (config.pin == null) {
       error("pin not set");
       return;
     }
@@ -171,17 +164,16 @@ public class Pir extends Service<PirConfig> implements PinListener {
       return;
     }
 
-    c.rate = rateHz;
+    config.rate = rateHz;
     /* PinArrayControl.enablePin */
-    send(c.controller, "enablePin", c.pin, rateHz);
-    c.enable = true;
+    send(config.controller, "enablePin", config.pin, rateHz);
+    config.enable = true;
     broadcastState();
   }
 
   @Override
   public String getPin() {
-    PirConfig c = (PirConfig) config;
-    return c.pin;
+    return config.pin;
   }
 
   /**
@@ -190,8 +182,7 @@ public class Pir extends Service<PirConfig> implements PinListener {
    * @return Hz
    */
   public int getRate() {
-    PirConfig c = (PirConfig) config;
-    return c.rate;
+    return config.rate;
   }
 
   /**
@@ -211,8 +202,7 @@ public class Pir extends Service<PirConfig> implements PinListener {
    * @return true = Enabled. false = Disabled.
    */
   public boolean isEnabled() {
-    PirConfig c = (PirConfig) config;
-    return c.enable;
+    return config.enable;
   }
 
   @Override
@@ -247,13 +237,12 @@ public class Pir extends Service<PirConfig> implements PinListener {
 
   @Override
   public void onPin(PinData pindata) {
-    PirConfig c = (PirConfig) config;
     log.debug("onPin {}", pindata);
 
     boolean sense = (pindata.value != 0);
 
     // sparse publishing only on state change 
-    if (active == null || active != sense && c.enable) {
+    if (active == null || active != sense && config.enable) {
       // state change
       invoke("publishSense", sense);
       active = sense;
@@ -286,14 +275,12 @@ public class Pir extends Service<PirConfig> implements PinListener {
    */
   @Override
   public void setPin(String pin) {
-    PirConfig c = (PirConfig) config;
-    c.pin = pin;
+    config.pin = pin;
   }
 
   @Deprecated /* use attach(String) */
   public void setPinArrayControl(PinArrayControl pinControl) {
-    PirConfig c = (PirConfig) config;
-    c.controller = pinControl.getName();
+    config.controller = pinControl.getName();
   }
 
   /**
@@ -306,8 +293,7 @@ public class Pir extends Service<PirConfig> implements PinListener {
       error("invalid poll rate - default is 1 Hz valid value is > 0");
       return;
     }
-    PirConfig c = (PirConfig) config;
-    c.rate = rateHz;
+    config.rate = rateHz;
   }
 
   /**
