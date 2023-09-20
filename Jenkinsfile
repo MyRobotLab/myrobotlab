@@ -101,11 +101,11 @@ pipeline {
                // TODO - integration tests !
                if (isUnix()) {
                   sh '''
-                     mvn -Dfile.encoding=UTF-8 -Dsurefire.skipAfterFailureCount=1  -DargLine="-Xmx1024m" verify --fail-fast -q
+                     mvn -Dfile.encoding=UTF-8 -DargLine="-Xmx1024m" verify --fail-fast -q
                   '''
                } else {
                   bat '''
-                     mvn -Dfile.encoding=UTF-8 -Dsurefire.skipAfterFailureCount=1  -DargLine="-Xmx1024m" verify --fail-fast -q
+                     mvn -Dfile.encoding=UTF-8 -DargLine="-Xmx1024m" verify --fail-fast -q
                   '''
                }
             }
