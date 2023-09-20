@@ -28,8 +28,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -46,11 +47,13 @@ import org.slf4j.Logger;
 
 public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl {
 
+  private BlockingQueue<LedDisplayData> displayQueue = new ArrayBlockingQueue<>(200); 
+
   /**
    * Thread to do animations Java side and push the changing of pixels to the
    * neopixel
    */
-  private class AnimationRunner implements Runnable {
+  private class Worker implements Runnable {
 
     boolean running = false;
 
@@ -68,13 +71,30 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
           if ((led.count > 0)  && (currentAnimation == null)){
 
         while (running) {
-          equalizer();
-          Double wait_ms_per_frame = fpsToWaitMs(speedFps);
-          sleep(wait_ms_per_frame.intValue());
+          LedDisplayData led = displayQueue.take();
+          // save existing state if necessary ..
+          // stop animations if running
+          // String lastAnimation = currentAnimation;
+          if (led.count > 0) {
+
+            clear();
+            for (int count = 0; count < led.count; count++) {
+              fill(led.red, led.green, led.blue);
+              sleep(led.timeOn);
+              clear();
+              sleep(led.timeOff);
+            }
+          }
+          // start animations
+          // playAnimation(lastAnimation);
         }
+      } catch (InterruptedException ex) {
+        log.info("shutting down worker");
       } catch (Exception e) {
         error(e);
         stop();
+      } finally {
+        running = false;
       }
     }
 
@@ -87,6 +107,9 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
 
     public synchronized void stop() {
       running = false;
+      if (thread != null) {
+        thread.interrupt();
+      }
       thread = null;
     }
   }
@@ -159,7 +182,7 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
   /**
    * thread for doing off board and in memory animations
    */
-  protected final AnimationRunner animationRunner;
+  protected final Worker worker;
 
   /**
    * current selected red value
@@ -236,7 +259,13 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
    */
   protected int brightness = 255;
 
-  final Map<String, Integer> animations = new HashMap<>();
+  protected final Map<String, Integer> animations = new HashMap<>();
+
+  protected long flashTimeOn = 300;
+
+  protected long flashTimeOff = 300;
+
+  protected int flashCount = 1;
 
   public Set<String> getAnimations() {
     return animations.keySet();
@@ -245,7 +274,7 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
   public NeoPixel(String n, String id) {
     super(n, id);
     registerForInterfaceChange(NeoPixelController.class);
-    animationRunner = new AnimationRunner();
+    worker = new Worker();
     animations.put("Stop", 1);
     animations.put("Color Wipe", 2);
     animations.put("Larson Scanner", 3);
@@ -255,8 +284,6 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
     animations.put("Rainbow Cycle", 7);
     animations.put("Flash Random", 8);
     animations.put("Ironman", 9);
-    // > 99 is java side animations
-    animations.put("Equalizer", 100);
   }
 
   @Override
@@ -312,8 +339,6 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
       return;
     }
 
-    // stop java animations
-    animationRunner.stop();
     // stop on board controller animations
     setAnimation(0, 0, 0, 0, speedFps);
 
@@ -367,74 +392,21 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
     broadcastState();
   }
 
-  public void equalizer() {
-    equalizer(null, null);
-  }
-
-  public void equalizer(Long wait_ms_per_frame, Integer range) {
-
-    if (controller == null) {
-      log.warn("controller not set");
-      return;
-    }
-
-    if (wait_ms_per_frame == null) {
-      wait_ms_per_frame = 25L;
-    }
-
-    if (range == null) {
-      range = 25;
-    }
-
-    Random rand = new Random();
-    int c = rand.nextInt(range);
-
-    fillMatrix(red, green, blue, white);
-
-    if (c < 18) {
-      setMatrix(0, 0, 0, 0);
-      setMatrix(7, 0, 0, 0);
-    }
-
-    fillMatrix(red, green, blue, white);
-
-    if (c < 16) {
-      setMatrix(0, 0, 0, 0);
-      setMatrix(7, 0, 0, 0);
-    }
-
-    if (c < 12) {
-      setMatrix(1, 0, 0, 0);
-      setMatrix(6, 0, 0, 0);
-    }
-
-    if (c < 8) {
-      setMatrix(2, 0, 0, 0);
-      setMatrix(5, 0, 0, 0);
-    }
-
-    writeMatrix();
-
-  }
-  
   public void onLedDisplay(LedDisplayData data) {
-    
-    if ("flash".equals(data.action)) {
-      flash(data.count, data.interval, data.red, data.green, data.blue);
-    }
-    
-  }
-
-  public void flash(int count, long interval, int r, int g, int b) {
-    long delay = 0;
-    for (int i = 0; i < count; ++i) {
-      addTask(getName()+"fill-"+System.currentTimeMillis(), true, 0, delay, "fill", r, g, b);
-      delay+= interval/2;
-      addTask(getName()+"clear-"+System.currentTimeMillis(), true, 0, delay, "clear");
-      delay+= interval/2;
+    try {
+      displayQueue.add(data);
+    } catch(IllegalStateException e) {
+       log.info("queue full");
     }
   }
 
+  public void flash() {
+    flash(red, green, blue, flashCount, flashTimeOn, flashTimeOff);
+  }
+
+  public void flash(int r, int g, int b) {
+    flash(r, g, b, flashCount , flashTimeOn, flashTimeOff);
+  }
   
   public void flash(int r, int g, int b, int count) {
     flash(r, g, b, count, flashTimeOn, flashTimeOff);
@@ -466,29 +438,39 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
   public void flashBrightness(double brightNess) {
     NeoPixelConfig c = (NeoPixelConfig)config;
 
-    // FIXME - these need to be moved into config
-//    int count = 2;
-//    int interval = 75;
-    setBrightness((int)brightNess);
+  public void onStopAnimation() {
+    stopAnimation();
+  }
+
+  public void flash(int r, int g, int b, int count, long timeOn, long timeOff) {
+    LedDisplayData data = new LedDisplayData();
+    data.red = r;
+    data.green = g;
+    data.blue = b;
+    data.count = count;
+    data.timeOn = timeOn;
+    data.timeOff = timeOff;
+    displayQueue.add(data);
+  }
+  
+  public void onFlash(LedDisplayData data) {
+    displayQueue.add(data);
+  }
+
+  public void flashBrightness(double brightNess) {
+    NeoPixelConfig c = (NeoPixelConfig) config;
+
+    setBrightness((int) brightNess);
     fill(red, green, blue);
-    
-//    long delay = 0;
-//    for (int i = 0; i < count; ++i) {
-//      addTask(getName()+"fill-"+System.currentTimeMillis(), true, 0, delay, "fill", red, green, blue);
-//      delay+= interval/2;
-//      addTask(getName()+"clear-"+System.currentTimeMillis(), true, 0, delay, "clear");
-//      delay+= interval/2;
-//    }
-    
+
     if (c.autoClear) {
       purgeTask("clear");
       // and start our countdown
       addTaskOneShot(c.idleTimeout, "clear");
     }
 
-    
   }
-  
+
   public void fill(int r, int g, int b) {
     fill(0, pixelCount, r, g, b, null);
   }
@@ -498,8 +480,8 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
   }
 
   public void fill(int beginAddress, int count, int r, int g, int b, Integer w) {
-    NeoPixelConfig c = (NeoPixelConfig)config;
-    
+    NeoPixelConfig c = (NeoPixelConfig) config;
+
     if (w == null) {
       w = 0;
     }
@@ -510,7 +492,7 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
       return;
     }
     np2.neoPixelFill(getName(), beginAddress, count, r, g, b, w);
-    
+
     if (c.autoClear) {
       purgeTask("clear");
       // and start our countdown
@@ -633,17 +615,10 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
 
     if (animations.containsKey(animation)) {
       currentAnimation = animation;
-      if (animations.get(animation) < 99) {
-        setAnimation(animations.get(animation), red, green, blue, speedFps);
-      } else {
-        // only 1 java side animation at the moment
-        equalizer();
-        animationRunner.start();
-      }
+      setAnimation(animations.get(animation), red, green, blue, speedFps);
     } else {
       error("could not find animation %s", animation);
     }
-    broadcastState();
   }
 
   public void stopAnimation() {
@@ -651,6 +626,7 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
   }
 
   @Override
+  @Deprecated /* use playAnimation */
   public void setAnimation(int animation, int red, int green, int blue, int speedFps) {
     if (speedFps > maxFps) {
       speedFps = maxFps;
@@ -668,7 +644,6 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
     nc2.neoPixelSetAnimation(getName(), animation, red, green, blue, 0, wait_ms_per_frame.intValue());
     if (animation == 1) {
       currentAnimation = null;
-      animationRunner.stop();
     }
     broadcastState();
   }
@@ -703,7 +678,7 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
   }
 
   public void setBrightness(int value) {
-    NeoPixelConfig c = (NeoPixelConfig)config;
+    NeoPixelConfig c = (NeoPixelConfig) config;
 
     NeoPixelController np2 = (NeoPixelController) Runtime.getService(controller);
     if (controller == null || np2 == null) {
@@ -712,7 +687,7 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
     }
     brightness = value;
     np2.neoPixelSetBrightness(getName(), value);
-    
+
     if (c.autoClear) {
       purgeTask("clear");
       // and start our countdown
@@ -768,7 +743,7 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
    * @param delayMs
    */
   public void setPixel(String matrixName, Integer pixelSetIndex, int address, int red, int green, int blue, int white, Integer delayMs) {
-    NeoPixelConfig c = (NeoPixelConfig)config;
+    NeoPixelConfig c = (NeoPixelConfig) config;
     // get and update memory cache
     PixelSet ps = getPixelSet(matrixName, pixelSetIndex);
 
@@ -796,7 +771,7 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
     }
 
     np2.neoPixelWriteMatrix(getName(), pixel.flatten());
-    
+
     if (c.autoClear) {
       purgeTask("clear");
       // and start our countdown
@@ -838,20 +813,6 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
     this.red = red;
   }
 
-  public void startAnimation() {
-    startAnimation(currentMatrix);
-  }
-
-  /**
-   * handle both user defined, java defined, and controller on board animations
-   * FIXME - make "settings" separate call
-   * 
-   * @param name
-   */
-  public void startAnimation(String name) {
-    animationRunner.start();
-  }
-
   public void setColor(int red, int green, int blue) {
     this.red = red;
     this.green = green;
@@ -864,8 +825,8 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
 
   @Override
   public void writeMatrix() {
-    NeoPixelConfig c = (NeoPixelConfig)config;
-    
+    NeoPixelConfig c = (NeoPixelConfig) config;
+
     NeoPixelController np2 = (NeoPixelController) Runtime.getService(controller);
     if (controller == null || np2 == null) {
       error("%s cannot writeMatrix controller not set", getName());
@@ -877,8 +838,6 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
       // and start our countdown
       addTaskOneShot(c.idleTimeout, "clear");
     }
-    
-    
   }
 
   /**
@@ -908,7 +867,7 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
   @Override
   public ServiceConfig getConfig() {
 
-    NeoPixelConfig config = (NeoPixelConfig)super.getConfig();
+    NeoPixelConfig config = (NeoPixelConfig) super.getConfig();
     // FIXME - remove local fields in favor of config
     config.pin = pin;
     config.pixelCount = pixelCount;
@@ -966,6 +925,18 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
 
   public String onStarted(String name) {
     return name;
+  }
+
+  @Override
+  public void startService() {
+    super.startService();
+    worker.start();
+  }
+
+  public void stopService() {
+    super.stopService();
+    worker.stop();
+    // clear() ?
   }
 
   public static void main(String[] args) throws InterruptedException {
@@ -1043,9 +1014,9 @@ public class NeoPixel extends Service<ServiceConfig> implements NeoPixelControl 
       error(e);
     }
   }
-  
+
   public boolean setAutoClear(boolean b) {
-    NeoPixelConfig c = (NeoPixelConfig)config;
+    NeoPixelConfig c = (NeoPixelConfig) config;
     c.autoClear = b;
     return b;
   }

@@ -17,7 +17,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.FiniteStateMachineConfig;
 import org.myrobotlab.service.config.FiniteStateMachineConfig.Transition;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 import com.github.pnavais.machine.StateMachine;
@@ -46,7 +45,13 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
 
   protected String lastEvent = null;
 
+  @Deprecated /* is this deprecated with ServiceConfig.listeners ? */
   protected Set<String> messageListeners = new HashSet<>();
+
+  /**
+   * state history of fsm
+   */
+  protected List<String> history = new ArrayList<>();
 
   // TODO - .from("A").to("B").on(Messages.ANY)
   // TODO - .from("A").to("B").on(Messages.EMPTY)
@@ -107,6 +112,13 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
 
   public void init() {
     stateMachine.init();
+    State state = stateMachine.getCurrent();
+    if (history.size() > 100) {
+      history.remove(0);
+    }
+    if (state != null) {
+      history.add(state.getName());
+    }
   }
 
   private String makeKey(String state0, String msgType, String state1) {
@@ -182,7 +194,8 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
       log.info("fired event ({}) -> ({}) moves to ({})", event, last == null ? null : last.getName(), current == null ? null : current.getName());
 
       if (last != null && !last.equals(current)) {
-        invoke("publishNewState", current.getName());
+        invoke("publishStateChange", new StateChange(last.getName(), current.getName(), event));
+        history.add(current.getName());
       }
     } catch (Exception e) {
       log.error("fire threw", e);
@@ -224,21 +237,21 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
   }
 
   /**
-   * publishes state if changed here
+   * Publishes state change (current, last and event) 
    * 
-   * @param state
+   * @param stateChange
    * @return
    */
-  public String publishNewState(String state) {
-    log.error("publishNewState {}", state);
+  public StateChange publishStateChange(StateChange stateChange) {
+    log.error("publishStateChange {}", stateChange);
     for (String listener : messageListeners) {
       ServiceInterface service = Runtime.getService(listener);
       if (service != null) {
-        org.myrobotlab.framework.Message msg = org.myrobotlab.framework.Message.createMessage(getName(), listener, CodecUtils.getCallbackTopicName(state), null);
+        org.myrobotlab.framework.Message msg = org.myrobotlab.framework.Message.createMessage(getName(), listener, CodecUtils.getCallbackTopicName(stateChange.current), null);
         service.in(msg);
       }
     }
-    return state;
+    return stateChange;
   }
 
   @Override
@@ -406,7 +419,7 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
       stateMachine.setCurrent(state);
       current = stateMachine.getCurrent();
       if (last != null && !last.equals(current)) {
-        invoke("publishNewState", current.getName());
+        invoke("publishStateChange", new StateChange(last.getName(), current.getName(), null));
       }
     } catch (Exception e) {
       log.error("setCurrent threw", e);

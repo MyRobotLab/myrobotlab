@@ -119,10 +119,7 @@ public class Gpt3 extends Service<Gpt3Config> implements TextListener, TextPubli
           @SuppressWarnings({ "unchecked", "rawtypes" })
           Map<String, Object> textObject = (Map) choices.get(0);
           responseText = (String) textObject.get("text");
-          if (responseText != null) {
-            // /completions
-            invoke("publishText", responseText);
-          } else {
+          if (responseText == null) {
             // /chat/completions
             @SuppressWarnings({ "unchecked", "rawtypes" })
             Map<String, Object> content = (Map)textObject.get("message"); 
@@ -156,6 +153,7 @@ public class Gpt3 extends Service<Gpt3Config> implements TextListener, TextPubli
       if (responseText != null && responseText.length() > 0) {
         invoke("publishUtterance", utterance);
         invoke("publishResponse", response);
+        invoke("publishText", responseText);
       }
 
       return response;

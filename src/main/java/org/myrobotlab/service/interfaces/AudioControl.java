@@ -2,6 +2,7 @@ package org.myrobotlab.service.interfaces;
 
 public interface AudioControl {
 
+  // FIXME - should be onVolume(volume)
   public void setVolume(double volume);
 
   public double getVolume();
@@ -10,7 +11,7 @@ public interface AudioControl {
    * plays an audiofile - is a listener function for publishAudioFile
    * @param file
    */
-  public void onPlayAudioFile(String file);
+  public void onPlayAudioFile(String dir);
   
   /**
    * must be a directory, will play one of the audio files within that directory
@@ -18,7 +19,7 @@ public interface AudioControl {
    */
   public void onPlayRandomAudioFile(String dir);
 
-  // pause
-  // resume
-  // interrupt ?
+  // onPause
+  // onResume
+  // onInterrupt ?
 }
