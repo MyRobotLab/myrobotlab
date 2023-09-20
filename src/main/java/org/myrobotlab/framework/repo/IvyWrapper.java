@@ -74,6 +74,7 @@ public class IvyWrapper extends Repo implements Serializable {
   static String ivysettingsXmlTemplate = null;
 
   static String ivyXmlTemplate = null;
+
   transient static IvyWrapper localInstance = null;
 
   public static final Filter NO_FILTER = NoFilter.INSTANCE;
@@ -436,8 +437,24 @@ public class IvyWrapper extends Repo implements Serializable {
 
       Platform platform = Platform.getLocalInstance();
 
-      // templates [originalname](-[classifier])(-[revision]).[ext]  parens are "optional"
-      String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname].[ext]" };
+      // templates [originalname](-[classifier])(-[revision]).[ext] parens are
+      // "optional"
+
+      List<String> cmd = new ArrayList<>();
+      cmd.add("-settings");
+      cmd.add(location + "/ivysettings.xml");
+      cmd.add("-ivy");
+      cmd.add(location + "/ivy.xml");
+      cmd.add("-retrieve");
+      cmd.add(location + "/jar" + "/[originalname].[ext]");
+
+      int msgLevel = 1;
+      if (log.isWarnEnabled() || log.isErrorEnabled()) {
+        msgLevel = Message.MSG_WARN;
+        cmd.add("-warn");
+      } else {
+        msgLevel = Message.MSG_INFO;
+      }
 
       StringBuilder sb = new StringBuilder();
       sb.append("wget https://repo1.maven.org/maven2/org/apache/ivy/ivy/" + IVY_VERSION + "/ivy-" + IVY_VERSION + ".jar\n");
@@ -453,14 +470,14 @@ public class IvyWrapper extends Repo implements Serializable {
       FileIO.toFile("libraries/install.sh", sb.toString().getBytes());
 
       Ivy ivy = Ivy.newInstance(); // <-- for future 2.5.x release
-      ivy.getLoggerEngine().pushLogger(new IvyWrapperLogger(Message.MSG_INFO));
+      ivy.getLoggerEngine().pushLogger(new IvyWrapperLogger(msgLevel));
 
       ResolveReport report = null;
       List<String> err = new ArrayList<>();
       try {
-         report = Main.run(cmd);
-      } catch(Exception e) {
-         err.add(e.toString());
+        report = Main.run(cmd.toArray(new String[cmd.size()]));
+      } catch (Exception e) {
+        err.add(e.toString());
       }
 
       // if no errors -h
@@ -490,30 +507,37 @@ public class IvyWrapper extends Repo implements Serializable {
         save();
       }
 
-      ArtifactDownloadReport[] artifacts = report.getAllArtifactsReports();
-      for (int i = 0; i < artifacts.length; ++i) {
-        ArtifactDownloadReport ar = artifacts[i];
-        Artifact artifact = ar.getArtifact();
-        // String filename = IvyPatternHelper.substitute("[originalname].[ext]",
-        // artifact);
+      if (report == null) {
+        log.error("problems resolving dependencies");
+        publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.ERROR, Repo.INSTALL_FINISHED,
+            String.format("there was problems resolving dependencies %s", (Object[]) serviceTypes)));
+      } else {
 
-        File file = ar.getLocalFile();
-        String filename = file.getAbsoluteFile().getAbsolutePath();
-        log.info("{}", filename);
+        ArtifactDownloadReport[] artifacts = report.getAllArtifactsReports();
+        for (int i = 0; i < artifacts.length; ++i) {
+          ArtifactDownloadReport ar = artifacts[i];
+          Artifact artifact = ar.getArtifact();
+          // String filename =
+          // IvyPatternHelper.substitute("[originalname].[ext]",
+          // artifact);
 
-        if ("zip".equalsIgnoreCase(artifact.getExt())) {
-          info("unzipping %s", filename);
-          try {
-            Zip.unzip(filename, "./");
-            info("unzipped %s", filename);
-          } catch (Exception e) {
-            log.error("unable to unzip file {}", filename, e);
+          File file = ar.getLocalFile();
+          String filename = file.getAbsoluteFile().getAbsolutePath();
+          log.info("{}", filename);
+
+          if ("zip".equalsIgnoreCase(artifact.getExt())) {
+            info("unzipping %s", filename);
+            try {
+              Zip.unzip(filename, "./");
+              info("unzipped %s", filename);
+            } catch (Exception e) {
+              log.error("unable to unzip file {}", filename, e);
+            }
           }
         }
+
+        publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of %s", (Object[]) serviceTypes)));
       }
-
-      publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of %s", (Object[]) serviceTypes)));
-
     } catch (Exception e) {
       error(e.getMessage());
       log.error(e.getMessage(), e);

@@ -243,7 +243,7 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
    * @return
    */
   public StateChange publishStateChange(StateChange stateChange) {
-    log.error("publishStateChange {}", stateChange);
+    log.info("publishStateChange {}", stateChange);
     for (String listener : messageListeners) {
       ServiceInterface service = Runtime.getService(listener);
       if (service != null) {
