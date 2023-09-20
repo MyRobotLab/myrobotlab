@@ -13,6 +13,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.http.ServerWebSocket;
 
 /**
+ * Minimal Handler for all websocket messages coming from the react js client.
  * 
  * TODO - what else besides text messages - websocket binary streams ???  text stream ?
  * 
@@ -23,7 +24,14 @@ public class WebSocketHandler implements Handler<ServerWebSocket> {
   
   public final static Logger log = LoggerFactory.getLogger(WebSocketHandler.class);
 
+  /**
+   * reference to the MRL Vertx service / websocket and http server
+   */
   transient private org.myrobotlab.service.Vertx service = null;
+  
+  /**
+   * reference to the websocket text message handler
+   */
   TextMessageHandler textMessageHandler = null;
   
   public static class TextMessageHandler implements Handler<String> {
@@ -58,8 +66,10 @@ public class WebSocketHandler implements Handler<ServerWebSocket> {
           return;
         }
 
+        // FIXME - probably shouldn't be invoking, probable should be putting
+        // the message on the out queue ... not sure
         ServiceInterface si = Runtime.getService(msg.name);
-        Object ret = method.invoke(si, params);
+        // Object ret = method.invoke(si, params);
 
         // put msg on mrl msg bus :)
         // service.in(msg); <- NOT DECODE PARAMS !!
@@ -69,6 +79,11 @@ public class WebSocketHandler implements Handler<ServerWebSocket> {
         // } else {
         // ctx.writeTextMessage("ping"); Useful is writing back
         // }
+        
+        // replace with typed parameters
+        msg.data = params;
+        // queue the message
+        si.in(msg);
 
       } catch (Exception e) {
         service.error(e);
