@@ -1674,6 +1674,18 @@
 <!-- Duplicate entry for javax.websocket-javax.websocket-api-1.1 skipping -->
 <!-- WebSocketConnector end -->
 
+  <dependency>
+      <groupId>au.edu.federation.caliko</groupId>
+      <artifactId>caliko</artifactId>
+      <version>1.3.8</version>
+    </dependency> 
+    
+        <dependency>
+      <groupId>au.edu.federation.caliko.visualisation</groupId>
+      <artifactId>caliko-visualisation</artifactId>
+      <version>1.3.8</version>
+    </dependency> 
+
 <!-- Webcam begin -->
   <dependency>
     <groupId>com.github.sarxos</groupId>
@@ -1762,6 +1774,12 @@
   </dependency>
 <!-- Xmpp end -->
 
+<dependency>
+    <groupId>dev.onvoid.webrtc</groupId>
+    <artifactId>webrtc-java</artifactId>
+    <version>0.7.0</version>
+</dependency>
+
 
   	<dependency>
 	    <groupId>org.mockito</groupId>
@@ -1769,6 +1787,11 @@
 	    <version>3.12.4</version>
 	    <scope>test</scope>
 	</dependency>
+  	<dependency>
+  		<groupId>au.edu.federation.caliko.demo</groupId>
+  		<artifactId>caliko-demo</artifactId>
+  		<version>1.3.8</version>
+  	</dependency>
   </dependencies>
   
   <build>
