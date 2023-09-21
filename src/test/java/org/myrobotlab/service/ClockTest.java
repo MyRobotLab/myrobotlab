@@ -37,7 +37,7 @@ public class ClockTest extends AbstractTest {
     assertEquals(interval, clock.getInterval());
 
     clock.startClock();
-    Service.sleep(10);
+    Service.sleep(100);
     assertTrue(clock.isClockRunning());
 
     clock.stopClock();
