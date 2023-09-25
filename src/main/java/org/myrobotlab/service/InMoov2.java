@@ -1407,7 +1407,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   }
 
   public void setHeadSpeed(Double rothead, Double neck) {
-    setHeadSpeed(rothead, neck, null, null, null);
+    setHeadSpeed(rothead, neck, null, null, null, null);
   }
 
   public void setHeadSpeed(Double rothead, Double neck, Double rollNeck) {
@@ -1419,7 +1419,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   }
 
   public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
-    sendToPeer("head", "setSpeed", neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
+    sendToPeer("head", "setSpeed", rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
   }
 
   public void setHeadSpeed(Integer rothead, Integer neck, Integer rollNeck) {
