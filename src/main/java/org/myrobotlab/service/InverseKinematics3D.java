@@ -247,11 +247,7 @@ public class InverseKinematics3D extends Service<ServiceConfig> implements IKJoi
       log.info("Servo : {}  Angle : {}", jointName, angleMap.get(jointName));
     }
     invoke("publishJointAngles", angleMap);
-    
-    InMoov2 i01 = (InMoov2)Runtime.getService("i01");
-    if (i01 != null) {
-      i01.onJointAngles(angleMap);
-    }
+
     
     // we want to publish the joint positions
     // this way we can render on the web gui..
