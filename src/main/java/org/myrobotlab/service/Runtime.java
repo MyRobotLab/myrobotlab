@@ -139,7 +139,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * all these requests.
    */
   @Deprecated /* use the filesystem only no memory plan */
-  transient final Plan masterPlan = new Plan("runtime");
+  transient Plan masterPlan = new Plan("runtime");
 
   /**
    * thread for non-blocking install of services
@@ -4293,7 +4293,8 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
    */
   static public void clearPlan() {
     Runtime runtime = Runtime.getInstance();
-    runtime.masterPlan.clear();
+    // fixes concurrent modification
+    runtime.masterPlan = new Plan("runtime");
     runtime.masterPlan.put("runtime", new RuntimeConfig());
     // unset config path
     runtime.configName = null;
