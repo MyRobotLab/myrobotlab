@@ -1,16 +1,24 @@
 package org.myrobotlab.service;
 
-import java.util.HashMap;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.net.Connection;
+import org.myrobotlab.service.config.VertxConfig;
+import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.vertx.ApiVerticle;
 import org.slf4j.Logger;
 
 import io.vertx.core.VertxOptions;
+import io.vertx.core.http.ServerWebSocket;
 
 /**
  * Vertx gateway - used to support a http and websocket gateway for myrobotlab.
@@ -21,10 +29,10 @@ import io.vertx.core.VertxOptions;
  * 
  * @see https://medium.com/@pvub/https-medium-com-pvub-vert-x-workers-6a8df9b2b9ee
  * 
- * @author greg
+ * @author GroG
  *
  */
-public class Vertx extends Service {
+public class Vertx extends Service<VertxConfig> implements Gateway {
 
   private static final long serialVersionUID = 1L;
 
@@ -78,9 +86,8 @@ public class Vertx extends Service {
     stop();
   }
 
-
   /**
-   * 
+   * Undeploy the verticle serving http and ws
    */
   public void stop() {
     log.info("stopping driver");
@@ -88,25 +95,12 @@ public class Vertx extends Service {
     for (String id : ids) {
       vertx.undeploy(id, (result) -> {
         if (result.succeeded()) {
-          log.info("succeeded");
+          log.info("undeploy succeeded");
         } else {
-          log.error("failed");
+          log.error("undeploy failed");
         }
       });
     }
-  }
-
-  public static class Matrix {
-    public String name;
-    public HashMap<String, Float> matrix;
-
-    public Matrix() {
-    };
-  }
-
-  public Matrix publishMatrix(Matrix data) {
-    // log.info("publishMatrix {}", data.name);
-    return data;
   }
 
   public static void main(String[] args) {
@@ -132,4 +126,44 @@ public class Vertx extends Service {
       log.error("main threw", e);
     }
   }
+
+  // FIXME - refactor for bare minimum
+  
+  @Override /* FIXME "Gateway" is server/service oriented not connecting thing - remove this */
+  public void connect(String uri) throws URISyntaxException {
+    // TODO Auto-generated method stub
+
+  }
+  
+  @Override /* FIXME not much point of these - as they are all consistently using Runtime's centralized connection info */
+  public List<String> getClientIds() {
+    return Runtime.getInstance().getConnectionUuids(getName());
+  }
+
+  @Override /* FIXME not much point of these - as they are all consistently using Runtime's centralized connection info */
+  public Map<String, Connection> getClients() {
+    return Runtime.getInstance().getConnections(getName());
+  }
+
+
+  @Override /* FIXME this is the one and probably "only" relevant method for Gateway - perhaps a handle(Connection c) */
+  public void sendRemote(Message msg) throws Exception {
+    log.info("sendRemote {}", msg.toString());
+    msg.addHop(getId());
+    Map<String, Connection> clients = getClients();
+    for(Connection c: clients.values()) {
+      try {
+      ServerWebSocket socket = (ServerWebSocket)c.get("websocket");
+      String json = CodecUtils.toJsonMsg(msg);
+      socket.writeTextMessage(json);
+      } catch(Exception e) {
+        error(e);
+      }
+    }
+    // broadcastMode - iterate through clients send all
+  }
+
+  @Override
+  public boolean isLocal(Message msg) {
+    return Runtime.getInstance().isLocal(msg);  }
 }

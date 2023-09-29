@@ -7,8 +7,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.FloatBuffer;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,7 +50,6 @@ import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.net.Connection;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
-import org.myrobotlab.service.abstracts.AbstractComputerVision;
 import org.myrobotlab.service.config.JMonkeyEngineConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.Gateway;
@@ -405,10 +402,12 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     // this is to support future (non-Java) classes that cannot be instantiated
     // and
     // are subclassed in a proxy class with getType() overloaded for to identify
+    /**<pre> DO NOT NEED THIS UNTIL JMONKEY DISPLAYS VIDEO DATA - SLAM MAPPING
     if (service.getTypeKey().equals("org.myrobotlab.service.OpenCV")) {
       AbstractComputerVision cv = (AbstractComputerVision) service;
       subscribe(service.getName(), "publishCvData");
-    }
+    }</pre>
+     */
 
     if (service.getTypeKey().equals("org.myrobotlab.service.Servo")) {
       // non-batched - "instantaneous" move data subscription

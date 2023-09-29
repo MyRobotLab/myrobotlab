@@ -16,7 +16,7 @@ public class WebXRMeta extends MetaData {
   public WebXRMeta() {
 
     // add a cool description
-    addDescription("WebXr allows hmi devices to add input and get data back from mrl");
+    addDescription("WebXR allows hmi devices to add input and get data back from mrl");
 
     // false will prevent it being seen in the ui
     setAvailable(true);

@@ -44,7 +44,8 @@ public class ApiVerticle extends AbstractVerticle {
     router.route().handler(CorsHandler.create("*").allowedMethod(HttpMethod.GET).allowedMethod(HttpMethod.OPTIONS).allowedHeader("Accept").allowedHeader("Authorization")
         .allowedHeader("Content-Type"));
 
-    // static file routing
+    // static file routing - this is from a npm "build" ... but durin gdevelop its far
+    // easier to use setupProxy.js from a npm start .. but deployment would be easier with a "build"
 
     //StaticHandler root = StaticHandler.create("src/main/resources/resource/Vertx/app");
     // StaticHandler root = StaticHandler.create("src/main/resources/resource/Vertx/app");
