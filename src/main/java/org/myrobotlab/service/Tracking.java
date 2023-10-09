@@ -265,7 +265,7 @@ public class Tracking extends Service<TrackingConfig> {
   }
 
   public void attachTilt(String tilt) {
-    setPeerName("pan", tilt); // this is config NOT plan
+    setPeerName("tilt", tilt); // this is config NOT plan
   }
 
   public void attachCv(String cv) {
