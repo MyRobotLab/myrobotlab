@@ -180,6 +180,7 @@ public class InMoov2Config extends ServiceConfig {
 
     // == Peer - servoMixer =============================
     // setup name references to different services
+    ServoMixerConfig servoMixer = (ServoMixerConfig) plan.get(getPeerName("servoMixer"));
     servoMixer.listeners = new ArrayList<>();
     servoMixer.listeners.add(new Listener("publishText", name + ".mouth", "onText"));
 
