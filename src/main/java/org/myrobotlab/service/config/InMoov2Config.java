@@ -177,8 +177,11 @@ public class InMoov2Config extends ServiceConfig {
     MarySpeechConfig mouth = (MarySpeechConfig) plan.get(getPeerName("mouth"));
     mouth.voice = "Mark";
     mouth.speechRecognizers = new String[] { name + ".ear" };
-    mouth.listeners = new ArrayList<>();
-    mouth.listeners.add(new Listener("publishText", name + ".servoMixer", "onText"));
+
+    // == Peer - servoMixer =============================
+    // setup name references to different services
+    servoMixer.listeners = new ArrayList<>();
+    servoMixer.listeners.add(new Listener("publishText", name + ".mouth", "onText"));
 
     // == Peer - ear =============================
     // setup name references to different services
