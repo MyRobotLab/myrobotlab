@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.abstracts.AbstractMicrocontroller.PinListenerFilter;
 import org.myrobotlab.service.config.Ads1115Config;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.PinData;
@@ -446,44 +448,10 @@ public class Ads1115 extends Service<Ads1115Config> implements I2CControl, PinAr
 
   }
 
-  @Override
-  public void attachPinListener(PinListener listener, int pinAddress) {
-    attach(listener, String.format("%d", pinAddress));
-  }
-
-  @Override
-  public void attach(PinListener listener, String pin) {
-    String name = listener.getName();
-
-    if (listener.isLocal()) {
-      List<PinListener> list = null;
-      if (pinListeners.containsKey(pin)) {
-        list = pinListeners.get(pin);
-      } else {
-        list = new ArrayList<PinListener>();
-      }
-      list.add(listener);
-      pinListeners.put(pin, list);
-
-    } else {
-      // setup for pub sub
-      // FIXME - there is an architectual problem here
-      // locally it works - but remotely - outbox would need to know
-      // specifics of
-      // the data its sending
-      addListener("publishPin", name, "onPin");
-    }
-
-  }
-
   // This section contains all the new attach logic
   @Override
   public void attach(String service) throws Exception {
     attach(Runtime.getService(service));
-  }
-
-  public void attach(String listener, int pinAddress) {
-    attachPinListener((PinListener) Runtime.getService(listener), pinAddress);
   }
 
   public void attach(String controllerName, String deviceBus, String deviceAddress) {
@@ -589,7 +557,7 @@ public class Ads1115 extends Service<Ads1115Config> implements I2CControl, PinAr
     }
   }
 
-  @Override
+  @Deprecated /* use enablePin(String pin) */
   public void enablePin(int address) {
     if (controller == null) {
       error("must be connected to enable pins");
@@ -608,8 +576,7 @@ public class Ads1115 extends Service<Ads1115Config> implements I2CControl, PinAr
     }
   }
 
-  @Override
-  // TODO Implement individula sample rates per pin
+  @Deprecated /* sue enablePin(String, int) */
   public void enablePin(int address, int rate) {
     setSampleRate(rate);
     enablePin(address);
@@ -697,7 +664,7 @@ public class Ads1115 extends Service<Ads1115Config> implements I2CControl, PinAr
     }
   }
 
-  @Override
+  @Deprecated /* use getPin(String) */
   public PinDefinition getPin(int address) {
     if (pinIndex.containsKey(address)) {
       return pinIndex.get(address);
@@ -769,7 +736,7 @@ public class Ads1115 extends Service<Ads1115Config> implements I2CControl, PinAr
 
   }
 
-  @Override
+  @Deprecated /* use pinMode(String, String */
   public void pinMode(int address, String mode) {
     if (mode != null && mode.equalsIgnoreCase("INPUT")) {
     } else {
@@ -780,7 +747,10 @@ public class Ads1115 extends Service<Ads1115Config> implements I2CControl, PinAr
 
   @Override
   public void pinMode(String pin, String mode) {
-    pinMode(getPin(pin).getAddress(), mode);
+    if (mode != null && mode.equalsIgnoreCase("INPUT")) {
+    } else {
+      log.error("Ads1115 only supports INPUT mode");
+    }
   }
 
   public Integer pinNameToAddress(String pinName) {
@@ -817,7 +787,7 @@ public class Ads1115 extends Service<Ads1115Config> implements I2CControl, PinAr
     return pinDef;
   }
 
-  @Override
+  @Deprecated /* use read(String) */
   public int read(int address) {
     pinIndex.get(address).setValue(readADC_SingleEnded(address));
     return pinIndex.get(address).getValue();
@@ -1110,7 +1080,7 @@ public class Ads1115 extends Service<Ads1115Config> implements I2CControl, PinAr
     writeRegister(ADS1015_REG_POINTER_CONFIG, config);
   }
 
-  @Override
+  @Deprecated /* use write(String, int value) */
   public void write(int address, int value) {
     log.error("Ads1115 only supports read, not write");
 
@@ -1185,5 +1155,19 @@ public class Ads1115 extends Service<Ads1115Config> implements I2CControl, PinAr
     return c;
   }
 
+  @Override
+  public void attachPinListener(PinListener listener) {
+    String name = listener.getName();
+    addListener("publishPin", name);
+    PinListenerFilter filter = new PinListenerFilter(listener);
+    outbox.addFilter(name, CodecUtils.getCallbackTopicName("publishPin"), filter);
+  }
+  
+  @Override
+  public void detachPinListener(PinListener listener) {
+    String name = listener.getName();
+    removeListener("publishPin", name);
+    outbox.removeFilter(name, CodecUtils.getCallbackTopicName("publishPin"));
+  }
 
 }

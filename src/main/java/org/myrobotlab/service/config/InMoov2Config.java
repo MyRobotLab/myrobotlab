@@ -12,80 +12,95 @@ import org.myrobotlab.service.config.RandomConfig.RandomMessageConfig;
 
 public class InMoov2Config extends ServiceConfig {
 
+  @Deprecated /* no implementation */
   public int analogPinFromSoundCard = 53;
-  
+
+  @Deprecated /* no implementation */
   public int audioPollsBySeconds = 2;
-  
-  public boolean audioSignalProcessing=false;
-  
+
+  @Deprecated /* no implementation */
+  public boolean audioSignalProcessing = false;
+
   public boolean batteryInSystem = false;
+
+  /**
+   * start sound for when service starts
+   */
+  public boolean bootUpSound = true;
+
+  /**
+   * produces random sound on wake and other events
+   * TODO - make this not random
+   */
+  public boolean customSound = false;
   
-  public boolean customSound=false;
-  
+  /**
+   *  sound for when the topic/state switches
+   */
+  public boolean topicSound = false;
+
   public boolean forceMicroOnIfSleeping = true;
-  
+
   public boolean healthCheckActivated = false;
-  
+
   public int healthCheckTimerMs = 60000;
-  
+
   public boolean heartbeat = false;
-  
 
   /**
    * idle time measures the time the fsm is in an idle state
    */
   public boolean idleTimer = true;
 
-  public boolean loadGestures = true;
+  public boolean loadGestures = false;
+
+  public boolean loadInitScripts = false;
 
   /**
    * default to null - allow the OS to set it, unless explicilty set
    */
   public String locale = null; // = "en-US";
 
-  public boolean neoPixelBootGreen=true;
+  public boolean neoPixelBootGreen = true;
 
   public boolean neoPixelDownloadBlue = true;
 
   public boolean neoPixelErrorRed = true;
-  
+
   public boolean neoPixelFlashWhenSpeaking = true;
-  
-  public boolean openCVFaceRecognizerActivated=true;
-  
-  public boolean openCVFlipPicture=false;
-  
+
+  public boolean openCVFaceRecognizerActivated = true;
+
+  public boolean openCVFlipPicture = false;
+
   public boolean pirEnableTracking = false;
-  
+
   /**
-   * play pir sounds when pir switching states
-   * sound located in data/InMoov2/sounds/pir-activated.mp3
-   * sound located in data/InMoov2/sounds/pir-deactivated.mp3
+   * play pir sounds when pir switching states sound located in
+   * data/InMoov2/sounds/pir-activated.mp3 sound located in
+   * data/InMoov2/sounds/pir-deactivated.mp3
    */
   public boolean pirPlaySounds = true;
-  
+
   public boolean pirWakeUp = true;
-    
+
   public boolean robotCanMoveHeadWhileSpeaking = true;
-  
-  
+
   /**
    * startup and shutdown will pause inmoov - set the speed to this value then
    * attempt to move to rest
    */
   public double shutdownStartupSpeed = 50;
-  
+
   /**
-   * Sleep 5 minutes after last presence detected 
+   * Sleep 5 minutes after last presence detected
    */
   public int sleepTimeoutMs=300000;
   
   public boolean startupSound = true;
 
-  public int trackingTimeoutMs=10000;
-  
   public String unlockInsult = "forgive me";
-  
+
   public boolean virtual = false;
 
   public InMoov2Config() {
@@ -95,9 +110,13 @@ public class InMoov2Config extends ServiceConfig {
   public Plan getDefault(Plan plan, String name) {
     super.getDefault(plan, name);
 
-    // peers FIXME global opencv
+    // peers which autostart by default
     addDefaultPeerConfig(plan, name, "audioPlayer", "AudioFile", true);
+    addDefaultPeerConfig(plan, name, "htmlFilter", "HtmlFilter", true);
+    addDefaultPeerConfig(plan, name, "mouth", "MarySpeech", false);
+
     addDefaultPeerConfig(plan, name, "chatBot", "ProgramAB", true);
+
     addDefaultPeerConfig(plan, name, "controller3", "Arduino", false);
     addDefaultPeerConfig(plan, name, "controller4", "Arduino", false);
     addDefaultPeerConfig(plan, name, "ear", "WebkitSpeechRecognition", false);
@@ -112,7 +131,6 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "left", "Arduino", false);
     addDefaultPeerConfig(plan, name, "leftArm", "InMoov2Arm", false);
     addDefaultPeerConfig(plan, name, "leftHand", "InMoov2Hand", false);
-    addDefaultPeerConfig(plan, name, "mouth", "MarySpeech", false);
     addDefaultPeerConfig(plan, name, "mouthControl", "MouthControl", false);
     addDefaultPeerConfig(plan, name, "neoPixel", "NeoPixel", false);
     addDefaultPeerConfig(plan, name, "opencv", "OpenCV", false);
@@ -131,16 +149,13 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "ultrasonicLeft", "UltrasonicSensor", false);
 
     MouthControlConfig mouthControl = (MouthControlConfig) plan.get(getPeerName("mouthControl"));
+    
+    
 
     // setup name references to different services
     mouthControl.jaw = name + ".head.jaw";
-    String i01Name = name;
-    int index = name.indexOf(".");
-    if (index > 0) {
-      i01Name = name.substring(0, name.indexOf("."));
-    }
+    mouthControl.mouth = name + ".mouth";
 
-    mouthControl.mouth = i01Name + ".mouth";
 
     ProgramABConfig chatBot = (ProgramABConfig) plan.get(getPeerName("chatBot"));
     Runtime runtime = Runtime.getInstance();
@@ -174,6 +189,8 @@ public class InMoov2Config extends ServiceConfig {
     // onStarted
     // == Peer - mouth =============================
     // setup name references to different services
+    // LocalSpeechConfig mouth = (LocalSpeechConfig)
+    // plan.get(getPeerName("mouth"));
     MarySpeechConfig mouth = (MarySpeechConfig) plan.get(getPeerName("mouth"));
     mouth.voice = "Mark";
     mouth.speechRecognizers = new String[] { name + ".ear" };
@@ -186,6 +203,12 @@ public class InMoov2Config extends ServiceConfig {
     ear.listening = true;
     // remove, should only need ServiceConfig.listeners
     ear.textListeners = new String[]{name + ".chatBot"};
+    
+    // for servo mixer speech
+    ServoMixerConfig servoMixer = (ServoMixerConfig) plan.get(getPeerName("servoMixer"));
+    servoMixer.listeners = new ArrayList<>();
+    servoMixer.listeners.add(new Listener("publishText", name + ".mouth", "onText"));
+    
 
     JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.get(getPeerName("simulator"));
 
@@ -252,9 +275,14 @@ public class InMoov2Config extends ServiceConfig {
     simulator.nodes.put(name + ".rightHand.pinky2", new UserDataConfig(new MapperLinear(0.0, 180.0, 70.0, -10.0, true, false), "x"));
     simulator.nodes.put(name + ".rightHand.pinky3", new UserDataConfig(new MapperLinear(0.0, 180.0, 60.0, -10.0, true, false), "x"));
     simulator.cameraLookAt = name + ".torso.lowStom";
+    
+    simulator.listeners = new ArrayList<>();
+    simulator.listeners.add(new Listener("getSelectedPath", name + ".servoMixer", "onSelected"));
+
 
     FiniteStateMachineConfig fsm = (FiniteStateMachineConfig) plan.get(getPeerName("fsm"));
-    // TODO - events easily gotten from InMoov data ?? auto callbacks in python if exists ?
+    // TODO - events easily gotten from InMoov data ?? auto callbacks in python
+    // if exists ?
     fsm.current = "boot";
     fsm.transitions.add(new Transition("boot", "configStarted", "applyingConfig"));
     fsm.transitions.add(new Transition("applyingConfig", "getUserInfo", "getUserInfo"));
@@ -264,14 +292,12 @@ public class InMoov2Config extends ServiceConfig {
     fsm.transitions.add(new Transition("systemCheck", "systemCheckFinished", "awake"));
     fsm.transitions.add(new Transition("awake", "sleep", "sleeping"));
 
-    
-    
     PirConfig pir = (PirConfig) plan.get(getPeerName("pir"));
-    pir.pin = "23";
+    pir.pin = "D23";
     pir.controller = name + ".left";
     pir.listeners = new ArrayList<>();
     pir.listeners.add(new Listener("publishPirOn", name, "onPirOn"));
-    
+
     // == Peer - random =============================
     RandomConfig random = (RandomConfig) plan.get(getPeerName("random"));
     random.enabled = false;
@@ -380,17 +406,31 @@ public class InMoov2Config extends ServiceConfig {
     plan.remove(name + ".eyeTracking.controller");
     plan.remove(name + ".eyeTracking.controller.serial");
     plan.remove(name + ".eyeTracking.cv");
-    
+
     // inmoov2 default listeners
     listeners = new ArrayList<>();
     // FIXME - should be getPeerName("neoPixel")
     listeners.add(new Listener("publishFlash", name + ".neoPixel", "onLedDisplay"));
 
     listeners.add(new Listener("publishEvent", name + ".fsm"));
-        
+
+    listeners.add(new Listener("publishPython", "python"));
+
+    listeners.add(new Listener("publishPlayAudioFile", name + ".audioPlayer"));
+    listeners.add(new Listener("publishPlayRandomAudioFile", name + ".audioPlayer"));
+
+    
+    listeners.add(new Listener("setConfig", name + ".chatBot"));
+    listeners.add(new Listener("getConfig", name + ".chatBot"));
+    listeners.add(new Listener("setConfigValue", name + ".chatBot", "onConfig"));
+    
+    
+    // listeners.add(new Listener("publishLeftAr", name + ".audioPlayer"));
+    
+
     // remove the auto-added starts in the plan's runtime RuntimConfig.registry
     plan.removeStartsWith(name + ".");
-    
+
     // rtConfig.add(name); // <-- adding i01 / not needed
 
     return plan;

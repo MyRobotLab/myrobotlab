@@ -8,6 +8,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
+import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.PinData;
@@ -19,6 +22,33 @@ import org.myrobotlab.service.interfaces.PinListener;
 public abstract class AbstractMicrocontroller<C extends ServiceConfig> extends Service<C> implements Microcontroller {
 
   private static final long serialVersionUID = 1L;
+  
+  /**
+   * A filter class. This class is used to provide a filter on a common publishing point.  In this case
+   * "publishPin".  The challenge with publishPin is all pins get published to all PinListeners, yet a
+   * PinListener typically only wants to listen to a single pin.  What this filter provides is a filter
+   * for that specific pin before the message gets enqueued on the outbox.  The filter is added when
+   * the subscription is processed, and its done in a general way that "any" filter could be provided to a subscription.
+   * This is a generalized and simple way to provide filtering on subscriptions.
+   * 
+   * @author GroG
+   *
+   */
+  public static class PinListenerFilter implements Outbox.FilterInterface{
+    PinListener listener = null;
+    
+    public PinListenerFilter(PinListener listener) {
+      this.listener = listener;
+    }
+
+    @Override
+    public boolean filter(Message msg) {
+      if ("onPin".equals(msg.method) && msg.data != null && msg.data.length > 0 && ((PinData)msg.data[0]).pin.equals(listener.getPin())) {
+        return false;
+      }
+      return true;
+    }
+  }
 
   /**
    * board type - UNO Mega etc..
@@ -52,6 +82,7 @@ public abstract class AbstractMicrocontroller<C extends ServiceConfig> extends S
    * whatever its documented to people e.g. "A5" or "D7", it comes down to a
    * unique address
    */
+  @Deprecated /* use pinIndex only */
   protected Map<Integer, PinDefinition> addressIndex = new TreeMap<>();
 
   /**
@@ -89,28 +120,17 @@ public abstract class AbstractMicrocontroller<C extends ServiceConfig> extends S
   }
 
   @Override
-  @Deprecated /*
-               * use attachPinListener(PinListener listener) GET RID OF THIS !
-               */
-  public void attachPinListener(PinListener listener, int address) {
-    PinDefinition pin = getPin(address);
-    listener.setPin(pin.getPinName());
-    attachPinListener(listener);
-  }
-
-  /**
-   * attach a pin listener who listens to a specific pin
-   */
   public void attachPinListener(PinListener listener) {
     String name = listener.getName();
     addListener("publishPin", name);
+    PinListenerFilter filter = new PinListenerFilter(listener);
+    outbox.addFilter(name, CodecUtils.getCallbackTopicName("publishPin"), filter);
   }
-
-  @Override
-  @Deprecated /* set pin then call attach(listener) */
-  public void attach(PinListener listener, String pin) {
-    PinDefinition pinDef = getPin(pin);
-    attachPinListener(listener, pinDef.getAddress());
+  
+  public void detachPinListener(PinListener listener) {
+    String name = listener.getName();
+    removeListener("publishPin", name);
+    outbox.removeFilter(name, CodecUtils.getCallbackTopicName("publishPin"));
   }
 
   @Override
@@ -119,6 +139,7 @@ public abstract class AbstractMicrocontroller<C extends ServiceConfig> extends S
   }
 
   @Override
+  @Deprecated /* use disablePin(String pin) */
   abstract public void disablePin(int address);
 
   @Override
@@ -133,7 +154,7 @@ public abstract class AbstractMicrocontroller<C extends ServiceConfig> extends S
     enablePin(getPin(pin).getAddress());
   }
 
-  @Override
+  @Deprecated /*use enablePin(String)*/
   abstract public void enablePin(int address);
 
   @Override
@@ -141,18 +162,19 @@ public abstract class AbstractMicrocontroller<C extends ServiceConfig> extends S
     enablePin(getPin(pin).getAddress(), rate);
   }
 
-  @Override
+  @Deprecated /* use enablePin(String, int) */
   abstract public void enablePin(int address, int rate);
 
   @Override
-  public PinDefinition getPin(String pinName) {
-    if (pinIndex.containsKey(pinName)) {
-      return pinIndex.get(pinName);
+  public PinDefinition getPin(String pin) {
+    if (pinIndex.containsKey(pin)) {
+      return pinIndex.get(pin);
     }
 
     // another attempt - if user used address instead of pin
+    // FIXME - remove this
     try {
-      int address = Integer.parseInt(pinName);
+      int address = Integer.parseInt(pin);
       return addressIndex.get(address);
     } catch (Exception e) {
     }
@@ -161,7 +183,7 @@ public abstract class AbstractMicrocontroller<C extends ServiceConfig> extends S
     return null;
   }
 
-  @Override
+  @Deprecated /* use getPin(String pin) */
   public PinDefinition getPin(int address) {
     if (addressIndex.containsKey(address)) {
       return addressIndex.get(address);
@@ -172,13 +194,13 @@ public abstract class AbstractMicrocontroller<C extends ServiceConfig> extends S
 
   @Override
   abstract public List<PinDefinition> getPinList();
-
+  
   @Override
   public void pinMode(String pin, String mode) {
     pinMode(getPin(pin).getAddress(), mode);
   }
 
-  @Override
+  
   abstract public void pinMode(int address, String mode);
 
   @Override
@@ -202,7 +224,7 @@ public abstract class AbstractMicrocontroller<C extends ServiceConfig> extends S
     return pinDef;
   }
 
-  @Override
+  @Deprecated /* use read(String pin) */
   public int read(int address) {
     // FIXME - this would be "last" read
     return addressIndex.get(address).getValue();
@@ -223,8 +245,10 @@ public abstract class AbstractMicrocontroller<C extends ServiceConfig> extends S
     write(pinDef.getAddress(), value);
   }
 
-  @Override
-  abstract public void write(int address, int value);
+  @Deprecated /* don't expose the complexity of address to the user, use only "pin" write(String, int) */
+  public void write(int address, int value) {
+    log.error("do not use write(int address, int value) use write(String pin, int)");
+  }
 
   /**
    * Identifier of "board type" from the possible set in boardTypes

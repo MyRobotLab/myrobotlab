@@ -187,7 +187,7 @@ public class Hd44780 extends Service<Hd44780Config> implements TextListener {
    * 
    */
   public void display(String string, int line) {
-    log.info("display({},{})", string, line);
+    log.debug("display({},{})", string, line);
     if (!initialized) {
       init();
     }

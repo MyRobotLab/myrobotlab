@@ -49,7 +49,7 @@ public class Mpu6050 extends Service<Mpu6050Config> implements I2CControl, Orien
 
   protected transient HashSet<OrientationListener> listeners = new HashSet<OrientationListener>();
 
-  final protected OrientationPublisher publisher = new OrientationPublisher();
+  transient final protected OrientationPublisher publisher = new OrientationPublisher();
 
   protected transient I2CController controller;
 
@@ -67,21 +67,22 @@ public class Mpu6050 extends Service<Mpu6050Config> implements I2CControl, Orien
 
   protected String controllerName;
 
+  protected boolean isPublishing = false;
+
   /**
    * frequency
    */
   protected Double sampleRateHz = 3.0;
 
   protected class OrientationPublisher implements Runnable {
-    protected boolean isRunning = false;
     private transient Thread thread = null;
 
     @Override
     public void run() {
       try {
-        isRunning = true;
+        isPublishing = true;
         dmpInitialize(); // TODO check initialize() switch use dmp?
-        while (isRunning) {
+        while (isPublishing) {
           refresh();
           invoke("publishOrientation", data.orientation);
           invoke("publishMpu6050Data", data);
@@ -92,11 +93,11 @@ public class Mpu6050 extends Service<Mpu6050Config> implements I2CControl, Orien
         log.error("publisher threw", e);
         error("publisher error %s", e.getMessage());
       }
-      isRunning = false;
+      isPublishing = false;
     }
 
     public synchronized void start() {
-      if (isRunning) {
+      if (isPublishing) {
         return;
       }
       thread = new Thread(this, String.format("%s-publisher", getName()));
@@ -105,7 +106,7 @@ public class Mpu6050 extends Service<Mpu6050Config> implements I2CControl, Orien
     }
 
     public synchronized void stop() {
-      isRunning = false;
+      isPublishing = false;
       broadcastState();
     }
   }
@@ -4438,7 +4439,7 @@ public class Mpu6050 extends Service<Mpu6050Config> implements I2CControl, Orien
   public Mpu6050Config getConfig() {
     super.getConfig();
     // FIXME remove local fields in favor or config
-    config.start = publisher.isRunning;
+    config.start = isPublishing;
     config.sampleRate = sampleRateHz;
     config.bus = deviceBus;
     config.address = deviceAddress;
@@ -4449,10 +4450,7 @@ public class Mpu6050 extends Service<Mpu6050Config> implements I2CControl, Orien
   @Override
   public Mpu6050Config apply(Mpu6050Config c) {
     Mpu6050Config config = (Mpu6050Config) super.apply(c);
-    // FIXME remove local fields in favor or config
-    if (config.start) {
-      publisher.start();
-    }
+
     if (config.sampleRate != null) {
       setSampleRate(config.sampleRate);
     }
@@ -4466,10 +4464,16 @@ public class Mpu6050 extends Service<Mpu6050Config> implements I2CControl, Orien
     if (config.controller != null) {
       try {
         attach(config.controller);
+
+        if (config.start) {
+          publisher.start();
+        }    
+        
       } catch (Exception e) {
         log.error("attach threw", e);
       }
     }
+        
     return c;
   }
 
@@ -4485,7 +4489,7 @@ public class Mpu6050 extends Service<Mpu6050Config> implements I2CControl, Orien
   public static void main(String[] args) {
     try {
 
-      Runtime.main(new String[] { "--id", "admin"});
+      Runtime.main(new String[] { "--id", "admin" });
       LoggingFactory.init(Level.INFO);
 
       // Runtime.setAllVirtual(true);

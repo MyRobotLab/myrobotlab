@@ -9,12 +9,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.abstracts.AbstractMicrocontroller.PinListenerFilter;
 import org.myrobotlab.service.config.Pcf8574Config;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.I2CControl;
@@ -196,33 +198,23 @@ public class Pcf8574 extends Service<Pcf8574Config>
   }
 
   @Override
-  public void attachPinListener(PinListener listener, int address) {
-    attach(listener, String.format("%d", address));
+  public void attachPinListener(PinListener listener) {
+    String name = listener.getName();
+    addListener("publishPin", name);
+    PinListenerFilter filter = new PinListenerFilter(listener);
+    outbox.addFilter(name, CodecUtils.getCallbackTopicName("publishPin"), filter);
+  }
+  
+  @Override
+  public void detachPinListener(PinListener listener) {
+    String name = listener.getName();
+    removeListener("publishPin", name);
+    outbox.removeFilter(name, CodecUtils.getCallbackTopicName("publishPin"));
   }
 
-  @Override
-  public void attach(PinListener listener, String pin) {
-    String name = listener.getName();
 
-    if (listener.isLocal()) {
-      List<PinListener> list = null;
-      if (pinListeners.containsKey(pin)) {
-        list = pinListeners.get(pin);
-      } else {
-        list = new ArrayList<PinListener>();
-      }
-      list.add(listener);
-      pinListeners.put(pin, list);
-
-    } else {
-      // setup for pub sub
-      // FIXME - there is an architectual problem here
-      // locally it works - but remotely - outbox would need to know
-      // specifics of
-      // the data its sending
-      addListener("publishPin", name, "onPin");
-    }
-
+  public void attach(PinListener listener) {
+    attachPinListener(listener);
   }
 
   // This section contains all the new attach logic
@@ -235,11 +227,6 @@ public class Pcf8574 extends Service<Pcf8574Config>
     } else {
       log.error("%s does not know how to attach to %s of type %s", getName(), si.getName(), si.getSimpleName());
     }
-  }
-
-  @Deprecated /* use attach(String) */
-  public void attach(String listener, int pinAddress) {
-    attachPinListener((PinListener) Runtime.getService(listener), pinAddress);
   }
 
   @Deprecated /* use attach(String) */
@@ -354,7 +341,7 @@ public class Pcf8574 extends Service<Pcf8574Config>
     }
   }
 
-  @Override
+  @Deprecated /* use enablePin(String pin) */
   public void enablePin(int address) {
     if (controller == null) {
       error("must be connected to enable pins");
@@ -368,7 +355,7 @@ public class Pcf8574 extends Service<Pcf8574Config>
     broadcastState();
   }
 
-  @Override
+  @Deprecated /* use enablePin(String, int) */
   public void enablePin(int address, int rate) {
     setSampleRate(rate);
     enablePin(address);
@@ -444,7 +431,7 @@ public class Pcf8574 extends Service<Pcf8574Config>
     return c.bus;
   }
 
-  @Override
+  @Deprecated /* use getPin(String) */
   public PinDefinition getPin(int address) {
     if (pinIndex.containsKey(address)) {
       return pinIndex.get(address);
@@ -503,7 +490,7 @@ public class Pcf8574 extends Service<Pcf8574Config>
     invoke("publishPinDefinition", pinDef);
   }
 
-  @Override
+  @Deprecated /* use pinMode(String, String */
   public void pinMode(int address, String mode) {
     PinDefinition pinDef = getPin(address);
     // There is no direction register in the PCF8574 it is always BIDRECTIONAL.
@@ -541,7 +528,7 @@ public class Pcf8574 extends Service<Pcf8574Config>
     return pinDef;
   }
 
-  @Override
+  @Deprecated /* use read(String) */
   public int read(int address) {
       readRegister();
     return getPin(address).getValue();
@@ -646,7 +633,7 @@ public class Pcf8574 extends Service<Pcf8574Config>
     return rate;
   }
 
-  @Override
+  @Deprecated /* use write(String, int value) */
   public void write(int address, int value) {
     log.info("Write Pin int {} with {}", address, value);
     // PinDefinition pinDef = getPin(address); // this doesn't get used at all

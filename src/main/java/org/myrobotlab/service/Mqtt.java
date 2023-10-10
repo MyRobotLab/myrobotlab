@@ -59,13 +59,13 @@ import org.slf4j.Logger;
  * information is updated from each connection since an instance can determine where
  * the incoming message came from by the topic 
  * 
- *  The recv topic between two instances c1 and c2 are
- *  mrl/gw/c1/rx&lt;-c2  for c1
- *  mrl/gw/c2/rx&lt;-c1  for c2
+ *  The recv topic between two instances id1 and id2 are
+ *  mrl/gw/id1/rx&lt;-id2  for id1
+ *  mrl/gw/id2/rx&lt;-id1  for id2
  *  
  *  a general recv topic exist
- *  mrl/gw/c1/rx for c1
- *  mrl/gw/c2/rx for c2
+ *  mrl/gw/id1/rx for id1
+ *  mrl/gw/id2/rx for id2
  *  
  * &#64;author kmcgerald and GroG
  * </pre>
@@ -481,7 +481,7 @@ public class Mqtt extends Service<MqttConfig> implements MqttCallback, IMqttActi
             message.getQos(), message.getId());
         /*
          * if (logMsg.
-         * equals("mqtt <--rx-- mrl/gw/c1/rx<-w1 (runtime@c1.onDescribe <--invoke-- runtime@w1.describe) qos 1 id 3"
+         * equals("mqtt <--rx-- mrl/gw/id1/rx<-w1 (runtime@id1.onDescribe <--invoke-- runtime@w1.describe) qos 1 id 3"
          * )) { log.info("here"); }
          */
         log.warn(logMsg);
@@ -846,7 +846,8 @@ public class Mqtt extends Service<MqttConfig> implements MqttCallback, IMqttActi
   public static void main(String[] args) {
     try {
       LoggingFactory.init("info");
-      Runtime.main(new String[] { "--id", "m1"});
+      Runtime.main(new String[] { "--id", "id1"});
+      // Runtime.main(new String[] { "--id", "id2"});
       /*
        * WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
        * webgui.setPort(8888); webgui.autoStartBrowser(false);
@@ -856,18 +857,24 @@ public class Mqtt extends Service<MqttConfig> implements MqttCallback, IMqttActi
        */
       // Runtime.start("python", "Python");
       // Runtime.start("audio", "AudioFile");
-      Mqtt mqtt01 = (Mqtt) Runtime.start("mqtt01", "Mqtt");
+      //Mqtt mqtt01 = (Mqtt) Runtime.start("mqtt01", "Mqtt");
+      Mqtt mqtt02 = (Mqtt) Runtime.start("mqtt01", "Mqtt");
       // mqtt01.connect("mqtt://localhost:1884");
       // mqtt01.connect(fs, fs, fs, fs);
       // mqtt.inquire("r1")
-      // mqtt.inquire("mqtt02@c2")
+      // mqtt.inquire("mqtt02@id2")
       // MqttBroker broker = (MqttBroker) Runtime.start("broker", "MqttBroker");
       // broker.start();
 
-      mqtt01.setCert("certs/home-client/rootCA.pem", "certs/home-client/cert.pem.crt", "certs/home-client/private.key");
-      mqtt01.connect("mqtts://a22mowsnlyfeb6-ats.iot.us-west-2.amazonaws.com:8883");
+      // mqtt01.setCert("certs/home-client/rootCA.pem", "certs/home-client/cert.pem.crt", "certs/home-client/private.key");
+      // mqtt01.connect("mqtts://a22mowsnlyfeb6-ats.iot.us-west-2.amazonaws.com:8883");
       // mqtt01.connect("mqtt://broker.emqx.io:1883");
-      // mqtt01.connect("tcp://iot.eclipse.org:1883");
+      
+      // TO TEST ============= BEGIN ================
+      // go to https://www.hivemq.com/demos/websocket-client/
+      mqtt02.connect("mqtt://broker.hivemq.com:1883");
+      
+      
       // mqtt01.connect("tcp://broker.hivemq.com:1883");
       // mqtt01.connect("mqtt://127.0.0.1:1883");
       // mqtt01.connect("mqtt://127.0.0.1:1883", "client",

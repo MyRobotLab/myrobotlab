@@ -369,8 +369,7 @@ public abstract class AbstractServo<C extends ServoConfig> extends Service<C> im
       disable();
       addTaskOneShot(idleTimeout, "disable");
     }
-
-    broadcastState();
+    
   }
 
   /**

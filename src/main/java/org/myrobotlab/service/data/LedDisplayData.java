@@ -9,7 +9,7 @@ package org.myrobotlab.service.data;
  */
 public class LedDisplayData {
 
-    public String action; // fill | flash | play animation | stop | clear
+    public String action = "flash"; // fill | flash | play animation | stop | clear
     public int red;
     public int green;
     public int blue;
@@ -23,6 +23,16 @@ public class LedDisplayData {
      * interval of flash in ms
      */
     public long interval = 500;
+    
+    
+    public LedDisplayData() {};
+
+    public LedDisplayData(int red, int green, int blue) {
+      this.red = red;
+      this.green = green;
+      this.blue = blue;
+      
+    };
     
     
 }

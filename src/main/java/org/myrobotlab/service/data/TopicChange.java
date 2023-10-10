@@ -40,5 +40,8 @@ public class TopicChange {
     this.oldTopic = oldTopic;
   }
   
+  public String toString() {
+    return String.format("newTopic: %s oldTopic: %s botName %s userName: %s", newTopic, oldTopic, botName, userName);
+  }
 
 }
