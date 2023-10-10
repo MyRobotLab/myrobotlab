@@ -5333,6 +5333,9 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
   @Override
   public RuntimeConfig getConfig() {
     config = super.getConfig();
+    config.locale = getLocaleTag();
+    config.virtual = isVirtual;
+    config.id = getId();
     return config;
   }
 
