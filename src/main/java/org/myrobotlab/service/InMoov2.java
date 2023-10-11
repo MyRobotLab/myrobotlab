@@ -637,8 +637,18 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return mute;
   }
 
+  /**
+   * execute python scripts in the app directory on startup of the service
+   * 
+   * @throws IOException
+   */
+  public void loadAppScripts() throws IOException {
+    loadScripts(getResourceDir() + fs + "gestures/InMoovApps/Rock_Paper_Scissors");
+    loadScripts(getResourceDir() + fs + "gestures/InMoovApps/Kids_WordsGame");
+  }
+  
   public void loadGestures() {
-    loadGestures(getResourceDir() + fs + "gestures", getResourceDir() + fs + "gestures/InMoovApps/Rock_Paper_Scissors", getResourceDir() + fs + "gestures/InMoovApps/Kids_WordsGame",);
+    loadGestures(getResourceDir() + fs + "gestures");
   }
 
   /**
