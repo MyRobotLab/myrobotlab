@@ -26,53 +26,41 @@ import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_dnn.Net;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
+import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
+/**
+ * This filter uses the Yolo image recognition libraries. 
+ * For more information about yolo, here's a link:
+ * https://pjreddie.com/darknet/yolo/
+ * 
+ */
 public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   private static final long serialVersionUID = 1L;
-  
-  public transient final static Logger log = LoggerFactory.getLogger(OpenCVFilterYolo.class);
-
-  protected Boolean running;
-
-  // zero offset to where the confidence level is in the output matrix of the
-  // darknet.
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterYolo.class);
+  volatile protected Boolean running;
+  // offset to where the confidence level is in the output matrix of the darknet.
   private static final int CONFIDENCE_INDEX = 4;
-
   transient private final OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
-
-  protected float confidenceThreshold = 0.25F;
-  // the column in the detection matrix that contains the confidence level. (I
-  // think?)
-  // int probability_index = 5;
-  // yolo file locations
-  // private String darknetHome = "c:/dev/workspace/darknet/";
-
-  // *** the 'correct' way ***
-  // public String darknetHome =
-  // FileIO.gluePaths(Service.getResourceDir(OpenCV.class),"yolo");
-  public String darknetHome = "resource/OpenCV/yolo"; // FileIO.gluePaths(Service.getResourceDir(OpenCV.class),"yolo");
+  private float confidenceThreshold = 0.25F;
+  public String darknetHome = FileIO.gluePaths(Service.getResourceDir(OpenCV.class),"yolo");
   public String modelConfig = "yolov2.cfg";
   public String modelWeights = "yolov2.weights";
   public String modelNames = "coco.names";
-
-  int classifierThreadCount = 0;
-
   transient DecimalFormat df2 = new DecimalFormat("#.###");
-
   transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
-
-  protected boolean debug = false;
+  boolean debug = false;
   transient private Net net;
   ArrayList<String> classNames;
-  // quick fix for exploding serialization of Classification
-  transient public ArrayList<Classification> lastResult = null;
+  public ArrayList<Classification> lastResult = null;
   transient private volatile IplImage lastImage = null;
   private volatile boolean pending = false;
   transient private Thread classifier;
+  volatile Object lock = new Object();
 
   public OpenCVFilterYolo(String name) {
     super(name);
@@ -84,11 +72,9 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   }
 
   private void loadYolo() {
-    log.info("loadYolo - begin");
-
+    log.info("Loading Yolo model.");
     try {
       net = readNetFromDarknet(darknetHome + File.separator + modelConfig, darknetHome + File.separator + modelWeights);
-      log.info("Loaded yolo darknet model to opencv");
     } catch (Exception e) {
       log.error("readNetFromDarknet could not read", e);
       return;
@@ -100,12 +86,10 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       log.warn("Error unable to load class names from file {}", modelNames, e);
       return;
     }
-    log.info("Done loading model..");
-    log.info("loadYolo - end");
+    log.info("Yolo model loaded.");
   }
 
   private ArrayList<String> loadClassNames(String filename) throws IOException {
-    log.info("loadClassNames - begin");
     ArrayList<String> names = new ArrayList<String>();
     FileReader fileReader = new FileReader(filename);
     BufferedReader bufferedReader = new BufferedReader(fileReader);
@@ -115,18 +99,16 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       names.add(line.trim());
       i++;
     }
-    log.info("read {} names", i);
+    log.info("read {} class names", i);
     fileReader.close();
-
-    log.info("loadClassNames - end");
     return names;
   }
 
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
+    // TODO: what is this doing here?
     if (lastResult != null) {
-      // the thread running will be updating lastResult for it as fast as it
-      // can.
+      // the thread running will be updating lastResult for it as fast as itcan.
       // displayResult(image, lastResult);
     }
     // ok now we just need to update the image that the current thread is
@@ -155,29 +137,25 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       running = true;
       // loading the model takes a lot of time, we want to block enable/disable
       // until we are actually running - then we notifyAll
-
       while (running && enabled) {
         if (!pending) {
-          log.debug("Skipping frame");
+          // avoid spinning the cpu too hard.
           Thread.sleep(10);
           continue;
         }
-
-        log.info("process - begin");
+        log.info("Yolo Image Frame - Begin");
         // only classify this if we haven't already classified it.
         if (lastImage != null) {
-          // lastResult = dl4j.classifyImageVGG16(lastImage);
-          log.debug("Doing yolo...");
           lastResult = yoloFrame(lastImage);
-          // log.info("Yolo done.");
-          // we processed, next object we'll pick up.
+          // update this so we will process the next frame that arrives.
           pending = false;
           count++;
           if (count % 10 == 0) {
             double rate = 1000.0 * count / (System.currentTimeMillis() - start);
             log.info("Yolo Classification Rate : {}", rate);
           }
-
+          // TODO: why don't we just publish the lastResult object instead?
+          // This seems silly.. and potentially this looses data?
           Map<String, List<Classification>> ret = new TreeMap<>();
           for (Classification c : lastResult) {
             List<Classification> nl = null;
@@ -189,17 +167,12 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
             }
             nl.add(c);
           }
-
           invoke("publishClassification", ret);
         } else {
-          log.info("No Image to classify...");
+          // We shouldn't see this?
+          log.info("Waiting for a frame to process.");
         }
-        // TODO: see why there's a race condition. i seem to need a little delay
-        // here o/w the recognition never seems to start.
-        // maybe lastImage needs to be marked as volatile ?
-
-        Thread.sleep(1);
-      } // while (running)
+      }
 
     } catch (Exception e) {
       log.error("yolo thread threw", e);
@@ -208,38 +181,23 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     synchronized (lock) {
       classifier = null;
     }
-
+    
     log.info("yolo exiting classifier thread");
-    log.info("run - end");
   }
 
   private ArrayList<Classification> yoloFrame(IplImage frame) {
-    log.debug("Starting yolo on frame...");
-    log.info("yoloFrame - begin");
     // this is our list of objects that have been detected in a given frame.
     ArrayList<Classification> yoloObjects = new ArrayList<Classification>();
     // convert that frame to a matrix (Mat) using the frame converters in javacv
-
-    log.info("yoloFrame - grabberConverter {}", frame);
-    // log.info("Yolo frame start");
     Mat inputMat = grabberConverter.convertToMat(grabberConverter.convert(frame));
-    // log.info("Input mat created");
     // TODO: I think yolo expects RGB color (which is inverted in the next step)
     // so if the input image isn't in RGB color, we might need a cvCutColor
-    log.info("yoloFrame - blobFromImage");
     Mat inputBlob = blobFromImage(inputMat, 1 / 255.F, new Size(416, 416), new Scalar(), true, false, CV_32F);
     // put our frame/input blob into the model.
-    // log.info("input blob created");
-    log.info("yoloFrame - blob {}", inputBlob);
     net.setInput(inputBlob);
-
-    log.debug("Feed forward!");
-    // log.info("Input blob set on network.");
     // ask for the detection_out layer i guess? not sure the details of the
     // forward method, but this computes everything like magic!
     Mat detectionMat = net.forward("detection_out");
-    // log.info("output detection matrix produced");
-    log.debug("detection matrix computed");
     // iterate the rows of the detection matrix.
     for (int i = 0; i < detectionMat.rows(); i++) {
       Mat currentRow = detectionMat.row(i);
@@ -248,13 +206,11 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
         // skip the noise
         continue;
       }
-
       // System.out.println("\nCurrent row has " + currentRow.size().width() +
       // "=width " + currentRow.size().height() + "=height.");
       // currentRow.position(probability_index);
       // int probability_size = detectionMat.cols() - probability_index;
       // detectionMat;
-
       // String className = getWithDefault(classNames, i);
       // System.out.print("\nROW (" + className + "): " +
       // currentRow.getFloatBuffer().get(4) + " -- \t\t");
@@ -275,69 +231,57 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
           // ok. in theory this is something we think it might actually be.
           float x = currentRow.getFloatBuffer().get(0);
           float y = currentRow.getFloatBuffer().get(1);
-
           float width = currentRow.getFloatBuffer().get(2);
           float height = currentRow.getFloatBuffer().get(3);
           int xLeftBottom = (int) ((x - width / 2) * inputMat.cols());
           int yLeftBottom = (int) ((y - height / 2) * inputMat.rows());
           int xRightTop = (int) ((x + width / 2) * inputMat.cols());
           int yRightTop = (int) ((y + height / 2) * inputMat.rows());
-
           if (xLeftBottom < 0) {
             xLeftBottom = 0;
           }
           if (yLeftBottom < 0) {
             yLeftBottom = 0;
           }
-
           // crop the right top
           if (xRightTop > inputMat.cols()) {
             xRightTop = inputMat.cols();
           }
-
           if (yRightTop > inputMat.rows()) {
             yRightTop = inputMat.rows();
           }
-
           log.debug(label + " (" + confidence + "%) [(" + xLeftBottom + "," + yLeftBottom + "),(" + xRightTop + "," + yRightTop + ")]");
           Rect boundingBox = new Rect(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
           // grab just the bytes for the ROI defined by that rect..
           // get that as a mat, save it as a byte array (png?) other encoding?
           // TODO: have a target size?
-
-          IplImage cropped = extractSubImage(inputMat, boundingBox);
           if (debug) {
             debug = false;
+            IplImage cropped = extractSubImage(inputMat, boundingBox);
             show(cropped, "detected img");
           }
           Classification obj = new Classification(String.format("%s.%s-%d", data.getName(), name, data.getFrameIndex()));
           obj.setLabel(label);
           obj.setBoundingBox(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
           obj.setConfidence(confidence);
+          // TODO: add the original frame converted as a serializable image ( BufferedImage or png byte array? )
           // obj.setImage(data.getDisplay());
-          // for non-serializable "local" image objects
-          obj.setObject(frame);
+          // we might just want to provide a reference to the frame.  such as the frame number or something similar so if 
+          // we want to find the original frame we can look it up.  (in solr?)
           yoloObjects.add(obj);
         }
       }
     }
-    log.info("yoloFrame - end");
     return yoloObjects;
   }
 
   private IplImage extractSubImage(Mat inputMat, Rect boundingBox) {
-    log.info("extractSubImage - begin");
-    //
     log.debug(boundingBox.x() + " " + boundingBox.y() + " " + boundingBox.width() + " " + boundingBox.height());
-
     // TODO: figure out if the width/height is too large! don't want to go array
     // out of bounds
     Mat cropped = new Mat(inputMat, boundingBox);
-
     IplImage image = converterToIpl.convertToIplImage(converterToIpl.convert(cropped));
     // This mat should be the cropped image!
-
-    log.info("extractSubImage - end");
     return image;
   }
 
@@ -346,10 +290,8 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     // synchronized (lock) {
     log.info("release - begin");
     disable(); // blocks until ready
-
     // while(isRunning){ sleep(30) .. check again }
     // bleed out the thread before deallocating
-
     if (net != null) {
       net.deallocate();
       net = null;
@@ -357,8 +299,6 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     log.info("release - end");
     // }
   }
-
-  transient volatile Object lock = new Object();
 
   @Override
   public void enable() {
@@ -396,16 +336,13 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     if (lastResult != null) {
-
       for (Classification obj : lastResult) {
         String label = obj.getLabel() + " (" + df2.format(obj.getConfidence() * 100) + "%)";
-
         Rectangle bb = obj.getBoundingBox();
         int x = (int) bb.x;
         int y = (int) bb.y;
         int width = (int) bb.width;
         int height = (int) bb.height;
-
         graphics.setColor(Color.BLACK);
         graphics.drawRect(x, y, width, height);
         graphics.fillRect(x, y - 20, 7 * label.length(), 20);

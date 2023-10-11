@@ -110,14 +110,6 @@ public class Classification extends Document {
     return null;
   }
 
-  public void setObject(Object frame) {
-    setField("imageObject", frame);
-  }
-
-  public Object getObject() {
-    return getValue("imageObject");
-  }
-
   public void setBoundingBox(Rectangle rect) {
     setField("bounding_box", rect);
   }
