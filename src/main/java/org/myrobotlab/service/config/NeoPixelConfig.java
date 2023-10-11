@@ -14,7 +14,7 @@ public class NeoPixelConfig extends ServiceConfig {
   public Integer brightness = 255;
   public boolean fill = false;
   // auto clears flashes
-  public boolean autoClear = true;
+  public boolean autoClear = false;
   public int idleTimeout = 1000;
 
 }

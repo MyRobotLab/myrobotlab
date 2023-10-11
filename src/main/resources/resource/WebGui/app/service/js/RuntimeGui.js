@@ -361,7 +361,9 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     }
 
      $scope.saveConfig = function() {
-          $scope.service.selectedOption = 'current'
+        $scope.service.includePeers = false
+        $scope.service.selectedOption = "current"
+         
           var modalInstance = $uibModal.open({
             templateUrl: 'saveConfig.html',
             scope: $scope,

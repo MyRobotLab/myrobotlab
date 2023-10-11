@@ -1,6 +1,7 @@
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.framework.interfaces.Invoker;
+import org.myrobotlab.framework.interfaces.JsonInvoker;
+import org.myrobotlab.framework.interfaces.JsonSender;
 
 /**
  * Interface to a Executor - currently only utilized by Py4j to
@@ -10,7 +11,7 @@ import org.myrobotlab.framework.interfaces.Invoker;
  * @author GroG
  *
  */
-public interface Executor extends Invoker {
+public interface Executor extends JsonInvoker, JsonSender {
 
   /**
    * exec in Python - executes arbitrary code

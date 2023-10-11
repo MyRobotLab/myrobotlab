@@ -2,7 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.myrobotlab.framework.Service;
@@ -142,15 +142,34 @@ public class InMoov2Head extends Service<InMoov2HeadConfig> {
       eyelidRight.disable();
   }
 
-  public long getLastActivityTime() {
+  public Long getLastActivityTime() {
 
-    long lastActivityTime = Math.max(rothead.getLastActivityTime(), neck.getLastActivityTime());
-    lastActivityTime = Math.max(lastActivityTime, eyeX.getLastActivityTime());
-    lastActivityTime = Math.max(lastActivityTime, eyeY.getLastActivityTime());
-    lastActivityTime = Math.max(lastActivityTime, jaw.getLastActivityTime());
-    lastActivityTime = Math.max(lastActivityTime, rollNeck.getLastActivityTime());
-    lastActivityTime = Math.max(lastActivityTime, eyelidLeft.getLastActivityTime());
-    lastActivityTime = Math.max(lastActivityTime, eyelidRight.getLastActivityTime());
+    Long lastActivityTime = Math.max(rothead.getLastActivityTime(), neck.getLastActivityTime());
+    if (getPeer("eyeX") != null) {
+      lastActivityTime = Math.max(lastActivityTime, eyeX.getLastActivityTime());
+    }
+    if (getPeer("eyeY") != null) {
+      lastActivityTime = Math.max(lastActivityTime, eyeY.getLastActivityTime());
+    }
+    if (getPeer("jaw") != null) {
+      lastActivityTime = Math.max(lastActivityTime, jaw.getLastActivityTime());
+    }
+    if (getPeer("rollNeck") != null) {
+      lastActivityTime = Math.max(lastActivityTime, rollNeck.getLastActivityTime());
+    }
+    if (getPeer("rollNeck") != null) {
+      lastActivityTime = Math.max(lastActivityTime, rothead.getLastActivityTime());
+    }
+    if (getPeer("rollNeck") != null) {
+      lastActivityTime = Math.max(lastActivityTime, neck.getLastActivityTime());
+    }
+
+    if (getPeer("eyelidLeft") != null) {
+      lastActivityTime = Math.max(lastActivityTime, eyelidLeft.getLastActivityTime());
+    }
+    if (getPeer("eyelidRight") != null) {
+      lastActivityTime = Math.max(lastActivityTime, eyelidRight.getLastActivityTime());
+    }
     return lastActivityTime;
   }
 
@@ -199,7 +218,7 @@ public class InMoov2Head extends Service<InMoov2HeadConfig> {
     log.info("object distance is {},rothead servo {},neck servo {} ", distance, rotation, colatitude);
   }
 
-  public void onMoveHead(HashMap<String, Double> map) {
+  public void onMove(Map<String, Double> map) {
     moveTo(map.get("neck"), map.get("rothead"), map.get("eyeX"), map.get("eyeY"), map.get("jaw"), map.get("rollNeck"));
   }
 

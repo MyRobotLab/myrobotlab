@@ -2,7 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
@@ -93,7 +93,7 @@ public class InMoov2Torso extends Service<InMoov2TorsoConfig> {
       lowStom.disable();
   }
   
-  public void onMoveTorso(HashMap<String, Double> map) {
+  public void onMove(Map<String, Double> map) {
     moveTo(map.get("topStom"), map.get("midStom"), map.get("lowStom"));
   }
 

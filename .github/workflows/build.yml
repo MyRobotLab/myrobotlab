@@ -15,5 +15,7 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
+      - name: Dependency Test
+        run: mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
       - name: Build with Maven
-        run: mvn --batch-mode -Dtest=!**/OpenCV* test -X
+        run: mvn --batch-mode -Dtest=!**/OpenCV* test -q
