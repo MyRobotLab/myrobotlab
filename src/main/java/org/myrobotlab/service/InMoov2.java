@@ -638,9 +638,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   }
 
   public void loadGestures() {
-    loadGestures(getResourceDir() + fs + "gestures");
-    loadGestures(getResourceDir() + fs + "gestures/InMoovApps/Kids_WordsGame");
-    loadGestures(getResourceDir() + fs + "gestures/InMoovApps/Rock_Paper_Scissors");
+    loadGestures(getResourceDir() + fs + "gestures", "gestures/InMoovApps/Kids_WordsGame", "gestures/InMoovApps/Rock_Paper_Scissors");
   }
 
   /**
