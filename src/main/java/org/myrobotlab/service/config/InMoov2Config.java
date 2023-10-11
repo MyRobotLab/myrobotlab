@@ -344,23 +344,25 @@ public class InMoov2Config extends ServiceConfig {
     PidConfig pid = (PidConfig) plan.get(getPeerName("pid"));
 
     PidData tiltPid = new PidData();
-    tiltPid.ki = 0.001;
-    tiltPid.kp = 30.0;
+    tiltPid.ki = -0.001;
+    tiltPid.kp = -40.0;
+    tiltPid.inverted = true;
     pid.data.put(headTracking.getPeer("tilt").name, tiltPid);
 
     PidData panPid = new PidData();
     panPid.ki = 0.001;
-    panPid.kp = 15.0;
+    panPid.kp = 40.0;
     pid.data.put(headTracking.getPeer("pan").name, panPid);
 
     PidData eyeTiltPid = new PidData();
-    eyeTiltPid.ki = 0.001;
-    eyeTiltPid.kp = 10.0;
+    eyeTiltPid.ki = -0.001;
+    eyeTiltPid.kp = -30.0;
+    eyeTiltPid.inverted = true;
     pid.data.put(eyeTracking.getPeer("tilt").name, eyeTiltPid);
 
     PidData eyePanPid = new PidData();
     eyePanPid.ki = 0.001;
-    eyePanPid.kp = 10.0;
+    eyePanPid.kp = 30.0;
     pid.data.put(eyeTracking.getPeer("pan").name, eyePanPid);
 
     NeoPixelConfig neoPixel = (NeoPixelConfig) plan.get(getPeerName("neoPixel"));
