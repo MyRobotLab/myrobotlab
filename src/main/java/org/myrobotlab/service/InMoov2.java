@@ -163,6 +163,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
         setLocale(getSupportedLocale(Runtime.getInstance().getLocale().toString()));
       }
 
+      loadAppsScripts();
+      
       loadInitScripts();
 
       if (c.loadGestures) {
@@ -642,7 +644,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * 
    * @throws IOException
    */
-  public void loadAppScripts() throws IOException {
+  public void loadAppsScripts() throws IOException {
     loadScripts(getResourceDir() + fs + "gestures/InMoovApps/Rock_Paper_Scissors");
     loadScripts(getResourceDir() + fs + "gestures/InMoovApps/Kids_WordsGame");
   }
