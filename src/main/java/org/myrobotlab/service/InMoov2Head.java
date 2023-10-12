@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -216,6 +217,11 @@ public class InMoov2Head extends Service<InMoov2HeadConfig> {
     log.info("rotation: " + rotation);
     log.info("colatitude: " + colatitude);
     log.info("object distance is {},rothead servo {},neck servo {} ", distance, rotation, colatitude);
+  }
+
+  @Deprecated /* use onMoov */
+  public void onMoveHead(HashMap<String, Double> map) {
+    onMove(map);
   }
 
   public void onMove(Map<String, Double> map) {
