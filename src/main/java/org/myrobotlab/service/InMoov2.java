@@ -925,9 +925,10 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     led.interval = 500;
     // FIXME flash on config.flashOnBoot
     invoke("publishFlash");
-    // pirOn event vs wake event
-    invoke("publishEvent", "WAKE");
-  }
+    String sleepState = fsm.getCurrent();
+    if ("SLEEPING".equals(sleepState))
+      invoke("publishEvent", "WAKE");
+    }
 
   // GOOD GOOD GOOD - LOOPBACK - flexible and replacable by python
   // yet provides a stable default, which can be fully replaced
