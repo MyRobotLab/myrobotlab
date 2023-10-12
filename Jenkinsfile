@@ -92,6 +92,26 @@ pipeline {
          }
       } // stage compile
 
+      stage('dependencies') {
+         when {
+               expression { params.verify == 'true' }
+         }
+         steps {
+            script {
+               // TODO - integration tests !
+               if (isUnix()) {
+                  sh '''
+                     mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
+                  '''
+               } else {
+                  bat '''
+                     mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
+                  '''
+               }
+            }
+         }
+      } // stage verify      
+
       stage('verify') {
          when {
                expression { params.verify == 'true' }
@@ -101,11 +121,11 @@ pipeline {
                // TODO - integration tests !
                if (isUnix()) {
                   sh '''
-                     mvn -Dfile.encoding=UTF-8 -Dsurefire.skipAfterFailureCount=1  -DargLine="-Xmx1024m" verify --fail-fast
+                     mvn -Dfile.encoding=UTF-8 -DargLine="-Xmx1024m" verify --fail-fast -q
                   '''
                } else {
                   bat '''
-                     mvn -Dfile.encoding=UTF-8 -Dsurefire.skipAfterFailureCount=1  -DargLine="-Xmx1024m" verify --fail-fast
+                     mvn -Dfile.encoding=UTF-8 -DargLine="-Xmx1024m" verify --fail-fast -q
                   '''
                }
             }
