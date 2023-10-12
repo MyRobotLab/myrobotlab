@@ -925,8 +925,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     led.interval = 500;
     // FIXME flash on config.flashOnBoot
     invoke("publishFlash");
-    String sleepState = fsm.getCurrent();
-    if ("SLEEPING".equals(sleepState)) {
+    String botState = chatBot.getPredicate("botState");
+    if ("sleeping".equals(botState)) {
       invoke("publishEvent", "WAKE");
     }
   }
