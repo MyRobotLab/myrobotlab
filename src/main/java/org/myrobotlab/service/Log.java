@@ -34,7 +34,8 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.LogConfig;
+import org.myrobotlab.service.config.RuntimeConfig;
 import org.slf4j.Logger;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -44,7 +45,7 @@ import ch.qos.logback.core.LogbackException;
 import ch.qos.logback.core.spi.FilterReply;
 import ch.qos.logback.core.status.Status;
 
-public class Log extends Service<ServiceConfig> implements Appender<ILoggingEvent> {
+public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
 
   public static class LogEntry {
     public long ts;
@@ -81,7 +82,7 @@ public class Log extends Service<ServiceConfig> implements Appender<ILoggingEven
    * broadcast logging is through publishLogEvent (not broadcastState)
    */
   transient List<LogEntry> buffer = new ArrayList<>();
-
+  
   /**
    * logging state
    */
@@ -92,11 +93,8 @@ public class Log extends Service<ServiceConfig> implements Appender<ILoggingEven
    */
   long lastPublishLogTimeTs = 0;
 
-  /**
-   * current log level
-   */
-  String logLevel = null;
 
+  
   /**
    * max size of log buffer
    */
@@ -114,8 +112,10 @@ public class Log extends Service<ServiceConfig> implements Appender<ILoggingEven
 
   public String getLogLevel() {
     Logging logging = LoggingFactory.getInstance();
-    logLevel = logging.getLevel();
-    return logLevel;
+    if (config != null) {
+      config.level = logging.getLevel();
+    }
+    return logging.getLevel();
   }
 
   @Override
@@ -192,6 +192,7 @@ public class Log extends Service<ServiceConfig> implements Appender<ILoggingEven
   synchronized public void flush() {
     if (buffer.size() > 0) {
       invoke("publishLogEvents", buffer);
+      
       buffer = new ArrayList<>(maxSize);
       lastPublishLogTimeTs = System.currentTimeMillis();
     }
@@ -224,6 +225,11 @@ public class Log extends Service<ServiceConfig> implements Appender<ILoggingEven
     return entries;
   }
 
+  public List<LogEntry> publishErrors(List<LogEntry> entries) {
+    return entries;
+  }
+
+  
   @Override
   public void setContext(Context arg0) {
     // TODO Auto-generated method stub
@@ -255,6 +261,18 @@ public class Log extends Service<ServiceConfig> implements Appender<ILoggingEven
     // getting current level before broadcasting state
     getLogLevel();
     broadcastState();
+  }
+  
+  public LogConfig apply(LogConfig c) {
+    super.apply(c);
+    if (c.level != null) {
+      setRootLogLevel(c.level);
+    }
+    return c;
+  }
+  
+  public LogConfig getConfig() {
+    return config;
   }
 
   @Override
@@ -308,14 +326,17 @@ public class Log extends Service<ServiceConfig> implements Appender<ILoggingEven
     try {
 
       // Log4jLoggerAdapter blah;
-
+      Runtime runtime = Runtime.getInstance();
+      RuntimeConfig config = runtime.getConfig();
+      config.resource = "src/main/resources/resource";
+      runtime.apply(config);
+      
       Runtime.start("log", "Log");
       Runtime.start("python", "Python");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
-      Runtime runtime = Runtime.getInstance();
-      runtime.startInteractiveMode();
+
       log.info("this is an info test");
       log.warn("this is an warn test");
       log.error("this is an error test");

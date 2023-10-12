@@ -1,5 +1,5 @@
-angular.module('mrlapp.service.LogGui', []).controller('LogGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
-    $log.info('LogGuiCtrl')
+angular.module('mrlapp.service.LogGui', []).controller('LogGuiCtrl', ['$scope', 'mrl', function($scope,  mrl) {
+    console.info('LogGuiCtrl')
     var _self = this
     var msg = this.msg
 
@@ -116,7 +116,7 @@ angular.module('mrlapp.service.LogGui', []).controller('LogGuiCtrl', ['$scope', 
             }
             break
         default:
-            $log.error("ERROR - unhandled method " + $scope.name + "." + msg.method)
+            console.error("ERROR - unhandled method " + $scope.name + "." + msg.method)
             break
         }
     }
