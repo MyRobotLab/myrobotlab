@@ -17,7 +17,7 @@ public class OpenWeatherMapMeta extends MetaData {
     addDescription("This service will query OpenWeatherMap for the current weather.  Get an API key at http://openweathermap.org/");
     addCategory("weather");
     setCloudService(true);
-    addDependency("org.json", "json", "20090211");
+    addDependency("org.json", "json", "20230227");
 
   }
 
