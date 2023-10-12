@@ -34,7 +34,7 @@ public class IvyWrapper extends Repo implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  public static final String IVY_VERSION = "2.5.1";
+  public static final String IVY_VERSION = "2.5.2";
 
   class IvyWrapperLogger extends AbstractMessageLogger {
 

@@ -827,7 +827,6 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
 
     inputQueueThread.stop();
     thread.interruptAllThreads();
-    Py.getSystemState()._systemRestart = true;
   }
 
   /**
