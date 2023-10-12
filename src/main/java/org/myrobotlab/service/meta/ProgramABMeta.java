@@ -26,7 +26,7 @@ public class ProgramABMeta extends MetaData {
     
     addDependency("com.fasterxml.jackson.dataformat", "jackson-dataformat-xml", "2.14.0");
 
-    addDependency("org.json", "json", "20090211");
+    addDependency("org.json", "json", "20230227");
     // used by FileIO
     addDependency("commons-io", "commons-io", "2.7");
     // TODO: This is for CJK support in ProgramAB move this into the published

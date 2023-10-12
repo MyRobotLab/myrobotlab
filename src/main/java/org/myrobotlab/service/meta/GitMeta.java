@@ -17,7 +17,7 @@ public class GitMeta extends MetaData {
     addCategory("programming");
 
     // EDL (new-style BSD) licensed
-    addDependency("org.eclipse.jgit", "org.eclipse.jgit", "5.4.0.201906121030-r");
+    addDependency("org.eclipse.jgit", "org.eclipse.jgit", "6.6.1.202309021850-r");
   }
 
 }
