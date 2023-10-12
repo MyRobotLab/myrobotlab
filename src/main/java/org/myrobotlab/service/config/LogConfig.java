@@ -5,6 +5,6 @@ public class LogConfig extends ServiceConfig {
   /**
    * level of log error, warn, info, debug
    */
-  String level = "info";
+  public String level = "info";
 
 }

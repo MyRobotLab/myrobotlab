@@ -35,6 +35,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.LogConfig;
+import org.myrobotlab.service.config.RuntimeConfig;
 import org.slf4j.Logger;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -92,11 +93,8 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
    */
   long lastPublishLogTimeTs = 0;
 
-  /**
-   * current log level
-   */
-  String logLevel = null;
 
+  
   /**
    * max size of log buffer
    */
@@ -114,8 +112,10 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
 
   public String getLogLevel() {
     Logging logging = LoggingFactory.getInstance();
-    logLevel = logging.getLevel();
-    return logLevel;
+    if (config != null) {
+      config.level = logging.getLevel();
+    }
+    return logging.getLevel();
   }
 
   @Override
@@ -262,6 +262,18 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
     getLogLevel();
     broadcastState();
   }
+  
+  public LogConfig apply(LogConfig c) {
+    super.apply(c);
+    if (c.level != null) {
+      setRootLogLevel(c.level);
+    }
+    return c;
+  }
+  
+  public LogConfig getConfig() {
+    return config;
+  }
 
   @Override
   public void setName(String name) {
@@ -314,14 +326,17 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
     try {
 
       // Log4jLoggerAdapter blah;
-
+      Runtime runtime = Runtime.getInstance();
+      RuntimeConfig config = runtime.getConfig();
+      config.resource = "src/main/resources/resource";
+      runtime.apply(config);
+      
       Runtime.start("log", "Log");
       Runtime.start("python", "Python");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
-      Runtime runtime = Runtime.getInstance();
-      runtime.startInteractiveMode();
+
       log.info("this is an info test");
       log.warn("this is an warn test");
       log.error("this is an error test");

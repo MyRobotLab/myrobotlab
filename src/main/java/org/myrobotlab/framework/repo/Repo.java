@@ -55,9 +55,9 @@ public abstract class Repo {
    */
   protected static String LOCATION = null;
 
-  List<Status> errors = new ArrayList<Status>();
+  protected List<Status> errors = new ArrayList<Status>();
 
-  Map<String, ServiceDependency> installedLibraries = new TreeMap<String, ServiceDependency>();
+  protected Map<String, ServiceDependency> installedLibraries = new TreeMap<String, ServiceDependency>();
 
   public String getRepoPath() {
     return LOCATION + File.separator + REPO_STATE_FILE_NAME;
@@ -403,7 +403,7 @@ public abstract class Repo {
 
   abstract public void installDependency(String location, ServiceDependency serviceTypes);
 
-  abstract public void install(String location, String[] serviceTypes) throws Exception;
+  abstract public void install(String location, String[] serviceTypes) throws IOException;
 
   synchronized public void install(String[] serviceTypes) throws Exception {
     install(getInstallDir(), serviceTypes);
