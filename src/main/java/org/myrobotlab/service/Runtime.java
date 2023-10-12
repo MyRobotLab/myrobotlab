@@ -20,6 +20,7 @@ import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,18 +33,23 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Queue;
+
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+import boofcv.alg.fiducial.qrcode.PackedBits8;
 import org.myrobotlab.codec.ClassUtil;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.CodecUtils.ApiDescription;
 import org.myrobotlab.codec.ForeignProcessUtils;
+import org.myrobotlab.ext.python.PythonUtils;
+
 import org.myrobotlab.framework.CmdConfig;
 import org.myrobotlab.framework.CmdOptions;
 import org.myrobotlab.framework.DescribeQuery;
@@ -66,10 +72,7 @@ import org.myrobotlab.framework.interfaces.ConfigurableService;
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.framework.repo.IvyWrapper;
-import org.myrobotlab.framework.repo.Repo;
-import org.myrobotlab.framework.repo.ServiceData;
-import org.myrobotlab.framework.repo.ServiceDependency;
+import org.myrobotlab.framework.repo.*;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.AppenderType;
 import org.myrobotlab.logging.LoggerFactory;
@@ -88,11 +91,7 @@ import org.myrobotlab.service.config.RuntimeConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.ServiceTypeNameResults;
-import org.myrobotlab.service.interfaces.ConnectionManager;
-import org.myrobotlab.service.interfaces.Gateway;
-import org.myrobotlab.service.interfaces.LocaleProvider;
-import org.myrobotlab.service.interfaces.RemoteMessageHandler;
-import org.myrobotlab.service.interfaces.ServiceLifeCyclePublisher;
+import org.myrobotlab.service.interfaces.*;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
@@ -124,7 +123,7 @@ import picocli.CommandLine;
  * VAR OF RUNTIME !
  *
  */
-public class Runtime extends Service<RuntimeConfig> implements MessageListener, ServiceLifeCyclePublisher, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider {
+public class Runtime extends Service<RuntimeConfig> implements MessageListener, ServiceLifeCyclePublisher, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider, ServiceRunner {
   final static private long serialVersionUID = 1L;
 
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
@@ -134,6 +133,12 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * each must have a unique name
    */
   static private final Map<String, ServiceInterface> registry = new TreeMap<>();
+
+  /**
+   * List of all services capable of running other services,
+   * even those outside of Java-land.
+   */
+  private static final List<ServiceRunner> serviceRunners = new CopyOnWriteArrayList<>();
 
   /**
    * A plan is a request to runtime to change the system. Typically its to ask
@@ -245,7 +250,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    */
   transient private IvyWrapper repo = null; // was transient abstract Repo
 
-  transient private ServiceData serviceData = ServiceData.getLocalInstance();
+  final transient private ServiceData serviceData = ServiceData.getLocalInstance();
 
   /**
    * command line options
@@ -315,6 +320,12 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * releasing config
    */
   protected Set<String> startingServices = new HashSet<>();
+
+  private static final String PYTHON_SERVICES_PATH = "python_services";
+
+  private static final String PYTHON_VENV_PATH = PYTHON_SERVICES_PATH + fs + "venv";
+
+  private String pythonCommand;
 
   /**
    * Wraps {@link java.lang.Runtime#availableProcessors()}.
@@ -629,6 +640,30 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     invoke("getStartYml");
   }
 
+  public void startPythonRuntime() {
+    PythonUtils.runPythonScriptAsync(
+            pythonCommand,
+            new File(PYTHON_SERVICES_PATH),
+            new File(PYTHON_SERVICES_PATH + fs + "mrl" + fs + "bootstrap.py").getAbsolutePath(),
+            Platform.getLocalInstance().getId() + "-python"
+    );
+  }
+
+  @Override
+  public List<String> getSupportedLanguageKeys() {
+    return null;
+  }
+
+  @Override
+  public List<String> getAvailableServiceTypes() {
+    return Arrays.asList(getServiceNames());
+  }
+
+  @Override
+  public ServiceInterface startService(String name, String type) {
+    return Runtime.start(name, type);
+  }
+
   /**
    * Framework owned method - core of creating a new service. This method will
    * create a service with the given name and of the given type. If the type
@@ -694,7 +729,12 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       return null;
     }
 
-    String fullTypeName = CodecUtils.makeFullTypeName(type);
+    String fullTypeName;
+    if (ForeignProcessUtils.isForeignTypeKey(type) || type.contains(".")) {
+      fullTypeName = type;
+    } else {
+      fullTypeName = String.format("org.myrobotlab.service.%s", type);
+    }
 
     ServiceInterface si = Runtime.getService(fullName);
     if (si != null) {
@@ -719,6 +759,32 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     if (sw != null) {
       log.info("service {} already exists", name);
       return sw;
+    }
+
+    if (ForeignProcessUtils.isForeignTypeKey(type)) {
+      String languageKey = ForeignProcessUtils.getLanguageId(type);
+      // Needed cause of lambda requiring effectively-final variables
+      String finalType = type;
+      List<ServiceRunner> possibleRunners = serviceRunners.stream()
+              .filter(runner -> runner.getSupportedLanguageKeys().contains(languageKey))
+              .filter(runner -> runner.getAvailableServiceTypes().contains(finalType))
+              .collect(Collectors.toList());
+      if (possibleRunners.isEmpty()) {
+        log.error("Cannot find a service runner to start service with type {}, all known runners: {}", type, serviceRunners);
+        return null;
+      }
+
+      if (inId == null) {
+        return possibleRunners.get(0).startService(name, type);
+      } else {
+        Optional<ServiceRunner> maybeRunner = possibleRunners.stream().filter(runner -> inId.equals(runner.getId())).findFirst();
+        if (maybeRunner.isEmpty()) {
+          log.error("Cannot find compatible service runner with ID {}", inId);
+          return null;
+        }
+        return maybeRunner.get().startService(name, type);
+
+      }
     }
 
     try {
@@ -907,6 +973,10 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
           Security.getInstance();
           runtime.getRepo().addStatusPublisher(runtime);
           FileIO.extractResources();
+          FileIO.extractPythonServices();
+
+          runtime.pythonCommand = PythonUtils.setupVenv(PYTHON_VENV_PATH, true, List.of("mrlpy"));
+
           // protected services we don't want to remove when releasing a config
           runtime.startingServices.add("runtime");
           runtime.startingServices.add("security");
@@ -1144,7 +1214,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * @return list of registrations
    */
   synchronized public List<Registration> getServiceList() {
-    return registry.values().stream().map(si -> new Registration(si.getId(), si.getName(), si.getTypeKey())).collect(Collectors.toList());
+    return registry.values().stream().map(Registration::new).collect(Collectors.toList());
   }
 
   // FIXME - scary function - returns private data
@@ -1516,7 +1586,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * License - should be appropriately accepted or rejected by user
    *
    * @param serviceType
-   *          the service tyype to install
+   *          the service type to install
    * @param blocking
    *          if this should block until done.
    *
@@ -1534,8 +1604,24 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         try {
           if (serviceType == null) {
             r.getRepo().install();
+            int returnCode = PythonUtils.runPythonScript(
+                    r.pythonCommand,
+                    new File("python_services"),
+                    "python_services" + fs + "setup.py",
+                    "install");
+            if (returnCode != 0) {
+              r.error("Cannot install Python services, subprocess returned " + returnCode);
+            }
           } else {
             r.getRepo().install(serviceType);
+            int returnCode = PythonUtils.runPythonScript(
+                    r.pythonCommand,
+                    new File("python_services"),
+                    "python_services" + fs + "setup.py",
+                    "install", serviceType);
+            if (returnCode != 0) {
+              r.error("Cannot install Python services, subprocess returned " + returnCode);
+            }
           }
         } catch (Exception e) {
           r.error(e);
@@ -1686,11 +1772,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     registry.put(String.format("%s@%s", updatedService.getName(), updatedService.getId()), updatedService);
   }
 
-  public static synchronized Registration register(String id, String name, String typeKey, ArrayList<String> interfaces) {
-    Registration proxy = new Registration(id, name, typeKey, interfaces);
-    register(proxy);
-    return proxy;
-  }
 
   /**
    * Registration is the process where a remote system sends detailed info
@@ -1788,6 +1869,48 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       }
 
       registry.put(fullname, registration.service);
+      if (registration.interfaces.contains(ServiceRunner.class.getName())) {
+        if (Runtime.class.isAssignableFrom(registration.service.getClass())) {
+
+          // Might not be needed, I'm just not sure how calling these methods
+          // on an emulated Runtime like mrlpy's would work
+//          serviceRunners.add(new ServiceRunner() {
+//            @Override
+//            public String getName() {
+//              return null;
+//            }
+//
+//            @Override
+//            public String getId() {
+//              return null;
+//            }
+//
+//            @Override
+//            public List<String> getSupportedLanguageKeys() {
+//              try {
+//                return (List<String>) Runtime.get().sendBlocking(registration.getFullName(), "getSupportedLanguageKeys");
+//              } catch (TimeoutException | InterruptedException e) {
+//                throw new RuntimeException(e);
+//              }
+//            }
+//
+//            @Override
+//            public List<String> getAvailableServiceTypes() {
+//              try {
+//                return (List<String>) Runtime.get().sendBlocking(registration.getFullName(), "getAvailableServiceTypes");
+//              } catch (TimeoutException | InterruptedException e) {
+//                throw new RuntimeException(e);
+//              }
+//            }
+//
+//            @Override
+//            public ServiceInterface createService(String name, String type, String inId) {
+//              return null;
+//            }
+//          });
+        }
+        serviceRunners.add((ServiceRunner) registration.service);
+      }
 
       if (runtime != null) {
 

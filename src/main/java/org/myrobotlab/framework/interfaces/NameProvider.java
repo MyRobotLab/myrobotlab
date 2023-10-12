@@ -4,4 +4,5 @@ public interface NameProvider {
 
   public String getName();
 
+
 }

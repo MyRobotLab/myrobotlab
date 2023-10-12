@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodCache;
@@ -178,9 +180,9 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    */
   void setOrder(int creationCount);
 
-  String getId();
-
   String getFullName();
+
+  String getId();
 
   void loadLocalizations();
 
@@ -226,4 +228,9 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    * get all the subscriptions to this service
    */
   public Map<String, List<MRLListener>>  getNotifyList();
+
+  @JsonIgnore
+  default String getSerializedState() {
+    return CodecUtils.toJson(this);
+  }
 }

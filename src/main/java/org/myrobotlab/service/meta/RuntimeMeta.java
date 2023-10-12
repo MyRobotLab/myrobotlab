@@ -52,7 +52,16 @@ public class RuntimeMeta extends MetaData {
     addDependency("com.squareup.okhttp3", "okhttp", "3.9.0");
         
     // force correct version of netty - needed for Vertx but not for Runtime ?
-    addDependency("io.netty", "netty-all", "4.1.82.Final");    
+    addDependency("io.netty", "netty-all", "4.1.82.Final");
+
+    // Used just as a Python exe redistributable.
+    // ABSOLUTELY NO JNI/JNA IS USED
+    addDependency("org.bytedeco", "cpython-platform", "3.10.8-1.5.8");
+    addDependency("org.bytedeco", "cpython", "3.10.8-1.5.8");
+    addDependency("org.bytedeco", "javacpp", "1.5.8");
+    addDependency("org.bytedeco", "javacpp-platform", "1.5.8");
+
+//    addDependency("org.apache.commons", "commons-lang3", "3.3.2");
 
   }
 

@@ -72,7 +72,7 @@ public class Registration {
     this.typeKey = service.getTypeKey();
     // when this registration is re-broadcasted to remotes it will use this
     // serialization to init state
-    this.state = CodecUtils.toJson(service);
+    this.state = service.getSerializedState();
     // if this is a local registration - need reference to service
     this.service = service;
   }
