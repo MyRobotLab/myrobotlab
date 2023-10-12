@@ -89,7 +89,12 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
     return arm;
   }
   
+  @Deprecated /* use onMove */
   public void onMoveArm(HashMap<String, Double> map) {
+    onMove(map);
+  }
+
+  public void onMove(Map<String, Double> map) {
     moveTo(map.get("bicep"), map.get("rotate"), map.get("shoulder"), map.get("omoplate"));
   }
 
