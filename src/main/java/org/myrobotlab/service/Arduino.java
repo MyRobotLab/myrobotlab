@@ -929,7 +929,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
 
     List<BoardType> boardTypes = new ArrayList<BoardType>();
     try {
-      String b = FileIO.resourceToString("Arduino" + File.separator + "boards.txt");
+      String b = FileIO.toString(FileIO.gluePaths(getResourceDir(), "boards.txt"));
       Properties boardProps = new Properties();
       boardProps.load(new ByteArrayInputStream(b.getBytes()));
 

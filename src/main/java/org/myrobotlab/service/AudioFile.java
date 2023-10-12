@@ -557,7 +557,7 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
   }
 
   public double publishPeak(double peak) {
-    log.info("publishPeak {}", peak);
+    log.debug("publishPeak {}", peak);
     return peak;
   }
   
