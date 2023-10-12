@@ -1245,7 +1245,7 @@
     <version>2.14.0</version>
     <scope>provided</scope>
   </dependency>
-<!-- Duplicate entry for org.json-json-20090211 skipping -->
+<!-- Duplicate entry for org.json-json-20230227 skipping -->
 <!-- Duplicate entry for commons-io-commons-io-2.7 skipping -->
   <dependency>
     <groupId>org.apache.lucene</groupId>
