@@ -55,9 +55,9 @@ public abstract class Repo {
    */
   protected static String LOCATION = null;
 
-  List<Status> errors = new ArrayList<Status>();
+  protected List<Status> errors = new ArrayList<Status>();
 
-  Map<String, ServiceDependency> installedLibraries = new TreeMap<String, ServiceDependency>();
+  protected Map<String, ServiceDependency> installedLibraries = new TreeMap<String, ServiceDependency>();
 
   public String getRepoPath() {
     return LOCATION + File.separator + REPO_STATE_FILE_NAME;
@@ -360,7 +360,7 @@ public abstract class Repo {
     publishStatus(Status.info(format, args));
   }
 
-  synchronized public void install() {
+  synchronized public void install() throws Exception {
     // if a runtime exits we'll broadcast we are starting to install
     ServiceData sd = ServiceData.getLocalInstance();
     info("starting installation of %s services", sd.getServiceTypeNames().length);
@@ -368,11 +368,11 @@ public abstract class Repo {
     info("finished installing %d services", sd.getServiceTypeNames().length);
   }
 
-  synchronized public void install(String serviceType) {
+  synchronized public void install(String serviceType) throws Exception {
     install(getInstallDir(), serviceType);
   }
 
-  synchronized public void install(String location, String serviceType) {
+  synchronized public void install(String location, String serviceType) throws Exception {
 
     String[] types = null;
     if (serviceType == null) {
@@ -403,18 +403,18 @@ public abstract class Repo {
 
   abstract public void installDependency(String location, ServiceDependency serviceTypes);
 
-  abstract public void install(String location, String[] serviceTypes);
+  abstract public void install(String location, String[] serviceTypes) throws IOException;
 
-  synchronized public void install(String[] serviceTypes) {
+  synchronized public void install(String[] serviceTypes) throws Exception {
     install(getInstallDir(), serviceTypes);
   }
 
-  public void installEach() {
+  public void installEach() throws Exception {
     String workDir = String.format(String.format("libraries.ivy.services.%d", System.currentTimeMillis()));
     installEachTo(workDir);
   }
 
-  public void installEachTo(String location) {
+  public void installEachTo(String location) throws Exception {
     // if a runtime exits we'll broadcast we are starting to install
     ServiceData sd = ServiceData.getLocalInstance();
     String[] serviceNames = sd.getServiceTypeNames();
@@ -423,7 +423,7 @@ public abstract class Repo {
     info("finished installing %d services", sd.getServiceTypeNames().length);
   }
 
-  public void installTo(String location) {
+  public void installTo(String location) throws Exception {
     // if a runtime exits we'll broadcast we are starting to install
     ServiceData sd = ServiceData.getLocalInstance();
     info("starting installation of %s services", sd.getServiceTypeNames().length);
