@@ -15,22 +15,25 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
+
       - name: Dependency Test
         run: mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
+
       - name: Build and Test with Maven
         run: mvn --batch-mode -Dtest=!**/OpenCV* test -q
+
       - name: Package with Maven
         run: mvn package -DskipTests 
 
       - name: Determine Next Version
         id: next_version
         run: |
-          latest_release_tag=$(git describe --tags --abbrev=0)
+          current_version=$(cat version.txt)
           major_minor="1.1."
-          current_version="${latest_release_tag#v}"
           increment_version=$((current_version + 1))
           next_version="${major_minor}${increment_version}"
-          echo "::set-output name=next_version::${next_version}"        
+          echo "$next_version" > version.txt
+          echo "next_version=${next_version}" >> $GITHUB_OUTPUT        
 
       - name: Create Release
         id: create_release
