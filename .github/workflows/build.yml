@@ -25,15 +25,21 @@ jobs:
       - name: Package with Maven
         run: mvn package -DskipTests 
 
-      - name: Determine Next Version
-        id: next_version
-        run: |
-          current_version=$(cat version.txt)
-          major_minor="1.1."
-          increment_version=$((current_version + 1))
-          next_version="${major_minor}${increment_version}"
-          echo "$next_version" > version.txt
-          echo "next_version=${next_version}" >> $GITHUB_OUTPUT        
+      # - name: Determine Next Version
+      #   id: next_version
+      #   run: |
+      #     current_version=$(cat version.txt)
+      #     major_minor="1.1."
+      #     increment_version=$((current_version + 1))
+      #     next_version="${major_minor}${increment_version}"
+      #     echo "$next_version" > version.txt
+      #     echo "next_version=${next_version}" >> $GITHUB_OUTPUT        
+      - name: Get next version
+        uses: reecetech/version-increment@2023.9.3
+        id: version
+        with:
+          scheme: semver
+          increment: patch      
 
       - name: Create Release
         id: create_release
@@ -41,8 +47,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.next_version.outputs.next_version }}
-          release_name: Release ${{ steps.next_version.outputs.next_version }}
+          tag_name: ${{ steps.next_version.outputs.version }}
+          release_name: Release ${{ steps.next_version.outputs.version }}
           draft: false
           prerelease: false  
           
