@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -84,19 +85,19 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   boolean isLocal = true;
 
-  public Set<String> onCreated = new HashSet<>();
+  public Set<String> onCreated = ConcurrentHashMap.newKeySet();
 
   public Map<String, Registration> onRegistered = new HashMap<String, Registration>();
 
-  public Set<String> onStarted = new HashSet<>();
+  public Set<String> onStarted = ConcurrentHashMap.newKeySet();
 
-  public Set<String> onReleased = new HashSet<>();
+  public Set<String> onReleased = ConcurrentHashMap.newKeySet();
 
-  public Set<String> onStopped = new HashSet<>();
+  public Set<String> onStopped = ConcurrentHashMap.newKeySet();
 
   public List<Long> longs = new ArrayList<>();
 
-  public Set<PinData[]> pinSet = new HashSet<>();
+  public Set<PinData[]> pinSet = ConcurrentHashMap.newKeySet();
 
   public String[] activePins = null;
 
