@@ -21,16 +21,28 @@ jobs:
         run: mvn --batch-mode -Dtest=!**/OpenCV* test -q
       - name: Package with Maven
         run: mvn package -DskipTests 
+
+      - name: Determine Next Version
+        id: next_version
+        run: |
+          latest_release_tag=$(git describe --tags --abbrev=0)
+          major_minor="1.1."
+          current_version="${latest_release_tag#v}"
+          increment_version=$((current_version + 1))
+          next_version="${major_minor}${increment_version}"
+          echo "::set-output name=next_version::${next_version}"        
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ steps.next_version.outputs.next_version }}
+          release_name: Release ${{ steps.next_version.outputs.next_version }}
           draft: false
-          prerelease: false        
+          prerelease: false  
+          
       - name: Upload Release Artifacts
         uses: actions/upload-release-asset@v1
         with:
