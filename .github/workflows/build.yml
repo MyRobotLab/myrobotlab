@@ -17,5 +17,24 @@ jobs:
           distribution: 'adopt'
       - name: Dependency Test
         run: mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
-      - name: Build with Maven
+      - name: Build and Test with Maven
         run: mvn --batch-mode -Dtest=!**/OpenCV* test -q
+      - name: Package with Maven
+        run: mvn package -DskipTests 
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false        
+      - name: Upload Release Artifacts
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./target/myrobotlab.zip
+          asset_name: myrobotlab.zip
+          asset_content_type: application/zip
