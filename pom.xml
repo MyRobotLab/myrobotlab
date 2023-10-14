@@ -68,7 +68,6 @@
   <name>MyRobotLab</name>
   <description>Open Source Creative Machine Control</description>
   <properties>
-      <!-- TODO all manually set manifest properties here e.g. <build.number>${env.BUILD_NUMBER} - for clarity !!!! -->
       <dependency.locations.enabled>false</dependency.locations.enabled>
       <!-- begin env vars -->
       <!-- 
@@ -81,7 +80,6 @@
       <!-- force overriding property at command line, use ${maven.build.timestamp}-->
       <timestamp>${maven.build.timestamp}</timestamp>
       <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>      
-      <build.number>${timestamp}</build.number>
       <version>${version}</version>   
       <GitBranch>${git.branch}</GitBranch>
       <username>${NODE_NAME}</username>      
@@ -1814,47 +1812,6 @@
             </execution>
         </executions>
       </plugin>
-
-      <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>properties-maven-plugin</artifactId>        
-          <executions>
-            <execution>
-              <phase>initialize</phase>
-              <goals>
-                <goal>read-project-properties</goal>
-              </goals>
-              <configuration>
-                <files>
-                  <file>build.properties</file>
-                </files>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-  
-      <!-- removed because now we generate serviceData.json during runtime plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.6.0</version>
-        <executions>
-          <execution>
-            <id>service-data-execution</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>java</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <mainClass>org.myrobotlab.framework.repo.ServiceData</mainClass>
-          <classpathScope>test</classpathScope>
-          <arguments>
-                  <argument>target/classes/resource/framework</argument>
-                </arguments>
-        </configuration>
-      </plugin -->
-    
       <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -1884,7 +1841,7 @@
                                           <Major-Version>${version}</Major-Version>
                                           <Implementation-Version>${version}</Implementation-Version>                               
               
-                        <Build-Version>${build.number}</Build-Version>
+                        <Build-Version>${version}</Build-Version>
                         <Build-Time>${maven.build.timestamp}</Build-Time>
                         <Build-Host>${agent.name}</Build-Host>
                         <Build-User>${user.name}</Build-User>

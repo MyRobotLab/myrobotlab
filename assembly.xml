@@ -14,7 +14,7 @@
                 <include>myrobotlab.sh</include>
             </includes>
             <directory>./</directory>
-            <outputDirectory>myrobotlab-${version.prefix}${build.number}</outputDirectory>
+            <outputDirectory>myrobotlab-${version}</outputDirectory>
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
@@ -22,7 +22,7 @@
                 <include>myrobotlab.jar</include>
             </includes>
             <directory>target</directory>
-            <outputDirectory>myrobotlab-${version.prefix}${build.number}</outputDirectory>
+            <outputDirectory>myrobotlab-${version}</outputDirectory>
         </fileSet>
     </fileSets>
 </assembly>
