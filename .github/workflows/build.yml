@@ -43,31 +43,12 @@ jobs:
           increment: patch      
 
       - name: Release
+        id: release
         uses: softprops/action-gh-release@v1
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
           files: ./target/myrobotlab.zip
+          name: "${{ steps.version.outputs.version }} Nixie"
           tag_name: ${{ steps.version.outputs.version }}
-
-      # - name: Create Release
-      #   id: create_release
-      #   uses: actions/create-release@v1
-      #   env:
-      #     # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} default expires
-      #     GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-      #   with:
-      #     tag_name: ${{ steps.version.outputs.version }}
-      #     release_name: Release ${{ steps.version.outputs.version }}
-      #     draft: false
-      #     prerelease: false  
-          
-      # - name: Upload Release Artifacts
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} default expires
-      #     GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: ./target/myrobotlab.zip
-      #     asset_name: myrobotlab.zip
-      #     asset_content_type: application/zip
+          generate_release_notes: true
+          body_path: 
