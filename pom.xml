@@ -78,13 +78,11 @@
         maven or jenkins can do this
         
        -->
-      <!-- from jenkins env vars -->
-      <version.prefix>1.1.</version.prefix>
       <!-- force overriding property at command line, use ${maven.build.timestamp}-->
       <timestamp>${maven.build.timestamp}</timestamp>
       <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>      
       <build.number>${timestamp}</build.number>
-      <version>${version.prefix}${build.number}</version>   
+      <version>${version}</version>   
       <GitBranch>${git.branch}</GitBranch>
       <username>${NODE_NAME}</username>      
       <platform>${NODE_LABELS}</platform>      
