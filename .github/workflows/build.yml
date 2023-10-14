@@ -33,7 +33,7 @@ jobs:
       - name: Fake Build
         run: |
           mkdir -p target
-          echo ${{ github.sha }} > myrobotlab.zip
+          echo ${{ github.sha }} > ./target/myrobotlab.zip
 
       - name: Get next version
         uses: reecetech/version-increment@2023.9.3
