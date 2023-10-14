@@ -51,4 +51,4 @@ jobs:
           name: "${{ steps.version.outputs.version }} Nixie"
           tag_name: ${{ steps.version.outputs.version }}
           generate_release_notes: true
-          body_path: 
+          body_path: ./release-template.md

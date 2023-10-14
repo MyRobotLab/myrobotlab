@@ -4,12 +4,13 @@ Open Source Framework for Robotics and Creative Machine Control
 
   *You know, for robots!*
 
-
 * Project Website http://myrobotlab.org 
 
 * Project Discord https://discord.gg/AfScp5x8r5
 
 * [JavDocs](https://build.myrobotlab.org:8443/job/myrobotlab/job/develop/$build/artifact/target/site/apidocs/org/myrobotlab/service/package-summary.html)
+
+* To start MyRobotLab, download the latest 'myrobotlab.zip', extract the contents, and then execute the appropriate startup script for your operating system. For example, on Windows, double click on the myrobotlab.bat file.  On Linux or Mac, execute the myrobotlab.sh script.
 
 ## Base Requirements
 
