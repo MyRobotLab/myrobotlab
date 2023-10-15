@@ -16,6 +16,8 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
+          # NEATO ! CACHE !!!
+          cache: 'maven'
 
       - name: Dependency Test
         run: mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
