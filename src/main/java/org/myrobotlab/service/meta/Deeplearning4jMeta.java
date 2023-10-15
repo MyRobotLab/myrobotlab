@@ -36,7 +36,7 @@ public class Deeplearning4jMeta extends MetaData {
     addDependency("org.deeplearning4j", "deeplearning4j-modelimport", dl4jVersion);
 
     // the miniXCEPTION network / model for emotion detection on detected faces
-    addDependency("miniXCEPTION", "miniXCEPTION", "0.0", "zip");
+    addDependency("miniXCEPTION", "minixception", "0.0", "zip");
 
     if (!cudaEnabled) {
       // By default support native CPU execution.

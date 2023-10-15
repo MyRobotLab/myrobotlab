@@ -15,7 +15,7 @@ public class ChessGameMeta extends MetaData {
    */
   public ChessGameMeta() {
     addCategory("game");
-    addDependency("ChessBoard", "ChessBoard", "1.0.0");
+    addDependency("ChessBoard", "chessboard", "1.0.0");
     addDescription("Would you like to play a game?");
   }
 }

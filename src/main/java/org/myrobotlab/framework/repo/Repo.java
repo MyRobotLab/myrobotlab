@@ -140,40 +140,18 @@ public abstract class Repo {
       // FIXME reduce down to maven central bintray & repo.myrobotlab.org
       remotes = new ArrayList<RemoteRepo>();
       remotes.add(new RemoteRepo("central", "https://repo.maven.apache.org/maven2", "the mother load"));
-      // remotes.add(new RemoteRepo("bintray", "https://jcenter.bintray.com",
-      // "the big kahuna"));
-      // remotes.add(new RemoteRepo("bintray2", "https://dl.bintray.com", "more
-      // big kahuna"));
+      // old repo in AWS EC2
+      // remotes.add(new RemoteRepo("myrobotlab", "https://repo.myrobotlab.org/artifactory/myrobotlab", "all other mrl deps"));
+      
+      // mrl repo for all other missing deps - requires personal access token to read (what a pain)
+      // created a read only package token for this purpose
       remotes.add(new RemoteRepo("myrobotlab", "https://repo.myrobotlab.org/artifactory/myrobotlab", "all other mrl deps"));
+      
       remotes.add(new RemoteRepo("sarxos", "https://oss.sonatype.org/content/repositories/snapshots", "for sarxos webcam"));
 
-      // DO NOT INCLUDE - messed up repo !
-      // remotes.add(new RemoteRepo("dcm4che", "http://www.dcm4che.org/maven2",
-      // "for
-      // jai_imageio")); - do not use
       remotes.add(new RemoteRepo("eclipse-release", "https://repo.eclipse.org/content/groups/releases"));
 
-      // remotes.add(new RemoteRepo("jmonkey",
-      // "https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine", "jmonkey
-      // simulator"));
-
       remotes.add(new RemoteRepo("oss-snapshots-repo", "https://oss.sonatype.org/content/groups/public", "sphinx"));
-      // remotes.add(new RemoteRepo("alfresco",
-      // "https://artifacts.alfresco.com/nexus/content/repositories/public",
-      // "swinggui mxgraph"));
-      // remotes.add(new RemoteRepo("talend",
-      // "https://nexus.talanlabs.com/content/repositories/releases/", "swinggui
-      // mxgraph"));
-
-      // probably safe to drop this one - maven central should have it
-      // remotes.add(new RemoteRepo("marytts", "http://mary.dfki.de/repo", "some
-      // marytts voices"));
-
-      // This one is needed because of a transient dependency of solr
-      // org.restlet.jee .. not sure where
-      // remotes.add(new RemoteRepo("maven-restlet",
-      // "https://maven.restlet.talend.com", "Public online Restlet
-      // repository"));
 
       // This is the repo for the Java Discord API for the Discord Bot service
       // lives.
