@@ -4,8 +4,6 @@ name: Java CI
 
 on:
   push:
-    branches:
-      - develop
 
 jobs:
   build:
@@ -28,6 +26,7 @@ jobs:
         run: mvn --batch-mode -Dtest=!**/OpenCV* test -q
 
       - name: Get next version
+        if: github.ref == 'refs/heads/develop'
         uses: reecetech/version-increment@2023.9.3
         id: version
         with:
@@ -35,6 +34,7 @@ jobs:
           increment: patch      
 
       - name: Package with Maven
+        if: github.ref == 'refs/heads/develop'
         run: "mvn package -DskipTests -Dversion=${{ steps.version.outputs.version }} -q"
 
       # - name: Fake Build
@@ -43,6 +43,7 @@ jobs:
       #     echo ${{ github.sha }} > ./target/myrobotlab.zip
 
       - name: Release
+        if: github.ref == 'refs/heads/develop'
         id: release
         uses: softprops/action-gh-release@v1
         with:

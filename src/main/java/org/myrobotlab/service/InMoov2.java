@@ -189,7 +189,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   protected String voiceSelected;
 
-  protected boolean wasMutedBeforeBoot = false;
 
   public InMoov2(String n, String id) {
     super(n, id);
