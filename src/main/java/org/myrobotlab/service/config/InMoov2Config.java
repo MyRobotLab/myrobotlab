@@ -212,6 +212,7 @@ public class InMoov2Config extends ServiceConfig {
     }
 
     mouthControl.mouth = i01Name + ".mouth";
+    
 
     ProgramABConfig chatBot = (ProgramABConfig) plan.get(getPeerName("chatBot"));
     Runtime runtime = Runtime.getInstance();
@@ -254,13 +255,6 @@ public class InMoov2Config extends ServiceConfig {
     MarySpeechConfig mouth = (MarySpeechConfig) plan.get(getPeerName("mouth"));
     mouth.voice = "Mark";
     mouth.speechRecognizers = new String[] { name + ".ear" };
-
-    // == Peer - servoMixer =============================
-    // setup name references to different services
-    ServoMixerConfig servoMixer = (ServoMixerConfig) plan.get(getPeerName("servoMixer"));
-    servoMixer.listeners = new ArrayList<>();
-    servoMixer.listeners.add(new Listener("publishText", name + ".mouth", "onText"));
-    //servoMixer.listeners.add(new Listener("publishText", name + ".chatBot", "onText"));
 
     // == Peer - ear =============================
     // setup name references to different services
@@ -540,6 +534,13 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishFlash", getPeerName("neoPixel"), "onLedDisplay"));
     listeners.add(new Listener("publishEvent", getPeerName("chatBot"), "getResponse"));
     listeners.add(new Listener("publishPlayAudioFile", getPeerName("audioPlayer")));
+    
+    
+    // service --to--> service    
+    ServoMixerConfig servoMixer = (ServoMixerConfig) plan.get(getPeerName("servoMixer"));
+    servoMixer.listeners = new ArrayList<>();
+    servoMixer.listeners.add(new Listener("publishText", name + ".mouth", "onText"));
+
     
     
     // remove the auto-added starts in the plan's runtime RuntimConfig.registry

@@ -1,7 +1,5 @@
 name: Java CI
 
-#on: [push]
-
 on:
   push:
 
@@ -26,7 +24,6 @@ jobs:
         run: mvn --batch-mode -Dtest=!**/OpenCV* test -q
 
       - name: Get next version
-        if: github.ref == 'refs/heads/develop'
         uses: reecetech/version-increment@2023.9.3
         id: version
         with:
@@ -34,13 +31,25 @@ jobs:
           increment: patch      
 
       - name: Package with Maven
-        if: github.ref == 'refs/heads/develop'
         run: "mvn package -DskipTests -Dversion=${{ steps.version.outputs.version }} -q"
 
       # - name: Fake Build
       #   run: |
       #     mkdir -p target
       #     echo ${{ github.sha }} > ./target/myrobotlab.zip
+
+      - name: Pre Release
+        if: github.ref != 'refs/heads/develop'
+        id: prerelease
+        uses: softprops/action-gh-release@v1
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+          prerelease: true
+          files: ./target/myrobotlab.zip
+          name: "Pre ${{ steps.version.outputs.version }} Nixie"
+          tag_name: ${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          body_path: ./release-template.md
 
       - name: Release
         if: github.ref == 'refs/heads/develop'
@@ -53,3 +62,4 @@ jobs:
           tag_name: ${{ steps.version.outputs.version }}
           generate_release_notes: true
           body_path: ./release-template.md
+
