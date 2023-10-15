@@ -520,13 +520,9 @@ public class IvyWrapper extends Repo implements Serializable {
         // IvyPatternHelper.substitute("[originalname].[ext]",
         // artifact);
 
-        ArtifactDownloadReport[] artifacts = report.getAllArtifactsReports();
-        for (int i = 0; i < artifacts.length; ++i) {
-          ArtifactDownloadReport ar = artifacts[i];
-          Artifact artifact = ar.getArtifact();
-          // String filename =
-          // IvyPatternHelper.substitute("[originalname].[ext]",
-          // artifact);
+        File file = ar.getLocalFile();
+        String filename = file.getAbsoluteFile().getAbsolutePath();
+        log.info("{}", filename);        
 
         if ("zip".equalsIgnoreCase(artifact.getExt())) {
           info("unzipping %s", filename);

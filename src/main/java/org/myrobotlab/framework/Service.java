@@ -725,8 +725,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   }
 
   @Override
-  public void addListener(String topicMethod, String callbackName) {
-    addListener(topicMethod, callbackName, CodecUtils.getCallbackTopicName(topicMethod));
+  public void addListener(String localMethod, String remoteName) {
+    addListener(localMethod, remoteName, CodecUtils.getCallbackTopicName(localMethod));
   }
 
   /**
@@ -734,18 +734,18 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * "subscribe" from a different service FIXME !! - implement with HashMap or
    * HashSet .. WHY ArrayList ???
    * 
-   * @param topicMethod
+   * @param localMethod
    *          - method when called, it's return will be sent to the
-   *          callbackName/calbackMethod
-   * @param callbackName
+   *          remoteName.remoteMethod
+   * @param remoteName
    *          - name of the service to send return message to
-   * @param callbackMethod
+   * @param remoteMethod
    *          - name of the method to send return data to
    */
   @Override
-  public void addListener(String topicMethod, String callbackName, String callbackMethod) {
-    callbackName = CodecUtils.getFullName(callbackName);
-    MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
+  public void addListener(String localMethod, String remoteName, String remoteMethod) {
+    remoteName = CodecUtils.getFullName(remoteName);
+    MRLListener listener = new MRLListener(localMethod, remoteName, remoteMethod);
     if (outbox.notifyList.containsKey(listener.topicMethod)) {
       // iterate through all looking for duplicate
       boolean found = false;
