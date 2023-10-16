@@ -149,6 +149,7 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
   @Override /* FIXME this is the one and probably "only" relevant method for Gateway - perhaps a handle(Connection c) */
   public void sendRemote(Message msg) throws Exception {
     log.info("sendRemote {}", msg.toString());
+    // FIXME MUST BE DIRECT THREAD FROM BROADCAST NOT OUTBOX !!!
     msg.addHop(getId());
     Map<String, Connection> clients = getClients();
     for(Connection c: clients.values()) {
@@ -166,4 +167,8 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
   @Override
   public boolean isLocal(Message msg) {
     return Runtime.getInstance().isLocal(msg);  }
+  
+  public io.vertx.core.Vertx getVertx() {
+    return vertx;
+  }
 }
