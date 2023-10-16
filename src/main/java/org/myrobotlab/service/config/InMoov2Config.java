@@ -536,11 +536,11 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishPlayAudioFile", getPeerName("audioPlayer")));
     
     
-    // service --to--> service    
+    // service --to--> service
     ServoMixerConfig servoMixer = (ServoMixerConfig) plan.get(getPeerName("servoMixer"));
     servoMixer.listeners = new ArrayList<>();
-    servoMixer.listeners.add(new Listener("publishText", name + ".mouth", "onText"));
-
+    servoMixer.listeners.add(new Listener("publishText", getPeerName("mouth"), "onText"));
+    
     
     
     // remove the auto-added starts in the plan's runtime RuntimConfig.registry
