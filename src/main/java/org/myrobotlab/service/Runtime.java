@@ -1532,6 +1532,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       @Override
       public void run() {
         try {
+          // r.getRepo().setKey(Runtime.getSecurity().getRepoKey());
           if (serviceType == null) {
             r.getRepo().install();
           } else {
