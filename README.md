@@ -8,7 +8,7 @@ Open Source Framework for Robotics and Creative Machine Control
 
 * Project Website http://myrobotlab.org 
 * Project Discord https://discord.gg/AfScp5x8r5
-* Latest Build    [Nixie 1.1.(Latest)](http://build.myrobotlab.org:8080/job/myrobotlab/job/develop/lastSuccessfulBuild/artifact/target/myrobotlab.zip)
+* Latest Build    [Nixie 1.1.(Latest)](https://github.com/MyRobotLab/myrobotlab/releases/latest/download/myrobotlab.zip)
 * Latest Javadocs [Javdocs](http://build.myrobotlab.org:8080/job/myrobotlab/job/develop/lastSuccessfulBuild/artifact/target/site/apidocs/org/myrobotlab/service/package-summary.html)
 
 ## Base Requirements
@@ -18,9 +18,7 @@ You will need Java 11 or newer.  If you are only running MyRobotLab you need the
 ## Download the myrobotlab.jar
 Download
 
-latest [Nixie 1.1.X](http://build.myrobotlab.org:8080/job/myrobotlab/job/develop/lastSuccessfulBuild/artifact/target/myrobotlab.zip)
-
-stable [Manticore 1.0.2693](https://github.com/MyRobotLab/myrobotlab/releases/tag/1.0.2693)
+latest [Nixie 1.1.X](https://github.com/MyRobotLab/myrobotlab/releases/latest/download/myrobotlab.zip)
 
 ## Running MyRobotLab
 
@@ -99,26 +97,25 @@ Enjoy the code review, address issues and concern in the code review
 Reviewer merges pull request to develop.
 Reviewer deletes branch.
 
-
 The following config should be useful to work directly on WebGui UI and
-InMoov2 UI if the repos are checked out at the same level
+InMoov2 UI if the repos are submoduled under 
+src/main/resources/resource/InMoov2,
+src/main/resources/resource/ProgramAB
 ```yml
 !!org.myrobotlab.service.config.WebGuiConfig
-autoStartBrowser: true
+autoStartBrowser: false
 enableMdns: false
 listeners: null
 peers: null
 port: 8888
 resources:
   # these are the only two in usual runtime
-- ./resource/WebGui/app
-- ./resource
+  # - ./resource/WebGui/app
+  # - ./resource
   # the rest are useful when doing dev
-- ../InMoov2/resource/WebGui/app
 - ./src/main/resources/resource/WebGui/app
-- ./src/main/resources/resource/WebGui
+- ./src/main/resources/resource/InMoov2/peers/WebGui/app
 - ./src/main/resources/resource
-- ./src/main/resources
 type: WebGui
 ```
 ```yml
@@ -134,7 +131,7 @@ registry:
 - security
 - webgui
 - python
-resource: src/main/resources/resource
+resource: ./src/main/resources/resource
 type: Runtime
 virtual: false
 ```
