@@ -1549,13 +1549,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   }
   
   /**
-   * simple heartbeat clock of InMoov2 to keep things moving
-   */
-  public void publishHeartbeat() {
-    log.info("publishInactivity");
-  }
-
-  /**
    * A more extensible interface point than publishEvent FIXME - create
    * interface for this
    * 
