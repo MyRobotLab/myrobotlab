@@ -1498,12 +1498,11 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return d;
   }
 
-  /** FIXME with checking status, healthbeat, and fire events to the FSM.
-   * Checks battery level and sends a heartbeat flash on publishHeartbeat
-   * and onHeartbeat at a regular interval
-   * */
+  /**
+   * simple heartbeat clock of InMoov2 to keep things moving
+   */
   public void publishHeartbeat() {
-    log.info("publishHeartbeat");
+    log.info("publishInactivity");
   }
 
   public void publishBoot() {
