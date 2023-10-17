@@ -1498,11 +1498,13 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return d;
   }
 
-  /**
-   * simple heartbeat clock of InMoov2 to keep things moving
-   */
+  /** 
+   * A heartbeat that continues to check status, and fire events to the FSM.
+   * Checks battery, flashes leds and processes all the configured checks in
+   * onHeartbeat at a regular interval
+   * */
   public void publishHeartbeat() {
-    log.info("publishInactivity");
+    log.info("publishHeartbeat");
   }
 
   public void publishBoot() {
