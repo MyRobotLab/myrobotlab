@@ -8,7 +8,7 @@ Open Source Framework for Robotics and Creative Machine Control
 
 * Project Website http://myrobotlab.org 
 * Project Discord https://discord.gg/AfScp5x8r5
-* Latest Build    [Nixie 1.1.(Latest)](http://build.myrobotlab.org:8080/job/myrobotlab/job/develop/lastSuccessfulBuild/artifact/target/myrobotlab.zip)
+* Latest Build    [Nixie 1.1.(Latest)](https://github.com/MyRobotLab/myrobotlab/releases/latest/download/myrobotlab.zip)
 * Latest Javadocs [Javdocs](http://build.myrobotlab.org:8080/job/myrobotlab/job/develop/lastSuccessfulBuild/artifact/target/site/apidocs/org/myrobotlab/service/package-summary.html)
 
 ## Base Requirements
@@ -18,9 +18,7 @@ You will need Java 11 or newer.  If you are only running MyRobotLab you need the
 ## Download the myrobotlab.jar
 Download
 
-latest [Nixie 1.1.X](http://build.myrobotlab.org:8080/job/myrobotlab/job/develop/lastSuccessfulBuild/artifact/target/myrobotlab.zip)
-
-stable [Manticore 1.0.2693](https://github.com/MyRobotLab/myrobotlab/releases/tag/1.0.2693)
+latest [Nixie 1.1.X](https://github.com/MyRobotLab/myrobotlab/releases/latest/download/myrobotlab.zip)
 
 ## Running MyRobotLab
 
