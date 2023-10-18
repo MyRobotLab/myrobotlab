@@ -1737,6 +1737,14 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     addTask(1000, "publishHeartbeat");
   }
 
+  public void startCvFlipPicture() {
+    opencv.addFilter("Flip");
+  }
+
+  public void stopCvFlipPicture() {
+    opencv.removeFilter("Flip");
+  }
+
   // TODO - general objective "might" be to reduce peers down to something
   // that does not need a reference - where type can be switched before creation
   // and the only thing needed is pubs/subs that are not handled in abstracts
