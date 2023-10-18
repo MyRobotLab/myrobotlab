@@ -926,7 +926,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     // FIXME flash on config.flashOnBoot
     invoke("publishFlash");
     String botState = chatBot.getPredicate("botState");
-    if ("sleeping".equals("botState")) {
+    if ("sleeping".equals(botState)) {
       invoke("publishEvent", "WAKE");
     }
   }
