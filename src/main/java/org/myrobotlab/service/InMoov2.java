@@ -140,11 +140,11 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   protected String voiceSelected;
 
-
   public InMoov2(String n, String id) {
     super(n, id);
   }
 
+  // should be removed in favor of general listeners
   public void addTextListener(TextListener service) {
     // CORRECT WAY ! - no direct reference - just use the name in a subscription
     addListener("publishText", service.getName());
@@ -407,7 +407,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     subscribe("python", "publishStatus", this.getName(), "onGestureStatus");
     startedGesture(gesture);
     lastGestureExecuted = gesture;
-    Python python = (Python)Runtime.getService("python");
+    Python python = (Python) Runtime.getService("python");
     if (python == null) {
       error("python service not started");
       return null;
@@ -773,19 +773,19 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     moveHead((double) neck, (double) rothead, null, null, null, (double) rollNeck);
   }
 
-  public void moveHeadBlocking(Double neck, Double rothead)  {
+  public void moveHeadBlocking(Double neck, Double rothead) {
     moveHeadBlocking(neck, rothead, null);
   }
 
-  public void moveHeadBlocking(Double neck, Double rothead, Double rollNeck)  {
+  public void moveHeadBlocking(Double neck, Double rothead, Double rollNeck) {
     moveHeadBlocking(neck, rothead, null, null, null, rollNeck);
   }
 
-  public void moveHeadBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw)  {
+  public void moveHeadBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw) {
     moveHeadBlocking(neck, rothead, eyeX, eyeY, jaw, null);
   }
 
-  public void moveHeadBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck)  {
+  public void moveHeadBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
     try {
       sendBlocking(getPeerName("head"), "moveToBlocking", neck, rothead, eyeX, eyeY, jaw, rollNeck);
     } catch (Exception e) {
@@ -866,7 +866,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       error("I cannot execute %s, please check logs", lastGestureExecuted);
     }
     finishedGesture(lastGestureExecuted);
-    
+
     unsubscribe("python", "publishStatus", this.getName(), "onGestureStatus");
   }
 
@@ -994,10 +994,10 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       Runtime runtime = Runtime.getInstance();
       log.info("onStarted {}", name);
 
-//    BAD IDEA - better to ask for a system report or an error report
-//      if (runtime.isProcessingConfig()) {
-//        invoke("publishEvent", "CONFIG STARTED");
-//      }
+      // BAD IDEA - better to ask for a system report or an error report
+      // if (runtime.isProcessingConfig()) {
+      // invoke("publishEvent", "CONFIG STARTED");
+      // }
 
       String peerKey = getPeerKey(name);
       if (peerKey == null) {
@@ -1229,8 +1229,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   }
 
   /**
-   * A more extensible interface point than publishEvent
-   * FIXME - create interface for this
+   * A more extensible interface point than publishEvent FIXME - create
+   * interface for this
    * 
    * @param msg
    * @return
@@ -1561,7 +1561,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     setTorsoSpeed((double) topStom, (double) midStom, (double) lowStom);
   }
 
-  @Deprecated
+  @Deprecated /* use setTorsoSpeed */
   public void setTorsoVelocity(Double topStom, Double midStom, Double lowStom) {
     setTorsoSpeed(topStom, midStom, lowStom);
   }
@@ -1814,8 +1814,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     subscribe("runtime", "shutdown");
     // power up loopback subscription
     addListener(getName(), "powerUp");
-    
-    
+
     subscribe("runtime", "publishConfigList");
     if (runtime.isProcessingConfig()) {
       invoke("publishEvent", "configStarted");
@@ -1923,7 +1922,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     sendToPeer("torso", "waitTargetPos");
   }
 
-
   public static void main(String[] args) {
     try {
 
@@ -1934,19 +1932,25 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
       // Runtime.startConfig("pr-1213-1");
       
-      Runtime.main(new String[] {"--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python"});
-      
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
-
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
       // webgui.setPort(8888);
       webgui.startService();
+
+      InMoov2 i01 = (InMoov2)Runtime.start("i01","InMoov2");
+      i01.setPeerConfigValue("opencv", "flip", true);
+      // i01.savePeerConfig("", null);
+      
+      // Runtime.startConfig("default");
+
+      // Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
 
       Runtime.start("python", "Python");
       // Runtime.start("ros", "Ros");
@@ -1958,7 +1962,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
       // Polly polly = (Polly)Runtime.start("i01.mouth", "Polly");
       // i01 = (InMoov2) Runtime.start("i01", "InMoov2");
-
 
       // polly.speakBlocking("Hi, to be or not to be that is the question,
       // wheather to take arms against a see of trouble, and by aposing them end
@@ -1999,14 +2002,15 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
       random.save();
 
-//      i01.startChatBot();
-//
-//      i01.startAll("COM3", "COM4");
+      // i01.startChatBot();
+      //
+      // i01.startAll("COM3", "COM4");
       Runtime.start("python", "Python");
 
     } catch (Exception e) {
       log.error("main threw", e);
     }
   }
+
 
 }

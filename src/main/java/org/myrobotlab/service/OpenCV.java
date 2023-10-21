@@ -1967,6 +1967,19 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
     }
   }
 
+  /**
+   * flip the video display vertically
+   * @param toFlip
+   */
+  public void flip(boolean toFlip) {
+    config.flip = toFlip;
+    if (config.flip) {      
+      addFilter("Flip");
+    } else {
+      removeFilter("Flip");
+    }
+  }
+
   @Override
   public void disableFilter(String name) {
     OpenCVFilter f = filters.get(name);
@@ -2062,6 +2075,8 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
         // TODO: better configuration of the filter when it's added.
       }
     }
+    
+    flip(c.flip);
 
     if (c.capturing) {
       capture();
