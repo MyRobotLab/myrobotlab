@@ -4294,8 +4294,7 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
    */
   static public void clearPlan() {
     Runtime runtime = Runtime.getInstance();
-    // fixes concurrent modification
-    runtime.masterPlan = new Plan("runtime");
+    runtime.masterPlan.clear();
     runtime.masterPlan.put("runtime", new RuntimeConfig());
     // unset config path
     runtime.configName = null;
