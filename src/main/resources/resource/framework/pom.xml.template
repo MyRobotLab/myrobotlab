@@ -13,6 +13,9 @@
     # fast build
     mvn -DskipTests package -o 
 
+    # execute
+    mvn exec:java -Dexec.mainClass=org.myrobotlab.service.Runtime -Dexec.args="-s webgui WebGui intro Intro python Python"
+
     # specific test
     mvn test -Dtest="org.myrobotlab.service.WebGuiTest#postTest"  
 

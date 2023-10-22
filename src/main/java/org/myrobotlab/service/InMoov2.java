@@ -189,7 +189,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   protected String voiceSelected;
 
-
   public InMoov2(String n, String id) {
     super(n, id);
 
@@ -227,6 +226,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   }
 
+  // should be removed in favor of general listeners
   public void addTextListener(TextListener service) {
     // CORRECT WAY ! - no direct reference - just use the name in a subscription
     addListener("publishText", service.getName());
@@ -1868,7 +1868,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     setTorsoSpeed((double) topStom, (double) midStom, (double) lowStom);
   }
 
-  @Deprecated
+  @Deprecated /* use setTorsoSpeed */
   public void setTorsoVelocity(Double topStom, Double midStom, Double lowStom) {
     setTorsoSpeed(topStom, midStom, lowStom);
   }
@@ -2363,5 +2363,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       }
     }
   }
+
 
 }

@@ -21,8 +21,7 @@ jobs:
 
       - name: Dependency Test
         run: mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
-
-      - name: Build and Test with Maven
+      - name: Build with Maven
         run: mvn --batch-mode -Dtest=!**/OpenCV* test -q
 
       - name: Get next version

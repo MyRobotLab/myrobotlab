@@ -132,6 +132,10 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             _self.updateState(data)
             $scope.$apply()
             break
+        case 'onPlan':
+            $scope.plan = data
+            $scope.$apply()
+            break
         case 'onLocalServices':
             $scope.registry = data
             //  $scope.$apply()
@@ -410,6 +414,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.subscribe("publishStatus")
     msg.subscribe('publishConfigList')
     msg.subscribe('publishInterfaceToNames')
+    // msg.subscribe("getPlan")
 
     //msg.send("getLocalServices")
     msg.send("getStartYml")
@@ -419,6 +424,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.send("getLocales")
     msg.send("publishInterfaceToNames")
     msg.send("getConfigName")
+    // msg.send("getPlan")
 
     // msg.send("getHosts")
     msg.subscribe(this)

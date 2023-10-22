@@ -85,11 +85,9 @@ public class InMoov2Config extends ServiceConfig {
   public boolean neoPixelErrorRed = true;
 
   public boolean neoPixelFlashWhenSpeaking = true;
-
-  public boolean openCVFaceRecognizerActivated = true;
-
-  public boolean openCVFlipPicture = false;
-
+  
+  public boolean openCVFaceRecognizerActivated=true;
+    
   public boolean pirEnableTracking = false;
 
   public boolean pirOnFlash = true;

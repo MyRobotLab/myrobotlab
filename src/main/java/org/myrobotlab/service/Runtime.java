@@ -139,7 +139,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * all these requests.
    */
   @Deprecated /* use the filesystem only no memory plan */
-  transient Plan masterPlan = new Plan("runtime");
+  protected final Plan masterPlan = new Plan("runtime");
 
   /**
    * thread for non-blocking install of services
@@ -2627,6 +2627,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       }
 
       Runtime.load(name, type);
+      Runtime.savePlan(null);
       // FIXME - does some order need to be maintained
       Map<String, ServiceInterface> services = createServicesFromPlan(Runtime.getPlan(), null, name);
 
@@ -4759,6 +4760,16 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
 
     return plan;
   }
+  
+  /**
+   * read a service's configuration, in the context
+   * of current config set name or default
+   * @param name
+   * @return
+   */
+  public ServiceConfig readServiceConfig(String name) {
+    return readServiceConfig(null, name);
+  }
 
   /**
    *
@@ -4799,19 +4810,6 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
     return name;
   }
 
-  // @Override
-  // public ServiceConfig getConfig() {
-  // RuntimeConfig config = (RuntimeConfig)super.getConfig();
-  // List<org.myrobotlab.service.config.ServiceConfig.Listener> listeners = new
-  // ArrayList
-  // for (org.myrobotlab.service.config.ServiceConfig.Listener listener:
-  // config.listeners) {
-  // if (listener.equals("stopped") || listener.equals("created")||
-  // listener.equals("registered")|| listener.equals("released")) {
-  //
-  // }
-  // }
-  // }
 
   public String setAllIds(String id) {
     Platform.getLocalInstance().setId(id);
@@ -5108,6 +5106,10 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
 
     for (String s : masterPlan.keySet()) {
       String filename = CONFIG_ROOT + fs + configName + fs + s + ".yml";
+      File check = new File(filename);
+      if (check.exists()) {
+        continue;
+      }
       String data = CodecUtils.toYaml(masterPlan.get(s));
       try {
         FileIO.toFile(filename, data.getBytes());
@@ -5289,7 +5291,6 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
     config = super.getConfig();
     config.locale = getLocaleTag();
     config.virtual = isVirtual;
-    config.id = getId();
     return config;
   }
 
