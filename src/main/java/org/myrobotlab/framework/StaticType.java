@@ -81,6 +81,27 @@ public abstract class StaticType<T> {
         return storedType;
     }
 
+    /**
+     * Get the stored type as a Class object
+     * that can be used for checking cast
+     * compatibility. Note that the resulting
+     * Class object will not check for generic
+     * compatibility. If the stored type
+     * is not a Class type, then this method
+     * throws {@link IllegalStateException}.
+     *
+     * @return The internal stored type cast to a Class object
+     * @throws IllegalStateException if the stored type is not a Class.
+     */
+    @SuppressWarnings("unchecked")
+    public Class<T> asClass() {
+        if (storedType instanceof Class) {
+            return (Class<T>) storedType;
+        } else {
+            throw new IllegalStateException("Stored type " + storedType + " is not a Class.");
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -96,6 +117,11 @@ public abstract class StaticType<T> {
         return storedType != null ? storedType.hashCode() : 0;
     }
 
+
+    @Override
+    public String toString() {
+        return storedType.toString();
+    }
     /**
      * Function to recursively validate type parameters
      * to ensure they are all concrete so no type variables sneak in.
