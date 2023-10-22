@@ -3,6 +3,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.myrobotlab.framework.StaticType;
 import org.myrobotlab.service.config.OpenCVConfig;
 
 public class InMoov2Test {
@@ -14,11 +15,11 @@ public class InMoov2Test {
       
       // flip
       i01.setPeerConfigValue("opencv", "flip", true);
-      OpenCVConfig cvconfig = (OpenCVConfig)i01.getPeerConfig("opencv");
+      OpenCVConfig cvconfig = i01.getPeerConfig("opencv", new StaticType<>() {});
       assertTrue(cvconfig.flip);
 
       i01.setPeerConfigValue("opencv", "flip", false);
-      cvconfig = (OpenCVConfig)i01.getPeerConfig("opencv");
+      cvconfig = i01.getPeerConfig("opencv", new StaticType<>() {});
       assertFalse(cvconfig.flip);
       
   }

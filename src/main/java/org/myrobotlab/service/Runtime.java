@@ -61,6 +61,7 @@ import org.myrobotlab.framework.ProxyFactory;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceReservation;
+import org.myrobotlab.framework.StaticType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.ConfigurableService;
 import org.myrobotlab.framework.interfaces.MessageListener;
@@ -1152,6 +1153,14 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     return registry;// FIXME should return copy
   }
 
+  public static ServiceInterface getService(String inName) {
+    return getService(inName, new StaticType<>() {});
+  }
+
+  public static <C extends ServiceConfig, S extends ServiceInterface & ConfigurableService<C>> S getConfigurableService(String inName, StaticType<S> serviceType) {
+    return getService(inName, serviceType);
+  }
+
   /**
    * Gets a running service with the specified name. If the name is null or
    * there's no such service with the specified name, returns null instead.
@@ -1160,7 +1169,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    *          The name of the service
    * @return The service if it exists, or null
    */
-  public static ServiceInterface getService(String inName) {
+  @SuppressWarnings("unchecked")
+  public static <S extends ServiceInterface> S getService(String inName, StaticType<S> serviceType) {
     if (inName == null) {
       return null;
     }
@@ -1170,7 +1180,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     if (!registry.containsKey(name)) {
       return null;
     } else {
-      return registry.get(name);
+      return (S) registry.get(name);
     }
   }
 
@@ -2572,7 +2582,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     Runtime runtime = Runtime.getInstance();
     runtime.processingConfig = true; // multiple inbox threads not available
     runtime.invoke("publishStartConfig", configName);
-    RuntimeConfig rtConfig = (RuntimeConfig) runtime.readServiceConfig(runtime.getConfigName(), "runtime");
+    RuntimeConfig rtConfig = runtime.readServiceConfig(runtime.getConfigName(), "runtime", new StaticType<>() {});
     if (rtConfig == null) {
       runtime.error("cannot find %s%s%s", runtime.getConfigName(), fs, "runtime.yml");
       return;
@@ -4806,6 +4816,10 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
 
     return plan;
   }
+
+  public ServiceConfig readServiceConfig(String name) {
+    return readServiceConfig(name, new StaticType<>() {});
+  }
   
   /**
    * read a service's configuration, in the context
@@ -4813,8 +4827,12 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
    * @param name
    * @return
    */
-  public ServiceConfig readServiceConfig(String name) {
-    return readServiceConfig(null, name);
+  public <C extends ServiceConfig> C readServiceConfig(String name, StaticType<C> configType) {
+    return readServiceConfig(null, name, configType);
+  }
+
+  public ServiceConfig readServiceConfig(String configName, String name) {
+    return readServiceConfig(configName, name, new StaticType<>() {});
   }
 
   /**
@@ -4825,7 +4843,7 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
    *          - name of config file within that dir e.g. {name}.yml
    * @return
    */
-  public ServiceConfig readServiceConfig(String configName, String name) {
+  public <C extends ServiceConfig> C readServiceConfig(String configName, String name, StaticType<C> configType) {
     // if config path set and yaml file exists - it takes precedence
 
     if (configName == null) {
@@ -4839,10 +4857,10 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
 
     String filename = CONFIG_ROOT + fs + configName + fs + name + ".yml";
     File check = new File(filename);
-    ServiceConfig sc = null;
+    C sc = null;
     if (check.exists()) {
       try {
-        sc = CodecUtils.readServiceConfig(filename);
+        sc = CodecUtils.readServiceConfig(filename, configType);
       } catch (ConstructorException e) {
         error("%s invalid %s %s. Please remove it from the file.", name, filename, e.getCause().getMessage());
       } catch (IOException e) {

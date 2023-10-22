@@ -16,6 +16,7 @@ import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.StaticType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
@@ -28,6 +29,7 @@ import org.myrobotlab.programab.Response;
 import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.InMoov2Config;
+import org.myrobotlab.service.config.OpenCVConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.LedDisplayData;
@@ -1939,6 +1941,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       webgui.startService();
 
       InMoov2 i01 = (InMoov2)Runtime.start("i01","InMoov2");
+      OpenCVConfig ocvConfig = i01.getPeerConfig("opencv", new StaticType<>() {});
+      ocvConfig.flip = true;
       i01.setPeerConfigValue("opencv", "flip", true);
       // i01.savePeerConfig("", null);
       
