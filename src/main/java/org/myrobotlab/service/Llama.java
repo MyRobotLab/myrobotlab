@@ -1,7 +1,8 @@
 package org.myrobotlab.service;
 
+import de.kherud.llama.InferenceParameters;
 import de.kherud.llama.LlamaModel;
-import de.kherud.llama.Parameters;
+import de.kherud.llama.ModelParameters;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
@@ -36,25 +37,29 @@ public class Llama extends Service<LlamaConfig> implements UtterancePublisher, R
     }
 
     public void loadModel(String modelPath) {
-        Parameters params = new Parameters.Builder()
+        ModelParameters params = new ModelParameters.Builder()
                 .setNGpuLayers(0)
                 .setNThreads(Platform.getLocalInstance().getNumPhysicalProcessors())
-                .setTemperature(0.7f)
-                .setPenalizeNl(true)
-                .setMirostat(Parameters.MiroStat.V2)
-                .setAntiPrompt(new String[]{config.userPrompt})
                 .build();
         model = new LlamaModel(modelPath, params);
     }
 
     public Response getResponse(String text) {
+        InferenceParameters inferenceParameters = new InferenceParameters.Builder()
+                .setTemperature(0.7f)
+                .setPenalizeNl(true)
+                .setMirostat(InferenceParameters.MiroStat.V2)
+                .setAntiPrompt(new String[]{config.userPrompt})
+                .build();
+
+
         if (model == null) {
             error("Model is not loaded.");
             return null;
         }
 
         String prompt = config.systemPrompt + config.systemMessage + "\n" + text + "\n";
-        String response = StreamSupport.stream(model.generate(prompt).spliterator(), false)
+        String response = StreamSupport.stream(model.generate(prompt, inferenceParameters).spliterator(), false)
                 .map(LlamaModel.Output::toString)
                 .reduce("", (a, b) -> a + b);
 
@@ -132,7 +137,7 @@ public class Llama extends Service<LlamaConfig> implements UtterancePublisher, R
     }
 
     public void reset() {
-        model.reset();
+        model.close();
 
     }
 
