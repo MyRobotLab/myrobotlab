@@ -1,6 +1,7 @@
 name: Java CI
 
-on: [push]
+on:
+  push:
 
 jobs:
   build:
@@ -15,7 +16,51 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
+          # NEATO ! CACHE !!!!
+          cache: 'maven'
+
       - name: Dependency Test
         run: mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
       - name: Build with Maven
         run: mvn --batch-mode -Dtest=!**/OpenCV* test -q
+
+      - name: Get next version
+        uses: reecetech/version-increment@2023.9.3
+        id: version
+        with:
+          scheme: semver
+          increment: patch      
+
+      - name: Package with Maven
+        run: "mvn package -DskipTests -Dversion=${{ steps.version.outputs.version }} -q"
+
+      # - name: Fake Build
+      #   run: |
+      #     mkdir -p target
+      #     echo ${{ github.sha }} > ./target/myrobotlab.zip
+
+      - name: Pre Release
+        if: github.ref != 'refs/heads/develop'
+        id: prerelease
+        uses: softprops/action-gh-release@v1
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+          prerelease: true
+          files: ./target/myrobotlab.zip
+          name: "Pre ${{ steps.version.outputs.version }} Nixie"
+          tag_name: ${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          body_path: ./release-template.md
+
+      - name: Release
+        if: github.ref == 'refs/heads/develop'
+        id: release
+        uses: softprops/action-gh-release@v1
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+          files: ./target/myrobotlab.zip
+          name: "${{ steps.version.outputs.version }} Nixie"
+          tag_name: ${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          body_path: ./release-template.md
+
