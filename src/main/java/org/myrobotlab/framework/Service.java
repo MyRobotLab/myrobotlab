@@ -1408,6 +1408,12 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     return config;
   }
 
+  public <P extends ServiceConfig> P getPeerConfig(String peerKey) {
+    return getPeerConfig(peerKey, new StaticType<>() {
+    });
+  }
+
+
   /**
    * Get a service's peer's configuration. This method is used to get the
    * configuration of a peer service regarless if it is currently running or
