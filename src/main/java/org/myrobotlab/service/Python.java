@@ -985,6 +985,9 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
    */
   public List<String> getScriptList() throws IOException {
     List<String> sorted = new ArrayList<>();
+    if (config.scriptRootDir == null) {
+      config.scriptRootDir = new File(getDataInstanceDir()).getAbsolutePath();
+    }    
     List<File> files = FileIO.getFileList(config.scriptRootDir, true);
     for (File file : files) {
       if (file.toString().endsWith(".py")) {

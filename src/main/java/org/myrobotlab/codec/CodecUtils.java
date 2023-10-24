@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InvalidObjectException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -1481,6 +1482,10 @@ public class CodecUtils {
     return name.substring(name.indexOf("@") + 1).equals(id);
   }
 
+  public static ServiceConfig readServiceConfig(String filename) throws IOException {
+    return readServiceConfig(filename, new StaticType<>() {});
+  }
+
   /**
    * Read a YAML file given by the filename and convert it into a ServiceConfig
    * object by deserialization.
@@ -1491,10 +1496,15 @@ public class CodecUtils {
    * @throws IOException
    *           if reading the file fails
    */
-  public static ServiceConfig readServiceConfig(String filename) throws IOException {
+  public static <C extends ServiceConfig> C readServiceConfig(String filename, StaticType<C> type) throws IOException {
     String data = Files.readString(Paths.get(filename));
     Yaml yaml = new Yaml();
-    return yaml.load(data);
+    C parsed = yaml.load(data);
+    if (type.asClass().isAssignableFrom(parsed.getClass())) {
+      return parsed;
+    } else {
+      throw new InvalidObjectException("Deserialized type was " + parsed.getClass() + ", expected " + type + ". Deserialized object: " + parsed);
+    }
   }
 
   /**

@@ -1403,23 +1403,28 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    *          i01."opencv"
    * @return
    */
-  public ServiceConfig getPeerConfig(String peerKey) {
+  public <P extends ServiceConfig> P getPeerConfig(String peerKey, StaticType<P> type) {
     String peerName = getPeerName(peerKey);
     if (peerName == null) {
       error("peer name not found for peer key %s", peerKey);
       return null;
     }
 
-    ServiceInterface si = Runtime.getService(peerName);
+    // Java generics don't let us create a new StaticType using
+    // P here because the type variable is erased, so we have to cast anyway for now
+    ConfigurableService<P> si = (ConfigurableService<P>) Runtime.getService(peerName);
     if (si != null) {
       // peer is currently running - get its config
-      return si.getConfig();
+      P c = si.getConfig();
+      if (type.asClass().isAssignableFrom(c.getClass())) {
+        return c;
+      }
     }
 
     // peer is not currently running attempt to read from config
     Runtime runtime = Runtime.getInstance();
     // read current service config for this peer service
-    ServiceConfig sc = runtime.readServiceConfig(peerName);
+    P sc = runtime.readServiceConfig(peerName, type);
     if (sc == null) {
       error("peer service %s is defined, but %s.yml not available on filesystem", peerKey, peerName);
       return null;
@@ -1428,7 +1433,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   }
 
   public void setPeerConfigValue(String peerKey, String fieldname, Object value) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-    ServiceConfig sc = getPeerConfig(peerKey);
+    ServiceConfig sc = getPeerConfig(peerKey, new StaticType<>() {});
     if (sc == null) {
       error("invalid config for peer key %s field name %s", peerKey, fieldname);
       return;
@@ -1437,7 +1442,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     field.set(sc, value);
     savePeerConfig(peerKey, sc);
     String peerName = getPeerName(peerKey);
-    ConfigurableService cs = (ConfigurableService) Runtime.getService(peerName);
+    var cs = Runtime.getConfigurableService(peerName, new StaticType<Service<ServiceConfig>>() {});
     if (cs != null) {
       cs.apply(sc); // TODO - look for applies if its read from the file system
                     // it needs to update Runtime.plan
@@ -2846,6 +2851,10 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     apply((T) sc);
   }
 
+  public void applyPeerConfig(String peerKey, ServiceConfig config) {
+    applyPeerConfig(peerKey, config, new StaticType<>() {});
+  }
+
   /**
    * Apply the config to a peer, regardless if the peer is currently running or
    * not
@@ -2853,13 +2862,13 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * @param peerKey
    * @param config
    */
-  public void applyPeerConfig(String peerKey, ServiceConfig config) {
+  public <P extends ServiceConfig> void applyPeerConfig(String peerKey, P config, StaticType<Service<P>> configServiceType) {
     String peerName = getPeerName(peerKey);
 
     Runtime.getPlan().put(peerName, config);
 
     // meh - templating is not very helpful here
-    ConfigurableService si = (ConfigurableService) Runtime.getService(peerName);
+    ConfigurableService<P> si = Runtime.getService(peerName, configServiceType);
     if (si != null) {
       si.apply(config);
     }

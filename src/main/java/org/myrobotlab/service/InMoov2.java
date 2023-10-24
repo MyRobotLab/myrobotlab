@@ -18,6 +18,7 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.StaticType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
@@ -98,22 +99,13 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return true;
   }
 
-  public static void main(String[] args) {
-    try {
-
-      LoggingFactory.init(Level.ERROR);
-      // identical to command line start
-      // Runtime.startConfig("inmoov2");
-      Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
-  }
 
   /**
    * the config that was processed before booting, if there was one.
    */
-  String bootedConfig = null;
+  protected String bootedConfig = null;
+  
+  protected LedDisplayData led = new LedDisplayData();
 
   protected transient ProgramAB chatBot;
 
@@ -1548,7 +1540,17 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     log.info("publishInactivity");
     fsm.fire("inactvity");
   }
-  
+
+  /**
+   * used to configure a flashing event - could use configuration to signal
+   * different colors and states
+   * 
+   * @return
+   */
+  public LedDisplayData publishFlash() {
+    return led;
+  }
+
   /**
    * A more extensible interface point than publishEvent FIXME - create
    * interface for this
@@ -2099,6 +2101,19 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
     // get service start and release life cycle events
     runtime.attachServiceLifeCycleListener(getName());
+
+    List<ServiceInterface> services = Runtime.getServices();
+    for (ServiceInterface si : services) {
+      if ("Servo".equals(si.getSimpleName())) {
+        send(si.getFullName(), "setAutoDisable", true);
+      }
+    }
+
+    // get events of new services and shutdown
+    subscribe("runtime", "shutdown");
+    // power up loopback subscription
+    addListener(getName(), "powerUp");
+
     subscribe("runtime", "publishConfigList");
 
     // subscribe to config processing events
@@ -2364,5 +2379,16 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
   }
 
+  public static void main(String[] args) {
+    try {
+
+      LoggingFactory.init(Level.ERROR);
+      // identical to command line start
+      // Runtime.startConfig("inmoov2");
+      Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
 
 }
