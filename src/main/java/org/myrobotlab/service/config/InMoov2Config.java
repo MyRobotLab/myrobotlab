@@ -1,10 +1,13 @@
 package org.myrobotlab.service.config;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.jme3.UserDataConfig;
 import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.math.MapperSimple;
 import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.FiniteStateMachineConfig.Transition;
@@ -198,7 +201,26 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "torso", "InMoov2Torso", false);
     addDefaultPeerConfig(plan, name, "ultrasonicRight", "UltrasonicSensor", false);
     addDefaultPeerConfig(plan, name, "ultrasonicLeft", "UltrasonicSensor", false);
+    addDefaultPeerConfig(plan, name, "vertx", "Vertx", false);
+    addDefaultPeerConfig(plan, name, "webxr", "WebXR", false);
+    
+    WebXRConfig webxr = (WebXRConfig)plan.get(getPeerName("webxr"));
+    
+    Map<String, MapperSimple> map = new HashMap<>();
+    MapperSimple mapper = new MapperSimple(-0.5, 0.5, 0, 180);
+    map.put("i01.head.neck", mapper);
+    webxr.controllerMappings.put("head.orientation.pitch", map);
 
+    map = new HashMap<>();
+    mapper = new MapperSimple(-0.5, 0.5, 0, 180);
+    map.put("i01.head.rothead", mapper);
+    webxr.controllerMappings.put("head.orientation.yaw", map);
+
+    map = new HashMap<>();
+    mapper = new MapperSimple(-0.5, 0.5, 0, 180);
+    map.put("i01.head.roll", mapper);
+    webxr.controllerMappings.put("head.orientation.roll", map);
+    
     MouthControlConfig mouthControl = (MouthControlConfig) plan.get(getPeerName("mouthControl"));
 
     // setup name references to different services FIXME getPeerName("head").getPeerName("jaw")
@@ -525,6 +547,10 @@ public class InMoov2Config extends ServiceConfig {
     mouth_audioFile.listeners = new ArrayList<>();
     mouth_audioFile.listeners.add(new Listener("publishPeak", name));
     fsm.listeners.add(new Listener("publishStateChange", name, "publishStateChange"));
+    
+    webxr.listeners = new ArrayList<>();
+    webxr.listeners.add(new Listener("publishJointAngles", name));
+    
 //    mouth_audioFile.listeners.add(new Listener("publishAudioEnd", name));
 //    mouth_audioFile.listeners.add(new Listener("publishAudioStart", name));
     

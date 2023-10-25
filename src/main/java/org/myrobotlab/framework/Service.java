@@ -1416,7 +1416,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     }
 
     // Java generics don't let us create a new StaticType using
-    // P here because the type variable is erased, so we have to cast anyway for now
+    // P here because the type variable is erased, so we have to cast anyway for
+    // now
     ConfigurableService<P> si = (ConfigurableService<P>) Runtime.getService(peerName);
     if (si != null) {
       // peer is currently running - get its config
@@ -1447,7 +1448,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     field.set(sc, value);
     savePeerConfig(peerKey, sc);
     String peerName = getPeerName(peerKey);
-    var cs = Runtime.getConfigurableService(peerName, new StaticType<Service<ServiceConfig>>() {});
+    var cs = Runtime.getConfigurableService(peerName, new StaticType<Service<ServiceConfig>>() {
+    });
     if (cs != null) {
       cs.apply(sc); // TODO - look for applies if its read from the file system
                     // it needs to update Runtime.plan
@@ -2163,7 +2165,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     invoke("publishStatus", status);
     return status;
   }
-  
+
   @Override
   public Status error(String format, Object... args) {
     Status ret;
@@ -2194,10 +2196,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
 
   @Override
   public Status warn(String format, Object... args) {
-    String msg =  String.format(
-        Objects.requireNonNullElse(format, ""),
-        args);    
-   
+    String msg = String.format(Objects.requireNonNullElse(format, ""), args);
+
     return warn(msg);
   }
 
@@ -2235,7 +2235,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   public Status publishError(Status status) {
     return status;
   }
-  
+
   public Status publishWarn(Status status) {
     return status;
   }
@@ -2857,7 +2857,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   }
 
   public void applyPeerConfig(String peerKey, ServiceConfig config) {
-    applyPeerConfig(peerKey, config, new StaticType<>() {});
+    applyPeerConfig(peerKey, config, new StaticType<>() {
+    });
   }
 
   /**

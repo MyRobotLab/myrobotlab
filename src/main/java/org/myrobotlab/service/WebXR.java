@@ -129,7 +129,15 @@ public class WebXR extends Service<WebXRConfig> {
       
       // identical to command line start
       // Runtime.startConfig("inmoov2");
-      Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
+      
+      
+      // normal non-config launch
+      // Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
+      
+      
+      // config launch
+      Runtime.startConfig("webxr");
+      
       boolean done = true;
       if (done)
         return;

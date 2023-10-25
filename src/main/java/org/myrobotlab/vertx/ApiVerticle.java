@@ -47,14 +47,20 @@ public class ApiVerticle extends AbstractVerticle {
     // static file routing - this is from a npm "build" ... but durin gdevelop its far
     // easier to use setupProxy.js from a npm start .. but deployment would be easier with a "build"
 
-    //StaticHandler root = StaticHandler.create("src/main/resources/resource/Vertx/app");
-    // StaticHandler root = StaticHandler.create("src/main/resources/resource/Vertx/app");
-    StaticHandler root = StaticHandler.create("../robotlab-x-app/build/");
+    // new UI
+    // StaticHandler root = StaticHandler.create("../robotlab-x-app/build/");
+    
+    // old UI (runtime vs dev time...)
+    StaticHandler root = StaticHandler.create("src/main/resources/resource/WebGui/app/");
     root.setCachingEnabled(false);
     root.setDirectoryListing(true);
     root.setIndexPage("index.html");
     // root.setAllowRootFileSystemAccess(true);
     // root.setWebRoot(null);
+    
+    VideoStreamHandler video = new VideoStreamHandler(service);
+    
+    router.route("/video/*").handler(video);
     router.route("/*").handler(root);    
 
 
