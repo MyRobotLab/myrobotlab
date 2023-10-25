@@ -58,9 +58,9 @@ public class ApiVerticle extends AbstractVerticle {
     // root.setAllowRootFileSystemAccess(true);
     // root.setWebRoot(null);
     
-    VideoStreamHandler video = new VideoStreamHandler(service);
+    // VideoStreamHandler video = new VideoStreamHandler(service);
     
-    router.route("/video/*").handler(video);
+    // router.route("/video/*").handler(video);
     router.route("/*").handler(root);    
 
 
