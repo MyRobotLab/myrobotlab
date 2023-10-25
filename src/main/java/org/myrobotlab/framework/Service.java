@@ -1408,9 +1408,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     return config;
   }
 
-  public <P extends ServiceConfig> P getPeerConfig(String peerKey) {
-    return getPeerConfig(peerKey, new StaticType<>() {
-    });
+  public ServiceConfig getPeerConfig(String peerKey) {
+    return getPeerConfig(peerKey, new StaticType<ServiceConfig>() {});
   }
 
 
@@ -1457,7 +1456,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   }
 
   public void setPeerConfigValue(String peerKey, String fieldname, Object value) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-    ServiceConfig sc = getPeerConfig(peerKey, new StaticType<>() {});
+    ServiceConfig sc = getPeerConfig(peerKey, new StaticType<ServiceConfig>() {});
     if (sc == null) {
       error("invalid config for peer key %s field name %s", peerKey, fieldname);
       return;
