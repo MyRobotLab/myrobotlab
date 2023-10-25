@@ -1390,6 +1390,11 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     return config;
   }
 
+  public ServiceConfig getPeerConfig(String peerKey) {
+    return getPeerConfig(peerKey, new StaticType<ServiceConfig>() {});
+  }
+
+
   /**
    * Get a service's peer's configuration. This method is used to get the
    * configuration of a peer service regarless if it is currently running or
@@ -1433,7 +1438,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   }
 
   public void setPeerConfigValue(String peerKey, String fieldname, Object value) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-    ServiceConfig sc = getPeerConfig(peerKey, new StaticType<>() {});
+    ServiceConfig sc = getPeerConfig(peerKey, new StaticType<ServiceConfig>() {});
     if (sc == null) {
       error("invalid config for peer key %s field name %s", peerKey, fieldname);
       return;
