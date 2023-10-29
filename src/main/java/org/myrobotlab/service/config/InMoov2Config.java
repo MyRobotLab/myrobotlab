@@ -49,7 +49,7 @@ public class InMoov2Config extends ServiceConfig {
 
   public boolean neoPixelErrorRed = true;
   
-  public boolean neoPixelFlashWhenSpeaking = true;
+  public boolean neoPixelFlashWhenSpeaking = false;
   
   public boolean openCVFaceRecognizerActivated=true;
     
