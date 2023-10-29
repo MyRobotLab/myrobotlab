@@ -20,15 +20,19 @@ Download
 
 latest [Nixie 1.1.X](https://github.com/MyRobotLab/myrobotlab/releases/latest/download/myrobotlab.zip)
 
-## Running MyRobotLab
+## Starting MyRobotLab
 
 After downloading and unzipping myrobtlab.zip into a new folder, start the appropriate script 
 ### Linux or MacOS
-`myrobotlab.sh`
+```bash
+myrobotlab.sh
+```
 ### Windows
-`myrobotlab.bat`
-
+```dos
+myrobotlab.bat
+```
 The first time the script runs it will automatically install all services and their dependencies, then it will launch myrobotlab.
+This can take a long time depending on the speed of your internet connection. 
 The subsequent starting of myrobotlab will skip the installation stage.  If a browser does not automatically start you
 can go to http://localhost:8888 to see the web user interface.
 
