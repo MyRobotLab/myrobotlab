@@ -13,7 +13,6 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.I2cMuxConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
@@ -376,13 +375,26 @@ public class I2cMux extends Service<I2cMuxConfig> implements I2CControl, I2CCont
   public I2cMuxConfig apply(I2cMuxConfig c) {
     super.apply(c);
     // FIXME - remove all this, it should "only" be in config
-    deviceBus = c.bus;
-    deviceAddress = c.address;
-    i2cDevices = c.i2cDevices;
+    if (c.bus != null) {
+      setBus(c.bus);
+    }
+    if (c.address != null) {
+      setAddress(c.address);
+    }
+   
+    if (c.i2cDevices != null) {
+      i2cDevices = c.i2cDevices;
+    }
+        
     if (c.controller != null) {
-      controllerName = c.controller;
+      try {
+        attach(controllerName);
+      } catch(Exception e) {
+        error(e);
+      }
     }
     return c;
+    
   }
 
 }
