@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+/.pydevproject
 
 # Distribution / packaging
 dist/
@@ -11,7 +12,6 @@ build/
 
 # IDEs and editors
 .idea/
-.vscode/
 *.pyc
 
 # Local development settings
@@ -44,8 +44,6 @@ build/
 /dist
 /repo
 /test
-/.ivy
-/.myrobotlab
 /.settings
 /libraries
 /haarcascades
@@ -53,8 +51,6 @@ build/
 /lbpcascades
 /myrobotlab.log
 /audioFile
-/obj
-/ProgramAB/
 /build/
 /myrobotlab.jar
 /*.mp4
@@ -63,38 +59,26 @@ build/
 /MRLComm/
 /*.log
 /*.json
-/notifyEntries.runtime.xml
 /mary
 /opennlp/
 /mimic/
-/inmoov/
 /serial.rx.hex
 /serial.tx.hex
 /pids/
-/voicetest.bat
-/generatedPython/
 /InMoov/
 /tts/
 /tools/
-/START_INMOOV.bat
-/start_inmoov.sh
-/.pydevproject
 /OpenAL64.dll
 /lwjgl64.dll
-/audacity-win-2.1.0.exe
-/text.txt
-/gestures/
 /target/
 /training/
 /dependencies.xml
 /.gradle/
 /dependencies/
-/gradle/
 /pom/
 /install*
 /libraries*
 /ivy*
-/maven.eclipse.project
 /pom*.xml
 /yolo/
 /jinput-natives/
@@ -102,21 +86,11 @@ build/
 /target/
 /Solr/
 /OpenCV/
-/models/*
 /models/
 /bulletjme.dll
-/Harry-export.py
-/Harry.py
 /backup-routes.py
-/worke.py
-/myrobotlab*.jar
 /libbulletjme.so
 /liblwjgl64.so
-/copyToRaspi.sh
-/lastRestart.py
 /.factorypath
 start.yml
 /config
-src/main/resources/resource/InMoov2
-src/main/resources/resource/ProgramAB
-*.iml
