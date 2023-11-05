@@ -55,8 +55,6 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 
-import org.bytedeco.ffmpeg.global.avcodec;
-import org.bytedeco.javacpp.avutil;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
@@ -150,8 +148,6 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
   int vpId = 0;
 
   transient CanvasFrame canvasFrame = null;
-  
-  transient FFmpegFrameRecorder recorder = null;
 
   class VideoProcessor implements Runnable {
 
@@ -172,44 +168,6 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
         lengthInTime = grabber.getLengthInTime();
         log.info("grabber {} started - length time {} length frames {}", grabberType, lengthInTime, lengthInFrames);
 
-        // create recorder
-        recorder = new FFmpegFrameRecorder("output.flv", grabber.getImageWidth(), grabber.getImageHeight());
-        // recorder.setFormat("mp4");
-        recorder.setFormat("flv");
-        
-//        recorder.setFormat("ogg"); // Set the output format to Ogg
-//        recorder.setVideoCodec(avcodec.AV_CODEC_ID_THEORA); // Set the video codec to Theora
-//        recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P); // Set pixel format
-//        
-//        recorder.setVideoCodec(avcodec.AV_CODEC_ID_THEORA); // Set the video codec to Theora
-//        recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P); // Set pixel format
-//        recorder.start();
-//        
-//        recorder.start();
-        
-// h264        
-//        recorder.setFormat("mp4");
-//        recorder.setVideoQuality(10);
-//        recorder.setFrameRate(grabber1.getFrameRate());
-//        recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
-
-        
-        
-
-         // webm
-//         recorder.setVideoCodecName("libvpx-vp9");
-//         recorder.setFormat("webm");
-//         recorder.setPixelFormat(org.bytedeco.javacv.Frame.DEPTH_UBYTE);
-         // recorder.setFrameRate(frameRate);
-
-
-        // not sure what this is .. but it works
-        // recorder.setFormat("ffm");
-
-        
-        recorder.start();
-
-        
         // Wait for the Kinect to heat up.
         int loops = 0;
         while (grabber.getClass() == OpenKinectFrameGrabber.class && lengthInFrames == 0 && loops < 200) {
@@ -239,8 +197,6 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
           ++frameIndex;
 
           data = new OpenCVData(getName(), frameStartTs, frameIndex, newFrame);
-                    
-          recorder.record(newFrame);
 
           if (grabber.getClass().equals(OpenKinectFrameGrabber.class)) {
             // by default this framegrabber returns video
@@ -1258,7 +1214,6 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
         BufferedImage b = data.getDisplay();
         SerializableImage si = new SerializableImage(b, displayFilter, frameIndex);
         invoke("publishDisplay", si);
-        // sleep(1000);
 
         if (webViewer) {
           // broadcast(???)
@@ -2145,8 +2100,8 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
       // Runtime.start("python", "Python");
       OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
 
-//      OpenCVFilter fr = new OpenCVFilterFaceRecognizer("fr");
-//       cv.addFilter(fr);
+      OpenCVFilter fr = new OpenCVFilterFaceRecognizer("fr");
+      cv.addFilter(fr);
       // OpenCVFilterTracker tracker = new OpenCVFilterTracker("tracker");
       // cv.addFilter(tracker);
       // OpenCVFilterLKOpticalTrack lk = new OpenCVFilterLKOpticalTrack("lk");
