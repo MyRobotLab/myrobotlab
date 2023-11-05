@@ -8,6 +8,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.net.SelfSignedCertificate;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.CorsHandler;
@@ -91,6 +92,10 @@ public class ApiVerticle extends AbstractVerticle {
     // FIXME - how to do this -> server.webSocketHandler(this::handleWebSocket);
     server.webSocketHandler(new WebSocketHandler(service));
     server.requestHandler(router);
+
+
+
+
     // start servers
     server.listen();
   }

@@ -199,12 +199,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   boolean processingConfig = false;
 
   /**
-   * The one config directory where all config is managed the {default} is the
-   * current configuration set
-   */
-  // protected String configDir = "data" + fs + "config";
-
-  /**
    * <pre>
    * The set of client connections to this mrl instance Some of the connections
    * are outbound to other webguis, others may be inbound if a webgui is
