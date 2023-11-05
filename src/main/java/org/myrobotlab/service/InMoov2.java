@@ -927,10 +927,13 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     led.interval = 500;
     // FIXME flash on config.flashOnBoot
     invoke("publishFlash");
-    String botState = chatBot.getPredicate("botState");
-    if ("sleeping".equals(botState)) {
-      invoke("publishEvent", "WAKE");
-    }    
+    ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
+    if (chatBot != null) {
+      String botState = chatBot.getPredicate("botState");
+      if ("sleeping".equals(botState)) {
+        invoke("publishEvent", "WAKE");
+      }
+    }
   }
 
   // GOOD GOOD GOOD - LOOPBACK - flexible and replacable by python
