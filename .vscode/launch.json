@@ -6,18 +6,1626 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "PeerDiscovery",
+            "request": "launch",
+            "mainClass": "PeerDiscovery",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "ArduinoMsgGenerator",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.arduino.ArduinoMsgGenerator",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Msg",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.arduino.Msg",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "VirtualMsg",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.arduino.VirtualMsg",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "CaptureCalibrationImagesApp",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.boofcv.CaptureCalibrationImagesApp",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "CreateRgbPointCloudFileApp",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.boofcv.CreateRgbPointCloudFileApp",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "DisplayKinectPointCloudApp",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.boofcv.DisplayKinectPointCloudApp",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "ExampleDepthPointCloud",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.boofcv.ExampleDepthPointCloud",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "ExampleVisualOdometryDepth",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.boofcv.ExampleVisualOdometryDepth",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "IntrinsicToDepthParameters",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.boofcv.IntrinsicToDepthParameters",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "LogKinectDataApp",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.boofcv.LogKinectDataApp",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "OpenKinectOdometry",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.boofcv.OpenKinectOdometry",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "OpenKinectPointCloud",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.boofcv.OpenKinectPointCloud",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "OpenKinectStreamingTest",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.boofcv.OpenKinectStreamingTest",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "OverlayRgbDepthStreamsApp",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.boofcv.OverlayRgbDepthStreamsApp",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "PlaybackKinectLogApp",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.boofcv.PlaybackKinectLogApp",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "CmdLine",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.cmdline.CmdLine",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "CodecUtils",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.codec.CodecUtils",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "PolymorphicSerializer",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.codec.PolymorphicSerializer",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "RecorderPythonFile",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.codec.RecorderPythonFile",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "CvData",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.cv.CvData",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "WikipediaIndexer",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.document.connector.WikipediaIndexer",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Index",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.framework.Index",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "MRLListener",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.framework.MRLListener",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Message",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.framework.Message",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "MethodCacheTest",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.framework.MethodCacheTest",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "NameGenerator",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.framework.NameGenerator",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Platform",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.framework.Platform",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Status",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.framework.Status",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "TypeConverter",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.framework.TypeConverter",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "IvyWrapper",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.framework.repo.IvyWrapper",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "MavenWrapper",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.framework.repo.MavenWrapper",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "ServiceData",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.framework.repo.ServiceData",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "I2CFactory",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.i2c.I2CFactory",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "SerializableImage",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.image.SerializableImage",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "FileIO",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.io.FileIO",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "FindFile",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.io.FindFile",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Zip",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.io.Zip",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "TestPhysicsHingeJoint",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.jme3.TestPhysicsHingeJoint",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "TestSimplePhysics",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.jme3.TestSimplePhysics",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "TestJmeIMModel",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.kinematics.TestJmeIMModel",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "TestJmeIntegratedMovement",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.kinematics.TestJmeIntegratedMovement",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "MapperLinearTest",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.math.MapperLinearTest",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Node",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.memory.Node",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Email",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.net.Email",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Http",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.net.Http",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "HttpRequest",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.net.HttpRequest",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "InstallCert",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.net.InstallCert",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "MjpegServer",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.net.MjpegServer",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "NanoHTTPD",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.net.NanoHTTPD",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "TcpSerialHub",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.net.TcpSerialHub",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "TcpServer",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.net.TcpServer",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "WsClient",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.net.WsClient",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "OculusDisplay",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.oculus.OculusDisplay",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "OpenCVData",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.opencv.OpenCVData",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "OpenCVFaceRecognizer",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.opencv.OpenCVFaceRecognizer",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "OpenCVFilterAddMask",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.opencv.OpenCVFilterAddMask",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "OpenCVFilterKinectFloorFinder",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.opencv.OpenCVFilterKinectFloorFinder",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "OpenCVFilterKinectPointCloud",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.opencv.OpenCVFilterKinectPointCloud",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "InProcessCli",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.process.InProcessCli",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Launcher",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.process.Launcher",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "RTTTLParser",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.roomba.RTTTLParser",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "RTTTLPlay",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.roomba.RTTTLPlay",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "ProcParser",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.runtime.ProcParser",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Adafruit16CServoDriver",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Adafruit16CServoDriver",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "AdafruitIna219",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.AdafruitIna219",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "AdafruitMotorHat4Pi",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.AdafruitMotorHat4Pi",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Ads1115",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Ads1115",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Amt203Encoder",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Amt203Encoder",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Android",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Android",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Arduino",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Arduino",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Arm",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Arm",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "As5048AEncoder",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.As5048AEncoder",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "AudioCapture",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.AudioCapture",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "AudioFile",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.AudioFile",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "AzureTranslator",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.AzureTranslator",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "BeagleBoardBlack",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.BeagleBoardBlack",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Blender",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Blender",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Blocks",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Blocks",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Bno055",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Bno055",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "BodyPart",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.BodyPart",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "BoofCv",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.BoofCv",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Chassis",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Chassis",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "ChessGame",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.ChessGame",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Clock",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Clock",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Cron",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Cron",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Database",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Database",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Deeplearning4j",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Deeplearning4j",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "DiscordBot",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.DiscordBot",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "DiyServo",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.DiyServo",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Docker",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Docker",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "DocumentPipeline",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.DocumentPipeline",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "DruppNeck",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.DruppNeck",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "EddieControlBoard",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.EddieControlBoard",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Elasticsearch",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Elasticsearch",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Emoji",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Emoji",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Esp8266",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Esp8266",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Esp8266_01",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Esp8266_01",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "FiniteStateMachine",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.FiniteStateMachine",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Git",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Git",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "GoPro",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.GoPro",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "GoogleCloud",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.GoogleCloud",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "GoogleSearch",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.GoogleSearch",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "GoogleTranslate",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.GoogleTranslate",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Gps",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Gps",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Gpt3",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Gpt3",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Hd44780",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Hd44780",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "HtmlFilter",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.HtmlFilter",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "HtmlParser",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.HtmlParser",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "HttpClient",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.HttpClient",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "I2cMux",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.I2cMux",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "IBus",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.IBus",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "ImageDisplay",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.ImageDisplay",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "ImapEmailConnector",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.ImapEmailConnector",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "InMoov2",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.InMoov2",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "InMoov2Hand",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.InMoov2Hand",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "InMoov2Head",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.InMoov2Head",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "InMoov2Torso",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.InMoov2Torso",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "IndianTts",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.IndianTts",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "IntegratedMovement",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.IntegratedMovement",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Intro",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Intro",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "InverseKinematics",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.InverseKinematics",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "InverseKinematics3D",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.InverseKinematics3D",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "IpCamera",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.IpCamera",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "JFugue",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.JFugue",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "JMonkeyEngine",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.JMonkeyEngine",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "JMonkeyEngineTest",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.JMonkeyEngineTest",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "JavaScript",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.JavaScript",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Joystick",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Joystick",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "KafkaConnector",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.KafkaConnector",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Keyboard",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Keyboard",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "KeyboardSim",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.KeyboardSim",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "LeapMotion",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.LeapMotion",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "LeapMotion2",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.LeapMotion2",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Lidar",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Lidar",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "LidarVlp16",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.LidarVlp16",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Lloyd",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Lloyd",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Lm75a",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Lm75a",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "LocalSpeech",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.LocalSpeech",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Log",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Log",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Mail",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Mail",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "MarySpeech",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.MarySpeech",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Maven",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Maven",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "MobilePlatform",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.MobilePlatform",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Motor",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Motor",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "MotorDualPwm",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.MotorDualPwm",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "MotorHat4Pi",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.MotorHat4Pi",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "MotorPort",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.MotorPort",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "MouseSim",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.MouseSim",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "MouthControl",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.MouthControl",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Mpr121",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Mpr121",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Mpu6050",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Mpu6050",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Mqtt",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Mqtt",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "MqttBroker",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.MqttBroker",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "MultiWii",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.MultiWii",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "MyoThalmic",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.MyoThalmic",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "NeoPixel",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.NeoPixel",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "OakD",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.OakD",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "OculusDiy",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.OculusDiy",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "OculusRift",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.OculusRift",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "OledSsd1306",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.OledSsd1306",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "OpenCV",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.OpenCV",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "OpenCVTest",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.OpenCVTest",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "OpenNi",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.OpenNi",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "OpenWeatherMap",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.OpenWeatherMap",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Osc",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Osc",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Pcf8574",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Pcf8574",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Pid",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Pid",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Pingdar",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Pingdar",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Pir",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Pir",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Polly",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Polly",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "ProgramAB",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.ProgramAB",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Py4j",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Py4j",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Python",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Python",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "RSSConnector",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.RSSConnector",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Random",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Random",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "RasPi",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.RasPi",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Rekognition",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Rekognition",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Relay",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Relay",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "RoboClaw",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.RoboClaw",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Roomba",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Roomba",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Ros",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Ros",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
             "name": "Runtime",
             "request": "launch",
             "mainClass": "org.myrobotlab.service.Runtime",
-            "projectName": "mrl",
-            "args": [
-                "--log-level",
-                "info",
-                "-s",
-                "webgui", "WebGui", "intro", "Intro", "python", "Python",
-                "-c",
-                "dev"
-              ]
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Sabertooth",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Sabertooth",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Security",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Security",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "SegmentDisplay",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.SegmentDisplay",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "SensorMonitor",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.SensorMonitor",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Serial",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Serial",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "SerialRelay",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.SerialRelay",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Servo",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Servo",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "ServoMixer",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.ServoMixer",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Shoutbox",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Shoutbox",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "SlackBot",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.SlackBot",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Solr",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Solr",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Sphinx",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Sphinx",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "SpotMicro",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.SpotMicro",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Ssc32UsbServoController",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Ssc32UsbServoController",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "TarsosDsp",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.TarsosDsp",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Tensorflow",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Tensorflow",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "TesseractOcr",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.TesseractOcr",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Test",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Test",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "TestCatcher",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.TestCatcher",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "ThingSpeak",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.ThingSpeak",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "TopCodes",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.TopCodes",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Tracking",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Tracking",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Twitter",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Twitter",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "UltrasonicSensor",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.UltrasonicSensor",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "UltrasonicSensorTest",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.UltrasonicSensorTest",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Updater",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Updater",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "VideoStreamer",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.VideoStreamer",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "VirtualArduino",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.VirtualArduino",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "VoiceRss",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.VoiceRss",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "WatchDogTimer",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.WatchDogTimer",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "WebGui",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.WebGui",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "WebSocketConnector",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.WebSocketConnector",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Webcam",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Webcam",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "WebkitSpeechRecognition",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.WebkitSpeechRecognition",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "WebkitSpeechSynthesis",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.WebkitSpeechSynthesis",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Wii",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Wii",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "WiiDar",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.WiiDar",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "WikiDataFetcher",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.WikiDataFetcher",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Wikipedia",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Wikipedia",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "WolframAlpha",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.WolframAlpha",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "WorkE",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.WorkE",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Xmpp",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.Xmpp",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "YahooFinanceStockQuote",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.YahooFinanceStockQuote",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "_TemplateService",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service._TemplateService",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "Pin",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.data.Pin",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "SpeechSynthesisTest",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.service.interfaces.SpeechSynthesisTest",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "StringUtil",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.string.StringUtil",
+            "projectName": "mrl"
+        },
+        {
+            "type": "java",
+            "name": "AbstractTest",
+            "request": "launch",
+            "mainClass": "org.myrobotlab.test.AbstractTest",
+            "projectName": "mrl"
         }
     ]
 }

@@ -235,10 +235,7 @@ public class DHRobotArm implements Serializable {
     int numSteps = 0;
     double iterStep = 0.05;
     // we're in millimeters..
-    double errorThreshold = 20.0;
-    
-    maxIterations = 1000;
-    
+    double errorThreshold = 2.0;
     // what's the current point
     while (true) {
       numSteps++;
