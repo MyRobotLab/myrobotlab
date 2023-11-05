@@ -1280,15 +1280,19 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * 
    * @param volume
    */
-  public void onPeak(double volume) {
-    if (config.neoPixelFlashWhenSpeaking && !configStarted) {
-      if (volume > 0.5) {
-        if (ledDisplayMap.get("onPeakColor") != null) {
-          LedDisplayData onPeakColor = ledDisplayMap.get("onPeakColor");
-          invoke("publishFlash", onPeakColor);
-        }
-      }
-    }
+  public void onPirOn() {
+    led.action = "flash";
+    led.red = 50;
+    led.green = 100;
+    led.blue = 150;
+    led.count = 5;
+    led.interval = 500;
+    // FIXME flash on config.flashOnBoot
+    invoke("publishFlash");
+    String botState = chatBot.getPredicate("botState");
+    if ("sleeping".equals(botState)) {
+      invoke("publishEvent", "WAKE");
+    }    
   }
 
   /**
