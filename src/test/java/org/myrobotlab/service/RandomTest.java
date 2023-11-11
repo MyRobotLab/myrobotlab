@@ -3,7 +3,10 @@ package org.myrobotlab.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Map;
+
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.service.Random.RandomMessage;
 
 public class RandomTest extends AbstractServiceTest {
 
@@ -25,8 +28,9 @@ public class RandomTest extends AbstractServiceTest {
     assertTrue("set interval 1000 base value", 1000 == clock.getInterval());
 
     random.addRandom(0, 200, "clock", "setInterval", 5000, 10000);
+    random.enable();
 
-    sleep(200);
+    sleep(300);
 
     assertTrue("should have method", random.getKeySet().contains("clock.setInterval"));
     
@@ -45,13 +49,13 @@ public class RandomTest extends AbstractServiceTest {
     assertTrue("clock should be started 1", clock.isClockRunning());
     
     // disable all of a services random events
-    random.disable("clock");
+    random.disable("clock.startClock");
     clock.stopClock();
     sleep(200);
     assertTrue("clock should not be started", !clock.isClockRunning());
     
     // enable all of a service's random events
-    random.enable("clock");
+    random.enable("clock.startClock");
     sleep(200);
     assertTrue("clock should be started 2", clock.isClockRunning());
     
@@ -77,7 +81,15 @@ public class RandomTest extends AbstractServiceTest {
     assertTrue("clock should not be started", !clock.isClockRunning());
     assertTrue(String.format("random method 3 should be %d => 5000 values", clock.getInterval()), 5000 <= clock.getInterval());
     assertTrue(String.format("random method 3 should be %d <= 10000 values",clock.getInterval()) , clock.getInterval() <= 10000);
+
+    clock.stopClock();
+    random.purge();
         
+    Map<String, RandomMessage> events = random.getRandomEvents();
+    assertTrue(events.size() == 0);
+    
+    random.addRandom("named task", 200, 500, "clock", "setInterval", 100, 1000, 10);
+    
     clock.releaseService();
     random.releaseService();
 
