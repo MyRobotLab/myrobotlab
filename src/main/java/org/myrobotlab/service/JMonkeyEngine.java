@@ -2157,7 +2157,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     new File(getDataDir()).mkdirs();
     new File(getResourceDir()).mkdirs();
 
-    // assetManager.registerLocator("./", FileLocator.class);
+    assetManager.registerLocator("./", FileLocator.class);
     assetManager.registerLocator(getDataDir(), FileLocator.class);
     assetManager.registerLocator(assetsDir, FileLocator.class);
     assetManager.registerLocator(modelsDir, FileLocator.class);
