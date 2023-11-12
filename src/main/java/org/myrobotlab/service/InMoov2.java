@@ -30,7 +30,7 @@ import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.OpenCVConfig;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.LedDisplayData;
 import org.myrobotlab.service.data.Locale;
@@ -913,6 +913,19 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     // FIXME - publish event with or without data ? String file reference
     return data;
   }
+  
+  /**
+   * onPeak volume callback TODO - maybe make it variable with volume ?
+   * 
+   * @param volume
+   */
+  public void onPeak(double volume) {
+    if (config.neoPixelFlashWhenSpeaking && !configStarted) {
+      if (volume > 0.5) {
+          invoke("publishSpeakingFlash", "speaking");
+      }
+    }
+  }
 
   /**
    * initial callback for Pir sensor Default behavior will be: send fsm event
@@ -1555,11 +1568,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     setHandSpeed("right", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
   }
 
-  public String setSpeechType(String speechType) {
-    updatePeerType("mouth" /* getPeerName("mouth") */, speechType);
-    return speechType;
-  }
-
   public void setTorsoSpeed(Double topStom, Double midStom, Double lowStom) {
     sendToPeer("torso", "setSpeed", topStom, midStom, lowStom);
   }
@@ -1928,6 +1936,44 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     sendToPeer("leftArm", "waitTargetPos");
     sendToPeer("torso", "waitTargetPos");
   }
+  
+  public boolean setSpeechType(String speechType) {
+    
+    if (speechType == null) {
+      error("cannot change speech type to null");
+      return false;
+    }
+    
+    if (!speechType.contains(".")) {
+      speechType = "org.myrobotlab.service." + speechType;
+    }
+    
+    Runtime runtime = Runtime.getInstance();
+    String peerName = getName() + ".mouth";
+    Plan plan = runtime.getDefault(peerName, speechType);
+    try {
+      SpeechSynthesisConfig mouth = (SpeechSynthesisConfig)plan.get(peerName);
+      mouth.speechRecognizers = new String[] { getName() + ".ear" };
+
+      savePeerConfig("mouth", plan.get(peerName));
+      
+      if (isPeerStarted("mouth")) {
+        // restart 
+        releasePeer("mouth");
+        startPeer("mouth");
+      }
+      
+    } catch(Exception e) {
+      error("could not create config for %s", speechType);
+      return false;
+    }
+    
+    return true;
+    
+    // updatePeerType("mouth" /* getPeerName("mouth") */, speechType);
+    // return speechType;
+  }
+
 
   public static void main(String[] args) {
     try {
@@ -1937,15 +1983,21 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       // Runtime.start("s01", "Servo");
       // Runtime.start("intro", "Intro");
 
-      // Runtime.startConfig("pr-1213-1");
+      Runtime.startConfig("dev");
       
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
       // webgui.setPort(8888);
       webgui.startService();
-
       InMoov2 i01 = (InMoov2)Runtime.start("i01","InMoov2");
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+      
+
       OpenCVConfig ocvConfig = i01.getPeerConfig("opencv", new StaticType<>() {});
       ocvConfig.flip = true;
       i01.setPeerConfigValue("opencv", "flip", true);
@@ -1955,10 +2007,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
       // Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
 
       Runtime.start("python", "Python");
