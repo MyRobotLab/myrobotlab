@@ -545,7 +545,7 @@ public abstract class AbstractSpeechSynthesis<C extends SpeechSynthesisConfig> e
       log.warn("{} audioFile is null", getName());
       return data;
     }
-    return audioFile.play(data);
+    return audioFile.playAudioData(data);
   }
 
   /**
@@ -571,6 +571,12 @@ public abstract class AbstractSpeechSynthesis<C extends SpeechSynthesisConfig> e
    * @return - list of audio data
    */
   public List<AudioData> parse(String toSpeak) {
+    
+    // we generate a list of audio data to play to support
+    // synthesizing this speech
+    List<AudioData> playList = new ArrayList<AudioData>();
+    
+    try {
 
     // TODO - not sure if we want to support this notation
     // but at the moment it seems useful
@@ -595,10 +601,6 @@ public abstract class AbstractSpeechSynthesis<C extends SpeechSynthesisConfig> e
     List<String> spokenParts = parseEffects(toSpeak);
 
     toSpeak = filterText(toSpeak);
-
-    // we generate a list of audio data to play to support
-    // synthesizing this speech
-    List<AudioData> playList = new ArrayList<AudioData>();
 
     for (String speak : spokenParts) {
 
@@ -627,6 +629,9 @@ public abstract class AbstractSpeechSynthesis<C extends SpeechSynthesisConfig> e
     // so starting speaking event is when the first audio is "started"
     // and finished speaking is when the last audio is finished
 
+    } catch(Exception e) {
+      error(e);
+    }
     return playList;
   }
 

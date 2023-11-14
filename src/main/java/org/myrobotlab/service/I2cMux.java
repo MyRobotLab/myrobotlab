@@ -237,11 +237,13 @@ public class I2cMux extends Service<I2cMuxConfig> implements I2CControl, I2CCont
     }
   }
 
+  @Deprecated /* use attach(String) */
   public void attach(String controllerName, String deviceBus, String deviceAddress) {
     attach((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
   }
 
   @Override
+  @Deprecated /*use attach(String) */
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
 
     if (isAttached && this.controller != controller) {

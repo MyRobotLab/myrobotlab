@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -32,6 +36,8 @@ public class AudioProcessor extends Thread {
   // it seems to make sense - some how the file gets decoded enough - so that
   // a audio decoder can be slected from some
   // internal registry ... i think
+  
+  private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);  transient private final ScheduledExecutorService delayScheduler = Executors.newScheduledThreadPool(1);
 
   protected int currentTrackCount = 0;
 
@@ -231,7 +237,14 @@ public class AudioProcessor extends Thread {
                 peak = abs;
               }
             }
-            audioFile.invoke("publishPeak", peak * (double) audioFile.getPeakMultiplier());
+            
+            final double value = peak * (double) audioFile.getPeakMultiplier();
+                
+            if (audioFile.getConfig().peakDelayMs == null) {
+              audioFile.invoke("publishPeak", value);  
+            } else {              
+              delayScheduler.schedule(() -> audioFile.invoke("publishPeak", value), audioFile.getConfig().peakDelayMs, TimeUnit.MILLISECONDS);
+            }
           }
         }
         // Stop
@@ -247,6 +260,12 @@ public class AudioProcessor extends Thread {
 
         // System.gc();
 
+        if (audioFile.getConfig().peakDelayMs == null) {
+          audioFile.invoke("publishPeak", 0);  
+        } else {              
+          delayScheduler.schedule(() -> audioFile.invoke("publishPeak", 0), audioFile.getConfig().peakDelayMs, TimeUnit.MILLISECONDS);
+        }
+        
         audioFile.invoke("publishPeak", 0);
         audioFile.invoke("publishAudioEnd", data);
 
@@ -313,6 +332,7 @@ public class AudioProcessor extends Thread {
     }
     // default waits on queued audio requests
     log.info("audio processor {} exiting", getName());
+    delayScheduler.shutdown();
   }
 
   public void setVolume(Double volume) {

@@ -1,14 +1,13 @@
 package org.myrobotlab.service;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.config.MotorDualPwmConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 
 public class MotorDualPwm extends AbstractMotor<MotorDualPwmConfig> {
   private static final long serialVersionUID = 1L;
@@ -92,32 +91,34 @@ public class MotorDualPwm extends AbstractMotor<MotorDualPwmConfig> {
     return c;
   }
 
-  public static void main(String[] args) throws InterruptedException {
-
-    LoggingFactory.init(Level.INFO);
-    String arduinoPort = "COM5";
-
-    VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+  public static void main(String[] args) {
     try {
-      virtual.connect(arduinoPort);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    Runtime.start("gui", "SwingGui");
-    Runtime.start("python", "Python");
+      LoggingFactory.init(Level.INFO);
+      String arduinoPort = "COM5";
 
-    MotorDualPwm motor = (MotorDualPwm) Runtime.start("motor", "MotorDualPwm");
-    Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-    arduino.connect(arduinoPort);
-    motor.setPwmPins(10, 11);
-    try {
+      Platform.setVirtual(true);
+      Runtime.startConfig("dev");
+      Runtime.start("webgui", "WebGui");
+      MotorDualPwm motor = (MotorDualPwm) Runtime.start("motor", "MotorDualPwm");
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      arduino.connect(arduinoPort);
+      motor.setPwmPins(10, 11);
+
       motor.attach(arduino);
     } catch (Exception e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
-
   }
 
+  @Override
+  public void attachMotorController(String controller) throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void detachMotorController(String controller) {
+    // TODO Auto-generated method stub
+    
+  }
 }

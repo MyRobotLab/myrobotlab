@@ -52,6 +52,18 @@ public class MotorPort extends AbstractMotor<MotorPortConfig> {
       log.error("main threw", e);
     }
   }
+
+  @Override
+  public void attachMotorController(String controller) throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void detachMotorController(String controller) {
+    // TODO Auto-generated method stub
+    
+  }
   
   
 
