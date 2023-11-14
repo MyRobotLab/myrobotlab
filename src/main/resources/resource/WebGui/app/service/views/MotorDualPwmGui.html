@@ -40,18 +40,23 @@
                 </tr>
                 <tr>
                     <td>
-                        <input class="form-control" type="text" width="4" ng-model="service.mapper.minX" title="minimum input"/>
+                        min<br/>
+                        <input class="form-control" type="text" width="4" ng-model="service.config.mapper.minIn" title="minimum input"/>
                     </td>
                     <td>
-                        <input class="form-control" type="text" width="4" ng-model="service.mapper.maxX" title="maximum input"/>
+                        max<br/>
+                        <input class="form-control" type="text" width="4" ng-model="service.config.mapper.maxIn" title="maximum input"/>
                     </td>
                     <td>
-                        <input class="form-control" type="text" width="4" ng-model="service.mapper.minY" title="minimum output"/>
+                        min<br/>
+                        <input class="form-control" type="text" width="4" ng-model="service.config.mapper.minOut" title="minimum output"/>
                     </td>
                     <td>
-                        <input class="form-control" type="text" width="4" ng-model="service.mapper.maxY" title="maximum output"/>
+                        max<br/>
+                        <input class="form-control" type="text" width="4" ng-model="service.config.mapper.maxOut" title="maximum output"/>
                     </td>
                     <td>
+                        <br/>                        
                         <button type="button" class="btn btn-default" ng-click='update()'>update</button>
                     </td>
                 </tr>
@@ -61,7 +66,7 @@
                 <tr>
                     <td>
                         <b>invert</b>
-                        &nbsp;<toggle ng-model="service.mapper.inverted" class="miniBTN" title="This will invert motor direction" ng-change="msg.setInverted(service.mapper.inverted)" on="" off="" size="btn-lg"/>
+                        &nbsp;<toggle ng-model="service.config.mapper.inverted" class="miniBTN" title="This will invert motor direction" ng-change="msg.setInverted(true)" on="" off="" size="btn-lg"/>
                     </td>
                     <td></td>
                     <td></td>
@@ -73,19 +78,9 @@
 </div>
 <div class="row">
     <div class="col-md-6">
-        <div class="btn-group" uib-dropdown>
-            <button type="button" class="btn btn-default">controller {{requestedController}}</button>
-            <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
-                <span class="caret"></span>
-            </button>
-            <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
-                <li ng-repeat="c in service.controllers">
-                    <a href="" ng-click="setController(c)">{{c}}</a>
-                </li>
-            </ul>
-        </div>
-        <button type="button" class="btn btn-default" ng-click='attach()' ng-show='!service.controllerName'>attach</button>
-        <button type="button" class="btn btn-default" ng-click='detach()' ng-show='service.controllerName'>detach</button>
+        <attach options='options'/>
+        <button type="button" class="btn btn-default" ng-click='attach()' ng-show='!service.config.controller'>attach</button>
+        <button type="button" class="btn btn-default" ng-click='detach()' ng-show='service.config.controller'>detach</button>
         <div class="btn-group" uib-dropdown>
             <button type="button" class="btn btn-default">left pin {{service.leftPwmPin}}</button>
             <button id="single-button" ng-disabled="service.controller != null" type="button" class="btn btn-default" uib-dropdown-toggle>
@@ -108,7 +103,7 @@
                 </li>
             </ul>
         </div>
-        <button type="button" class="btn btn-default" ng-click='stop()' ng-show='service.controllerName'>
+        <button type="button" class="btn btn-default" ng-click='stop()' ng-show='service.config.controller'>
             <img src="stop-large.png" width="40"/>
         </button>
     </div>

@@ -196,4 +196,16 @@ public class Motor extends AbstractMotor<MotorConfig> {
 
   }
 
+  @Override
+  public void attachMotorController(String controller) throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void detachMotorController(String controller) {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

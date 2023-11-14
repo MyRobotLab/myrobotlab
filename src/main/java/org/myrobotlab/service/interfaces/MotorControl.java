@@ -26,13 +26,65 @@
 package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.sensor.EncoderPublisher;
+import org.myrobotlab.service.abstracts.AbstractMotor;
+import org.slf4j.Logger;
 
 public interface MotorControl extends RelativePositionControl, AnalogListener, Attachable {
 
-  void attachMotorController(MotorController controller) throws Exception;
+  public final static Logger log = LoggerFactory.getLogger(MotorControl.class);
 
-  void detachMotorController(MotorController controller);
+  /**
+   * Attaching a motor controller with a reference is useful in Python or Java
+   * but final implementation should always be done with a named string parameter
+   * attachMotorController(String name) to support standardized messaging without
+   * the need of typed references 
+   * 
+   * @param controller
+   * @throws Exception
+   */
+  default void attachMotorController(MotorController controller) throws Exception {
+    if (controller == null) {
+      log.error("cannot attach with null controller");
+      return;
+    }
+    attachMotorController(controller.getName());
+  }
+
+  /**
+   * Implementation of attachMotorController
+   * @param controller
+   * @throws Exception
+   */
+  void attachMotorController(String controller) throws Exception;
+
+  
+  /**
+   * Detaching a motor controller with a reference is useful in Python or Java
+   * but final implementation should always be done with a named string parameter
+   * detachMotorController(String name) to support standardized messaging without
+   * the need of typed references 
+   * 
+   * @param controller
+   * @throws Exception
+   */
+  default void detachMotorController(MotorController controller){
+    if (controller == null) {
+      log.error("cannot detach with null controller");
+      return;
+    }
+    detachMotorController(controller.getName());
+  }
+
+
+  /**
+   * Implementation of detachMotorController
+   * @param controller
+   * @throws Exception
+   */
+  void detachMotorController(String controller);
+
 
   /**
    * the raw non-computed input range is -1.0 &lt;---&gt; 1.0

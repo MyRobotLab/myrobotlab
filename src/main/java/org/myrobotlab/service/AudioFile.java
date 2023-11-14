@@ -223,10 +223,10 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
     data.track = track;
     data.repeat = repeat;
 
-    return play(data);
+    return playAudioData(data);
   }
 
-  public AudioData play(AudioData data) {
+  public AudioData playAudioData(AudioData data) {
     // use File interface such that filename is preserved
     // but regardless of location (e.g. url, local, resource)
     // or type (mp3 wav) a stream is opened and the
@@ -382,7 +382,7 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
     // TODO Auto-generated method stub
     AudioData data = new AudioData(filename);
     data.repeat = count;
-    return play(data);
+    return playAudioData(data);
   }
 
   @Deprecated /* use setTrack() */

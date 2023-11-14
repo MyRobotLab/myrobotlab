@@ -6,6 +6,13 @@ angular.module('mrlapp.service.MotorDualPwmGui', []).controller('MotorDualPwmGui
 
     $scope.requestedPower = 0
     $scope.powerOutput = 0
+    $scope.options = {
+        interface: 'PinArrayControl',
+        attach: _self.selectController,
+        // isAttached: $scope.service.config.controller // callback: function...
+        // attachName: $scope.controllerName
+    }
+
 
     $scope.powerSlider = {
         value: 0,
@@ -14,12 +21,9 @@ angular.module('mrlapp.service.MotorDualPwmGui', []).controller('MotorDualPwmGui
             ceil: 100,
             minLimit: -100,
             maxLimit: 100,
-            // hideLimitLabels: true,
             onStart: function() {},
             onChange: function() {
-                // if ($scope.sliderEnabled) {
                 msg.send('move', $scope.requestedPower / 100)
-                //}
             },
             onEnd: function() {}
         }
@@ -35,8 +39,12 @@ angular.module('mrlapp.service.MotorDualPwmGui', []).controller('MotorDualPwmGui
     this.updateState = function(service) {
         $scope.service = service
         if (firstTime) {
-            $scope.requestedController = service.controllerName
+            $scope.requestedController = service.config.controller
             firstTime = false
+
+            $scope.options.attachName = service.config.controller
+            $scope.options.isAttached = service.attached
+            $scope.options.interface = 'PinArrayControl'    
         }
     }
 
@@ -77,7 +85,7 @@ angular.module('mrlapp.service.MotorDualPwmGui', []).controller('MotorDualPwmGui
 
     $scope.update = function() {
         console.info('update')
-        msg.send('map', $scope.service.mapper.minX, $scope.service.mapper.maxX, $scope.service.mapper.minY, $scope.service.mapper.maxY)
+        msg.send('map', $scope.service.config.mapper.minIn, $scope.service.config.mapper.minIn, $scope.service.config.mapper.minOut, $scope.service.config.mapper.maxOut)
     }
 
     $scope.setController = function(c) {
@@ -91,8 +99,8 @@ angular.module('mrlapp.service.MotorDualPwmGui', []).controller('MotorDualPwmGui
     }
 
     $scope.detach = function() {
-        console.info('detach', $scope.service.controllerName)
-        msg.send('detach', $scope.service.controllerName)
+        console.info('detach')
+        msg.send('detach')
     }
 
     $scope.moveTo = function() {
