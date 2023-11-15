@@ -25,9 +25,9 @@ public class WebXR extends Service<WebXRConfig> {
   }
   
   public Event publishEvent(Event event) {
-    // if (log.isDebugEnabled()) {
-      log.info("publishEvent XRController {}", event);
-    // }
+    if (log.isDebugEnabled()) {
+      log.debug("publishEvent {}", event);
+    }
         
     String path = String.format("event.%s.%s", event.meta.get("handedness"), event.type);
     if (event.value != null) {
@@ -53,9 +53,9 @@ public class WebXR extends Service<WebXRConfig> {
    * @return
    */
   public Pose publishPose(Pose pose) {
-//    if (log.isDebugEnabled()) {
-      log.error("publishPose {}", pose);
-//    }    
+    if (log.isDebugEnabled()) {
+      log.debug("publishPose {}", pose);
+    }    
     // process mappings config into joint angles
     Map<String, Double> map = new HashMap<>();
 
@@ -83,27 +83,27 @@ public class WebXR extends Service<WebXRConfig> {
       }
     }
     
-//    InverseKinematics3D ik = (InverseKinematics3D)Runtime.getService("ik3d");
-//    if (ik != null && pose.name.equals("left")) {
-//      ik.setCurrentArm("left", InMoov2Arm.getDHRobotArm("i01", "left"));
-//
-//      ik.centerAllJoints("left");
-//
-//      for (int i = 0; i < 1000; ++i) {
-//        
-//        ik.centerAllJoints("left");
-//        ik.moveTo("left", 0, 0.0+ i * 0.02, 0.0);
-//
-//        
-//        // ik.moveTo(pose.name, new Point(0, -200, 50));
-//      }
-//      
-//      // map name
-//      // and then map all position and rotation too :P
-//      Point p = new Point(70 + pose.position.x, -550 + pose.position.y, pose.position.z);
-//      
-//      ik.moveTo(pose.name, p);
-//    }
+    InverseKinematics3D ik = (InverseKinematics3D)Runtime.getService("ik3d");
+    if (ik != null && pose.name.equals("left")) {
+      ik.setCurrentArm("left", InMoov2Arm.getDHRobotArm("i01", "left"));
+
+      ik.centerAllJoints("left");
+
+      for (int i = 0; i < 1000; ++i) {
+        
+        ik.centerAllJoints("left");
+        ik.moveTo("left", 0, 0.0+ i * 0.02, 0.0);
+
+        
+        // ik.moveTo(pose.name, new Point(0, -200, 50));
+      }
+      
+      // map name
+      // and then map all position and rotation too :P
+      Point p = new Point(70 + pose.position.x, -550 + pose.position.y, pose.position.z);
+      
+      ik.moveTo(pose.name, p);
+    }
 
     if (map.size() > 0) {
       invoke("publishJointAngles", map);

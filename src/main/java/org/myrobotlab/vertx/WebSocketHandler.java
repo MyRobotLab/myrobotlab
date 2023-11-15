@@ -108,10 +108,6 @@ public class WebSocketHandler implements Handler<ServerWebSocket> {
     // client
     MultiMap headers = socket.headers();
     String uri = socket.uri();
-    // String remoteId = r.getRequest().getParameter("id");
-    String id = String.format("vertx-%s", service.getName());
-    // String uuid = UUID.randomUUID().toString();
-    String uuid = socket.binaryHandlerID();
     Connection connection = new Connection(uuid, id, service.getName());
     connection.put("c-type", service.getSimpleName());
     connection.put("gateway", service.getName());
