@@ -11,6 +11,7 @@ public class Orientation {
   public Double roll = null;
   public Double pitch = null;
   public Double yaw = null;
+  public String src = null;
 
   // default constructor (values will be null until set)
   public Orientation() {
