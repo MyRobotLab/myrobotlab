@@ -162,7 +162,7 @@
 <!-- Duplicate entry for com.squareup.okhttp3-okhttp-3.9.0 skipping -->
 <!-- AzureTranslator end -->
 
-<!-- BoofCV begin -->
+<!-- BoofCv begin -->
   <dependency>
     <groupId>org.boofcv</groupId>
     <artifactId>boofcv-all</artifactId>
@@ -197,6 +197,12 @@
     <scope>provided</scope>
   </dependency>
 <!-- CsvConnector end -->
+
+<dependency>
+	<groupId>org.nanohttpd</groupId> <!-- <groupId>com.nanohttpd</groupId> for 2.1.0 and earlier -->
+	<artifactId>nanohttpd</artifactId>
+	<version>2.2.0</version>
+</dependency>
 
 <!-- Deeplearning4j begin -->
   <dependency>
@@ -1602,6 +1608,34 @@
   </dependency>
 <!-- Twitter end -->
 
+<!-- Vertx begin -->
+  <dependency>
+    <groupId>io.vertx</groupId>
+    <artifactId>vertx-core</artifactId>
+    <version>4.3.3</version>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+  </dependency>
+  <dependency>
+    <groupId>io.vertx</groupId>
+    <artifactId>vertx-web</artifactId>
+    <version>4.3.3</version>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+  </dependency>
+<!-- Duplicate entry for io.netty-netty-all-4.1.82.Final skipping -->
+<!-- Vertx end -->
+
 <!-- VoiceRss begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
   <dependency>
@@ -1644,6 +1678,18 @@
 <!-- WebSocketConnector begin -->
 <!-- Duplicate entry for javax.websocket-javax.websocket-api-1.1 skipping -->
 <!-- WebSocketConnector end -->
+
+  <dependency>
+      <groupId>au.edu.federation.caliko</groupId>
+      <artifactId>caliko</artifactId>
+      <version>1.3.8</version>
+    </dependency> 
+    
+        <dependency>
+      <groupId>au.edu.federation.caliko.visualisation</groupId>
+      <artifactId>caliko-visualisation</artifactId>
+      <version>1.3.8</version>
+    </dependency> 
 
 <!-- Webcam begin -->
   <dependency>
@@ -1733,6 +1779,12 @@
   </dependency>
 <!-- Xmpp end -->
 
+<dependency>
+    <groupId>dev.onvoid.webrtc</groupId>
+    <artifactId>webrtc-java</artifactId>
+    <version>0.7.0</version>
+</dependency>
+
 
   	<dependency>
 	    <groupId>org.mockito</groupId>
@@ -1740,6 +1792,11 @@
 	    <version>3.12.4</version>
 	    <scope>test</scope>
 	</dependency>
+  	<dependency>
+  		<groupId>au.edu.federation.caliko.demo</groupId>
+  		<artifactId>caliko-demo</artifactId>
+  		<version>1.3.8</version>
+  	</dependency>
   </dependencies>
   
   <build>
