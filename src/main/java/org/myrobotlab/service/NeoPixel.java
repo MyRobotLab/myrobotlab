@@ -422,9 +422,15 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
     data.timeOff = timeOff;
     displayQueue.add(data);
   }
-
-  public void onFlash(LedDisplayData data) {
-    displayQueue.add(data);
+  
+  /**
+   * Publishes a flash based on a predefined name
+   * @param name
+   */
+  public void onFlash(String name) {
+    if (config.flashMap != null && config.flashMap.containsKey(name)) {
+      displayQueue.add(config.flashMap.get(name));
+    }
   }
 
   public void flashBrightness(double brightNess) {

@@ -15,6 +15,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.io.FilenameUtils;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
@@ -35,7 +36,6 @@ import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.OpenCVConfig;
 import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.data.JoystickData;
-import org.myrobotlab.service.data.LedDisplayData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.JoystickListener;
@@ -106,8 +106,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    */
   protected String bootedConfig = null;
   
-  protected LedDisplayData led = new LedDisplayData();
-
   protected transient ProgramAB chatBot;
 
   protected List<String> configList;
@@ -159,8 +157,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   protected Long lastPirActivityTime;
 
-  protected Map<String, LedDisplayData> ledDisplayMap = new TreeMap<>();
-
   /**
    * supported locales
    */
@@ -199,14 +195,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
                                 // wakeWord, pir active
     stateDefaults.add("powerDown"); // stops heartbeat, listening ?
     stateDefaults.add("shutdown");// ends mrl
-
-    ledDisplayMap.put("error", new LedDisplayData(120, 0, 0, 3, 30, 30));
-    ledDisplayMap.put("info", new LedDisplayData(0, 0, 120, 1, 30, 30));
-    ledDisplayMap.put("success", new LedDisplayData(0, 0, 120, 2, 30, 30));
-    ledDisplayMap.put("warn", new LedDisplayData(100, 100, 0, 3, 30, 30));
-    ledDisplayMap.put("heartbeat", new LedDisplayData(210, 110, 0, 2, 100, 30));
-    ledDisplayMap.put("pirOn", new LedDisplayData(60, 200, 90, 3, 100, 30));
-    ledDisplayMap.put("onPeakColor", new LedDisplayData(180, 53, 21, 3, 60, 30));
 
     customSoundMap.put("boot", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/confirmation.wav"));
     customSoundMap.put("wake", FileIO.gluePaths(getResourceDir(), "system/sounds/Notifications/ting.wav"));
@@ -511,14 +499,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
   }
 
-  public void flash(String name) {
-    LedDisplayData led = ledDisplayMap.get(name);
-    if (led == null) {
-      led = ledDisplayMap.get("default");
-    }
-    invoke("publishFlash", led.red, led.green, led.blue, led.count, led.timeOn, led.timeOff);
-  }
-
   /**
    * used to configure a flashing event - could use configuration to signal
    * different colors and states
@@ -526,18 +506,12 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * @return
    */
   public void flash() {
-    if (ledDisplayMap.get("default") != null) {
-      LedDisplayData led = ledDisplayMap.get("default");
-      invoke("publishFlash", led.red, led.green, led.blue, led.count, led.timeOn, led.timeOff);
-    }
+      invoke("publishFlash", "default");
   }
 
-  public void flash(int r, int g, int b, int count) {
-    // FIXME - this should be checking a protected "state"
-    if (ledDisplayMap.get("default") != null) {
-      LedDisplayData led = ledDisplayMap.get("default");
-      invoke("publishFlash", r, g, b, count, led.timeOn, led.timeOff);
-    }
+  public String flash(String name) {
+    invoke("publishFlash", name);
+    return name;
   }
 
   public void fullSpeed() {
@@ -1074,6 +1048,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   public void onConfigFinished(String configName) {
     log.info("onConfigFinished");
+    configStarted = false;
     invoke("publishBoot");
   }
 
@@ -1161,11 +1136,10 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
     // flash error until errors are cleared
     if (config.healthCheckFlash) {
-      if (errors.size() > 0 && ledDisplayMap.containsKey("error")) {
-        invoke("publishFlash", ledDisplayMap.get("error"));
-      } else if (ledDisplayMap.containsKey("heartbeat")) {
-        LedDisplayData heartbeat = ledDisplayMap.get("heartbeat");
-        invoke("publishFlash", heartbeat);
+      if (errors.size() > 0) {
+        invoke("publishFlash", "error");
+      } else {
+        invoke("publishFlash", "heartbeat");
       }
     }
 
@@ -1289,21 +1263,9 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
   }
 
-  /**
-   * onPeak volume callback TODO - maybe make it variable with volume ?
-   * 
-   * @param volume
-   */
   public void onPirOn() {
-    led.action = "flash";
-    led.red = 50;
-    led.green = 100;
-    led.blue = 150;
-    led.count = 5;
-    led.timeOn = 500;
-    led.timeOff = 10;
-    // FIXME flash on config.flashOnBoot
-    invoke("publishFlash");
+
+    invoke("publishFlash", "pirOn");    
     ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
     if (chatBot != null) {
       String botState = chatBot.getPredicate("botState");
@@ -1531,19 +1493,24 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return configList;
   }
 
-  public LedDisplayData publishFlash(int r, int g, int b, int count, long timeOn, long timeOff) {
-    LedDisplayData data = new LedDisplayData();
-    data.red = r;
-    data.green = g;
-    data.blue = b;
-    data.count = count;
-    data.timeOn = timeOn;
-    data.timeOff = timeOff;
-    return data;
+  /**
+   * publishes a name for NeoPixel.onFlash to consume
+   * @param name
+   * @return
+   */
+  public String publishFlash(String name) {
+    return name;
   }
-
-  public LedDisplayData publishFlash(LedDisplayData data) {
-    return data;
+  
+  /**
+   * publishes a name for NeoPixel.onFlash to consume,
+   * in a seperate channel to potentially be used by 
+   * "speaking only" leds
+   * @param name
+   * @return
+   */
+  public String publishSpeakingFlash(String name) {
+    return name;
   }
 
   /**
@@ -1553,16 +1520,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   public void publishInactivity() {
     log.info("publishInactivity");
     fsm.fire("inactvity");
-  }
-
-  /**
-   * used to configure a flashing event - could use configuration to signal
-   * different colors and states
-   * 
-   * @return
-   */
-  public LedDisplayData publishFlash() {
-    return led;
   }
 
   /**
@@ -2345,12 +2302,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     closeLeftHand();
     closeRightHand();
   }
-  
-  public Event onEvent(Event event) {
     
-    return event;
-  }
-  
   public void wake() {
     log.info("wake");
     // do waking things - based on config

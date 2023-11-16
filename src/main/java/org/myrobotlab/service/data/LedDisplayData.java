@@ -12,11 +12,13 @@ public class LedDisplayData {
 
   public String action; // fill | flash | play animation | stop | clear
 
-  public int red;
+  public int red = 0;
 
-  public int green;
+  public int green = 0;
 
-  public int blue;
+  public int blue = 0;
+  
+  // public int brightness = 255; 
 
   // public int white?;
 

@@ -523,7 +523,7 @@ public class InMoov2Config extends ServiceConfig {
 //    mouth_audioFile.listeners.add(new Listener("publishAudioStart", name));
     
     // InMoov2 --to--> service 
-    listeners.add(new Listener("publishFlash", getPeerName("neoPixel"), "onLedDisplay"));
+    listeners.add(new Listener("publishFlash", getPeerName("neoPixel")));
     listeners.add(new Listener("publishEvent", getPeerName("chatBot"), "getResponse"));
     listeners.add(new Listener("publishPlayAudioFile", getPeerName("audioPlayer")));
     
