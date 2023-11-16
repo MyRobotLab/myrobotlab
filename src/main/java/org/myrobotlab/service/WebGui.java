@@ -1179,7 +1179,7 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
 
       // Platform.setVirtual(true);
       
-      Runtime.startConfig("default");
+      Runtime.startConfig("dev");
       
       boolean done = true;
       if (done) {
