@@ -11,6 +11,8 @@ import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.ServerWebSocket;
 
 /**
@@ -25,6 +27,8 @@ import io.vertx.core.http.ServerWebSocket;
 public class WebSocketHandler implements Handler<ServerWebSocket> {
 
   public final static Logger log = LoggerFactory.getLogger(WebSocketHandler.class);
+
+  
 
   /**
    * reference to the MRL Vertx service / websocket and http server
@@ -102,10 +106,16 @@ public class WebSocketHandler implements Handler<ServerWebSocket> {
   public void handle(ServerWebSocket socket) {
     // FIXME - get "id" from js client - need something unique from the js
     // client
+    MultiMap headers = socket.headers();
+    String uri = socket.uri();
+        
+    // FIXME - get "id" from js client - need something unique from the js
+    // client
     // String id = r.getRequest().getParameter("id");
     String id = String.format("vertx-%s", service.getName());
     // String uuid = UUID.randomUUID().toString();
-    String uuid = socket.binaryHandlerID();
+    String uuid = socket.binaryHandlerID();    
+    
     Connection connection = new Connection(uuid, id, service.getName());
     connection.put("c-type", service.getSimpleName());
     connection.put("gateway", service.getName());
