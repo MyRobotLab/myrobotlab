@@ -18,6 +18,11 @@ public class Gpt3Config extends ServiceConfig {
   public String engine = "gpt-3.5-turbo"; // "text-davinci-003"
   public String wakeWord = "wake";
   public String sleepWord = "sleep";
+  /**
+   * static prefix to send to gpt3
+   * e.g. " talk like a pirate when responding, "
+   */
+  public String prefix = null; 
   
   @Override
   public Plan getDefault(Plan plan, String name) {
