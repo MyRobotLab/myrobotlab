@@ -61,7 +61,7 @@ public class Gpt3 extends Service<Gpt3Config> implements TextListener, TextPubli
   private String currentChannelName;
 
   private String currentChannelType;
-
+  
   public Gpt3(String n, String id) {
     super(n, id);
   }
@@ -84,6 +84,10 @@ public class Gpt3 extends Service<Gpt3Config> implements TextListener, TextPubli
       if (c.sleepWord != null && text.contains(c.sleepWord) && !c.sleeping) {
         sleep();
         responseText = "Ok, I will go to sleep";
+      }
+      
+      if (c.prefix != null) {
+        text = c.prefix + " " + text;
       }
 
       if (!c.sleeping) {
