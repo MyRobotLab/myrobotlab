@@ -522,7 +522,7 @@ public class IvyWrapper extends Repo implements Serializable {
 
         File file = ar.getLocalFile();
         String filename = file.getAbsoluteFile().getAbsolutePath();
-        log.info("{}", filename);
+        log.info("{}", filename);        
 
         if ("zip".equalsIgnoreCase(artifact.getExt())) {
           info("unzipping %s", filename);
@@ -534,6 +534,8 @@ public class IvyWrapper extends Repo implements Serializable {
             throw new IOException(String.format("unable to unzip file %s", filename));
           }
         }
+
+        publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of artifacts for %s", (Object[]) serviceTypes)));
       }
 
       publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of %s", (Object[]) serviceTypes)));
