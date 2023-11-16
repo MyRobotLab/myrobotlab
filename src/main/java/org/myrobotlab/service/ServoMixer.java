@@ -676,24 +676,14 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
   public static void main(String[] args) throws Exception {
 
     try {
-      LoggingFactory.init("WARN");
-
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.startService();
-      
-      
-      boolean done = true;
-      if (done) {
-        return;
-      }
-      
-      
       Runtime.main(new String[] { "--id", "admin"});
       LoggingFactory.init("INFO");
 
       Runtime.start("i01.head.rothead", "Servo");
       Runtime.start("i01.head.neck", "Servo");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
       Python python = (Python) Runtime.start("python", "Python");
       ServoMixer mixer = (ServoMixer) Runtime.start("mixer", "ServoMixer");
     } catch (Exception e) {
