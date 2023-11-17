@@ -299,10 +299,16 @@ public class Random extends Service<RandomConfig> {
     super.getConfig();
 
     config.enabled = enabled;
+    
+    if (config.randomMessages == null) {
+      config.randomMessages = new HashMap<>();
+    }
 
     for (String key : randomData.keySet()) {
       RandomMessage msg = randomData.get(key);
       RandomMessageConfig m = new RandomMessageConfig();
+      m.service = msg.name;
+      m.method = msg.method;
       m.maxIntervalMs = msg.maxIntervalMs;
       m.minIntervalMs = msg.minIntervalMs;
       m.data = msg.data;
@@ -316,12 +322,16 @@ public class Random extends Service<RandomConfig> {
   @Override
   public RandomConfig apply(RandomConfig c) {
     super.apply(c);
-    enabled = c.enabled;
+    if (c.enabled) {
+      enable();
+    } else {
+      disable();
+    }
 
     try {
       for (String key : c.randomMessages.keySet()) {
         RandomMessageConfig msgc = c.randomMessages.get(key);
-        addRandom(msgc.minIntervalMs, msgc.maxIntervalMs, key.substring(0, key.lastIndexOf(".")), key.substring(key.lastIndexOf(".") + 1), msgc.data);
+        addRandom(key, msgc.minIntervalMs, msgc.maxIntervalMs, msgc.service, msgc.method, msgc.data);
         if (!msgc.enabled) {
           disable(key);
         }

@@ -282,40 +282,40 @@ public class InMoov2Config extends ServiceConfig {
     random.enabled = false;
 
     // setup name references to different services
-    RandomMessageConfig rm = new RandomMessageConfig(3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+    RandomMessageConfig rm = new RandomMessageConfig(name, "setLeftArmSpeed", 3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
     random.randomMessages.put(name + ".setLeftArmSpeed", rm);
 
-    rm = new RandomMessageConfig(3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+    rm = new RandomMessageConfig(name, "setRightArmSpeed", 3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
     random.randomMessages.put(name + ".setRightArmSpeed", rm);
 
-    rm = new RandomMessageConfig(3000, 8000, 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
+    rm = new RandomMessageConfig(name, "moveLeftArm", 000, 8000, 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
     random.randomMessages.put(name + ".moveLeftArm", rm);
 
-    rm = new RandomMessageConfig(3000, 8000, 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
+    rm = new RandomMessageConfig(name, "moveRightArm", 3000, 8000, 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
     random.randomMessages.put(name + ".moveRightArm", rm);
 
-    rm = new RandomMessageConfig(3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+    rm = new RandomMessageConfig(name, "setLeftHandSpeed", 3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
     random.randomMessages.put(name + ".setLeftHandSpeed", rm);
 
-    rm = new RandomMessageConfig(3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+    rm = new RandomMessageConfig(name, "setRightHandSpeed", 3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
     random.randomMessages.put(name + ".setRightHandSpeed", rm);
 
-    rm = new RandomMessageConfig(3000, 8000, 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 130.0, 175.0);
+    rm = new RandomMessageConfig(name, "moveLeftHand", 3000, 8000, 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 130.0, 175.0);
     random.randomMessages.put(name + ".moveLeftHand", rm);
 
-    rm = new RandomMessageConfig(3000, 8000, 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 130.0, 175.0);
+    rm = new RandomMessageConfig(name, "moveRightHand", 3000, 8000, 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 130.0, 175.0);
     random.randomMessages.put(name + ".moveRightHand", rm);
 
-    rm = new RandomMessageConfig(3000, 8000, 8.0, 20.0, 8.0, 20.0, 8.0, 20.0);
+    rm = new RandomMessageConfig(name, "setHeadSpeed",3000, 8000, 8.0, 20.0, 8.0, 20.0, 8.0, 20.0);
     random.randomMessages.put(name + ".setHeadSpeed", rm);
 
-    rm = new RandomMessageConfig(3000, 8000, 70.0, 110.0, 65.0, 115.0, 70.0, 110.0);
+    rm = new RandomMessageConfig(name, "moveHead", 3000, 8000, 70.0, 110.0, 65.0, 115.0, 70.0, 110.0);
     random.randomMessages.put(name + ".moveHead", rm);
 
-    rm = new RandomMessageConfig(3000, 8000, 2.0, 5.0, 2.0, 5.0, 2.0, 5.0);
+    rm = new RandomMessageConfig(name , "setTorsoSpeed", 3000, 8000, 2.0, 5.0, 2.0, 5.0, 2.0, 5.0);
     random.randomMessages.put(name + ".setTorsoSpeed", rm);
 
-    rm = new RandomMessageConfig(3000, 8000, 85.0, 95.0, 88.0, 93.0, 70.0, 110.0);
+    rm = new RandomMessageConfig(name, "moveTorso", 3000, 8000, 85.0, 95.0, 88.0, 93.0, 70.0, 110.0);
     random.randomMessages.put(name + ".moveTorso", rm);
 
     // == Peer - headTracking =============================
