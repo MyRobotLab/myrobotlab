@@ -12,14 +12,11 @@
         (        
         
         
-        <span ng-repeat="param in value.data">[
+        <span ng-repeat="param in value.data">
           <span ng-if="param.min !== null">
-            {{param.min}} - {{param.max}}
+            [ {{param.min}} - {{param.max}} ]
           </span>
-          <span ng-repeat="item in param.set">
-            {{item}}
-            <span ng-if="!$last || param.min !== null">, </span>
-          </span>]
+            {{param.set}}
           <span ng-if="!$last">, </span>
             
         </span>
@@ -91,4 +88,4 @@
         </div>
     </div>
 </div>
-<!-- {{parameters}} -->
+
