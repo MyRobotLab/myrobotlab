@@ -30,7 +30,7 @@ public class RandomTest extends AbstractServiceTest {
     random.addRandom(0, 200, "clock", "setInterval", 5000, 10000);
     random.enable();
 
-    sleep(300);
+    sleep(500);
 
     assertTrue("should have method", random.getKeySet().contains("clock.setInterval"));
     
