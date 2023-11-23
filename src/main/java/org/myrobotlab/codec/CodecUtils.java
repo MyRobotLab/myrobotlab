@@ -1,5 +1,6 @@
 package org.myrobotlab.codec;
 
+import java.awt.Color;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -188,7 +189,7 @@ public class CodecUtils {
   private static final ObjectMapper mapper = new ObjectMapper();
 
   /**
-   * The pretty printer to be used with {@link #mapper} 
+   * The pretty printer to be used with {@link #mapper}
    */
   private static final PrettyPrinter jacksonPrettyPrinter = new JacksonPrettyPrinter();
 
@@ -964,9 +965,8 @@ public class CodecUtils {
   }
 
   /**
-   * Serializes the specified object to JSON, using
-   * {@link #mapper} with {@link #jacksonPrettyPrinter} to pretty-ify the
-   * result. 
+   * Serializes the specified object to JSON, using {@link #mapper} with
+   * {@link #jacksonPrettyPrinter} to pretty-ify the result.
    *
    * @param ret
    *          The object to be serialized
@@ -1095,12 +1095,13 @@ public class CodecUtils {
       // path parts less than 3 is a dir or ls
       if (parts.length < 3) {
         // this morphs a path which has less than 3 parts
-        // into a runtime "ls" method call to do reflection of services or service methods
+        // into a runtime "ls" method call to do reflection of services or
+        // service methods
         // e.g. /clock -> /runtime/ls/"/clock"
         // e.g. /clock/ -> /runtime/ls/"/clock/"
 
         msg.method = "ls";
-        msg.data = new Object[] { "\"" + path + "\""};
+        msg.data = new Object[] { "\"" + path + "\"" };
         return msg;
       }
 
@@ -1483,7 +1484,8 @@ public class CodecUtils {
   }
 
   public static ServiceConfig readServiceConfig(String filename) throws IOException {
-    return readServiceConfig(filename, new StaticType<>() {});
+    return readServiceConfig(filename, new StaticType<>() {
+    });
   }
 
   /**
@@ -1629,4 +1631,58 @@ public class CodecUtils {
     return Base64.getDecoder().decode(input);
   }
 
+  public static int[] getColor(String value) {
+    String hex = getColorHex(value);
+    if (hex != null) {
+      return hexToRGB(hex);
+    }
+    return hexToRGB(value);
+  }
+
+  public static List<String> getColorNames() {
+    Field[] colorFields = Color.class.getDeclaredFields();
+    List<String> colorNames = new ArrayList<>();
+
+    for (Field field : colorFields) {
+      if (field.getType().equals(Color.class)) {
+        colorNames.add(field.getName());
+      }
+    }
+    return colorNames;
+  }
+
+  public static String getColorHex(String colorName) {
+    Color color;
+    try {
+      color = (Color) Color.class.getField(colorName.toLowerCase()).get(null);
+    } catch (Exception e) {
+      return null;
+    }
+    return String.format("#%06X", (0xFFFFFF & color.getRGB()));
+  }
+
+  public static int[] hexToRGB(String hexValue) {
+    if (hexValue == null) {
+      return null;
+    }
+    int[] rgb = new int[3];
+    try {
+      // Check if the hex value starts with '#' and remove it if present
+      if (hexValue.startsWith("#")) {
+        hexValue = hexValue.substring(1);
+      }
+
+      if (hexValue.startsWith("0x")) {
+        hexValue = hexValue.substring(2);
+      }
+
+      // Parse the hex string into integers for red, green, and blue components
+      rgb[0] = Integer.parseInt(hexValue.substring(0, 2), 16); // Red
+      rgb[1] = Integer.parseInt(hexValue.substring(2, 4), 16); // Green
+      rgb[2] = Integer.parseInt(hexValue.substring(4, 6), 16); // Blue
+    } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+      log.error("Invalid hex color value {}", hexValue);
+    }
+    return rgb;
+  }
 }
