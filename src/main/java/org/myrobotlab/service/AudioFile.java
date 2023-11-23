@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,17 +45,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.audio.AudioProcessor;
 import org.myrobotlab.audio.PlaylistPlayer;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Http;
 import org.myrobotlab.service.config.AudioFileConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.AudioControl;
+import org.myrobotlab.service.interfaces.AudioListener;
 import org.myrobotlab.service.interfaces.AudioPublisher;
 import org.slf4j.Logger;
-import java.util.Random;
 /**
  * 
  * AudioFile - This service can be used to play an audio file such as an mp3.
@@ -128,7 +129,16 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
 
   final private transient PlaylistPlayer playlistPlayer = new PlaylistPlayer(this);
 
-
+  public void attach(Attachable attachable) {
+    if (attachable instanceof AudioListener) {
+      attachAudioListener(attachable.getName());
+    }
+  }
+  
+  public void attach(AudioListener listener) {
+    attachAudioListener(listener.getName());
+  }
+  
   public void setPeakMultiplier(double peakMultiplier) {
     AudioFileConfig c = (AudioFileConfig)config;
     c.peakMultiplier = peakMultiplier;

@@ -1,8 +1,9 @@
 package org.myrobotlab.service.interfaces;
 
+import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.service.data.AudioData;
 
-public interface AudioPublisher {
+public interface AudioPublisher extends NameProvider {
 
   public static String[] publishMethods = new String[] { "publishAudioStart", "publishAudioEnd" };
 

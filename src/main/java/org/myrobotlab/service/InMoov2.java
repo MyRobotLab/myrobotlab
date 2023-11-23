@@ -1270,8 +1270,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   }
 
   public void onPirOn() {
-
-    invoke("publishFlash", "pirOn");    
+    // FIXME flash on config.flashOnBoot
+    invoke("publishFlash", "pir");
     ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
     if (chatBot != null) {
       String botState = chatBot.getPredicate("botState");
@@ -1530,9 +1530,13 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * if inactivityTime configured, this event is published after there has not
    * been in activity since.
    */
-  public void publishInactivity() {
-    log.info("publishInactivity");
-    fsm.fire("inactvity");
+  public String publishFlash(String flashName) {
+    return flashName;
+  }
+
+  public String publishHeartbeat() {
+    invoke("publishFlash", "heartbeat");
+    return getName();
   }
 
   /**

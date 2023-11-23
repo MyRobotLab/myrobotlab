@@ -103,7 +103,7 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
             $scope.pin = service.pin
         }
 
-        if (!$scope.state.controller) {
+        if ($scope.service.controller) {
             $scope.state.controller = $scope.service.controller
         }
 
