@@ -123,7 +123,7 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
         try {
           LedDisplayData display = displayQueue.take();
           // get led display data
-          log.error(display.toString());
+          log.info(display.toString());
 
           NeoPixelController npc = (NeoPixelController) Runtime.getService(controller);
           if (npc == null) {
@@ -420,7 +420,7 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
   @Override
   public void attach(Attachable service) throws Exception {
     if (service == null) {
-      log.error("cannot attache to null service");
+      log.error("cannot attach to null service");
       return;
     }
 
@@ -742,6 +742,7 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
     flash(name);
   }
 
+  @Deprecated /* use onFlash */
   public void onLedDisplay(LedDisplayData data) {
     try {
       addDisplayTask(data);
