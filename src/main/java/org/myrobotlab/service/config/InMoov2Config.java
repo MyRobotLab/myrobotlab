@@ -31,12 +31,12 @@ public class InMoov2Config extends ServiceConfig {
    * When the healthCheck is operating, it will check the battery level.
    * If the battery level is < 5% it will publishFlash with red at regular interval 
    */
-  public boolean batteryLevelCheck = false;
+  public boolean batteryInSystem = false;
 
   /**
    * enable custom sound map for state changes
    */
-  public boolean customSounds = false;
+  public boolean customSound = false;
 
   
   public boolean forceMicroOnIfSleeping = true;
@@ -46,13 +46,6 @@ public class InMoov2Config extends ServiceConfig {
    */
   public boolean healthCheckFlash = true;
   
-  /**
-   * Single heartbeat to drive InMoov2 .. it can check status, healthbeat,
-   * and fire events to the FSM.
-   * Checks battery level and sends a heartbeat flash on publishHeartbeat
-   * and onHeartbeat at a regular interval
-   */
-  public boolean heartbeat = true;
 
   /**
    * flashes the neopixel every time a health check is preformed.
@@ -60,6 +53,14 @@ public class InMoov2Config extends ServiceConfig {
    * red == battery < 5%
    */
   public boolean heartbeatFlash = false;
+
+  /**
+   * Single heartbeat to drive InMoov2 .. it can check status, healthbeat,
+   * and fire events to the FSM.
+   * Checks battery level and sends a heartbeat flash on publishHeartbeat
+   * and onHeartbeat at a regular interval
+   */
+  public boolean heartbeat = true;
   
   /**
    * interval heath check processes in milliseconds
@@ -233,7 +234,6 @@ public class InMoov2Config extends ServiceConfig {
 
     mouthControl.mouth = i01Name + ".mouth";
     
-
     ProgramABConfig chatBot = (ProgramABConfig) plan.get(getPeerName("chatBot"));
     Runtime runtime = Runtime.getInstance();
     String[] bots = new String[] { "cn-ZH", "en-US", "fi-FI", "hi-IN", "nl-NL", "ru-RU", "de-DE", "es-ES", "fr-FR", "it-IT", "pt-PT", "tr-TR" };
@@ -276,6 +276,14 @@ public class InMoov2Config extends ServiceConfig {
     mouth.voice = "Mark";
     mouth.speechRecognizers = new String[] { name + ".ear" };
 
+    // == Peer - servoMixer =============================
+    // setup name references to different services
+    ServoMixerConfig servoMixer = (ServoMixerConfig) plan.get(getPeerName("servoMixer"));
+    servoMixer.listeners = new ArrayList<>();
+    servoMixer.listeners.add(new Listener("publishText", name + ".mouth", "onText"));
+    // servoMixer.listeners.add(new Listener("publishText", name + ".chatBot",
+    // "onText"));
+
     // == Peer - ear =============================
     // setup name references to different services
     WebkitSpeechRecognitionConfig ear = (WebkitSpeechRecognitionConfig) plan.get(getPeerName("ear"));
@@ -285,8 +293,6 @@ public class InMoov2Config extends ServiceConfig {
     // remove, should only need ServiceConfig.listeners
     ear.textListeners = new String[] { name + ".chatBot" };
     
-    
-
     JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.get(getPeerName("simulator"));
 
     simulator.multiMapped.put(name + ".leftHand.index", new String[] { name + ".leftHand.index", name + ".leftHand.index2", name + ".leftHand.index3" });

@@ -109,6 +109,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   protected transient ProgramAB chatBot;
 
   protected List<String> configList;
+
   /**
    * Configuration from runtime has started. This is when runtime starts
    * processing a configuration set for the first time since inmoov was started
@@ -633,6 +634,10 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   }
 
   public String getState() {
+    FiniteStateMachine fsm = (FiniteStateMachine) getPeer("fsm");
+    if (fsm == null) {
+      return null;
+    }
     return fsm.getCurrent();
   }
 
@@ -1081,7 +1086,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * A generalized recurring event which can preform checks and various other
    * methods or tasks. Heartbeats will not start until after boot stage.
    */
-  public void onHeartbeat() {
+  public void onHeartbeat(String name) {
     try {
       // heartbeats can start before config is
       // done processing - so the following should
@@ -1117,10 +1122,10 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
 
     if (config.pirOnFlash && isPeerStarted("pir") && isPirOn) {
-      flash("pirOn");
+      flash("pir");
     }
 
-    if (config.batteryLevelCheck) {
+    if (config.batteryInSystem) {
       double batteryLevel = Runtime.getBatteryLevel();
       invoke("publishBatteryLevel", batteryLevel);
       // FIXME - thresholding should always have old value or state
@@ -1135,7 +1140,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
 
     // flash error until errors are cleared
-    if (config.healthCheckFlash) {
+    if (config.flashOnErrors) {
       if (errors.size() > 0) {
         invoke("publishFlash", "error");
       } else {
@@ -1174,6 +1179,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   public void onJoystickInput(JoystickData input) throws Exception {
     // TODO timer ? to test and not send an event
     // switches to manual control ?
+    invoke("publishEvent", "joystick");
   }
 
   /**
@@ -1276,7 +1282,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   }
 
   /**
-   * Pir off callback
+   * Pir off callback - FIXME NEEDS WORK
    */
   public void onPirOff() {
     isPirOn = false;
@@ -1429,6 +1435,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     invoke("publishText", text);
   }
 
+  // TODO FIX/CHECK this, migrate from python land
   public void powerDown() {
     // publishFlash(maxInactivityTimeSeconds, maxInactivityTimeSeconds,
     // maxInactivityTimeSeconds, maxInactivityTimeSeconds,
@@ -1460,6 +1467,12 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   public void publish(String name, String method, Object... data) {
     Message msg = Message.createMessage(getName(), name, method, data);
     invoke("publishMessage", msg);
+  }
+
+  public String publishStartConfig(String configName) {
+    info("config %s started", configName);
+    invoke("publishEvent", "CONFIG STARTED " + configName);
+    return configName;
   }
 
   public double publishBatteryLevel(double d) {
@@ -1813,11 +1826,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   public void setRightHandSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     setHandSpeed("right", thumb, index, majeure, ringFinger, pinky, wrist);
   }
-
-  // -----------------------------------------------------------------------------
-  // These are methods added that were in InMoov1 that we no longer had in
-  // InMoov2.
-  // From original InMoov1 so we don't loose the
 
   public void setRightHandSpeed(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
     setHandSpeed("right", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
