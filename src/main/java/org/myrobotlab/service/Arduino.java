@@ -129,6 +129,12 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
   boolean boardInfoEnabled = true;
 
   private long boardInfoRequestTs;
+  
+  /**
+   * connecting is true while the arduino is in the process of connecting
+   * to a port
+   */
+  protected boolean connecting = false;
 
   @Deprecated /*
                * should develop a MrlSerial on Arduinos and
@@ -535,7 +541,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
    */
   @Override
   public void connect(String port, int rate, int databits, int stopbits, int parity) {
-
+    connecting = true;
     if (port == null) {
       warn("%s attempted to connect with a null port", getName());
       return;
@@ -596,6 +602,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
         sleep(30);
       }
 
+      connecting = false;
       log.info("waited {} ms for Arduino {} to say hello", System.currentTimeMillis() - startBoardRequestTs, getName());
 
       // we might be connected now
@@ -1341,6 +1348,10 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
   public boolean isAttached(String name) {
     return deviceList.containsKey(name);
   }
+  
+  public boolean isConnecting() {
+    return connecting;
+  }
 
   @Override
   public boolean isConnected() {
@@ -1595,13 +1606,16 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
 
     boardInfo = new BoardInfo(version, boardTypeId, boardTypeName, microsPerLoop, sram, activePins, arrayToDeviceSummary(deviceSummary), boardInfoRequestTs);
 
+    // connected now
+    connecting = false;
+    
     boardInfoRequestTs = System.currentTimeMillis();
 
     log.debug("Version return by Arduino: {}", boardInfo.getVersion());
     log.debug("Board type currently set: {} => {}", boardTypeId, boardTypeName);
 
     if (lastBoardInfo == null || !lastBoardInfo.getBoardTypeName().equals(board)) {
-      log.warn("setting board to type {}", board);
+      log.info("setting board to type {}", boardInfo.getBoardTypeName());
       this.board = boardInfo.getBoardTypeName();
       // we don't invoke, because
       // it might get into a race condition

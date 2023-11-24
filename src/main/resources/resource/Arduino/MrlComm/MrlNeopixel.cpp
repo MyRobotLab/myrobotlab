@@ -176,6 +176,8 @@ void MrlNeopixel::setAnimation(byte animation, byte red, byte green, byte blue, 
 {
   animationIndex = animation;
   x = 0;
+  y = 0;
+  z = 0;
   color = Adafruit_NeoPixel::Color(red, green, blue, white);
   wait = wait_ms;
   if (animation == 0)

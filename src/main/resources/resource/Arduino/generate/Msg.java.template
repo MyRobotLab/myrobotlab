@@ -234,7 +234,9 @@ public class %javaClass% {
             msgSize = 0;
             Arrays.fill(ioCmd, 0); // FIXME - optimize - remove
             // warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++errorServiceToHardwareRxCnt));
-            log.warn("Arduino->MRL error - bad magic number {} - {} rx errors", newByte, ++errorServiceToHardwareRxCnt);
+            if (!arduino.isConnecting()){
+              log.warn("Arduino->MRL error - bad magic number {} - {} rx errors", newByte, ++errorServiceToHardwareRxCnt);
+            }
           }
           continue;
         } else if (byteCount.get() == 2) {
@@ -267,7 +269,10 @@ public class %javaClass% {
           } 
           
           if (!clearToSend) {
-            log.warn("NOT CLEAR TO SEND! resetting parser!");
+            if (!arduino.isConnecting()) {
+              // we're connecting, so we're going to ignore the message.
+              log.warn("NOT CLEAR TO SEND! resetting parser!");
+            }
             // We opened the port, and we got some data that isn't a Begin message.
             // so, I think we need to reset the parser and continue processing bytes...
             // there will be errors until the next magic byte is seen.
@@ -482,7 +487,7 @@ public class %javaClass% {
   }
   
   public void waitForAck(){
-    if (!ackEnabled) {
+    if (!ackEnabled || serial == null || !serial.isConnected()) {
       return;
     }
     // if there's a pending message, we need to wait for the ack to be received.

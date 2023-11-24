@@ -223,4 +223,10 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     return null;
   }
 
+  @Override
+  public boolean isConnecting() {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
 }

@@ -366,4 +366,10 @@ public class MrlCommDirectTest implements SerialDataListener, MrlCommPublisher, 
     return null;
   }
 
+  @Override
+  public boolean isConnecting() {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
 }
