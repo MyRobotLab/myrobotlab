@@ -1,28 +1,56 @@
 package org.myrobotlab.service.data;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.myrobotlab.service.config.NeoPixelConfig.Flash;
+
 /**
- * Class to publish to specify details on how to display an led or a group of leds.
- * There is a need to "flash" LEDs in order to signal some event.  This is the
- * beginning of an easy way to publish a message to do that.
+ * This class is a composite of possible led display details.
+ * Flashes, animations, etc.
  * 
  * @author GroG
  *
  */
 public class LedDisplayData {
 
-    public String action; // fill | flash | play animation | stop | clear
-    public int red;
-    public int green;
-    public int blue;
-    //public int white?;
-    
-    /**
-     * number of flashes
-     */
-    public int count = 5;
-    /**
-     * interval of flash in ms
-     */
-    public long interval = 500;
-    
-    
+  /**
+   * required action field may be
+   *  fill | flash | play animation | stop | clear
+   */
+  public String action; 
+  
+  /**
+   * name of animation
+   */
+  public String animation = null;
+
+  /**
+   * flash definition
+   */
+  public List<Flash> flashes = new ArrayList<>();
+  
+  /**
+   * if set overrides default brightness
+   */  
+  public Integer brightness = null;
+
+  /**
+   * begin fill address
+   */
+  public int beginAddress;
+
+  /**
+   * fill count
+   */
+  public int onCount; 
+
+
+  public LedDisplayData(String action) {
+    this.action = action;
+  }
+
+  public String toString() {
+    return String.format("%s, %s", action, animation);
+  }
 }

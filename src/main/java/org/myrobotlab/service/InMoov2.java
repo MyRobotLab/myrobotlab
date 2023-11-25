@@ -123,8 +123,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   protected Long lastPirActivityTime;
 
-  protected LedDisplayData led = new LedDisplayData();
-
   /**
    * supported locales
    */
@@ -932,14 +930,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * onPirOn flash neopixel
    */
   public void onPirOn() {
-    led.action = "flash";
-    led.red = 50;
-    led.green = 100;
-    led.blue = 150;
-    led.count = 5;
-    led.interval = 500;
     // FIXME flash on config.flashOnBoot
-    invoke("publishFlash");
+    invoke("publishFlash", "pir");
     ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
     if (chatBot != null) {
       String botState = chatBot.getPredicate("botState");
@@ -1233,18 +1225,12 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * 
    * @return
    */
-  public LedDisplayData publishFlash() {
-    return led;
+  public String publishFlash(String flashName) {
+    return flashName;
   }
 
   public String publishHeartbeat() {
-    led.action = "flash";
-    led.red = 180;
-    led.green = 10;
-    led.blue = 30;
-    led.count = 1;
-    led.interval = 50;
-    invoke("publishFlash");
+    invoke("publishFlash", "heartbeat");
     return getName();
   }
 
