@@ -1018,4 +1018,9 @@ public class MrlComm implements SerialDataListener {
 
   }
 
+  public boolean isConnecting() {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
 }
