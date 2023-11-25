@@ -121,7 +121,7 @@ public class MouthControl extends Service<MouthControlConfig> implements SpeechL
   }
 
   public void startMouthAnimation() {
-    send(neoPixel, "playAnimation", "Equalizer");
+    send(neoPixel, "playAnimation", config.animation);
   }
 
   public void stopMouthAnimation() {
