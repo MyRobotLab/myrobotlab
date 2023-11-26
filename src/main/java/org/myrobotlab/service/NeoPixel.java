@@ -81,10 +81,8 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
       return String.format("%d:%d,%d,%d,%d", address, red, green, blue, white);
     }
   }
-  
 
   public static class PixelSet {
-    public long delayMs = 0;
     public List<Pixel> pixels = new ArrayList<>();
 
     public int[] flatten() {
@@ -123,7 +121,7 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
         try {
           LedDisplayData display = displayQueue.take();
           // get led display data
-          log.info(display.toString());
+          log.debug(display.toString());
 
           NeoPixelController npc = (NeoPixelController) Runtime.getService(controller);
           if (npc == null) {
@@ -132,30 +130,31 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
           }
 
           if ("animation".equals(display.action)) {
-            sleep(100);
+            npc.neoPixelClear(getName());
+            // sleep(100);
             Double fps = fpsToWaitMs(speedFps);
             npc.neoPixelSetAnimation(getName(), animations.get(display.animation), red, green, blue, white, fps.intValue());
             currentAnimation = display.animation;
           } else if ("clear".equals(display.action)) {
-            sleep(100);
+            // sleep(100);
             npc.neoPixelClear(getName());
             currentAnimation = null;
           } else if ("writeMatrix".equals(display.action)) {
-            sleep(100);            
+            // sleep(100);
             npc.neoPixelWriteMatrix(getName(), getPixelSet().flatten());
-          } else if ("fill".equals(display.action)) {            
+          } else if ("fill".equals(display.action)) {
             Flash f = display.flashes.get(0);
-            sleep(100);
+            // sleep(100);
             npc.neoPixelFill(getName(), display.beginAddress, display.onCount, f.red, f.green, f.blue, f.white);
           } else if ("brightness".equals(display.action)) {
-            sleep(100);
-            display.brightness = (display.brightness > 255)?255:display.brightness;
-            display.brightness = (display.brightness < 0)?0:display.brightness;            
+            // sleep(100);
+            display.brightness = (display.brightness > 255) ? 255 : display.brightness;
+            display.brightness = (display.brightness < 0) ? 0 : display.brightness;
             npc.neoPixelSetBrightness(getName(), display.brightness);
           } else if ("flash".equals(display.action)) {
 
             // FIXME disable currentAnimation ??? // save it ?
-            sleep(100);
+            // sleep(100);
             npc.neoPixelClear(getName());
             for (int count = 0; count < display.flashes.size(); count++) {
               Flash flash = display.flashes.get(count);
@@ -200,8 +199,6 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
   private final static int MAX_QUEUE = 200;
 
   private static final long serialVersionUID = 1L;
-
-
 
   public static void main(String[] args) throws InterruptedException {
 
@@ -372,7 +369,7 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
       displayQueue.add(data);
     }
   }
-  
+
   @Deprecated /* use clear() */
   public void animationStop() {
     clear();
@@ -590,18 +587,18 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
       error("requested flash %s not found in flash map", name);
     }
   }
-  
-  public void flashBrightness(double brightness) {    
+
+  public void flashBrightness(double brightness) {
     LedDisplayData data = new LedDisplayData("brightness");
-    
-    // adafruit neopixel library does not recover from setting 
+
+    // adafruit neopixel library does not recover from setting
     // brightness to 0 - so we have to hack around it
     if (data.brightness < 10) {
       return;
-    }    
+    }
     addDisplayTask(data);
   }
-  
+
   // utility to convert frames per second to milliseconds per frame.
   private double fpsToWaitMs(int fps) {
     if (fps == 0) {
@@ -752,8 +749,9 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
   }
 
   /**
-   * takes a scalar value and fills with the appropriate brightness
-   * using the peak color if available
+   * takes a scalar value and fills with the appropriate brightness using the
+   * peak color if available
+   * 
    * @param value
    */
   public void onPeak(double value) {
@@ -793,7 +791,7 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
       if (speedFps > maxFps) {
         speedFps = maxFps;
       }
-      
+
       LedDisplayData data = new LedDisplayData("animation");
       data.animation = animation;
       addDisplayTask(data);
@@ -910,16 +908,13 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
     }
   }
 
-  /**
-   * basic setting of a pixel
-   */
   @Override
   public void setPixel(int address, int red, int green, int blue) {
-    setPixel(currentMatrix, currentSequence, address, red, green, blue, 0, 0);
+    setPixel(currentMatrix, currentSequence, address, red, green, blue, 0);
   }
 
   public void setPixel(int address, int red, int green, int blue, int white) {
-    setPixel(currentMatrix, currentSequence, address, red, green, blue, white, 0);
+    setPixel(currentMatrix, currentSequence, address, red, green, blue, white);
   }
 
   /**
@@ -934,11 +929,9 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
    * @param white
    * @param delayMs
    */
-  public void setPixel(String matrixName, Integer pixelSetIndex, int address, int red, int green, int blue, int white, Integer delayMs) {
+  public void setPixel(String matrixName, Integer pixelSetIndex, int address, int red, int green, int blue, int white) {
     // get and update memory cache
     PixelSet ps = getPixelSet(matrixName, pixelSetIndex);
-
-    ps.delayMs = delayMs;
 
     // NeoPixelController c = (NeoPixelController)
     // Runtime.getService(controller);
@@ -953,6 +946,13 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
 
     // update memory
     ps.pixels.set(address, pixel);
+  }
+
+  /**
+   * Both sets and writes an individual pixel
+   */
+  public void writePixel(int address, int red, int green, int blue) {
+    setPixel(address, red, green, blue);
     LedDisplayData data = new LedDisplayData("writeMatrix");
     addDisplayTask(data);
   }
@@ -1034,12 +1034,21 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
   @Override
   public void onAudioStart(AudioData data) {
     if (config.audioAnimation != null) {
-      playAnimation(config.audioAnimation);  
+      playAnimation(config.audioAnimation);
     }
   }
 
   @Override
   public void onAudioEnd(AudioData data) {
     clear();
+  }
+
+  public void setPixel(int address, String color) {
+    int rgb[] = CodecUtils.getColor(color);
+    if (rgb == null) {
+      error("could not get color %s", color);
+      return;
+    }
+   setPixel(address, rgb[0], rgb[1], rgb[2]);
   }
 }
