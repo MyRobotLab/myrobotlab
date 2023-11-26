@@ -32,7 +32,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
@@ -70,7 +69,6 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.IvyWrapper;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
-import org.myrobotlab.framework.repo.ServiceDependency;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.AppenderType;
 import org.myrobotlab.logging.LoggerFactory;
@@ -134,7 +132,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * a registry of all services regardless of which environment they came from -
    * each must have a unique name
    */
-  static private final Map<String, ServiceInterface> registry = new TreeMap<>();
+  static private final Map<String, ServiceInterface> registry = new LinkedHashMap<>();
 
   /**
    * A plan is a request to runtime to change the system. Typically its to ask
@@ -199,12 +197,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * config. If true you can find which config from runtime.getConfigName()
    */
   boolean processingConfig = false;
-
-  /**
-   * The one config directory where all config is managed the {default} is the
-   * current configuration set
-   */
-  // protected String configDir = "data" + fs + "config";
 
   /**
    * <pre>
@@ -437,9 +429,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         runtime.error("could not get %s from plan", service);
         continue;
       }
-      sc.state = "CREATING";
+      // sc.state = "CREATING";
       ServiceInterface si = createService(service, sc.type, null);
-      sc.state = "CREATED";
+      // sc.state = "CREATED";
       // process  the base listeners/subscription of ServiceConfig
       si.addConfigListeners(sc);
       if (si instanceof ConfigurableService) {
@@ -1552,7 +1544,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
             r.getRepo().install(serviceType);
           }
         } catch (Exception e) {
-          r.error(e);
+          r.error("dependencies failed - install error", e);
+          throw new RuntimeException(String.format("dependencies failed - install error %s", e.getMessage()));
         }
       }
     };
@@ -1912,13 +1905,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     if (si.isLocal()) {
       si.purgeTasks();
       si.stopService();
-      Plan plan = Runtime.getPlan();
-      ServiceConfig sc = plan.get(inName);
-      if (sc == null) {
-        log.debug("service config not available for {}", inName);
-      } else {
-        sc.state = "STOPPED";
-      }
     } else {
       if (runtime != null) {
         runtime.send(name, "releaseService");
@@ -1927,33 +1913,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     // FOR remote this isn't correct - it should wait for
     // a message from the other runtime to say that its released
     unregister(name);
-    Plan plan = Runtime.getPlan();
-    ServiceConfig sc = plan.get(inName);
-
-    if (sc != null) {
-      sc.state = "RELEASED";
-      // FIXME - TODO RELEASE PEERS ! which is any inName.* !!!
-
-      // iterate through peers
-      // if (sc.autoStartPeers) {
-      // // get peers from meta data
-      // MetaData md = MetaData.get(sc.type);
-      // Map<String, ServiceReservation> peers = md.getPeers();
-      // log.info("auto start peers and {} of type {} has {} peers", inName,
-      // sc.type, peers.size());
-      // // RECURSE ! - if we found peers and autoStartPeers is true - we start
-      // // all
-      // // the children up
-      // for (String peer : peers.keySet()) {
-      // // get actual Name
-      // String actualPeerName = getPeerName(peer, sc, peers, inName);
-      // if (actualPeerName != null && isStarted(actualPeerName) &&
-      // si.autoStartedPeersContains(actualPeerName)) {
-      // release(actualPeerName);
-      // }
-      // }
-      // }
-    }
 
     return true;
   }
@@ -2585,8 +2544,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     setConfig(configName);
     Runtime runtime = Runtime.getInstance();
     runtime.processingConfig = true; // multiple inbox threads not available
-    runtime.invoke("publishStartConfig", configName);
-    RuntimeConfig rtConfig = runtime.readServiceConfig(runtime.getConfigName(), "runtime", new StaticType<>() {});
+    runtime.invoke("publishConfigStarted", configName);
+    RuntimeConfig rtConfig = (RuntimeConfig) runtime.readServiceConfig(runtime.getConfigName(), "runtime");
     if (rtConfig == null) {
       runtime.error("cannot find %s%s%s", runtime.getConfigName(), fs, "runtime.yml");
       return;
@@ -2597,6 +2556,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     // for every service listed in runtime registry - load it
     // FIXME - regex match on filesystem matches on *.yml
     for (String service : rtConfig.getRegistry()) {
+            
       if ("runtime".equals(service) || Runtime.isStarted(service)) {
         continue;
       }
@@ -2626,12 +2586,12 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     }
 
     runtime.processingConfig = false; // multiple inbox threads not available
-    runtime.invoke("publishFinishedConfig", configName);
+    runtime.invoke("publishConfigFinished", configName);
 
   }
 
-  public String publishStartConfig(String configName) {
-    log.info("publishStartConfig {}", configName);
+  public String publishConfigStarted(String configName) {
+    log.info("publishConfigStarted {}", configName);
     // Make Note: done inline, because the thread actually doing the config
     // processing
     // would need to be finished with it before this thread could be invoked
@@ -2640,8 +2600,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     return configName;
   }
 
-  public String publishFinishedConfig(String configName) {
-    log.info("publishFinishedConfig {}", configName);
+  public String publishConfigFinished(String configName) {
+    log.info("publishConfigFinished {}", configName);
     // Make Note: done inline, because the thread actually doing the config
     // processing
     // would need to be finished with it before this thread could be invoked
@@ -2781,21 +2741,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         // fist and only time....
         runtime = this;
         repo = (IvyWrapper) Repo.getInstance(LIBRARIES, "IvyWrapper");
-
-        // resolve serviceData MetaTypes for the repo
-
-        for (MetaData metaData : serviceData.getServiceTypes()) {
-          if (metaData.getSimpleName().equals("OpenCV")) {
-            log.warn("here");
-          }
-          Set<ServiceDependency> deps = repo.getUnfulfilledDependencies(metaData.getType());
-          if (deps.size() == 0) {
-            metaData.installed = true;
-          } else {
-            log.warn("{} not installed", metaData.getSimpleName());
-          }
-        }
-
       }
     }
 
@@ -3536,7 +3481,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * @return The programs stderr and stdout output
    */
   static public String execute(String program, List<String> args, String workingDir, Map<String, String> additionalEnv, boolean block) {
-    log.info("execToString(\"{} {}\")", program, args);
+    log.debug("execToString(\"{} {}\")", program, args);
 
     List<String> command = new ArrayList<>();
     command.add(program);
@@ -3572,14 +3517,15 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         if (block) {
             int exitValue = handle.waitFor();
             outputBuilder.append("Exit Value: ").append(exitValue);
-            log.info("Command exited with exit value: {}", exitValue);
+            log.debug("Command exited with exit value: {}", exitValue);
         } else {
-            log.info("Command started");
+            log.debug("Command started");
         }
 
         return outputBuilder.toString();
     } catch (IOException e) {
         log.error("Error executing command", e);
+        Runtime.getInstance().error(e.getMessage());
         return e.getMessage();
     } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
@@ -3631,13 +3577,14 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
       } else if (platform.isLinux()) {
         // TODO This is incorrect, will not work when unplugged
         // and acpitool output is different than expected,
-        // at least on Ubuntu 22.04
-        String ret = Runtime.execute("acpitool");
-        int pos0 = ret.indexOf("Charging, ");
+        // at least on Ubuntu 22.04 - consider oshi library
+        String ret = Runtime.execute("acpi");
+        int pos0 = ret.indexOf("%");
+
         if (pos0 != -1) {
-          pos0 = pos0 + 10;
-          int pos1 = ret.indexOf("%", pos0);
-          String dble = ret.substring(pos0, pos1).trim();
+          int pos1 = ret.lastIndexOf(" ", pos0);
+          // int pos1 = ret.indexOf("%", pos0);
+          String dble = ret.substring(pos1, pos0).trim();
           try {
             r = Double.parseDouble(dble);
           } catch (Exception e) {
@@ -4820,9 +4767,15 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
 
     return plan;
   }
-
+  
+  /**
+   * read a service's configuration, in the context
+   * of current config set name or default
+   * @param name
+   * @return
+   */
   public ServiceConfig readServiceConfig(String name) {
-    return readServiceConfig(name, new StaticType<>() {});
+    return readServiceConfig(null, name);
   }
   
   /**

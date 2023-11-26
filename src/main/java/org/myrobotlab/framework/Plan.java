@@ -142,21 +142,5 @@ public class Plan {
     runtime.add(service);
   }
 
-  /**
-   * good to prune trees of peers from starting - expecially if the peers
-   * require re-configuring
-   * 
-   * @param startsWith
-   *          - removes RuntimeConfig.registry all services that start with
-   *          input
-   */
-  public void removeStartsWith(String startsWith) {
-    RuntimeConfig runtime = (RuntimeConfig) config.get("runtime");
-    if (runtime == null) {
-      log.error("removeRegistry - runtime null !");
-      return;
-    }
-    runtime.removeStartsWith(startsWith);
-  }
 
 }
