@@ -1201,10 +1201,12 @@ public class ProgramAB extends Service<ProgramABConfig>
       if (s.chat == chat) {
         // found session saving predicates
         invoke("publishPredicate", s, predicateName, result);
-        if ("botname".equals(predicateName)) {
+        // botname is the name of the bot  currentBotName is the aiml folder that is 
+        // mostly equivalent to its "type"
+        if ("currentBotName".equals(predicateName)) {
           setCurrentBotName(result);
         }
-        if ("username".equals(predicateName)) {
+        if ("name".equals(predicateName)) {
           setCurrentUserName(result);
         }
         s.savePredicates();
@@ -1400,6 +1402,11 @@ public class ProgramAB extends Service<ProgramABConfig>
     return utterance;
   }
 
+  /**
+   * New topic published when it changes
+   * @param topicChange
+   * @return
+   */
   public TopicChange publishTopic(TopicChange topicChange) {
     return topicChange;
   }
