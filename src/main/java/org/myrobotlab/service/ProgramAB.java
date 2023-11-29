@@ -1201,6 +1201,12 @@ public class ProgramAB extends Service<ProgramABConfig>
       if (s.chat == chat) {
         // found session saving predicates
         invoke("publishPredicate", s, predicateName, result);
+        if ("botname".equals(predicateName)) {
+          setCurrentBotName(result);
+        }
+        if ("username".equals(predicateName)) {
+          setCurrentUserName(result);
+        }
         s.savePredicates();
         return;
       }
