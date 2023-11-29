@@ -287,7 +287,7 @@ public class InMoov2Head extends Service<InMoov2HeadConfig> {
 
     ServoControl eyeY = (ServoControl) Runtime.getService(getPeerName("eyeY"));
     if (eyeY != null) {
-      eyeY.moveTo(eyeXPos);
+      eyeY.moveTo(eyeYPos);
     }
 
     ServoControl jaw = (ServoControl) Runtime.getService(getPeerName("jaw"));
