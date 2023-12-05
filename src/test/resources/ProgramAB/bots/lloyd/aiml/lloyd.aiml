@@ -1,167 +1,273 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <aiml>
-<!--  -->
-<!--  -->
-<category><pattern>*</pattern>
-<template><random>
+  <!--  -->
+  <!--  -->
+  <category>
+    <pattern>*</pattern>
+    <template>
+      <random>
         <li>My Default Response 1.</li>
         <li>My Default Response 2.</li>
         <li>My Default Response 3.</li>
-      </random></template>
-</category>
-<category><pattern>HI</pattern>
-<template>Hello user!</template>
-</category>
-<category><pattern>GREETINGS</pattern>
-<template><srai>HI</srai></template>
-</category>
-<category><pattern>HELLO ROBOT</pattern>
-<template><srai>HI</srai></template>
-</category>
-<category><pattern>HELLO *</pattern>
-<template><srai>HI</srai> You said, <star/>.</template>
-</category>
-<category><pattern>WHAT TIME IS IT</pattern>
-<template>It is <date jformat="HH:mm"/>.</template>
-</category>
-<category><pattern>MY NAME IS *</pattern>
-<template>Nice to meet you <star/>. <think><set name="name"><star/></set></think></template>
-</category>
-<category><pattern>WHAT IS MY NAME</pattern>
-<template><get name="name"/></template>
-</category>
-<category><pattern>SAY MY NAME</pattern>
-<template><random>
-        <li><get name="name"/></li>
+      </random>
+    </template>
+  </category>
+  <category>
+    <pattern>HI</pattern>
+    <template>Hello user!</template>
+  </category>
+  <category>
+    <pattern>GREETINGS</pattern>
+    <template>
+      <srai>HI</srai>
+    </template>
+  </category>
+  <category>
+    <pattern>HELLO ROBOT</pattern>
+    <template>
+      <srai>HI</srai>
+    </template>
+  </category>
+  <category>
+    <pattern>HELLO *</pattern>
+    <template><srai>HI</srai> You said, <star />.</template>
+  </category>
+  <category>
+    <pattern>WHAT TIME IS IT</pattern>
+    <template>It is <date jformat="HH:mm" />.</template>
+  </category>
+  <category>
+    <pattern>MY NAME IS *</pattern>
+    <template>Nice to meet you <star />. <think>
+        <set name="name">
+          <star />
+        </set>
+      </think></template>
+  </category>
+  <category>
+    <pattern>WHAT IS MY NAME</pattern>
+    <template>
+      <get name="name" />
+    </template>
+  </category>
+  <category>
+    <pattern>SAY MY NAME</pattern>
+    <template>
+      <random>
+        <li>
+          <get name="name" />
+        </li>
         <li>Heisenberg?</li>
-      </random></template>
-</category>
-<category><pattern>WHAT IS A *</pattern>
-<template><sr/></template>
-</category>
-<category><pattern>ROBOT</pattern>
-<template>Robots are mechanical devices, but for how long?</template>
-</category>
-<category><pattern>HOW MANY DAYS UNTIL CHRISTMAS</pattern>
-<template><interval>
+      </random>
+    </template>
+  </category>
+  <category>
+    <pattern>WHAT IS A *</pattern>
+    <template>
+      <sr />
+    </template>
+  </category>
+  <category>
+    <pattern>ROBOT</pattern>
+    <template>Robots are mechanical devices, but for how long?</template>
+  </category>
+  <category>
+    <pattern>HOW MANY DAYS UNTIL CHRISTMAS</pattern>
+    <template><interval>
         <style>days</style>
-        <from><date jformat="MMMMMMMMM dd, yyyy"/></from>
-        <to>Dec 25, <date jformat="yyyy"/></to>
+        <from>
+          <date jformat="MMMMMMMMM dd, yyyy" />
+        </from>
+        <to>Dec 25, <date jformat="yyyy" /></to>
       </interval> days until Christmas.</template>
-</category>
-<category><pattern>TIME TEST</pattern>
-<template>ok. <set name="tswa"><date jformat="yyyy-MM-dd hh:mm:ss"/></set></template>
-</category>
-<category><pattern>BORING TIME</pattern>
-<template><think><set var="minutes">
-        <interval>
-          <jformat>yyyy-MM-dd hh:mm:ss</jformat>
-          <style>seconds</style>
-          <from><get name="tswa"/></from>
-          <to><date jformat="yyyy-MM-dd hh:mm:ss"/></to>
-        </interval>
-      </set></think> I am bored since <get var="minutes"/>.</template>
-</category>
-<category><pattern>UNIT TEST PATTERN</pattern>
-<template>Unit Test Pattern Passed</template>
-</category>
-<category><pattern>OOB TEST</pattern>
-<template>OOB Tag Test<oob>
+  </category>
+  <category>
+    <pattern>TIME TEST</pattern>
+    <template>ok. <set name="tswa">
+        <date jformat="yyyy-MM-dd hh:mm:ss" />
+      </set></template>
+  </category>
+  <category>
+    <pattern>BORING TIME</pattern>
+    <template><think>
+        <set var="minutes">
+          <interval>
+            <jformat>yyyy-MM-dd hh:mm:ss</jformat>
+            <style>seconds</style>
+            <from>
+              <get name="tswa" />
+            </from>
+            <to>
+              <date jformat="yyyy-MM-dd hh:mm:ss" />
+            </to>
+          </interval>
+        </set>
+      </think>
+      I am bored since <get var="minutes" />.</template>
+  </category>
+  <category>
+    <pattern>UNIT TEST PATTERN</pattern>
+    <template>Unit Test Pattern Passed</template>
+  </category>
+  <category>
+    <pattern>OOB TEST</pattern>
+    <template>OOB Tag Test<oob>
         <mrl>
           <service>runtime</service>
-          <method>createAndStart</method>
-          <param>python</param>
-          <param>Python</param>
+          <method>start</method>
+          <param>oobclock</param>
+          <param>Clock</param>
         </mrl>
       </oob></template>
-</category>
-<category><pattern>SET FOO *</pattern>
-<template><set name="foo"><star/></set></template>
-</category>
-<category><pattern>GET FOO</pattern>
-<template>FOO IS <get name="foo"/></template>
-</category>
-<category><pattern>LEARN * IS *</pattern>
-<template>OK <star/> IS <star index="2"/>
+  </category>
+  <category>
+    <pattern>SET FOO *</pattern>
+    <template>
+      <set name="foo">
+        <star />
+      </set>
+    </template>
+  </category>
+  <category>
+    <pattern>GET FOO</pattern>
+    <template>FOO IS <get name="foo" /></template>
+  </category>
+  <category>
+    <pattern>LEARN * IS *</pattern>
+    <template>OK <star /> IS <star index="2" />
       <think>
         <learn>
           <category>
-            <pattern><eval><star/></eval></pattern>
-            <template><eval><star index="2"/></eval></template>
+            <pattern>
+              <eval>
+                <star />
+              </eval>
+            </pattern>
+            <template>
+              <eval>
+                <star index="2" />
+              </eval>
+            </template>
           </category>
         </learn>
       </think></template>
-</category>
-<category><pattern>WHAT IS *</pattern>
-<template><srai><star/></srai></template>
-</category>
-<category><pattern>SETTEST <set>animal</set></pattern>
-<template>An Animal.</template>
-</category>
-<category><pattern>DO YOU LIKE <set>starwarsnames</set></pattern>
-<template><map name="starwars"><star/></map> is awesome.</template>
-</category>
-<category><pattern>ADD * TO THE * SET</pattern>
-<template>Ok...<oob>
-      <mrl>
-        <service>lloyd</service>
-        <method>addToSet</method>
-        <param><star index="2"/></param>
-        <param><star/></param>
-      </mrl>
-    </oob>
+  </category>
+  <category>
+    <pattern>WHAT IS *</pattern>
+    <template>
+      <srai>
+        <star />
+      </srai>
+    </template>
+  </category>
+  <category>
+    <pattern>SETTEST <set>animal</set></pattern>
+    <template>An Animal.</template>
+  </category>
+  <category>
+    <pattern>DO YOU LIKE <set>starwarsnames</set></pattern>
+    <template><map name="starwars">
+        <star />
+      </map> is awesome.</template>
+  </category>
+  <category>
+    <pattern>ADD * TO THE * SET</pattern>
+    <template>Ok...<oob>
+        <mrl>
+          <service>lloyd</service>
+          <method>addToSet</method>
+          <param>
+            <star index="2" />
+          </param>
+          <param>
+            <star />
+          </param>
+        </mrl>
+      </oob>
     <think>
-      <learn>
-        <category>
-           <pattern>NEWSETTEST <set><eval><star index="2"/></eval></set></pattern>
-           <template><star/> is a <eval><star index="2"/></eval></template>
-        </category>
-      </learn>
-    </think></template>
-</category>
-<category><pattern>ADD * EQUALS * TO THE * MAP</pattern>
-<template>Ok...<oob>
-      <mrl>
-        <service>lloyd</service>
-        <method>addToMap</method>
-        <param><star index="3"/></param>
-        <param><star/></param>        
-        <param><star index="2"/></param>
-      </mrl>
-    </oob></template>
-</category>
-<category><pattern>SET TOPIC TEST</pattern>
-<template><think><set name="topic">TESTTOPIC</set></think></template>
-</category>
-<category><pattern>TESTTOPICTEST</pattern>
-<template>TOPIC IS <get name="topic"/></template>
-</category>
-<topic name="TESTTOPIC">
-<category><pattern>TESTTOPICTEST</pattern>
-<template>TEST TOPIC RESPONSE</template>
-</category></topic>
+        <learn>
+          <category>
+            <pattern>NEWSETTEST <set>
+                <eval>
+                  <star index="2" />
+                </eval>
+              </set></pattern>
+            <template><star /> is a <eval>
+                <star index="2" />
+              </eval></template>
+          </category>
+        </learn>
+      </think></template>
+  </category>
+  <category>
+    <pattern>ADD * EQUALS * TO THE * MAP</pattern>
+    <template>Ok...<oob>
+        <mrl>
+          <service>lloyd</service>
+          <method>addToMap</method>
+          <param>
+            <star index="3" />
+          </param>
+          <param>
+            <star />
+          </param>
+          <param>
+            <star index="2" />
+          </param>
+        </mrl>
+      </oob></template>
+  </category>
+  <category>
+    <pattern>SET TOPIC TEST</pattern>
+    <template>
+      <think>
+        <set name="topic">TESTTOPIC</set>
+      </think>
+    </template>
+  </category>
+  <category>
+    <pattern>TESTTOPICTEST</pattern>
+    <template>TOPIC IS <get name="topic" /></template>
+  </category>
+  <topic name="TESTTOPIC">
+    <category>
+      <pattern>TESTTOPICTEST</pattern>
+      <template>TEST TOPIC RESPONSE</template>
+    </category>
+  </topic>
 
-<category><pattern>LARS ÜMLAÜT</pattern>
-<template>He's a character from Guitar Hero!</template>
-</category>
-<category><pattern>SHOW ME INMOOV</pattern>
-<template>Search of pannous returned this: <sraix default="PICFAILED" hint="pic">SHOW ME <star/></sraix></template>
-</category>
-<category><pattern>MRLSRAIX</pattern>
-<template><sraix>Claude Shannon</sraix></template>
-</category>
-<category><pattern>OOBMRLSRAIX</pattern>
-<template>You are talking to <sraix><oob>
-      <mrl>
-        <service>lloyd</service>
-        <method>getCurrentBotName</method>
-      </mrl>
-    </oob></sraix></template>
-</category>
+  <category>
+    <pattern>LARS ÜMLAÜT</pattern>
+    <template>He's a character from Guitar Hero!</template>
+  </category>
+  <category>
+    <pattern>SHOW ME INMOOV</pattern>
+    <template>Search of pannous returned this: <sraix default="PICFAILED" hint="pic">SHOW ME <star /></sraix></template>
+  </category>
+  <category>
+    <pattern>MRLSRAIX</pattern>
+    <template>
+      <sraix>
+        <search>Claude Shannon</search>
+      </sraix>
+    </template>
+  </category>
+  <category>
+    <pattern>OOBMRLSRAIX</pattern>
+    <template>You are talking to <sraix>
+        <oob>
+          <mrl>
+            <service>lloyd</service>
+            <method>getCurrentBotName</method>
+          </mrl>
+        </oob>
+      </sraix></template>
+  </category>
 
-<category><PATTERN>UPPERCASE</PATTERN>
-<template>Passed</template>
-</category>
+  <category>
+    <PATTERN>UPPERCASE</PATTERN>
+    <template>Passed</template>
+  </category>
 
 
 </aiml>
