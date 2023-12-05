@@ -144,7 +144,8 @@ public class HarryTest extends AbstractTest {
     solr.startEmbedded();
     createAIML();
     ProgramAB harry = (ProgramAB) Runtime.start("harry", "ProgramAB");
-    harry.startSession("testbots", "username", "test");
+    harry.setBotType("testbots");
+    harry.startSession("username", "test", true);
 
     goLearnStuff(solr, harry);
 
@@ -166,7 +167,8 @@ public class HarryTest extends AbstractTest {
     solr.startEmbedded();
     createAIML();
     ProgramAB harry = (ProgramAB) Runtime.start("harry", "ProgramAB");
-    harry.startSession("testbots", "username", "test");
+    harry.setSession("username", "test");
+    // harry.startSession("username", "test");
 
     // start the opencv service with the yolo filter.
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
