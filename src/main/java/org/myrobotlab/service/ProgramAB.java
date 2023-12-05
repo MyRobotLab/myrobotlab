@@ -16,11 +16,12 @@ import org.alicebot.ab.AIMLSet;
 import org.alicebot.ab.Bot;
 import org.alicebot.ab.Category;
 import org.alicebot.ab.Chat;
-import org.alicebot.ab.MagicBooleans;
 import org.alicebot.ab.ProgramABListener;
 import org.apache.commons.lang3.StringUtils;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.generics.SlidingWindowList;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
@@ -28,13 +29,12 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.logging.SimpleLogPublisher;
 import org.myrobotlab.programab.BotInfo;
-import org.myrobotlab.programab.PredicateEvent;
 import org.myrobotlab.programab.Response;
 import org.myrobotlab.programab.Session;
+import org.myrobotlab.programab.models.Event;
 import org.myrobotlab.service.config.ProgramABConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
-import org.myrobotlab.service.data.TopicChange;
 import org.myrobotlab.service.data.Utterance;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.LogPublisher;
@@ -73,6 +73,11 @@ public class ProgramAB extends Service<ProgramABConfig>
   private static final long serialVersionUID = 1L;
 
   /**
+   * history of topic changes
+   */
+  protected List<Event> topicHistory = new SlidingWindowList<>(100);
+
+  /**
    * useGlobalSession true will allow the sleep member to control session focus
    */
   protected boolean useGlobalSession = false;
@@ -85,7 +90,7 @@ public class ProgramAB extends Service<ProgramABConfig>
   Map<String, BotInfo> bots = new TreeMap<>();
 
   /**
-   * Mapping a bot to a userName and chat session
+   * Mapping a bot to a username and chat session
    */
   Map<String, Session> sessions = new TreeMap<>();
 
@@ -140,7 +145,7 @@ public class ProgramAB extends Service<ProgramABConfig>
       if (checkIfValid(file)) {
         info("found %s bot directory", file.getName());
         botDirs.add(file);
-        addBotPath(file.getAbsolutePath());
+        addBot(file.getAbsolutePath());
       }
     }
     return botDirs;
@@ -183,7 +188,7 @@ public class ProgramAB extends Service<ProgramABConfig>
   }
 
   public int getMaxConversationDelay() {
-    return getCurrentSession().maxConversationDelay;
+    return getConfig().maxConversationDelay;
   }
 
   /**
@@ -196,105 +201,101 @@ public class ProgramAB extends Service<ProgramABConfig>
    * 
    */
   public Response getResponse(String text) {
-    return getResponse(getCurrentUserName(), text);
+    return getResponse(getUsername(), text);
   }
 
   /**
    * This method has the side effect of switching which bot your are currently
    * chatting with.
    * 
-   * @param userName
+   * @param username
    *          - the query string to the bot brain
    * @param text
    *          - the user that is sending the query
    * @return the response for a user from a bot given the input text.
    */
-  public Response getResponse(String userName, String text) {
-    return getResponse(userName, getCurrentBotName(), text);
+  public Response getResponse(String username, String text) {
+    return getResponse(username, getBotType(), text);
   }
 
   /**
    * Full get response method . Using this method will update the current
    * user/bot name if different from the current session.
    * 
-   * @param userName
+   * @param username
    *          username
-   * @param botName
+   * @param botType
    *          bot name
    * @param text
    *          utterace
    * @return programab response to utterance
    * 
    */
-  public Response getResponse(String userName, String botName, String text) {
-    return getResponse(userName, botName, text, true);
+  public Response getResponse(String username, String botType, String text) {
+    return getResponse(username, botType, text, true);
   }
 
   /**
    * Gets a response and optionally update if this is the current bot session
    * that's active globally.
    * 
-   * @param userName
-   *          username
-   * @param botName
-   *          botname
+   * @param username
+   *          - user request a response
+   * 
+   * @param botType
+   *          - bot type providing the response
+   * 
    * @param text
-   *          utterance
+   *          - query
    * 
    * @param updateCurrentSession
-   *          (specify if the currentbot/currentuser name should be updated in
-   *          the programab service.)
+   *          - switch the current focus, so that the current session is the
+   *          username and bot type in the parameter, publishSession will
+   *          publish the new session if different
+   * 
    * @return the response
    * 
-   *         TODO - no one cares about starting sessions, starting a new session
-   *         could be as simple as providing a different username, or botname in
-   *         getResponse and a necessary session could be created
-   * 
    */
-  public Response getResponse(String userName, String botName, String text, boolean updateCurrentSession) {
-    Session session = getSession(userName, botName);
+  public Response getResponse(String username, String botType, String text, boolean updateCurrentSession) {
+    Session session = getSession(username, botType);
 
     // if a session with this user and bot does not exist
     // attempt to create it
     if (session == null) {
-      session = startSession(userName, botName);
+      session = startSession(username, botType, updateCurrentSession);
       if (session == null) {
-        error("username or bot name not valid %s %s", userName, botName);
+        error("username or bot name not valid %s %s", username, botType);
         return null;
       }
     }
 
-    // update the current session if we want to change which bot is at
-    // attention.
-    if (updateCurrentSession) {
-      setCurrentUserName(userName);
-      setCurrentBotName(botName);
+    if (updateCurrentSession && (!getUsername().equals(username) || !getBotType().equals(botType))) {
+      setUsername(username);
+      setBotType(botType);
     }
 
-    // Get the actual bots aiml based response for this session
     log.info("getResponse({})", text);
     Response response = session.getResponse(text);
 
-    // EEK! clean up the API!
-    invoke("publishRequest", text); // publisher used by uis
+    invoke("publishRequest", text);
     invoke("publishResponse", response);
     invoke("publishText", response.msg);
 
     return response;
   }
 
-  private Bot getBot(String botName) {
-    return bots.get(botName).getBot();
+  private Bot getBot(String botType) {
+    return bots.get(botType).getBot();
   }
 
-  private BotInfo getBotInfo(String botName) {
-    if (botName == null) {
+  private BotInfo getBotInfo(String botType) {
+    if (botType == null) {
       error("getBotinfo(null) not valid");
       return null;
     }
-    BotInfo botInfo = bots.get(botName);
+    BotInfo botInfo = bots.get(botType);
     if (botInfo == null) {
-      error("botInfo(%s) is null", botName);
+      error("botInfo(%s) is null", botType);
       return null;
     }
 
@@ -312,12 +313,24 @@ public class ProgramAB extends Service<ProgramABConfig>
     org.alicebot.ab.MagicNumbers.repetition_count = val;
   }
 
+  /**
+   * get the "current" session if it exists
+   * 
+   * @return
+   */
   public Session getSession() {
-    return getSession(getCurrentUserName(), getCurrentBotName());
+    return getSession(getUsername(), getBotType());
   }
 
-  public Session getSession(String userName, String botName) {
-    String sessionKey = getSessionKey(userName, botName);
+  /**
+   * get a specific user & botType session
+   * 
+   * @param user
+   * @param botType
+   * @return
+   */
+  public Session getSession(String user, String botType) {
+    String sessionKey = getSessionKey(user, botType);
     if (sessions.containsKey(sessionKey)) {
       return sessions.get(sessionKey);
     } else {
@@ -325,12 +338,27 @@ public class ProgramAB extends Service<ProgramABConfig>
     }
   }
 
-  public void removePredicate(String userName, String predicateName) {
-    removePredicate(userName, getCurrentBotName(), predicateName);
+  /**
+   * remove a specific user and current bot types predicate
+   */
+  public void removePredicate(String user, String predicateName) {
+    removePredicate(user, getBotType(), predicateName);
   }
 
-  public void removePredicate(String userName, String botName, String predicateName) {
-    getSession(userName, botName).remove(predicateName);
+  /**
+   * remove an explicit user and botType's predicate
+   * 
+   * @param user
+   * @param botType
+   * @param name
+   */
+  public void removePredicate(String user, String botType, String name) {
+    Session session = getSession(user, botType);
+    if (session != null) {
+      session.remove(name);
+    } else {
+      error("could not remove predicate %s from session %s<->%s session does not exist", user, botType, name);
+    }
   }
 
   /**
@@ -342,8 +370,15 @@ public class ProgramAB extends Service<ProgramABConfig>
    *          value to add to the set
    */
   public void addToSet(String setName, String setValue) {
+    if (setName == null || setValue == null) {
+      error("addToSet(%s,%s) cannot have name or value null", setName, setValue);
+      return;
+    }
+    setName = setName.toLowerCase().trim();
+    setValue = setValue.trim();
+    
     // add to the set for the bot.
-    Bot bot = getBot(getCurrentBotName());
+    Bot bot = getBot(getBotType());
     AIMLSet updateSet = bot.setMap.get(setName);
     setValue = setValue.toUpperCase().trim();
     if (updateSet != null) {
@@ -371,8 +406,17 @@ public class ProgramAB extends Service<ProgramABConfig>
    *          - the value
    */
   public void addToMap(String mapName, String key, String value) {
+    
+    if (mapName == null || key == null || value == null) {
+      error("addToMap(%s,%s,%s) mapname, key or value cannot be null", mapName, key, value);
+      return;
+    }
+    mapName = mapName.toLowerCase().trim();
+    key = key.toUpperCase().trim();
+    
+    
     // add an entry to the map.
-    Bot bot = getBot(getCurrentBotName());
+    Bot bot = getBot(getBotType());
     AIMLMap updateMap = bot.mapMap.get(mapName);
     key = key.toUpperCase().trim();
     if (updateMap != null) {
@@ -388,41 +432,87 @@ public class ProgramAB extends Service<ProgramABConfig>
     }
   }
 
-  public void setPredicate(String predicateName, String predicateValue) {
-    setPredicate(getCurrentUserName(), predicateName, predicateValue);
+  public void setPredicate(String name, String value) {
+    setPredicate(getUsername(), name, value);
   }
 
-  public void setPredicate(String userName, String predicateName, String predicateValue) {
-    setPredicate(userName, getCurrentBotName(), predicateName, predicateValue);
+  /**
+   * Sets a specific user and current bot predicate to a value. Useful when
+   * setting predicate values of a session, when the user previously was an
+   * unknown human to a new or previously known user.
+   * 
+   * @param username
+   * @param name
+   * @param value
+   */
+  public void setPredicate(String username, String name, String value) {
+    setPredicate(username, getBotType(), name, value);
   }
 
-  public void setPredicate(String userName, String botName, String predicateName, String predicateValue) {
-    Session session = getSession(userName, botName);
+  /**
+   * Sets a predicate for a session keyed by username and bottype. If the
+   * session does not currently exist, it will make a new session for that user.
+   * 
+   * @param username
+   * @param botType
+   * @param name
+   * @param value
+   */
+  public void setPredicate(String username, String botType, String name, String value) {
+    Session session = getSession(username, botType);
     if (session != null) {
-      session.setPredicate(predicateName, predicateValue);
+      session.setPredicate(name, value);
+    } else {
+      // attempt to create a session if it doesn't exist
+      session = startSession(username, botType, false);
+      if (session != null) {
+        session.setPredicate(name, value);
+      } else {
+        error("could not create session");
+      }
     }
   }
 
-  @Deprecated
-  public void unsetPredicate(String userName, String predicateName) {
-    removePredicate(userName, getCurrentBotName(), predicateName);
+  @Deprecated /* use removePredicate */
+  public void unsetPredicate(String username, String predicateName) {
+    removePredicate(username, getBotType(), predicateName);
   }
 
+  /**
+   * Get a predicate's value for the current session
+   * 
+   * @param predicateName
+   * @return
+   */
   public String getPredicate(String predicateName) {
-    return getPredicate(getCurrentUserName(), predicateName);
+    return getPredicate(getUsername(), predicateName);
   }
 
-  public String getPredicate(String userName, String predicateName) {
-    return getPredicate(userName, getCurrentBotName(), predicateName);
+  /**
+   * get a specified users's predicate value for the current botType session
+   * 
+   * @param username
+   * @param predicateName
+   * @return
+   */
+  public String getPredicate(String username, String predicateName) {
+    return getPredicate(username, getBotType(), predicateName);
   }
 
-  public String getPredicate(String userName, String botName, String predicateName) {
-    Session s = getSession(userName, botName);
+  /**
+   * With a session key, get a specific predicate value
+   * 
+   * @param username
+   * @param botType
+   * @param predicateName
+   * @return
+   */
+  public String getPredicate(String username, String botType, String predicateName) {
+    Session s = getSession(username, botType);
     if (s == null) {
-      // If that session doesn't currently exist, let's start it.
-      s = startSession(userName, botName);
+      s = startSession(username, botType, false);
       if (s == null) {
-        log.warn("Error starting programAB session between bot {} and user {}", userName, botName);
+        log.warn("Error starting programAB session between bot {} and user {}", username, botType);
         return null;
       }
     }
@@ -432,8 +522,8 @@ public class ProgramAB extends Service<ProgramABConfig>
   /**
    * Only respond if the last response was longer than delay ms ago
    * 
-   * @param userName
-   *          - current userName
+   * @param username
+   *          - current username
    * @param text
    *          - text to get a response
    * @param delay
@@ -442,11 +532,11 @@ public class ProgramAB extends Service<ProgramABConfig>
    * @throws IOException
    *           boom
    */
-  public Response troll(String userName, String text, Long delay) throws IOException {
-    Session session = getSession(userName, getCurrentBotName());
+  public Response troll(String username, String text, Long delay) throws IOException {
+    Session session = getSession(username, getBotType());
     long delta = System.currentTimeMillis() - session.lastResponseTime.getTime();
     if (delta > delay) {
-      return getResponse(userName, text);
+      return getResponse(username, text);
     } else {
       log.info("Skipping response, minimum delay since previous response not reached.");
       return null;
@@ -461,13 +551,13 @@ public class ProgramAB extends Service<ProgramABConfig>
    * Return a list of all patterns that the current AIML Bot knows to match
    * against.
    * 
-   * @param botName
+   * @param botType
    *          the bots name from which to return it's patterns.
    * @return a list of all patterns loaded into the aiml brain
    */
-  public ArrayList<String> listPatterns(String botName) {
+  public ArrayList<String> listPatterns(String botType) {
     ArrayList<String> patterns = new ArrayList<String>();
-    Bot bot = getBot(botName);
+    Bot bot = getBot(botType);
     for (Category c : bot.brain.getCategories()) {
       patterns.add(c.getPattern());
     }
@@ -508,6 +598,9 @@ public class ProgramAB extends Service<ProgramABConfig>
 
   @Override
   public String publishText(String text) {
+    if (text == null || text.length() == 0) {
+      return "";
+    }
     // TODO: this should not be done here.
     // clean up whitespaces & cariage return
     text = text.replaceAll("\\n", " ");
@@ -535,21 +628,21 @@ public class ProgramAB extends Service<ProgramABConfig>
 
   /**
    * This method will close the current bot, and reload it from AIML It then
-   * will then re-establish only the session associated with userName.
+   * will then re-establish only the session associated with username.
    * 
-   * @param userName
+   * @param username
    *          username for the session
-   * @param botName
+   * @param botType
    *          the bot name being chatted with
    * @throws IOException
    *           boom
    * 
    */
-  public void reloadSession(String userName, String botName) throws IOException {
-    Session session = getSession(userName, botName);
+  public void reloadSession(String username, String botType) throws IOException {
+    Session session = getSession(username, botType);
     if (session != null) {
       session.reload();
-      info("reloaded session %s <-> %s ", userName, botName);
+      info("reloaded session %s <-> %s ", username, botType);
     }
   }
 
@@ -559,7 +652,7 @@ public class ProgramAB extends Service<ProgramABConfig>
    * @return
    */
   public Map<String, String> getPredicates() {
-    return getPredicates(config.currentUserName, config.currentBotName);
+    return getPredicates(config.username, config.botType);
   }
 
   /**
@@ -567,8 +660,8 @@ public class ProgramAB extends Service<ProgramABConfig>
    * 
    * @return
    */
-  public Map<String, String> getPredicates(String userName, String botName) {
-    Session session = getSession(userName, botName);
+  public Map<String, String> getPredicates(String username, String botType) {
+    Session session = getSession(username, botType);
     if (session != null) {
       return session.getPredicates();
     }
@@ -585,15 +678,15 @@ public class ProgramAB extends Service<ProgramABConfig>
   }
 
   public void setEnableAutoConversation(boolean enableAutoConversation) {
-    getSession().enableTrolling = enableAutoConversation;
+    getConfig().enableTrolling = enableAutoConversation;
+  }
+
+  public boolean getEnableAutoConversation() {
+    return getConfig().enableTrolling;
   }
 
   public void setMaxConversationDelay(int maxConversationDelay) {
-    getSession().maxConversationDelay = maxConversationDelay;
-  }
-
-  public void setProcessOOB(boolean processOOB) {
-    getSession().processOOB = processOOB;
+    getConfig().maxConversationDelay = maxConversationDelay;
   }
 
   /**
@@ -605,128 +698,105 @@ public class ProgramAB extends Service<ProgramABConfig>
    *          value to set for current bot/session
    */
   public void setBotProperty(String name, String value) {
-    setBotProperty(getCurrentBotName(), name, value);
+    setBotProperty(getBotType(), name, value);
   }
 
   /**
    * set a bot property - the result will be serialized to config/properties.txt
    * 
-   * @param botName
+   * @param botType
    *          bot name
    * @param name
    *          bot property name
    * @param value
    *          value to set the property too
    */
-  public void setBotProperty(String botName, String name, String value) {
-    info("setting %s property %s:%s", getCurrentBotName(), name, value);
-    BotInfo botInfo = getBotInfo(botName);
+  public void setBotProperty(String botType, String name, String value) {
+    info("setting %s property %s:%s", getBotType(), name, value);
+    BotInfo botInfo = getBotInfo(botType);
     name = name.trim();
     value = value.trim();
     botInfo.setProperty(name, value);
   }
 
   public void removeBotProperty(String name) {
-    removeBotProperty(getCurrentBotName(), name);
+    removeBotProperty(getBotType(), name);
   }
 
-  public void removeBotProperty(String botName, String name) {
-    info("removing %s property %s", getCurrentBotName(), name);
-    BotInfo botInfo = getBotInfo(botName);
+  public void removeBotProperty(String botType, String name) {
+    info("removing %s property %s", getBotType(), name);
+    BotInfo botInfo = getBotInfo(botType);
     botInfo.removeProperty(name);
   }
 
-  public Session startSession() throws IOException {
-    return startSession(config.currentUserName);
-  }
-
-  // FIXME - it should just set the current userName only
-  public Session startSession(String userName) throws IOException {
-    return startSession(userName, getCurrentBotName());
-  }
-
-  public Session startSession(String userName, String botName) {
-    return startSession(null, userName, botName, MagicBooleans.defaultLocale);
-  }
-
-  @Deprecated /* path included for legacy */
-  public Session startSession(String path, String userName, String botName) {
-    return startSession(path, userName, botName, MagicBooleans.defaultLocale);
+  /**
+   * Setting a session is only setting a key, to the active user and bot, its
+   * not starting a session, which is a different process done threw
+   * startSession.
+   * 
+   * Sets username and botType. The session will be started if it can be when a
+   * getResponse is processed. "Active" session is just where the session key
+   * exists and is currently set via username and botType
+   * 
+   * @param username
+   * @param botType
+   * @return
+   */
+  public void setSession(String username, String botType) {
+    // replacing "focus" so
+    // current name and bottype is the
+    // one that will be used
+    setUsername(username);
+    setBotType(botType);
   }
 
   /**
    * Load the AIML 2.0 Bot config and start a chat session. This must be called
-   * after the service is created.
+   * after the service is created. If the session does not exist it will be
+   * created. If the session does exist then that session will be used.
    * 
-   * @param path
-   *          - the path to the ProgramAB directory where the bots aiml and
-   *          config reside
-   * @param userName
+   * config.username and config.botType will be set in memory the specified
+   * values. The "current" session will be this session.
+   * 
+   * @param username
    *          - The new user name
-   * @param botName
+   * @param botType
    *          - The name of the bot to load. (example: alice2)
-   * @param locale
-   *          - The locale of the bot to ensure the aiml is loaded (mostly for
-   *          Japanese support) FIXME - local is defined in the bot,
-   *          specifically config/mrl.properties
    * 
-   *          reasons to deprecate:
-   * 
-   *          1. I question the need to expose this externally at all - if the
-   *          user uses getResponse(username, botname, text) then a session can
-   *          be auto-started - there is really no reason not to auto-start.
-   * 
-   *          2. path is completely invalid here
-   * 
-   *          3. Locale is completely invalid - it is now part of the bot
-   *          description in mrl.properties and shouldn't be defined externally,
-   *          unles its pulled from Runtime
    * @return the session that is started
    */
 
-  public Session startSession(String path, String userName, String botName, java.util.Locale locale) {
+  public Session startSession(String username, String botType, boolean setAsCurrent) {
 
-    /*
-     * not wanted or needed if (path != null) { addBotPath(path); }
-     */
-
-    Session session = getSession(userName, botName);
-
-    if (session != null) {
-      log.info("session {} already exists - will use it", getSessionKey(userName, botName));
-      setCurrentSession(userName, botName);
-      return session;
-    }
-
-    // create a new session
-    log.info("creating new sessions");
-    BotInfo botInfo = getBotInfo(botName);
-    if (botInfo == null) {
-      error("cannot create session %s is not a valid botName", botName);
+    if (username == null || botType == null) {
+      error("username nor bot type can be null");
       return null;
     }
 
-    session = new Session(this, userName, botInfo);
-    sessions.put(getSessionKey(userName, botName), session);
+    if (!bots.containsKey(botType)) {
+      error("bot type %s is not valid, list of possible types are %s", botType, bots.keySet());
+      return null;
+    }
 
-    log.info("Started session for bot botName:{} , userName:{}", botName, userName);
-    setCurrentSession(userName, botName);
-    return session;
-  }
+    if (setAsCurrent) {
+      // really sets the key of the active session username <-> botType
+      // but next getResponse will use this session
+      setSession(username, botType);
+    }
 
-  /**
-   * setting the current session is equivalent to setting current user name and
-   * current bot name
-   * 
-   * @param userName
-   *          username
-   * @param botName
-   *          botname
-   * 
-   */
-  public void setCurrentSession(String userName, String botName) {
-    setCurrentUserName(userName);
-    setCurrentBotName(botName);
+    String sessionKey = getSessionKey(username, botType);
+    if (sessions.containsKey(sessionKey)) {
+      log.info("session exists returning existing");
+      return sessions.get(sessionKey);
+    }
+
+    log.info("creating new session {}<->{} replacing {}", username, botType, setAsCurrent);
+    BotInfo botInfo = getBotInfo(botType);
+    Session session = new Session(this, username, botInfo);
+    sessions.put(sessionKey, session);
+
+    // get session
+    return getSession();
   }
 
   /**
@@ -736,7 +806,7 @@ public class ProgramAB extends Service<ProgramABConfig>
    * @param c
    */
   public void addCategory(Category c) {
-    Bot bot = getBot(getCurrentBotName());
+    Bot bot = getBot(getBotType());
     bot.brain.addCategory(c);
   }
 
@@ -758,16 +828,18 @@ public class ProgramAB extends Service<ProgramABConfig>
   public void addCategory(String pattern, String template) {
     addCategory(pattern, template, "*");
   }
-  
+
   /**
-   * Verifies and adds a new path to the search directories for bots
+   * Verifies and adds a new path to the search directories for bots. Bots of
+   * aiml live in directories which represent their "type" The directory names
+   * must be unique.
    * 
    * @param path
    *          the path to add a bot from
    * @return the path if successful. o/w null
    * 
    */
-  public String addBotPath(String path) {
+  public String addBot(String path) {
     // verify the path is valid
     File botPath = new File(path);
     File verifyAiml = new File(FileIO.gluePaths(path, "aiml"));
@@ -783,12 +855,12 @@ public class ProgramAB extends Service<ProgramABConfig>
 
       BotInfo botInfo = new BotInfo(this, botPath);
 
-      // key'ing on "path" probably would be better and only displaying "name"
-      // then there would be no put/collisions only duplicate names
-      // (preferrable)
+      if (bots.containsKey(botInfo.botType)) {
+        log.info("replacing bot %s with new bot definition", botInfo.botType);
+      }
 
-      bots.put(botInfo.name, botInfo);
-      botInfo.img = getBotImage(botInfo.name);
+      bots.put(botInfo.botType, botInfo);
+      botInfo.img = getBotImage(botInfo.botType);
 
       broadcastState();
     } else {
@@ -798,41 +870,79 @@ public class ProgramAB extends Service<ProgramABConfig>
     return path;
   }
 
-  @Deprecated /* for legacy - use addBotsDir */
-  public String setPath(String path) {
-    // This method is not good, because it doesn't take the full path
-    // from input and there is a buried "hardcoded" value which no one knows
-    // about
-    addBotsDir(path + File.separator + "bots");
-
-    return path;
+  @Deprecated /* use setBotType */
+  public void setCurrentBotName(String botType) {
+    setBotType(botType);
   }
 
-  public void setCurrentBotName(String botName) {
-    config.currentBotName = botName;
-    invoke("getBotImage", botName);
-    broadcastState();
+  /**
+   * Sets the current bot type to a set of aiml folders previously added via
+   * configuration or through the addBot(path) function.
+   * 
+   * You can get a list of possible configured bot types through the method
+   * getBots()
+   * 
+   * @param botType
+   */
+  public void setBotType(String botType) {
+    if (botType == null) {
+      error("bot type cannot be null");
+      return;
+    }
+
+    if (bots.size() == 0) {
+      error("bot paths must be set before a bot type is set");
+    }
+
+    if (!bots.containsKey(botType)) {
+      error("cannot set bot %s, no valid type found, possible values are %s", botType, bots.keySet());
+      return;
+    }
+    String prev = config.botType;
+    config.botType = botType;
+    if (!botType.equals(prev)) {
+      invoke("getBotImage", botType);
+      broadcastState();
+    }
   }
 
-  public void setCurrentUserName(String currentUserName) {
-    config.currentUserName = currentUserName;
-    broadcastState();
+  public void setUsername(String username) {
+    if (username == null) {
+      error("username cannot be null");
+      return;
+    }
+    String prev = config.username;
+    config.username = username;
+    if (!username.equals(prev)) {
+      broadcastState();
+    }
   }
 
-  public Session getCurrentSession() {
-    return sessions.get(getSessionKey(getCurrentUserName(), getCurrentBotName()));
+  public String getSessionKey(String username, String botType) {
+    return String.format("%s <-> %s", username, botType);
   }
 
-  public String getSessionKey(String userName, String botName) {
-    return String.format("%s <-> %s", userName, botName);
+  /**
+   * Simple preferred way to get the user's name
+   * 
+   * @return
+   */
+  public String getUsername() {
+    return config.username;
   }
 
+  @Deprecated /* of course it will be "current" - use getUser() */
   public String getCurrentUserName() {
-    return config.currentUserName;
+    return getUsername();
   }
 
+  @Deprecated /* use getBotType() */
   public String getCurrentBotName() {
-    return config.currentBotName;
+    return getBotType();
+  }
+
+  public String getBotType() {
+    return config.botType;
   }
 
   /**
@@ -930,17 +1040,44 @@ public class ProgramAB extends Service<ProgramABConfig>
 
   @Override
   public void startService() {
-    super.startService();
+    try {
+      super.startService();
 
-    logPublisher = new SimpleLogPublisher(this);
-    logPublisher.filterClasses(new String[] { "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans", "class org.myrobotlab.programab.MrlSraixHandler" });
-    Logging logging = LoggingFactory.getInstance();
-    logging.setLevel("org.alicebot.ab.Graphmaster", "DEBUG");
-    logging.setLevel("org.alicebot.ab.MagicBooleans", "DEBUG");
-    logging.setLevel("class org.myrobotlab.programab.MrlSraixHandler", "DEBUG");
-    logPublisher.start();
+      // scan for bots
+      if (config.botDir != null) {
+        scanForBots(config.botDir);
+      }
 
-    scanForBots(getResourceDir());
+      // explicitly setting bots overrides scans
+      if (config.bots != null && config.bots.size() > 0) {
+        for (String botPath : config.bots) {
+          addBot(botPath);
+        }
+      }
+
+      if (config.username != null) {
+        setUsername(config.username);
+      }
+
+      if (config.botType != null) {
+        setBotType(config.botType);
+      }
+
+      if (config.startTopic != null) {
+        setTopic(config.startTopic);
+      }
+
+      logPublisher = new SimpleLogPublisher(this);
+      logPublisher.filterClasses(new String[] { "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans", "class org.myrobotlab.programab.MrlSraixHandler" });
+      Logging logging = LoggingFactory.getInstance();
+      logging.setLevel("org.alicebot.ab.Graphmaster", "DEBUG");
+      logging.setLevel("org.alicebot.ab.MagicBooleans", "DEBUG");
+      logging.setLevel("class org.myrobotlab.programab.MrlSraixHandler", "DEBUG");
+      logPublisher.start();
+
+    } catch (Exception e) {
+      error(e);
+    }
 
   }
 
@@ -992,7 +1129,7 @@ public class ProgramAB extends Service<ProgramABConfig>
   }
 
   public BotInfo getBotInfo() {
-    return getBotInfo(config.currentBotName);
+    return getBotInfo(config.botType);
   }
 
   /**
@@ -1002,21 +1139,25 @@ public class ProgramAB extends Service<ProgramABConfig>
    *           boom
    * 
    */
-  public void reload() throws IOException {
-    reloadSession(getCurrentUserName(), getCurrentBotName());
+  public void reload() {
+    try {
+      reloadSession(getUsername(), getBotType());
+    } catch (Exception e) {
+      error(e);
+    }
   }
 
   public String getBotImage() {
-    return getBotImage(getCurrentBotName());
+    return getBotImage(getBotType());
   }
 
-  public String getBotImage(String botName) {
+  public String getBotImage(String botType) {
     BotInfo botInfo = null;
     String path = null;
 
     try {
 
-      botInfo = getBotInfo(botName);
+      botInfo = getBotInfo(botType);
       if (botInfo != null) {
         path = FileIO.gluePaths(botInfo.path.getAbsolutePath(), "bot.png");
         File check = new File(path);
@@ -1026,16 +1167,16 @@ public class ProgramAB extends Service<ProgramABConfig>
       }
 
     } catch (Exception e) {
-      info("image for %s cannot be found %s", botName, e.getMessage());
+      info("image for %s cannot be found %s", botType, e.getMessage());
     }
 
     return getResourceImage("default.png");
   }
 
-  public String getAimlFile(String botName, String name) {
-    BotInfo botInfo = getBotInfo(botName);
+  public String getAimlFile(String botType, String name) {
+    BotInfo botInfo = getBotInfo(botType);
     if (botInfo == null) {
-      error("cannot get bot %s", botName);
+      error("cannot get bot %s", botType);
       return null;
     }
 
@@ -1053,10 +1194,10 @@ public class ProgramAB extends Service<ProgramABConfig>
     return ret;
   }
 
-  public void saveAimlFile(String botName, String filename, String data) {
-    BotInfo botInfo = getBotInfo(botName);
+  public void saveAimlFile(String botType, String filename, String data) {
+    BotInfo botInfo = getBotInfo(botType);
     if (botInfo == null) {
-      error("cannot get bot %s", botName);
+      error("cannot get bot %s", botType);
       return;
     }
 
@@ -1090,44 +1231,10 @@ public class ProgramAB extends Service<ProgramABConfig>
     return config;
   }
 
-  @Override
-  public ProgramABConfig apply(ProgramABConfig c) {
-    super.apply(c);
-    if (c.bots != null && c.bots.size() > 0) {
-      // bots.clear();
-      for (String botPath : c.bots) {
-        addBotPath(botPath);
-      }
-    }
-    
-    if (c.botDir == null) {
-      c.botDir = getResourceDir();
-    }
-
-    List<File> botsFromScanning = scanForBots(c.botDir);
-    for (File file : botsFromScanning) {
-      addBotPath(file.getAbsolutePath());
-    }
-
-    if (c.currentUserName != null) {
-      setCurrentUserName(c.currentUserName);
-    }
-    
-    if (c.currentBotName != null) {
-      setCurrentBotName(c.currentBotName);
-    }    
-    
-    if (c.startTopic != null) {
-      setTopic(c.startTopic);  
-    }
-    
-
-    return c;
-  }
-
   public static void main(String args[]) {
     try {
       LoggingFactory.init("INFO");
+      Runtime.startConfig("dev");
       // Runtime.start("gui", "SwingGui");
 
       Runtime runtime = Runtime.getInstance();
@@ -1164,7 +1271,7 @@ public class ProgramAB extends Service<ProgramABConfig>
     }
   }
 
-  public void addBotsDir(String path) {
+  public void addBots(String path) {
 
     if (path == null) {
       error("set path can not be null");
@@ -1182,14 +1289,14 @@ public class ProgramAB extends Service<ProgramABConfig>
     if (check.exists() && check.isDirectory()) {
       log.info("found %d possible bot directories", check.listFiles().length);
       for (File f : check.listFiles()) {
-        addBotPath(f.getAbsolutePath());
+        addBot(f.getAbsolutePath());
       }
     }
   }
 
   @Override
-  synchronized public void onChangePredicate(Chat chat, String predicateName, String result) {
-    log.info("{} on predicate change {}={}", chat.bot.name, predicateName, result);
+  synchronized public void onChangePredicate(Chat chat, String predicateName, String value) {
+    log.info("{} on predicate change {}={}", chat.bot.name, predicateName, value);
 
     // a little janky because program-ab doesn't know the predicate filename,
     // because it does know the "user"
@@ -1200,15 +1307,7 @@ public class ProgramAB extends Service<ProgramABConfig>
     for (Session s : sessions.values()) {
       if (s.chat == chat) {
         // found session saving predicates
-        invoke("publishPredicate", s, predicateName, result);
-        // botname is the name of the bot  currentBotName is the aiml folder that is 
-        // mostly equivalent to its "type"
-        if ("currentBotName".equals(predicateName)) {
-          setCurrentBotName(result);
-        }
-        if ("name".equals(predicateName)) {
-          setCurrentUserName(result);
-        }
+        invoke("publishPredicate", s, predicateName, value);
         s.savePredicates();
         return;
       }
@@ -1229,17 +1328,19 @@ public class ProgramAB extends Service<ProgramABConfig>
    *          - new value of predicate
    * @return
    */
-  public PredicateEvent publishPredicate(Session session, String name, String value) {
-    PredicateEvent event = new PredicateEvent();
-    event.id = String.format("%s<->%s", session.userName, session.botInfo.name);
-    event.userName = session.userName;
-    event.botName = session.botInfo.name;
+  public Event publishPredicate(Session session, String name, String value) {
+    Event event = new Event();
+    event.id = String.format("%s<->%s", session.username, session.botInfo.botType);
+    event.user = session.username;
+    event.botname = session.botInfo.botType;
     event.name = name;
     event.value = value;
 
     if ("topic".equals(name) && value != null && !value.equals(session.currentTopic)) {
-      invoke("publishTopic", new TopicChange(session.userName, session.botInfo.name, value, session.currentTopic));
+      Event topicChange = new Event(getName(), session.username, session.botInfo.botType, value);
+      invoke("publishTopic", topicChange);
       session.currentTopic = value;
+      topicHistory.add(topicChange);
     }
 
     return event;
@@ -1310,14 +1411,14 @@ public class ProgramAB extends Service<ProgramABConfig>
 
   @Override
   public void onUtterance(Utterance utterance) throws Exception {
-    
+
     log.info("Utterance Received " + utterance);
 
     boolean talkToBots = false;
     // TODO: reconcile having different name between the discord bot username
     // and the programab bot name. Mr. Turing is not actually Alice.. and vice
     // versa.
-    String botName = utterance.channelBotName;
+    String botType = utterance.channelBotName;
 
     // prevent bots going off the rails
     if (utterance.isBot && talkToBots) {
@@ -1326,7 +1427,7 @@ public class ProgramAB extends Service<ProgramABConfig>
     }
 
     // Don't talk to myself, though I should be a bot..
-    if (utterance.username.contentEquals(botName)) {
+    if (utterance.username.contentEquals(botType)) {
       log.info("Don't talk to myself.");
       return;
     }
@@ -1340,7 +1441,7 @@ public class ProgramAB extends Service<ProgramABConfig>
         // TODO: don't talk to bots.. it won't go well..
         // TODO: the discord api can provide use the list of mentioned users.
         // for now.. we'll just see if we see Mr. Turing as a substring.
-        config.sleep = (config.sleep || utterance.text.contains("@")) && !utterance.text.contains(botName);
+        config.sleep = (config.sleep || utterance.text.contains("@")) && !utterance.text.contains(botType);
         if (!config.sleep) {
           shouldIRespond = true;
         }
@@ -1354,7 +1455,7 @@ public class ProgramAB extends Service<ProgramABConfig>
       String utteranceDisp = utterance.text;
       // let's strip the @+botname from the beginning of the utterance i guess.
       // Strip the botname from the utterance passed to programab.
-      utteranceDisp = utteranceDisp.replace("@" + botName, "");
+      utteranceDisp = utteranceDisp.replace("@" + botType, "");
       Response resp = getResponse(utterance.username, utteranceDisp);
       if (resp != null && !StringUtils.isEmpty(resp.msg)) {
         // Ok.. now what? respond to the user ...
@@ -1375,17 +1476,18 @@ public class ProgramAB extends Service<ProgramABConfig>
       }
     }
   }
-  
+
   /**
    * This receiver can take a config published by another service and sync
    * predicates from it
+   * 
    * @param cfg
    */
   public void onConfig(ServiceConfig cfg) {
-    Yaml yaml = new Yaml();    
+    Yaml yaml = new Yaml();
     String yml = yaml.dumpAsMap(cfg);
     Map<String, Object> cfgMap = yaml.load(yml);
-    
+
     for (Map.Entry<String, Object> entry : cfgMap.entrySet()) {
       if (entry.getValue() == null) {
         setPredicate("cfg_" + entry.getKey(), null);
@@ -1393,7 +1495,7 @@ public class ProgramAB extends Service<ProgramABConfig>
         setPredicate("cfg_" + entry.getKey(), entry.getValue().toString());
       }
     }
-    
+
     invoke("getPredicates");
   }
 
@@ -1404,27 +1506,74 @@ public class ProgramAB extends Service<ProgramABConfig>
 
   /**
    * New topic published when it changes
+   * 
    * @param topicChange
    * @return
    */
-  public TopicChange publishTopic(TopicChange topicChange) {
+  public Event publishTopic(Event topicChange) {
     return topicChange;
   }
 
-  public String getTopic() {    
-    return getPredicate(getCurrentUserName(), "topic");
+  public String getTopic() {
+    return getPredicate(getUsername(), "topic");
   }
-  
-  public String getTopic(String username) {    
+
+  public String getTopic(String username) {
     return getPredicate(username, "topic");
   }
-  
-  public void setTopic(String username, String topic) {    
+
+  public void setTopic(String username, String topic) {
     setPredicate(username, "topic", topic);
   }
-  
-  public void setTopic(String topic) {    
-    setPredicate(getCurrentUserName(), "topic", topic);
+
+  public void setTopic(String topic) {
+    setPredicate(getUsername(), "topic", topic);
+  }
+
+  /**
+   * Published when a new session is created
+   * 
+   * @param session
+   * @return
+   */
+  public Event publishSession(Event session) {
+    return session;
+  }
+
+  /**
+   * clear all sessions
+   */
+  public void clear() {
+    log.info("clearing sessions");
+    sessions.clear();
+  }
+
+  /**
+   * <pre>
+   * A mechanism to publish a message directly from aiml.
+   * The subscriber can interpret the message and do something with it.
+   * In the case of InMoov for example, the unaddressed messages are processed
+   * as python method calls. This remove direct addressing from the aiml!
+   * And allows a great amount of flexibility on how the messages are
+   * interpreted, without polluting the aiml or ProgramAB.
+   * 
+   * The oob syntax is:
+   *  &lt;oob&gt;
+   *    &lt;mrljson&gt;
+   *        [{method:on_new_user, data:[{&quot;name&quot;:&quot;&lt;star/&gt;&quot;}]}]
+   *    &lt;/mrljson&gt;
+   * &lt;/oob&gt;
+   * 
+   * 
+   * Full typed parameters are supported without conversions.
+   * 
+   * </pre>
+   * 
+   * @param msg
+   * @return
+   */
+  public Message publishMessage(Message msg) {
+    return msg;
   }
 
 }
