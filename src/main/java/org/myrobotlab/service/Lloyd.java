@@ -23,7 +23,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVFilterDL4JTransfer;
 import org.myrobotlab.opencv.OpenCVFilterLloyd;
-import org.myrobotlab.programab.OOBPayload;
+import org.myrobotlab.programab.models.Oob;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
@@ -143,7 +143,7 @@ public class Lloyd extends Service<ServiceConfig> {
   public void startBrain() throws IOException {
     brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
     // TODO: setup the AIML / chat bot directory for all of this.
-    brain.startSession("ProgramAB", "person", "lloyd");
+    brain.setSession("person", "lloyd");
   }
 
   public void initializeBrain() {
@@ -240,13 +240,15 @@ public class Lloyd extends Service<ServiceConfig> {
   }
 
   public void createKnowledgeLookup(String pattern, String fieldName, String prefix, String suffix) {
-    OOBPayload oobTag = createSolrFieldSearchOOB(fieldName);
+    Oob oobTag = createSolrFieldSearchOOB(fieldName);
     // TODO: handle (in the template) a zero hit result ?)
-    String template = prefix + OOBPayload.asBlockingOOBTag(oobTag) + suffix;
-    brain.addCategory(pattern, template);
+
+    // FIXME
+//    String template = prefix + OOBPayload.asBlockingOOBTag(oobTag) + suffix;
+//    brain.addCategory(pattern, template);
   }
 
-  private OOBPayload createSolrFieldSearchOOB(String fieldName) {
+  private Oob createSolrFieldSearchOOB(String fieldName) {
     String serviceName = "cloudMemory";
     // TODO: make this something that's completely abstracted out from here.
     String methodName = "fetchFirstResultSentence";
@@ -257,8 +259,10 @@ public class Lloyd extends Service<ServiceConfig> {
     // +has_infobox:true");
     params.add("infobox_name_ss:<star/> title:<star/> text:<star/> +" + fieldName + ":* +has_infobox:true");
     params.add(fieldName);
-    OOBPayload oobTag = new OOBPayload(serviceName, methodName, params);
-    return oobTag;
+//    OOBPayload oobTag = new OOBPayload(serviceName, methodName, params);
+//    return oobTag;
+    // FIXME
+    return null;
   }
 
   public void startMemory() {

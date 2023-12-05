@@ -1,90 +1,176 @@
 package org.myrobotlab.service.config;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.jme3.UserDataConfig;
 import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.math.MapperSimple;
 import org.myrobotlab.service.Pid.PidData;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.FiniteStateMachineConfig.Transition;
 import org.myrobotlab.service.config.RandomConfig.RandomMessageConfig;
 
+/**
+ * InMoov2Config - configuration for InMoov2 service
+ *  - this is a "default" configuration 
+ * If its configuration which will directly affect another service the naming
+ * pattern should be {peerName}{propertyName}
+ * e.g. neoPixelErrorRed
+ * 
+ * FIXME make a color map that can be overridden
+ * 
+ * @author GroG
+ *
+ */
 public class InMoov2Config extends ServiceConfig {
 
-  public int analogPinFromSoundCard = 53;
-  
-  public int audioPollsBySeconds = 2;
-  
-  public boolean audioSignalProcessing=false;
-  
+  /**
+   * When the healthCheck is operating, it will check the battery level.
+   * If the battery level is < 5% it will publishFlash with red at regular interval 
+   */
   public boolean batteryInSystem = false;
-  
-  public boolean customSound=false;
+
+  /**
+   * enable custom sound map for state changes
+   */
+  public boolean customSound = false;
+
   
   public boolean forceMicroOnIfSleeping = true;
-  
-  public boolean healthCheckActivated = false;
-  
-  public int healthCheckTimerMs = 60000;
-  
-  public boolean heartbeat = false;
+
+  /**
+   * flashes if error has occurred - requires heartbeat
+   */
+  public boolean healthCheckFlash = true;
   
 
   /**
-   * idle time measures the time the fsm is in an idle state
+   * flashes the neopixel every time a health check is preformed.
+   * green == good
+   * red == battery < 5%
    */
-  public boolean idleTimer = true;
+  public boolean heartbeatFlash = false;
 
+  /**
+   * Single heartbeat to drive InMoov2 .. it can check status, healthbeat,
+   * and fire events to the FSM.
+   * Checks battery level and sends a heartbeat flash on publishHeartbeat
+   * and onHeartbeat at a regular interval
+   */
+  public boolean heartbeat = true;
+
+  /**
+   * interval heath check processes in milliseconds
+   */
+  public long heartbeatInterval = 3000;
+
+  /**
+   * loads all python gesture files in the gesture directory
+   */
   public boolean loadGestures = true;
 
+  /**
+   * executes all scripts in the init directory on startup 
+   */
+  public boolean loadInitScripts = true;
+  
   /**
    * default to null - allow the OS to set it, unless explicilty set
    */
   public String locale = null; // = "en-US";
 
-  public boolean neoPixelBootGreen=true;
+  public boolean neoPixelBootGreen = true;
 
   public boolean neoPixelDownloadBlue = true;
 
   public boolean neoPixelErrorRed = true;
-  
+
   public boolean neoPixelFlashWhenSpeaking = false;
-  
-  public boolean openCVFaceRecognizerActivated=true;
-    
+
+  public boolean openCVFaceRecognizerActivated = true;
+
   public boolean pirEnableTracking = false;
-  
+
+  public boolean pirOnFlash = true;
+
   /**
-   * play pir sounds when pir switching states
-   * sound located in data/InMoov2/sounds/pir-activated.mp3
-   * sound located in data/InMoov2/sounds/pir-deactivated.mp3
+   * play pir sounds when pir switching states sound located in
+   * data/InMoov2/sounds/pir-activated.mp3 sound located in
+   * data/InMoov2/sounds/pir-deactivated.mp3
    */
   public boolean pirPlaySounds = true;
-  
+
   public boolean pirWakeUp = true;
-    
+
   public boolean robotCanMoveHeadWhileSpeaking = true;
-  
-  
+
   /**
    * startup and shutdown will pause inmoov - set the speed to this value then
    * attempt to move to rest
    */
   public double shutdownStartupSpeed = 50;
-  
+
   /**
-   * Sleep 5 minutes after last presence detected 
+   * Sleep 5 minutes after last presence detected
    */
-  public int sleepTimeoutMs=300000;
-  
+  public int sleepTimeoutMs = 300000;
+
   public boolean startupSound = true;
 
-  public int trackingTimeoutMs=10000;
+  /**
+   * 
+   */
+  public boolean stateChangeIsMute = true; 
+    
+  /**
+   * Interval in seconds for a idle state event to fire off.
+   * If the fsm is in a state which will allow transitioning, the InMoov2
+   * state will transition to idle. Heartbeat will fire the event.
+   */
+  public Integer stateIdleInterval = 120;
   
+  
+  /**
+   * Interval in seconds for a random state event to fire off.
+   * If the fsm is in a state which will allow transitioning, the InMoov2
+   * state will transition to random. Heartbeat will fire the event.
+   */
+  public Integer stateRandomInterval = 120;
+
+  /**
+   * Determines if InMoov2 publish system events during boot state
+   */
+  public boolean systemEventsOnBoot = false;
+  
+  /**
+   * The user id .. initially it would be the person starting the program
+   * but in a more general sense it would be the person "under focus"
+   * So, a newly discovered user may be the "user" - Python event hanlder
+   * on_new_user will set this when discovered
+   */
+  public String user = null;
+
+  /**
+   * Publish system event when state changes
+   */
+  public boolean systemEventStateChange = true;
+
+  public int trackingTimeoutMs = 10000;
+
   public String unlockInsult = "forgive me";
-  
+
   public boolean virtual = false;
+
+  public String bootAnimation = "Theater Chase";
+
+  public boolean flashOnErrors = true;
+
+  public boolean flashOnPir;
+
+  public boolean loadAppsScripts = true;
 
   public InMoov2Config() {
   }
@@ -92,6 +178,9 @@ public class InMoov2Config extends ServiceConfig {
   @Override
   public Plan getDefault(Plan plan, String name) {
     super.getDefault(plan, name);
+    
+    // FIXME define global peers named "python" "webgui" etc...
+    
 
     // peers FIXME global opencv
     addDefaultPeerConfig(plan, name, "audioPlayer", "AudioFile", true);
@@ -101,6 +190,7 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "ear", "WebkitSpeechRecognition", false);
     addDefaultPeerConfig(plan, name, "eyeTracking", "Tracking", false);
     addDefaultPeerConfig(plan, name, "fsm", "FiniteStateMachine", false);
+    addDefaultPeerConfig(plan, name, "log", "Log", false);
     addDefaultPeerConfig(plan, name, "gpt3", "Gpt3", false);
     addDefaultPeerConfig(plan, name, "head", "InMoov2Head", false);
     addDefaultPeerConfig(plan, name, "headTracking", "Tracking", false);
@@ -111,6 +201,7 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "leftArm", "InMoov2Arm", false);
     addDefaultPeerConfig(plan, name, "leftHand", "InMoov2Hand", false);
     addDefaultPeerConfig(plan, name, "mouth", "MarySpeech", false);
+    addDefaultPeerConfig(plan, name, "mouth.audioFile", "AudioFile", false);
     addDefaultPeerConfig(plan, name, "mouthControl", "MouthControl", false);
     addDefaultPeerConfig(plan, name, "neoPixel", "NeoPixel", false);
     addDefaultPeerConfig(plan, name, "opencv", "OpenCV", false);
@@ -127,6 +218,25 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "torso", "InMoov2Torso", false);
     addDefaultPeerConfig(plan, name, "ultrasonicRight", "UltrasonicSensor", false);
     addDefaultPeerConfig(plan, name, "ultrasonicLeft", "UltrasonicSensor", false);
+    addDefaultPeerConfig(plan, name, "vertx", "Vertx", false);
+    addDefaultPeerConfig(plan, name, "webxr", "WebXR", false);
+
+    WebXRConfig webxr = (WebXRConfig) plan.get(getPeerName("webxr"));
+
+    Map<String, MapperSimple> map = new HashMap<>();
+    MapperSimple mapper = new MapperSimple(-0.5, 0.5, 0, 180);
+    map.put("i01.head.neck", mapper);
+    webxr.controllerMappings.put("head.orientation.pitch", map);
+
+    map = new HashMap<>();
+    mapper = new MapperSimple(-0.5, 0.5, 0, 180);
+    map.put("i01.head.rothead", mapper);
+    webxr.controllerMappings.put("head.orientation.yaw", map);
+
+    map = new HashMap<>();
+    mapper = new MapperSimple(-0.5, 0.5, 0, 180);
+    map.put("i01.head.roll", mapper);
+    webxr.controllerMappings.put("head.orientation.roll", map);
 
     MouthControlConfig mouthControl = (MouthControlConfig) plan.get(getPeerName("mouthControl"));
 
@@ -141,6 +251,8 @@ public class InMoov2Config extends ServiceConfig {
     mouthControl.mouth = i01Name + ".mouth";
 
     ProgramABConfig chatBot = (ProgramABConfig) plan.get(getPeerName("chatBot"));
+    chatBot.listeners = new ArrayList<>();
+    
     Runtime runtime = Runtime.getInstance();
     String[] bots = new String[] { "cn-ZH", "en-US", "fi-FI", "hi-IN", "nl-NL", "ru-RU", "de-DE", "es-ES", "fr-FR", "it-IT", "pt-PT", "tr-TR" };
     String tag = runtime.getLocaleTag();
@@ -149,19 +261,17 @@ public class InMoov2Config extends ServiceConfig {
       String lang = tagparts[0];
       for (String b : bots) {
         if (b.startsWith(lang)) {
-          chatBot.currentBotName = b;
+          chatBot.botType = b;
           break;
         }
       }
     }
-    
-    chatBot.currentUserName = "human";
-    
-    // chatBot.textListeners = new String[] { name + ".htmlFilter" };
-    if (chatBot.listeners == null) {
-      chatBot.listeners = new ArrayList<>();
-    }
-    chatBot.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));
+
+    // chatBot.currentUserName = "human"; is already default
+
+    Gpt3Config gpt3 = (Gpt3Config) plan.get(getPeerName("gpt3"));
+    gpt3.listeners = new ArrayList<>();
+    gpt3.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));
 
     HtmlFilterConfig htmlFilter = (HtmlFilterConfig) plan.get(getPeerName("htmlFilter"));
     // htmlFilter.textListeners = new String[] { name + ".mouth" };
@@ -176,21 +286,15 @@ public class InMoov2Config extends ServiceConfig {
     mouth.voice = "Mark";
     mouth.speechRecognizers = new String[] { name + ".ear" };
 
-    // == Peer - servoMixer =============================
-    // setup name references to different services
-    ServoMixerConfig servoMixer = (ServoMixerConfig) plan.get(getPeerName("servoMixer"));
-    servoMixer.listeners = new ArrayList<>();
-    servoMixer.listeners.add(new Listener("publishText", name + ".mouth", "onText"));
-    //servoMixer.listeners.add(new Listener("publishText", name + ".chatBot", "onText"));
 
     // == Peer - ear =============================
     // setup name references to different services
     WebkitSpeechRecognitionConfig ear = (WebkitSpeechRecognitionConfig) plan.get(getPeerName("ear"));
-    ear.listeners = new ArrayList<>(); 
+    ear.listeners = new ArrayList<>();
     ear.listeners.add(new Listener("publishText", name + ".chatBot", "onText"));
     ear.listening = true;
     // remove, should only need ServiceConfig.listeners
-    ear.textListeners = new String[]{name + ".chatBot"};
+    ear.textListeners = new String[] { name + ".chatBot" };
 
     JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.get(getPeerName("simulator"));
 
@@ -259,63 +363,72 @@ public class InMoov2Config extends ServiceConfig {
     simulator.cameraLookAt = name + ".torso.lowStom";
 
     FiniteStateMachineConfig fsm = (FiniteStateMachineConfig) plan.get(getPeerName("fsm"));
-    // TODO - events easily gotten from InMoov data ?? auto callbacks in python if exists ?
+    // TODO - events easily gotten from InMoov data ?? auto callbacks in python
+    // if exists ?
+    fsm.listeners = new ArrayList<>();
     fsm.current = "boot";
-    fsm.transitions.add(new Transition("boot", "configStarted", "applyingConfig"));
-    fsm.transitions.add(new Transition("applyingConfig", "getUserInfo", "getUserInfo"));
-    fsm.transitions.add(new Transition("applyingConfig", "systemCheck", "systemCheck"));
-    fsm.transitions.add(new Transition("applyingConfig", "wake", "awake"));
-    fsm.transitions.add(new Transition("getUserInfo", "systemCheck", "systemCheck"));
-    fsm.transitions.add(new Transition("systemCheck", "systemCheckFinished", "awake"));
-    fsm.transitions.add(new Transition("awake", "sleep", "sleeping"));
+    fsm.transitions.add(new Transition("boot", "start", "start"));
+    // fsm.transitions.add(new Transition("start", "idle", "idle"));
+    fsm.transitions.add(new Transition("start", "first_init", "first_init"));
+    fsm.transitions.add(new Transition("start", "wake", "wake"));
+    fsm.transitions.add(new Transition("idle", "random", "random"));
+    fsm.transitions.add(new Transition("random", "idle", "idle"));
+    fsm.transitions.add(new Transition("idle", "sleep", "sleep"));
+    fsm.transitions.add(new Transition("sleep", "wake", "wake"));
+    fsm.transitions.add(new Transition("idle", "power_down", "power_down"));
+    fsm.transitions.add(new Transition("wake", "idle", "idle"));
+    // fsm.transitions.add(new Transition("wake", "first_init", "first_init"));
+    // powerDown to shutdown
+    // fsm.transitions.add(new Transition("systemCheck", "systemCheckFinished",
+    // "awake"));
+    // fsm.transitions.add(new Transition("awake", "sleep", "sleeping"));
 
-    
-    
     PirConfig pir = (PirConfig) plan.get(getPeerName("pir"));
-    pir.pin = "23";
+    pir.pin = "D23";
     pir.controller = name + ".left";
     pir.listeners = new ArrayList<>();
-    pir.listeners.add(new Listener("publishPirOn", name, "onPirOn"));
-    
+    pir.listeners.add(new Listener("publishPirOn", name));
+    pir.listeners.add(new Listener("publishPirOff", name));
+
     // == Peer - random =============================
     RandomConfig random = (RandomConfig) plan.get(getPeerName("random"));
     random.enabled = false;
 
     // setup name references to different services
-    RandomMessageConfig rm = new RandomMessageConfig(name, "setLeftArmSpeed", 3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+    RandomMessageConfig rm = new RandomMessageConfig(name, "setLeftArmSpeed", 3000, 8000, 8, 25, 8, 25, 8, 25, 8, 25);
     random.randomMessages.put(name + ".setLeftArmSpeed", rm);
 
-    rm = new RandomMessageConfig(name, "setRightArmSpeed", 3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+    rm = new RandomMessageConfig(name, "setRightArmSpeed", 3000, 8000, 8, 25, 8, 25, 8, 25, 8, 25);
     random.randomMessages.put(name + ".setRightArmSpeed", rm);
 
-    rm = new RandomMessageConfig(name, "moveLeftArm", 000, 8000, 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
+    rm = new RandomMessageConfig(name, "moveLeftArm", 000, 8000, 0, 5, 85, 95, 25, 30, 10, 15);
     random.randomMessages.put(name + ".moveLeftArm", rm);
 
-    rm = new RandomMessageConfig(name, "moveRightArm", 3000, 8000, 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
+    rm = new RandomMessageConfig(name, "moveRightArm", 3000, 8000, 0, 5, 85, 95, 25, 30, 10, 15);
     random.randomMessages.put(name + ".moveRightArm", rm);
 
-    rm = new RandomMessageConfig(name, "setLeftHandSpeed", 3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+    rm = new RandomMessageConfig(name, "setLeftHandSpeed", 3000, 8000, 8, 25, 8, 25, 8, 25, 8, 25, 8, 25, 8, 25);
     random.randomMessages.put(name + ".setLeftHandSpeed", rm);
 
-    rm = new RandomMessageConfig(name, "setRightHandSpeed", 3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+    rm = new RandomMessageConfig(name, "setRightHandSpeed", 3000, 8000, 8, 25, 8, 25, 8, 25, 8, 25, 8, 25, 8, 25);
     random.randomMessages.put(name + ".setRightHandSpeed", rm);
 
-    rm = new RandomMessageConfig(name, "moveLeftHand", 3000, 8000, 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 130.0, 175.0);
+    rm = new RandomMessageConfig(name, "moveLeftHand", 3000, 8000, 10, 160, 10, 60, 10, 60, 10, 60, 10, 60, 130, 175);
     random.randomMessages.put(name + ".moveLeftHand", rm);
 
-    rm = new RandomMessageConfig(name, "moveRightHand", 3000, 8000, 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 130.0, 175.0);
+    rm = new RandomMessageConfig(name, "moveRightHand", 3000, 8000, 10, 160, 10, 60, 10, 60, 10, 60, 10, 60, 130, 175);
     random.randomMessages.put(name + ".moveRightHand", rm);
 
-    rm = new RandomMessageConfig(name, "setHeadSpeed",3000, 8000, 8.0, 20.0, 8.0, 20.0, 8.0, 20.0);
+    rm = new RandomMessageConfig(name, "setHeadSpeed", 3000, 8000, 8, 20, 8, 20, 8, 20);
     random.randomMessages.put(name + ".setHeadSpeed", rm);
 
-    rm = new RandomMessageConfig(name, "moveHead", 3000, 8000, 70.0, 110.0, 65.0, 115.0, 70.0, 110.0);
+    rm = new RandomMessageConfig(name, "moveHead", 3000, 8000, 70, 110, 65, 115, 70, 110);
     random.randomMessages.put(name + ".moveHead", rm);
 
-    rm = new RandomMessageConfig(name , "setTorsoSpeed", 3000, 8000, 2.0, 5.0, 2.0, 5.0, 2.0, 5.0);
+    rm = new RandomMessageConfig(name, "setTorsoSpeed", 3000, 8000, 2, 5, 2, 5, 2, 5);
     random.randomMessages.put(name + ".setTorsoSpeed", rm);
 
-    rm = new RandomMessageConfig(name, "moveTorso", 3000, 8000, 85.0, 95.0, 88.0, 93.0, 70.0, 110.0);
+    rm = new RandomMessageConfig(name, "moveTorso", 3000, 8000, 85, 95, 88, 93, 70, 110);
     random.randomMessages.put(name + ".moveTorso", rm);
 
     // == Peer - headTracking =============================
@@ -387,17 +500,114 @@ public class InMoov2Config extends ServiceConfig {
     plan.remove(name + ".eyeTracking.controller");
     plan.remove(name + ".eyeTracking.controller.serial");
     plan.remove(name + ".eyeTracking.cv");
-    
+
+    // LOOPBACK PUBLISHING - ITS A GREAT WAY TO SUPPORT
+    // EXTENSIBLE AND OVERRIDABLE BEHAVIORS
+
     // inmoov2 default listeners
     listeners = new ArrayList<>();
     // FIXME - should be getPeerName("neoPixel")
-    listeners.add(new Listener("publishFlash", name + ".neoPixel", "onLedDisplay"));
 
-    listeners.add(new Listener("publishEvent", name + ".fsm"));
+    // loopbacks allow user to override or extend with python
+//    listeners.add(new Listener("publishBoot", name));
+      listeners.add(new Listener("publishHeartbeat", name));
+//    listeners.add(new Listener("publishConfigFinished", name));
+//    listeners.add(new Listener("publishStateChange", name));
+
+    // listeners.add(new Listener("publishPowerUp", name));
+    // listeners.add(new Listener("publishPowerDown", name));
+    // listeners.add(new Listener("publishError", name));
+
+    listeners.add(new Listener("publishMoveHead", name));
+    listeners.add(new Listener("publishMoveRightArm", name));
+    listeners.add(new Listener("publishMoveLeftArm", name));
+    listeners.add(new Listener("publishMoveRightHand", name));
+    listeners.add(new Listener("publishMoveLeftHand", name));
+    listeners.add(new Listener("publishMoveTorso", name));
+
+    LogConfig log = (LogConfig) plan.get(getPeerName("log"));
+    log.listeners = new ArrayList<>();
+    log.listeners.add(new Listener("publishLogEvents", name));
+
+    // mouth_audioFile.listeners.add(new Listener("publishAudioEnd", name));
+    // mouth_audioFile.listeners.add(new Listener("publishAudioStart", name));
+
+    // InMoov2 --to--> service
+    listeners.add(new Listener("publishFlash", getPeerName("neoPixel")));
+    listeners.add(new Listener("publishEvent", getPeerName("chatBot"), "getResponse"));
+    listeners.add(new Listener("publishPlayAudioFile", getPeerName("audioPlayer")));
+
+    listeners.add(new Listener("publishPlayAnimation", getPeerName("neoPixel")));
+    listeners.add(new Listener("publishStopAnimation", getPeerName("neoPixel")));
+
+    // listeners.add(new Listener("publishPowerUp", name));
+    // listeners.add(new Listener("publishPowerDown", name));
+    // listeners.add(new Listener("publishError", name));
+
+    listeners.add(new Listener("publishMoveHead", name));
+    listeners.add(new Listener("publishMoveRightArm", name));
+    listeners.add(new Listener("publishMoveLeftArm", name));
+    listeners.add(new Listener("publishMoveRightHand", name));
+    listeners.add(new Listener("publishMoveLeftHand", name));
+    listeners.add(new Listener("publishMoveTorso", name));
+
+   
+    // service --to--> InMoov2
+    AudioFileConfig mouth_audioFile = (AudioFileConfig) plan.get(getPeerName("mouth.audioFile"));
+    mouth_audioFile.listeners = new ArrayList<>();
+    mouth_audioFile.listeners.add(new Listener("publishPeak", name));
+    
+    // service --> InMoov2 FIXME !!! - rebroadcast with event and event.src
+    mouth.listeners = new ArrayList<>();
+    mouth.listeners.add(new Listener("publishStartSpeaking", name));
+    mouth.listeners.add(new Listener("publishEndSpeaking", name));
+
+    // service --> hardcoded service name - NOT GOOD :(
+    mouth.listeners.add(new Listener("publishStartSpeaking", "python"));
+    mouth.listeners.add(new Listener("publishEndSpeaking", "python"));
+
+    // mouth --> ear .. should it be audio file instead "closer to the actual audio"?
+    mouth.listeners.add(new Listener("publishStartSpeaking", getPeerName("ear")));
+    mouth.listeners.add(new Listener("publishEndSpeaking", getPeerName("ear")));
+    
+
+
+    webxr.listeners = new ArrayList<>();
+    webxr.listeners.add(new Listener("publishJointAngles", name)); // TODO rebroadcast this
+
+    // mouth_audioFile.listeners.add(new Listener("publishAudioEnd", name));
+    // mouth_audioFile.listeners.add(new Listener("publishAudioStart", name));
+
+    // InMoov2 --to--> service
+    listeners.add(new Listener("publishEvent", getPeerName("chatBot"), "getResponse"));
+    listeners.add(new Listener("publishPlayAudioFile", getPeerName("audioPlayer")));
+    listeners.add(new Listener("publishPython", "python"));
+    listeners.add(new Listener("publishSensorData", "python"));
+    listeners.add(new Listener("publishPredicate", "python"));
+    listeners.add(new Listener("publishStateChange", "python"));
+    listeners.add(new Listener("publishSession", "python"));
+    listeners.add(new Listener("publishMessage", "python"));
+    
+
+    // service --to--> service
+    ServoMixerConfig servoMixer = (ServoMixerConfig) plan.get(getPeerName("servoMixer"));
+    servoMixer.listeners = new ArrayList<>();
+    servoMixer.listeners.add(new Listener("publishText", getPeerName("mouth"), "onText"));
         
+    chatBot.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));
+    
+
+    // service --> InMoov2 --> rebroadcast correctly with src
+    chatBot.listeners.add(new Listener("publishTopic", name, "publishTopic"));
+    chatBot.listeners.add(new Listener("publishPredicate", name, "publishPredicate"));
+    chatBot.listeners.add(new Listener("publishSession", name, "publishSession"));
+    chatBot.listeners.add(new Listener("publishMessage", name, "publishMessage"));
+    fsm.listeners.add(new Listener("publishStateChange", name, "publishStateChange"));
+
+
     // remove the auto-added starts in the plan's runtime RuntimConfig.registry
     plan.removeStartsWith(name + ".");
-    
+
     // rtConfig.add(name); // <-- adding i01 / not needed
 
     return plan;
