@@ -25,7 +25,7 @@ jobs:
       - name: Dependency Test # installs all dependencies
         run: mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
       - name: Build with Maven # currently cannot test opencv
-        run: mvn --batch-mode test surefire-report:report jacoco:report -q -Dtest="!**/OpenCV*"
+        run: mvn --batch-mode test surefire-report:report jacoco:report -q
 
       - name: Get next version
         uses: reecetech/version-increment@2023.9.3
@@ -66,8 +66,9 @@ jobs:
           paths: |
             ${{ github.workspace }}/target/site/jacoco/jacoco.xml
           token: ${{ secrets.ACCESS_TOKEN }}
-          # min-coverage-overall: 40
-          # min-coverage-changed-files: 60
+          debug: true
+          min-coverage-overall: 40
+          min-coverage-changed-files: 60
 
       - name: Release
         if: github.ref == 'refs/heads/develop'
