@@ -22,7 +22,7 @@ jobs:
       - name: Dependency Test # installs all dependencies
         run: mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
       - name: Build with Maven # currently cannot test opencv
-        run: mvn --batch-mode -Dtest=!**/OpenCV* test -q
+        run: mvn --batch-mode -Dtest=!**/OpenCV* test surefire-report:report jacoco:report -q
 
       - name: Get next version
         uses: reecetech/version-increment@2023.9.3
@@ -52,7 +52,11 @@ jobs:
           generate_release_notes: true
           body_path: ./release-template.md
 
-      - name: Add coverage to PR
+      # - name: Publish Test Report
+      #   if: success() || failure()
+      #   uses: scacap/action-surefire-report@v1
+
+      - name: Add Coverage to PR
         id: jacoco
         uses: madrapps/jacoco-report@v1.6.1
         with:
