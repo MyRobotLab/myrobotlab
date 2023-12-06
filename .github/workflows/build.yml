@@ -19,6 +19,9 @@ jobs:
           # NEATO ! CACHE !!!!
           cache: "maven"
 
+      - name: Install Missing Dependencies
+        run: sudo apt-get install -y libv4l-0
+
       - name: Dependency Test # installs all dependencies
         run: mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
       - name: Build with Maven # currently cannot test opencv
