@@ -2044,6 +2044,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <version>2.18</version>
         <configuration>
+          <!-- critical for jacoco to have original argLine prefixed here-->
           <argLine>${argLine} -Djava.library.path=libraries/native
             -Djna.library.path=libraries/native</argLine>
           <includes>
