@@ -25,8 +25,7 @@ jobs:
       - name: Dependency Test # installs all dependencies
         run: mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
       - name: Build with Maven # currently cannot test opencv
-        # run: mvn --batch-mode -Dtest=!**/OpenCV* test surefire-report:report jacoco:report -q
-        run: mvn --batch-mode test surefire-report:report jacoco:report -q
+        run: mvn --batch-mode test surefire-report:report jacoco:report -q -Dtest="!**/OpenCV*"
 
       - name: Get next version
         uses: reecetech/version-increment@2023.9.3
