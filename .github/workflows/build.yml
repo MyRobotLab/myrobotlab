@@ -14,14 +14,14 @@ jobs:
         uses: actions/setup-java@v3
 
         with:
-          java-version: '11'
-          distribution: 'adopt'
+          java-version: "11"
+          distribution: "adopt"
           # NEATO ! CACHE !!!!
-          cache: 'maven'
+          cache: "maven"
 
-      - name: Dependency Test
+      - name: Dependency Test # installs all dependencies
         run: mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
-      - name: Build with Maven
+      - name: Build with Maven # currently cannot test opencv
         run: mvn --batch-mode -Dtest=!**/OpenCV* test -q
 
       - name: Get next version
@@ -29,7 +29,7 @@ jobs:
         id: version
         with:
           scheme: semver
-          increment: patch      
+          increment: patch
 
       - name: Package with Maven
         run: "mvn package -DskipTests -Dversion=${{ steps.version.outputs.version }} -q"
@@ -52,6 +52,16 @@ jobs:
           generate_release_notes: true
           body_path: ./release-template.md
 
+      - name: Add coverage to PR
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: |
+            ${{ github.workspace }}/target/site/jacoco/jacoco.xml
+          token: ${{ secrets.ACCESS_TOKEN }}
+          # min-coverage-overall: 40
+          # min-coverage-changed-files: 60
+
       - name: Release
         if: github.ref == 'refs/heads/develop'
         id: release
@@ -63,4 +73,3 @@ jobs:
           tag_name: ${{ steps.version.outputs.version }}
           generate_release_notes: true
           body_path: ./release-template.md
-
