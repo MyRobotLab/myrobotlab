@@ -11,6 +11,13 @@ angular.module("mrlapp.service.MockGatewayGui", []).controller("MockGatewayGuiCt
       $scope.service = service
     }
 
+    $scope.msgToRemote = function (msg) {
+      if ($scope.service) {
+        return msg.name.endsWith($scope.service.remoteId)
+      } else {
+        return false
+      }
+    }
 
     this.onMsg = function (inMsg) {
       let data = inMsg.data[0]
@@ -19,9 +26,8 @@ angular.module("mrlapp.service.MockGatewayGui", []).controller("MockGatewayGuiCt
           _self.updateState(data)
           $scope.$apply()
           break
-        case "onSendMessage":
-          const date = new Date(data)
-          $scope.onTime = date.toLocaleString()
+        case "onMessageEvent":
+          $scope.service.msgs.push(data)
           $scope.$apply()
           break
         default:
@@ -30,7 +36,7 @@ angular.module("mrlapp.service.MockGatewayGui", []).controller("MockGatewayGuiCt
       }
     }
 
-    // msg.subscribe("publishSendMessage")
+    msg.subscribe("publishMessageEvent")
     msg.subscribe(this)
   },
 ])

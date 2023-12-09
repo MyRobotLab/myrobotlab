@@ -27,7 +27,7 @@ public class ProxyFactoryTest extends AbstractTest {
         // TimeoutException indicates we're getting all the way to
         // Service.waitOn(), so things *probably* work.
         // FIXME use mocks or startup a second instance to rigorously test
-        assertThrows(TimeoutException.class, proxy::getName);
+        assertThrows(TimeoutException.class, proxy::getPeerKeys);
     }
 
     @Test

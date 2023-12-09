@@ -55,15 +55,22 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
       this.gateway = gateway;
     }
 
-    public void handle(Message msg) {      
+    public void handle(Message msg) {
       if (msg.method.equals("getMethodMap")) {
         Map<String, MethodEntry> emptyMap = new HashMap<>();
         // emptyMap = Runtime.getMethodMap("clock");
-        Message returnMsg = Message.createMessage(name, msg.sender, "onMethodMap",  emptyMap);
+        Message returnMsg = Message.createMessage(name, msg.sender, "onMethodMap", emptyMap);
         gateway.send(returnMsg);
       }
-        
+
     }
+  }
+
+  @Override
+  public void send(Message msg) {
+    super.send(msg);
+    invoke("publishMessageEvent", msg);
+    msgs.add(msg);
   }
 
   public MockGateway(String reservedKey, String inId) {
@@ -102,28 +109,32 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
   @Override
   public void sendRemote(Message msg) throws Exception {
     log.info("mock gateway got a sendRemote {}", msg);
-    
+
     String key = String.format("%s.%s", msg.name, msg.method);
-    
+
     BlockingQueue<Message> q = null;
     if (!sendQueues.containsKey(key)) {
-       q = new LinkedBlockingQueue<>();
+      q = new LinkedBlockingQueue<>();
       sendQueues.put(key, q);
     } else {
       q = sendQueues.get(key);
     }
-    
+
     q.add(msg);
-    invoke("publishSendMessage", msg);
+    invoke("publishMessageEvent", msg);
     msgs.add(msg);
-    
+
+    // verify the msg can be serialized
+    String json = CodecUtils.toJson(msg);
+    log.debug("sendRemote {}", json);
+
     if (!remoteServices.containsKey(msg.name)) {
       error("got remote message from %s - and do not have its client !!!", msg.name);
       return;
-    }    
+    }
     remoteServices.get(msg.name).handle(msg);
   }
-  
+
   public void clear() {
     sendQueues.clear();
   }
@@ -136,13 +147,11 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
   public boolean isLocal(Message msg) {
     return Runtime.getInstance().isLocal(msg);
   }
-  
 
   public void sendWithDelay(String name, String method, Object... data) {
     Message msg = Message.createMessage(method, name, method, data);
     addTask(UUID.randomUUID().toString(), true, 0, 0, "send", new Object[] { msg });
   }
-
 
   /**
    * Send an asynchronous message so waiting for a callback can be done easily
@@ -171,12 +180,13 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
   public Message waitForMsg(String name, String callback, long maxTimeWaitMs) throws TimeoutException {
     try {
       String fullName = getFullRemoteName(name);
-      
+
       String key = String.format("%s.%s", fullName, callback);
+
       if (!sendQueues.containsKey(key)) {
-        return null;
+        sendQueues.put(key, new LinkedBlockingQueue<>());
       }
-      
+
       Message msg = sendQueues.get(key).poll(maxTimeWaitMs, TimeUnit.MILLISECONDS);
       if (msg == null) {
         String timeout = String.format("waited %dms for %s.%s", maxTimeWaitMs, name, callback);
@@ -229,7 +239,7 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
   public void registerRemoteService(String remoteServiceName) {
     registerRemoteService(remoteServiceName, null);
   }
-  
+
   public String getFullRemoteName(String name) {
     if (!name.contains("@")) {
       return String.format("%s@%s", name, remoteId);
@@ -252,7 +262,6 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
     // Runtime.register(remoteId, remoteServiceName, "mock:mock", interfaces);
     Runtime.register(remoteId, remoteServiceName, "Unknown", interfaces);
 
-    
   }
 
   /**
@@ -271,11 +280,7 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
     return toString();
   }
 
-  public Message publishSendMessage(Message msg) {
-    return msg;
-  }
-
-  public Message publishReceiveMessage(Message msg) {
+  public Message publishMessageEvent(Message msg) {
     return msg;
   }
 
@@ -307,5 +312,22 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  public Message getMsg(String name, String callback) {
+    String fullName = getFullRemoteName(name);
+
+    String key = String.format("%s.%s", fullName, callback);
+    if (!sendQueues.containsKey(key)) {
+      return null;
+    }
+
+    try {
+      Message msg = sendQueues.get(key).poll(0, TimeUnit.MILLISECONDS);
+      return msg;
+    } catch (InterruptedException e) {
+      log.info("interrupted");
+    }
+    return null;
   }
 }
