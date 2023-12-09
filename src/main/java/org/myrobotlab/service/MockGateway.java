@@ -65,6 +65,13 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
         
     }
   }
+  
+  @Override
+  public void send(Message msg) {
+    super.send(msg);
+    invoke("publishMessageEvent", msg);
+    msgs.add(msg);
+  }
 
   public MockGateway(String reservedKey, String inId) {
     super(reservedKey, inId);
@@ -114,8 +121,12 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
     }
     
     q.add(msg);
-    invoke("publishSendMessage", msg);
+    invoke("publishMessageEvent", msg);
     msgs.add(msg);
+    
+    // verify the msg can be serialized
+    String json = CodecUtils.toJson(msg);
+    log.debug("sendRemote {}", json);
     
     if (!remoteServices.containsKey(msg.name)) {
       error("got remote message from %s - and do not have its client !!!", msg.name);
@@ -271,11 +282,7 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
     return toString();
   }
 
-  public Message publishSendMessage(Message msg) {
-    return msg;
-  }
-
-  public Message publishReceiveMessage(Message msg) {
+  public Message publishMessageEvent(Message msg) {
     return msg;
   }
 
@@ -307,5 +314,22 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  public Message getMsg(String name, String callback) {
+    String fullName = getFullRemoteName(name);
+    
+    String key = String.format("%s.%s", fullName, callback);
+    if (!sendQueues.containsKey(key)) {
+      return null;
+    }
+    
+    try {
+      Message msg = sendQueues.get(key).poll(0, TimeUnit.MILLISECONDS);
+      return msg;
+    } catch (InterruptedException e) {
+      log.info("interrupted");
+    }
+    return null;
   }
 }
