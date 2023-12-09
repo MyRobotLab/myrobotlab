@@ -1,7 +1,7 @@
 name: Java CI
 
 on:
-  push:
+  pull_request:
 
 jobs:
   build:
@@ -14,22 +14,25 @@ jobs:
         uses: actions/setup-java@v3
 
         with:
-          java-version: '11'
-          distribution: 'adopt'
+          java-version: "11"
+          distribution: "adopt"
           # NEATO ! CACHE !!!!
-          cache: 'maven'
+          cache: "maven"
 
-      - name: Dependency Test
+      - name: Install Missing Dependencies
+        run: sudo apt-get install -y libv4l-0 libopencv-dev python3-opencv
+
+      - name: Dependency Test # installs all dependencies
         run: mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
-      - name: Build with Maven
-        run: mvn --batch-mode -Dtest=!**/OpenCV* test -q
+      - name: Build with Maven # currently cannot test opencv
+        run: mvn --batch-mode test surefire-report:report jacoco:report -q
 
       - name: Get next version
         uses: reecetech/version-increment@2023.9.3
         id: version
         with:
           scheme: semver
-          increment: patch      
+          increment: patch
 
       - name: Package with Maven
         run: "mvn package -DskipTests -Dversion=${{ steps.version.outputs.version }} -q"
@@ -52,6 +55,21 @@ jobs:
           generate_release_notes: true
           body_path: ./release-template.md
 
+      # - name: Publish Test Report
+      #   if: success() || failure()
+      #   uses: scacap/action-surefire-report@v1
+
+      - name: Add Coverage to PR
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: |
+            ${{ github.workspace }}/target/site/jacoco/jacoco.xml
+          token: ${{ secrets.ACCESS_TOKEN }}
+          debug-mode: true
+          min-coverage-overall: 40
+          min-coverage-changed-files: 60
+
       - name: Release
         if: github.ref == 'refs/heads/develop'
         id: release
@@ -63,4 +81,3 @@ jobs:
           tag_name: ${{ steps.version.outputs.version }}
           generate_release_notes: true
           body_path: ./release-template.md
-
