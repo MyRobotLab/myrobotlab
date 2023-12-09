@@ -1179,12 +1179,8 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
 
       // Platform.setVirtual(true);
       
-      Runtime.startConfig("dev");
+      // Runtime.startConfig("dev");
       
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
 
       // Runtime.start("python", "Python");
@@ -1197,6 +1193,13 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
       webgui.startService();
 
       Runtime.start("python", "Python");
+      
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+      
       // Runtime.start("intro", "Intro");
       // Runtime.start("i01", "InMoov2");
 

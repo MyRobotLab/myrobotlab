@@ -1291,6 +1291,19 @@ public class Serial extends Service<SerialConfig> implements SerialControl, Queu
   public void stopTcpServer() throws IOException {
     tcpSerialHub.stop();
   }
+  
+  public void startService() {
+    super.startService();
+    if (config.port != null) {
+      try {
+        if (!isConnected()) {
+          connect(config.port);
+        }
+      } catch (Exception e) {
+        log.error("load connecting threw", e);
+      }
+    }
+  }
 
   @Override
   public SerialConfig getConfig() {
@@ -1300,21 +1313,6 @@ public class Serial extends Service<SerialConfig> implements SerialControl, Queu
     return config;
   }
 
-  @Override
-  public SerialConfig apply(SerialConfig c) {
-    super.apply(c);
-
-    if (c.port != null) {
-      try {
-        if (isConnected()) {
-          connect(c.port);
-        }
-      } catch (Exception e) {
-        log.error("load connecting threw", e);
-      }
-    }
-    return c;
-  }
 
   public static void main(String[] args) {
 

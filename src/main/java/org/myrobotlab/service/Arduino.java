@@ -828,41 +828,6 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
     msg.enableAcks(enabled);
   }
 
-  transient BoardInfoPoller poller = new BoardInfoPoller();
-
-  public class BoardInfoPoller implements Runnable {
-    boolean running = false;
-    Thread thread = null;
-
-    @Override
-    public void run() {
-      try {
-        running = true;
-        while (running) {
-          sendBoardInfoRequest();
-          sleep(1000);
-        }
-      } catch (Exception e) {
-        log.info("board info stopping {}", e.getMessage());
-      }
-      thread = null;
-      running = false;
-    }
-
-    public void start() {
-      if (thread == null) {
-        thread = new Thread(this, "boardInfoPoller");
-        thread.start();
-      }
-    }
-
-    public void stop() {
-      if (thread != null) {
-        thread.interrupt();
-      }
-    }
-  }
-
   // TODO - remove
   // MrlComm now constantantly sends a stream of BoardInfo
   // > enableBoardInfo/bool enabled - no point to this
@@ -1864,8 +1829,6 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
   public void releaseService() {
     super.releaseService();
 
-    poller.stop();
-
     // SHUTDOWN ACKING - use case - port no longer exists
     if (msg != null) {
       msg.enableAck(false);
@@ -2343,23 +2306,17 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
 
     return config;
   }
+  
+  public void startService() {
+    super.startService();
+    if (config.connect && config.port != null && !isConnected()) {
+      connect(config.port);
+    }
+  }
 
   @Override
   public ArduinoConfig apply(ArduinoConfig c) {
     super.apply(c);
-
-    if (msg == null) {
-      serial = (Serial) startPeer("serial");
-      if (serial == null) {
-        log.error("serial is null");
-      }      
-      msg.setSerial(serial);
-      serial.addByteListener(this);
-    } else {
-      // TODO: figure out why this gets called so often.
-      log.info("Init serial we already have a msg class.");
-    }
-
     if (config.connect && config.port != null) {
       connect(config.port);
     }

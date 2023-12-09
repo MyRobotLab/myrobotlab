@@ -3,6 +3,8 @@ package org.myrobotlab.arduino;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.io.IOException;
+import org.myrobotlab.service.Serial;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -44,8 +46,11 @@ import org.myrobotlab.string.StringUtil;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.VirtualArduino;
 
 import java.io.FileOutputStream;
+import java.util.Arrays;
+import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.SerialDevice;
@@ -1589,7 +1594,9 @@ public class VirtualMsg {
             msgSize = 0;
             Arrays.fill(ioCmd, 0); // FIXME - optimize - remove
             // warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++errorServiceToHardwareRxCnt));
-            log.warn("Arduino->MRL error - bad magic number {} - {} rx errors", newByte, ++errorServiceToHardwareRxCnt);
+            if (!arduino.isConnecting()){
+              log.warn("Arduino->MRL error - bad magic number {} - {} rx errors", newByte, ++errorServiceToHardwareRxCnt);
+            }
           }
           continue;
         } else if (byteCount.get() == 2) {
@@ -1622,7 +1629,10 @@ public class VirtualMsg {
           } 
           
           if (!clearToSend) {
-            log.warn("NOT CLEAR TO SEND! resetting parser!");
+            if (!arduino.isConnecting()) {
+              // we're connecting, so we're going to ignore the message.
+              log.warn("NOT CLEAR TO SEND! resetting parser!");
+            }
             // We opened the port, and we got some data that isn't a Begin message.
             // so, I think we need to reset the parser and continue processing bytes...
             // there will be errors until the next magic byte is seen.
@@ -1877,7 +1887,7 @@ public class VirtualMsg {
   }
   
   public void waitForAck(){
-    if (!ackEnabled) {
+    if (!ackEnabled || serial == null || !serial.isConnected()) {
       return;
     }
     // if there's a pending message, we need to wait for the ack to be received.
@@ -1910,10 +1920,8 @@ public class VirtualMsg {
   
 
   public void add(int value) {
-    // this explodes - sendBufferSize increases forever ... duh index not valid
-    // is this suppose to be round robin buffer ?
-    // sendBuffer[sendBufferSize] = (value & 0xFF);
-    // sendBufferSize += 1;
+    sendBuffer[sendBufferSize] = (value & 0xFF);
+    sendBufferSize += 1;
   }
   
   public int[] getBuffer() {    
@@ -2017,6 +2025,10 @@ public class VirtualMsg {
   
   public void setInvoke(boolean b){	
     invoke = b;	
+  }
+
+  public void setSerial(Serial serial) {
+    this.serial = serial;
   }
 
 }

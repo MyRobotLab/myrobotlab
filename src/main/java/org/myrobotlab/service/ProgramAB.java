@@ -1412,7 +1412,7 @@ public class ProgramAB extends Service<ProgramABConfig>
   @Override
   public void onUtterance(Utterance utterance) throws Exception {
 
-    log.info("Utterance Received " + utterance);
+    log.info("utterance received {}", utterance);
 
     boolean talkToBots = false;
     // TODO: reconcile having different name between the discord bot username
@@ -1427,7 +1427,7 @@ public class ProgramAB extends Service<ProgramABConfig>
     }
 
     // Don't talk to myself, though I should be a bot..
-    if (utterance.username.contentEquals(botType)) {
+    if (utterance.username != null && utterance.username.contentEquals(botType)) {
       log.info("Don't talk to myself.");
       return;
     }

@@ -8,11 +8,11 @@ import org.myrobotlab.framework.Plan;
 public class NeoPixelConfig extends ServiceConfig {
 
   /**
-   * when attached to an audio file service the animation to be
-   * played when audio is playing
+   * when attached to an audio file service the animation to be played when
+   * audio is playing
    */
   public String audioAnimation = "Ironman";
-  
+
   /**
    * pin number of controller
    */
@@ -60,8 +60,6 @@ public class NeoPixelConfig extends ServiceConfig {
    * initial fill
    */
   public boolean fill = false;
-  
-  
 
   /**
    * Map of predefined led flashes, defined here in configuration. Another
@@ -99,11 +97,9 @@ public class NeoPixelConfig extends ServiceConfig {
      * time this flash remains off
      */
     public long timeOff = 500;
-    
-    
-    public Flash() {      
+
+    public Flash() {
     }
-    
 
     public Flash(int red, int green, int blue, long timeOn, long timeOff) {
       this.red = red;

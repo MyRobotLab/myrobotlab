@@ -18,6 +18,10 @@ from abc import ABC, abstractmethod
 from py4j.java_collections import JavaObject, JavaClass
 from py4j.java_gateway import JavaGateway, CallbackServerParameters, GatewayParameters
 
+# REQUIRED TO SET FIELDS !
+# from py4j.java_gateway import set_field
+
+# rename java_object proxy or service?
 
 class Service(ABC):
     def __init__(self, name):
@@ -31,9 +35,9 @@ class Service(ABC):
         # Delegate string representation to the underlying Java object
         return str(self.java_object)
     
-    def subscribe(self, event):
+    def subscribe(self, topic, method):
         print("subscribe")
-        self.java_object.subscribe(event)
+        self.java_object.subscribe(topic, method)
     
     @abstractmethod
     def getType(self):
@@ -54,7 +58,7 @@ class NeoPixel(Service):
 class InMoov2(Service):
     def __init__(self, name):
         super().__init__(name)
-        self.subscribe('onStateChange')
+        self.subscribe(name, 'onStateChange')
 
     def getType(self):
         return "InMoov2"
@@ -104,7 +108,7 @@ class MessageHandler(object):
         sys.stderr = self
         self.gateway = JavaGateway(callback_server_parameters=CallbackServerParameters(),
                                    python_server_entry_point=self,
-                                   gateway_parameters=GatewayParameters(auto_convert=True))
+                                   gateway_parameters=GatewayParameters(auto_convert=True, auto_field=True))
         self.runtime = self.gateway.jvm.org.myrobotlab.service.Runtime.getInstance()
         # FIXME - REMOVE THIS - DO NOT SET ANY GLOBALS !!!!
         runtime = self.runtime
@@ -113,6 +117,7 @@ class MessageHandler(object):
 
     def construct_runtime(self):
         """
+        FIXME - remove this method
         Constructs a new Runtime instance and returns it.
         """
         jvm_runtime = self.gateway.jvm.org.myrobotlab.service.Runtime.getInstance()

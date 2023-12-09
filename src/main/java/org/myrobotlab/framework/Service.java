@@ -141,9 +141,9 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
 
   transient protected Thread thisThread = null;
 
-  transient protected Inbox inbox = null;
+  final transient protected Inbox inbox;
 
-  protected Outbox outbox = null;
+  final protected Outbox outbox;
 
   protected String serviceVersion = null;
 

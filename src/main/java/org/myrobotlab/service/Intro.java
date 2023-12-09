@@ -168,7 +168,7 @@ public class Intro extends Service<ServiceConfig> {
 
       DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
-      brain.setCurrentBotName("Alice");
+      brain.setBotType("Alice");
       bot.connect();
       brain.attach(bot);
       bot.attach(brain);

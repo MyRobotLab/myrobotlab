@@ -54,5 +54,22 @@
                 <td></td>
             </tr>
         </table>
+<table class="table-condensed table-striped table-bordered">
+  <thead>
+    <tr>
+      <th>Timestamp</th>
+      <th>State</th>
+      <th>Event</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="item in service.history">
+      <td>{{ item.ts }}</td>
+      <td>{{ item.state }}</td>
+      <td>{{ item.event }}</td>
+    </tr>
+  </tbody>
+</table>            
+            
     </div>
 </div>

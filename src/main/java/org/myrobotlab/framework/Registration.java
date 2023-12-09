@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.codec.ForeignProcessUtils;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -70,9 +71,17 @@ public class Registration {
     this.id = service.getId();
     this.name = service.getName();
     this.typeKey = service.getTypeKey();
-    // when this registration is re-broadcasted to remotes it will use this
+    // When this registration is re-broadcasted to remotes it will use this
     // serialization to init state
-    this.state = CodecUtils.toJson(service);
+    
+    // FIXME: This switch would not be necessary
+    // if Java remote services were handled the same way, would not need to do this
+    if (ForeignProcessUtils.isValidJavaClassName(service.getTypeKey())) {
+      this.state = CodecUtils.toJson(service);
+    } else {
+      this.state = service.toString();
+    }
+    
     // if this is a local registration - need reference to service
     this.service = service;
   }

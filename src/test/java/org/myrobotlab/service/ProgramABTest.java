@@ -3,6 +3,11 @@ package org.myrobotlab.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,12 +21,16 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.programab.BotInfo;
 import org.myrobotlab.programab.Response;
 import org.myrobotlab.programab.Session;
 import org.myrobotlab.service.data.Locale;
+import org.myrobotlab.service.data.Utterance;
 import org.slf4j.Logger;
 
 public class ProgramABTest {
@@ -32,7 +41,6 @@ public class ProgramABTest {
   
   static protected final String LLOYD = "lloyd";
 
-  // TODO: move this to test resources
   private String testResources = "src/test/resources/ProgramAB";
 
   static private ProgramAB lloyd;
@@ -66,7 +74,6 @@ public class ProgramABTest {
   // executed
   @AfterClass
   public static void tearDownClass() {
-    System.out.println("AfterClass - Runs once after all test methods");
     Runtime.release(LLOYD);
     Runtime.release(PIKACHU);
   }
@@ -107,6 +114,23 @@ public class ProgramABTest {
         f.delete();
       }
     }
+  }
+  
+  @Test
+  public void testOnUtterance() throws Exception {
+    
+    MockGateway  gateway = (MockGateway)Runtime.start("gateway", "MockGateway");
+    lloyd.addListener("publishUtterance", "mocker@mockId");
+   
+    Utterance utterance = new Utterance();
+    utterance.username = "human";
+    utterance.text = "HELLO";
+    utterance.channelBotName = "Mr.Turing";
+
+    gateway.sendWithDelay("lloyd", "onUtterance", utterance);
+    Message msg = gateway.waitForMsg("mocker", "onUtterance", 50);
+    assertNotNull(msg);
+    assertEquals("Passed",((Utterance)msg.data[0]).text);
   }
 
   // This method runs after each test method

@@ -245,6 +245,10 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
         msg.send('setIdleTimeout', idleTime * 1000)
     }
 
+    $scope.toggleServoSpeedBar = function (service) {
+      service.speedBar = !service.speedBar
+    }
+    
     $scope.map = function() {
 
         if ($scope.lockInputOutput) {

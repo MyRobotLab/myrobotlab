@@ -611,7 +611,7 @@ public abstract class AbstractServo<C extends ServoConfig> extends Service<C> im
      * controller or calling moveTo when blocking is in process
      */
     if (newPos == null) {
-      log.info("{} will not move to null position - not moving", getName());
+      log.debug("{} will not move to null position - not moving", getName());
       return newPos;
     }
 

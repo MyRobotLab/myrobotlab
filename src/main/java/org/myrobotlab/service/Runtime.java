@@ -32,7 +32,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
@@ -178,7 +177,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       "org.myrobotlab.service.interfaces.ServiceLifeCycleListener", "org.myrobotlab.framework.interfaces.StatePublisher"));
 
   protected final Set<String> serviceTypes = new HashSet<>();
-  
+
   /**
    * The directory name currently being used for config. This is NOT full path
    * name. It cannot be null, it cannot have "/" or "\" in the name - it has to
@@ -440,13 +439,13 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       sc.state = "CREATING";
       ServiceInterface si = createService(service, sc.type, null);
       sc.state = "CREATED";
-      // process  the base listeners/subscription of ServiceConfig
+      // process the base listeners/subscription of ServiceConfig
       si.addConfigListeners(sc);
       if (si instanceof ConfigurableService) {
         try {
-        ((ConfigurableService)si).apply(sc);
-        } catch(Exception e) {
-         Runtime.getInstance().error("could not apply config of type %s to service %s, using default config", sc.type, si.getName(), sc.type);
+          ((ConfigurableService) si).apply(sc);
+        } catch (Exception e) {
+          Runtime.getInstance().error("could not apply config of type %s to service %s, using default config", sc.type, si.getName(), sc.type);
         }
       }
       createdServices.put(service, si);
@@ -896,7 +895,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
           // a bit backwards - it loads after it been created
           // but its necessary because you need an runtime instance before you
           // load
-          
+
           File cfgRoot = new File(CONFIG_ROOT);
           cfgRoot.mkdirs();
           if (startYml.enable) {
@@ -1158,7 +1157,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   }
 
   public static ServiceInterface getService(String inName) {
-    return getService(inName, new StaticType<>() {});
+    return getService(inName, new StaticType<>() {
+    });
   }
 
   public static <C extends ServiceConfig, S extends ServiceInterface & ConfigurableService<C>> S getConfigurableService(String inName, StaticType<S> serviceType) {
@@ -1740,10 +1740,11 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         return registration;
       }
 
-      if (!ForeignProcessUtils.isValidTypeKey(registration.getTypeKey())) {
-        log.error("Invalid type key being registered: " + registration.getTypeKey());
-        return null;
-      }
+      // if (!ForeignProcessUtils.isValidTypeKey(registration.getTypeKey())) {
+      // log.error("Invalid type key being registered: " +
+      // registration.getTypeKey());
+      // return null;
+      // }
 
       log.info("{}@{} registering at {} of type {}", registration.getName(), registration.getId(), Platform.getLocalInstance().getId(), registration.getTypeKey());
 
@@ -1783,6 +1784,17 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
             return null;
           }
 
+          // FIXME - probably some more clear definition about the requirements
+          // of remote
+          // service registration
+          // In general, there should be very few requirements if any, besides
+          // providing a
+          // name, and the proxy
+          // interface should be responsible for creating a minimal
+          // interpretation
+          // (ServiceInterface) for the remote
+          // service
+
           // Class<?>[] interfaces = registration.interfaces.stream().map(i -> {
           // try {
           // return Class.forName(i);
@@ -1796,8 +1808,13 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
           // Proxy.newProxyInstance(Runtime.class.getClassLoader(), interfaces,
           // new ProxyServiceInvocationHandler(registration.getName(),
           // registration.getId()));
-          registration.service = ProxyFactory.createProxyService(registration);
-          log.info("Created proxy: " + registration.service);
+          try {
+            registration.service = ProxyFactory.createProxyService(registration);
+            log.info("Created proxy: " + registration.service);
+          } catch (Exception e) {
+            // at the moment preventing throw
+            Runtime.getInstance().error(e);
+          }
         }
       }
 
@@ -2456,7 +2473,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       // runtime@{id}
       // subscribe to "describe"
       MRLListener listener = new MRLListener("describe", getFullName(), "onDescribe");
-      Message msg = Message.createMessage(getFullName(), "runtime", "addListener", listener);      
+      Message msg = Message.createMessage(getFullName(), "runtime", "addListener", listener);
       client2.send(CodecUtils.toJsonMsg(msg));
 
       // send describe
@@ -2585,8 +2602,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     setConfig(configName);
     Runtime runtime = Runtime.getInstance();
     runtime.processingConfig = true; // multiple inbox threads not available
-    runtime.invoke("publishStartConfig", configName);
-    RuntimeConfig rtConfig = runtime.readServiceConfig(runtime.getConfigName(), "runtime", new StaticType<>() {});
+    runtime.invoke("publishConfigStarted", configName);
+    RuntimeConfig rtConfig = runtime.readServiceConfig(runtime.getConfigName(), "runtime", new StaticType<>() {
+    });
     if (rtConfig == null) {
       runtime.error("cannot find %s%s%s", runtime.getConfigName(), fs, "runtime.yml");
       return;
@@ -2626,12 +2644,12 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     }
 
     runtime.processingConfig = false; // multiple inbox threads not available
-    runtime.invoke("publishFinishedConfig", configName);
+    runtime.invoke("publishConfigFinished", configName);
 
   }
 
-  public String publishStartConfig(String configName) {
-    log.info("publishStartConfig {}", configName);
+  public String publishConfigStarted(String configName) {
+    log.info("publishConfigStarted {}", configName);
     // Make Note: done inline, because the thread actually doing the config
     // processing
     // would need to be finished with it before this thread could be invoked
@@ -2640,8 +2658,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     return configName;
   }
 
-  public String publishFinishedConfig(String configName) {
-    log.info("publishFinishedConfig {}", configName);
+  public String publishConfigFinished(String configName) {
+    log.info("publishConfigFinished {}", configName);
     // Make Note: done inline, because the thread actually doing the config
     // processing
     // would need to be finished with it before this thread could be invoked
@@ -2661,7 +2679,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    */
   synchronized static public ServiceInterface start(String name, String type) {
     try {
-
 
       ServiceInterface requestedService = Runtime.getService(name);
       if (requestedService != null) {
@@ -2733,8 +2750,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   }
 
   /**
-   * sing parameter name info supplied - potentially all information regarding
-   * this service coulde be found in on the filesystem or in the plan
+   * single parameter name info supplied - potentially all information regarding
+   * this service could be found in on the filesystem or in the plan
    * 
    * @param name
    * @return
@@ -2785,9 +2802,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         // resolve serviceData MetaTypes for the repo
 
         for (MetaData metaData : serviceData.getServiceTypes()) {
-          if (metaData.getSimpleName().equals("OpenCV")) {
-            log.warn("here");
-          }
           Set<ServiceDependency> deps = repo.getUnfulfilledDependencies(metaData.getType());
           if (deps.size() == 0) {
             metaData.installed = true;
@@ -3541,63 +3555,63 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     List<String> command = new ArrayList<>();
     command.add(program);
     if (args != null) {
-        command.addAll(args);
+      command.addAll(args);
     }
 
     ProcessBuilder builder = new ProcessBuilder(command);
     if (workingDir != null) {
-        builder.directory(new File(workingDir));
+      builder.directory(new File(workingDir));
     }
 
     Map<String, String> environment = builder.environment();
     if (additionalEnv != null) {
-        environment.putAll(additionalEnv);
+      environment.putAll(additionalEnv);
     }
 
     StringBuilder outputBuilder = new StringBuilder();
 
     try {
-        Process handle = builder.start();
+      Process handle = builder.start();
 
-        InputStream stdErr = handle.getErrorStream();
-        InputStream stdOut = handle.getInputStream();
+      InputStream stdErr = handle.getErrorStream();
+      InputStream stdOut = handle.getInputStream();
 
-        // Read the output streams in separate threads to avoid potential blocking
-        Thread stdErrThread = new Thread(() -> readStream(stdErr, outputBuilder));
-        stdErrThread.start();
+      // Read the output streams in separate threads to avoid potential blocking
+      Thread stdErrThread = new Thread(() -> readStream(stdErr, outputBuilder));
+      stdErrThread.start();
 
-        Thread stdOutThread = new Thread(() -> readStream(stdOut, outputBuilder));
-        stdOutThread.start();
+      Thread stdOutThread = new Thread(() -> readStream(stdOut, outputBuilder));
+      stdOutThread.start();
 
-        if (block) {
-            int exitValue = handle.waitFor();
-            outputBuilder.append("Exit Value: ").append(exitValue);
-            log.info("Command exited with exit value: {}", exitValue);
-        } else {
-            log.info("Command started");
-        }
+      if (block) {
+        int exitValue = handle.waitFor();
+        outputBuilder.append("Exit Value: ").append(exitValue);
+        log.info("Command exited with exit value: {}", exitValue);
+      } else {
+        log.info("Command started");
+      }
 
-        return outputBuilder.toString();
+      return outputBuilder.toString();
     } catch (IOException e) {
-        log.error("Error executing command", e);
-        return e.getMessage();
+      log.error("Error executing command", e);
+      return e.getMessage();
     } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        log.error("Command execution interrupted", e);
-        return e.getMessage();
+      Thread.currentThread().interrupt();
+      log.error("Command execution interrupted", e);
+      return e.getMessage();
     }
-}
+  }
 
-private static void readStream(InputStream inputStream, StringBuilder outputBuilder) {
+  private static void readStream(InputStream inputStream, StringBuilder outputBuilder) {
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-        String line;
-        while ((line = reader.readLine()) != null) {
-            outputBuilder.append(line).append(System.lineSeparator());
-        }
+      String line;
+      while ((line = reader.readLine()) != null) {
+        outputBuilder.append(line).append(System.lineSeparator());
+      }
     } catch (IOException e) {
-        log.error("Error reading process output", e);
+      log.error("Error reading process output", e);
     }
-}
+  }
 
   /**
    * Get the current battery level of the computer this MRL instance is running
@@ -3954,7 +3968,7 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
     }
     return filteredTypes;
   }
-  
+
   /**
    * Register a connection route from one instance to this one.
    *
@@ -3981,21 +3995,24 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
     addRoute(id, uuid, 10);
   }
 
-//  @Override
-//  public ServiceConfig getFilteredConfig() {
-//    RuntimeConfig sc = (RuntimeConfig) super.getFilteredConfig();
-//    Set<Listener> removeList = new HashSet<>();
-//    for (Listener listener : sc.listeners) {
-//      if (listener.callback.equals("onReleased") || listener.callback.equals("onStarted") || listener.callback.equals("onRegistered") || listener.callback.equals("onStopped")
-//          || listener.callback.equals("onCreated")) {
-//        removeList.add(listener);
-//      }
-//    }
-//    for (Listener remove : removeList) {
-//      sc.listeners.remove(remove);
-//    }
-//    return sc;
-//  }
+  // @Override
+  // public ServiceConfig getFilteredConfig() {
+  // RuntimeConfig sc = (RuntimeConfig) super.getFilteredConfig();
+  // Set<Listener> removeList = new HashSet<>();
+  // for (Listener listener : sc.listeners) {
+  // if (listener.callback.equals("onReleased") ||
+  // listener.callback.equals("onStarted") ||
+  // listener.callback.equals("onRegistered") ||
+  // listener.callback.equals("onStopped")
+  // || listener.callback.equals("onCreated")) {
+  // removeList.add(listener);
+  // }
+  // }
+  // for (Listener remove : removeList) {
+  // sc.listeners.remove(remove);
+  // }
+  // return sc;
+  // }
 
   /**
    * Unregister all connections that a specified client has made.
@@ -4766,7 +4783,7 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
       if (type == null) {
         log.error("cannot get Java def with type == null");
       }
-      log.info("getting default Java definition {} {}", name, type);
+      log.debug("getting default Java definition {} {}", name, type);
 
       // TODO !!!! - switch on Runtime var useDefaults = true/false
       ServiceConfig.getDefault(plan, name, type);
@@ -4776,7 +4793,7 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
     // HIGHEST PRIORITY - OVERRIDE WITH FILE
     String configPath = runtime.getConfigName();
     if (configPath != null) {
-      log.info("priority #1 user's yml override {}", configPath + fs + name + ".yml");
+      log.debug("priority #1 user's yml override {}", configPath + fs + name + ".yml");
       // PRIORITY #1
       // find if a current yml config file exists - highest priority
       ServiceConfig fileSc = readServiceConfig(configPath, name);
@@ -4822,12 +4839,14 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
   }
 
   public ServiceConfig readServiceConfig(String name) {
-    return readServiceConfig(name, new StaticType<>() {});
+    return readServiceConfig(name, new StaticType<>() {
+    });
   }
-  
+
   /**
-   * read a service's configuration, in the context
-   * of current config set name or default
+   * read a service's configuration, in the context of current config set name
+   * or default
+   * 
    * @param name
    * @return
    */
@@ -4836,7 +4855,8 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
   }
 
   public ServiceConfig readServiceConfig(String configName, String name) {
-    return readServiceConfig(configName, name, new StaticType<>() {});
+    return readServiceConfig(configName, name, new StaticType<>() {
+    });
   }
 
   /**
@@ -4878,7 +4898,6 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
     return name;
   }
 
-
   public String setAllIds(String id) {
     Platform.getLocalInstance().setId(id);
     for (ServiceInterface si : getServices()) {
@@ -4887,12 +4906,11 @@ private static void readStream(InputStream inputStream, StringBuilder outputBuil
     return id;
   }
 
-
   @Override
   public RuntimeConfig apply(RuntimeConfig c) {
     super.apply(c);
     config = c;
-    
+
     setLocale(config.locale);
 
     if (config.id != null) {

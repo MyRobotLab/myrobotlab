@@ -83,6 +83,11 @@ public class ForeignProcessUtils {
      * @return Whether name is a valid FQCN
      */
     public static boolean isValidJavaClassName(String name) {
+        // TODO: this is temporary, until proxy java classes
+      // are proxied in the same way as other services
+        if (name.equals("Unknown")) {
+          return false;
+        }
         return JAVA_FQCN_PATTERN.matcher(name).matches();
     }
 
