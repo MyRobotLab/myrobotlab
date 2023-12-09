@@ -184,8 +184,9 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
       String fullName = getFullRemoteName(name);
       
       String key = String.format("%s.%s", fullName, callback);
-      if (!sendQueues.containsKey(key)) {
-        return null;
+      
+      if (!sendQueues.containsKey(key)) {        
+        sendQueues.put(key, new LinkedBlockingQueue<>());
       }
       
       Message msg = sendQueues.get(key).poll(maxTimeWaitMs, TimeUnit.MILLISECONDS);
