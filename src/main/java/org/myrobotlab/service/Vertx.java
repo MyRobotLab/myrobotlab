@@ -27,7 +27,7 @@ import io.vertx.core.http.ServerWebSocket;
  * It currently does not utilize the Vertx event bus - which is pretty much the most important part of Vertx.
  * TODO: take advantage of publishing on the event bus
  * 
- * @see https://medium.com/@pvub/https-medium-com-pvub-vert-x-workers-6a8df9b2b9ee
+ * <a href="https://medium.com/@pvub/https-medium-com-pvub-vert-x-workers-6a8df9b2b9ee">vertx worker</a>
  * 
  * @author GroG
  *
