@@ -288,6 +288,17 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
 
   @Override
   public void attach(UltrasonicSensorControl sensor, Integer triggerPin, Integer echoPin) throws Exception {
+    
+    if (triggerPin == null) {
+      error("%s please set trigger pin");
+      return;
+    }
+
+    if (echoPin == null) {
+      error("%s please set echo pin");
+      return;
+    }
+    
     // refer to
     // http://myrobotlab.org/content/control-controller-manifesto
     if (isAttached(sensor)) {
