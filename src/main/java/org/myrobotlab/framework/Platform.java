@@ -19,6 +19,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
+import oshi.SystemInfo;
 
 /**
  * The purpose of this class is to retrieve all the detailed information
@@ -85,6 +86,10 @@ public class Platform implements Serializable {
 
   String shortCommit;
 
+  int numLogicalProcessors;
+
+  int numPhysicalProcessors;
+
   static Platform localInstance;
 
   /**
@@ -108,11 +113,11 @@ public class Platform implements Serializable {
 
       // === OS ===
       platform.os = System.getProperty("os.name").toLowerCase();
-      if (platform.os.indexOf("win") >= 0) {
+      if (platform.os.contains("win")) {
         platform.os = OS_WINDOWS;
-      } else if (platform.os.indexOf("mac") >= 0) {
+      } else if (platform.os.contains("mac")) {
         platform.os = OS_MAC;
-      } else if (platform.os.indexOf("linux") >= 0) {
+      } else if (platform.os.contains("linux")) {
         platform.os = OS_LINUX;
       }
 
@@ -247,6 +252,13 @@ public class Platform implements Serializable {
 
       } catch (Exception e) {
       }
+
+      // Logical and physical processor detection
+
+      // availableProcessors returns the number of logical cores dedicated to the JVM
+      platform.numLogicalProcessors = java.lang.Runtime.getRuntime().availableProcessors();
+
+      platform.numPhysicalProcessors = new SystemInfo().getHardware().getProcessor().getPhysicalProcessorCount();
 
       localInstance = platform;
     }
@@ -495,6 +507,29 @@ public class Platform implements Serializable {
    */
   public Date getStartTime() {
     return startTime;
+  }
+
+  /**
+   * Get the number of logical cores
+   * available to the VM. May be different
+   * from the number of logical cores in the
+   * system if the user only allocates
+   * some of them to the VM.
+   * @return The number of available logical cores
+   */
+  public int getNumLogicalProcessors() {
+    return numLogicalProcessors;
+  }
+
+  /**
+   * Get the number of physical cores in the system.
+   * This may be different from the number of cores allocated
+   * to the JVM, and on x86 will usually be different from
+   * the number of logical cores in the system.
+   * @return The number of physical cores in the system.
+   */
+  public int getNumPhysicalProcessors() {
+    return numPhysicalProcessors;
   }
 
   /**

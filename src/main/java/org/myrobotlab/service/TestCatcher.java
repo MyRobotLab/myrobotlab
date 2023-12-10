@@ -109,6 +109,8 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   public BlockingQueue<String> strings = new LinkedBlockingDeque<>();
 
+  public BlockingQueue<Object> objects = new LinkedBlockingQueue<>();
+
   /**
    * awesome override to simulate remote services - e.g. in
    * Serial.addByteListener
@@ -169,6 +171,9 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     pinSet.clear();
     methodsCalled.clear();
     longs.clear();
+    integers.clear();
+    strings.clear();
+    objects.clear();
   }
 
   public Message getMsg(long timeout) throws InterruptedException {
@@ -265,21 +270,25 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
       throw new IOException(String.format("expected null parameters - got non-null"));
     }
 
+    // Never reached since msg.data.length is accessed above and would throw NPE
+    // Probably don't need this if we can assume that msg.data is always non-null
+    // and may just be empty
     if (checkParms != null && msg.data == null) {
       log.error("{}", msg);
-      throw new IOException(String.format("expected non null parameters - got null"));
+      throw new IOException("expected non null parameters - got null");
     }
 
     if (!method.equals(msg.method)) {
       log.error("{}", msg);
       throw new IOException(String.format("unlike methods - expected %s got %s", method, msg.method));
     }
-
-    for (int i = 0; i < checkParms.length; ++i) {
-      Object expected = checkParms[i];
-      Object got = msg.data[i];
-      if (!expected.equals(got)) {
-        throw new IOException(String.format("unlike methods - expected %s got %s", method, msg.method));
+    if (checkParms != null) {
+      for (int i = 0; i < checkParms.length; ++i) {
+        Object expected = checkParms[i];
+        Object got = msg.data[i];
+        if (!expected.equals(got)) {
+          throw new IOException(String.format("unlike methods - expected %s got %s", method, msg.method));
+        }
       }
     }
 
@@ -329,6 +338,12 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   public double onDouble(double data) {
     log.info("onDouble {}", data);
+    return data;
+  }
+
+  public Object onObject(Object data) {
+    log.info("onObject {}", data);
+    objects.add(data);
     return data;
   }
 

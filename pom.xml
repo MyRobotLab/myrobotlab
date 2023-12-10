@@ -617,6 +617,15 @@
   </dependency>
 <!-- LeapMotion end -->
 
+<!-- Llama begin -->
+  <dependency>
+    <groupId>de.kherud</groupId>
+    <artifactId>llama</artifactId>
+    <version>2.2.1</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Llama end -->
+
 <!-- LocalSpeech begin -->
   <dependency>
     <groupId>org.myrobotlab.audio</groupId>
@@ -1021,6 +1030,12 @@
     <artifactId>jovr</artifactId>
     <version>1.8.0.0</version>
     <scope>provided</scope>
+    <exclusions>
+      <exclusion>
+        <groupId>net.java.dev.jna</groupId>
+        <artifactId>jna</artifactId>
+      </exclusion>
+    </exclusions>
   </dependency>
   <dependency>
     <groupId>slick-util</groupId>
@@ -1385,6 +1400,11 @@
     <version>3.9.0</version>
   </dependency>
 <!-- Duplicate entry for io.netty-netty-all-4.1.82.Final skipping -->
+  <dependency>
+    <groupId>com.github.oshi</groupId>
+    <artifactId>oshi-core</artifactId>
+    <version>6.4.5</version>
+  </dependency>
 <!-- Runtime end -->
 
 <!-- Serial begin -->
@@ -1693,6 +1713,15 @@
 <!-- WebkitSpeechSynthesis begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
 <!-- WebkitSpeechSynthesis end -->
+
+<!-- Whisper begin -->
+  <dependency>
+    <groupId>io.github.givimad</groupId>
+    <artifactId>whisper-jni</artifactId>
+    <version>1.4.2-6</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Whisper end -->
 
 <!-- Wii begin -->
 <!-- Duplicate entry for wiiusej-wiiusej-wiiusej skipping -->
