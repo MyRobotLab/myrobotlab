@@ -1,12 +1,38 @@
-{
-	"files.exclude": {
-		"**/.classpath": true,
-		"**/.project": true,
-		"**/.settings": true,
-		"**/.factorypath": true,
-		"**/target": true
+{	"files.exclude": {
+	"**/.classpath": true,
+	"**/.project": true,
+	"**/.settings": true,
+	"**/.factorypath": true,
+	"**/target": true
+  },
+  "files.associations": {
+	"cstddef": "cpp"
+  },
+	"terminal.integrated.scrollback": 9999,
+	"jest.rootPath": "app",
+	"jest.jestCommandLine": "npx jest --runInBand --verbose",
+	"jest.autoRun": "off",
+	"jest.monitorLongRun": 120000,
+	"jest.showCoverageOnLoad": false,
+	"jest.coverageFormatter": "GutterFormatter",
+	"editor.formatOnSave": true,
+	"editor.codeActionsOnSave": {
+	  "source.organizeImports": true
 	},
-	"files.associations": {
-		"cstddef": "cpp"
+	"typescript.tsdk": "./app/node_modules/typescript/lib",
+	"typescript.enablePromptUseWorkspaceTsdk": true,
+	"editor.tabSize": 2,
+	"[typescript]": {
+	  "editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[typescriptreact]": {
+	  "editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[javascript]": {
+	  "editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[javascriptreact]": {
+	  "editor.defaultFormatter": "esbenp.prettier-vscode"
 	}
-}
+  }
+  
