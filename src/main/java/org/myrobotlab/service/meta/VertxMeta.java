@@ -22,10 +22,10 @@ public class VertxMeta extends MetaData {
     setAvailable(true);
 
     // add dependencies if necessary
-    addDependency("io.vertx", "vertx-core", "4.3.3");
+    addDependency("io.vertx", "vertx-core", "4.3.8");
     exclude("io.netty", "*"); // it brings in an old version of netty
 
-    addDependency("io.vertx", "vertx-web", "4.3.3");
+    addDependency("io.vertx", "vertx-web", "4.3.8");
     exclude("io.netty", "*"); // it brings in an old version of netty
     
     // force correct version of netty

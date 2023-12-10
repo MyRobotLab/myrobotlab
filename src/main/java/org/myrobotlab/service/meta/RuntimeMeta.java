@@ -20,10 +20,10 @@ public class RuntimeMeta extends MetaData {
 
     // logback gets upset if its in the jar and in the libraries dir
     // so backend will just be in the libraries dir
-    addDependency("ch.qos.logback", "logback-classic", "1.2.3");
+    addDependency("ch.qos.logback", "logback-classic", "1.2.13");
 
     includeServiceInOneJar(true);
-    
+
     // for proxy generation
     addDependency("net.bytebuddy", "byte-buddy", "1.12.16");
 
@@ -39,7 +39,7 @@ public class RuntimeMeta extends MetaData {
     // apache 2.0 license - REMOVE in favor of okhttp
     // FIXME - replace apache with okhttp
     addDependency("org.apache.httpcomponents", "httpclient", "4.5.13");
-    
+
     // apache 2.0 license
     addDependency("info.picocli", "picocli", "4.4.0");
     // all your logging needs
@@ -50,9 +50,9 @@ public class RuntimeMeta extends MetaData {
 
     // ws best client websockets with Apache license
     addDependency("com.squareup.okhttp3", "okhttp", "3.9.0");
-        
+
     // force correct version of netty - needed for Vertx but not for Runtime ?
-    addDependency("io.netty", "netty-all", "4.1.82.Final");    
+    addDependency("io.netty", "netty-all", "4.1.82.Final");
 
   }
 
