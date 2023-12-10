@@ -5183,7 +5183,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   private void savePlanInternal(String configName) {
 
     if (configName == null) {
-      error("cannot save plan config name is null");
+      info("cannot save plan config name is null");
       return;
     }
 

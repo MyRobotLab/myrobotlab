@@ -175,7 +175,7 @@
     <!-- Duplicate entry for com.squareup.okhttp3-okhttp-3.9.0 skipping -->
     <!-- AzureTranslator end -->
 
-    <!-- BoofCv begin -->
+    <!-- BoofCV begin -->
     <dependency>
       <groupId>org.boofcv</groupId>
       <artifactId>boofcv-all</artifactId>
@@ -1346,7 +1346,7 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.2.3</version>
+      <version>1.2.13</version>
     </dependency>
     <dependency>
       <groupId>net.bytebuddy</groupId>
@@ -1625,7 +1625,7 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
-      <version>4.3.3</version>
+      <version>4.3.8</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1637,7 +1637,7 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web</artifactId>
-      <version>4.3.3</version>
+      <version>4.3.8</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1672,6 +1672,14 @@
       <exclusions>
         <exclusion>
           <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>logback-classic</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>logback-core</groupId>
           <artifactId>*</artifactId>
         </exclusion>
       </exclusions>
@@ -2042,6 +2050,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <groupId>org.apache.maven.plugins</groupId>
+        <!-- do not upgrade this version jacoco will break -->
         <version>2.18</version>
         <configuration>
           <!-- critical for jacoco to have original argLine prefixed here-->
@@ -2058,6 +2067,18 @@
           <systemPropertyVariables>
           </systemPropertyVariables>
         </configuration>
+        <executions>
+          <execution>
+            <id>surefire-test</id>
+            <phase>test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <!-- Additional configurations for the test execution -->
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <!-- This plugin deletes the .myrobotlab on a build also the target directory from previous
       builds -->
@@ -2126,7 +2147,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>2.22.2</version>
+        <version>2.18</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

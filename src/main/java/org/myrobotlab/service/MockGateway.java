@@ -330,4 +330,14 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
     }
     return null;
   }
+
+  public Integer size(String name, String callback) {
+    String fullName = getFullRemoteName(name);
+    
+    String key = String.format("%s.%s", fullName, callback);
+    if (!sendQueues.containsKey(key)) {
+      return null;
+    }
+    return sendQueues.get(key).size();
+  }
 }

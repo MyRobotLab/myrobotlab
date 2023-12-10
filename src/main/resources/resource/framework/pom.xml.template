@@ -175,7 +175,7 @@
                 </goals>
                 <configuration>
                     <rules>
-                        <banDuplicatePomDependencyVersions/>
+                        <banDuplicatePomDependencyVersions />
                     </rules>
                 </configuration>
             </execution>
@@ -330,7 +330,8 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <groupId>org.apache.maven.plugins</groupId>
-        <version>2.22.2</version>
+        <!-- do not upgrade this version jacoco will break -->
+        <version>2.18</version>
         <configuration>
           <!-- critical for jacoco to have original argLine prefixed here-->
           <argLine>${argLine} -Djava.library.path=libraries/native -Djna.library.path=libraries/native</argLine>
@@ -345,6 +346,18 @@
              <systemPropertyVariables>
               </systemPropertyVariables>
         </configuration>
+        <executions>
+          <execution>
+            <id>surefire-test</id>
+            <phase>test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <!-- Additional configurations for the test execution -->
+            </configuration>
+          </execution>
+        </executions>        
       </plugin>
       <!-- This plugin deletes the .myrobotlab on a build also the target directory from previous builds -->
       <plugin>
@@ -412,7 +425,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>2.22.2</version>
+        <version>2.18</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
