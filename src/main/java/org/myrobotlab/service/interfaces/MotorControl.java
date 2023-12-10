@@ -67,7 +67,6 @@ public interface MotorControl extends RelativePositionControl, AnalogListener, A
    * the need of typed references 
    * 
    * @param controller
-   * @throws Exception
    */
   default void detachMotorController(MotorController controller){
     if (controller == null) {
@@ -81,7 +80,6 @@ public interface MotorControl extends RelativePositionControl, AnalogListener, A
   /**
    * Implementation of detachMotorController
    * @param controller
-   * @throws Exception
    */
   void detachMotorController(String controller);
 
