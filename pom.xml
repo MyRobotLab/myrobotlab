@@ -2022,6 +2022,7 @@
           <includes>
             <include>**/ClockTest.java</include>
             <include>**/DependencyTest.java</include>
+            <include>**/ServiceInterfaceTest.java</include>
           </includes>
           <excludes>
             <exclude>**/integration/*</exclude>
