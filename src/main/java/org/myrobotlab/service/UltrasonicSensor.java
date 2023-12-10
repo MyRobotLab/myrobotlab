@@ -35,20 +35,13 @@ public class UltrasonicSensor extends Service<UltrasonicSensorConfig> implements
 
   private static final long serialVersionUID = 1L;
 
-  // probably should do this in a util class
-  public static int byteArrayToInt(int[] b) {
-    return b[3] & 0xFF | (b[2] & 0xFF) << 8 | (b[1] & 0xFF) << 16 | (b[0] & 0xFF) << 24;
-  }
-
-  // currently not variable in NewPing.h
-  // Integer maxDistanceCm = 500;
-
   transient protected UltrasonicSensorController controller;
 
   protected String controllerName;
 
   transient protected BlockingQueue<Double> data = new LinkedBlockingQueue<Double>();
 
+  @Deprecated /* use directly from config - should be String */
   protected Integer echoPin = null;
 
   protected boolean isAttached = false;
@@ -74,6 +67,7 @@ public class UltrasonicSensor extends Service<UltrasonicSensorConfig> implements
 
   protected long timeout = 500;
 
+  @Deprecated /* use directly from config - should be String */
   protected Integer trigPin = null;
 
   protected final Set<String> types = new HashSet<String>(Arrays.asList("SR04", "SR05"));
@@ -221,6 +215,10 @@ public class UltrasonicSensor extends Service<UltrasonicSensorConfig> implements
    */
   public int getTriggerPin() {
     return trigPin;
+  }
+  
+  public boolean isAttached() {
+    return isAttached;
   }
 
   @Override

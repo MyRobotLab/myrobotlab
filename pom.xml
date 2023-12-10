@@ -1655,6 +1655,14 @@
           <groupId>io.netty</groupId>
           <artifactId>*</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>logback-classic</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>logback-core</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
       </exclusions>
   </dependency>
   <dependency>
