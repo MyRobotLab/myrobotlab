@@ -1740,10 +1740,10 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         return registration;
       }
 
-      if (!ForeignProcessUtils.isValidTypeKey(registration.getTypeKey())) {
-        log.error("Invalid type key being registered: " + registration.getTypeKey());
-        return null;
-      }
+//      if (!ForeignProcessUtils.isValidTypeKey(registration.getTypeKey())) {
+//        log.error("Invalid type key being registered: " + registration.getTypeKey());
+//        return null;
+//      }
 
       log.info("{}@{} registering at {} of type {}", registration.getName(), registration.getId(), Platform.getLocalInstance().getId(), registration.getTypeKey());
 
