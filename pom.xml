@@ -2023,16 +2023,26 @@
             <include>**/ClockTest.java</include>
             <include>**/DependencyTest.java</include>
             <include>**/ServiceInterfaceTest.java</include>
+            <include>org/myrobotlab/arduino/**/*Test.java</include>
             <include>org/myrobotlab/codec/**/*Test.java</include>
-            <include>org/myrobotlab/io/**/*Test.java</include>
-            <include>org/myrobotlab/kinematics/**/*Test.java</include>
-            <include>org/myrobotlab/math/**/*Test.java</include>
-            <include>org/myrobotlab/programab/**/*Test.java</include>
-            <include>org/myrobotlab/serial/**/*Test.java</include>
-            <include>org/myrobotlab/string/**/*Test.java</include>
+            <!--
+            <include>org/myrobotlab/deeplearning4j/**/*Test.java</include>
+            -->
+            <include>org/myrobotlab/document/**/*Test.java</include>
             <!--
             <include>org/myrobotlab/framework/**/*Test.java</include>
             -->
+            <include>org/myrobotlab/io/**/*Test.java</include>
+            <include>org/myrobotlab/kinematics/**/*Test.java</include>
+            <include>org/myrobotlab/math/**/*Test.java</include>
+            <!--
+            <include>org/myrobotlab/opencv/**/*Test.java</include>
+            <include>org/myrobotlab/process/**/*Test.java</include>
+            -->
+            <include>org/myrobotlab/programab/**/*Test.java</include>
+            <include>org/myrobotlab/serial/**/*Test.java</include>
+            <include>org/myrobotlab/string/**/*Test.java</include>
+            <include>org/myrobotlab/test/**/*Test.java</include>
           </includes>
           <excludes>
             <exclude>**/integration/*</exclude>
