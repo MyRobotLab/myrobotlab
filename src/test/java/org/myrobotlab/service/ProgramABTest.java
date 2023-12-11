@@ -8,9 +8,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
@@ -18,24 +23,49 @@ import org.myrobotlab.programab.Response;
 import org.myrobotlab.service.data.Locale;
 import org.slf4j.Logger;
 
+/**
+ * ProgramABTest - This is the unit test to validate that the ProgramAB service continues
+ * to behave as expected.
+ * 
+ * It tests the behavior of some reference sets of aiml.
+ * 
+ * There are 2 AIML sets used in this unit test
+ * lloyd and pikachu.
+ * 
+ * The lloyd aiml set is used to test most functionality, 
+ * the pikachu aiml set is used to validate that japanese tokenization is working
+ * 
+ */
 public class ProgramABTest extends AbstractServiceTest {
 
   public final static Logger log = LoggerFactory.getLogger(ProgramABTest.class);
-  private String botname = "lloyd";
-  // TODO: move this to test resources
-  private String testResources = "src/test/resources/ProgramAB";
+  
   private String path = null;
   private ProgramAB testService;
-
+  
+  // the botname and test username to use (for most of the test suite)
+  private String botname = "lloyd";
   private String username = "testUser";
 
-  public void addCategoryTest() throws IOException {
-    testService.addCategory("BOOG", "HOWDY");
-    Response resp = testService.getResponse(username, "BOOG");
-    assertTrue(resp.msg.equals("HOWDY"));
-  }
-
+  // The aiml sets will be modified in this test, to avoid the junit annotation makes sure this will
+  // be cleaned up after test execution. 
+  // watch for open file handles which will prevent these directories from being deleted.
+  @Rule
+  public TemporaryFolder testFolder = new TemporaryFolder();
+  // the location of the test bot folders containing the aiml an dother configs.
+  private String testResources = "src/test/resources/ProgramAB";
+  
   public Service createService() {
+    
+    // let's do a file copy to the temp folder.
+    try {
+      FileUtils.copyDirectory(new File(testResources), testFolder.getRoot());
+      log.info("Using JUnit temp folder: {}", testFolder);
+    } catch (IOException e) {
+      log.error("create temp folder threw", e);
+      return null; 
+    }
+    
     try {
       // LoggingFactory.init("INFO");
       log.info("Setting up the Program AB Service ########################################");
@@ -44,32 +74,22 @@ public class ProgramABTest extends AbstractServiceTest {
       // TODO: this should probably be created by Runtime,
       // OOB tags might not know what the service name is ?!
       testService = (ProgramAB) Runtime.start(botname, "ProgramAB");
-      testService.setPath(path);
-      // testService = new ProgramAB("simple");
-      // testService.setPath("c:/mrl/develop/ProgramAB");
-
+      // Important, tell this service to use the test folder as it's path for loading bots.
+      testService.setPath(testFolder.getRoot().getAbsolutePath());
       // start the service.
       testService.startService();
       // load the bot brain for the chat with the user
-      testService.startSession(username, botname);
-      // clean out any aimlif the bot that might
-      // have been saved in a previous test run!
-      String aimlIFPath = path + "/bots/" + botname + "/aimlif";
-      File aimlIFPathF = new File(aimlIFPath);
-      if (aimlIFPathF.isDirectory()) {
-        for (File f : aimlIFPathF.listFiles()) {
-          // if there's a file here.
-          log.info("Deleting pre-existing AIMLIF files : {}", f.getAbsolutePath());
-          f.delete();
-        }
-      }
-      // TODO: same thing for predicates! (or other artifacts from a previous
-      // aiml
-      // test run)
+      testService.startSession(username, botname);      
     } catch (Exception e) {
       log.error("createService threw", e);
     }
     return testService;
+  }
+    
+  public void addCategoryTest() throws IOException {
+    testService.addCategory("BOOG", "HOWDY");
+    Response resp = testService.getResponse(username, "BOOG");
+    assertTrue(resp.msg.equals("HOWDY"));
   }
 
   public void listPatternsTest() {
@@ -142,8 +162,7 @@ public class ProgramABTest extends AbstractServiceTest {
   }
 
   @Test
-  public void testJapanese() throws IOException {
-
+  public void testJapanese() throws IOException, InterruptedException {
     ProgramAB pikachu = (ProgramAB) Runtime.start("pikachu", "ProgramAB");
     pikachu.setPath(path);
     // pikachu the service.
@@ -152,6 +171,7 @@ public class ProgramABTest extends AbstractServiceTest {
     pikachu.startSession(path, username, "pikachu", new java.util.Locale("ja"));
     Response resp = pikachu.getResponse("私はケビンです");
     assertEquals("あなたに会えてよかったケビン", resp.msg);
+    // Release the service we just created
     pikachu.releaseService();
   }
 
@@ -201,7 +221,7 @@ public class ProgramABTest extends AbstractServiceTest {
     // wait up to 5 seconds for python service to start
     long maxWait = 6000;
     int i = 0;
-    Runtime.start("python", "Python");
+    Python python = (Python)Runtime.start("python", "Python");
     while (Runtime.getService("python") == null) {
       Thread.sleep(100);
       log.info("Waiting for python to start...");
@@ -211,6 +231,8 @@ public class ProgramABTest extends AbstractServiceTest {
       }
     }
     Assert.assertNotNull(Runtime.getService("python"));
+    
+    python.releaseService();
 
   }
 
@@ -314,20 +336,21 @@ public class ProgramABTest extends AbstractServiceTest {
 
   public void umlautTest() throws IOException {
     Response resp = testService.getResponse(username, "Lars Ümlaüt");
-    // @GroG says - "this is not working"
     assertEquals("He's a character from Guitar Hero!", resp.msg);
   }
 
   @Test
   public void testLocales() {
     // have locales
-    ProgramAB lloyd = (ProgramAB)Runtime.start("pikachu", "ProgramAB");
+    ProgramAB pikachu = (ProgramAB)Runtime.start("pikachu", "ProgramAB");
     // lloyd.setPath(path);
-    lloyd.addBotsDir(path + File.separator + "bots");
-    lloyd.setCurrentBotName("pikachu");
-    Map<String, Locale> locales = lloyd.getLocales();
+    pikachu.addBotsDir(path + File.separator + "bots");
+    pikachu.setCurrentBotName("pikachu");
+    Map<String, Locale> locales = pikachu.getLocales();
     assertTrue(locales.size() > 0);
     assertTrue(locales.containsKey("ja"));
+    // release the service we created in this method.
+    pikachu.releaseService();
   }
 
   @Test
@@ -357,7 +380,6 @@ public class ProgramABTest extends AbstractServiceTest {
     lloyd.setPath(path);
     lloyd.setCurrentBotName("lloyd");
     assertTrue(lloyd.getBots().size() > 0);
-
     // test for a response
     Response response = lloyd.getResponse("Hello");
     assertTrue(!response.msg.startsWith("I have no"));
@@ -365,8 +387,10 @@ public class ProgramABTest extends AbstractServiceTest {
     // not sure if this is worth testing - there might be more
     // assertEquals("Alice", alice.getCurrentBotName());
     // assertEquals("default", alice.getCurrentUserName());
+    lloyd.releaseService();
 
   }
+
   // TODO - tests
   // ProgramAB starts - it should find its own bot info's
   // set username = default
