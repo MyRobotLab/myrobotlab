@@ -2029,9 +2029,7 @@
             <include>org/myrobotlab/deeplearning4j/**/*Test.java</include>
             -->
             <include>org/myrobotlab/document/**/*Test.java</include>
-            <!--
             <include>org/myrobotlab/framework/**/*Test.java</include>
-            -->
             <include>org/myrobotlab/io/**/*Test.java</include>
             <include>org/myrobotlab/kinematics/**/*Test.java</include>
             <include>org/myrobotlab/math/**/*Test.java</include>
