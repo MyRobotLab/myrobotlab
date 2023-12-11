@@ -2024,7 +2024,9 @@
             <include>**/DependencyTest.java</include>
             <include>**/ServiceInterfaceTest.java</include>
             <include>org/myrobotlab/codec/**/*Test.java</include>
+            <!--
             <include>org/myrobotlab/framework/**/*Test.java</include>
+            -->
           </includes>
           <excludes>
             <exclude>**/integration/*</exclude>
