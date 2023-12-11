@@ -43,6 +43,7 @@ public class BotInfo {
     try {
       FileInputStream fis = new FileInputStream(FileIO.gluePaths(path.getAbsolutePath(), "manifest.txt"));
       properties.load(new InputStreamReader(fis, Charset.forName("UTF-8")));
+      fis.close();
       log.info("loaded properties");
     } catch (FileNotFoundException e) {
       programab.warn("bot %s does not have a manifest.txt", name);
