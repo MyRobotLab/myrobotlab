@@ -217,5 +217,11 @@ pipeline {
          }
       }
 
+      always {
+            // Publish JaCoCo coverage report
+            jacoco(execPattern: '**/target/jacoco.exec')
+      }
+
+
   } // post
 } // pipeline
