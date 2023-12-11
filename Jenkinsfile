@@ -166,23 +166,23 @@ pipeline {
          }
       } // stage javadoc
 
-      stage('archive-min') {
-         when {
-            expression { env.BRANCH_NAME != 'master' && env.BRANCH_NAME != 'develop' }
-         }
+      stage('archive') {
+         // when {
+         //    expression { env.BRANCH_NAME != 'master' && env.BRANCH_NAME != 'develop' }
+         // }
          steps {
-            archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec'
+            archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec, target/site/**'
          }
       }
 
-      stage('archive-javadocs') {
-         when {
-            expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }
-         }
-         steps {
-            archiveArtifacts 'target/myrobotlab.zip, target/surefire-reports/*, target/*.exec, target/site/**'
-         }
-      }
+      // stage('archive-javadocs') {
+      //    when {
+      //       expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }
+      //    }
+      //    steps {
+      //       archiveArtifacts 'target/myrobotlab.zip, target/surefire-reports/*, target/*.exec, target/site/**'
+      //    }
+      // }
 
       // stage('jacoco') {
       //    steps {
@@ -192,7 +192,8 @@ pipeline {
       // }
 
       stage('publish-github') {
-         when { expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' } }
+         // when { expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' } }
+         when { expression { env.BRANCH_NAME == 'master'} }
          steps {
             withCredentials([string(credentialsId: 'github-token-2', variable: 'token')]) { // var name "token" is set in cred config and is case senstive
                echo "publishing ${VERSION_PREFIX}.${BUILD_NUMBER}"

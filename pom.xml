@@ -2026,9 +2026,10 @@
             <exclude>**/integration/*</exclude>
             <!-- unfortunately not testing OpenCV is required for ci to work -->
           </excludes>
-          <!-- required so surefire doesnt die talking to the agent over stdin-->
+          <!-- required so surefire doesnt die talking to the agent over stdin
           <forkNode
             implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory" />
+            -->
         </configuration>
         <executions>
           <execution>
