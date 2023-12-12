@@ -2790,18 +2790,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         // fist and only time....
         runtime = this;
         repo = (IvyWrapper) Repo.getInstance(LIBRARIES, "IvyWrapper");
-
-        // resolve serviceData MetaTypes for the repo
-
-        for (MetaData metaData : serviceData.getServiceTypes()) {
-          Set<ServiceDependency> deps = repo.getUnfulfilledDependencies(metaData.getType());
-          if (deps.size() == 0) {
-            metaData.installed = true;
-          } else {
-            log.warn("{} not installed", metaData.getSimpleName());
-          }
-        }
-
       }
     }
 
