@@ -10,7 +10,7 @@
     <logger name="com.sun" level="ERROR" />
 
     <root>
-        <level value="INFO" />
+        <level value="WARN" />
         <appender-ref ref="STDOUT" />
     </root>
 
