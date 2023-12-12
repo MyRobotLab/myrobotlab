@@ -6,7 +6,6 @@
  * Cancel all jobs - Jenkins.instance.queue.clear()
  ***********************************************************************************/
  
-
 pipeline {
    // https://plugins.jenkins.io/agent-server-parameter/
    // agent { label params['agent-name'] }
@@ -51,27 +50,14 @@ pipeline {
                echo "VERSION ${VERSION}"
                echo "BUILD_NUMBER ${BUILD_NUMBER}"
 
-               
-
                print params['agent-name']
                // print System.properties['os.name'].toLowerCase() - access to java object requires permission changes
                script {
-                  if (isUnix()) {
                   sh '''
-                        echo isUnix true
                         git --version
                         java -version
                         mvn -version
 
-                     '''
-                  echo sh(script: 'env|sort', returnStdout: true)
-                  } else {
-                  bat '''
-                        echo isUnix false
-                        git --version
-                        java -version
-                        mvn -version
-                        set
                      '''
                   }
                }
@@ -81,13 +67,9 @@ pipeline {
       stage('compile') {
          steps {
             script {
-               if (isUnix()) {
                   sh '''
                      mvn -Dbuild.number=${BUILD_NUMBER} -DskipTests -q clean compile
                   '''
-               } else {
-                  bat(/"${MAVEN_HOME}\bin\mvn" -Dbuild.number=${BUILD_NUMBER} -DskipTests -q clean compile  /)
-               }
             }
          }
       } // stage compile
@@ -98,19 +80,12 @@ pipeline {
          }
          steps {
             script {
-               // TODO - integration tests !
-               if (isUnix()) {
                   sh '''
                      mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
                   '''
-               } else {
-                  bat '''
-                     mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
-                  '''
-               }
             }
          }
-      } // stage verify      
+      } // stage dependencies      
 
       stage('verify') {
          when {
@@ -118,16 +93,9 @@ pipeline {
          }
          steps {
             script {
-               // TODO - integration tests !
-               if (isUnix()) {
                   sh '''
                      mvn -Dfile.encoding=UTF-8 -DargLine="-Xmx1024m" verify --fail-fast -q
                   '''
-               } else {
-                  bat '''
-                     mvn -Dfile.encoding=UTF-8 -DargLine="-Xmx1024m" verify --fail-fast -q
-                  '''
-               }
             }
          }
       } // stage verify
@@ -135,33 +103,22 @@ pipeline {
       stage('package') {
          steps {
             script {
-               if (isUnix()) {
                   sh '''
                      mvn -Dbuild.number=${BUILD_NUMBER} -DskipTests -q package
                   '''
-               } else {
-                  bat(/"${MAVEN_HOME}\bin\mvn" -Dbuild.number=${BUILD_NUMBER} -DskipTests -q package  /)
-               }
             }
          }
-      } // stage compile
+      } // stage package
 
       stage('javadoc') {
-         // when {
-         //         // expression { params.javadoc == 'true' }
-         //         expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }
-         // }
+         when {
+                 // expression { params.javadoc == 'true' }
+                 expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }
+         }
          steps {
-            script {
-               if (isUnix()) {
                   sh '''
                      mvn -q javadoc:javadoc
                   '''
-               } else {
-                  bat '''
-                     mvn -q javadoc:javadoc
-                  '''
-               }
             }
          }
       } // stage javadoc
@@ -171,7 +128,7 @@ pipeline {
          //    expression { env.BRANCH_NAME != 'master' && env.BRANCH_NAME != 'develop' }
          // }
          steps {
-            archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec, target/site/**'
+            archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/**, target/*.exec, target/site/**'
          }
       }
 
@@ -195,7 +152,7 @@ pipeline {
          // when { expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' } }
          when { expression { env.BRANCH_NAME == 'master'} }
          steps {
-            withCredentials([string(credentialsId: 'github-token-2', variable: 'token')]) { // var name "token" is set in cred config and is case senstive
+            withCredentials([string(credentialsId: 'supertick-github-token', variable: 'token')]) { // var name "token" is set in cred config and is case senstive
                echo "publishing ${VERSION_PREFIX}.${BUILD_NUMBER}"
                echo "version ${VERSION}"
                // for security - your supposed to make it non-interpretive single quotes and let the OS process the interpolation
