@@ -1072,7 +1072,7 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
 
   public void stop() {
     if (nettosphere != null) {
-      log.warn("==== nettosphere STOPPING ====");
+      log.info("==== nettosphere STOPPING ====");
       // done so a thread "from" webgui can stop itself :P
       // Must not be called from a I/O-Thread to prevent deadlocks!
       new Thread() {
@@ -1081,7 +1081,7 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
           nettosphere.framework().removeAllAtmosphereHandler();
           nettosphere.stop();
           nettosphere = null;
-          log.warn("==== nettosphere STOPPED ====");
+          log.info("==== nettosphere STOPPED ====");
         }
       }.start();
     }
