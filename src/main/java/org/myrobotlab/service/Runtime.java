@@ -4573,7 +4573,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       // if supplied by the command line it will be used
       // command line has the highest precedence
       if (options.id == null) {
-        if (startYml == null || startYml.id == null || !startYml.enable) {
+        if (startYml == null || startYml.id == null) {
           options.id = NameGenerator.getName();
         } else {
           options.id = startYml.id;
