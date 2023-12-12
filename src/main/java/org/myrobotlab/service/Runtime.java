@@ -131,10 +131,10 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
 
   /**
-   * a registry of all services regardless of which environment they came from -
-   * each must have a unique name
+   * A registry of all services regardless of which environment they came from -
+   * each must have a unique name. 
    */
-  static private final Map<String, ServiceInterface> registry = new TreeMap<>();
+  static private Map<String, ServiceInterface> registry = new TreeMap<>();
 
   /**
    * A plan is a request to runtime to change the system. Typically its to ask
@@ -2005,8 +2005,16 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
     // FIXME - release autostarted peers ?
 
-    // last step - remove from registry
-    registry.remove(name);
+    // last step - remove from registry by making new registry
+    // thread safe way
+    Map<String, ServiceInterface> removedService = new TreeMap<>();
+    for (String key: registry.keySet()) {
+      if (!name.equals(key)) {
+        removedService.put(key, registry.get(key));
+      }
+    }
+    registry = removedService;
+    
     // and config
     RuntimeConfig c = (RuntimeConfig) Runtime.getInstance().config;
     c.registry.remove(CodecUtils.getShortName(name));
@@ -2130,11 +2138,10 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     // clean up remote ... the contract should
     // probably be just remove their references - do not
     // ask for them to be released remotely ..
-    for (String remoteService : registry.keySet()) {
-      if (!remoteService.equals(runtime.getFullName())) {
-        registry.remove(remoteService);
-      }
-    }
+    // in thread safe way
+    Map<String, ServiceInterface> removedAllServices = new TreeMap<>();
+    removedAllServices.put(runtime.getFullName(), registry.get(runtime.getFullName()));
+    registry = removedAllServices;
 
     if (runtime != null && releaseRuntime) {
       runtime.releaseService();
