@@ -120,7 +120,6 @@ pipeline {
                      mvn -q javadoc:javadoc
                   '''
             }
-         }
       } // stage javadoc
 
       stage('archive') {
