@@ -2784,9 +2784,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         // resolve serviceData MetaTypes for the repo
 
         for (MetaData metaData : serviceData.getServiceTypes()) {
-          if (metaData.getSimpleName().equals("OpenCV")) {
-            log.warn("here");
-          }
           Set<ServiceDependency> deps = repo.getUnfulfilledDependencies(metaData.getType());
           if (deps.size() == 0) {
             metaData.installed = true;
