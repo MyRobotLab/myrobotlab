@@ -2170,9 +2170,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
     if (runtime != null && releaseRuntime) {
       runtime.releaseService();
-      synchronized(INSTANCE_LOCK) {
-        runtime = null;
-      }
     }
   }
 
