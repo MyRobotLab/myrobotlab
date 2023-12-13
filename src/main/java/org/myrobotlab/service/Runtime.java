@@ -3395,7 +3395,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
       runtime.getRepo().removeStatusPublishers();
     }
-    runtime = null;
+    synchronized(INSTANCE_LOCK) {
+      runtime = null;
+    }
   }
 
   /**
