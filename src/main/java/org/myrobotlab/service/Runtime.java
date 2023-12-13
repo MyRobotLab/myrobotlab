@@ -2165,11 +2165,13 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     // ask for them to be released remotely ..
     // in thread safe way
     Map<String, ServiceInterface> removedAllServices = new TreeMap<>();
-    removedAllServices.put(runtime.getFullName(), registry.get(runtime.getFullName()));
     registry = removedAllServices;
 
-    if (runtime != null && releaseRuntime) {
+    if (releaseRuntime) {
       runtime.releaseService();
+    } else {
+      // put runtime in new registry
+      removedAllServices.put(runtime.getFullName(), registry.get(runtime.getFullName()));  
     }
   }
 
