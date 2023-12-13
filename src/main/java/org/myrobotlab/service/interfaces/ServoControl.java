@@ -25,7 +25,6 @@
 
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.framework.Config;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.StateSaver;
 import org.myrobotlab.math.interfaces.Mapper;
@@ -55,7 +54,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   /**
    * enable the PWM pulses/power to the servo
    */
-  @Config
   void enable();
 
   /**
