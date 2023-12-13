@@ -2252,29 +2252,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    *
    */
   static public void release(String fullName) {
-    if (fullName == null) {
-      log.error("release(null)");
-      return;
-    }
-
-    ServiceInterface si = Runtime.getService(fullName);
-    if (si == null) {
-      log.info("{} already released", fullName);
-      return;
-    }
-
-    // check for peers !! check in config or check in Plan ?!?!?
-    Map<String, Peer> peers = si.getPeers();
-    if (peers != null) {
-      for (String peerKey : peers.keySet()) {
-        Peer peer = peers.get(peerKey);
-        if (peer.autoStart) {
-          release(peer.name);
-        }
-      }
-    }
-
-    si.releaseService();
+    releaseService(fullName);
   }
 
   /**
