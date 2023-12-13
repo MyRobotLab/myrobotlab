@@ -1177,15 +1177,16 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
 
     try {
 
-      // Platform.setVirtual(true);
-      
-      Runtime.startConfig("dev");
+      Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
       
       boolean done = true;
       if (done) {
         return;
       }
-
+      
+      // Platform.setVirtual(true);
+      // Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python", "-c", "dev" });
+      // Runtime.startConfig("dev");      
 
       // Runtime.start("python", "Python");
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
@@ -1196,6 +1197,8 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
       // webgui.setSsl(true);
       webgui.startService();
 
+
+      
       Runtime.start("python", "Python");
       // Runtime.start("intro", "Intro");
       // Runtime.start("i01", "InMoov2");

@@ -1,3 +1,5 @@
+# This file must be in the .github/workflows folder for git actions to work
+# but currently is disabled, since builds are being done by jenkins
 name: Java CI
 
 on:

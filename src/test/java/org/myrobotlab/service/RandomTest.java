@@ -3,8 +3,10 @@ package org.myrobotlab.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.Map;
 
+import org.junit.Before;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.service.Random.RandomMessage;
 
@@ -17,6 +19,17 @@ public class RandomTest extends AbstractServiceTest {
   public Service createService() throws Exception {
     return (Service) Runtime.start("random", "Random");
   }
+  
+  @Before /* before each test */
+  public void setUp() throws IOException {
+    // remove all services - also resets config name to DEFAULT effectively
+    Runtime.releaseAll(true, true);
+      // clean our config directory
+    Runtime.removeConfig("RandomTest");
+    // set our config
+    Runtime.setConfig("RandomTest");
+  }
+  
 
   @Override
   public void testService() throws Exception {

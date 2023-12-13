@@ -163,11 +163,11 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
         setLocale(getSupportedLocale(Runtime.getInstance().getLocale().toString()));
       }
 
-      loadAppsScripts();
-      
-      loadInitScripts();
-
       if (c.loadGestures) {
+        loadAppsScripts();
+        
+        loadInitScripts();
+
         loadGestures();
       }
 
