@@ -2133,7 +2133,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * @param releaseRuntime
    *                       Whether the Runtime should also be released
    */
-  static private void processRelease(boolean releaseRuntime) {
+  synchronized static private void processRelease(boolean releaseRuntime) {
 
     // reverse release to order of creation
     Collection<ServiceInterface> local = getLocalServices().values();
@@ -2170,7 +2170,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
     if (runtime != null && releaseRuntime) {
       runtime.releaseService();
-      runtime = null;
+      synchronized(INSTANCE_LOCK) {
+        runtime = null;
+      }
     }
   }
 
