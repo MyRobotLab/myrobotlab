@@ -96,8 +96,8 @@ public class ServiceSmokeTest extends AbstractTest {
       }
 
       // releases all service including runtime
-      Runtime.releaseAll();
-      
+      Runtime.releaseAll(true, true);
+
       // starts new service
       Runtime.start("clock", "Clock");
       Runtime.setAllVirtual(true);
