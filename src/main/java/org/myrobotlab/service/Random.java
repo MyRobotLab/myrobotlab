@@ -353,6 +353,9 @@ public class Random extends Service<RandomConfig> {
   }
 
   public RandomMessage remove(String key) {
+    if (!randomData.containsKey(key)) {
+      error("key %s does not exist");
+    }
     return randomData.remove(key);
   }
 

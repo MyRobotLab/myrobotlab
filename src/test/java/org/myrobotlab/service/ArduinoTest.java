@@ -20,7 +20,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinDefinition;
-import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;

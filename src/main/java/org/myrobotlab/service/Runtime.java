@@ -2585,8 +2585,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * Start Runtime with the specified config
    *
    * @param configName
-   *                   The name of the config file
-   * @return The Runtime singleton
+
+   *          The name of the config file
    */
   static public void startConfig(String configName) {
     setConfig(configName);
