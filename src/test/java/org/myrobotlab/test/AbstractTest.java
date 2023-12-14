@@ -150,7 +150,10 @@ public class AbstractTest {
 
     // release all including runtime - be careful of default runtime.yml
     Runtime.releaseAll(true, true);
+    // wait for draining threads
     sleep(100);
+    // resets runtime with fresh new instance
+    Runtime.getInstance();
 
     // check threads - kill stragglers
     // Set<Thread> stragglers = new HashSet<Thread>();
