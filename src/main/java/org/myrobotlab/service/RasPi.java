@@ -709,14 +709,19 @@ public class RasPi extends AbstractMicrocontroller<RasPiConfig> implements I2CCo
 
       log.info("Initiating i2c");
       I2CFactory.getInstance(Integer.parseInt(bus));
-      log.info("i2c initiated on bus {}", bus);
-      addTask(1000, "scan");
 
-      log.info("read task initialized");
-      addTask(1000, "read");
+      if (config.pollOnStart) {
+        log.info("i2c initiated on bus {}", bus);
+        addTask(1000, "scan");
+
+        log.info("read task initialized");
+        addTask(1000, "read");
+      }
 
     } catch (IOException e) {
       log.error("i2c initiation failed", e);
+    } catch (UnsupportedOperationException er) {
+      log.warn("invalid operation initializing i2c - is platform not raspberry pi?");
     } catch (Exception e) {
       // an error in the constructor won't get broadcast - so we need Runtime to
       // do it

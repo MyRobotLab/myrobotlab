@@ -32,7 +32,8 @@ public class ProgramABMeta extends MetaData {
     // TODO: This is for CJK support in ProgramAB move this into the published
     // POM for ProgramAB so they are pulled in transiently.
     addDependency("org.apache.lucene", "lucene-analysis-common", "9.4.2");
-    addDependency("org.apache.lucene", "lucene-analysis-kuromoji", "9.4.2");
+    addDependency("org.apache.lucene", "lucene-analysis-kuromoji", "9.4.2");    
+    addDependency("org.openjdk.nashorn", "nashorn-core", "15.4");
     addCategory("ai", "control");
 
   }

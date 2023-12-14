@@ -60,7 +60,7 @@ void MrlNeopixel::colorWipe()
 
 void MrlNeopixel::scanner()
 {
-  if (y == strip->numPixels() - 1)
+  if (y >= strip->numPixels() - 1)
   {
     z = 0;
   }
@@ -158,7 +158,7 @@ void MrlNeopixel::theaterChaseRainbow()
 
 void MrlNeopixel::writeMatrix(byte bufferSize, const byte *buffer)
 {
-  if (!strip)
+  if (!strip || runAnimation)
   {
     return;
   }

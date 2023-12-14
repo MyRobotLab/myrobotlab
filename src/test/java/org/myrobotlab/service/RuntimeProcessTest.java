@@ -31,7 +31,7 @@ public class RuntimeProcessTest extends AbstractTest {
   @Test
   public void cliTest() throws Exception {
 
-    // from ,to null=runtime, data  
+    // from ,to null=runtime, data
     String cwd = null;
     Message msg = CodecUtils.pathToMsg(getName(), "ls");
     assertEquals("runtime", msg.getName());
@@ -73,31 +73,39 @@ public class RuntimeProcessTest extends AbstractTest {
     Runtime.releaseAll(false, true);
     String[] services = Runtime.getServiceNames();
 
-    assertTrue(String.format("releasedAll(false) should have 1 remaining runtime services are %s", Arrays.toString(services)), services.length == 1);
-    
+    assertTrue(
+        String.format("releasedAll(false) should have 1 remaining runtime services are %s", Arrays.toString(services)),
+        services.length == 1);
+
     // releasing "self" test
     runtime.releaseService();
     services = Runtime.getServiceNames();
-    assertTrue(String.format("releasedAll(false) should have 0 remaining runtime services are %s", Arrays.toString(services)), services.length == 0);
-    
+    assertTrue(
+        String.format("releasedAll(false) should have 0 remaining runtime services are %s", Arrays.toString(services)),
+        services.length == 0);
+
     // testing re-entrant -
     runtime = Runtime.getInstance();
-    assertTrue("testing re-entrant - expecting runtime service", Arrays.toString(Runtime.getServiceNames()).contains("runtime"));
-    
-    // removing all 
-    Runtime.releaseAll();
+    assertTrue("testing re-entrant - expecting runtime service",
+        Arrays.toString(Runtime.getServiceNames()).contains("runtime"));
+
+    // removing all
+    Runtime.releaseAll(true, true);
     sleep(100);
 
     // better be 0
     services = Runtime.getServiceNames();
-    assertTrue(String.format("releasedAll(false) should have 0 remaining runtime services are %s", Arrays.toString(services)), services.length == 0);
+    assertTrue(
+        String.format("releasedAll(false) should have 0 remaining runtime services are %s", Arrays.toString(services)),
+        services.length == 0);
 
     // better be re-entrant
     runtime = Runtime.getInstance();
     services = Runtime.getServiceNames();
-    assertTrue(String.format("releasedAll(false) should have new runtime services are %s", Arrays.toString(services)), services.length > 0);
-    assertTrue("testing re-entrant again - expecting runtime service", Arrays.toString(Runtime.getServiceNames()).contains("runtime"));
-    
+    assertTrue(String.format("releasedAll(false) should have new runtime services are %s", Arrays.toString(services)),
+        services.length > 0);
+    assertTrue("testing re-entrant again - expecting runtime service",
+        Arrays.toString(Runtime.getServiceNames()).contains("runtime"));
 
     /**
      * cli

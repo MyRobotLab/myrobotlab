@@ -62,7 +62,7 @@ public class Intro extends Service<ServiceConfig> {
 
   /**
    * @param introScriptName
-   *          execute an Intro resource script
+   *                        execute an Intro resource script
    */
   public void execScript(String introScriptName) {
     try {
@@ -78,7 +78,7 @@ public class Intro extends Service<ServiceConfig> {
    * This method will load a python file into the python interpreter.
    * 
    * @param file
-   *          the python file to load
+   *             the python file to load
    * @return true/false
    */
   @Deprecated
@@ -127,7 +127,6 @@ public class Intro extends Service<ServiceConfig> {
       // Runtime.start("intro", "Intro");
 
       // Runtime.release("python");
-      // Runtime.releaseAll();
       Runtime.start("python", "Python");
       // Runtime.start("mega", "Arduino");
       // Runtime.start("ada", "Adafruit16CServoDriver");
@@ -168,7 +167,7 @@ public class Intro extends Service<ServiceConfig> {
 
       DiscordBot bot = (DiscordBot) Runtime.start("bot", "DiscordBot");
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
-      brain.setCurrentBotName("Alice");
+      brain.setBotType("Alice");
       bot.connect();
       brain.attach(bot);
       bot.attach(brain);

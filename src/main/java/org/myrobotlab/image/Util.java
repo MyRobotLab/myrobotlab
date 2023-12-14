@@ -609,11 +609,7 @@ public class Util {
    * for display inline in html.
    * 
    * @param bytes
-   *          input bytes
-   * @return a string
-   * @throws IOException
-   *           boom
-   * 
+   * @return
    */
   public static String bytesToBase64Jpg(byte[] bytes) {
     //

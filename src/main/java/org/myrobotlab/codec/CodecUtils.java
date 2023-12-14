@@ -1685,4 +1685,10 @@ public class CodecUtils {
     }
     return rgb;
   }
+
+  public static String hashcodeToHex(int hashCode) {
+    String hexString = Long.toHexString(hashCode).toUpperCase();
+    return String.format("%6s", hexString).replace(' ', '0').substring(0, 6);
+  }
+
 }

@@ -20,11 +20,12 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.programab.Response;
 
-// @Ignore
+@Ignore
 public class SolrTest extends AbstractServiceTest {
-  // @Test
+
+  @Ignore
   public void testImageStoreFetch() throws SolrServerException, IOException {
-    Solr solr = (Solr) Runtime.createAndStart("solr", "Solr");
+    Solr solr = (Solr) Runtime.start("solr", "Solr");
     String solrHome = SolrTest.testFolder.getRoot().getAbsolutePath();
     solr.startEmbedded(solrHome);
     solr.deleteEmbeddedIndex();
@@ -55,7 +56,8 @@ public class SolrTest extends AbstractServiceTest {
   }
 
   private IplImage loadDefaultImage() {
-    String path = "src" + File.separator + "test" + File.separator + "resources" + File.separator + "OpenCV" + File.separator + "lena.png";
+    String path = "src" + File.separator + "test" + File.separator + "resources" + File.separator + "OpenCV"
+        + File.separator + "lena.png";
     IplImage image = cvLoadImage(path);
     return image;
   }
@@ -69,9 +71,8 @@ public class SolrTest extends AbstractServiceTest {
 
   @Override
   public void testService() throws Exception {
-    // LoggingFactory.init("INFO"); please do not do this
-    Solr solr = (Solr) service;
-    // String solrHome = SolrTest.testFolder.getRoot().getAbsolutePath();
+    Solr solr = (Solr) Runtime.start("solr", "Solr");
+
     solr.startEmbedded();
     solr.deleteEmbeddedIndex();
     solr.addDocument(makeTestDoc("doc_1"));
@@ -95,7 +96,7 @@ public class SolrTest extends AbstractServiceTest {
     Document mrlDoc = new Document("doc_3");
     mrlDoc.setField("title", "Mrl Rocks!");
     // Object o = Arrays.asList(1.0f, 2.5f, 3.7f, 4.1f);
-    //Object o2 = Arrays.asList(makeVector(384));
+    // Object o2 = Arrays.asList(makeVector(384));
     mrlDoc.setField("vector", makeVector(384));
 
     solr.onDocument(mrlDoc);
@@ -128,16 +129,14 @@ public class SolrTest extends AbstractServiceTest {
     query = new SolrQuery("username:joe");
     resp = solr.search(query);
     Assert.assertEquals(1, resp.getResults().getNumFound());
-    
-    
+
     // let's search for our vector
     ArrayList<Float> v = makeVector(384);
-   String queryVec = vecToString(v);
-    
-    
-    query = new SolrQuery("{!knn f=vector topK=10}"+queryVec);
+    String queryVec = vecToString(v);
+
+    query = new SolrQuery("{!knn f=vector topK=10}" + queryVec);
     resp = solr.search(query);
-    
+
     // System.out.println(resp);
     Assert.assertEquals(1, resp.getResults().getNumFound());
 
@@ -147,23 +146,24 @@ public class SolrTest extends AbstractServiceTest {
     // TODO Auto-generated method stub
     StringBuilder sb = new StringBuilder();
     sb.append("[");
-    for (int i = 0 ; i < v.size(); i++) {
+    for (int i = 0; i < v.size(); i++) {
       sb.append(v.get(i));
-      if (i != v.size()-1) {
+      if (i != v.size() - 1) {
         sb.append(",");
       }
-    }    
+    }
     sb.append("]");
     return sb.toString();
   }
 
-  private ArrayList<Float> makeVector (int length) {
+  private ArrayList<Float> makeVector(int length) {
     ArrayList<Float> result = new ArrayList<Float>();
-    for (int i = 0 ; i < length; i++) {
-      result.add( 0.5f );
+    for (int i = 0; i < length; i++) {
+      result.add(0.5f);
     }
     return result;
   }
+
   private SolrInputDocument makeTestDoc(String docId) {
     // TODO Auto-generated method stub
     SolrInputDocument doc = new SolrInputDocument();

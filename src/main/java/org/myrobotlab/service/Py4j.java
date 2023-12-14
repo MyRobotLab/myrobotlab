@@ -155,6 +155,8 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
 
   public Py4j(String n, String id) {
     super(n, id);
+    // ready when connected
+    ready = false;
   }
 
   /**
@@ -199,7 +201,7 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
     try {
       log.info("connectionStarted {}", gatewayConnection.toString());
       clients.put(getClientKey(gatewayConnection), new Py4jClient());
-
+      ready = true;
       info("connection started");
       invoke("getClients");
     } catch (Exception e) {
@@ -220,6 +222,7 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
    * @param code The Python code to execute in the interpreter.
    */
   public void exec(String code) {
+    log.info(String.format("exec %s", code));
     try {
       if (handler != null) {
         handler.exec(code);
@@ -340,6 +343,7 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
                 
         String json = CodecUtils.toJson(msg);
         // handler.invoke(msg.method, json);
+        log.info(String.format("handler %s", json));
         handler.send(json);
       } else {
         error("preProcessHook handler is null");
@@ -566,7 +570,6 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
    * 
    * @param scriptName
    * @param code
-   * @return
    */
   public void updateScript(String scriptName, String code) {
     if (openedScripts.containsKey(scriptName)) {
@@ -606,6 +609,7 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
   public void sendRemote(Message msg) throws Exception {
     log.info("sendRemote");
     String jsonMsg = CodecUtils.toJson(msg);
+    log.info(String.format("sendRemote %s"));
     handler.send(jsonMsg);
   }
 

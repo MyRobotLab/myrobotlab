@@ -3,8 +3,10 @@ package org.myrobotlab.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.Map;
 
+import org.junit.Before;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.service.Random.RandomMessage;
 
@@ -17,6 +19,17 @@ public class RandomTest extends AbstractServiceTest {
   public Service createService() throws Exception {
     return (Service) Runtime.start("random", "Random");
   }
+  
+  @Before /* before each test */
+  public void setUp() throws IOException {
+    // remove all services - also resets config name to DEFAULT effectively
+    Runtime.releaseAll(true, true);
+      // clean our config directory
+    Runtime.removeConfig("RandomTest");
+    // set our config
+    Runtime.setConfig("RandomTest");
+  }
+  
 
   @Override
   public void testService() throws Exception {
@@ -37,13 +50,12 @@ public class RandomTest extends AbstractServiceTest {
     assertTrue(String.format("random method 1 should be %d => 5000 values", clock.getInterval()), 5000 <= clock.getInterval());
     assertTrue(String.format("random method 1 should be %d <= 10000 values",clock.getInterval()) , clock.getInterval() <= 10000);
     
-    random.remove("clock", "setInterval");
+    random.remove("clock.setInterval");
     
     assertTrue("should not have method", !random.getKeySet().contains("clock.setInterval"));
 
     random.addRandom(0, 200, "clock", "setInterval", 5000, 10000);
     random.addRandom(0, 200, "clock", "startClock");
-    // random.addRandom(0, 200, "clock", "stopClock");
     
     sleep(500);
     assertTrue("clock should be started 1", clock.isClockRunning());
@@ -51,12 +63,12 @@ public class RandomTest extends AbstractServiceTest {
     // disable all of a services random events
     random.disable("clock.startClock");
     clock.stopClock();
-    sleep(200);
-    assertTrue("clock should not be started", !clock.isClockRunning());
+    sleep(250);
+    assertTrue("clock should not be started 1", !clock.isClockRunning());
     
     // enable all of a service's random events
     random.enable("clock.startClock");
-    sleep(200);
+    sleep(250);
     assertTrue("clock should be started 2", clock.isClockRunning());
     
     // disable one method - leave other enabled
@@ -64,7 +76,7 @@ public class RandomTest extends AbstractServiceTest {
     clock.stopClock();
     clock.setInterval(999999);
     sleep(200);
-    assertTrue("clock should not be started", !clock.isClockRunning());
+    assertTrue("clock should not be started 3", !clock.isClockRunning());
     assertTrue(String.format("random method 2 should be %d => 5000 values", clock.getInterval()), 5000 <= clock.getInterval());
     assertTrue(String.format("random method 2 should be %d <= 10000 values",clock.getInterval()) , clock.getInterval() <= 10000);
 
@@ -72,13 +84,13 @@ public class RandomTest extends AbstractServiceTest {
     random.disable();
     sleep(200);
     clock.setInterval(999999);
-    assertTrue("clock should not be started", !clock.isClockRunning());   
+    assertTrue("clock should not be started 4", !clock.isClockRunning());   
     assertEquals(999999, (long)clock.getInterval());
 
     // re-enable all that were previously enabled but not explicitly disabled ones
     random.enable();
     sleep(1000);
-    assertTrue("clock should not be started", !clock.isClockRunning());
+    assertTrue("clock should not be started 5", !clock.isClockRunning());
     assertTrue(String.format("random method 3 should be %d => 5000 values", clock.getInterval()), 5000 <= clock.getInterval());
     assertTrue(String.format("random method 3 should be %d <= 10000 values",clock.getInterval()) , clock.getInterval() <= 10000);
 

@@ -453,7 +453,7 @@ public class Shoutbox extends Service<ServiceConfig> {
       return;
     }
     chatbot = (ProgramAB) Runtime.start("chatbot", "ProgramAB");
-    chatbot.startSession("ProgramAB", "alice2");
+    chatbot.setSession("ProgramAB", "alice2");
     chatbot.addResponseListener(this);
   }
 

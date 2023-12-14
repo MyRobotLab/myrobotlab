@@ -20,7 +20,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinDefinition;
-import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
@@ -218,7 +217,7 @@ public class ArduinoTest extends AbstractTest {
     sleep(200);
     arduino01.reset();
     // Wait for reset to complete
-    sleep(100);
+    sleep(200);
 
     assertTrue("did not get pin array data D10", catcher.containsPinArrayFromPin(arduino01.getPin(10).getPinName()));
     assertTrue("did not get pin array data D12", catcher.containsPinArrayFromPin(arduino01.getPin(12).getPinName()));
@@ -471,8 +470,10 @@ public class ArduinoTest extends AbstractTest {
     arduino01.attachPinListener(catcher);
 
     arduino01.enablePin(pin.getAddress());
-    sleep(100);
+    sleep(200);
     arduino01.disablePin(pin.getAddress());
+    assertNotNull("should not be null", catcher.pinData);
+    assertNotNull("should not be null2", catcher.pinData.pin);
     assertTrue("did not receive pin data int", catcher.pinData.pin.equals(analogPin));
 
     catcher.pinData = null;

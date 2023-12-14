@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashSet;
@@ -8,19 +9,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.fsm.api.Event;
-import org.myrobotlab.fsm.api.EventHandler;
-import org.myrobotlab.fsm.api.SimpleEvent;
-import org.myrobotlab.fsm.api.State;
-import org.myrobotlab.fsm.core.SimpleTransition;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.FiniteStateMachine.StateChange;
 import org.myrobotlab.service.config.EmojiConfig;
 import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.interfaces.ImagePublisher;
+import org.myrobotlab.service.interfaces.StateChangeHandler;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
@@ -28,17 +27,15 @@ import org.slf4j.Logger;
 // emotionListener
 // Links
 // - http://googleemotionalindex.com/
-public class Emoji extends Service<EmojiConfig> implements TextListener, EventHandler, ImagePublisher {
+public class Emoji extends Service<EmojiConfig> implements TextListener, StateChangeHandler, ImagePublisher {
 
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(Emoji.class);
 
-  // transient ImageDisplay display = null;
-
   transient HttpClient http = null;
 
-  State lastState = null;
+  String lastState = null;
 
   final Set<Integer> validSize = new HashSet<>();
 
@@ -87,11 +84,20 @@ public class Emoji extends Service<EmojiConfig> implements TextListener, EventHa
 
   }
 
+  /**
+   * Map a reference of some text like "grinning face" to a unicode reference.
+   * 
+   * @param keyword - words desired
+   * @param unicode - emoji reference
+   */
   public void addEmoji(String keyword, String unicode) {
     log.info("emoji {}:{}", keyword, unicode);
     ((EmojiConfig) config).map.put(keyword, unicode);
   }
 
+  /**
+   * clears all mappings
+   */
   public void clearEmojis() {
     ((EmojiConfig) config).map.clear();
   }
@@ -99,16 +105,42 @@ public class Emoji extends Service<EmojiConfig> implements TextListener, EventHa
   @Override
   public void startService() {
     super.startService();
-
-    // FIXME - send default fullscreen always on top minAutoSize to display ?
-    // display = (ImageDisplay) startPeer("display");
     http = (HttpClient) startPeer("http");
-
     addEmojiMap();
   }
 
-  public void display(String source) {
+  /**
+   * Returns a base 64 string representation of the emoji image
+   * 
+   * @param source - text or unicode refrence
+   * @return - base64 png
+   * @throws IOException
+   */
+  public String getBase64Image(String source) throws IOException {
+    ImageData img = getImageData(source);
+    String ret = CodecUtils.toBase64(FileIO.toByteArray(new File(img.src)));
+    return ret;
+  }
+
+  /**
+   * Returns filename and other info
+   * 
+   * @param source - keyword or unicode reference
+   * @return ImageData
+   */
+  public ImageData getImageData(String source) {
+
     try {
+
+      if (source == null) {
+        error("emoji source cannot be null");
+        return null;
+      }
+
+      boolean isUnicode = source.toUpperCase().startsWith("U+");
+      if (isUnicode) {
+        source = source.toUpperCase();
+      }
 
       String cacheDir = getEmojiCacheDir();
 
@@ -123,12 +155,23 @@ public class Emoji extends Service<EmojiConfig> implements TextListener, EventHa
       Map<String, String> map = ((EmojiConfig) config).map;
 
       // check for keyword
-      if (map.containsKey(source)) {
-        String unicodeFileName = cacheDir + File.separator + map.get(source) + ".png";
+      if (map.containsKey(source) || isUnicode) {
+        String unicodeFileName = null;
+        if (isUnicode) {
+          unicodeFileName = cacheDir + File.separator + source + ".png";
+        } else {
+          unicodeFileName = cacheDir + File.separator + map.get(source) + ".png";
+        }
         if (!new File(unicodeFileName).exists()) {
           try {
-            String fetchCode = map.get(source).replace("+", "").toLowerCase();
-            String url = ((EmojiConfig) config).emojiSourceUrlTemplate.replace("{size}", "" + getSize()).replace("{code}", fetchCode).replace("{CODE}", source);
+            String fetchCode = null;
+            if (isUnicode) {
+              fetchCode = source.replace("+", "").toLowerCase();
+            } else {
+              fetchCode = map.get(source).replace("+", "").toLowerCase();
+            }
+            String url = ((EmojiConfig) config).emojiSourceUrlTemplate.replace("{size}", "" + getSize())
+                .replace("{code}", fetchCode).replace("{CODE}", source);
             byte[] bytes = http.getBytes(url);
             FileIO.toFile(unicodeFileName, bytes);
           } catch (Exception e) {
@@ -164,11 +207,18 @@ public class Emoji extends Service<EmojiConfig> implements TextListener, EventHa
       img.src = filename;
       img.source = getName();
 
-      invoke("publishImage", img);
+      return img;
 
     } catch (Exception e) {
       log.error("displayFullScreen threw", e);
     }
+    return null;
+  }
+
+  public void display(String source) {
+    ImageData img = getImageData(source);
+    invoke("publishImage", img);
+    invoke("publishDisplay", img);
   }
 
   public int getSize() {
@@ -192,16 +242,13 @@ public class Emoji extends Service<EmojiConfig> implements TextListener, EventHa
 
   // FIXME - publish events if desired...
   @Override
-  public void handleEvent(Event event) throws Exception {
+  public void handleStateChange(StateChange event) {
     log.info("handleEvent {}", event);
-    SimpleEvent se = (SimpleEvent) event;
-    SimpleTransition transition = (SimpleTransition) se.getTransition();
     EmojiData emoji = new EmojiData();
-    emoji.name = transition.getTargetState().getName();
+    emoji.name = event.state;
     emoji.unicode = ((EmojiConfig) config).map.get(emoji.name);
     invoke("publishEmoji", emoji);
-    display(transition.getTargetState().getName());
-    // emotionalState.getCurrentState().getName();
+    display(event.state);
   }
 
   public void publishEmoji(EmojiData emoji) {
@@ -224,12 +271,17 @@ public class Emoji extends Service<EmojiConfig> implements TextListener, EventHa
       // scan text for emotional words - addEmotionWordPair(happy 1f609) ...
       LoggingFactory.init(Level.WARN);
 
-      Runtime.startConfig("emoji-display-2");
+      // Runtime.startConfig("emoji-display-2");
 
       // Runtime.startConfig("emoji-display-1");
       // Runtime.saveConfig("emoji-display-2");
 
       Emoji emoji = (Emoji) Runtime.start("emoji", "Emoji");
+
+      String imgTag = String.format("<img src=\"data:img/png;base64,%s\" />", emoji.getBase64Image("U+1F98D"));
+
+      FileIO.toFile("emoji.html", String.format("<html><body>%s</body></html>", imgTag));
+
       ImageDisplay display = (ImageDisplay) Runtime.start("display", "ImageDisplay");
       emoji.attachImageListener(display);
 
@@ -360,6 +412,11 @@ public class Emoji extends Service<EmojiConfig> implements TextListener, EventHa
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  public String getImageFile(String emoji) {
+    ImageData data = getImageData(emoji);
+    return data.src;
   }
 
   @Override

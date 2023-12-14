@@ -48,6 +48,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
+@Deprecated /* use OpenAI service */
 public class Gpt3 extends Service<Gpt3Config> implements TextListener, TextPublisher, UtterancePublisher, UtteranceListener, ResponsePublisher {
 
   private static final long serialVersionUID = 1L;

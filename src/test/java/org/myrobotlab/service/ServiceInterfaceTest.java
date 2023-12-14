@@ -122,7 +122,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     blacklist.add("Solr");
     blacklist.add("Proxy"); // interesting idea - but no worky
     blacklist.add("Sphinx");
-    blacklist.add("SwingGui");
+
     // This one just takes so darn long.
     blacklist.add("Deeplearning4j");
     blacklist.add("OculusDiy");

@@ -18,7 +18,7 @@ import org.myrobotlab.test.AbstractTest;
 /**
  * 
  * This test was intended to test variations of the inmoov scripts.
- * It's ignored now until we can have some similar test coverage 
+ * It's ignored now until we can have some similar test coverage
  * with the InMoov2 implementatoin.
  */
 @Ignore
@@ -98,7 +98,7 @@ public class InMoovScriptTest extends AbstractTest {
       // test virtual inmoov
 
       // tear down
-      Runtime.releaseAll();
+      Runtime.releaseAll(true, true);
 
     }
   }

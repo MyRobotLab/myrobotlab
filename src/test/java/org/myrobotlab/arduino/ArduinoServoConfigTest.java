@@ -1,4 +1,5 @@
 package org.myrobotlab.arduino;
+
 import java.io.IOException;
 import java.text.ParseException;
 
@@ -27,7 +28,6 @@ import org.myrobotlab.service.Servo;
 
 @Ignore
 public class ArduinoServoConfigTest {
-
 
   @Test
   public void generateSimpleConfigs() throws Exception {
@@ -102,10 +102,6 @@ public class ArduinoServoConfigTest {
     System.out.println("Loaded...");
 
     waitOnAnyKey();
-    // Runtime.releaseAll();
-    // i02 = (InMoov2)Runtime.createAndStart("i02", "InMoov2");
-    // i02.load("testconfig.yml");
-    // TODO: do something.
   }
 
   // @Test

@@ -8,6 +8,8 @@ public class RasPiConfig extends ServiceConfig {
      */
     public int pollRateHz = 1;
     
+    public boolean pollOnStart = false;
+    
     // TODO - config which starts pins in a mode (read/write) and if write a value 0/1
 
 }

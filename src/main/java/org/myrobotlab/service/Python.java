@@ -180,7 +180,7 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
   public final static transient Logger log = LoggerFactory.getLogger(Python.class);
   // TODO this needs to be moved into an actual cache if it is to be used
   // Cache of compile python code
-  private static final transient HashMap<String, PyObject> objectCache = new HashMap<String, PyObject>();
+  private final transient HashMap<String, PyObject> objectCache = new HashMap<String, PyObject>();
 
   private static final long serialVersionUID = 1L;
 
@@ -200,7 +200,7 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
    * @param interp
    * @return
    */
-  private static synchronized PyObject getCompiledMethod(String name, String code, PythonInterpreter interp) {
+  private synchronized PyObject getCompiledMethod(String name, String code, PythonInterpreter interp) {
     // TODO change this from a synchronized method to a few blocks to
     // improve concurrent performance
     if (objectCache.containsKey(name)) {
@@ -334,7 +334,7 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
   /**
    * append more Python to the current script
    * 
-   * @param data
+   * @param code
    *          the code to append
    * @return the resulting concatenation
    */
@@ -759,7 +759,6 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
    * upserts a script in memory
    * @param file
    * @param code
-   * @return
    */
   public void updateScript(String file, String code) {
       if (openedScripts.containsKey(file)) {
@@ -889,8 +888,6 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
 
     localPythonFiles = getFileListing();
 
-    attachPythonConsole();
-
     String selfReferenceScript = "from time import sleep\nfrom org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
         + "from org.myrobotlab.framework import Service\n" + "from org.myrobotlab.service import Python\n"
         + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
@@ -900,6 +897,8 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
     PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
     interp.exec(compiled);
 
+    attachPythonConsole();
+    
     // initialize all the pre-existing service before python was created
     Map<String, ServiceInterface> services = Runtime.getLocalServices();
     for (ServiceInterface service : services.values()) {

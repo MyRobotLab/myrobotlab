@@ -3,6 +3,8 @@ package org.myrobotlab.programab;
 import java.util.Date;
 import java.util.List;
 
+import org.myrobotlab.programab.models.Mrl;
+
 /**
  * FIXME - this class should become a more generalized AI response data object
  * in org.myrobotlab.data so that other AI systems (and search engines) can fill
@@ -29,12 +31,14 @@ public class Response {
   /**
    * filtered oob data
    */
-  public List<OOBPayload> payloads;
+  public List<Mrl> payloads;
 
-  public Response(String userName, String botName, String msg, List<OOBPayload> payloads) {
+  public Response(String userName, String botName, String msg, List<Mrl> payloads) {
     this.botName = botName;
     this.userName = userName;
     this.msg = msg;
+    
+    // what is this for ?
     this.payloads = payloads;
   }
 
@@ -48,7 +52,7 @@ public class Response {
     str.append("Msg:" + msg + ", ");
     str.append("Payloads:[");
     if (payloads != null) {
-      for (OOBPayload payload : payloads) {
+      for (Mrl payload : payloads) {
         str.append(payload.toString() + ", ");
       }
     }

@@ -43,7 +43,6 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.slf4j.Logger;
 
-
 /*
  * Outbox is a message based thread which sends messages based on addListener lists and current
  * queue status.  It is only aware of the Service directory, addListener lists, and operators.
@@ -63,11 +62,17 @@ public class Outbox implements Runnable, Serializable {
   static public final String PROCESSANDBROADCAST = "PROCESSANDBROADCAST";
 
   protected String name = null;
-  private transient  LinkedList<Message> msgBox = new LinkedList<Message>();
+
+  private transient LinkedList<Message> msgBox = new LinkedList<Message>();
+
   private boolean isRunning = false;
+
   private boolean blocking = false;
+
   int maxQueue = 1024;
+
   int initialThreadCount = 1;
+
   transient ArrayList<Thread> outboxThreadPool = new ArrayList<Thread>();
 
   protected Map<String, FilterInterface> filters = new HashMap<>();
@@ -216,10 +221,10 @@ public class Outbox implements Runnable, Serializable {
           MRLListener listener = subList.get(i);
           msg.setName(listener.callbackName);
           msg.method = listener.callbackMethod;
-          
+
           if (!isFiltered(msg)) {
-            send(msg);  
-          }                    
+            send(msg);
+          }
 
           // must make new for internal queues
           // otherwise you'll change the name on
@@ -228,21 +233,22 @@ public class Outbox implements Runnable, Serializable {
         }
       } else {
         if (log.isDebugEnabled()) {
-          log.debug("{}/{}({}) notifyList is empty", msg.getName(), msg.method, CodecUtils.getParameterSignature(msg.data));
+          log.debug("{}/{}({}) notifyList is empty", msg.getName(), msg.method,
+              CodecUtils.getParameterSignature(msg.data));
         }
         continue;
       }
     } // while (isRunning)
   }
-    
+
   public FilterInterface addFilter(String name, String method, FilterInterface filter) {
     return filters.put(String.format("%s.%s", CodecUtils.getFullName(name), method), filter);
   }
-  
+
   public FilterInterface removeFilter(String name, String method) {
     return filters.remove(String.format("%s.%s", CodecUtils.getFullName(name), method));
   }
-  
+
   public boolean isFiltered(Message msg) {
     String fullname = CodecUtils.getFullName(msg.name);
     if (filters.size() == 0 || !filters.containsKey(String.format("%s.%s", fullname, msg.method))) {
@@ -258,7 +264,7 @@ public class Outbox implements Runnable, Serializable {
 
   public void start() {
     for (int i = outboxThreadPool.size(); i < initialThreadCount; ++i) {
-      Thread t = new Thread(this, name + "_outbox_" + i);
+      Thread t = new Thread(this, CodecUtils.getShortName(name) + "_outbox_" + i);
       outboxThreadPool.add(t);
       t.start();
     }
@@ -317,7 +323,8 @@ public class Outbox implements Runnable, Serializable {
         // ?
         ServiceInterface sw = Runtime.getService(msg.getName());
         if (sw == null && autoClean) {
-          log.warn("could not find service {} to process {} from sender {} - tearing down route", msg.getName(), msg.method, msg.sender);
+          log.warn("could not find service {} to process {} from sender {} - tearing down route", msg.getName(),
+              msg.method, msg.sender);
           ServiceInterface sender = Runtime.getService(msg.sender);
           if (sender != null) {
             sender.removeListener(msg.sendingMethod, msg.getName(), msg.method);
@@ -358,8 +365,8 @@ public class Outbox implements Runnable, Serializable {
   /**
    * Safe detach for single subscriber
    * 
-   * @param name
-   *          the name of the listener to detach
+   * @param service
+   *                the name of the listener to detach
    * 
    */
   synchronized public void detach(String service) {
@@ -379,7 +386,4 @@ public class Outbox implements Runnable, Serializable {
   public Map<String, List<MRLListener>> getNotifyList() {
     return notifyList;
   }
-
-
-
 }

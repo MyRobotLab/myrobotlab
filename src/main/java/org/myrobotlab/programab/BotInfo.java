@@ -12,6 +12,7 @@ import java.util.TreeMap;
 import org.alicebot.ab.Bot;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.programab.handlers.sraix.MrlSraixHandler;
 import org.myrobotlab.service.ProgramAB;
 import org.slf4j.Logger;
 
@@ -23,7 +24,7 @@ public class BotInfo {
 
   transient public final static Logger log = LoggerFactory.getLogger(BotInfo.class);
 
-  public String name;
+  public String botType;
   public File path;
   public Properties properties = new Properties();
   private transient Bot bot;
@@ -36,17 +37,17 @@ public class BotInfo {
   public String img;
 
   public BotInfo(ProgramAB programab, File path) {
-    this.name = path.getName();
+    this.botType = path.getName();
     this.path = path;
     this.programab = programab;
-    programab.info("found bot %s", name);
+    programab.info("found bot %s", botType);
     try {
       FileInputStream fis = new FileInputStream(FileIO.gluePaths(path.getAbsolutePath(), "manifest.txt"));
       properties.load(new InputStreamReader(fis, Charset.forName("UTF-8")));
       fis.close();
       log.info("loaded properties");
     } catch (FileNotFoundException e) {
-      programab.warn("bot %s does not have a manifest.txt", name);
+      programab.warn("bot %s does not have a manifest.txt", botType);
     } catch (Exception e) {
       log.error("BotInfo threw", e);
     }
@@ -62,13 +63,13 @@ public class BotInfo {
     if (bot == null) {
       // lazy loading of bot - created on the first use
       if (properties.containsKey("locale")) {
-        bot = new Bot(name, path.getAbsolutePath(), java.util.Locale.forLanguageTag((String) properties.get("locale")));
+        bot = new Bot(botType, path.getAbsolutePath(), java.util.Locale.forLanguageTag((String) properties.get("locale")));
         bot.listener = programab;
       } else {
         if (programab.getLocaleTag() == null) {
-          bot = new Bot(name, path.getAbsolutePath());
+          bot = new Bot(botType, path.getAbsolutePath());
         } else {
-          bot = new Bot(name, path.getAbsolutePath(), java.util.Locale.forLanguageTag(programab.getLocaleTag()));
+          bot = new Bot(botType, path.getAbsolutePath(), java.util.Locale.forLanguageTag(programab.getLocaleTag()));
         }
         bot.listener = programab;
       }
@@ -131,7 +132,7 @@ public class BotInfo {
 
   @Override
   public String toString() {
-    return String.format("%s - %s", name, path);
+    return String.format("%s - %s", botType, path);
   }
 
 }

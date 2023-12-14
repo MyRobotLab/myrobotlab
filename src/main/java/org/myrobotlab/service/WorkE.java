@@ -26,7 +26,8 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class WorkE extends Service<ServiceConfig> implements StatusListener, TextPublisher, SpeechSynthesisControl, SpeechSynthesisControlPublisher, JoystickListener {
+public class WorkE extends Service<ServiceConfig> implements StatusListener, TextPublisher, SpeechSynthesisControl,
+    SpeechSynthesisControlPublisher, JoystickListener {
 
   public final static Logger log = LoggerFactory.getLogger(WorkE.class);
 
@@ -231,13 +232,13 @@ public class WorkE extends Service<ServiceConfig> implements StatusListener, Tex
    * TODO - make a brain interface ??
    * 
    * @param service
-   *          the programab for the brain
+   *                the programab for the brain
    * 
    */
   public void attachBrain(ProgramAB service) {
     brain = service.getName();
     speak("attaching brain");
-    send(brain, "addBotPath", getResourcePath("bot/WorkE"));
+    send(brain, "addBot", getResourcePath("bot/WorkE"));
     send(brain, "setCurrentBotName", "WorkE");
     send(brain, "setCurrentUserName", "master");
 
@@ -558,7 +559,7 @@ public class WorkE extends Service<ServiceConfig> implements StatusListener, Tex
    * ChassiControl interface
    * 
    * @param pwr
-   *          power
+   *            power
    * @return the power
    * 
    */
@@ -572,7 +573,7 @@ public class WorkE extends Service<ServiceConfig> implements StatusListener, Tex
    * ChassiControl interface
    * 
    * @param pwr
-   *          power
+   *            power
    * @return the power
    * 
    */
@@ -706,7 +707,7 @@ public class WorkE extends Service<ServiceConfig> implements StatusListener, Tex
    * must NOT end in bots - is its parent folder
    * 
    * @param path
-   *          path
+   *             path
    * @return the brainPath
    * 
    */

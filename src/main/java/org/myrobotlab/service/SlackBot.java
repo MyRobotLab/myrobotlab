@@ -139,7 +139,7 @@ public class SlackBot extends Service<SlackBotConfig> implements UtteranceListen
     // Let's see about getting a programAB instance setup and attached to the
     // slack bot
     ProgramAB chatBot = (ProgramAB) Runtime.start("chatBot", "ProgramAB");
-    chatBot.setCurrentBotName("Mr. Turing");
+    chatBot.setBotType("Mr. Turing");
     slackBot.attachUtteranceListener(chatBot.getName());
     chatBot.attachUtteranceListener(slackBot.getName());
     // Tell the slack bot to connect
