@@ -1213,20 +1213,20 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    *
    */
   static public String[] getServiceNames() {
-    List<ServiceInterface> si = getServices();
-    String[] ret = new String[si.size()];
-    for (int i = 0; i < ret.length; ++i) {
-      ServiceInterface s = si.get(i);
+    Set<String>ret = registry.keySet();
+    String[] services = new String[ret.size()];
+    
+    String localId = Platform.getLocalInstance().getId();
+    int cnt = 0;
+    for (String fullname : ret) {
 
-      if (isLocal(s.getFullName())) {
-        ret[i] = s.getName();
+      if (fullname.endsWith(String.format("@%s", localId))){
+        services[cnt] = CodecUtils.getShortName(fullname);  
       } else {
-        ret[i] = s.getFullName();
-      }
-
-      // ret[i] = s.getFullName();
+        services[cnt] = fullname;
+      }      
     }
-    return ret;
+    return services;
   }
 
   // Is it a good idea to modify all regex inputs? For example, if the pattern
