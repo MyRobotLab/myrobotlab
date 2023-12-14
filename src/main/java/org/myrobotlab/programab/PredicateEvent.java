@@ -7,7 +7,7 @@ package org.myrobotlab.programab;
  */
 public class PredicateEvent {
   /**
-   * unique identifier for the session user & bot
+   * unique identifier for the session user and bot
    */
   public String id;
   /**

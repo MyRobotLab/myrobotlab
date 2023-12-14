@@ -164,7 +164,7 @@ public class Mail {
    * This will work with gmail but an "app password" will need to be set up on
    * the sending account.
    * 
-   * "Create & use App Passwords"
+   * "Create and use App Passwords"
    * https://support.google.com/mail/answer/185833?hl=en
    * 
    * @param host
