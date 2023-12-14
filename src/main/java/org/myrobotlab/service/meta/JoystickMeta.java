@@ -28,11 +28,6 @@ public class JoystickMeta extends MetaData {
       log.info("adding jinput native dependencies");
       addDependency("jinput-natives", "jinput-natives", "2.0.7", "zip");
     }
-    // addDependency("net.java.jinput", "jinput-platform", "2.0.7");
-    // addArtifact("net.java.jinput", "natives-windows");
-    // addArtifact("net.java.jinput", "natives-linux");
-    // addArtifact("")
-
   }
 
 }

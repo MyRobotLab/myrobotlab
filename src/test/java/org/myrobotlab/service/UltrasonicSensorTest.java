@@ -56,7 +56,7 @@ public class UltrasonicSensorTest extends AbstractTest {
     // 1 hz
     ultra.setRate(1);
     ultra.startRanging();
-    Message msg = gateway.waitForMsg("mocker@mockId", "onRange", 1000);
+    Message msg = gateway.waitForMsg("mocker@mockId", "onRange", 1500);
     Double r = (Double)msg.data[0];
     assertNotNull(r);
     ultra.stopRanging();

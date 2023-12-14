@@ -360,7 +360,11 @@ public class Adafruit16CServoDriver extends Service<Adafruit16CServoDriverConfig
     byte[] buffer = { (byte) (PCA9685_LED0_ON_L + (pin * 4)), (byte) (pulseWidthOn & 0xff), (byte) (pulseWidthOn >> 8), (byte) (pulseWidthOff & 0xff),
         (byte) (pulseWidthOff >> 8) };
     log.debug("Writing pin {}, pulesWidthOn {}, pulseWidthOff {}", pin, pulseWidthOn, pulseWidthOff);
-    controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
+    if (controller != null) {
+      controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
+    } else {
+      error("controller not set!");
+    }
   }
 
   /**

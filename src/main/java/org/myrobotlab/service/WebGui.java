@@ -1072,7 +1072,7 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
 
   public void stop() {
     if (nettosphere != null) {
-      log.warn("==== nettosphere STOPPING ====");
+      log.info("==== nettosphere STOPPING ====");
       // done so a thread "from" webgui can stop itself :P
       // Must not be called from a I/O-Thread to prevent deadlocks!
       new Thread() {
@@ -1081,7 +1081,7 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
           nettosphere.framework().removeAllAtmosphereHandler();
           nettosphere.stop();
           nettosphere = null;
-          log.warn("==== nettosphere STOPPED ====");
+          log.info("==== nettosphere STOPPED ====");
         }
       }.start();
     }
@@ -1177,15 +1177,16 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
 
     try {
 
-      // Platform.setVirtual(true);
-      
-      Runtime.startConfig("dev");
+      Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
       
       boolean done = true;
       if (done) {
         return;
       }
-
+      
+      // Platform.setVirtual(true);
+      // Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python", "-c", "dev" });
+      // Runtime.startConfig("dev");      
 
       // Runtime.start("python", "Python");
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
@@ -1196,6 +1197,8 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
       // webgui.setSsl(true);
       webgui.startService();
 
+
+      
       Runtime.start("python", "Python");
       // Runtime.start("intro", "Intro");
       // Runtime.start("i01", "InMoov2");

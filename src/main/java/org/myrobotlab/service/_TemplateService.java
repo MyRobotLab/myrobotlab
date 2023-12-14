@@ -17,24 +17,6 @@ public class _TemplateService extends Service<ServiceConfig> {
     super(n, id);
   }
 
-  /**
-   * The methods apply and getConfig can be used, if more complex configuration handling is needed.
-   * By default, the framework takes care of most of it, including subscription handling.
-   * <pre>
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    super.apply(c)
-    return c;
-  }
-
-  @Override
-  public ServiceConfig getConfig() {
-    super.getConfig()
-    return config;
-  }
-  </pre>
-  **/
-
   public static void main(String[] args) {
     try {
 
