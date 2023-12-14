@@ -2171,6 +2171,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       runtime.releaseService();
     } else {
       // put runtime in new registry
+      Runtime.getInstance();
       removedAllServices.put(runtime.getFullName(), registry.get(runtime.getFullName()));  
     }
   }
