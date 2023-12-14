@@ -63,7 +63,18 @@ public class RandomConfig extends ServiceConfig {
 
   }
 
+  /**
+   * enable or disables all random tasks
+   */
   public boolean enabled = true;
+  
+  /**
+   * map of random data for messaage creation
+   */
   public Map<String, RandomMessageConfig> randomMessages = new HashMap<>();
+  /**
+   * rate at which each random data enqueued is sampled and evaluated
+   */
+  public long rate = 100L;
 
 }
