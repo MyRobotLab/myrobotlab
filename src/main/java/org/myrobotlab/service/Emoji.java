@@ -245,10 +245,10 @@ public class Emoji extends Service<EmojiConfig> implements TextListener, StateCh
   public void handleStateChange(StateChange event) {
     log.info("handleEvent {}", event);
     EmojiData emoji = new EmojiData();
-    emoji.name = event.current;
+    emoji.name = event.state;
     emoji.unicode = ((EmojiConfig) config).map.get(emoji.name);
     invoke("publishEmoji", emoji);
-    display(event.current);
+    display(event.state);
   }
 
   public void publishEmoji(EmojiData emoji) {

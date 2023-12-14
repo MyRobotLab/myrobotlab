@@ -120,6 +120,12 @@ public class InMoov2Config extends ServiceConfig {
 
     public boolean loadAppsScripts = true;
 
+    public boolean systemEventsOnBoot = true;
+
+    public Integer stateRandomInterval = null;
+
+    public Integer stateIdleInterval = null;
+
     public InMoov2Config() {
     }
 
@@ -215,7 +221,7 @@ public class InMoov2Config extends ServiceConfig {
             }
         }
 
-        chatBot.currentUserName = "human";
+        chatBot.username = "human";
 
         // chatBot.textListeners = new String[] { name + ".htmlFilter" };
         if (chatBot.listeners == null) {
@@ -521,7 +527,6 @@ public class InMoov2Config extends ServiceConfig {
         listeners.add(new Listener("publishEvent", name + ".fsm"));
 
         // remove the auto-added starts in the plan's runtime RuntimConfig.registry
-        plan.removeStartsWith(name + ".");
 
         // rtConfig.add(name); // <-- adding i01 / not needed
 

@@ -127,8 +127,8 @@ public class ProgramABTest {
   }
 
   public void addCategoryTest() throws IOException {
-    testService.addCategory("BOOG", "HOWDY");
-    Response resp = testService.getResponse(username, "BOOG");
+    lloyd.addCategory("BOOG", "HOWDY");
+    Response resp = lloyd.getResponse(username, "BOOG");
     assertTrue(resp.msg.equals("HOWDY"));
   }
 
