@@ -1219,12 +1219,12 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     String localId = Platform.getLocalInstance().getId();
     int cnt = 0;
     for (String fullname : ret) {
-
       if (fullname.endsWith(String.format("@%s", localId))){
         services[cnt] = CodecUtils.getShortName(fullname);  
       } else {
         services[cnt] = fullname;
-      }      
+      } 
+      ++cnt;
     }
     return services;
   }
@@ -2164,15 +2164,14 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     // probably be just remove their references - do not
     // ask for them to be released remotely ..
     // in thread safe way
-    Map<String, ServiceInterface> removedAllServices = new TreeMap<>();
-    registry = removedAllServices;
 
     if (releaseRuntime && runtime != null) {
       runtime.releaseService();
     } else {
       // put runtime in new registry
       Runtime.getInstance();
-      removedAllServices.put(runtime.getFullName(), registry.get(runtime.getFullName()));  
+      registry = new TreeMap<>();
+      registry.put(runtime.getFullName(), registry.get(runtime.getFullName()));  
     }
   }
 
@@ -3394,6 +3393,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       runtime.stopService();
       runtime.stopInteractiveMode();
       runtime.getRepo().removeStatusPublishers();
+      registry = new TreeMap<>();
     }
     synchronized(INSTANCE_LOCK) {
       runtime = null;
