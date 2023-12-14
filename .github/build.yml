@@ -1,3 +1,5 @@
+# This file must be in the .github/workflows folder for git actions to work
+# but currently is disabled, since builds are being done by jenkins
 name: Java CI
 
 on:
@@ -82,3 +84,4 @@ jobs:
           tag_name: ${{ steps.version.outputs.version }}
           generate_release_notes: true
           body_path: ./release-template.md
+
