@@ -30,8 +30,6 @@ public class AbstractTest {
 
   static private boolean logWarnTestHeader = false;
 
-  private static boolean releaseRemainingServices = true;
-
   private static boolean releaseRemainingThreads = false;
 
   protected transient Queue<Object> queue = new LinkedBlockingQueue<>();
@@ -122,9 +120,7 @@ public class AbstractTest {
   public static void tearDownAbstractTest() throws Exception {
     log.info("tearDownAbstractTest");
 
-    if (releaseRemainingServices) {
-      releaseServices();
-    }
+    releaseServices();
 
     if (logWarnTestHeader) {
       log.warn("=========== finished test {} ===========", simpleName);

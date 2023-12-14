@@ -3387,11 +3387,11 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * re-entrant in junit tests
    */
   @Override
-  public void releaseService() {
-    super.releaseService();
+  public void releaseService() {            
     if (runtime != null) {
+      runtime.purgeTasks();
+      runtime.stopService();
       runtime.stopInteractiveMode();
-
       runtime.getRepo().removeStatusPublishers();
     }
     synchronized(INSTANCE_LOCK) {
