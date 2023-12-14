@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <!-- 
     # configure jvm and javac
@@ -14,7 +15,8 @@
     mvn -DskipTests package -o 
 
     # execute
-    mvn exec:java -Dexec.mainClass=org.myrobotlab.service.Runtime -Dexec.args="-s webgui WebGui intro Intro python Python"
+    mvn exec:java -Dexec.mainClass=org.myrobotlab.service.Runtime -Dexec.args="-s webgui WebGui intro
+  Intro python Python"
 
     # specific test
     mvn test -Dtest="org.myrobotlab.service.WebGuiTest#postTest"  
@@ -43,25 +45,36 @@
     -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
 
     # single dep
-    mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=org.myrobotlab:worke:0.0.2:jar:sources -Ddest=.
-    mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=org.myrobotlab:worke:0.0.2:zip -Ddest=.
+    mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get
+  -Dartifact=org.myrobotlab:worke:0.0.2:jar:sources -Ddest=.
+    mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get
+  -Dartifact=org.myrobotlab:worke:0.0.2:zip -Ddest=.
 
     # doclets
-    javadoc -classpath target/myrobotlab.jar:libraries/jar/* -docletpath target/myrobotlab.jar -doclet org.myrobotlab.doclet.ScannerDoclet  src/main/java/org/myrobotlab/service/Clock.java minus-show-comments/show-elements
+    javadoc -classpath target/myrobotlab.jar:libraries/jar/* -docletpath target/myrobotlab.jar -doclet
+  org.myrobotlab.doclet.ScannerDoclet  src/main/java/org/myrobotlab/service/Clock.java
+  minus-show-comments/show-elements
     # specific test
     mvn -Dtest=org.myrobotlab.opencv.OpenCVFilterFaceDetectTest test
 
     # doclets
-    javadoc -classpath target/myrobotlab.jar:libraries/jar/* -docletpath target/myrobotlab.jar -doclet org.myrobotlab.doclet.ScannerDoclet  src/main/java/org/myrobotlab/service/Clock.java minus-show-comments/show-elements
+    javadoc -classpath target/myrobotlab.jar:libraries/jar/* -docletpath target/myrobotlab.jar -doclet
+  org.myrobotlab.doclet.ScannerDoclet  src/main/java/org/myrobotlab/service/Clock.java
+  minus-show-comments/show-elements
   
     # how to mount sshfs from a raspi and maintain a single build
     usermod -a -G i2c xxxxx
     usermod -a -G gpio xxxxx
     sshfs xxxxx@yyyyy.myrobotlab.org:/home/xxxxx /home/xxxxx/sshfs/blade2
-    java -classpath target/classes:libraries/jar/* org.myrobotlab.service.Runtime &#45;&#45;from-launcher -s webgui WebGui python Python
+    java -classpath target/classes:libraries/jar/* org.myrobotlab.service.Runtime
+  &#45;&#45;from-launcher -s webgui WebGui python Python
 
     # jpackage
-    jpackage &#45;&#45;verbose &#45;&#45;name myrobotlab &#45;&#45;input target &#45;&#45;main-jar myrobotlab.jar &#45;&#45;main-class org.myrobotlab.service.Runtime &#45;&#45;java-options '-Xmx512m -Xms512m -Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8' &#45;&#45;arguments "&#45;&#45;from-launcher &#45;&#45;id historical-gates &#45;&#45;log-level info -s webgui WebGui intro Intro python Python" &#45;&#45;type app-image
+    jpackage &#45;&#45;verbose &#45;&#45;name myrobotlab &#45;&#45;input target &#45;&#45;main-jar
+  myrobotlab.jar &#45;&#45;main-class org.myrobotlab.service.Runtime &#45;&#45;java-options
+  '-Xmx512m -Xms512m -Djava.library.path=libraries/native -Djna.library.path=libraries/native
+  -Dfile.encoding=UTF-8' &#45;&#45;arguments "&#45;&#45;from-launcher &#45;&#45;id historical-gates
+  &#45;&#45;log-level info -s webgui WebGui intro Intro python Python" &#45;&#45;type app-image
   
    -->
   <modelVersion>4.0.0</modelVersion>
