@@ -331,7 +331,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <groupId>org.apache.maven.plugins</groupId>
         <!-- do not upgrade this version jacoco will break -->
-        <version>2.18</version>
+        <version>3.2.2</version>
         <configuration>
           <!-- critical for jacoco to have original argLine prefixed here-->
           <argLine>${argLine} -Djava.library.path=libraries/native -Djna.library.path=libraries/native</argLine>
@@ -340,11 +340,11 @@
           </includes>
           <excludes>
             <exclude>**/integration/*</exclude>
-            <!-- unfortunately not testing OpenCV is required for ci to work -->
-            <exclude>**/OpenCV*</exclude>
+            <!-- unfortunately not testing OpenCV is required for git actions ci to work -->
           </excludes>
-             <systemPropertyVariables>
-              </systemPropertyVariables>
+          <!-- required so surefire doesnt die talking to the agent over stdin -->
+          <forkNode
+            implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory" />
         </configuration>
         <executions>
           <execution>
@@ -425,7 +425,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>2.18</version>
+        <version>3.2.2</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
