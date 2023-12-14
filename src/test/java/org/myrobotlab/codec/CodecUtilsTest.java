@@ -2,6 +2,7 @@ package org.myrobotlab.codec;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -19,10 +20,6 @@ import org.myrobotlab.test.AbstractTest;
 
 public class CodecUtilsTest extends AbstractTest {
 
-  @Ignore /*
-           * need to ignore it for the moment - should not compare exact json -
-           * not effective
-           */
   @Test
   public void testLocale() {
     Locale mrlLocale;
@@ -32,38 +29,58 @@ public class CodecUtilsTest extends AbstractTest {
     String json = null;
 
     java.util.Locale check = new java.util.Locale("zh-cmn-Hans-CN");
-
+    Locale locale = null;
     code = "-";
     mrlLocale = new Locale(code);
     json = CodecUtils.toJson(mrlLocale);
-    assertEquals("{\"language\":null,\"displayLanguage\":null,\"country\":null,\"displayCountry\":null,\"tag\":null,\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+    locale = (Locale)CodecUtils.fromJson(json, Locale.class);
+    assertNull(locale.getLanguage());
+    assertNull(locale.getCountry());
+    assertNull(locale.getTag());
+    assertNull(locale.getDisplayLanguage());
 
     mrlLocale = new Locale("en");
     json = CodecUtils.toJson(mrlLocale);
-    Locale locale = CodecUtils.fromJson(json, Locale.class);
+    locale = CodecUtils.fromJson(json, Locale.class);
     assertEquals("en", locale.getLanguage());
 
     code = " - ";
     mrlLocale = new Locale(code);
     json = CodecUtils.toJson(mrlLocale);
-    assertEquals("{\"language\":null,\"displayLanguage\":null,\"country\":null,\"displayCountry\":null,\"tag\":null,\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+    locale = CodecUtils.fromJson(json, Locale.class);
+    assertNull(locale.getLanguage());
+    assertNull(locale.getCountry());
+    assertNull(locale.getTag());
+    assertNull(locale.getDisplayLanguage());
+
 
     code = "  ";
     mrlLocale = new Locale(code);
     json = CodecUtils.toJson(mrlLocale);
-    assertEquals("{\"language\":null,\"displayLanguage\":null,\"country\":null,\"displayCountry\":null,\"tag\":null,\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+    locale = CodecUtils.fromJson(json, Locale.class);
+    assertNull(locale.getLanguage());
+    assertNull(locale.getCountry());
+    assertNull(locale.getTag());
+    assertNull(locale.getDisplayLanguage());
 
     code = "";
     mrlLocale = new Locale(code);
     json = CodecUtils.toJson(mrlLocale);
-    assertEquals("{\"language\":null,\"displayLanguage\":null,\"country\":null,\"displayCountry\":null,\"tag\":null,\"class\":\"org.myrobotlab.service.data.Locale\"}", json);
+    locale = CodecUtils.fromJson(json, Locale.class);
+    assertNull(locale.getLanguage());
+    assertNull(locale.getCountry());
+    assertNull(locale.getTag());
+    assertNull(locale.getDisplayLanguage());
 
-    code = "-uS";
+    code = "en-US";
     mrlLocale = new Locale(code);
-    json = CodecUtils.toJson(mrlLocale);
-    assertEquals(
-        "{\"language\":\"\",\"displayLanguage\":\"\",\"country\":\"US\",\"displayCountry\":\"United States\",\"tag\":\"-US\",\"class\":\"org.myrobotlab.service.data.Locale\"}",
-        json);
+    json = CodecUtils.toJson(mrlLocale, Locale.class);
+    locale = CodecUtils.fromJson(json, Locale.class);
+    assertEquals("en", locale.getLanguage());
+    assertEquals("US", locale.getCountry());
+    assertEquals("United States", locale.getDisplayCountry());
+    assertEquals("en-US", locale.getTag());
+    assertEquals  ("English", locale.getDisplayLanguage());
 
   }
   
