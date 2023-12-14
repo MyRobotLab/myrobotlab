@@ -80,7 +80,7 @@ public class CodecUtilsTest extends AbstractTest {
     assertEquals("US", locale.getCountry());
     assertEquals("United States", locale.getDisplayCountry());
     assertEquals("en-US", locale.getTag());
-    assertEquals("English", locale.getDisplayLanguage());
+    assertEquals  ("English", locale.getDisplayLanguage());
 
   }
   
