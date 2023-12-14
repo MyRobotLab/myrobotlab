@@ -27,7 +27,7 @@ public class KeyboardSim extends Service<ServiceConfig> {
       if (!GraphicsEnvironment.isHeadless()) {
         robot = new Robot();
       } else {
-        log.warn("headless environment - but KeyboardSim requires a display");
+        log.info("headless environment - but KeyboardSim requires a display");
       }
     } catch (Exception e) {
       log.error("could not create java.awt.Robot", e);

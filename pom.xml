@@ -211,12 +211,6 @@
     </dependency>
     <!-- CsvConnector end -->
 
-    <dependency>
-      <groupId>org.nanohttpd</groupId> <!-- <groupId>com.nanohttpd</groupId> for 2.1.0 and earlier -->
-      <artifactId>nanohttpd</artifactId>
-      <version>2.2.0</version>
-    </dependency>
-
     <!-- Deeplearning4j begin -->
     <dependency>
       <groupId>org.bytedeco</groupId>
@@ -1700,18 +1694,6 @@
     <!-- Duplicate entry for javax.websocket-javax.websocket-api-1.1 skipping -->
     <!-- WebSocketConnector end -->
 
-    <dependency>
-      <groupId>au.edu.federation.caliko</groupId>
-      <artifactId>caliko</artifactId>
-      <version>1.3.8</version>
-    </dependency>
-
-    <dependency>
-      <groupId>au.edu.federation.caliko.visualisation</groupId>
-      <artifactId>caliko-visualisation</artifactId>
-      <version>1.3.8</version>
-    </dependency>
-
     <!-- Webcam begin -->
     <dependency>
       <groupId>com.github.sarxos</groupId>
@@ -1769,14 +1751,6 @@
     </dependency>
     <!-- WolframAlpha end -->
 
-    <!-- https://mvnrepository.com/artifact/org.openjdk.nashorn/nashorn-core -->
-    <dependency>
-      <groupId>org.openjdk.nashorn</groupId>
-      <artifactId>nashorn-core</artifactId>
-      <version>15.4</version>
-    </dependency>
-
-
     <!-- WorkE begin -->
     <!-- skipping org.myrobotlab worke org.myrobotlab-worke-null null version/latest -->
     <!-- WorkE end -->
@@ -1808,23 +1782,12 @@
     </dependency>
     <!-- Xmpp end -->
 
-    <dependency>
-      <groupId>dev.onvoid.webrtc</groupId>
-      <artifactId>webrtc-java</artifactId>
-      <version>0.7.0</version>
-    </dependency>
-
 
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <version>3.12.4</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>au.edu.federation.caliko.demo</groupId>
-      <artifactId>caliko-demo</artifactId>
-      <version>1.3.8</version>
     </dependency>
   </dependencies>
 
@@ -2051,7 +2014,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <groupId>org.apache.maven.plugins</groupId>
         <!-- do not upgrade this version jacoco will break -->
-        <version>2.18</version>
+        <version>3.2.2</version>
         <configuration>
           <!-- critical for jacoco to have original argLine prefixed here-->
           <argLine>${argLine} -Djava.library.path=libraries/native
@@ -2062,10 +2025,10 @@
           <excludes>
             <exclude>**/integration/*</exclude>
             <!-- unfortunately not testing OpenCV is required for ci to work -->
-            <exclude>**/OpenCV*</exclude>
           </excludes>
-          <systemPropertyVariables>
-          </systemPropertyVariables>
+          <!-- required so surefire doesnt die talking to the agent over stdin -->
+          <forkNode
+            implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory" />
         </configuration>
         <executions>
           <execution>
@@ -2147,7 +2110,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>2.18</version>
+        <version>3.2.2</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

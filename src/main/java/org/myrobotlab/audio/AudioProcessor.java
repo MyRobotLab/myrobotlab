@@ -23,7 +23,6 @@ import org.myrobotlab.service.config.AudioFileConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
-// FIXME - make runnable
 public class AudioProcessor extends Thread {
 
   static transient Logger log = LoggerFactory.getLogger(AudioProcessor.class);

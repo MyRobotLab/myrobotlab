@@ -570,7 +570,6 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
    * 
    * @param scriptName
    * @param code
-   * @return
    */
   public void updateScript(String scriptName, String code) {
     if (openedScripts.containsKey(scriptName)) {

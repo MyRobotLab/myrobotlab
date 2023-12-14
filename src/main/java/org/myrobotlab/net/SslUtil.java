@@ -19,18 +19,14 @@ public class SslUtil {
    * Returns a SSLSocketFactory if provided with a x509 cert, and key file. The
    * caCrtFile is the certificate authority root and inpassword is the protected
    * password of the cert "if suppied". If unprotected leave null or empty "".
+   * @param sslCaFilePath - ca root
+   * @param sslCertFilePath - certificate file (pem)
+   * @param sslKeyFilePath - private key
+   * @param sslPassword - password if key/cert are protected by a password
    * 
-   * @param caCrtFile
-   *          - ca root
-   * @param crtFile
-   *          - certificate file (pem)
-   * @param keyFile
-   *          - private key
-   * @param inpassword
-   *          - password if key/cert are protected by a password
    * @return the ssl socket factory
    * @throws Exception
-   *           boom
+   * 
    */
 
   public static SSLSocketFactory getSocketFactory(String sslCaFilePath, String sslCertFilePath, String sslKeyFilePath, String sslPassword) throws Exception {

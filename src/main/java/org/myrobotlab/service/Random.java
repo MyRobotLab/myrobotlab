@@ -228,7 +228,7 @@ public class Random extends Service<RandomConfig> {
           // minimal interval time for processor to check
           // and see if any random event needs processing
 
-          sleep(200);
+          sleep(config.rate);
           for (String key : randomData.keySet()) {
 
             long now = System.currentTimeMillis();

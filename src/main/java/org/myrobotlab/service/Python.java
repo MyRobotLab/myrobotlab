@@ -334,7 +334,7 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
   /**
    * append more Python to the current script
    * 
-   * @param data
+   * @param code
    *          the code to append
    * @return the resulting concatenation
    */
@@ -759,7 +759,6 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
    * upserts a script in memory
    * @param file
    * @param code
-   * @return
    */
   public void updateScript(String file, String code) {
       if (openedScripts.containsKey(file)) {

@@ -1473,7 +1473,6 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
 
     // broadcast change
     invoke("getPeerConfig", peerKey);
-    Runtime.getPlan().put(peerName, sc);
     Runtime runtime = Runtime.getInstance();
     runtime.broadcastState();
   }
@@ -1724,8 +1723,6 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   @Override
   public boolean save() {
     Runtime runtime = Runtime.getInstance();
-    // save all services ... weird notation - should have explicit
-    // saveAllServices
     return runtime.saveService(runtime.getConfigName(), getName(), null);
   }
 
@@ -1994,30 +1991,10 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
       error("startPeer could not find peerKey of %s in %s", peerKey, getName());
       return null;
     }
-
-    ServiceInterface si = Runtime.getService(peer.name);
-    if (si != null) {
-      // so this peer is already started, but are we responsible for
-      // all subpeers ?
-      return si;
-    }
-
-    // request to modify the plan's runtime to start all service that match
-    // actualName.*
-    Plan plan = Runtime.getPlan();
-    ServiceConfig sc = plan.get(peer.name);
-
-    if (sc == null) {
-      log.info("no current plan for peer {} - since this is a peer request we can make a plan", peer.name);
-      // error("plan.get(%s) == null", actualName);
-      Runtime.load(peer.name, peer.type);
-      sc = plan.get(peer.name);
-    }
-
+  
     // start peer requested
-    Runtime.start(peer.name, sc.type);
     broadcastState();
-    return Runtime.getService(peer.name);
+    return Runtime.start(peer.name);
   }
 
   /**
@@ -2032,8 +2009,13 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   synchronized public void releasePeer(String peerKey) {
 
     if (getConfig() != null && getConfig().getPeer(peerKey) != null) {
-      Peer peer = getConfig().getPeer(peerKey);
-      ServiceConfig sc = Runtime.getPlan().get(peer.name);
+      ServiceConfig sc = null;
+      String peerName = getPeerName(peerKey);
+      ServiceInterface si = Runtime.getService(peerName);
+      if (si != null) {
+        sc = si.getConfig();
+      }
+        
       // peer recursive
       if (sc != null && sc.getPeers() != null) {
         for (String subPeerKey : sc.getPeers().keySet()) {
@@ -2043,9 +2025,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
           }
         }
       }
-      Plan plan = Runtime.getPlan();
-      plan.removeRegistry(peer.name);
-      Runtime.release(peer.name);
+      Runtime.release(peerName);
       broadcastState();
     } else {
       error("%s.releasePeer(%s) does not exist", getName(), peerKey);
@@ -2827,7 +2807,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   }
 
   final public Plan getDefault() {
-    return ServiceConfig.getDefault(Runtime.getPlan(), getName(), this.getClass().getSimpleName());
+    return ServiceConfig.getDefault(new Plan("runtime"), getName(), this.getClass().getSimpleName());
   }
 
   @Override
@@ -2848,9 +2828,6 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
       return;
     }
 
-    // updating plan - FIXME remove plan
-    Runtime.getPlan().put(getName(), sc);
-
     // applying config to self
     apply((T) sc);
   }
@@ -2868,8 +2845,6 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    */
   public <P extends ServiceConfig> void applyPeerConfig(String peerKey, P config, StaticType<Service<P>> configServiceType) {
     String peerName = getPeerName(peerKey);
-
-    Runtime.getPlan().put(peerName, config);
 
     // meh - templating is not very helpful here
     ConfigurableService<P> si = Runtime.getService(peerName, configServiceType);
@@ -2891,7 +2866,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     String oldName = peer.name;
     peer.name = fullName;
     // update plan ?
-    ServiceConfig.getDefault(Runtime.getPlan(), peer.name, peer.type);
+    ServiceConfig.getDefault(new Plan("runtime"), peer.name, peer.type);
     // FIXME - determine if only updating the Plan in memory is enough,
     // should we also make or update a config file - if the config path is set?
     info("updated %s name to %s", oldName, peer.name);
@@ -2915,26 +2890,10 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    */
   public void updatePeerType(String key, String peerType) {
 
-    // MAKE NOTE ! - CONFIG IS DIFFERENT THAN PLAN !!!! MODIFY BOTH ???!?
-
-    // get current plan
-    Plan plan = Runtime.getPlan();
-
-    // get self
-    ServiceConfig sc = plan.get(getName());
-    if (sc != null) {
-      sc.putPeerType(key, String.format("%s.%s", getName(), key), peerType);
-    }
-
     Peer peer = getConfig().getPeer(key);
     peer.type = peerType;
 
-    // not Needed
-    // config.putPeerType(key, String.format("%s.%s", key, getName()),
-    // peerType);
-    plan.remove(peer.name);
-    // FIXME - rename putDefault
-    ServiceConfig.getDefault(Runtime.getPlan(), peer.name, peerType);
+    ServiceConfig.getDefault(new Plan("runtime"), peer.name, peerType);
     Runtime runtime = Runtime.getInstance();
     String configName = runtime.getConfigName();
     // Seems a bit invasive - but yml file overrides everything

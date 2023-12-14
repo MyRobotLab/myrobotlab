@@ -927,7 +927,6 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
    * @param green
    * @param blue
    * @param white
-   * @param delayMs
    */
   public void setPixel(String matrixName, Integer pixelSetIndex, int address, int red, int green, int blue, int white) {
     // get and update memory cache

@@ -312,9 +312,8 @@ public class Pir extends Service<PirConfig> implements PinListener {
    * "selecting" the controller's name, returns the possible list of pins to
    * attach.
    * 
+   * @param pinArrayControl
    * @return
-   * @throws InterruptedException
-   * @throws TimeoutException
    */
   @SuppressWarnings("unchecked")
   public List<PinDefinition> getPinList(String pinArrayControl) {

@@ -359,9 +359,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
    * Typically double quotes should be filtered out of the command as creating
    * the text to speech process command can be broken by double quotes
    * 
-   * @param filter
-   *          chars to filter.
-   * 
+   * @param target
+   * @param replace
    */
   public void addFilter(String target, String replace) {
     LocalSpeechConfig c = (LocalSpeechConfig) config;

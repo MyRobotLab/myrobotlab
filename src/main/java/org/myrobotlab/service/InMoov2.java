@@ -216,6 +216,14 @@ public class InMoov2 extends Service<InMoov2Config>
         setLocale(getSupportedLocale(Runtime.getInstance().getLocale().toString()));
       }
 
+      if (c.loadGestures) {
+        loadAppsScripts();
+
+        loadInitScripts();
+
+        loadGestures();
+      }
+
       if (c.heartbeat) {
         startHeartbeat();
       } else {
@@ -1849,6 +1857,7 @@ public class InMoov2 extends Service<InMoov2Config>
    * &lt;/oob&gt;
    * 
    * </pre>
+   * 
    * @param msg
    * @return
    */
@@ -2733,7 +2742,8 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   // predicate change ? rebroadcasted ?
-  // FIXME if it went chatBot.publishSession -> InMoov2.onSession (if getState() != boot) InMoov2.publishSession
+  // FIXME if it went chatBot.publishSession -> InMoov2.onSession (if getState()
+  // != boot) InMoov2.publishSession
   public Event publishSession(Event newSession) {
     newSession.src = getName();
     return newSession;

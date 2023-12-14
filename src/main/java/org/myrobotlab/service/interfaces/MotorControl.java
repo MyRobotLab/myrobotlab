@@ -28,7 +28,6 @@ package org.myrobotlab.service.interfaces;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.sensor.EncoderPublisher;
-import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.slf4j.Logger;
 
 public interface MotorControl extends RelativePositionControl, AnalogListener, Attachable {
@@ -67,7 +66,6 @@ public interface MotorControl extends RelativePositionControl, AnalogListener, A
    * the need of typed references 
    * 
    * @param controller
-   * @throws Exception
    */
   default void detachMotorController(MotorController controller){
     if (controller == null) {
@@ -81,7 +79,6 @@ public interface MotorControl extends RelativePositionControl, AnalogListener, A
   /**
    * Implementation of detachMotorController
    * @param controller
-   * @throws Exception
    */
   void detachMotorController(String controller);
 

@@ -3,11 +3,6 @@ package org.myrobotlab.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,8 +17,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.programab.BotInfo;
@@ -38,7 +31,7 @@ public class ProgramABTest {
   public final static Logger log = LoggerFactory.getLogger(ProgramABTest.class);
 
   static protected final String PIKACHU = "pikachu";
-  
+
   static protected final String LLOYD = "lloyd";
 
   private String testResources = "src/test/resources/ProgramAB";
@@ -88,7 +81,7 @@ public class ProgramABTest {
     List<File> bots = lloyd.scanForBots(testResources + "/bots");
     assertTrue("2+ test bots", bots.size() >= 2);
     assertTrue("6+ bots total", lloyd.getBots().size() >= 6);
-        
+
     pikachu.scanForBots(testResources + "/bots");
 
     // validate newly created programab can by default start a session
@@ -115,13 +108,13 @@ public class ProgramABTest {
       }
     }
   }
-  
+
   @Test
   public void testOnUtterance() throws Exception {
-    
-    MockGateway  gateway = (MockGateway)Runtime.start("gateway", "MockGateway");
+
+    MockGateway gateway = (MockGateway) Runtime.start("gateway", "MockGateway");
     lloyd.addListener("publishUtterance", "mocker@mockId");
-   
+
     Utterance utterance = new Utterance();
     utterance.username = "human";
     utterance.text = "HELLO";
@@ -130,7 +123,13 @@ public class ProgramABTest {
     gateway.sendWithDelay("lloyd", "onUtterance", utterance);
     Message msg = gateway.waitForMsg("mocker", "onUtterance", 50);
     assertNotNull(msg);
-    assertEquals("Passed",((Utterance)msg.data[0]).text);
+    assertEquals("Passed", ((Utterance) msg.data[0]).text);
+  }
+
+  public void addCategoryTest() throws IOException {
+    testService.addCategory("BOOG", "HOWDY");
+    Response resp = testService.getResponse(username, "BOOG");
+    assertTrue(resp.msg.equals("HOWDY"));
   }
 
   // This method runs after each test method
@@ -143,7 +142,7 @@ public class ProgramABTest {
   public void testAddCategoryTest() throws IOException {
     lloyd.addCategory("ABCDEF", "ABCDEF");
     // String username = lloyd.getUsername();
-    // username, 
+    // username,
     Response resp = lloyd.getResponse("ABCDEF");
     assertTrue(resp.msg.equals("ABCDEF"));
   }
@@ -379,6 +378,8 @@ public class ProgramABTest {
     lloyd.setBotType("pikachu");
     Map<String, Locale> locales = lloyd.getLocales();
     assertTrue(locales.containsKey("ja"));
+    // release the service we created in this method.
+    pikachu.releaseService();
   }
 
   @Test
@@ -396,13 +397,13 @@ public class ProgramABTest {
 
     response = lloyd.getResponse("RELOAD");
     assertTrue(response.msg.contains("I have reloaded"));
-    
+
     response = lloyd.getResponse("what is my name?");
     assertTrue(response.msg.contains("george"));
-    
+
     // clean out file
     new File(newFile).delete();
-    
+
   }
 
   @Test
@@ -411,7 +412,6 @@ public class ProgramABTest {
     ProgramAB lloyd = (ProgramAB) Runtime.start("lloyd", "ProgramAB");
     lloyd.setBotType("lloyd");
     assertTrue(lloyd.getBots().size() > 0);
-
     // test for a response
     Response response = lloyd.getResponse("Hello");
     assertTrue(!response.msg.startsWith("I have no"));
@@ -419,8 +419,10 @@ public class ProgramABTest {
     // not sure if this is worth testing - there might be more
     // assertEquals("Alice", alice.getCurrentBotName());
     // assertEquals("default", alice.getCurrentUserName());
+    lloyd.releaseService();
 
   }
+
   // TODO - tests
   // ProgramAB starts - it should find its own bot info's
   // set username = default
