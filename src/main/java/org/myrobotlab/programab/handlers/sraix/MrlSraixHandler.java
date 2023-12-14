@@ -36,11 +36,15 @@ public class MrlSraixHandler implements SraixHandler {
         return ret;
       } else if (sraix.search != null) {
         log.info("search now");
+        SearchPublisher search = (SearchPublisher)programab.startPeer("search");
         // if my default "search" peer key has a name .. use it ?
-        SearchPublisher search = (SearchPublisher)programab.getPeer("search");
-        SearchResults results = search.search(sraix.search);
+        if (search != null) {
+          SearchResults results = search.search(sraix.search);
         // return results.getTextAndImages();
-        return results.getHtml();
+          return results.getHtml();
+        } else {
+          log.warn("no default search configured");
+        }
       }
     } catch (Exception e) {
       programab.error(e);

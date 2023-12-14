@@ -247,8 +247,8 @@ public class ProgramABTest {
     Response respB = lloyd.getResponse("What is my name?");
     System.out.println(respB);
     lloyd.setSession(username, LLOYD);
-    assertEquals("Kevin", respA.msg);
-    assertEquals("Grog", respB.msg);
+    assertEquals("Kevin.", respA.msg);
+    assertEquals("Grog.", respB.msg);
   }
 
   @Test
