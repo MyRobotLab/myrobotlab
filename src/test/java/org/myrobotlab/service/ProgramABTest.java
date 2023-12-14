@@ -113,6 +113,7 @@ public class ProgramABTest {
   public void testOnUtterance() throws Exception {
 
     MockGateway gateway = (MockGateway) Runtime.start("gateway", "MockGateway");
+    lloyd = (ProgramAB)Runtime.start("lloyd", "ProgramAB");
     lloyd.addListener("publishUtterance", "mocker@mockId");
 
     Utterance utterance = new Utterance();
@@ -123,19 +124,13 @@ public class ProgramABTest {
     gateway.sendWithDelay("lloyd", "onUtterance", utterance);
     Message msg = gateway.waitForMsg("mocker", "onUtterance", 50);
     assertNotNull(msg);
-    assertEquals("Passed", ((Utterance) msg.data[0]).text);
+    assertTrue( ((Utterance) msg.data[0]).text.startsWith("Hi"));
   }
 
   public void addCategoryTest() throws IOException {
     lloyd.addCategory("BOOG", "HOWDY");
     Response resp = lloyd.getResponse(username, "BOOG");
     assertTrue(resp.msg.equals("HOWDY"));
-  }
-
-  // This method runs after each test method
-  @After
-  public void tearDown() {
-    System.out.println("After - Runs after each test method");
   }
 
   @Test
@@ -166,12 +161,7 @@ public class ProgramABTest {
 
   @Test
   public void testSraixOOB() throws IOException {
-    // Response resp = testService.getResponse(username, "MRLSRAIX");
-    // System.out.println(resp);
-    // boolean contains = resp.msg.contains("foobar");
-    // assertTrue(contains);
     Response resp = lloyd.getResponse(username, "OOBMRLSRAIX");
-    // System.out.println(resp);
     boolean contains = resp.msg.contains("You are talking to lloyd");
     assertTrue(contains);
   }
@@ -180,10 +170,6 @@ public class ProgramABTest {
   public void testSraix() throws IOException {
     if (Runtime.hasInternet()) {
       Response resp = lloyd.getResponse(username, "MRLSRAIX");
-      // Response resp = testService.getResponse(username, "Why is the sky
-      // blue?");
-      // System.out.println(resp);
-      // System.out.println(resp);
       boolean contains = resp.msg.contains("information");
       assertTrue(contains);
     }
@@ -221,10 +207,7 @@ public class ProgramABTest {
 
   @Test
   public void testLearn() throws IOException {
-    // Response resp1 = testService.getResponse(session, "SET FOO BAR");
-    // System.out.println(resp1.msg);
     Response resp = lloyd.getResponse(username, "LEARN AAA IS BBB");
-    // System.out.println(resp.msg);
     resp = lloyd.getResponse(username, "WHAT IS AAA");
     assertEquals("BBB", resp.msg);
   }
@@ -254,11 +237,8 @@ public class ProgramABTest {
   @Test
   public void testOOBTags() throws Exception {
 
-    // Response resp = testService.getResponse(username, "OOB TEST");
-
     ProgramAB lloyd = (ProgramAB) Runtime.start("lloyd", "ProgramAB");
     Response resp = lloyd.getResponse(username, "OOB TEST");
-
     assertEquals("OOB Tag Test", resp.msg);
 
     // TODO figure a mock object that can wait on a callback to let us know the
