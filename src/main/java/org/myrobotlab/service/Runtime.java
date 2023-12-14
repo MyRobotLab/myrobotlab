@@ -2167,7 +2167,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     Map<String, ServiceInterface> removedAllServices = new TreeMap<>();
     registry = removedAllServices;
 
-    if (releaseRuntime) {
+    if (releaseRuntime && runtime != null) {
       runtime.releaseService();
     } else {
       // put runtime in new registry
