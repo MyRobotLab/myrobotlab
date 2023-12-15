@@ -57,14 +57,14 @@ angular.module("mrlapp.service.ProgramABGui", []).controller("ProgramABGuiCtrl",
       // use another scope var to transfer/merge selection
       // from user - service.currentSession is always read-only
       // all service data should never be written to, only read from
-      $scope.currentUserName = service.config.username
+      $scope.currentUserName = service.config.currentUserName
       $scope.service = service
       $scope.currentSessionKey = $scope.getCurrentSessionKey()
 
       /*
         for (let bot in $scope.service.sessions){
-            for (let username in $scope.service.sessions[bot]){
-                console.info(username)
+            for (let currentUserName in $scope.service.sessions[bot]){
+                console.info(currentUserName)
             }
         }
         */
@@ -124,7 +124,7 @@ angular.module("mrlapp.service.ProgramABGui", []).controller("ProgramABGuiCtrl",
           var textData = data
           $scope.chatLog.unshift({
             type: "Bot",
-            name: $scope.service.config.botType,
+            name: $scope.service.config.currentBotName,
             text: $sce.trustAsHtml(data.msg),
           })
           $scope.lastResponse = textData
@@ -169,22 +169,22 @@ angular.module("mrlapp.service.ProgramABGui", []).controller("ProgramABGuiCtrl",
     $scope.getAimlFile = function (filename) {
       $scope.aimlFile = filename
       console.log("getting aiml file " + filename)
-      msg.send("getAimlFile", $scope.service.config.botType, filename)
+      msg.send("getAimlFile", $scope.service.config.currentBotName, filename)
       $scope.tabs.selected = 2
     }
 
     $scope.saveAimlFile = function () {
-      msg.send("saveAimlFile", $scope.service.config.botType, $scope.aimlFile, $scope.aimlFileData.data)
+      msg.send("saveAimlFile", $scope.service.config.currentBotName, $scope.aimlFile, $scope.aimlFileData.data)
     }
 
     $scope.setSessionKey = function () {
-      msg.send("setCurrentUserName", $scope.service.config.username)
-      msg.send("setCurrentBotName", $scope.service.config.botType)
+      msg.send("setCurrentUserName", $scope.service.config.currentUserName)
+      msg.send("setCurrentBotName", $scope.service.config.currentBotName)
     }
 
     $scope.getBotInfo = function () {
       if ($scope.service && $scope.service.bots) {
-        return $scope.service.bots[$scope.service.config.botType]
+        return $scope.service.bots[$scope.service.config.currentBotName]
       }
       return null
     }
@@ -200,7 +200,7 @@ angular.module("mrlapp.service.ProgramABGui", []).controller("ProgramABGuiCtrl",
     }
 
     $scope.getCurrentSessionKey = function () {
-      return $scope.service.config.username + " <-> " + $scope.service.config.botType
+      return $scope.service.config.currentUserName + " <-> " + $scope.service.config.currentBotName
     }
 
     $scope.test = function (session, utterance) {
@@ -208,13 +208,13 @@ angular.module("mrlapp.service.ProgramABGui", []).controller("ProgramABGuiCtrl",
     }
 
     $scope.getSessionResponse = function (utterance) {
-      console.info("SESSION GET RESPONSE (" + $scope.currentUserName + " " + $scope.service.config.botType + ")")
-      $scope.getResponse($scope.currentUserName, $scope.service.config.botType, utterance)
+      console.info("SESSION GET RESPONSE (" + $scope.currentUserName + " " + $scope.service.config.currentBotName + ")")
+      $scope.getResponse($scope.currentUserName, $scope.service.config.currentBotName, utterance)
     }
 
-    $scope.getResponse = function (username, botname, utterance) {
-      console.info("USER BOT RESPONSE (" + username + " " + botname + ")")
-      msg.send("getResponse", username, botname, utterance)
+    $scope.getResponse = function (currentUserName, botname, utterance) {
+      console.info("USER BOT RESPONSE (" + currentUserName + " " + botname + ")")
+      msg.send("getResponse", currentUserName, botname, utterance)
       $scope.utterance = ""
     }
 
@@ -230,11 +230,11 @@ angular.module("mrlapp.service.ProgramABGui", []).controller("ProgramABGuiCtrl",
       })
     }
 
-    $scope.startSession = function (username, botname) {
-      $scope.currentUserName = username
+    $scope.startSession = function (currentUserName, botname) {
+      $scope.currentUserName = currentUserName
       $scope.chatLog.unshift("Reload Session for Bot " + botname)
       $scope.startSessionLabel = "Reload Session"
-      msg.send("startSession", username, botname)
+      msg.send("startSession", currentUserName, botname)
       startDialog.dismiss()
     }
 
@@ -280,7 +280,7 @@ angular.module("mrlapp.service.ProgramABGui", []).controller("ProgramABGuiCtrl",
 
     $scope.getBotPath = function (e) {
       if ($scope.service?.bots && $scope.service?.bots[$scope.service?.config?.currentBotName]?.path) {
-        return $scope.service?.bots[$scope.service?.config.botType].path
+        return $scope.service?.bots[$scope.service?.config.currentBotName].path
       }
       return null
     }

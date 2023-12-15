@@ -38,11 +38,11 @@ public class ProgramABTest2 {
 
     // by default there should be a valid user and bot type
     String user = programab.getUsername();
-    String botType = programab.getBotType();
+    String currentBotName = programab.getBotType();
 
     assertEquals("human is the first default user", "human", user);
     // if valid directories there should be "some" default bot
-    assertNotNull(botType);
+    assertNotNull(currentBotName);
 
   }
 
@@ -52,7 +52,7 @@ public class ProgramABTest2 {
     assertEquals("x is the first default user", LLOYD, programab.getBotType());
 
     programab.setBotType("bogus");
-    assertEquals("should not be able to set to invalid botType", LLOYD, programab.getBotType());
+    assertEquals("should not be able to set to invalid currentBotName", LLOYD, programab.getBotType());
 
   }
 

@@ -6,7 +6,7 @@ import java.util.List;
 import org.myrobotlab.framework.Plan;
 
 public class ProgramABConfig extends ServiceConfig {
-    
+
   /**
    * a directory ProgramAB will scan for new bots on startup
    */
@@ -16,18 +16,18 @@ public class ProgramABConfig extends ServiceConfig {
    * explicit bot directories
    */
   public List<String> bots = new ArrayList<>();
-  
+
   /**
    * current sessions bot name, it must match a botname that was scanned
    * currently with ProgramAB Alice, Dr.Who, Mr. Turing and Ency
    */
-  public String botType = "Alice";
+  public String currentBotName = "Alice";
 
   /**
    * User name currently interacting with the bot. Setting it here will
    * default it.
    */
-  public String username = "human";
+  public String currentUserName = "human";
 
   /**
    * sleep current state of the sleep if globalSession is used true : ProgramAB
@@ -36,10 +36,11 @@ public class ProgramABConfig extends ServiceConfig {
    * current sleep/wake value
    */
   public boolean sleep = false;
-  
+
   /**
-   * topic to start with, if null then topic will be loaded from predicates of 
-   * a new session if available, this means a config/{username}.predicates.txt 
+   * topic to start with, if null then topic will be loaded from predicates of
+   * a new session if available, this means a
+   * config/{currentUserName}.predicates.txt
    * will need to exist with a topic field
    */
   public String startTopic = null;
@@ -50,7 +51,6 @@ public class ProgramABConfig extends ServiceConfig {
    */
   public boolean enableTrolling = false;
 
-  
   /**
    * Number of milliseconds before the robot starts talking on its own.
    */

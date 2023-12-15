@@ -19,11 +19,11 @@
                         <button class="btn btn-default" ng-click="msg.reload()" title="Reload Bot">
                             <span class="glyphicon glyphicon-refresh"></span>
                         </button>
-                        <select class="btn btn-default dropdown-toggle" ng-model="service.config.botType" ng-change="msg.setBotType(service.config.botType)" ng-options="key as key for (key, value) in service.bots"></select>
+                        <select class="btn btn-default dropdown-toggle" ng-model="service.config.currentBotName" ng-change="msg.setBotType(service.config.currentBotName)" ng-options="key as key for (key, value) in service.bots"></select>
                         <div>
                 </td>
                 <td>
-                    <input class="form-control userField" tabindex="1" type="text" ng-model="service.config.username" placeholder="{{service.config.username}}" ng-blur="msg.setUsername(service.config.username)"/>
+                    <input class="form-control userField" tabindex="1" type="text" ng-model="service.config.currentUserName" placeholder="{{service.config.currentUserName}}" ng-blur="msg.setUsername(service.config.currentUserName)"/>
                 </td>
                 <td rowspan="3">
                     <span ng-show="getSession() != null">

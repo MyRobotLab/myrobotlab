@@ -34,7 +34,7 @@ public class Session {
   /**
    * name of the user that owns this session
    */
-  public String username;
+  public String userName;
 
   /**
    * last time the bot responded
@@ -86,16 +86,16 @@ public class Session {
    * Session for a user and bot
    * 
    * @param programab
-   *          program ab for this session
+   *                  program ab for this session
    * @param userName
-   *          username
+   *                  userName
    * @param botInfo
-   *          the bot for the session
+   *                  the bot for the session
    * 
    */
   public Session(ProgramAB programab, String userName, BotInfo botInfo) {
     this.programab = programab;
-    this.username = userName;
+    this.userName = userName;
     this.botInfo = botInfo;
     this.chat = loadChat();
     predicates = chat.predicates;
@@ -120,7 +120,8 @@ public class Session {
   private Chat loadChat() {
     Chat chat = new Chat(botInfo.getBot());
     // loading predefined predicates - if they exist
-    File userPredicates = new File(FileIO.gluePaths(botInfo.path.getAbsolutePath(), String.format("config/%s.predicates.txt", username)));
+    File userPredicates = new File(
+        FileIO.gluePaths(botInfo.path.getAbsolutePath(), String.format("config/%s.predicates.txt", userName)));
     if (userPredicates.exists()) {
       predicatesFile = userPredicates;
       chat.predicates.getPredicateDefaults(userPredicates.getAbsolutePath());
@@ -139,9 +140,10 @@ public class Session {
         sb.append(predicate + ":" + value + "\n");
       }
     }
-    File predicates = new File(FileIO.gluePaths(botInfo.path.getAbsolutePath(), String.format("config/%s.predicates.txt", username)));
+    File predicates = new File(
+        FileIO.gluePaths(botInfo.path.getAbsolutePath(), String.format("config/%s.predicates.txt", userName)));
     predicates.getParentFile().mkdirs();
-    log.info("bot : {} user : {} saving predicates filename : {} ", botInfo.botType, username, predicates);
+    log.info("bot : {} user : {} saving predicates filename : {} ", botInfo.currentBotName, userName, predicates);
     try {
       FileWriter writer = new FileWriter(predicates, StandardCharsets.UTF_8);
       writer.write(sb.toString());
@@ -174,12 +176,12 @@ public class Session {
 
       List<Mrl> mrl = template.oob != null ? template.oob.mrl : null;
       // returned all text inside template but outside oob
-      Response response = new Response(username, botInfo.botType, template.text, mrl);
+      Response response = new Response(userName, botInfo.currentBotName, template.text, mrl);
       return response;
     } catch (Exception e) {
       programab.error(e);
     }
-    return new Response(username, botInfo.botType, "", null);
+    return new Response(userName, botInfo.currentBotName, "", null);
   }
 
   public Chat reload() {
@@ -201,11 +203,11 @@ public class Session {
   }
 
   public String getUsername() {
-    return username;
+    return userName;
   }
 
   public Object getBotType() {
-    return botInfo.botType;
+    return botInfo.currentBotName;
   }
 
 }

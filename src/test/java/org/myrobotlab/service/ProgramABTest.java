@@ -40,7 +40,7 @@ public class ProgramABTest {
 
   static private ProgramAB pikachu;
 
-  private String username = "testUser";
+  private String currentUserName = "testUser";
 
   // This method runs once before any test method in the class
   @BeforeClass
@@ -59,7 +59,7 @@ public class ProgramABTest {
 
     Session session = lloyd.getSession();
     assertEquals("default user should be human", "human", session.getUsername());
-    assertEquals("default botType should be Alice", "Alice", session.getBotType());
+    assertEquals("default currentBotName should be Alice", "Alice", session.getBotType());
 
   }
 
@@ -94,8 +94,8 @@ public class ProgramABTest {
     // validate error is called when invalid bot type set
 
     // load the bot brain for the chat with the user
-    lloyd.setSession(username, LLOYD);
-    assertEquals(username, lloyd.getUsername());
+    lloyd.setSession(currentUserName, LLOYD);
+    assertEquals(currentUserName, lloyd.getUsername());
     // clean out any aimlif the bot that might
     // have been saved in a previous test run!
     String aimlIFPath = testResources + "/bots/" + LLOYD + "/aimlif";
@@ -113,7 +113,7 @@ public class ProgramABTest {
   public void testOnUtterance() throws Exception {
 
     MockGateway gateway = (MockGateway) Runtime.start("gateway", "MockGateway");
-    lloyd = (ProgramAB)Runtime.start("lloyd", "ProgramAB");
+    lloyd = (ProgramAB) Runtime.start("lloyd", "ProgramAB");
     lloyd.addListener("publishUtterance", "mocker@mockId");
 
     Utterance utterance = new Utterance();
@@ -124,20 +124,20 @@ public class ProgramABTest {
     gateway.sendWithDelay("lloyd", "onUtterance", utterance);
     Message msg = gateway.waitForMsg("mocker", "onUtterance", 50);
     assertNotNull(msg);
-    assertTrue( ((Utterance) msg.data[0]).text.startsWith("Hi"));
+    assertTrue(((Utterance) msg.data[0]).text.startsWith("Hi"));
   }
 
   public void addCategoryTest() throws IOException {
     lloyd.addCategory("BOOG", "HOWDY");
-    Response resp = lloyd.getResponse(username, "BOOG");
+    Response resp = lloyd.getResponse(currentUserName, "BOOG");
     assertTrue(resp.msg.equals("HOWDY"));
   }
 
   @Test
   public void testAddCategoryTest() throws IOException {
     lloyd.addCategory("ABCDEF", "ABCDEF");
-    // String username = lloyd.getUsername();
-    // username,
+    // String currentUserName = lloyd.getUsername();
+    // currentUserName,
     Response resp = lloyd.getResponse("ABCDEF");
     assertTrue(resp.msg.equals("ABCDEF"));
   }
@@ -153,7 +153,7 @@ public class ProgramABTest {
   // stuff
   // @Test
   public void pannousTest() throws IOException {
-    Response resp = lloyd.getResponse(username, "SHOW ME INMOOV");
+    Response resp = lloyd.getResponse(currentUserName, "SHOW ME INMOOV");
     // System.out.println(resp);
     boolean contains = resp.msg.contains("http");
     assertTrue(contains);
@@ -161,7 +161,7 @@ public class ProgramABTest {
 
   @Test
   public void testSraixOOB() throws IOException {
-    Response resp = lloyd.getResponse(username, "OOBMRLSRAIX");
+    Response resp = lloyd.getResponse(currentUserName, "OOBMRLSRAIX");
     boolean contains = resp.msg.contains("You are talking to lloyd");
     assertTrue(contains);
   }
@@ -169,7 +169,7 @@ public class ProgramABTest {
   @Test
   public void testSraix() throws IOException {
     if (Runtime.hasInternet()) {
-      Response resp = lloyd.getResponse(username, "MRLSRAIX");
+      Response resp = lloyd.getResponse(currentUserName, "MRLSRAIX");
       boolean contains = resp.msg.contains("information");
       assertTrue(contains);
     }
@@ -178,17 +178,17 @@ public class ProgramABTest {
   @Test
   public void testAddEntryToSetAndMaps() throws IOException {
     // TODO: This does NOT work yet!
-    Response resp = lloyd.getResponse(username, "Add Jabba to the starwarsnames SET");
+    Response resp = lloyd.getResponse(currentUserName, "Add Jabba to the starwarsnames SET");
     assertEquals("Ok...", resp.msg);
-    resp = lloyd.getResponse(username, "Add jabba equals Jabba the Hut to the starwars MAP");
+    resp = lloyd.getResponse(currentUserName, "Add jabba equals Jabba the Hut to the starwars MAP");
     assertEquals("Ok...", resp.msg);
-    resp = lloyd.getResponse(username, "DO YOU LIKE Jabba?");
+    resp = lloyd.getResponse(currentUserName, "DO YOU LIKE Jabba?");
     assertEquals("Jabba the Hut is awesome.", resp.msg);
     // TODO : re-enable this one?
     // now test creating a new set.
-    resp = lloyd.getResponse(username, "Add bourbon to the whiskey SET");
+    resp = lloyd.getResponse(currentUserName, "Add bourbon to the whiskey SET");
     assertEquals("Ok...", resp.msg);
-    resp = lloyd.getResponse(username, "NEWSETTEST bourbon");
+    resp = lloyd.getResponse(currentUserName, "NEWSETTEST bourbon");
     // assertEquals("bourbon is a whiskey", resp.msg);
   }
 
@@ -199,7 +199,7 @@ public class ProgramABTest {
     // setting Japanese locality
     pikachu.setLocale("ja");
     // load the bot brain for the chat with the user
-    pikachu.setSession(username, PIKACHU);
+    pikachu.setSession(currentUserName, PIKACHU);
     Response resp = pikachu.getResponse("私はケビンです");
     assertEquals("あなたに会えてよかったケビン", resp.msg);
     Runtime.release(PIKACHU);
@@ -207,8 +207,8 @@ public class ProgramABTest {
 
   @Test
   public void testLearn() throws IOException {
-    Response resp = lloyd.getResponse(username, "LEARN AAA IS BBB");
-    resp = lloyd.getResponse(username, "WHAT IS AAA");
+    Response resp = lloyd.getResponse(currentUserName, "LEARN AAA IS BBB");
+    resp = lloyd.getResponse(currentUserName, "WHAT IS AAA");
     assertEquals("BBB", resp.msg);
   }
 
@@ -229,7 +229,7 @@ public class ProgramABTest {
     lloyd.setSession("user2", "lloyd");
     Response respB = lloyd.getResponse("What is my name?");
     System.out.println(respB);
-    lloyd.setSession(username, LLOYD);
+    lloyd.setSession(currentUserName, LLOYD);
     assertEquals("Kevin.", respA.msg);
     assertEquals("Grog.", respB.msg);
   }
@@ -238,7 +238,7 @@ public class ProgramABTest {
   public void testOOBTags() throws Exception {
 
     ProgramAB lloyd = (ProgramAB) Runtime.start("lloyd", "ProgramAB");
-    Response resp = lloyd.getResponse(username, "OOB TEST");
+    Response resp = lloyd.getResponse(currentUserName, "OOB TEST");
     assertEquals("OOB Tag Test", resp.msg);
 
     // TODO figure a mock object that can wait on a callback to let us know the
@@ -262,18 +262,18 @@ public class ProgramABTest {
   @Test
   public void testPredicates() {
     // test removing the predicate if it exists
-    lloyd.setPredicate(username, "name", "foo1");
-    String name = lloyd.getPredicate(username, "name");
+    lloyd.setPredicate(currentUserName, "name", "foo1");
+    String name = lloyd.getPredicate(currentUserName, "name");
     // validate it's set properly
     assertEquals("foo1", name);
-    lloyd.removePredicate(username, "name");
+    lloyd.removePredicate(currentUserName, "name");
     // validate the predicate doesn't exist
-    name = lloyd.getPredicate(username, "name");
+    name = lloyd.getPredicate(currentUserName, "name");
     // TODO: is this valid? one would expect it would return null.
     assertEquals("unknown", name);
     // set a predicate
-    lloyd.setPredicate(username, "name", "foo2");
-    name = lloyd.getPredicate(username, "name");
+    lloyd.setPredicate(currentUserName, "name", "foo2");
+    name = lloyd.getPredicate(currentUserName, "name");
     // validate it's set properly
     assertEquals("foo2", name);
   }
@@ -281,7 +281,7 @@ public class ProgramABTest {
   @Test
   public void testProgramAB() throws Exception {
     // a response
-    Response resp = lloyd.getResponse(username, "UNIT TEST PATTERN");
+    Response resp = lloyd.getResponse(currentUserName, "UNIT TEST PATTERN");
     // System.out.println(resp.msg);
     assertEquals("Unit Test Pattern Passed", resp.msg);
   }
@@ -290,63 +290,63 @@ public class ProgramABTest {
   public void testSavePredicates() throws IOException {
     long uniqueVal = System.currentTimeMillis();
     String testValue = String.valueOf(uniqueVal);
-    Response resp = lloyd.getResponse(username, "SET FOO " + testValue);
+    Response resp = lloyd.getResponse(currentUserName, "SET FOO " + testValue);
     assertEquals(testValue, resp.msg);
     lloyd.savePredicates();
-    lloyd.reloadSession(username, LLOYD);
-    resp = lloyd.getResponse(username, "GET FOO");
+    lloyd.reloadSession(currentUserName, LLOYD);
+    resp = lloyd.getResponse(currentUserName, "GET FOO");
     assertEquals("FOO IS " + testValue, resp.msg);
   }
 
   @Test
   public void testUppercase() {
     // test a category where the aiml tag is uppercased.
-    Response resp = lloyd.getResponse(username, "UPPERCASE");
+    Response resp = lloyd.getResponse(currentUserName, "UPPERCASE");
     assertEquals("Passed", resp.msg);
   }
 
   @Test
   public void testSets() throws IOException {
-    Response resp = lloyd.getResponse(username, "SETTEST CAT");
+    Response resp = lloyd.getResponse(currentUserName, "SETTEST CAT");
     assertEquals("An Animal.", resp.msg);
-    resp = lloyd.getResponse(username, "SETTEST MOUSE");
+    resp = lloyd.getResponse(currentUserName, "SETTEST MOUSE");
     assertEquals("An Animal.", resp.msg);
-    resp = lloyd.getResponse(username, "SETTEST DOG");
+    resp = lloyd.getResponse(currentUserName, "SETTEST DOG");
     // System.out.println(resp.msg);
     assertEquals("An Animal.", resp.msg);
   }
 
   @Test
   public void testSetsAndMaps() throws IOException {
-    Response resp = lloyd.getResponse(username, "DO YOU LIKE Leah?");
+    Response resp = lloyd.getResponse(currentUserName, "DO YOU LIKE Leah?");
     assertEquals("Princess Leia Organa is awesome.", resp.msg);
-    resp = lloyd.getResponse(username, "DO YOU LIKE Princess Leah?");
+    resp = lloyd.getResponse(currentUserName, "DO YOU LIKE Princess Leah?");
     assertEquals("Princess Leia Organa is awesome.", resp.msg);
   }
 
   @Test
   public void testTopicCategories() throws IOException {
-    lloyd.removePredicate(username, "topic");
+    lloyd.removePredicate(currentUserName, "topic");
     String topic = lloyd.getTopic();
     assertEquals("unknown", topic);
     // Top level definition
-    Response resp = lloyd.getResponse(username, "TESTTOPICTEST");
+    Response resp = lloyd.getResponse(currentUserName, "TESTTOPICTEST");
     assertEquals("TOPIC IS unknown", resp.msg);
-    resp = lloyd.getResponse(username, "SET TOPIC TEST");
-    resp = lloyd.getResponse(username, "TESTTOPICTEST");
+    resp = lloyd.getResponse(currentUserName, "SET TOPIC TEST");
+    resp = lloyd.getResponse(currentUserName, "TESTTOPICTEST");
     assertEquals("TEST TOPIC RESPONSE", resp.msg);
     // maybe we can still fallback to non-topic responses.
-    resp = lloyd.getResponse(username, "HI");
+    resp = lloyd.getResponse(currentUserName, "HI");
     assertEquals("Hello user!", resp.msg);
     // TODO: how the heck do we unset a predicate from AIML?
-    lloyd.removePredicate(username, "topic");
-    resp = lloyd.getResponse(username, "TESTTOPICTEST");
+    lloyd.removePredicate(currentUserName, "topic");
+    resp = lloyd.getResponse(currentUserName, "TESTTOPICTEST");
     assertEquals("TOPIC IS unknown", resp.msg);
   }
 
   @Test
   public void testUmlaut() throws IOException {
-    Response resp = lloyd.getResponse(username, "Lars Ümlaüt");
+    Response resp = lloyd.getResponse(currentUserName, "Lars Ümlaüt");
     // @GroG says - "this is not working"
     assertEquals("He's a character from Guitar Hero!", resp.msg);
   }
@@ -405,7 +405,7 @@ public class ProgramABTest {
 
   // TODO - tests
   // ProgramAB starts - it should find its own bot info's
-  // set username = default
+  // set currentUserName = default
   // set LLOYD = what is available if NOT set
   // getResponse() -> if current session doesn't exist - get bot
   // if current bot doesn't exist - attempt to activate it

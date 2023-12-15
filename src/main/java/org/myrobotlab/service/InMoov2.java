@@ -216,11 +216,16 @@ public class InMoov2 extends Service<InMoov2Config>
         setLocale(getSupportedLocale(Runtime.getInstance().getLocale().toString()));
       }
 
-      if (c.loadGestures) {
+      if (c.loadAppsScripts) {
         loadAppsScripts();
+      }
+
+      if (c.loadInitScripts) {
 
         loadInitScripts();
+      }
 
+      if (c.loadGestures) {
         loadGestures();
       }
 
@@ -1828,7 +1833,7 @@ public class InMoov2 extends Service<InMoov2Config>
   /**
    * publishes a name for NeoPixel.onFlash to consume
    * 
-   * @param botType
+   * @param currentBotName
    * @return
    */
   public String publishFlash(String flashName) {
