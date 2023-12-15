@@ -138,6 +138,15 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * each must have a unique name
    */
   static private Map<String, ServiceInterface> registry = new TreeMap<>();
+  static private final Map<String, ServiceInterface> registry = new LinkedHashMap<>();
+
+  /**
+   * A plan is a request to runtime to change the system. Typically its to ask
+   * to start and configure new services. The master plan is an accumulation of
+   * all these requests.
+   */
+  @Deprecated /* use the filesystem only no memory plan */
+  protected final Plan masterPlan = new Plan("runtime");
 
   /**
    * thread for non-blocking install of services
@@ -194,12 +203,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * config. If true you can find which config from runtime.getConfigName()
    */
   boolean processingConfig = false;
-
-  /**
-   * The one config directory where all config is managed the {default} is the
-   * current configuration set
-   */
-  // protected String configDir = "data" + fs + "config";
 
   /**
    * <pre>
@@ -442,7 +445,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         runtime.error("could not get %s from plan", service);
         continue;
       }
-      sc.state = "CREATING";
+      // sc.state = "CREATING";
       ServiceInterface si = createService(service, sc.type, null);
       sc.state = "CREATED";
       // process the base listeners/subscription of ServiceConfig
@@ -1575,7 +1578,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
             r.getRepo().install(serviceType);
           }
         } catch (Exception e) {
-          r.error(e);
+          r.error("dependencies failed - install error", e);
+          throw new RuntimeException(String.format("dependencies failed - install error %s", e.getMessage()));
         }
       }
     };
@@ -2585,8 +2589,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * Start Runtime with the specified config
    *
    * @param configName
-
-   *          The name of the config file
+   * 
+   *                   The name of the config file
    */
   static public void startConfig(String configName) {
     setConfig(configName);
@@ -2605,6 +2609,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     // for every service listed in runtime registry - load it
     // FIXME - regex match on filesystem matches on *.yml
     for (String service : rtConfig.getRegistry()) {
+
       if ("runtime".equals(service) || Runtime.isStarted(service)) {
         continue;
       }
@@ -3542,9 +3547,10 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    *                      Whether this method blocks for the program to execute
    * @return The programs stderr and stdout output
    */
+
   static public String execute(String program, List<String> args, String workingDir, Map<String, String> additionalEnv,
       boolean block) {
-    log.info("execToString(\"{} {}\")", program, args);
+    log.debug("execToString(\"{} {}\")", program, args);
 
     List<String> command = new ArrayList<>();
     command.add(program);
@@ -3639,13 +3645,14 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       } else if (platform.isLinux()) {
         // TODO This is incorrect, will not work when unplugged
         // and acpitool output is different than expected,
-        // at least on Ubuntu 22.04
-        String ret = Runtime.execute("acpitool");
-        int pos0 = ret.indexOf("Charging, ");
+        // at least on Ubuntu 22.04 - consider oshi library
+        String ret = Runtime.execute("acpi");
+        int pos0 = ret.indexOf("%");
+
         if (pos0 != -1) {
-          pos0 = pos0 + 10;
-          int pos1 = ret.indexOf("%", pos0);
-          String dble = ret.substring(pos0, pos1).trim();
+          int pos1 = ret.lastIndexOf(" ", pos0);
+          // int pos1 = ret.indexOf("%", pos0);
+          String dble = ret.substring(pos1, pos0).trim();
           try {
             r = Double.parseDouble(dble);
           } catch (Exception e) {
@@ -4790,6 +4797,13 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     return plan;
   }
 
+  /**
+   * read a service's configuration, in the context
+   * of current config set name or default
+   * 
+   * @param name
+   * @return
+   */
   public ServiceConfig readServiceConfig(String name) {
     return readServiceConfig(name, new StaticType<>() {
     });

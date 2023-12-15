@@ -8,6 +8,7 @@ public class SpeechSynthesisConfig extends ServiceConfig {
 
   public boolean mute = false;
   public boolean blocking = false;
+  @Deprecated /* :(  ... this is already in listeners ! */
   public String[] speechRecognizers;
   public Map<String, String> substitutions;
   public String voice;

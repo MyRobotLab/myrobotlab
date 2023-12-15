@@ -34,13 +34,28 @@ public class InMoov2Config extends ServiceConfig {
          */
         public boolean batteryInSystem = false;
 
+        /**
+         * enable custom sound map for state changes
+         */
         public boolean customSound = false;
 
         public boolean forceMicroOnIfSleeping = true;
 
         public boolean healthCheckActivated = false;
 
+        /**
+         * flashes if error has occurred - requires heartbeat
+         */
+        public boolean healthCheckFlash = true;
+
         public int healthCheckTimerMs = 60000;
+
+        /**
+         * flashes the neopixel every time a health check is preformed.
+         * green == good
+         * red == battery < 5%
+         */
+        public boolean heartbeatFlash = false;
 
         /**
          * Single heartbeat to drive InMoov2 .. it can check status, healthbeat,
@@ -82,6 +97,8 @@ public class InMoov2Config extends ServiceConfig {
 
         public boolean pirEnableTracking = false;
 
+        public boolean pirOnFlash = true;
+
         /**
          * play pir sounds when pir switching states sound located in
          * data/InMoov2/sounds/pir-activated.mp3 sound located in
@@ -106,6 +123,36 @@ public class InMoov2Config extends ServiceConfig {
 
         public boolean startupSound = true;
 
+        public boolean flashOnErrors = true;
+
+        public boolean flashOnPir;
+
+        public boolean loadAppsScripts = true;
+
+        /**
+         * Interval in seconds for a idle state event to fire off.
+         * If the fsm is in a state which will allow transitioning, the InMoov2
+         * state will transition to idle. Heartbeat will fire the event.
+         */
+        public Integer stateIdleInterval = 120;
+
+        /**
+         * Interval in seconds for a random state event to fire off.
+         * If the fsm is in a state which will allow transitioning, the InMoov2
+         * state will transition to random. Heartbeat will fire the event.
+         */
+        public Integer stateRandomInterval = 120;
+
+        /**
+         * Determines if InMoov2 publish system events during boot state
+         */
+        public boolean systemEventsOnBoot = false;
+
+        /**
+         * Publish system event when state changes
+         */
+        public boolean systemEventStateChange = true;
+
         public int trackingTimeoutMs = 10000;
 
         public String unlockInsult = "forgive me";
@@ -113,18 +160,6 @@ public class InMoov2Config extends ServiceConfig {
         public boolean virtual = false;
 
         public String bootAnimation = "Theater Chase";
-
-        public boolean flashOnErrors = true;
-
-        public boolean flashOnPir;
-
-        public boolean loadAppsScripts = true;
-
-        public boolean systemEventsOnBoot = true;
-
-        public Integer stateRandomInterval = null;
-
-        public Integer stateIdleInterval = null;
 
         public InMoov2Config() {
         }
@@ -229,6 +264,10 @@ public class InMoov2Config extends ServiceConfig {
                         chatBot.listeners = new ArrayList<>();
                 }
                 chatBot.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));
+
+                Gpt3Config gpt3 = (Gpt3Config) plan.get(getPeerName("gpt3"));
+                gpt3.listeners = new ArrayList<>();
+                gpt3.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));
 
                 HtmlFilterConfig htmlFilter = (HtmlFilterConfig) plan.get(getPeerName("htmlFilter"));
                 // htmlFilter.textListeners = new String[] { name + ".mouth" };
@@ -397,19 +436,26 @@ public class InMoov2Config extends ServiceConfig {
                 // TODO - events easily gotten from InMoov data ?? auto callbacks in python if
                 // exists ?
                 fsm.current = "boot";
-                fsm.transitions.add(new Transition("boot", "configStarted", "applyingConfig"));
-                fsm.transitions.add(new Transition("applyingConfig", "getUserInfo", "getUserInfo"));
-                fsm.transitions.add(new Transition("applyingConfig", "systemCheck", "systemCheck"));
-                fsm.transitions.add(new Transition("applyingConfig", "wake", "awake"));
-                fsm.transitions.add(new Transition("getUserInfo", "systemCheck", "systemCheck"));
-                fsm.transitions.add(new Transition("systemCheck", "systemCheckFinished", "awake"));
-                fsm.transitions.add(new Transition("awake", "sleep", "sleeping"));
+                fsm.transitions.add(new Transition("boot", "wake", "wake"));
+                fsm.transitions.add(new Transition("wake", "idle", "idle"));
+                fsm.transitions.add(new Transition("firstInit", "idle", "idle"));
+                fsm.transitions.add(new Transition("idle", "random", "random"));
+                fsm.transitions.add(new Transition("random", "idle", "idle"));
+                fsm.transitions.add(new Transition("idle", "sleep", "sleep"));
+                fsm.transitions.add(new Transition("sleep", "wake", "wake"));
+                fsm.transitions.add(new Transition("idle", "powerDown", "powerDown"));
+                fsm.transitions.add(new Transition("wake", "firstInit", "firstInit"));
+                // powerDown to shutdown
+                // fsm.transitions.add(new Transition("systemCheck", "systemCheckFinished",
+                // "awake"));
+                // fsm.transitions.add(new Transition("awake", "sleep", "sleeping"));
 
                 PirConfig pir = (PirConfig) plan.get(getPeerName("pir"));
                 pir.pin = "D23";
                 pir.controller = name + ".left";
                 pir.listeners = new ArrayList<>();
-                pir.listeners.add(new Listener("publishPirOn", name, "onPirOn"));
+                pir.listeners.add(new Listener("publishPirOn", name));
+                pir.listeners.add(new Listener("publishPirOff", name));
 
                 // == Peer - random =============================
                 RandomConfig random = (RandomConfig) plan.get(getPeerName("random"));
@@ -537,7 +583,65 @@ public class InMoov2Config extends ServiceConfig {
                 // FIXME - should be getPeerName("neoPixel")
                 listeners.add(new Listener("publishFlash", name + ".neoPixel", "onLedDisplay"));
 
-                listeners.add(new Listener("publishEvent", name + ".fsm"));
+                // loopbacks allow user to override or extend with python
+                listeners.add(new Listener("publishBoot", name));
+                listeners.add(new Listener("publishHeartbeat", name));
+                listeners.add(new Listener("publishConfigFinished", name));
+                listeners.add(new Listener("publishStateChange", name));
+
+                // listeners.add(new Listener("publishPowerUp", name));
+                // listeners.add(new Listener("publishPowerDown", name));
+                // listeners.add(new Listener("publishError", name));
+
+                listeners.add(new Listener("publishMoveHead", name));
+                listeners.add(new Listener("publishMoveRightArm", name));
+                listeners.add(new Listener("publishMoveLeftArm", name));
+                listeners.add(new Listener("publishMoveRightHand", name));
+                listeners.add(new Listener("publishMoveLeftHand", name));
+                listeners.add(new Listener("publishMoveTorso", name));
+
+                LogConfig log = (LogConfig) plan.get(getPeerName("log"));
+                log.listeners = new ArrayList<>();
+                log.listeners.add(new Listener("publishLogEvents", name));
+
+                // mouth_audioFile.listeners.add(new Listener("publishAudioEnd", name));
+                // mouth_audioFile.listeners.add(new Listener("publishAudioStart", name));
+
+                // InMoov2 --to--> service
+                listeners.add(new Listener("publishFlash", getPeerName("neoPixel")));
+                listeners.add(new Listener("publishEvent", getPeerName("chatBot"), "getResponse"));
+                listeners.add(new Listener("publishPlayAudioFile", getPeerName("audioPlayer")));
+
+                listeners.add(new Listener("publishPlayAnimation", getPeerName("neoPixel")));
+                listeners.add(new Listener("publishStopAnimation", getPeerName("neoPixel")));
+
+                // listeners.add(new Listener("publishPowerUp", name));
+                // listeners.add(new Listener("publishPowerDown", name));
+                // listeners.add(new Listener("publishError", name));
+
+                listeners.add(new Listener("publishMoveHead", name));
+                listeners.add(new Listener("publishMoveRightArm", name));
+                listeners.add(new Listener("publishMoveLeftArm", name));
+                listeners.add(new Listener("publishMoveRightHand", name));
+                listeners.add(new Listener("publishMoveLeftHand", name));
+                listeners.add(new Listener("publishMoveTorso", name));
+
+                // service --to--> InMoov2
+                AudioFileConfig mouth_audioFile = (AudioFileConfig) plan.get(getPeerName("mouth.audioFile"));
+                mouth_audioFile.listeners = new ArrayList<>();
+                mouth_audioFile.listeners.add(new Listener("publishPeak", name));
+                fsm.listeners.add(new Listener("publishStateChange", name, "publishStateChange"));
+
+                webxr.listeners = new ArrayList<>();
+                webxr.listeners.add(new Listener("publishJointAngles", name));
+
+                // mouth_audioFile.listeners.add(new Listener("publishAudioEnd", name));
+                // mouth_audioFile.listeners.add(new Listener("publishAudioStart", name));
+
+                // InMoov2 --to--> service
+                listeners.add(new Listener("publishFlash", getPeerName("neoPixel"), "onLedDisplay"));
+                listeners.add(new Listener("publishEvent", getPeerName("chatBot"), "getResponse"));
+                listeners.add(new Listener("publishPlayAudioFile", getPeerName("audioPlayer")));
 
                 // remove the auto-added starts in the plan's runtime RuntimConfig.registry
 

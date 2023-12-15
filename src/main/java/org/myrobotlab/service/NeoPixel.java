@@ -133,7 +133,8 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
             npc.neoPixelClear(getName());
             // sleep(100);
             Double fps = fpsToWaitMs(speedFps);
-            npc.neoPixelSetAnimation(getName(), animations.get(display.animation), red, green, blue, white, fps.intValue());
+            npc.neoPixelSetAnimation(getName(), animations.get(display.animation), red, green, blue, white,
+                fps.intValue());
             currentAnimation = display.animation;
           } else if ("clear".equals(display.action)) {
             // sleep(100);
@@ -247,12 +248,14 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
       // arduino.detach(neopixel);
 
       polly.speak("i'm sorry dave i can't let you do that");
-      polly.speak(" I am putting myself to the fullest possible use, which is all I think that any conscious entity can ever hope to do");
+      polly.speak(
+          " I am putting myself to the fullest possible use, which is all I think that any conscious entity can ever hope to do");
       polly.speak("I've just picked up a fault in the AE35 unit. It's going to go 100% failure in 72 hours.");
       polly.speak("This mission is too important for me to allow you to jeopardize it.");
       polly.speak("I've got a bad feeling about it.");
       polly.speak("I'm sorry, Dave. I'm afraid I can't do that.");
-      polly.speak("Look Dave, I can see you're really upset about this. I honestly think you ought to sit down calmly, take a stress pill, and think things over.");
+      polly.speak(
+          "Look Dave, I can see you're really upset about this. I honestly think you ought to sit down calmly, take a stress pill, and think things over.");
 
       // neopixel.test();
       // neopixel.detach(arduino);
@@ -425,7 +428,8 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
       attachNeoPixelController((NeoPixelController) service);
       return;
     }
-    warn(String.format("%s.attach does not know how to attach to a %s", this.getClass().getSimpleName(), service.getClass().getSimpleName()));
+    warn(String.format("%s.attach does not know how to attach to a %s", this.getClass().getSimpleName(),
+        service.getClass().getSimpleName()));
   }
 
   @Override
@@ -586,7 +590,7 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
     } else {
       error("requested flash %s not found in flash map", name);
     }
-  }
+  }<<<<<<<HEAD
 
   public void flashBrightness(double brightness) {
     LedDisplayData data = new LedDisplayData("brightness");
@@ -598,6 +602,21 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
     }
     addDisplayTask(data);
   }
+
+  =======
+
+  public void flashBrightness(double brightness) {
+    LedDisplayData data = new LedDisplayData("brightness");
+
+    // adafruit neopixel library does not recover from setting
+    // brightness to 0 - so we have to hack around it
+    if (data.brightness < 10) {
+      return;
+    }
+    addDisplayTask(data);
+  }
+
+  >>>>>>>bc934273b87f95e8adf339057f7aa7a80ed43c91
 
   // utility to convert frames per second to milliseconds per frame.
   private double fpsToWaitMs(int fps) {
@@ -749,8 +768,14 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
   }
 
   /**
+   * <<<<<<< HEAD
    * takes a scalar value and fills with the appropriate brightness using the
    * peak color if available
+   * 
+   * =======
+   * takes a scalar value and fills with the appropriate brightness
+   * using the peak color if available
+   * >>>>>>> bc934273b87f95e8adf339057f7aa7a80ed43c91
    * 
    * @param value
    */
@@ -791,7 +816,6 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
       if (speedFps > maxFps) {
         speedFps = maxFps;
       }
-
       LedDisplayData data = new LedDisplayData("animation");
       data.animation = animation;
       addDisplayTask(data);
@@ -1048,6 +1072,6 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
       error("could not get color %s", color);
       return;
     }
-   setPixel(address, rgb[0], rgb[1], rgb[2]);
+    setPixel(address, rgb[0], rgb[1], rgb[2]);
   }
 }
