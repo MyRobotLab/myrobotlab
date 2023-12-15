@@ -63,16 +63,7 @@ pipeline {
                }
         } // stage build
 
-      stage('compile') {
-         steps {
-            script {
-                  sh '''
-                     mvn -Dbuild.number=${BUILD_NUMBER} -DskipTests -q clean compile
-                  '''
-            }
-         }
-      } // stage compile
-
+   
       stage('dependencies') {
          when {
                expression { params.verify == 'true' }
@@ -86,24 +77,13 @@ pipeline {
          }
       } // stage dependencies      
 
-      stage('verify') {
-         when {
-               expression { params.verify == 'true' }
-         }
+      // --fail-fast
+      // -DargLine="-Xmx1024m"
+      stage('maven package') {
          steps {
             script {
                   sh '''
-                     mvn -Dfile.encoding=UTF-8 -DargLine="-Xmx1024m" verify --fail-fast -q
-                  '''
-            }
-         }
-      } // stage verify
-
-      stage('package') {
-         steps {
-            script {
-                  sh '''
-                     mvn -Dbuild.number=${BUILD_NUMBER} -DskipTests -q package
+                     mvn -Dfile.encoding=UTF-8 -Dbuild.number=${BUILD_NUMBER} -DargLine="-Xmx1024m" clean package -q
                   '''
             }
          }
