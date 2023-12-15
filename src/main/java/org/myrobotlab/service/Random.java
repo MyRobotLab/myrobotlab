@@ -107,6 +107,10 @@ public class Random extends Service<RandomConfig> {
   public double getRandom(double min, double max) {
     return min + (Math.random() * (max - min));
   }
+  
+  public RandomMessage getTask(String taskName) {
+    return randomData.get(taskName);
+  }
 
   public void addRandom(String taskName, long minIntervalMs, long maxIntervalMs, String name, String method, Integer... values) {
     addRandom(taskName, minIntervalMs, maxIntervalMs, name, method, toRanges((Object[]) values));
@@ -349,6 +353,9 @@ public class Random extends Service<RandomConfig> {
   }
 
   public RandomMessage remove(String key) {
+    if (!randomData.containsKey(key)) {
+      error("key %s does not exist");
+    }
     return randomData.remove(key);
   }
 
@@ -435,6 +442,16 @@ public class Random extends Service<RandomConfig> {
   
   public RandomMessage getRandomEvent(String key) {
     return randomData.get(key);
+  }
+  
+  /**
+   * disables all the individual tasks
+   */
+  public void disableAll() {
+    for (RandomMessage data : randomData.values()) {
+      data.enabled = false;
+    }
+    broadcastState();
   }
 
   public static void main(String[] args) {

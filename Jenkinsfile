@@ -14,7 +14,7 @@ pipeline {
    parameters {
       // agentParameter name:'agent-name'
       choice(name: 'verify', choices: ['true', 'false'], description: 'verify')
-      choice(name: 'javadoc', choices: ['true', 'false'], description: 'build javadocs')
+      choice(name: 'javadoc', choices: ['false', 'true'], description: 'build javadocs')
       choice(name: 'githubPublish', choices: ['true', 'false'], description: 'publish to github')
    // choice(choices: ['plan', 'apply -auto-approve', 'destroy -auto-approve'], description: 'terraform command for master branch', name: 'terraform_cmd')
    }
@@ -63,16 +63,7 @@ pipeline {
                }
         } // stage build
 
-      stage('compile') {
-         steps {
-            script {
-                  sh '''
-                     mvn -Dbuild.number=${BUILD_NUMBER} -DskipTests -q clean compile
-                  '''
-            }
-         }
-      } // stage compile
-
+   
       stage('dependencies') {
          when {
                expression { params.verify == 'true' }
@@ -86,24 +77,13 @@ pipeline {
          }
       } // stage dependencies      
 
-      stage('verify') {
-         when {
-               expression { params.verify == 'true' }
-         }
+      // --fail-fast
+      // -DargLine="-Xmx1024m"
+      stage('maven package') {
          steps {
             script {
                   sh '''
-                     mvn -Dfile.encoding=UTF-8 -DargLine="-Xmx1024m" verify --fail-fast -q
-                  '''
-            }
-         }
-      } // stage verify
-
-      stage('package') {
-         steps {
-            script {
-                  sh '''
-                     mvn -Dbuild.number=${BUILD_NUMBER} -DskipTests -q package
+                     mvn -Dfile.encoding=UTF-8 -Dbuild.number=${BUILD_NUMBER} clean package jacoco:report -q
                   '''
             }
          }
@@ -111,8 +91,7 @@ pipeline {
 
       stage('javadoc') {
          when {
-                 // expression { params.javadoc == 'true' }
-                 expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }
+                 expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' || params.javadoc == 'true' }
          }
          steps {
                   sh '''
@@ -126,25 +105,9 @@ pipeline {
          //    expression { env.BRANCH_NAME != 'master' && env.BRANCH_NAME != 'develop' }
          // }
          steps {
-            archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/**, target/*.exec, target/site/**'
+            archiveArtifacts 'target/**'
          }
       }
-
-      // stage('archive-javadocs') {
-      //    when {
-      //       expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }
-      //    }
-      //    steps {
-      //       archiveArtifacts 'target/myrobotlab.zip, target/surefire-reports/*, target/*.exec, target/site/**'
-      //    }
-      // }
-
-      // stage('jacoco') {
-      //    steps {
-      //       jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
-      //       jacoco()
-      //    }
-      // }
 
       stage('publish-github') {
          // when { expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' } }
