@@ -83,7 +83,7 @@ pipeline {
          steps {
             script {
                   sh '''
-                     mvn -Dfile.encoding=UTF-8 -Dbuild.number=${BUILD_NUMBER} clean package jacoco:report -q
+                     mvn -Dfile.encoding=UTF-8 -Dbuild.number=${BUILD_NUMBER} -DargLine="${argLine} -Xmx1024m" clean package jacoco:report -q
                   '''
             }
          }
