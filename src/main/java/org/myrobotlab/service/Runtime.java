@@ -1213,17 +1213,17 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    *
    */
   static public String[] getServiceNames() {
-    Set<String>ret = registry.keySet();
+    Set<String> ret = registry.keySet();
     String[] services = new String[ret.size()];
-    
+
     String localId = Platform.getLocalInstance().getId();
     int cnt = 0;
     for (String fullname : ret) {
-      if (fullname.endsWith(String.format("@%s", localId))){
-        services[cnt] = CodecUtils.getShortName(fullname);  
+      if (fullname.endsWith(String.format("@%s", localId))) {
+        services[cnt] = CodecUtils.getShortName(fullname);
       } else {
         services[cnt] = fullname;
-      } 
+      }
       ++cnt;
     }
     return services;
@@ -2171,7 +2171,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       // put runtime in new registry
       Runtime.getInstance();
       registry = new TreeMap<>();
-      registry.put(runtime.getFullName(), registry.get(runtime.getFullName()));  
+      registry.put(runtime.getFullName(), registry.get(runtime.getFullName()));
     }
   }
 
@@ -2586,7 +2586,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    *
    * @param configName
    *                   The name of the config file
-   * @return The Runtime singleton
    */
   static public void startConfig(String configName) {
     setConfig(configName);
@@ -3387,7 +3386,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * re-entrant in junit tests
    */
   @Override
-  public void releaseService() {            
+  public void releaseService() {
     if (runtime != null) {
       runtime.purgeTasks();
       runtime.stopService();
@@ -3395,7 +3394,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       runtime.getRepo().removeStatusPublishers();
       registry = new TreeMap<>();
     }
-    synchronized(INSTANCE_LOCK) {
+    synchronized (INSTANCE_LOCK) {
       runtime = null;
     }
   }
