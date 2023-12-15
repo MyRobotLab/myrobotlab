@@ -139,6 +139,8 @@ pipeline {
       always {
             // publish junit
             junit 'target/surefire-reports/**/*.xml'
+            // Publish JaCoCo coverage report
+            jacoco(execPattern: '**/target/jacoco.exec')
       }
 
   } // post
