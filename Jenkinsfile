@@ -105,7 +105,7 @@ pipeline {
          //    expression { env.BRANCH_NAME != 'master' && env.BRANCH_NAME != 'develop' }
          // }
          steps {
-            archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/**, target/*.exec, target/site/**'
+            archiveArtifacts 'target/**'
          }
       }
 
