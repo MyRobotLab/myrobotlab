@@ -70,7 +70,7 @@ public class ServoTest extends AbstractTest {
     assertTrue(!servo.isEnabled());
   }
 
-  // @Test
+  @Test
   public void disabledMove() throws Exception {
     // take off speed control
     servo.fullSpeed();
@@ -269,7 +269,7 @@ public class ServoTest extends AbstractTest {
 
   }
 
-  // @Test
+  @Test
   public void moveToBlockingTest() throws Exception {
     Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
     Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
