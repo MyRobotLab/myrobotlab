@@ -14,7 +14,7 @@ pipeline {
    parameters {
       // agentParameter name:'agent-name'
       choice(name: 'verify', choices: ['true', 'false'], description: 'verify')
-      choice(name: 'javadoc', choices: ['true', 'false'], description: 'build javadocs')
+      choice(name: 'javadoc', choices: ['false', 'true'], description: 'build javadocs')
       choice(name: 'githubPublish', choices: ['true', 'false'], description: 'publish to github')
    // choice(choices: ['plan', 'apply -auto-approve', 'destroy -auto-approve'], description: 'terraform command for master branch', name: 'terraform_cmd')
    }
@@ -91,8 +91,7 @@ pipeline {
 
       stage('javadoc') {
          when {
-                 // expression { params.javadoc == 'true' }
-                 expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }
+                 expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' || params.javadoc == 'true' }
          }
          steps {
                   sh '''
