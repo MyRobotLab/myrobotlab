@@ -130,22 +130,6 @@ pipeline {
          }
       }
 
-      // stage('archive-javadocs') {
-      //    when {
-      //       expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }
-      //    }
-      //    steps {
-      //       archiveArtifacts 'target/myrobotlab.zip, target/surefire-reports/*, target/*.exec, target/site/**'
-      //    }
-      // }
-
-      // stage('jacoco') {
-      //    steps {
-      //       jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
-      //       jacoco()
-      //    }
-      // }
-
       stage('publish-github') {
          // when { expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' } }
          when { expression { env.BRANCH_NAME == 'master'} }
