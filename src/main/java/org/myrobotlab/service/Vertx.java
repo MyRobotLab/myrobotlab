@@ -29,9 +29,8 @@ import io.vertx.core.http.ServerWebSocket;
  * most important part of Vertx. TODO: take advantage of publishing on the event
  * bus
  * 
- * {@link <a href=
- * "https://medium.com/@pvub/https-medium-com-pvub-vert-x-workers-6a8df9b2b9ee">vertx
- * worker</a>}
+ * @see https://medium.com/@pvub/https-medium-com-pvub-vert-x-workers-6a8df9b2b9ee
+ *      vertx workers
  * 
  * @author GroG
  *
