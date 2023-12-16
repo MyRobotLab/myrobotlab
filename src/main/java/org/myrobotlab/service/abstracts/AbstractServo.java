@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.Config;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -861,7 +860,6 @@ public abstract class AbstractServo<C extends ServoConfig> extends Service<C> im
   }
 
   @Override
-  @Config // default - if pin is different - output servo.setPin()
   public void setPin(Integer pin) {
     if (pin == null) {
       log.info("{}.setPin(null) as pin is not a valid pin value", pin);
@@ -1160,7 +1158,7 @@ public abstract class AbstractServo<C extends ServoConfig> extends Service<C> im
 
     if (c.synced != null) {
       syncedServos.clear();
-        Collections.addAll(syncedServos, c.synced);
+      Collections.addAll(syncedServos, c.synced);
     }
 
     // rest = c.rest;

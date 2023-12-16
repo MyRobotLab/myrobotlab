@@ -669,7 +669,7 @@ public class ImageDisplay extends Service<ImageDisplayConfig> implements ImageLi
   public void startService() {
     super.startService();
     if (GraphicsEnvironment.isHeadless()) {
-      log.warn("in headless mode - %s will not display images", getName());
+      log.info("in headless mode - {} will not display images", getName());
       return;
     }
   }

@@ -520,8 +520,8 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
    * 
    * @param filename
    *          the filename to save the gesture as
-   * @param json
-   *          the json to save
+   * @param gesture
+   *          the gesture to save
    */
   public void saveGesture(String filename, Gesture gesture) {
     try {

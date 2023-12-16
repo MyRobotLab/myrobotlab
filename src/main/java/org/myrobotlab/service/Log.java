@@ -105,6 +105,8 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
    */
   long minIntervalMs = 1000;
 
+  private String previousLogLevel;
+
   public Log(String n, String id) {
     super(n, id);
     getLogLevel();
@@ -265,6 +267,7 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
   
   public LogConfig apply(LogConfig c) {
     super.apply(c);
+    previousLogLevel = getLogLevel();
     if (c.level != null) {
       setRootLogLevel(c.level);
     }
@@ -317,6 +320,9 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
   public void stopService() {
     super.stopService();
     stopLogging();
+    if (previousLogLevel != null) {
+      Runtime.setLogLevel(previousLogLevel);
+    }
   }
 
   public static void main(String[] args) {

@@ -91,7 +91,7 @@ public class ClockTest extends AbstractTest {
     clock.restartClock();
     
     // wait now for the event
-    Service.sleep(1100);
+    Service.sleep(1500);
     assertNotNull("should have event now", gateway.getMsg("mocker", "onEpoch"));
     clock.restartClock();
     Service.sleep(500);

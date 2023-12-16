@@ -22,12 +22,16 @@ import io.vertx.core.http.ServerWebSocket;
 
 /**
  * Vertx gateway - used to support a http and websocket gateway for myrobotlab.
- * Write business logic in Verticles. Also, try not to write any logic besides initialization inside start() method.
+ * Write business logic in Verticles. Also, try not to write any logic besides
+ * initialization inside start() method.
  * 
- * It currently does not utilize the Vertx event bus - which is pretty much the most important part of Vertx.
- * TODO: take advantage of publishing on the event bus
+ * It currently does not utilize the Vertx event bus - which is pretty much the
+ * most important part of Vertx. TODO: take advantage of publishing on the event
+ * bus
  * 
- * @see https://medium.com/@pvub/https-medium-com-pvub-vert-x-workers-6a8df9b2b9ee
+ * {@link <a href=
+ * "https://medium.com/@pvub/https-medium-com-pvub-vert-x-workers-6a8df9b2b9ee">vertx
+ * worker</a>}
  * 
  * @author GroG
  *
@@ -45,7 +49,8 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
   }
 
   /**
-   * deploys a http and websocket verticle on a secure TLS channel with self signed certificate
+   * deploys a http and websocket verticle on a secure TLS channel with self
+   * signed certificate
    */
   public void start() {
     log.info("starting driver");
@@ -73,13 +78,13 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
     vertx.deployVerticle(new ApiVerticle(this));
 
   }
-  
+
   @Override
   public void startService() {
     super.startService();
     start();
   }
-  
+
   @Override
   public void stopService() {
     super.stopService();
@@ -111,16 +116,16 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
       Vertx vertx = (Vertx) Runtime.start("vertx", "Vertx");
       vertx.start();
 
-       InMoov2 i01 = (InMoov2)Runtime.start("i01", "InMoov2");
-       // i01.startSimulator();
-       JMonkeyEngine jme = (JMonkeyEngine)i01.startPeer("simulator");
-//       Runtime.start("python", "Python");
-//      
-       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-       // webgui.setSsl(true);
-       webgui.autoStartBrowser(false);
-       webgui.setPort(8888);
-       webgui.startService();
+      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+      // i01.startSimulator();
+      JMonkeyEngine jme = (JMonkeyEngine) i01.startPeer("simulator");
+      // Runtime.start("python", "Python");
+      //
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      // webgui.setSsl(true);
+      webgui.autoStartBrowser(false);
+      webgui.setPort(8888);
+      webgui.startService();
 
     } catch (Exception e) {
       log.error("main threw", e);
@@ -128,36 +133,47 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
   }
 
   // FIXME - refactor for bare minimum
-  
-  @Override /* FIXME "Gateway" is server/service oriented not connecting thing - remove this */
+
+  @Override /*
+             * FIXME "Gateway" is server/service oriented not connecting thing -
+             * remove this
+             */
   public void connect(String uri) throws URISyntaxException {
     // TODO Auto-generated method stub
 
   }
-  
-  @Override /* FIXME not much point of these - as they are all consistently using Runtime's centralized connection info */
+
+  @Override /*
+             * FIXME not much point of these - as they are all consistently
+             * using Runtime's centralized connection info
+             */
   public List<String> getClientIds() {
     return Runtime.getInstance().getConnectionUuids(getName());
   }
 
-  @Override /* FIXME not much point of these - as they are all consistently using Runtime's centralized connection info */
+  @Override /*
+             * FIXME not much point of these - as they are all consistently
+             * using Runtime's centralized connection info
+             */
   public Map<String, Connection> getClients() {
     return Runtime.getInstance().getConnections(getName());
   }
 
-
-  @Override /* FIXME this is the one and probably "only" relevant method for Gateway - perhaps a handle(Connection c) */
+  @Override /*
+             * FIXME this is the one and probably "only" relevant method for
+             * Gateway - perhaps a handle(Connection c)
+             */
   public void sendRemote(Message msg) throws Exception {
     log.info("sendRemote {}", msg.toString());
     // FIXME MUST BE DIRECT THREAD FROM BROADCAST NOT OUTBOX !!!
     msg.addHop(getId());
     Map<String, Connection> clients = getClients();
-    for(Connection c: clients.values()) {
+    for (Connection c : clients.values()) {
       try {
-      ServerWebSocket socket = (ServerWebSocket)c.get("websocket");
-      String json = CodecUtils.toJsonMsg(msg);
-      socket.writeTextMessage(json);
-      } catch(Exception e) {
+        ServerWebSocket socket = (ServerWebSocket) c.get("websocket");
+        String json = CodecUtils.toJsonMsg(msg);
+        socket.writeTextMessage(json);
+      } catch (Exception e) {
         error(e);
       }
     }
@@ -166,8 +182,9 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
 
   @Override
   public boolean isLocal(Message msg) {
-    return Runtime.getInstance().isLocal(msg);  }
-  
+    return Runtime.getInstance().isLocal(msg);
+  }
+
   public io.vertx.core.Vertx getVertx() {
     return vertx;
   }
