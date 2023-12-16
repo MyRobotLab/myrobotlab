@@ -2,8 +2,8 @@ package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.service.FiniteStateMachine.StateChange;
 
-public interface StateChangeHandler {
+public interface StateChangeListener {
 
-  public void handleStateChange(StateChange event);
+  public void onStateChange(StateChange event);
   
 }
