@@ -103,7 +103,7 @@ public class Keyboard extends Service<ServiceConfig> {
   public Keyboard(String n, String id) {
     super(n, id);
     if (Service.isHeadless()) {
-      log.info("the Keyboard service requires a DISPLAY to function correctly");
+      log.warn("the Keyboard service requires a DISPLAY to function correctly");
       keyboard = null;
       mouseEvent = null;
       return;
