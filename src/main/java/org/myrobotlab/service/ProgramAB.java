@@ -756,6 +756,10 @@ public class ProgramAB extends Service<ProgramABConfig>
     setUsername(currentUserName);
     setBotType(currentBotName);
   }
+  
+  public Session startSession(String currentUserName, String currentBotName) {
+    return startSession(currentUserName, currentBotName, true);
+  }
 
   /**
    * Load the AIML 2.0 Bot config and start a chat session. This must be called

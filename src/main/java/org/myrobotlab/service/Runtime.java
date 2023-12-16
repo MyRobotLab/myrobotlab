@@ -138,7 +138,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * each must have a unique name
    */
   static private Map<String, ServiceInterface> registry = new TreeMap<>();
-  static private final Map<String, ServiceInterface> registry = new LinkedHashMap<>();
 
   /**
    * A plan is a request to runtime to change the system. Typically its to ask
@@ -447,7 +446,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       }
       // sc.state = "CREATING";
       ServiceInterface si = createService(service, sc.type, null);
-      sc.state = "CREATED";
       // process the base listeners/subscription of ServiceConfig
       si.addConfigListeners(sc);
       if (si instanceof ConfigurableService) {

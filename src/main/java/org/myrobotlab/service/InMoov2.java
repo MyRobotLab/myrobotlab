@@ -496,6 +496,7 @@ public class InMoov2 extends Service<InMoov2Config>
   public void fire(String event) {
     // systemEvent(event);
     fsm.fire(event);
+  }
 
   public void firstInit() {
     log.info("firstInit");
@@ -985,6 +986,7 @@ public class InMoov2 extends Service<InMoov2Config>
     if (event.name.equals("topic")) {
       systemEvent(String.format("TOPIC CHANGED TO %s", event.value));
     }
+    return event;
   }
 
   /**
@@ -1096,7 +1098,8 @@ public class InMoov2 extends Service<InMoov2Config>
 
     hasBooted = true;
   }
-
+  /**
+<pre>
   public PredicateEvent onChangePredicate(PredicateEvent event) {
     log.error("onChangePredicate {}", event);
     if (event.name.equals("topic")) {
@@ -1108,6 +1111,8 @@ public class InMoov2 extends Service<InMoov2Config>
     // do defaults ?
     return event;
   }
+  </pre>
+  */
 
   public void onConfigFinished(String configName) {
     log.info("onConfigFinished");
@@ -1153,6 +1158,8 @@ public class InMoov2 extends Service<InMoov2Config>
    * Initial boot prevents sensor data from interfering with booting.
    */
   protected boolean allowSensorInput = false;
+
+  protected String lastState = null;
 
   /**
    * A generalized recurring event which can preform checks and various other
@@ -1292,67 +1299,8 @@ public class InMoov2 extends Service<InMoov2Config>
     }
   }
 
-  public void onMoveRightArm(Map<String, Double> map) {
-    InMoov2Arm rightArm = (InMoov2Arm) getPeer("rightArm");
-    if (rightArm != null) {
-      rightArm.onMove(map);
-    }
-  }
 
-  public void onMoveRightHand(Map<String, Double> map) {
-    InMoov2Hand rightHand = (InMoov2Hand) getPeer("rightHand");
-    if (rightHand != null) {
-      rightHand.onMove(map);
-    }
-  }
 
-  public void onMoveTorso(Map<String, Double> map) {
-    InMoov2Torso torso = (InMoov2Torso) getPeer("torso");
-    if (torso != null) {
-      torso.onMove(map);
-    }
-  }
-
-  /**
-   * Centralized logging system will have all logging from all services,
-   * including lower level logs that do not propegate as statuses
-   * 
-   * @param log
-   *            - flushed log from Log service
-   */
-  public void onLogEvents(List<LogEntry> log) {
-    // scan for warn or errors
-    for (LogEntry entry : log) {
-      if ("ERROR".equals(entry.level) && errors.size() < 100) {
-        errors.add(entry);
-      }
-    }
-  }
-
-  public void onMoveHead(Map<String, Double> map) {
-    InMoov2Head head = (InMoov2Head) getPeer("head");
-    if (head != null) {
-      head.onMove(map);
-    }
-  }
-
-  public void onMoveLeftArm(Map<String, Double> map) {
-    InMoov2Arm leftArm = (InMoov2Arm) getPeer("leftArm");
-    if (leftArm != null) {
-      leftArm.onMove(map);
-    }
-  }
-
-  public void onMoveLeftHand(Map<String, Double> map) {
-    InMoov2Hand leftHand = (InMoov2Hand) getPeer("leftHand");
-    if (leftHand != null) {
-      leftHand.onMove(map);
-    }
-  }
-
-  // public Message publishPython(String method, Object...data) {
-  // return Message.createMessage(getName(), getName(), method, data);
-  // }
 
   public void onMoveRightArm(Map<String, Double> map) {
     InMoov2Arm rightArm = (InMoov2Arm) getPeer("rightArm");
@@ -1407,26 +1355,6 @@ public class InMoov2 extends Service<InMoov2Config>
     }
   }
 
-  /**
-   * Pir off callback - FIXME NEEDS WORK
-   */
-  public void onPirOff() {
-    isPirOn = false;
-    // one advantage of re-publishing from inmoov - getName parameter can be
-    // added
-    if (allowSensorInput && !"boot".equals(getState())) {
-      SensorData pir = new SensorData(getName(), "Pir", isPirOn);
-      invoke("publishSensorData", pir);
-    }
-  }
-
-  /**
-   * Pir off callback - FIXME NEEDS WORK
-   */
-  public void onPirOff() {
-    isPirOn = false;
-    fsm.fire("sleep");
-  }
 
   @Override
   public void onRegistered(Registration registration) {
@@ -1518,30 +1446,30 @@ public class InMoov2 extends Service<InMoov2Config>
     try {
       log.error("onStateChange {}", stateChange);
 
-      String current = stateChange.current;
-      String last = stateChange.last;
+      lastState = state;
+      state = stateChange.state;
 
       // leaving random state
-      if ("random".equals(last) && !"random".equals(current) && isPeerStarted("random")) {
+      if ("random".equals(lastState) && !"random".equals(state) && isPeerStarted("random")) {
         Random random = (Random) getPeer("random");
         random.disable();
       }
 
-      if ("wake".equals(last)) {
+      if ("wake".equals(lastState)) {
         invoke("publishStopAnimation");
       }
 
       if (config.systemEventStateChange) {
-        systemEvent("ON STATE %s", current);
+        systemEvent("ON STATE %s", state);
       }
 
-      if (config.customSounds && customSoundMap.containsKey(current)) {
-        invoke("publishPlayAudioFile", customSoundMap.get(current));
+      if (config.customSound && customSoundMap.containsKey(state)) {
+        invoke("publishPlayAudioFile", customSoundMap.get(state));
       }
 
       // TODO - only a few InMoov2 state defaults will be called here
-      if (stateDefaults.contains(current)) {
-        invoke(current);
+      if (stateDefaults.contains(state)) {
+        invoke(state);
       }
 
       // FIXME add topic changes to AIML here !
@@ -1822,6 +1750,8 @@ public class InMoov2 extends Service<InMoov2Config>
   public String publishConfigFinished(String configName) {
     info("config %s finished", configName);
     systemEvent("CONFIG LOADED " + configName);
+    return configName;
+  }
 
   /**
    * A heartbeat that continues to check status, and fire events to the FSM.
@@ -1834,10 +1764,6 @@ public class InMoov2 extends Service<InMoov2Config>
 
   public void publishBoot() {
     log.info("publishBoot");
-  }
-
-  public String publishConfigFinished(String configName) {
-    return configName;
   }
 
   /**
@@ -1885,32 +1811,6 @@ public class InMoov2 extends Service<InMoov2Config>
     return name;
   }
 
-  /**
-   * publishes a name for NeoPixel.onFlash to consume,
-   * in a seperate channel to potentially be used by
-   * "speaking only" leds
-   * 
-   * @param name
-   * @return
-   */
-  public String publishSpeakingFlash(String name) {
-    return name;
-  }
-
-  /**
-   * publishes a name for NeoPixel.onFlash to consume
-   * 
-   * @param currentBotName
-   * @return
-   */
-  public String publishFlash(String flashName) {
-    return flashName;
-  }
-
-  public String publishHeartbeat() {
-    invoke("publishFlash", "heartbeat");
-    return getName();
-  }
 
   /**
    * <pre>
@@ -2012,6 +1912,7 @@ public class InMoov2 extends Service<InMoov2Config>
     state.src = getName();
     state.state = stateChange.state;
     state.event = stateChange.event;
+    return state;
   }
 
   /**
@@ -2346,86 +2247,12 @@ public class InMoov2 extends Service<InMoov2Config>
     }
   }
 
-  @Deprecated /* this needs to be removed - runtime and config handle this */
-  public ProgramAB startChatBot() {
-
-    try {
-      chatBot = (ProgramAB) startPeer("chatBot");
-
-      if (locale != null) {
-        chatBot.setCurrentBotName(locale.getTag());
-      }
-
-      // FIXME remove get en.properties stuff
-      speakBlocking(get("CHATBOTACTIVATED"));
-
-      chatBot.attachTextPublisher(ear);
-
-      // this.attach(chatBot); FIXME - attach as a TextPublisher - then
-      // re-publish
-      // FIXME - deal with language
-      // speakBlocking(get("CHATBOTACTIVATED"));
-      chatBot.repetitionCount(10);
-      // chatBot.setPath(getResourceDir() + fs + "chatbot");
-      // chatBot.setPath(getDataDir() + "ProgramAB");
-      chatBot.startSession("default", locale.getTag());
-      // reset some parameters to default...
-      chatBot.setPredicate("topic", "default");
-      chatBot.setPredicate("questionfirstinit", "");
-      chatBot.setPredicate("tmpname", "");
-      chatBot.setPredicate("null", "");
-      // load last user session
-      if (!chatBot.getPredicate("name").isEmpty()) {
-        if (chatBot.getPredicate("lastUsername").isEmpty() || chatBot.getPredicate("lastUsername").equals("unknown")
-            || chatBot.getPredicate("lastUsername").equals("default")) {
-          chatBot.setPredicate("lastUsername", chatBot.getPredicate("name"));
-        }
-      }
-      chatBot.setPredicate("parameterHowDoYouDo", "");
-      chatBot.savePredicates();
-      htmlFilter = (HtmlFilter) startPeer("htmlFilter");// Runtime.start("htmlFilter",
-      // "HtmlFilter");
-      chatBot.attachTextListener(htmlFilter);
-      htmlFilter.attachTextListener((TextListener) getPeer("mouth"));
-      chatBot.attachTextListener(this);
-      // start session based on last recognized person
-      // if (!chatBot.getPredicate("default", "lastUsername").isEmpty() &&
-      // !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
-      // chatBot.startSession(chatBot.getPredicate("lastUsername"));
-      // }
-      if (chatBot.getPredicate("default", "firstinit").isEmpty()
-          || chatBot.getPredicate("default", "firstinit").equals("unknown")
-          || chatBot.getPredicate("default", "firstinit").equals("started")) {
-        chatBot.startSession(chatBot.getPredicate("default", "lastUsername"));
-        // probably not necessary - state change events should be enough
-        systemEvent("FIRST INIT");
-      } else {
-        chatBot.startSession(chatBot.getPredicate("default", "lastUsername"));
-        // probably not necessary - state change events should be enough
-        systemEvent("WAKE UP");
-      }
-    } catch (Exception e) {
-      speak("could not load chatBot");
-      error(e.getMessage());
-      speak(e.getMessage());
-    }
-    broadcastState();
-    return chatBot;
-  }
-
-  public SpeechRecognizer startEar() {
-
-    ear = (SpeechRecognizer) startPeer("ear");
-    ear.attachSpeechSynthesis((SpeechSynthesis) getPeer("mouth"));
-    ear.attachTextListener(chatBot);
-    broadcastState();
-    return ear;
-  }
-
+  @Deprecated
   public void startedGesture() {
     startedGesture("unknown");
   }
 
+  @Deprecated
   public void startedGesture(String nameOfGesture) {
     if (gestureAlreadyStarted) {
       warn("Warning 1 gesture already running, this can break spacetime and lot of things");
@@ -2736,83 +2563,8 @@ public class InMoov2 extends Service<InMoov2Config>
 
   }
 
-  public void openRightHand() {
-    // if InMoov2Hand.close/open is used directly
-    // it prevents user's interception of the data
-    // and forces InMoov2Hand type to be used :(
-    // pub/sub is the way
 
-    // hardcoded, but if necessary can be put in config
-    HashMap<String, Double> map = new HashMap<>();
-    map.put("thumb", 0.0);
-    map.put("index", 0.0);
-    map.put("majeure", 0.0);
-    map.put("ringFinger", 0.0);
-    map.put("pinky", 0.0);
-    invoke("publishMoveRightHand", map);
-  }
 
-  public void closeLeftHand() {
-
-    // if InMoov2Hand.close/open is used directly
-    // it prevents user's interception of the data
-    // and forces InMoov2Hand type to be used :(
-    // pub/sub is the way
-
-    // hardcoded, but if necessary can be put in config
-    HashMap<String, Double> map = new HashMap<>();
-    map.put("thumb", 130.0);
-    map.put("index", 180.0);
-    map.put("majeure", 180.0);
-    map.put("ringFinger", 180.0);
-    map.put("pinky", 180.0);
-    invoke("publishMoveLeftHand", map);
-
-  }
-
-  public void openLeftHand() {
-    // if InMoov2Hand.close/open is used directly
-    // it prevents user's interception of the data
-    // and forces InMoov2Hand type to be used :(
-    // pub/sub is the way
-
-    // hardcoded, but if necessary can be put in config
-    HashMap<String, Double> map = new HashMap<>();
-    map.put("thumb", 0.0);
-    map.put("index", 0.0);
-    map.put("majeure", 0.0);
-    map.put("ringFinger", 0.0);
-    map.put("pinky", 0.0);
-    invoke("publishMoveLeftHand", map);
-  }
-
-  public void openHands() {
-    openLeftHand();
-    openRightHand();
-  }
-
-  public void closeHands() {
-    closeLeftHand();
-    closeRightHand();
-  }
-
-  public void closeRightHand() {
-
-    // if InMoov2Hand.close/open is used directly
-    // it prevents user's interception of the data
-    // and forces InMoov2Hand type to be used :(
-    // pub/sub is the way
-
-    // hardcoded, but if necessary can be put in config
-    HashMap<String, Double> map = new HashMap<>();
-    map.put("thumb", 130.0);
-    map.put("index", 180.0);
-    map.put("majeure", 180.0);
-    map.put("ringFinger", 180.0);
-    map.put("pinky", 180.0);
-    invoke("publishMoveRightHand", map);
-
-  }
 
   public void openRightHand() {
     // if InMoov2Hand.close/open is used directly

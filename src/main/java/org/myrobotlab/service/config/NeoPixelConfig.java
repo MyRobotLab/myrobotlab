@@ -59,9 +59,7 @@ public class NeoPixelConfig extends ServiceConfig {
   /**
    * initial fill
    */
-  public boolean fill = false;<<<<<<<HEAD=======
-
-  >>>>>>>bc934273b87f95e8adf339057f7aa7a80ed43c91
+  public boolean fill = false;
 
   /**
    * Map of predefined led flashes, defined here in configuration. Another

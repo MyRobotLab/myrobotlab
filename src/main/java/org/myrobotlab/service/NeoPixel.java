@@ -590,7 +590,7 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
     } else {
       error("requested flash %s not found in flash map", name);
     }
-  }<<<<<<<HEAD
+  }
 
   public void flashBrightness(double brightness) {
     LedDisplayData data = new LedDisplayData("brightness");
@@ -603,20 +603,6 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
     addDisplayTask(data);
   }
 
-  =======
-
-  public void flashBrightness(double brightness) {
-    LedDisplayData data = new LedDisplayData("brightness");
-
-    // adafruit neopixel library does not recover from setting
-    // brightness to 0 - so we have to hack around it
-    if (data.brightness < 10) {
-      return;
-    }
-    addDisplayTask(data);
-  }
-
-  >>>>>>>bc934273b87f95e8adf339057f7aa7a80ed43c91
 
   // utility to convert frames per second to milliseconds per frame.
   private double fpsToWaitMs(int fps) {
