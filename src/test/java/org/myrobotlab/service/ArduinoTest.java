@@ -16,12 +16,12 @@ import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.arduino.virtual.Device;
 import org.myrobotlab.arduino.virtual.MrlServo;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.ServiceTest;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.SerialDevice;
-import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
 /**
@@ -37,7 +37,7 @@ import org.slf4j.Logger;
  *
  */
 
-public class ArduinoTest extends AbstractTest {
+public class ArduinoTest extends ServiceTest {
 
   public final static Logger log = LoggerFactory.getLogger(ArduinoTest.class);
 
@@ -73,25 +73,6 @@ public class ArduinoTest extends AbstractTest {
     catcher = (TestCatcher) Runtime.start("arduinoTestCatcher", "TestCatcher");
     arduino01.connect(port01);
     assertTrue(String.format("arduino could not connect to port %s", port01), arduino01.isConnected());
-  }
-
-  // TODO: fix this test method.
-  // @Test
-  public final void testAnalogWrite() throws InterruptedException, IOException {
-
-    arduino01.analogWrite(10, 0);
-    assertVirtualPinValue(arduino01.getVirtual(), 10, 0);
-
-    arduino01.analogWrite(10, 127);
-    assertVirtualPinValue(arduino01.getVirtual(), 10, 127);
-
-    arduino01.analogWrite(10, 128);
-    assertVirtualPinValue(arduino01.getVirtual(), 10, 128);
-
-    arduino01.analogWrite(10, 255);
-    assertVirtualPinValue(arduino01.getVirtual(), 10, 255);
-
-    arduino01.error("test");
   }
 
   @Test
