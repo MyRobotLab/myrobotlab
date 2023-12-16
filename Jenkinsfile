@@ -11,6 +11,10 @@ pipeline {
    // agent { label params['agent-name'] }
    agent any
 
+   triggers {
+        cron('H 0 * * *')
+    }   
+
    parameters {
       // agentParameter name:'agent-name'
       choice(name: 'verify', choices: ['true', 'false'], description: 'verify')
