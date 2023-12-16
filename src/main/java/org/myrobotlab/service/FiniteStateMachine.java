@@ -80,6 +80,13 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
      * event which activated new state
      */
     public String event;
+
+    /**
+     * source of event
+     */
+    public String src = getName();
+    
+    
     public StateChange(String current, String event) {
       this.state = current;
       this.event = event;

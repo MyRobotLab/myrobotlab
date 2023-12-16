@@ -33,6 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.myrobotlab.codec.CodecUtils;
@@ -75,16 +76,16 @@ public class Outbox implements Runnable, Serializable {
 
   transient ArrayList<Thread> outboxThreadPool = new ArrayList<Thread>();
 
-  protected Map<String, FilterInterface> filters = new HashMap<>();
+  protected Map<String, FilterInterface> filters = new TreeMap<>();
 
   public interface FilterInterface {
     public boolean filter(Message msg);
   }
 
   /**
-   * pub/sub listeners - HashMap &lt; {topic}, List {listeners} &gt;
+   * pub/sub listeners 
    */
-  protected Map<String, List<MRLListener>> notifyList = new HashMap<String, List<MRLListener>>();
+  protected Map<String, List<MRLListener>> notifyList = new TreeMap<String, List<MRLListener>>();
 
   List<MessageListener> listeners = new ArrayList<MessageListener>();
 
