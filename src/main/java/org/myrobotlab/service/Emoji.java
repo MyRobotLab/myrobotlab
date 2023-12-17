@@ -19,7 +19,7 @@ import org.myrobotlab.service.FiniteStateMachine.StateChange;
 import org.myrobotlab.service.config.EmojiConfig;
 import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.interfaces.ImagePublisher;
-import org.myrobotlab.service.interfaces.StateChangeHandler;
+import org.myrobotlab.service.interfaces.StateChangeListener;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 // emotionListener
 // Links
 // - http://googleemotionalindex.com/
-public class Emoji extends Service<EmojiConfig> implements TextListener, StateChangeHandler, ImagePublisher {
+public class Emoji extends Service<EmojiConfig> implements TextListener, StateChangeListener, ImagePublisher {
 
   private static final long serialVersionUID = 1L;
 
@@ -242,7 +242,7 @@ public class Emoji extends Service<EmojiConfig> implements TextListener, StateCh
 
   // FIXME - publish events if desired...
   @Override
-  public void handleStateChange(StateChange event) {
+  public void onStateChange(StateChange event) {
     log.info("handleEvent {}", event);
     EmojiData emoji = new EmojiData();
     emoji.name = event.state;
