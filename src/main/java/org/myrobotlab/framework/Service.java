@@ -43,6 +43,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1516,6 +1517,9 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     if (newListeners.size() > 0) {
       sc.listeners = newListeners;
     }
+    
+    Collections.sort(sc.listeners, new MrlListenerComparator());
+    
     return sc;
   }
 

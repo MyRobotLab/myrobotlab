@@ -4,12 +4,15 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.MrlListenerComparator;
 import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Service;
@@ -96,7 +99,7 @@ public class ServiceConfig {
    */
   // public Map<String, Peer> peers = new TreeMap<>();
   public Map<String, Peer> peers = null;
-  public  List<Listener> listeners = null;
+  public  List<Listener> listeners = new ArrayList<>();
                                            
 
   public ServiceConfig() {
@@ -219,9 +222,9 @@ public class ServiceConfig {
       Class<?> c = Class.forName(fullType);
       Constructor<?> mc = c.getConstructor();
       ServiceConfig config = (ServiceConfig) mc.newInstance();
-      // FIXME pass in plan
-      // plan.merge();
+            
       config.getDefault(plan, name);
+      Collections.sort(config.listeners, new MrlListenerComparator());
 
     } catch (ClassNotFoundException cnfe) {
       // We could not find the config type with the simple {serviceType}Config pattern
@@ -252,6 +255,10 @@ public class ServiceConfig {
         log.info("could not find config class for {}, loading generalized ServiceConfig", inType);
         ServiceConfig sc = new ServiceConfig();
         sc.type = inType;
+        if (name.equals("i01")) {
+          log.info("here");
+        }
+        Collections.sort(sc.listeners, new MrlListenerComparator());
         plan.put(name, sc);
       }
     } catch (Exception e) {

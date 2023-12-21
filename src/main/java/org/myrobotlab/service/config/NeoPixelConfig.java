@@ -11,7 +11,7 @@ public class NeoPixelConfig extends ServiceConfig {
    * when attached to an audio file service the animation to be
    * played when audio is playing
    */
-  public String audioAnimation = "Ironman";
+  public String audioAnimation = null;
 
   /**
    * pin number of controller

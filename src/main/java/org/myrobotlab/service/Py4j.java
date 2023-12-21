@@ -278,6 +278,15 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
     log.info("onPython {}", code);
     exec(code);
   }
+  
+  
+  public String onPythonMessage(Message msg) {
+    // create wrapper to tunnel incoming message - include original sender?
+    Message tunnelMsg = Message.createMessage(msg.sender, getName(), "onPythonMessage", msg);
+    String json = CodecUtils.toJson(tunnelMsg);
+    handler.send(json);
+    return json;
+  }
 
   /**
    * Opens an example "service" script maintained in myrobotlab
@@ -411,6 +420,11 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
         gateway.start();
         info("server started listening on %s:%d", gateway.getAddress(), gateway.getListeningPort());
         handler = (Executor) gateway.getPythonServerEntryPoint(new Class[] { Executor.class });
+
+//        sleep(100);
+//        String[] services = Runtime.getServiceNames();
+//        sendRemote(Message.createMessage(getName(), "runtime", "onServiceNames", services));
+
       } else {
         log.info("Py4j gateway server already started");
       }
@@ -523,11 +537,10 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
   @Override
   public void startService() {
     super.startService();
-    Py4jConfig c = (Py4jConfig)config;
-    if (c.scriptRootDir == null) {
-        c.scriptRootDir = new File(getDataInstanceDir()).getAbsolutePath();
+    if (config.scriptRootDir == null) {
+      config.scriptRootDir = new File(getDataInstanceDir()).getAbsolutePath();
     }
-    File dataDir = new File(c.scriptRootDir);
+    File dataDir = new File(config.scriptRootDir);
     dataDir.mkdirs();
     // start the py4j socket server
     start();

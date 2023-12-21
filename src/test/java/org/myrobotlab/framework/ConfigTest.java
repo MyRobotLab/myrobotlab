@@ -162,7 +162,6 @@ public class ConfigTest extends AbstractTest {
     Runtime runtime = Runtime.getInstance();    
     Runtime.load("mouth", "MarySpeech");
     MarySpeechConfig mouth = (MarySpeechConfig)runtime.getConfig("mouth");
-    mouth.listeners = new ArrayList<Listener>();    
     mouth.listeners.add(new Listener("publishStartSpeaking", "fakeListener"));
     Runtime.saveConfig("mouth", mouth);
     MarySpeechConfig mary = (MarySpeechConfig)runtime.getConfig("mouth");
