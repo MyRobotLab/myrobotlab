@@ -110,27 +110,33 @@ class MessageHandler(metaclass=SingletonMeta):
 
     def __init__(self):
         global runtime
-        # initializing stdout and stderr
-        print("initializing")
-        self.name = None
-        self.stdout = sys.stdout
-        self.stderr = sys.stderr
-        # registry is registry of py4j services
-        self.registry = {}
-        # registry_handlers is registry of python handlers for java proxies
-        self.registry_handlers = {}
-        sys.stdout = self
-        sys.stderr = self
-        self.gateway = JavaGateway(
-            callback_server_parameters=CallbackServerParameters(),
-            python_server_entry_point=self,
-            gateway_parameters=GatewayParameters(auto_convert=True, auto_field=True),
-        )
-        self.runtime = self.gateway.jvm.org.myrobotlab.service.Runtime.getInstance()
-        # FIXME - REMOVE THIS - DO NOT SET ANY GLOBALS !!!!
-        runtime = self.runtime
-        self.py4j = None  # need to wait until name is set
-        print("initialized ... waiting for name to be set")
+        try:
+            # initializing stdout and stderr
+            print("initializing")
+            self.name = None
+            self.stdout = sys.stdout
+            self.stderr = sys.stderr
+            # registry is registry of py4j services
+            self.registry = {}
+            # registry_handlers is registry of python handlers for java proxies
+            self.registry_handlers = {}
+            sys.stdout = self
+            sys.stderr = self
+            # print("creating gateway")
+            self.gateway = JavaGateway(
+                callback_server_parameters=CallbackServerParameters(),
+                python_server_entry_point=self,
+                gateway_parameters=GatewayParameters(
+                    auto_convert=True, auto_field=True
+                ),
+            )
+            self.runtime = self.gateway.jvm.org.myrobotlab.service.Runtime.getInstance()
+            # FIXME - REMOVE THIS - DO NOT SET ANY GLOBALS !!!!
+            runtime = self.runtime
+            self.py4j = None  # need to wait until name is set
+            print("initialized ... waiting for name to be set")
+        except Exception as e:
+            print(e)
 
     def construct_runtime(self):
         """

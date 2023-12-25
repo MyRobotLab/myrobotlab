@@ -180,6 +180,20 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
     openedScripts.put(scriptName, new Script(scriptName, code));
     broadcastState();
   }
+  
+  /**
+   * If autostartPython is true, Py4j will start a process on starting and
+   * connect the stdout/stdin streams to be redirected to the UI
+   * @param b
+   * @return
+   */
+  public boolean autostartPython(boolean b) {
+    config.autostartPython = b;
+    if (config.autostartPython && pythonProcess == null) {
+      startPythonProcess();
+    }    
+    return b;
+  }
 
   /**
    * removes script from memory of openScripts
@@ -546,7 +560,9 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
     start();
     sleep(300);
     // start the python process which starts the Py4j.py MessageHandler
-    startPythonProcess();
+    if (config.autostartPython) {
+      startPythonProcess();
+    }
   }
 
   /**
@@ -566,6 +582,8 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
     if (pythonProcess != null) {
       log.info("shutting down python process");
       pythonProcess.process.destroy();
+      pythonProcess.gobbler.interrupt();
+      pythonProcess = null;
     }
   }
 
