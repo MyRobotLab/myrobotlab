@@ -58,6 +58,20 @@ import org.slf4j.Logger;
 public class InMoov2 extends Service<InMoov2Config>
     implements ServiceLifeCycleListener, SpeechListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
+  public class Heartbeat {
+    public long ts = System.currentTimeMillis();
+    public String state;
+    public List<LogEntry> errors;
+    double batteryLevel = 100;
+    
+    public Heartbeat(InMoov2 inmoov) {
+      this.state = inmoov.state;
+      this.errors = inmoov.errors;
+      
+
+    }
+  }
+
   public class Heart implements Runnable {
     private final ReentrantLock lock = new ReentrantLock();
     private Thread thread;
@@ -67,7 +81,7 @@ public class InMoov2 extends Service<InMoov2Config>
       if (lock.tryLock()) {
         try {
           while (!Thread.currentThread().isInterrupted()) {
-            invoke("publishHeartbeat", getName());
+            invoke("publishHeartbeat");
             Thread.sleep(config.heartbeatInterval);
           }
         } catch (InterruptedException ignored) {
@@ -253,6 +267,8 @@ public class InMoov2 extends Service<InMoov2Config>
 
   protected String voiceSelected;
 
+  protected Double batteryLevel = 100.0;
+
   public InMoov2(String n, String id) {
     super(n, id);
     locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
@@ -347,13 +363,15 @@ public class InMoov2 extends Service<InMoov2Config>
       // Although this exposes type, it does use startPeer
       // which allows the potential of the user switching types of processors
       // if the processor
+
+      // TODO - make Py4j without zombies and more robust
       Py4j py4j = (Py4j) startPeer("py4j");
       if (!py4j.isReady()) {
         log.warn("{} not ready....", getPeerName("py4j"));
         return;
       }
-//      String code = FileIO.toString(getResourceDir() + fs + "InMoov2.py");
-//      py4j.exec(code);
+      String code = FileIO.toString(getResourceDir() + fs + "InMoov2.py");
+      py4j.exec(code);
 
       // TODO - MAKE BOOT REPORT !!!! deliver it on a heartbeat
       runtime.invoke("publishConfigList");
@@ -1239,81 +1257,6 @@ public class InMoov2 extends Service<InMoov2Config>
     unsubscribe("python", "publishStatus", this.getName(), "onGestureStatus");
   }
 
-  /**
-   * A generalized recurring event which can preform checks and various other
-   * methods or tasks. Heartbeats will not start until after boot stage.
-   */
-  public void onHeartbeat(String name) {
-    try {
-      // heartbeats can start before config is
-      // done processing - so the following should
-      // not be dependent on config
-
-      if (!hasBooted) {
-        log.info("boot hasn't completed, will not process heartbeat");
-        boot();
-      }
-      
-       Long lastActivityTime = getLastActivityTime();
-
-      // FIXME lastActivityTime != 0 is bogus - the value should be null if
-      // never set
-      if (config.stateIdleInterval != null && lastActivityTime != null && lastActivityTime != 0
-          && lastActivityTime + (config.stateIdleInterval * 1000) < System.currentTimeMillis()) {
-        stateLastIdleTime = lastActivityTime;
-      }
-
-      if (System.currentTimeMillis() > stateLastIdleTime + (config.stateIdleInterval * 1000)) {
-        fsm.fire("idle");
-        stateLastIdleTime = System.currentTimeMillis();
-      }
-
-      // interval event firing
-      if (config.stateRandomInterval != null && System.currentTimeMillis() > stateLastRandomTime + (config.stateRandomInterval * 1000)) {
-        // fsm.fire("random");
-        stateLastRandomTime = System.currentTimeMillis();
-      }
-      
-      
-    } catch (Exception e) {
-      error(e);
-    }
-
-    if (config.pirOnFlash && isPeerStarted("pir") && isPirOn) {
-      flash("pir");
-    }
-
-    if (config.batteryInSystem) {
-      double batteryLevel = Runtime.getBatteryLevel();
-      invoke("publishBatteryLevel", batteryLevel);
-      // FIXME - thresholding should always have old value or state
-      // so we don't pump endless errors
-      if (batteryLevel < 5) {
-        error("battery level < 5 percent");
-        // systemEvent(BATTERY ERROR)
-      } else if (batteryLevel < 10) {
-        warn("battery level < 10 percent");
-        // systemEvent(BATTERY WARN)
-      }
-    }
-
-    // flash error until errors are cleared
-    if (config.flashOnErrors) {
-      if (errors.size() > 0) {
-        invoke("publishFlash", "error");
-      } else {
-        invoke("publishFlash", "heartbeat");
-      }
-    }
-
-  }
-
-  public void onInactivity() {
-    log.info("onInactivity");
-
-    // powerDown ?
-
-  }
 
   /**
    * Central hub of input motion control. Potentially, all input from joysticks,
@@ -1693,20 +1636,82 @@ public class InMoov2 extends Service<InMoov2Config>
    * Checks battery, flashes leds and processes all the configured checks in
    * onHeartbeat at a regular interval
    */
-  public String publishHeartbeat(String name) {
+  public Heartbeat publishHeartbeat() {
     log.info("publishHeartbeat");
-    
-    // external processing if booted
-    if (!"boot".equals(state)) {
-      // FIXME - this needs to be in config
-      // FIXME - change peer name to "processor"
-      String defaultProcessor = getPeerName("py4j");
-      Message heartbeat = Message.createMessage(getName(), defaultProcessor, "onHeartbeat", getName());
-      // FIXME - is this too much abstraction .. to publish as well as configurable send ?      
-      invoke("publishProcessMessage", heartbeat);
+    Heartbeat heartbeat = new Heartbeat(this);
+    try {
+
+      if ("boot".equals(state)) {
+        // continue booting
+        log.info("boot hasn't completed, will not process heartbeat");
+        boot();
+        return heartbeat;
+      }
+
+      Long lastActivityTime = getLastActivityTime();
+
+      // FIXME lastActivityTime != 0 is bogus - the value should be null if
+      // never set
+      if (config.stateIdleInterval != null && lastActivityTime != null && lastActivityTime != 0
+          && lastActivityTime + (config.stateIdleInterval * 1000) < System.currentTimeMillis()) {
+        stateLastIdleTime = lastActivityTime;
+      }
+
+      if (System.currentTimeMillis() > stateLastIdleTime + (config.stateIdleInterval * 1000)) {
+        fsm.fire("idle");
+        stateLastIdleTime = System.currentTimeMillis();
+      }
+
+      // interval event firing
+      if (config.stateRandomInterval != null && System.currentTimeMillis() > stateLastRandomTime + (config.stateRandomInterval * 1000)) {
+        // fsm.fire("random");
+        stateLastRandomTime = System.currentTimeMillis();
+      }
+
+    } catch (Exception e) {
+      error(e);
     }
-    
-    return name;
+
+    if (config.pirOnFlash && isPeerStarted("pir") && isPirOn) {
+      flash("pir");
+    }
+
+    if (config.batteryInSystem) {
+      double batteryLevel = Runtime.getBatteryLevel();
+      invoke("publishBatteryLevel", batteryLevel);
+      // FIXME - thresholding should always have old value or state
+      // so we don't pump endless errors
+      if (batteryLevel < 5) {
+        error("battery level < 5 percent");
+        // systemEvent(BATTERY ERROR)
+      } else if (batteryLevel < 10) {
+        warn("battery level < 10 percent");
+        // systemEvent(BATTERY WARN)
+      }
+    }
+
+    // flash error until errors are cleared
+    if (config.flashOnErrors) {
+      if (errors.size() > 0) {
+        invoke("publishFlash", "error");
+      } else {
+        invoke("publishFlash", "heartbeat");
+      }
+    }
+
+    // FIXME - add errors to heartbeat
+    processMessage("onHeartbeat", heartbeat);
+    return heartbeat;
+  }
+
+  public void processMessage(String method, Object data) {
+    // FIXME - this needs to be in config
+    // FIXME - change peer name to "processor"
+    String processor = getPeerName("py4j");
+    Message msg = Message.createMessage(getName(), processor, method, data);
+    // FIXME - is this too much abstraction .. to publish as well as
+    // configurable send ?
+    invoke("publishProcessMessage", msg);
   }
 
   /**

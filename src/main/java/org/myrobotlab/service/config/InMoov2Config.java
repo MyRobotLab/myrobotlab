@@ -470,6 +470,8 @@ public class InMoov2Config extends ServiceConfig {
     neoPixel.currentAnimation = "Ironman";
 
     // remove undesired defaults from our default
+    // FIXME getPeerName(key) - 
+    // FIXME REMOVAL !!
     plan.remove(name + ".headTracking.tilt");
     plan.remove(name + ".headTracking.pan");
     plan.remove(name + ".headTracking.pid");
@@ -484,13 +486,10 @@ public class InMoov2Config extends ServiceConfig {
     plan.remove(name + ".eyeTracking.controller.serial");
     plan.remove(name + ".eyeTracking.cv");
 
-    // FIXME - should be getPeerName("neoPixel")
-    listeners.add(new Listener("publishFlash", name + ".neoPixel", "onLedDisplay"));
-
     // InMoov2 --to--> InMoov2 loopbacks 
     // allow user to override or extend with python
     listeners.add(new Listener("publishBoot", name));
-    listeners.add(new Listener("publishHeartbeat", name));
+    // listeners.add(new Listener("publishHeartbeat", name));
     listeners.add(new Listener("publishConfigFinished", name));
     listeners.add(new Listener("publishMoveHead", name));
     listeners.add(new Listener("publishMoveRightArm", name));

@@ -6,4 +6,6 @@ public class VertxConfig extends ServiceConfig {
   public Integer workerCount = 1;
   public boolean ssl = true;
 
+  public String root = "./resource/Vertx/build";
+
 }

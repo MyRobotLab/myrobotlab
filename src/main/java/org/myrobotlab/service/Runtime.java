@@ -310,7 +310,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   /**
    * available Locales
    */
-  transient protected Map<String, Locale> locales;
+  protected Map<String, Locale> locales;
 
   protected List<String> configList;
 
@@ -2603,6 +2603,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
     runtime.apply(rtConfig);
 
+    Plan plan = new Plan("runtime");
     // for every service listed in runtime registry - load it
     // FIXME - regex match on filesystem matches on *.yml
     for (String service : rtConfig.getRegistry()) {
@@ -2623,14 +2624,14 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         if (sc == null) {
           continue;
         }
-        runtime.loadService(new Plan("runtime"), service, sc.type, true, 0);
+        runtime.loadService(plan, service, sc.type, true, 0);
       } catch (Exception e) {
         runtime.error(e);
       }
     }
 
     // for all newly created services start them
-    Map<String, ServiceInterface> created = Runtime.createServicesFromPlan(new Plan("runtime"), null, null);
+    Map<String, ServiceInterface> created = Runtime.createServicesFromPlan(plan, null, null);
     for (ServiceInterface si : created.values()) {
       si.startService();
     }

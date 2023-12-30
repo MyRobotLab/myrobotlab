@@ -1518,8 +1518,10 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
       sc.listeners = newListeners;
     }
     
-    Collections.sort(sc.listeners, new MrlListenerComparator());
-    
+    if (sc.listeners != null) {
+      Collections.sort(sc.listeners, new MrlListenerComparator());
+    }
+       
     return sc;
   }
 
