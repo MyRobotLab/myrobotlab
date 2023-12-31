@@ -9,26 +9,24 @@ import java.util.Map;
 import java.util.Set;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.fsm.api.Event;
-import org.myrobotlab.fsm.api.EventHandler;
-import org.myrobotlab.fsm.api.SimpleEvent;
-import org.myrobotlab.fsm.api.State;
-import org.myrobotlab.fsm.core.SimpleTransition;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.FiniteStateMachine.StateChange;
 import org.myrobotlab.service.config.EmojiConfig;
 import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.interfaces.ImagePublisher;
+import org.myrobotlab.service.interfaces.StateChangeListener;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
+
 // emotionListener
 // Links
 // - http://googleemotionalindex.com/
-public class Emoji extends Service<EmojiConfig> implements TextListener, EventHandler, ImagePublisher {
+public class Emoji extends Service<EmojiConfig> implements TextListener, StateChangeListener, ImagePublisher {
 
   private static final long serialVersionUID = 1L;
 
@@ -38,7 +36,7 @@ public class Emoji extends Service<EmojiConfig> implements TextListener, EventHa
 
   transient HttpClient http = null;
 
-  State lastState = null;
+  String lastState = null;
 
   final Set<Integer> validSize = new HashSet<>();
 
@@ -192,16 +190,13 @@ public class Emoji extends Service<EmojiConfig> implements TextListener, EventHa
 
   // FIXME - publish events if desired...
   @Override
-  public void handleEvent(Event event) throws Exception {
+  public void onStateChange(StateChange event) {
     log.info("handleEvent {}", event);
-    SimpleEvent se = (SimpleEvent) event;
-    SimpleTransition transition = (SimpleTransition) se.getTransition();
     EmojiData emoji = new EmojiData();
-    emoji.name = transition.getTargetState().getName();
+    emoji.name = event.current;
     emoji.unicode = ((EmojiConfig) config).map.get(emoji.name);
     invoke("publishEmoji", emoji);
-    display(transition.getTargetState().getName());
-    // emotionalState.getCurrentState().getName();
+    display(event.current);
   }
 
   public void publishEmoji(EmojiData emoji) {
