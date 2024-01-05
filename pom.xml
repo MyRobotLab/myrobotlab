@@ -96,7 +96,7 @@
     <!-- force overriding property at command line, use ${maven.build.timestamp}-->
     <timestamp>${maven.build.timestamp}</timestamp>
     <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
-    <version>${project.version}</version>
+    <version>${version}</version>
     <GitBranch>${git.branch}</GitBranch>
     <username>${NODE_NAME}</username>
     <platform>${NODE_LABELS}</platform>
@@ -1876,7 +1876,7 @@
             </goals>
             <configuration>
               <finalName>myrobotlab</finalName>
-              <!-- finalName>myrobotlab-${git.branch}-${project.version}</finalName -->
+              <!-- finalName>myrobotlab-${git.branch}-${version}</finalName -->
               <shadedArtifactAttached>true</shadedArtifactAttached>
               <shadedClassifierName>myrobotlab-full</shadedClassifierName>
               <minimizeJar>false</minimizeJar>
@@ -1890,10 +1890,10 @@
                   implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <manifestEntries>
                     <Main-Class>org.myrobotlab.service.Runtime</Main-Class>
-                    <Major-Version>${project.version}</Major-Version>
-                    <Implementation-Version>${project.version}</Implementation-Version>
+                    <Major-Version>${version}</Major-Version>
+                    <Implementation-Version>${version}</Implementation-Version>
 
-                    <Build-Version>${project.version}</Build-Version>
+                    <Build-Version>${version}</Build-Version>
                     <Build-Time>${maven.build.timestamp}</Build-Time>
                     <Build-Host>${agent.name}</Build-Host>
                     <Build-User>${user.name}</Build-User>
