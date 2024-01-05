@@ -154,13 +154,17 @@ public class Jme3Util {
   public void rotateTo(String name, String axis, double degrees) {
     try {
       UserData o = jme.getUserData(name);
+      // error once
       if (o == null && !nullUserData.contains(name)) {
         // error only once
         jme.error("no user data for %s", name);
         nullUserData.add(name);
         return;
+      } else if (o == null) {
+        log.info("{} not found");
+        return;
       }
-
+      
       // default rotation is around Y axis unless specified
       Vector3f rotMask = Vector3f.UNIT_Y;
       if (axis == null && o.rotationMask != null) {
