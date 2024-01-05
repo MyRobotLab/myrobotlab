@@ -83,7 +83,7 @@ pipeline {
          steps {
             script {
                   sh '''
-                     mvn -Dfile.encoding=UTF-8 -Dproject.version=${VERSION} clean package jacoco:report -q
+                     mvn -Dfile.encoding=UTF-8 -Dversion=${VERSION} clean package jacoco:report -q
                   '''
             }
          }
