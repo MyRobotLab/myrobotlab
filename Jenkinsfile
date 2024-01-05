@@ -110,8 +110,7 @@ pipeline {
       }
 
       stage('publish-github') {
-         // when { expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' } }
-         when { expression { env.BRANCH_NAME == 'master'} }
+         when { expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' } }
          steps {
             withCredentials([string(credentialsId: 'supertick-github-token', variable: 'token')]) { // var name "token" is set in cred config and is case senstive
                echo "publishing ${VERSION_PREFIX}.${BUILD_NUMBER}"
