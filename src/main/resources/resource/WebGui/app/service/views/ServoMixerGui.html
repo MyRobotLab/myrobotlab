@@ -27,8 +27,9 @@
           </button>
         </span>
 
-        <input class="form-control" type="text" ng-model="gestureName" name="gestureName" id="gestureName" ng-init="" placeholder="Gesture Name" />
-        <button class="btn btn-default" ng-click="saveGesture(gestureName)">Save</button>
+        <input class="form-control" type="text" ng-model="state.selectedGestureFile" name="gestureName" id="gestureName" ng-init="" placeholder="Gesture Name" />
+        <button class="btn btn-default" ng-click="saveGesture()">Save</button>
+        <button class="btn btn-default" ng-click="openGesture()">Open</button>
       </td>
       <td>
         Actions
@@ -114,13 +115,17 @@
           <td>
             <button class="btn btn-default" ng-click="msg.rest()">Rest</button>
           </td>
+            <td></td>
+            <td>
+                &nbsp;<input type="checkbox" ng-model="selectAllCheckbox" ng-click="selectAll()"/ > select all
+            </td>
         </tr>
       </table>
       <br />
       <br />
       <div ng-model="dummy" ng-repeat="(key, value) in searchServos(searchServo.displayName)">
         <div class="sliderMixer">
-              <input type="checkbox" ng-model="servos[$index + 1].selected" />
+              <input type="checkbox" ng-model="mrl.getPanel(key).selected" />
           <div class="servomixer-hidden">
             <div service-body panel="mrl.getPanel(key)"></div>
           </div>
@@ -129,5 +134,3 @@
     </div>
   </div>
 </div>
-
-here {{servos}}

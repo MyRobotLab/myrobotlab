@@ -566,17 +566,15 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
         error("save gesture file name cannot be null");
         return;
       }
-
+      
       if (gesture == null) {
-        error("gesture json cannot be null");
-        return;
+        log.info("creating empty gesture");
+        gesture = new Gesture();
       }
 
       if (!filename.toLowerCase().endsWith(".yml")) {
         filename += ".yml";
       }
-
-      // Gesture seq = CodecUtils.fromJson(json, Gesture.class);
 
       if (gesture != null) {
         String path = config.gesturesDir + fs + filename;
@@ -756,6 +754,10 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
     for (String servoName : servos) {
       ServoControl sc = (ServoControl)Runtime.getService(servoName);
       Map<String, Object> posAndSpeed = new TreeMap<>();
+      if (sc == null) {
+        error("%s not a valid service name", servoName);
+        continue;
+      }
       posAndSpeed.put("position", sc.getCurrentInputPos());
       posAndSpeed.put("speed", sc.getSpeed());
       moves.put(servoName, posAndSpeed);

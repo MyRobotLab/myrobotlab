@@ -30,8 +30,6 @@ public class InMoov2Config extends ServiceConfig {
    */
   public boolean batteryInSystem = false;
 
-  public String bootAnimation = "Theater Chase";
-
   /**
    * enable custom sound map for state changes
    */
@@ -86,8 +84,6 @@ public class InMoov2Config extends ServiceConfig {
    * default to null - allow the OS to set it, unless explicilty set
    */
   public String locale = null;
-
-  public boolean neoPixelBootGreen = true;
 
   public boolean neoPixelDownloadBlue = true;
 
@@ -172,7 +168,7 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "ear", "WebkitSpeechRecognition", false);
     addDefaultPeerConfig(plan, name, "eyeTracking", "Tracking", false);
     addDefaultPeerConfig(plan, name, "fsm", "FiniteStateMachine", false);
-    addDefaultPeerConfig(plan, name, "log", "Log", false);
+    addDefaultPeerConfig(plan, name, "log", "Log", true);
     addDefaultPeerConfig(plan, name, "gpt3", "Gpt3", false);
     addDefaultPeerConfig(plan, name, "head", "InMoov2Head", false);
     addDefaultPeerConfig(plan, name, "headTracking", "Tracking", false);
@@ -355,14 +351,16 @@ public class InMoov2Config extends ServiceConfig {
     fsm.current = "boot";
     fsm.transitions.add(new Transition("boot", "wake", "wake"));
     fsm.transitions.add(new Transition("wake", "idle", "idle"));
-    fsm.transitions.add(new Transition("firstInit", "idle", "idle"));
+    fsm.transitions.add(new Transition("first_init", "idle", "idle"));
     fsm.transitions.add(new Transition("idle", "random", "random"));
     fsm.transitions.add(new Transition("random", "idle", "idle"));
     fsm.transitions.add(new Transition("idle", "sleep", "sleep"));
     fsm.transitions.add(new Transition("sleep", "wake", "wake"));
-    fsm.transitions.add(new Transition("idle", "powerDown", "powerDown"));
-    fsm.transitions.add(new Transition("wake", "firstInit", "firstInit"));
-    // powerDown to shutdown
+    fsm.transitions.add(new Transition("sleep", "power_down", "power_down"));
+    fsm.transitions.add(new Transition("idle", "power_down", "power_down"));
+    fsm.transitions.add(new Transition("wake", "first_init", "first_init"));
+    fsm.transitions.add(new Transition("idle", "first_init", "first_init"));
+    // power_down to shutdown
     // fsm.transitions.add(new Transition("systemCheck", "systemCheckFinished",
     // "awake"));
     // fsm.transitions.add(new Transition("awake", "sleep", "sleeping"));
@@ -491,15 +489,9 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishBoot", name));
     // listeners.add(new Listener("publishHeartbeat", name));
     listeners.add(new Listener("publishConfigFinished", name));
-    listeners.add(new Listener("publishMoveHead", name));
-    listeners.add(new Listener("publishMoveRightArm", name));
-    listeners.add(new Listener("publishMoveLeftArm", name));
-    listeners.add(new Listener("publishMoveRightHand", name));
-    listeners.add(new Listener("publishMoveLeftHand", name));
-    listeners.add(new Listener("publishMoveTorso", name));
-    listeners.add(new Listener("publishStateChange", name));
 
     LogConfig log = (LogConfig) plan.get(getPeerName("log"));
+    log.level = "WARN";
     log.listeners.add(new Listener("publishLogEvents", name));
 
     // mouth_audioFile.listeners.add(new Listener("publishAudioEnd", name));
@@ -529,7 +521,7 @@ public class InMoov2Config extends ServiceConfig {
     // mouth_audioFile.listeners.add(new Listener("publishAudioEnd", name));
     // mouth_audioFile.listeners.add(new Listener("publishAudioStart", name));
 
-    fsm.listeners.add(new Listener("publishStateChange", name, "publishStateChange"));
+    fsm.listeners.add(new Listener("publishStateChange", name));
 
     return plan;
   }

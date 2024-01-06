@@ -39,9 +39,9 @@ import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.SpeechSynthesisConfig;
+import org.myrobotlab.service.data.Classification;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Locale;
-import org.myrobotlab.service.data.SensorData;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.LocaleProvider;
@@ -59,18 +59,21 @@ public class InMoov2 extends Service<InMoov2Config>
     implements ServiceLifeCycleListener, SpeechListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
   public class Heartbeat {
+    public long count = 0;
     public long ts = System.currentTimeMillis();
     public String state;
     public List<LogEntry> errors;
     double batteryLevel = 100;
+    public boolean isPirOn = false;
     
     public Heartbeat(InMoov2 inmoov) {
       this.state = inmoov.state;
       this.errors = inmoov.errors;
-      
-
+      this.count = inmoov.heartbeatCount;
+      this.isPirOn = inmoov.isPirOn;
     }
   }
+  
 
   public class Heart implements Runnable {
     private final ReentrantLock lock = new ReentrantLock();
@@ -164,12 +167,6 @@ public class InMoov2 extends Service<InMoov2Config>
     }
     return true;
   }
-
-  /**
-   * Allows or prevents sensor input from processing. Initial boot prevents
-   * sensor data from interfering with booting.
-   */
-  protected boolean allowSensorInput = false;
 
   /**
    * number of times waited in boot state
@@ -388,15 +385,6 @@ public class InMoov2 extends Service<InMoov2Config>
         loadGestures();
       }
 
-      // TODO
-
-      // FIXME - find good way of running an animation "through" a state
-      if (config.neoPixelBootGreen && getPeer("neoPixel") != null) {
-        NeoPixel neoPixel = (NeoPixel) getPeer("neoPixel");
-        if (neoPixel != null) {
-          // invoke("publishPlayAnimation", config.bootAnimation);
-        }
-      }
 
       if (config.startupSound) {
         // BAD WAY : reference to type, npe prone
@@ -417,9 +405,9 @@ public class InMoov2 extends Service<InMoov2Config>
       }
 
       // FIXME - find good way of running an animation "through" a state
-      if (config.neoPixelBootGreen) {
-        invoke("publishPlayAnimation", config.bootAnimation);
-      }
+//      if (config.neoPixelBootGreen) {
+//        invoke("publishPlayAnimation", config.bootAnimation);
+//      }
 
       // TODO - all reports could be done here or minimally
       // report gathering
@@ -755,6 +743,7 @@ public class InMoov2 extends Service<InMoov2Config>
     fsm.fire(event);
   }
 
+  @Deprecated /* remove all state functions ! */
   public void firstInit() {
     log.info("firstInit");
     // cheap way to prevent race condition
@@ -768,6 +757,17 @@ public class InMoov2 extends Service<InMoov2Config>
     }
   }
 
+  /**
+   * Generalized callback for a classification event
+   * @param classification
+   * @return
+   */
+  public Classification onClassification(Classification classification) {
+    processMessage("onClassification", classification);
+    return classification;
+  }
+  
+  
   /**
    * used to configure a flashing event - could use configuration to signal
    * different colors and states
@@ -1286,7 +1286,7 @@ public class InMoov2 extends Service<InMoov2Config>
   // return Message.createMessage(getName(), getName(), method, data);
   // }
 
-  /**
+/**
    * Centralized logging system will have all logging from all services,
    * including lower level logs that do not propegate as statuses
    * 
@@ -1298,8 +1298,22 @@ public class InMoov2 extends Service<InMoov2Config>
     for (LogEntry entry : log) {
       if ("ERROR".equals(entry.level) && errors.size() < 100) {
         errors.add(entry);
+        // invoke("publishError", entry);
       }
-    }
+    }    
+  }
+
+// use hearbeat to process errors
+//  public LogEntry publishError(LogEntry error) {
+//    processMessage("onError", error);
+//    return error;
+//  }
+  
+  /**
+   * clear current errors
+   */
+  public void clearErrors() {
+    errors.clear();
   }
 
   public void onMoveHead(Map<String, Double> map) {
@@ -1364,12 +1378,13 @@ public class InMoov2 extends Service<InMoov2Config>
 
   public void onPirOn() {
     isPirOn = true;
-    // one advantage of re-publishing from inmoov - getName parameter can be
-    // added
-    if (allowSensorInput && !"boot".equals(getState())) {
-      SensorData pir = new SensorData(getName(), "Pir", isPirOn);
-      invoke("publishSensorData", pir);
-    }
+    processMessage("onPirOn");
+  }
+  
+  
+  public void onPirOff() {
+    isPirOn = false;    
+    processMessage("onPirOff");
   }
 
   @Override
@@ -1450,33 +1465,35 @@ public class InMoov2 extends Service<InMoov2Config>
    */
   public FiniteStateMachine.StateChange onStateChange(FiniteStateMachine.StateChange stateChange) {
     try {
-      log.error("onStateChange {}", stateChange);
+      log.info("onStateChange {}", stateChange);
 
       lastState = state;
       state = stateChange.state;
+      
+      processMessage("onStateChange", stateChange);
 
-      // leaving random state
-      if ("random".equals(lastState) && !"random".equals(state) && isPeerStarted("random")) {
-        Random random = (Random) getPeer("random");
-        random.disable();
-      }
-
-      if ("wake".equals(lastState)) {
-        invoke("publishStopAnimation");
-      }
-
-      if (config.systemEventStateChange) {
-        systemEvent("ON STATE %s", state);
-      }
-
-      if (config.customSound && customSoundMap.containsKey(state)) {
-        invoke("publishPlayAudioFile", customSoundMap.get(state));
-      }
+//      // leaving random state
+//      if ("random".equals(lastState) && !"random".equals(state) && isPeerStarted("random")) {
+//        Random random = (Random) getPeer("random");
+//        random.disable();
+//      }
+//
+//      if ("wake".equals(lastState)) {
+//        invoke("publishStopAnimation");
+//      }
+//
+//      if (config.systemEventStateChange) {
+//        systemEvent("ON STATE %s", state);
+//      }
+//
+//      if (config.customSound && customSoundMap.containsKey(state)) {
+//        invoke("publishPlayAudioFile", customSoundMap.get(state));
+//      }
 
       // TODO - only a few InMoov2 state defaults will be called here
-      if (stateDefaults.contains(state)) {
-        invoke(state);
-      }
+//      if (stateDefaults.contains(state)) {
+//        invoke(state);
+//      }
 
       // FIXME add topic changes to AIML here !
       // FIXME add clallbacks to inmmoov2 library
@@ -1601,12 +1618,10 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   public double publishBatteryLevel(double d) {
+    processMessage("onBatteryLevel", d);
     return d;
   }
 
-  public void publishBoot() {
-    log.info("publishBoot");
-  }
 
   /**
    * "re"-publishing runtime config list, because I don't want to fix the js
@@ -1637,12 +1652,14 @@ public class InMoov2 extends Service<InMoov2Config>
    * onHeartbeat at a regular interval
    */
   public Heartbeat publishHeartbeat() {
-    log.info("publishHeartbeat");
+    log.debug("publishHeartbeat");
+    heartbeatCount++;
     Heartbeat heartbeat = new Heartbeat(this);
     try {
 
       if ("boot".equals(state)) {
-        // continue booting
+        // continue booting - we don't put heartbeats in user/python space
+        // until java-land is done booting
         log.info("boot hasn't completed, will not process heartbeat");
         boot();
         return heartbeat;
@@ -1672,9 +1689,9 @@ public class InMoov2 extends Service<InMoov2Config>
       error(e);
     }
 
-    if (config.pirOnFlash && isPeerStarted("pir") && isPirOn) {
-      flash("pir");
-    }
+//    if (config.pirOnFlash && isPeerStarted("pir") && isPirOn) {
+////      flash("pir");
+//    }
 
     if (config.batteryInSystem) {
       double batteryLevel = Runtime.getBatteryLevel();
@@ -1693,9 +1710,9 @@ public class InMoov2 extends Service<InMoov2Config>
     // flash error until errors are cleared
     if (config.flashOnErrors) {
       if (errors.size() > 0) {
-        invoke("publishFlash", "error");
+//        invoke("publishFlash", "error");
       } else {
-        invoke("publishFlash", "heartbeat");
+//         invoke("publishFlash", "heartbeat");
       }
     }
 
@@ -1703,15 +1720,28 @@ public class InMoov2 extends Service<InMoov2Config>
     processMessage("onHeartbeat", heartbeat);
     return heartbeat;
   }
+  
+  public void processMessage(String method) {
+    processMessage(method, null);
+  }
 
+  /**
+   * Will publish processing messages to the processor(s) currently 
+   * subscribed.
+   * @param method
+   * @param data
+   */
   public void processMessage(String method, Object data) {
-    // FIXME - this needs to be in config
-    // FIXME - change peer name to "processor"
+    // User processing should not occur until after boot has completed
+    if (!state.equals("boot")) {
+      // FIXME - this needs to be in config
+      // FIXME - change peer name to "processor"
     String processor = getPeerName("py4j");
     Message msg = Message.createMessage(getName(), processor, method, data);
     // FIXME - is this too much abstraction .. to publish as well as
     // configurable send ?
     invoke("publishProcessMessage", msg);
+    }
   }
 
   /**
@@ -1817,34 +1847,6 @@ public class InMoov2 extends Service<InMoov2Config>
    */
   public String publishSpeakingFlash(String name) {
     return name;
-  }
-
-  /**
-   * The integration between the FiniteStateMachine (fsm) and the InMoov2
-   * service and potentially other services (Python, ProgramAB) happens here.
-   * 
-   * After boot all state changes get published here.
-   * 
-   * Some InMoov2 service methods will be called here for "default
-   * implemenation" of states. If a user doesn't want to have that default
-   * implementation, they can change it by changing the definition of the state
-   * machine, and have a new state which will call a Python inmoov2 library
-   * callback. Overriding, appending, or completely transforming the behavior is
-   * all easily accomplished by managing the fsm and python inmoov2 library
-   * callbacks.
-   * 
-   * Python inmoov2 callbacks ProgramAB topic switching
-   * 
-   * Depending on config:
-   * 
-   * 
-   * @param stateChange
-   * @return
-   */
-  public FiniteStateMachine.StateChange publishStateChange(FiniteStateMachine.StateChange stateChange) {
-    log.info("publishStateChange {}", stateChange);
-    stateChange.src = getName();
-    return stateChange;
   }
 
   /**
