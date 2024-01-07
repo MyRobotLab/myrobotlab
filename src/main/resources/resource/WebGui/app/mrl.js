@@ -115,7 +115,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         transport: 'websocket',
         maxRequest: 100,
         maxReconnectOnClose: 100,
-        enableProtocol: true,
+        enableProtocol: false,
         timeout: -1,
         // infinite idle timeout
         fallbackTransport: 'long-polling',
@@ -323,11 +323,20 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         let simpleTypeName = _self.getSimpleName(registration.typeKey)
 
+        // FIXME - currently handles all unknown types through kludgy test
+        if (!simpleTypeName || simpleTypeName.includes(':') || simpleTypeName == 'Unknown') {
+            simpleTypeName = "Unknown";
+            registration.typeKey = "Unknown"
+        }
+
         serviceTypes[simpleTypeName] = registration.typeKey
 
         // initial de-serialization of state
         let service = JSON.parse(registration.state)
         registry[fullname] = service
+        if (simpleTypeName == "Unknown") {
+            service.simpleName = "Unknown"
+        }
 
         // now add a panel - with the function it registered
         // _self.addServicePanel(service)
@@ -557,6 +566,10 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 }
             }
         } else {
+
+            if (!service.name) {
+                console.error('uh oh')
+            }
 
             if (service.name.includes('@')) {
                 return service.name
@@ -959,8 +972,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         let createPanel = function(fullname, type, x, y, width, height, zIndex, data) {
 
-            let displayName = fullname.endsWith(_self.remoteId)?_self.getShortName(fullname):fullname
-            console.error('createPanel', _self.remoteId, displayName)
+            let displayName = fullname.endsWith(_self.remoteId) ? _self.getShortName(fullname) : fullname
+            console.info('createPanel', _self.remoteId, displayName)
             let panel = {
                 simpleName: _self.getSimpleName(type),
                 name: fullname,
@@ -1109,7 +1122,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             }
 
             panels[newPanel.name].name = newPanel.name
-            panels[newPanel.name].displayName = _self.getShortName(newPanel.name) 
+            panels[newPanel.name].displayName = _self.getShortName(newPanel.name)
             if (newPanel.simpleName) {
                 panels[newPanel.name].simpleName = newPanel.simpleName
             }
@@ -1198,6 +1211,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             if (!tabsViewCtrl || !_self.getService(serviceName)) {
                 console.error('tabsViewCtrl is null - cannot changeTab')
             } else {
+                console.info("changeTab !", serviceName)
                 tabsViewCtrl.changeTab(serviceName)
                 history.push(serviceName)
             }
@@ -1207,7 +1221,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             if (!tabsViewCtrl) {
                 console.error('tabsViewCtrl is null - cannot goBack')
             } else {
-                tabsViewCtrl.goBack()                
+                tabsViewCtrl.goBack()
             }
         }
 
@@ -1235,6 +1249,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 var deferred = $q.defer()
                 if (!msgInterfaces.hasOwnProperty(name)) {
                     //console.log(name + ' getMsgInterface ')
+
                     msgInterfaces[name] = {
                         "name": name,
                         "temp": {},
@@ -1409,6 +1424,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 // - name + '@' + _self.id)
                 _self.subscribeToServiceMethod(msgInterfaces[name].onMsg, name, 'getMethodMap')
                 msgInterfaces[name].getMethodMap()
+                // deferred.resolve("yay")
                 return deferred.promise
             },
             getPlatform: function() {
