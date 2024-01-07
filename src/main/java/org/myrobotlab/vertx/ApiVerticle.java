@@ -1,7 +1,5 @@
 package org.myrobotlab.vertx;
 
-import java.util.UUID;
-
 import org.myrobotlab.service.config.VertxConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,23 +42,26 @@ public class ApiVerticle extends AbstractVerticle {
     // create a router
     router = Router.router(vertx);
 
-    // handle cors requests
-    router.route().handler(CorsHandler.create("*").allowedMethod(HttpMethod.GET).allowedMethod(HttpMethod.OPTIONS).allowedHeader("Accept").allowedHeader("Authorization")
-        .allowedHeader("Content-Type"));
+    // handle cors requests - required for development setupProxy.js
+    CorsHandler cors = CorsHandler.create("*");
+    cors.allowedMethod(HttpMethod.GET);
+    cors.allowedMethod(HttpMethod.OPTIONS);
+    cors.allowedHeader("Accept");
+    cors.allowedHeader("Authorization");
+    cors.allowedHeader("Content-Type");
+    router.route().handler(cors);
 
-    StaticHandler root = StaticHandler.create(service.getConfig().root);
-    root.setCachingEnabled(false);
-    root.setDirectoryListing(true);
-    root.setIndexPage("index.html");
-    
-    router.route("/*").handler(root); // FIXME need a map of paths
-    
-    
-    StaticHandler root2 = StaticHandler.create("src/main/resources/resource");
-    root2.setCachingEnabled(false);
-    root2.setDirectoryListing(true);
-    root2.setIndexPage("index.html");
-    router.route("/*").handler(root2);
+    if (service.getConfig().root != null) {
+
+      for (String path : service.getConfig().root) {
+        StaticHandler root = StaticHandler.create(path);
+        root.setCachingEnabled(false);
+        root.setDirectoryListing(true);
+        root.setIndexPage("index.html");
+        router.route("/*").handler(root); // FIXME need a map of paths
+      }
+
+    }
 
     // VideoStreamHandler video = new VideoStreamHandler(service);
     // router.route("/video/*").handler(video);
