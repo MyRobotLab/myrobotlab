@@ -115,7 +115,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         transport: 'websocket',
         maxRequest: 100,
         maxReconnectOnClose: 100,
-        enableProtocol: true,
+        enableProtocol: false,
         timeout: -1,
         // infinite idle timeout
         fallbackTransport: 'long-polling',
@@ -324,7 +324,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         let simpleTypeName = _self.getSimpleName(registration.typeKey)
 
         // FIXME - currently handles all unknown types through kludgy test
-        if (!simpleTypeName || simpleTypeName.includes(':') || simpleTypeName == 'Unknown'){
+        if (!simpleTypeName || simpleTypeName.includes(':') || simpleTypeName == 'Unknown') {
             simpleTypeName = "Unknown";
             registration.typeKey = "Unknown"
         }
@@ -334,7 +334,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         // initial de-serialization of state
         let service = JSON.parse(registration.state)
         registry[fullname] = service
-        if (simpleTypeName == "Unknown"){
+        if (simpleTypeName == "Unknown") {
             service.simpleName = "Unknown"
         }
 
@@ -567,7 +567,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             }
         } else {
 
-            if (!service.name){
+            if (!service.name) {
                 console.error('uh oh')
             }
 
@@ -972,7 +972,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         let createPanel = function(fullname, type, x, y, width, height, zIndex, data) {
 
-            let displayName = fullname.endsWith(_self.remoteId)?_self.getShortName(fullname):fullname
+            let displayName = fullname.endsWith(_self.remoteId) ? _self.getShortName(fullname) : fullname
             console.info('createPanel', _self.remoteId, displayName)
             let panel = {
                 simpleName: _self.getSimpleName(type),
@@ -1122,7 +1122,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             }
 
             panels[newPanel.name].name = newPanel.name
-            panels[newPanel.name].displayName = _self.getShortName(newPanel.name) 
+            panels[newPanel.name].displayName = _self.getShortName(newPanel.name)
             if (newPanel.simpleName) {
                 panels[newPanel.name].simpleName = newPanel.simpleName
             }
@@ -1221,7 +1221,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             if (!tabsViewCtrl) {
                 console.error('tabsViewCtrl is null - cannot goBack')
             } else {
-                tabsViewCtrl.goBack()                
+                tabsViewCtrl.goBack()
             }
         }
 
@@ -1249,7 +1249,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 var deferred = $q.defer()
                 if (!msgInterfaces.hasOwnProperty(name)) {
                     //console.log(name + ' getMsgInterface ')
-                    
+
                     msgInterfaces[name] = {
                         "name": name,
                         "temp": {},
