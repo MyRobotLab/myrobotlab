@@ -11,6 +11,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.config.VertxConfig;
 import org.myrobotlab.service.interfaces.Gateway;
@@ -29,8 +30,9 @@ import io.vertx.core.http.ServerWebSocket;
  * most important part of Vertx. TODO: take advantage of publishing on the event
  * bus
  * 
- * see https://medium.com/@pvub/https-medium-com-pvub-vert-x-workers-6a8df9b2b9ee
- *      vertx workers
+ * see
+ * https://medium.com/@pvub/https-medium-com-pvub-vert-x-workers-6a8df9b2b9ee
+ * vertx workers
  * 
  * @author GroG
  *
@@ -40,6 +42,11 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
   private static final long serialVersionUID = 1L;
 
   private transient io.vertx.core.Vertx vertx = null;
+
+  /**
+   * If listening currently on port
+   */
+  protected boolean listening = false;
 
   public final static Logger log = LoggerFactory.getLogger(Vertx.class);
 
@@ -55,9 +62,7 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
     log.info("starting driver");
 
     /**
-     * FIXME - might have to revisit this This is a block comment, but takes
-     * advantage of javadoc pre non-formatting in ide to preserve the code
-     * formatting
+     * TODO - relevant ? - shutdown hook for vertx
      * 
      * <pre>
      * 
@@ -73,9 +78,16 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
      * </pre>
      */
 
+    // vertx = io.vertx.core.Vertx.vertx(new VertxOptions().setWorkerPoolSize(125).setBlockedThreadCheckInterval(100000));
     vertx = io.vertx.core.Vertx.vertx(new VertxOptions().setBlockedThreadCheckInterval(100000));
     vertx.deployVerticle(new ApiVerticle(this));
 
+    if (config.autoStartBrowser) {
+      log.info("auto starting default browser");
+      String startUrl = (String.format((config.ssl) ? "https:" : "http:") + String.format("//localhost:%d/index.html", config.port));
+      BareBonesBrowserLaunch.openURL(startUrl);
+    }
+    listening = true;
   }
 
   @Override
@@ -105,6 +117,7 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
         }
       });
     }
+    listening = false;
   }
 
   public static void main(String[] args) {
@@ -131,7 +144,7 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
     }
   }
 
-  // FIXME - refactor for bare minimum
+  // FIXME - refactor to bare minimum
 
   @Override /*
              * FIXME "Gateway" is server/service oriented not connecting thing -
@@ -147,7 +160,7 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
              * using Runtime's centralized connection info
              */
   public List<String> getClientIds() {
-    return Runtime.getInstance().getConnectionUuids(getName());
+    return Runtime.getInstance().getClientIds();
   }
 
   @Override /*
@@ -184,7 +197,34 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
     return Runtime.getInstance().isLocal(msg);
   }
 
-  public io.vertx.core.Vertx getVertx() {
-    return vertx;
+  /**
+   * Restart service on different listening port
+   * 
+   * @param port
+   */
+  public void setPort(int port) {
+    config.port = port;
+    boolean wasListening = listening;
+    if (listening) {
+      stop();
+    }
+    sleep(2000);
+    if (wasListening) {
+      start();
+    }
   }
+
+  /**
+   * Starts browser when server starts
+   * 
+   * @param autoStartBrowser
+   */
+  public void setAutoStartBrowser(boolean autoStartBrowser) {
+    config.autoStartBrowser = autoStartBrowser;
+  }
+
+  public void setSsl(boolean ssl) {
+    config.ssl = ssl;
+  }
+
 }
