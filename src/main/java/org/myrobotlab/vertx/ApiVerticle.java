@@ -1,6 +1,6 @@
 package org.myrobotlab.vertx;
 
-import java.util.UUID;
+import java.io.FileOutputStream;
 
 import org.myrobotlab.service.config.VertxConfig;
 import org.slf4j.Logger;
@@ -47,28 +47,43 @@ public class ApiVerticle extends AbstractVerticle {
     // handle cors requests - required for development setupProxy.js
     CorsHandler cors = CorsHandler.create("*");
     cors.allowedMethod(HttpMethod.GET);
+    cors.allowedMethod(HttpMethod.DELETE);
+    cors.allowedMethod(HttpMethod.PUT);
+    cors.allowedMethod(HttpMethod.POST);
     cors.allowedMethod(HttpMethod.OPTIONS);
     cors.allowedHeader("Accept");
     cors.allowedHeader("Authorization");
     cors.allowedHeader("Content-Type");
     router.route().handler(cors);
+
+    // added here before all the file system nonsense
+    router.route("/api/service/*").handler(new ApiHandler(service));
     
+    // comment this out and its insane performance
+    // file routing with merged roots is insanely slow !!!!
     if (service.getConfig().root != null) {
-    
-      for (String path: service.getConfig().root) {
+
+      for (String path : service.getConfig().root) {
         StaticHandler root = StaticHandler.create(path);
-        root.setCachingEnabled(false);
-        root.setDirectoryListing(true);
+        root.setCachingEnabled(true);
+        // root.setDirectoryListing(true);  Hellaciously SLOW !!!!
         root.setIndexPage("index.html");
+        // root.setCachingEnabled(true);
+        // root.setCacheEntryTimeout(0);
         router.route("/*").handler(root); // FIXME need a map of paths
       }
 
     }
     
+//    StaticHandler webgui2 = StaticHandler.create("src/main/resources/resource/Vertx/build");
+//    webgui2.setCachingEnabled(true);
+//    // root.setDirectoryListing(true);  Hellaciously SLOW !!!!
+//    webgui2.setIndexPage("index.html");
+//    router.route("/webgui2/*").handler(webgui2);
+
     // VideoStreamHandler video = new VideoStreamHandler(service);
     // router.route("/video/*").handler(video);
 
-    router.route("/api/service/*").handler(new ApiHandler(service));
 
     // create the HTTP server and pass the
     // "accept" method to the request handler
@@ -76,6 +91,23 @@ public class ApiVerticle extends AbstractVerticle {
 
     if (config.ssl) {
       SelfSignedCertificate certificate = SelfSignedCertificate.create();
+      
+      String path = certificate.certificatePath();
+      
+      // Manually installing the certificate into the system's trust store is required
+      // Below are example commands to add the certificate to the trust store on Linux (requires sudo/root access)
+      // Replace '/path/to/your/certificate.pem' with the actual path to your certificate file
+      
+      // # Copy the certificate to the system's trusted certificate location
+      // sudo cp /tmp/keyutil_localhost_5417591985169018746.crt /usr/local/share/ca-certificates/your_cert_name.crt
+      log.info("sudo cp {} /usr/local/share/ca-certificates/localhost-ts.crt", path);
+      log.info("sudo update-ca-certificates ");
+
+      // Add the certificate to the system's trust store
+      // You might need to convert it to a format acceptable by the trust store (e.g., .pem to .crt)
+      // Example for adding to the system's CA trust store on Linux (may vary for different distributions)
+      // sudo cp /path/to/your/certificate.pem /usr/local/share/ca-certificates/your_cert_name.crt
+      // sudo update-ca-certificates      
 
       // FIXME make/save/install the certificate so its valid on this machine
 

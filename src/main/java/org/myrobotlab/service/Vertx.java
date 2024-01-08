@@ -46,7 +46,7 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
   /**
    * If listening currently on port
    */
-  protected boolean isListening = false;
+  protected boolean listening = false;
 
   public final static Logger log = LoggerFactory.getLogger(Vertx.class);
 
@@ -78,15 +78,16 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
      * </pre>
      */
 
+    // vertx = io.vertx.core.Vertx.vertx(new VertxOptions().setWorkerPoolSize(125).setBlockedThreadCheckInterval(100000));
     vertx = io.vertx.core.Vertx.vertx(new VertxOptions().setBlockedThreadCheckInterval(100000));
     vertx.deployVerticle(new ApiVerticle(this));
 
     if (config.autoStartBrowser) {
       log.info("auto starting default browser");
-      String startUrl = String.format((config.ssl) ? "https:" : "http:" + "//localhost:%d/", config.port);
+      String startUrl = (String.format((config.ssl) ? "https:" : "http:") + String.format("//localhost:%d/index.html", config.port));
       BareBonesBrowserLaunch.openURL(startUrl);
     }
-    isListening = true;
+    listening = true;
   }
 
   @Override
@@ -116,7 +117,7 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
         }
       });
     }
-    isListening = false;
+    listening = false;
   }
 
   public static void main(String[] args) {
@@ -203,8 +204,8 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
    */
   public void setPort(int port) {
     config.port = port;
-    boolean wasListening = isListening;
-    if (isListening) {
+    boolean wasListening = listening;
+    if (listening) {
       stop();
     }
     sleep(2000);
