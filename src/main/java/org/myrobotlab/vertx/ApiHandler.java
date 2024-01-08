@@ -133,7 +133,7 @@ public class ApiHandler implements Handler<RoutingContext> {
       } else if ("post".equals(verb)) {
         handlePost(rc);
       } else {
-        log.info("got a request to handle http verb %s", verb);
+        log.warn("got a request to handle http verb %s", verb);
         return;
       }
 
