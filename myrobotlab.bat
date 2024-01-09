@@ -29,5 +29,4 @@ IF NOT "%*"=="" (
     )
 
     "%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime --log-level info -s vertx Vertx intro Intro python Python
-
 )
