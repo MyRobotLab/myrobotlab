@@ -15,7 +15,7 @@ public class WiiDarMeta extends MetaData {
   public WiiDarMeta() {
 
     addDescription("WiiDar.... who dar?  WiiDar!");
-    addDependency("wiiusej", "wiiusej", "wiiusej");
+    addDependency("wiiusej", "wiiusej", "0.0.1");
     addCategory("sensors");
     // no longer have hardware for this ...
     setAvailable(false);

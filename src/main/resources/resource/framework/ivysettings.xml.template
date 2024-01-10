@@ -1,4 +1,5 @@
 <ivysettings>
+  <credentials host="maven.pkg.github.com" realm="GitHub Package Registry" username="supertick" passwd="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"/>
    <settings defaultResolver="public"/>
        <resolvers>
          <chain name="public">

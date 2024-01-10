@@ -17,7 +17,7 @@ public class WiiMeta extends MetaData {
     addDescription("Wii mote control and sensor info");
     addCategory("control", "sensors");
 
-    addDependency("wiiusej", "wiiusej", "wiiusej");
+    addDependency("wiiusej", "wiiusej", "0.0.1");
     //
 
   }

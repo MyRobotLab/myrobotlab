@@ -16,6 +16,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.TreeSet;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
@@ -142,15 +144,17 @@ public class Security extends Service<ServiceConfig> implements AuthorizationPro
     // LoggingFactory.init(Level.INFO);
 
     Runtime.getInstance(args);
+    
+    Security security = Runtime.getSecurity();
+    System.out.println(security.encrypt("repo-key"));
+    System.out.println(security.getRepoKey());
 
-    Runtime.start("gui", "SwingGui");
     // Security security = Security.getInstance();
     // initializeStore("im a rockin rocker");
     Runtime.getSecurity().setKey("myKeyName", "XXDDLKERIOEJKLJ##$KJKJ#LJ@@");
     String key = Runtime.getSecurity().getKey("myKeyName");
     log.info("key is {}", key);
 
-    Security security = Runtime.getSecurity();
 
     security.setKey("amazon.polly.user.key", "XXXXXXXXXXXXXX");
     security.setKey("amazon.polly.user.secret", "XXXXXXXXXXXXXXXXXXXXXXXXXXXX");
@@ -220,6 +224,10 @@ public class Security extends Service<ServiceConfig> implements AuthorizationPro
 
   public boolean addGroup(String groupId) {
     return addGroup(groupId, false);
+  }
+  
+  public String getRepoKey() {
+    return decrypt(encryptedRepoKey);
   }
 
   public boolean addGroup(String groupId, boolean defaultAccess) {
@@ -784,5 +792,66 @@ public class Security extends Service<ServiceConfig> implements AuthorizationPro
   public ServiceConfig getConfig() {
     return config;
   }
+  
+  /**
+   * 16 byte initialization vector
+   */
+  private String initVector = "myrobotlabrocks!";
+  
+  /**
+   * At some point this could be replaced by the users key, but
+   * currently we only need this to decrypt repo reader personal access token
+   * to download dependency libraries from github, which SHOULD NOT require a
+   * PAT anyway
+   */
+  private String key = "replcewthuserkey";
+  
+  private String encryptedRepoKey = "yKPc6MH7zpRVE58Utji8uq26At64qn6fmDbXMhObcLHWVp451ONpXu6MHNUZj5Lp";
+  
+  public String encrypt(String toEncrypt) {
+    return encrypt(key, initVector, toEncrypt);
+  }
+
+  
+  public  String encrypt(String key, String initVector, String toEncrypt) {
+    try {
+        IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
+        SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+        cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
+
+        byte[] encrypted = cipher.doFinal(toEncrypt.getBytes());
+
+        return Base64.getEncoder().encodeToString(encrypted);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return null;
+}
+
+  public String decrypt(String encrypted) {
+    return decrypt(key, initVector, encrypted);
+  }
+  
+public  String decrypt(String key, String initVector, String encrypted) {
+    try {
+        IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
+        SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+        cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
+
+        byte[] original = cipher.doFinal(Base64.getDecoder().decode(encrypted));
+
+        return new String(original);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return null;
+}
+
 
 }
