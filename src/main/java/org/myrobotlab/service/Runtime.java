@@ -1414,6 +1414,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   }
 
   /**
+   * FIXME - terrible use a uuid
+   * 
    * unique id's are need for sendBlocking - to uniquely identify the message
    * this is a method to support that - it is unique within a process, but not
    * across processes
@@ -1422,7 +1424,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    */
   public static final synchronized long getUniqueID() {
     ++uniqueID;
-    return uniqueID;
+    return System.currentTimeMillis();
   }
 
   /**
@@ -3048,6 +3050,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       return Runtime.getService(parts[1]);
     } else if (parts.length == 2 && absPath.endsWith("/")) {
       ServiceInterface si = Runtime.getService(parts[1]);
+      if (si == null) {
+        return null;
+      }
       return si.getDeclaredMethodNames();
       /*
        * } else if (parts.length == 3 && !absPath.endsWith("/")) { // execute 0
