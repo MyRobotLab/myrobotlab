@@ -105,9 +105,9 @@ public class IvyWrapper extends Repo implements Serializable {
    * </pre>
    * 
    * @param location
-   *          - location of work directory
+   *                     - location of work directory
    * @param serviceTypes
-   *          - list of services to process
+   *                     - list of services to process
    * 
    */
   @Override
@@ -149,7 +149,8 @@ public class IvyWrapper extends Repo implements Serializable {
       // " <artifact name=\"foo-src\" type=\"%s\" ext=\"%s\"
       // conf=\"provided->master\"
       // />\n",
-      sb.append(String.format("    <artifact name=\"%s\" type=\"%s\" ext=\"%s\" />\n", dependency.getArtifactId(), dependency.getExt(), dependency.getExt()));
+      sb.append(String.format("    <artifact name=\"%s\" type=\"%s\" ext=\"%s\" />\n", dependency.getArtifactId(),
+          dependency.getExt(), dependency.getExt()));
     }
 
     // exclusions begin ---
@@ -235,7 +236,8 @@ public class IvyWrapper extends Repo implements Serializable {
           // " <artifact name=\"foo-src\" type=\"%s\" ext=\"%s\"
           // conf=\"provided->master\"
           // />\n",
-          sb.append(String.format("    <artifact name=\"%s\" type=\"%s\" ext=\"%s\" />\n", dependency.getArtifactId(), dependency.getExt(), dependency.getExt()));
+          sb.append(String.format("    <artifact name=\"%s\" type=\"%s\" ext=\"%s\" />\n", dependency.getArtifactId(),
+              dependency.getExt(), dependency.getExt()));
         }
 
         // exclusions begin ---
@@ -305,7 +307,8 @@ public class IvyWrapper extends Repo implements Serializable {
     // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
     // location + "/jar" + "/[originalname].[ext]", "-noterminate" };
     // [artifact]-[revision].[ext]
-    String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname].[ext]" };
+    String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml",
+        "-retrieve", location + "/jar" + "/[originalname].[ext]" };
     // String[] cmd = new String[] { "-settings", location +
     // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
     // location + "/jar" + "/[artifact]-[revision].[ext]" };
@@ -395,7 +398,8 @@ public class IvyWrapper extends Repo implements Serializable {
 
       // save repo.json file
       save();
-      publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of %s", library)));
+      publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED,
+          String.format("finished install of %s", library)));
 
     } catch (Exception e) {
       error(e.getMessage());
@@ -423,7 +427,8 @@ public class IvyWrapper extends Repo implements Serializable {
       return;
     }
 
-    publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_START, String.format("starting install of %s", (Object[]) serviceTypes)));
+    publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_START,
+        String.format("starting install of %s", (Object[]) serviceTypes)));
 
     log.info("installing {} services into {}", serviceTypes.length, location);
 
@@ -447,15 +452,15 @@ public class IvyWrapper extends Repo implements Serializable {
     cmd.add(location + "/jar" + "/[originalname].[ext]");
 
     int msgLevel = Message.MSG_WARN;
-    if (log.isWarnEnabled() || log.isErrorEnabled()) {
-      msgLevel = Message.MSG_WARN;
-      cmd.add("-warn");
-    } else {
+    if (log.isInfoEnabled()) {
       msgLevel = Message.MSG_INFO;
+    } else {
+      cmd.add("-warn");
     }
 
     StringBuilder sb = new StringBuilder();
-    sb.append("wget https://repo1.maven.org/maven2/org/apache/ivy/ivy/" + IVY_VERSION + "/ivy-" + IVY_VERSION + ".jar\n");
+    sb.append(
+        "wget https://repo1.maven.org/maven2/org/apache/ivy/ivy/" + IVY_VERSION + "/ivy-" + IVY_VERSION + ".jar\n");
     sb.append("java -jar ivy-" + IVY_VERSION + ".jar");
     for (String s : cmd) {
       sb.append(" ");
@@ -508,7 +513,8 @@ public class IvyWrapper extends Repo implements Serializable {
     if (report == null) {
       String errorDetail = String.format("There were problems resolving dependencies %s", (Object[]) serviceTypes);
       log.error(errorDetail);
-      publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.ERROR, Repo.INSTALL_FINISHED, errorDetail));
+      publishStatus(
+          Status.newInstance(Repo.class.getSimpleName(), StatusLevel.ERROR, Repo.INSTALL_FINISHED, errorDetail));
       throw new RuntimeException(errorDetail);
     } else {
 
@@ -522,7 +528,7 @@ public class IvyWrapper extends Repo implements Serializable {
 
         File file = ar.getLocalFile();
         String filename = file.getAbsoluteFile().getAbsolutePath();
-        log.info("{}", filename);        
+        log.info("{}", filename);
 
         if ("zip".equalsIgnoreCase(artifact.getExt())) {
           info("unzipping %s", filename);
@@ -535,10 +541,12 @@ public class IvyWrapper extends Repo implements Serializable {
           }
         }
 
-        publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of artifacts for %s", (Object[]) serviceTypes)));
+        publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED,
+            String.format("finished install of artifacts for %s", (Object[]) serviceTypes)));
       }
 
-      publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of %s", (Object[]) serviceTypes)));
+      publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED,
+          String.format("finished install of %s", (Object[]) serviceTypes)));
     }
   }
 
@@ -577,7 +585,8 @@ public class IvyWrapper extends Repo implements Serializable {
       String[] cmd = repo.buidCmdLine(".");
 
       StringBuilder sb = new StringBuilder();
-      sb.append("wget https://repo1.maven.org/maven2/org/apache/ivy/ivy/" + IVY_VERSION + "/ivy-" + IVY_VERSION + ".jar\n");
+      sb.append(
+          "wget https://repo1.maven.org/maven2/org/apache/ivy/ivy/" + IVY_VERSION + "/ivy-" + IVY_VERSION + ".jar\n");
       sb.append("java -jar ivy-" + IVY_VERSION + ".jar");
 
       for (String s : cmd) {
