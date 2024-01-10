@@ -162,8 +162,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       } else {
         setLocale(getSupportedLocale(Runtime.getInstance().getLocale().toString()));
       }
-
-      loadAppsScripts();
       
       loadInitScripts();
 
@@ -638,19 +636,11 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   public boolean isMute() {
     return mute;
   }
-
-  /**
-   * execute python scripts in the app directory on startup of the service
-   * 
-   * @throws IOException
-   */
-  public void loadAppsScripts() throws IOException {
-    loadScripts(getResourceDir() + fs + "gestures/InMoovApps/Rock_Paper_Scissors");
-    loadScripts(getResourceDir() + fs + "gestures/InMoovApps/Kids_WordsGame");
-  }
   
   public void loadGestures() {
     loadGestures(getResourceDir() + fs + "gestures");
+    loadGestures(getResourceDir() + fs + "gestures/InMoovApps/Rock_Paper_Scissors");
+    loadGestures(getResourceDir() + fs + "gestures/InMoovApps/Kids_WordsGame");
   }
 
   /**
