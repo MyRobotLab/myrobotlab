@@ -18,12 +18,16 @@ import java.net.NetworkInterface;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -43,7 +47,6 @@ import org.myrobotlab.codec.ClassUtil;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.CodecUtils.ApiDescription;
 import org.myrobotlab.codec.ForeignProcessUtils;
-import org.myrobotlab.framework.CmdConfig;
 import org.myrobotlab.framework.CmdOptions;
 import org.myrobotlab.framework.DescribeQuery;
 import org.myrobotlab.framework.DescribeResults;
@@ -60,6 +63,7 @@ import org.myrobotlab.framework.ProxyFactory;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceReservation;
+import org.myrobotlab.framework.StartYml;
 import org.myrobotlab.framework.StaticType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.ConfigurableService;
@@ -69,7 +73,6 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.IvyWrapper;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
-import org.myrobotlab.framework.repo.ServiceDependency;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.AppenderType;
 import org.myrobotlab.logging.LoggerFactory;
@@ -133,7 +136,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * a registry of all services regardless of which environment they came from -
    * each must have a unique name
    */
-  static private final Map<String, ServiceInterface> registry = new TreeMap<>();
+  static private Map<String, ServiceInterface> registry = new TreeMap<>();
 
   /**
    * A plan is a request to runtime to change the system. Typically its to ask
@@ -183,27 +186,13 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * name. It cannot be null, it cannot have "/" or "\" in the name - it has to
    * be a valid file name for the OS. It's defaulted to "default". Changed often
    */
-  @Deprecated /* use startyml.config */
   protected String configName = "default";
-
-  /**
-   * default parent path of configPath - rarely changed FIXME - don't make it
-   * static !
-   */
-  @Deprecated /* use startYml.configRoot */
-  static protected String CONFIG_ROOT = "data" + fs + "config";
 
   /**
    * State variable reporting if runtime is currently starting services from
    * config. If true you can find which config from runtime.getConfigName()
    */
   boolean processingConfig = false;
-
-  /**
-   * The one config directory where all config is managed the {default} is the
-   * current configuration set
-   */
-  // protected String configDir = "data" + fs + "config";
 
   /**
    * <pre>
@@ -230,9 +219,15 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
   static private final String RUNTIME_NAME = "runtime";
 
+  /**
+   * user's data directory
+   */
   static public final String DATA_DIR = "data";
 
-  static private boolean autoAcceptLicense = true; // at the moment
+  /**
+   * default parent path of configPath static !
+   */
+  final static protected String ROOT_CONFIG_DIR = DATA_DIR + fs + "config";
 
   /**
    * number of services created by this runtime
@@ -255,7 +250,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   /**
    * command line configuration
    */
-  static CmdConfig startYml = new CmdConfig();
+  static StartYml startYml = new StartYml();
 
   /**
    * the platform (local instance) for this runtime. It must be a non-static as
@@ -306,7 +301,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   /**
    * available Locales
    */
-  transient protected Map<String, Locale> locales;
+  protected Map<String, Locale> locales;
 
   protected List<String> configList;
 
@@ -384,20 +379,23 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   static public synchronized ServiceInterface create(String name, String type) {
 
     try {
-      Runtime runtime = Runtime.getInstance();
       ServiceInterface si = Runtime.getService(name);
       if (si != null) {
         return si;
       }
 
       // FIXME remove configName from loadService
-      Runtime.load(name, type);
+      Plan plan = Runtime.load(name, type);
       Runtime.check(name, type);
       // at this point - the plan should be loaded, now its time to create the
       // children peers
       // and parent service
-      createServicesFromPlan(Runtime.getPlan(), null, name);
-      return Runtime.getService(name);
+      createServicesFromPlan(plan, null, name);
+      si = Runtime.getService(name);
+      if (si == null) {
+        Runtime.getInstance().error("coult not create %s of type %s", name, type);
+      }
+      return si;
     } catch (Exception e) {
       runtime.error(e);
     }
@@ -436,9 +434,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         runtime.error("could not get %s from plan", service);
         continue;
       }
-      sc.state = "CREATING";
+      // sc.state = "CREATING";
       ServiceInterface si = createService(service, sc.type, null);
-      sc.state = "CREATED";
       // process the base listeners/subscription of ServiceConfig
       si.addConfigListeners(sc);
       if (si instanceof ConfigurableService) {
@@ -536,12 +533,11 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   }
 
   /**
-   * creates and starts service from a cmd line object
+   * creates and starts services from a cmd line object
    *
    * @param services
    *          - services to be created
    */
-  @Deprecated /* who uses this ? */
   public final static void createAndStartServices(List<String> services) {
 
     if (services == null) {
@@ -628,7 +624,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     startYml.id = getId();
     startYml.enable = autoStart;
     startYml.config = configName;
-    startYml.configRoot = CONFIG_ROOT;
     FileIO.toFile("start.yml", CodecUtils.toYaml(startYml));
     invoke("getStartYml");
   }
@@ -683,7 +678,13 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       fullName = String.format("%s@%s", name, inId);
 
     if (type == null) {
-      ServiceConfig sc = runtime.masterPlan.get(name);
+      ServiceConfig sc;
+      try {
+        sc = CodecUtils.readServiceConfig(runtime.getConfigName() + fs + name + ".yml");
+      } catch (IOException e) {
+        runtime.error("could not find type for service %s", name);
+        return null;
+      }
       if (sc != null) {
         log.info("found type for {} in plan", name);
         type = sc.type;
@@ -896,7 +897,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
           // but its necessary because you need an runtime instance before you
           // load
 
-          File cfgRoot = new File(CONFIG_ROOT);
+          File cfgRoot = new File(ROOT_CONFIG_DIR);
           cfgRoot.mkdirs();
           if (startYml.enable) {
             Runtime.load("runtime", "Runtime");
@@ -1194,20 +1195,20 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    *
    */
   static public String[] getServiceNames() {
-    List<ServiceInterface> si = getServices();
-    String[] ret = new String[si.size()];
-    for (int i = 0; i < ret.length; ++i) {
-      ServiceInterface s = si.get(i);
+    Set<String> ret = registry.keySet();
+    String[] services = new String[ret.size()];
 
-      if (isLocal(s.getFullName())) {
-        ret[i] = s.getName();
+    String localId = Platform.getLocalInstance().getId();
+    int cnt = 0;
+    for (String fullname : ret) {
+      if (fullname.endsWith(String.format("@%s", localId))) {
+        services[cnt] = CodecUtils.getShortName(fullname);
       } else {
-        ret[i] = s.getFullName();
+        services[cnt] = fullname;
       }
-
-      // ret[i] = s.getFullName();
+      ++cnt;
     }
-    return ret;
+    return services;
   }
 
   // Is it a good idea to modify all regex inputs? For example, if the pattern
@@ -1367,7 +1368,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * 
    * @return
    */
-  static public CmdConfig getStartYml() {
+  static public StartYml getStartYml() {
     return startYml;
   }
 
@@ -1391,6 +1392,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   }
 
   /**
+   * FIXME - terrible use a uuid
+   * 
    * unique id's are need for sendBlocking - to uniquely identify the message
    * this is a method to support that - it is unique within a process, but not
    * across processes
@@ -1399,7 +1402,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    */
   public static final synchronized long getUniqueID() {
     ++uniqueID;
-    return uniqueID;
+    return System.currentTimeMillis();
   }
 
   /**
@@ -1552,7 +1555,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
             r.getRepo().install(serviceType);
           }
         } catch (Exception e) {
-          r.error(e);
+          r.error("dependencies failed - install error", e);
+          throw new RuntimeException(String.format("dependencies failed - install error %s", e.getMessage()));
         }
       }
     };
@@ -1784,6 +1788,17 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
             return null;
           }
 
+          // FIXME - probably some more clear definition about the requirements
+          // of remote
+          // service registration
+          // In general, there should be very few requirements if any, besides
+          // providing a
+          // name, and the proxy
+          // interface should be responsible for creating a minimal
+          // interpretation
+          // (ServiceInterface) for the remote
+          // service
+
           // Class<?>[] interfaces = registration.interfaces.stream().map(i -> {
           // try {
           // return Class.forName(i);
@@ -1797,8 +1812,13 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
           // Proxy.newProxyInstance(Runtime.class.getClassLoader(), interfaces,
           // new ProxyServiceInvocationHandler(registration.getName(),
           // registration.getId()));
-          registration.service = ProxyFactory.createProxyService(registration);
-          log.info("Created proxy: " + registration.service);
+          try {
+            registration.service = ProxyFactory.createProxyService(registration);
+            log.info("Created proxy: " + registration.service);
+          } catch (Exception e) {
+            // at the moment preventing throw
+            Runtime.getInstance().error(e);
+          }
         }
       }
 
@@ -1893,6 +1913,12 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
     String name = getFullName(inName);
 
+    String id = CodecUtils.getId(name);
+    if (!id.equals(Platform.getLocalInstance().getId())) {
+      log.warn("will only release local services - %s is remote", name);
+      return false;
+    }
+
     log.info("releasing service {}", name);
 
     if (!registry.containsKey(name)) {
@@ -1913,49 +1939,23 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     if (si.isLocal()) {
       si.purgeTasks();
       si.stopService();
-      Plan plan = Runtime.getPlan();
-      ServiceConfig sc = plan.get(inName);
-      if (sc == null) {
-        log.debug("service config not available for {}", inName);
-      } else {
-        sc.state = "STOPPED";
-      }
     } else {
       if (runtime != null) {
         runtime.send(name, "releaseService");
       }
     }
+
+    // recursive peer release
+    Map<String, Peer> peers = si.getPeers();
+    if (peers != null) {
+      for (Peer peer : peers.values()) {
+        release(peer.name);
+      }
+    }
+
     // FOR remote this isn't correct - it should wait for
     // a message from the other runtime to say that its released
     unregister(name);
-    Plan plan = Runtime.getPlan();
-    ServiceConfig sc = plan.get(inName);
-
-    if (sc != null) {
-      sc.state = "RELEASED";
-      // FIXME - TODO RELEASE PEERS ! which is any inName.* !!!
-
-      // iterate through peers
-      // if (sc.autoStartPeers) {
-      // // get peers from meta data
-      // MetaData md = MetaData.get(sc.type);
-      // Map<String, ServiceReservation> peers = md.getPeers();
-      // log.info("auto start peers and {} of type {} has {} peers", inName,
-      // sc.type, peers.size());
-      // // RECURSE ! - if we found peers and autoStartPeers is true - we start
-      // // all
-      // // the children up
-      // for (String peer : peers.keySet()) {
-      // // get actual Name
-      // String actualPeerName = getPeerName(peer, sc, peers, inName);
-      // if (actualPeerName != null && isStarted(actualPeerName) &&
-      // si.autoStartedPeersContains(actualPeerName)) {
-      // release(actualPeerName);
-      // }
-      // }
-      // }
-    }
-
     return true;
   }
 
@@ -2006,11 +2006,19 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
     // FIXME - release autostarted peers ?
 
-    // last step - remove from registry
-    registry.remove(name);
+    // last step - remove from registry by making new registry
+    // thread safe way
+    Map<String, ServiceInterface> removedService = new TreeMap<>();
+    for (String key : registry.keySet()) {
+      if (!name.equals(key)) {
+        removedService.put(key, registry.get(key));
+      }
+    }
+    registry = removedService;
+
     // and config
     RuntimeConfig c = (RuntimeConfig) Runtime.getInstance().config;
-    c.registry.remove(CodecUtils.getShortName(name));
+    c.remove(CodecUtils.getShortName(name));
 
     log.info("released {}", name);
   }
@@ -2101,7 +2109,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * @param releaseRuntime
    *          Whether the Runtime should also be released
    */
-  static private void processRelease(boolean releaseRuntime) {
+  synchronized static private void processRelease(boolean releaseRuntime) {
 
     // reverse release to order of creation
     Collection<ServiceInterface> local = getLocalServices().values();
@@ -2131,15 +2139,15 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     // clean up remote ... the contract should
     // probably be just remove their references - do not
     // ask for them to be released remotely ..
-    for (String remoteService : registry.keySet()) {
-      if (!remoteService.equals(runtime.getFullName())) {
-        registry.remove(remoteService);
-      }
-    }
+    // in thread safe way
 
-    if (runtime != null && releaseRuntime) {
+    if (releaseRuntime && runtime != null) {
       runtime.releaseService();
-      runtime = null;
+    } else {
+      // put runtime in new registry
+      Runtime.getInstance();
+      registry = new TreeMap<>();
+      registry.put(runtime.getFullName(), registry.get(runtime.getFullName()));
     }
   }
 
@@ -2208,7 +2216,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   public List<String> publishConfigList() {
     configList = new ArrayList<>();
 
-    File configDirFile = new File(CONFIG_ROOT);
+    File configDirFile = new File(ROOT_CONFIG_DIR);
     if (!configDirFile.exists() || !configDirFile.isDirectory()) {
       error("%s config root does not exist", configDirFile.getAbsolutePath());
       return configList;
@@ -2262,35 +2270,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    *
    */
   static public void release(String fullName) {
-    if (fullName == null) {
-      log.error("release(null)");
-      return;
-    }
-
-    ServiceInterface si = Runtime.getService(fullName);
-    if (si == null) {
-      log.info("{} already released", fullName);
-      return;
-    }
-    String shortName = si.getName();
-
-    // check for peers !! check in config or check in Plan ?!?!?
-    Map<String, Peer> peers = si.getPeers();
-    if (peers != null) {
-      for (String peerKey : peers.keySet()) {
-        Peer peer = peers.get(peerKey);
-        if (peer.autoStart) {
-          release(peer.name);
-        }
-      }
-    }
-
-    // important to call service.releaseService because
-    // many are derived that take care of additional thread
-    // cleanup
-    Plan plan = Runtime.getPlan();
-    plan.remove(shortName);
-    si.releaseService();
+    releaseService(fullName);
   }
 
   /**
@@ -2585,7 +2565,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     setConfig(configName);
     Runtime runtime = Runtime.getInstance();
     runtime.processingConfig = true; // multiple inbox threads not available
-    runtime.invoke("publishStartConfig", configName);
+    runtime.invoke("publishConfigStarted", configName);
     RuntimeConfig rtConfig = runtime.readServiceConfig(runtime.getConfigName(), "runtime", new StaticType<>() {
     });
     if (rtConfig == null) {
@@ -2595,15 +2575,17 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
     runtime.apply(rtConfig);
 
+    Plan plan = new Plan("runtime");
     // for every service listed in runtime registry - load it
     // FIXME - regex match on filesystem matches on *.yml
     for (String service : rtConfig.getRegistry()) {
+
       if ("runtime".equals(service) || Runtime.isStarted(service)) {
         continue;
       }
 
       // has to be loaded
-      File file = new File(Runtime.CONFIG_ROOT + fs + runtime.getConfigName() + fs + service + ".yml");
+      File file = new File(Runtime.ROOT_CONFIG_DIR + fs + runtime.getConfigName() + fs + service + ".yml");
       if (!file.exists()) {
         runtime.error("cannot read file %s - skipping", file.getPath());
         continue;
@@ -2614,25 +2596,25 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         if (sc == null) {
           continue;
         }
-        runtime.loadService(Runtime.getPlan(), service, sc.type, true, 0);
+        runtime.loadService(plan, service, sc.type, true, 0);
       } catch (Exception e) {
         runtime.error(e);
       }
     }
 
     // for all newly created services start them
-    Map<String, ServiceInterface> created = Runtime.createServicesFromPlan(Runtime.getPlan(), null, null);
+    Map<String, ServiceInterface> created = Runtime.createServicesFromPlan(plan, null, null);
     for (ServiceInterface si : created.values()) {
       si.startService();
     }
 
     runtime.processingConfig = false; // multiple inbox threads not available
-    runtime.invoke("publishFinishedConfig", configName);
+    runtime.invoke("publishConfigFinished", configName);
 
   }
 
-  public String publishStartConfig(String configName) {
-    log.info("publishStartConfig {}", configName);
+  public String publishConfigStarted(String configName) {
+    log.info("publishConfigStarted {}", configName);
     // Make Note: done inline, because the thread actually doing the config
     // processing
     // would need to be finished with it before this thread could be invoked
@@ -2641,8 +2623,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     return configName;
   }
 
-  public String publishFinishedConfig(String configName) {
-    log.info("publishFinishedConfig {}", configName);
+  public String publishConfigFinished(String configName) {
+    log.info("publishConfigFinished {}", configName);
     // Make Note: done inline, because the thread actually doing the config
     // processing
     // would need to be finished with it before this thread could be invoked
@@ -2674,10 +2656,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         return requestedService;
       }
 
-      Runtime.load(name, type);
-      Runtime.savePlan(null);
-      // FIXME - does some order need to be maintained
-      Map<String, ServiceInterface> services = createServicesFromPlan(Runtime.getPlan(), null, name);
+      Plan plan = Runtime.load(name, type);
+
+      Map<String, ServiceInterface> services = createServicesFromPlan(plan, null, name);
 
       if (services == null) {
         Runtime.getInstance().error("cannot create instance of %s with type %s given current configuration", name, type);
@@ -2733,15 +2714,23 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   }
 
   /**
-   * sing parameter name info supplied - potentially all information regarding
-   * this service coulde be found in on the filesystem or in the plan
+   * single parameter name info supplied - potentially all information regarding
+   * this service could be found in on the filesystem or in the plan
    * 
    * @param name
    * @return
    */
   synchronized static public ServiceInterface start(String name) {
-    Runtime.load(name, null);
-    Map<String, ServiceInterface> services = createServicesFromPlan(Runtime.getPlan(), null, name);
+    if (Runtime.getService(name) != null) {
+      // already exists
+      ServiceInterface si = Runtime.getService(name);
+      if (!si.isRunning()) {
+        si.startService();
+      }
+      return si;
+    }
+    Plan plan = Runtime.load(name, null);
+    Map<String, ServiceInterface> services = createServicesFromPlan(plan, null, name);
     // FIXME - order ?
     for (ServiceInterface service : services.values()) {
       service.startService();
@@ -2752,7 +2741,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   synchronized public static Plan load(String name, String type) {
     try {
       Runtime runtime = Runtime.getInstance();
-      return runtime.loadService(Runtime.getPlan(), name, type, true, 0);
+      return runtime.loadService(new Plan("runtime"), name, type, true, 0);
     } catch (IOException e) {
       runtime.error(e);
     }
@@ -2781,18 +2770,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         // fist and only time....
         runtime = this;
         repo = (IvyWrapper) Repo.getInstance(LIBRARIES, "IvyWrapper");
-
-        // resolve serviceData MetaTypes for the repo
-
-        for (MetaData metaData : serviceData.getServiceTypes()) {
-          Set<ServiceDependency> deps = repo.getUnfulfilledDependencies(metaData.getType());
-          if (deps.size() == 0) {
-            metaData.installed = true;
-          } else {
-            log.warn("{} not installed", metaData.getSimpleName());
-          }
-        }
-
       }
     }
 
@@ -3041,6 +3018,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       return Runtime.getService(parts[1]);
     } else if (parts.length == 2 && absPath.endsWith("/")) {
       ServiceInterface si = Runtime.getService(parts[1]);
+      if (si == null) {
+        return null;
+      }
       return si.getDeclaredMethodNames();
       /*
        * } else if (parts.length == 3 && !absPath.endsWith("/")) { // execute 0
@@ -3381,13 +3361,16 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    */
   @Override
   public void releaseService() {
-    super.releaseService();
     if (runtime != null) {
+      runtime.purgeTasks();
+      runtime.stopService();
       runtime.stopInteractiveMode();
-
       runtime.getRepo().removeStatusPublishers();
+      registry = new TreeMap<>();
     }
-    runtime = null;
+    synchronized (INSTANCE_LOCK) {
+      runtime = null;
+    }
   }
 
   /**
@@ -3532,8 +3515,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    *          Whether this method blocks for the program to execute
    * @return The programs stderr and stdout output
    */
+
   static public String execute(String program, List<String> args, String workingDir, Map<String, String> additionalEnv, boolean block) {
-    log.info("execToString(\"{} {}\")", program, args);
+    log.debug("execToString(\"{} {}\")", program, args);
 
     List<String> command = new ArrayList<>();
     command.add(program);
@@ -3628,13 +3612,14 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       } else if (platform.isLinux()) {
         // TODO This is incorrect, will not work when unplugged
         // and acpitool output is different than expected,
-        // at least on Ubuntu 22.04
-        String ret = Runtime.execute("acpitool");
-        int pos0 = ret.indexOf("Charging, ");
+        // at least on Ubuntu 22.04 - consider oshi library
+        String ret = Runtime.execute("acpi");
+        int pos0 = ret.indexOf("%");
+
         if (pos0 != -1) {
-          pos0 = pos0 + 10;
-          int pos1 = ret.indexOf("%", pos0);
-          String dble = ret.substring(pos0, pos1).trim();
+          int pos1 = ret.lastIndexOf(" ", pos0);
+          // int pos1 = ret.indexOf("%", pos0);
+          String dble = ret.substring(pos1, pos0).trim();
           try {
             r = Double.parseDouble(dble);
           } catch (Exception e) {
@@ -3733,19 +3718,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     log.info("Runtime exec {}", Arrays.toString(cmd));
     Process p = java.lang.Runtime.getRuntime().exec(cmd);
     return p;
-  }
-
-  /**
-   * Re-execute {@link Runtime#main(String[])} with the specified arguments and
-   * then return the Runtime singleton instance.
-   *
-   * @param args2
-   *          An array of the arguments to be passed to main()
-   * @return The Runtime singleton
-   */
-  public static Runtime getInstance(String[] args2) {
-    Runtime.main(args2);
-    return Runtime.getInstance();
   }
 
   /**
@@ -3977,25 +3949,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
     addRoute(id, uuid, 10);
   }
-
-  // @Override
-  // public ServiceConfig getFilteredConfig() {
-  // RuntimeConfig sc = (RuntimeConfig) super.getFilteredConfig();
-  // Set<Listener> removeList = new HashSet<>();
-  // for (Listener listener : sc.listeners) {
-  // if (listener.callback.equals("onReleased") ||
-  // listener.callback.equals("onStarted") ||
-  // listener.callback.equals("onRegistered") ||
-  // listener.callback.equals("onStopped")
-  // || listener.callback.equals("onCreated")) {
-  // removeList.add(listener);
-  // }
-  // }
-  // for (Listener remove : removeList) {
-  // sc.listeners.remove(remove);
-  // }
-  // return sc;
-  // }
 
   /**
    * Unregister all connections that a specified client has made.
@@ -4341,27 +4294,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     return name;
   }
 
-  public static Plan getPlan() {
-    Runtime runtime = Runtime.getInstance();
-    return runtime.getLocalPlan();
-  }
-
-  public Plan getLocalPlan() {
-    return masterPlan;
-  }
-
-  /**
-   * Clear the {@link #masterPlan}.
-   */
-  static public void clearPlan() {
-    Runtime runtime = Runtime.getInstance();
-    runtime.masterPlan.clear();
-    runtime.masterPlan.put("runtime", new RuntimeConfig());
-    // unset config path
-    runtime.configName = null;
-    runtime.publishConfigList();
-  }
-
   /**
    * Wrapper for {@link ServiceData#getMetaData(String, String)}
    * 
@@ -4552,10 +4484,18 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         return;
       }
 
-      File checkStart = new File("start.yml");
-      if (checkStart.exists()) {
+      // start.yml file is required, if not pre-existing
+      // is created immediately. It contains static information
+      // which needs to be available before a Runtime is created
+      File checkStartYml = new File("start.yml");
+      if (!checkStartYml.exists()) {
+        // save default
+        startYml = new StartYml();
+        String defaultStartFile = CodecUtils.toYaml(startYml);
+        FileIO.toFile("start.yml", defaultStartFile);
+      } else {
         String yml = FileIO.toString("start.yml");
-        startYml = CodecUtils.fromYaml(yml, CmdConfig.class);
+        startYml = CodecUtils.fromYaml(yml, StartYml.class);
       }
 
       // id always required - precedence
@@ -4563,31 +4503,19 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       // if in start.yml it will be used
       // if supplied by the command line it will be used
       // command line has the highest precedence
-      if (options.id == null) {
-        if (startYml == null || startYml.id == null || !startYml.enable) {
-          options.id = NameGenerator.getName();
-        } else {
-          options.id = startYml.id;
-        }
-      }
 
-      // String id = (options.fromLauncherx) ? options.id :
-      // String.format("%s-launcher", options.id);
-      String id = options.id;
-
-      // fix paths
       Platform platform = Platform.getLocalInstance();
-      platform.setId(id);
-
-      // save an output of our cmd options
-      File dataDir = new File(Runtime.DATA_DIR);
-      if (!dataDir.exists()) {
-        dataDir.mkdirs();
-      }
-
-      File configRoot = new File(Runtime.CONFIG_ROOT);
-      if (!configRoot.exists()) {
-        configRoot.mkdirs();
+      if (options.id != null) {
+        platform.setId(options.id);
+      } else if (startYml.id != null) {
+        platform.setId(startYml.id);
+      } else {
+        // no id set - should be first
+        // time mrl is started
+        String id = NameGenerator.getName();
+        platform.setId(id);
+        startYml.id = id;
+        FileIO.toFile("start.yml", CodecUtils.toYaml(startYml));
       }
 
       if (options.virtual) {
@@ -4610,18 +4538,21 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         return;
       }
 
-      if (options.configRoot != null || (startYml != null && startYml.configRoot != null && startYml.enable)) {
-        CONFIG_ROOT = (startYml != null && startYml.configRoot != null) ? startYml.configRoot : options.configRoot;
-      }
-
       // if a you specify a config file it becomes the "base" of configuration
       // inline flags will still override values
-      if (options.config != null || (startYml != null && startYml.config != null && startYml.enable)) {
+      if (options.config != null) {
         // if this is a valid config, it will load
-        Runtime.getInstance();
+        setConfig(options.config);
+      } else {
+        // required directory to load any service
+        setConfig(startYml.config);
       }
 
-      createAndStartServices(options.services);
+      if (startYml.enable) {
+        Runtime.startConfig(startYml.config);
+      } else {
+        createAndStartServices(options.services);
+      }
 
       if (options.invoke != null) {
         invokeCommands(options.invoke);
@@ -4749,45 +4680,56 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * @return
    * @throws IOException
    */
-  synchronized private Plan loadService(Plan plan, String name, String type, boolean start, int level) throws IOException {
-
-    log.info("loading - {} {} {}", name, type, level);
+  synchronized public Plan loadService(Plan plan, String name, String type, boolean start, int level) throws IOException {
 
     if (plan == null) {
       log.error("plan required to load a system");
       return null;
     }
 
+    log.info("loading - {} {} {}", name, type, level);
+    // from recursive memory definition
     ServiceConfig sc = plan.get(name);
 
-    // if there isn't some form of definition in the plan
-    // get a "default" service config and put it in the plan
-    if (sc == null) {
-      if (type == null) {
-        log.error("cannot get Java def with type == null");
-      }
-      log.info("getting default Java definition {} {}", name, type);
+    // HIGHEST PRIORITY - OVERRIDE WITH FILE
+    String configPath = runtime.getConfigPath();
+    String configFile = configPath + fs + name + ".yml";
 
-      // TODO !!!! - switch on Runtime var useDefaults = true/false
-      ServiceConfig.getDefault(plan, name, type);
-      sc = plan.get(name);
+    // PRIORITY #1
+    // find if a current yml config file exists - highest priority
+    log.debug("priority #1 user's yml override {} ", configFile);
+    ServiceConfig fileSc = readServiceConfig(Runtime.getInstance().getConfigName(), name);
+    if (fileSc != null) {
+      // if definition exists in file form, it overrides current memory one
+      sc = fileSc;
+    } else if (sc != null) {
+      // if memory config is available but not file
+      // we save it
+      String yml = CodecUtils.toYaml(sc);
+      FileIO.toFile(configFile, yml);
     }
 
-    // HIGHEST PRIORITY - OVERRIDE WITH FILE
-    String configPath = runtime.getConfigName();
-    if (configPath != null) {
-      log.info("priority #1 user's yml override {}", configPath + fs + name + ".yml");
-      // PRIORITY #1
-      // find if a current yml config file exists - highest priority
-      ServiceConfig fileSc = readServiceConfig(configPath, name);
-      if (fileSc != null) {
-        // if definition exists in file form, it overrides current memory one
-        sc = fileSc;
+    // special conflict case - type is specified, but its not the same as
+    // file version - in that case specified parameter type wins and overwrites
+    // config. User can force type by supplying one as a parameter, however, the
+    // recursive
+    // call other peer types will have name/file.yml definition precedence
+    if ((type != null && sc != null && !type.equals(sc.type) && level == 0) || (sc == null)) {
+      if (sc != null) {
+        warn("type %s overwriting type %s specified in %s.yml file", type, sc.type, name);
       }
+      ServiceConfig.getDefault(plan, name, type);
+      sc = plan.get(name);
+
+      // create new file if it didn't exist or overwrite it if new type is
+      // required
+      String yml = CodecUtils.toYaml(sc);
+      FileIO.toFile(configFile, yml);
     }
 
     if (sc == null && type == null) {
       log.error("no local config and unknown type");
+      return plan;
     }
 
     // finalize
@@ -4821,6 +4763,13 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     return plan;
   }
 
+  /**
+   * read a service's configuration, in the context of current config set name
+   * or default
+   * 
+   * @param name
+   * @return
+   */
   public ServiceConfig readServiceConfig(String name) {
     return readServiceConfig(name, new StaticType<>() {
     });
@@ -4862,7 +4811,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       return null;
     }
 
-    String filename = CONFIG_ROOT + fs + configName + fs + name + ".yml";
+    String filename = ROOT_CONFIG_DIR + fs + configName + fs + name + ".yml";
     File check = new File(filename);
     C sc = null;
     if (check.exists()) {
@@ -4953,7 +4902,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    */
   static public void releaseConfigPath(String configPath) {
     try {
-      String filename = CONFIG_ROOT + fs + Runtime.getInstance().getConfigName() + fs + "runtime.yml";
+      String filename = ROOT_CONFIG_DIR + fs + Runtime.getInstance().getConfigName() + fs + "runtime.yml";
       String releaseData = FileIO.toString(new File(filename));
       RuntimeConfig config = CodecUtils.fromYaml(releaseData, RuntimeConfig.class);
       List<String> registry = config.getRegistry();
@@ -4970,7 +4919,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   }
 
   public static String getConfigRoot() {
-    return CONFIG_ROOT;
+    return ROOT_CONFIG_DIR;
   }
 
   /**
@@ -5014,10 +4963,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
       setConfig(configName);
 
-      String configPath = CONFIG_ROOT + fs + configName;
-
-      File dir = new File(configPath);
-      dir.mkdirs();
+      String configPath = ROOT_CONFIG_DIR + fs + configName;
 
       // save running services
       Set<String> servicesToSave = new HashSet<>();
@@ -5026,7 +4972,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       if (startYml.enable) {
         startYml.id = getId();
         startYml.config = configName;
-        startYml.configRoot = CONFIG_ROOT;
         FileIO.toFile("start.yml", CodecUtils.toYaml(startYml));
       }
 
@@ -5066,6 +5011,14 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     if (name != null) {
       configName = name.trim();
     }
+
+    // for the moment the best way is to mandate
+    // a dir is created when a new config name is set
+    // because loading service are required to save config
+    // before starting
+    File configDir = new File(ROOT_CONFIG_DIR + fs + name);
+    configDir.mkdirs();
+
     invoke("publishConfigList");
     return name;
   }
@@ -5088,20 +5041,13 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * @return configName
    */
   public static String setConfig(String configName) {
+
+    File configDir = new File(ROOT_CONFIG_DIR + fs + configName);
+    configDir.mkdirs();
+
     Runtime runtime = Runtime.getInstance();
     runtime.setConfigName(configName);
     return configName;
-  }
-
-  /**
-   * sets the root of all config, where root + fs + configName exists
-   * 
-   * @param root
-   * @return
-   */
-  public static String setConfigRoot(String root) {
-    CONFIG_ROOT = root;
-    return root;
   }
 
   // FIXME - move this to service and add default (no servicename) method
@@ -5149,44 +5095,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       }
     }
     invoke("publishInterfaceToNames");
-  }
-
-  /**
-   * save the current "plan" to the filesystem this will give the user the
-   * opportunity to tweak defaults before starting
-   * 
-   * @param configName
-   */
-  static public void savePlan(String configName) {
-    Runtime runtime = Runtime.getInstance();
-    Runtime.setConfig(configName);
-    Runtime.getInstance().savePlanInternal(runtime.getConfigName());
-  }
-
-  private void savePlanInternal(String configName) {
-
-    if (configName == null) {
-      info("cannot save plan config name is null");
-      return;
-    }
-
-    File configDirectory = new File(CONFIG_ROOT + fs + configName);
-    configDirectory.mkdirs();
-
-    for (String s : masterPlan.keySet()) {
-      String filename = CONFIG_ROOT + fs + configName + fs + s + ".yml";
-      File check = new File(filename);
-      if (check.exists()) {
-        continue;
-      }
-      String data = CodecUtils.toYaml(masterPlan.get(s));
-      try {
-        FileIO.toFile(filename, data.getBytes());
-      } catch (Exception e) {
-        error(e);
-      }
-      info("saved %s config to %s", getName(), filename);
-    }
   }
 
   /**
@@ -5282,8 +5190,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       }
       String name = f.getName().substring(0, f.getName().length() - 4);
       ServiceConfig sc = CodecUtils.readServiceConfig(path);
-      loadService(Runtime.getPlan(), name, sc.type, true, 0);
-      masterPlan.put(name, sc);
+      loadService(new Plan("runtime"), name, sc.type, true, 0);
     } catch (Exception e) {
       error("loadFile requirese");
     }
@@ -5304,7 +5211,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   final public Plan saveDefault(String configName, String name, String type, boolean fullPlan) {
 
     Plan plan = ServiceConfig.getDefault(new Plan(name), name, type);
-    String configPath = CONFIG_ROOT + fs + configName;
+    String configPath = ROOT_CONFIG_DIR + fs + configName;
 
     if (!fullPlan) {
       try {
@@ -5347,12 +5254,13 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     }
   }
 
+  /**
+   * Get current runtime's config path
+   * 
+   * @return
+   */
   public String getConfigPath() {
-    if (configName == null) {
-      error("config name is not set");
-      return null;
-    }
-    return CONFIG_ROOT + fs + configName;
+    return ROOT_CONFIG_DIR + fs + configName;
   }
 
   @Override
@@ -5361,6 +5269,128 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     config.locale = getLocaleTag();
     config.virtual = isVirtual;
     return config;
+  }
+
+  /**
+   * Gets a {serviceName}.yml file config from configName directory
+   * 
+   * @param configName
+   * @param serviceName
+   * @return ServiceConfig
+   */
+  public ServiceConfig getConfig(String configName, String serviceName) {
+    return readServiceConfig(configName, serviceName);
+  }
+
+  /**
+   * Get a {serviceName}.yml file in the current config directory
+   * 
+   * @param serviceName
+   * @return
+   */
+  public ServiceConfig getConfig(String serviceName) {
+    return readServiceConfig(serviceName);
+  }
+
+  /**
+   * Save a config with a new Config
+   * 
+   * @param name
+   * @param serviceConfig
+   * @throws IOException
+   */
+  public static void saveConfig(String name, ServiceConfig serviceConfig) throws IOException {
+    String file = Runtime.ROOT_CONFIG_DIR + fs + runtime.getConfigName() + fs + name + ".yml";
+    FileIO.toFile(file, CodecUtils.toYaml(serviceConfig));
+  }
+
+  /**
+   * get the service's peer config
+   * 
+   * @param serviceName
+   * @param peerKey
+   * @return
+   */
+  public ServiceConfig getPeerConfig(String serviceName, String peerKey) {
+    ServiceConfig sc = runtime.getConfig(serviceName);
+    if (sc == null) {
+      return null;
+    }
+    Peer peer = sc.getPeer(peerKey);
+    return runtime.getConfig(peer.name);
+  }
+
+  /**
+   * Switches a service's .yml type definition while replacing the set of
+   * listeners to preserver subscriptions. Useful when switching services that
+   * support the same interface like SpeechSynthesis services etc.
+   * 
+   * @param serviceName
+   * @param type
+   * @return
+   * @throws IOException
+   */
+  public boolean changeType(String serviceName, String type) {
+    try {
+      ServiceConfig sc = getConfig(serviceName);
+      if (sc == null) {
+        error("could not find %s config", serviceName);
+        return false;
+      }
+      // get target
+      Plan targetPlan = getDefault(serviceName, type);
+      if (targetPlan == null || targetPlan.get(serviceName) == null) {
+        error("%s null", type);
+        return false;
+      }
+      ServiceConfig target = targetPlan.get(serviceName);
+      // replacing listeners
+      target.listeners = sc.listeners;
+      saveConfig(serviceName, target);
+      return true;
+    } catch (Exception e) {
+      error("could not save %s of type %s", serviceName, type);
+      return false;
+    }
+  }
+
+  /**
+   * Get a peer's config
+   * 
+   * @param sericeName
+   * @param peerKey
+   * @return
+   */
+  public ServiceConfig getPeer(String sericeName, String peerKey) {
+    ServiceConfig sc = getConfig(sericeName);
+    if (sc == null) {
+      return null;
+    }
+    Peer peer = sc.getPeer(peerKey);
+    if (peer == null) {
+      return null;
+    }
+    return getConfig(peer.name);
+  }
+
+  /**
+   * Removes a config set and all its files
+   * 
+   * @param string
+   */
+  public static void removeConfig(String configName) {
+    try {
+      log.info("removeing config");
+
+      File check = new File(ROOT_CONFIG_DIR + fs + configName);
+
+      if (check.exists()) {
+        Path pathToBeDeleted = Paths.get(check.getAbsolutePath());
+        Files.walk(pathToBeDeleted).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+      }
+    } catch (Exception e) {
+      log.error("removeConfig threw", e);
+    }
   }
 
 }

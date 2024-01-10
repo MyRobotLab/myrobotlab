@@ -141,7 +141,6 @@ public class Security extends Service<ServiceConfig> implements AuthorizationPro
   public static void main(String[] args) throws Exception {
     // LoggingFactory.init(Level.INFO);
 
-    Runtime.getInstance(args);
 
     Runtime.start("gui", "SwingGui");
     // Security security = Security.getInstance();
