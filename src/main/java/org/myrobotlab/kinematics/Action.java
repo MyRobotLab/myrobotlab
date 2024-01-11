@@ -55,4 +55,11 @@ public class Action {
     action.value = speechCommand;
     return action;
   }
+
+  public static Action createGestureToAction(String gestureName) {
+    Action action = new Action();
+    action.type = "gesture";
+    action.value = gestureName;
+    return action;
+  }
 }

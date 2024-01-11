@@ -198,6 +198,7 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
 
     $scope.removeActionFromGesture = function () {
       msg.send("removeActionFromGesture", parseInt($scope.state.gestureIndex))
+      $scope.state.gestureIndex = parseInt($scope.state.gestureIndex) - 1 + ""
       msg.send("getGesture")
     }
 
@@ -267,12 +268,12 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
     $scope.addSleep = function (seconds) {
       let value = parseFloat(seconds)
 
-      if (Number.isNaN(value)) {
+      if (Number.isNaN(seconds)) {
         console.error(seconds, "is not a valid number for sleep")
         return
       }
 
-      msg.send("addSleepAction", seconds)
+      msg.send("addSleepAction", seconds, $scope.state.gestureIndex )
       msg.send("getGesture")
     }
 
@@ -297,8 +298,10 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
         return `sleep ${action.value}`
       } else if (action.type == "speak") {
         return `speak ${action.value.text}`
+      } else if (action.type == "gesture") {
+        return `gesture ${action.value}`
       } else if (action.type == "moveTo") {
-        let ret = "move"
+        let ret = "moveTo"
         Object.keys(action.value).forEach((key) => {
           ret += ` ${key} ${action.value[key].position}`
           if (action.value[key].speed) {
@@ -307,7 +310,7 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
         })
         return ret
       } else {
-        return action.value
+        return `${action.type} ${action.value}`
       }
     }
 
