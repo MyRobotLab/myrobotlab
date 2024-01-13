@@ -272,8 +272,9 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
         console.error(seconds, "is not a valid number for sleep")
         return
       }
-
-      msg.send("addSleepAction", seconds, $scope.state.gestureIndex )
+      let index = parseInt($scope.state.gestureIndex) + 1
+        $scope.state.gestureIndex = index + ""
+      msg.send("addSleepAction", seconds, index)
       msg.send("getGesture")
     }
 

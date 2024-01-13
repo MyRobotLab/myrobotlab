@@ -52,12 +52,21 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
     public PlayingGesture(String name, Gesture gesture) {
       this(name, gesture, 0);
     }
-    
+
     public PlayingGesture(String name, Gesture gesture, int index) {
       this.name = name;
       this.gesture = gesture;
       this.startIndex = index;
     }
+
+    public String toString() {
+      int actionCnt = 0;
+      if (gesture != null && gesture.actions != null) {
+        actionCnt = gesture.actions.size();
+      }
+      return String.format("name:%s actionCnt:%d index:%d", name, actionCnt, startIndex);
+    }
+
   }
 
   /**
@@ -78,12 +87,11 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
     private void play() {
       try {
         PlayingGesture current = playStack.pop();
-
+        invoke("publishGestureStarted", current.name);
         while (current != null) {
           playingGesture = current.name;
 
           if (current.gesture.actions != null) {
-            invoke("publishGestureStarted", current.name);
             for (int i = current.startIndex; i < current.gesture.actions.size(); ++i) {
               if (!running) {
                 break;
@@ -101,9 +109,15 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
                 }
                   break;
                 case "gesture": {
-                  // read in file and
+
+                  // save current place
+                  current.startIndex = i + 1; // Obiwan error prolly
+                  playStack.add(current);
+
+                  // read in new gesture
                   String gestureName = (String) action.value;
-                  Gesture embedded = getGesture(gestureName);
+                  // Gesture embedded = getGesture(gestureName);
+                  Gesture embedded = (Gesture)invoke("getGesture", gestureName);
                   if (embedded == null) {
                     error("embedded gesture %s was not found", gestureName);
                     break;
@@ -111,10 +125,11 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
                   // insert actions ?
                   // TODO - check for infinite recursion ... history, if your
                   // new gesture is already on the playstack
-                  playStack.add(new PlayingGesture(gestureName, embedded, i));
-                  playingGesture = gestureName;
-                  current.gesture = embedded;
-                  i = 0;
+
+                  // replace current with new embedded gesture
+                  // index reset
+                  i = -1;
+                  current = new PlayingGesture(gestureName, embedded, i);
                 }
                   break;
                 case "sleep": {
@@ -130,10 +145,14 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
                 }
               }
             } // poses
-            invoke("publishGestureStopped", current.name);
           }
-          current = playStack.pop();
+          if (!playStack.isEmpty()) {
+            current = playStack.pop();
+          } else {
+            current = null;
+          }
         }
+        invoke("publishGestureStopped", playingGesture);
       } catch (Exception e) {
         error(e);
       }
@@ -905,10 +924,13 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
   }
 
   private void speak(Map<String, Object> speechPart) {
-    String mouthName = (String) speechPart.get("mouth");
-    SpeechSynthesis mouth = (SpeechSynthesis) Runtime.getService(mouthName);
-    if (mouthName == null || mouth == null) {
-      error("speech synthesis service name missing");
+    if (config.mouth == null) {
+      warn("mouth configuration not set");
+      return;
+    }
+    SpeechSynthesis mouth = (SpeechSynthesis) Runtime.getService(config.mouth);
+    if (mouth == null) {
+      error("%s speech synthesis service missing", config.mouth);
       return;
     }
     try {
@@ -916,11 +938,11 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
       // FIXME if blocking send(mouthName, "speak")
       // TODO - show multiple SpeechSynthesis select like Servos
       Boolean blocking = (Boolean) speechPart.get("blocking");
-      if (blocking != null && blocking) {
-        mouth.speakBlocking((String) speechPart.get("text"));
-      } else {
-        mouth.speak((String) speechPart.get("text"));
-      }
+//      if (blocking != null && blocking) {
+        mouth.speakBlocking((String) speechPart.get("text")); // default blocking
+//      } else {
+//        mouth.speak((String) speechPart.get("text"));
+//      }
     } catch (Exception e) {
       error(e);
     }

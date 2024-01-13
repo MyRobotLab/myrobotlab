@@ -19,11 +19,6 @@ public class Action {
   public Object value;
 
   /**
-   * if set wait this many millis before next action blocking delay
-   */
-  public Long waitMs = null;
-
-  /**
    * blocks if true - and will wait for this action to complete before going to
    * the next action
    */
