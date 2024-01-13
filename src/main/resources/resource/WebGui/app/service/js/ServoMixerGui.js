@@ -243,12 +243,7 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
 
     $scope.step = function () {
       let index = parseInt($scope.state.gestureIndex)
-      let part = $scope.state.currentGesture.parts[index]
-      if (part.type === "Pose") {
-        msg.send("moveToPose", part.name)
-      }
-      index++
-      $scope.state.gestureIndex = index + ""
+      msg.send("step", index)
     }
 
     // initialize all services which have panel references in Intro

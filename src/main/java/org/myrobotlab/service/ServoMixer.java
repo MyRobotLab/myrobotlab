@@ -96,54 +96,9 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
               if (!running) {
                 break;
               }
-              Action action = current.gesture.actions.get(i);
-              invoke("publishPlayingAction", action);
-              invoke("publishPlayingActionIndex", i);
-              switch (action.type) {
-                case "moveTo": {
-                  Map<String, Map<String, Object>> moves = (Map) action.value;
-                  for (String servoName : moves.keySet()) {
-                    Map<String, Object> move = moves.get(servoName);
-                    moveTo(servoName, move);
-                  }
-                }
-                  break;
-                case "gesture": {
+              
+              processAction(current, i);
 
-                  // save current place
-                  current.startIndex = i + 1; // Obiwan error prolly
-                  playStack.add(current);
-
-                  // read in new gesture
-                  String gestureName = (String) action.value;
-                  // Gesture embedded = getGesture(gestureName);
-                  Gesture embedded = (Gesture)invoke("getGesture", gestureName);
-                  if (embedded == null) {
-                    error("embedded gesture %s was not found", gestureName);
-                    break;
-                  }
-                  // insert actions ?
-                  // TODO - check for infinite recursion ... history, if your
-                  // new gesture is already on the playstack
-
-                  // replace current with new embedded gesture
-                  // index reset
-                  i = -1;
-                  current = new PlayingGesture(gestureName, embedded, i);
-                }
-                  break;
-                case "sleep": {
-                  sleep(Math.round((double) action.value * 1000));
-                }
-                  break;
-                case "speak": {
-                  speak((Map) action.value);
-                }
-                  break;
-                default: {
-                  error("do not know how to handle gesture part of type %s", action.type);
-                }
-              }
             } // poses
           }
           if (!playStack.isEmpty()) {
@@ -157,6 +112,57 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
         error(e);
       }
       running = false;
+    }
+    
+    public void processAction(PlayingGesture current, int i) {
+      Action action = current.gesture.actions.get(i);
+      invoke("publishPlayingAction", action);
+      invoke("publishPlayingActionIndex", i);
+      switch (action.type) {
+        case "moveTo": {
+          Map<String, Map<String, Object>> moves = (Map) action.value;
+          for (String servoName : moves.keySet()) {
+            Map<String, Object> move = moves.get(servoName);
+            moveTo(servoName, move);
+          }
+        }
+          break;
+        case "gesture": {
+
+          // save current place
+          current.startIndex = i + 1; // Obiwan error prolly
+          playStack.add(current);
+
+          // read in new gesture
+          String gestureName = (String) action.value;
+          // Gesture embedded = getGesture(gestureName);
+          Gesture embedded = (Gesture)invoke("getGesture", gestureName);
+          if (embedded == null) {
+            error("embedded gesture %s was not found", gestureName);
+            break;
+          }
+          // insert actions ?
+          // TODO - check for infinite recursion ... history, if your
+          // new gesture is already on the playstack
+
+          // replace current with new embedded gesture
+          // index reset
+          i = -1;
+          current = new PlayingGesture(gestureName, embedded, i);
+        }
+          break;
+        case "sleep": {
+          sleep(Math.round((double) action.value * 1000));
+        }
+          break;
+        case "speak": {
+          speak((Map) action.value);
+        }
+          break;
+        default: {
+          error("do not know how to handle gesture part of type %s", action.type);
+        }
+      }
     }
 
     @Override
@@ -215,6 +221,9 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
    */
   final protected transient Player player = new Player();
 
+  /**
+   * gesture name of the currentGesture
+   */
   protected String currentEditGestureName = null;
 
   public ServoMixer(String n, String id) {
@@ -360,31 +369,6 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
     return files;
   }
 
-  /**
-   * Get a pose by name - name corresponds to the filename of the file in the
-   * servoMixerDirectory
-   * 
-   * @param name
-   *          name of the post to load.
-   * 
-   * @return the loaded pose object
-   */
-  public Pose getPose(String name) {
-
-    try {
-
-      String filename = new File(config.posesDir).getAbsolutePath() + File.separator + name + ".yml";
-      log.info("loading pose name {}", filename);
-      String yml = FileIO.toString(filename);
-      return CodecUtils.fromYaml(yml, Pose.class);
-      // pose = Pose.loadPose(filename);
-      // broadcastState(); "maybe too chatty"
-    } catch (Exception e) {
-      error(e);
-    }
-    return null;
-  }
-
   public String getPosesDirectory() {
     return config.posesDir;
   }
@@ -398,13 +382,36 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
     }
     return servos;
   }
+  
+  public void step(int index) {
+    step(currentEditGestureName, index);
+  }
 
-  public void moveToPose(String name) throws IOException {
-    Pose p = getPose(name);
-    if (p == null) {
-      error("cannot find pose %s", name);
+  public void step(String gestureName, int index) {
+    
+    if (gestureName == null) {
+      error("gesture name cannot be null");
+      return;
     }
-    moveToPose(name, p, false);
+        
+    if (!gestureName.equals(currentEditGestureName)) {
+      // load gesture
+      getGesture(gestureName);
+    }
+    
+    if (currentGesture == null) {
+      error("gesture cannot be nulle");
+      return;
+    }
+    
+    player.processAction(new PlayingGesture(gestureName, currentGesture), index);
+    // step to next action
+    index++;
+    if (index < currentGesture.actions.size()) {
+      Action action = currentGesture.actions.get(index);
+      invoke("publishPlayingAction", action);
+      invoke("publishPlayingActionIndex", index);
+    }
   }
 
   public void moveToPose(String name, Pose p, boolean blocking) {
