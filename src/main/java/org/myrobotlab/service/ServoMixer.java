@@ -228,13 +228,17 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
    * @param filename
    * @return
    */
-  public String addNewGestureFile(String filename) {
-    if (filename == null) {
-      error("filename cannot be null");
+  public String addNewGestureFile(String name) {
+    if (name == null) {
+      error("name cannot be null");
       return null;
     }
-    if (!filename.toLowerCase().endsWith(".yml")) {
-      filename += ".yml";
+    
+    String filename = null;    
+    if (!name.toLowerCase().endsWith(".yml")) {
+      filename = name + ".yml";
+    } else {
+      filename = name;
     }
 
     String path = config.gesturesDir + fs + filename;
@@ -244,6 +248,7 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
       return null;
     }
     saveGesture(filename, new Gesture());
+    invoke("getGesture", name);
     return filename;
   }
 
