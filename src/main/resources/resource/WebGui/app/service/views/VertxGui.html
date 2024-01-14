@@ -1,0 +1,97 @@
+<form class="form-inline" role="forms">
+  <div class="form-group">
+    <label data-toggle="tooltip">
+      autostart browser
+      <input
+        type="checkbox"
+        ng-model="service.config.autoStartBrowser"
+        ng-change="msg.setAutoStartBrowser(service.config.autoStartBrowser);msg.broadcastState()"
+        title="automatically spawns a new browser next startup"
+      />
+    </label>
+  </div>
+  <div class="form-group">
+    <label>
+      &nbsp;&nbsp;port
+      <input class="form-control" type="text" ng-model="port" placeholder="{{service.config.port}}" title="the port vertx is currently set to listen on" />
+      <button class="btn btn-default" ng-click="msg.setPort(port);">restart</button>
+    </label>
+  </div>
+</form>
+<!--
+{{panel.name}}
+
+         <div class="col-md-1">&nbsp;</div>
+        <div class="col-md-10">
+            <div class="tab-content">
+                <div service-body panel="mrl.getPanel('runtime')"></div>
+            </div>
+        </div>
+-->
+<!--
+ <div 
+                 panel-drctv
+                 panel="panel">
+            </div>
+-->
+
+<!--
+<div ng-repeat="panel in displayImages">
+    <div class="panel-heading absolute" drag-directive name="name-01">
+        <h3 class="panel-title">
+            <b>WHAT A DRAG {{panel}}</b>
+        </h3>
+        <div >
+            <img ngsf-fullscreen class="fullscreen" ng-src="{{panel.data}}">
+            <button ngsf-toggle-fullscreen>Toggle fullscreen</button>
+            </img>
+        </div>
+
+    </div>
+</div>
+-->
+
+<!--
+
+<button ng-click="displayImage()">display image</button>
+
+-->
+<!--
+<pre>{{service}}</pre>
+-->
+<!-- <input type="text" ng-disabled="isConnected" ng-model="service.port" class="form-control"> -->
+<!--
+<video width="400" controls autoplay>
+  <source src="/stream" type="video/x-flv">
+  Your browser does not support HTML5 video.
+</stream>
+-->
+<!--
+<video width="600" controls autoplay>
+  <source src="/stream">
+  Your browser does not support HTML5 video.
+</stream>
+
+-->
+<!--  WORKY
+
+
+<video width="400" controls autoplay>
+  <source src="/stream" type="video/mp4">
+  Your browser does not support HTML5 video.
+</stream>
+
+-->
+<!--
+<video width="320" controls autoplay>
+  <source src="http://localhost:20000" >
+  Your browser does not support HTML5 video.
+</stream>
+-->
+<!--
+<video width="400" controls autoplay>
+
+  <source src="rtmp://localhost:1888/stream/test.flv" type="video/mp4">
+  Your browser does not support HTML5 video.
+</stream>
+-->

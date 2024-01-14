@@ -80,16 +80,17 @@
         maven or jenkins can do this
         
        -->
-      <!-- force overriding property at command line, use ${maven.build.timestamp}-->
-      <timestamp>${maven.build.timestamp}</timestamp>
-      <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>      
-      <version>${project.version}</version>   
-      <GitBranch>${git.branch}</GitBranch>
-      <username>${NODE_NAME}</username>      
-      <platform>${NODE_LABELS}</platform>      
-      <!-- end env vars -->
-      <!-- echoproperties / -->
-      
+
+    <!-- force overriding property at command line, use ${maven.build.timestamp}-->
+    <timestamp>${maven.build.timestamp}</timestamp>
+    <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
+    <version>${version}</version>
+    <GitBranch>${git.branch}</GitBranch>
+    <username>${NODE_NAME}</username>
+    <platform>${NODE_LABELS}</platform>
+    <!-- end env vars -->
+    <!-- echoproperties / -->
+
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -1875,39 +1876,39 @@
         </executions>
       </plugin>
       <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>myrobotlab</finalName>
-                            <!-- finalName>myrobotlab-${git.branch}-${project.version}</finalName -->
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>myrobotlab-full</shadedClassifierName>
-                            <minimizeJar>false</minimizeJar>
-                           <!--  <artifactSet>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <finalName>myrobotlab</finalName>
+              <!-- finalName>myrobotlab-${git.branch}-${version}</finalName -->
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>myrobotlab-full</shadedClassifierName>
+              <minimizeJar>false</minimizeJar>
+              <!--  <artifactSet>
                                 <excludes>
                                     <exclude>edu.stanford.nlp:*</exclude>
                                 </excludes>
                             </artifactSet>  -->
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                        <manifestEntries>
-                                          <Main-Class>org.myrobotlab.service.Runtime</Main-Class>
-                                          <Major-Version>${project.version}</Major-Version>
-                                          <Implementation-Version>${project.version}</Implementation-Version>                               
-              
-                        <Build-Version>${project.version}</Build-Version>
-                        <Build-Time>${maven.build.timestamp}</Build-Time>
-                        <Build-Host>${agent.name}</Build-Host>
-                        <Build-User>${user.name}</Build-User>
-                        
+              <transformers>
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <manifestEntries>
+                    <Main-Class>org.myrobotlab.service.Runtime</Main-Class>
+                    <Major-Version>${version}</Major-Version>
+                    <Implementation-Version>${version}</Implementation-Version>
+
+                    <Build-Version>${version}</Build-Version>
+                    <Build-Time>${maven.build.timestamp}</Build-Time>
+                    <Build-Host>${agent.name}</Build-Host>
+                    <Build-User>${user.name}</Build-User>
+
                     <!-- maven git plugin id info -->
                       <GitTags>${git.tags}</GitTags>
                       <GitBranch>${git.branch}</GitBranch>

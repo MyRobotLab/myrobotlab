@@ -6,7 +6,11 @@
         <div class="col-md-12">
           <nav class="settingsbar prevent-drag-select">
             <span>
-              <h6>You need to attach a controller to a servo.<br />For example real and virtual controller.</h6>
+              <h6>
+                You need to attach a controller to a servo.
+                <br />
+                For example real and virtual controller.
+              </h6>
             </span>
           </nav>
         </div>
@@ -347,34 +351,37 @@
   </uib-tabset>
 </div>
 <div class="min-view">
-  <span class="servo-mixer-name">{{service.name}}</span
-  ><span class="servo-mixer-value">{{service.targetPos}}º@{{speedDisplay}}°/s</span>
-  <span>
-    <span class="servo-mixer-name">
-      <span ng-click="toggleServoSpeedBar(service)" class="glyphicon glyphicon-chevron-down"></span>
-      <span ng-show="service.speedBar">
-        speed <button ng-click="pos.value=restSlider.value;msg.rest()">rest</button>
-      <input
-        class="base-slider"
-        width="60px"
-        type="range"
-        name="speedRange"
-        ng-model="service.speed"
-        min="1"
-        max="201"
-        ng-change="setSpeed()"
-    /></span>
-    <span>
-      <input
-        class="base-slider slider-width100"
-        type="range"
-        name="targetPos"
-        ng-model="service.targetPos"
-        min="0"
-        max="180"
-        ng-change="moveTo(service.targetPos)"
-        ng-mousedown="disableUpdates()"
-        ng-mouseup="enableUpdates()"
-    /></span>
-  </span>
+  <table>
+    <tr>
+      <td><span class="servo-mixer-name">{{service.name}}</span></td>
+      <td>
+        <input
+          class="base-slider slider-width100"
+          type="range"
+          name="speedRange"
+          ng-model="service.speed"
+          min="1"
+          max="201"
+          ng-change="setSpeed()"
+        />
+      </td>
+      <td><span class="servo-mixer-value">{{speedDisplay}}°/s</span></td>
+      <td><span class="servo-mixer-value"> &nbsp;&nbsp;&nbsp;{{service.targetPos}}º</span></td>
+    </tr>
+    <tr>
+      <td colspan="4">
+        <input
+          class="base-slider slider-width100"
+          type="range"
+          name="targetPos"
+          ng-model="service.targetPos"
+          min="0"
+          max="180"
+          ng-change="moveTo(service.targetPos)"
+          ng-mousedown="disableUpdates()"
+          ng-mouseup="enableUpdates()"
+        />
+      </td>
+    </tr>
+  </table>
 </div>

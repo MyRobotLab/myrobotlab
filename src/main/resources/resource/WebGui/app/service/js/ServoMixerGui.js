@@ -175,7 +175,8 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
       let hasSelected = false
       if ($scope.servos) {
         $scope.servos.forEach((servo) => {
-          if (servo.selected) {
+          if (mrl.getPanel(mrl.getShortName(servo.name)).selected) {
+            // if (servo.selected) {
             moves[mrl.getShortName(servo.name)] = {
               position: servo.currentInputPos,
               speed: servo.speed,
@@ -186,7 +187,8 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
       }
 
       if (hasSelected) {
-        msg.send("addMoveToAction", moves, parseInt($scope.state.gestureIndex) + 1)
+        let servoNames = Object.keys(moves)
+        msg.send("addMoveToAction", servoNames, parseInt($scope.state.gestureIndex) + 1)
         msg.send("getGesture")
         $scope.state.gestureIndex = parseInt($scope.state.gestureIndex) + 1 + ""
       } else {
@@ -196,6 +198,7 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
 
     $scope.removeActionFromGesture = function () {
       msg.send("removeActionFromGesture", parseInt($scope.state.gestureIndex))
+      $scope.state.gestureIndex = parseInt($scope.state.gestureIndex) - 1 + ""
       msg.send("getGesture")
     }
 
@@ -240,12 +243,7 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
 
     $scope.step = function () {
       let index = parseInt($scope.state.gestureIndex)
-      let part = $scope.state.currentGesture.parts[index]
-      if (part.type === "Pose") {
-        msg.send("moveToPose", part.name)
-      }
-      index++
-      $scope.state.gestureIndex = index + ""
+      msg.send("step", index)
     }
 
     // initialize all services which have panel references in Intro
@@ -254,19 +252,24 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
       this.onRegistered(servicePanelList[index])
     }
 
-    $scope.saveGesture = function (gestureName) {
-      msg.send("saveGesture", gestureName)
+    $scope.saveGesture = function () {
+      msg.send("saveGesture", $scope.state.selectedGestureFile)
+    }
+
+    $scope.openGesture = function () {
+      msg.send("openGesture", state.selectedGestureFile)
     }
 
     $scope.addSleep = function (seconds) {
       let value = parseFloat(seconds)
 
-      if (Number.isNaN(value)) {
+      if (Number.isNaN(seconds)) {
         console.error(seconds, "is not a valid number for sleep")
         return
       }
-
-      msg.send("addSleepAction", seconds)
+      let index = parseInt($scope.state.gestureIndex) + 1
+      $scope.state.gestureIndex = index + ""
+      msg.send("addSleepAction", seconds, index)
       msg.send("getGesture")
     }
 
@@ -291,8 +294,10 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
         return `sleep ${action.value}`
       } else if (action.type == "speak") {
         return `speak ${action.value.text}`
+      } else if (action.type == "gesture") {
+        return `gesture ${action.value}`
       } else if (action.type == "moveTo") {
-        let ret = "move"
+        let ret = "moveTo"
         Object.keys(action.value).forEach((key) => {
           ret += ` ${key} ${action.value[key].position}`
           if (action.value[key].speed) {
@@ -301,8 +306,14 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
         })
         return ret
       } else {
-        return action.value
+        return `${action.type} ${action.value}`
       }
+    }
+
+    $scope.selectAll = function () {
+      angular.forEach($scope.subPanels, function (key) {
+        mrl.getPanel(key).selected = $scope.selectAllCheckbox
+      })
     }
 
     $scope.speak = function () {

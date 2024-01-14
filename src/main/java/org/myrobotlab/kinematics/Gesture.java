@@ -11,9 +11,4 @@ public class Gesture {
    */
   public List<Action> actions = new ArrayList<>();
 
-  /**
-   * loop this set of actions
-   */
-  public boolean repeat = false;
-
 }

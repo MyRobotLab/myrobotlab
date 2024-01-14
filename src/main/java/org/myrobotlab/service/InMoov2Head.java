@@ -50,6 +50,8 @@ public class InMoov2Head extends Service<InMoov2HeadConfig> {
     rothead = (ServoControl) getPeer("rothead");
     neck = (ServoControl) getPeer("neck");
     rollNeck = (ServoControl) getPeer("rollNeck");
+    eyelidLeft = (ServoControl) getPeer("eyelidLeft");
+    eyelidRight = (ServoControl) getPeer("eyelidRight");
   }
 
   public void blink() {

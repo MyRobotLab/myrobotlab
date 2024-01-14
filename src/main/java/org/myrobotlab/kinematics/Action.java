@@ -19,15 +19,10 @@ public class Action {
   public Object value;
 
   /**
-   * if set wait this many millis before next action blocking delay
-   */
-  public Long waitMs = null;
-
-  /**
    * blocks if true - and will wait for this action to complete before going to
    * the next action
    */
-  public boolean willBlock = false;
+  public boolean willBlock = true;
 
   @Override
   public String toString() {
@@ -53,6 +48,13 @@ public class Action {
     Action action = new Action();
     action.type = "speak";
     action.value = speechCommand;
+    return action;
+  }
+
+  public static Action createGestureToAction(String gestureName) {
+    Action action = new Action();
+    action.type = "gesture";
+    action.value = gestureName;
     return action;
   }
 }

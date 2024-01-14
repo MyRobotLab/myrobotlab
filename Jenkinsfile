@@ -87,7 +87,7 @@ pipeline {
          steps {
             script {
                   sh '''
-                     mvn -Dfile.encoding=UTF-8 -Dbuild.number=${BUILD_NUMBER} clean package jacoco:report surefire-report:report -q
+                     mvn -Dfile.encoding=UTF-8 -Dbuild.number=${VERSION} clean package jacoco:report surefire-report:report -q
                   '''
             }
          }
@@ -114,10 +114,9 @@ pipeline {
       }
 
       stage('publish-github') {
-         // when { expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' } }
-         when { expression { env.BRANCH_NAME == 'master'} }
+         when { expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' } }
          steps {
-            withCredentials([string(credentialsId: 'supertick-github-token', variable: 'token')]) { // var name "token" is set in cred config and is case senstive
+            withCredentials([string(credentialsId: 'publish_token', variable: 'token')]) { // var name "token" is set in cred config and is case senstive
                echo "publishing ${VERSION_PREFIX}.${BUILD_NUMBER}"
                echo "version ${VERSION}"
                // for security - your supposed to make it non-interpretive single quotes and let the OS process the interpolation

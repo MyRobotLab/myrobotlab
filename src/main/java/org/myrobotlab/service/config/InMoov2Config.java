@@ -220,6 +220,9 @@ public class InMoov2Config extends ServiceConfig {
     mapper = new MapperSimple(-0.5, 0.5, 0, 180);
     map.put("i01.head.roll", mapper);
     webxr.controllerMappings.put("head.orientation.roll", map);
+    
+    ServoMixerConfig servoMixer = (ServoMixerConfig) plan.get(getPeerName("servoMixer"));
+    servoMixer.mouth = getPeerName("mouth");
 
     MouthControlConfig mouthControl = (MouthControlConfig) plan.get(getPeerName("mouthControl"));
 
@@ -274,14 +277,6 @@ public class InMoov2Config extends ServiceConfig {
     MarySpeechConfig mouth = (MarySpeechConfig) plan.get(getPeerName("mouth"));
     mouth.voice = "Mark";
     mouth.speechRecognizers = new String[] { name + ".ear" };
-
-    // == Peer - servoMixer =============================
-    // setup name references to different services
-    ServoMixerConfig servoMixer = (ServoMixerConfig) plan.get(getPeerName("servoMixer"));
-    servoMixer.listeners = new ArrayList<>();
-    servoMixer.listeners.add(new Listener("publishText", name + ".mouth", "onText"));
-    // servoMixer.listeners.add(new Listener("publishText", name + ".chatBot",
-    // "onText"));
 
     // == Peer - ear =============================
     // setup name references to different services

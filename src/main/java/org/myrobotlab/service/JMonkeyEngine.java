@@ -818,7 +818,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   public Spatial get(String name, Node startNode) {
     Spatial ret = find(name, startNode);
     if (ret == null) {
-      error("get(%s) could not find child", name);
+      log.info("get({}) could not find child", name);
     }
     return ret;
   }

@@ -13,7 +13,6 @@ angular
         link: function (scope, elem, attr) {
           scope.service = mrl.getService(scope.panel.name)
           scope.panelconfig = {}
-          console.error("WHAT THE HELL CHROME !!!!")
 
           // ACTUAL SCOPE IS CREATED IN serviceCtrlNext DIRECTIVE !!!!
           //prepare dynamic controller injection
