@@ -4,6 +4,14 @@ import java.util.Comparator;
 
 import org.myrobotlab.service.config.ServiceConfig.Listener;
 
+/**
+ * 
+ * @author GroG
+ * 
+ * This comparator is used to organize subscriptions/listeners in yml files
+ * so that they are all nicely ordered by publishing method.
+ *
+ */
 public class MrlListenerComparator implements Comparator<Listener> {
   @Override
   public int compare(Listener listener1, Listener listener2) {

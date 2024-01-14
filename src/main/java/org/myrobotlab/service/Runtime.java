@@ -434,7 +434,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         runtime.error("could not get %s from plan", service);
         continue;
       }
-      // sc.state = "CREATING";
       ServiceInterface si = createService(service, sc.type, null);
       // process the base listeners/subscription of ServiceConfig
       si.addConfigListeners(sc);
