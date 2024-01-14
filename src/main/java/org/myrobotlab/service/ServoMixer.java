@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -96,7 +95,7 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
               if (!running) {
                 break;
               }
-              
+
               processAction(current, i);
 
             } // poses
@@ -113,17 +112,46 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
       }
       running = false;
     }
-    
+
     public void processAction(PlayingGesture current, int i) {
       Action action = current.gesture.actions.get(i);
       invoke("publishPlayingAction", action);
       invoke("publishPlayingActionIndex", i);
       switch (action.type) {
         case "moveTo": {
+          // process a move
           Map<String, Map<String, Object>> moves = (Map) action.value;
+
+          // do the moves
           for (String servoName : moves.keySet()) {
             Map<String, Object> move = moves.get(servoName);
             moveTo(servoName, move);
+          }
+
+          // Boolean blocking = (Boolean) move.get("blocking");
+          boolean anyServoMoving = true;
+
+          // wait until all servos stop
+          while (anyServoMoving) {
+            // start by assuming all are not moving
+            anyServoMoving = false;
+            log.error("======starting moving=========");
+            for (String servoName : moves.keySet()) {
+              ServoControl servo = (ServoControl) Runtime.getService(servoName);
+              if (servo == null || !servo.isMoving()) {
+                log.error("{} not moving", servoName);
+              } else {
+                log.error("{} moving sleeping", servoName);
+                anyServoMoving = true;
+              }
+            }
+
+            if (anyServoMoving) {
+              log.error("sleeping 20 ms");
+              sleep(20);
+            } else {
+              log.error("======done with move=========");              
+            }
           }
         }
           break;
@@ -136,7 +164,7 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
           // read in new gesture
           String gestureName = (String) action.value;
           // Gesture embedded = getGesture(gestureName);
-          Gesture embedded = (Gesture)invoke("getGesture", gestureName);
+          Gesture embedded = (Gesture) invoke("getGesture", gestureName);
           if (embedded == null) {
             error("embedded gesture %s was not found", gestureName);
             break;
@@ -242,8 +270,8 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
       error("name cannot be null");
       return null;
     }
-    
-    String filename = null;    
+
+    String filename = null;
     if (!name.toLowerCase().endsWith(".yml")) {
       filename = name + ".yml";
     } else {
@@ -382,28 +410,28 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
     }
     return servos;
   }
-  
+
   public void step(int index) {
     step(currentEditGestureName, index);
   }
 
   public void step(String gestureName, int index) {
-    
+
     if (gestureName == null) {
       error("gesture name cannot be null");
       return;
     }
-        
+
     if (!gestureName.equals(currentEditGestureName)) {
       // load gesture
       getGesture(gestureName);
     }
-    
+
     if (currentGesture == null) {
       error("gesture cannot be nulle");
       return;
     }
-    
+
     player.processAction(new PlayingGesture(gestureName, currentGesture), index);
     // step to next action
     index++;
@@ -918,20 +946,11 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
       }
     }
 
-    Boolean blocking = (Boolean) move.get("blocking");
     Object position = move.get("position");
-    if (blocking != null && blocking) {
-      if (position instanceof Integer) {
-        servo.moveToBlocking((Integer) position);
-      } else if (position instanceof Double) {
-        servo.moveToBlocking((Double) position);
-      }
-    } else {
-      if (position instanceof Integer) {
-        servo.moveTo((Integer) position);
-      } else if (position instanceof Double) {
-        servo.moveTo((Double) position);
-      }
+    if (position instanceof Integer) {
+      servo.moveTo((Integer) position);
+    } else if (position instanceof Double) {
+      servo.moveTo((Double) position);
     }
   }
 
@@ -950,11 +969,11 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
       // FIXME if blocking send(mouthName, "speak")
       // TODO - show multiple SpeechSynthesis select like Servos
       Boolean blocking = (Boolean) speechPart.get("blocking");
-//      if (blocking != null && blocking) {
-        mouth.speakBlocking((String) speechPart.get("text")); // default blocking
-//      } else {
-//        mouth.speak((String) speechPart.get("text"));
-//      }
+      // if (blocking != null && blocking) {
+      mouth.speakBlocking((String) speechPart.get("text")); // default blocking
+      // } else {
+      // mouth.speak((String) speechPart.get("text"));
+      // }
     } catch (Exception e) {
       error(e);
     }
