@@ -130,27 +130,29 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
 
           // Boolean blocking = (Boolean) move.get("blocking");
           boolean anyServoMoving = true;
+          log.info("======starting moving=========");
 
           // wait until all servos stop
-          while (anyServoMoving) {
-            // start by assuming all are not moving
-            anyServoMoving = false;
-            log.error("======starting moving=========");
-            for (String servoName : moves.keySet()) {
-              ServoControl servo = (ServoControl) Runtime.getService(servoName);
-              if (servo == null || !servo.isMoving()) {
-                log.error("{} not moving", servoName);
-              } else {
-                log.error("{} moving sleeping", servoName);
-                anyServoMoving = true;
+          if (action.willBlock) {
+            while (anyServoMoving) {
+              // start by assuming all are not moving
+              anyServoMoving = false;
+              for (String servoName : moves.keySet()) {
+                ServoControl servo = (ServoControl) Runtime.getService(servoName);
+                if (servo == null || !servo.isMoving()) {
+                  log.debug("not moving {}", servoName);
+                } else {
+                  log.error("still moving {}", servoName);
+                  anyServoMoving = true;
+                }
               }
-            }
 
-            if (anyServoMoving) {
-              log.error("sleeping 20 ms");
-              sleep(20);
-            } else {
-              log.error("======done with move=========");              
+              if (anyServoMoving) {
+                log.info("sleeping 20 ms");
+                sleep(20);
+              } else {
+                log.info("======done with move=========");
+              }
             }
           }
         }

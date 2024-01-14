@@ -22,7 +22,7 @@ public class Action {
    * blocks if true - and will wait for this action to complete before going to
    * the next action
    */
-  public boolean willBlock = false;
+  public boolean willBlock = true;
 
   @Override
   public String toString() {
