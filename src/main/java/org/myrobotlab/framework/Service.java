@@ -43,6 +43,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -515,8 +516,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    */
 
   static public String getResourceRoot() {
-    // setting resource root details
-    return "resource";
+    return Runtime.getInstance().getConfig().resource;
   }
 
   /**
@@ -1516,6 +1516,11 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     if (newListeners.size() > 0) {
       sc.listeners = newListeners;
     }
+    
+    if (sc.listeners != null) {
+      Collections.sort(sc.listeners, new MrlListenerComparator());
+    }
+       
     return sc;
   }
 

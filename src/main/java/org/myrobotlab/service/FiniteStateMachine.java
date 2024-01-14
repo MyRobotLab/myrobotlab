@@ -46,9 +46,6 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
 
   protected String lastEvent = null;
 
-  @Deprecated /* is this deprecated with ServiceConfig.listeners ? */
-  protected Set<String> messageListeners = new HashSet<>();
-
   /**
    * state history of fsm
    */
@@ -260,13 +257,6 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
    */
   public StateChange publishStateChange(StateChange stateChange) {
     log.info("publishStateChange {}", stateChange);
-    for (String listener : messageListeners) {
-      ServiceInterface service = Runtime.getService(listener);
-      if (service != null) {
-        org.myrobotlab.framework.Message msg = org.myrobotlab.framework.Message.createMessage(getName(), listener, CodecUtils.getCallbackTopicName(stateChange.state), null);
-        service.in(msg);
-      }
-    }
     return stateChange;
   }
 
@@ -274,8 +264,6 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
   public FiniteStateMachineConfig getConfig() {
     super.getConfig();
     config.current = getCurrent();
-    config.messageListeners = new ArrayList<>();
-    config.messageListeners.addAll(messageListeners);
     return config;
   }
 
@@ -294,9 +282,6 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
       for (Transition t : newTransistions) {
         addTransition(t.from, t.event, t.to);
       }
-
-      messageListeners = new HashSet<>();
-      messageListeners.addAll(c.messageListeners);
       broadcastState();
     }
 
@@ -306,22 +291,6 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
     }
 
     return c;
-  }
-
-  public void attach(String name) {
-    attachMessageListener(name);
-  }
-
-  public void attach(MessageListener listener) {
-    attachMessageListener(listener.getName());
-  }
-
-  public void attachMessageListener(String listener) {
-    messageListeners.add(listener);
-  }
-
-  public void detachMessageListener(String listener) {
-    messageListeners.remove(listener);
   }
 
   public static void main(String[] args) {
@@ -449,6 +418,14 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
     } else {
       return history.get(history.size() - 2).state;
     }
+  }
+  
+  @Override
+  public void startService() {
+    super.startService();
+    // should be configured,
+    // need to init
+    init();
   }
 
 }

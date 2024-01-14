@@ -45,6 +45,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.config.WebGuiConfig;
+import org.myrobotlab.service.data.Classification;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
@@ -537,10 +538,11 @@ public class WebGui extends Service<WebGuiConfig>
 
         String path = URLDecoder.decode(r.getRequest().getPathInfo(), StandardCharsets.UTF_8);
         Message msg = CodecUtils.pathToMsg(getFullName(), path);
-        msg = CodecUtils.decodeMessageParams(msg);
-        // if body exists it overrides
+
         if (bodyData != null) {
           msg.data = CodecUtils.fromJson(bodyData, Object[].class);
+        } else {
+          msg = CodecUtils.decodeMessageParams(msg);
         }
 
         if (isLocal(msg)) {
@@ -549,6 +551,7 @@ public class WebGui extends Service<WebGuiConfig>
           // Object[] params = cache.getDecodedJsonParameters(clazz, msg.method,
           // msg.data);
           // msg.data = params;
+                    
           Object ret = invoke(msg);
           OutputStream out = r.getResponse().getOutputStream();
           out.write(CodecUtils.toJson(ret).getBytes());
@@ -1182,7 +1185,10 @@ public class WebGui extends Service<WebGuiConfig>
 
     try {
 
-      Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
+      // Runtime.startConfig("dev");      
+      Runtime.main(new String[] { "--log-level", "info", "-s", "vertx", "Vertx", "intro", "Intro", "python", "Python" });
+      // Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
+      // Runtime.main(new String[] { "--log-level", "info", "-c", "dev" });
       boolean done = true;
       if (done) {
         return;

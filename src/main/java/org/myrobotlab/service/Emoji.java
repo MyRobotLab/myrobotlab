@@ -24,7 +24,6 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-
 // emotionListener
 // Links
 // - http://googleemotionalindex.com/

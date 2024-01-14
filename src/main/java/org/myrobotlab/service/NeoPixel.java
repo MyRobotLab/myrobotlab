@@ -754,14 +754,11 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
   }
 
   /**
-   * <<<<<<< HEAD
    * takes a scalar value and fills with the appropriate brightness using the
    * peak color if available
    * 
-   * =======
    * takes a scalar value and fills with the appropriate brightness
    * using the peak color if available
-   * >>>>>>> bc934273b87f95e8adf339057f7aa7a80ed43c91
    * 
    * @param value
    */

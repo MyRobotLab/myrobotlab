@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.List;
 
 import org.junit.Before;
@@ -40,11 +39,15 @@ public class WebGuiTest extends AbstractTest {
 
   @Test
   public void getTest() {
+    for (int i = 0; i < 1000; ++i) {
 
     byte[] bytes = Http.get("http://localhost:8889/api/service/runtime/getUptime");
     assertNotNull(bytes);
     String ret = new String(bytes);
     assertTrue(ret.contains("days"));
+    System.out.println(String.format("%d", i));
+
+    }
   }
   
   @Test
@@ -94,7 +97,7 @@ public class WebGuiTest extends AbstractTest {
     
     
     // post non primitive non string object
-    MRLListener listener = new MRLListener("getRegistry", "runtime@webguittest", "onRegistry");
+    MRLListener listener = new MRLListener("getRegistry", "runtime@webguittest", "onRegistry");    
     postBody = "[" + CodecUtils.toJson(listener) + "]";    
     // postBody = "[\"runtime\"]";
     bytes = Http.post("http://localhost:8889/api/service/runtime/addListener", postBody);

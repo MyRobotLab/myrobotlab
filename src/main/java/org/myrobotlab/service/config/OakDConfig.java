@@ -24,7 +24,6 @@ public class OakDConfig extends ServiceConfig {
   public Plan getDefault(Plan plan, String name) {
     super.getDefault(plan, name);
     addDefaultPeerConfig(plan, name, "py4j", "Py4j");
-    addDefaultPeerConfig(plan, name, "git", "Git");
     return plan;
   }
 

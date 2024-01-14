@@ -677,7 +677,7 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
         error("save gesture file name cannot be null");
         return;
       }
-
+      
       if (gesture == null) {
         log.info("creating empty gesture");
         gesture = new Gesture();

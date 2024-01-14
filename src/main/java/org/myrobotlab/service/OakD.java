@@ -1,13 +1,18 @@
 package org.myrobotlab.service;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.process.GitHub;
 import org.myrobotlab.service.config.OakDConfig;
+import org.myrobotlab.service.data.Classification;
 import org.slf4j.Logger;
+
 /**
  * 
  * 
@@ -23,30 +28,28 @@ public class OakD extends Service<OakDConfig> {
   public final static Logger log = LoggerFactory.getLogger(OakD.class);
 
   private transient Py4j py4j = null;
-  private transient Git git = null;
-  
+
   public OakD(String n, String id) {
     super(n, id);
   }
-  
+
   public void startService() {
     super.startService();
-    
-    py4j = (Py4j)startPeer("py4j");
-    git = (Git)startPeer("git");
-    
+
+    py4j = (Py4j) startPeer("py4j");
+
     if (config.py4jInstall) {
       installDepthAi();
     }
 
   }
-  
+
   /**
    * starting install of depthapi
    */
-  public void publishInstallStart() {    
+  public void publishInstallStart() {
   }
-  
+
   public Status publishInstallFinish() {
     return Status.error("depth ai install was not successful");
   }
@@ -56,9 +59,23 @@ public class OakD extends Service<OakDConfig> {
    * 
    */
   public void installDepthAi() {
-    
-    //git.clone("./", config.depthaiCloneUrl)
-    py4j.exec("");
+    try {
+
+      // git.clone("./", config.depthaiCloneUrl)
+      List<String> packages = new ArrayList<>();
+      packages.add("depthai==2.20.2.0");
+      packages.add("blobconverter==1.3.0");
+      packages.add("opencv-python");
+      packages.add("numpy");
+      py4j.installPipPackages(packages);
+    } catch (IOException e) {
+      error(e);
+    }
+    // py4j.exec("");
+  }
+  
+  public Classification publishClassification(Classification classification) {
+    return classification;
   }
 
   public static void main(String[] args) {
@@ -66,7 +83,7 @@ public class OakD extends Service<OakDConfig> {
 
       LoggingFactory.init(Level.INFO);
 
-      Runtime.start("camera", "OakD");
+      Runtime.start("oakd", "OakD");
       Runtime.start("servo", "Servo");
       Runtime.start("webgui", "WebGui");
 

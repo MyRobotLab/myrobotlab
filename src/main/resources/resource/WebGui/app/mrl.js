@@ -326,14 +326,18 @@ angular.module("mrlapp.mrl", []).provider("mrl", [
         registration.typeKey = "Unknown"
       }
 
-      serviceTypes[simpleTypeName] = registration.typeKey
+        serviceTypes[simpleTypeName] = registration.typeKey
 
-      // initial de-serialization of state
-      let service = JSON.parse(registration.state)
-      registry[fullname] = service
-      if (simpleTypeName == "Unknown") {
-        service.simpleName = "Unknown"
-      }
+        // initial de-serialization of state
+        let service = JSON.parse(registration.state)
+        registry[fullname] = service
+        if (simpleTypeName == "Unknown") {
+            service.simpleName = "Unknown"
+        }
+
+        // now add a panel - with the function it registered
+        // _self.addServicePanel(service)
+        _self.addService(service)
 
       // now add a panel - with the function it registered
       // _self.addServicePanel(service)
@@ -429,22 +433,8 @@ angular.module("mrlapp.mrl", []).provider("mrl", [
             }
           }
 
-          // on all onState msg - from broadcastState update the
-          // registry
-          let senderFullName = _self.getFullName(msg.sender)
-          if (msg.method == "onState") {
-            let s = registry[senderFullName]
-            if (s) {
-              let service = msg.data[0]
-              registry[senderFullName] = service
-              // for ([key,value] of Object.entries(service.serviceType.peers)) {
-              //     peerKey = key[0].toUpperCase() + key.substring(1)
-              //     if (value.state == 'STARTED') {
-              //         service['is' + peerKey + 'Started'] = true
-              //     } else {
-              //         service['is' + peerKey + 'Started'] = false
-              //     }
-              // }
+            if (!service.name) {
+                console.error('uh oh')
             }
           }
 
@@ -1028,6 +1018,193 @@ angular.module("mrlapp.mrl", []).provider("mrl", [
                 // broadcast - a new panel has been added
                 panelRegistered(newPanel)
 
+        var notifyAllOfUpdate = function() {
+            var panellist = _self.getPanelList()
+            angular.forEach(updateSubscribtions, function(value, key) {
+                value(panellist)
+            })
+        }
+
+        //END_update-notification
+        _self.getPanels = function() {
+            //return panels as an object
+            return panels
+        }
+
+        // TODO - implement
+        _self.savePanels = function() {
+            console.debug("here")
+        }
+        /**
+         * panelSvc (PanelData) --to--> MRL
+         * saves panel data from panelSvc to MRL
+         */
+        _self.savePanel = function(name) {
+            mrl.sendTo(_self.gateway.name, "savePanel", _self.getPanelData(name))
+        }
+
+        /**
+         * return a flattened sorted array of properties for input service
+         * TODO - add exclude replacement and info parameters
+         */
+        _self.getProperties = function(service) {
+            let flat = _self.flatten(service)
+            // console.table(flat) -  very cool logging, but to intensive
+
+            let properties = []
+
+            let exclude = ['serviceType', 'id', 'simpleName', 'interfaceSet', 'typeKey', 'statusBroadcastLimitMs', 'isRunning', 'name', 'creationOrder', 'serviceType']
+
+            // FIXME - extract from javadoc !
+            let info = {
+                autoDisable: "servo will de-energize if no activity occurs in {idleTimeout} ms - saving the servo from unnecessary wear or damage",
+                idleTimeout: "number of milliseconds the servo will de-energize if no activity has occurred",
+                isSweeping: "servo is in sweep mode - which will make the servo swing back and forth at current speed between min and max values",
+                lastActivityTimeTs: "timestamp of last move servo did"
+            }
+
+            // Push each JSON Object entry in array by [key, value]
+            for (let i in flat) {
+
+                let o = flat[i]
+
+                let excluded = false
+
+                for (let j = 0; j < exclude.length; j++) {
+                    if (i.startsWith(exclude[j])) {
+                        excluded = true
+                        break;
+                    }
+                }
+
+                if (excluded) {
+                    continue
+                }
+
+                let inf = (info[i] == null) ? '' : info[i]
+
+                properties.push([i, flat[i], inf])
+            }
+
+            // Run native sort function and returns sorted array.
+            return properties.sort()
+        }
+
+        _self.getPanelList = function() {
+            return Object.keys(panels).map(function(key) {
+                return panels[key]
+            })
+        }
+
+        _self.display = function(imageSrc, name) {
+            if (!name) {
+                name = 'image-' + Object.keys(displayImages).length
+            }
+            displayImages[name] = createPanel(name, name, 15, lastPosY, 800, 0, zIndex, imageSrc)
+            for (let i = 0; i < displayCallbacks.length; ++i) {
+                displayCallbacks[i](displayImages[name])
+            }
+        }
+
+        let setDisplayCallback = function(callback) {
+            displayCallbacks.push(callback)
+        }
+
+        let getDisplayImages = function() {
+            return displayImages
+        }
+
+        let addPanel = function(service) {
+            var fullname = _self.getFullName(service)
+
+            if (panels.hasOwnProperty(fullname)) {
+                console.warn(fullname + ' already has panel')
+                return panels[fullname]
+            }
+            lastPosY += 40
+            zIndex++
+            //construct panel & add it to dictionary
+            panels[fullname] = createPanel(fullname, service.typeKey, 15, lastPosY, 800, 0, zIndex)
+            return panels[fullname]
+        }
+
+        _self.getPanel = function(serviceName) {
+            let name = _self.getFullName(serviceName)
+            if (panels.hasOwnProperty(name)) {
+                return panels[name]
+            } else {// TOO CHATTY - BROWSER KILLER !
+            // console.error('could not find panel ' + name)
+            }
+            return null
+        }
+
+        let createPanel = function(fullname, type, x, y, width, height, zIndex, data) {
+
+            let displayName = fullname.endsWith(_self.remoteId) ? _self.getShortName(fullname) : fullname
+            console.info('createPanel', _self.remoteId, displayName)
+            let panel = {
+                simpleName: _self.getSimpleName(type),
+                name: fullname,
+                displayName: displayName,
+
+                //the state the loading of the template is in (loading, loaded, notfound) - probably can be removed
+                templatestatus: null,
+                // service.templatestatus,
+                // ???
+                list: 'main',
+                size: 'free',
+
+                data: data,
+
+                posX: x,
+                posY: y,
+
+                width: width,
+                height: height,
+                zIndex: zIndex,
+                hide: false,
+
+                showPeerTable: false,
+
+                // FIXME  - remove this use mrl panel methods
+                svc: _self,
+                hide: function() {
+                    hide = true
+                }
+            }
+
+            return panel
+        }
+
+        _self.addService = function(service) {
+
+            var name = _self.getFullName(service)
+            console.debug('mrl.addService ' + name)
+            var type = service.simpleName
+            //first load & parse the controller,    //js
+            //then load and save the template       //html
+            console.debug('lazy-loading:', name, type)
+            $ocLazyLoad.load('service/js/' + type + 'Gui.js').then(function() {
+                console.debug('lazy-loading successful:', name, type)
+                $http.get('service/views/' + type + 'Gui.html').then(function(response) {
+                    $templateCache.put(type + 'Gui.html', response.data)
+                    var newPanel = addPanel(service)
+                    newPanel.templatestatus = 'loaded'
+
+                    // broadcast - a new panel has been added
+                    panelRegistered(newPanel)
+
+                    notifyAllOfUpdate()
+                }, function(response) {
+                    addPanel(name).templatestatus = 'notfound'
+                    notifyAllOfUpdate()
+                })
+            }, function(e) {
+                // http template failure
+                type = "No"
+                // becomes NoGui
+                console.warn('lazy-loading wasnt successful:', type)
+                addPanel(name).templatestatus = 'notfound'
                 notifyAllOfUpdate()
               },
               function (response) {
@@ -1246,76 +1423,175 @@ angular.module("mrlapp.mrl", []).provider("mrl", [
          * creating a message interface unique for each service, and dynamically building out methods
          * based on information from getMessageMap
          */
-        createMsgInterface: function (name) {
-          //TODO - clean up here !!!
-          //left kind of a mess here (e.g. temp and mod below), MaVo
-          var deferred = $q.defer()
-          if (!msgInterfaces.hasOwnProperty(name)) {
-            //console.log(name + ' getMsgInterface ')
-            msgInterfaces[name] = {
-              name: name,
-              temp: {},
-              send: function (method, data) {
-                var args = Array.prototype.slice.call(arguments, 1)
-                var msg = _self.createMessage(name, method, args)
-                msg.sendingMethod = "sendTo"
-                // FIXME - not very useful
-                _self.sendMessage(msg)
-              },
-              sendBlocking: function (method, data) {
-                var args = Array.prototype.slice.call(arguments, 1)
-                var msg = _self.createMessage(name, method, args)
-                msg.sendingMethod = "sendTo"
-                msg.msgType = "B"
-                // FIXME - not very useful
-                _self.sendMessage(msg)
-              },
-              sendTo: function (toName, method, data) {
-                var args = Array.prototype.slice.call(arguments, 2)
-                var msg = _self.createMessage(toName, method, args)
-                msg.sendingMethod = "sendTo"
-                _self.sendMessage(msg)
-              },
-              /**
-               *   sendArgs will be called by the dynamically generated code interface
-               */
-              sendArgs: function (method, obj) {
-                let data = []
-                for (var key in obj) {
-                  if (obj.hasOwnProperty(key)) {
-                    data.push(obj[key])
-                  }
-                }
-                var msg = _self.createMessage(name, method, data)
-                msg.sendingMethod = "sendTo"
-                // FIXME - not very useful
-                _self.sendMessage(msg)
-              },
-              // framework routed callbacks come here
-              onMsg: function (msg) {
-                // webgui.onMethodMap gets processed here
-                // console.log("framework callback " + msg.name + "." + msg.method)
-                switch (msg.method) {
-                  // FIXME - bury it ?
-                  case "onState":
-                    _self.updateState(msg.data[0])
-                    //                                $apply() scope is context related !!!
-                    break
-                  case "onMethodMap":
-                    // console.log('onMethodMap Yay !!')
-                    // method maps are dynamically created binding functions
-                    // created to allow direct access from html views to a msg.{method}
-                    // bound to a service
-                    try {
-                      var methodMap = msg.data[0]
-                      for (var method in methodMap) {
-                        if (methodMap.hasOwnProperty(method)) {
-                          var m = methodMap[method]
-                          var dynaFn = "(function ("
-                          var argList = ""
-                          for (i = 0; i < m.parameterTypeNames.length; ++i) {
-                            if (i != 0) {
-                              argList += ","
+        _self.setPanel = function(newPanel) {
+
+            if (!(newPanel.name in panels)) {
+                console.debug('service ' + newPanel.name + ' currently does not exist yet')
+                return
+            }
+
+            panels[newPanel.name].name = newPanel.name
+            panels[newPanel.name].displayName = _self.getShortName(newPanel.name)
+            if (newPanel.simpleName) {
+                panels[newPanel.name].simpleName = newPanel.simpleName
+            }
+            panels[newPanel.name].posY = newPanel.posY
+            panels[newPanel.name].posX = newPanel.posX
+            panels[newPanel.name].width = newPanel.width
+            panels[newPanel.name].height = newPanel.height
+            zIndex = (newPanel.zIndex > zIndex) ? (newPanel.zIndex + 1) : zIndex
+            panels[newPanel.name].zIndex = newPanel.zIndex
+            panels[newPanel.name].hide = newPanel.hide
+            notifyAllOfUpdate()
+            // <-- WTF is this?
+        }
+        /**
+         * getPanelData - input is a panels name
+         * output is a panelData object which which will serialize into a 
+         * WebGui's PanelData object - we have to create a data object from the
+         * angular "panel" since the angular panels cannot be serialized due to
+         * circular references and other contraints
+         */
+        _self.getPanelData = function(panelName) {
+            return {
+                "name": panels[panelName].name,
+                "simpleName": panels[panelName].simpleName,
+                "posX": panels[panelName].posX,
+                "posY": panels[panelName].posY,
+                "zIndex": panels[panelName].zIndex,
+                "width": panels[panelName].width,
+                "height": panels[panelName].height,
+                "hide": panels[panelName].hide
+            }
+        }
+
+        function show(panelName) {
+            panels[panelName].hide = false
+        }
+
+        function hide(name) {
+            panels[name].hide = true
+            _self.savePanel(name)
+        }
+
+        function showAll(show) {
+            //hide or show all panels
+            console.debug('showAll', show)
+            angular.forEach(panels, function(value, key) {
+                value.hide = !show
+                _self.savePanel(key)
+            })
+        }
+
+        this.connect = function(url, proxy) {
+            console.info('mrl.connect()')
+            if (connected) {
+                console.debug("aleady connected")
+                return this
+            }
+            // TODO - use proxy for connectionless testing
+            if (url != undefined && url != null) {
+                this.url = url
+            }
+
+            connecting = true
+            socket = atmosphere.subscribe(this.request)
+
+            // critical subscriptions from the java runtime we are connected to
+            // to the js runtime - these send addListeners to java runtime
+
+        }
+
+        this.onError = function(response) {
+            console.error('onError, can not connect')
+        }
+
+        _self.setSearchFunction = function(ref) {
+            searchFunction = ref
+        }
+        _self.setNavCtrl = function(ref) {
+            navCtrl = ref
+        }
+        _self.setTabsViewCtrl = function(ref) {
+            tabsViewCtrl = ref
+        }
+
+        _self.changeTab = function(serviceName) {
+            if (!tabsViewCtrl || !_self.getService(serviceName)) {
+                console.error('tabsViewCtrl is null - cannot changeTab')
+            } else {
+                console.info("changeTab !", serviceName)
+                tabsViewCtrl.changeTab(serviceName)
+                history.push(serviceName)
+            }
+        }
+
+        _self.goBack = function() {
+            if (!tabsViewCtrl) {
+                console.error('tabsViewCtrl is null - cannot goBack')
+            } else {
+                tabsViewCtrl.goBack()
+            }
+        }
+
+        /**
+         * search panels using the nav search input
+         */
+        _self.search = function(text) {
+            if (searchFunction) {
+                searchFunction(text)
+            }
+        }
+
+        // the Angular service interface object
+        var service = {
+            getGateway: function() {
+                return _self.gateway
+            },
+            /** 
+             * creating a message interface unique for each service, and dynamically building out methods
+             * based on information from getMessageMap
+             */
+            createMsgInterface: function(name) {
+                //TODO - clean up here !!!
+                //left kind of a mess here (e.g. temp and mod below), MaVo
+                var deferred = $q.defer()
+                if (!msgInterfaces.hasOwnProperty(name)) {
+                    //console.log(name + ' getMsgInterface ')
+
+                    msgInterfaces[name] = {
+                        "name": name,
+                        "temp": {},
+                        send: function(method, data) {
+                            var args = Array.prototype.slice.call(arguments, 1)
+                            var msg = _self.createMessage(name, method, args)
+                            msg.sendingMethod = 'sendTo'
+                            // FIXME - not very useful
+                            _self.sendMessage(msg)
+                        },
+                        sendBlocking: function(method, data) {
+                            var args = Array.prototype.slice.call(arguments, 1)
+                            var msg = _self.createMessage(name, method, args)
+                            msg.sendingMethod = 'sendTo'
+                            msg.msgType = 'B'
+                            // FIXME - not very useful
+                            _self.sendMessage(msg)
+                        },
+                        sendTo: function(toName, method, data) {
+                            var args = Array.prototype.slice.call(arguments, 2)
+                            var msg = _self.createMessage(toName, method, args)
+                            msg.sendingMethod = 'sendTo'
+                            _self.sendMessage(msg)
+                        },
+                        /**
+                         *   sendArgs will be called by the dynamically generated code interface
+                         */
+                        sendArgs: function(method, obj) {
+                            let data = []
+                            for (var key in obj) {
+                                if (obj.hasOwnProperty(key)) {
+                                    data.push(obj[key])
+                                }
                             }
                             argList += "arg" + i
                           }

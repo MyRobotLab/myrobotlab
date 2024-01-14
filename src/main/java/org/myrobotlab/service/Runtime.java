@@ -310,7 +310,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   /**
    * available Locales
    */
-  transient protected Map<String, Locale> locales;
+  protected Map<String, Locale> locales;
 
   protected List<String> configList;
 
@@ -452,7 +452,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         try {
           ((ConfigurableService) si).apply(sc);
         } catch (Exception e) {
-          Runtime.getInstance().error("could not apply config of type %s to service %s, using default config", sc.type, si.getName(), sc.type);
+          Runtime.getInstance().error("could not apply config of type %s to service %s, using default config", sc.type,
+              si.getName(), sc.type);
         }
       }
       createdServices.put(service, si);
@@ -1413,6 +1414,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   }
 
   /**
+   * FIXME - terrible use a uuid
+   * 
    * unique id's are need for sendBlocking - to uniquely identify the message
    * this is a method to support that - it is unique within a process, but not
    * across processes
@@ -1421,7 +1424,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    */
   public static final synchronized long getUniqueID() {
     ++uniqueID;
-    return uniqueID;
+    return System.currentTimeMillis();
   }
 
   /**
@@ -2602,6 +2605,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
     runtime.apply(rtConfig);
 
+    Plan plan = new Plan("runtime");
     // for every service listed in runtime registry - load it
     // FIXME - regex match on filesystem matches on *.yml
     for (String service : rtConfig.getRegistry()) {
@@ -2622,14 +2626,14 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         if (sc == null) {
           continue;
         }
-        runtime.loadService(new Plan("runtime"), service, sc.type, true, 0);
+        runtime.loadService(plan, service, sc.type, true, 0);
       } catch (Exception e) {
         runtime.error(e);
       }
     }
 
     // for all newly created services start them
-    Map<String, ServiceInterface> created = Runtime.createServicesFromPlan(new Plan("runtime"), null, null);
+    Map<String, ServiceInterface> created = Runtime.createServicesFromPlan(plan, null, null);
     for (ServiceInterface si : created.values()) {
       si.startService();
     }
@@ -3046,6 +3050,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       return Runtime.getService(parts[1]);
     } else if (parts.length == 2 && absPath.endsWith("/")) {
       ServiceInterface si = Runtime.getService(parts[1]);
+      if (si == null) {
+        return null;
+      }
       return si.getDeclaredMethodNames();
       /*
        * } else if (parts.length == 3 && !absPath.endsWith("/")) { // execute 0
@@ -4794,8 +4801,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   }
 
   /**
-   * read a service's configuration, in the context
-   * of current config set name or default
+   * read a service's configuration, in the context of current config set name
+   * or default
    * 
    * @param name
    * @return

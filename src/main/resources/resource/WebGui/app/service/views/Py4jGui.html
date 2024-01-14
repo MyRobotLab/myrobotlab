@@ -54,6 +54,11 @@
                 </button>
             </td>
 
+			<td>
+				       
+            autostart python 
+            <input type="checkbox" ng-model="service.config.autostartPython" ng-change="msg.autostartPython(service.config.autostartPython);msg.broadcastState()" title="automatically spawns a new python process next startup">
+			</td>		
         </tr>
     </table>
 </div>
@@ -123,6 +128,7 @@
       <button class="btn btn-default" ng-click="cancel()">Cancel</button>
     </div>
 </script>
+
 
 <script type="text/ng-template" id="openScript.html">
     <div class="modal-header">

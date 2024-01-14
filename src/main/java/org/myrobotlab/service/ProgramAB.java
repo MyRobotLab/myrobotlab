@@ -757,6 +757,10 @@ public class ProgramAB extends Service<ProgramABConfig>
     setBotType(currentBotName);
   }
   
+  public Session startSession(String currentUserName) {
+    return startSession(currentUserName, getBotType(), true);
+  }
+  
   public Session startSession(String currentUserName, String currentBotName) {
     return startSession(currentUserName, currentBotName, true);
   }

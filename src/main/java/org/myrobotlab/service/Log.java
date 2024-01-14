@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.generics.SlidingWindowList;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -75,37 +76,41 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
   /**
    * log file name
    */
-  public static String MYROBOTLAB_LOG = "myrobotlab.log";
+  protected static String MYROBOTLAB_LOG = "myrobotlab.log";
+  
+  /**
+   * max size of log buffer
+   */
+  protected int maxSize = 1000;
+
+  /**
+   * a sliding window of logs
+   */
+  protected List<LogEntry> logs = new SlidingWindowList<>(maxSize);
 
   /**
    * buffer of log event - made transient because the appropriate way to
    * broadcast logging is through publishLogEvent (not broadcastState)
    */
-  transient List<LogEntry> buffer = new ArrayList<>();
+  protected transient List<LogEntry> buffer = new ArrayList<>();
   
   /**
    * logging state
    */
-  boolean isLogging = false;
+  protected boolean isLogging = false;
 
   /**
    * last time events were broadcast
    */
-  long lastPublishLogTimeTs = 0;
+  protected long lastPublishLogTimeTs = 0;
 
-
-  
-  /**
-   * max size of log buffer
-   */
-  int maxSize = 1000;
 
   /**
    * minimal time between log broadcasts
    */
-  long minIntervalMs = 1000;
+  protected long minIntervalMs = 1000;
 
-  private String previousLogLevel;
+  protected String previousLogLevel;
 
   public Log(String n, String id) {
     super(n, id);
@@ -177,7 +182,9 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
   @Override
   public void doAppend(ILoggingEvent event) throws LogbackException {
     String name = Thread.currentThread().getName();
-    buffer.add(new LogEntry(event));
+    LogEntry entry = new LogEntry(event);
+    buffer.add(entry);
+    // add to sliding 
     // if (buffer.size() > maxSize || System.currentTimeMillis() -
     // lastPublishLogTimeTs > minIntervalMs) {
     // // event.get
@@ -193,8 +200,9 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
    */
   synchronized public void flush() {
     if (buffer.size() > 0) {
+      // bucket add to sliding window
+      logs.addAll(buffer);
       invoke("publishLogEvents", buffer);
-      
       buffer = new ArrayList<>(maxSize);
       lastPublishLogTimeTs = System.currentTimeMillis();
     }
@@ -231,7 +239,6 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
     return entries;
   }
 
-  
   @Override
   public void setContext(Context arg0) {
     // TODO Auto-generated method stub
@@ -264,7 +271,7 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
     getLogLevel();
     broadcastState();
   }
-  
+
   public LogConfig apply(LogConfig c) {
     super.apply(c);
     previousLogLevel = getLogLevel();
@@ -273,7 +280,7 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
     }
     return c;
   }
-  
+
   public LogConfig getConfig() {
     return config;
   }
@@ -324,6 +331,10 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
       Runtime.setLogLevel(previousLogLevel);
     }
   }
+  
+  public void clear() {
+    logs = new SlidingWindowList<>(maxSize);
+  }
 
   public static void main(String[] args) {
 
@@ -336,7 +347,7 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
       RuntimeConfig config = runtime.getConfig();
       config.resource = "src/main/resources/resource";
       runtime.apply(config);
-      
+
       Runtime.start("log", "Log");
       Runtime.start("python", "Python");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");

@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 public class AudioFileConfig extends ServiceConfig {
+  
+  // FIXME - remove audioListeners
 
   public boolean mute = false;
   public String currentTrack = "default";
