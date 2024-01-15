@@ -5328,7 +5328,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * @param serviceName
    * @param type
    * @return
-   * @throws IOException
    */
   public boolean changeType(String serviceName, String type) {
     try {
@@ -5376,7 +5375,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   /**
    * Removes a config set and all its files
    * 
-   * @param string
+   * @param configName - name of config
    */
   public static void removeConfig(String configName) {
     try {

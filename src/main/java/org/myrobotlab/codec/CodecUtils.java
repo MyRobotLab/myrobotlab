@@ -69,12 +69,15 @@ import com.fasterxml.jackson.module.noctordeser.NoCtorDeserModule;
  * /api/returnEncoding/inputEncoding/service/method/param1/param2/ ...
  * <p>
  * xmpp for example assumes (/api/string/json)/service/method/param1/param2/ ...
+ * </p>
  * <p>
  * scheme = alpha *( alpha | digit | "+" | "-" | "." ) Components of all URIs: [
  * &lt;scheme&gt;:]&lt;scheme-specific-part&gt;[#&lt;fragment&gt;]
+ * </p>
  * <p>
  * branch API test 5
- *
+ * </p>
+ * 
  * @see <a href=
  *      "http://stackoverflow.com/questions/3641722/valid-characters-for-uri-schemes">Valid
  *      characters for URI schemes</a>
@@ -126,8 +129,8 @@ public class CodecUtils {
   public static final String API_SERVICE = "service";
 
   /**
-   * The path from a top-level URL to the messages API endpoint.
    * <p>
+   * The path from a top-level URL to the messages API endpoint.
    * </p>
    * FIXME This should be moved to WebGui, CodecUtils should have no knowledge
    * of URLs
@@ -135,8 +138,8 @@ public class CodecUtils {
   public static final String API_MESSAGES_PATH = PARAMETER_API + API_MESSAGES;
 
   /**
-   * The path from a top-level URL to the service API endpoint.
    * <p>
+   * The path from a top-level URL to the service API endpoint.
    * </p>
    * FIXME This should be moved to WebGui, CodecUtils should have no knowledge
    * of URLs
@@ -1157,8 +1160,8 @@ public class CodecUtils {
    * 
    * It will return the json parts in a string array
    * 
-   * @param input
-   * @return
+   * @param input - json input
+   * @return - object array of params
    */
   public static Object[] extractJsonParamsFromPath(String input) {
     List<Object> fromJson = new ArrayList<>();
