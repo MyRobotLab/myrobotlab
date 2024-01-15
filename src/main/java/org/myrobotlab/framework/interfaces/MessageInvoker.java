@@ -1,6 +1,7 @@
 package org.myrobotlab.framework.interfaces;
 
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.StaticType;
 
 public interface MessageInvoker {
   /**
@@ -10,7 +11,11 @@ public interface MessageInvoker {
    * @param msg
    * @return
    */
-  public Object invoke(Message msg);
+  default Object invoke(Message msg) {
+    return invoke(msg, new StaticType<>(){});
+  }
+
+  <R> R invoke(Message msg, StaticType<R> returnType);
 
   /**
    * Invoke a method on a service with params.
@@ -21,6 +26,10 @@ public interface MessageInvoker {
    * @param params - the parameters to pass to the method
    * @return - the return value of the method
    */
-  public Object invokeOn(boolean blockLocally, Object obj, String method, Object... params);
+  default Object invokeOn(boolean blockLocally, Object obj, String method, Object... params) {
+    return invokeOn(blockLocally, obj, method, new StaticType<>(){}, params);
+  }
+
+  <R> R invokeOn(boolean blockLocally, Object obj, String method, StaticType<R> returnType, Object... params);
 
 }

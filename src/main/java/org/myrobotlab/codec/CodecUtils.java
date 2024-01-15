@@ -40,6 +40,7 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.StaticType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -490,7 +491,6 @@ public class CodecUtils {
     if (name == null) {
       return null;
     }
-
     if (getId(name) == null) {
       return name + '@' + Platform.getLocalInstance().getId();
     } else {
@@ -501,7 +501,7 @@ public class CodecUtils {
   /**
    * Checks whether two service names are equal by first normalizing each. If a
    * name does not have a runtime ID, it is assumed to be a local service.
-   * 
+   *
    * @param name1
    *          The first service name
    * @param name2
@@ -511,6 +511,7 @@ public class CodecUtils {
   public static boolean checkServiceNameEquality(String name1, String name2) {
     return Objects.equals(getFullName(name1), getFullName(name2));
   }
+
 
   /**
    * Converts a topic method name to the name of the method that is used for
@@ -676,6 +677,14 @@ public class CodecUtils {
     // falls back to virt class field
     boolean useVirtClassField = clazz == null;
     if (!useVirtClassField) {
+      // For blocking send return type checking
+      ServiceInterface si = Runtime.getService(serviceName);
+      String blockingKey = String.format("%s.%s", msg.getFullName(), msg.getMethod());
+      if (si != null && Message.MSG_TYPE_RETURN.equals(msg.msgType) && si.getInbox().blockingList.containsKey(blockingKey)) {
+        msg.data[0] = fromJson((String) msg.data[0], si.getInbox().blockingList.get(blockingKey).second);
+        msg.encoding = null;
+        return msg;
+      }
       try {
         Object[] params = MethodCache.getInstance().getDecodedJsonParameters(clazz, msg.method, msg.data);
         if (params == null)

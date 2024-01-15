@@ -1,6 +1,7 @@
 package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.arduino.BoardInfo;
+import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
@@ -12,7 +13,7 @@ import org.myrobotlab.service.data.SerialRelayData;
  * @author kwatters
  *
  */
-public interface MrlCommPublisher {
+public interface MrlCommPublisher extends Invoker {
 
   public void onBytes(byte[] data);
 
@@ -50,8 +51,5 @@ public interface MrlCommPublisher {
 
   public void ackTimeout();
 
-  // Necessary evil so Msg.java can invoke the publish methods on the publisher
-  // service.
-  public Object invoke(String method, Object... params);
 
 }

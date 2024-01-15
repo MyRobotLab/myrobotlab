@@ -1,5 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
+import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.framework.interfaces.NameProvider;
 
 /**
@@ -9,7 +10,7 @@ import org.myrobotlab.framework.interfaces.NameProvider;
  *         A LogPublisher can publish its own logging messages
  * 
  */
-public interface LogPublisher extends NameProvider {
+public interface LogPublisher extends NameProvider, Invoker {
 
   /**
    * A String is currently used as the log entry - but it could be an object in
@@ -21,17 +22,5 @@ public interface LogPublisher extends NameProvider {
    *          msg to publish
    * @return string
    */
-  public String publishLog(String msg);
-
-  /**
-   * a way to publish the log messages and log entries
-   * 
-   * @param method
-   *          method
-   * @param params
-   *          params
-   * @return returned object
-   * 
-   */
-  public Object invoke(String method, Object... params);
+  String publishLog(String msg);
 }

@@ -74,6 +74,7 @@ import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.QueueReporter;
 import org.myrobotlab.service.meta.abstracts.MetaData;
+import org.myrobotlab.utils.ObjectTypePair;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
@@ -746,8 +747,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
       // iterate through all looking for duplicate
       boolean found = false;
       List<MRLListener> nes = outbox.notifyList.get(listener.topicMethod);
-      for (int i = 0; i < nes.size(); ++i) {
-        MRLListener entry = nes.get(i);
+      for (MRLListener entry : nes) {
         if (entry.equals(listener)) {
           log.debug("attempting to add duplicate MRLListener {}", listener);
           found = true;
@@ -1053,7 +1053,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
       // use the runtime to send a message
       // FIXME - parameters !
       try {
-        return (ArrayList<MRLListener>) Runtime.getInstance().sendBlocking(getName(), "getNotifyList", new Object[] { key });
+        return Runtime.getInstance().sendBlocking(getName(), "getNotifyList", new StaticType<>(){}, new Object[] { key });
       } catch (Exception e) {
         log.error("remote getNotifyList threw", e);
         return null;
@@ -1073,7 +1073,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
       // use the runtime to send a message
 
       try {
-        return (ArrayList<String>) Runtime.getInstance().sendBlocking(getFullName(), "getNotifyListKeySet");
+        return Runtime.getInstance().sendBlocking(getName(), "getNotifyListKeySet", new StaticType<>(){});
+
       } catch (Exception e) {
         log.error("remote getNotifyList threw", e);
         return null;
@@ -1174,9 +1175,10 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   /**
    * This is where all messages are routed to and processed
    */
+  @SuppressWarnings("unchecked")
   @Override
-  final public Object invoke(Message msg) {
-    Object retobj = null;
+  final public <R> R invoke(Message msg, StaticType<R> returnType) {
+    R retobj;
 
     if (log.isDebugEnabled()) {
       log.debug("--invoking {}.{}({}) {} --", name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId);
@@ -1191,17 +1193,17 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     // happen in other situations...
     if (Runtime.getInstance().isLocal(msg) && !name.equals(msg.getName())) {
       // wrong Service - get the correct one
-      return Runtime.getService(msg.getName()).invoke(msg);
+      return Runtime.getService(msg.getName()).invoke(msg, returnType);
     }
 
     String blockingKey = String.format("%s.%s", msg.getFullName(), msg.getMethod());
     if (inbox.blockingList.containsKey(blockingKey)) {
-      Object[] returnContainer = inbox.blockingList.get(blockingKey);
+      ObjectTypePair<R> returnContainer = (ObjectTypePair<R>) inbox.blockingList.get(blockingKey);
       if (msg.getData() == null) {
-        returnContainer[0] = null;
+        returnContainer.first = null;
       } else {
         // transferring data
-        returnContainer[0] = msg.getData()[0];
+        returnContainer.first = (R) msg.getData()[0];
       }
 
       synchronized (returnContainer) {
@@ -1212,19 +1214,19 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
       return null;
     }
 
-    retobj = invokeOn(false, this, msg.method, msg.data);
+    retobj = invokeOn(false, this, msg.method, returnType, msg.data);
 
     return retobj;
   }
 
   @Override
-  final public Object invoke(String method) {
-    return invokeOn(false, this, method, (Object[]) null);
+  final public <R> R invoke(String method, StaticType<R> returnType) {
+    return invokeOn(false, this, method, returnType, (Object[]) null);
   }
 
   @Override
-  final public Object invoke(String method, Object... params) {
-    return invokeOn(false, this, method, params);
+  final public <R> R invoke(String method, StaticType<R> returnType, Object... params) {
+    return invokeOn(false, this, method, returnType, params);
   }
 
   /**
@@ -1261,8 +1263,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * @return the returned value from invoking
    * 
    */
-  final public Object invokeOn(String serviceName, String methodName, Object... params) {
-    return invokeOn(false, Runtime.getService(serviceName), methodName, params);
+  final public <R> R invokeOn(String serviceName, String methodName, StaticType<R> returnType, Object... params) {
+    return invokeOn(false, Runtime.getService(serviceName), methodName, returnType, params);
   }
 
   /**
@@ -1277,8 +1279,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * @return return object
    */
   @Override
-  final public Object invokeOn(boolean blockLocally, Object obj, String methodName, Object... params) {
-    Object retobj = null;
+  final public <R> R invokeOn(boolean blockLocally, Object obj, String methodName, StaticType<R> returnType, Object... params) {
+    R retobj = null;
     try {
       MethodCache cache = MethodCache.getInstance();
       if (obj == null) {
@@ -1290,7 +1292,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
         error("could not find method %s.%s(%s)", obj.getClass().getSimpleName(), methodName, MethodCache.formatParams(params));
         return null; // should this be allowed to throw to a higher level ?
       }
-      retobj = method.invoke(obj, params);
+      retobj = (R) method.invoke(obj, params);
       if (blockLocally) {
         Outbox outbox = null;
         if (obj instanceof ServiceInterface) {
@@ -1305,6 +1307,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
         if (subList != null) {
           for (MRLListener listener : subList) {
             Message msg = Message.createMessage(getFullName(), listener.callbackName, listener.callbackMethod, retobj);
+            msg.msgType = Message.MSG_TYPE_RETURN;
             msg.sendingMethod = methodName;
             if (runtime.isLocal(msg)) {
               ServiceInterface si = Runtime.getService(listener.callbackName);
@@ -1813,11 +1816,12 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   }
 
   @Override
-  public Object sendBlocking(String name, Integer timeout, String method, Object... data) throws InterruptedException, TimeoutException {
-    Message msg = Message.createMessage(getFullName(), name, method, data);
+  public <R> R sendBlocking(String name, Integer timeout, String method, StaticType<R> returnType, Object... data) throws InterruptedException, TimeoutException {
+    Message msg = Message.createMessage(getName(), name, method, data);
+    msg.sender = this.getFullName();
     msg.msgId = Runtime.getUniqueID();
 
-    return sendBlocking(msg, timeout);
+    return sendBlocking(msg, timeout, returnType);
   }
 
   /**
@@ -1834,11 +1838,12 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * 
    */
   @Override
-  public Object sendBlocking(Message msg, Integer timeout) throws InterruptedException, TimeoutException {
+  public <R> R sendBlocking(Message msg, Integer timeout, StaticType<R> returnType) throws InterruptedException, TimeoutException {
+    msg.msgType = Message.MSG_TYPE_BLOCKING;
     if (Runtime.getInstance().isLocal(msg)) {
-      return invoke(msg);
+      return invoke(msg, returnType);
     } else {
-      return waitOn(msg.getFullName(), msg.getMethod(), timeout, msg);
+      return waitOn(msg.getFullName(), msg.getMethod(), timeout, msg, returnType);
     }
   }
 
@@ -1865,8 +1870,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * @throws TimeoutException
    *           boom
    */
-  protected Object waitOn(String fullName, String method, Integer timeout, Message sendMsg) throws InterruptedException, TimeoutException {
-
+  @SuppressWarnings("unchecked")
+  protected <R> R waitOn(String fullName, String method, Integer timeout, Message sendMsg, StaticType<R> returnType) throws InterruptedException, TimeoutException {
     String subscriber = null;
     if (sendMsg != null) {
       // InProcCli proxies - so the subscription needs to be from the sender NOT
@@ -1879,14 +1884,14 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     // put in-process lock in map
     String callbackMethod = CodecUtils.getCallbackTopicName(method);
     String blockingKey = String.format("%s.%s", subscriber, callbackMethod);
-    Object[] blockingLockContainer = null;
+    ObjectTypePair<R> blockingLockContainer;
     if (!inbox.blockingList.containsKey(blockingKey)) {
-      blockingLockContainer = new Object[1];
+      blockingLockContainer = new ObjectTypePair<>(null, returnType);
       inbox.blockingList.put(blockingKey, blockingLockContainer);
     } else {
       // if it already exists - other threads are already waiting for the
       // same callback ...
-      blockingLockContainer = inbox.blockingList.get(blockingKey);
+      blockingLockContainer = (ObjectTypePair<R>) inbox.blockingList.get(blockingKey);
     }
 
     // send subscription
@@ -1919,26 +1924,32 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     // cleanup
     unsubscribe(fullName, method, subscriber, CodecUtils.getCallbackTopicName(method));
 
-    return blockingLockContainer[0];
+    if (returnType.equals(blockingLockContainer.second)) {
+      // Unchecked cast is fine because the deserializer ensures second is assignable to R
+      return blockingLockContainer.first;
+    } else {
+      error("Return type was changed during blocking call. Was {}, now {}", returnType, blockingLockContainer.second);
+      return null;
+    }
 
   }
 
   // equivalent to sendBlocking without the sending a message
   @Override
-  public Object waitFor(String fullName, String method, Integer timeout) throws InterruptedException, TimeoutException {
-    return waitOn(fullName, method, timeout, null);
+  public <R> R waitFor(String fullName, String method, Integer timeout, StaticType<R> returnType) throws InterruptedException, TimeoutException {
+    return waitOn(fullName, method, timeout, null, returnType);
   }
 
   // BOXING - End --------------------------------------
   @Override
-  public Object sendBlocking(String name, String method) throws InterruptedException, TimeoutException {
-    return sendBlocking(name, method, (Object[]) null);
+  public <R> R sendBlocking(String name, String method, StaticType<R> returnType) throws InterruptedException, TimeoutException {
+    return sendBlocking(name, method, returnType, (Object[]) null);
   }
 
   @Override
-  public Object sendBlocking(String name, String method, Object... data) throws InterruptedException, TimeoutException {
+  public <R> R sendBlocking(String name, String method, StaticType<R> returnType, Object... data) throws InterruptedException, TimeoutException {
     // default 1 second timeout - FIXME CONFIGURABLE
-    return sendBlocking(name, 1000, method, data);
+    return sendBlocking(name, 1000, method, returnType, data);
   }
 
   @Override

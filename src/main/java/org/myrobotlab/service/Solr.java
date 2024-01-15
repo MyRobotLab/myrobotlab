@@ -1008,7 +1008,7 @@ public class Solr extends Service<SolrConfig> implements DocumentListener, TextL
     doc.setField("message_dataEncoding", message.encoding);
     doc.setField("message_name", message.getName());
     doc.setField("sender_method", message.sendingMethod);
-    doc.setField("message_status", message.status);
+    doc.setField("message_status", message.msgType);
     /*
      * This makes no sense.. if (message.getHops() != null) { for (String
      * history : message.getHops()) { doc.addField("history",

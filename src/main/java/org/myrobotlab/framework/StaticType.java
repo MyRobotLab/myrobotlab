@@ -70,6 +70,11 @@ public abstract class StaticType<T> {
 
     }
 
+    private StaticType(Type storedType) {
+        this.storedType = storedType;
+        validateType(storedType);
+    }
+
     /**
      * Gets the stored {@link Type}
      * instance. This type should contain the type of
@@ -136,5 +141,9 @@ public abstract class StaticType<T> {
             throw new IllegalArgumentException("Cannot construct a StaticType with any non-concrete type variables");
         }
 
+    }
+
+    public static <T> StaticType<T> fromJavaType(Type type) {
+        return new StaticType<>(type){};
     }
 }

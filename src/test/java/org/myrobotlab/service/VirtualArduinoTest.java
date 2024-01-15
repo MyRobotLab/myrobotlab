@@ -11,6 +11,7 @@ import org.myrobotlab.arduino.virtual.Device;
 import org.myrobotlab.arduino.virtual.MrlServo;
 import org.myrobotlab.framework.QueueStats;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.StaticType;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
@@ -218,7 +219,7 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
   }
 
   @Override
-  public Object invoke(String method, Object... params) {
+  public <R> R invoke(String method, StaticType<R> returnType, Object... params) {
     log.warn("Don't invoke in a unit test!!!!!!");
     return null;
   }
