@@ -6,8 +6,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
@@ -29,26 +31,25 @@ import org.slf4j.Logger;
 public class ServiceLifeCycleTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(ServiceLifeCycleTest.class);
+  
+  @Before /* before each test */
+  public void setUp() throws IOException {
+    // remove all services - also resets config name to DEFAULT effectively
+    Runtime.releaseAll(true, true);
+      // clean our config directory
+    Runtime.removeConfig("ServiceLifeCycleTest");
+    // set our config
+    Runtime.setConfig("ServiceLifeCycleTest");
+  }
+
 
   @Test
   public void serviceLifeCycleTest() throws Exception {
 
-    // clear plan
-    Runtime.clearPlan();
 
     // load a simple plan
     Runtime.load("c1", "Clock");
-    Plan plan = Runtime.getPlan();
-    // 1 clock and 1 runtime
-    assertEquals(2, plan.size());
-
-    // clear plan
-    Runtime.clearPlan();
-
-    plan = Runtime.getPlan();
-    assertEquals(1, plan.size());
-
-    plan = Runtime.load("controller", "Arduino");
+    Plan plan = Runtime.load("controller", "Arduino");
     ArduinoConfig ac = (ArduinoConfig) plan.get("controller");
     assertFalse(ac.connect);
     // 1 arduino 1 serial
@@ -65,8 +66,6 @@ public class ServiceLifeCycleTest extends AbstractTest {
 
     assertNull(Runtime.getService("controller"));
     assertNull(Runtime.getService("controller.serial"));
-
-    Runtime.clearPlan();
 
     /**
      * use case - load a default config - modify it substantially then start the
@@ -97,7 +96,6 @@ public class ServiceLifeCycleTest extends AbstractTest {
     Runtime.release("track");
     assertNull(Runtime.getService("track.controller"));
 
-    Runtime.clearPlan();
     plan = Runtime.load("i02", "InMoov2");
 
     log.info("plan has {} services", plan.size());
@@ -119,9 +117,8 @@ public class ServiceLifeCycleTest extends AbstractTest {
 
     i02.startPeer("eyeTracking");
     assertEquals("i02.eyeTracking", i02.getPeerName("eyeTracking"));
-
-    Runtime.load("webgui", "WebGui");
-    WebGuiConfig webgui = (WebGuiConfig) plan.get("webgui");
+    
+    WebGuiConfig webgui = (WebGuiConfig)Runtime.load("webgui", "WebGui").get("webgui");
     webgui.autoStartBrowser = false;
     // start it up
     Runtime.startConfig("webgui");
@@ -137,7 +134,6 @@ public class ServiceLifeCycleTest extends AbstractTest {
     LocalSpeech mouth = (LocalSpeech) i02.getPeer("mouth");
     assertNotNull(mouth);
 
-    // FIXME i02.releasePeers()
 
     log.info("done");
 
