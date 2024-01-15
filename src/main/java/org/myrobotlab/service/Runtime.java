@@ -128,6 +128,7 @@ import picocli.CommandLine;
  *
  */
 public class Runtime extends Service<RuntimeConfig> implements MessageListener, ServiceLifeCyclePublisher, RemoteMessageHandler, ConnectionManager, Gateway, LocaleProvider {
+  
   final static private long serialVersionUID = 1L;
 
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
@@ -136,7 +137,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * a registry of all services regardless of which environment they came from -
    * each must have a unique name
    */
-  static private Map<String, ServiceInterface> registry = new TreeMap<>();
+  static volatile private Map<String, ServiceInterface> registry = new TreeMap<>();
 
   /**
    * A plan is a request to runtime to change the system. Typically its to ask
