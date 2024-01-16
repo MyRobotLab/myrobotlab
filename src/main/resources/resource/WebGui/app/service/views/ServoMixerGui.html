@@ -1,15 +1,14 @@
-
 <!-- <pre>{{ state | json: 2 }}</pre> -->
 <div class="col-md-8">
-  <h3>{{state.selectedGestureFile}} {{state.playingPose.name}} </h3>
+  <h3>{{state.selectedGestureFile}} {{state.playingPose.name}} {{state.gestureIndex}}</h3>
   <table class="tableController table-striped table-bordered">
-        <tr>
-              <td colspan="2">Directory {{service.config.gesturesDir}}</td>
-        </tr>
+    <tr>
+      <td colspan="2">Directory {{service.config.gesturesDir}}</td>
+    </tr>
     <tr valign="top">
-      <td style="width: 33.33%">
+      <td style="width: 33%">
         Gesture
-        <br/>
+        <br />
         <select
           ng-model="state.selectedGestureFile"
           ng-change="msg.getGesture(state.selectedGestureFile);gestureName = state.selectedGestureFile"
@@ -20,99 +19,99 @@
           <option ng-repeat="x in gestureFiles" ng-value="{{x}}">{{x}}</option>
         </select>
         <span class="input-group-btn">
-              <!--
-        <button class="btn btn-default" ng-click="showGestureSave=!showGestureSave">
-          <span class="glyphicon glyphicon-plus"></span>
-        </button> -->
-        <button class="btn btn-default" ng-click="removeGesture(state.selectedGestureFile)" title="Delete" >
-          <span class="glyphicon glyphicon-remove red"></span>
-        </button>
-        <button class="btn btn-default" ng-click="msg.getGestureFiles()">
-          <span class="glyphicon glyphicon-refresh"></span>
-        </button>
-          
+          <button class="btn btn-default" ng-click="removeGesture(state.selectedGestureFile)" title="Delete">
+            <span class="glyphicon glyphicon-remove red"></span>
+          </button>
+          <button class="btn btn-default" ng-click="msg.getGestureFiles()">
+            <span class="glyphicon glyphicon-refresh"></span>
+          </button>
         </span>
 
-      <input  class="form-control" type="text" ng-model="gestureName" name="gestureName" id="gestureName" ng-init="" placeholder="Gesture Name" />
-      <button  class="btn btn-default" ng-click="saveGesture(gestureName)">Save</button>
-            <br/>
-        Content
+        <input class="form-control" type="text" ng-model="state.selectedGestureFile" name="gestureName" id="gestureName" ng-init="" placeholder="Gesture Name" />
+        <button class="btn btn-default" ng-click="msg.addNewGestureFile(state.selectedGestureFile)">New</button>
+        <button class="btn btn-default" ng-click="saveGesture()">Save</button>
+        <button class="btn btn-default" ng-click="openGesture()">Open</button>
+        <br />
+        <br />
+        <table>
+          <tr>
+            <td>
+              <input
+                id="servo-mixer-filter"
+                class="form-control"
+                ng-change="searchServos(searchServo.displayName)"
+                type="text"
+                ng-model="searchServo.displayName"
+                ng-init=""
+                placeholder="servo name"
+              />
+            </td>
+            <td>
+              <button class="btn btn-default" ng-click="msg.rest()">Rest</button>
+            </td>
+            <td></td>
+            <td>&nbsp;<input type="checkbox" ng-model="selectAllCheckbox" ng-click="selectAll()"/ > select all</td>
+          </tr>
+        </table>
+      </td>
+      <td>
+        Actions
         <br />
         <button class="btn btn-default" ng-click="speak()" title="Add speech to gesture">
           <span class="glyphicon glyphicon-plus"></span>
-          Speak
+          mouth: {{service.config.mouth}} speak
         </button>
         <input class="form-control servo-mixer-pose" type="text" ng-model="text" placeholder="text" />
-            <!--
+        <!--
         Blocking
         <toggle class="miniBTN" title="Speak Blocking" ng-model="blocking" ng-change="" on="" off="" size="btn-lg" />
             -->
-        <button class="btn btn-default" ng-click="addDelay(delay)" title="Add Delay in seconds to gesture">
+        <button class="btn btn-default" ng-click="addSleep(sleep)" title="Add sleep in seconds to gesture">
           <span class="glyphicon glyphicon-plus"></span>
-          Delay
+          sleep
         </button>
-        <input class="form-control fieldDelay" type="text" ng-model="delay" ng-init="3" placeholder="sec" />
-        <select ng-model="state.gestureIndex" class="form-control vertical-menu gestureList" size="6" title="Select a pose to load">
-          <option ng-repeat="pose in state.currentGesture.parts" value="{{$index}}" id="select-{{$index}}">
-            {{$index}} {{pose.name}} {{displayValue(pose)}}
-          </option>
+        <input class="form-control fieldDelay" type="text" ng-model="sleep" ng-init="3" placeholder="sec" />
+        <select ng-model="state.gestureIndex" class="form-control vertical-menu gestureList" size="8" title="actions">
+          <option ng-repeat="action in state.currentGesture.actions" value="{{$index}}" id="select-{{$index}}">{{action.name}} {{displayAction(action)}}</option>
         </select>
-
         <table>
-              <tr><td>
-        <span class="input-group-btn">
-        <button class="btn btn-default" ng-click="addPoseToGesture()">
-          <span class="glyphicon glyphicon-plus" />
-          {{state.selectedPose}}
-        </button>
-        <button class="btn btn-default" title="Move Up" ng-click="moveUpPoseInGesture()">
-          <span class="glyphicon glyphicon-triangle-top"></span>
-        </button>
-        <button class="btn btn-default" title="Move Down" ng-click="moveDownPoseInGesture()">
-          <span class="glyphicon glyphicon-triangle-bottom"></span>
-        </button>
-        <button class="btn btn-default" title="Remove Pose" ng-click="removePoseFromGesture()" title="Delete">
-          <span class="glyphicon glyphicon-remove red"></span>
-        </button>              
-        </span>
-              </td></tr>
-      <tr><td>
-        <span class="input-group-btn">
-        <button class="btn btn-default" title="Stop" ng-click="msg.stop()">
-          stop
-          <span class="glyphicon glyphicon-stop red"></span>
-        </button>
-            <button class="btn btn-default" ng-click="step()" title="Step">
-          <span class="glyphicon glyphicon-play"></span>
-        </button>
-        <button class="btn btn-default" title="Play" ng-click="saveGesture(gestureName);playGesture(state.selectedGestureFile)">
-          play
-          <span class="glyphicon glyphicon-play text-success"></span>
-        </button>
-        </span>
-      </td></tr>
+          <tr>
+            <td>
+              <span class="input-group-btn">
+                <button class="btn btn-default" ng-click="addMoveToAction()">
+                  <span class="glyphicon glyphicon-plus" />
+                  {{state.selectedPose}}
+                </button>
+                <button class="btn btn-default" title="move up" ng-click="moveActionUp()">
+                  <span class="glyphicon glyphicon-triangle-top"></span>
+                </button>
+                <button class="btn btn-default" title="move down" ng-click="moveActionDown()">
+                  <span class="glyphicon glyphicon-triangle-bottom"></span>
+                </button>
+                <button class="btn btn-default" title="remove action" ng-click="removeActionFromGesture()" title="remove">
+                  <span class="glyphicon glyphicon-remove red"></span>
+                </button>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="input-group-btn">
+                <button class="btn btn-default" title="Stop" ng-click="msg.stop()">
+                  stop
+                  <span class="glyphicon glyphicon-stop red"></span>
+                </button>
+                <button class="btn btn-default" ng-click="step()" title="Step">
+                  <span class="glyphicon glyphicon-play"></span>
+                </button>
+                <button class="btn btn-default" title="Play" ng-click="playGesture(state.selectedGestureFile)">
+                  play
+                  <span class="glyphicon glyphicon-play text-success"></span>
+                </button>
+              </span>
+            </td>
+          </tr>
         </table>
-      <button class="btn btn-default" ng-click="saveGesture(gestureName)">Save</button>
-            
-      </td>
-      <td>
-        Pose
-        <select ng-model="state.selectedPose" ng-change="msg.getPose(state.selectedPose)" class="form-control vertical-menu poseList" size="6" title="Select a pose to load">
-          <option ng-repeat="x in poseFiles" ng-value="{{x}}">{{x}}</option>
-        </select>
-        <button class="btn btn-default" ng-click="msg.moveToPose(state.selectedPose)">
-          <span class="glyphicon glyphicon-play"></span>          
-        </button>
-        <button class="btn btn-default" ng-click="msg.removePose(state.selectedPose)" title="Delete">
-          <span class="glyphicon glyphicon-remove red"></span>
-        </button>
-        <button class="btn btn-default" ng-click="msg.getPoseFiles()">
-          <span class="glyphicon glyphicon-refresh"></span>
-        </button>
-        <input class="form-control fieldSave" ng-model="state.selectedPose" type="text" name="servo-mixer-pose" id="servo-mixer-pose" ng-init="" placeholder="name" />
-        <span class="input-group-btn">
-          <button class="btn btn-default" ng-click="msg.savePose(state.selectedPose)">Save</button>
-        </span>
       </td>
     </tr>
   </table>
@@ -121,29 +120,9 @@
   <div class="col-md-12">
     &nbsp;
     <div class="container rzMixer">
-      <br />
-      <table>
-        <tr>
-          <td>
-            <input
-              id="servo-mixer-filter"
-              class="form-control"
-              ng-change="searchServos(searchServo.displayName)"
-              type="text"
-              ng-model="searchServo.displayName"
-              ng-init=""
-              placeholder="servo name"
-            />
-          </td>
-          <td>
-            <button class="btn btn-default" ng-click="msg.rest()">Rest</button>
-          </td>
-        </tr>
-      </table>
-      <br />
-      <br />
       <div ng-model="dummy" ng-repeat="(key, value) in searchServos(searchServo.displayName)">
         <div class="sliderMixer">
+          <input type="checkbox" ng-model="mrl.getPanel(key).selected" />
           <div class="servomixer-hidden">
             <div service-body panel="mrl.getPanel(key)"></div>
           </div>
