@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -15,10 +17,12 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.TimeoutException;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.net.Http;
+import org.myrobotlab.net.WsClient;
+import org.myrobotlab.service.interfaces.RemoteMessageHandler;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
-public class VertxTest extends AbstractTest {
+public class VertxTest extends AbstractTest implements RemoteMessageHandler {
 
   public final static Logger log = LoggerFactory.getLogger(Vertx.class);
 
@@ -45,6 +49,11 @@ public class VertxTest extends AbstractTest {
   public String getUrl(String path) {
     String protocol = (ssl) ? "https" : "http";
     return String.format("%s://localhost:%d/api/service%s", protocol, port, path);
+  }
+  
+  public String getWsUrl(String path) {
+    String protocol = (ssl) ? "wss" : "ws";
+    return String.format("%s://localhost:%d/api/messages%s", protocol, port, path);
   }
 
   @Test
@@ -187,5 +196,54 @@ public class VertxTest extends AbstractTest {
 
     assertEquals(retVal, blockingListRet[0]);
   }
+  
+  
+  
+
+  
+  private final Object lock = new Object();
+  
+  @Test
+  public void webSocketTest() throws InterruptedException {
+    Runtime.setLogLevel("info");
+    MockGateway mock = (MockGateway)Runtime.start("mock", "MockGateway");
+    WsClient ws = new WsClient();
+    ws.connect(this, getWsUrl("?id=blah"));
+    assertTrue(ws.isConnected());
+    Object[] data = new Object[] {"\"getUptime\"", "\"blah@blah\"", "\"onUptime\""};
+//    Message msg = Message.createMessage("blah@blah", "runtime", "addListener", data);
+//    ws.send(CodecUtils.toJson(msg));
+    
+    ws.sendMsg("blah@blah", "runtime", "addListener", data);
+    Service.sleep(100);
+//    msg = Message.createMessage("blah@blah", "runtime", "getUptime", null);
+//    ws.send(CodecUtils.toJson(msg));
+//    ws.sendJson(msg);
+    returnMsg = null;
+    uuid = null;
+    ws.sendMsg("blah@blah", "runtime", "getUptime", null);
+    synchronized(lock) {
+      lock.wait(10000);      
+    }
+    assertNotNull(uuid);
+    assertNotNull(returnMsg);
+    assertTrue(returnMsg.contains("day"));
+    
+  }
+
+  protected String returnMsg = null;
+  protected String uuid = null;
+  
+  @Override
+  public void onRemoteMessage(String uuid, String data) {
+    synchronized(lock) {
+      this.uuid = uuid;
+      this.returnMsg = data;
+    lock.notify();
+    }
+    
+  }
+  
+  
 
 }

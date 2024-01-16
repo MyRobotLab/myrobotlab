@@ -17,6 +17,12 @@ angular.module('mrlapp.service.OakDGui', []).controller('OakDGuiCtrl', ['$scope'
             break
         case 'onClassification':
               $scope.classification = data
+              $scope.latency = Date.now() - data.ts
+              $scope.$apply()             
+            break
+        case 'onImageToWeb':
+              $scope.image = data
+              $scope.$apply()
             break
         default:
             console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
@@ -25,6 +31,7 @@ angular.module('mrlapp.service.OakDGui', []).controller('OakDGuiCtrl', ['$scope'
     }
 
     msg.subscribe('publishClassification')
+    msg.subscribe('imageToWeb')    
     msg.subscribe(this)
 }
 ])

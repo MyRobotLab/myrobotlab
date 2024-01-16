@@ -11,6 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Service;
@@ -26,15 +27,48 @@ import org.slf4j.Logger;
 
 public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
 
+  public class RemoteService {
+    protected transient MockGateway gateway;
+    protected String name;
+    protected boolean sendMessageMap = true;
+
+    public RemoteService(MockGateway gateway, String fullname) {
+      this.name = fullname;
+      this.gateway = gateway;
+    }
+    
+    public void subscribe(String topicName, String topicMethod) {
+      String serviceName = CodecUtils.getFullName(topicName);
+      gateway.send(Message.createMessage(this.name, serviceName, "addListener", new Object[]{topicMethod, this.name}));      
+    }
+
+    public void send(String name, String method) {
+      send(name, method, null);
+    }
+
+    public void send(String name, String method, Object[] data) {
+      gateway.sendWithDelay(10, Message.createMessage(this.name, name, method, data));
+    }
+
+    public void handle(Message msg) {
+      // FIXME - currently "required" by web UI - shouldn't be ie, it should
+      // be able to handle a no-response - if this is not sent back a service
+      // panel will not be displayed
+      if (msg.method.equals("getMethodMap") && sendMessageMap) {
+        Map<String, MethodEntry> emptyMap = new HashMap<>();
+        // emptyMap = Runtime.getMethodMap("clock");
+        Message returnMsg = Message.createMessage(name, msg.sender, "onMethodMap", emptyMap);
+        gateway.send(returnMsg);
+      }
+
+    }
+  }
+
   transient public final static Logger log = LoggerFactory.getLogger(MockGateway.class);
 
   private static final long serialVersionUID = 1L;
 
-  protected final transient BlockingQueue<Message> sendQueuex = new LinkedBlockingQueue<>();
-
   protected SlidingWindowList<Message> msgs = new SlidingWindowList<>(100);
-
-  transient protected Map<String, BlockingQueue<Message>> sendQueues = new HashMap<>();
 
   /**
    * Id of a fake remote instance
@@ -46,35 +80,25 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
    */
   protected Map<String, RemoteService> remoteServices = new TreeMap<>();
 
-  public class RemoteService {
-    protected transient MockGateway gateway;
-    protected String name;
-
-    public RemoteService(MockGateway gateway, String fullname) {
-      this.name = fullname;
-      this.gateway = gateway;
-    }
-
-    public void handle(Message msg) {
-      if (msg.method.equals("getMethodMap")) {
-        Map<String, MethodEntry> emptyMap = new HashMap<>();
-        // emptyMap = Runtime.getMethodMap("clock");
-        Message returnMsg = Message.createMessage(name, msg.sender, "onMethodMap", emptyMap);
-        gateway.send(returnMsg);
-      }
-
-    }
-  }
-
-  @Override
-  public void send(Message msg) {
-    super.send(msg);
-    invoke("publishMessageEvent", msg);
-    msgs.add(msg);
-  }
+  transient protected Map<String, BlockingQueue<Message>> sendQueues = new HashMap<>();
 
   public MockGateway(String reservedKey, String inId) {
     super(reservedKey, inId);
+  }
+
+  /**
+   * Connect a remote instance identified by remote id
+   * 
+   * @param id
+   */
+  public void addConnection(String id) {
+    String uuid = UUID.randomUUID().toString();
+    Connection connection = new Connection(uuid, id, getName());
+    Runtime.getInstance().addConnection(uuid, id, connection);
+  }
+
+  public void clear() {
+    sendQueues.clear();
   }
 
   @Override
@@ -92,15 +116,87 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
     return Runtime.getInstance().getConnections(getName());
   }
 
+  public String getFullRemoteName(String name) {
+    if (!name.contains("@")) {
+      return String.format("%s@%s", name, remoteId);
+    } else {
+      return name;
+    }
+  }
+
+  public Message getMsg(String name, String callback) {
+    String fullName = getFullRemoteName(name);
+
+    String key = String.format("%s.%s", fullName, callback);
+    if (!sendQueues.containsKey(key)) {
+      return null;
+    }
+
+    try {
+      Message msg = sendQueues.get(key).poll(0, TimeUnit.MILLISECONDS);
+      return msg;
+    } catch (InterruptedException e) {
+      log.info("interrupted");
+    }
+    return null;
+  }
+
   /**
-   * Connect a remote instance identified by remote id
+   * get the current remote id
    * 
-   * @param id
+   * @return
    */
-  public void addConnection(String id) {
-    String uuid = UUID.randomUUID().toString();
-    Connection connection = new Connection(uuid, id, getName());
-    Runtime.getInstance().addConnection(uuid, id, connection);
+  public String getRemoteId() {
+    return remoteId;
+  }
+
+  @Override
+  public boolean isLocal(Message msg) {
+    return Runtime.getInstance().isLocal(msg);
+  }
+
+  //
+  public String onToString() {
+    return toString();
+  }
+
+  public Message publishMessageEvent(Message msg) {
+    return msg;
+  }
+
+  /**
+   * Registers a non Java service with mrl runtime, so it can be added to
+   * listeners and verified in testing
+   * 
+   * @param remoteServiceName
+   */
+  public void registerRemoteService(String remoteServiceName) {
+    registerRemoteService(remoteServiceName, null);
+  }
+
+  /**
+   * Registers a non Java service with mrl runtime, so it can be added to
+   * listeners and verified in testing
+   * 
+   * @param remoteServiceName
+   * @param interfaces
+   */
+  public void registerRemoteService(String remoteServiceName, ArrayList<String> interfaces) {
+    String fullName = getFullRemoteName(remoteServiceName);
+    remoteServices.put(fullName, new RemoteService(this, fullName));
+
+    Message registrationMsg = Message.createMessage(fullName, "runtime", "register", new Object[] {remoteId, remoteServiceName,"Unknown", interfaces});
+    send(registrationMsg);    
+  }
+
+  @Override
+  public void send(Message msg) {
+    super.send(msg);
+    invoke("publishMessageEvent", msg);
+    if (msg.msgId < 0) {
+      log.info("here");
+    }
+    msgs.add(msg);
   }
 
   /**
@@ -122,6 +218,10 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
 
     q.add(msg);
     invoke("publishMessageEvent", msg);
+    if (msg.msgId < 0) {
+      log.info("here");
+    }
+    
     msgs.add(msg);
 
     // verify the msg can be serialized
@@ -133,24 +233,6 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
       return;
     }
     remoteServices.get(msg.name).handle(msg);
-  }
-
-  public void clear() {
-    sendQueues.clear();
-  }
-
-  public int size() {
-    return msgs.size();
-  }
-
-  @Override
-  public boolean isLocal(Message msg) {
-    return Runtime.getInstance().isLocal(msg);
-  }
-
-  public void sendWithDelay(String name, String method, Object... data) {
-    Message msg = Message.createMessage(method, name, method, data);
-    addTask(UUID.randomUUID().toString(), true, 0, 0, "send", new Object[] { msg });
   }
 
   /**
@@ -172,8 +254,64 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
   }
 
   public void sendWithDelay(long wait, String name, String method, Object... data) {
-    Message msg = Message.createMessage(method, name, method, data);
+    Message msg = Message.createMessage(getName(), name, method, data);
     addTask(UUID.randomUUID().toString(), true, wait, wait, "send", new Object[] { msg });
+  }
+
+  public void sendWithDelay(long wait, Message msg) {
+    addTask(UUID.randomUUID().toString(), true, wait, wait, "send", new Object[] { msg });
+  }
+
+  
+  /**
+   * Sends an asynchronous message with a slight delay so that testing for a
+   * callback publish can be done inline
+   * 
+   * @param name
+   * @param method
+   */
+  public void sendWithDelay(String name, String method) {
+    sendWithDelay(10, name, method);
+  }
+
+  public void sendWithDelay(String name, String method, Object... data) {
+    Message msg = Message.createMessage(method, name, method, data);
+    addTask(UUID.randomUUID().toString(), true, 0, 0, "send", new Object[] { msg });
+  }
+
+  /**
+   * set the current remote id
+   * 
+   * @param id
+   */
+  public void setRemoteId(String id) {
+    remoteId = id;
+  }
+
+  public int size() {
+    return msgs.size();
+  }
+
+  public Integer size(String name, String callback) {
+    String fullName = getFullRemoteName(name);
+    
+    String key = String.format("%s.%s", fullName, callback);
+    if (!sendQueues.containsKey(key)) {
+      return null;
+    }
+    return sendQueues.get(key).size();
+  }
+
+  @Override
+  public void startService() {
+    super.startService();
+    // add the remote instance over a connection
+    addConnection(remoteId);
+    // add a default remote service
+    ArrayList<String> interfaces = new ArrayList<>();
+    interfaces.add(ServiceInterface.class.getName());
+    registerRemoteService("mocker", interfaces);
+
   }
 
   // FIXME - must have a radix of names and block on specific publishing methods
@@ -199,145 +337,51 @@ public class MockGateway extends Service<MockGatewayConfig> implements Gateway {
     }
     return null;
   }
-
-  /**
-   * set the current remote id
-   * 
-   * @param id
-   */
-  public void setRemoteId(String id) {
-    remoteId = id;
-  }
-
-  /**
-   * get the current remote id
-   * 
-   * @return
-   */
-  public String getRemoteId() {
-    return remoteId;
-  }
-
-  @Override
-  public void startService() {
-    super.startService();
-    // add the remote instance over a connection
-    addConnection(remoteId);
-    // add a default remote service
-    ArrayList<String> interfaces = new ArrayList<>();
-    interfaces.add(ServiceInterface.class.getName());
-    registerRemoteService("mocker", interfaces);
-
-  }
-
-  /**
-   * Registers a non Java service with mrl runtime, so it can be added to
-   * listeners and verified in testing
-   * 
-   * @param remoteServiceName
-   */
-  public void registerRemoteService(String remoteServiceName) {
-    registerRemoteService(remoteServiceName, null);
-  }
-
-  public String getFullRemoteName(String name) {
-    if (!name.contains("@")) {
-      return String.format("%s@%s", name, remoteId);
-    } else {
-      return name;
-    }
-  }
-
-  /**
-   * Registers a non Java service with mrl runtime, so it can be added to
-   * listeners and verified in testing
-   * 
-   * @param remoteServiceName
-   * @param interfaces
-   */
-  public void registerRemoteService(String remoteServiceName, ArrayList<String> interfaces) {
-    String fullName = getFullRemoteName(remoteServiceName);
-    remoteServices.put(fullName, new RemoteService(this, fullName));
-
-    // Runtime.register(remoteId, remoteServiceName, "mock:mock", interfaces);
-    Runtime.register(remoteId, remoteServiceName, "Unknown", interfaces);
-
-  }
-
-  /**
-   * Sends an asynchronous message with a slight delay so that testing for a
-   * callback publish can be done inline
-   * 
-   * @param name
-   * @param method
-   */
-  public void sendWithDelay(String name, String method) {
-    sendWithDelay(0, name, method);
-  }
-
-  //
-  public String onToString() {
-    return toString();
-  }
-
-  public Message publishMessageEvent(Message msg) {
-    return msg;
-  }
-
+  
   public static void main(String[] args) {
     try {
 
       LoggingFactory.setLevel("WARN");
 
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.startService();
+      Runtime.start("log", "Log");
+      Runtime.start("python", "Python");
+
+//      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+//      webgui.autoStartBrowser(false);
+//      webgui.startService();
+      
+      
+      Vertx vertx = (Vertx) Runtime.create("vertx", "Vertx");
+      vertx.setAutoStartBrowser(false);
+      vertx.startService();
+
 
       // starts a mocking gateway with default id instance
       MockGateway gateway = (MockGateway) Runtime.start("gateway", "MockGateway");
 
       Clock clock = (Clock) Runtime.start("clock", "Clock");
+      RemoteService mocker = gateway.getRemoteService("mocker@mockId");
+      mocker.subscribe("clock", "publishTime");
+      mocker.send("clock", "startClock");
 
-      clock.addListener("publishTime", "mocker");
+//      clock.addListener("publishTime", "mocker@mockId");
 
       // mocker.send("clock", "startClock");
       // first click is after 1 second
+      // gateway.sendWithDelay("clock", "startClock");
 
       // mocker.send("clock", "StartClock");
       // gateway.sendWithDelay("clock", "startClock");
       // gateway.sendWithDelay(0, "clock", "startClock");
-      Message msg = gateway.waitForMsg("mocker@mockid", "onTime", 1100);
-      log.info("message {}", msg);
+      Message msg = gateway.waitForMsg("mocker@mockId", "onTime", 3000);
+      log.warn("message {}", msg);
 
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-  public Message getMsg(String name, String callback) {
-    String fullName = getFullRemoteName(name);
-
-    String key = String.format("%s.%s", fullName, callback);
-    if (!sendQueues.containsKey(key)) {
-      return null;
-    }
-
-    try {
-      Message msg = sendQueues.get(key).poll(0, TimeUnit.MILLISECONDS);
-      return msg;
-    } catch (InterruptedException e) {
-      log.info("interrupted");
-    }
-    return null;
-  }
-
-  public Integer size(String name, String callback) {
-    String fullName = getFullRemoteName(name);
-    
-    String key = String.format("%s.%s", fullName, callback);
-    if (!sendQueues.containsKey(key)) {
-      return null;
-    }
-    return sendQueues.get(key).size();
+  private RemoteService getRemoteService(String fullname) {
+    return remoteServices.get(fullname);
   }
 }
