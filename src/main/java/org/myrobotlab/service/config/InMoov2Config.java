@@ -127,6 +127,9 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "torso", "InMoov2Torso", false);
     addDefaultPeerConfig(plan, name, "ultrasonicRight", "UltrasonicSensor", false);
     addDefaultPeerConfig(plan, name, "ultrasonicLeft", "UltrasonicSensor", false);
+    
+    ServoMixerConfig servoMixer = (ServoMixerConfig) plan.get(getPeerName("servoMixer"));
+    servoMixer.mouth = getPeerName("mouth");
 
     MouthControlConfig mouthControl = (MouthControlConfig) plan.get(getPeerName("mouthControl"));
 
@@ -141,6 +144,24 @@ public class InMoov2Config extends ServiceConfig {
     mouthControl.mouth = i01Name + ".mouth";
 
     ProgramABConfig chatBot = (ProgramABConfig) plan.get(getPeerName("chatBot"));
+    chatBot.botDir = "resource/ProgramAB";
+        
+    chatBot.bots.add("resource/ProgramAB/Alice");
+    chatBot.bots.add("resource/ProgramAB/Dr.Who");
+    chatBot.bots.add("resource/ProgramAB/Ency");
+    chatBot.bots.add("resource/ProgramAB/Mr. Turing");
+    chatBot.bots.add("resource/ProgramAB/de-DE");
+    chatBot.bots.add("resource/ProgramAB/en-US");
+    chatBot.bots.add("resource/ProgramAB/es-ES");
+    chatBot.bots.add("resource/ProgramAB/fi-FI");
+    chatBot.bots.add("resource/ProgramAB/fr-FR");
+    chatBot.bots.add("resource/ProgramAB/hi-IN");
+    chatBot.bots.add("resource/ProgramAB/it-IT");
+    chatBot.bots.add("resource/ProgramAB/nl-NL");
+    chatBot.bots.add("resource/ProgramAB/pt-PT");
+    chatBot.bots.add("resource/ProgramAB/ru-RU");
+    chatBot.bots.add("resource/ProgramAB/tr-TR");
+
     Runtime runtime = Runtime.getInstance();
     String[] bots = new String[] { "cn-ZH", "en-US", "fi-FI", "hi-IN", "nl-NL", "ru-RU", "de-DE", "es-ES", "fr-FR", "it-IT", "pt-PT", "tr-TR" };
     String tag = runtime.getLocaleTag();
@@ -175,13 +196,6 @@ public class InMoov2Config extends ServiceConfig {
     MarySpeechConfig mouth = (MarySpeechConfig) plan.get(getPeerName("mouth"));
     mouth.voice = "Mark";
     mouth.speechRecognizers = new String[] { name + ".ear" };
-
-    // == Peer - servoMixer =============================
-    // setup name references to different services
-    ServoMixerConfig servoMixer = (ServoMixerConfig) plan.get(getPeerName("servoMixer"));
-    servoMixer.listeners = new ArrayList<>();
-    servoMixer.listeners.add(new Listener("publishText", name + ".mouth", "onText"));
-    //servoMixer.listeners.add(new Listener("publishText", name + ".chatBot", "onText"));
 
     // == Peer - ear =============================
     // setup name references to different services

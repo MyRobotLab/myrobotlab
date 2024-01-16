@@ -191,7 +191,7 @@ public class OpenCVTest extends AbstractTest {
     if (hasInternet()) {
       cv.reset();
       cv.setGrabberType("ImageFile");
-      cv.capture("https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
+      cv.capture("https://upload.wikimedia.org/wikipedia/commons/f/fe/Isaac_Asimov%2C_RIT_NandE_Vol13Num29_1981_Sep24_Complete.jpg");
       data = cv.getFaces(MAX_TIMEOUT);
       assertNotNull(data);
       assertTrue(data.size() > 0);

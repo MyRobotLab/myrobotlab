@@ -496,7 +496,7 @@ public class InMoov2Hand extends Service<InMoov2HandConfig> implements LeapDataL
   }
 
   public void onMove(Map<String, Double> map) {
-    moveTo(map.get("thumb"), map.get("index"), map.get("majeure"), map.get("majeure"), map.get("pinky"), map.get("wrist"));
+    moveTo(map.get("thumb"), map.get("index"), map.get("majeure"), map.get("ringFinger"), map.get("pinky"), map.get("wrist"));
   }
 
   // FIXME - use pub/sub attach to set this up without having this method !
