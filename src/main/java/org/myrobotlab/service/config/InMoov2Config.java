@@ -216,7 +216,7 @@ public class InMoov2Config extends ServiceConfig {
     mapper = new MapperSimple(-0.5, 0.5, 0, 180);
     map.put("i01.head.roll", mapper);
     webxr.controllerMappings.put("head.orientation.roll", map);
-    
+
     ServoMixerConfig servoMixer = (ServoMixerConfig) plan.get(getPeerName("servoMixer"));
     servoMixer.mouth = getPeerName("mouth");
 
@@ -233,6 +233,23 @@ public class InMoov2Config extends ServiceConfig {
     mouthControl.mouth = i01Name + ".mouth";
 
     ProgramABConfig chatBot = (ProgramABConfig) plan.get(getPeerName("chatBot"));
+    chatBot.botDir = "resource/ProgramAB";
+
+    chatBot.bots.add("resource/ProgramAB/Alice");
+    chatBot.bots.add("resource/ProgramAB/Dr.Who");
+    chatBot.bots.add("resource/ProgramAB/Ency");
+    chatBot.bots.add("resource/ProgramAB/Mr. Turing");
+    chatBot.bots.add("resource/ProgramAB/de-DE");
+    chatBot.bots.add("resource/ProgramAB/en-US");
+    chatBot.bots.add("resource/ProgramAB/es-ES");
+    chatBot.bots.add("resource/ProgramAB/fi-FI");
+    chatBot.bots.add("resource/ProgramAB/fr-FR");
+    chatBot.bots.add("resource/ProgramAB/hi-IN");
+    chatBot.bots.add("resource/ProgramAB/it-IT");
+    chatBot.bots.add("resource/ProgramAB/nl-NL");
+    chatBot.bots.add("resource/ProgramAB/pt-PT");
+    chatBot.bots.add("resource/ProgramAB/ru-RU");
+    chatBot.bots.add("resource/ProgramAB/tr-TR");
 
     Runtime runtime = Runtime.getInstance();
     String[] bots = new String[] { "cn-ZH", "en-US", "fi-FI", "hi-IN", "nl-NL", "ru-RU", "de-DE", "es-ES", "fr-FR", "it-IT", "pt-PT", "tr-TR" };
@@ -375,13 +392,13 @@ public class InMoov2Config extends ServiceConfig {
     RandomMessageConfig rm = new RandomMessageConfig(name, "setLeftArmSpeed", 3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
     random.randomMessages.put(name + ".setLeftArmSpeed", rm);
 
-    rm = new RandomMessageConfig(name, "setRightArmSpeed", 3000, 8000, 8, 25, 8, 25, 8, 25, 8, 25);
+    rm = new RandomMessageConfig(name, "setRightArmSpeed", 3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
     random.randomMessages.put(name + ".setRightArmSpeed", rm);
 
-    rm = new RandomMessageConfig(name, "moveLeftArm", 000, 8000, 0, 5, 85, 95, 25, 30, 10, 15);
+    rm = new RandomMessageConfig(name, "moveLeftArm", 000, 8000, 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
     random.randomMessages.put(name + ".moveLeftArm", rm);
 
-    rm = new RandomMessageConfig(name, "moveRightArm", 3000, 8000, 0, 5, 85, 95, 25, 30, 10, 15);
+    rm = new RandomMessageConfig(name, "moveRightArm", 3000, 8000, 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
     random.randomMessages.put(name + ".moveRightArm", rm);
 
     rm = new RandomMessageConfig(name, "setLeftHandSpeed", 3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
@@ -399,13 +416,13 @@ public class InMoov2Config extends ServiceConfig {
     rm = new RandomMessageConfig(name, "setHeadSpeed", 3000, 8000, 8.0, 20.0, 8.0, 20.0, 8.0, 20.0);
     random.randomMessages.put(name + ".setHeadSpeed", rm);
 
-    rm = new RandomMessageConfig(name, "moveHead", 3000, 8000, 70, 110, 65, 115, 70, 110);
+    rm = new RandomMessageConfig(name, "moveHead", 3000, 8000, 70.0, 110.0, 65.0, 115.0, 70.0, 110.0);
     random.randomMessages.put(name + ".moveHead", rm);
 
     rm = new RandomMessageConfig(name, "setTorsoSpeed", 3000, 8000, 2.0, 5.0, 2.0, 5.0, 2.0, 5.0);
     random.randomMessages.put(name + ".setTorsoSpeed", rm);
 
-    rm = new RandomMessageConfig(name, "moveTorso", 3000, 8000, 85, 95, 88, 93, 70, 110);
+    rm = new RandomMessageConfig(name, "moveTorso", 3000, 8000, 85.0, 95.0, 88.0, 93.0, 70.0, 110.0);
     random.randomMessages.put(name + ".moveTorso", rm);
 
     // == Peer - headTracking =============================
@@ -464,7 +481,7 @@ public class InMoov2Config extends ServiceConfig {
     neoPixel.currentAnimation = "Ironman";
 
     // remove undesired defaults from our default
-    // FIXME getPeerName(key) - 
+    // FIXME getPeerName(key) -
     // FIXME REMOVAL !!
     plan.remove(name + ".headTracking.tilt");
     plan.remove(name + ".headTracking.pan");
@@ -480,7 +497,7 @@ public class InMoov2Config extends ServiceConfig {
     plan.remove(name + ".eyeTracking.controller.serial");
     plan.remove(name + ".eyeTracking.cv");
 
-    // InMoov2 --to--> InMoov2 loopbacks 
+    // InMoov2 --to--> InMoov2 loopbacks
     // allow user to override or extend with python
     listeners.add(new Listener("publishBoot", name));
     // listeners.add(new Listener("publishHeartbeat", name));
@@ -500,7 +517,7 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishPlayAnimation", getPeerName("neoPixel")));
     listeners.add(new Listener("publishStopAnimation", getPeerName("neoPixel")));
     listeners.add(new Listener("publishProcessMessage", getPeerName("py4j"), "onPythonMessage"));
-   
+
     // InMoov2 --to--> InMoov2
     listeners.add(new Listener("publishMoveHead", name));
     listeners.add(new Listener("publishMoveRightArm", name));

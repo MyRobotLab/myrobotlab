@@ -65,7 +65,7 @@ public class InMoov2 extends Service<InMoov2Config>
     public List<LogEntry> errors;
     double batteryLevel = 100;
     public boolean isPirOn = false;
-    
+
     public Heartbeat(InMoov2 inmoov) {
       this.state = inmoov.state;
       this.errors = inmoov.errors;
@@ -73,7 +73,6 @@ public class InMoov2 extends Service<InMoov2Config>
       this.isPirOn = inmoov.isPirOn;
     }
   }
-  
 
   public class Heart implements Runnable {
     private final ReentrantLock lock = new ReentrantLock();
@@ -385,7 +384,6 @@ public class InMoov2 extends Service<InMoov2Config>
         loadGestures();
       }
 
-
       if (config.startupSound) {
         // BAD WAY : reference to type, npe prone
         // && getPeer("audioPlayer") != null
@@ -405,9 +403,9 @@ public class InMoov2 extends Service<InMoov2Config>
       }
 
       // FIXME - find good way of running an animation "through" a state
-//      if (config.neoPixelBootGreen) {
-//        invoke("publishPlayAnimation", config.bootAnimation);
-//      }
+      // if (config.neoPixelBootGreen) {
+      // invoke("publishPlayAnimation", config.bootAnimation);
+      // }
 
       // TODO - all reports could be done here or minimally
       // report gathering
@@ -759,6 +757,7 @@ public class InMoov2 extends Service<InMoov2Config>
 
   /**
    * Generalized callback for a classification event
+   * 
    * @param classification
    * @return
    */
@@ -766,8 +765,7 @@ public class InMoov2 extends Service<InMoov2Config>
     processMessage("onClassification", classification);
     return classification;
   }
-  
-  
+
   /**
    * used to configure a flashing event - could use configuration to signal
    * different colors and states
@@ -1257,7 +1255,6 @@ public class InMoov2 extends Service<InMoov2Config>
     unsubscribe("python", "publishStatus", this.getName(), "onGestureStatus");
   }
 
-
   /**
    * Central hub of input motion control. Potentially, all input from joysticks,
    * quest2 controllers and headset, or any IK service could be sent here
@@ -1286,7 +1283,7 @@ public class InMoov2 extends Service<InMoov2Config>
   // return Message.createMessage(getName(), getName(), method, data);
   // }
 
-/**
+  /**
    * Centralized logging system will have all logging from all services,
    * including lower level logs that do not propegate as statuses
    * 
@@ -1300,15 +1297,15 @@ public class InMoov2 extends Service<InMoov2Config>
         errors.add(entry);
         // invoke("publishError", entry);
       }
-    }    
+    }
   }
 
-// use hearbeat to process errors
-//  public LogEntry publishError(LogEntry error) {
-//    processMessage("onError", error);
-//    return error;
-//  }
-  
+  // use hearbeat to process errors
+  // public LogEntry publishError(LogEntry error) {
+  // processMessage("onError", error);
+  // return error;
+  // }
+
   /**
    * clear current errors
    */
@@ -1380,10 +1377,9 @@ public class InMoov2 extends Service<InMoov2Config>
     isPirOn = true;
     processMessage("onPirOn");
   }
-  
-  
+
   public void onPirOff() {
-    isPirOn = false;    
+    isPirOn = false;
     processMessage("onPirOff");
   }
 
@@ -1469,31 +1465,32 @@ public class InMoov2 extends Service<InMoov2Config>
 
       lastState = state;
       state = stateChange.state;
-      
+
       processMessage("onStateChange", stateChange);
 
-//      // leaving random state
-//      if ("random".equals(lastState) && !"random".equals(state) && isPeerStarted("random")) {
-//        Random random = (Random) getPeer("random");
-//        random.disable();
-//      }
-//
-//      if ("wake".equals(lastState)) {
-//        invoke("publishStopAnimation");
-//      }
-//
-//      if (config.systemEventStateChange) {
-//        systemEvent("ON STATE %s", state);
-//      }
-//
-//      if (config.customSound && customSoundMap.containsKey(state)) {
-//        invoke("publishPlayAudioFile", customSoundMap.get(state));
-//      }
+      // // leaving random state
+      // if ("random".equals(lastState) && !"random".equals(state) &&
+      // isPeerStarted("random")) {
+      // Random random = (Random) getPeer("random");
+      // random.disable();
+      // }
+      //
+      // if ("wake".equals(lastState)) {
+      // invoke("publishStopAnimation");
+      // }
+      //
+      // if (config.systemEventStateChange) {
+      // systemEvent("ON STATE %s", state);
+      // }
+      //
+      // if (config.customSound && customSoundMap.containsKey(state)) {
+      // invoke("publishPlayAudioFile", customSoundMap.get(state));
+      // }
 
       // TODO - only a few InMoov2 state defaults will be called here
-//      if (stateDefaults.contains(state)) {
-//        invoke(state);
-//      }
+      // if (stateDefaults.contains(state)) {
+      // invoke(state);
+      // }
 
       // FIXME add topic changes to AIML here !
       // FIXME add clallbacks to inmmoov2 library
@@ -1622,7 +1619,6 @@ public class InMoov2 extends Service<InMoov2Config>
     return d;
   }
 
-
   /**
    * "re"-publishing runtime config list, because I don't want to fix the js
    * subscribeTo :P
@@ -1689,9 +1685,9 @@ public class InMoov2 extends Service<InMoov2Config>
       error(e);
     }
 
-//    if (config.pirOnFlash && isPeerStarted("pir") && isPirOn) {
-////      flash("pir");
-//    }
+    // if (config.pirOnFlash && isPeerStarted("pir") && isPirOn) {
+    //// flash("pir");
+    // }
 
     if (config.batteryInSystem) {
       double batteryLevel = Runtime.getBatteryLevel();
@@ -1710,9 +1706,9 @@ public class InMoov2 extends Service<InMoov2Config>
     // flash error until errors are cleared
     if (config.flashOnErrors) {
       if (errors.size() > 0) {
-//        invoke("publishFlash", "error");
+        // invoke("publishFlash", "error");
       } else {
-//         invoke("publishFlash", "heartbeat");
+        // invoke("publishFlash", "heartbeat");
       }
     }
 
@@ -1720,14 +1716,14 @@ public class InMoov2 extends Service<InMoov2Config>
     processMessage("onHeartbeat", heartbeat);
     return heartbeat;
   }
-  
+
   public void processMessage(String method) {
     processMessage(method, null);
   }
 
   /**
-   * Will publish processing messages to the processor(s) currently 
-   * subscribed.
+   * Will publish processing messages to the processor(s) currently subscribed.
+   * 
    * @param method
    * @param data
    */
@@ -1736,11 +1732,11 @@ public class InMoov2 extends Service<InMoov2Config>
     if (!state.equals("boot")) {
       // FIXME - this needs to be in config
       // FIXME - change peer name to "processor"
-    String processor = getPeerName("py4j");
-    Message msg = Message.createMessage(getName(), processor, method, data);
-    // FIXME - is this too much abstraction .. to publish as well as
-    // configurable send ?
-    invoke("publishProcessMessage", msg);
+      String processor = getPeerName("py4j");
+      Message msg = Message.createMessage(getName(), processor, method, data);
+      // FIXME - is this too much abstraction .. to publish as well as
+      // configurable send ?
+      invoke("publishProcessMessage", msg);
     }
   }
 

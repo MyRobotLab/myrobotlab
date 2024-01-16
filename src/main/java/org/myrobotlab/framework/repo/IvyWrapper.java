@@ -447,11 +447,10 @@ public class IvyWrapper extends Repo implements Serializable {
     cmd.add(location + "/jar" + "/[originalname].[ext]");
 
     int msgLevel = Message.MSG_WARN;
-    if (log.isWarnEnabled() || log.isErrorEnabled()) {
-      msgLevel = Message.MSG_WARN;
-      cmd.add("-warn");
-    } else {
+    if (log.isInfoEnabled()) {
       msgLevel = Message.MSG_INFO;
+    } else {
+      cmd.add("-warn");
     }
 
     StringBuilder sb = new StringBuilder();
@@ -522,7 +521,7 @@ public class IvyWrapper extends Repo implements Serializable {
 
         File file = ar.getLocalFile();
         String filename = file.getAbsoluteFile().getAbsolutePath();
-        log.info("{}", filename);        
+        log.info("{}", filename);
 
         if ("zip".equalsIgnoreCase(artifact.getExt())) {
           info("unzipping %s", filename);
@@ -535,7 +534,8 @@ public class IvyWrapper extends Repo implements Serializable {
           }
         }
 
-        publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of artifacts for %s", (Object[]) serviceTypes)));
+        publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED,
+            String.format("finished install of artifacts for %s", (Object[]) serviceTypes)));
       }
 
       publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of %s", (Object[]) serviceTypes)));

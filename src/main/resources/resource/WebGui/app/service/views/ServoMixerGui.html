@@ -36,8 +36,31 @@
           ng-init=""
           placeholder="Gesture Name"
         />
+        <button class="btn btn-default" ng-click="msg.addNewGestureFile(state.selectedGestureFile)">New</button>
         <button class="btn btn-default" ng-click="saveGesture()">Save</button>
         <button class="btn btn-default" ng-click="openGesture()">Open</button>
+        <br />
+        <br />
+        <table>
+          <tr>
+            <td>
+              <input
+                id="servo-mixer-filter"
+                class="form-control"
+                ng-change="searchServos(searchServo.displayName)"
+                type="text"
+                ng-model="searchServo.displayName"
+                ng-init=""
+                placeholder="servo name"
+              />
+            </td>
+            <td>
+              <button class="btn btn-default" ng-click="msg.rest()">Rest</button>
+            </td>
+            <td></td>
+            <td>&nbsp;<input type="checkbox" ng-model="selectAllCheckbox" ng-click="selectAll()"/ > select all</td>
+          </tr>
+        </table>
       </td>
       <td>
         Actions
@@ -112,29 +135,6 @@
   <div class="col-md-12">
     &nbsp;
     <div class="container rzMixer">
-      <br />
-      <table>
-        <tr>
-          <td>
-            <input
-              id="servo-mixer-filter"
-              class="form-control"
-              ng-change="searchServos(searchServo.displayName)"
-              type="text"
-              ng-model="searchServo.displayName"
-              ng-init=""
-              placeholder="servo name"
-            />
-          </td>
-          <td>
-            <button class="btn btn-default" ng-click="msg.rest()">Rest</button>
-          </td>
-          <td></td>
-          <td>&nbsp;<input type="checkbox" ng-model="selectAllCheckbox" ng-click="selectAll()"/ > select all</td>
-        </tr>
-      </table>
-      <br />
-      <br />
       <div ng-model="dummy" ng-repeat="(key, value) in searchServos(searchServo.displayName)">
         <div class="sliderMixer">
           <input type="checkbox" ng-model="mrl.getPanel(key).selected" />
