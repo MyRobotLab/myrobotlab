@@ -264,7 +264,7 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
    * Explicitly saving a new gesture file. This will error if the file already
    * exists. The gesture part moves will be empty.
    * 
-   * @param filename
+   * @param name - gesture name
    * @return
    */
   public String addNewGestureFile(String name) {

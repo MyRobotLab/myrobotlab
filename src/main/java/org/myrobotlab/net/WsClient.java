@@ -53,7 +53,7 @@ public class WsClient extends WebSocketListener {
   /**
    * connect to a listening websocket e.g. connect("ws://localhost:8888")
    * 
-   * @param url
+   * @param url - url to connect to
    */
   public void connect(String url) {
     connect(null, url);
