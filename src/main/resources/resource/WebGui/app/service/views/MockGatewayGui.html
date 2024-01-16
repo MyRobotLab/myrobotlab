@@ -7,7 +7,8 @@
     <thead>
       <tr>
         <th>ts</th>
-        <th>sender</th>
+        <th>name</th>
+        <th>method</th>
         <th></th>
         <th>name</th>
         <th>method</th>
@@ -18,7 +19,9 @@
     <tbody>
       <tr ng-repeat="msg in service.msgs">
         <td><small>{{msg.msgId}}</small></td>
-        <td><small>{{msg.sender}} </small></td>
+        <td><small><span ng-hide="msgToRemote(msg)">{{msg.name}}</span>
+                  <span ng-hide="!msgToRemote(msg)">{{msg.sender}}</span></small></td>
+        <td><small><span ng-hide="msgToRemote(msg)">{{msg.method}}</span></small></td>
         <td>
           <small
             ><span ng-hide="msgToRemote(msg)" class="glyphicon glyphicon-arrow-left" style="color: grey" /><span
@@ -27,8 +30,9 @@
               style="color: grey"
           /></small>
         </td>
-        <td><small>{{msg.name}}</small></td>
-        <td><small>{{msg.method}}</small></td>
+        <td><small><span ng-hide="!msgToRemote(msg)">{{msg.name}}</span>
+                  <span ng-hide="msgToRemote(msg)">{{msg.sender}}</span></small></td>
+        <td><small><span ng-hide="!msgToRemote(msg)">{{msg.method}}</span></small></td>
         <td><small>{{msg.data}}</small></td>
       </tr>
     </tbody>
