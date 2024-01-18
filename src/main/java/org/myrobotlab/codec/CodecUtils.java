@@ -117,16 +117,14 @@ public class CodecUtils {
    *      Wrapper Classes</a>
    */
   public static final Set<Class<?>> WRAPPER_TYPES = new HashSet<>(
-      Arrays.asList(Boolean.class, Character.class, Byte.class, Short.class, Integer.class, Long.class, Float.class,
-          Double.class, Void.class));
+      Arrays.asList(Boolean.class, Character.class, Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class, Void.class));
   /**
    * Set of the fully-qualified (AKA canonical) names of {@link #WRAPPER_TYPES}.
    *
    * @see <a href="https://www.w3schools.com/java/java_wrapper_classes.asp">Java
    *      Wrapper Classes</a>
    */
-  public static final Set<String> WRAPPER_TYPES_CANONICAL = WRAPPER_TYPES.stream().map(Object::getClass)
-      .map(Class::getCanonicalName).collect(Collectors.toSet());
+  public static final Set<String> WRAPPER_TYPES_CANONICAL = WRAPPER_TYPES.stream().map(Object::getClass).map(Class::getCanonicalName).collect(Collectors.toSet());
   public static final String API_MESSAGES = "messages";
   public static final String API_SERVICE = "service";
 
@@ -236,7 +234,7 @@ public class CodecUtils {
    * package.
    *
    * @param type
-   *             The service type name, either shortened or fully qualified.
+   *          The service type name, either shortened or fully qualified.
    * @return Null if type is null, otherwise fully qualified name.
    */
   public static String makeFullTypeName(String type) {
@@ -244,8 +242,7 @@ public class CodecUtils {
       return null;
     }
     if (!type.contains(".")) {
-      return ("Service".equals(type)) ? "org.myrobotlab.framework.Service"
-          : String.format("org.myrobotlab.service.%s", type);
+      return ("Service".equals(type)) ? "org.myrobotlab.framework.Service" : String.format("org.myrobotlab.service.%s", type);
     }
     return type;
   }
@@ -254,7 +251,7 @@ public class CodecUtils {
    * Capitalize the first character of the given string
    *
    * @param line
-   *             The string to be capitalized
+   *          The string to be capitalized
    * @return The capitalized version of line.
    */
   public static String capitalize(final String line) {
@@ -266,17 +263,16 @@ public class CodecUtils {
    * {@link #CLASS_META_KEY} exists) using the selected JSON backend.
    *
    * @param json
-   *              The JSON to be deserialized in String form
+   *          The JSON to be deserialized in String form
    * @param clazz
-   *              The target class. If a class is not supplied the default class
-   *              returned will be an {@link #DEFAULT_OBJECT_TYPE}
+   *          The target class. If a class is not supplied the default class
+   *          returned will be an {@link #DEFAULT_OBJECT_TYPE}
    * @param <T>
-   *              The type of the target class.
+   *          The type of the target class.
    * @return An object of the specified class (or a subclass of) with the state
    *         given by the json. Null is an allowed return object.
    * @throws JsonDeserializationException
-   *                                      if an error during deserialization
-   *                                      occurs.
+   *           if an error during deserialization occurs.
    */
   @SuppressWarnings("unchecked")
   public static <T> /* @Nullable */ T fromJson(/* @Nonnull */ String json,
@@ -322,20 +318,18 @@ public class CodecUtils {
    * {@link #CLASS_META_KEY} exists) using the selected JSON backend.
    *
    * @param json
-   *                      The JSON to be deserialized in String form
+   *          The JSON to be deserialized in String form
    * @param genericClass
-   *                      The target class.
+   *          The target class.
    * @param parameterized
-   *                      The list of types used as the genericClass type
-   *                      parameters of
-   *                      genericClass.
+   *          The list of types used as the genericClass type parameters of
+   *          genericClass.
    * @param <T>
-   *                      The type of the target class.
+   *          The type of the target class.
    * @return An object of the specified class (or a subclass of) with the state
    *         given by the json. Null is an allowed return object.
    * @throws JsonDeserializationException
-   *                                      if an error during deserialization
-   *                                      occurs.
+   *           if an error during deserialization occurs.
    */
   public static <T> /* @Nullable */ T fromJson(/* @Nonnull */ String json,
       /* @Nonnull */ Class<?> genericClass, /* @Nonnull */ Class<?>... parameterized) {
@@ -352,15 +346,14 @@ public class CodecUtils {
    * may not deserialize into T.
    *
    * @param json
-   *             A string encoded in JSON
+   *          A string encoded in JSON
    * @param type
-   *             Reified type information to pass to the deserializers
+   *          Reified type information to pass to the deserializers
    * @return An instance of T decoded from the json
    * @param <T>
-   *            The type to deserialize into
+   *          The type to deserialize into
    * @throws JsonDeserializationException
-   *                                      if the selected deserializer throws an
-   *                                      exception
+   *           if the selected deserializer throws an exception
    */
   public static <T> /* @Nullable */ T fromJson(/* @NonNull */ String json,
       /* @NonNull */ StaticType<T> type) {
@@ -372,16 +365,15 @@ public class CodecUtils {
    * {@link #CLASS_META_KEY} exists) using the selected JSON backend.
    *
    * @param json
-   *             The JSON to be deserialized in String form
+   *          The JSON to be deserialized in String form
    * @param type
-   *             The target type.
+   *          The target type.
    * @param <T>
-   *             The type of the target class.
+   *          The type of the target class.
    * @return An object of the specified class (or a subclass of) with the state
    *         given by the json. Null is an allowed return object.
    * @throws JsonDeserializationException
-   *                                      if an error during deserialization
-   *                                      occurs.
+   *           if an error during deserialization occurs.
    */
   public static <T> /* @Nullable */ T fromJson(/* @Nonnull */ String json,
       /* @Nonnull */ Type type) {
@@ -396,10 +388,10 @@ public class CodecUtils {
    * Convert the given JSON string into an equivalent tree map.
    *
    * @param json
-   *             The json to be converted
+   *          The json to be converted
    * @return The json in a tree map form
    * @throws JsonDeserializationException
-   *                                      if deserialization fails
+   *           if deserialization fails
    */
   @SuppressWarnings("unchecked")
   public static LinkedHashMap<String, Object> toTree(String json) {
@@ -444,7 +436,7 @@ public class CodecUtils {
    * without any runtime IDs, meaning no '@' signs.
    *
    * @param name
-   *             The service name to be converted
+   *          The service name to be converted
    * @return The simple name of the service. If null, will return null, and if
    *         already a simple name then will return name
    */
@@ -468,7 +460,7 @@ public class CodecUtils {
    * Gets the instance id from a service name
    *
    * @param name
-   *             the name of the instance
+   *          the name of the instance
    * @return the name of the instance
    */
   static public String getId(String name) {
@@ -494,7 +486,7 @@ public class CodecUtils {
    * already a full name, then it is returned unmodified.
    * 
    * @param name
-   *             The service name to normalize
+   *          The service name to normalize
    * @return The normalized (full) name, or null if name is null
    */
   public static String getFullName(String name) {
@@ -514,9 +506,9 @@ public class CodecUtils {
    * name does not have a runtime ID, it is assumed to be a local service.
    * 
    * @param name1
-   *              The first service name
+   *          The first service name
    * @param name2
-   *              The second service name
+   *          The second service name
    * @return Whether the two names are effectively equal
    */
   public static boolean checkServiceNameEquality(String name1, String name2) {
@@ -529,7 +521,7 @@ public class CodecUtils {
    * "get" or "publish" prefix, and converting it all to proper camelCase.
    *
    * @param topicMethod
-   *                    The topic method name, such as "publishState"
+   *          The topic method name, such as "publishState"
    * @return The name for the callback method, such as "onState"
    */
   static public String getCallbackTopicName(String topicMethod) {
@@ -549,16 +541,14 @@ public class CodecUtils {
    * Gets a String representation of a Message
    *
    * @param msg
-   *            The message
+   *          The message
    * @return The String representation of the message
    */
   static public String getMsgKey(Message msg) {
     if (msg.sendingMethod != null) {
-      return String.format("%s.%s --> %s.%s(%s) - %d", msg.sender, msg.sendingMethod, msg.name, msg.method,
-          CodecUtils.getParameterSignature(msg.data), msg.msgId);
+      return String.format("%s.%s --> %s.%s(%s) - %d", msg.sender, msg.sendingMethod, msg.name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId);
     } else {
-      return String.format("%s --> %s.%s(%s) - %d", msg.sender, msg.name, msg.method,
-          CodecUtils.getParameterSignature(msg.data), msg.msgId);
+      return String.format("%s --> %s.%s(%s) - %d", msg.sender, msg.name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId);
     }
   }
 
@@ -570,7 +560,7 @@ public class CodecUtils {
    * class's simple name.
    *
    * @param data
-   *             The list of objects to be represented as a parameter list string.
+   *          The list of objects to be represented as a parameter list string.
    * @return The string representing the data array
    */
   static public String getParameterSignature(final Object[] data) {
@@ -624,11 +614,11 @@ public class CodecUtils {
    * virtual "class" field of the JSON to provide the type information.
    *
    * @param jsonData
-   *                 The serialized Message in JSON form
+   *          The serialized Message in JSON form
    * @return A completely decoded Message object. Null is allowed if the JSON
    *         represented null.
    * @throws JsonDeserializationException
-   *                                      if jsonData is malformed
+   *           if jsonData is malformed
    */
   public static /* @Nullable */ Message jsonToMessage(/* @Nonnull */ String jsonData) {
     if (log.isDebugEnabled()) {
@@ -675,12 +665,11 @@ public class CodecUtils {
    *
    *
    * @param msg
-   *            The Message object containing the json-encoded data parameters.
-   *            This object will be modified in-place
+   *          The Message object containing the json-encoded data parameters.
+   *          This object will be modified in-place
    * @return A fully-decoded Message
    * @throws JsonDeserializationException
-   *                                      if any of the data parameters are
-   *                                      malformed JSON
+   *           if any of the data parameters are malformed JSON
    */
   public static /* @Nonnull */ Message decodeMessageParams(/* @Nonnull */ Message msg) {
     String serviceName = msg.getFullName();
@@ -729,12 +718,10 @@ public class CodecUtils {
           }
 
           if (msg.data[i] != null && JSON_DEFAULT_OBJECT_TYPE.isAssignableFrom(msg.data[i].getClass())) {
-            log.warn("Deserialized parameter to default object type. " + "Possibly missing virtual class field: "
-                + msg.data[i]);
+            log.warn("Deserialized parameter to default object type. " + "Possibly missing virtual class field: " + msg.data[i]);
           }
         } else {
-          log.error(
-              "Attempted fallback Message decoding with virtual class field but " + "parameter is not String: %s");
+          log.error("Attempted fallback Message decoding with virtual class field but " + "parameter is not String: %s");
         }
       }
       msg.encoding = null;
@@ -749,7 +736,7 @@ public class CodecUtils {
    * conversion is possible
    *
    * @param clazz
-   *              the class
+   *          the class
    * @return true/false
    */
   public static boolean isSimpleType(Class<?> clazz) {
@@ -799,7 +786,7 @@ public class CodecUtils {
    *          The object to be converted
    * @return The object in String JSON form
    * @throws JsonSerializationException
-   *                                    if serialization fails
+   *           if serialization fails
    */
   public static String toJson(Object o) {
     try {
@@ -814,14 +801,13 @@ public class CodecUtils {
    * the specified output stream.
    *
    * @param out
-   *            The OutputStream that the resultant JSON will be written to.
+   *          The OutputStream that the resultant JSON will be written to.
    * @param obj
-   *            The object that will be converted to JSON.
+   *          The object that will be converted to JSON.
    * @throws IOException
-   *                                    if writing to the output stream fails
+   *           if writing to the output stream fails
    * @throws JsonSerializationException
-   *                                    if an exception occurs during
-   *                                    serialization.
+   *           if an exception occurs during serialization.
    */
   static public void toJson(OutputStream out, Object obj) throws IOException {
     String json;
@@ -841,13 +827,12 @@ public class CodecUtils {
    * given class.
    *
    * @param o
-   *              The object to be serialized
+   *          The object to be serialized
    * @param clazz
-   *              The class to treat the object as
+   *          The class to treat the object as
    * @return The resultant JSON string
    * @throws JsonSerializationException
-   *                                    if an exception occurs during
-   *                                    serialization
+   *           if an exception occurs during serialization
    */
   public static String toJson(Object o, Class<?> clazz) {
     try {
@@ -862,13 +847,13 @@ public class CodecUtils {
    * write the result to a file with the given filename.
    *
    * @param o
-   *                 The object to be serialized
+   *          The object to be serialized
    * @param filename
-   *                 The name of the file to write the JSON to
+   *          The name of the file to write the JSON to
    * @throws IOException
-   *                                    if writing to the file fails
+   *           if writing to the file fails
    * @throws JsonSerializationException
-   *                                    if serialization throws an exception
+   *           if serialization throws an exception
    */
   public static void toJsonFile(Object o, String filename) throws IOException {
     byte[] json;
@@ -890,7 +875,7 @@ public class CodecUtils {
    * string to be lowercase.
    *
    * @param camelCase
-   *                  The camelCase string to be converted
+   *          The camelCase string to be converted
    * @return The string in snake_case form
    */
   static public String toUnderScore(String camelCase) {
@@ -903,11 +888,10 @@ public class CodecUtils {
    * to uppercase, and if null the casing will not be changed.
    *
    * @param camelCase
-   *                    The camelCase string to be converted
+   *          The camelCase string to be converted
    * @param toLowerCase
-   *                    Whether the entire string should be lowercase, uppercase,
-   *                    or not
-   *                    changed (null)
+   *          Whether the entire string should be lowercase, uppercase, or not
+   *          changed (null)
    * @return The string in snake_case form
    */
   static public String toUnderScore(String camelCase, Boolean toLowerCase) {
@@ -941,7 +925,7 @@ public class CodecUtils {
    * Equivalent to {@link #isInteger(String)}
    *
    * @param string
-   *               The String to be checked
+   *          The String to be checked
    * @return Whether the String can be parsed as an Integer
    */
   @Deprecated
@@ -968,7 +952,7 @@ public class CodecUtils {
    * the service type without any package specifier.
    *
    * @param serviceType
-   *                    The service type in String form
+   *          The service type in String form
    * @return The simple name of the servide type
    */
   public static String getSimpleName(String serviceType) {
@@ -988,7 +972,7 @@ public class CodecUtils {
    * {@link #jacksonPrettyPrinter} to pretty-ify the result.
    *
    * @param ret
-   *            The object to be serialized
+   *          The object to be serialized
    * @return The object in pretty JSON form
    */
   public static String toPrettyJson(Object ret) {
@@ -1005,10 +989,10 @@ public class CodecUtils {
    * JSON and using the selected JSON backend.
    *
    * @param data
-   *             A String containing a JSON array
+   *          A String containing a JSON array
    * @return An array of Objects created by deserializing the JSON array
    * @throws Exception
-   *                   If deserialization fails
+   *           If deserialization fails
    */
   static public Object[] decodeArray(Object data) throws Exception {
     // ITS GOT TO BE STRING - it just has to be !!! :)
@@ -1059,9 +1043,9 @@ public class CodecUtils {
    * </pre>
    *
    * @param from
-   *             - sender
+   *          - sender
    * @param path
-   *             - cli encoded msg
+   *          - cli encoded msg
    * @return - a Message derived from cli
    */
   static public Message pathToMsg(String from, String path) {
@@ -1212,7 +1196,7 @@ public class CodecUtils {
    * Parse the specified data as an Integer. If parsing fails, returns null
    *
    * @param data
-   *             The String to be coerced into an Integer
+   *          The String to be coerced into an Integer
    * @return the data as an Integer, if parsing fails then null instead
    */
   static public Integer makeInteger(String data) {
@@ -1227,7 +1211,7 @@ public class CodecUtils {
    * Checks whether the given String can be parsed as an Integer
    *
    * @param data
-   *             The string to be checked
+   *          The string to be checked
    * @return true if the data can be parsed as an Integer, false otherwise
    */
   static public boolean isInteger(String data) {
@@ -1243,7 +1227,7 @@ public class CodecUtils {
    * Checks whether the given String can be parsed as a Double
    *
    * @param data
-   *             The string to be checked
+   *          The string to be checked
    * @return true if the data can be parsed as a Double, false otherwise
    */
   static public boolean isDouble(String data) {
@@ -1259,7 +1243,7 @@ public class CodecUtils {
    * Parse the specified data as a Double. If parsing fails, returns null
    *
    * @param data
-   *             The String to be coerced into a Doubled=
+   *          The String to be coerced into a Doubled=
    * @return the data as a Double, if parsing fails then null instead
    */
   static public Double makeDouble(String data) {
@@ -1274,7 +1258,7 @@ public class CodecUtils {
    * Checks whether the given String can be parsed as a Boolean
    *
    * @param data
-   *             The string to be checked
+   *          The string to be checked
    * @return true if the data can be parsed as a boolean, false otherwise
    */
   @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -1293,7 +1277,7 @@ public class CodecUtils {
    * Parse the specified data as a Boolean. If parsing fails, returns null
    *
    * @param data
-   *             The String to be coerced into a Boolean
+   *          The String to be coerced into a Boolean
    * @return the data as a boolean, if parsing fails then null instead
    */
   static public Boolean makeBoolean(String data) {
@@ -1311,13 +1295,10 @@ public class CodecUtils {
    */
   static public List<ApiDescription> getApis() {
     List<ApiDescription> ret = new ArrayList<>();
-    ret.add(new ApiDescription("message", "{scheme}://{host}:{port}" + API_MESSAGES_PATH,
-        "ws://localhost:8888" + API_MESSAGES_PATH,
-        "An asynchronous api useful for bi-directional websocket communication, primary messages api for the webgui.  URI is "
-            + API_MESSAGES_PATH
+    ret.add(new ApiDescription("message", "{scheme}://{host}:{port}" + API_MESSAGES_PATH, "ws://localhost:8888" + API_MESSAGES_PATH,
+        "An asynchronous api useful for bi-directional websocket communication, primary messages api for the webgui.  URI is " + API_MESSAGES_PATH
             + " data contains a json encoded Message structure"));
-    ret.add(new ApiDescription("service", "{scheme}://{host}:{port}" + API_SERVICE_PATH,
-        "http://localhost:8888" + API_SERVICE_PATH + "/runtime/getUptime",
+    ret.add(new ApiDescription("service", "{scheme}://{host}:{port}" + API_SERVICE_PATH, "http://localhost:8888" + API_SERVICE_PATH + "/runtime/getUptime",
         "An synchronous api useful for simple REST responses"));
     return ret;
   }
@@ -1331,19 +1312,18 @@ public class CodecUtils {
    * key match (key based on parameter types).
    *
    * @param sender
-   *                      the sender of the message
+   *          the sender of the message
    * @param sendingMethod
-   *                      the method sending it
+   *          the method sending it
    * @param name
-   *                      dest service
+   *          dest service
    * @param method
-   *                      dest method
+   *          dest method
    * @param params
-   *                      params to pass
+   *          params to pass
    * @return the string representation of the json message
    */
-  public static String createJsonMsg(String sender, String sendingMethod, String name, String method,
-      Object... params) {
+  public static String createJsonMsg(String sender, String sendingMethod, String name, String method, Object... params) {
     Message msg = Message.createMessage(sender, name, method, null);
     msg.sendingMethod = sendingMethod;
     Object[] d = null;
@@ -1362,7 +1342,7 @@ public class CodecUtils {
    * already double-encoded. The selected JSON backend will be used.
    *
    * @param inMsg
-   *              The message to be encoded
+   *          The message to be encoded
    * @return A String representation of the message and all of its members in
    *         JSON format.
    */
@@ -1461,11 +1441,11 @@ public class CodecUtils {
    * as YAML.
    *
    * @param data
-   *              The YAML to be deserialized
+   *          The YAML to be deserialized
    * @param clazz
-   *              The target class
+   *          The target class
    * @param <T>
-   *              The type of the target class
+   *          The type of the target class
    * @return An instance of the target class with the state given by the YAML
    *         string
    */
@@ -1479,7 +1459,7 @@ public class CodecUtils {
    * Checks if the service name is local to the current process instance
    * 
    * @param name
-   *             The service name to be checked
+   *          The service name to be checked
    * @return Whether the service name is local to the given ID
    */
   public static boolean isLocal(String name) {
@@ -1494,9 +1474,9 @@ public class CodecUtils {
    * (has no '@' symbol), or if it has a remote ID it matches the ID given.
    *
    * @param name
-   *             The service name to be checked
+   *          The service name to be checked
    * @param id
-   *             The runtime ID of the local instance
+   *          The runtime ID of the local instance
    * @return Whether the service name is local to the given ID
    */
   public static boolean isLocal(String name, String id) {
@@ -1516,10 +1496,10 @@ public class CodecUtils {
    * object by deserialization.
    *
    * @param filename
-   *                 The name of the YAML file
+   *          The name of the YAML file
    * @return The equivalent ServiceConfig object
    * @throws IOException
-   *                     if reading the file fails
+   *           if reading the file fails
    */
   public static <C extends ServiceConfig> C readServiceConfig(String filename, StaticType<C> type) throws IOException {
     String data = Files.readString(Paths.get(filename));
@@ -1528,8 +1508,7 @@ public class CodecUtils {
     if (type.asClass().isAssignableFrom(parsed.getClass())) {
       return parsed;
     } else {
-      throw new InvalidObjectException(
-          "Deserialized type was " + parsed.getClass() + ", expected " + type + ". Deserialized object: " + parsed);
+      throw new InvalidObjectException("Deserialized type was " + parsed.getClass() + ", expected " + type + ". Deserialized object: " + parsed);
     }
   }
 
@@ -1539,11 +1518,11 @@ public class CodecUtils {
    * this method is a no-op.
    *
    * @param o
-   *              The object whose field will be modified
+   *          The object whose field will be modified
    * @param field
-   *              The name of the field to be modified
+   *          The name of the field to be modified
    * @param value
-   *              The new value to set the field to
+   *          The new value to set the field to
    */
   public static void setField(Object o, String field, Object value) {
     try {
@@ -1605,13 +1584,13 @@ public class CodecUtils {
      * Construct a new API description.
      *
      * @param key
-     *                       {@link #key}
+     *          {@link #key}
      * @param uriDescription
-     *                       {@link #path}
+     *          {@link #path}
      * @param exampleUri
-     *                       {@link #exampleUri}
+     *          {@link #exampleUri}
      * @param description
-     *                       {@link #description}
+     *          {@link #description}
      */
     public ApiDescription(String key, String uriDescription, String exampleUri, String description) {
       this.key = key;
@@ -1627,8 +1606,7 @@ public class CodecUtils {
       if (o == null || getClass() != o.getClass())
         return false;
       ApiDescription that = (ApiDescription) o;
-      return Objects.equals(key, that.key) && Objects.equals(path, that.path)
-          && Objects.equals(exampleUri, that.exampleUri) && Objects.equals(description, that.description);
+      return Objects.equals(key, that.key) && Objects.equals(path, that.path) && Objects.equals(exampleUri, that.exampleUri) && Objects.equals(description, that.description);
     }
 
     @Override
