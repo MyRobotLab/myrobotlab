@@ -56,9 +56,9 @@ public class Plan {
    * Puts a service name and its service config into the plan, replacing any
    * previous definition. It WILL NOT replace a runtime config !
    * 
-   * @param name
-   * @param sc
-   * @return
+   * @param name - name of the service
+   * @param sc - service config to be updated
+   * @return - updated service config
    */
   public ServiceConfig put(String name, ServiceConfig sc) {
 

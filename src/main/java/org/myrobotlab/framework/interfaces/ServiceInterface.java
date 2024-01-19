@@ -68,7 +68,7 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
   /**
    * equivalent to getClass().getCanonicalName()
    *
-   * @return
+   * @return type string
    */
   String getTypeKey();
 
@@ -79,7 +79,7 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    * Peer service. The key never changes. However, the Peer's name and type can.
    * This returns all peers for a service.
    * 
-   * @return
+   * @return all peers
    */
   Map<String, Peer> getPeers();
 
@@ -87,7 +87,7 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    * Returns peers keys. Peer key is the hardcoded key a composite service
    * references its peers with - actual name may vary
    * 
-   * @return
+   * @return all peer keys
    */
   Set<String> getPeerKeys();
 
@@ -199,7 +199,7 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
   
   /**
    * Release a set of peers in the order they are provided.
-   * @param peerKey
+   * @param peerKeys
    */
   public void releasePeers(String[] peerKeys);
 
@@ -215,7 +215,7 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
   
   /**
    * Start a set of peers in the order they are provided.
-   * @param peerKey
+   * @param peerKeys
    */
   public void startPeers(String[] peerKeys);
 
@@ -231,7 +231,7 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
   /**
    * Get a clone of config that is filtered based on service preference
    * 
-   * @return
+   * @return a service config
    */
   ServiceConfig getFilteredConfig();
 
@@ -240,12 +240,14 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
    * this service.
    * 
    * @param config
-   * @return
+   * @return a service config
    */
   public ServiceConfig addConfigListeners(ServiceConfig config);
 
   /**
    * get all the subscriptions to this service
+   * 
+   * @return - a map of current listeners (subscriptions)
    */
   public Map<String, List<MRLListener>>  getNotifyList();
 }
