@@ -189,17 +189,39 @@ public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypePro
   int getCreationOrder();
 
   MetaData getMetaData();
+  
 
   /**
-   * start a peer using a peerKey E.g. inside InMoov service startPeer("head")
+   * Release a peer.
+   * @param peerKey
+   */
+  public void releasePeer(String peerKey);
+  
+  /**
+   * Release a set of peers in the order they are provided.
+   * @param peerKey
+   */
+  public void releasePeers(String[] peerKeys);
+
+
+  /**
+   * Start a peer using a peerKey E.g. inside InMoov service startPeer("head").
    * 
    * @param peerKey
    * @return
    */
   ServiceInterface startPeer(String peerKey);
+  
+  
+  /**
+   * Start a set of peers in the order they are provided.
+   * @param peerKey
+   */
+  public void startPeers(String[] peerKeys);
+
 
   /**
-   * setting an instance id on the service - this represents the running
+   * Setting an instance id on the service - this represents the running
    * instance's identifier which would be the service's home
    * 
    * @param id
