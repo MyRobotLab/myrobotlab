@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 public class MrlSraixHandler implements SraixHandler {
   transient public final static Logger log = LoggerFactory.getLogger(MrlSraixHandler.class);
 
-  private ProgramAB programab = null;
+  final transient private ProgramAB programab;
 
   public MrlSraixHandler(ProgramAB programab) {
     this.programab = programab;
@@ -31,7 +31,7 @@ public class MrlSraixHandler implements SraixHandler {
       Sraix sraix = XmlParser.parseSraix(xml);
       
       if (sraix.oob != null) {      
-        OobProcessor handler = OobProcessor.getInstance(programab);
+        OobProcessor handler = programab.getOobProcessor();
         String ret = handler.process(sraix.oob, true); // block by default
         return ret;
       } else if (sraix.search != null) {
