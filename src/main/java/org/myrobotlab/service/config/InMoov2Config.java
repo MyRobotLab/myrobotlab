@@ -26,7 +26,7 @@ public class InMoov2Config extends ServiceConfig {
 
   /**
    * When the healthCheck is operating, it will check the battery level. If the
-   * battery level is < 5% it will publishFlash with red at regular interval
+   * battery level is &lt; 5% it will publishFlash with red at regular interval
    */
   public boolean batteryInSystem = false;
 
@@ -59,7 +59,7 @@ public class InMoov2Config extends ServiceConfig {
 
   /**
    * flashes the neopixel every time a health check is preformed. green == good
-   * red == battery < 5%
+   * red == battery &lt; 5%
    */
   public boolean heartbeatFlash = false;
 
