@@ -1853,7 +1853,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   public void startService() {
     super.startService();
 
-    InMoov2Config c = (InMoov2Config) config;
     Runtime runtime = Runtime.getInstance();
 
     // get service start and release life cycle events
