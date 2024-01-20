@@ -55,7 +55,7 @@ public class InMoov2Config extends ServiceConfig {
    * fire events to the FSM. Checks battery level and sends a heartbeat flash on
    * publishHeartbeat and onHeartbeat at a regular interval
    */
-  public boolean heartbeat = false;
+  public boolean heartbeat = true;
 
   /**
    * flashes the neopixel every time a health check is preformed. green == good
