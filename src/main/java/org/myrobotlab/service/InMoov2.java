@@ -58,7 +58,7 @@ import org.slf4j.Logger;
 
 public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleListener, SpeechListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
-  public class Heartbeat {
+  public static class Heartbeat {
     public long count = 0;
     public long ts = System.currentTimeMillis();
     public String state;
@@ -360,6 +360,10 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
       </pre>
       */
+      
+      // load the InMoov2.py and publish it for Python/Jython or Py4j to consume
+      String script = getResourceAsString("InMoov2.py");
+      invoke("publishPython", script);
 
       // TODO - MAKE BOOT REPORT !!!! deliver it on a heartbeat
       runtime.invoke("publishConfigList");
@@ -730,30 +734,32 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * @return the timestamp of the last activity time.
    */
   public Long getLastActivityTime() {
-    try {
+    Long head = (InMoov2Head) getPeer("head") != null ? ((InMoov2Head) getPeer("head")).getLastActivityTime() : null;
+    Long leftArm = (InMoov2Arm) getPeer("leftArm") != null ? ((InMoov2Arm) getPeer("leftArm")).getLastActivityTime() : null;
+    Long rightArm = (InMoov2Arm) getPeer("rightArm") != null ? ((InMoov2Arm) getPeer("rightArm")).getLastActivityTime() : null;
+    Long leftHand = (InMoov2Hand) getPeer("leftHand") != null ? ((InMoov2Hand) getPeer("leftHand")).getLastActivityTime() : null;
+    Long rightHand = (InMoov2Hand) getPeer("rightHand") != null ? ((InMoov2Hand) getPeer("rightHand")).getLastActivityTime() : null;
+    Long torso = (InMoov2Torso) getPeer("torso") != null ? ((InMoov2Torso) getPeer("torso")).getLastActivityTime() : null;
 
-      Long lastActivityTime = 0L;
+    Long lastActivityTime = null;
 
-      Long head = (Long) sendToPeerBlocking("head", "getLastActivityTime", getName());
-      Long leftArm = (Long) sendToPeerBlocking("leftArm", "getLastActivityTime", getName());
-      Long rightArm = (Long) sendToPeerBlocking("rightArm", "getLastActivityTime", getName());
-      Long leftHand = (Long) sendToPeerBlocking("leftHand", "getLastActivityTime", getName());
-      Long rightHand = (Long) sendToPeerBlocking("rightHand", "getLastActivityTime", getName());
-      Long torso = (Long) sendToPeerBlocking("torso", "getLastActivityTime", getName());
-
-      lastActivityTime = Math.max(head, leftArm);
+    if (head != null || leftArm != null || rightArm != null || leftHand != null || rightHand != null || torso != null) {
+      lastActivityTime = 0L;
+      if (head != null)
+        lastActivityTime = Math.max(lastActivityTime, head);
+      if (leftArm != null)
+        lastActivityTime = Math.max(lastActivityTime, leftArm);
+      if (rightArm != null)
       lastActivityTime = Math.max(lastActivityTime, rightArm);
+      if (leftHand != null)
       lastActivityTime = Math.max(lastActivityTime, leftHand);
+      if (rightHand != null)
       lastActivityTime = Math.max(lastActivityTime, rightHand);
+      if (torso != null)
       lastActivityTime = Math.max(lastActivityTime, torso);
-
-      return lastActivityTime;
-
-    } catch (Exception e) {
-      error(e);
-      return null;
     }
 
+      return lastActivityTime;
   }
 
   public InMoov2Arm getLeftArm() {
@@ -1520,7 +1526,9 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     if (!state.equals("boot")) {
       // FIXME - this needs to be in config
       // FIXME - change peer name to "processor"
-      String processor = getPeerName("py4j");
+      // String processor = getPeerName("py4j");
+      String processor = "python";
+      
       Message msg = Message.createMessage(getName(), processor, method, data);
       // FIXME - is this too much abstraction .. to publish as well as
       // configurable send ?
@@ -1632,6 +1640,62 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     map.put("midStom", midStom);
     map.put("lowStom", lowStom);
     return map;
+  }
+
+  public String publishPlayAudioFile(String filename) {
+    return filename;
+  }
+
+  /**
+   * Processing publishing point, where everything InMoov2 wants to be processed
+   * is turned into a message and published.
+   * 
+   * @param msg
+   * @return
+   */
+  public Message publishProcessMessage(Message msg) {
+    return msg;
+  }
+
+  /**
+   * Possible pub/sub way to interface with python - no blocking though
+   * 
+   * @param code
+   * @return
+   */
+  public String publishPython(String code) {
+    return code;
+  }
+
+
+  /**
+   * publishes a name for NeoPixel.onFlash to consume, in a seperate channel to
+   * potentially be used by "speaking only" leds
+   * 
+   * @param name
+   * @return
+   */
+  public String publishSpeakingFlash(String name) {
+    return name;
+  }
+
+  /**
+   * stop animation event
+   */
+  public void publishStopAnimation() {
+  }
+
+  /**
+   * event publisher for the fsm - although other services potentially can
+   * consume and filter this event channel
+   * 
+   * @param event
+   * @return
+   */
+  public String publishSystemEvent(String event) {
+    // well, it turned out underscore was a goofy selection, as underscore in
+    // aiml is wildcard ... duh
+    return String.format("SYSTEM_EVENT %s", event);
   }
 
   /**

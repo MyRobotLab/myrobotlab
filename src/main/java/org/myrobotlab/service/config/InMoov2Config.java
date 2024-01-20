@@ -188,7 +188,7 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "openWeatherMap", "OpenWeatherMap", false);
     addDefaultPeerConfig(plan, name, "pid", "Pid", false);
     addDefaultPeerConfig(plan, name, "pir", "Pir", false);
-    addDefaultPeerConfig(plan, name, "py4j", "Py4j", true);
+    addDefaultPeerConfig(plan, name, "py4j", "Py4j", false);
     addDefaultPeerConfig(plan, name, "random", "Random", false);
     addDefaultPeerConfig(plan, name, "right", "Arduino", false);
     addDefaultPeerConfig(plan, name, "rightArm", "InMoov2Arm", false);
@@ -519,7 +519,11 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishPlayAudioFile", getPeerName("audioPlayer")));
     listeners.add(new Listener("publishPlayAnimation", getPeerName("neoPixel")));
     listeners.add(new Listener("publishStopAnimation", getPeerName("neoPixel")));
-    listeners.add(new Listener("publishProcessMessage", getPeerName("py4j"), "onPythonMessage"));
+    // listeners.add(new Listener("publishProcessMessage", getPeerName("python"), "onPythonMessage"));
+    listeners.add(new Listener("publishProcessMessage", "python", "onPythonMessage"));
+    listeners.add(new Listener("publishPython", "python"));
+    
+    
 
     // InMoov2 --to--> InMoov2
     listeners.add(new Listener("publishMoveHead", name));
