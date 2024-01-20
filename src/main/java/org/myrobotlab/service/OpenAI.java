@@ -13,7 +13,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.Response;
-import org.myrobotlab.service.config.Gpt3Config;
+import org.myrobotlab.service.config.OpenAIConfig;
 import org.myrobotlab.service.data.Utterance;
 import org.myrobotlab.service.interfaces.ResponsePublisher;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -48,12 +48,11 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-@Deprecated /* use OpenAI service */
-public class Gpt3 extends Service<Gpt3Config> implements TextListener, TextPublisher, UtterancePublisher, UtteranceListener, ResponsePublisher {
+public class OpenAI extends Service<OpenAIConfig> implements TextListener, TextPublisher, UtterancePublisher, UtteranceListener, ResponsePublisher {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(Gpt3.class);
+  public final static Logger log = LoggerFactory.getLogger(OpenAI.class);
 
   protected String currentChannel;
 
@@ -63,7 +62,7 @@ public class Gpt3 extends Service<Gpt3Config> implements TextListener, TextPubli
 
   private String currentChannelType;
   
-  public Gpt3(String n, String id) {
+  public OpenAI(String n, String id) {
     super(n, id);
   }
 
@@ -71,7 +70,7 @@ public class Gpt3 extends Service<Gpt3Config> implements TextListener, TextPubli
 
     try {
 
-      Gpt3Config c = (Gpt3Config) config;
+      OpenAIConfig c = (OpenAIConfig) config;
       
       invoke("publishRequest", text);
 
@@ -191,12 +190,12 @@ public class Gpt3 extends Service<Gpt3Config> implements TextListener, TextPubli
   }
 
   public void setToken(String token) {
-    Gpt3Config c = (Gpt3Config) config;
+    OpenAIConfig c = (OpenAIConfig) config;
     c.token = token;
   }
 
   public String setEngine(String engine) {
-    Gpt3Config c = (Gpt3Config) config;
+    OpenAIConfig c = (OpenAIConfig) config;
     c.engine = engine;
     return engine;
   }
@@ -239,7 +238,7 @@ public class Gpt3 extends Service<Gpt3Config> implements TextListener, TextPubli
    * wakes the global session up
    */
   public void wake() {
-    Gpt3Config c = (Gpt3Config) config;
+    OpenAIConfig c = (OpenAIConfig) config;
     log.info("wake now");
     c.sleeping = false;
   }
@@ -248,7 +247,7 @@ public class Gpt3 extends Service<Gpt3Config> implements TextListener, TextPubli
    * sleeps the global session
    */
   public void sleep() {
-    Gpt3Config c = (Gpt3Config) config;
+    OpenAIConfig c = (OpenAIConfig) config;
     log.info("sleeping now");
     c.sleeping = true;
   }
@@ -277,14 +276,14 @@ public class Gpt3 extends Service<Gpt3Config> implements TextListener, TextPubli
       LoggingFactory.init(Level.INFO);
 
       // Runtime runtime = Runtime.getInstance();
-      // Runtime.startConfig("gpt3-01");
+      // Runtime.startConfig("openai-01");
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
 
       /*
-       * Gpt3 i01_chatBot = (Gpt3) Runtime.start("i01.chatBot", "Gpt3");
+       * OpenAI i01_chatBot = (OpenAI) Runtime.start("i01.chatBot", "OpenAI");
        * 
        * bot.attach("i01.chatBot"); i01_chatBot.attach("bot");
        * 

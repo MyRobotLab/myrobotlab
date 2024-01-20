@@ -91,6 +91,10 @@ public class ProxyInterceptor {
     return CodecUtils.toJson(this);
   }
 
+  public String getSimpleName() {
+    return name;
+  }
+  
   @RuntimeType
   public Object intercept(@Origin Method method, @AllArguments Object... args)
       throws InterruptedException, TimeoutException {

@@ -74,7 +74,7 @@ public class ArduinoMotorPotTest {
 
   public void onSensorData(SensorData event) {
     // about we downsample this call?
-    int[] data = (int[]) event.getData();
+    int[] data = (int[]) event.data;
     count++;
     int value = data[0];
     log.info("Data: {}", data);    
