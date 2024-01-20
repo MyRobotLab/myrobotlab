@@ -1055,7 +1055,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
         configStarted = true;
       }
 
-      invoke("publishEvent", "STARTED " + peerKey);
+      invoke("publishEvent", "STARTED " + peerKey.replace(".", " "));
 
       switch (peerKey) {
         case "audioPlayer":
