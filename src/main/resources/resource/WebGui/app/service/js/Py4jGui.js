@@ -10,7 +10,7 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
 
     // filesystem list of scripts
     $scope.scriptList = []
-    $scope.log = ''
+    $scope.logs = []
 
     // this UI's currently active script
     $scope.activeKey = null
@@ -33,11 +33,15 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
             $scope.$apply()
             break
         case 'onStdOut':
-            $scope.log = data + $scope.log
-            $scope.$apply()
+            if (data !== "\n"){
+                $scope.logs.unshift(data)
+                if ($scope.logs.length > 100) {
+                    $scope.logs.pop()
+                }                
+                $scope.$apply()
+            }
             break
         case 'onAppend':
-            $scope.log = data + $scope.log
             $scope.$apply()
             break
         case 'onScriptList':
@@ -50,7 +54,7 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
             break
         case 'onStatus':
             if (data.level == 'error') {
-                $scope.log = data.detail + '\n' + $scope.log
+                $scope.logs.unshift(data.detail)
             }
             console.info("onStatus ", data)
             $scope.$apply()

@@ -1191,6 +1191,10 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     // happen in other situations...
     if (Runtime.getInstance().isLocal(msg) && !name.equals(msg.getName())) {
       // wrong Service - get the correct one
+      if (Runtime.getService(msg.getName()) == null) {
+        error("cannot get service %s", msg.getName());
+        return null;
+      }
       return Runtime.getService(msg.getName()).invoke(msg);
     }
 

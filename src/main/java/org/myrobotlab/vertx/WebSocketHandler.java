@@ -90,7 +90,7 @@ public class WebSocketHandler implements Handler<ServerWebSocket> {
 
         // FIXME - probably shouldn't be invoking, probable should be putting
         // the message on the out queue ... not sure
-        ServiceInterface si = Runtime.getService(msg.name);
+        // ServiceInterface si = Runtime.getService(msg.name);
         // Object ret = method.invoke(si, params);
 
         // put msg on mrl msg bus :)
@@ -105,7 +105,14 @@ public class WebSocketHandler implements Handler<ServerWebSocket> {
         // replace with typed parameters
         msg.data = params;
         // queue the message
-        si.in(msg);
+        // si.in(msg);
+        // si.send(msg); <- interesting MockGateway delegates this and it sends a send
+        
+        // the way to do it
+        // no direct handling of a service
+        // no direct invoking
+        // just send a message after decoding
+        service.send(msg);
 
         if (newConnection) {
         // New Connection 1st message
