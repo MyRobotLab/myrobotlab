@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,6 +27,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.programab.PredicateEvent;
 import org.myrobotlab.programab.Response;
+import org.myrobotlab.service.Log.LogEntry;
 import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.InMoov2Config;
@@ -108,6 +110,16 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   String currentConfigurationName = "default";
 
   protected transient SpeechRecognizer ear;
+
+  protected List<LogEntry> errors = new ArrayList<>();
+
+  /**
+   * The finite state machine is core to managing state of InMoov2. There is
+   * very little benefit gained in having the interactions pub/sub. Therefore,
+   * there will be a direct reference to the fsm. If different state graph is
+   * needed, then the fsm can provide that service.
+   */
+  private transient FiniteStateMachine fsm = null;
 
   // waiting controable threaded gestures we warn user
   protected boolean gestureAlreadyStarted = false;
@@ -910,6 +922,24 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return state;
   }
 
+  /**
+   * Centralized logging system will have all logging from all services,
+   * including lower level logs that do not propegate as statuses
+   * 
+   * @param log
+   *          - flushed log from Log service
+   */
+  public void onLogEvents(List<LogEntry> log) {
+    // scan for warn or errors
+    for (LogEntry entry : log) {
+      if ("ERROR".equals(entry.level) && errors.size() < 100) {
+        errors.add(entry);
+        // invoke("publishError", entry);
+      }
+    }
+  }
+
+
   public OpenCVData onOpenCVData(OpenCVData data) {
     // FIXME - publish event with or without data ? String file reference
     return data;
@@ -1645,10 +1675,12 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
   }
 
+  @Deprecated /* use startPeers */
   public void startAll() throws Exception {
     startAll(null, null);
   }
 
+  @Deprecated /* use startPeers */
   public void startAll(String leftPort, String rightPort) throws Exception {
     startMouth();
     startChatBot();
@@ -1664,10 +1696,12 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     speakBlocking(get("STARTINGSEQUENCE"));
   }
 
+  @Deprecated /* i01.startPeer("chatBot") - all details should be in config */
   public void startBrain() {
     startChatBot();
   }
 
+  @Deprecated /* i01.startPeer("chatBot") - all details should be in config */
   public ProgramAB startChatBot() {
 
     try {
@@ -1732,6 +1766,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return chatBot;
   }
 
+  @Deprecated /* use startPeer */
   public SpeechRecognizer startEar() {
 
     ear = (SpeechRecognizer) startPeer("ear");
@@ -1762,6 +1797,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   // TODO - general objective "might" be to reduce peers down to something
   // that does not need a reference - where type can be switched before creation
   // and the only thing needed is pubs/subs that are not handled in abstracts
+  @Deprecated /* use startPeer */
   public SpeechSynthesis startMouth() {
 
     // FIXME - set type ??? - maybe a good product of InMoov
@@ -1799,9 +1835,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return mouth;
   }
 
-  // FIXME - universal (good) way of handling all exceptions - ie - reporting
-  // back to the user the problem in a short concise way but have
-  // expandable detail in appropriate places
+  @Deprecated /* use startPeer */
   public OpenCV startOpenCV() {
     speakBlocking(get("STARTINGOPENCV"));
     opencv = (OpenCV) startPeer("opencv");

@@ -1933,24 +1933,14 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
   // > servoDetachPin/deviceId
   @Override
   public void onServoDisable(String servoName) {
-    if (!isConnected()) {
-      warn("Arduino cannot set speed when not connected - connected %b", isConnected());
-      return;
-    }
-
     Integer id = getDeviceId(servoName);
-    if (id != null) {
+    if (id != null && isConnected()) {
       msg.servoDetachPin(id);
     }
   }
 
   @Override
   public void onServoEnable(String servoName) {
-    if (!isConnected()) {
-      warn("Arduino cannot set speed when not connected - connected %b", isConnected());
-      return;
-    }
-
     Integer deviceId = getDeviceId(servoName);
     if (deviceId == null) {
       log.warn("servoEnable servo {} does not have a corresponding device currently - did you attach?", servoName);
@@ -1960,7 +1950,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
       ServoControl sc = (ServoControl) Runtime.getService(servoName);
       msg.servoAttachPin(deviceId, getAddress(sc.getPin()));
     } else {
-      log.info("not currently connected");
+      log.info("cannot enable servo {} not currently connected", getName());
     }
   }
 
@@ -1974,7 +1964,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
   // > servoWrite/deviceId/target
   public void onServoMoveTo(ServoMove move) {
     if (!isConnected()) {
-      warn("Arduino cannot set speed when not connected - connected %b", isConnected());
+      warn("arduino cannot move servo %s when not connected", move.name);
       return;
     }
 
@@ -1999,11 +1989,6 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
       return;
     }
     
-    if (!isConnected()) {
-      log.info("Arduino cannot set speed of %s when not connected", servoSpeed.name);
-      return;
-    }
-
     int speed = -1;
     Servo servo = (Servo) Runtime.getService(servoSpeed.name);
     if (servoSpeed.speed != null) {
@@ -2015,7 +2000,9 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
       log.error("{} has null deviceId", servo);
       return;
     }
-    msg.servoSetVelocity(id, speed);
+    if (isConnected()) {
+      msg.servoSetVelocity(id, speed);
+    }
   }
 
   /**
@@ -2026,7 +2013,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
   // > servoWriteMicroseconds/deviceId/b16 ms
   public void onServoWriteMicroseconds(ServoControl servo, int uS) {
     if (!isConnected()) {
-      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected());
+      warn("Arduino cannot write servo %s microseconds when not connected", servo.getName());
       return;
     }
 
@@ -2037,7 +2024,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
 
   public void setAref(String aref) {
     if (!isConnected()) {
-      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected());
+      warn("cannot set Aref when not connected");
       return;
     }
     aref = aref.toUpperCase();
