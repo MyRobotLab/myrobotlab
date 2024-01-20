@@ -1990,6 +1990,19 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     return Runtime.start(peer.name);
   }
 
+  @Override
+  synchronized public void startPeers(String[] peerKeys) {
+    
+    if (peerKeys == null) {
+      return;
+    }
+    
+    for (String peerKey: peerKeys) {
+      startPeer(peerKey);
+    }    
+  }
+
+
   /**
    * Release a peer by peerKey. There can be advantages to refer to a peer with
    * a peer key instead of a typed reference. This allows more modularity and
@@ -1999,6 +2012,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * 
    * @param peerKey
    */
+  @Override
   synchronized public void releasePeer(String peerKey) {
 
     if (getConfig() != null && getConfig().getPeer(peerKey) != null) {
@@ -2022,6 +2036,20 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
       broadcastState();
     } else {
       error("%s.releasePeer(%s) does not exist", getName(), peerKey);
+    }
+  }
+  
+  /**
+   * Release a set of peers in the order they are provided.
+   */
+  @Override
+  synchronized public void releasePeers(String[] peerKeys) {
+    if (peerKeys == null) {
+      return;
+    }
+    
+    for (String peerKey: peerKeys) {
+      releasePeer(peerKey);
     }
   }
 
