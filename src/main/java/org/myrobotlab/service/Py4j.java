@@ -531,7 +531,7 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
       String s;
       try {
         while ((s = stdOutput.readLine()) != null) {
-          handleStdOut(s + '\n');
+          handleStdOut(s);
         }
       } catch (IOException e) {
         error(e);

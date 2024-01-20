@@ -55,8 +55,8 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class InMoov2 extends Service<InMoov2Config>
-    implements ServiceLifeCycleListener, SpeechListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
+public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleListener, SpeechListener, TextListener, TextPublisher, 
+JoystickListener, LocaleProvider, IKJointAngleListener {
 
   public class Heartbeat {
     public long count = 0;

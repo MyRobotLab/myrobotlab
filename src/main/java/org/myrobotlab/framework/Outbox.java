@@ -83,7 +83,7 @@ public class Outbox implements Runnable, Serializable {
   }
 
   /**
-   * pub/sub listeners 
+   * pub/sub listeners - HashMap &lt; {topic}, List {listeners} &gt;
    */
   protected Map<String, List<MRLListener>> notifyList = new TreeMap<String, List<MRLListener>>();
 
@@ -234,8 +234,7 @@ public class Outbox implements Runnable, Serializable {
         }
       } else {
         if (log.isDebugEnabled()) {
-          log.debug("{}/{}({}) notifyList is empty", msg.getName(), msg.method,
-              CodecUtils.getParameterSignature(msg.data));
+          log.debug("{}/{}({}) notifyList is empty", msg.getName(), msg.method, CodecUtils.getParameterSignature(msg.data));
         }
         continue;
       }
@@ -324,8 +323,7 @@ public class Outbox implements Runnable, Serializable {
         // ?
         ServiceInterface sw = Runtime.getService(msg.getName());
         if (sw == null && autoClean) {
-          log.warn("could not find service {} to process {} from sender {} - tearing down route", msg.getName(),
-              msg.method, msg.sender);
+          log.warn("could not find service {} to process {} from sender {} - tearing down route", msg.getName(), msg.method, msg.sender);
           ServiceInterface sender = Runtime.getService(msg.sender);
           if (sender != null) {
             sender.removeListener(msg.sendingMethod, msg.getName(), msg.method);
@@ -387,4 +385,5 @@ public class Outbox implements Runnable, Serializable {
   public Map<String, List<MRLListener>> getNotifyList() {
     return notifyList;
   }
+
 }

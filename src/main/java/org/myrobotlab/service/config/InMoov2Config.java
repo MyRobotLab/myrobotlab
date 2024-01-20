@@ -26,7 +26,7 @@ public class InMoov2Config extends ServiceConfig {
 
   /**
    * When the healthCheck is operating, it will check the battery level. If the
-   * battery level is < 5% it will publishFlash with red at regular interval
+   * battery level is &lt; 5% it will publishFlash with red at regular interval
    */
   public boolean batteryInSystem = false;
 
@@ -46,7 +46,7 @@ public class InMoov2Config extends ServiceConfig {
   /**
    * flashes if error has occurred - requires heartbeat
    */
-  public boolean healthCheckFlash = true;
+  public boolean healthCheckFlash = false;
 
   public int healthCheckTimerMs = 60000;
 
@@ -59,7 +59,7 @@ public class InMoov2Config extends ServiceConfig {
 
   /**
    * flashes the neopixel every time a health check is preformed. green == good
-   * red == battery < 5%
+   * red == battery &lt; 5%
    */
   public boolean heartbeatFlash = false;
 
@@ -168,7 +168,7 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "ear", "WebkitSpeechRecognition", false);
     addDefaultPeerConfig(plan, name, "eyeTracking", "Tracking", false);
     addDefaultPeerConfig(plan, name, "fsm", "FiniteStateMachine", false);
-    addDefaultPeerConfig(plan, name, "log", "Log", true);
+    addDefaultGlobalConfig(plan, "log", "log", "Log", true);
     addDefaultPeerConfig(plan, name, "gpt3", "Gpt3", false);
     addDefaultPeerConfig(plan, name, "head", "InMoov2Head", false);
     addDefaultPeerConfig(plan, name, "headTracking", "Tracking", false);

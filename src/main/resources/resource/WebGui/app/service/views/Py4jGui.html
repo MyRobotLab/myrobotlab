@@ -100,7 +100,17 @@
         </button>
     </span>
     <br/>
-    <pre>{{log}}</pre>
+
+<table class="table table-hover table-striped">
+    <tbody>
+        <tr ng-repeat="e in logs track by $index">
+            <td><small>{{e}}</small></td>
+        </tr>
+    </tbody>
+</table>
+	
+
+	
 </div>
 
 <script type="text/ng-template" id="installPackage.html">

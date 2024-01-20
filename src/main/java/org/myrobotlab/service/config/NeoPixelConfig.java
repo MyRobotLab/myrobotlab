@@ -11,8 +11,8 @@ public class NeoPixelConfig extends ServiceConfig {
    * when attached to an audio file service the animation to be
    * played when audio is playing
    */
-  public String audioAnimation = null;
-
+  public String audioAnimation = "Ironman";
+  
   /**
    * pin number of controller
    */
@@ -60,6 +60,8 @@ public class NeoPixelConfig extends ServiceConfig {
    * initial fill
    */
   public boolean fill = false;
+  
+  
 
   /**
    * Map of predefined led flashes, defined here in configuration. Another
@@ -97,9 +99,11 @@ public class NeoPixelConfig extends ServiceConfig {
      * time this flash remains off
      */
     public long timeOff = 500;
-
-    public Flash() {
+    
+    
+    public Flash() {      
     }
+    
 
     public Flash(int red, int green, int blue, long timeOn, long timeOff) {
       this.red = red;
@@ -118,15 +122,12 @@ public class NeoPixelConfig extends ServiceConfig {
   public Plan getDefault(Plan plan, String name) {
     super.getDefault(plan, name);
 
-    flashMap.put("error",
-        new Flash[] { new Flash(120, 0, 0, 30, 30), new Flash(120, 0, 0, 30, 30), new Flash(120, 0, 0, 30, 30) });
+    flashMap.put("error", new Flash[] { new Flash(120, 0, 0, 30, 30), new Flash(120, 0, 0, 30, 30), new Flash(120, 0, 0, 30, 30) });
     flashMap.put("info", new Flash[] { new Flash(120, 0, 0, 30, 30) });
     flashMap.put("success", new Flash[] { new Flash(0, 0, 120, 30, 30) });
-    flashMap.put("warn",
-        new Flash[] { new Flash(100, 100, 0, 30, 30), new Flash(100, 100, 0, 30, 30), new Flash(100, 100, 0, 30, 30) });
+    flashMap.put("warn", new Flash[] { new Flash(100, 100, 0, 30, 30), new Flash(100, 100, 0, 30, 30), new Flash(100, 100, 0, 30, 30) });
     flashMap.put("heartbeat", new Flash[] { new Flash(210, 110, 0, 100, 30), new Flash(210, 110, 0, 100, 30) });
-    flashMap.put("pir",
-        new Flash[] { new Flash(60, 200, 90, 30, 30), new Flash(60, 200, 90, 30, 30), new Flash(60, 200, 90, 30, 30) });
+    flashMap.put("pir", new Flash[] { new Flash(60, 200, 90, 30, 30), new Flash(60, 200, 90, 30, 30), new Flash(60, 200, 90, 30, 30) });
     flashMap.put("speaking", new Flash[] { new Flash(0, 183, 90, 60, 30), new Flash(0, 183, 90, 60, 30) });
 
     return plan;
