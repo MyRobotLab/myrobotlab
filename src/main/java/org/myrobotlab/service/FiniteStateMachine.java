@@ -12,6 +12,7 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.generics.SlidingWindowList;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -45,13 +46,10 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
 
   protected String lastEvent = null;
 
-  @Deprecated /* is this deprecated with ServiceConfig.listeners ? */
-  protected Set<String> messageListeners = new HashSet<>();
-
   /**
    * state history of fsm
    */
-  protected List<String> history = new ArrayList<>();
+  protected List<StateChange> history = new SlidingWindowList<>(100);
 
   // TODO - .from("A").to("B").on(Messages.ANY)
   // TODO - .from("A").to("B").on(Messages.EMPTY)
@@ -65,17 +63,34 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
   }
   
   public class StateChange {
-    public String last;
-    public String current;
+    /**
+     * timestamp
+     */
+    public long ts = System.currentTimeMillis();
+
+    /**
+     * current new state
+     */
+    public String state;
+    
+    /**
+     * event which activated new state
+     */
     public String event;
-    public StateChange(String last, String current, String event) {
-      this.last = last;
-      this.current = current;
+
+    /**
+     * source of event
+     */
+    public String src = getName();
+    
+    
+    public StateChange(String current, String event) {
+      this.state = current;
       this.event = event;
     }
     
     public String toString() {
-      return String.format("%s --%s--> %s", last, event, current);
+      return String.format("%s --%s--> %s", last, event, state);
     }
   }
 
@@ -113,11 +128,8 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
   public void init() {
     stateMachine.init();
     State state = stateMachine.getCurrent();
-    if (history.size() > 100) {
-      history.remove(0);
-    }
     if (state != null) {
-      history.add(state.getName());
+      history.add(new StateChange(state.getName(), String.format("%s.setCurrent", getName())));
     }
   }
 
@@ -194,8 +206,9 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
       log.info("fired event ({}) -> ({}) moves to ({})", event, last == null ? null : last.getName(), current == null ? null : current.getName());
 
       if (last != null && !last.equals(current)) {
-        invoke("publishStateChange", new StateChange(last.getName(), current.getName(), event));
-        history.add(current.getName());
+        StateChange stateChange = new StateChange(current.getName(), event);
+        invoke("publishStateChange", stateChange);
+        history.add(stateChange);
       }
     } catch (Exception e) {
       log.error("fire threw", e);
@@ -244,13 +257,6 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
    */
   public StateChange publishStateChange(StateChange stateChange) {
     log.info("publishStateChange {}", stateChange);
-    for (String listener : messageListeners) {
-      ServiceInterface service = Runtime.getService(listener);
-      if (service != null) {
-        org.myrobotlab.framework.Message msg = org.myrobotlab.framework.Message.createMessage(getName(), listener, CodecUtils.getCallbackTopicName(stateChange.current), null);
-        service.in(msg);
-      }
-    }
     return stateChange;
   }
 
@@ -258,8 +264,6 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
   public FiniteStateMachineConfig getConfig() {
     super.getConfig();
     config.current = getCurrent();
-    config.messageListeners = new ArrayList<>();
-    config.messageListeners.addAll(messageListeners);
     return config;
   }
 
@@ -278,9 +282,6 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
       for (Transition t : newTransistions) {
         addTransition(t.from, t.event, t.to);
       }
-
-      messageListeners = new HashSet<>();
-      messageListeners.addAll(c.messageListeners);
       broadcastState();
     }
 
@@ -290,22 +291,6 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
     }
 
     return c;
-  }
-
-  public void attach(String name) {
-    attachMessageListener(name);
-  }
-
-  public void attach(MessageListener listener) {
-    attachMessageListener(listener.getName());
-  }
-
-  public void attachMessageListener(String listener) {
-    messageListeners.add(listener);
-  }
-
-  public void detachMessageListener(String listener) {
-    messageListeners.remove(listener);
   }
 
   public static void main(String[] args) {
@@ -419,12 +404,28 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
       stateMachine.setCurrent(state);
       current = stateMachine.getCurrent();
       if (last != null && !last.equals(current)) {
-        invoke("publishStateChange", new StateChange(last.getName(), current.getName(), null));
+        invoke("publishStateChange", new StateChange(current.getName(), String.format("%s.setCurrent", getName())));
       }
     } catch (Exception e) {
       log.error("setCurrent threw", e);
       error(e.getMessage());
     }
+  }
+
+  public String getPreviousState() {
+    if (history.size() == 0) {
+      return null;
+    } else {
+      return history.get(history.size() - 2).state;
+    }
+  }
+  
+  @Override
+  public void startService() {
+    super.startService();
+    // should be configured,
+    // need to init
+    init();
   }
 
 }

@@ -14,4 +14,11 @@ public class Py4jConfig extends ServiceConfig {
    */
   public boolean useBundledPython = true;
   
+  /**
+   * Whether to start a new Python process with
+   * stdin/stdout connected to the JVM or leave the
+   * starting of the process to the user.
+   */
+  public boolean autostartPython = true;
+
 }

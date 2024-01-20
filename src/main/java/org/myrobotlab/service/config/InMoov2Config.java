@@ -184,6 +184,7 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "neoPixel", "NeoPixel", false);
     addDefaultPeerConfig(plan, name, "opencv", "OpenCV", false);
     addDefaultPeerConfig(plan, name, "openni", "OpenNi", false);
+    addDefaultPeerConfig(plan, name, "oakd", "OakD", false);
     addDefaultPeerConfig(plan, name, "openWeatherMap", "OpenWeatherMap", false);
     addDefaultPeerConfig(plan, name, "pid", "Pid", false);
     addDefaultPeerConfig(plan, name, "pir", "Pir", false);
@@ -497,6 +498,8 @@ public class InMoov2Config extends ServiceConfig {
     plan.remove(name + ".eyeTracking.controller.serial");
     plan.remove(name + ".eyeTracking.cv");
 
+    plan.remove(name + ".oakd.py4j");
+
     // InMoov2 --to--> InMoov2 loopbacks
     // allow user to override or extend with python
     listeners.add(new Listener("publishBoot", name));
@@ -529,6 +532,12 @@ public class InMoov2Config extends ServiceConfig {
     // service --to--> InMoov2
     AudioFileConfig mouth_audioFile = (AudioFileConfig) plan.get(getPeerName("mouth.audioFile"));
     mouth_audioFile.listeners.add(new Listener("publishPeak", name));
+    
+    OakDConfig oakd = (OakDConfig) plan.get(getPeerName("oakd"));
+    oakd.listeners.add(new Listener("publishClassification", name));
+    oakd.getPeer("py4j").name = getPeerName("py4j");
+
+    
     webxr.listeners.add(new Listener("publishJointAngles", name));
 
     // mouth_audioFile.listeners.add(new Listener("publishAudioEnd", name));
