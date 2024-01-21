@@ -82,6 +82,14 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$sc
         $scope.activeKey = script.file
     }
 
+    $scope.getFileName = function(path){
+        if (path){
+        const pathComponents = path.split('/');
+        return pathComponents[pathComponents.length - 1]            
+        }
+        else return ""
+    }
+
     $scope.saveScript = function() {
         activeScript = $scope.service.openedScripts[$scope.activeKey]
         msg.send('saveScript', activeScript.file, activeScript.code)

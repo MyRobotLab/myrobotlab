@@ -53,6 +53,7 @@ public class ProxyInterceptor {
    * Name, Id, FullName, TypeKey and list of interfaces
    * are all available during registration, these methods
    * should not later go out to the client to resolve.
+   * 
    * @return
    */
   public String getId() {
@@ -60,8 +61,9 @@ public class ProxyInterceptor {
   }
 
   /**
-   * Name is availble at registration, don't need to ask the 
+   * Name is availble at registration, don't need to ask the
    * remote service again
+   * 
    * @return
    */
   public String getName() {
@@ -70,6 +72,7 @@ public class ProxyInterceptor {
 
   /**
    * Convenience method
+   * 
    * @return
    */
   public String getFullName() {
@@ -78,6 +81,7 @@ public class ProxyInterceptor {
 
   /**
    * Given on registration, don't need client to be queried for it
+   * 
    * @return
    */
   public String getTypeKey() {
@@ -90,11 +94,11 @@ public class ProxyInterceptor {
   public String toString() {
     return CodecUtils.toJson(this);
   }
-  
+
   public String getSimpleName() {
     return name;
   }
-  
+
   @RuntimeType
   public Object intercept(@Origin Method method, @AllArguments Object... args)
       throws InterruptedException, TimeoutException {

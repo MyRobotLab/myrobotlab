@@ -17,7 +17,7 @@ public class RandomTest extends AbstractServiceTest {
              * rarely happens - seems not useful and silly
              */
   public Service createService() throws Exception {
-    return (Service) Runtime.start("random", "Random");
+    return (Service) Runtime.start("randomTest", "Random");
   }
 
   @Before /* before each test */
@@ -33,7 +33,7 @@ public class RandomTest extends AbstractServiceTest {
   @Override
   public void testService() throws Exception {
     Clock clock = (Clock) Runtime.start("clock", "Clock");
-    Random random = (Random) Runtime.start("random", "Random");
+    Random random = (Random) Runtime.start("randomTest", "Random");
 
     clock.stopClock();
     clock.setInterval(1000);
@@ -42,7 +42,7 @@ public class RandomTest extends AbstractServiceTest {
     random.addRandom(0, 200, "clock", "setInterval", 5000, 10000);
     random.enable();
 
-    sleep(500);
+    sleep(1000);
 
     assertTrue("should have method", random.getKeySet().contains("clock.setInterval"));
 

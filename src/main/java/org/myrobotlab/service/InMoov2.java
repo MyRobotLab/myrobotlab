@@ -55,23 +55,8 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleListener, SpeechListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
-
-  public class Heartbeat {
-    public long count = 0;
-    public long ts = System.currentTimeMillis();
-    public String state;
-    public List<LogEntry> errors;
-    double batteryLevel = 100;
-    public boolean isPirOn = false;
-
-    public Heartbeat(InMoov2 inmoov) {
-      this.state = inmoov.state;
-      this.errors = inmoov.errors;
-      this.count = inmoov.heartbeatCount;
-      this.isPirOn = inmoov.isPirOn;
-    }
-  }
+public class InMoov2 extends Service<InMoov2Config>
+    implements ServiceLifeCycleListener, SpeechListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
   public class Heart implements Runnable {
     private final ReentrantLock lock = new ReentrantLock();
@@ -116,6 +101,22 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
   }
 
+  public class Heartbeat {
+    double batteryLevel = 100;
+    public long count = 0;
+    public List<LogEntry> errors;
+    public boolean isPirOn = false;
+    public String state;
+    public long ts = System.currentTimeMillis();
+
+    public Heartbeat(InMoov2 inmoov) {
+      this.state = inmoov.state;
+      this.errors = inmoov.errors;
+      this.count = inmoov.heartbeatCount;
+      this.isPirOn = inmoov.isPirOn;
+    }
+  }
+
   public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
 
   public static LinkedHashMap<String, String> lpVars = new LinkedHashMap<String, String>();
@@ -123,7 +124,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   private static final long serialVersionUID = 1L;
 
   static String speechRecognizer = "WebkitSpeechRecognition";
-
 
   /**
    * This method will load a python file into the python interpreter.
@@ -164,6 +164,26 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
     return true;
   }
+
+  public static void main(String[] args) {
+    try {
+
+      LoggingFactory.init(Level.ERROR);
+      Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
+
+      // Runtime.startConfig("dev");
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
+  protected Double batteryLevel = 100.0;
 
   /**
    * number of times waited in boot state
@@ -231,9 +251,9 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * one centralized place. Not the same as configuration, as this definition is
    * owned by what the user needs vs configuration is what the service needs and
    * understands. Python, ProgramAB and the InMoov2 service can all normalize
-   * their data here with one way or two way bindings.  A competing data source
-   * would be ProgramAB predicates.  Advantage of this is it could be used by 
-   * any service and can preserve type.  I don't know what is preferred
+   * their data here with one way or two way bindings. A competing data source
+   * would be ProgramAB predicates. Advantage of this is it could be used by any
+   * service and can preserve type. I don't know what is preferred
    */
   protected Map<String, Object> memory = new TreeMap<>();
 
@@ -255,8 +275,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   protected long stateLastRandomTime = System.currentTimeMillis();
 
   protected String voiceSelected;
-
-  protected Double batteryLevel = 100.0;
 
   public InMoov2(String n, String id) {
     super(n, id);
@@ -356,18 +374,19 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       // TODO - make Py4j without zombies and more robust
       /**
        * Py4j is not ready for primetime yet
+       * 
        * <pre>
-       
-      Py4j py4j = (Py4j) startPeer("py4j");
-      if (!py4j.isReady()) {
-        log.warn("{} not ready....", getPeerName("py4j"));
-        return;
-      }
-      String code = FileIO.toString(getResourceDir() + fs + "InMoov2.py");
-      py4j.exec(code);
-
-      </pre>
-      */
+       * 
+       * Py4j py4j = (Py4j) startPeer("py4j");
+       * if (!py4j.isReady()) {
+       *   log.warn("{} not ready....", getPeerName("py4j"));
+       *   return;
+       * }
+       * String code = FileIO.toString(getResourceDir() + fs + "InMoov2.py");
+       * py4j.exec(code);
+       * 
+       * </pre>
+       */
 
       // TODO - MAKE BOOT REPORT !!!! deliver it on a heartbeat
       runtime.invoke("publishConfigList");
@@ -521,6 +540,13 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return script.toString();
   }
 
+  /**
+   * clear current errors
+   */
+  public void clearErrors() {
+    errors.clear();
+  }
+
   public void closeAllImages() {
     // FIXME - follow this pattern ?
     // CON npe possible although unlikely
@@ -626,8 +652,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   /**
    * Single place for InMoov2 service to execute arbitrary code - needed
-   * initially to set "global" vars in python.
-   * FIXME - should just publishPython !
+   * initially to set "global" vars in python. FIXME - should just publishPython
+   * !
    * 
    * @param pythonCode
    * @return
@@ -713,17 +739,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     if (chatBot != null) {
       chatBot.getResponse("FIRST_INIT");
     }
-  }
-
-  /**
-   * Generalized callback for a classification event
-   * 
-   * @param classification
-   * @return
-   */
-  public Classification onClassification(Classification classification) {
-    processMessage("onClassification", classification);
-    return classification;
   }
 
   /**
@@ -1186,6 +1201,17 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   }
 
   /**
+   * Generalized callback for a classification event
+   * 
+   * @param classification
+   * @return
+   */
+  public Classification onClassification(Classification classification) {
+    processMessage("onClassification", classification);
+    return classification;
+  }
+
+  /**
    * comes in from runtime which owns the config list
    * 
    * @param configList
@@ -1215,6 +1241,10 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     unsubscribe("python", "publishStatus", this.getName(), "onGestureStatus");
   }
 
+  // public Message publishPython(String method, Object...data) {
+  // return Message.createMessage(getName(), getName(), method, data);
+  // }
+
   /**
    * Central hub of input motion control. Potentially, all input from joysticks,
    * quest2 controllers and headset, or any IK service could be sent here
@@ -1239,10 +1269,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     systemEvent("joystick");
   }
 
-  // public Message publishPython(String method, Object...data) {
-  // return Message.createMessage(getName(), getName(), method, data);
-  // }
-
   /**
    * Centralized logging system will have all logging from all services,
    * including lower level logs that do not propegate as statuses
@@ -1258,14 +1284,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
         // invoke("publishError", entry);
       }
     }
-  }
-
-
-  /**
-   * clear current errors
-   */
-  public void clearErrors() {
-    errors.clear();
   }
 
   public void onMoveHead(Map<String, Double> map) {
@@ -1328,6 +1346,11 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
   }
 
+  public void onPirOff() {
+    isPirOn = false;
+    processMessage("onPirOff");
+  }
+
   /**
    * initial callback for Pir sensor Default behavior will be: send fsm event
    * onPirOn flash neopixel
@@ -1335,11 +1358,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   public void onPirOn() {
     isPirOn = true;
     processMessage("onPirOn");
-  }
-
-  public void onPirOff() {
-    isPirOn = false;
-    processMessage("onPirOff");
   }
 
   @Override
@@ -1508,6 +1526,29 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
   }
 
+  public void processMessage(String method) {
+    processMessage(method, null);
+  }
+
+  /**
+   * Will publish processing messages to the processor(s) currently subscribed.
+   * 
+   * @param method
+   * @param data
+   */
+  public void processMessage(String method, Object data) {
+    // User processing should not occur until after boot has completed
+    if (!state.equals("boot")) {
+      // FIXME - this needs to be in config
+      // FIXME - change peer name to "processor"
+      String processor = getPeerName("py4j");
+      Message msg = Message.createMessage(getName(), processor, method, data);
+      // FIXME - is this too much abstraction .. to publish as well as
+      // configurable send ?
+      invoke("publishProcessMessage", msg);
+    }
+  }
+
   /**
    * Easy utility to publishMessage
    * 
@@ -1632,29 +1673,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     // FIXME - add errors to heartbeat
     processMessage("onHeartbeat", heartbeat);
     return heartbeat;
-  }
-
-  public void processMessage(String method) {
-    processMessage(method, null);
-  }
-
-  /**
-   * Will publish processing messages to the processor(s) currently subscribed.
-   * 
-   * @param method
-   * @param data
-   */
-  public void processMessage(String method, Object data) {
-    // User processing should not occur until after boot has completed
-    if (!state.equals("boot")) {
-      // FIXME - this needs to be in config
-      // FIXME - change peer name to "processor"
-      String processor = getPeerName("py4j");
-      Message msg = Message.createMessage(getName(), processor, method, data);
-      // FIXME - is this too much abstraction .. to publish as well as
-      // configurable send ?
-      invoke("publishProcessMessage", msg);
-    }
   }
 
   /**
@@ -2418,24 +2436,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       if (!"ok".equals(firstinit)) {
         fsm.fire("firstInit");
       }
-    }
-  }
-
-  public static void main(String[] args) {
-    try {
-
-      LoggingFactory.init(Level.ERROR);
-      Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
-
-      // Runtime.startConfig("dev");
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
-    } catch (Exception e) {
-      log.error("main threw", e);
     }
   }
 

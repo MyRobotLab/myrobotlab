@@ -57,7 +57,7 @@
         <uib-tab ng-repeat="(key, value) in service.openedScripts" select="tabSelected(value)">
             <uib-tab-heading>
                 <span>
-                    {{key}}&nbsp;&nbsp;&nbsp;
+                    {{getFileName(key)}}&nbsp;&nbsp;&nbsp;
                     <button type="button" class="close" data-ng-click="closeScript(key)" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
